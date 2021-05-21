@@ -2,13 +2,10 @@ import $ from 'cash-dom'
 import counter from './counter'
 
 const incrementAndCheck = (value) => {
-  return cy.get('button')
-  .click()
-  .get('#counter')
-  .should('contain', value)
+  return cy.get('button').click().get('#counter').should('contain', value)
 }
 
-function mount () {
+function mount() {
   $('body').html('')
   const $counter = counter($(`<div id="counter-root"/>`))
 

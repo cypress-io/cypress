@@ -18,7 +18,7 @@ describe('issue 3975 redirect bug', () => {
     const win = cy.state('window')
     const x = new win.XMLHttpRequest()
 
-    function onloadFn (e) {
+    function onloadFn(e) {
       if (x.onload === onloadFn) {
         throw new Error('onload not intercepted')
       }

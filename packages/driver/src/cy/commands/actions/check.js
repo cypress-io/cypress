@@ -32,15 +32,11 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
   })
 
   const isNoop = ($el) => {
-    return type === 'check'
-      ? $el.prop('checked')
-      : !$el.prop('checked')
+    return type === 'check' ? $el.prop('checked') : !$el.prop('checked')
   }
 
   const isAcceptableElement = ($el) => {
-    return type === 'check'
-      ? $el.is(':checkbox,:radio')
-      : $el.is(':checkbox')
+    return type === 'check' ? $el.is(':checkbox,:radio') : $el.is(':checkbox')
   }
 
   // does our el have a value
@@ -49,7 +45,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
   const elHasMatchingValue = ($el) => {
     const value = $elements.getNativeProp($el.get(0), 'value')
 
-    return (values.length === 0) || values.includes(value)
+    return values.length === 0 || values.includes(value)
   }
 
   // blow up if any member of the subject
@@ -76,7 +72,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
 
     const consoleProps = {
       'Applied To': $dom.getElements($el),
-      'Elements': $el.length,
+      Elements: $el.length,
     }
 
     if (options.log && isElActionable) {
@@ -87,7 +83,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         message: deltaOptions,
         $el,
         timeout: options.timeout,
-        consoleProps () {
+        consoleProps() {
           return _.extend(consoleProps, {
             Options: deltaOptions,
           })
@@ -119,7 +115,8 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
     // if we didnt pass in any values or our
     // el's value is in the array then check it
     if (isElActionable) {
-      return cy.now('click', $el, {
+      return cy
+      .now('click', $el, {
         $el,
         log: false,
         verify: false,
@@ -130,7 +127,8 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         waitForAnimations: options.waitForAnimations,
         animationDistanceThreshold: options.animationDistanceThreshold,
         scrollBehavior: options.scrollBehavior,
-      }).then(() => {
+      })
+      .then(() => {
         if (options._log) {
           options._log.snapshot().end()
         }
@@ -141,8 +139,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
   }
 
   // return our original subject when our promise resolves
-  return Promise
-  .resolve(options.$el.toArray())
+  return Promise.resolve(options.$el.toArray())
   .each(checkOrUncheckEl)
   .then(() => {
     // filter down our $el to the
@@ -160,13 +157,16 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
 }
 
 module.exports = function (Commands, Cypress, cy) {
-  return Commands.addAll({ prevSubject: 'element' }, {
-    check (subject, values, options) {
-      return checkOrUncheck.call(this, Cypress, cy, 'check', subject, values, options)
-    },
+  return Commands.addAll(
+    { prevSubject: 'element' },
+    {
+      check(subject, values, options) {
+        return checkOrUncheck.call(this, Cypress, cy, 'check', subject, values, options)
+      },
 
-    uncheck (subject, values, options) {
-      return checkOrUncheck.call(this, Cypress, cy, 'uncheck', subject, values, options)
-    },
-  })
+      uncheck(subject, values, options) {
+        return checkOrUncheck.call(this, Cypress, cy, 'uncheck', subject, values, options)
+      },
+    }
+  )
 }

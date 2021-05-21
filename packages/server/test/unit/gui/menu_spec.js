@@ -55,13 +55,7 @@ describe('gui/menu', function () {
       menu.set()
       const labels = getLabels(getMenuItem('File').submenu)
 
-      expect(labels).to.eql([
-        'Changelog',
-        'Manage Account',
-        'Log Out',
-        'View App Data',
-        'Close Window',
-      ])
+      expect(labels).to.eql(['Changelog', 'Manage Account', 'Log Out', 'View App Data', 'Close Window'])
     })
 
     it('opens changelog when Changelog is clicked', () => {
@@ -204,12 +198,7 @@ describe('gui/menu', function () {
       menu.set()
       const labels = getLabels(getMenuItem('Help').submenu)
 
-      expect(labels).to.eql([
-        'Support',
-        'Documentation',
-        'Download Chromium',
-        'Report an Issue',
-      ])
+      expect(labels).to.eql(['Support', 'Documentation', 'Download Chromium', 'Report an Issue'])
     })
 
     it('opens chat when Support is clicked', () => {
@@ -257,10 +246,7 @@ describe('gui/menu', function () {
       it('exists and contains reload, toggle', function () {
         const labels = getLabels(this.devSubmenu)
 
-        expect(labels).to.eql([
-          'Reload',
-          'Toggle Developer Tools',
-        ])
+        expect(labels).to.eql(['Reload', 'Toggle Developer Tools'])
       })
 
       it('sets shortcut for Reload', function () {

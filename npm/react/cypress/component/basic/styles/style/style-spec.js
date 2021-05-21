@@ -18,9 +18,7 @@ describe('style', () => {
         style: indexStyle,
       })
 
-      cy.get('button')
-      .should('have.class', className)
-      .and('have.css', 'background-color', backgroundColor)
+      cy.get('button').should('have.class', className).and('have.css', 'background-color', backgroundColor)
     })
 
     it('string[]', () => {
@@ -30,9 +28,7 @@ describe('style', () => {
         style: [indexStyle],
       })
 
-      cy.get('button')
-      .should('have.class', className)
-      .and('have.css', 'background-color', backgroundColor)
+      cy.get('button').should('have.class', className).and('have.css', 'background-color', backgroundColor)
     })
   })
 
@@ -45,16 +41,12 @@ describe('style', () => {
         log: false,
       })
 
-      cy.get('button')
-      .should('have.class', className)
-      .and('have.css', 'background-color', backgroundColor)
+      cy.get('button').should('have.class', className).and('have.css', 'background-color', backgroundColor)
     })
 
     it('sets several', () => {
       const Component = () => {
-        return (
-          <button className={className}>Large green button</button>
-        )
+        return <button className={className}>Large green button</button>
       }
 
       mount(<Component />, {
@@ -76,9 +68,7 @@ describe('style', () => {
 
     it('resets the style', () => {
       const Component = () => {
-        return (
-          <button className={className}>Large green button</button>
-        )
+        return <button className={className}>Large green button</button>
       }
 
       mount(<Component />)

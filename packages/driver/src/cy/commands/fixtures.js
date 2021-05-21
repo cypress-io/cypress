@@ -18,7 +18,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   Cypress.on('clear:fixtures:cache', reset)
 
   return Commands.addAll({
-    fixture (fixture, ...args) {
+    fixture(fixture, ...args) {
       if (config('fixturesFolder') === false) {
         $errUtils.throwErrByPath('fixture.set_to_false')
       }
@@ -68,7 +68,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         // return the cloned response
         return clone(response)
-      }).catch(Promise.TimeoutError, () => {
+      })
+      .catch(Promise.TimeoutError, () => {
         return $errUtils.throwErrByPath('fixture.timed_out', {
           args: { timeout },
         })

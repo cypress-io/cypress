@@ -4,16 +4,20 @@ import EventManager from '../lib/event-manager'
 import State from '../lib/state'
 
 /**
-* SplitPane hierarchy looks like this:
-* ```jsx
-* <div class="SplitPane">
-*    <div class="Pane vertical Pane1  ">..</div>
-*    <span role="presentation" class="Resizer vertical  ">...</span>
-* </div>
-*```
-* we need to set these to display: none during cy.screenshot.
-*/
-export function useScreenshotHandler ({ eventManager, state, splitPaneRef }: {
+ * SplitPane hierarchy looks like this:
+ * ```jsx
+ * <div class="SplitPane">
+ *    <div class="Pane vertical Pane1  ">..</div>
+ *    <span role="presentation" class="Resizer vertical  ">...</span>
+ * </div>
+ *```
+ * we need to set these to display: none during cy.screenshot.
+ */
+export function useScreenshotHandler({
+  eventManager,
+  state,
+  splitPaneRef,
+}: {
   eventManager: typeof EventManager
   state: State
   splitPaneRef: React.MutableRefObject<{ splitPane: HTMLDivElement }>

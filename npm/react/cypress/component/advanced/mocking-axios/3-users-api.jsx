@@ -3,14 +3,14 @@ import React from 'react'
 import { get } from './axios-api'
 
 export class Users extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       users: [],
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     get('https://jsonplaceholder.cypress.io/users?_limit=3').then((response) => {
       // JSON responses are automatically parsed.
       this.setState({
@@ -19,7 +19,7 @@ export class Users extends React.Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.users.map((user) => (

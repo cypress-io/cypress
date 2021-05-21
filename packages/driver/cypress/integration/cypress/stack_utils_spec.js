@@ -262,7 +262,7 @@ Error: spec iframe stack
       ])
     })
 
-    it('returns empty object if there\'s no stack', () => {
+    it("returns empty object if there's no stack", () => {
       expect($stackUtils.getSourceStack()).to.eql({})
     })
   })
@@ -284,7 +284,9 @@ Error: spec iframe stack
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
       expect(details.function, 'function name').to.equal('Suite.eval')
-      expect(details.fileUrl, 'file url').to.equal('http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js')
+      expect(details.fileUrl, 'file url').to.equal(
+        'http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js'
+      )
     })
 
     it('parses anonymous eval line', () => {

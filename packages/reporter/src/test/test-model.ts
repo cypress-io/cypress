@@ -53,79 +53,85 @@ export default class Test extends Runnable {
   @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
 
-  constructor (props: TestProps, level: number, private store: RunnablesStore) {
+  constructor(props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
 
     this.invocationDetails = props.invocationDetails
 
-    this.hooks = [...props.hooks, {
-      hookId: props.id.toString(),
-      hookName: 'test body',
-      invocationDetails: props.invocationDetails,
-    }, {
-      hookId: `${props.id.toString()}-studio`,
-      hookName: 'studio commands',
-      isStudio: true,
-    }]
+    this.hooks = [
+      ...props.hooks,
+      {
+        hookId: props.id.toString(),
+        hookName: 'test body',
+        invocationDetails: props.invocationDetails,
+      },
+      {
+        hookId: `${props.id.toString()}-studio`,
+        hookName: 'studio commands',
+        isStudio: true,
+      },
+    ]
 
     _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
 
     this._addAttempt(props)
   }
 
-  @computed get isLongRunning () {
+  @computed get isLongRunning() {
     return _.some(this.attempts, (attempt: Attempt) => {
       return attempt.isLongRunning
     })
   }
 
-  @computed get isOpen () {
+  @computed get isOpen() {
     if (this._isOpen === null) {
-      return Boolean(this.state === 'failed'
-      || this.isLongRunning
-      || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
-      || this.store.hasSingleTest)
+      return Boolean(
+        this.state === 'failed' ||
+          this.isLongRunning ||
+          (this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)) ||
+          this.store.hasSingleTest
+      )
     }
 
     return this._isOpen
   }
 
-  @computed get state () {
+  @computed get state() {
     return this.lastAttempt ? this.lastAttempt.state : 'active'
   }
 
-  @computed get err () {
+  @computed get err() {
     return this.lastAttempt ? this.lastAttempt.err : new Err({})
   }
 
-  @computed get lastAttempt () {
+  @computed get lastAttempt() {
     return _.last(this.attempts) as Attempt
   }
 
-  @computed get hasMultipleAttempts () {
+  @computed get hasMultipleAttempts() {
     return this.attempts.length > 1
   }
 
-  @computed get hasRetried () {
+  @computed get hasRetried() {
     return this.state === 'passed' && this.hasMultipleAttempts
   }
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @computed get isActive (): boolean {
+  @computed get isActive(): boolean {
     return _.some(this.attempts, { isActive: true })
   }
 
-  @computed get currentRetry () {
+  @computed get currentRetry() {
     return this.attempts.length - 1
   }
 
-  @computed get studioIsNotEmpty () {
+  @computed get studioIsNotEmpty() {
     return this._withAttempt(this.currentRetry, (attempt: Attempt) => {
       return attempt.studioIsNotEmpty
     })
   }
 
-  isLastAttempt (attemptModel: Attempt) {
+  isLastAttempt(attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }
 
@@ -135,19 +141,19 @@ export default class Test extends Runnable {
     })
   }
 
-  updateLog (props: LogProps) {
+  updateLog(props: LogProps) {
     this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
     })
   }
 
-  removeLog (props: LogProps) {
+  removeLog(props: LogProps) {
     this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       attempt.removeLog(props)
     })
   }
 
-  @action start (props: TestProps) {
+  @action start(props: TestProps) {
     let attempt = this.getAttemptByIndex(props.currentRetry)
 
     if (!attempt) {
@@ -157,7 +163,7 @@ export default class Test extends Runnable {
     attempt.start()
   }
 
-  @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
+  @action update(props: UpdatableTestProps, cb: UpdateTestCallback) {
     if (props.isOpen != null) {
       this.setIsOpenWhenActive(props.isOpen)
 
@@ -179,18 +185,18 @@ export default class Test extends Runnable {
 
   // this is called to sync up the command log UI for the sake of
   // screenshots, so we only ever need to open the last attempt
-  setIsOpenWhenActive (isOpen: boolean) {
+  setIsOpenWhenActive(isOpen: boolean) {
     this.isOpenWhenActive = isOpen
   }
 
-  callbackAfterUpdate () {
+  callbackAfterUpdate() {
     if (this._callbackAfterUpdate) {
       this._callbackAfterUpdate()
       this._callbackAfterUpdate = null
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  @action finish(props: UpdatableTestProps) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
     this._withAttempt(props.currentRetry || 0, (attempt: Attempt) => {
@@ -198,13 +204,13 @@ export default class Test extends Runnable {
     })
   }
 
-  getAttemptByIndex (attemptIndex: number) {
+  getAttemptByIndex(attemptIndex: number) {
     if (attemptIndex >= this.attempts.length) return
 
     return this.attempts[attemptIndex || 0]
   }
 
-  commandMatchingErr () {
+  commandMatchingErr() {
     return this.lastAttempt.commandMatchingErr()
   }
 
@@ -218,7 +224,7 @@ export default class Test extends Runnable {
     return attempt
   }
 
-  _withAttempt<T> (attemptIndex: number, cb: (attempt: Attempt) => T) {
+  _withAttempt<T>(attemptIndex: number, cb: (attempt: Attempt) => T) {
     const attempt = this.getAttemptByIndex(attemptIndex)
 
     if (attempt) return cb(attempt)

@@ -7,18 +7,14 @@ i18n
   resources: {
     en: {
       translation: {
-        userMessagesUnread:
-            'Hello <1>{{name}}</1>, you have {{count}} unread message.',
-        userMessagesUnread_plural:
-            'Hello <1>{{name}}</1>, you have {{count}} unread messages.',
+        userMessagesUnread: 'Hello <1>{{name}}</1>, you have {{count}} unread message.',
+        userMessagesUnread_plural: 'Hello <1>{{name}}</1>, you have {{count}} unread messages.',
       },
     },
     ru: {
       translation: {
-        userMessagesUnread:
-            'Привет, <1>{{name}}</1>, y тебя {{count}} непрочитанное сообщение.',
-        userMessagesUnread_plural:
-            'Привет, <1>{{name}}</1>, y тебя {{count}} непрочитанных сообщений.',
+        userMessagesUnread: 'Привет, <1>{{name}}</1>, y тебя {{count}} непрочитанное сообщение.',
+        userMessagesUnread_plural: 'Привет, <1>{{name}}</1>, y тебя {{count}} непрочитанных сообщений.',
       },
     },
   },

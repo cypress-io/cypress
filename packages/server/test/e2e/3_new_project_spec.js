@@ -14,8 +14,10 @@ describe('e2e new project', () => {
     .statAsync(supportPath)
     .then(() => {
       throw new Error('support folder should not exist')
-    }).catch(() => {
-      return e2e.exec(this, {
+    })
+    .catch(() => {
+      return e2e
+      .exec(this, {
         project: noScaffoldingPath,
         sanitizeScreenshotDimensions: true,
         snapshot: true,

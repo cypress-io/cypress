@@ -8,68 +8,46 @@ import { log } from '../log'
 import { Browser, FoundBrowser, PathData } from '../types'
 import { utils } from '../utils'
 
-function formFullAppPath (name: string) {
+function formFullAppPath(name: string) {
   return [
     `C:/Program Files (x86)/Google/Chrome/Application/${name}.exe`,
     `C:/Program Files/Google/Chrome/Application/${name}.exe`,
   ].map(normalize)
 }
 
-function formChromeBetaAppPath () {
+function formChromeBetaAppPath() {
   return [
     'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
     'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
   ].map(normalize)
 }
 
-function formChromiumAppPath () {
+function formChromiumAppPath() {
   const exe = 'C:/Program Files (x86)/Google/chrome-win32/chrome.exe'
 
   return [normalize(exe)]
 }
 
-function formChromeCanaryAppPath () {
+function formChromeCanaryAppPath() {
   const home = os.homedir()
-  const exe = join(
-    home,
-    'AppData',
-    'Local',
-    'Google',
-    'Chrome SxS',
-    'Application',
-    'chrome.exe',
-  )
+  const exe = join(home, 'AppData', 'Local', 'Google', 'Chrome SxS', 'Application', 'chrome.exe')
 
   return [normalize(exe)]
 }
 
-function getFirefoxPaths (editionFolder) {
+function getFirefoxPaths(editionFolder) {
   return () => {
-    return (['Program Files', 'Program Files (x86)'])
+    return ['Program Files', 'Program Files (x86)']
     .map((programFiles) => {
       return normalize(`C:/${programFiles}/${editionFolder}/firefox.exe`)
     })
-    .concat(normalize(join(
-      os.homedir(),
-      'AppData',
-      'Local',
-      editionFolder,
-      'firefox.exe',
-    )))
+    .concat(normalize(join(os.homedir(), 'AppData', 'Local', editionFolder, 'firefox.exe')))
   }
 }
 
-function formEdgeCanaryAppPath () {
+function formEdgeCanaryAppPath() {
   const home = os.homedir()
-  const exe = join(
-    home,
-    'AppData',
-    'Local',
-    'Microsoft',
-    'Edge SxS',
-    'Application',
-    'msedge.exe',
-  )
+  const exe = join(home, 'AppData', 'Local', 'Microsoft', 'Edge SxS', 'Application', 'msedge.exe')
 
   return [normalize(exe)]
 }
@@ -110,7 +88,7 @@ const formPaths: WindowsBrowserPaths = {
   },
 }
 
-function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
+function getWindowsBrowser(browser: Browser): Promise<FoundBrowser> {
   const getVersion = (stdout: string): string => {
     // result from wmic datafile
     // "Version=61.0.3163.100"
@@ -142,7 +120,8 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
     let path = doubleEscape(exePath)
 
-    return fse.pathExists(path)
+    return fse
+    .pathExists(path)
     .then((exists) => {
       log('found %s ?', path, exists)
 
@@ -154,7 +133,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       .then(tap(log))
       .then(getVersion)
       .then((version: string) => {
-        log('browser %s at \'%s\' version %s', browser.name, exePath, version)
+        log("browser %s at '%s' version %s", browser.name, exePath, version)
 
         return {
           name: browser.name,
@@ -173,31 +152,22 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
   return tryNextExePath()
 }
 
-export function doubleEscape (s: string) {
+export function doubleEscape(s: string) {
   // Converts all types of paths into windows supported double backslash path
   // Handles any number of \\ in the given path
   return win32.join(...s.split(win32.sep)).replace(/\\/g, '\\\\')
 }
 
-export function getVersionString (path: string) {
+export function getVersionString(path: string) {
   // on Windows using "--version" seems to always start the full
   // browser, no matter what one does.
 
-  const args = [
-    'datafile',
-    'where',
-    `name="${path}"`,
-    'get',
-    'Version',
-    '/value',
-  ]
+  const args = ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value']
 
-  return utils.execa('wmic', args)
-  .then(prop('stdout'))
-  .then(trim)
+  return utils.execa('wmic', args).then(prop('stdout')).then(trim)
 }
 
-export function getVersionNumber (version: string) {
+export function getVersionNumber(version: string) {
   if (version.indexOf('Version=') > -1) {
     return version.split('=')[1]
   }
@@ -205,7 +175,7 @@ export function getVersionNumber (version: string) {
   return version
 }
 
-export function getPathData (pathStr: string): PathData {
+export function getPathData(pathStr: string): PathData {
   const test = new RegExp(/^.+\.exe:(.+)$/)
   const res = test.exec(pathStr)
   let browserKey = ''
@@ -237,6 +207,6 @@ export function getPathData (pathStr: string): PathData {
   return { path }
 }
 
-export function detect (browser: Browser) {
+export function detect(browser: Browser) {
   return getWindowsBrowser(browser)
 }

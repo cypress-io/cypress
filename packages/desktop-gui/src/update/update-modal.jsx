@@ -26,10 +26,10 @@ const UpdateModal = observer(({ show, onClose }) => {
   }
 
   return (
-    <BootstrapModal show={show} onHide={onClose} backdrop='static'>
-      <div className='update-modal modal-body os-dialog'>
-        <BootstrapModal.Dismiss className='close'>
-          <i className='fas fa-times' />
+    <BootstrapModal show={show} onHide={onClose} backdrop="static">
+      <div className="update-modal modal-body os-dialog">
+        <BootstrapModal.Dismiss className="close">
+          <i className="fas fa-times" />
         </BootstrapModal.Dismiss>
         <Contents onShowInstructions={showInstructions} />
       </div>

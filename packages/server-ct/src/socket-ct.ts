@@ -7,7 +7,7 @@ import { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
 const debug = Debug('cypress:server-ct:socket-ct')
 
 export class SocketCt extends SocketBase {
-  constructor (config: Record<string, any>) {
+  constructor(config: Record<string, any>) {
     super(config)
 
     devServer.emitter.on('dev-server:compile:error', (error) => {
@@ -22,19 +22,19 @@ export class SocketCt extends SocketBase {
     }
   }
 
-  startListening (server: DestroyableHttpServer, automation, config, options) {
+  startListening(server: DestroyableHttpServer, automation, config, options) {
     const { componentFolder } = config
 
     this.testsDir = componentFolder
 
     return super.startListening(server, automation, config, options, {
-      onSocketConnection (socket: socketIo.SocketIOServer) {
+      onSocketConnection(socket: socketIo.SocketIOServer) {
         debug('do onSocketConnection')
       },
     })
   }
 
-  sendSpecList (specs) {
+  sendSpecList(specs) {
     this.toRunner('component:specs:changed', specs)
   }
 }

@@ -22,12 +22,7 @@ interface RegisterDeps {
 
 type TimeoutID = number
 
-export const register = ({
-  enzyme,
-  EnzymeAdapter,
-  chaiEnzyme,
-  requireOverride,
-}: RegisterDeps) => {
+export const register = ({ enzyme, EnzymeAdapter, chaiEnzyme, requireOverride }: RegisterDeps) => {
   const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
   const { window } = jsdom
 
@@ -37,10 +32,10 @@ export const register = ({
 
   // @ts-ignore
   global.window = window
-  global.document = window.document;
+  global.document = window.document
 
   // DOMWindow doesn't have Selection yet.
-  (window as any).Selection = { prototype: { isCollapsed: {} } }
+  ;(window as any).Selection = { prototype: { isCollapsed: {} } }
 
   // @ts-ignore
   global.navigator = {
@@ -57,11 +52,7 @@ export const register = ({
   }
 
   Object.keys(window.document.defaultView as Record<string, any>).forEach((property) => {
-    if (
-      property === 'localStorage' ||
-    property === 'sessionStorage' ||
-    typeof global[property] !== 'undefined'
-    ) return
+    if (property === 'localStorage' || property === 'sessionStorage' || typeof global[property] !== 'undefined') return
 
     global[property] = (window.document.defaultView as Record<string, any>)[property]
   })

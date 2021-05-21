@@ -24,13 +24,13 @@ const ignoreEPIPE = () => {
 }
 
 module.exports = {
-  handle (spec, req, res, config, next, onError) {
+  handle(spec, req, res, config, next, onError) {
     debug('request for %o', { spec })
 
     res.set({
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
+      Pragma: 'no-cache',
+      Expires: '0',
     })
 
     res.type('js')

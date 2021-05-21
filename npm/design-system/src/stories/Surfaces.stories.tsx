@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from './util'
@@ -16,16 +16,14 @@ const Surface: React.FC<{
 }> = ({ className }) => {
   const level = className.replace('shadow-', '')
 
-  return (
-    <div className={`${styles.surface} ${`depth-${level}`}`}>
-      {`Level ${level}`}
-    </div>
-  )
+  return <div className={`${styles.surface} ${`depth-${level}`}`}>{`Level ${level}`}</div>
 }
 
 const Template: Story = () => (
   <div>
-    {Object.keys(surfaces).map((className) => <Surface key={className} className={className} />)}
+    {Object.keys(surfaces).map((className) => (
+      <Surface key={className} className={className} />
+    ))}
   </div>
 )
 

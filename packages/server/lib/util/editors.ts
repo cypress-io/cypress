@@ -64,11 +64,11 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
 
     return shell.commandExists(editor.binary)
-  })
-  .then((editors: Editor[] = []) => {
+  }).then((editors: Editor[] = []) => {
     debug('user has the following editors: %o', editors)
 
-    return savedState.create()
+    return savedState
+    .create()
     .then((state) => {
       return state.get('preferredOpener')
     })
@@ -86,7 +86,8 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
 export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsResult> => {
   debug('get user editor')
 
-  return savedState.create()
+  return savedState
+  .create()
   .then((state) => state.get())
   .then((state) => {
     const preferredOpener = state.preferredOpener
@@ -109,8 +110,7 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
 export const setUserEditor = (editor) => {
   debug('set user editor: %o', editor)
 
-  return savedState.create()
-  .then((state) => {
+  return savedState.create().then((state) => {
     state.set('preferredOpener', editor)
   })
 }

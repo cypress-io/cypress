@@ -18,30 +18,33 @@ export const getFs = () => {
       return dir
     }
 
-    return _.extend({}, ..._.map(dir, (val, key) => {
-      let nextDepth = null
+    return _.extend(
+      {},
+      ..._.map(dir, (val, key) => {
+        let nextDepth = null
 
-      if (d !== null) {
-        if (d === -1) {
-          nextDepth = d + 1
-        } else if (!(d > cwd.length) && key === cwd[d]) {
-          key = 'foo'
-          nextDepth = d + 1
+        if (d !== null) {
+          if (d === -1) {
+            nextDepth = d + 1
+          } else if (!(d > cwd.length) && key === cwd[d]) {
+            key = 'foo'
+            nextDepth = d + 1
 
-          if (d === cwd.length - 1) {
-            return { '[cwd]': recurse(val._items, nextDepth) }
+            if (d === cwd.length - 1) {
+              return { '[cwd]': recurse(val._items, nextDepth) }
+            }
+
+            return recurse(val._items, nextDepth)
+          } else {
+            nextDepth = null
           }
-
-          return recurse(val._items, nextDepth)
-        } else {
-          nextDepth = null
         }
-      }
 
-      return {
-        [key]: recurse(val._content ? val._content.toString() : val._items, nextDepth),
-      }
-    }))
+        return {
+          [key]: recurse(val._content ? val._content.toString() : val._items, nextDepth),
+        }
+      })
+    )
   }
 
   return recurse({ root: mockfs.getMockRoot() }, -1).root

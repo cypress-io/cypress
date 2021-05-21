@@ -6,7 +6,7 @@ import { DeferSourceMapRewriteFn } from './js'
 // the HTML rewriter passes inline JS to the JS rewriter, hence
 // the lack of basic `rewriteHtml` or `HtmlRewriter` exports here
 
-export function HtmlJsRewriter (url: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): stream.Transform {
+export function HtmlJsRewriter(url: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): stream.Transform {
   const rewriter = new RewritingStream()
 
   htmlRules.install(url, rewriter, deferSourceMapRewrite)
@@ -14,7 +14,11 @@ export function HtmlJsRewriter (url: string, deferSourceMapRewrite?: DeferSource
   return rewriter
 }
 
-export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): Promise<string> {
+export function rewriteHtmlJs(
+  url: string,
+  html: string,
+  deferSourceMapRewrite?: DeferSourceMapRewriteFn
+): Promise<string> {
   let out = ''
   const rewriter = HtmlJsRewriter(url, deferSourceMapRewrite)
 

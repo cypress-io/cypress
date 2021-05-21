@@ -556,17 +556,20 @@ describe('StudioRecorder', () => {
     })
 
     it('removes an existing type if additional typing causes element to become empty', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'clear',
-        message: null,
-      }, {
-        id: 2,
-        selector: '.selector',
-        name: 'type',
-        message: 'a',
-      }]
+      instance.logs = [
+        {
+          id: 1,
+          selector: '.selector',
+          name: 'clear',
+          message: null,
+        },
+        {
+          id: 2,
+          selector: '.selector',
+          name: 'type',
+          message: 'a',
+        },
+      ]
 
       const $el = $('<input value="" />')
 
@@ -578,12 +581,14 @@ describe('StudioRecorder', () => {
     })
 
     it('does not record a duplicate clear event if one already exists when typing', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'clear',
-        message: null,
-      }]
+      instance.logs = [
+        {
+          id: 1,
+          selector: '.selector',
+          name: 'clear',
+          message: null,
+        },
+      ]
 
       const $el = $('<input value="val" />')
 
@@ -740,12 +745,14 @@ describe('StudioRecorder', () => {
     })
 
     it('does not filter if selectors do not match', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'type',
-        message: 'a',
-      }]
+      instance.logs = [
+        {
+          id: 1,
+          selector: '.selector',
+          name: 'type',
+          message: 'a',
+        },
+      ]
 
       const result = instance._updateLastLog('.different-selector', 'type', 'b')
 
@@ -753,12 +760,14 @@ describe('StudioRecorder', () => {
     })
 
     it('modifies original log in place with updated value for typing events with same selector', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'type',
-        message: 'a',
-      }]
+      instance.logs = [
+        {
+          id: 1,
+          selector: '.selector',
+          name: 'type',
+          message: 'a',
+        },
+      ]
 
       const result = instance._updateLastLog('.selector', 'type', 'ab')
 
@@ -768,12 +777,14 @@ describe('StudioRecorder', () => {
     })
 
     it('converts clicks into clears on type and returns false', () => {
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'click',
-        message: null,
-      }]
+      instance.logs = [
+        {
+          id: 1,
+          selector: '.selector',
+          name: 'click',
+          message: null,
+        },
+      ]
 
       const result = instance._updateLastLog('.selector', 'type', 'a')
 
@@ -784,12 +795,14 @@ describe('StudioRecorder', () => {
 
     it('emits reporter:log:state:changed with the child log when a log is updated', () => {
       instance.testId = 'r2'
-      instance.logs = [{
-        id: 1,
-        selector: '.selector',
-        name: 'type',
-        message: 'a',
-      }]
+      instance.logs = [
+        {
+          id: 1,
+          selector: '.selector',
+          name: 'type',
+          message: 'a',
+        },
+      ]
 
       instance._updateLastLog('.selector', 'type', 'ab')
 

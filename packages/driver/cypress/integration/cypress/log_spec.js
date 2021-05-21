@@ -17,7 +17,7 @@ describe('src/cypress/log', function () {
     it('creates a snapshot and returns the log', function () {
       const div = Cypress.$('<div />')
 
-      const log = this.log({ '$el': div })
+      const log = this.log({ $el: div })
       const result = log.snapshot()
 
       expect(this.cy.createSnapshot).to.be.calledWith(undefined, div)

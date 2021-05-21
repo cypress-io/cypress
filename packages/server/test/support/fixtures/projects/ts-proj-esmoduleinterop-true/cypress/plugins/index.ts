@@ -7,6 +7,4 @@ if (commonjsExports.export1 !== 'export1' || commonjsExports.export2 !== 'export
 }
 
 // Default Cypress plugin function
-export default (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
-
-}
+export default (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {}

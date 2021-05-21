@@ -21,13 +21,15 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 
   const urlArray = _.castArray(url)
 
-  return (<>
-    {_.map(urlArray, (url) => (
-      <a className='runnable-err-docs-url' href={url} target='_blank' key={url}>
-        Learn more
-      </a>
-    ))}
-  </>)
+  return (
+    <>
+      {_.map(urlArray, (url) => (
+        <a className="runnable-err-docs-url" href={url} target="_blank" key={url}>
+          Learn more
+        </a>
+      ))}
+    </>
+  )
 }
 
 interface TestErrorProps {
@@ -59,40 +61,37 @@ const TestError = observer((props: TestErrorProps) => {
   if (!err.displayMessage) return null
 
   return (
-    <div className='runnable-err-wrapper'>
-      <div className='runnable-err'>
-        <div className='runnable-err-header'>
-          <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle' />
+    <div className="runnable-err-wrapper">
+      <div className="runnable-err">
+        <div className="runnable-err-header">
+          <div className="runnable-err-name">
+            <i className="fas fa-exclamation-circle" />
             {err.name}
           </div>
         </div>
-        <div className='runnable-err-message'>
+        <div className="runnable-err-message">
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
           <DocsUrl url={err.docsUrl} />
         </div>
         {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
-        {err.stack &&
+        {err.stack && (
           <Collapsible
-            header='View stack trace'
-            headerClass='runnable-err-stack-expander'
+            header="View stack trace"
+            headerClass="runnable-err-stack-expander"
             headerExtras={
               <FlashOnClick onClick={_onPrintClick} message="Printed output to your console">
-                <div
-                  className="runnable-err-print"
-                  onKeyPress={onEnterOrSpace(onPrint)}
-                  role='button'
-                  tabIndex={0}
-                >
-                  <div tabIndex={-1}><i className="fas fa-terminal" /> <span>Print to console</span></div>
+                <div className="runnable-err-print" onKeyPress={onEnterOrSpace(onPrint)} role="button" tabIndex={0}>
+                  <div tabIndex={-1}>
+                    <i className="fas fa-terminal" /> <span>Print to console</span>
+                  </div>
                 </div>
               </FlashOnClick>
             }
-            contentClass='runnable-err-stack-trace'
+            contentClass="runnable-err-stack-trace"
           >
             <ErrorStack err={err} />
           </Collapsible>
-        }
+        )}
       </div>
     </div>
   )

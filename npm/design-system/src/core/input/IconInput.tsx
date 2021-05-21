@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { RefAttributes } from 'react'
+import React, { RefAttributes } from 'react'
 import cs from 'classnames'
 import { useFocusRing } from '@react-aria/focus'
 import { PressEvent } from '@react-types/shared'
@@ -17,54 +16,68 @@ export type IconSettings = {
   icon: IconProps['icon']
   hideOnFocus?: boolean
   hidden?: boolean
-} & ({
-  // If click is specified, it _must_ have an aria label
-  onPress: (event: PressEvent) => void
-  ['aria-label']: string
-} | {
-  onPress?: undefined
-  ['aria-label']?: undefined
-})
+} & (
+  | {
+      // If click is specified, it _must_ have an aria label
+      onPress: (event: PressEvent) => void
+      ['aria-label']: string
+    }
+  | {
+      onPress?: undefined
+      ['aria-label']?: undefined
+    }
+)
 
 export type IconInputProps = InputProps<{
   prefixIcon?: IconSettings
   suffixIcon?: IconSettings
-}>
-& RefAttributes<HTMLInputElement>
+}> &
+  RefAttributes<HTMLInputElement>
 
-export const IconInput: React.FC<IconInputProps> = (props) => <InputBase {...props} InputRenderer={IconInputComponent} />
+export const IconInput: React.FC<IconInputProps> = (props) => (
+  <InputBase {...props} InputRenderer={IconInputComponent} />
+)
 
-const IconInputComponent: InputRenderer<IconInputProps> = ({ componentProps: { size = 'm', prefixIcon, suffixIcon, className, ...props }, inputProps, inputRef }) => {
+const IconInputComponent: InputRenderer<IconInputProps> = ({
+  componentProps: { size = 'm', prefixIcon, suffixIcon, className, ...props },
+  inputProps,
+  inputRef,
+}) => {
   const iconSize = modifySize(size, 2)
   const { isFocused, focusProps } = useFocusRing({ isTextInput: true })
 
-  const prefixIconProps = prefixIcon ? {
-    className: cs(prefixIcon.onPress ? styles.iconButton : styles.icon, prefixIcon.className),
-    size: iconSize,
-    ['aria-label']: prefixIcon['aria-label'],
-  } : {}
+  const prefixIconProps = prefixIcon
+    ? {
+        className: cs(prefixIcon.onPress ? styles.iconButton : styles.icon, prefixIcon.className),
+        size: iconSize,
+        ['aria-label']: prefixIcon['aria-label'],
+      }
+    : {}
 
-  const suffixIconProps = suffixIcon ? {
-    className: cs(suffixIcon.onPress ? styles.iconButton : styles.icon, suffixIcon.className),
-    size: iconSize,
-    ['aria-label']: suffixIcon['aria-label'],
-  } : {}
+  const suffixIconProps = suffixIcon
+    ? {
+        className: cs(suffixIcon.onPress ? styles.iconButton : styles.icon, suffixIcon.className),
+        size: iconSize,
+        ['aria-label']: suffixIcon['aria-label'],
+      }
+    : {}
 
   return (
     <span className={cs(styles.iconInput, { [focusClass]: isFocused }, className)}>
-      {prefixIcon && (
-        prefixIcon.onPress ? (
+      {prefixIcon &&
+        (prefixIcon.onPress ? (
           <IconButton
-            {...prefixIconProps as IconButtonProps}
-            elementType='button'
-            color='white'
+            {...(prefixIconProps as IconButtonProps)}
+            elementType="button"
+            color="white"
             noBorder={true}
             ignoreTextCenter={false}
             icon={prefixIcon.icon}
             onPress={prefixIcon.onPress}
           />
-        ) : <Icon {...prefixIconProps} icon={prefixIcon.icon} />
-      )}
+        ) : (
+          <Icon {...prefixIconProps} icon={prefixIcon.icon} />
+        ))}
       {/* Apply iconSize to input wrapper, so we have the same em measure */}
       <div className={cs(textSizeToClassName(iconSize), styles.wrapper)}>
         <BasicInput
@@ -77,19 +90,20 @@ const IconInputComponent: InputRenderer<IconInputProps> = ({ componentProps: { s
           size={size}
         />
       </div>
-      {suffixIcon && (
-        suffixIcon.onPress ? (
+      {suffixIcon &&
+        (suffixIcon.onPress ? (
           <IconButton
-            {...suffixIconProps as IconButtonProps}
-            elementType='button'
-            color='white'
+            {...(suffixIconProps as IconButtonProps)}
+            elementType="button"
+            color="white"
             noBorder={true}
             ignoreTextCenter={false}
             icon={suffixIcon.icon}
             onPress={suffixIcon.onPress}
           />
-        ) : <Icon {...suffixIconProps} icon={suffixIcon.icon} />
-      )}
+        ) : (
+          <Icon {...suffixIconProps} icon={suffixIcon.icon} />
+        ))}
     </span>
   )
 }

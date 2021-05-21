@@ -3,7 +3,7 @@ const $errUtils = require('../cypress/error_utils')
 
 const create = (state) => {
   return {
-    timeout (ms, delta = false) {
+    timeout(ms, delta = false) {
       const runnable = state('runnable')
 
       if (!runnable) {
@@ -22,7 +22,7 @@ const create = (state) => {
       return runnable.timeout()
     },
 
-    clearTimeout () {
+    clearTimeout() {
       const runnable = state('runnable')
 
       if (!runnable) {

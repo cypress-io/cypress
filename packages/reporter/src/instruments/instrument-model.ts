@@ -34,7 +34,7 @@ export default class Log {
   @observable state?: string | null
   @observable.ref referencesAlias?: Alias = null
 
-  constructor (props: InstrumentProps) {
+  constructor(props: InstrumentProps) {
     this.id = props.id
     this.alias = props.alias
     this.aliasType = props.aliasType
@@ -46,7 +46,7 @@ export default class Log {
     this.referencesAlias = props.referencesAlias
   }
 
-  update (props: InstrumentProps) {
+  update(props: InstrumentProps) {
     this.alias = props.alias
     this.aliasType = props.aliasType
     this.displayName = props.displayName

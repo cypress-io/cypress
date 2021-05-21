@@ -19,12 +19,7 @@ const getLeaves = (tree: TreeFolder<FileBase>): Array<TreeFile<FileBase>> => {
 
 describe('tree contents', () => {
   it('should contain all files', () => {
-    const files = [
-      'forOfStatement.js',
-      'foo/y/bar.js',
-      'foo/bar',
-      'a/b/c',
-    ].map((path) => ({ path }))
+    const files = ['forOfStatement.js', 'foo/y/bar.js', 'foo/bar', 'a/b/c'].map((path) => ({ path }))
 
     const tree = buildTree(files, '/')
 
@@ -70,9 +65,7 @@ describe('tree contents', () => {
 
 describe('tree collapsing', () => {
   it('should collapse directories into a single node', () => {
-    const files = [
-      { path: 'folder1/folder2/folder3/moreFolder/file1.js' },
-    ]
+    const files = [{ path: 'folder1/folder2/folder3/moreFolder/file1.js' }]
 
     const tree = buildTree(files, '/')!
 

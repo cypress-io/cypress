@@ -86,11 +86,11 @@ describe('lib/tasks/unzip', function () {
       const unzipChildProcess = new events.EventEmitter()
 
       unzipChildProcess.stdout = {
-        on () {},
+        on() {},
       }
 
       unzipChildProcess.stderr = {
-        on () {},
+        on() {},
       }
 
       sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess)
@@ -127,11 +127,11 @@ describe('lib/tasks/unzip', function () {
       const unzipChildProcess = new events.EventEmitter()
 
       unzipChildProcess.stdout = {
-        on () {},
+        on() {},
       }
 
       unzipChildProcess.stderr = {
-        on () {},
+        on() {},
       }
 
       sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess)
@@ -179,11 +179,11 @@ describe('lib/tasks/unzip', function () {
       const unzipChildProcess = new events.EventEmitter()
 
       unzipChildProcess.stdout = {
-        on () {},
+        on() {},
       }
 
       unzipChildProcess.stderr = {
-        on () {},
+        on() {},
       }
 
       sinon.stub(cp, 'spawn').withArgs('ditto').returns(unzipChildProcess)

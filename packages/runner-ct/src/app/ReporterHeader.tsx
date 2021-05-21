@@ -14,13 +14,15 @@ export const EmptyReporterHeader: React.FC = () => {
   )
 }
 
-export const ReporterHeader: React.FC<ReporterHeaderProps> = namedObserver('ReporterHeader',
+export const ReporterHeader: React.FC<ReporterHeaderProps> = namedObserver(
+  'ReporterHeader',
   ({ statsStore, appState }) => {
     return (
       <header className={styles.ctReporterHeader}>
         <Stats stats={statsStore} />
-        <div className='spacer' />
+        <div className="spacer" />
         <Controls appState={appState} />
       </header>
     )
-  })
+  }
+)

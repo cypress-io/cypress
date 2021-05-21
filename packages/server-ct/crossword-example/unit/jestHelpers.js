@@ -1,4 +1,4 @@
-export function fillCrossword (inputWrappers, options) {
+export function fillCrossword(inputWrappers, options) {
   const letters = options.partially ? options.crossword.grid.slice(0, 15) : options.crossword.grid
 
   letters.forEach((letter, idx) => {
@@ -10,7 +10,7 @@ export function fillCrossword (inputWrappers, options) {
   })
 }
 
-export function getCrossword (inputWrappers) {
+export function getCrossword(inputWrappers) {
   return Array.from(inputWrappers.wrappers)
   .map((wrapper) => wrapper.element.value)
   .join('')

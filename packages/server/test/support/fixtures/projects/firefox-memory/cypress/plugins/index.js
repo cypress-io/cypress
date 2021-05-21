@@ -26,18 +26,21 @@ module.exports = (on, config) => {
   }
 
   on('task', {
-    'console' (...args) {
+    console(...args) {
       console.log(...args)
 
       return null
     },
-    'stop:capture:memory' () {
+    'stop:capture:memory'() {
       clearInterval(intervalId)
-      console.log('available memory', util.inspect(timings, {
-        compact: true,
-        breakLength: Infinity,
-        maxArrayLength: Infinity,
-      }))
+      console.log(
+        'available memory',
+        util.inspect(timings, {
+          compact: true,
+          breakLength: Infinity,
+          maxArrayLength: Infinity,
+        })
+      )
 
       console.log('details of available memory', {
         min: _.min(timings),
@@ -45,11 +48,14 @@ module.exports = (on, config) => {
         average: _.chain(timings).sum().divide(timings.length).value(),
       })
 
-      console.log('firefox rss', util.inspect(rss, {
-        compact: true,
-        breakLength: Infinity,
-        maxArrayLength: Infinity,
-      }))
+      console.log(
+        'firefox rss',
+        util.inspect(rss, {
+          compact: true,
+          breakLength: Infinity,
+          maxArrayLength: Infinity,
+        })
+      )
 
       console.log('details of firefox rss', {
         min: _.min(rss),
@@ -59,23 +65,15 @@ module.exports = (on, config) => {
 
       return null
     },
-    'capture:memory' () {
+    'capture:memory'() {
       clearInterval(intervalId)
 
       timings = []
 
       intervalId = setInterval(() => {
-        execa('free', ['-m'])
-        .then(({ stdout }) => {
+        execa('free', ['-m']).then(({ stdout }) => {
           console.log(stdout)
-          const avail = _
-          .chain(stdout)
-          .split('\n')
-          .nth(1)
-          .split(' ')
-          .last()
-          .toNumber()
-          .value()
+          const avail = _.chain(stdout).split('\n').nth(1).split(' ').last().toNumber().value()
 
           console.log(avail)
           timings.push(avail)
@@ -84,9 +82,8 @@ module.exports = (on, config) => {
 
       return null
     },
-    'log:memory' () {
-      return si.processes()
-      .then(({ list }) => {
+    'log:memory'() {
+      return si.processes().then(({ list }) => {
         const totalRss = _.chain(list)
         // BLOCKING TODO: need to make this detect firefox that are children of Cypress
         // *only* using parent pid and pid, otherwise it will detect the user's

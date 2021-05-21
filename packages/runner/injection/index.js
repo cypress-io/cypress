@@ -9,10 +9,12 @@
 
 import { createTimers } from './timers'
 
-const Cypress = window.Cypress = parent.Cypress
+const Cypress = (window.Cypress = parent.Cypress)
 
 if (!Cypress) {
-  throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing!. This should never happen and likely is a bug. Please open an issue!')
+  throw new Error(
+    'Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing!. This should never happen and likely is a bug. Please open an issue!'
+  )
 }
 
 // We wrap timers in the injection code because if we do it in the driver (like

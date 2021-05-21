@@ -21,7 +21,7 @@ import StudioModals from '../studio/studio-modals'
 class App extends Component {
   @observable isReporterResizing = false
 
-  render () {
+  render() {
     /**
      * @type {Cypress.Cypress['spec']}
      */
@@ -30,32 +30,28 @@ class App extends Component {
     const NO_COMMAND_LOG = this.props.config.env && this.props.config.env.NO_COMMAND_LOG
 
     return (
-      <div className={cs({
-        'is-reporter-resizing': this.isReporterResizing,
-        'is-reporter-sized': this.props.state.reporterWidth != null,
-      })}>
-        <div
-          ref='reporterWrap'
-          className='reporter-wrap'
-          style={{ width: this.props.state.reporterWidth }}
-        >
-          {Boolean(NO_COMMAND_LOG) || <Reporter
-            runner={this.props.eventManager.reporterBus}
-            spec={spec}
-            autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
-            firefoxGcInterval={this.props.config.firefoxGcInterval}
-            experimentalStudioEnabled={this.props.config.experimentalStudio}
-          />}
+      <div
+        className={cs({
+          'is-reporter-resizing': this.isReporterResizing,
+          'is-reporter-sized': this.props.state.reporterWidth != null,
+        })}
+      >
+        <div ref="reporterWrap" className="reporter-wrap" style={{ width: this.props.state.reporterWidth }}>
+          {Boolean(NO_COMMAND_LOG) || (
+            <Reporter
+              runner={this.props.eventManager.reporterBus}
+              spec={spec}
+              autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
+              error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
+              firefoxGcInterval={this.props.config.firefoxGcInterval}
+              experimentalStudioEnabled={this.props.config.experimentalStudio}
+            />
+          )}
         </div>
-        <div
-          ref='container'
-          className='runner container'
-          style={{ left: this.props.state.absoluteReporterWidth }}
-        >
-          <Header ref='header' {...this.props} />
-          <Iframes ref='iframes' {...this.props} />
-          <Message ref='message' state={this.props.state} />
+        <div ref="container" className="runner container" style={{ left: this.props.state.absoluteReporterWidth }}>
+          <Header ref="header" {...this.props} />
+          <Iframes ref="iframes" {...this.props} />
+          <Message ref="message" state={this.props.state} />
           {this.props.children}
         </div>
         <Resizer
@@ -67,19 +63,24 @@ class App extends Component {
         />
         <StudioModals />
         {/* these pixels help ensure the browser has painted when taking a screenshot */}
-        <div ref='screenshotHelperPixels' className='screenshot-helper-pixels'>
-          <div /><div /><div /><div /><div /><div />
+        <div ref="screenshotHelperPixels" className="screenshot-helper-pixels">
+          <div />
+          <div />
+          <div />
+          <div />
+          <div />
+          <div />
         </div>
       </div>
     )
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this._monitorWindowResize()
     this._handleScreenshots()
   }
 
-  _monitorWindowResize () {
+  _monitorWindowResize() {
     const state = this.props.state
     const win = this.props.window
 
@@ -120,7 +121,7 @@ class App extends Component {
     })
   }
 
-  _handleScreenshots () {
+  _handleScreenshots() {
     const containerNode = findDOMNode(this.refs.container)
     const reporterNode = this.refs.reporterWrap
     const headerNode = findDOMNode(this.refs.header)
@@ -134,7 +135,9 @@ class App extends Component {
     const { eventManager } = this.props
 
     eventManager.on('before:screenshot', (config) => {
-      if (!config.appOnly) return
+      if (!config.appOnly) {
+        return
+      }
 
       screenshotting = true
 
@@ -176,7 +179,9 @@ class App extends Component {
     })
 
     const afterScreenshot = (config) => {
-      if (!config.appOnly) return
+      if (!config.appOnly) {
+        return
+      }
 
       screenshotting = false
 
@@ -217,7 +222,7 @@ class App extends Component {
     })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     $(this.props.window).off('resize', this._onWindowResize)
   }
 }
@@ -229,14 +234,13 @@ App.defaultProps = {
 
 App.propTypes = {
   config: PropTypes.shape({
-    browsers: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      majorVersion: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-      ]),
-      version: PropTypes.string.isRequired,
-    })).isRequired,
+    browsers: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        majorVersion: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        version: PropTypes.string.isRequired,
+      })
+    ).isRequired,
     integrationFolder: PropTypes.string.isRequired,
     numTestsKeptInMemory: PropTypes.number.isRequired,
     projectName: PropTypes.string.isRequired,

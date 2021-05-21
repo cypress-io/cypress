@@ -42,7 +42,9 @@ describe('Socket', function () {
       const clientPath = path.join(resolvePkg('socket.io-client'), 'dist', 'socket.io.js')
 
       fs.readFile(clientPath, 'utf8', function (err, str) {
-        if (err) done(err)
+        if (err) {
+          done(err)
+        }
 
         expect(lib.getClientSource()).to.eq(str)
         done()

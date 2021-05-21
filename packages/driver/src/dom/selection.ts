@@ -211,13 +211,7 @@ const deleteRightOfCursor = function (el) {
     const selection = _getSelectionByEl(el)
 
     if (isSelectionCollapsed(selection)) {
-      $elements.callNativeMethod(
-        selection,
-        'modify',
-        'extend',
-        'forward',
-        'character',
-      )
+      $elements.callNativeMethod(selection, 'modify', 'extend', 'forward', 'character')
     }
 
     if ($elements.getNativeProp(selection, 'isCollapsed')) {
@@ -263,13 +257,7 @@ const deleteLeftOfCursor = function (el) {
     const selection = _getSelectionByEl(el)
 
     if (isSelectionCollapsed(selection)) {
-      $elements.callNativeMethod(
-        selection,
-        'modify',
-        'extend',
-        'backward',
-        'character',
-      )
+      $elements.callNativeMethod(selection, 'modify', 'extend', 'backward', 'character')
     }
 
     deleteSelectionContents(el)
@@ -404,10 +392,7 @@ const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
       return
     }
 
-    return $elements.callNativeMethod(selection, 'modify',
-      'move',
-      up ? 'backward' : 'forward',
-      'line')
+    return $elements.callNativeMethod(selection, 'modify', 'move', up ? 'backward' : 'forward', 'line')
   }
 }
 

@@ -13,7 +13,7 @@ export * from '@packages/server/lib/project-base'
 const debug = Debug('cypress:server-ct:project')
 
 export class ProjectCt extends ProjectBase<ServerCt> {
-  get projectType () {
+  get projectType() {
     return 'ct'
   }
 
@@ -22,7 +22,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
    * 1. if user specified viewport values in their cypress.json, use those.
    * 2. otherwise, use 500/500 by default.
    */
-  addComponentTestingUniqueDefaults (cfg: Record<string, unknown>) {
+  addComponentTestingUniqueDefaults(cfg: Record<string, unknown>) {
     const rawJson = cfg.rawJson as Cfg
 
     return {
@@ -32,21 +32,19 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     }
   }
 
-  changeToUrl (targetUrl: string) {
+  changeToUrl(targetUrl: string) {
     this.server.socket.changeToUrl(targetUrl)
   }
 
-  open (options: Record<string, unknown>) {
+  open(options: Record<string, unknown>) {
     this._server = new ServerCt()
 
     return super.open(options, {
       onOpen: (cfg) => {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
 
-        return this._initPlugins(cfgForComponentTesting, options)
-        .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
-          .then(([port, warning]) => {
+        return this._initPlugins(cfgForComponentTesting, options).then(({ cfg, specsStore }) => {
+          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning).then(([port, warning]) => {
             return {
               cfg,
               port,
@@ -56,7 +54,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
         })
       },
 
-      onAfterOpen ({ cfg }) {
+      onAfterOpen({ cfg }) {
         cfg.proxyServer = cfg.proxyUrl
 
         return cfg
@@ -64,18 +62,19 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     })
   }
 
-  _initPlugins (cfg, options) {
+  _initPlugins(cfg, options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
     const allowedCfg = config.allowed(cfg)
 
-    return plugins.init(allowedCfg, {
+    return plugins
+    .init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
-      onError (err) {
+      onError(err) {
         debug('plugins failed with error', err)
 
         options.onError(err)
@@ -98,19 +97,21 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       // the plugin event for 'dev-server:start' and get back
       // @ts-ignore - let's not attempt to TS all the things in packages/server
 
-      return specsUtil.find(modifiedConfig)
+      return specsUtil
+      .find(modifiedConfig)
       .filter((spec: Cypress.Cypress['spec']) => {
         return spec.specType === 'component'
       })
       .then((specs) => {
-        return devServer.start({ specs, config: modifiedConfig })
-        .then((devServerOptions) => {
+        return devServer.start({ specs, config: modifiedConfig }).then((devServerOptions) => {
           if (!devServerOptions) {
-            throw new Error([
-              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-              'Make sure that the dev-server:start function returns an object.',
-              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
-            ].join('\n'))
+            throw new Error(
+              [
+                "It looks like nothing was returned from on('dev-server:start', {here}).",
+                'Make sure that the dev-server:start function returns an object.',
+                'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+              ].join('\n')
+            )
           }
 
           const { port } = devServerOptions
@@ -129,8 +130,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
             },
           })
 
-          return specsStore.storeSpecFiles()
-          .return({
+          return specsStore.storeSpecFiles().return({
             specsStore,
             cfg: modifiedConfig,
           })

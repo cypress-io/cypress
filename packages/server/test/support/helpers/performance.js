@@ -10,7 +10,7 @@ const API_URL = process.env.PERF_API_URL || 'http://localhost:2999/track'
 const API_KEY = process.env.PERF_API_KEY
 
 // Store this performance record permanently.
-function track (type, data) {
+function track(type, data) {
   if (!API_KEY) {
     debug('skip tracking "%s", API key is not set', type)
 

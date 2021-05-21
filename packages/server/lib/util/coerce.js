@@ -3,7 +3,7 @@ const toBoolean = require('underscore.string/toBoolean')
 
 // https://github.com/cypress-io/cypress/issues/6810
 const toArray = (value) => {
-  const valueIsNotStringOrArray = typeof (value) !== 'string' || (value[0] !== '[' && value[value.length - 1] !== ']')
+  const valueIsNotStringOrArray = typeof value !== 'string' || (value[0] !== '[' && value[value.length - 1] !== ']')
 
   if (valueIsNotStringOrArray) {
     return

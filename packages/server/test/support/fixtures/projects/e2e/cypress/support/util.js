@@ -18,19 +18,16 @@ export const fail = (ctx, test) => {
 }
 
 export const verify = (ctx, options) => {
-  const {
-    line,
-    column,
-    message,
-    stack,
-  } = options
+  const { line, column, message, stack } = options
 
   const fileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column}`)
 
   it(`✓ VERIFY`, function () {
     const runnerWs = window.top.runnerWs
 
-    cy.stub(window.top.runnerWs, 'emit').callThrough().withArgs('get:user:editor')
+    cy.stub(window.top.runnerWs, 'emit')
+    .callThrough()
+    .withArgs('get:user:editor')
     .yields({
       preferredOpener: {
         id: 'foo-editor',
@@ -50,24 +47,18 @@ export const verify = (ctx, options) => {
       cy.contains('View stack trace').click()
 
       _.each([].concat(message), (msg) => {
-        cy.get('.runnable-err-message')
-        .should('include.text', msg)
+        cy.get('.runnable-err-message').should('include.text', msg)
 
-        cy.get('.runnable-err-stack-trace')
-        .should('not.include.text', msg)
+        cy.get('.runnable-err-stack-trace').should('not.include.text', msg)
       })
 
-      cy.get('.runnable-err-stack-trace')
-      .invoke('text')
-      .should('match', fileRegex)
+      cy.get('.runnable-err-stack-trace').invoke('text').should('match', fileRegex)
 
       _.each([].concat(stack), (stackLine) => {
-        cy.get('.runnable-err-stack-trace')
-        .should('include.text', stackLine)
+        cy.get('.runnable-err-stack-trace').should('include.text', stackLine)
       })
 
-      cy.get('.runnable-err-stack-trace')
-      .should('not.include.text', '__stackReplacementMarker')
+      cy.get('.runnable-err-stack-trace').should('not.include.text', '__stackReplacementMarker')
 
       cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative)
       .click()
@@ -77,10 +68,7 @@ export const verify = (ctx, options) => {
         })
       })
 
-      cy
-      .get('.test-err-code-frame .runnable-err-file-path')
-      .invoke('text')
-      .should('match', fileRegex)
+      cy.get('.test-err-code-frame .runnable-err-file-path').invoke('text').should('match', fileRegex)
 
       // code frames will show `fail(this,()=>` as the 1st line
       cy.get('.test-err-code-frame pre span').should('include.text', 'fail(this,()=>')

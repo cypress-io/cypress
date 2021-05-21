@@ -59,7 +59,5 @@
     "experimentalDecorators": true
     // "noResolve": true
   },
-  "exclude": [
-    "dist"
-  ]
+  "exclude": ["dist"]
 }

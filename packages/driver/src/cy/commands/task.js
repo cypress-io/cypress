@@ -7,7 +7,7 @@ const $stackUtils = require('../../cypress/stack_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
-    task (task, arg, options = {}) {
+    task(task, arg, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return consoleOutput
           },
         })

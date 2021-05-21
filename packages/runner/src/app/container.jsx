@@ -16,20 +16,20 @@ const automationElementId = '__cypress-string'
 
 @observer
 class Container extends Component {
-  constructor (...args) {
+  constructor(...args) {
     super(...args)
 
     this.randomString = `${Math.random()}`
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
       string: this.randomString,
     })
   }
 
-  render () {
+  render() {
     switch (this.props.state.automation) {
       case automation.CONNECTING:
         return this._automationElement()
@@ -43,7 +43,7 @@ class Container extends Component {
     }
   }
 
-  _automationElement () {
+  _automationElement() {
     return (
       <div id={automationElementId} style={{ display: 'none' }}>
         {this.randomString}
@@ -51,15 +51,11 @@ class Container extends Component {
     )
   }
 
-  _app () {
-    return (
-      <App {...this.props}>
-        {this._automationElement()}
-      </App>
-    )
+  _app() {
+    return <App {...this.props}>{this._automationElement()}</App>
   }
 
-  _noSpec () {
+  _noSpec() {
     return (
       <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
         {this._automationElement()}
@@ -73,7 +69,7 @@ class Container extends Component {
     }
   }
 
-  _noAutomation () {
+  _noAutomation() {
     return (
       <NoAutomation
         browsers={this.props.config.browsers}
@@ -82,7 +78,7 @@ class Container extends Component {
     )
   }
 
-  _automationDisconnected () {
+  _automationDisconnected() {
     return <AutomationDisconnected onReload={this.props.eventManager.launchBrowser} />
   }
 }

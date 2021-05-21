@@ -7,12 +7,12 @@ const state = {}
  */
 module.exports = (on) => {
   on('task', {
-    incrState (arg) {
+    incrState(arg) {
       state[arg] = state[arg] + 1 || 1
 
       return null
     },
-    getState () {
+    getState() {
       return state
     },
   })

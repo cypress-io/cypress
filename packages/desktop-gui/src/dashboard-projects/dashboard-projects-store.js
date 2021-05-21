@@ -8,7 +8,7 @@ export class DashboardProjects {
   @observable error = null
   @observable isLoaded = false
 
-  @action setProjects (projects) {
+  @action setProjects(projects) {
     this.projects = _.map(projects, (project) => {
       return new DashboardProject(project)
     })
@@ -16,19 +16,19 @@ export class DashboardProjects {
     this.isLoaded = true
   }
 
-  @action addProject (project) {
+  @action addProject(project) {
     this.projects.push(new DashboardProject(project))
   }
 
-  @action setError (err) {
+  @action setError(err) {
     this.error = err
   }
 
-  getProjectById (id) {
+  getProjectById(id) {
     return _.find(this.projects, { id })
   }
 
-  getProjectsByOrgId (orgId) {
+  getProjectsByOrgId(orgId) {
     return _.filter(this.projects, { orgId })
   }
 }

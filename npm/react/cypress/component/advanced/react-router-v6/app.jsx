@@ -1,7 +1,7 @@
 import React from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 
-function Home () {
+function Home() {
   return (
     <div>
       <h2>Home</h2>
@@ -10,7 +10,7 @@ function Home () {
   )
 }
 
-function About () {
+function About() {
   return <h2>About</h2>
 }
 

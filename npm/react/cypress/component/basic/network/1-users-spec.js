@@ -36,10 +36,7 @@ context('Users', () => {
 
       cy.route('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
-      cy.get('li')
-      .should('have.length', 1)
-      .first()
-      .contains('foo')
+      cy.get('li').should('have.length', 1).first().contains('foo')
     })
 
     it('can inspect mocked XHR', () => {
@@ -47,9 +44,7 @@ context('Users', () => {
 
       cy.route('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
-      cy.wait('@users')
-      .its('response.body')
-      .should('deep.equal', users)
+      cy.wait('@users').its('response.body').should('deep.equal', users)
     })
 
     it('can delay and wait on XHR', () => {

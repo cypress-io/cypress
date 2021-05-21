@@ -3,7 +3,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 export default class MouseMovement extends React.Component {
-  constructor (props) {
+  constructor(props) {
     console.log('MouseMovement constructor')
     super(props)
     this.state = {
@@ -14,7 +14,7 @@ export default class MouseMovement extends React.Component {
     this.onMouseMove = this.onMouseMove.bind(this)
   }
 
-  componentWillMount () {
+  componentWillMount() {
     console.log('MouseMovement componentWillMount')
     document.addEventListener('mousemove', this.onMouseMove)
     const timer = setTimeout(this.timeout, 4000)
@@ -22,14 +22,14 @@ export default class MouseMovement extends React.Component {
     this.setState({ timer })
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     console.log('MouseMovement componentWillUnmount')
     document.removeEventListener('mousemove', this.onMouseMove)
     clearTimeout(this.state.timer)
     this.setState({ timer: undefined })
   }
 
-  onMouseMove () {
+  onMouseMove() {
     console.log('MouseMovement onMouseMove')
     clearTimeout(this.state.timer)
     const timer = setTimeout(this.timeout, 4000)
@@ -38,13 +38,13 @@ export default class MouseMovement extends React.Component {
     this.props.onMoved(true)
   }
 
-  timeout () {
+  timeout() {
     console.log('timeout')
     clearTimeout(this.state.timer)
     this.props.onMoved(false)
   }
 
-  render () {
+  render() {
     return null
   }
 }

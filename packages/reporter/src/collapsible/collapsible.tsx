@@ -25,39 +25,33 @@ class Collapsible extends Component<Props, State> {
     contentClass: '',
   }
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props)
 
     this.state = { isOpen: props.isOpen || false }
   }
 
-  componentDidUpdate (prevProps: Props) {
+  componentDidUpdate(prevProps: Props) {
     if (this.props.isOpen != null && this.props.isOpen !== prevProps.isOpen) {
       this.setState({ isOpen: this.props.isOpen })
     }
   }
 
-  render () {
+  render() {
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })} ref={this.props.containerRef}>
         <div className={cs('collapsible-header-wrapper', this.props.headerClass)}>
           <div
             aria-expanded={this.state.isOpen}
-            className='collapsible-header'
+            className="collapsible-header"
             onClick={this._onClick}
             onKeyPress={onEnterOrSpace(this._onKeyPress)}
-            role='button'
+            role="button"
             tabIndex={0}
           >
-            <div
-              className='collapsible-header-inner'
-              style={this.props.headerStyle}
-              tabIndex={-1}
-            >
-              <i className='collapsible-indicator fa-fw fas' />
-              <span className='collapsible-header-text'>
-                {this.props.header}
-              </span>
+            <div className="collapsible-header-inner" style={this.props.headerStyle} tabIndex={-1}>
+              <i className="collapsible-indicator fa-fw fas" />
+              <span className="collapsible-header-text">{this.props.header}</span>
             </div>
           </div>
           {this.props.headerExtras}

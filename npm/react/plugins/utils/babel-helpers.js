@@ -44,9 +44,7 @@ const findBabelRule = (webpackOptions) => {
   debug('oneOfRule.oneOf %o', oneOfRule.oneOf)
   oneOfRule.oneOf.forEach((rule) => debug('rule %o', rule))
 
-  const babelRule = oneOfRule.oneOf.find(
-    (rule) => rule.loader && isBabelLoader(rule.loader),
-  )
+  const babelRule = oneOfRule.oneOf.find((rule) => rule.loader && isBabelLoader(rule.loader))
 
   return babelRule
 }
@@ -72,9 +70,7 @@ const findBabelLoaderRule = (webpackOptions) => {
     debug('rule %o', rule)
   })
 
-  const babelRule = webpackOptions.module.rules.find(
-    (rule) => rule.loader === 'babel-loader',
-  )
+  const babelRule = webpackOptions.module.rules.find((rule) => rule.loader === 'babel-loader')
 
   if (!babelRule) {
     debug('could not find babel rule')
@@ -112,9 +108,7 @@ const findBabelLoaderUseRule = (webpackOptions) => {
     return rule.use && rule.use.loader === 'next-babel-loader'
   }
 
-  const babelRule = webpackOptions.module.rules.find(
-    (rule) => isBabelLoader(rule) || isNextBabelLoader(rule),
-  )
+  const babelRule = webpackOptions.module.rules.find((rule) => isBabelLoader(rule) || isNextBabelLoader(rule))
 
   if (!babelRule) {
     debug('could not find babel rule')
@@ -185,10 +179,7 @@ const addFolderToBabelLoaderTranspileInPlace = (addFolderToTranspile, webpackOpt
     return
   }
 
-  debug(
-    'trying to transpile additional folder %s using Babel',
-    addFolderToTranspile,
-  )
+  debug('trying to transpile additional folder %s using Babel', addFolderToTranspile)
 
   const babelRule = findBabelRuleWrap(webpackOptions)
 

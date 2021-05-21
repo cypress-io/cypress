@@ -14,12 +14,15 @@ const babelLoader = _.find(commonConfig.module.rules, (rule) => {
 })
 
 // @ts-ignore
-babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  languages: ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
-  plugins: ['line-numbers', 'line-highlight'],
-  theme: 'default',
-  css: false,
-}])
+babelLoader.use.options.plugins.push([
+  require.resolve('babel-plugin-prismjs'),
+  {
+    languages: ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+    plugins: ['line-numbers', 'line-highlight'],
+    theme: 'default',
+    css: false,
+  },
+])
 
 let pngRule
 // @ts-ignore
@@ -44,10 +47,7 @@ pngRule.use[0].options = {
 const config: webpack.Configuration = {
   ...commonConfig,
   module: {
-    rules: [
-      ...nonPngRules,
-      pngRule,
-    ],
+    rules: [...nonPngRules, pngRule],
   },
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/index.js')],

@@ -19,9 +19,7 @@ const Todos = () => {
 
       <div className="todos">
         {state.todos.map((todo, i) => {
-          return (
-            <Todo todo={todo} key={i} onRemove={() => removeTodo(i)} />
-          )
+          return <Todo todo={todo} key={i} onRemove={() => removeTodo(i)} />
         })}
       </div>
     </div>

@@ -2,9 +2,7 @@ const { $ } = Cypress
 const $SnapshotsCss = require('../../../src/cy/snapshots_css')
 
 const normalizeStyles = (styles) => {
-  return styles
-  .replace(/\s+/gm, '')
-  .replace(/['"]/gm, '\'')
+  return styles.replace(/\s+/gm, '').replace(/['"]/gm, "'")
 }
 
 const addStyles = (styles, to) => {
@@ -24,7 +22,10 @@ describe('driver/src/cy/snapshots_css', () => {
       return Cypress.Promise.all([
         addStyles('<link rel="stylesheet" href="/fixtures/generic_styles.css" />', 'head'),
         addStyles('<style>p { color: blue; }</style>', 'head'),
-        addStyles('<link media="screen" rel="stylesheet" href="http://localhost:3501/fixtures/generic_styles.css" />', 'head'),
+        addStyles(
+          '<link media="screen" rel="stylesheet" href="http://localhost:3501/fixtures/generic_styles.css" />',
+          'head'
+        ),
         addStyles('<link media="print" rel="stylesheet" href="/fixtures/generic_styles_print.css" />', 'head'),
         addStyles('<link media="all" rel="stylesheet" href="/fixtures/generic_styles_2.css" />', 'body'),
         addStyles('<link rel="stylesheet" href="/fixtures/generic_styles_3.css" />', 'body'),
@@ -41,7 +42,10 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(headStyleIds[0]).to.eql({ hrefId: 'http://localhost:3500/fixtures/generic_styles.css' })
 
       expect(bodyStyleIds).to.have.length(2)
-      expect(bodyStyleIds).to.eql([{ hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' }, { hrefId: 'http://localhost:3500/fixtures/generic_styles_3.css' }])
+      expect(bodyStyleIds).to.eql([
+        { hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' },
+        { hrefId: 'http://localhost:3500/fixtures/generic_styles_3.css' },
+      ])
       // IDs for 2 of the same stylesheets should have referential equality
       expect(headStyleIds[0]).to.equal(another.headStyleIds[0])
     })
@@ -184,24 +188,28 @@ describe('driver/src/cy/snapshots_css', () => {
 
       const { headStyles } = getStyles()
 
-      expect(normalizeStyles(headStyles[3])).to.include(normalizeStyles(`
+      expect(normalizeStyles(headStyles[3])).to.include(
+        normalizeStyles(`
         @font-face {
           font-family: "Some Font";
           src: url('http://localhost:3500/fonts/some-font.eot?#iefix') format("embedded-opentype"), url('http://localhost:3500/fonts/some-font.woff2') format("woff2"), url('http://localhost:3500/fonts/some-font.woff') format("woff"), url('http://localhost:3500/fonts/some-font.ttf') format("truetype"), url('http://localhost:3500/fonts/some-font.svg#glyphicons_halflingsregular') format("svg");
         }
-      `))
+      `)
+      )
     })
 
     it('replaces CSS paths of local stylesheets with absolute paths', () => {
       return addStyles('<link rel="stylesheet" href="nested/with_paths.css" />', 'head').then(() => {
         const { headStyles } = getStyles()
 
-        expect(normalizeStyles(headStyles[3])).to.include(normalizeStyles(`
+        expect(normalizeStyles(headStyles[3])).to.include(
+          normalizeStyles(`
           @font-face {
             font-family: 'Some Font';
             src: url('http://localhost:3500/fixtures/fonts/some-font.eot?#iefix') format('embedded-opentype'), url('http://localhost:3500/fixtures/fonts/some-font.woff2') format('woff2'), url('http://localhost:3500/fixtures/fonts/some-font.woff') format('woff'), url('http://localhost:3500/fixtures/fonts/some-font.ttf') format('truetype'), url('http://localhost:3500/fixtures/fonts/some-font.svg#glyphicons_halflingsregular') format('svg');
           }
-        `))
+        `)
+        )
       })
     })
   })

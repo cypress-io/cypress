@@ -11,30 +11,35 @@ export type HandlerResult<D> = {
   stopPropagation?: boolean
 } | null
 
-export type HandlerFn<D> = (Cypress: Cypress.Cypress, frame: NetEvent.ToDriver.Event<D>, userHandler: (data: D) => void | Promise<void>, opts: {
-  getRequest: (routeId: string, requestId: string) => Interception | undefined
-  getRoute: (routeId: string) => Route | undefined
-  emitNetEvent: (eventName: string, frame: any) => Promise<void>
-  sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
-}) => Promise<HandlerResult<D>> | HandlerResult<D>
+export type HandlerFn<D> = (
+  Cypress: Cypress.Cypress,
+  frame: NetEvent.ToDriver.Event<D>,
+  userHandler: (data: D) => void | Promise<void>,
+  opts: {
+    getRequest: (routeId: string, requestId: string) => Interception | undefined
+    getRoute: (routeId: string) => Route | undefined
+    emitNetEvent: (eventName: string, frame: any) => Promise<void>
+    sendStaticResponse: (requestId: string, staticResponse: StaticResponse) => void
+  }
+) => Promise<HandlerResult<D>> | HandlerResult<D>
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'before:request': onBeforeRequest,
   'before:response': onResponse,
   'response:callback': onResponse,
-  'response': onResponse,
+  response: onResponse,
   'after:response': onAfterResponse,
   'network:error': onNetworkError,
 }
 
-export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
+export function registerEvents(Cypress: Cypress.Cypress, cy: Cypress.cy) {
   const { state } = Cypress
 
-  function getRoute (routeId) {
+  function getRoute(routeId) {
     return state('routes')[routeId]
   }
 
-  function getRequest (routeId: string, requestId: string): Interception | undefined {
+  function getRequest(routeId: string, requestId: string): Interception | undefined {
     const route = getRoute(routeId)
 
     if (route) {
@@ -44,23 +49,22 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
     return
   }
 
-  function emitNetEvent (eventName: string, frame: any): Promise<void> {
+  function emitNetEvent(eventName: string, frame: any): Promise<void> {
     // all messages from driver to server are wrapped in backend:request
-    return Cypress.backend('net', eventName, frame)
-    .catch((err) => {
+    return Cypress.backend('net', eventName, frame).catch((err) => {
       err.message = `An error was thrown while processing a network event: ${err.message}`
       failCurrentTest(err)
     })
   }
 
-  function sendStaticResponse (requestId: string, staticResponse: StaticResponse) {
+  function sendStaticResponse(requestId: string, staticResponse: StaticResponse) {
     emitNetEvent('send:static:response', {
       requestId,
       staticResponse: getBackendStaticResponse(staticResponse),
     })
   }
 
-  function failCurrentTest (err: Error) {
+  function failCurrentTest(err: Error) {
     // @ts-ignore
     cy.fail(err, { async: true })
   }
@@ -105,9 +109,11 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
 
         const request = getRequest(frame.subscription.routeId, frame.requestId)
 
-        const subscription = request && request.subscriptions.find(({ subscription }) => {
-          return subscription.id === frame.subscription.id
-        })
+        const subscription =
+          request &&
+          request.subscriptions.find(({ subscription }) => {
+            return subscription.id === frame.subscription.id
+          })
 
         return subscription && subscription.handler
       }
@@ -130,8 +136,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
       }
 
       return emitResolved(result)
-    })
-    .catch(failCurrentTest)
+    }).catch(failCurrentTest)
   })
 
   return { emitNetEvent }

@@ -1,7 +1,7 @@
 const contentType = require('content-type')
 
 module.exports = {
-  getContentType (res) {
+  getContentType(res) {
     try {
       return contentType.parse(res).type
     } catch (err) {
@@ -10,7 +10,7 @@ module.exports = {
     }
   },
 
-  hasContentType (res, type) {
+  hasContentType(res, type) {
     // does the response object have a content-type
     // that matches what we expect
     try {

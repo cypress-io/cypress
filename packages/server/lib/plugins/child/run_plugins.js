@@ -83,8 +83,7 @@ const load = (ipc, config, pluginsFile) => {
   register('_get:task:body', () => {})
   register('_get:task:keys', () => {})
 
-  Promise
-  .try(() => {
+  Promise.try(() => {
     debug('run plugins function')
 
     return plugins(register, config)

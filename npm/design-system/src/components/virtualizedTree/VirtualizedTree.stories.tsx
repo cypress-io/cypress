@@ -69,7 +69,9 @@ const tree: TreeParent = {
 export const VirtualizedTree = createStory(() => {
   return (
     <div>
-      <Button color="white" aria-label='Before focus'>Before focus</Button>
+      <Button color="white" aria-label="Before focus">
+        Before focus
+      </Button>
       <div style={{ width: 800, height: 400 }}>
         <VirtualizedTreeComponent<TreeLeaf, TreeParent>
           tree={tree}
@@ -80,18 +82,14 @@ export const VirtualizedTree = createStory(() => {
             }
           }}
           onRenderParent={({ parent, depth, isOpen, setOpen }) => (
-            <div style={{ marginLeft: 20 * depth, backgroundColor: 'red', cursor: 'pointer' }}>
-              {parent.name}
-            </div>
+            <div style={{ marginLeft: 20 * depth, backgroundColor: 'red', cursor: 'pointer' }}>{parent.name}</div>
           )}
-          onRenderLeaf={({ leaf, depth }) => (
-            <div style={{ marginLeft: 20 * depth }}>
-              {leaf.name}
-            </div>
-          )}
+          onRenderLeaf={({ leaf, depth }) => <div style={{ marginLeft: 20 * depth }}>{leaf.name}</div>}
         />
       </div>
-      <Button color="white" aria-label='After focus'>After focus</Button>
+      <Button color="white" aria-label="After focus">
+        After focus
+      </Button>
     </div>
   )
 })

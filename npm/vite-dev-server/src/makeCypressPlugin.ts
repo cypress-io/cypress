@@ -11,10 +11,8 @@ const read = promisify(readFile)
 const pluginName = 'cypress-transform-html'
 const OSSepRE = new RegExp(`\\${sep}`, 'g')
 
-function convertPathToPosix (path: string): string {
-  return sep === '/'
-    ? path
-    : path.replace(OSSepRE, '/')
+function convertPathToPosix(path: string): string {
+  return sep === '/' ? path : path.replace(OSSepRE, '/')
 }
 
 const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
@@ -25,7 +23,7 @@ export const makeCypressPlugin = (
   projectRoot: string,
   supportFilePath: string,
   devServerEvents: EventEmitter,
-  specs: {absolute: string, relative: string}[],
+  specs: { absolute: string; relative: string }[]
 ): Plugin => {
   let base = '/'
 
@@ -38,20 +36,22 @@ export const makeCypressPlugin = (
   return {
     name: pluginName,
     enforce: 'pre',
-    config (_, env) {
+    config(_, env) {
       if (env) {
         return {
           define: {
             'import.meta.env.__cypress_supportPath': JSON.stringify(normalizedSupportFilePath),
-            'import.meta.env.__cypress_originAutUrl': JSON.stringify(`__cypress/iframes/${convertPathToPosix(projectRoot)}/`),
+            'import.meta.env.__cypress_originAutUrl': JSON.stringify(
+              `__cypress/iframes/${convertPathToPosix(projectRoot)}/`
+            ),
           },
         }
       }
     },
-    configResolved (config) {
+    configResolved(config) {
       base = config.base
     },
-    transformIndexHtml () {
+    transformIndexHtml() {
       debug('transformIndexHtml with base', base)
 
       return [
@@ -81,7 +81,9 @@ export const makeCypressPlugin = (
       // until we reached a point where the current module is imported by no other
       while (moduleImporters && moduleImporters.size) {
         if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
-          debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
+          debug(
+            `max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`
+          )
 
           return []
         }
@@ -106,7 +108,7 @@ export const makeCypressPlugin = (
   }
 }
 
-function getImporters (modules: Set<ModuleNode>): Set<ModuleNode> {
+function getImporters(modules: Set<ModuleNode>): Set<ModuleNode> {
   const allImporters = new Set<ModuleNode>()
 
   modules.forEach((m) => {

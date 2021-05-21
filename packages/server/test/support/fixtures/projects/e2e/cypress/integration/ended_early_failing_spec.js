@@ -6,12 +6,12 @@ describe('ending early', () => {
     cy.noop({})
     .then(() => {
       return Cypress.Promise.delay(1000)
-    }).noop({})
+    })
+    .noop({})
     .wrap({})
 
     return setTimeout(() => {
       return done()
-    }
-    , 500)
+    }, 500)
   })
 })

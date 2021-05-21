@@ -60,18 +60,18 @@ const spyOn = (obj, prop, fn) => {
   }
 }
 
-function createCypress (defaultOptions = {}) {
+function createCypress(defaultOptions = {}) {
   /**
    * @type {sinon.SinonStub}
    */
   let allStubs
   /**
-     * @type {sinon.SinonStub}
-     */
+   * @type {sinon.SinonStub}
+   */
   let mochaStubs
   /**
-     * @type {sinon.SinonStub}
-     */
+   * @type {sinon.SinonStub}
+   */
   let setRunnablesStub
 
   const enableStubSnapshots = false
@@ -104,12 +104,13 @@ function createCypress (defaultOptions = {}) {
     opts = _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
-      onBeforeRun () {},
+      onBeforeRun() {},
       visitUrl: 'http://localhost:3500/fixtures/dom.html',
       visitSuccess: true,
     })
 
-    return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
+    return cy
+    .visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
     .then({ timeout: 60000 }, (win) => {
       win.runnerWs.destroy()
 
@@ -125,7 +126,9 @@ function createCypress (defaultOptions = {}) {
           const emitMap = autCypress.emitMap
           const emitThen = autCypress.emitThen
 
-          cy.stub(autCypress, 'automation').log(false).snapshot(enableStubSnapshots)
+          cy.stub(autCypress, 'automation')
+          .log(false)
+          .snapshot(enableStubSnapshots)
           .callThrough()
           .withArgs('clear:cookies')
           .resolves({
@@ -144,18 +147,23 @@ function createCypress (defaultOptions = {}) {
             duration: 100,
           })
 
-          cy.stub(autCypress, 'emit').snapshot(enableStubSnapshots).log(false)
+          cy.stub(autCypress, 'emit')
+          .snapshot(enableStubSnapshots)
+          .log(false)
           .callsFake(function () {
-            const noLog = _.includes([
-              'navigation:changed',
-              'stability:changed',
-              'window:load',
-              'url:changed',
-              'log:added',
-              'page:loading',
-              'window:unload',
-              'newListener',
-            ], arguments[0])
+            const noLog = _.includes(
+              [
+                'navigation:changed',
+                'stability:changed',
+                'window:load',
+                'url:changed',
+                'log:added',
+                'page:loading',
+                'window:unload',
+                'newListener',
+              ],
+              arguments[0]
+            )
             const noCall = _.includes(['window:before:unload', 'mocha'], arguments[0])
             const isMocha = _.includes(['mocha'], arguments[0])
 
@@ -168,14 +176,18 @@ function createCypress (defaultOptions = {}) {
             return noCall || emit.apply(this, arguments)
           })
 
-          cy.stub(autCypress, 'emitMap').snapshot(enableStubSnapshots).log(false)
+          cy.stub(autCypress, 'emitMap')
+          .snapshot(enableStubSnapshots)
+          .log(false)
           .callsFake(function () {
             allStubs.apply(this, ['emitMap'].concat([].slice.call(arguments)))
 
             return emitMap.apply(this, arguments)
           })
 
-          cy.stub(autCypress, 'emitThen').snapshot(enableStubSnapshots).log(false)
+          cy.stub(autCypress, 'emitThen')
+          .snapshot(enableStubSnapshots)
+          .log(false)
           .callsFake(function () {
             allStubs.apply(this, ['emitThen'].concat([].slice.call(arguments)))
 
@@ -214,12 +226,17 @@ function createCypress (defaultOptions = {}) {
         cy.spy(win.eventManager.reporterBus, 'emit').snapshot(enableStubSnapshots).log(false).as('reporterBus')
         cy.spy(win.eventManager.localBus, 'emit').snapshot(enableStubSnapshots).log(false).as('localBus')
 
-        cy.stub(win.runnerWs, 'emit').snapshot(enableStubSnapshots).log(false)
+        cy.stub(win.runnerWs, 'emit')
+        .snapshot(enableStubSnapshots)
+        .log(false)
         .withArgs('watch:test:file')
         .callsFake(() => {
           autCypress = win.Cypress
 
-          cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
+          cy.stub(autCypress, 'onSpecWindow')
+          .snapshot(enableStubSnapshots)
+          .log(false)
+          .callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
             opts.onBeforeRun({ specWindow, win, autCypress })
@@ -235,7 +252,9 @@ function createCypress (defaultOptions = {}) {
               },
             ])
 
-            if (testsInOwnFile) return
+            if (testsInOwnFile) {
+              return
+            }
 
             generateMochaTestsForWin(specWindow, mochaTestsOrFile)
           })
@@ -257,11 +276,13 @@ function createCypress (defaultOptions = {}) {
         .yieldsAsync({})
 
         .withArgs('backend:request', 'resolve:url')
-        .yieldsAsync({ response: {
-          isOkStatusCode: opts.visitSuccess,
-          isHtml: true,
-          url: opts.visitUrl,
-        } })
+        .yieldsAsync({
+          response: {
+            isOkStatusCode: opts.visitSuccess,
+            isHtml: true,
+            url: opts.visitUrl,
+          },
+        })
 
         .withArgs('set:runnables:and:maybe:record:tests')
         .callsFake((...args) => {
@@ -275,14 +296,19 @@ function createCypress (defaultOptions = {}) {
         .withArgs('automation:request')
         .yieldsAsync({ response: {} })
 
-        const c = _.extend({}, Cypress.config(), {
-          isTextTerminal: false,
-          spec: {
-            relative: 'relative/path/to/spec.js',
-            absolute: '/absolute/path/to/spec.js',
-            name: 'empty_spec.js',
+        const c = _.extend(
+          {},
+          Cypress.config(),
+          {
+            isTextTerminal: false,
+            spec: {
+              relative: 'relative/path/to/spec.js',
+              absolute: '/absolute/path/to/spec.js',
+              name: 'empty_spec.js',
+            },
           },
-        }, opts.config)
+          opts.config
+        )
 
         c.state = {}
 
@@ -473,14 +499,16 @@ const shouldHaveTestResults = (expPassed, expFailed, expPending) => {
     expFailed = expFailed || '--'
     cy.get('header .passed .num').should('have.text', `${expPassed}`)
     cy.get('header .failed .num').should('have.text', `${expFailed}`)
-    if (expPending) cy.get('header .pending .num').should('have.text', `${expPending}`)
+    if (expPending) {
+      cy.get('header .pending .num').should('have.text', `${expPending}`)
+    }
   }
 }
 
 const containText = (text) => {
-  return (($el) => {
+  return ($el) => {
     expect($el[0]).property('innerText').contain(text)
-  })
+  }
 }
 
 const getRunState = (Cypress) => {

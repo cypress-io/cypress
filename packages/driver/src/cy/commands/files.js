@@ -5,7 +5,7 @@ const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
-    readFile (file, encoding, options = {}) {
+    readFile(file, encoding, options = {}) {
       let userOptions = options
 
       if (_.isObject(encoding)) {
@@ -24,7 +24,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: file,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return consoleProps
           },
         })
@@ -51,13 +51,14 @@ module.exports = (Commands, Cypress, cy) => {
             onFail: options._log,
             args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
           })
-        }).then(({ contents, filePath }) => {
+        })
+        .then(({ contents, filePath }) => {
           consoleProps['File Path'] = filePath
           consoleProps['Contents'] = contents
 
           return cy.verifyUpcomingAssertions(contents, options, {
             ensureExistenceFor: 'subject',
-            onFail (err) {
+            onFail(err) {
               if (err.type !== 'existence') {
                 return
               }
@@ -79,7 +80,7 @@ module.exports = (Commands, Cypress, cy) => {
       return verifyAssertions()
     },
 
-    writeFile (fileName, contents, encoding, options = {}) {
+    writeFile(fileName, contents, encoding, options = {}) {
       let userOptions = options
 
       if (_.isObject(encoding)) {
@@ -99,7 +100,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: fileName,
           timeout: 0,
-          consoleProps () {
+          consoleProps() {
             return consoleProps
           },
         })
@@ -129,7 +130,8 @@ module.exports = (Commands, Cypress, cy) => {
         consoleProps['Contents'] = contents
 
         return null
-      }).catch(Promise.TimeoutError, () => {
+      })
+      .catch(Promise.TimeoutError, () => {
         return $errUtils.throwErrByPath('files.timed_out', {
           onFail: options._log,
           args: { cmd: 'writeFile', file: fileName, timeout: options.timeout },

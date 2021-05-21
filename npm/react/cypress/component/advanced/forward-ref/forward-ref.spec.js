@@ -18,7 +18,7 @@ describe('Button component', function () {
     mount(
       <Button className="testing" ref={ref}>
         Hello, World
-      </Button>,
+      </Button>
     )
 
     expect(ref).to.have.property('current')

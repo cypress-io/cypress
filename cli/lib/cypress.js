@@ -14,7 +14,7 @@ const cypressModuleApi = {
    * Opens Cypress GUI
    * @see https://on.cypress.io/module-api#cypress-open
    */
-  open (options = {}) {
+  open(options = {}) {
     options = util.normalizeModuleOptions(options)
 
     return open.start(options)
@@ -24,21 +24,18 @@ const cypressModuleApi = {
    * Runs Cypress tests in the current project
    * @see https://on.cypress.io/module-api#cypress-run
    */
-  run (options = {}) {
+  run(options = {}) {
     if (!run.isValidProject(options.project)) {
       return Promise.reject(new Error(`Invalid project path parameter: ${options.project}`))
     }
 
     options = util.normalizeModuleOptions(options)
 
-    return tmp.fileAsync()
-    .then((outputPath) => {
+    return tmp.fileAsync().then((outputPath) => {
       options.outputPath = outputPath
 
-      return run.start(options)
-      .then((failedTests) => {
-        return fs.readJsonAsync(outputPath, { throws: false })
-        .then((output) => {
+      return run.start(options).then((failedTests) => {
+        return fs.readJsonAsync(outputPath, { throws: false }).then((output) => {
           if (!output) {
             return {
               status: 'failed',
@@ -64,7 +61,7 @@ const cypressModuleApi = {
      *  await cypress.run(options)
      * @see https://on.cypress.io/module-api
      */
-    parseRunArguments (args) {
+    parseRunArguments(args) {
       return cli.parseRunCommand(args)
     },
   },

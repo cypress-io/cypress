@@ -34,7 +34,7 @@ const friendlyJsonParse = function (s) {
 }
 
 module.exports = {
-  get (fixturesFolder, filePath, options = {}) {
+  get(fixturesFolder, filePath, options = {}) {
     const p = path.join(fixturesFolder, filePath)
     const fixture = path.basename(p)
 
@@ -45,7 +45,8 @@ module.exports = {
       debug('fixture exact name exists', p)
 
       return this.parseFile(p, fixture, options)
-    }).catch(function (e) {
+    })
+    .catch(function (e) {
       if (e.code !== 'ENOENT') {
         throw e
       }
@@ -55,7 +56,8 @@ module.exports = {
       return glob(pattern, {
         nosort: true,
         nodir: true,
-      }).bind(this)
+      })
+      .bind(this)
       .then(function (matches) {
         if (matches.length === 0) {
           const relativePath = path.relative('.', p)
@@ -72,8 +74,10 @@ module.exports = {
     })
   },
 
-  fileExists (p) {
-    return fs.statAsync(p).bind(this)
+  fileExists(p) {
+    return fs
+    .statAsync(p)
+    .bind(this)
     .then((stat) => {
       // check for files, not directories
       // https://github.com/cypress-io/cypress/issues/3739
@@ -86,7 +90,7 @@ module.exports = {
     })
   },
 
-  parseFile (p, fixture, options) {
+  parseFile(p, fixture, options) {
     if (queue[p]) {
       return Promise.delay(1).then(() => {
         return this.parseFile(p, fixture, options)
@@ -104,32 +108,45 @@ module.exports = {
       const ext = path.extname(p)
 
       return this.parseFileByExtension(p, fixture, ext, options)
-    }).then((ret) => {
+    })
+    .then((ret) => {
       cleanup()
 
       return ret
-    }).catch((err) => {
+    })
+    .catch((err) => {
       cleanup()
 
       throw err
     })
   },
 
-  parseFileByExtension (p, fixture, ext, options = {}) {
+  parseFileByExtension(p, fixture, ext, options = {}) {
     switch (ext) {
-      case '.json': return this.parseJson(p, fixture)
-      case '.js': return this.parseJs(p, fixture)
-      case '.coffee': return this.parseCoffee(p, fixture)
-      case '.html': return this.parseHtml(p, fixture)
-      case '.png': case '.jpg': case '.jpeg': case '.gif': case '.tif': case '.tiff': case '.zip':
-        return this.parse(p, fixture, _.isNull(options.encoding) ? null : (options.encoding || 'base64'))
+      case '.json':
+        return this.parseJson(p, fixture)
+      case '.js':
+        return this.parseJs(p, fixture)
+      case '.coffee':
+        return this.parseCoffee(p, fixture)
+      case '.html':
+        return this.parseHtml(p, fixture)
+      case '.png':
+      case '.jpg':
+      case '.jpeg':
+      case '.gif':
+      case '.tif':
+      case '.tiff':
+      case '.zip':
+        return this.parse(p, fixture, _.isNull(options.encoding) ? null : options.encoding || 'base64')
       default:
         return this.parse(p, fixture, _.isNull(options.encoding) ? null : options.encoding)
     }
   },
 
-  parseJson (p, fixture) {
-    return fs.readFileAsync(p, 'utf8')
+  parseJson(p, fixture) {
+    return fs
+    .readFileAsync(p, 'utf8')
     .bind(this)
     .then(friendlyJsonParse)
     .catch((err) => {
@@ -137,8 +154,9 @@ module.exports = {
     })
   },
 
-  parseJs (p, fixture) {
-    return fs.readFileAsync(p, 'utf8')
+  parseJs(p, fixture) {
+    return fs
+    .readFileAsync(p, 'utf8')
     .bind(this)
     .then((str) => {
       let obj
@@ -156,36 +174,38 @@ module.exports = {
       }
 
       return obj
-    }).catch((err) => {
+    })
+    .catch((err) => {
       throw new Error(`'${fixture}' is not a valid JavaScript object.${err.toString()}`)
     })
   },
 
-  parseCoffee (p, fixture) {
+  parseCoffee(p, fixture) {
     const dc = process.env.NODE_DISABLE_COLORS
 
     process.env.NODE_DISABLE_COLORS = '0'
 
-    return fs.readFileAsync(p, 'utf8')
+    return fs
+    .readFileAsync(p, 'utf8')
     .bind(this)
     .then((str) => {
       str = coffee.compile(str, { bare: true })
 
       return eval(str)
-    }).catch((err) => {
+    })
+    .catch((err) => {
       throw new Error(`'${fixture} is not a valid CoffeeScript object.\n${err.toString()}`)
-    }).finally(() => {
-      return process.env.NODE_DISABLE_COLORS = dc
+    })
+    .finally(() => {
+      return (process.env.NODE_DISABLE_COLORS = dc)
     })
   },
 
-  parseHtml (p, fixture) {
-    return fs.readFileAsync(p, 'utf8')
-    .bind(this)
+  parseHtml(p, fixture) {
+    return fs.readFileAsync(p, 'utf8').bind(this)
   },
 
-  parse (p, fixture, encoding = 'utf8') {
-    return fs.readFileAsync(p, encoding)
-    .bind(this)
+  parse(p, fixture, encoding = 'utf8') {
+    return fs.readFileAsync(p, encoding).bind(this)
   },
 }

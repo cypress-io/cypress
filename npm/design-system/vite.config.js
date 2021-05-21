@@ -3,15 +3,7 @@ const cssFolders = require('./css.folders')
 
 export default defineConfig({
   resolve: {
-    alias: [
-      'core',
-      'css',
-      'components',
-      'hooks',
-      'shared',
-      'stories',
-      'util',
-    ].map((p) => {
+    alias: ['core', 'css', 'components', 'hooks', 'shared', 'stories', 'util'].map((p) => {
       return { find: new RegExp(`^${p}/`), replacement: `/src/${p}/` }
     }),
   },

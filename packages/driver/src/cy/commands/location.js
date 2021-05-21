@@ -5,7 +5,7 @@ const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
-    url (options = {}) {
+    url(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy) => {
       return resolveHref()
     },
 
-    hash (options = {}) {
+    hash(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -59,7 +59,7 @@ module.exports = (Commands, Cypress, cy) => {
       return resolveHash()
     },
 
-    location (key, options) {
+    location(key, options) {
       let userOptions = options
 
       // normalize arguments allowing key + options to be undefined
@@ -76,9 +76,9 @@ module.exports = (Commands, Cypress, cy) => {
         const location = cy.getRemoteLocation()
 
         return _.isString(key)
-          // use existential here because we only want to throw
-          // on null or undefined values (and not empty strings)
-          ? location[key] ?? $errUtils.throwErrByPath('location.invalid_key', { args: { key } })
+          ? // use existential here because we only want to throw
+            // on null or undefined values (and not empty strings)
+            location[key] ?? $errUtils.throwErrByPath('location.invalid_key', { args: { key } })
           : location
       }
 

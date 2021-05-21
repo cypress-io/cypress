@@ -6,7 +6,7 @@ const cache = {}
 module.exports = {
   cache,
 
-  render (filePath, options, cb) {
+  render(filePath, options, cb) {
     const cachedFn = cache[filePath]
 
     // if we already have a cachedFn function
@@ -20,7 +20,7 @@ module.exports = {
     .readFileAsync(filePath, 'utf8')
     .then((str) => {
       // and cache the Sqrl compiled template fn
-      const compiledFn = cache[filePath] = Sqrl.Compile(str)
+      const compiledFn = (cache[filePath] = Sqrl.Compile(str))
 
       return compiledFn(options, Sqrl)
     })

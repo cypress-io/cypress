@@ -41,18 +41,12 @@ describe('PositiveCounter', () => {
 
   it('should render counts', () => {
     mount(<PositiveCounter />)
-    cy.get('.increment')
-    .click()
-    .click()
-    .click()
+    cy.get('.increment').click().click().click()
 
     // make sure the component updates
     cy.contains('Value: 3').toMatchHTML()
 
-    cy.get('.increment')
-    .click()
-    .click()
-    .click()
+    cy.get('.increment').click().click().click()
 
     cy.contains('Value: 6').toMatchHTML()
   })
@@ -60,27 +54,19 @@ describe('PositiveCounter', () => {
   it('should not go negative', () => {
     mount(<PositiveCounter />)
     cy.get('.increment').click()
-    cy.get('.decrement')
-    .click()
-    .click()
+    cy.get('.decrement').click().click()
 
     cy.contains('Value: 0').toMatchHTML()
   })
 
   it('snapshots the component state', () => {
     mount(<PositiveCounter />)
-    cy.get('.increment')
-    .click()
-    .click()
-    .click()
-    .click()
+    cy.get('.increment').click().click().click().click()
 
     // The component's code set its reference
     // as a property on the "window" object
     // when running inside Cypress. This allows
     // the test to access it.
-    cy.window()
-    .its('PositiveCounter.state')
-    .toMatchSnapshot()
+    cy.window().its('PositiveCounter.state').toMatchSnapshot()
   })
 })

@@ -37,9 +37,7 @@ const create = (Cypress, state) => {
           state('whenStable', null)
 
           // and invoke the original function
-          return tryFn(fn)
-          .then(resolve)
-          .catch(reject)
+          return tryFn(fn).then(resolve).catch(reject)
         })
       })
     }

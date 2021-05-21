@@ -17,8 +17,7 @@ it('has focus when running headlessly in electron', (done) => {
 it('sets the AUT document.hasFocus to top.document.hasFocus', () => {
   // the AUT's hasFocus() method should always return whatever
   // the top does.
-  cy.visit('/timeout')
-  .then(() => {
+  cy.visit('/timeout').then(() => {
     if (top.document.hasFocus()) {
       return cy.document().invoke('hasFocus').should('be.true')
     }
@@ -28,9 +27,7 @@ it('sets the AUT document.hasFocus to top.document.hasFocus', () => {
 })
 
 it('continues to have focus through top navigations', (done) => {
-  cy
-  .visit('http://localhost:3501/fixtures/generic.html')
-  .then(() => {
+  cy.visit('http://localhost:3501/fixtures/generic.html').then(() => {
     if (Cypress.browser.isHeadless) {
       // top (aka Cypress frame) should always be in focus
       // when running headlessly. if we aren't running headlessly

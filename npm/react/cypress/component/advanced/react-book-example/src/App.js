@@ -5,7 +5,7 @@ import Todos from './Todos'
 import Select from './Select'
 
 class App extends Component {
-  render () {
+  render() {
     return (
       <div className="App">
         <header className="App-header">

@@ -1,13 +1,7 @@
 import { blocked } from '../..'
 import { expect } from 'chai'
 
-const hosts = [
-  '*.google.com',
-  'shop.apple.com',
-  'localhost:6666',
-  'adwords.com',
-  '*yahoo.com',
-]
+const hosts = ['*.google.com', 'shop.apple.com', 'localhost:6666', 'adwords.com', '*yahoo.com']
 
 const matchesStr = function (url, host, val) {
   const m = blocked.matches(url, host)

@@ -39,7 +39,7 @@ const OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
 const hasFormUrlEncodedContentTypeHeader = (headers) => {
   const header = _.findKey(headers, _.matches('application/x-www-form-urlencoded'))
 
-  return header && (_.toLower(header) === 'content-type')
+  return header && _.toLower(header) === 'content-type'
 }
 
 const isValidJsonObj = (body) => {
@@ -47,7 +47,7 @@ const isValidJsonObj = (body) => {
 }
 
 const whichAreOptional = (val, key) => {
-  return (val === null) && OPTIONAL_OPTS.includes(key)
+  return val === null && OPTIONAL_OPTS.includes(key)
 }
 
 const needsFormSpecified = (options = {}) => {
@@ -55,7 +55,7 @@ const needsFormSpecified = (options = {}) => {
 
   // json isn't true, and we have an object body and the user
   // specified that the content-type header is x-www-form-urlencoded
-  return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
+  return json !== true && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
 module.exports = (Commands, Cypress, cy, state, config) => {
@@ -63,7 +63,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     // allow our signature to be similar to cy.route
     // METHOD / URL / BODY
     // or object literal with all expanded options
-    request (...args) {
+    request(...args) {
       const o = {}
       const userOptions = o
 
@@ -142,7 +142,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       } catch (error) {
         const err = error
 
-        if (!(err instanceof TypeError)) { // unexpected, new URL should only throw TypeError
+        if (!(err instanceof TypeError)) {
+          // unexpected, new URL should only throw TypeError
           throw err
         }
 
@@ -193,7 +194,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       // only set json to true if form isnt true
       // and we have a valid object for body
-      if ((options.form !== true) && isValidJsonObj(options.body)) {
+      if (options.form !== true && isValidJsonObj(options.body)) {
         options.json = true
       }
 
@@ -231,7 +232,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           message: '',
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             const resp = options.response || {}
             let rr = resp.allRequestResponses || []
 
@@ -249,7 +250,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             return obj
           },
 
-          renderProps () {
+          renderProps() {
             let indicator
             let status
             const r = options.response
@@ -298,7 +299,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options.response = response
 
         // bomb if we should fail on non okay status code
-        if (options.failOnStatusCode && (response.isOkStatusCode !== true)) {
+        if (options.failOnStatusCode && response.isOkStatusCode !== true) {
           $errUtils.throwErrByPath('request.status_invalid', {
             onFail: options._log,
             args: {
@@ -316,7 +317,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         return response
-      }).catch(Promise.TimeoutError, () => {
+      })
+      .catch(Promise.TimeoutError, () => {
         $errUtils.throwErrByPath('request.timed_out', {
           onFail: options._log,
           args: {
@@ -325,7 +327,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             timeout: options.timeout,
           },
         })
-      }).catch({ backend: true }, (err) => {
+      })
+      .catch({ backend: true }, (err) => {
         $errUtils.throwErrByPath('request.loading_failed', {
           onFail: options._log,
           args: {

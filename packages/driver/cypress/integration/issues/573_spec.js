@@ -12,11 +12,13 @@ const run = () => {
       return win.document.body.appendChild(i)
     })
   })
-  .get('iframe').should(($iframe) => {
+  .get('iframe')
+  .should(($iframe) => {
     expect($iframe.contents().text()).to.include('basic auth worked')
   })
-  .window().then({ timeout: 60000 }, (win) => {
-    return new Cypress.Promise(((resolve, reject) => {
+  .window()
+  .then({ timeout: 60000 }, (win) => {
+    return new Cypress.Promise((resolve, reject) => {
       const xhr = new win.XMLHttpRequest()
 
       xhr.open('GET', '/basic_auth')
@@ -31,10 +33,10 @@ const run = () => {
       }
 
       return xhr.send()
-    }))
+    })
   })
   .then({ timeout: 60000 }, (win) => {
-    return new Cypress.Promise(((resolve, reject) => {
+    return new Cypress.Promise((resolve, reject) => {
       // ensure other origins do not have auth headers attached
       const xhr = new win.XMLHttpRequest()
 
@@ -50,7 +52,7 @@ const run = () => {
       }
 
       return xhr.send()
-    }))
+    })
   })
 }
 

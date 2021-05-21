@@ -6,7 +6,7 @@ import { mount } from '@cypress/react'
 it('works', () => {
   const click = cy.stub()
   const App = () => {
-    return (<button onClick={click}>Button!</button>)
+    return <button onClick={click}>Button!</button>
   }
 
   mount(<App />)

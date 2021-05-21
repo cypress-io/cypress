@@ -58,9 +58,7 @@ context('lib/tasks/verify', () => {
 
     sinon.stub(_, 'random').returns('222')
 
-    util.exec
-    .withArgs(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
-    .resolves(spawnedProcess)
+    util.exec.withArgs(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222']).resolves(spawnedProcess)
   })
 
   afterEach(() => {
@@ -80,10 +78,7 @@ context('lib/tasks/verify', () => {
     .catch((err) => {
       logger.error(err)
 
-      snapshot(
-        'no version of Cypress installed 1',
-        normalize(stdout.toString()),
-      )
+      snapshot('no version of Cypress installed 1', normalize(stdout.toString()))
     })
   })
 
@@ -101,8 +96,7 @@ context('lib/tasks/verify', () => {
       stderr: '',
     })
 
-    return verify.start()
-    .then(() => {
+    return verify.start().then(() => {
       expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     })
   })
@@ -121,8 +115,7 @@ context('lib/tasks/verify', () => {
       stderr: '',
     })
 
-    return verify.start()
-    .then(() => {
+    return verify.start().then(() => {
       expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     })
   })
@@ -157,10 +150,7 @@ context('lib/tasks/verify', () => {
       throw new Error('should have caught error')
     })
     .catch(() => {
-      return snapshot(
-        'warning installed version does not match verified version 1',
-        normalize(stdout.toString()),
-      )
+      return snapshot('warning installed version does not match verified version 1', normalize(stdout.toString()))
     })
   })
 
@@ -184,10 +174,12 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
-      cp.stderr.write('some stderr')
-      cp.stdout.write('some stdout')
-    }))
+    sinon.stub(cp, 'spawn').callsFake(
+      mockSpawn((cp) => {
+        cp.stderr.write('some stderr')
+        cp.stdout.write('some stdout')
+      })
+    )
 
     util.exec.restore()
 
@@ -208,12 +200,14 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
-      cp.stderr.write('some stderr')
-      cp.stdout.write('some stdout')
-      cp.emit('exit', 0, null)
-      cp.end()
-    }))
+    sinon.stub(cp, 'spawn').callsFake(
+      mockSpawn((cp) => {
+        cp.stderr.write('some stderr')
+        cp.stdout.write('some stdout')
+        cp.emit('exit', 0, null)
+        cp.end()
+      })
+    )
 
     util.exec.restore()
 
@@ -234,11 +228,13 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawn((cp) => {
-      cp.stdout.write('some stdout')
-      cp.emit('exit', 0, null)
-      cp.end()
-    }))
+    sinon.stub(cp, 'spawn').callsFake(
+      mockSpawn((cp) => {
+        cp.stdout.write('some stdout')
+        cp.emit('exit', 0, null)
+        cp.end()
+      })
+    )
 
     util.exec.restore()
 
@@ -264,9 +260,7 @@ context('lib/tasks/verify', () => {
     util.exec.resolves()
     sinon.stub(util, 'stdoutLineMatches').returns(true)
 
-    return verify
-    .start()
-    .then(() => {
+    return verify.start().then(() => {
       expect(process.env.ELECTRON_ENABLE_LOGGING).to.be.undefined
 
       const stdioOptions = util.exec.firstCall.args[2]
@@ -298,10 +292,7 @@ context('lib/tasks/verify', () => {
 
     it('clears verified version from state if verification fails', () => {
       util.exec.restore()
-      sinon
-      .stub(util, 'exec')
-      .withArgs(executablePath)
-      .rejects({
+      sinon.stub(util, 'exec').withArgs(executablePath).rejects({
         code: 1,
         stderr: 'an error about dependencies',
       })
@@ -321,10 +312,7 @@ context('lib/tasks/verify', () => {
         return expect(exists).to.eq(false)
       })
       .then(() => {
-        return snapshot(
-          'fails verifying Cypress 1',
-          normalize(slice(stdout.toString())),
-        )
+        return snapshot('fails verifying Cypress 1', normalize(slice(stdout.toString())))
       })
     })
   })
@@ -407,7 +395,7 @@ context('lib/tasks/verify', () => {
         expect(util.exec).to.have.been.calledTwice
         // user should have been warned
         expect(logger.warn).to.have.been.calledWithMatch(
-          'This is likely due to a misconfigured DISPLAY environment variable.',
+          'This is likely due to a misconfigured DISPLAY environment variable.'
         )
       })
     })
@@ -446,7 +434,9 @@ context('lib/tasks/verify', () => {
         return Promise.reject(firstSpawnError)
       })
 
-      return verify.start().then(() => {
+      return verify
+      .start()
+      .then(() => {
         throw new Error('Should have failed')
       })
       .catch((e) => {
@@ -500,10 +490,7 @@ context('lib/tasks/verify', () => {
       stdout = Stdout.capture()
       logger.error(err)
 
-      return snapshot(
-        'Cypress non-executable permissions 1',
-        normalize(stdout.toString()),
-      )
+      return snapshot('Cypress non-executable permissions 1', normalize(stdout.toString()))
     })
   })
 
@@ -515,10 +502,7 @@ context('lib/tasks/verify', () => {
     })
 
     return verify.start().then(() => {
-      return snapshot(
-        'current version has not been verified 1',
-        normalize(stdout.toString()),
-      )
+      return snapshot('current version has not been verified 1', normalize(stdout.toString()))
     })
   })
 
@@ -530,10 +514,7 @@ context('lib/tasks/verify', () => {
     })
 
     return verify.start().then(() => {
-      return snapshot(
-        'different version installed 1',
-        normalize(stdout.toString()),
-      )
+      return snapshot('different version installed 1', normalize(stdout.toString()))
     })
   })
 
@@ -547,10 +528,7 @@ context('lib/tasks/verify', () => {
     process.env.npm_config_loglevel = 'silent'
 
     return verify.start().then(() => {
-      return snapshot(
-        'silent verify 1',
-        normalize(`[no output]${stdout.toString()}`),
-      )
+      return snapshot('silent verify 1', normalize(`[no output]${stdout.toString()}`))
     })
   })
 
@@ -629,7 +607,8 @@ context('lib/tasks/verify', () => {
       err.stack = 'xvfb? no dice'
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(err)
 
-      return verify.start()
+      return verify
+      .start()
       .then(() => {
         throw new Error('should have thrown')
       })
@@ -688,9 +667,7 @@ context('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
 
-      util.exec
-      .withArgs(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'])
-      .resolves(spawnedProcess)
+      util.exec.withArgs(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222']).resolves(spawnedProcess)
 
       return verify.start().then(() => {
         expect(util.exec.firstCall.args[0]).to.equal(realEnvBinaryPath)
@@ -710,10 +687,7 @@ context('lib/tasks/verify', () => {
         })
         .catch((err) => {
           logger.error(err)
-          snapshot(
-            `${platform}: error when invalid CYPRESS_RUN_BINARY 1`,
-            normalize(stdout.toString()),
-          )
+          snapshot(`${platform}: error when invalid CYPRESS_RUN_BINARY 1`, normalize(stdout.toString()))
         })
       })
     })
@@ -747,7 +721,7 @@ context('lib/tasks/verify', () => {
 })
 
 // TODO this needs documentation with examples badly.
-function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
+function createfs({ alreadyVerified, executable, packageVersion, customDir }) {
   if (!customDir) {
     customDir = '/cache/Cypress/1.2.3/Cypress.app'
   }
@@ -769,8 +743,8 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
       Contents: {
         MacOS: executable
           ? {
-            Cypress: executable,
-          }
+              Cypress: executable,
+            }
           : {},
         Resources: {
           app: {
@@ -791,7 +765,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
   return mockfs(mockFiles)
 }
 
-function slice (str) {
+function slice(str) {
   // strip answer and split by new lines
   str = str.split('\n')
 

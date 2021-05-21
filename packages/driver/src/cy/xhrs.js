@@ -27,7 +27,7 @@ const xhrNotWaitedOnByIndex = (state, alias, index, prop) => {
 
 const create = (state) => {
   return {
-    getIndexedXhrByAlias (alias, index) {
+    getIndexedXhrByAlias(alias, index) {
       let prop
       let str
 
@@ -56,7 +56,7 @@ const create = (state) => {
       return xhrNotWaitedOnByIndex(state, str, index, 'responses')
     },
 
-    getRequestsByAlias (alias) {
+    getRequestsByAlias(alias) {
       let prop
 
       if (_.indexOf(alias, '.') === -1 || _.keys(cy.state('aliases')).includes(alias)) {
@@ -82,11 +82,7 @@ const create = (state) => {
       }
 
       // return an array of xhrs
-      const matching = _
-      .chain(state('responses'))
-      .filter({ alias })
-      .map('xhr')
-      .value()
+      const matching = _.chain(state('responses')).filter({ alias }).map('xhr').value()
 
       // return the whole array if prop is all
       if (prop === 'all') {

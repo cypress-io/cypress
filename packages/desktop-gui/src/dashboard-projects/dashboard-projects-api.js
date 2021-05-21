@@ -4,11 +4,14 @@ import dashboardProjectsStore from './dashboard-projects-store'
 let pollId
 
 const getDashboardProjects = () => {
-  ipc.getDashboardProjects().then((projects = []) => {
+  ipc
+  .getDashboardProjects()
+  .then((projects = []) => {
     dashboardProjectsStore.setProjects(projects)
 
     return null
-  }).catch(ipc.isUnauthed, ipc.handleUnauthed)
+  })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {
     dashboardProjectsStore.setError(err)
 
@@ -23,7 +26,9 @@ const isPolling = () => {
 }
 
 const pollDashboardProjects = () => {
-  if (pollId) return
+  if (pollId) {
+    return
+  }
 
   pollId = setInterval(() => {
     getDashboardProjects()
@@ -36,7 +41,8 @@ const stopPollingDashboardProjects = () => {
 }
 
 const setupDashboardProject = (projectDetails) => {
-  return ipc.setupDashboardProject(projectDetails)
+  return ipc
+  .setupDashboardProject(projectDetails)
   .then((project) => {
     dashboardProjectsStore.addProject(project)
 

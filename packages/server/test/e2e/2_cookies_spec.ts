@@ -44,8 +44,7 @@ const onServer = function (app) {
   })
 
   app.get('/expirationMaxAge', (req, res) => {
-    res.header('Set-Cookie',
-      'shouldExpire=; Max-Age=0; Path=/; Expires=Sun, 24 Jun 1997 20:36:13 GMT')
+    res.header('Set-Cookie', 'shouldExpire=; Max-Age=0; Path=/; Expires=Sun, 24 Jun 1997 20:36:13 GMT')
     // response to set
     // auth=p1_2FruNr1entizk9QEGHFYQlWjIK5LULzdDj17lkYhZTz7XA5GOfnVgbbeBDAqnfImkwof2qz0M3yi3AUVusKPqh1BRK6253h0kiBENwdjWDsx3mYQQKpHn6o3XOXX7poSkzrHThnrDlH4w9zoLItwIVNhR2hQrCYhQhtHuw20YM_3D; Domain=.surveymonkey.com;Max-Age=3600; Path=/; expires=Fri, 26-Oct-2018 06:13:48 GMT; secure; HttpOnly'
 
@@ -64,8 +63,7 @@ const onServer = function (app) {
   })
 
   app.get('/cookieWithNoName', (req, res) => {
-    res.header('Set-Cookie',
-      '=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/')
+    res.header('Set-Cookie', '=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; path=/')
 
     return res.send('<html></html>')
   })
@@ -80,17 +78,10 @@ const onServer = function (app) {
     const n = Number(req.query.n)
 
     // alternates between base URLs
-    const {
-      a,
-    } = req.query
-    const {
-      b,
-    } = req.query
+    const { a } = req.query
+    const { b } = req.query
 
-    res.header('Set-Cookie', [
-      `namefoo${n}=valfoo${n}`,
-      `namebar${n}=valbar${n}`,
-    ])
+    res.header('Set-Cookie', [`namefoo${n}=valfoo${n}`, `namebar${n}=valbar${n}`])
 
     console.log('to', a, 'from', b)
 
@@ -137,10 +128,12 @@ foo\
   })
 }
 
-const haveRoot = !process.env.USE_HIGH_PORTS && (process.geteuid() === 0)
+const haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() === 0
 
 if (!haveRoot) {
-  console.warn('(e2e tests warning) You are not running as root; therefore, 2_cookies_spec cannot cover the case where the default (80/443) HTTP(s) port is used. Alternate ports (2121/2323) will be used instead.')
+  console.warn(
+    '(e2e tests warning) You are not running as root; therefore, 2_cookies_spec cannot cover the case where the default (80/443) HTTP(s) port is used. Alternate ports (2121/2323) will be used instead.'
+  )
 }
 
 let httpPort = 2121
@@ -170,14 +163,17 @@ const sharedNoBaseUrlSpecSnapshot = 'e2e cookies with no baseurl'
 
 describe('e2e cookies', () => {
   e2e.setup({
-    servers: [{
-      onServer,
-      port: httpPort,
-    }, {
-      onServer,
-      port: httpsPort,
-      https: true,
-    }],
+    servers: [
+      {
+        onServer,
+        port: httpPort,
+      },
+      {
+        onServer,
+        port: httpsPort,
+        https: true,
+      },
+    ],
     settings: {
       hosts: {
         '*.foo.com': '127.0.0.1',
@@ -227,24 +223,15 @@ describe('e2e cookies', () => {
     ['FQDN', 'www.bar.foo.com'],
     ['private FQDN', 'local.cypress.test'],
     ['IP', '127.0.0.1'],
-  ]
-  .forEach(([
-    format,
-    baseDomain,
-  ]) => {
+  ].forEach(([format, baseDomain]) => {
     context(`with ${format} urls`, () => {
       const httpUrl = `http://${baseDomain}${haveRoot ? '' : `:${httpPort}`}`
-      const httpsUrl = `https://${baseDomain}${haveRoot ? '' : `:${httpsPort}`}`;
+      const httpsUrl = `https://${baseDomain}${haveRoot ? '' : `:${httpsPort}`}`
 
-      [
+      ;[
         [httpUrl, false],
         [httpsUrl, true],
-      ].forEach((
-        [
-          baseUrl,
-          https,
-        ],
-      ) => {
+      ].forEach(([baseUrl, https]) => {
         e2e.it(`passes with baseurl: ${baseUrl}`, {
           config: {
             baseUrl,

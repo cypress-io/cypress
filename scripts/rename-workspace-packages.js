@@ -5,7 +5,8 @@ const path = require('path')
 
 const args = minimist(process.argv.slice(2))
 
-const packages = glob.sync('*/', {
+const packages = glob
+.sync('*/', {
   cwd: path.join(process.cwd(), 'packages'),
 })
 .map((str) => {

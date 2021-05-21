@@ -5,7 +5,7 @@ import { Component, OnInit, Input } from '@angular/core'
   templateUrl: './html-mount.component.html',
 })
 export class HtmlMountComponent implements OnInit {
-  @Input() data = '';
+  @Input() data = ''
 
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 }

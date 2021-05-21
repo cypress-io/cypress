@@ -15,7 +15,7 @@ describe('lib/util/validation', () => {
   context('#isValidBrowser', () => {
     it('passes valid browsers and forms error messages for invalid ones', () => {
       const browsers = [
-      // valid browser
+        // valid browser
         {
           name: 'Chrome',
           displayName: 'Chrome Browser',

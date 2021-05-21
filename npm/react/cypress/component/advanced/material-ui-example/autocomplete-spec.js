@@ -9,7 +9,7 @@ import TextField from '@material-ui/core/TextField'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { top100Films } from './top-100-movies'
 
-export default function ComboBox () {
+export default function ComboBox() {
   return (
     <Autocomplete
       id="combo-box-demo"
@@ -17,9 +17,7 @@ export default function ComboBox () {
       getOptionLabel={(option) => option.title}
       style={{ width: 300 }}
       renderInput={(params) => {
-        return (
-          <TextField {...params} label="Combo box" variant="outlined" fullWidth />
-        )
+        return <TextField {...params} label="Combo box" variant="outlined" fullWidth />
       }}
     />
   )
@@ -34,9 +32,7 @@ it('finds my favorite movie', () => {
       getOptionLabel={(option) => option.title}
       style={{ width: 300 }}
       renderInput={(params) => {
-        return (
-          <TextField {...params} label="Combo box" variant="outlined" fullWidth />
-        )
+        return <TextField {...params} label="Combo box" variant="outlined" fullWidth />
       }}
     />,
     {
@@ -44,15 +40,12 @@ it('finds my favorite movie', () => {
         'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap',
         'https://fonts.googleapis.com/icon?family=Material+Icons',
       ],
-    },
+    }
   )
 
   cy.get('#combo-box-demo').click()
   cy.focused().type('god')
-  cy.contains('The Godfather')
-  .should('be.visible')
-  .and('have.class', 'MuiAutocomplete-option')
-  .click()
+  cy.contains('The Godfather').should('be.visible').and('have.class', 'MuiAutocomplete-option').click()
 
   cy.get('#combo-box-demo').should('have.value', 'The Godfather')
 })

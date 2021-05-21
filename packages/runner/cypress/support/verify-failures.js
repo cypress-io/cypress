@@ -32,8 +32,7 @@ const verifyFailure = (options) => {
     })
   }
 
-  win.runnerWs.emit.withArgs('get:user:editor')
-  .yields({
+  win.runnerWs.emit.withArgs('get:user:editor').yields({
     preferredOpener: {
       id: 'foo-editor',
       name: 'Foo',
@@ -52,17 +51,14 @@ const verifyFailure = (options) => {
     cy.log('message contains expected lines and stack does not include message')
 
     _.each(messageLines, (msg) => {
-      cy.get('.runnable-err-message')
-      .should('include.text', msg)
+      cy.get('.runnable-err-message').should('include.text', msg)
 
-      cy.get('.runnable-err-stack-trace')
-      .should('not.include.text', msg)
+      cy.get('.runnable-err-stack-trace').should('not.include.text', msg)
     })
   }
 
   if (originalMessage) {
-    cy.get('.runnable-err-message')
-    .should('include.text', originalMessage)
+    cy.get('.runnable-err-message').should('include.text', originalMessage)
   }
 
   const notInMessageLines = [].concat(notInMessage)
@@ -71,15 +67,12 @@ const verifyFailure = (options) => {
     cy.log('message does not contain the specified lines')
 
     _.each(notInMessageLines, (msg) => {
-      cy.get('.runnable-err-message')
-      .should('not.include.text', msg)
+      cy.get('.runnable-err-message').should('not.include.text', msg)
     })
   }
 
   cy.log('stack trace matches the specified pattern')
-  cy.get('.runnable-err-stack-trace')
-  .invoke('text')
-  .should('match', regex)
+  cy.get('.runnable-err-stack-trace').invoke('text').should('match', regex)
 
   if (stack) {
     const stackLines = [].concat(stack)
@@ -89,8 +82,7 @@ const verifyFailure = (options) => {
     }
 
     _.each(stackLines, (stackLine) => {
-      cy.get('.runnable-err-stack-trace')
-      .should('include.text', stackLine)
+      cy.get('.runnable-err-stack-trace').should('include.text', stackLine)
     })
   }
 
@@ -103,7 +95,10 @@ const verifyFailure = (options) => {
     const match = stackTrace.match(/From Your Spec Code/g)
 
     if (match && match.length) {
-      expect(match.length, `'From Your Spec Code' should only be in the stack once, but found ${match.length} instances`).to.equal(1)
+      expect(
+        match.length,
+        `'From Your Spec Code' should only be in the stack once, but found ${match.length} instances`
+      ).to.equal(1)
     }
   })
 
@@ -117,12 +112,7 @@ const verifyFailure = (options) => {
 
   if (command) {
     cy.log('the error is attributed to the correct command')
-    cy
-    .get('.command-state-failed')
-    .first()
-    .find('.command-method')
-    .invoke('text')
-    .should('equal', command)
+    cy.get('.command-state-failed').first().find('.command-method').invoke('text').should('equal', command)
   }
 
   if (uncaught) {
@@ -137,13 +127,12 @@ const verifyFailure = (options) => {
     cy.get('.command-name-uncaught-exception').should('not.exist')
   }
 
-  if (!hasCodeFrame) return
+  if (!hasCodeFrame) {
+    return
+  }
 
   cy.log('code frame matches specified pattern')
-  cy
-  .get('.test-err-code-frame .runnable-err-file-path')
-  .invoke('text')
-  .should('match', regex)
+  cy.get('.test-err-code-frame .runnable-err-file-path').invoke('text').should('match', regex)
 
   cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
 
@@ -166,27 +155,30 @@ const createVerifyTest = (modifier) => {
 
     const verifyFn = props.verifyFn || verifyFailure
 
-    const args = _.compact([title, opts, () => {
-      return runIsolatedCypress(`cypress/fixtures/errors/${props.file}`, {
-        visitUrl: props.visitUrl,
-        onBeforeRun ({ specWindow, win, autCypress }) {
-          specWindow.testToRun = title
-          specWindow.autWindow = win
-          specWindow.autCypress = autCypress
+    const args = _.compact([
+      title,
+      opts,
+      () => {
+        return runIsolatedCypress(`cypress/fixtures/errors/${props.file}`, {
+          visitUrl: props.visitUrl,
+          onBeforeRun({ specWindow, win, autCypress }) {
+            specWindow.testToRun = title
+            specWindow.autWindow = win
+            specWindow.autCypress = autCypress
 
-          if (props.onBeforeRun) {
-            props.onBeforeRun({ specWindow, win })
-          }
-        },
-      })
-      .then(({ win }) => {
-        props.codeFrameText = props.codeFrameText || title
-        props.win = win
-        verifyFn(props, verifyFailure)
-      })
-    }])
+            if (props.onBeforeRun) {
+              props.onBeforeRun({ specWindow, win })
+            }
+          },
+        }).then(({ win }) => {
+          props.codeFrameText = props.codeFrameText || title
+          props.win = win
+          verifyFn(props, verifyFailure)
+        })
+      },
+    ])
 
-;(modifier ? it[modifier] : it)(...args)
+    ;(modifier ? it[modifier] : it)(...args)
   }
 }
 
@@ -200,16 +192,13 @@ verify.it['skip'] = createVerifyTest('skip')
 export const verifyInternalFailure = (props) => {
   const { method, stackMethod } = props
 
-  cy.get('.runnable-err-message')
-  .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
+  cy.get('.runnable-err-message').should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
 
   cy.get('.runnable-err-stack-expander > .collapsible-header').click()
 
-  cy.get('.runnable-err-stack-trace')
-  .should('include.text', stackMethod || method)
+  cy.get('.runnable-err-stack-trace').should('include.text', stackMethod || method)
 
   // this is an internal cypress error and we can only show code frames
   // from specs, so it should not show the code frame
-  cy.get('.test-err-code-frame')
-  .should('not.exist')
+  cy.get('.test-err-code-frame').should('not.exist')
 }

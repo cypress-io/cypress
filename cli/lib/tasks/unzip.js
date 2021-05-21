@@ -29,8 +29,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
   const startTime = Date.now()
   let yauzlDoneTime = 0
 
-  return fs.ensureDirAsync(installDir)
-  .then(() => {
+  return fs.ensureDirAsync(installDir).then(() => {
     return new Promise((resolve, reject) => {
       return yauzl.open(zipFilePath, (err, zipFile) => {
         yauzlDoneTime = Date.now()
@@ -61,7 +60,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
         const tick = () => {
           count += 1
 
-          percent = ((count / total) * 100)
+          percent = (count / total) * 100
           const displayPercent = percent.toFixed(0)
 
           return notify(displayPercent)
@@ -77,7 +76,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           debug('calling Node extract tool %s %o', zipFilePath, opts)
 
-          return unzipTools.extract(zipFilePath, opts)
+          return unzipTools
+          .extract(zipFilePath, opts)
           .then(() => {
             debug('node unzip finished')
 
@@ -151,8 +151,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           sp.on('close', (code) => {
             if (code === 0) {
-            // make sure we get to 100% on the progress bar
-            // because reading in lines is not really accurate
+              // make sure we get to 100% on the progress bar
+              // because reading in lines is not really accurate
               percent = 100
               notify(percent)
 
@@ -164,7 +164,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             return unzipFallback()
           })
 
-          return readline.createInterface({
+          return readline
+          .createInterface({
             input: sp.stderr,
           })
           .on('line', (line) => {
@@ -185,8 +186,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             return
         }
       })
-    })
-    .tap(() => {
+    }).tap(() => {
       debug('unzip completed %o', {
         yauzlMs: yauzlDoneTime - startTime,
         unzipMs: Date.now() - yauzlDoneTime,
@@ -198,12 +198,15 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 const start = ({ zipFilePath, installDir, progress }) => {
   la(is.unemptyString(installDir), 'missing installDir')
   if (!progress) {
-    progress = { onProgress: () => {
-      return {}
-    } }
+    progress = {
+      onProgress: () => {
+        return {}
+      },
+    }
   }
 
-  return fs.pathExists(installDir)
+  return fs
+  .pathExists(installDir)
   .then((exists) => {
     if (exists) {
       debug('removing existing unzipped binary', installDir)

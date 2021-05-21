@@ -25,13 +25,13 @@ const stripPort = (url) => {
 export class HttpBuffers {
   buffer: Optional<HttpBuffer> | undefined = undefined
 
-  reset (): void {
+  reset(): void {
     debug('resetting buffers')
 
     delete this.buffer
   }
 
-  set (obj) {
+  set(obj) {
     obj = _.cloneDeep(obj)
     obj.url = stripPort(obj.url)
     obj.originalUrl = stripPort(obj.originalUrl)
@@ -45,13 +45,13 @@ export class HttpBuffers {
     this.buffer = obj
   }
 
-  get (str): Optional<HttpBuffer> {
+  get(str): Optional<HttpBuffer> {
     if (this.buffer && this.buffer.url === stripPort(str)) {
       return this.buffer
     }
   }
 
-  take (str): Optional<HttpBuffer> {
+  take(str): Optional<HttpBuffer> {
     const foundBuffer = this.get(str)
 
     if (foundBuffer) {

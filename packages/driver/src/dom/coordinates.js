@@ -15,10 +15,12 @@ const isAutIframe = (win) => {
 }
 
 const getFirstValidSizedRect = (el) => {
-  return _.find(el.getClientRects(), (rect) => {
-    // use the first rect that has a nonzero width and height
-    return rect.width && rect.height
-  }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect
+  return (
+    _.find(el.getClientRects(), (rect) => {
+      // use the first rect that has a nonzero width and height
+      return rect.width && rect.height
+    }) || el.getBoundingClientRect()
+  ) // otherwise fall back to the parent client rect
 }
 
 /**
@@ -131,17 +133,23 @@ const getCoordsByPosition = (left, top, xPosition = 'center', yPosition = 'cente
   const getLeft = () => {
     /* eslint-disable default-case */
     switch (xPosition) {
-      case 'left': return Math.ceil(left)
-      case 'center': return Math.floor(left)
-      case 'right': return Math.floor(left) - 1
+      case 'left':
+        return Math.ceil(left)
+      case 'center':
+        return Math.floor(left)
+      case 'right':
+        return Math.floor(left) - 1
     }
   }
 
   const getTop = () => {
     switch (yPosition) {
-      case 'top': return Math.ceil(top)
-      case 'center': return Math.floor(top)
-      case 'bottom': return Math.floor(top) - 1
+      case 'top':
+        return Math.ceil(top)
+      case 'center':
+        return Math.floor(top)
+      case 'bottom':
+        return Math.floor(top) - 1
     }
   }
 
@@ -165,7 +173,7 @@ const getTopLeftCoordinates = (rect) => {
 }
 
 const getTopCoordinates = (rect) => {
-  const x = rect.left + (rect.width / 2)
+  const x = rect.left + rect.width / 2
   const y = rect.top
 
   return getCoordsByPosition(x, y, 'center', 'top')
@@ -180,21 +188,21 @@ const getTopRightCoordinates = (rect) => {
 
 const getLeftCoordinates = (rect) => {
   const x = rect.left
-  const y = rect.top + (rect.height / 2)
+  const y = rect.top + rect.height / 2
 
   return getCoordsByPosition(x, y, 'left', 'center')
 }
 
 const getCenterCoordinates = (rect) => {
-  const x = rect.left + (rect.width / 2)
-  const y = rect.top + (rect.height / 2)
+  const x = rect.left + rect.width / 2
+  const y = rect.top + rect.height / 2
 
   return getCoordsByPosition(x, y, 'center', 'center')
 }
 
 const getRightCoordinates = (rect) => {
   const x = rect.left + rect.width
-  const y = rect.top + (rect.height / 2)
+  const y = rect.top + rect.height / 2
 
   return getCoordsByPosition(x, y, 'right', 'center')
 }
@@ -207,7 +215,7 @@ const getBottomLeftCoordinates = (rect) => {
 }
 
 const getBottomCoordinates = (rect) => {
-  const x = rect.left + (rect.width / 2)
+  const x = rect.left + rect.width / 2
   const y = rect.top + rect.height
 
   return getCoordsByPosition(x, y, 'center', 'bottom')

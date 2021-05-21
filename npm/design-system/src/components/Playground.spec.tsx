@@ -18,7 +18,7 @@ describe('Playground', () => {
         <CypressLogo size="medium" />
         <br />
         <CypressLogo size="large" />
-      </>,
+      </>
     )
   })
 })

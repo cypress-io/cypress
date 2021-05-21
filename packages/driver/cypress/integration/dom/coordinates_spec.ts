@@ -6,9 +6,7 @@ describe('src/dom/coordinates', () => {
   let doc: Document
 
   before(() => {
-    return cy
-    .visit('/fixtures/generic.html')
-    .then(function (win) {
+    return cy.visit('/fixtures/generic.html').then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
@@ -18,8 +16,9 @@ describe('src/dom/coordinates', () => {
 
     $(doc.body).empty().html(this.body)
 
-    this.$button = $('<button style=\'position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black\'>foo</button>')
-    .appendTo(cy.$$('body'))
+    this.$button = $(
+      "<button style='position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black'>foo</button>"
+    ).appendTo(cy.$$('body'))
   })
 
   // this is necessary so that document.elementFromPoint
@@ -39,12 +38,14 @@ describe('src/dom/coordinates', () => {
         value: 20,
       })
 
-      cy.stub(this.$button.get(0), 'getClientRects').returns([{
-        top: 100.9,
-        left: 60.9,
-        width: 50,
-        height: 40,
-      }])
+      cy.stub(this.$button.get(0), 'getClientRects').returns([
+        {
+          top: 100.9,
+          left: 60.9,
+          width: 50,
+          height: 40,
+        },
+      ])
 
       const { fromElViewport, fromElWindow } = Cypress.dom.getElementPositioning(this.$button)
 
@@ -84,8 +85,7 @@ describe('src/dom/coordinates', () => {
   context('.getElementCoordinatesByPosition', () => {
     beforeEach(function () {
       this.fromElWindowPos = (pos) => {
-        return Cypress.dom.getElementCoordinatesByPosition(this.$button, pos)
-        .fromElWindow
+        return Cypress.dom.getElementCoordinatesByPosition(this.$button, pos).fromElWindow
       }
     })
 

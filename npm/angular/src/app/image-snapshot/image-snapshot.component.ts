@@ -6,11 +6,11 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./image-snapshot.component.css'],
 })
 export class ImageSnapshotComponent implements OnInit {
-  clicked = false;
+  clicked = false
 
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 
-  clic () {
+  clic() {
     this.clicked = true
   }
 }

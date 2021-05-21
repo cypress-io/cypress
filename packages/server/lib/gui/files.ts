@@ -3,7 +3,8 @@ import { createFile } from '../util/spec_writer'
 import { showSaveDialog } from './dialog'
 
 export const showDialogAndCreateSpec = () => {
-  return openProject.getConfig()
+  return openProject
+  .getConfig()
   .then((cfg) => {
     return showSaveDialog(cfg.integrationFolder).then((path) => {
       return {

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from './util'
@@ -17,11 +17,7 @@ const Color: React.FC<{
   const match = name.match(/([A-Z]+)([0-9]+)/i)
 
   if (!match) {
-    return (
-      <div>
-        {`Could not parse color ${name}`}
-      </div>
-    )
+    return <div>{`Could not parse color ${name}`}</div>
   }
 
   // TODO: Group colors based on type
@@ -36,7 +32,10 @@ const Color: React.FC<{
   }
 
   return (
-    <div className={styles.colorBlock} style={{ backgroundColor: `var(--${type}-${number})`, color: `var(${textColor})` }}>
+    <div
+      className={styles.colorBlock}
+      style={{ backgroundColor: `var(--${type}-${number})`, color: `var(${textColor})` }}
+    >
       {name}
     </div>
   )
@@ -44,7 +43,9 @@ const Color: React.FC<{
 
 const Template: Story = () => (
   <div>
-    {Object.keys(colors).map((name: string) => <Color key={name} name={name} />)}
+    {Object.keys(colors).map((name: string) => (
+      <Color key={name} name={name} />
+    ))}
   </div>
 )
 

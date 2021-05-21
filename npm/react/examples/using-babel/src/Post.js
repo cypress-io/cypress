@@ -14,7 +14,7 @@ export default class Post extends Component {
     size: 'small',
   }
 
-  getStyle () {
+  getStyle() {
     const { size } = this.props
     const baseStyle = {
       padding: 8,
@@ -27,7 +27,7 @@ export default class Post extends Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <div style={this.getStyle()}>
         <h1>{this.props.title || <Skeleton />}</h1>

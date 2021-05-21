@@ -160,7 +160,7 @@ describe('SpecList', () => {
 
     cy.then(() => {
       // the found folder characters, rp
-      ['r', 'p'].forEach((char) => {
+      ;['r', 'p'].forEach((char) => {
         cy.get('[title="merp"] > div > span span').should('contain', char)
       })
 

@@ -19,81 +19,97 @@ export default class Header extends Component {
   @observable urlInput = ''
   urlInputRef = createRef()
 
-  render () {
+  render() {
     const { state, config } = this.props
 
     return (
       <header
-        ref='header'
+        ref="header"
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
           'showing-studio': studioRecorder.isOpen,
         })}
       >
-        <div className='sel-url-wrap'>
+        <div className="sel-url-wrap">
           <Tooltip
-            title='Open Selector Playground'
+            title="Open Selector Playground"
             visible={selectorPlaygroundModel.isOpen || studioRecorder.isOpen ? false : null}
-            wrapperClassName='selector-playground-toggle-tooltip-wrapper'
-            className='cy-tooltip'
+            wrapperClassName="selector-playground-toggle-tooltip-wrapper"
+            className="cy-tooltip"
           >
             <button
-              aria-label='Open Selector Playground'
-              className='header-button selector-playground-toggle'
+              aria-label="Open Selector Playground"
+              className="header-button selector-playground-toggle"
               onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning || studioRecorder.isOpen}
             >
-              <i aria-hidden="true" className='fas fa-crosshairs' />
+              <i aria-hidden="true" className="fas fa-crosshairs" />
             </button>
           </Tooltip>
           <div className={cs('menu-cover', { 'menu-cover-display': this._studioNeedsUrl })} />
           <form
             className={cs('url-container', {
-              'loading': state.isLoadingUrl,
-              'highlighted': state.highlightUrl,
+              loading: state.isLoadingUrl,
+              highlighted: state.highlightUrl,
               'menu-open': this._studioNeedsUrl,
             })}
             onSubmit={this._visitUrlInput}
           >
             <input
               ref={this.urlInputRef}
-              type='text'
+              type="text"
               className={cs('url', { 'input-active': this._studioNeedsUrl })}
               value={this._studioNeedsUrl ? this.urlInput : state.url}
               readOnly={!this._studioNeedsUrl}
               onChange={this._onUrlInput}
               onClick={this._openUrl}
             />
-            <div className='popup-menu url-menu'>
-              <p><strong>Please enter a valid URL to visit.</strong></p>
-              <div className='menu-buttons'>
-                <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
-                <button type='submit' className='btn-submit' disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
+            <div className="popup-menu url-menu">
+              <p>
+                <strong>Please enter a valid URL to visit.</strong>
+              </p>
+              <div className="menu-buttons">
+                <button type="button" className="btn-cancel" onClick={this._cancelStudio}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-submit" disabled={!this.urlInput}>
+                  Go <i className="fas fa-arrow-right" />
+                </button>
               </div>
             </div>
-            <span className='loading-container'>
-              ...loading <i className='fas fa-spinner fa-pulse' />
+            <span className="loading-container">
+              ...loading <i className="fas fa-spinner fa-pulse" />
             </span>
           </form>
         </div>
-        <ul className='menu'>
+        <ul className="menu">
           <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              {state.width} <span className='the-x'>x</span> {state.height} <span className='viewport-scale'>({state.displayScale}%)</span>
-              <i className='fas fa-fw fa-info-circle' />
+              {state.width} <span className="the-x">x</span> {state.height}{' '}
+              <span className="viewport-scale">({state.displayScale}%)</span>
+              <i className="fas fa-fw fa-info-circle" />
             </button>
-            <div className='popup-menu viewport-menu'>
-              <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
-              <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
-              <pre>{/* eslint-disable indent */}
+            <div className="popup-menu viewport-menu">
+              <p>
+                The <strong>viewport</strong> determines the width and height of your application. By default the
+                viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong>{' '}
+                unless specified by a <code>cy.viewport</code> command.
+              </p>
+              <p>
+                Additionally you can override the default viewport dimensions by specifying these values in your{' '}
+                {configFileFormatted(config.configFile)}.
+              </p>
+              <pre>
+                {/* eslint-disable indent */}
                 {`{
   "viewportWidth": ${state.defaults.width},
   "viewportHeight": ${state.defaults.height}
 }`}
-              </pre>{/* eslint-enable indent */}
+              </pre>
+              {/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank'>
-                  <i className='fas fa-info-circle' />
+                <a href="https://on.cypress.io/viewport" target="_blank">
+                  <i className="fas fa-info-circle" />
                   Read more about viewport here.
                 </a>
               </p>
@@ -106,14 +122,14 @@ export default class Header extends Component {
     )
   }
 
-  @action componentDidMount () {
+  @action componentDidMount() {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     this.previousRecorderIsOpen = studioRecorder.isOpen
 
     this.urlInput = this.props.config.baseUrl ? `${this.props.config.baseUrl}/` : ''
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
       this._updateWindowDimensions()
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
@@ -140,17 +156,21 @@ export default class Header extends Component {
   }
 
   _openUrl = () => {
-    if (this._studioNeedsUrl) return
+    if (this._studioNeedsUrl) {
+      return
+    }
 
     window.open(this.props.state.url)
   }
 
-  @computed get _studioNeedsUrl () {
+  @computed get _studioNeedsUrl() {
     return studioRecorder.needsUrl && !this.props.state.url
   }
 
   @action _onUrlInput = (e) => {
-    if (!this._studioNeedsUrl) return
+    if (!this._studioNeedsUrl) {
+      return
+    }
 
     this.urlInput = e.target.value
   }
@@ -158,7 +178,9 @@ export default class Header extends Component {
   @action _visitUrlInput = (e) => {
     e.preventDefault()
 
-    if (!this._studioNeedsUrl) return
+    if (!this._studioNeedsUrl) {
+      return
+    }
 
     studioRecorder.visitUrl(this.urlInput)
 

@@ -1,16 +1,13 @@
 import React from 'react'
 import ReactDomExperimental from 'react-dom'
-import {
-  activate as activateBackend,
-  initialize as initializeBackend,
-} from 'react-devtools-inline/backend'
+import { activate as activateBackend, initialize as initializeBackend } from 'react-devtools-inline/backend'
 import { ReactDevtoolsFallback } from './ReactDevtoolsFallback'
 import { DevtoolsProps, initialize as initializeFrontend } from 'react-devtools-inline/frontend'
 import { UIPlugin } from './UIPlugin'
 
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)')
 
-export function create (): UIPlugin {
+export function create(): UIPlugin {
   // This doesn't really have sense right now due, but we need to deal with this in future
   // For now react-split-pane view is recreating virtual tree on each render
   // Thats why when `state.spec` changed domElement will be recreated and content will be flushed
@@ -18,9 +15,9 @@ export function create (): UIPlugin {
   let isMounted = false
   let isFirstMount = true
   let _contentWindow: Window | null = null
-  let devtoolsRoot: { render: (component: JSX.Element) => void, unmount: () => void } | null = null
+  let devtoolsRoot: { render: (component: JSX.Element) => void; unmount: () => void } | null = null
 
-  function mount (domElement?: HTMLElement) {
+  function mount(domElement?: HTMLElement) {
     if (!isFirstMount) {
       // if devtools were unmounted it is closing the bridge, so we need to reinitialize the bridge on our side
       DevTools = initializeFrontend(_contentWindow)
@@ -38,12 +35,12 @@ export function create (): UIPlugin {
     isFirstMount = false
   }
 
-  function unmount () {
+  function unmount() {
     isMounted = false
     devtoolsRoot.unmount()
   }
 
-  function initialize (contentWindow: Window) {
+  function initialize(contentWindow: Window) {
     _contentWindow = contentWindow
     // @ts-expect-error global hook for react devtools is not typed
     window.__REACT_DEVTOOLS_TARGET_WINDOW__ = contentWindow

@@ -5,8 +5,7 @@ describe('keyboard', () => {
 
   context('modifiers', () => {
     it('fires keyboard and click events with modifier', () => {
-      cy
-      .window().then((win) => {
+      cy.window().then((win) => {
         win.$('#input').one('keyup', (e) => {
           expect(e.ctrlKey).to.be.true
 
@@ -24,8 +23,7 @@ describe('keyboard', () => {
     })
 
     it('releases modifiers between tests', () => {
-      cy
-      .window().then((win) => {
+      cy.window().then((win) => {
         win.$('#input').one('keyup', (e) => {
           expect(e.ctrlKey).to.be.false
         })
@@ -42,7 +40,6 @@ describe('keyboard', () => {
         ['*', 42, 56],
         ['+', 43, 187],
         ['-', 45, 189],
-
       ]
 
       characters.forEach(([char, asciiCode, keyCode]) => {

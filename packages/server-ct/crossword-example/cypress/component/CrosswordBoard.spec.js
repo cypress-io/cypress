@@ -52,8 +52,7 @@ describe('CrosswordBoard', () => {
       })
 
       it('renders the correct number of rows and columns', () => {
-        cy.get('@rows')
-        .should('have.length', crossword.size.rows)
+        cy.get('@rows').should('have.length', crossword.size.rows)
 
         cy.get('@rows').find('input').should('have.value', crossword.grid[0])
       })

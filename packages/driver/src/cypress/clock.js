@@ -54,7 +54,6 @@ const create = (win, now, methods) => {
     bind,
 
     details,
-
   }
 }
 

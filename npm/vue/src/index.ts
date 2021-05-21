@@ -7,17 +7,9 @@ import {
   Wrapper,
   enableAutoDestroy,
 } from '@vue/test-utils'
-import {
-  injectStylesBeforeElement,
-  StyleOptions,
-  ROOT_ID,
-  setupHooks,
-} from '@cypress/mount-utils'
+import { injectStylesBeforeElement, StyleOptions, ROOT_ID, setupHooks } from '@cypress/mount-utils'
 
-const defaultOptions: (keyof MountOptions)[] = [
-  'vue',
-  'extensions',
-]
+const defaultOptions: (keyof MountOptions)[] = ['vue', 'extensions']
 
 const registerGlobalComponents = (Vue, options) => {
   const globalComponents = Cypress._.get(options, 'extensions.components')
@@ -30,10 +22,7 @@ const registerGlobalComponents = (Vue, options) => {
 }
 
 const installFilters = (Vue, options) => {
-  const filters: VueFilters | undefined = Cypress._.get(
-    options,
-    'extensions.filters',
-  )
+  const filters: VueFilters | undefined = Cypress._.get(options, 'extensions.filters')
 
   if (Cypress._.isPlainObject(filters)) {
     Object.keys(filters).forEach((name) => {
@@ -44,10 +33,10 @@ const installFilters = (Vue, options) => {
 
 const installPlugins = (Vue, options, props) => {
   const plugins: VuePlugins =
-      Cypress._.get(props, 'plugins') ||
-      Cypress._.get(options, 'extensions.use') ||
-      Cypress._.get(options, 'extensions.plugins') ||
-      []
+    Cypress._.get(props, 'plugins') ||
+    Cypress._.get(options, 'extensions.use') ||
+    Cypress._.get(options, 'extensions.plugins') ||
+    []
 
   // @ts-ignore
   plugins.forEach((p) => {
@@ -56,9 +45,7 @@ const installPlugins = (Vue, options, props) => {
 }
 
 const installMixins = (Vue, options) => {
-  const mixins =
-    Cypress._.get(options, 'extensions.mixin') ||
-    Cypress._.get(options, 'extensions.mixins')
+  const mixins = Cypress._.get(options, 'extensions.mixin') || Cypress._.get(options, 'extensions.mixins')
 
   if (Cypress._.isArray(mixins)) {
     mixins.forEach((mixin) => {
@@ -270,7 +257,7 @@ declare global {
  * @see https://vuejs.org/v2/api/#errorHandler
  * @see https://github.com/cypress-io/cypress/issues/7910
  */
-function failTestOnVueError (err, vm, info) {
+function failTestOnVueError(err, vm, info) {
   console.error(`Vue error`)
   console.error(err)
   console.error('component:', vm)
@@ -278,7 +265,7 @@ function failTestOnVueError (err, vm, info) {
   window.top.onerror(err)
 }
 
-function registerAutoDestroy ($destroy: () => void) {
+function registerAutoDestroy($destroy: () => void) {
   Cypress.on('test:before:run', () => {
     $destroy()
   })
@@ -305,18 +292,9 @@ const injectStyles = (options: StyleOptions) => {
  *    cy.get('#greeting').should('be.visible')
  *  })
  */
-export const mount = (
-  component: VueComponent,
-  optionsOrProps: MountOptionsArgument = {},
-) => {
-  const options: Partial<MountOptions> = Cypress._.pick(
-    optionsOrProps,
-    defaultOptions,
-  )
-  const props: Partial<ComponentOptions> = Cypress._.omit(
-    optionsOrProps,
-    defaultOptions,
-  )
+export const mount = (component: VueComponent, optionsOrProps: MountOptionsArgument = {}) => {
+  const options: Partial<MountOptions> = Cypress._.pick(optionsOrProps, defaultOptions)
+  const props: Partial<ComponentOptions> = Cypress._.omit(optionsOrProps, defaultOptions)
 
   return cy
   .window({
@@ -385,10 +363,7 @@ export const mount = (
  *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
  */
-export const mountCallback = (
-  component: VueComponent,
-  options?: MountOptionsArgument,
-) => {
+export const mountCallback = (component: VueComponent, options?: MountOptionsArgument) => {
   return () => mount(component, options)
 }
 

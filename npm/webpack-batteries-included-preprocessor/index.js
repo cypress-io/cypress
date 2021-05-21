@@ -3,7 +3,9 @@ const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
-    if (!rule.use || !Array.isArray(rule.use)) return false
+    if (!rule.use || !Array.isArray(rule.use)) {
+      return false
+    }
 
     return rule.use.some((use) => {
       return use.loader && use.loader.includes('ts-loader')
@@ -13,16 +15,22 @@ const hasTsLoader = (rules) => {
 
 const addTypeScriptConfig = (file, options) => {
   // shortcut if we know we've already added typescript support
-  if (options.__typescriptSupportAdded) return
+  if (options.__typescriptSupportAdded) {
+    return
+  }
 
   const webpackOptions = options.webpackOptions
   const rules = webpackOptions.module && webpackOptions.module.rules
 
   // if there are no rules defined or it's not an array, we can't add to them
-  if (!rules || !Array.isArray(rules)) return
+  if (!rules || !Array.isArray(rules)) {
+    return
+  }
 
   // if we find ts-loader configured, don't add it again
-  if (hasTsLoader(rules)) return
+  if (hasTsLoader(rules)) {
+    return
+  }
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
@@ -51,10 +59,12 @@ const addTypeScriptConfig = (file, options) => {
   })
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
-  webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
-    configFile,
-    silent: true,
-  })]
+  webpackOptions.resolve.plugins = [
+    new TsconfigPathsPlugin({
+      configFile,
+      silent: true,
+    }),
+  ]
 
   options.__typescriptSupportAdded = true
 }
@@ -68,60 +78,69 @@ const getDefaultWebpackOptions = () => {
       __dirname: true,
     },
     module: {
-      rules: [{
-        test: /\.mjs$/,
-        include: /node_modules/,
-        exclude: [/browserslist/],
-        type: 'javascript/auto',
-      }, {
-        test: /(\.jsx?|\.mjs)$/,
-        exclude: [/node_modules/, /browserslist/],
-        type: 'javascript/auto',
-        use: [{
-          loader: require.resolve('babel-loader'),
-          options: {
-            plugins: [
-              ...[
-                'babel-plugin-add-module-exports',
-                '@babel/plugin-proposal-class-properties',
-                '@babel/plugin-proposal-object-rest-spread',
-              ].map(require.resolve),
-              [require.resolve('@babel/plugin-transform-runtime'), {
-                absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
-              }],
-            ],
-            presets: [
-              // the chrome version should be synced with
-              // packages/web-config/webpack.config.base.ts and
-              // packages/server/lib/browsers/chrome.ts
-              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
-              require.resolve('@babel/preset-react'),
-            ],
-          },
-        }],
-      }, {
-        test: /\.coffee$/,
-        exclude: [/node_modules/, /browserslist/],
-        loader: require.resolve('coffee-loader'),
-      }],
+      rules: [
+        {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          exclude: [/browserslist/],
+          type: 'javascript/auto',
+        },
+        {
+          test: /(\.jsx?|\.mjs)$/,
+          exclude: [/node_modules/, /browserslist/],
+          type: 'javascript/auto',
+          use: [
+            {
+              loader: require.resolve('babel-loader'),
+              options: {
+                plugins: [
+                  ...[
+                    'babel-plugin-add-module-exports',
+                    '@babel/plugin-proposal-class-properties',
+                    '@babel/plugin-proposal-object-rest-spread',
+                  ].map(require.resolve),
+                  [
+                    require.resolve('@babel/plugin-transform-runtime'),
+                    {
+                      absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
+                    },
+                  ],
+                ],
+                presets: [
+                  // the chrome version should be synced with
+                  // packages/web-config/webpack.config.base.ts and
+                  // packages/server/lib/browsers/chrome.ts
+                  [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { chrome: '64' } }],
+                  require.resolve('@babel/preset-react'),
+                ],
+              },
+            },
+          ],
+        },
+        {
+          test: /\.coffee$/,
+          exclude: [/node_modules/, /browserslist/],
+          loader: require.resolve('coffee-loader'),
+        },
+      ],
     },
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       alias: {
-        'child_process': require.resolve('./empty'),
-        'cluster': require.resolve('./empty'),
-        'console': require.resolve('./empty'),
-        'dgram': require.resolve('./empty'),
-        'dns': require.resolve('./empty'),
-        'fs': require.resolve('./empty'),
-        'http2': require.resolve('./empty'),
-        'inspector': require.resolve('./empty'),
-        'module': require.resolve('./empty'),
-        'net': require.resolve('./empty'),
-        'perf_hooks': require.resolve('./empty'),
-        'readline': require.resolve('./empty'),
-        'repl': require.resolve('./empty'),
-        'tls': require.resolve('./empty'),
+        child_process: require.resolve('./empty'),
+        cluster: require.resolve('./empty'),
+        console: require.resolve('./empty'),
+        dgram: require.resolve('./empty'),
+        dns: require.resolve('./empty'),
+        fs: require.resolve('./empty'),
+        http2: require.resolve('./empty'),
+        inspector: require.resolve('./empty'),
+        module: require.resolve('./empty'),
+        net: require.resolve('./empty'),
+        perf_hooks: require.resolve('./empty'),
+        readline: require.resolve('./empty'),
+        repl: require.resolve('./empty'),
+        tls: require.resolve('./empty'),
       },
     },
   }
@@ -132,7 +151,11 @@ const typescriptExtensionRegex = /\.tsx?$/
 const preprocessor = (options = {}) => {
   return (file) => {
     if (!options.typescript && typescriptExtensionRegex.test(file.filePath)) {
-      return Promise.reject(new Error(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support.\n\nThe file: ${file.filePath}`))
+      return Promise.reject(
+        new Error(
+          `You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support.\n\nThe file: ${file.filePath}`
+        )
+      )
     }
 
     options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions()

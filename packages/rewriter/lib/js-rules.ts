@@ -1,8 +1,4 @@
-import {
-  Visitor,
-  namedTypes as n,
-  builders as b,
-} from 'ast-types'
+import { Visitor, namedTypes as n, builders as b } from 'ast-types'
 import { ExpressionKind } from 'ast-types/gen/kinds'
 
 // use `globalThis` instead of `window`, `self`... to lower chances of scope conflict
@@ -17,12 +13,8 @@ const globalIdentifier = b.identifier('globalThis')
  * @param prop name of property being accessed
  * @param maybeVal if an assignment is being made, this is the RHS of the assignment
  */
-function resolveWindowReference (accessedObject: ExpressionKind, prop: string, maybeVal?: ExpressionKind) {
-  const args = [
-    globalIdentifier,
-    accessedObject,
-    b.stringLiteral(prop),
-  ]
+function resolveWindowReference(accessedObject: ExpressionKind, prop: string, maybeVal?: ExpressionKind) {
+  const args = [globalIdentifier, accessedObject, b.stringLiteral(prop)]
 
   if (maybeVal) {
     args.push(maybeVal)
@@ -30,35 +22,23 @@ function resolveWindowReference (accessedObject: ExpressionKind, prop: string, m
 
   return b.callExpression(
     b.memberExpression(
-      b.memberExpression(
-        b.memberExpression(
-          globalIdentifier,
-          b.identifier('top'),
-        ),
-        b.identifier('Cypress'),
-      ),
-      b.identifier('resolveWindowReference'),
+      b.memberExpression(b.memberExpression(globalIdentifier, b.identifier('top')), b.identifier('Cypress')),
+      b.identifier('resolveWindowReference')
     ),
-    args,
+    args
   )
 }
 
 /**
  * Generate a CallExpression for Cypress.resolveLocationReference
  */
-function resolveLocationReference () {
+function resolveLocationReference() {
   return b.callExpression(
     b.memberExpression(
-      b.memberExpression(
-        b.memberExpression(
-          globalIdentifier,
-          b.identifier('top'),
-        ),
-        b.identifier('Cypress'),
-      ),
-      b.identifier('resolveLocationReference'),
+      b.memberExpression(b.memberExpression(globalIdentifier, b.identifier('top')), b.identifier('Cypress')),
+      b.identifier('resolveLocationReference')
     ),
-    [globalIdentifier],
+    [globalIdentifier]
   )
 }
 
@@ -66,7 +46,7 @@ function resolveLocationReference () {
  * Given an Identifier or a Literal, return a property name that should use `resolveWindowReference`.
  * @param node
  */
-function getReplaceablePropOfMemberExpression (node: n.MemberExpression) {
+function getReplaceablePropOfMemberExpression(node: n.MemberExpression) {
   const { property } = node
 
   // something.(top|parent)
@@ -94,7 +74,7 @@ function getReplaceablePropOfMemberExpression (node: n.MemberExpression) {
  */
 export const jsRules: Visitor<{}> = {
   // replace member accesses like foo['top'] or bar.parent with resolveWindowReference
-  visitMemberExpression (path) {
+  visitMemberExpression(path) {
     const { node } = path
 
     const prop = getReplaceablePropOfMemberExpression(node)
@@ -108,7 +88,7 @@ export const jsRules: Visitor<{}> = {
     return false
   },
   // replace lone identifiers like `top`, `parent`, with resolveWindowReference
-  visitIdentifier (path) {
+  visitIdentifier(path) {
     const { node } = path
 
     if (path.parentPath) {
@@ -127,21 +107,19 @@ export const jsRules: Visitor<{}> = {
       // some Identifiers do not refer to a scoped variable, depending on how they're used
       if (
         // like `var top = 'foo'`
-        (n.VariableDeclarator.check(parentNode) && parentNode.id === node)
-        || (isAssignee)
-        || (
-          [
-            'LabeledStatement', // like `top: foo();`
-            'ContinueStatement', // like 'continue top'
-            'BreakStatement', // like 'break top'
-            'Property', // like `{ top: 'foo' }`
-            'FunctionDeclaration', // like `function top()`
-            'RestElement', // like (...top)
-            'ArrowFunctionExpression', // like `(top, ...parent) => { }`
-            'ArrowExpression', // MDN Parser docs mention this being used for () => {}
-            'FunctionExpression', // like `(function top())`,
-          ].includes(parentNode.type)
-        )
+        (n.VariableDeclarator.check(parentNode) && parentNode.id === node) ||
+        isAssignee ||
+        [
+          'LabeledStatement', // like `top: foo();`
+          'ContinueStatement', // like 'continue top'
+          'BreakStatement', // like 'break top'
+          'Property', // like `{ top: 'foo' }`
+          'FunctionDeclaration', // like `function top()`
+          'RestElement', // like (...top)
+          'ArrowFunctionExpression', // like `(top, ...parent) => { }`
+          'ArrowExpression', // MDN Parser docs mention this being used for () => {}
+          'FunctionExpression', // like `(function top())`,
+        ].includes(parentNode.type)
       ) {
         return false
       }
@@ -166,7 +144,7 @@ export const jsRules: Visitor<{}> = {
 
     this.traverse(path)
   },
-  visitAssignmentExpression (path) {
+  visitAssignmentExpression(path) {
     const { node } = path
 
     const finish = () => {

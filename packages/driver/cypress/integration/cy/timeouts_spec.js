@@ -15,7 +15,7 @@ describe('driver/src/cy/timeouts', () => {
 
   context('timeout', () => {
     it('throws when no runnable', () => {
-      const state = () => { }
+      const state = () => {}
       const timeouts = Timeouts.create(state)
 
       const fn = () => {
@@ -30,7 +30,7 @@ describe('driver/src/cy/timeouts', () => {
 
   context('clearTimeout', () => {
     it('throws when no runnable', () => {
-      const state = () => { }
+      const state = () => {}
       const timeouts = Timeouts.create(state)
 
       const fn = () => {

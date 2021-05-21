@@ -117,17 +117,15 @@ describe('lib/tasks/download', function () {
       return fs.createReadStream(examplePath)
     })
 
-    nock('https://download.cypress.io')
-    .get('/desktop/1.2.3')
-    .query(true)
-    .reply(302, undefined, {
+    nock('https://download.cypress.io').get('/desktop/1.2.3').query(true).reply(302, undefined, {
       Location: 'https://aws.amazon.com/some.zip',
       'x-version': '0.11.1',
     })
 
     const onProgress = sinon.stub().returns(undefined)
 
-    return download.start({
+    return download
+    .start({
       downloadDestination: this.options.downloadDestination,
       version: this.options.version,
       progress: { onProgress },
@@ -144,96 +142,132 @@ describe('lib/tasks/download', function () {
       this.expectedChecksum = hasha.fromFileSync(examplePath)
       this.expectedFileSize = fs.statSync(examplePath).size
       this.onProgress = sinon.stub().returns(undefined)
-      debug('example file %s should have checksum %s and file size %d',
-        examplePath, this.expectedChecksum, this.expectedFileSize)
+      debug(
+        'example file %s should have checksum %s and file size %d',
+        examplePath,
+        this.expectedChecksum,
+        this.expectedFileSize
+      )
     })
 
     it('throws if file size is different from expected', function () {
       nock('https://download.cypress.io')
       .get('/desktop/1.2.3')
       .query(true)
-      .reply(200, () => {
-        return fs.createReadStream(examplePath)
-      }, {
-        // definitely incorrect file size
-        'content-length': '10',
-      })
+      .reply(
+        200,
+        () => {
+          return fs.createReadStream(examplePath)
+        },
+        {
+          // definitely incorrect file size
+          'content-length': '10',
+        }
+      )
 
-      return expect(download.start({
-        downloadDestination: this.options.downloadDestination,
-        version: this.options.version,
-        progress: { onProgress: this.onProgress },
-      })).to.be.rejected
+      return expect(
+        download.start({
+          downloadDestination: this.options.downloadDestination,
+          version: this.options.version,
+          progress: { onProgress: this.onProgress },
+        })
+      ).to.be.rejected
     })
 
     it('throws if file size is different from expected x-amz-meta-size', function () {
       nock('https://download.cypress.io')
       .get('/desktop/1.2.3')
       .query(true)
-      .reply(200, () => {
-        return fs.createReadStream(examplePath)
-      }, {
-        // definitely incorrect file size
-        'x-amz-meta-size': '10',
-      })
+      .reply(
+        200,
+        () => {
+          return fs.createReadStream(examplePath)
+        },
+        {
+          // definitely incorrect file size
+          'x-amz-meta-size': '10',
+        }
+      )
 
-      return expect(download.start({
-        downloadDestination: this.options.downloadDestination,
-        version: this.options.version,
-        progress: { onProgress: this.onProgress },
-      })).to.be.rejected
+      return expect(
+        download.start({
+          downloadDestination: this.options.downloadDestination,
+          version: this.options.version,
+          progress: { onProgress: this.onProgress },
+        })
+      ).to.be.rejected
     })
 
     it('throws if checksum is different from expected', function () {
       nock('https://download.cypress.io')
       .get('/desktop/1.2.3')
       .query(true)
-      .reply(200, () => {
-        return fs.createReadStream(examplePath)
-      }, {
-        'x-amz-meta-checksum': 'incorrect-checksum',
-      })
+      .reply(
+        200,
+        () => {
+          return fs.createReadStream(examplePath)
+        },
+        {
+          'x-amz-meta-checksum': 'incorrect-checksum',
+        }
+      )
 
-      return expect(download.start({
-        downloadDestination: this.options.downloadDestination,
-        version: this.options.version,
-        progress: { onProgress: this.onProgress },
-      })).to.be.rejected
+      return expect(
+        download.start({
+          downloadDestination: this.options.downloadDestination,
+          version: this.options.version,
+          progress: { onProgress: this.onProgress },
+        })
+      ).to.be.rejected
     })
 
     it('throws if checksum and file size are different from expected', function () {
       nock('https://download.cypress.io')
       .get('/desktop/1.2.3')
       .query(true)
-      .reply(200, () => {
-        return fs.createReadStream(examplePath)
-      }, {
-        'x-amz-meta-checksum': 'incorrect-checksum',
-        'x-amz-meta-size': '10',
-      })
+      .reply(
+        200,
+        () => {
+          return fs.createReadStream(examplePath)
+        },
+        {
+          'x-amz-meta-checksum': 'incorrect-checksum',
+          'x-amz-meta-size': '10',
+        }
+      )
 
-      return expect(download.start({
-        downloadDestination: this.options.downloadDestination,
-        version: this.options.version,
-        progress: { onProgress: this.onProgress },
-      })).to.be.rejected
+      return expect(
+        download.start({
+          downloadDestination: this.options.downloadDestination,
+          version: this.options.version,
+          progress: { onProgress: this.onProgress },
+        })
+      ).to.be.rejected
     })
 
     it('passes when checksum and file size match', function () {
       nock('https://download.cypress.io')
       .get('/desktop/1.2.3')
       .query(true)
-      .reply(200, () => {
-        debug('creating read stream for %s', examplePath)
+      .reply(
+        200,
+        () => {
+          debug('creating read stream for %s', examplePath)
 
-        return fs.createReadStream(examplePath)
-      }, {
-        'x-amz-meta-checksum': this.expectedChecksum,
-        'x-amz-meta-size': String(this.expectedFileSize),
-      })
+          return fs.createReadStream(examplePath)
+        },
+        {
+          'x-amz-meta-checksum': this.expectedChecksum,
+          'x-amz-meta-size': String(this.expectedFileSize),
+        }
+      )
 
-      debug('downloading %s to %s for test version %s',
-        examplePath, this.options.downloadDestination, this.options.version)
+      debug(
+        'downloading %s to %s for test version %s',
+        examplePath,
+        this.options.downloadDestination,
+        this.options.version
+      )
 
       return download.start({
         downloadDestination: this.options.downloadDestination,
@@ -250,10 +284,7 @@ describe('lib/tasks/download', function () {
       return fs.createReadStream(examplePath)
     })
 
-    nock('https://download.cypress.io')
-    .get('/desktop/1.2.3')
-    .query(true)
-    .reply(302, undefined, {
+    nock('https://download.cypress.io').get('/desktop/1.2.3').query(true).reply(302, undefined, {
       Location: 'https://aws.amazon.com/some.zip',
       'x-version': '0.11.1',
     })
@@ -272,10 +303,7 @@ describe('lib/tasks/download', function () {
       return fs.createReadStream(examplePath)
     })
 
-    nock('https://download.cypress.io')
-    .get('/desktop/0.13.0')
-    .query(true)
-    .reply(302, undefined, {
+    nock('https://download.cypress.io').get('/desktop/0.13.0').query(true).reply(302, undefined, {
       Location: 'https://aws.amazon.com/some.zip',
       'x-version': '0.13.0',
     })

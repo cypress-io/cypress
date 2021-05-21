@@ -9,7 +9,18 @@ describe('<StyledText />', () => {
   it('StyledText', () => {
     const StyledText = () => (
       <>
-        {styledTextWithSizes(['text-xs', 'text-s', 'text-ms', 'text-m', 'text-ml', 'text-l', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'])}
+        {styledTextWithSizes([
+          'text-xs',
+          'text-s',
+          'text-ms',
+          'text-m',
+          'text-ml',
+          'text-l',
+          'text-xl',
+          'text-2xl',
+          'text-3xl',
+          'text-4xl',
+        ])}
       </>
     )
 

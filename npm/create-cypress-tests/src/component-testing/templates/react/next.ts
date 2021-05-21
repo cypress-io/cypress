@@ -14,10 +14,10 @@ export const NextTemplate: Template = {
   getPluginsCodeAst: () => {
     return {
       requiresReturnConfig: true,
-      RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/next\')'),
-      IfComponentTestingPluginsAst: babel.template.ast([
-        'injectDevServer(on, config)',
-      ].join('\n'), { preserveComments: true }),
+      RequireAst: babel.template.ast("const injectDevServer = require('@cypress/react/plugins/next')"),
+      IfComponentTestingPluginsAst: babel.template.ast(['injectDevServer(on, config)'].join('\n'), {
+        preserveComments: true,
+      }),
     }
   },
   test: (cwd) => {
@@ -39,13 +39,7 @@ export const NextTemplate: Template = {
         return { success: false }
       }
 
-      if (
-        !validateSemverVersion(
-          nextVersion,
-          MIN_SUPPORTED_VERSION['next'],
-          'next.js',
-        )
-      ) {
+      if (!validateSemverVersion(nextVersion, MIN_SUPPORTED_VERSION['next'], 'next.js')) {
         return { success: false }
       }
 

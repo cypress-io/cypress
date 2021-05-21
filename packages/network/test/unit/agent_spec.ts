@@ -49,7 +49,6 @@ describe('lib/agent', function () {
     after(function () {
       return this.servers.stop()
     })
-
     ;[
       {
         name: 'with no upstream',
@@ -74,13 +73,16 @@ describe('lib/agent', function () {
         httpsProxy: true,
         proxyAuth: true,
       },
-    ].slice().map((testCase) => {
+    ]
+    .slice()
+    .map((testCase) => {
       context(testCase.name, function () {
         beforeEach(function () {
           if (testCase.proxyUrl) {
             // PROXY vars should override npm_config vars, so set them to cause failures if they are used
             // @see https://github.com/cypress-io/cypress/pull/8295
-            process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+            process.env.npm_config_proxy = process.env.npm_config_https_proxy =
+              'http://erroneously-used-npm-proxy.invalid'
             process.env.npm_config_noproxy = 'just,some,nonsense'
 
             process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
@@ -156,7 +158,7 @@ describe('lib/agent', function () {
             url: `http://localhost:${HTTP_PORT}/empty-response`,
           })
           .then(() => {
-            throw new Error('Shouldn\'t reach this')
+            throw new Error("Shouldn't reach this")
           })
           .catch((err) => {
             if (this.debugProxy) {
@@ -176,7 +178,7 @@ describe('lib/agent', function () {
             url: `https://localhost:${HTTPS_PORT}/empty-response`,
           })
           .then(() => {
-            throw new Error('Shouldn\'t reach this')
+            throw new Error("Shouldn't reach this")
           })
           .catch((err) => {
             expect(err.message).to.eq('Error: socket hang up')
@@ -192,8 +194,7 @@ describe('lib/agent', function () {
 
           return new Bluebird((resolve) => {
             socket.on('message', resolve)
-          })
-          .then((msg) => {
+          }).then((msg) => {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0].ws).to.be.true
@@ -213,8 +214,7 @@ describe('lib/agent', function () {
 
           return new Bluebird((resolve) => {
             socket.on('message', resolve)
-          })
-          .then((msg) => {
+          }).then((msg) => {
             expect(msg).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({
@@ -232,8 +232,7 @@ describe('lib/agent', function () {
 
           return this.request({
             url: `https://127.0.0.1:${HTTPS_PORT}/get`,
-          })
-          .then(() => {
+          }).then(() => {
             expect(warningStub).to.not.be.called
           })
         })
@@ -258,8 +257,7 @@ describe('lib/agent', function () {
 
         return this.request({
           url: 'https://example.com/',
-        })
-        .then(() => {
+        }).then(() => {
           expect(spy).to.not.be.called
 
           return this.request({
@@ -268,9 +266,15 @@ describe('lib/agent', function () {
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
-            expect(spy).to.be.calledOnce
-          })
+          .catch(
+            {
+              message:
+                'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0',
+            },
+            () => {
+              expect(spy).to.be.calledOnce
+            }
+          )
         })
       })
 
@@ -283,7 +287,8 @@ describe('lib/agent', function () {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://localhost:${proxyPort}`
         process.env.NO_PROXY = ''
 
-        return proxy.start(proxyPort)
+        return proxy
+        .start(proxyPort)
         .then(() => {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
@@ -306,8 +311,8 @@ describe('lib/agent', function () {
           allowDestroy(
             net.createServer((socket) => {
               socket.end()
-            }),
-          ),
+            })
+          )
         ) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2
@@ -315,7 +320,8 @@ describe('lib/agent', function () {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://localhost:${proxyPort}`
         process.env.NO_PROXY = ''
 
-        return proxy.listenAsync(proxyPort)
+        return proxy
+        .listenAsync(proxyPort)
         .then(() => {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
@@ -325,7 +331,9 @@ describe('lib/agent', function () {
           throw new Error('should not succeed')
         })
         .catch((e) => {
-          expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.')
+          expect(e.message).to.eq(
+            'Error: A connection to the upstream proxy could not be established: ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'
+          )
 
           return proxy.destroyAsync()
         })
@@ -350,8 +358,7 @@ describe('lib/agent', function () {
 
         return this.request({
           url: 'http://example.com/',
-        })
-        .then(() => {
+        }).then(() => {
           expect(spy).to.not.be.called
 
           return this.request({
@@ -372,11 +379,7 @@ describe('lib/agent', function () {
     it('builds the correct request', function () {
       const head = buildConnectReqHead('foo.bar', '1234', {})
 
-      expect(head).to.eq([
-        'CONNECT foo.bar:1234 HTTP/1.1',
-        'Host: foo.bar:1234',
-        '', '',
-      ].join('\r\n'))
+      expect(head).to.eq(['CONNECT foo.bar:1234 HTTP/1.1', 'Host: foo.bar:1234', '', ''].join('\r\n'))
     })
 
     it('can do Proxy-Authorization', function () {
@@ -384,12 +387,11 @@ describe('lib/agent', function () {
         auth: 'baz:quux',
       })
 
-      expect(head).to.eq([
-        'CONNECT foo.bar:1234 HTTP/1.1',
-        'Host: foo.bar:1234',
-        'Proxy-Authorization: basic YmF6OnF1dXg=',
-        '', '',
-      ].join('\r\n'))
+      expect(head).to.eq(
+        ['CONNECT foo.bar:1234 HTTP/1.1', 'Host: foo.bar:1234', 'Proxy-Authorization: basic YmF6OnF1dXg=', '', ''].join(
+          '\r\n'
+        )
+      )
     })
   })
 
@@ -425,7 +427,7 @@ describe('lib/agent', function () {
   })
 
   context('.isRequestHttps', function () {
-    [
+    ;[
       {
         protocol: 'http',
         agent: http.globalAgent,
@@ -445,7 +447,7 @@ describe('lib/agent', function () {
           agent: testCase.agent,
         })
         .then(() => {
-          throw new Error('Shouldn\'t succeed')
+          throw new Error("Shouldn't succeed")
         })
         .catch(() => {
           const requestOptions = spy.getCall(0).args[1]
@@ -466,8 +468,7 @@ describe('lib/agent', function () {
         return new Bluebird((resolve, reject) => {
           socket.on('message', reject)
           socket.io.on('error', resolve)
-        })
-        .then(() => {
+        }).then(() => {
           const requestOptions = spy.getCall(0).args[1]
 
           expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
@@ -506,12 +507,9 @@ describe('lib/agent', function () {
       .catch(() => {
         const req = spy.getCall(0).args[0]
 
-        expect(req._header).to.equal([
-          'GET / HTTP/1.1',
-          'host: foo.bar.baz.invalid',
-          'Connection: close',
-          '', '',
-        ].join('\r\n'))
+        expect(req._header).to.equal(
+          ['GET / HTTP/1.1', 'host: foo.bar.baz.invalid', 'Connection: close', '', ''].join('\r\n')
+        )
 
         // now change some stuff, regen, and expect it to work
         delete req._header
@@ -520,13 +518,16 @@ describe('lib/agent', function () {
         req.setHeader('Host', 'foo.fleem.invalid')
         req.setHeader('bing', 'bang')
         regenerateRequestHead(req)
-        expect(req._header).to.equal([
-          'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
-          'Host: foo.fleem.invalid',
-          'bing: bang',
-          'Connection: close',
-          '', '',
-        ].join('\r\n'))
+        expect(req._header).to.equal(
+          [
+            'GET http://quuz.quux.invalid/abc?def=123 HTTP/1.1',
+            'Host: foo.fleem.invalid',
+            'bing: bang',
+            'Connection: close',
+            '',
+            '',
+          ].join('\r\n')
+        )
       })
     })
   })

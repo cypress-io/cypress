@@ -11,13 +11,9 @@ describe('Declarative rendering', () => {
     </ol>
   `
 
-  function data () {
+  function data() {
     return {
-      todos: [
-        { text: 'Learn JavaScript' },
-        { text: 'Learn Vue' },
-        { text: 'Build something awesome' },
-      ],
+      todos: [{ text: 'Learn JavaScript' }, { text: 'Learn Vue' }, { text: 'Build something awesome' }],
     }
   }
 

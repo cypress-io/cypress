@@ -28,8 +28,7 @@ const testAttachingCookiesWith = function (fn) {
     'set-cookie': 'three=3',
   })
 
-  return fn()
-  .then(() => {
+  return fn().then(() => {
     return snapshot({
       setCalls: set.getCalls().map((call) => {
         return {
@@ -161,13 +160,15 @@ describe('lib/request', () => {
     })
 
     it('sets status to statusCode and deletes statusCode', function () {
-      expect(request.normalizeResponse(this.push, {
-        statusCode: 404,
-        request: {
-          headers: { foo: 'bar' },
-          body: 'body',
-        },
-      })).to.deep.eq({
+      expect(
+        request.normalizeResponse(this.push, {
+          statusCode: 404,
+          request: {
+            headers: { foo: 'bar' },
+            body: 'body',
+          },
+        })
+      ).to.deep.eq({
         status: 404,
         statusText: 'Not Found',
         isOkStatusCode: false,
@@ -179,18 +180,20 @@ describe('lib/request', () => {
     })
 
     it('picks out status body and headers', function () {
-      expect(request.normalizeResponse(this.push, {
-        foo: 'bar',
-        req: {},
-        originalHeaders: {},
-        headers: { 'Content-Length': 50 },
-        body: '<html>foo</html>',
-        statusCode: 200,
-        request: {
-          headers: { foo: 'bar' },
-          body: 'body',
-        },
-      })).to.deep.eq({
+      expect(
+        request.normalizeResponse(this.push, {
+          foo: 'bar',
+          req: {},
+          originalHeaders: {},
+          headers: { 'Content-Length': 50 },
+          body: '<html>foo</html>',
+          statusCode: 200,
+          request: {
+            headers: { foo: 'bar' },
+            body: 'body',
+          },
+        })
+      ).to.deep.eq({
         body: '<html>foo</html>',
         headers: { 'Content-Length': 50 },
         status: 200,
@@ -249,8 +252,7 @@ describe('lib/request', () => {
           stream.on('error', cb)
         })
 
-        return expect(p).to.be.rejected
-        .then((err) => {
+        return expect(p).to.be.rejected.then((err) => {
           expect(err.code).to.eq('ESOCKETTIMEDOUT')
 
           expect(retries).to.eq(0)
@@ -276,8 +278,7 @@ describe('lib/request', () => {
           stream.on('error', cb)
         })
 
-        return expect(p).to.be.rejected
-        .then((err) => {
+        return expect(p).to.be.rejected.then((err) => {
           expect(err.code).to.eq('ECONNRESET')
 
           expect(retries).to.eq(4)
@@ -305,8 +306,7 @@ describe('lib/request', () => {
           stream.on('error', cb)
         })
 
-        return expect(p).to.be.rejected
-        .then((err) => {
+        return expect(p).to.be.rejected.then((err) => {
           expect(err.code).to.eq('ENOTFOUND')
 
           expect(retries).to.eq(4)
@@ -321,10 +321,12 @@ describe('lib/request', () => {
           timeout: 100,
         }
 
-        return request.create(opts, true)
+        return request
+        .create(opts, true)
         .then(() => {
           throw new Error('should not reach')
-        }).catch((err) => {
+        })
+        .catch((err) => {
           expect(err.error.code).to.eq('ESOCKETTIMEDOUT')
 
           expect(this.hits).to.eq(1)
@@ -338,10 +340,12 @@ describe('lib/request', () => {
           timeout: 250,
         }
 
-        return request.create(opts, true)
+        return request
+        .create(opts, true)
         .then(() => {
           throw new Error('should not reach')
-        }).catch((err) => {
+        })
+        .catch((err) => {
           expect(err.error.code).to.eq('ECONNRESET')
 
           expect(this.hits).to.eq(5)
@@ -354,13 +358,12 @@ describe('lib/request', () => {
     it('sets strictSSL=false', function () {
       const init = sinon.spy(request.rp.Request.prototype, 'init')
 
-      nock('http://www.github.com')
-      .get('/foo')
-      .reply(200, 'hello', {
+      nock('http://www.github.com').get('/foo').reply(200, 'hello', {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://www.github.com/foo',
         cookies: false,
       })
@@ -370,9 +373,7 @@ describe('lib/request', () => {
     })
 
     it('sets simple=false', function () {
-      nock('http://www.github.com')
-      .get('/foo')
-      .reply(500, '')
+      nock('http://www.github.com').get('/foo').reply(500, '')
 
       // should not bomb on 500
       // because simple = false
@@ -383,19 +384,28 @@ describe('lib/request', () => {
     })
 
     it('sets resolveWithFullResponse=true', function () {
-      nock('http://www.github.com')
-      .get('/foo')
-      .reply(200, 'hello', {
+      nock('http://www.github.com').get('/foo').reply(200, 'hello', {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://www.github.com/foo',
         cookies: false,
         body: 'foobarbaz',
       })
       .then((resp) => {
-        expect(resp).to.have.keys('status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'requestBody', 'requestHeaders')
+        expect(resp).to.have.keys(
+          'status',
+          'body',
+          'headers',
+          'duration',
+          'isOkStatusCode',
+          'statusText',
+          'allRequestResponses',
+          'requestBody',
+          'requestHeaders'
+        )
 
         expect(resp.status).to.eq(200)
         expect(resp.statusText).to.eq('OK')
@@ -404,17 +414,23 @@ describe('lib/request', () => {
         expect(resp.isOkStatusCode).to.be.true
         expect(resp.requestBody).to.eq('foobarbaz')
         expect(resp.requestHeaders).to.deep.eq({
-          'accept': '*/*',
+          accept: '*/*',
           'accept-encoding': 'gzip, deflate',
-          'connection': 'keep-alive',
+          connection: 'keep-alive',
           'content-length': 9,
-          'host': 'www.github.com',
+          host: 'www.github.com',
         })
 
         expect(resp.allRequestResponses).to.deep.eq([
           {
             'Request Body': 'foobarbaz',
-            'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'content-length': 9, 'host': 'www.github.com' },
+            'Request Headers': {
+              accept: '*/*',
+              'accept-encoding': 'gzip, deflate',
+              connection: 'keep-alive',
+              'content-length': 9,
+              host: 'www.github.com',
+            },
             'Request URL': 'http://www.github.com/foo',
             'Response Body': 'hello',
             'Response Headers': { 'content-type': 'text/html' },
@@ -430,23 +446,35 @@ describe('lib/request', () => {
       nock('http://www.github.com')
       .get('/dashboard')
       .reply(301, null, {
-        'location': '/auth',
+        location: '/auth',
       })
       .get('/auth')
       .reply(302, null, {
-        'location': '/login',
+        location: '/login',
       })
       .get('/login')
       .reply(200, 'log in', {
         'Content-Type': 'text/html',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://www.github.com/dashboard',
         cookies: false,
       })
       .then((resp) => {
-        expect(resp).to.have.keys('status', 'body', 'headers', 'duration', 'isOkStatusCode', 'statusText', 'allRequestResponses', 'redirects', 'requestBody', 'requestHeaders')
+        expect(resp).to.have.keys(
+          'status',
+          'body',
+          'headers',
+          'duration',
+          'isOkStatusCode',
+          'statusText',
+          'allRequestResponses',
+          'redirects',
+          'requestBody',
+          'requestHeaders'
+        )
 
         expect(resp.status).to.eq(200)
         expect(resp.statusText).to.eq('OK')
@@ -454,37 +482,53 @@ describe('lib/request', () => {
         expect(resp.headers).to.deep.eq({ 'content-type': 'text/html' })
         expect(resp.isOkStatusCode).to.be.true
         expect(resp.requestBody).to.be.undefined
-        expect(resp.redirects).to.deep.eq([
-          '301: http://www.github.com/auth',
-          '302: http://www.github.com/login',
-        ])
+        expect(resp.redirects).to.deep.eq(['301: http://www.github.com/auth', '302: http://www.github.com/login'])
 
         expect(resp.requestHeaders).to.deep.eq({
-          'accept': '*/*',
+          accept: '*/*',
           'accept-encoding': 'gzip, deflate',
-          'connection': 'keep-alive',
-          'referer': 'http://www.github.com/auth',
-          'host': 'www.github.com',
+          connection: 'keep-alive',
+          referer: 'http://www.github.com/auth',
+          host: 'www.github.com',
         })
 
         expect(resp.allRequestResponses).to.deep.eq([
           {
             'Request Body': null,
-            'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'host': 'www.github.com' },
+            'Request Headers': {
+              accept: '*/*',
+              'accept-encoding': 'gzip, deflate',
+              connection: 'keep-alive',
+              host: 'www.github.com',
+            },
             'Request URL': 'http://www.github.com/dashboard',
             'Response Body': null,
-            'Response Headers': { 'content-type': 'application/json', 'location': '/auth' },
+            'Response Headers': { 'content-type': 'application/json', location: '/auth' },
             'Response Status': 301,
-          }, {
+          },
+          {
             'Request Body': null,
-            'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'host': 'www.github.com', 'referer': 'http://www.github.com/dashboard' },
+            'Request Headers': {
+              accept: '*/*',
+              'accept-encoding': 'gzip, deflate',
+              connection: 'keep-alive',
+              host: 'www.github.com',
+              referer: 'http://www.github.com/dashboard',
+            },
             'Request URL': 'http://www.github.com/auth',
             'Response Body': null,
-            'Response Headers': { 'content-type': 'application/json', 'location': '/login' },
+            'Response Headers': { 'content-type': 'application/json', location: '/login' },
             'Response Status': 302,
-          }, {
+          },
+          {
             'Request Body': null,
-            'Request Headers': { 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'host': 'www.github.com', 'referer': 'http://www.github.com/auth' },
+            'Request Headers': {
+              accept: '*/*',
+              'accept-encoding': 'gzip, deflate',
+              connection: 'keep-alive',
+              host: 'www.github.com',
+              referer: 'http://www.github.com/auth',
+            },
             'Request URL': 'http://www.github.com/login',
             'Response Body': 'log in',
             'Response Headers': { 'content-type': 'text/html' },
@@ -499,13 +543,15 @@ describe('lib/request', () => {
 
       const req = Request({ timeout: 2000 })
 
-      return req.sendPromise({}, this.fn, {
+      return req
+      .sendPromise({}, this.fn, {
         url: 'http://localhost:1111/foo',
         cookies: false,
       })
       .then(() => {
         throw new Error('should have failed but didnt')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: connect ECONNREFUSED 127.0.0.1:1111')
       })
     })
@@ -517,7 +563,8 @@ describe('lib/request', () => {
         'Content-Type': 'application/json',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://localhost:8080/status.json',
         cookies: false,
       })
@@ -533,7 +580,8 @@ describe('lib/request', () => {
         'Content-Type': 'application/vnd.api+json',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://localhost:8080/status.json',
         cookies: false,
       })
@@ -543,30 +591,27 @@ describe('lib/request', () => {
     })
 
     it('revives from parsing bad json', function () {
-      nock('http://localhost:8080')
-      .get('/status.json')
-      .reply(200, '{bad: \'json\'}', {
+      nock('http://localhost:8080').get('/status.json').reply(200, "{bad: 'json'}", {
         'Content-Type': 'application/json',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://localhost:8080/status.json',
         cookies: false,
       })
       .then((resp) => {
-        expect(resp.body).to.eq('{bad: \'json\'}')
+        expect(resp.body).to.eq("{bad: 'json'}")
       })
     })
 
     it('sets duration on response', function () {
-      nock('http://localhost:8080')
-      .get('/foo')
-      .delay(10)
-      .reply(200, '123', {
+      nock('http://localhost:8080').get('/foo').delay(10).reply(200, '123', {
         'Content-Type': 'text/plain',
       })
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -578,16 +623,14 @@ describe('lib/request', () => {
     })
 
     it('sends up user-agent headers', function () {
-      nock('http://localhost:8080')
-      .matchHeader('user-agent', 'foobarbaz')
-      .get('/foo')
-      .reply(200, 'derp')
+      nock('http://localhost:8080').matchHeader('user-agent', 'foobarbaz').get('/foo').reply(200, 'derp')
 
       const headers = {}
 
       headers['user-agent'] = 'foobarbaz'
 
-      return request.sendPromise(headers, this.fn, {
+      return request
+      .sendPromise(headers, this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -597,12 +640,10 @@ describe('lib/request', () => {
     })
 
     it('sends connection: keep-alive by default', function () {
-      nock('http://localhost:8080')
-      .matchHeader('connection', 'keep-alive')
-      .get('/foo')
-      .reply(200, 'it worked')
+      nock('http://localhost:8080').matchHeader('connection', 'keep-alive').get('/foo').reply(200, 'it worked')
 
-      return request.sendPromise({}, this.fn, {
+      return request
+      .sendPromise({}, this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
       })
@@ -612,20 +653,18 @@ describe('lib/request', () => {
     })
 
     it('lower cases headers', function () {
-      nock('http://localhost:8080')
-      .matchHeader('test', 'true')
-      .get('/foo')
-      .reply(200, 'derp')
+      nock('http://localhost:8080').matchHeader('test', 'true').get('/foo').reply(200, 'derp')
 
       const headers = {}
 
       headers['user-agent'] = 'foobarbaz'
 
-      return request.sendPromise(headers, this.fn, {
+      return request
+      .sendPromise(headers, this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
         headers: {
-          'TEST': true,
+          TEST: true,
         },
       })
       .then((resp) => {
@@ -634,14 +673,12 @@ describe('lib/request', () => {
     })
 
     it('allows overriding user-agent in headers', function () {
-      nock('http://localhost:8080')
-      .matchHeader('user-agent', 'custom-agent')
-      .get('/foo')
-      .reply(200, 'derp')
+      nock('http://localhost:8080').matchHeader('user-agent', 'custom-agent').get('/foo').reply(200, 'derp')
 
       const headers = { 'user-agent': 'test' }
 
-      return request.sendPromise(headers, this.fn, {
+      return request
+      .sendPromise(headers, this.fn, {
         url: 'http://localhost:8080/foo',
         cookies: false,
         headers: {
@@ -655,12 +692,10 @@ describe('lib/request', () => {
 
     context('accept header', () => {
       it('sets to */* by default', function () {
-        nock('http://localhost:8080')
-        .matchHeader('accept', '*/*')
-        .get('/headers')
-        .reply(200)
+        nock('http://localhost:8080').matchHeader('accept', '*/*').get('/headers').reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/headers',
           cookies: false,
         })
@@ -670,12 +705,10 @@ describe('lib/request', () => {
       })
 
       it('can override accept header', function () {
-        nock('http://localhost:8080')
-        .matchHeader('accept', 'text/html')
-        .get('/headers')
-        .reply(200)
+        nock('http://localhost:8080').matchHeader('accept', 'text/html').get('/headers').reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/headers',
           cookies: false,
           headers: {
@@ -688,12 +721,10 @@ describe('lib/request', () => {
       })
 
       it('can override Accept header', function () {
-        nock('http://localhost:8080')
-        .matchHeader('accept', 'text/plain')
-        .get('/headers')
-        .reply(200)
+        nock('http://localhost:8080').matchHeader('accept', 'text/plain').get('/headers').reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/headers',
           cookies: false,
           headers: {
@@ -708,11 +739,10 @@ describe('lib/request', () => {
 
     context('qs', () => {
       it('can accept qs', function () {
-        nock('http://localhost:8080')
-        .get('/foo?bar=baz&q=1')
-        .reply(200)
+        nock('http://localhost:8080').get('/foo?bar=baz&q=1').reply(200)
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/foo',
           cookies: false,
           qs: {
@@ -740,7 +770,8 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: true,
@@ -762,7 +793,8 @@ describe('lib/request', () => {
         .get('/dashboard')
         .reply(200, 'dashboard')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           method: 'POST',
           url: 'http://localhost:8080/login',
           cookies: false,
@@ -784,7 +816,8 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: false,
@@ -806,7 +839,8 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: false,
@@ -827,7 +861,8 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
           followRedirect: false,
@@ -848,7 +883,8 @@ describe('lib/request', () => {
         .get('/login')
         .reply(200, 'login')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/dashboard',
           cookies: false,
         })
@@ -877,7 +913,8 @@ describe('lib/request', () => {
       })
 
       it('takes converts body to x-www-form-urlencoded and sets header', function () {
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',
           method: 'POST',
           cookies: false,
@@ -902,7 +939,8 @@ describe('lib/request', () => {
           baz: 'quux',
         }
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',
           method: 'POST',
           cookies: false,
@@ -921,7 +959,8 @@ describe('lib/request', () => {
       it('does not set json=true', function () {
         const init = sinon.spy(request.rp.Request.prototype, 'init')
 
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',
           method: 'POST',
           cookies: false,
@@ -957,7 +996,8 @@ describe('lib/request', () => {
       })
 
       it('recovers from bad headers', function () {
-        return request.sendPromise({}, this.fn, {
+        return request
+        .sendPromise({}, this.fn, {
           url: 'http://localhost:9988/foo',
           cookies: false,
           headers: {
@@ -966,7 +1006,8 @@ describe('lib/request', () => {
         })
         .then(() => {
           throw new Error('should have failed')
-        }).catch((err) => {
+        })
+        .catch((err) => {
           expect(err.message).to.eq('TypeError [ERR_INVALID_CHAR]: Invalid character in header content ["x-text"]')
         })
       })
@@ -986,10 +1027,7 @@ describe('lib/request', () => {
 
   context('#sendStream', () => {
     it('allows overriding user-agent in headers', function () {
-      nock('http://localhost:8080')
-      .matchHeader('user-agent', 'custom-agent')
-      .get('/foo')
-      .reply(200, 'derp')
+      nock('http://localhost:8080').matchHeader('user-agent', 'custom-agent').get('/foo').reply(200, 'derp')
 
       sinon.spy(request, 'create')
       this.fn.resolves({})
@@ -1004,8 +1042,7 @@ describe('lib/request', () => {
         },
       }
 
-      return request.sendStream(headers, this.fn, options)
-      .then((beginFn) => {
+      return request.sendStream(headers, this.fn, options).then((beginFn) => {
         beginFn()
         expect(request.create).to.be.calledOnce
 
@@ -1015,7 +1052,8 @@ describe('lib/request', () => {
 
     it('gets + attaches the cookies at each redirect', function () {
       return testAttachingCookiesWith(() => {
-        return request.sendStream({}, this.fn, {
+        return request
+        .sendStream({}, this.fn, {
           url: 'http://localhost:1234/',
           followRedirect: _.stubTrue,
         })

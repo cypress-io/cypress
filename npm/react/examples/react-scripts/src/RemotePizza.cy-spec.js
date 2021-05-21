@@ -7,9 +7,7 @@ const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 
 describe('RemotePizza', () => {
   it('download ingredients from internets (network mock)', () => {
-    cy.intercept('https://httpbin.org/anything*', { args: { ingredients } }).as(
-      'pizza',
-    )
+    cy.intercept('https://httpbin.org/anything*', { args: { ingredients } }).as('pizza')
 
     mount(<RemotePizza />, { ReactDom })
     cy.contains('button', /cook/i).click()

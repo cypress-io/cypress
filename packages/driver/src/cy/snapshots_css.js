@@ -10,9 +10,13 @@ const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
 const screenStylesheetRe = /(screen|all)/
 
 const reduceText = (arr, fn) => {
-  return _.reduce(arr, ((memo, item) => {
-    return memo += fn(item)
-  }), '')
+  return _.reduce(
+    arr,
+    (memo, item) => {
+      return (memo += fn(item))
+    },
+    ''
+  )
 }
 
 const isScreenStylesheet = (stylesheet) => {
@@ -22,16 +26,24 @@ const isScreenStylesheet = (stylesheet) => {
 }
 
 const getDocumentStylesheets = (doc) => {
-  if (!doc) return {}
+  if (!doc) {
+    return {}
+  }
 
-  return _.transform(doc.styleSheets, (memo, stylesheet) => {
-    memo[stylesheet.href] = stylesheet
-  }, {})
+  return _.transform(
+    doc.styleSheets,
+    (memo, stylesheet) => {
+      memo[stylesheet.href] = stylesheet
+    },
+    {}
+  )
 }
 
 const makePathsAbsoluteToDocCache = new LimitedMap(50)
 const makePathsAbsoluteToDoc = $utils.memoize((styles, doc) => {
-  if (!_.isString(styles)) return styles
+  if (!_.isString(styles)) {
+    return styles
+  }
 
   return styles.replace(anyUrlInCssRe, (_1, _2, filePath) => {
     //// the href getter will always resolve an absolute path taking into
@@ -81,7 +93,9 @@ const getExternalCssContents = (href, stylesheet) => {
 }
 
 const getInlineCssContents = (stylesheet, $$) => {
-  if (!stylesheet.sheet) return $$(stylesheet).text()
+  if (!stylesheet.sheet) {
+    return $$(stylesheet).text()
+  }
 
   const rules = stylesheet.sheet.cssRules
 
@@ -154,7 +168,7 @@ const create = ($$, state) => {
   }
 
   const getStyleIdsFor = (doc, $$, stylesheets, location) => {
-    let styles = $$(location).find('link[rel=\'stylesheet\'],style')
+    let styles = $$(location).find("link[rel='stylesheet'],style")
 
     styles = _.filter(styles, isScreenStylesheet)
 

@@ -5,36 +5,43 @@ import appState from './app-state'
 import { action } from 'mobx'
 
 class Shortcuts {
-  start () {
+  start() {
     document.addEventListener('keydown', this._handleKeyDownEvent)
   }
 
-  stop () {
+  stop() {
     document.removeEventListener('keydown', this._handleKeyDownEvent)
   }
 
-  _handleKeyDownEvent (event: KeyboardEvent) {
+  _handleKeyDownEvent(event: KeyboardEvent) {
     // if typing into an input, textarea, etc, don't trigger any shortcuts
     // @ts-ignore
     if (dom.isTextLike(event.target)) return
 
     switch (event.key) {
-      case 'r': !appState.studioActive && events.emit('restart')
+      case 'r':
+        !appState.studioActive && events.emit('restart')
         break
-      case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
+      case 's':
+        !appState.isPaused && !appState.studioActive && events.emit('stop')
         break
-      case 'f': events.emit('focus:tests')
+      case 'f':
+        events.emit('focus:tests')
         break
-      case 'c': events.emit('resume')
+      case 'c':
+        events.emit('resume')
         break
-      case 'n': events.emit('next')
+      case 'n':
+        events.emit('next')
         break
-      case 'a': action('set:scrolling', () => {
-        appState.setAutoScrolling(!appState.autoScrollingEnabled)
-      })()
+      case 'a':
+        action('set:scrolling', () => {
+          appState.setAutoScrolling(!appState.autoScrollingEnabled)
+        })()
 
         break
-      default: return
+      default:
+        return
     }
   }
 }

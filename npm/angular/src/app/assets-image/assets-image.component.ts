@@ -5,5 +5,5 @@ import { Component, OnInit } from '@angular/core'
   templateUrl: './assets-image.component.html',
 })
 export class AssetsImageComponent implements OnInit {
-  ngOnInit () {}
+  ngOnInit() {}
 }

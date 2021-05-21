@@ -10,10 +10,10 @@ describe('<Icon />', () => {
   it('Standard icons', () => {
     const Icons = () => (
       <div>
-        <Icon className={styles.icon} icon='check' size='xl' />
-        <Icon className={styles.icon} icon='exclamation' size='xl' />
-        <Icon className={styles.icon} icon='home' size='xl' />
-        <Icon className={styles.icon} icon='arrow-circle-up' size='xl' />
+        <Icon className={styles.icon} icon="check" size="xl" />
+        <Icon className={styles.icon} icon="exclamation" size="xl" />
+        <Icon className={styles.icon} icon="home" size="xl" />
+        <Icon className={styles.icon} icon="arrow-circle-up" size="xl" />
       </div>
     )
 
@@ -21,7 +21,19 @@ describe('<Icon />', () => {
   })
 
   it('Icon lines', () => {
-    const Icons = () => iconLines(['text-xs', 'text-s', 'text-ms', 'text-m', 'text-ml', 'text-l', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'])
+    const Icons = () =>
+      iconLines([
+        'text-xs',
+        'text-s',
+        'text-ms',
+        'text-m',
+        'text-ml',
+        'text-l',
+        'text-xl',
+        'text-2xl',
+        'text-3xl',
+        'text-4xl',
+      ])
 
     mountAndSnapshot(<Icons />)
   })

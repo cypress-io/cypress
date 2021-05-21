@@ -2,7 +2,7 @@ const propertyGetterNameRe = /\.get\s(.+?)\s/
 
 class AnyClass {}
 
-export function ensureProp<T> (this: AnyClass, prop: T | undefined, methodSetter): T {
+export function ensureProp<T>(this: AnyClass, prop: T | undefined, methodSetter): T {
   if (!prop) {
     const obj = {} as Error
 

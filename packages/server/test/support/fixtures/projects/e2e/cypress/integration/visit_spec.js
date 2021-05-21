@@ -30,7 +30,7 @@ describe('visits', () => {
     it('can visit a hash url and loads', () => {
       cy.visit('/hash.html#foo', { timeout: 5000 })
       cy.window().then((win) => {
-        return win[rand] = true
+        return (win[rand] = true)
       })
     })
 
@@ -87,7 +87,9 @@ describe('visits', () => {
     })
 
     it('submits user agent on cy.visit', () => {
-      cy.get('#agent').invoke('text').then((text) => {
+      cy.get('#agent')
+      .invoke('text')
+      .then((text) => {
         const ua = JSON.parse(text)
 
         expect(navigator.userAgent).to.deep.eq(ua.source)
@@ -96,7 +98,9 @@ describe('visits', () => {
 
     it('submits user agent on page load', () => {
       cy.get('a').click()
-      cy.get('#agent').invoke('text').then((text) => {
+      cy.get('#agent')
+      .invoke('text')
+      .then((text) => {
         const ua = JSON.parse(text)
 
         expect(navigator.userAgent).to.deep.eq(ua.source)
@@ -122,7 +126,9 @@ describe('visits', () => {
   context('issue #309: request accept header not set', () => {
     it('sets accept header to text/html,*/*', () => {
       cy.visit('http://localhost:3434/headers.html')
-      cy.get('#headers').invoke('text').then((text) => {
+      cy.get('#headers')
+      .invoke('text')
+      .then((text) => {
         const headers = JSON.parse(text)
 
         expect(headers.accept).to.eq('text/html,*/*')
@@ -141,8 +147,7 @@ describe('visits', () => {
           code: 307,
         },
         method: 'POST',
-      })
-      .contains('it posted')
+      }).contains('it posted')
     })
 
     return [301, 302, 303, 308].forEach((code) => {
@@ -153,8 +158,7 @@ describe('visits', () => {
             code,
           },
           method: 'POST',
-        })
-        .contains('timeout: 0')
+        }).contains('timeout: 0')
       })
     })
   })

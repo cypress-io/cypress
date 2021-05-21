@@ -1,6 +1,4 @@
-import {
-  _restoreMatcherOptionsTypes,
-} from '../../lib/server/driver-events'
+import { _restoreMatcherOptionsTypes } from '../../lib/server/driver-events'
 import { expect } from 'chai'
 
 describe('driver events', function () {
@@ -13,8 +11,7 @@ describe('driver events', function () {
         },
       })
 
-      expect(url).to.be.instanceOf(RegExp)
-      .and.include({
+      expect(url).to.be.instanceOf(RegExp).and.include({
         flags: 'gim',
         source: 'aaa',
       })

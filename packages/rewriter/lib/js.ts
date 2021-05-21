@@ -11,9 +11,9 @@ const defaultPrintOpts: recast.Options = {
   quote: 'single',
 }
 
-type OriginalSourceInfo = { url: string, js: string }
+type OriginalSourceInfo = { url: string; js: string }
 
-function _generateDriverError (url: string, err: Error) {
+function _generateDriverError(url: string, err: Error) {
   const args = JSON.stringify({
     errMessage: err.message,
     errStack: err.stack,
@@ -26,7 +26,7 @@ function _generateDriverError (url: string, err: Error) {
 // a function that, given source info, returns an id that can be used to build the sourcemap later
 export type DeferSourceMapRewriteFn = (sourceInfo: OriginalSourceInfo) => string
 
-export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any): any {
+export function rewriteJsSourceMap(url: string, js: string, inputSourceMap: any): any {
   try {
     const { sourceFileName, sourceMapName, sourceRoot } = sourceMaps.getPaths(url)
 
@@ -47,7 +47,7 @@ export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any
   }
 }
 
-export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
+export function _rewriteJsUnsafe(url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
   const ast = recast.parse(js)
 
   try {
@@ -71,11 +71,11 @@ export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite
     // using a relative URL ensures that required cookies + other headers are sent along
     // and can be reused if the user's sourcemap requires an HTTP request to be made
     `/__cypress/source-maps/${sourceMapId}.map`,
-    code,
+    code
   )
 }
 
-export function rewriteJs (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
+export function rewriteJs(url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
   try {
     // rewriting can throw on invalid JS or if there are bugs in the js-rules, so always wrap it
     return _rewriteJsUnsafe(url, js, deferSourceMapRewrite)

@@ -28,9 +28,9 @@ class StatsStore {
   @observable _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
-  private _interval?: IntervalID;
+  private _interval?: IntervalID
 
-  @computed get duration () {
+  @computed get duration() {
     if (!this._startTime) return 0
 
     if (!this._currentTime) {
@@ -40,7 +40,7 @@ class StatsStore {
     return this._currentTime - this._startTime
   }
 
-  start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }: StatsStoreStartInfo) {
+  start({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }: StatsStoreStartInfo) {
     if (this._startTime) return
 
     this.numPassed = numPassed
@@ -53,39 +53,39 @@ class StatsStore {
     this._startTimer()
   }
 
-  _startTimer () {
+  _startTimer() {
     this._interval = setInterval(action('duration:interval', this._updateCurrentTime.bind(this)), 100)
   }
 
-  _stopTimer () {
+  _stopTimer() {
     clearInterval(this._interval as IntervalID)
   }
 
-  _updateCurrentTime () {
+  _updateCurrentTime() {
     this._currentTime = Date.now()
   }
 
   @action
-  incrementCount (type: TestState) {
+  incrementCount(type: TestState) {
     const countKey = `num${_.capitalize(type)}`
 
     this[countKey] = this[countKey] + 1
   }
 
-  pause () {
+  pause() {
     this._stopTimer()
   }
 
-  resume () {
+  resume() {
     this._startTimer()
   }
 
-  end () {
+  end() {
     this._stopTimer()
     this._updateCurrentTime()
   }
 
-  reset () {
+  reset() {
     this._stopTimer()
     _.each(defaults, (value, key) => {
       this[key] = value

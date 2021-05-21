@@ -7,5 +7,5 @@ import '@angular/material/prebuilt-themes/indigo-pink.css'
   styleUrls: ['./material-button.component.css'],
 })
 export class MaterialButtonComponent implements OnInit {
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 }

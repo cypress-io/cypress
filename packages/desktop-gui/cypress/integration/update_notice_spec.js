@@ -10,7 +10,7 @@ describe('Update Notice', () => {
     let user
 
     cy.viewport(800, 500)
-    cy.fixture('user').then((theUser) => user = theUser)
+    cy.fixture('user').then((theUser) => (user = theUser))
 
     cy.visitIndex().then((win) => {
       ipc = win.App.ipc

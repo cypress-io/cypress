@@ -6,9 +6,9 @@ import { createFindPackageJsonIterator } from '../../../findPackageJson'
 
 export const BabelTemplate: Template = {
   message: `It looks like you have babel config defined. We can use it to transpile your components for testing.\n ${chalk.red(
-    '>>',
+    '>>'
   )} This is not a replacement for bundling tool. We will use ${chalk.red(
-    'webpack',
+    'webpack'
   )} to bundle the components for testing.`,
   recommendedComponentFolder: 'cypress/component',
   dependencies: ['webpack', '@cypress/webpack-dev-server'],
@@ -16,17 +16,17 @@ export const BabelTemplate: Template = {
   getPluginsCodeAst: () => {
     return {
       requiresReturnConfig: true,
-      RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/babel\')'),
-      IfComponentTestingPluginsAst: babel.template.ast([
-        'injectDevServer(on, config)',
-      ].join('\n'), { preserveComments: true }),
+      RequireAst: babel.template.ast("const injectDevServer = require('@cypress/react/plugins/babel')"),
+      IfComponentTestingPluginsAst: babel.template.ast(['injectDevServer(on, config)'].join('\n'), {
+        preserveComments: true,
+      }),
     }
   },
   test: (cwd) => {
-    const babelConfig = findUp.sync(
-      ['babel.config.js', 'babel.config.json', '.babelrc', '.babelrc.json'],
-      { type: 'file', cwd },
-    )
+    const babelConfig = findUp.sync(['babel.config.js', 'babel.config.json', '.babelrc', '.babelrc.json'], {
+      type: 'file',
+      cwd,
+    })
 
     if (babelConfig) {
       return { success: true }

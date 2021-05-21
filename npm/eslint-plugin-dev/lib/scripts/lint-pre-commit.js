@@ -14,7 +14,8 @@ const start = () => {
   let fail = false
   let lintedFilesCount = 0
 
-  return utils.lintFilesByName({
+  return utils
+  .lintFilesByName({
     getFilenames: () => filesFullyStaged,
     fix: true,
   })

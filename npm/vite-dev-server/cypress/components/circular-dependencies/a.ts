@@ -1,6 +1,6 @@
 import { b } from './b'
 
-export function a () {
+export function a() {
   const msg = b()
 
   return msg

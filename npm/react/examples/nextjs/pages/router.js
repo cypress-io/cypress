@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { useRouter } from 'next/router'
 
-function RouterPage (props) {
+function RouterPage(props) {
   const router = useRouter()
 
   console.log(router.push)

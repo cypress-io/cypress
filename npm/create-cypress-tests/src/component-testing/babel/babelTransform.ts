@@ -11,7 +11,7 @@ export type PluginsConfigAst = {
   requiresReturnConfig?: true
 }
 
-function tryRequirePrettier () {
+function tryRequirePrettier() {
   try {
     return require('prettier')
   } catch (e) {
@@ -26,7 +26,7 @@ const sharedBabelOptions = {
   root: process.env.BABEL_TEST_ROOT, // for testing
 }
 
-async function transformFileViaPlugin (filePath: string, babelPlugin: babel.PluginObj) {
+async function transformFileViaPlugin(filePath: string, babelPlugin: babel.PluginObj) {
   try {
     const initialCode = await fs.readFile(filePath, { encoding: 'utf-8' })
 
@@ -63,7 +63,7 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
 
 const returnConfigAst = babel.template.ast('return config; // IMPORTANT to return a config', { preserveComments: true })
 
-export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): babel.PluginObj {
+export function createTransformPluginsFileBabelPlugin(ast: PluginsConfigAst): babel.PluginObj {
   return {
     visitor: {
       Program: (path) => {
@@ -77,11 +77,11 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): b
         const assignment = path.parent.left
 
         const isModuleExports =
-        babelTypes.isMemberExpression(assignment)
-        && babelTypes.isIdentifier(assignment.object)
-        && assignment.object.name === 'module'
-        && babelTypes.isIdentifier(assignment.property)
-        && assignment.property.name === 'exports'
+          babelTypes.isMemberExpression(assignment) &&
+          babelTypes.isIdentifier(assignment.object) &&
+          assignment.object.name === 'module' &&
+          babelTypes.isIdentifier(assignment.property) &&
+          assignment.property.name === 'exports'
 
         if (isModuleExports && babelTypes.isFunction(path.parent.right)) {
           const paramsLength = path.parent.right.params.length
@@ -103,9 +103,9 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): b
             babelTypes.binaryExpression(
               '===',
               babelTypes.identifier('config.testingType'),
-              babelTypes.stringLiteral('component'),
+              babelTypes.stringLiteral('component')
             ),
-            babelTypes.blockStatement(statementToInject as babelTypes.Statement[] | babelTypes.Statement[]),
+            babelTypes.blockStatement(statementToInject as babelTypes.Statement[] | babelTypes.Statement[])
           )
 
           path.get('body').pushContainer('body' as never, ifComponentMode as babel.Node)
@@ -119,16 +119,12 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): b
   }
 }
 
-export async function injectPluginsCode (pluginsFilePath: string, ast: PluginsConfigAst) {
+export async function injectPluginsCode(pluginsFilePath: string, ast: PluginsConfigAst) {
   return transformFileViaPlugin(pluginsFilePath, createTransformPluginsFileBabelPlugin(ast))
 }
 
-export async function getPluginsSourceExample (ast: PluginsConfigAst) {
-  const exampleCode = [
-    'module.exports = (on, config) => {',
-    '',
-    '}',
-  ].join('\n')
+export async function getPluginsSourceExample(ast: PluginsConfigAst) {
+  const exampleCode = ['module.exports = (on, config) => {', '', '}'].join('\n')
 
   try {
     const babelResult = await babel.transformAsync(exampleCode, {
@@ -143,6 +139,8 @@ export async function getPluginsSourceExample (ast: PluginsConfigAst) {
 
     return babelResult.code
   } catch (e) {
-    throw new Error('Can not generate code example for plugins file because of unhandled error. Please update the plugins file manually.')
+    throw new Error(
+      'Can not generate code example for plugins file because of unhandled error. Please update the plugins file manually.'
+    )
   }
 }

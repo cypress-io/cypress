@@ -2,9 +2,7 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const {
-  agent,
-} = require('@packages/network')
+const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 const api = require(`${root}lib/api`)
 const cache = require(`${root}lib/cache`)
@@ -16,8 +14,8 @@ const API_BASEURL = 'http://localhost:1234'
 const ON_BASEURL = 'http://localhost:8080'
 const DASHBOARD_BASEURL = 'http://localhost:3000'
 const AUTH_URLS = {
-  'dashboardAuthUrl': 'http://localhost:3000/test-runner.html',
-  'dashboardLogoutUrl': 'http://localhost:3000/logout',
+  dashboardAuthUrl: 'http://localhost:3000/test-runner.html',
+  dashboardLogoutUrl: 'http://localhost:3000/logout',
 }
 
 const makeError = (details = {}) => {
@@ -26,10 +24,7 @@ const makeError = (details = {}) => {
 
 describe('lib/api', () => {
   beforeEach(() => {
-    nock(API_BASEURL)
-    .matchHeader('x-route-version', '2')
-    .get('/auth')
-    .reply(200, AUTH_URLS)
+    nock(API_BASEURL).matchHeader('x-route-version', '2').get('/auth').reply(200, AUTH_URLS)
 
     api.clearCache()
     sinon.stub(os, 'platform').returns('linux')
@@ -59,7 +54,8 @@ describe('lib/api', () => {
     it('makes calls using the correct agent', () => {
       nock.cleanAll()
 
-      return api.ping()
+      return api
+      .ping()
       .thenThrow()
       .catch(() => {
         expect(agent.addRequest).to.be.calledOnce
@@ -76,10 +72,11 @@ describe('lib/api', () => {
       })
 
       it('makes calls using the correct agent', () => {
-        process.env.HTTP_PROXY = (process.env.HTTPS_PROXY = 'http://foo.invalid:1234')
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://foo.invalid:1234'
         process.env.NO_PROXY = ''
 
-        return api.ping()
+        return api
+        .ping()
         .thenThrow()
         .catch(() => {
           expect(agent.addRequest).to.be.calledOnce
@@ -102,8 +99,7 @@ describe('lib/api', () => {
       .get('/organizations')
       .reply(200, orgs)
 
-      return api.getOrgs('auth-token-123')
-      .then((ret) => {
+      return api.getOrgs('auth-token-123').then((ret) => {
         expect(ret).to.deep.eq(orgs)
       })
     })
@@ -115,10 +111,12 @@ describe('lib/api', () => {
       .get('/organizations')
       .reply(500, {})
 
-      return api.getOrgs('auth-token-123')
+      return api
+      .getOrgs('auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -134,8 +132,7 @@ describe('lib/api', () => {
       .get('/projects')
       .reply(200, projects)
 
-      return api.getProjects('auth-token-123')
-      .then((ret) => {
+      return api.getProjects('auth-token-123').then((ret) => {
         expect(ret).to.deep.eq(projects)
       })
     })
@@ -147,10 +144,12 @@ describe('lib/api', () => {
       .get('/projects')
       .reply(500, {})
 
-      return api.getProjects('auth-token-123')
+      return api
+      .getProjects('auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -167,8 +166,7 @@ describe('lib/api', () => {
       .get('/projects/id-123')
       .reply(200, project)
 
-      return api.getProject('id-123', 'auth-token-123')
-      .then((ret) => {
+      return api.getProject('id-123', 'auth-token-123').then((ret) => {
         expect(ret).to.deep.eq(project)
       })
     })
@@ -180,10 +178,12 @@ describe('lib/api', () => {
       .get('/projects/id-123')
       .reply(500, {})
 
-      return api.getProject('id-123', 'auth-token-123')
+      return api
+      .getProject('id-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -200,8 +200,7 @@ describe('lib/api', () => {
       .get('/projects/id-123/runs')
       .reply(200, runs)
 
-      return api.getProjectRuns('id-123', 'auth-token-123')
-      .then((ret) => {
+      return api.getProjectRuns('id-123', 'auth-token-123').then((ret) => {
         expect(ret).to.deep.eq(runs)
       })
     })
@@ -214,37 +213,38 @@ describe('lib/api', () => {
       .socketDelay(5000)
       .reply(200, [])
 
-      return api.getProjectRuns('id-123', 'auth-token-123', { timeout: 100 })
+      return api
+      .getProjectRuns('id-123', 'auth-token-123', { timeout: 100 })
       .then((ret) => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
       })
     })
 
     it('sets timeout to 10 seconds', () => {
       sinon.stub(api.rp, 'get').returns({
-        catch () {
+        catch() {
           return {
-            catch () {
+            catch() {
               return {
-                then (fn) {
+                then(fn) {
                   return fn()
                 },
               }
             },
-            then (fn) {
+            then(fn) {
               return fn()
             },
           }
         },
-        then (fn) {
+        then(fn) {
           return fn()
         },
       })
 
-      return api.getProjectRuns('id-123', 'auth-token-123')
-      .then((ret) => {
+      return api.getProjectRuns('id-123', 'auth-token-123').then((ret) => {
         expect(api.rp.get).to.be.calledWithMatch({ timeout: 10000 })
       })
     })
@@ -261,10 +261,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.getProjectRuns('id-123', 'auth-token-123')
+      return api
+      .getProjectRuns('id-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 401
 
@@ -286,10 +288,12 @@ describe('lib/api', () => {
       .get('/projects/id-123/runs')
       .reply(500, {})
 
-      return api.getProjectRuns('id-123', 'auth-token-123')
+      return api
+      .getProjectRuns('id-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -303,8 +307,7 @@ describe('lib/api', () => {
       .get('/ping')
       .reply(200, 'OK')
 
-      return api.ping()
-      .then((resp) => {
+      return api.ping().then((resp) => {
         expect(resp).to.eq('OK')
       })
     })
@@ -316,10 +319,12 @@ describe('lib/api', () => {
       .get('/ping')
       .reply(500, {})
 
-      return api.ping()
+      return api
+      .ping()
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -349,8 +354,8 @@ describe('lib/api', () => {
         },
         specs: ['foo.js', 'bar.js'],
         runnerCapabilities: {
-          'dynamicSpecsInSerialMode': true,
-          'skipSpecAction': true,
+          dynamicSpecsInSerialMode: true,
+          skipSpecAction: true,
         },
       }
     })
@@ -365,8 +370,7 @@ describe('lib/api', () => {
         runId: 'new-run-id-123',
       })
 
-      return api.createRun(this.buildProps)
-      .then((ret) => {
+      return api.createRun(this.buildProps).then((ret) => {
         expect(ret).to.deep.eq({ runId: 'new-run-id-123' })
       })
     })
@@ -383,10 +387,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.createRun(this.buildProps)
+      return api
+      .createRun(this.buildProps)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -410,12 +416,14 @@ describe('lib/api', () => {
       .socketDelay(5000)
       .reply(200, {})
 
-      return api.createRun({
+      return api
+      .createRun({
         timeout: 100,
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
       })
     })
@@ -423,8 +431,7 @@ describe('lib/api', () => {
     it('sets timeout to 10 seconds', () => {
       sinon.stub(api.rp, 'post').resolves({ runId: 'foo' })
 
-      return api.createRun({})
-      .then(() => {
+      return api.createRun({}).then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
     })
@@ -437,10 +444,12 @@ describe('lib/api', () => {
       .post('/runs', this.buildProps)
       .reply(500, {})
 
-      return api.createRun(this.buildProps)
+      return api
+      .createRun(this.buildProps)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -477,7 +486,8 @@ describe('lib/api', () => {
         instanceId: 'instance-id-123',
       })
 
-      return api.createInstance(this.createProps)
+      return api
+      .createInstance(this.createProps)
       .get('instanceId')
       .then((instanceId) => {
         expect(instanceId).to.eq('instance-id-123')
@@ -496,10 +506,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.createInstance({ runId: 'run-id-123' })
+      return api
+      .createInstance({ runId: 'run-id-123' })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -523,13 +535,15 @@ describe('lib/api', () => {
       .socketDelay(5000)
       .reply(200, {})
 
-      return api.createInstance({
+      return api
+      .createInstance({
         runId: 'run-id-123',
         timeout: 100,
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
       })
     })
@@ -539,8 +553,7 @@ describe('lib/api', () => {
         instanceId: 'instanceId123',
       })
 
-      return api.createInstance({})
-      .then(() => {
+      return api.createInstance({}).then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
     })
@@ -552,10 +565,12 @@ describe('lib/api', () => {
       .post('/runs/run-id-123/instances', this.postProps)
       .reply(500, {})
 
-      return api.createInstance(this.createProps)
+      return api
+      .createInstance(this.createProps)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -599,10 +614,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.postInstanceTests({ instanceId: 'instance-id-123' })
+      return api
+      .postInstanceTests({ instanceId: 'instance-id-123' })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -626,13 +643,15 @@ describe('lib/api', () => {
       .socketDelay(5000)
       .reply(200, {})
 
-      return api.postInstanceTests({
+      return api
+      .postInstanceTests({
         instanceId: 'instance-id-123',
         timeout: 100,
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
       })
     })
@@ -640,8 +659,7 @@ describe('lib/api', () => {
     it('sets timeout to 60 seconds', () => {
       sinon.stub(api.rp, 'post').resolves()
 
-      return api.postInstanceTests({})
-      .then(() => {
+      return api.postInstanceTests({}).then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
     })
@@ -654,10 +672,12 @@ describe('lib/api', () => {
       .post('/instances/instance-id-123/tests', this.bodyProps)
       .reply(500, {})
 
-      return api.postInstanceTests(this.props)
+      return api
+      .postInstanceTests(this.props)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -703,10 +723,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.postInstanceResults({ instanceId: 'instance-id-123' })
+      return api
+      .postInstanceResults({ instanceId: 'instance-id-123' })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -730,13 +752,15 @@ describe('lib/api', () => {
       .socketDelay(5000)
       .reply(200, {})
 
-      return api.postInstanceResults({
+      return api
+      .postInstanceResults({
         instanceId: 'instance-id-123',
         timeout: 100,
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
       })
     })
@@ -744,8 +768,7 @@ describe('lib/api', () => {
     it('sets timeout to 60 seconds', () => {
       sinon.stub(api.rp, 'post').resolves()
 
-      return api.postInstanceResults({})
-      .then(() => {
+      return api.postInstanceResults({}).then(() => {
         expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
       })
     })
@@ -758,10 +781,12 @@ describe('lib/api', () => {
       .post('/instances/instance-id-123/results', this.postProps)
       .reply(500, {})
 
-      return api.postInstanceResults(this.updateProps)
+      return api
+      .postInstanceResults(this.updateProps)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -797,10 +822,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.updateInstanceStdout({ instanceId: 'instance-id-123' })
+      return api
+      .updateInstanceStdout({ instanceId: 'instance-id-123' })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -823,13 +850,15 @@ describe('lib/api', () => {
       .socketDelay(5000)
       .reply(200, {})
 
-      return api.updateInstanceStdout({
+      return api
+      .updateInstanceStdout({
         instanceId: 'instance-id-123',
         timeout: 100,
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq('Error: ESOCKETTIMEDOUT')
       })
     })
@@ -837,8 +866,7 @@ describe('lib/api', () => {
     it('sets timeout to 60 seconds', () => {
       sinon.stub(api.rp, 'put').resolves()
 
-      return api.updateInstanceStdout({})
-      .then(() => {
+      return api.updateInstanceStdout({}).then(() => {
         expect(api.rp.put).to.be.calledWithMatch({ timeout: 60000 })
       })
     })
@@ -852,13 +880,15 @@ describe('lib/api', () => {
       })
       .reply(500, {})
 
-      return api.updateInstanceStdout({
+      return api
+      .updateInstanceStdout({
         instanceId: 'instance-id-123',
         stdout: 'foobarbaz\n',
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -880,20 +910,24 @@ describe('lib/api', () => {
       .get('/auth')
       .reply(500, {})
 
-      return api.getAuthUrls()
+      return api
+      .getAuthUrls()
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
 
     it('caches the response from the first request', () => {
-      return api.getAuthUrls()
+      return api
+      .getAuthUrls()
       .then(() => {
         // nock will throw if this makes a second HTTP call
         return api.getAuthUrls()
-      }).then((urls) => {
+      })
+      .then((urls) => {
         expect(urls).to.deep.eq(AUTH_URLS)
       })
     })
@@ -927,10 +961,12 @@ describe('lib/api', () => {
       .post('/logout')
       .reply(500, {})
 
-      return api.postLogout('auth-token-123')
+      return api
+      .postLogout('auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -967,8 +1003,7 @@ describe('lib/api', () => {
         public: true,
       })
 
-      return api.createProject(this.createProps, 'remoteOrigin', 'auth-token-123')
-      .then((projectDetails) => {
+      return api.createProject(this.createProps, 'remoteOrigin', 'auth-token-123').then((projectDetails) => {
         expect(projectDetails).to.deep.eq({
           id: 'id-123',
           name: 'foobar',
@@ -1003,10 +1038,12 @@ describe('lib/api', () => {
         public: true,
       }
 
-      return api.createProject(projectDetails, 'remoteOrigin', 'auth-token-123')
+      return api
+      .createProject(projectDetails, 'remoteOrigin', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -1028,10 +1065,12 @@ describe('lib/api', () => {
       .post('/projects', this.postProps)
       .reply(500, {})
 
-      return api.createProject(this.createProps, 'remoteOrigin', 'auth-token-123')
+      return api
+      .createProject(this.createProps, 'remoteOrigin', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -1047,8 +1086,7 @@ describe('lib/api', () => {
       .get('/projects/id-123/keys')
       .reply(200, recordKeys)
 
-      return api.getProjectRecordKeys('id-123', 'auth-token-123')
-      .then((ret) => {
+      return api.getProjectRecordKeys('id-123', 'auth-token-123').then((ret) => {
         expect(ret).to.deep.eq(recordKeys)
       })
     })
@@ -1060,10 +1098,12 @@ describe('lib/api', () => {
       .get('/projects/id-123/keys')
       .reply(500, {})
 
-      return api.getProjectRecordKeys('id-123', 'auth-token-123')
+      return api
+      .getProjectRecordKeys('id-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -1077,8 +1117,7 @@ describe('lib/api', () => {
       .post('/projects/project-id-123/membership_requests')
       .reply(200)
 
-      return api.requestAccess('project-id-123', 'auth-token-123')
-      .then((ret) => {
+      return api.requestAccess('project-id-123', 'auth-token-123').then((ret) => {
         expect(ret).to.be.undefined
       })
     })
@@ -1094,10 +1133,12 @@ describe('lib/api', () => {
         },
       })
 
-      return api.requestAccess('project-id-123', 'auth-token-123')
+      return api
+      .requestAccess('project-id-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.eq(`\
 422
 
@@ -1119,10 +1160,12 @@ describe('lib/api', () => {
       .post('/projects/project-id-123/membership_requests')
       .reply(500, {})
 
-      return api.requestAccess('project-id-123', 'auth-token-123')
+      return api
+      .requestAccess('project-id-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -1140,8 +1183,7 @@ describe('lib/api', () => {
         apiToken: 'token-123',
       })
 
-      return api.getProjectToken('project-123', 'auth-token-123')
-      .then((resp) => {
+      return api.getProjectToken('project-123', 'auth-token-123').then((resp) => {
         expect(resp).to.eq('token-123')
       })
     })
@@ -1153,10 +1195,12 @@ describe('lib/api', () => {
       .get('/projects/project-123/token')
       .reply(500, {})
 
-      return api.getProjectToken('project-123', 'auth-token-123')
+      return api
+      .getProjectToken('project-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -1174,8 +1218,7 @@ describe('lib/api', () => {
         apiToken: 'token-123',
       })
 
-      return api.updateProjectToken('project-123', 'auth-token-123')
-      .then((resp) => {
+      return api.updateProjectToken('project-123', 'auth-token-123').then((resp) => {
         expect(resp).to.eq('token-123')
       })
     })
@@ -1187,10 +1230,12 @@ describe('lib/api', () => {
       .put('/projects/project-id-123/token')
       .reply(500, {})
 
-      return api.updateProjectToken('project-123', 'auth-token-123')
+      return api
+      .updateProjectToken('project-123', 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -1235,10 +1280,12 @@ describe('lib/api', () => {
       this.setup({ foo: 'bar' }, 'auth-token-123', 5000)
 
       // and set the timeout to only be 50ms
-      return api.createCrashReport({ foo: 'bar' }, 'auth-token-123', 50)
+      return api
+      .createCrashReport({ foo: 'bar' }, 'auth-token-123', 50)
       .then(() => {
         throw new Error('errored: it did not catch the timeout error!')
-      }).catch(Promise.TimeoutError, () => {})
+      })
+      .catch(Promise.TimeoutError, () => {})
     })
 
     it('tags errors', () => {
@@ -1250,10 +1297,12 @@ describe('lib/api', () => {
       .post('/exceptions', { foo: 'bar' })
       .reply(500, {})
 
-      return api.createCrashReport({ foo: 'bar' }, 'auth-token-123')
+      return api
+      .createCrashReport({ foo: 'bar' }, 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.isApiError).to.be.true
       })
     })
@@ -1263,23 +1312,17 @@ describe('lib/api', () => {
     it('GET /release-notes/:version + returns result', () => {
       const releaseNotes = { title: 'New in 1.2.3!' }
 
-      nock(ON_BASEURL)
-      .get('/release-notes/1.2.3')
-      .reply(200, releaseNotes)
+      nock(ON_BASEURL).get('/release-notes/1.2.3').reply(200, releaseNotes)
 
-      return api.getReleaseNotes('1.2.3')
-      .then((ret) => {
+      return api.getReleaseNotes('1.2.3').then((ret) => {
         expect(ret).to.deep.eq(releaseNotes)
       })
     })
 
     it('ignores errors + returns empty object', () => {
-      nock(ON_BASEURL)
-      .get('/release-notes/1.2.3')
-      .reply(500, {})
+      nock(ON_BASEURL).get('/release-notes/1.2.3').reply(500, {})
 
-      return api.getReleaseNotes('1.2.3')
-      .then((result) => {
+      return api.getReleaseNotes('1.2.3').then((result) => {
         expect(result).to.deep.eq({})
       })
     })
@@ -1301,13 +1344,11 @@ describe('lib/api', () => {
     })
 
     it('retries if function times out', () => {
-      const fn = sinon.stub()
-      .rejects(new Promise.TimeoutError())
+      const fn = sinon.stub().rejects(new Promise.TimeoutError())
 
       fn.onCall(1).resolves()
 
-      return api.retryWithBackoff(fn)
-      .then(() => {
+      return api.retryWithBackoff(fn).then(() => {
         console.log('gsd')
         expect(fn).to.be.calledTwice
         expect(fn.firstCall.args[0]).eq(0)
@@ -1324,12 +1365,14 @@ describe('lib/api', () => {
 
       fn2.onCall(1).resolves()
 
-      return api.retryWithBackoff(fn1)
+      return api
+      .retryWithBackoff(fn1)
       .then(() => {
         expect(fn1).to.be.calledTwice
 
         return api.retryWithBackoff(fn2)
-      }).then(() => {
+      })
+      .then(() => {
         expect(fn2).to.be.calledTwice
       })
     })
@@ -1339,8 +1382,7 @@ describe('lib/api', () => {
 
       fn.onCall(1).resolves()
 
-      return api.retryWithBackoff(fn)
-      .then(() => {
+      return api.retryWithBackoff(fn).then(() => {
         expect(fn).to.be.calledTwice
       })
     })
@@ -1350,16 +1392,20 @@ describe('lib/api', () => {
 
       const fn2 = sinon.stub().rejects(makeError({ message: '600 error', statusCode: 600 }))
 
-      return api.retryWithBackoff(fn1)
+      return api
+      .retryWithBackoff(fn1)
       .then(() => {
         throw new Error('Should not resolve 499 error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('499 error')
 
         return api.retryWithBackoff(fn2)
-      }).then(() => {
+      })
+      .then(() => {
         throw new Error('Should not resolve 600 error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('600 error')
       })
     })
@@ -1381,10 +1427,12 @@ describe('lib/api', () => {
     it('fails after third retry fails', () => {
       const fn = sinon.stub().rejects(makeError({ message: '500 error', statusCode: 500 }))
 
-      return api.retryWithBackoff(fn)
+      return api
+      .retryWithBackoff(fn)
       .then(() => {
         throw new Error('Should not resolve')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         expect(err.message).to.equal('500 error')
       })
     })

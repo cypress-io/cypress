@@ -5,11 +5,11 @@ import { Observable, of } from 'rxjs'
   providedIn: 'root',
 })
 export class MyValuesService {
-  getValues (): string[] {
+  getValues(): string[] {
     return ['val1', 'val2']
   }
 
-  getValuesObservable (): Observable<string[]> {
+  getValuesObservable(): Observable<string[]> {
     return of(['val1Obs', 'val2Obs'])
   }
 }

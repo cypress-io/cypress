@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 
-export default function Fetcher ({ url }) {
+export default function Fetcher({ url }) {
   const [greeting, setGreeting] = useState('')
   const [buttonClicked, setButtonClicked] = useState(false)
 

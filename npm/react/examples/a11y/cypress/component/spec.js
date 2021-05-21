@@ -22,15 +22,7 @@ describe('Accessibility', () => {
     })
 
     it('passes', () => {
-      mount(
-        <input
-          type="text"
-          aria-label="label text"
-          aria-required="true"
-          value="John Smith"
-          name="name"
-        />,
-      )
+      mount(<input type="text" aria-label="label text" aria-required="true" value="John Smith" name="name" />)
 
       cy.checkA11y('input', {
         runOnly: {

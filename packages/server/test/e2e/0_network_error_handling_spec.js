@@ -36,11 +36,11 @@ const launchBrowser = (url, opts = {}) => {
 
     const args = [
       `--user-data-dir=/tmp/cy-e2e-${random.id()}`,
-    // headless breaks automatic retries
-    // "--headless"
-    ].concat(
-      chrome._getArgs(browser),
-    ).filter((arg) => {
+      // headless breaks automatic retries
+      // "--headless"
+    ]
+    .concat(chrome._getArgs(browser))
+    .filter((arg) => {
       return ![
         // seems to break chrome's automatic retries
         '--enable-automation',
@@ -56,15 +56,15 @@ const launchBrowser = (url, opts = {}) => {
 }
 
 const controllers = {
-  loadScriptNetError (req, res) {
+  loadScriptNetError(req, res) {
     return res.send('<script type="text/javascript" src="/immediate-reset?load-js"></script>')
   },
 
-  loadImgNetError (req, res) {
+  loadImgNetError(req, res) {
     return res.send('<img src="/immediate-reset?load-img"/>')
   },
 
-  printBodyThirdTimeForm (req, res) {
+  printBodyThirdTimeForm(req, res) {
     return res.send(
       `\
 <html>
@@ -75,11 +75,11 @@ const controllers = {
     </form>
   </body>
 </html>\
-`,
+`
     )
   },
 
-  printBodyThirdTime (req, res) {
+  printBodyThirdTime(req, res) {
     console.log(req.body)
 
     res.type('html')
@@ -91,31 +91,29 @@ const controllers = {
     return req.socket.destroy()
   },
 
-  immediateReset (req, res) {
+  immediateReset(req, res) {
     return req.socket.destroy()
   },
 
-  afterHeadersReset (req, res) {
+  afterHeadersReset(req, res) {
     res.writeHead(200)
     res.write('')
 
     return setTimeout(() => {
       return req.socket.destroy()
-    }
-    , 1000)
+    }, 1000)
   },
 
-  duringBodyReset (req, res) {
+  duringBodyReset(req, res) {
     res.writeHead(200)
     res.write('<html>')
 
     return setTimeout(() => {
       return req.socket.destroy()
-    }
-    , 1000)
+    }, 1000)
   },
 
-  worksThirdTime (req, res) {
+  worksThirdTime(req, res) {
     if (counts[req.url] === 3) {
       return res.send('ok')
     }
@@ -123,7 +121,7 @@ const controllers = {
     return req.socket.destroy()
   },
 
-  worksThirdTimeElse500 (req, res) {
+  worksThirdTimeElse500(req, res) {
     if (counts[req.url] === 3) {
       return res.send('ok')
     }
@@ -131,23 +129,23 @@ const controllers = {
     return res.sendStatus(500)
   },
 
-  proxyInternalServerError (req, res) {
+  proxyInternalServerError(req, res) {
     return res.sendStatus(500)
   },
 
-  proxyBadGateway (req, res) {
+  proxyBadGateway(req, res) {
     // https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.3
     // "The server, while acting as a gateway or proxy, received an invalid response"
     return res.sendStatus(502)
   },
 
-  proxyServiceUnavailable (req, res) {
+  proxyServiceUnavailable(req, res) {
     // https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.4
     // "The implication is that this is a temporary condition which will be alleviated after some delay."
     return res.sendStatus(503)
   },
 
-  load304 (req, res) {
+  load304(req, res) {
     return res.type('html').end('<img src="/static/javascript-logo.png"/>')
   },
 }
@@ -158,7 +156,7 @@ describe('e2e network error handling', function () {
   e2e.setup({
     servers: [
       {
-        onServer (app) {
+        onServer(app) {
           app.use((req, res, next) => {
             counts[req.url] = _.get(counts, req.url, 0) + 1
 
@@ -193,14 +191,14 @@ describe('e2e network error handling', function () {
 
           return app.get('*', (req, res) => {
             // pretending we're a http proxy
-            const controller = ({
+            const controller = {
               'http://immediate-reset.invalid/': controllers.immediateReset,
               'http://after-headers-reset.invalid/': controllers.afterHeadersReset,
               'http://during-body-reset.invalid/': controllers.duringBodyReset,
               'http://proxy-internal-server-error.invalid/': controllers.proxyInternalServerError,
               'http://proxy-bad-gateway.invalid/': controllers.proxyBadGateway,
               'http://proxy-service-unavailable.invalid/': controllers.proxyServiceUnavailable,
-            })[req.url]
+            }[req.url]
 
             if (controller) {
               debug('got controller for request')
@@ -213,8 +211,9 @@ describe('e2e network error handling', function () {
         },
 
         port: PORT,
-      }, {
-        onServer (app) {
+      },
+      {
+        onServer(app) {
           app.use((req, res, next) => {
             counts[req.url] = _.get(counts, req.url, 0) + 1
 
@@ -256,14 +255,13 @@ describe('e2e network error handling', function () {
   // about how Chrome does it.
   context.skip('Google Chrome', () => {
     const testRetries = (path) => {
-      return launchBrowser(`http://127.0.0.1:${PORT}${path}`)
-      .then((proc) => {
+      return launchBrowser(`http://127.0.0.1:${PORT}${path}`).then((proc) => {
         return Promise.fromCallback((cb) => {
-          return onVisit = function () {
+          return (onVisit = function () {
             if (counts[path] >= 3) {
               return cb()
             }
-          }
+          })
         }).then(() => {
           proc.kill(9)
 
@@ -296,14 +294,13 @@ describe('e2e network error handling', function () {
 
     context('behind a proxy server', () => {
       const testProxiedRetries = (url) => {
-        return launchBrowser(url, { withProxy: true })
-        .then((proc) => {
+        return launchBrowser(url, { withProxy: true }).then((proc) => {
           return Promise.fromCallback((cb) => {
-            return onVisit = function () {
+            return (onVisit = function () {
               if (counts[url] >= 3) {
                 return cb()
               }
-            }
+            })
           }).then(() => {
             proc.kill(9)
 
@@ -334,15 +331,15 @@ describe('e2e network error handling', function () {
         return testProxiedNoRetries('http://during-body-reset.invalid/')
       })
 
-      it('does not retry on \'500 Internal Server Error\'', () => {
+      it("does not retry on '500 Internal Server Error'", () => {
         return testProxiedNoRetries('http://proxy-internal-server-error.invalid/')
       })
 
-      it('does not retry on \'502 Bad Gateway\'', () => {
+      it("does not retry on '502 Bad Gateway'", () => {
         return testProxiedNoRetries('http://proxy-bad-gateway.invalid/')
       })
 
-      it('does not retry on \'503 Service Unavailable\'', () => {
+      it("does not retry on '503 Service Unavailable'", () => {
         return testProxiedNoRetries('http://proxy-service-unavailable.invalid/')
       })
     })
@@ -358,8 +355,7 @@ describe('e2e network error handling', function () {
 
     afterEach(function () {
       if (this.debugProxy) {
-        return this.debugProxy.stop()
-        .then(() => {
+        return this.debugProxy.stop().then(() => {
           this.debugProxy = null
         })
       }
@@ -376,12 +372,14 @@ describe('e2e network error handling', function () {
     })
 
     it('tests run as expected', function () {
-      return e2e.exec(this, {
+      return e2e
+      .exec(this, {
         spec: 'network_error_handling_spec.js',
         video: false,
         expectedExitCode: 2,
         snapshot: true,
-      }).then(({ stdout }) => {
+      })
+      .then(({ stdout }) => {
         // sometimes <img>, <script> get retried 2x by chrome instead of 1x
 
         if (counts['/immediate-reset?load-img'] === 10) {
@@ -463,13 +461,12 @@ describe('e2e network error handling', function () {
         onConnect,
       })
 
-      return this.debugProxy
-      .start(PROXY_PORT)
-      .then(() => {
+      return this.debugProxy.start(PROXY_PORT).then(() => {
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
         process.env.NO_PROXY = '<-loopback>' // proxy everything including localhost
 
-        return e2e.exec(this, {
+        return e2e
+        .exec(this, {
           spec: 'https_passthru_spec.js',
           snapshot: true,
         })
@@ -492,13 +489,12 @@ describe('e2e network error handling', function () {
         onConnect,
       })
 
-      return this.debugProxy
-      .start(PROXY_PORT)
-      .then(() => {
+      return this.debugProxy.start(PROXY_PORT).then(() => {
         process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
         process.env.NO_PROXY = '<-loopback>,localhost:13373' // proxy everything except for the irrelevant test
 
-        return e2e.exec(this, {
+        return e2e
+        .exec(this, {
           spec: 'https_passthru_spec.js',
           snapshot: true,
           config: {
@@ -545,7 +541,8 @@ describe('e2e network error handling', function () {
         .then(() => {
           process.env.HTTP_PROXY = `http://localhost:${PROXY_PORT}`
           process.env.NO_PROXY = ''
-        }).then(() => {
+        })
+        .then(() => {
           return e2e.exec(this, {
             spec: 'network_error_304_handling_spec.js',
             video: false,

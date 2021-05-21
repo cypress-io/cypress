@@ -39,9 +39,7 @@ describe('ServiceStubComponent', () => {
 
     const myValuesService = getCypressTestBed().inject(MyValuesService)
 
-    cy.stub(myValuesService, 'getValuesObservable').returns(
-      of(['val3Obs', 'val4Obs']),
-    )
+    cy.stub(myValuesService, 'getValuesObservable').returns(of(['val3Obs', 'val4Obs']))
 
     mount(ServiceStubComponent)
     cy.contains('first : val1')

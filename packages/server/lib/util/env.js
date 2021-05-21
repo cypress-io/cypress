@@ -1,5 +1,5 @@
 const set = (key, val) => {
-  return process.env[key] = val
+  return (process.env[key] = val)
 }
 
 const get = (key) => {

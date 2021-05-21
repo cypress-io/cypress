@@ -18,12 +18,10 @@ const testContent = `it(\'simple test\', () => {
 `
 const sourceMap = {
   version: 3,
-  sources: [
-    'node_modules/browser-pack/_prelude.js',
-    'cypress/integration/file1.js',
-  ],
+  sources: ['node_modules/browser-pack/_prelude.js', 'cypress/integration/file1.js'],
   names: [],
-  mappings: 'AAAA;;;ACAA,EAAE,CAAC,kBAAD,EAAqB,YAAM;AAC3B,EAAA,MAAM,CAAC,IAAD,CAAN,CAAa,EAAb,CAAgB,EAAhB,CAAmB,IAAnB;AACA,EAAA,MAAM,CAAC,IAAD,CAAN,CAAa,EAAb,CAAgB,EAAhB,CAAmB,KAAnB;AACA,EAAA,MAAM,CAAC,KAAD,CAAN,CAAc,EAAd,CAAiB,EAAjB,CAAoB,KAApB;AACD,CAJC,CAAF',
+  mappings:
+    'AAAA;;;ACAA,EAAE,CAAC,kBAAD,EAAqB,YAAM;AAC3B,EAAA,MAAM,CAAC,IAAD,CAAN,CAAa,EAAb,CAAgB,EAAhB,CAAmB,IAAnB;AACA,EAAA,MAAM,CAAC,IAAD,CAAN,CAAa,EAAb,CAAgB,EAAhB,CAAmB,KAAnB;AACA,EAAA,MAAM,CAAC,KAAD,CAAN,CAAc,EAAd,CAAiB,EAAjB,CAAoB,KAApB;AACD,CAJC,CAAF',
   file: 'generated.js',
   sourceRoot: '',
   sourcesContent: [

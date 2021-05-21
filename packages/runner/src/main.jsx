@@ -9,7 +9,7 @@ import Container from './app/container'
 configure({ enforceActions: 'always' })
 
 const Runner = {
-  start (el, base64Config) {
+  start(el, base64Config) {
     action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 

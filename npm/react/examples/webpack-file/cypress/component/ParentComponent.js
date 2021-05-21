@@ -4,7 +4,7 @@ import ChildComponent from './ChildComponent'
 const ParentComponent = () => {
   return (
     <div>
-    Parent component, child component below
+      Parent component, child component below
       <br />
       <ChildComponent />
     </div>

@@ -25,35 +25,45 @@ const Settings = observer(({ project, app }) => {
   const hasExperiments = !isEmpty(experiments)
 
   return (
-    <div className={cs('settings', {
-      'show-project-id': !!project.id,
-      'show-record-key': project.isSetupForRecording,
-    })}>
-      <div className='settings-wrapper'>
+    <div
+      className={cs('settings', {
+        'show-project-id': !!project.id,
+        'show-record-key': project.isSetupForRecording,
+      })}
+    >
+      <div className="settings-wrapper">
         <Collapse>
-          <Panel header='Configuration' key='config' className='form-horizontal settings-config'>
+          <Panel header="Configuration" key="config" className="form-horizontal settings-config">
             <Configuration project={project} />
           </Panel>
-          <Panel header='Project ID' key='project-id' className='form-horizontal settings-project-id'>
+          <Panel header="Project ID" key="project-id" className="form-horizontal settings-project-id">
             <ProjectId project={project} />
           </Panel>
-          <Panel header='Record Key' key='record-key' className='form-horizontal settings-record-key'>
+          <Panel header="Record Key" key="record-key" className="form-horizontal settings-record-key">
             <RecordKey project={project} />
           </Panel>
-          <Panel header={`Node.js Version (${resolvedNodeVersion})`} key='node-version' className='form-horizontal settings-node'>
+          <Panel
+            header={`Node.js Version (${resolvedNodeVersion})`}
+            key="node-version"
+            className="form-horizontal settings-node"
+          >
             <NodeVersion project={project} />
           </Panel>
-          <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
+          <Panel header="Proxy Settings" key="proxy-settings" className="form-horizontal settings-proxy">
             <ProxySettings app={app} />
           </Panel>
-          <Panel header='File Opener Preference' key='file-preference' className='form-horizontal settings-file-preference'>
+          <Panel
+            header="File Opener Preference"
+            key="file-preference"
+            className="form-horizontal settings-file-preference"
+          >
             <FilePreference />
           </Panel>
-          {hasExperiments &&
-            <Panel header='Experiments' key='experiments' className='form-horizontal settings-experiments'>
+          {hasExperiments && (
+            <Panel header="Experiments" key="experiments" className="form-horizontal settings-experiments">
               <Experiments project={project} />
             </Panel>
-          }
+          )}
         </Collapse>
       </div>
     </div>

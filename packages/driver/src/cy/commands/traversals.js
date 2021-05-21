@@ -4,7 +4,9 @@ const $dom = require('../../dom')
 const $elements = require('../../dom/elements')
 const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
 
-const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
+const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(
+  ' '
+)
 
 const optInShadowTraversals = {
   find: (cy, $el, arg1, arg2) => {
@@ -30,21 +32,29 @@ const sortedUnique = (cy, $el) => {
 
 const autoShadowTraversals = {
   closest: (cy, $el, selector) => {
-    const nodes = _.reduce($el, (nodes, el) => {
-      const getClosest = (node) => {
-        const closestNode = node.closest(selector)
+    const nodes = _.reduce(
+      $el,
+      (nodes, el) => {
+        const getClosest = (node) => {
+          const closestNode = node.closest(selector)
 
-        if (closestNode) return nodes.concat(closestNode)
+          if (closestNode) {
+            return nodes.concat(closestNode)
+          }
 
-        const root = el.getRootNode()
+          const root = el.getRootNode()
 
-        if (!$elements.isShadowRoot(root)) return nodes
+          if (!$elements.isShadowRoot(root)) {
+            return nodes
+          }
 
-        return getClosest(root.host)
-      }
+          return getClosest(root.host)
+        }
 
-      return getClosest(el)
-    }, [])
+        return getClosest(el)
+      },
+      []
+    )
 
     return sortedUnique(cy, nodes)
   },
@@ -119,7 +129,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: getSelector(),
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return consoleProps
           },
         })
@@ -178,7 +188,7 @@ module.exports = (Commands, Cypress, cy) => {
 
         return cy.verifyUpcomingAssertions($el, options, {
           onRetry: getElements,
-          onFail (err) {
+          onFail(err) {
             if (err.type === 'existence') {
               const node = $dom.stringify(subject, 'short')
 

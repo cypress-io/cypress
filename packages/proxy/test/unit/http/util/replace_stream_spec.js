@@ -36,7 +36,7 @@ const { replaceStream } = require(`../../../../lib/http/util/replace_stream`)
 
 const script = [
   '<script type="text/javascript">',
-  'console.log(\'hello\');',
+  "console.log('hello');",
   'document.addEventListener("DOMContentLoaded", function () {',
   '  document.body.style.backgroundColor = "red";',
   '});',
@@ -69,44 +69,42 @@ describe('lib/util/replace_stream', function () {
     it('should be able to replace within a chunk', function (done) {
       let replace = replaceStream('</head>', `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include(script)
+          done()
+        })
+      )
 
-      replace.end([
-        '<!DOCTYPE html>',
-        '<html>',
-        ' <head>',
-        '   <title>Test</title>',
-        ' </head>',
-        ' <body>',
-        '   <h1>Head</h1>',
-        ' </body>',
-        '</html>',
-      ].join('\n'))
+      replace.end(
+        [
+          '<!DOCTYPE html>',
+          '<html>',
+          ' <head>',
+          '   <title>Test</title>',
+          ' </head>',
+          ' <body>',
+          '   <h1>Head</h1>',
+          ' </body>',
+          '</html>',
+        ].join('\n')
+      )
     })
 
     it('should be able to replace between chunks', function (done) {
       let haystacks = [
-        ['<!DOCTYPE html>',
-          '<html>',
-          ' <head>',
-          '   <title>Test</title>',
-          ' </he'].join('\n'),
-        ['ad>',
-          ' <body>',
-          '   <h1>Head</h1>',
-          ' </body>',
-          '</html>'].join('\n'),
+        ['<!DOCTYPE html>', '<html>', ' <head>', '   <title>Test</title>', ' </he'].join('\n'),
+        ['ad>', ' <body>', '   <h1>Head</h1>', ' </body>', '</html>'].join('\n'),
       ]
 
       let replace = replaceStream('</head>', `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include(script)
+          done()
+        })
+      )
 
       haystacks.forEach(function (haystack) {
         replace.write(haystack)
@@ -117,24 +115,18 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to handle no matches', function (done) {
       let haystacks = [
-        ['<!DOCTYPE html>',
-          '<html>',
-          ' <head>',
-          '   <title>Test</title>',
-          ' </de'].join('\n'),
-        ['ad>',
-          ' <body>',
-          '   <h1>Head</h1>',
-          ' </body>',
-          '</html>'].join('\n'),
+        ['<!DOCTYPE html>', '<html>', ' <head>', '   <title>Test</title>', ' </de'].join('\n'),
+        ['ad>', ' <body>', '   <h1>Head</h1>', ' </body>', '</html>'].join('\n'),
       ]
 
       let replace = replaceStream('</head>', `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.not.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.not.include(script)
+          done()
+        })
+      )
 
       haystacks.forEach(function (haystack) {
         replace.write(haystack)
@@ -146,99 +138,65 @@ describe('lib/util/replace_stream', function () {
     it('should be able to handle dangling tails', function (done) {
       let replace = replaceStream('</head>', `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include('</he')
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include('</he')
+          done()
+        })
+      )
 
-      replace.end([
-        '<!DOCTYPE html>',
-        '<html>',
-        ' <head>',
-        '   <title>Test</title>',
-        ' </he',
-      ].join('\n'))
+      replace.end(['<!DOCTYPE html>', '<html>', ' <head>', '   <title>Test</title>', ' </he'].join('\n'))
     })
 
     it('should replace characters specified and not modify partial matches', function (done) {
       let replace = replaceStream('ab', 'Z')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'Z',
-          'a',
-          'a',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = ['Z', 'a', 'a', 'b'].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'a',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'a', 'b'].join('\n'))
     })
 
     it('should handle partial matches between complete matches', function (done) {
       let replace = replaceStream(/ab/g, 'Z')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'Z',
-          'a',
-          'Z',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = ['Z', 'a', 'Z', 'b'].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'ab',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'ab', 'b'].join('\n'))
     })
 
     it('should only replace characters specified', function (done) {
       let replace = replaceStream('ab', 'Z')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'Z',
-          'a',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = ['Z', 'a', 'b'].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'b'].join('\n'))
     })
 
     it('should be able to use a replace function', function (done) {
       let haystacks = [
-        ['<!DOCTYPE html>',
-          '<html>',
-          ' <head>',
-          '   <title>Test</title>',
-          ' </he'].join('\n'),
-        ['ad>',
-          ' <body>',
-          '   <h1>Head</h1>',
-          ' </body>',
-          '</html>'].join('\n'),
+        ['<!DOCTYPE html>', '<html>', ' <head>', '   <title>Test</title>', ' </he'].join('\n'),
+        ['ad>', ' <body>', '   <h1>Head</h1>', ' </body>', '</html>'].join('\n'),
       ]
 
       let replace = replaceStream('</head>', function (match) {
@@ -247,10 +205,12 @@ describe('lib/util/replace_stream', function () {
         return `${script}</head>`
       })
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include(script)
+          done()
+        })
+      )
 
       haystacks.forEach(function (haystack) {
         replace.write(haystack)
@@ -262,44 +222,50 @@ describe('lib/util/replace_stream', function () {
     it('should be able to replace within a chunk using regex', function (done) {
       let replace = replaceStream(/<\/head>/, `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include(script)
+          done()
+        })
+      )
 
-      replace.end([
-        '<!DOCTYPE html>',
-        '<html>',
-        ' <head>',
-        '   <title>Test</title>',
-        ' </head>',
-        ' <body>',
-        '   <h1>Head</h1>',
-        ' </body>',
-        '</html>',
-      ].join('\n'))
-    })
-
-    it('should be able to replace between chunks using regex', function (done) {
-      let haystacks = [
-        ['<!DOCTYPE html>',
+      replace.end(
+        [
+          '<!DOCTYPE html>',
           '<html>',
           ' <head>',
           '   <title>Test</title>',
           ' </head>',
           ' <body>',
-          '   <h1>I love feeeee'].join('\n'),
-        ['eeeeeeeeeed</h1>',
+          '   <h1>Head</h1>',
           ' </body>',
-          '</html>'].join('\n'),
+          '</html>',
+        ].join('\n')
+      )
+    })
+
+    it('should be able to replace between chunks using regex', function (done) {
+      let haystacks = [
+        [
+          '<!DOCTYPE html>',
+          '<html>',
+          ' <head>',
+          '   <title>Test</title>',
+          ' </head>',
+          ' <body>',
+          '   <h1>I love feeeee',
+        ].join('\n'),
+        ['eeeeeeeeeed</h1>', ' </body>', '</html>'].join('\n'),
       ]
 
       let replace = replaceStream(/fe+d/, 'foooooooood')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include('foooooooood')
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include('foooooooood')
+          done()
+        })
+      )
 
       haystacks.forEach(function (haystack) {
         replace.write(haystack)
@@ -310,24 +276,18 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to handle no matches using regex', function (done) {
       let haystacks = [
-        ['<!DOCTYPE html>',
-          '<html>',
-          ' <head>',
-          '   <title>Test</title>',
-          ' </de'].join('\n'),
-        ['ad>',
-          ' <body>',
-          '   <h1>Head</h1>',
-          ' </body>',
-          '</html>'].join('\n'),
+        ['<!DOCTYPE html>', '<html>', ' <head>', '   <title>Test</title>', ' </de'].join('\n'),
+        ['ad>', ' <body>', '   <h1>Head</h1>', ' </body>', '</html>'].join('\n'),
       ]
 
       let replace = replaceStream(/<\/head>/, `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.not.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.not.include(script)
+          done()
+        })
+      )
 
       haystacks.forEach(function (haystack) {
         replace.write(haystack)
@@ -339,42 +299,35 @@ describe('lib/util/replace_stream', function () {
     it('should be able to handle dangling tails using regex', function (done) {
       let replace = replaceStream(/<\/head>/, `${script}</head>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include('</he')
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include('</he')
+          done()
+        })
+      )
 
-      replace.end([
-        '<!DOCTYPE html>',
-        '<html>',
-        ' <head>',
-        '   <title>Test</title>',
-        ' </he',
-      ].join('\n'))
+      replace.end(['<!DOCTYPE html>', '<html>', ' <head>', '   <title>Test</title>', ' </he'].join('\n'))
     })
 
-    it('should be able to handle multiple searches and replaces using regex',
-      function (done) {
-        let haystacks = [
-          ['<!DOCTYPE html>',
-            '<html>',
-            ' <head>',
-            '   <title>Test</title>',
-            ' </head>',
-            ' <body>',
-            ' <p> Hello 1</p>',
-            ' <p> Hello 2</'].join('\n'),
-          ['p>',
-            ' <p> Hello 3</p>',
-            ' <p> Hello 4</p>',
-            ' <p> Hello 5</p>',
-            ' </body>',
-            '</html>'].join('\n'),
-        ]
+    it('should be able to handle multiple searches and replaces using regex', function (done) {
+      let haystacks = [
+        [
+          '<!DOCTYPE html>',
+          '<html>',
+          ' <head>',
+          '   <title>Test</title>',
+          ' </head>',
+          ' <body>',
+          ' <p> Hello 1</p>',
+          ' <p> Hello 2</',
+        ].join('\n'),
+        ['p>', ' <p> Hello 3</p>', ' <p> Hello 4</p>', ' <p> Hello 5</p>', ' </body>', '</html>'].join('\n'),
+      ]
 
-        let replace = replaceStream(/<\/p>/g, ', world</p>')
+      let replace = replaceStream(/<\/p>/g, ', world</p>')
 
-        replace.pipe(concatStream({ encoding: 'string' }, function (data) {
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
           let expected = [
             '<!DOCTYPE html>',
             '<html>',
@@ -393,37 +346,35 @@ describe('lib/util/replace_stream', function () {
 
           expect(data).to.equal(expected)
           done()
-        }))
-
-        haystacks.forEach(function (haystack) {
-          replace.write(haystack)
         })
+      )
 
-        replace.end()
+      haystacks.forEach(function (haystack) {
+        replace.write(haystack)
       })
 
-    it('should be possible to specify the regexp flags when using a regex',
-      function (done) {
-        let haystacks = [
-          ['<!DOCTYPE html>',
-            '<html>',
-            ' <head>',
-            '   <title>Test</title>',
-            ' </head>',
-            ' <body>',
-            ' <P> Hello 1</P>',
-            ' <P> Hello 2</'].join('\n'),
-          ['P>',
-            ' <P> Hello 3</P>',
-            ' <p> Hello 4</p>',
-            ' <p> Hello 5</p>',
-            ' </body>',
-            '</html>'].join('\n'),
-        ]
+      replace.end()
+    })
 
-        let replace = replaceStream(/<\/P>/gm, ', world</P>')
+    it('should be possible to specify the regexp flags when using a regex', function (done) {
+      let haystacks = [
+        [
+          '<!DOCTYPE html>',
+          '<html>',
+          ' <head>',
+          '   <title>Test</title>',
+          ' </head>',
+          ' <body>',
+          ' <P> Hello 1</P>',
+          ' <P> Hello 2</',
+        ].join('\n'),
+        ['P>', ' <P> Hello 3</P>', ' <p> Hello 4</p>', ' <p> Hello 5</p>', ' </body>', '</html>'].join('\n'),
+      ]
 
-        replace.pipe(concatStream({ encoding: 'string' }, function (data) {
+      let replace = replaceStream(/<\/P>/gm, ', world</P>')
+
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
           let expected = [
             '<!DOCTYPE html>',
             '<html>',
@@ -442,106 +393,82 @@ describe('lib/util/replace_stream', function () {
 
           expect(data).to.equal(expected)
           done()
-        }))
-
-        haystacks.forEach(function (haystack) {
-          replace.write(haystack)
         })
+      )
 
-        replace.end()
+      haystacks.forEach(function (haystack) {
+        replace.write(haystack)
       })
+
+      replace.end()
+    })
 
     it('should replace characters specified and not modify partial matches using regex', function (done) {
       let replace = replaceStream('ab', 'Z')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'Z',
-          'a',
-          'a',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = ['Z', 'a', 'a', 'b'].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'a',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'a', 'b'].join('\n'))
     })
 
     it('should handle partial matches between complete matches using regex', function (done) {
       let replace = replaceStream(/ab/g, 'Z')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'Z',
-          'a',
-          'Z',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = ['Z', 'a', 'Z', 'b'].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'ab',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'ab', 'b'].join('\n'))
     })
 
     it('should only replace characters specified using regex', function (done) {
       let replace = replaceStream(/ab/, 'Z')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'Z',
-          'a',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = ['Z', 'a', 'b'].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'b'].join('\n'))
     })
 
-    it('should be able to change each replacement value with a function using regex',
-      function (done) {
-        let haystacks = [
-          ['<!DOCTYPE html>',
-            '<html>',
-            ' <head>',
-            '   <title>Test</title>',
-            ' </head>',
-            ' <body>',
-            ' <p> Hello 1</p>',
-            ' <p> Hello 2</'].join('\n'),
-          ['p>',
-            ' <p> Hello 3</p>',
-            ' <p> Hello 4</p>',
-            ' <p> Hello 5</p>',
-            ' </body>',
-            '</html>'].join('\n'),
-        ]
+    it('should be able to change each replacement value with a function using regex', function (done) {
+      let haystacks = [
+        [
+          '<!DOCTYPE html>',
+          '<html>',
+          ' <head>',
+          '   <title>Test</title>',
+          ' </head>',
+          ' <body>',
+          ' <p> Hello 1</p>',
+          ' <p> Hello 2</',
+        ].join('\n'),
+        ['p>', ' <p> Hello 3</p>', ' <p> Hello 4</p>', ' <p> Hello 5</p>', ' </body>', '</html>'].join('\n'),
+      ]
 
-        let greetings = ['Hi', 'Hey', 'Gday', 'Bonjour', 'Greetings']
+      let greetings = ['Hi', 'Hey', 'Gday', 'Bonjour', 'Greetings']
 
-        let replace = replaceStream(/Hello/g, greetings.shift.bind(greetings))
+      let replace = replaceStream(/Hello/g, greetings.shift.bind(greetings))
 
-        replace.pipe(concatStream({ encoding: 'string' }, function (data) {
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
           let expected = [
             '<!DOCTYPE html>',
             '<html>',
@@ -560,57 +487,59 @@ describe('lib/util/replace_stream', function () {
 
           expect(data).to.equal(expected)
           done()
-        }))
-
-        haystacks.forEach(function (haystack) {
-          replace.write(haystack)
         })
+      )
 
-        replace.end()
+      haystacks.forEach(function (haystack) {
+        replace.write(haystack)
       })
+
+      replace.end()
+    })
 
     it('should be able to replace captures using $1 notation', function (done) {
       let replace = replaceStream(/(a)(b)/g, 'this is $1 and this is $2 and this is again $1')
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        let expected = [
-          'this is a and this is b and this is again a',
-          'a',
-          'this is a and this is b and this is again a',
-          'b',
-        ].join('\n')
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          let expected = [
+            'this is a and this is b and this is again a',
+            'a',
+            'this is a and this is b and this is again a',
+            'b',
+          ].join('\n')
 
-        expect(data).to.equal(expected)
-        done()
-      }))
+          expect(data).to.equal(expected)
+          done()
+        })
+      )
 
-      replace.end([
-        'ab',
-        'a',
-        'ab',
-        'b',
-      ].join('\n'))
+      replace.end(['ab', 'a', 'ab', 'b'].join('\n'))
     })
 
     it('should be able to replace when the match is a tail using a regex', function (done) {
       let replace = replaceStream(/<\/html>/g, `${script}</html>`)
 
-      replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-        expect(data).to.include(script)
-        done()
-      }))
+      replace.pipe(
+        concatStream({ encoding: 'string' }, function (data) {
+          expect(data).to.include(script)
+          done()
+        })
+      )
 
-      replace.end([
-        '<!DOCTYPE html>',
-        '<html>',
-        ' <head>',
-        '   <title>Test</title>',
-        ' </head>',
-        ' <body>',
-        '   <h1>Head</h1>',
-        ' </body>',
-        '</html>',
-      ].join('\n'))
+      replace.end(
+        [
+          '<!DOCTYPE html>',
+          '<html>',
+          ' <head>',
+          '   <title>Test</title>',
+          ' </head>',
+          ' <body>',
+          '   <h1>Head</h1>',
+          ' </body>',
+          '</html>',
+        ].join('\n')
+      )
     })
   })
 })

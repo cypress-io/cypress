@@ -31,64 +31,64 @@ class AppState {
   @observable firefoxGcInterval = defaults.firefoxGcInterval
   @observable studioActive = defaults.studioActive
 
-  isStopped = false;
+  isStopped = false
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
 
-  startRunning () {
+  startRunning() {
     this.isRunning = true
     this.isStopped = false
   }
 
-  pause (nextCommandName?: string) {
+  pause(nextCommandName?: string) {
     this.isPaused = true
     this.nextCommandName = nextCommandName
   }
 
-  resume () {
+  resume() {
     this.isPaused = false
     this.nextCommandName = null
   }
 
-  stop () {
+  stop() {
     this.isStopped = true
   }
 
-  end () {
+  end() {
     this.isRunning = false
     this._resetAutoScrolling()
   }
 
-  setForcingGc (forcingGc: boolean) {
+  setForcingGc(forcingGc: boolean) {
     this.forcingGc = forcingGc
   }
 
-  setFirefoxGcInterval (firefoxGcInterval: DefaultAppState['firefoxGcInterval']) {
+  setFirefoxGcInterval(firefoxGcInterval: DefaultAppState['firefoxGcInterval']) {
     this.firefoxGcInterval = firefoxGcInterval
   }
 
-  temporarilySetAutoScrolling (isEnabled?: boolean | null) {
+  temporarilySetAutoScrolling(isEnabled?: boolean | null) {
     if (isEnabled != null) {
       this.autoScrollingEnabled = isEnabled
     }
   }
 
-  toggleAutoScrolling () {
+  toggleAutoScrolling() {
     this.setAutoScrolling(!this.autoScrollingEnabled)
   }
 
-  setAutoScrolling (isEnabled?: boolean | null) {
+  setAutoScrolling(isEnabled?: boolean | null) {
     if (isEnabled != null) {
       this._resetAutoScrollingEnabledTo = isEnabled
       this.autoScrollingEnabled = isEnabled
     }
   }
 
-  setStudioActive (studioActive: boolean) {
+  setStudioActive(studioActive: boolean) {
     this.studioActive = studioActive
   }
 
-  reset () {
+  reset() {
     _.each(defaults, (value: any, key: string) => {
       this[key] = value
     })
@@ -96,7 +96,7 @@ class AppState {
     this._resetAutoScrolling()
   }
 
-  _resetAutoScrolling () {
+  _resetAutoScrolling() {
     this.autoScrollingEnabled = this._resetAutoScrollingEnabledTo
   }
 }

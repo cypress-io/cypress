@@ -13,7 +13,7 @@ it('Todo - should create snapshot', () => {
         { title: 'item1', description: 'an item' },
         { title: 'item2', description: 'another item' },
       ]}
-    />,
+    />
   )
 
   cy.get('[data-testid=item]').should('have.length', 2)
@@ -33,7 +33,7 @@ it('Todo - should create snapshot', () => {
         <div>an item</div><button>Select</button>
         <h3 data-testid="item" class="">item2</h3>
         <div>another item</div><button>Select</button>
-      `,
+      `
   )
 
   cy.contains('[data-testid=item]', 'item1').should('be.visible')

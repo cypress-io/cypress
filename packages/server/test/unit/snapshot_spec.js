@@ -1,7 +1,7 @@
 const snapshot = require('snap-shot-it')
 
 describe('snapshots', () => {
-// sanity check to make sure backtick escape works with our snapshots
+  // sanity check to make sure backtick escape works with our snapshots
   it('saves snapshot with backticks', () => {
     const text = `\
 line 1

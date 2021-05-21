@@ -27,8 +27,7 @@ describe('e2e firefox', function () {
     },
     exit: false,
     onRun: (exec) => {
-      return exec()
-      .then(() => {
+      return exec().then(() => {
         return Bluebird.resolve(fs.readJson(outputPath))
         .get('runs')
         .get(0)
@@ -41,11 +40,13 @@ describe('e2e firefox', function () {
         })
         .then((tests) => {
           // eslint-disable-next-line
-          console.log(util.inspect(tests, {
-            depth: Infinity,
-            breakLength: Infinity,
-            maxArrayLength: Infinity,
-          }))
+          console.log(
+            util.inspect(tests, {
+              depth: Infinity,
+              breakLength: Infinity,
+              maxArrayLength: Infinity,
+            })
+          )
         })
       })
     },

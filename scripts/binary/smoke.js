@@ -53,7 +53,8 @@ const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
   .catch((err) => {
     console.error('smoke test failed with error %s', err.message)
     throw err
-  }).then(({ stdout }) => {
+  })
+  .then(({ stdout }) => {
     stdout = stdout.replace(/\s/, '')
     if (!hasRightResponse(stdout)) {
       throw new Error(`Stdout: '${stdout}' did not match the random number: '${rand}'`)
@@ -80,24 +81,21 @@ const runProjectTest = function (buildAppExecutable, e2e) {
       env.CYPRESS_VIDEO_RECORDING = 'false'
     }
 
-    const args = [
-      `--run-project=${e2e}`,
-      `--spec=${e2e}/cypress/integration/simple_passing_spec.js`,
-    ]
+    const args = [`--run-project=${e2e}`, `--spec=${e2e}/cypress/integration/simple_passing_spec.js`]
 
     if (verify.needsSandbox()) {
       args.push('--no-sandbox')
     }
 
     const options = {
-      stdio: 'inherit', env,
+      stdio: 'inherit',
+      env,
     }
 
     console.log('running project test')
     console.log(buildAppExecutable, args.join(' '))
 
-    return cp.spawn(buildAppExecutable, args, options)
-    .on('exit', (code) => {
+    return cp.spawn(buildAppExecutable, args, options).on('exit', (code) => {
       if (code === 0) {
         return resolve()
       }
@@ -117,23 +115,29 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   console.log('running failing project test')
 
   const verifyScreenshots = function () {
-    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails1 (failed).png')
-    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails2 (failed).png')
+    const screenshot1 = path.join(
+      e2e,
+      'cypress',
+      'screenshots',
+      'simple_failing_spec.js',
+      'simple failing spec -- fails1 (failed).png'
+    )
+    const screenshot2 = path.join(
+      e2e,
+      'cypress',
+      'screenshots',
+      'simple_failing_spec.js',
+      'simple failing spec -- fails2 (failed).png'
+    )
 
-    return Promise.all([
-      fs.statAsync(screenshot1),
-      fs.statAsync(screenshot2),
-    ])
+    return Promise.all([fs.statAsync(screenshot1), fs.statAsync(screenshot2)])
   }
 
   const spawn = () => {
     return new Promise((resolve, reject) => {
       const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
 
-      const args = [
-        `--run-project=${e2e}`,
-        `--spec=${e2e}/cypress/integration/simple_failing_spec.js`,
-      ]
+      const args = [`--run-project=${e2e}`, `--spec=${e2e}/cypress/integration/simple_failing_spec.js`]
 
       if (verify.needsSandbox()) {
         args.push('--no-sandbox')
@@ -144,8 +148,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
         env,
       }
 
-      return cp.spawn(buildAppExecutable, args, options)
-      .on('exit', (code) => {
+      return cp.spawn(buildAppExecutable, args, options).on('exit', (code) => {
         if (code === 2) {
           return resolve()
         }
@@ -155,8 +158,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
     })
   }
 
-  return spawn()
-  .then(verifyScreenshots)
+  return spawn().then(verifyScreenshots)
 }
 
 const test = function (buildAppExecutable) {
@@ -167,9 +169,11 @@ const test = function (buildAppExecutable) {
   return runSmokeTest(buildAppExecutable)
   .then(() => {
     return runProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
+  })
+  .then(() => {
     return runFailingProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
+  })
+  .then(() => {
     return Fixtures.remove()
   })
 }

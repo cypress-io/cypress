@@ -134,7 +134,6 @@ describe('src/cypress/resolvers', function () {
           state.withArgs('$autIframe').returns({
             prop: cy.stub().withArgs('contentWindow').returns(autIframe),
           })
-
           ;[cypressFrame, autIframe, nestedIframe, doublyNestedIframe].forEach((frame) => {
             isWindow.withArgs(frame).returns(true)
             isJquery.withArgs(frame).returns(false)
@@ -152,8 +151,7 @@ describe('src/cypress/resolvers', function () {
     let fakeWindow
 
     beforeEach(() => {
-      cy.visit('/fixtures/generic.html')
-      .then(($win) => {
+      cy.visit('/fixtures/generic.html').then(($win) => {
         fakeWindow = getFakeWindowWithLocation($win)
       })
     })

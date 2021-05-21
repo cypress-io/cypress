@@ -1,7 +1,6 @@
 describe('selector_playground', () => {
   it('draws rect over currently hovered element', () => {
-    cy.visit('/fixtures/dom.html')
-    .then(() => {
+    cy.visit('/fixtures/dom.html').then(() => {
       // We trick the selector-playground into rendering while the test is running
       top.Runner.configureMobx({ enforceActions: 'never' })
       top.Runner.state.isRunning = false
@@ -18,9 +17,7 @@ describe('selector_playground', () => {
         }
       }
 
-      cy.get('input:first')
-      .trigger('mousemove', { force: true })
-      .should(expectToBeCovered)
+      cy.get('input:first').trigger('mousemove', { force: true }).should(expectToBeCovered)
     })
   })
 })

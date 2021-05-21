@@ -13,7 +13,7 @@ export const hasOnlyStringValues = (o) => {
  * Useful for testing our code that calls S3 methods.
  */
 export const s3helpers = {
-  makeS3 (aws) {
+  makeS3(aws) {
     la(is.unemptyString(aws.key), 'missing aws key')
     la(is.unemptyString(aws.secret), 'missing aws secret')
 
@@ -23,52 +23,58 @@ export const s3helpers = {
     })
   },
 
-  verifyZipFileExists (zipFile: string, bucket: string, s3: S3): Promise<null> {
+  verifyZipFileExists(zipFile: string, bucket: string, s3: S3): Promise<null> {
     debug('checking S3 file %s', zipFile)
     debug('bucket %s', bucket)
 
     return new Promise((resolve, reject) => {
-      s3.headObject({
-        Bucket: bucket,
-        Key: zipFile,
-      }, (err, data) => {
-        if (err) {
-          debug('error getting object %s', zipFile)
-          debug(err)
+      s3.headObject(
+        {
+          Bucket: bucket,
+          Key: zipFile,
+        },
+        (err, data) => {
+          if (err) {
+            debug('error getting object %s', zipFile)
+            debug(err)
 
-          return reject(err)
+            return reject(err)
+          }
+
+          debug('s3 data for %s', zipFile)
+          debug(data)
+          resolve()
         }
-
-        debug('s3 data for %s', zipFile)
-        debug(data)
-        resolve()
-      })
+      )
     })
   },
 
   /**
    * Returns list of prefixes in a given folder
    */
-  listS3Objects (uploadDir: string, bucket: string, s3: S3): Promise<string[]> {
+  listS3Objects(uploadDir: string, bucket: string, s3: S3): Promise<string[]> {
     la(is.unemptyString(uploadDir), 'invalid upload dir', uploadDir)
 
     return new Promise((resolve, reject) => {
       const prefix = `${uploadDir}/`
 
-      s3.listObjectsV2({
-        Bucket: bucket,
-        Prefix: prefix,
-        Delimiter: '/',
-      }, (err, result) => {
-        if (err) {
-          return reject(err)
+      s3.listObjectsV2(
+        {
+          Bucket: bucket,
+          Prefix: prefix,
+          Delimiter: '/',
+        },
+        (err, result) => {
+          if (err) {
+            return reject(err)
+          }
+
+          debug('AWS result in %s %s', bucket, prefix)
+          debug('%o', result)
+
+          resolve(result.CommonPrefixes.map(prop('Prefix')))
         }
-
-        debug('AWS result in %s %s', bucket, prefix)
-        debug('%o', result)
-
-        resolve(result.CommonPrefixes.map(prop('Prefix')))
-      })
+      )
     })
   },
 
@@ -77,9 +83,14 @@ export const s3helpers = {
    * For copying a public zip file use content 'application/zip'
    * and ACL 'public-read'
    */
-  copyS3 (sourceKey: string, destinationKey: string, bucket: string,
-    contentType: S3.ContentType, acl: S3.ObjectCannedACL,
-    s3: S3): Promise<S3.CopyObjectOutput> {
+  copyS3(
+    sourceKey: string,
+    destinationKey: string,
+    bucket: string,
+    contentType: S3.ContentType,
+    acl: S3.ObjectCannedACL,
+    s3: S3
+  ): Promise<S3.CopyObjectOutput> {
     return new Promise((resolve, reject) => {
       debug('copying %s in bucket %s to %s', sourceKey, bucket, destinationKey)
 
@@ -110,34 +121,42 @@ export const s3helpers = {
    * Note: on S3 when adding user metadata, each key is prefixed with "x-amz-meta-"
    * but the returned object has these prefixes stripped. Thus if we set
    * a single "x-amz-meta-user: gleb", the resolved object will be simply {user: "gleb"}
-  */
-  getUserMetadata (bucket: string, key: string, s3: S3): Promise<S3.Metadata> {
+   */
+  getUserMetadata(bucket: string, key: string, s3: S3): Promise<S3.Metadata> {
     return new Promise((resole, reject) => {
       debug('getting user metadata from %s %s', bucket, key)
 
-      s3.headObject({
-        Bucket: bucket,
-        Key: key,
-      }, (err, data) => {
-        if (err) {
-          return reject(err)
-        }
+      s3.headObject(
+        {
+          Bucket: bucket,
+          Key: key,
+        },
+        (err, data) => {
+          if (err) {
+            return reject(err)
+          }
 
-        debug('user metadata')
-        debug('%o', data.Metadata)
-        resole(data.Metadata)
-      })
+          debug('user metadata')
+          debug('%o', data.Metadata)
+          resole(data.Metadata)
+        }
+      )
     })
   },
 
   /**
    * Setting user metadata can be accomplished with copying the object back onto itself
    * with replaced metadata object.
-  */
-  setUserMetadata (bucket: string, key: string, metadata: S3.Metadata,
-    contentType: S3.ContentType, acl: S3.ObjectCannedACL, s3: S3): Promise<S3.CopyObjectOutput> {
-    la(hasOnlyStringValues(metadata),
-      'metadata object can only have string values', metadata)
+   */
+  setUserMetadata(
+    bucket: string,
+    key: string,
+    metadata: S3.Metadata,
+    contentType: S3.ContentType,
+    acl: S3.ObjectCannedACL,
+    s3: S3
+  ): Promise<S3.CopyObjectOutput> {
+    la(hasOnlyStringValues(metadata), 'metadata object can only have string values', metadata)
 
     return new Promise((resolve, reject) => {
       debug('setting metadata to %o for %s %s', metadata, bucket, key)

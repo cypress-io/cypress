@@ -17,11 +17,11 @@ describe('Projects List', function () {
     }
 
     this.setLocalStorageProjects = (projects) => {
-      return localStorage.projects = JSON.stringify(projects)
+      return (localStorage.projects = JSON.stringify(projects))
     }
 
     cy.visitIndex().then(function (win) {
-      ({ start: this.start, ipc: this.ipc } = win.App)
+      ;({ start: this.start, ipc: this.ipc } = win.App)
 
       cy.stub(this.ipc, 'getOptions').resolves({})
       cy.stub(this.ipc, 'updaterCheck').resolves(false)
@@ -65,11 +65,9 @@ describe('Projects List', function () {
       })
 
       it('displays project name and path', function () {
-        cy.get('.projects-list li:first .project-name')
-        .should('have.text', 'My-Fake-Project')
+        cy.get('.projects-list li:first .project-name').should('have.text', 'My-Fake-Project')
 
-        cy.get('.projects-list li:first .project-path')
-        .should('have.text', '/Users/Jane/Projects/My-Fake-Project')
+        cy.get('.projects-list li:first .project-path').should('have.text', '/Users/Jane/Projects/My-Fake-Project')
       })
 
       it('goes to project when clicked', function () {
@@ -134,7 +132,8 @@ describe('Projects List', function () {
           {
             id: this.projectStatuses[0].id,
             name: 'Cached name',
-            path: this.projects[0].path },
+            path: this.projects[0].path,
+          },
         ])
 
         this.getProjects.resolve(this.projects)
@@ -189,7 +188,9 @@ describe('Projects List', function () {
       })
 
       it('puts project at start when dropped', function () {
-        cy.get('.project-drop').trigger('drop', this.dropEvent).should(() => {
+        cy.get('.project-drop')
+        .trigger('drop', this.dropEvent)
+        .should(() => {
           this.assertOrder(['id-bar', 'id-a', 'id-b'])
         })
       })
@@ -197,7 +198,9 @@ describe('Projects List', function () {
       it('puts project at start when dropped and it already exists', function () {
         this.dropEvent.dataTransfer.files[0].path = '/project/b'
 
-        cy.get('.project-drop').trigger('drop', this.dropEvent).then(() => {
+        cy.get('.project-drop')
+        .trigger('drop', this.dropEvent)
+        .then(() => {
           this.assertOrder(['id-b', 'id-a'])
         })
       })
@@ -205,7 +208,9 @@ describe('Projects List', function () {
       it('puts project at start when selected', function () {
         cy.stub(this.ipc, 'showDirectoryDialog').resolves('/foo/bar')
 
-        cy.get('.project-drop a').click().then(() => {
+        cy.get('.project-drop a')
+        .click()
+        .then(() => {
           this.assertOrder(['id-bar', 'id-a', 'id-b'])
         })
       })
@@ -213,13 +218,18 @@ describe('Projects List', function () {
       it('puts project at start when selected and it already exists', function () {
         cy.stub(this.ipc, 'showDirectoryDialog').resolves('/project/b')
 
-        cy.get('.project-drop a').click().then(() => {
+        cy.get('.project-drop a')
+        .click()
+        .then(() => {
           this.assertOrder(['id-b', 'id-a'])
         })
       })
 
       it('puts project at start when clicked on in list', function () {
-        cy.get('.projects-list a').eq(1).click().then(() => {
+        cy.get('.projects-list a')
+        .eq(1)
+        .click()
+        .then(() => {
           this.assertOrder(['id-b', 'id-a'])
         })
       })

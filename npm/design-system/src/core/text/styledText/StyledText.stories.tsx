@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 import { StyledText as TextComponent } from './StyledText'
 import { createStory, createStorybookConfig } from 'stories/util'
@@ -12,28 +12,23 @@ export default createStorybookConfig({
   excludeStories: ['styledTextWithSizes'],
 })
 
-export const styledTextWithSizes = (sizes: string[]) => sizes.filter((key) => !key.startsWith('line-height')).map((key) => {
-  return (
-    <>
-      <h3>
-        <TextComponent size='mono-m'>
-          {key}
-        </TextComponent>
-      </h3>
-      <p key={key}>
-        <TextComponent size={key.replace('text-', '') as TextSize}>
-          {lorem}
-        </TextComponent>
-      </p>
-      <hr />
-    </>
-  )
-})
+export const styledTextWithSizes = (sizes: string[]) =>
+  sizes
+  .filter((key) => !key.startsWith('line-height'))
+  .map((key) => {
+    return (
+      <>
+        <h3>
+          <TextComponent size="mono-m">{key}</TextComponent>
+        </h3>
+        <p key={key}>
+          <TextComponent size={key.replace('text-', '') as TextSize}>{lorem}</TextComponent>
+        </p>
+        <hr />
+      </>
+    )
+  })
 
-export const StyledText = createStory(() => (
-  <div>
-    {styledTextWithSizes(Object.keys(typography))}
-  </div>
-))
+export const StyledText = createStory(() => <div>{styledTextWithSizes(Object.keys(typography))}</div>)
 
 StyledText.storyName = 'StyledText'

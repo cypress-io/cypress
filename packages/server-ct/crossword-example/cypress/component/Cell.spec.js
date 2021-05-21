@@ -12,11 +12,9 @@ describe('Cell', () => {
 
       mount(Cell, { propsData: cellConfig })
 
-      cy.get('[data-testid=cell]')
-      .should('contain.text', cellConfig.number)
+      cy.get('[data-testid=cell]').should('contain.text', cellConfig.number)
 
-      cy.get('[data-testid=cell-input]')
-      .should('contain.value', cellConfig.letter)
+      cy.get('[data-testid=cell-input]').should('contain.value', cellConfig.letter)
     })
   })
 
@@ -48,8 +46,7 @@ describe('Cell', () => {
 
       mount(Cell, { propsData: cellConfig })
 
-      cy.get('[data-testid=cell-input]')
-      .should('not.contain.value', cellConfig.letter)
+      cy.get('[data-testid=cell-input]').should('not.contain.value', cellConfig.letter)
     })
   })
 

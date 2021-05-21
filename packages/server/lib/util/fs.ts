@@ -3,8 +3,7 @@
 import Bluebird from 'bluebird'
 import fsExtra from 'fs-extra'
 
-type Promisified<T extends (...args: any) => any>
-  = (...params: Parameters<T>) => Bluebird<ReturnType<T>>
+type Promisified<T extends (...args: any) => any> = (...params: Parameters<T>) => Bluebird<ReturnType<T>>
 
 interface PromisifiedFsExtra {
   statAsync: (path: string | Buffer) => Bluebird<ReturnType<typeof fsExtra.statSync>>

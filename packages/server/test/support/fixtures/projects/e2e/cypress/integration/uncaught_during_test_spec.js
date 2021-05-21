@@ -6,8 +6,7 @@ describe('foo', () => {
   it('fails with setTimeout', () => {
     setTimeout(() => {
       return foo.bar()
-    }
-    , 10)
+    }, 10)
 
     cy.wait(1000)
   })

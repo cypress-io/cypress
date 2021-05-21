@@ -16,9 +16,7 @@ const isCypressProcess = (process) => {
 }
 
 const getPidFromFolder = (folder, pidPrefix) => {
-  return _.toNumber(
-    path.basename(folder).replace(pidPrefix, ''),
-  )
+  return _.toNumber(path.basename(folder).replace(pidPrefix, ''))
 }
 
 const folderWithPid = (pidPrefix) => {
@@ -34,8 +32,7 @@ const folderWithPid = (pidPrefix) => {
 const inactivePids = ({ pid }) => {
   debug('finding process by pid:', pid)
 
-  return findProcess.byPid(pid)
-  .then((processes) => {
+  return findProcess.byPid(pid).then((processes) => {
     // return true if no processes are a cypress process
     return !_.some(processes, isCypressProcess)
   })

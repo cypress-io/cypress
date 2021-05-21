@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => {
   }
 })
 
-export default function SimpleSelect () {
+export default function SimpleSelect() {
   const classes = useStyles()
   const [age, setAge] = React.useState('')
 
@@ -40,12 +40,7 @@ export default function SimpleSelect () {
     <div>
       <FormControl className={classes.formControl}>
         <InputLabel id="demo-simple-select-label">Age</InputLabel>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={age}
-          onChange={handleChange}
-        >
+        <Select labelId="demo-simple-select-label" id="demo-simple-select" value={age} onChange={handleChange}>
           <MenuItem value={10}>Ten</MenuItem>
           <MenuItem value={20}>Twenty</MenuItem>
           <MenuItem value={30}>Thirty</MenuItem>
@@ -69,12 +64,7 @@ export default function SimpleSelect () {
         <FormHelperText>Some important helper text</FormHelperText>
       </FormControl>
       <FormControl className={classes.formControl}>
-        <Select
-          value={age}
-          onChange={handleChange}
-          displayEmpty
-          className={classes.selectEmpty}
-        >
+        <Select value={age} onChange={handleChange} displayEmpty className={classes.selectEmpty}>
           <MenuItem value="">
             <em>None</em>
           </MenuItem>
@@ -177,12 +167,7 @@ export default function SimpleSelect () {
         <FormHelperText>Auto width</FormHelperText>
       </FormControl>
       <FormControl className={classes.formControl}>
-        <Select
-          value={age}
-          onChange={handleChange}
-          displayEmpty
-          className={classes.selectEmpty}
-        >
+        <Select value={age} onChange={handleChange} displayEmpty className={classes.selectEmpty}>
           <MenuItem value="" disabled>
             Placeholder
           </MenuItem>
@@ -260,9 +245,7 @@ it('renders selects', () => {
   })
 
   cy.get('#demo-simple-select').click()
-  cy.contains('[role=option]', 'Twenty')
-  .should('be.visible')
-  .click()
+  cy.contains('[role=option]', 'Twenty').should('be.visible').click()
 
   // check that other select has changed
   cy.contains('#demo-simple-select-outlined', 'Twenty').should('be.visible')

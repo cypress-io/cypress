@@ -5,7 +5,7 @@ const _ = require('lodash')
 
 const pluginName = '__plugin__'
 
-function execute (file, options = {}) {
+function execute(file, options = {}) {
   const opts = _.defaultsDeep(options, {
     fix: true,
     config: {
@@ -14,7 +14,6 @@ function execute (file, options = {}) {
         sourceType: 'module',
       },
     },
-
   })
 
   const cli = new CLIEngine({

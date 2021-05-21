@@ -43,22 +43,24 @@ export default new Vuex.Store({
     },
   },
   mutations: {
-    setCrossword (state, crossword) {
-      if (state.boardDate !== crossword.date) state.board = []
+    setCrossword(state, crossword) {
+      if (state.boardDate !== crossword.date) {
+        state.board = []
+      }
 
       state.boardDate = crossword.date
       state.crossword = crossword
     },
-    setDate (state, date) {
+    setDate(state, date) {
       state.date = date
     },
-    toggleAnswersVisible (state) {
+    toggleAnswersVisible(state) {
       state.solved = !state.solved
     },
-    setBoardState (state, newBoardState) {
+    setBoardState(state, newBoardState) {
       state.board = newBoardState
     },
-    reset (state) {
+    reset(state) {
       const newState = []
 
       for (let i = 0; i < state.board.length; i++) {
@@ -74,27 +76,31 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    reset ({ commit }) {
+    reset({ commit }) {
       if (window.confirm('This will reset your progress. You sure?')) {
         commit('reset')
       }
     },
-    setBoardState ({ commit }, boardState) {
+    setBoardState({ commit }, boardState) {
       commit('setBoardState', boardState)
     },
-    toggleAnswersVisible ({ commit }) {
+    toggleAnswersVisible({ commit }) {
       commit('toggleAnswersVisible')
     },
-    getPreviousCrossword ({ getters, dispatch }) {
+    getPreviousCrossword({ getters, dispatch }) {
       return dispatch('fetchCrossword', getters.yesterday)
     },
-    getNextCrossword ({ getters, dispatch }) {
+    getNextCrossword({ getters, dispatch }) {
       return dispatch('fetchCrossword', getters.tomorrow)
     },
-    fetchCrossword ({ state, getters, commit }, date) {
-      if (!date) date = state.date
+    fetchCrossword({ state, getters, commit }, date) {
+      if (!date) {
+        date = state.date
+      }
 
-      if (typeof date !== 'string') date = formatDate(date)
+      if (typeof date !== 'string') {
+        date = formatDate(date)
+      }
 
       return fetch(crosswordUrl(date))
       .then((response) => {

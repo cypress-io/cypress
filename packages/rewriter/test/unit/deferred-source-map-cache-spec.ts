@@ -59,7 +59,7 @@ describe('DeferredSourceMapCache', function () {
         url: 'quux',
       })
 
-      await expect(cache.resolve('foo', {})).to.be.rejectedWith('Missing request with ID \'foo\'')
+      await expect(cache.resolve('foo', {})).to.be.rejectedWith("Missing request with ID 'foo'")
     })
 
     it('rejects if request missing JS', async () => {
@@ -130,20 +130,29 @@ describe('DeferredSourceMapCache', function () {
 
         it('with inlined base64 sourceMappingURL', testExternalSourceMap(testSourceWithInlineSourceMap, {}, false))
 
-        it('with external sourceMappingURL', testExternalSourceMap(testSourceWithExternalSourceMap, {
-          // sourceMappingURL should override headers
-          'SOURCEmap': 'garbage',
-          'x-sourceMAP': 'garbage',
-        }))
+        it(
+          'with external sourceMappingURL',
+          testExternalSourceMap(testSourceWithExternalSourceMap, {
+            // sourceMappingURL should override headers
+            SOURCEmap: 'garbage',
+            'x-sourceMAP': 'garbage',
+          })
+        )
 
-        it('with map referenced by sourcemap header', testExternalSourceMap(testSourceWithNoSourceMap, {
-          'SOURCEmap': 'test.js.map',
-          'x-sourceMAP': 'garbage', // SourceMap header should override x-sourcemap
-        }))
+        it(
+          'with map referenced by sourcemap header',
+          testExternalSourceMap(testSourceWithNoSourceMap, {
+            SOURCEmap: 'test.js.map',
+            'x-sourceMAP': 'garbage', // SourceMap header should override x-sourcemap
+          })
+        )
 
-        it('with map referenced by x-sourcemap header', testExternalSourceMap(testSourceWithNoSourceMap, {
-          'x-sourceMAP': 'test.js.map',
-        }))
+        it(
+          'with map referenced by x-sourcemap header',
+          testExternalSourceMap(testSourceWithNoSourceMap, {
+            'x-sourceMAP': 'test.js.map',
+          })
+        )
       })
     })
   })

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { action } from '@storybook/addon-actions'
 
 import { createStory, createStorybookConfig } from 'stories/util'
@@ -17,10 +17,11 @@ export default createStorybookConfig({
 export const Input = createStory(() => (
   <div>
     <InputComponent label={{ type: 'aria', contents: 'aria labeled input' }} />
-    <InputComponent label={{
-      type: 'tag',
-      contents: 'Labeled input',
-    }}
+    <InputComponent
+      label={{
+        type: 'tag',
+        contents: 'Labeled input',
+      }}
     />
   </div>
 ))
@@ -111,32 +112,42 @@ export const Icon = createStory(() => (
   </div>
 ))
 
-export const iconSizesWithSizes = (sizes: string[]) => sizes.map((key) => {
-  const size = key.replace('text-', '')
+export const iconSizesWithSizes = (sizes: string[]) =>
+  sizes.map((key) => {
+    const size = key.replace('text-', '')
 
-  return (
-    <IconInputComponent
-      key={key}
-      label={{ type: 'aria', contents: `input size ${size}` }}
-      size={size as TextSize}
-      prefixIcon={{
-        icon: 'home',
-        onPress: action('onPrefixClick'),
-        'aria-label': 'onPrefixClick',
-      }}
-      suffixIcon={{
-        icon: 'times',
-        onPress: action('onSuffixClick'),
-        'aria-label': 'onSuffixClick',
-      }}
-    />
-  )
-})
+    return (
+      <IconInputComponent
+        key={key}
+        label={{ type: 'aria', contents: `input size ${size}` }}
+        size={size as TextSize}
+        prefixIcon={{
+          icon: 'home',
+          onPress: action('onPrefixClick'),
+          'aria-label': 'onPrefixClick',
+        }}
+        suffixIcon={{
+          icon: 'times',
+          onPress: action('onSuffixClick'),
+          'aria-label': 'onSuffixClick',
+        }}
+      />
+    )
+  })
 
 export const IconSizes = createStory(() => (
   <div>
     <div style={{ width: 500 }}>
-      {iconSizesWithSizes(Object.keys(typography).filter((key) => key !== 'type' && !key.startsWith('line-height') && !key.startsWith('text-mono') && key !== 'text-3xl' && key !== 'text-4xl'))}
+      {iconSizesWithSizes(
+        Object.keys(typography).filter(
+          (key) =>
+            key !== 'type' &&
+            !key.startsWith('line-height') &&
+            !key.startsWith('text-mono') &&
+            key !== 'text-3xl' &&
+            key !== 'text-4xl'
+        )
+      )}
     </div>
   </div>
 ))

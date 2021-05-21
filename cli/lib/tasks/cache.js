@@ -37,17 +37,20 @@ const prune = () => {
 
   let deletedBinary = false
 
-  return fs.readdirAsync(cacheDir)
+  return fs
+  .readdirAsync(cacheDir)
   .then((versions) => {
-    return Bluebird.all(versions.map((version) => {
-      if (version !== currentVersion) {
-        deletedBinary = true
+    return Bluebird.all(
+      versions.map((version) => {
+        if (version !== currentVersion) {
+          deletedBinary = true
 
-        const versionDir = join(cacheDir, version)
+          const versionDir = join(cacheDir, version)
 
-        return fs.removeAsync(versionDir)
-      }
-    }))
+          return fs.removeAsync(versionDir)
+        }
+      })
+    )
   })
   .then(() => {
     if (deletedBinary) {
@@ -70,8 +73,7 @@ const fileSizeInMB = (size) => {
  * and prints a table with results to the terminal
  */
 const list = (showSize) => {
-  return getCachedVersions(showSize)
-  .then((binaries) => {
+  return getCachedVersions(showSize).then((binaries) => {
     const head = [colors.titles('version'), colors.titles('last used')]
 
     if (showSize) {
@@ -118,24 +120,27 @@ const getCachedVersions = (showSize) => {
     const binaryDir = state.getBinaryDir(binary.version)
     const executable = state.getPathToExecutable(binaryDir)
 
-    return fs.statAsync(executable).then((stat) => {
-      const lastAccessedTime = _.get(stat, 'atime')
+    return fs.statAsync(executable).then(
+      (stat) => {
+        const lastAccessedTime = _.get(stat, 'atime')
 
-      if (!lastAccessedTime) {
-        // the test runner has never been opened
-        // or could be a test simulating missing timestamp
+        if (!lastAccessedTime) {
+          // the test runner has never been opened
+          // or could be a test simulating missing timestamp
+          return binary
+        }
+
+        const accessed = dayjs(lastAccessedTime).fromNow()
+
+        binary.accessed = accessed
+
+        return binary
+      },
+      (e) => {
+        // could not find the binary or gets its stats
         return binary
       }
-
-      const accessed = dayjs(lastAccessedTime).fromNow()
-
-      binary.accessed = accessed
-
-      return binary
-    }, (e) => {
-      // could not find the binary or gets its stats
-      return binary
-    })
+    )
   })
   .mapSeries((binary) => {
     if (showSize) {

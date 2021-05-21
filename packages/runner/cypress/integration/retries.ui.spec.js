@@ -31,53 +31,46 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
           ],
         },
       },
-    })
-    .then(shouldHaveTestResults(2, 0))
+    }).then(shouldHaveTestResults(2, 0))
 
     cy.get('.test').should('have.length', 2)
     cy.percySnapshot()
   })
 
   it('collapses prev attempts and keeps final one open on failure', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          tests: [
-            { name: 'test 1',
-              fail: true,
-            },
-            { name: 'test 2',
-
-            },
-          ],
+    runIsolatedCypress(
+      {
+        suites: {
+          'suite 1': {
+            tests: [{ name: 'test 1', fail: true }, { name: 'test 2' }],
+          },
         },
       },
-    }, { config: { retries: 2 } })
-    .then(shouldHaveTestResults(1, 1))
+      { config: { retries: 2 } }
+    ).then(shouldHaveTestResults(1, 1))
 
     cy.get('.runnable-err-print').should('be.visible')
     cy.percySnapshot()
   })
 
   it('can toggle failed prev attempt open and log its error', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          tests: [
-            { name: 'test 1', fail: 1 },
-            { name: 'test 2', fail: 2 },
-            { name: 'test 3', fail: 1 },
-          ],
+    runIsolatedCypress(
+      {
+        suites: {
+          'suite 1': {
+            tests: [
+              { name: 'test 1', fail: 1 },
+              { name: 'test 2', fail: 2 },
+              { name: 'test 3', fail: 1 },
+            ],
+          },
         },
       },
-    }, { config: { retries: 1 } })
+      { config: { retries: 1 } }
+    )
     .then(shouldHaveTestResults(2, 1))
     .then(() => {
-      cy.contains('Attempt 1')
-      .click()
-      .closest('.attempt-item')
-      .find('.runnable-err-print')
-      .click()
+      cy.contains('Attempt 1').click().closest('.attempt-item').find('.runnable-err-print').click()
 
       cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
     })
@@ -91,7 +84,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     runIsolatedCypress(
       {
         suites: {
-          's1': {
+          s1: {
             tests: [
               't1',
               {
@@ -102,18 +95,22 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
             ],
           },
         },
-      }, { config: { retries: 3, isTextTerminal: true },
-        onBeforeRun ({ autCypress }) {
+      },
+      {
+        config: { retries: 3, isTextTerminal: true },
+        onBeforeRun({ autCypress }) {
           let attempt = 0
 
-          stub = cy.stub().callsFake(cyReject(() => {
-            attempt++
-            expect(cy.$$('.attempt-item > .is-open').length).to.equal(attempt)
-          }))
+          stub = cy.stub().callsFake(
+            cyReject(() => {
+              attempt++
+              expect(cy.$$('.attempt-item > .is-open').length).to.equal(attempt)
+            })
+          )
 
           autCypress.Screenshot.onAfterScreenshot = stub
         },
-      },
+      }
     ).then(() => {
       expect(stub).callCount(3)
       cy.get('.test.runnable:contains(t2)').then(($el) => {
@@ -125,7 +122,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   it('includes routes, spies, hooks, and commands in attempt', () => {
     runIsolatedCypress({
       suites: {
-        's1': {
+        s1: {
           hooks: [{ type: 'beforeEach', fail: 1, agents: true }],
           tests: [{ name: 't1', fail: 1, agents: true }],
         },
@@ -133,19 +130,33 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     })
     .then(shouldHaveTestResults(1, 0))
     .then(() => {
-      cy.get(attemptTag(1)).click().parentsUntil('.collapsible').last().parent().within(() => {
+      cy.get(attemptTag(1))
+      .click()
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .within(() => {
         cy.get('.instruments-container').should('contain', 'Spies / Stubs (1)')
         cy.get('.instruments-container').should('contain', 'Routes (1)')
         cy.get('.runnable-err').should('contain', 'AssertionError')
       })
 
-      cy.get(attemptTag(2)).click().parentsUntil('.collapsible').last().parent().within(() => {
+      cy.get(attemptTag(2))
+      .click()
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .within(() => {
         cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
         cy.get('.instruments-container').should('contain', 'Routes (2)')
         cy.get('.runnable-err').should('contain', 'AssertionError')
       })
 
-      cy.get(attemptTag(3)).parentsUntil('.collapsible').last().parent().within(() => {
+      cy.get(attemptTag(3))
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .within(() => {
         cy.get('.instruments-container').should('contain', 'Spies / Stubs (2)')
         cy.get('.instruments-container').should('contain', 'Routes (2)')
         cy.get('.runnable-err').should('not.be.visible')
@@ -157,18 +168,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
 
   describe('only', () => {
     it('test retry with [only]', () => {
-      runIsolatedCypress({
-        suites: {
-          'suite 1': {
-            hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-            tests: [
-              { name: 'test 1' },
-              { name: 'test 2', fail: 1, only: true },
-              { name: 'test 3' },
-            ],
+      runIsolatedCypress(
+        {
+          suites: {
+            'suite 1': {
+              hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+              tests: [{ name: 'test 1' }, { name: 'test 2', fail: 1, only: true }, { name: 'test 3' }],
+            },
           },
         },
-      }, { config: { retries: 1 } })
+        { config: { retries: 1 } }
+      )
       .then(shouldHaveTestResults(1, 0))
       .then(() => {
         cy.contains('test 2')
@@ -183,21 +193,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   describe('beforeAll', () => {
     // TODO: make beforeAll hooks retry
     it('tests do not retry when beforeAll fails', () => {
-      runIsolatedCypress({
-        suites: {
-          'suite 1': {
-            hooks: [
-              { type: 'before', fail: 1 },
-              'beforeEach',
-              'beforeEach',
-              'afterEach',
-              'afterEach',
-              'after',
-            ],
-            tests: ['test 1'],
+      runIsolatedCypress(
+        {
+          suites: {
+            'suite 1': {
+              hooks: [{ type: 'before', fail: 1 }, 'beforeEach', 'beforeEach', 'afterEach', 'afterEach', 'after'],
+              tests: ['test 1'],
+            },
           },
         },
-      }, { config: { retries: 1 } })
+        { config: { retries: 1 } }
+      )
       .then(shouldHaveTestResults(0, 1))
       .then(() => {
         cy.contains('Although you have test retries')
@@ -208,14 +214,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
 
     // TODO: future versions should run all hooks associated with test on retry
     it('before all hooks are not run on the second attempt when fails outside of beforeAll', () => {
-      runIsolatedCypress({
-        suites: {
-          'suite 1': {
-            hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-            tests: [{ name: 'test 1', fail: 1 }],
+      runIsolatedCypress(
+        {
+          suites: {
+            'suite 1': {
+              hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+              tests: [{ name: 'test 1', fail: 1 }],
+            },
           },
         },
-      }, { config: { retries: 1 } })
+        { config: { retries: 1 } }
+      )
       .then(shouldHaveTestResults(1, 0))
       .then(() => {
         cy.contains('test')
@@ -229,22 +238,18 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
 
   describe('beforeEach', () => {
     it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', () => {
-      runIsolatedCypress({
-        hooks: [{ type: 'beforeEach', fail: 1 }],
-        suites: {
-          'suite 1': {
-            hooks: [
-              'before',
-              'beforeEach',
-              { type: 'beforeEach', fail: 1 },
-              'beforeEach',
-              'afterEach',
-              'after',
-            ],
-            tests: [{ name: 'test 1' }],
+      runIsolatedCypress(
+        {
+          hooks: [{ type: 'beforeEach', fail: 1 }],
+          suites: {
+            'suite 1': {
+              hooks: ['before', 'beforeEach', { type: 'beforeEach', fail: 1 }, 'beforeEach', 'afterEach', 'after'],
+              tests: [{ name: 'test 1' }],
+            },
           },
         },
-      }, { config: { retries: 2 } })
+        { config: { retries: 2 } }
+      )
       .then(shouldHaveTestResults(1, 0))
       .then(() => {
         cy.contains('Attempt 1').click()
@@ -275,14 +280,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     })
 
     it('beforeEach retried tests skip remaining tests in suite', () => {
-      runIsolatedCypress({ suites: {
-        'beforeEach hooks': {
-          hooks: [{ type: 'beforeEach', fail: true }],
-          tests: ['fails in beforeEach', 'skips this'],
+      runIsolatedCypress(
+        {
+          suites: {
+            'beforeEach hooks': {
+              hooks: [{ type: 'beforeEach', fail: true }],
+              tests: ['fails in beforeEach', 'skips this'],
+            },
+          },
         },
-
-      } }, { config: { retries: 1 } })
-      .then(shouldHaveTestResults(0, 1, 0))
+        { config: { retries: 1 } }
+      ).then(shouldHaveTestResults(0, 1, 0))
 
       // ensure the page is loaded before taking snapshot
       cy.contains('skips this')
@@ -292,29 +300,28 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
 
   describe('afterEach', () => {
     it('afterEach hooks retry on failure, but only run higher-level afterEach hooks', () => {
-      runIsolatedCypress({
-        hooks: [{ type: 'afterEach', fail: 2 }],
-        suites: {
-          's1': {
-            hooks: [{ type: 'afterEach', fail: 1 }, 'afterEach', 'after'],
-            tests: ['t1'],
+      runIsolatedCypress(
+        {
+          hooks: [{ type: 'afterEach', fail: 2 }],
+          suites: {
+            s1: {
+              hooks: [{ type: 'afterEach', fail: 1 }, 'afterEach', 'after'],
+              tests: ['t1'],
+            },
           },
-
         },
-      }, { config: { retries: 2 } })
+        { config: { retries: 2 } }
+      )
       .then(shouldHaveTestResults(1, 0))
       .then(() => {
-        cy.contains('Attempt 1')
-        .click()
-        .then(shouldBeOpen)
+        cy.contains('Attempt 1').click().then(shouldBeOpen)
 
         cy.get('.attempt-1 .hook-item .collapsible:contains(after each (1))').find('.command-state-failed')
         cy.get('.attempt-1 .hook-item .collapsible:contains(after each (2))')
         cy.get('.attempt-1 .hook-item .collapsible:contains(after each (3))').should('not.exist')
         cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
 
-        cy.contains('Attempt 2').click()
-        .then(shouldBeOpen)
+        cy.contains('Attempt 2').click().then(shouldBeOpen)
 
         cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
         cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
@@ -332,14 +339,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     })
 
     it('afterEach retried tests skip remaining tests in suite', () => {
-      runIsolatedCypress({ suites: {
-        'afterEach hooks': {
-          hooks: [{ type: 'afterEach', fail: true }],
-          tests: ['fails in afterEach', 'skips this'],
+      runIsolatedCypress(
+        {
+          suites: {
+            'afterEach hooks': {
+              hooks: [{ type: 'afterEach', fail: true }],
+              tests: ['fails in afterEach', 'skips this'],
+            },
+          },
         },
-
-      } }, { config: { retries: 1 } })
-      .then(shouldHaveTestResults(0, 1, 0))
+        { config: { retries: 1 } }
+      ).then(shouldHaveTestResults(0, 1, 0))
 
       cy.percySnapshot()
     })
@@ -347,23 +357,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
 
   describe('afterAll', () => {
     it('only run afterAll hook on last attempt', () => {
-      runIsolatedCypress({
-        suites: {
-          'suite 1': {
-            hooks: [
-              'before',
-              'beforeEach',
-              'afterEach',
-              'after',
-            ],
-            tests: [
-              { name: 'test 1' },
-              { name: 'test 2' },
-              { name: 'test 3', fail: 1 },
-            ],
+      runIsolatedCypress(
+        {
+          suites: {
+            'suite 1': {
+              hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+              tests: [{ name: 'test 1' }, { name: 'test 2' }, { name: 'test 3', fail: 1 }],
+            },
           },
         },
-      }, { config: { retries: 1 } })
+        { config: { retries: 1 } }
+      )
       .then(shouldHaveTestResults(3, 0))
       .then(() => {
         cy.contains('test 3').click()
@@ -374,21 +378,17 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     })
 
     it('tests do not retry when afterAll fails', () => {
-      runIsolatedCypress({
-        suites: {
-          'suite 1': {
-            hooks: [
-              'before',
-              'beforeEach',
-              'beforeEach',
-              'afterEach',
-              'afterEach',
-              { type: 'after', fail: 1 },
-            ],
-            tests: [{ name: 'test 1' }],
+      runIsolatedCypress(
+        {
+          suites: {
+            'suite 1': {
+              hooks: ['before', 'beforeEach', 'beforeEach', 'afterEach', 'afterEach', { type: 'after', fail: 1 }],
+              tests: [{ name: 'test 1' }],
+            },
           },
         },
-      }, { config: { retries: 1 } })
+        { config: { retries: 1 } }
+      )
       .then(shouldHaveTestResults(0, 1))
       .then(() => {
         cy.contains('Although you have test retries')
@@ -401,7 +401,16 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   })
 
   describe('can configure retries', () => {
-    const haveCorrectError = ($el) => cy.wrap($el).last().parentsUntil('.collapsible').last().parent().find('.runnable-err').should('contain', 'Unspecified AssertionError')
+    const haveCorrectError = ($el) => {
+      return cy
+      .wrap($el)
+      .last()
+      .parentsUntil('.collapsible')
+      .last()
+      .parent()
+      .find('.runnable-err')
+      .should('contain', 'Unspecified AssertionError')
+    }
 
     it('via config value', () => {
       runIsolatedCypress({
@@ -475,15 +484,13 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
           // eslint-disable-next-line object-shorthand
           'suite 1': function () {
             this.retries(3)
-            it('test 1', () => {
-            })
+            it('test 1', () => {})
           },
         },
       })
       .then(shouldHaveTestResults(0, 1))
       .then(() => {
-        cy.get('.runnable-err')
-        .should(containText(`describe('suite 1', { retries: 3 }, () => `))
+        cy.get('.runnable-err').should(containText(`describe('suite 1', { retries: 3 }, () => `))
       })
 
       cy.percySnapshot()

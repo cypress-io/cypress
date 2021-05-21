@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 
 export default class Comp extends Component {
-  componentDidMount () {
+  componentDidMount() {
     this.props.onMount()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.onUnmount()
   }
 
-  render () {
+  render() {
     return <div>Component with mount and unmount calls</div>
   }
 }

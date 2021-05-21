@@ -5,7 +5,9 @@ describe('src/cy/commands/debugging', () => {
     })
 
     it('does not change the subject', () => {
-      cy.wrap({}).debug().then((subject) => {
+      cy.wrap({})
+      .debug()
+      .then((subject) => {
         expect(subject).to.deep.eq({})
       })
     })
@@ -13,13 +15,18 @@ describe('src/cy/commands/debugging', () => {
     it('logs current subject', () => {
       const obj = { foo: 'bar' }
 
-      cy.wrap(obj).its('foo').debug().then(function () {
+      cy.wrap(obj)
+      .its('foo')
+      .debug()
+      .then(function () {
         expect(this.utilsLog).to.be.calledWithMatch('Current Subject: ', 'bar')
       })
     })
 
     it('logs previous command', () => {
-      cy.wrap({}).debug().then(function () {
+      cy.wrap({})
+      .debug()
+      .then(function () {
         expect(this.utilsLog).to.be.calledWithMatch('Command Name: ', 'wrap')
         expect(this.utilsLog).to.be.calledWithMatch('Command Args: ', [{}])
         expect(this.utilsLog).to.be.calledWithMatch('Current Subject: ', {})
@@ -46,9 +53,9 @@ describe('src/cy/commands/debugging', () => {
       })
 
       it('can turn off logging', () => {
-        cy
-        .wrap([], { log: false })
-        .debug({ log: false }).then(function () {
+        cy.wrap([], { log: false })
+        .debug({ log: false })
+        .then(function () {
           expect(this.lastLog).to.be.undefined
         })
       })
@@ -88,7 +95,10 @@ describe('src/cy/commands/debugging', () => {
         Cypress.emit('resume:next')
       })
 
-      cy.pause().wrap({}).should('deep.eq', {}).then(function () {
+      cy.pause()
+      .wrap({})
+      .should('deep.eq', {})
+      .then(function () {
         expect(expected).to.be.true
 
         // should be pending

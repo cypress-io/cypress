@@ -1,17 +1,8 @@
 import _ from 'lodash'
 
-import {
-  Route,
-  Interception,
-  CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
-  Subscription,
-} from '../types'
+import { Route, Interception, CyHttpMessages, SERIALIZABLE_REQ_PROPS, Subscription } from '../types'
 import { parseJsonBody } from './utils'
-import {
-  validateStaticResponse,
-  parseStaticResponseShorthand,
-} from '../static-response-utils'
+import { validateStaticResponse, parseStaticResponseShorthand } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
@@ -32,8 +23,13 @@ const getDisplayUrl = (url: string) => {
   return url
 }
 
-export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
-  function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
+export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (
+  Cypress,
+  frame,
+  userHandler,
+  { getRoute, getRequest, emitNetEvent, sendStaticResponse }
+) => {
+  function getRequestLog(route: Route, request: Omit<Interception, 'log'>) {
     const message = _.compact([
       request.request.method,
       request.response && request.response.statusCode,
@@ -121,7 +117,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
-    on (eventName, handler) {
+    on(eventName, handler) {
       if (!validEvents.includes(eventName)) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
           args: {
@@ -139,9 +135,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
       return userReq
     },
-    continue (responseHandler?) {
+    continue(responseHandler?) {
       if (resolved) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'continue' } })
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', {
+          args: { cmd: 'continue' },
+        })
       }
 
       if (handlerCompleted) {
@@ -165,9 +163,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
       return finish(true)
     },
-    reply (responseHandler?, maybeBody?, maybeHeaders?) {
+    reply(responseHandler?, maybeBody?, maybeHeaders?) {
       if (resolved) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'reply' } })
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', {
+          args: { cmd: 'reply' },
+        })
       }
 
       if (handlerCompleted) {
@@ -199,13 +199,13 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
       return finish(true)
     },
-    redirect (location, statusCode = 302) {
+    redirect(location, statusCode = 302) {
       userReq.reply({
         headers: { location },
         statusCode,
       })
     },
-    destroy () {
+    destroy() {
       userReq.reply({
         forceNetworkError: true,
       }) // TODO: this misnomer is a holdover from XHR, should be numRequests
@@ -214,7 +214,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   let continueSent = false
 
-  function updateRequest (req) {
+  function updateRequest(req) {
     if (request) {
       request.request = _.cloneDeep(req)
 
@@ -279,7 +279,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   // if a Promise is returned, wait for it to resolve. if req.reply()
   // has not been called, continue to the next interceptor
-  return Bluebird.try(() => {
+  return (Bluebird.try(() => {
     return userHandler(userReq)
   })
   .timeout(timeout)
@@ -289,7 +289,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       return
     }
 
-    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', { args: { timeout, req, route: route.options } })
+    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', {
+      args: { timeout, req, route: route.options },
+    })
   })
   .finally(() => {
     resolved = true
@@ -309,5 +311,5 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       finish(false)
     }
   })
-  .return(promise) as any as Bluebird<Result>
+  .return(promise) as any) as Bluebird<Result>
 }

@@ -47,13 +47,13 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
-  constructor () {
+  constructor() {
     super()
 
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
+  open(config: Record<string, any> = {}, project, onError, onWarning) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -94,7 +94,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer(app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
@@ -122,8 +122,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         if (err.code === 'EADDRINUSE') {
           return reject(this.portInUseErr(port))
         }
-      })
-      .then((port) => {
+      }).then((port) => {
         return Bluebird.all([
           httpsProxy.create(appData.path('proxy'), port, {
             onRequest: this.callListeners.bind(this),
@@ -151,13 +150,15 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               })
             }
 
-            return ensureUrl.isListening(baseUrl)
+            return ensureUrl
+            .isListening(baseUrl)
             .return(null)
             .catch((err) => {
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
           }
-        }).then((warning) => {
+        })
+        .then((warning) => {
           // once we open set the domain
           // to root by default
           // which prevents a situation where navigating
@@ -170,17 +171,17 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     })
   }
 
-  createRoutes (...args) {
+  createRoutes(...args) {
     return require('./routes').apply(null, args)
   }
 
-  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
+  startWebsockets(automation, config, options: Record<string, unknown> = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     return super.startWebsockets(automation, config, options)
   }
 
-  _onResolveUrl (urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
+  _onResolveUrl(urlStr, headers, automationRequest, options: Record<string, any> = { headers: {} }) {
     let p
 
     debug('resolving visit %o', {
@@ -219,7 +220,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     let currentPromisePhase = null
 
     const runPhase = (fn) => {
-      return currentPromisePhase = fn()
+      return (currentPromisePhase = fn())
     }
 
     const matchesNetStubbingRoute = (requestOptions) => {
@@ -233,7 +234,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       return !!getRouteForRequest(this.netStubbingState?.routes, proxiedReq)
     }
 
-    return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
+    return (this._urlResolver = p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
       let urlFile
 
       onCancel?.(() => {
@@ -277,13 +278,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       const onReqStreamReady = (str) => {
         reqStream = str
 
-        return str
-        .on('error', onReqError)
-        .on('response', (incomingRes) => {
-          debug(
-            'resolve:url headers received, buffering response %o',
-            _.pick(incomingRes, 'headers', 'statusCode'),
-          )
+        return str.on('error', onReqError).on('response', (incomingRes) => {
+          debug('resolve:url headers received, buffering response %o', _.pick(incomingRes, 'headers', 'statusCode'))
 
           if (newUrl == null) {
             newUrl = urlStr
@@ -376,7 +372,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               })
 
               return str.pipe(concatStr)
-            }).catch(onReqError)
+            })
+            .catch(onReqError)
           })
         })
       }
@@ -392,7 +389,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       // if they're POSTing an object, querystringify their POST body
-      if ((options.method === 'POST') && _.isObject(options.body)) {
+      if (options.method === 'POST' && _.isObject(options.body)) {
         options.form = options.body
         delete options.body
       }
@@ -402,11 +399,14 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         // rewrite these contents
         gzip: false,
         url: urlFile != null ? urlFile : urlStr,
-        headers: _.assign({
-          accept: 'text/html,*/*',
-        }, options.headers),
+        headers: _.assign(
+          {
+            accept: 'text/html,*/*',
+          },
+          options.headers
+        ),
         onBeforeReqInit: runPhase,
-        followRedirect (incomingRes) {
+        followRedirect(incomingRes) {
           const status = incomingRes.statusCode
           const next = incomingRes.headers.location
 
@@ -432,25 +432,29 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        // @ts-ignore
-        return request.sendStream(headers, automationRequest, options)
-        .then((createReqStream) => {
-          const stream = createReqStream()
+        return (
+          request
+          // @ts-ignore
+          .sendStream(headers, automationRequest, options)
+          .then((createReqStream) => {
+            const stream = createReqStream()
 
-          return onReqStreamReady(stream)
-        }).catch(onReqError)
+            return onReqStreamReady(stream)
+          })
+          .catch(onReqError)
+        )
       })
     }))
   }
 
-  onTestFileChange (filePath) {
+  onTestFileChange(filePath) {
     return this.socket.onTestFileChange(filePath)
   }
 
-  _retryBaseUrlCheck (baseUrl, onWarning) {
+  _retryBaseUrlCheck(baseUrl, onWarning) {
     return ensureUrl.retryIsListening(baseUrl, {
       retryIntervals: [3000, 3000, 4000],
-      onRetry ({ attempt, delay, remaining }) {
+      onRetry({ attempt, delay, remaining }) {
         const warning = errors.get('CANNOT_CONNECT_BASE_URL_RETRYING', {
           remaining,
           attempt,

@@ -107,7 +107,7 @@ const create = (Cypress, cy, state, config) => {
   const Commands = {
     _commands: commands, // for testing
 
-    each (fn) {
+    each(fn) {
       // perf loop
       for (let name in commands) {
         const command = commands[name]
@@ -119,7 +119,7 @@ const create = (Cypress, cy, state, config) => {
       return null
     },
 
-    addAllSync (obj) {
+    addAllSync(obj) {
       // perf loop
       for (let name in obj) {
         const fn = obj[name]
@@ -131,11 +131,11 @@ const create = (Cypress, cy, state, config) => {
       return null
     },
 
-    addSync (name, fn) {
+    addSync(name, fn) {
       return cy.addCommandSync(name, fn)
     },
 
-    addAll (options = {}, obj) {
+    addAll(options = {}, obj) {
       if (!obj) {
         obj = options
         options = {}
@@ -152,7 +152,7 @@ const create = (Cypress, cy, state, config) => {
       return null
     },
 
-    add (name, options, fn) {
+    add(name, options, fn) {
       if (_.isFunction(options)) {
         fn = options
         options = {}
@@ -173,7 +173,7 @@ const create = (Cypress, cy, state, config) => {
       })
     },
 
-    addChainer (obj) {
+    addChainer(obj) {
       // perp loop
       for (let name in obj) {
         const fn = obj[name]
@@ -185,7 +185,7 @@ const create = (Cypress, cy, state, config) => {
       return null
     },
 
-    overwrite (name, fn) {
+    overwrite(name, fn) {
       return storeOverride(name, fn)
     },
   }

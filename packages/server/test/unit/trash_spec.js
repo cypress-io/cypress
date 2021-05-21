@@ -43,9 +43,8 @@ describe('lib/util/trash', () => {
       })
     })
 
-    it('doesn\'t fail if directory is non-existent', () => {
-      return trash.folder('bar')
-      .tapCatch(() => {
+    it("doesn't fail if directory is non-existent", () => {
+      return trash.folder('bar').tapCatch(() => {
         throw new Error('should not have errored')
       })
     })

@@ -7,13 +7,11 @@ import { NetworkService } from '../network.service'
   styleUrls: ['./network.component.css'],
 })
 export class NetworkComponent implements OnInit {
-  users = [];
+  users = []
 
-  constructor (private networkService: NetworkService) {}
+  constructor(private networkService: NetworkService) {}
 
-  ngOnInit (): void {
-    this.networkService
-    .getUsers()
-    .subscribe((response) => (this.users = response))
+  ngOnInit(): void {
+    this.networkService.getUsers().subscribe((response) => (this.users = response))
   }
 }

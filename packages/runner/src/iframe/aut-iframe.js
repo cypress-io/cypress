@@ -10,12 +10,12 @@ import selectorPlaygroundModel from '../selector-playground/selector-playground-
 import studioRecorder from '../studio/studio-recorder'
 
 export default class AutIframe {
-  constructor (config) {
+  constructor(config) {
     this.config = config
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create () {
+  create() {
     this.$iframe = $('<iframe>', {
       id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
@@ -24,7 +24,7 @@ export default class AutIframe {
     return this.$iframe
   }
 
-  showBlankContents () {
+  showBlankContents() {
     this._showContents(blankContents())
   }
 
@@ -32,30 +32,32 @@ export default class AutIframe {
     this._showContents(visitFailure(props))
   }
 
-  _showContents (contents) {
+  _showContents(contents) {
     this._body().html(contents)
   }
 
-  _contents () {
+  _contents() {
     return this.$iframe && this.$iframe.contents()
   }
 
-  _window () {
+  _window() {
     return this.$iframe.prop('contentWindow')
   }
 
-  _document () {
+  _document() {
     return this.$iframe.prop('contentDocument')
   }
 
-  _body () {
+  _body() {
     return this._contents() && this._contents().find('body')
   }
 
   detachDom = () => {
     const Cypress = eventManager.getCypress()
 
-    if (!Cypress) return
+    if (!Cypress) {
+      return
+    }
 
     return Cypress.cy.detachDom(this._contents())
   }
@@ -78,7 +80,7 @@ export default class AutIframe {
     this.debouncedToggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
   }
 
-  _replaceHtmlAttrs ($html, htmlAttrs) {
+  _replaceHtmlAttrs($html, htmlAttrs) {
     let oldAttrs = {}
 
     // remove all attributes
@@ -98,7 +100,7 @@ export default class AutIframe {
     })
   }
 
-  _replaceHeadStyles (styles = []) {
+  _replaceHeadStyles(styles = []) {
     const $head = this._contents().find('head')
     const existingStyles = $head.find('link[rel="stylesheet"],style')
 
@@ -122,7 +124,7 @@ export default class AutIframe {
     }
   }
 
-  _replaceLink ($head, existingStyle, style) {
+  _replaceLink($head, existingStyle, style) {
     const linkTag = this._linkTag(style)
 
     if (!existingStyle) {
@@ -138,7 +140,7 @@ export default class AutIframe {
     }
   }
 
-  _replaceStyle ($head, existingStyle, style) {
+  _replaceStyle($head, existingStyle, style) {
     const styleTag = this._styleTag(style)
 
     if (existingStyle) {
@@ -150,17 +152,17 @@ export default class AutIframe {
     }
   }
 
-  _insertBodyStyles ($body, styles = []) {
+  _insertBodyStyles($body, styles = []) {
     _.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
   }
 
-  _linkTag (style) {
+  _linkTag(style) {
     return `<link rel="stylesheet" href="${style.href}" />`
   }
 
-  _styleTag (style) {
+  _styleTag(style) {
     return `<style>${style}</style>`
   }
 
@@ -194,7 +196,9 @@ export default class AutIframe {
       const $_el = $(element)
 
       // bail if our el no longer exists in the parent body
-      if (!$.contains(body, element)) return
+      if (!$.contains(body, element)) {
+        return
+      }
 
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
@@ -223,7 +227,9 @@ export default class AutIframe {
   toggleSelectorPlayground = (isEnabled) => {
     const $body = this._body()
 
-    if (!$body) return
+    if (!$body) {
+      return
+    }
 
     if (isEnabled) {
       $body.on('mouseenter', this._resetShowHighlight)
@@ -246,7 +252,9 @@ export default class AutIframe {
   _onSelectorMouseMove = (e) => {
     const $body = this._body()
 
-    if (!$body) return
+    if (!$body) {
+      return
+    }
 
     let el = e.target
     let $el = $(el)
@@ -266,7 +274,9 @@ export default class AutIframe {
       $highlight.css('display', 'block')
     }
 
-    if (this._highlightedEl === el) return
+    if (this._highlightedEl === el) {
+      return
+    }
 
     this._highlightedEl = el
 
@@ -290,7 +300,9 @@ export default class AutIframe {
   _clearHighlight = () => {
     const $body = this._body()
 
-    if (!$body) return
+    if (!$body) {
+      return
+    }
 
     dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
     if (this._highlightedEl) {
@@ -298,7 +310,7 @@ export default class AutIframe {
     }
   }
 
-  toggleSelectorHighlight (isShowingHighlight) {
+  toggleSelectorHighlight(isShowingHighlight) {
     if (!isShowingHighlight) {
       this._clearHighlight()
 
@@ -327,11 +339,13 @@ export default class AutIframe {
     })
   }
 
-  getElements (cypressDom) {
+  getElements(cypressDom) {
     const { selector, method } = selectorPlaygroundModel
     const $contents = this._contents()
 
-    if (!$contents || !selector) return
+    if (!$contents || !selector) {
+      return
+    }
 
     return dom.getElementsForSelector({
       method,
@@ -341,7 +355,7 @@ export default class AutIframe {
     })
   }
 
-  printSelectorElementsToConsole () {
+  printSelectorElementsToConsole() {
     logger.clearLog()
 
     const Cypress = eventManager.getCypress()

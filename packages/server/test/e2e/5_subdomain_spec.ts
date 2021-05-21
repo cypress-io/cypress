@@ -51,9 +51,7 @@ const onServer = function (app) {
   }) as Function
 
   app.get('/htmlCookies', (req, res) => {
-    const {
-      cookie,
-    } = req.headers
+    const { cookie } = req.headers
 
     return res.send(`<html><div id='cookie'>${cookie}</div></html>`)
   })
@@ -98,7 +96,8 @@ const onServer = function (app) {
 
           return getText('Domain')
 
-        case 'qa.sub.foobar.com:2292': case 'staging.sub.foobar.com:2292':
+        case 'qa.sub.foobar.com:2292':
+        case 'staging.sub.foobar.com:2292':
           return getText('Nested Subdomains')
 
         default:

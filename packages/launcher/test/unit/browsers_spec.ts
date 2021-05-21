@@ -10,8 +10,12 @@ describe('browsers', () => {
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('exports multiline versionRegexes', () => {
-    expect(_.every(browsers.map(({ versionRegex }) => {
-      return versionRegex.multiline
-    }))).to.be.true
+    expect(
+      _.every(
+        browsers.map(({ versionRegex }) => {
+          return versionRegex.multiline
+        })
+      )
+    ).to.be.true
   })
 })

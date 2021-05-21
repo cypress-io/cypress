@@ -15,12 +15,11 @@ const start = () => {
     debug({ gitRemote })
     debug({ gitBranch })
 
-    return sh
-    .exec(`git diff HEAD ${sh.ShellString(gitRemoteBranch)} --name-only`)
-    .split('\n')
+    return sh.exec(`git diff HEAD ${sh.ShellString(gitRemoteBranch)} --name-only`).split('\n')
   }
 
-  return utils.lintFilesByText({
+  return utils
+  .lintFilesByText({
     getFilenames,
     getFileText: (f) => sh.exec(`git show :${sh.ShellString(f)}`),
   })

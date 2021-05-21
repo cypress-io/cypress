@@ -54,7 +54,7 @@ const getVersions = async ({ core }) => {
       description += `Chrome (beta) to ${betaData.version}`
     }
 
-    core.setOutput('has_update', (hasStableUpdate || hasBetaUpdate) ? 'true' : 'false')
+    core.setOutput('has_update', hasStableUpdate || hasBetaUpdate ? 'true' : 'false')
     core.setOutput('current_stable_version', currentBrowserVersions['chrome:stable'])
     core.setOutput('latest_stable_version', stableData.version)
     core.setOutput('current_beta_version', currentBrowserVersions['chrome:beta'])
@@ -73,7 +73,7 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
   const hasNewerStableVersion = branchBrowserVersions['chrome:stable'] !== latestStableVersion
   const hasNewerBetaVersion = branchBrowserVersions['chrome:beta'] !== latestBetaVersion
 
-  core.setOutput('has_newer_update', (hasNewerStableVersion || hasNewerBetaVersion) ? 'true' : 'false')
+  core.setOutput('has_newer_update', hasNewerStableVersion || hasNewerBetaVersion ? 'true' : 'false')
 }
 
 const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) => {
@@ -83,7 +83,7 @@ const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) =
   }
 
   // file path is relative to repo root
-  fs.writeFileSync('./browser-versions.json', `${JSON.stringify(versions, null, 2) }\n`)
+  fs.writeFileSync('./browser-versions.json', `${JSON.stringify(versions, null, 2)}\n`)
 }
 
 const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {

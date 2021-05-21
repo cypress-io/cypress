@@ -9,8 +9,7 @@ const clean = (done) => {
 }
 
 const manifest = () => {
-  return gulp.src('app/manifest.json')
-  .pipe(gulp.dest('dist'))
+  return gulp.src('app/manifest.json').pipe(gulp.dest('dist'))
 }
 
 const background = (cb) => {
@@ -20,17 +19,16 @@ const background = (cb) => {
 }
 
 const html = () => {
-  return gulp.src('app/**/*.html')
-  .pipe(gulp.dest('dist'))
+  return gulp.src('app/**/*.html').pipe(gulp.dest('dist'))
 }
 
 const css = () => {
-  return gulp.src('app/**/*.css')
-  .pipe(gulp.dest('dist'))
+  return gulp.src('app/**/*.css').pipe(gulp.dest('dist'))
 }
 
 const icons = () => {
-  return gulp.src([
+  return gulp
+  .src([
     cypressIcons.getPathToIcon('icon_16x16.png'),
     cypressIcons.getPathToIcon('icon_19x19.png'),
     cypressIcons.getPathToIcon('icon_38x38.png'),
@@ -41,23 +39,10 @@ const icons = () => {
 }
 
 const logos = () => {
-  return gulp.src([
-    cypressIcons.getPathToLogo('cypress-bw.png'),
-  ])
-  .pipe(gulp.dest('dist/logos'))
+  return gulp.src([cypressIcons.getPathToLogo('cypress-bw.png')]).pipe(gulp.dest('dist/logos'))
 }
 
-const build = gulp.series(
-  clean,
-  gulp.parallel(
-    icons,
-    logos,
-    manifest,
-    background,
-    html,
-    css,
-  ),
-)
+const build = gulp.series(clean, gulp.parallel(icons, logos, manifest, background, html, css))
 
 const watchBuild = () => {
   return gulp.watch('app/**/*', build)

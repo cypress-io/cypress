@@ -23,7 +23,7 @@ const isValidJSON = function (text) {
 }
 
 module.exports = {
-  handle (req, res, config, next) {
+  handle(req, res, config, next) {
     const get = function (val, def) {
       return decodeURI(req.get(val) || def)
     }
@@ -69,14 +69,10 @@ module.exports = {
 
         headers['content-length'] = chunk.length
 
-        return res
-        .set(headers)
-        .status(status)
-        .end(chunk)
-      }).catch((err) => {
-        return res
-        .status(400)
-        .send({ __error: err.stack })
+        return res.set(headers).status(status).end(chunk)
+      })
+      .catch((err) => {
+        return res.status(400).send({ __error: err.stack })
       })
     }
 
@@ -87,7 +83,7 @@ module.exports = {
     return respond()
   },
 
-  _get (resp, config) {
+  _get(resp, config) {
     const options = {}
 
     const file = resp.replace(fixturesRe, '')
@@ -98,8 +94,7 @@ module.exports = {
       options.encoding = encoding
     }
 
-    return fixture.get(config.fixturesFolder, filePath, options)
-    .then((bytes) => {
+    return fixture.get(config.fixturesFolder, filePath, options).then((bytes) => {
       return {
         data: bytes,
         encoding,
@@ -107,7 +102,7 @@ module.exports = {
     })
   },
 
-  getResponse (resp, config) {
+  getResponse(resp, config) {
     if (fixturesRe.test(resp)) {
       return this._get(resp, config)
     }
@@ -115,7 +110,7 @@ module.exports = {
     return Promise.resolve({ data: resp })
   },
 
-  parseContentType (response) {
+  parseContentType(response) {
     const ret = (type) => {
       return mime.getType(type) //+ "; charset=utf-8"
     }
@@ -131,7 +126,7 @@ module.exports = {
     return ret('text')
   },
 
-  parseHeaders (headers, response) {
+  parseHeaders(headers, response) {
     try {
       headers = JSON.parse(headers)
     } catch (error) {} // eslint-disable-line no-empty
@@ -146,5 +141,4 @@ module.exports = {
 
     return headers
   },
-
 }

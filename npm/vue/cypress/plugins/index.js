@@ -7,7 +7,9 @@ const webpackConfig = require('../../webpack.config')
  */
 module.exports = (on, config) => {
   if (config.testingType !== 'component') {
-    throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
+    throw Error(
+      `This is a component testing project. testingType should be 'component'. Received ${config.testingType}`
+    )
   }
 
   require('@cypress/code-coverage/task')(on, config)

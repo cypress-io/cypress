@@ -25,9 +25,7 @@ describe('Renderless component', () => {
 
     unmount()
 
-    cy.get('@log')
-    .its('callCount')
-    .should('equal', 4)
+    cy.get('@log').its('callCount').should('equal', 4)
 
     cy.get('@log')
     .invoke('getCalls')

@@ -14,7 +14,7 @@ import Child from './Child'
 // import giantImage from '/__root/src/vans.jpg'
 // <img src={giantImage} alt="cypress-logo" />
 
-function App () {
+function App() {
   return (
     <div className="App">
       <img src={cypressLogo} className="Cypress-log" alt="Logo" />
@@ -26,17 +26,11 @@ function App () {
         </p>
         <p className="random">This is a random number {getRandomNumber()}</p>
         <Child />
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
           Learn React
         </a>
         <p>
-          <code>.env</code> variable is{' '}
-          <span id="env-var">{process.env.REACT_APP_NOT_SECRET_CODE}</span>
+          <code>.env</code> variable is <span id="env-var">{process.env.REACT_APP_NOT_SECRET_CODE}</span>
         </p>
       </header>
     </div>

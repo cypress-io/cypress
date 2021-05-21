@@ -14,7 +14,7 @@ const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
 
 class File {
-  constructor (options = {}) {
+  constructor(options = {}) {
     if (!options.path) {
       throw new Error('Must specify path to file when creating new FileUtil()')
     }
@@ -34,7 +34,7 @@ class File {
     })
   }
 
-  transaction (fn) {
+  transaction(fn) {
     debug('transaction for %s', this.path)
 
     return this._addToQueue(() => {
@@ -45,19 +45,19 @@ class File {
     })
   }
 
-  get (...args) {
+  get(...args) {
     debug('get values from %s', this.path)
 
     return this._get(false, ...args)
   }
 
-  set (...args) {
+  set(...args) {
     debug('set values in %s', this.path)
 
     return this._set(false, ...args)
   }
 
-  remove () {
+  remove() {
     debug('remove %s', this.path)
     this._cache = {}
 
@@ -72,17 +72,15 @@ class File {
     })
   }
 
-  _get (inTransaction, key, defaultValue) {
-    const get = inTransaction ?
-      this._getContents()
-      :
-      this._addToQueue(() => {
-        return this._getContents()
-      })
+  _get(inTransaction, key, defaultValue) {
+    const get = inTransaction
+      ? this._getContents()
+      : this._addToQueue(() => {
+          return this._getContents()
+        })
 
-    return get
-    .then((contents) => {
-      if ((key == null)) {
+    return get.then((contents) => {
+      if (key == null) {
         return contents
       }
 
@@ -92,16 +90,15 @@ class File {
     })
   }
 
-  _getContents () {
+  _getContents() {
     // read from disk on first call, but resolve cache for any subsequent
     // calls within the DEBOUNCE_LIMIT
     // once the DEBOUNCE_LIMIT passes, read from disk again
     // on the next call
-    if ((Date.now() - this._lastRead) > DEBOUNCE_LIMIT) {
+    if (Date.now() - this._lastRead > DEBOUNCE_LIMIT) {
       this._lastRead = Date.now()
 
-      return this._read()
-      .tap((contents) => {
+      return this._read().tap((contents) => {
         this._cache = contents
       })
     }
@@ -109,7 +106,7 @@ class File {
     return Promise.resolve(this._cache)
   }
 
-  _read () {
+  _read() {
     return this._lock()
     .then(() => {
       debug('read %s', this.path)
@@ -119,9 +116,9 @@ class File {
     .catch((err) => {
       // default to {} in certain cases, otherwise bubble up error
       if (
-        (err.code === 'ENOENT') || // file doesn't exist
-        (err.code === 'EEXIST') || // file contains invalid JSON
-        (err.name === 'SyntaxError') // can't get lock on file
+        err.code === 'ENOENT' || // file doesn't exist
+        err.code === 'EEXIST' || // file contains invalid JSON
+        err.name === 'SyntaxError' // can't get lock on file
       ) {
         return {}
       }
@@ -135,9 +132,9 @@ class File {
     })
   }
 
-  _set (inTransaction, key, value) {
+  _set(inTransaction, key, value) {
     if (!_.isString(key) && !_.isPlainObject(key)) {
-      const type = _.isArray(key) ? 'array' : (typeof key)
+      const type = _.isArray(key) ? 'array' : typeof key
 
       throw new TypeError(`Expected \`key\` to be of type \`string\` or \`object\`, got \`${type}\``)
     }
@@ -161,9 +158,8 @@ class File {
     })
   }
 
-  _setContents (valueObject) {
-    return this._getContents()
-    .then((contents) => {
+  _setContents(valueObject) {
+    return this._getContents().then((contents) => {
       _.each(valueObject, (value, key) => {
         _.set(contents, key, value)
       })
@@ -174,14 +170,14 @@ class File {
     })
   }
 
-  _addToQueue (operation) {
+  _addToQueue(operation) {
     // queues operations so they occur serially as invoked
     return Promise.try(() => {
       return this._queue.add(operation)
     })
   }
 
-  _write () {
+  _write() {
     return this._lock()
     .then(() => {
       debug('write %s', this.path)
@@ -195,7 +191,7 @@ class File {
     })
   }
 
-  _lock () {
+  _lock() {
     debug('attempt to get lock on %s', this.path)
 
     return fs
@@ -209,7 +205,7 @@ class File {
     })
   }
 
-  _unlock () {
+  _unlock() {
     debug('attempt to unlock %s', this.path)
 
     return lockFile
@@ -223,14 +219,14 @@ class File {
 }
 
 File.noopFile = {
-  get () {
+  get() {
     return Promise.resolve({})
   },
-  set () {
+  set() {
     return Promise.resolve()
   },
-  transaction () {},
-  remove () {
+  transaction() {},
+  remove() {
     return Promise.resolve()
   },
 }

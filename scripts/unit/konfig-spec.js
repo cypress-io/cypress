@@ -19,12 +19,7 @@ describe('konfig check', () => {
 
   before(() => {
     cwd = process.cwd()
-    la(
-      !cwd.includes(join('packages', 'server')),
-      'process CWD is set to',
-      cwd,
-      'for some reason',
-    )
+    la(!cwd.includes(join('packages', 'server')), 'process CWD is set to', cwd, 'for some reason')
     // if the above assertion breaks, it means some script in binary scripts
     // loads "lib/konfig" directly, which unexpectedly changes the CWD.
   })
@@ -33,13 +28,7 @@ describe('konfig check', () => {
     const konfig = require('../binary/get-config')()
     const cwdAfter = process.cwd()
 
-    la(
-      cwd === cwdAfter,
-      'previous cwd',
-      cwd,
-      'differs after loading konfig',
-      cwdAfter,
-    )
+    la(cwd === cwdAfter, 'previous cwd', cwd, 'differs after loading konfig', cwdAfter)
 
     la(is.fn(konfig), 'expected konfig to be a function', konfig)
   })

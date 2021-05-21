@@ -11,8 +11,7 @@ describe('e2e headless spec', function () {
       return
     }
 
-    cy.wrap(navigator.userAgent)
-    .should(expectedHeadless ? 'contain' : 'not.contain', 'HeadlessChrome')
+    cy.wrap(navigator.userAgent).should(expectedHeadless ? 'contain' : 'not.contain', 'HeadlessChrome')
   })
 
   it('has expected launch args', function () {
@@ -20,7 +19,6 @@ describe('e2e headless spec', function () {
       return
     }
 
-    cy.task('get:browser:args')
-    .should(expectedHeadless ? 'contain' : 'not.contain', '--headless')
+    cy.task('get:browser:args').should(expectedHeadless ? 'contain' : 'not.contain', '--headless')
   })
 })

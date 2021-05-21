@@ -26,7 +26,7 @@ const URLS_UNDER_TEST = [
   'http://test-page-speed.cypress.io/index1000.html',
 ]
 
-const start = (new Date()) / 1000
+const start = new Date() / 1000
 
 const PROXY_PORT = process.env.PROXY_PORT || 45678
 const HTTPS_PROXY_PORT = process.env.HTTPS_PROXY_PORT || 45681
@@ -108,7 +108,7 @@ const average = (arr) => {
 }
 
 const percentile = (sortedArr, p) => {
-  const i = Math.floor(p / 100 * (sortedArr.length - 1))
+  const i = Math.floor((p / 100) * (sortedArr.length - 1))
 
   return Math.round(sortedArr[i])
 }
@@ -128,10 +128,10 @@ const getResultsFromHar = (har) => {
   let maxes = {}
 
   const timings = {
-    'receive': [],
-    'wait': [],
-    'send': [],
-    'total': [],
+    receive: [],
+    wait: [],
+    send: [],
+    total: [],
   }
 
   entries.forEach((entry) => {
@@ -141,11 +141,15 @@ const getResultsFromHar = (har) => {
     timings.total.push(totalTime)
 
     Object.keys(entry.timings).forEach((timingKey) => {
-      if (entry.timings[timingKey] === -1 || !entry.timings[timingKey]) return
+      if (entry.timings[timingKey] === -1 || !entry.timings[timingKey]) {
+        return
+      }
 
       const ms = Math.round(entry.timings[timingKey])
 
-      if (timings[timingKey]) timings[timingKey].push(ms)
+      if (timings[timingKey]) {
+        timings[timingKey].push(ms)
+      }
     })
   })
 
@@ -167,7 +171,6 @@ const getResultsFromHar = (har) => {
   results['Min'] = mins.total
 
   expect(timings.total.length).to.be.at.least(1000)
-
   ;[1, 5, 25, 50, 75, 95, 99, 99.7].forEach((p) => {
     results[`${p}% <=`] = percentile(timings.total, p)
   })
@@ -234,8 +237,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
     const artifacts = process.env.CIRCLE_ARTIFACTS
 
     if (artifacts) {
-      return fse.ensureDir(artifacts)
-      .then(() => {
+      return fse.ensureDir(artifacts).then(() => {
         const pathToFile = path.join(artifacts, sanitizeFilename(`${name}.har`))
 
         debug('saving har to path:', pathToFile)
@@ -250,16 +252,15 @@ const runBrowserTest = (urlUnderTest, testCase) => {
     return Promise.delay(500).then(() => {
       debug('Trying to connect to Chrome...')
 
-      const harCapturer = HarCapturer.run([
-        urlUnderTest,
-      ], {
+      const harCapturer = HarCapturer.run([urlUnderTest], {
         port: cdpPort,
         // disable SSL verification on older Chrome versions, copied from the HAR CLI
         // https://github.com/cyrus-and/chrome-har-capturer/blob/587550508bddc23b7f4b4328c158322be4749298/bin/cli.js#L60
         preHook: (_, cdp) => {
           const { Security } = cdp
 
-          return Security.enable().then(() => {
+          return Security.enable()
+          .then(() => {
             return Security.setOverrideCertificateErrors({ override: true })
           })
           .then(() => {
@@ -301,8 +302,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
 
         _.merge(testCase, results)
 
-        return storeHar(testCase.name, har)
-        .return(results)
+        return storeHar(testCase.name, har).return(results)
       })
       .catch({ code: 'ECONNREFUSED' }, (err) => {
         // sometimes chrome takes surprisingly long, just reconn
@@ -351,7 +351,7 @@ describe('Proxy Performance', function () {
           cyServer = new ServerE2E()
 
           return cyServer.open(config)
-        }),
+        })
       )
     })
   })
@@ -363,8 +363,7 @@ describe('Proxy Performance', function () {
 
       before(function () {
         // run baseline test
-        return runBrowserTest(urlUnderTest, testCases[0])
-        .then((runtime) => {
+        return runBrowserTest(urlUnderTest, testCases[0]).then((runtime) => {
           debug('baseline runtime is: ', runtime)
 
           baseline = runtime
@@ -384,15 +383,14 @@ describe('Proxy Performance', function () {
         it(`${testCase.name} loads 1000 images less than ${multiplier}x as slowly as Chrome`, function () {
           debug('Current test: ', testCase.name)
 
-          return runBrowserTest(urlUnderTest, testCase)
-          .then((results) => {
+          return runBrowserTest(urlUnderTest, testCase).then((results) => {
             expect(results['Total']).to.be.lessThan(multiplier * baseline['Total'])
           })
         })
       })
 
       after(() => {
-        debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
+        debug(`Done in ${Math.round(new Date() / 1000 - start)}s`)
         process.stdout.write('Note: All times are in milliseconds.\n')
 
         console.table(testCases)

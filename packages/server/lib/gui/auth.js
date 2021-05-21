@@ -35,8 +35,7 @@ const _buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
 
   const authUrl = url.parse(baseLoginUrl)
 
-  return machineId.machineId()
-  .then((id) => {
+  return machineId.machineId().then((id) => {
     authUrl.query = {
       port,
       state: authState,
@@ -68,7 +67,7 @@ const _getOriginFromUrl = (originalUrl) => {
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
 const start = (onMessage, utmCode) => {
-  function sendMessage (type, name, arg1) {
+  function sendMessage(type, name, arg1) {
     onMessage({
       type,
       name,
@@ -79,7 +78,8 @@ const start = (onMessage, utmCode) => {
 
   authRedirectReached = false
 
-  return user.getBaseLoginUrl()
+  return user
+  .getBaseLoginUrl()
   .then((baseLoginUrl) => {
     return _launchServer(baseLoginUrl, sendMessage, utmCode)
   })
@@ -89,8 +89,7 @@ const start = (onMessage, utmCode) => {
   .then((loginRedirectUrl) => {
     debug('Trying to open native auth to URL ', loginRedirectUrl)
 
-    return _launchNativeAuth(loginRedirectUrl, sendMessage)
-    .then(() => {
+    return _launchNativeAuth(loginRedirectUrl, sendMessage).then(() => {
       debug('openExternal completed')
     })
   })
@@ -119,8 +118,7 @@ const _launchServer = (baseLoginUrl, sendMessage, utmCode) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      _buildFullLoginUrl(baseLoginUrl, server, utmCode)
-      .then((fullLoginUrl) => {
+      _buildFullLoginUrl(baseLoginUrl, server, utmCode).then((fullLoginUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
         res.redirect(303, fullLoginUrl)
@@ -158,7 +156,8 @@ const _launchServer = (baseLoginUrl, sendMessage, utmCode) => {
           authToken: access_token,
         }
 
-        return user.set(userObj)
+        return user
+        .set(userObj)
         .then(() => {
           authCallback(undefined, userObj)
           redirectToStatus('success')
@@ -207,8 +206,7 @@ const _launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
-  return shell.openExternal(loginUrl)
-  .catch((err) => {
+  return shell.openExternal(loginUrl).catch((err) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()
   })

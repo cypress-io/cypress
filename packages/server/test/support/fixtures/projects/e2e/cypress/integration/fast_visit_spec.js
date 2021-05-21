@@ -15,8 +15,7 @@ const fastVisitSpec = function (url) {
   const times = []
 
   Cypress._.times(100, () => {
-    cy.visit(url)
-    .then(function () {
+    cy.visit(url).then(function () {
       const time = this.lastLog.get('totalTime')
 
       times.push(time)
@@ -43,8 +42,7 @@ const fastVisitSpec = function (url) {
       url,
       browser: Cypress.config('browser').name,
       currentRetry: Cypress.env('currentRetry'),
-    })
-    .then(() => {
+    }).then(() => {
       expect(percentile(80)).to.be.lte(100)
       expect(percentile(95)).to.be.lte(250)
     })

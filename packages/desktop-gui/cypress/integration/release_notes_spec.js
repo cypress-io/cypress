@@ -8,8 +8,8 @@ describe('Release Notes', () => {
   beforeEach(() => {
     let user
 
-    cy.fixture('user').then((theUser) => user = theUser)
-    cy.fixture('release_notes').then((theReleaseNotes) => releaseNotes = theReleaseNotes)
+    cy.fixture('user').then((theUser) => (user = theUser))
+    cy.fixture('release_notes').then((theReleaseNotes) => (releaseNotes = theReleaseNotes))
     cy.intercept('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
 
     cy.visitIndex().then((win) => {
@@ -53,7 +53,10 @@ describe('Release Notes', () => {
   })
 
   it('shows update instructions if getting release notes errors', () => {
-    cy.get('.update-notice').contains('Learn more').click().then(() => {
+    cy.get('.update-notice')
+    .contains('Learn more')
+    .click()
+    .then(() => {
       getReleaseNotes.reject(new Error('something went wrong'))
     })
 
@@ -80,17 +83,11 @@ describe('Release Notes', () => {
     })
 
     it('shows content', () => {
-      cy.get('.release-notes .contents')
-      .shadow()
-      .find('h1')
-      .should('have.text', 'This is a great release')
+      cy.get('.release-notes .contents').shadow().find('h1').should('have.text', 'This is a great release')
     })
 
     it('content handles emoji', () => {
-      cy.get('.release-notes .contents')
-      .shadow()
-      .find('h2')
-      .should('include.text', '😀 4️⃣ 👽 👍 🌎')
+      cy.get('.release-notes .contents').shadow().find('h2').should('include.text', '😀 4️⃣ 👽 👍 🌎')
     })
 
     it('opens links in content externally', () => {
@@ -98,7 +95,9 @@ describe('Release Notes', () => {
       .shadow()
       .find('a')
       .each(($a) => {
-        cy.wrap($a).click().then(() => {
+        cy.wrap($a)
+        .click()
+        .then(() => {
           expect(ipc.externalOpen).to.be.calledWith($a.attr('href'))
         })
       })
@@ -123,12 +122,13 @@ describe('Release Notes', () => {
     })
 
     it('external link text handles emoji', () => {
-      cy.get('.release-notes .external-link')
-      .should('include.text', '👍')
+      cy.get('.release-notes .external-link').should('include.text', '👍')
     })
 
     it('opens external link externally', () => {
-      cy.get('.release-notes .external-link').click().then(() => {
+      cy.get('.release-notes .external-link')
+      .click()
+      .then(() => {
         expect(ipc.externalOpen).to.be.calledWith(releaseNotes.externalLink)
       })
     })

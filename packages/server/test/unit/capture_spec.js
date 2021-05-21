@@ -18,11 +18,7 @@ describe('lib/capture', () => {
       console.log('bar')
       process.stdout.write('baz')
 
-      expect(this.captured.data).to.deep.eq([
-        'foo\n',
-        'bar\n',
-        'baz',
-      ])
+      expect(this.captured.data).to.deep.eq(['foo\n', 'bar\n', 'baz'])
 
       expect(this.captured.toString()).to.eq('foo\nbar\nbaz')
 
@@ -37,7 +33,7 @@ describe('lib/capture', () => {
   context('process.log', () => {
     beforeEach(function () {
       this.log = process.log
-      this.logStub = (process.log = sinon.stub())
+      this.logStub = process.log = sinon.stub()
 
       this.captured = capture.stdout()
     })
@@ -50,10 +46,7 @@ describe('lib/capture', () => {
       process.log('foo\n')
       process.log('bar\n')
 
-      expect(this.captured.data).to.deep.eq([
-        'foo\n',
-        'bar\n',
-      ])
+      expect(this.captured.data).to.deep.eq(['foo\n', 'bar\n'])
 
       expect(this.captured.toString()).to.eq('foo\nbar\n')
 

@@ -20,7 +20,9 @@ const register = (projectRoot, pluginsFile) => {
   try {
     const tsPath = resolve.typescript(projectRoot)
 
-    if (!tsPath) return
+    if (!tsPath) {
+      return
+    }
 
     const tsOptions = getTsNodeOptions(tsPath, pluginsFile)
 

@@ -12,19 +12,17 @@ const verifyPassedAndFailedAreSame = (expectedFailures) => {
 
 describe('e2e error ui', function () {
   e2e.setup()
-
   ;[
     'webpack-preprocessor',
     'webpack-preprocessor-ts-loader',
     'webpack-preprocessor-ts-loader-compiler-options',
     'webpack-preprocessor-awesome-typescript-loader',
-  ]
-  .forEach((project) => {
+  ].forEach((project) => {
     e2e.it(`handles sourcemaps in webpack for project: ${project}`, {
       project: Fixtures.projectPath(project),
       spec: 'failing_spec.*',
       expectedExitCode: 1,
-      onRun (exec) {
+      onRun(exec) {
         return exec().then(verifyPassedAndFailedAreSame(1))
       },
     })
@@ -35,7 +33,7 @@ describe('e2e error ui', function () {
     project: path.join(Fixtures.projectPath('integration-outside-project-root'), 'project-root'),
     spec: '../../../integration/failing_spec.js',
     expectedExitCode: 1,
-    onRun (exec) {
+    onRun(exec) {
       return exec().then(verifyPassedAndFailedAreSame(1))
     },
   })

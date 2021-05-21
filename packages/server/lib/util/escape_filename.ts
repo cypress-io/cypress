@@ -3,7 +3,7 @@ const percentRe = /%/g
 const questionRe = /\?/g
 const plusRe = /\+/g
 
-export function escapeFilenameInUrl (url: string) {
+export function escapeFilenameInUrl(url: string) {
   // escape valid file name characters that cannot be used in URL
   return url
   .replace(percentRe, '%25') // %

@@ -4,17 +4,9 @@ import Debug from 'debug'
 import { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 
-import {
-  ResponseMiddleware,
-} from '@packages/proxy'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_RES_PROPS,
-} from '../../types'
-import {
-  getBodyStream,
-  mergeDeletedHeaders,
-} from '../util'
+import { ResponseMiddleware } from '@packages/proxy'
+import { CyHttpMessages, SERIALIZABLE_RES_PROPS } from '../../types'
+import { getBodyStream, mergeDeletedHeaders } from '../util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
@@ -50,8 +42,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     } else {
       this.incomingResStream.pipe(concatStream(resolve))
     }
-  })
-  .then((buf) => {
+  }).then((buf) => {
     return getEncoding(buf) !== 'binary' ? buf.toString('utf8') : buf
   })
 

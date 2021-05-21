@@ -3,9 +3,7 @@ const { Promise } = Cypress
 
 describe('src/cy/commands/actions/submit', () => {
   before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
+    cy.visit('/fixtures/dom.html').then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
@@ -22,7 +20,9 @@ describe('src/cy/commands/actions/submit', () => {
         return false
       })
 
-      cy.get('form:first').submit().then(($form) => {
+      cy.get('form:first')
+      .submit()
+      .then(($form) => {
         expect($form.get(0)).to.eq(form.get(0))
       })
     })
@@ -30,11 +30,15 @@ describe('src/cy/commands/actions/submit', () => {
     it('works with native event listeners', () => {
       let submitted = false
 
-      cy.$$('form:first').get(0).addEventListener('submit', () => {
+      cy.$$('form:first')
+      .get(0)
+      .addEventListener('submit', () => {
         submitted = true
       })
 
-      cy.get('form:first').submit().then(() => {
+      cy.get('form:first')
+      .submit()
+      .then(() => {
         expect(submitted).to.be.true
       })
     })
@@ -42,25 +46,27 @@ describe('src/cy/commands/actions/submit', () => {
     it('bubbles up to the window', () => {
       let onsubmitCalled = false
 
-      cy
-      .window().then((win) => {
+      cy.window()
+      .then((win) => {
         win.onsubmit = () => {
           onsubmitCalled = true
         }
       })
-      .get('form:first').submit().then(() => {
+      .get('form:first')
+      .submit()
+      .then(() => {
         expect(onsubmitCalled).to.be.true
       })
     })
 
     it('does not submit the form action is prevented default', (done) => {
-      cy.$$('form:first').parent().on('submit', (e) => {
+      cy.$$('form:first')
+      .parent()
+      .on('submit', (e) => {
         e.preventDefault()
       })
 
-      cy
-      .window()
-      .then((win) => {
+      cy.window().then((win) => {
         const $win = $(win)
 
         // if we reach beforeunload we know the form
@@ -71,7 +77,9 @@ describe('src/cy/commands/actions/submit', () => {
           return undefined
         })
 
-        cy.get('form:first').submit().then(() => {
+        cy.get('form:first')
+        .submit()
+        .then(() => {
           $win.off('beforeunload')
 
           done()
@@ -80,13 +88,13 @@ describe('src/cy/commands/actions/submit', () => {
     })
 
     it('does not submit the form action returned false', (done) => {
-      cy.$$('form:first').parent().on('submit', (e) => {
+      cy.$$('form:first')
+      .parent()
+      .on('submit', (e) => {
         return false
       })
 
-      cy
-      .window()
-      .then((win) => {
+      cy.window().then((win) => {
         const $win = $(win)
 
         // if we reach beforeunload we know the form
@@ -97,7 +105,9 @@ describe('src/cy/commands/actions/submit', () => {
           return undefined
         })
 
-        cy.get('form:first').submit().then(() => {
+        cy.get('form:first')
+        .submit()
+        .then(() => {
           $win.off('beforeunload')
 
           done()
@@ -108,8 +118,8 @@ describe('src/cy/commands/actions/submit', () => {
     it('actually submits the form.', () => {
       let beforeunload = false
 
-      cy
-      .window().then((win) => {
+      cy.window()
+      .then((win) => {
         // if we reach beforeunload we know the form
         // has been submitted
         $(win).on('beforeunload', () => {
@@ -118,13 +128,15 @@ describe('src/cy/commands/actions/submit', () => {
           return undefined
         })
       })
-      .get('form:first').submit().then(() => {
+      .get('form:first')
+      .submit()
+      .then(() => {
         expect(beforeunload).to.be.true
       })
     })
 
     // if we removed our submit handler this would fail.
-    it('fires \'form:submitted event\'', () => {
+    it("fires 'form:submitted event'", () => {
       const $form = cy.$$('form:first')
       // we must rely on isReady already being pending here
       // because the submit method does not trigger beforeunload
@@ -138,12 +150,14 @@ describe('src/cy/commands/actions/submit', () => {
         expect(e.target).to.eq($form.get(0))
       })
 
-      cy.get('form:first').submit().then(() => {
+      cy.get('form:first')
+      .submit()
+      .then(() => {
         expect(submitted).to.be.true
       })
     })
 
-    it('does not fire \'form:submitted\' if default action is prevented', () => {
+    it("does not fire 'form:submitted' if default action is prevented", () => {
       let submitted = false
 
       cy.on('form:submitted', (e) => {
@@ -154,8 +168,9 @@ describe('src/cy/commands/actions/submit', () => {
         e.preventDefault()
       })
 
-      cy
-      .get('form:first').submit().then(() => {
+      cy.get('form:first')
+      .submit()
+      .then(() => {
         expect(submitted).to.be.false
       })
     })
@@ -165,7 +180,9 @@ describe('src/cy/commands/actions/submit', () => {
         cy.spy(Promise, 'delay')
       })
 
-      cy.get('form:first').submit().then(() => {
+      cy.get('form:first')
+      .submit()
+      .then(() => {
         expect(Promise.delay).to.be.calledWith(50, 'submit')
       })
     })
@@ -173,7 +190,9 @@ describe('src/cy/commands/actions/submit', () => {
     it('increases the timeout delta', () => {
       cy.spy(cy, 'timeout')
 
-      cy.get('form:first').submit().then(() => {
+      cy.get('form:first')
+      .submit()
+      .then(() => {
         expect(cy.timeout).to.be.calledWith(50, true)
       })
     })
@@ -198,7 +217,10 @@ describe('src/cy/commands/actions/submit', () => {
           return false
         })
 
-        cy.get('form:first').submit().should('have.class', 'submitted').then(function () {
+        cy.get('form:first')
+        .submit()
+        .should('have.class', 'submitted')
+        .then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -208,134 +230,142 @@ describe('src/cy/commands/actions/submit', () => {
       })
     })
 
-    describe('errors', {
-      defaultCommandTimeout: 100,
-    }, () => {
-      beforeEach(function () {
-        this.logs = []
+    describe(
+      'errors',
+      {
+        defaultCommandTimeout: 100,
+      },
+      () => {
+        beforeEach(function () {
+          this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          cy.on('log:added', (attrs, log) => {
+            this.lastLog = log
+            this.logs.push(log)
+          })
+
+          return null
         })
 
-        return null
-      })
+        it('is a child command', (done) => {
+          cy.on('fail', () => {
+            done()
+          })
 
-      it('is a child command', (done) => {
-        cy.on('fail', () => {
-          done()
+          cy.submit()
         })
 
-        cy.submit()
-      })
+        it('throws when non dom subject', (done) => {
+          cy.on('fail', () => {
+            done()
+          })
 
-      it('throws when non dom subject', (done) => {
-        cy.on('fail', () => {
-          done()
+          cy.noop({}).submit()
         })
 
-        cy.noop({}).submit()
-      })
+        it('throws when subject isnt a form', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when subject isnt a form', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+            expect(this.logs.length).to.eq(2)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(err.message).to.include(
+              '`cy.submit()` can only be called on a `<form>`. Your subject contains a: `<input id="input">`'
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/submit')
 
-          expect(this.logs.length).to.eq(2)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('`cy.submit()` can only be called on a `<form>`. Your subject contains a: `<input id="input">`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/submit')
+            done()
+          })
 
-          done()
+          cy.get('input').submit()
         })
 
-        cy.get('input').submit()
-      })
+        it('throws when subject is not in the document', (done) => {
+          let submitted = 0
 
-      it('throws when subject is not in the document', (done) => {
-        let submitted = 0
+          const form = cy.$$('form:first').submit((e) => {
+            submitted += 1
+            form.remove()
 
-        const form = cy.$$('form:first').submit((e) => {
-          submitted += 1
-          form.remove()
+            return false
+          })
 
-          return false
+          cy.on('fail', (err) => {
+            expect(submitted).to.eq(1)
+            expect(err.message).to.include('`cy.submit()` failed because this element')
+
+            done()
+          })
+
+          cy.get('form:first').submit().submit()
         })
 
-        cy.on('fail', (err) => {
-          expect(submitted).to.eq(1)
-          expect(err.message).to.include('`cy.submit()` failed because this element')
+        it('throws when subject is a collection of elements', (done) => {
+          const forms = cy.$$('form')
 
-          done()
+          // make sure we have more than 1 form.
+          expect(forms.length).to.be.gt(1)
+
+          cy.on('fail', (err) => {
+            expect(err.message).to.include(
+              `\`cy.submit()\` can only be called on a single \`form\`. Your subject contained ${forms.length} \`form\` elements.`
+            )
+            expect(err.docsUrl).to.eq('https://on.cypress.io/submit')
+
+            done()
+          })
+
+          cy.get('form').submit()
         })
 
-        cy.get('form:first').submit().submit()
-      })
+        it('logs once when not dom subject', function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-      it('throws when subject is a collection of elements', (done) => {
-        const forms = cy.$$('form')
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error')).to.eq(err)
 
-        // make sure we have more than 1 form.
-        expect(forms.length).to.be.gt(1)
+            done()
+          })
 
-        cy.on('fail', (err) => {
-          expect(err.message).to.include(`\`cy.submit()\` can only be called on a single \`form\`. Your subject contained ${forms.length} \`form\` elements.`)
-          expect(err.docsUrl).to.eq('https://on.cypress.io/submit')
-
-          done()
+          return cy.submit()
         })
 
-        cy.get('form').submit()
-      })
+        it('eventually fails the assertion', function (done) {
+          cy.$$('form:first').submit(() => {
+            return false
+          })
 
-      it('logs once when not dom subject', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+          cy.on('fail', (err) => {
+            const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
+            expect(err.message).to.include(lastLog.get('error').message)
+            expect(err.message).not.to.include('undefined')
+            expect(lastLog.get('name')).to.eq('assert')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          done()
+            done()
+          })
+
+          cy.get('form:first').submit().should('have.class', 'submitted')
         })
 
-        return cy.submit()
-      })
+        it('does not log an additional log on failure', function (done) {
+          cy.$$('form:first').submit(() => {
+            return false
+          })
 
-      it('eventually fails the assertion', function (done) {
-        cy.$$('form:first').submit(() => {
-          return false
+          cy.on('fail', () => {
+            expect(this.logs.length).to.eq(3)
+
+            done()
+          })
+
+          cy.get('form:first').submit().should('have.class', 'submitted')
         })
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
-
-          done()
-        })
-
-        cy.get('form:first').submit().should('have.class', 'submitted')
-      })
-
-      it('does not log an additional log on failure', function (done) {
-        cy.$$('form:first').submit(() => {
-          return false
-        })
-
-        cy.on('fail', () => {
-          expect(this.logs.length).to.eq(3)
-
-          done()
-        })
-
-        cy.get('form:first').submit().should('have.class', 'submitted')
-      })
-    })
+      }
+    )
 
     describe('.log', () => {
       beforeEach(function () {
@@ -366,7 +396,10 @@ describe('src/cy/commands/actions/submit', () => {
           return false
         })
 
-        cy.get('form').first().submit().then(function ($form) {
+        cy.get('form')
+        .first()
+        .submit()
+        .then(function ($form) {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('submit')
@@ -381,7 +414,9 @@ describe('src/cy/commands/actions/submit', () => {
           return false
         })
 
-        cy.$$('form').first().submit(() => {
+        cy.$$('form')
+        .first()
+        .submit(() => {
           const { lastLog } = this
 
           expected = true
@@ -391,7 +426,10 @@ describe('src/cy/commands/actions/submit', () => {
           expect(lastLog.get('snapshots')[0].body).to.be.an('object')
         })
 
-        cy.get('form').first().submit().then(() => {
+        cy.get('form')
+        .first()
+        .submit()
+        .then(() => {
           expect(expected).to.be.true
         })
       })
@@ -401,7 +439,10 @@ describe('src/cy/commands/actions/submit', () => {
           return false
         })
 
-        cy.get('form').first().submit().then(function ($form) {
+        cy.get('form')
+        .first()
+        .submit()
+        .then(function ($form) {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(2)
@@ -415,7 +456,10 @@ describe('src/cy/commands/actions/submit', () => {
           return false
         })
 
-        cy.get('form').first().submit().then(function ($form) {
+        cy.get('form')
+        .first()
+        .submit()
+        .then(function ($form) {
           const { lastLog } = this
 
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({

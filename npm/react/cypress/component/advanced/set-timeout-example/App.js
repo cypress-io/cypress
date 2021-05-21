@@ -8,15 +8,15 @@ class App extends Component {
     isLoading: true,
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this._timer = setTimeout(() => this.setState({ isLoading: false }), 2000)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     clearTimeout(this._timer)
   }
 
-  render () {
+  render() {
     return (
       <div className="App">
         <header className="App-header">

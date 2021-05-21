@@ -1,15 +1,14 @@
-import * as React from 'react'
-import { useRef, RefObject } from 'react'
+import React, { useRef, RefObject } from 'react'
 import cs from 'classnames'
-
 import { useButton } from '@react-aria/button'
-import { AriaButtonProps } from '@react-types/button'
-import { TextSizableComponent } from '../shared'
-import { styledTextSizeClassNames } from 'core/text/styledText'
-
-import styles from './Button.module.scss'
 import { FocusRing } from '@react-aria/focus'
+import { AriaButtonProps } from '@react-types/button'
+
+import { styledTextSizeClassNames } from 'core/text/styledText'
+import { TextSizableComponent } from '../shared'
+
 import { focusClass } from 'css/derived/util'
+import styles from './Button.module.scss'
 
 interface SharedButtonProps extends TextSizableComponent {
   /**
@@ -21,11 +20,15 @@ interface SharedButtonProps extends TextSizableComponent {
   ['aria-label']: string
 }
 
-export type BaseButtonProps = SharedButtonProps & (({
-  elementType: 'button'
-} & AriaButtonProps<'button'>) | ({
-  elementType: 'a'
-} & AriaButtonProps<'a'>))
+export type BaseButtonProps = SharedButtonProps &
+  (
+    | ({
+        elementType: 'button'
+      } & AriaButtonProps<'button'>)
+    | ({
+        elementType: 'a'
+      } & AriaButtonProps<'a'>)
+  )
 
 export type ButtonProps = SharedButtonProps & Omit<AriaButtonProps<'button'>, 'elementType'>
 
@@ -38,19 +41,21 @@ export const BaseButton: React.FC<BaseButtonProps> = ({ size, color, noBorder, c
 
   const textClass = styledTextSizeClassNames(size)
 
-  const classNames = cs(textClass, styles.button, {
-    [styles.white]: color === 'white',
-    [styles.disableBorder]: noBorder,
-  }, buttonProps.className, props.className)
+  const classNames = cs(
+    textClass,
+    styles.button,
+    {
+      [styles.white]: color === 'white',
+      [styles.disableBorder]: noBorder,
+    },
+    buttonProps.className,
+    props.className
+  )
 
   return (
     <FocusRing focusRingClass={focusClass}>
       {props.elementType === 'button' ? (
-        <button
-          {...buttonProps}
-          ref={buttonRef as RefObject<HTMLButtonElement>}
-          className={classNames}
-        >
+        <button {...buttonProps} ref={buttonRef as RefObject<HTMLButtonElement>} className={classNames}>
           {children}
         </button>
       ) : (
@@ -62,6 +67,10 @@ export const BaseButton: React.FC<BaseButtonProps> = ({ size, color, noBorder, c
   )
 }
 
-export const Button: React.FC<ButtonProps & Omit<AriaButtonProps<'button'>, 'elementType'>> = (props) => <BaseButton {...props} elementType='button' />
+export const Button: React.FC<ButtonProps & Omit<AriaButtonProps<'button'>, 'elementType'>> = (props) => (
+  <BaseButton {...props} elementType="button" />
+)
 
-export const LinkButton: React.FC<ButtonProps & Omit<AriaButtonProps<'a'>, 'elementType'>> = (props) => <BaseButton {...props} elementType='a' />
+export const LinkButton: React.FC<ButtonProps & Omit<AriaButtonProps<'a'>, 'elementType'>> = (props) => (
+  <BaseButton {...props} elementType="a" />
+)

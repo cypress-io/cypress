@@ -6,14 +6,17 @@ let idNum = 0
 const Portal = ({ children }) => {
   const [id, setId] = useState(null)
 
-  useEffect(() => () => {
-    // remove element on unmount. use a try/catch because it's possible
-    // the element was removed from the dom or the dom has been blown
-    // away, which will cause `removeChild` to throw an exception
-    try {
-      document.removeChild(element)
-    } catch (err) {} // eslint-disable-line no-empty
-  }, [true])
+  useEffect(
+    () => () => {
+      // remove element on unmount. use a try/catch because it's possible
+      // the element was removed from the dom or the dom has been blown
+      // away, which will cause `removeChild` to throw an exception
+      try {
+        document.removeChild(element)
+      } catch (err) {} // eslint-disable-line no-empty
+    },
+    [true]
+  )
 
   if (!id) {
     setId(`cy-desktop-gui-portal-${idNum++}`)

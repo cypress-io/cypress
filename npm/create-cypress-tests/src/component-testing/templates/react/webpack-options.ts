@@ -15,21 +15,20 @@ export const WebpackOptions: Template = {
   dependencies: ['webpack', '@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      RequireAst: babel.template.ast([
-        'const path = require("path")',
-        'const { startDevServer } = require("@cypress/webpack-dev-Server")',
-      ].join('\n')),
+      RequireAst: babel.template.ast(
+        ['const path = require("path")', 'const { startDevServer } = require("@cypress/webpack-dev-Server")'].join('\n')
+      ),
       IfComponentTestingPluginsAst: babel.template.ast(
         fs.readFileSync(path.resolve(__dirname, 'webpack-options-module-exports.template.js'), { encoding: 'utf-8' }),
-        { preserveComments: true },
+        { preserveComments: true }
       ),
     }
   },
   printHelper: () => {
     console.log(
       `${chalk.inverse('Important:')} this configuration is using ${chalk.blue(
-        'new webpack configuration',
-      )} to bundle components. If you are using some framework (e.g. next) or bundling tool (e.g. rollup/vite) consider using them to bundle component specs for cypress. \n`,
+        'new webpack configuration'
+      )} to bundle components. If you are using some framework (e.g. next) or bundling tool (e.g. rollup/vite) consider using them to bundle component specs for cypress. \n`
     )
   },
 }

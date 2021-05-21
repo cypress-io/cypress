@@ -21,13 +21,10 @@ const banner = `
  */
 `
 
-function createEntry () {
+function createEntry() {
   const config = {
     input: 'src/index.ts',
-    external: [
-      'react',
-      'react-dom',
-    ],
+    external: ['react', 'react-dom'],
     plugins: [
       peerDepsExternal(),
       // Mirrors that in tsconfig
@@ -44,9 +41,12 @@ function createEntry () {
           globalModulePaths: ['src/css/derived/export.scss'],
         },
         use: [
-          ['sass', {
-            includePaths: cssFolders,
-          }],
+          [
+            'sass',
+            {
+              includePaths: cssFolders,
+            },
+          ],
         ],
       }),
       image(),
@@ -68,9 +68,12 @@ function createEntry () {
           },
         ],
       }),
-      { name: 'test', writeBundle: () => {
-        replaceTscAliasPaths()
-      } },
+      {
+        name: 'test',
+        writeBundle: () => {
+          replaceTscAliasPaths()
+        },
+      },
     ],
     output: {
       banner,
@@ -89,6 +92,4 @@ function createEntry () {
   return config
 }
 
-export default [
-  createEntry(),
-]
+export default [createEntry()]

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import cs from 'classnames'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -20,27 +20,30 @@ interface GroupedItems {
 }
 
 export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavClasses, navButtonClasses }) => {
-  const mappedItems = items.reduce<GroupedItems>((acc, curr, index) => {
-    if (curr.location === 'bottom') {
+  const mappedItems = items.reduce<GroupedItems>(
+    (acc, curr, index) => {
+      if (curr.location === 'bottom') {
+        return {
+          top: acc.top,
+          bottom: acc.bottom.concat({
+            ...curr,
+            _index: curr._index || index,
+            location: 'bottom',
+          }),
+        }
+      }
+
       return {
-        top: acc.top,
-        bottom: acc.bottom.concat({
+        top: acc.top.concat({
           ...curr,
           _index: curr._index || index,
-          location: 'bottom',
+          location: 'top',
         }),
+        bottom: acc.bottom,
       }
-    }
-
-    return {
-      top: acc.top.concat({
-        ...curr,
-        _index: curr._index || index,
-        location: 'top',
-      }),
-      bottom: acc.bottom,
-    }
-  }, { top: [], bottom: [] })
+    },
+    { top: [], bottom: [] }
+  )
 
   const navItem = (item: NavItemDefinedLocation) => (
     <NavButtonCell
@@ -53,19 +56,13 @@ export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavCla
   )
 
   const topNav = (
-    <nav
-      key='nav-section-top'
-      className={styles.top}
-    >
+    <nav key="nav-section-top" className={styles.top}>
       {mappedItems.top.map((item) => navItem(item))}
     </nav>
   )
 
   const bottomNav = (
-    <nav
-      key='nav-section-bottom'
-      className={styles.bottom}
-    >
+    <nav key="nav-section-bottom" className={styles.bottom}>
       {mappedItems.bottom.map((item) => navItem(item))}
     </nav>
   )
@@ -80,7 +77,12 @@ export const LeftNav: React.FC<LeftNavProps> = ({ items, activeIndex, leftNavCla
   return nav
 }
 
-export const NavButtonCell: React.FC<NavButtonProps> = ({ item: { title, icon, interaction, itemClasses, itemClassesActive = '', itemClassesInactive = '', location }, isActive, navButtonClasses, index }) => {
+export const NavButtonCell: React.FC<NavButtonProps> = ({
+  item: { title, icon, interaction, itemClasses, itemClassesActive = '', itemClassesInactive = '', location },
+  isActive,
+  navButtonClasses,
+  index,
+}) => {
   const commonClasses = cs(styles.item, itemClasses, navButtonClasses, {
     [styles.active]: isActive,
     [styles.inactive]: !isActive,
@@ -106,28 +108,17 @@ export const NavButtonCell: React.FC<NavButtonProps> = ({ item: { title, icon, i
 
     if (interaction.targetBlank) {
       return (
-        <a
-          {...anchorProps}
-          target='_blank'
-        >
+        <a {...anchorProps} target="_blank">
           {faIcon}
         </a>
       )
     }
 
-    return (
-      <a {...anchorProps}>
-        {faIcon}
-      </a>
-    )
+    return <a {...anchorProps}>{faIcon}</a>
   }
 
   return (
-    <a
-      className={commonClasses}
-      title={title}
-      onClick={(event) => interaction.onClick({ event, index })}
-    >
+    <a className={commonClasses} title={title} onClick={(event) => interaction.onClick({ event, index })}>
       {faIcon}
     </a>
   )

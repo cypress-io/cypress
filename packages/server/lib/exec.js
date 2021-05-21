@@ -15,35 +15,33 @@ const trimStdio = R.evolve({
 const loadShellVars = R.memoizeWith(R.toString, shellEnv)
 
 module.exports = {
-  run (projectRoot, options) {
-    let {
-      cmd,
-    } = options
+  run(projectRoot, options) {
+    let { cmd } = options
 
     const shellCommand = function (cmd, cwd, env, shell) {
       log('cy.exec found shell', shell)
       log('and is running command:', options.cmd)
       log('in folder:', projectRoot)
 
-      return execa.shell(cmd, { cwd, env, shell })
+      return execa
+      .shell(cmd, { cwd, env, shell })
       .then((result) => {
         // do we want to return all fields returned by execa?
         result.shell = shell
         result.cmd = cmd
 
         return result
-      }).then(pickMainProps)
+      })
+      .then(pickMainProps)
       .catch(pickMainProps) // transform rejection into an object
       .then(trimStdio)
     }
 
     const run = () => {
-      return loadShellVars()
-      .then((shellVariables) => {
+      return loadShellVars().then((shellVariables) => {
         const env = R.mergeAll([{}, shellVariables, process.env, options.env])
 
-        return utils.getShell(env.SHELL)
-        .then((shell) => {
+        return utils.getShell(env.SHELL).then((shell) => {
           cmd = utils.sourceShellCommand(options.cmd, shell)
 
           return shellCommand(cmd, projectRoot, env, shell)
@@ -51,8 +49,7 @@ module.exports = {
       })
     }
 
-    return Promise
-    .try(run)
+    return Promise.try(run)
     .timeout(options.timeout)
     .catch(Promise.TimeoutError, () => {
       const msg = `Process timed out\ncommand: ${options.cmd}`

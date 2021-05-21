@@ -57,11 +57,11 @@ const renameSupportFolder = (obj) => {
 }
 
 module.exports = {
-  _pathToFile (projectRoot, file) {
+  _pathToFile(projectRoot, file) {
     return path.join(projectRoot, file)
   },
 
-  _err (type, file, err) {
+  _err(type, file, err) {
     const e = errors.get(type, file, err)
 
     e.code = err.code
@@ -69,49 +69,55 @@ module.exports = {
     throw e
   },
 
-  _logReadErr (file, err) {
+  _logReadErr(file, err) {
     errors.throw('ERROR_READING_FILE', file, err)
   },
 
-  _logWriteErr (file, err) {
+  _logWriteErr(file, err) {
     return this._err('ERROR_WRITING_FILE', file, err)
   },
 
-  _write (file, obj = {}) {
-    return fs.outputJsonAsync(file, obj, { spaces: 2 })
+  _write(file, obj = {}) {
+    return fs
+    .outputJsonAsync(file, obj, { spaces: 2 })
     .return(obj)
     .catch((err) => {
       return this._logWriteErr(file, err)
     })
   },
 
-  _applyRewriteRules (obj = {}) {
-    return _.reduce([flattenCypress, renameVisitToPageLoad, renameCommandTimeout, renameSupportFolder], (memo, fn) => {
-      const ret = fn(memo)
+  _applyRewriteRules(obj = {}) {
+    return _.reduce(
+      [flattenCypress, renameVisitToPageLoad, renameCommandTimeout, renameSupportFolder],
+      (memo, fn) => {
+        const ret = fn(memo)
 
-      return ret ? ret : memo
-    }, _.cloneDeep(obj))
+        return ret ? ret : memo
+      },
+      _.cloneDeep(obj)
+    )
   },
 
-  isComponentTesting (options = {}) {
+  isComponentTesting(options = {}) {
     return options.testingType === 'component'
   },
 
-  configFile (options = {}) {
-    return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  configFile(options = {}) {
+    return options.configFile === false ? false : options.configFile || 'cypress.json'
   },
 
-  id (projectRoot, options = {}) {
+  id(projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
+    return fs
+    .readJsonAsync(file)
     .get('projectId')
     .catch(() => {
       return null
     })
   },
 
-  exists (projectRoot, options = {}) {
+  exists(projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
 
     // first check if cypress.json exists
@@ -120,15 +126,18 @@ module.exports = {
       // if it does also check that the projectRoot
       // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
-    }).catch({ code: 'ENOENT' }, () => {
+    })
+    .catch({ code: 'ENOENT' }, () => {
       // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
-    }).catch({ code: 'EACCES' }, () => {
+    })
+    .catch({ code: 'EACCES' }, () => {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
-    }).catch((err) => {
+    })
+    .catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err
       }
@@ -137,17 +146,19 @@ module.exports = {
     })
   },
 
-  read (projectRoot, options = {}) {
+  read(projectRoot, options = {}) {
     if (options.configFile === false) {
       return Promise.resolve({})
     }
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
+    return fs
+    .readJsonAsync(file)
     .catch({ code: 'ENOENT' }, () => {
       return this._write(file, {})
-    }).then((json = {}) => {
+    })
+    .then((json = {}) => {
       if (this.isComponentTesting(options) && 'component' in json) {
         json = { ...json, ...json.component }
       }
@@ -166,7 +177,8 @@ module.exports = {
 
       // else write the new reduced obj
       return this._write(file, changed)
-    }).catch((err) => {
+    })
+    .catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err
       }
@@ -175,10 +187,11 @@ module.exports = {
     })
   },
 
-  readEnv (projectRoot) {
+  readEnv(projectRoot) {
     const file = this.pathToCypressEnvJson(projectRoot)
 
-    return fs.readJsonAsync(file)
+    return fs
+    .readJsonAsync(file)
     .catch({ code: 'ENOENT' }, () => {
       return {}
     })
@@ -191,13 +204,12 @@ module.exports = {
     })
   },
 
-  write (projectRoot, obj = {}, options = {}) {
+  write(projectRoot, obj = {}, options = {}) {
     if (options.configFile === false) {
       return Promise.resolve({})
     }
 
-    return this.read(projectRoot)
-    .then((settings) => {
+    return this.read(projectRoot).then((settings) => {
       _.extend(settings, obj)
 
       const file = this.pathToConfigFile(projectRoot, options)
@@ -206,17 +218,17 @@ module.exports = {
     })
   },
 
-  remove (projectRoot, options = {}) {
+  remove(projectRoot, options = {}) {
     return fs.unlinkSync(this.pathToConfigFile(projectRoot, options))
   },
 
-  pathToConfigFile (projectRoot, options = {}) {
+  pathToConfigFile(projectRoot, options = {}) {
     const configFile = this.configFile(options)
 
     return configFile && this._pathToFile(projectRoot, configFile)
   },
 
-  pathToCypressEnvJson (projectRoot) {
+  pathToCypressEnvJson(projectRoot) {
     return this._pathToFile(projectRoot, 'cypress.env.json')
   },
 }

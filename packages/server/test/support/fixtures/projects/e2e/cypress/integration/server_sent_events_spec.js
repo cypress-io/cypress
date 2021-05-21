@@ -48,13 +48,13 @@ describe('server sent events', () => {
 
         es.onerror = reject
       })
-    }).should('deep.eq', ['1', '2', '3', '4', '5'])
+    })
+    .should('deep.eq', ['1', '2', '3', '4', '5'])
   })
 
   it('aborts proxied connections to prevent client connection buildup', () => {
     // there shouldn't be any leftover connections either
-    cy.request('http://localhost:3038/clients')
-    .its('body').should('deep.eq', { clients: 0 })
+    cy.request('http://localhost:3038/clients').its('body').should('deep.eq', { clients: 0 })
 
     cy.window()
     .then((win) => {
@@ -67,17 +67,17 @@ describe('server sent events', () => {
 
         es.onerror = reject
       })
-    }).then((es) => {
+    })
+    .then((es) => {
       cy.request('http://localhost:3038/clients')
-      .its('body').should('deep.eq', { clients: 1 })
+      .its('body')
+      .should('deep.eq', { clients: 1 })
       .then(() => {
         es.close()
       })
 
-      cy.wait(100)
-      .then(() => {
-        cy.request('http://localhost:3038/clients')
-        .its('body').should('deep.eq', { clients: 0 })
+      cy.wait(100).then(() => {
+        cy.request('http://localhost:3038/clients').its('body').should('deep.eq', { clients: 0 })
       })
     })
   })

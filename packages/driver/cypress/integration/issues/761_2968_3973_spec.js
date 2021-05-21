@@ -68,9 +68,9 @@ if (Cypress.isBrowser('chrome')) {
         }
       })
 
-      cy
-      .server()
-      .route('GET', /timeout/).as('getTimeout')
+      cy.server()
+      .route('GET', /timeout/)
+      .as('getTimeout')
       .visit('http://localhost:3500/fixtures/generic.html')
       .window()
       .then((win) => {
@@ -104,9 +104,9 @@ if (Cypress.isBrowser('chrome')) {
       })
       .wait('@getTimeout')
       .then((xhrProxy) => {
-      // after we unload we should cancel the
-      // pending XHR's and receive it here
-      // after waiting on it
+        // after we unload we should cancel the
+        // pending XHR's and receive it here
+        // after waiting on it
         expect(xhrProxy.canceled).to.be.true
 
         const [firstXhr, secondXhr] = xhrs

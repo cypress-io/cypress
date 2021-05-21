@@ -27,8 +27,7 @@ Bluebird.mapSeries(paths, async (path) => {
   if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
     nextVersion = pathNextVersion
   }
-})
-.then(() => {
+}).then(() => {
   if (!nextVersion) {
     throw new Error('Unable to determine next version.')
   }

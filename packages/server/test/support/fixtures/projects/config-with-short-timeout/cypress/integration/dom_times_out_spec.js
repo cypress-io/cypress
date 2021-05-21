@@ -12,8 +12,7 @@ describe('short defaultCommandTimeout', () => {
       }, 2000)
     }
 
-    cy
-    .visit('/index.html')
+    cy.visit('/index.html')
     // this first time around this should pass
     // which covers the situation of us just fucking
     // up writing this spec

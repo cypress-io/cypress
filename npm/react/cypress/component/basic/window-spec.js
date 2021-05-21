@@ -3,26 +3,20 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 export class Component extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
-    console.log(
-      'set window.counter to this component in window',
-      window.location.pathname,
-    )
+    console.log('set window.counter to this component in window', window.location.pathname)
 
     window.component = this
   }
 
-  render () {
+  render() {
     return <p>component</p>
   }
 }
 
 it('has the same window from the component as from test', () => {
-  cy.window()
-  .its('location')
-  .should('have.property', 'pathname')
-  .and('not.equal', 'blank')
+  cy.window().its('location').should('have.property', 'pathname').and('not.equal', 'blank')
 
   mount(<Component />)
   cy.contains('component')

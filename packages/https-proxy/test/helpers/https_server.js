@@ -25,7 +25,7 @@ const create = (onRequest) => {
 module.exports = {
   create,
 
-  start (port, onRequest) {
+  start(port, onRequest) {
     return new Promise((resolve) => {
       const srv = create(onRequest)
 
@@ -41,15 +41,14 @@ module.exports = {
     })
   },
 
-  stop () {
+  stop() {
     const stop = (srv) => {
       return new Promise((resolve) => {
         srv.destroy(resolve)
       })
     }
 
-    return Promise.map(servers, stop)
-    .then(() => {
+    return Promise.map(servers, stop).then(() => {
       servers = []
     })
   },

@@ -17,9 +17,11 @@ describe('e2e plugins', function () {
     spec: 'app_spec.js',
     project: Fixtures.projectPath('plugins-root-async-error'),
     expectedExitCode: 1,
-    onRun (exec) {
+    onRun(exec) {
       return exec().then(({ stdout }) => {
-        expect(stdout).to.include('The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file')
+        expect(stdout).to.include(
+          'The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file'
+        )
         expect(stdout).to.include('Error: Root async error from plugins file')
       })
     },
@@ -111,10 +113,7 @@ describe('e2e plugins', function () {
     return e2e.exec(this, {
       spec: 'absolute_spec.js',
       config: {
-        pluginsFile: path.join(
-          pluginsAbsolutePath,
-          'cypress/plugins/index.js',
-        ),
+        pluginsFile: path.join(pluginsAbsolutePath, 'cypress/plugins/index.js'),
       },
       project: pluginsAbsolutePath,
       sanitizeScreenshotDimensions: true,

@@ -1,6 +1,6 @@
 import $ from 'cash-dom'
 
-function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
+function appendTargetIfNotExists(id, tag = 'div', parent = document.body) {
   let node = document.getElementById(id)
 
   if (!node) {
@@ -19,17 +19,19 @@ function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
  *  The Evergreen AUT will be re-created between runs
  *  The Root container div will be replaced when mount is called
  */
-export function renderTargets () {
+export function renderTargets() {
   const containerEl = appendTargetIfNotExists('evergreen-aut')
 
   appendTargetIfNotExists('root', 'div', containerEl)
 }
 
-export function renderMochaTarget () {
+export function renderMochaTarget() {
   const $mocha = $('#mocha')
   const $testRun = $('#test-run')
 
-  if ($mocha.length) $mocha[0].innerHTML = ''
+  if ($mocha.length) {
+    $mocha[0].innerHTML = ''
+  }
 
   if ($testRun.length) {
     return

@@ -10,7 +10,9 @@ const AddTodo = ({ onAdd }) => {
   const handleEnter = (e) => e.key === 'Enter' && handleAdd()
 
   const handleAdd = () => {
-    if (!state.input) return // ignore empty input
+    if (!state.input) {
+      return
+    } // ignore empty input
 
     const todo = { title: state.input, completed: false } // make todo
 

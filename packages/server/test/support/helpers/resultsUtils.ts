@@ -2,7 +2,7 @@ import e2e from './e2e'
 import dayjs from 'dayjs'
 import _ from 'lodash'
 
-const expect = global.expect as unknown as Chai.ExpectStatic
+const expect = (global.expect as unknown) as Chai.ExpectStatic
 
 const STATIC_DATE = '2018-02-01T20:14:19.323Z'
 
@@ -25,10 +25,7 @@ const expectStartToBeBeforeEnd = function (obj, start, end) {
   const s = _.get(obj, start)
   const e = _.get(obj, end)
 
-  expect(
-    dayjs(s).isBefore(e),
-    `expected start: ${s} to be before end: ${e}`,
-  ).to.be.true
+  expect(dayjs(s).isBefore(e), `expected start: ${s} to be before end: ${e}`).to.be.true
 
   // once valid, mutate and set static dates
   _.set(obj, start, STATIC_DATE)
@@ -44,32 +41,36 @@ const normalizeTestTimings = function (obj, timings) {
     return
   }
 
-  _.set(obj, 'timings', _.mapValues(t, (val, key) => {
-    switch (key) {
-      case 'lifecycle':
-        // ensure that lifecycle is under 500ms
-        expect(val, 'lifecycle').to.be.within(0, 500)
+  _.set(
+    obj,
+    'timings',
+    _.mapValues(t, (val, key) => {
+      switch (key) {
+        case 'lifecycle':
+          // ensure that lifecycle is under 500ms
+          expect(val, 'lifecycle').to.be.within(0, 500)
 
-        // reset to 100
-        return 100
-      case 'test':
-        // ensure test fn duration is within 2000ms
-        expectDurationWithin(val, 'fnDuration', 0, 2000, 400)
-        // ensure test after fn duration is within 500ms
-        expectDurationWithin(val, 'afterFnDuration', 0, 500, 200)
-
-        return val
-      default:
-        return _.map(val, (hook) => {
-          // ensure test fn duration is within 1500ms
-          expectDurationWithin(hook, 'fnDuration', 0, 1500, 400)
+          // reset to 100
+          return 100
+        case 'test':
+          // ensure test fn duration is within 2000ms
+          expectDurationWithin(val, 'fnDuration', 0, 2000, 400)
           // ensure test after fn duration is within 500ms
-          expectDurationWithin(hook, 'afterFnDuration', 0, 500, 200)
+          expectDurationWithin(val, 'afterFnDuration', 0, 500, 200)
 
-          return hook
-        })
-    }
-  }))
+          return val
+        default:
+          return _.map(val, (hook) => {
+            // ensure test fn duration is within 1500ms
+            expectDurationWithin(hook, 'fnDuration', 0, 1500, 400)
+            // ensure test after fn duration is within 500ms
+            expectDurationWithin(hook, 'afterFnDuration', 0, 500, 200)
+
+            return hook
+          })
+      }
+    })
+  )
 }
 
 export const expectRunsToHaveCorrectTimings = (runs = []) => {
@@ -95,7 +96,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
       'stats.wallClockDuration',
       wallClocks,
       wallClocks + 400, // add 400ms to account for padding
-      1234,
+      1234
     )
 
     expectDurationWithin(
@@ -103,7 +104,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
       'reporterStats.duration',
       wallClocks,
       wallClocks + 400, // add 400ms to account for padding
-      1234,
+      1234
     )
 
     const addFnAndAfterFn = (obj) => {
@@ -145,7 +146,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
             'wallClockDuration',
             timings,
             timings + 80, // add 80ms to account for padding
-            1234,
+            1234
           )
 
           // now reset all the test timings
@@ -181,11 +182,14 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
   })
 }
 
-export const expectCorrectModuleApiResult = (json, opts: {
-  e2ePath: string
-  runs: number
-  video: boolean
-}) => {
+export const expectCorrectModuleApiResult = (
+  json,
+  opts: {
+    e2ePath: string
+    runs: number
+    video: boolean
+  }
+) => {
   if (opts.video == null) {
     opts.video = true
   }
@@ -218,14 +222,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
   })
 
   // ensure the totals are accurate
-  expect(json.totalTests).to.eq(
-    _.sum([
-      json.totalFailed,
-      json.totalPassed,
-      json.totalPending,
-      json.totalSkipped,
-    ]),
-  )
+  expect(json.totalTests).to.eq(_.sum([json.totalFailed, json.totalPassed, json.totalPending, json.totalSkipped]))
 
   // ensure totalDuration matches all of the stats durations
   expectDurationWithin(
@@ -233,7 +230,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
     'totalDuration',
     _.sumBy(json.runs, 'stats.duration'),
     _.sumBy(json.runs, 'stats.duration'),
-    5555,
+    5555
   )
 
   expectStartToBeBeforeEnd(json, 'startedTestsAt', 'endedTestsAt')
@@ -253,7 +250,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
       'stats.duration',
       wallClocks,
       wallClocks + 400, // add 400ms to account for padding
-      1234,
+      1234
     )
 
     expectDurationWithin(
@@ -261,7 +258,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
       'reporterStats.duration',
       wallClocks,
       wallClocks + 400, // add 400ms to account for padding
-      1234,
+      1234
     )
 
     run.spec.absolute = e2e.normalizeStdout(run.spec.absolute)

@@ -12,14 +12,11 @@ type InstallCypressOpts = {
   ignoreExamples: boolean
 }
 
-async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts) {
+async function copyFiles({ ignoreExamples, useTypescript }: InstallCypressOpts) {
   let fileSpinner = ora('Creating config files').start()
 
   await fs.outputFile(path.resolve(process.cwd(), 'cypress.json'), '{}\n')
-  await fs.copy(
-    initialTemplate.getInitialPluginsFilePath(),
-    path.resolve('cypress', 'plugins/index.js'),
-  )
+  await fs.copy(initialTemplate.getInitialPluginsFilePath(), path.resolve('cypress', 'plugins/index.js'))
 
   const supportFiles: string[] = await initialTemplate.getInitialSupportFilesPaths()
 
@@ -28,7 +25,7 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
       const newSupportFilePath = path.resolve('cypress', 'support', path.basename(supportFilePath))
 
       return fs.copy(supportFilePath, newSupportFilePath)
-    }),
+    })
   )
 
   if (useTypescript) {
@@ -37,23 +34,20 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
 
   // TODO think about better approach
   if (ignoreExamples) {
-    const dummySpec = [
-      'describe("Spec", () => {',
-      '',
-      '})',
-      '',
-    ].join('\n')
+    const dummySpec = ['describe("Spec", () => {', '', '})', ''].join('\n')
 
     const specFileToCreate = path.resolve('cypress', 'integration', useTypescript ? 'spec.ts' : 'spec.js')
 
     await fs.outputFile(path.resolve('cypress', 'integration', useTypescript ? 'spec.js' : 'spec.ts'), dummySpec)
-    console.log(`In order to ignore examples a spec file ${chalk.green(path.relative(process.cwd(), specFileToCreate))}.`)
+    console.log(
+      `In order to ignore examples a spec file ${chalk.green(path.relative(process.cwd(), specFileToCreate))}.`
+    )
   }
 
   fileSpinner.succeed()
 }
 
-export async function findInstalledOrInstallCypress (options: InstallCypressOpts) {
+export async function findInstalledOrInstallCypress(options: InstallCypressOpts) {
   let cypressJsonPath = await findUp('cypress.json')
 
   if (!cypressJsonPath) {
@@ -69,8 +63,6 @@ export async function findInstalledOrInstallCypress (options: InstallCypressOpts
 
   return {
     cypressConfigPath: cypressJsonPath,
-    config: JSON.parse(
-      fs.readFileSync(cypressJsonPath, { encoding: 'utf-8' }).toString(),
-    ) as Record<string, string>,
+    config: JSON.parse(fs.readFileSync(cypressJsonPath, { encoding: 'utf-8' }).toString()) as Record<string, string>,
   }
 }

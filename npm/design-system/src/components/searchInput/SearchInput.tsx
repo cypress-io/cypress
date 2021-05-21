@@ -13,11 +13,11 @@ export interface SearchInputProps extends CoreComponent {
   /**
    * Defaults to 'm'
    */
-   size?: TextSize
+  size?: TextSize
 
-   onInput: (input: string) => void
-   onEnter?: (input: string) => void
-   onVerticalArrowKey?: (key: 'up' | 'down') => void
+  onInput: (input: string) => void
+  onEnter?: (input: string) => void
+  onVerticalArrowKey?: (key: 'up' | 'down') => void
 
   ['aria-label']: string
 }
@@ -26,12 +26,20 @@ const prefixItem: IconSettings = {
   icon: 'search',
 }
 
-export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInput: externalOnInput, onEnter, onVerticalArrowKey, ...props }) => {
+export const SearchInput: React.FC<SearchInputProps> = ({
+  inputRef = null,
+  onInput: externalOnInput,
+  onEnter,
+  onVerticalArrowKey,
+  ...props
+}) => {
   const ref = React.useRef<HTMLInputElement>(null)
 
   useCombinedRefs(ref, inputRef)
 
-  const onInput = useCallback((e: FormEvent<HTMLInputElement>) => externalOnInput(e.currentTarget.value), [externalOnInput])
+  const onInput = useCallback((e: FormEvent<HTMLInputElement>) => externalOnInput(e.currentTarget.value), [
+    externalOnInput,
+  ])
   const onClear = useCallback(() => {
     if (ref.current) {
       ref.current.value = ''
@@ -42,24 +50,30 @@ export const SearchInput: React.FC<SearchInputProps> = ({ inputRef = null, onInp
     ref.current?.focus()
   }, [externalOnInput])
 
-  const onKeyDown = useMemo(() => onEnter || onVerticalArrowKey ? (e: KeyboardEvent<HTMLInputElement>) => {
-    switch (e.key) {
-      case 'Enter':
-        onEnter?.(e.currentTarget.value)
-        break
-      case 'ArrowUp':
-        onVerticalArrowKey?.('up')
-        break
-      case 'ArrowDown':
-        onVerticalArrowKey?.('down')
-        break
-      default:
-        return
-    }
+  const onKeyDown = useMemo(
+    () =>
+      onEnter || onVerticalArrowKey
+        ? (e: KeyboardEvent<HTMLInputElement>) => {
+            switch (e.key) {
+              case 'Enter':
+                onEnter?.(e.currentTarget.value)
+                break
+              case 'ArrowUp':
+                onVerticalArrowKey?.('up')
+                break
+              case 'ArrowDown':
+                onVerticalArrowKey?.('down')
+                break
+              default:
+                return
+            }
 
-    // If we get here, we matched a key
-    e.preventDefault()
-  } : undefined, [onEnter, onVerticalArrowKey])
+            // If we get here, we matched a key
+            e.preventDefault()
+          }
+        : undefined,
+    [onEnter, onVerticalArrowKey]
+  )
 
   const value = props.value ?? ref.current?.value
 

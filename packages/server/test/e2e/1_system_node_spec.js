@@ -15,7 +15,8 @@ describe('e2e system node', () => {
       (expectedNodeVersion, expectedNodePath) => {
         expectedNodeVersion = expectedNodeVersion.slice(1) // v1.2.3 -> 1.2.3
 
-        return e2e.exec(this, {
+        return e2e
+        .exec(this, {
           project: systemNode,
           config: {
             env: {
@@ -32,7 +33,7 @@ describe('e2e system node', () => {
 
           expect(stderr).to.contain('Plugin Electron version: undefined')
         })
-      },
+      }
     )
   })
 })

@@ -6,5 +6,5 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./scss-style.component.scss'],
 })
 export class ScssStyleComponent implements OnInit {
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 }

@@ -1,8 +1,7 @@
 describe('e2e remote debugging disconnect', () => {
   it('reconnects as expected', () => {
     // 1 probing connection and 1 real connection should have been made during startup
-    cy.task('get:stats')
-    .should('include', {
+    cy.task('get:stats').should('include', {
       totalConnectionCount: 2,
       currentConnectionCount: 1,
     })
@@ -20,8 +19,7 @@ describe('e2e remote debugging disconnect', () => {
     .should('have.keys', ['protocolVersion', 'product', 'revision', 'userAgent', 'jsVersion'])
 
     // evidence of a reconnection:
-    cy.task('get:stats')
-    .should('include', {
+    cy.task('get:stats').should('include', {
       totalConnectionCount: 3,
       currentConnectionCount: 1,
     })

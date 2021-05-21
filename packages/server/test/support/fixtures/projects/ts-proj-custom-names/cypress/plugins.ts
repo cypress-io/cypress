@@ -7,7 +7,6 @@ export default (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) =
     if (browser.family === 'chromium' && browser.name !== 'electron') {
       // Mac/Linux
       //launchOptions.args.push('--use-file-for-fake-video-capture=cypress/fixtures/my-video.y4m')
-
       // Windows
       // launchOptions.args.push('--use-file-for-fake-video-capture=c:\\path\\to\\video\\my-video.y4m')
     }

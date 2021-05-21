@@ -29,14 +29,16 @@ const formRelativePath = (spec) => {
 }
 
 const pathsEqual = (path1, path2) => {
-  if (!path1 || !path2) return false
+  if (!path1 || !path2) {
+    return false
+  }
 
   return path1.replace(pathSeparatorRe, '') === path2.replace(pathSeparatorRe, '')
 }
 
 /**
  * Filters give file objects by spec name substring
-*/
+ */
 const filterSpecs = (filter, files) => {
   if (!filter) {
     return files
@@ -64,20 +66,22 @@ export class SpecsStore {
   @observable newSpecAbsolutePath
   @observable showNewSpecWarning = false
 
-  @computed get specs () {
+  @computed get specs() {
     return this._tree(this._files)
   }
 
-  @action loading (bool) {
+  @action loading(bool) {
     this.isLoading = bool
   }
 
-  @action setSpecs (specsByType) {
-    this._files = _.flatten(_.map(specsByType, (specs, type) => {
-      return _.map(specs, (spec) => {
-        return _.extend({}, spec, { specType: type })
+  @action setSpecs(specsByType) {
+    this._files = _.flatten(
+      _.map(specsByType, (specs, type) => {
+        return _.map(specs, (spec) => {
+          return _.extend({}, spec, { specType: type })
+        })
       })
-    }))
+    )
 
     if (this.newSpecAbsolutePath && !_.find(this._files, this.isNew)) {
       this.showNewSpecWarning = true
@@ -86,11 +90,11 @@ export class SpecsStore {
     this.isLoading = false
   }
 
-  @action setChosenSpec (spec) {
+  @action setChosenSpec(spec) {
     this.chosenSpecPath = spec ? formRelativePath(spec) : null
   }
 
-  @action setChosenSpecByRelativePath (relativePath) {
+  @action setChosenSpecByRelativePath(relativePath) {
     // find an actual spec using relative path
     if (relativePath === allIntegrationSpecsSpec.relative) {
       this.chosenSpecPath = relativePath
@@ -110,7 +114,7 @@ export class SpecsStore {
     }
   }
 
-  @action setNewSpecPath (absolutePath) {
+  @action setNewSpecPath(absolutePath) {
     this.newSpecAbsolutePath = absolutePath
     this.dismissNewSpecWarning()
   }
@@ -119,15 +123,15 @@ export class SpecsStore {
     this.showNewSpecWarning = false
   }
 
-  @action setExpandSpecFolder (spec, isExpanded) {
+  @action setExpandSpecFolder(spec, isExpanded) {
     spec.setExpanded(isExpanded)
   }
 
-  @action toggleExpandSpecFolder (spec) {
+  @action toggleExpandSpecFolder(spec) {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setExpandSpecChildren (spec, isExpanded) {
+  @action setExpandSpecChildren(spec, isExpanded) {
     this._depthFirstIterateSpecs(spec, (specOrFolder) => {
       if (specOrFolder.isFolder) {
         specOrFolder.setExpanded(isExpanded)
@@ -135,7 +139,7 @@ export class SpecsStore {
     })
   }
 
-  @action setFilter (project, filter = null) {
+  @action setFilter(project, filter = null) {
     if (!filter) {
       return this.clearFilter(project)
     }
@@ -145,17 +149,17 @@ export class SpecsStore {
     this.filter = filter
   }
 
-  @action clearFilter (project) {
+  @action clearFilter(project) {
     localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
   }
 
-  @action setSelectedSpec (spec) {
+  @action setSelectedSpec(spec) {
     this.selectedSpec = spec
   }
 
-  isChosen (spec) {
+  isChosen(spec) {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
 
@@ -163,13 +167,13 @@ export class SpecsStore {
     return pathsEqual(this.newSpecAbsolutePath, spec.absolute)
   }
 
-  getSpecsFilterId ({ id, path = '' }) {
+  getSpecsFilterId({ id, path = '' }) {
     const shortenedPath = path.replace(/.*cypress/, 'cypress')
 
     return `specsFilter-${id || '<no-id>'}-${shortenedPath}`
   }
 
-  specHasFolders (specOrFolder) {
+  specHasFolders(specOrFolder) {
     if (!specOrFolder.isFolder) {
       return false
     }
@@ -182,52 +186,56 @@ export class SpecsStore {
    *
    * @memberof SpecsStore
    */
-  getFilteredSpecs () {
+  getFilteredSpecs() {
     return filterSpecs(this.filter, this._files)
   }
 
-  _tree (files) {
+  _tree(files) {
     files = filterSpecs(this.filter, files)
 
-    const tree = _.reduce(files, (root, file) => {
-      const segments = [file.specType].concat(file.name.split(pathSeparatorRe))
-      const segmentsPassed = []
+    const tree = _.reduce(
+      files,
+      (root, file) => {
+        const segments = [file.specType].concat(file.name.split(pathSeparatorRe))
+        const segmentsPassed = []
 
-      let placeholder = root
+        let placeholder = root
 
-      _.each(segments, (segment, i) => {
-        segmentsPassed.push(segment)
-        const currentPath = path.join(...segmentsPassed)
-        const isCurrentAFile = i === segments.length - 1
+        _.each(segments, (segment, i) => {
+          segmentsPassed.push(segment)
+          const currentPath = path.join(...segmentsPassed)
+          const isCurrentAFile = i === segments.length - 1
 
-        const props = {
-          path: currentPath,
-          displayName: segment,
-          specType: file.specType,
-        }
+          const props = {
+            path: currentPath,
+            displayName: segment,
+            specType: file.specType,
+          }
 
-        let existing = _.find(placeholder, (file) => {
-          return pathsEqual(file.path, currentPath)
+          let existing = _.find(placeholder, (file) => {
+            return pathsEqual(file.path, currentPath)
+          })
+
+          if (!existing) {
+            existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)
+
+            placeholder.push(existing)
+          }
+
+          if (!isCurrentAFile) {
+            placeholder = existing.children
+          }
         })
 
-        if (!existing) {
-          existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)
-
-          placeholder.push(existing)
-        }
-
-        if (!isCurrentAFile) {
-          placeholder = existing.children
-        }
-      })
-
-      return root
-    }, [])
+        return root
+      },
+      []
+    )
 
     return tree
   }
 
-  _depthFirstIterateSpecs (root, func) {
+  _depthFirstIterateSpecs(root, func) {
     _.each(root.children, (child) => {
       func(child)
       if (child.isFolder) {

@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { SVGAttributes } from 'react'
+import React, { SVGAttributes } from 'react'
 import cs from 'classnames'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -25,13 +24,26 @@ export interface IconProps extends TextSizableComponent, Omit<SVGAttributes<SVGS
 }
 
 // Currently only a passthrough for FontAwesome. This provides a single place to swap out the icon library
-export const Icon: React.FC<IconProps> = ({ className, size, lineHeight, icon, ignoreTextCenter, sizeWithoutCenter, ...props }) => (
+export const Icon: React.FC<IconProps> = ({
+  className,
+  size,
+  lineHeight,
+  icon,
+  ignoreTextCenter,
+  sizeWithoutCenter,
+  ...props
+}) => (
   <FontAwesomeIcon
     {...props}
-    className={cs(styledTextSizeClassNames(size, lineHeight), styles.icon, {
-      [styles.ignoreTextCenter]: ignoreTextCenter,
-      [styles.sizeWithoutCenter]: sizeWithoutCenter,
-    }, className)}
+    className={cs(
+      styledTextSizeClassNames(size, lineHeight),
+      styles.icon,
+      {
+        [styles.ignoreTextCenter]: ignoreTextCenter,
+        [styles.sizeWithoutCenter]: sizeWithoutCenter,
+      },
+      className
+    )}
     icon={icon}
   />
 )

@@ -40,13 +40,13 @@ $.find.matchesSelector = function (elem, expr) {
   const _this = this
 
   return tryCatchFinally({
-    tryFn () {
+    tryFn() {
       return matchesSelector.apply(_this, args)
     },
-    catchFn (e) {
+    catchFn(e) {
       throw e
     },
-    finallyFn () {
+    finallyFn() {
       if (isUsingFocus) {
         $.find.support.matchesSelector = supportMatchesSelector
       }

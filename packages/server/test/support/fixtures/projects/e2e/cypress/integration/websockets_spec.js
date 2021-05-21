@@ -11,7 +11,11 @@ const shouldCloseUrlWithCode = (win, url, code) => {
         return resolve()
       }
 
-      return reject(new Error(`websocket connection should have been closed with code ${code} for url: ${url} but was instead closed with code: ${evt.code}`))
+      return reject(
+        new Error(
+          `websocket connection should have been closed with code ${code} for url: ${url} but was instead closed with code: ${evt.code}`
+        )
+      )
     }
 
     ws.onopen = (evt) => {
@@ -51,6 +55,7 @@ describe('websockets', () => {
           return ws.send('foo')
         }
       })
-    }).should('eq', 'foobar')
+    })
+    .should('eq', 'foobar')
   })
 })

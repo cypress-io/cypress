@@ -1,22 +1,26 @@
-(function() {
-  var HOST, PATH, automation, client, fail, invoke,
-    slice = [].slice;
+;(function () {
+  var HOST,
+    PATH,
+    automation,
+    client,
+    fail,
+    invoke,
+    slice = [].slice
 
-  HOST = "CHANGE_ME_HOST";
+  HOST = 'CHANGE_ME_HOST'
 
-  PATH = "CHANGE_ME_PATH";
+  PATH = 'CHANGE_ME_PATH'
 
   client = io.connect(HOST, {
-    path: PATH
-  });
+    path: PATH,
+  })
 
   automation = {
-    getAllCookies: function(filter, fn) {
+    getAllCookies: function (filter, fn) {
       if (filter == null) {
-        filter = {};
+        filter = {}
       }
-      return chrome.cookies.getAll(filter, fn);
-    }
-  };
-
-}).call(this);
+      return chrome.cookies.getAll(filter, fn)
+    },
+  }
+}.call(this))

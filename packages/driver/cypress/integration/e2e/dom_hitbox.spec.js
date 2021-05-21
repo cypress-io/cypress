@@ -38,7 +38,8 @@ describe('rect highlight', () => {
   })
 
   it('highlight elements with css transform on parent', () => {
-    cy.$$('<div id="parent">parent<div id="child">child</div></div>').css({
+    cy.$$('<div id="parent">parent<div id="child">child</div></div>')
+    .css({
       transform: 'scale(1.5) rotate(45deg) translate(100px, 20px)',
       height: 40,
       width: 60,
@@ -65,7 +66,8 @@ describe('rect highlight', () => {
 
   // https://github.com/cypress-io/cypress/issues/7762
   it('highlights above z-index elements', () => {
-    cy.$$('<div id="absolute-el"></div>').css({
+    cy.$$('<div id="absolute-el"></div>')
+    .css({
       position: 'absolute',
       zIndex: 1000,
       top: 0,
@@ -75,7 +77,8 @@ describe('rect highlight', () => {
       padding: 20,
       margin: 20,
       backgroundColor: 'salmon',
-    }).appendTo(cy.$$('body'))
+    })
+    .appendTo(cy.$$('body'))
 
     getAndPin('#absolute-el')
     ensureCorrectHighlightPositions('#absolute-el')

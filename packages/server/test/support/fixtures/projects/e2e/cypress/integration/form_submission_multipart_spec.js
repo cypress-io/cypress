@@ -25,7 +25,7 @@ Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) 
       const blob = Blob.base64StringToBlob(image)
       const elementNode = element[0]
       const file = new File([blob], filePath, { type: mimeType })
-      const dataTransfer = new DataTransfer
+      const dataTransfer = new DataTransfer()
 
       dataTransfer.items.add(file)
       elementNode.files = dataTransfer.files
@@ -39,39 +39,30 @@ Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) 
 describe('<form> submissions', () => {
   it('can submit a form correctly', () => {
     cy.visit('/')
-    cy.get('input[type=text]')
-    .type('hello world')
+    cy.get('input[type=text]').type('hello world')
 
-    cy.get('input[type=submit]')
-    .click()
+    cy.get('input[type=submit]').click()
 
-    cy.document()
-    .contains('hello+world')
+    cy.document().contains('hello+world')
   })
 
   it('can submit a multipart/form-data form correctly', () => {
     cy.visit('/multipart-form-data')
-    cy.get('input[type=text]')
-    .type('hello world')
+    cy.get('input[type=text]').type('hello world')
 
-    cy.get('input[type=submit]')
-    .click()
+    cy.get('input[type=submit]').click()
 
-    cy.document()
-    .contains('hello world')
+    cy.document().contains('hello world')
   })
 
   context('can submit a multipart/form-data form with attachments', () => {
     const testUpload = (fixturePath, containsOpts = {}) => {
       cy.visit(`/multipart-with-attachment?fixturePath=${fixturePath}`)
-      cy.get('input[type=file]')
-      .setFile(fixturePath)
+      cy.get('input[type=file]').setFile(fixturePath)
 
-      cy.get('input[type=submit]')
-      .click()
+      cy.get('input[type=submit]').click()
 
-      cy.document()
-      .contains('files match', containsOpts)
+      cy.document().contains('files match', containsOpts)
     }
 
     it('image/png', () => {

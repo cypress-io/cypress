@@ -2,9 +2,7 @@ const { $ } = Cypress
 
 describe('src/cy/commands/actions/hover', () => {
   before(() => {
-    cy
-    .visit('/fixtures/dom.html')
-    .then(function (win) {
+    cy.visit('/fixtures/dom.html').then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })

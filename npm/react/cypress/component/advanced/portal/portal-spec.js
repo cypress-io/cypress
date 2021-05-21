@@ -14,7 +14,7 @@ describe('Portals', () => {
         <RenderInPortal>
           <p> I am in portal </p>
         </RenderInPortal>
-      </div>,
+      </div>
     )
 
     cy.contains('#component', 'Hello World!')

@@ -3,8 +3,9 @@ import authStore from './auth-store'
 import ipc from '../lib/ipc'
 
 class AuthApi {
-  loadUser () {
-    ipc.getCurrentUser()
+  loadUser() {
+    ipc
+    .getCurrentUser()
     .then((user) => {
       authStore.setUser(user)
 
@@ -21,12 +22,13 @@ class AuthApi {
     })
   }
 
-  login (utm) {
+  login(utm) {
     ipc.onAuthMessage((__, message) => {
       authStore.setMessage(message)
     })
 
-    return ipc.beginAuth(utm)
+    return ipc
+    .beginAuth(utm)
     .then((user) => {
       authStore.setUser(user)
       authStore.setMessage(null)
@@ -36,11 +38,10 @@ class AuthApi {
     .catch({ alreadyOpen: true }, () => {})
   }
 
-  logOut () {
+  logOut() {
     authStore.setUser(null)
 
-    ipc.logOut()
-    .catch((err) => {
+    ipc.logOut().catch((err) => {
       err.name = 'An unexpected error occurred while logging out'
       appStore.setError(err)
     })

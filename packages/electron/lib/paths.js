@@ -26,19 +26,19 @@ const normalize = (...paths) => {
 }
 
 module.exports = {
-  getPathToDist (...paths) {
+  getPathToDist(...paths) {
     paths = [distPath].concat(paths)
 
     return normalize(...paths)
   },
 
-  getPathToExec () {
+  getPathToExec() {
     const p = execPath[os.platform()] || unknownPlatformErr()
 
     return this.getPathToDist(p)
   },
 
-  getPathToResources (...paths) {
+  getPathToResources(...paths) {
     let p = resourcesPath[os.platform()] || unknownPlatformErr()
 
     p = [].concat(p, paths)
@@ -46,11 +46,11 @@ module.exports = {
     return this.getPathToDist(...p)
   },
 
-  getPathToVersion () {
+  getPathToVersion() {
     return this.getPathToDist('version')
   },
 
-  getSymlinkType () {
+  getSymlinkType() {
     if (os.platform() === 'win32') {
       return 'junction'
     }

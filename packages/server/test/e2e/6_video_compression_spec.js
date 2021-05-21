@@ -19,7 +19,7 @@ const MS_PER_TEST = 500
 const EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 
 // ffmpeg command that extracts the final frame as a jpg
-function outputFinalFrameAsJpg (inputFile, outputFile) {
+function outputFinalFrameAsJpg(inputFile, outputFile) {
   return new Promise((resolve, reject) => {
     return ffmpeg(inputFile)
     .inputOption('-sseof -3')
@@ -33,10 +33,7 @@ function outputFinalFrameAsJpg (inputFile, outputFile) {
 describe('e2e video compression', () => {
   e2e.setup()
 
-  return [
-    true,
-    false,
-  ].forEach((headed) => {
+  return [true, false].forEach((headed) => {
     e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
       spec: 'video_compression_spec.js',
       snapshot: false,
@@ -47,7 +44,7 @@ describe('e2e video compression', () => {
           MS_PER_TEST,
         },
       },
-      onRun (exec) {
+      onRun(exec) {
         process.env.VIDEO_COMPRESSION_THROTTLE = 10
 
         return exec()
@@ -56,7 +53,10 @@ describe('e2e video compression', () => {
 
           return glob(videosPath)
           .tap(async (files) => {
-            expect(files).to.have.length(1, `globbed for videos and found: ${files.length}. Expected to find 1 video. Search in videosPath: ${videosPath}.`)
+            expect(files).to.have.length(
+              1,
+              `globbed for videos and found: ${files.length}. Expected to find 1 video. Search in videosPath: ${videosPath}.`
+            )
 
             const lastFrameFile = path.join(path.dirname(files[0]), 'lastFrame.jpg')
 
@@ -64,11 +64,12 @@ describe('e2e video compression', () => {
             // https://github.com/cypress-io/cypress/issues/9265
             // if video is seekable and not just one frozen frame, this file should exist
             await fs.stat(lastFrameFile).catch((err) => {
-              throw new Error(`Expected video to have seekable ending frame, but it did not. The video may be corrupted.`)
+              throw new Error(
+                `Expected video to have seekable ending frame, but it did not. The video may be corrupted.`
+              )
             })
 
-            return videoCapture.getCodecData(files[0])
-            .then(({ duration }) => {
+            return videoCapture.getCodecData(files[0]).then(({ duration }) => {
               const durationMs = videoCapture.getMsFromDuration(duration)
 
               expect(durationMs).to.be.ok
@@ -77,8 +78,7 @@ describe('e2e video compression', () => {
             })
           })
           .then((files) => {
-            return videoCapture.getChapters(files[0])
-            .then(({ chapters }) => {
+            return videoCapture.getChapters(files[0]).then(({ chapters }) => {
               // There are 40 chapters but we test only the first one
               // because what we want to check is if chapters are added properly.
               // In a chapter object, there are properties like 'end' and 'end_time'.
@@ -95,7 +95,8 @@ describe('e2e video compression', () => {
               expect(Number.isNaN(chapters[0].end_time)).to.be.false
             })
           })
-        }).get('stdout')
+        })
+        .get('stdout')
         .then((stdout) => {
           expect(stdout).to.match(/Compression progress:\s+\d{1,3}%/)
         })

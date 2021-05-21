@@ -40,8 +40,7 @@ describe('lib/template_engine', () => {
         }
 
         return render(tmpPath, opts, cb)
-      })
-      .then((str) => {
+      }).then((str) => {
         expect(str).to.eq('My favorite template engine is Squirrelly2.')
 
         expect(cache[tmpPath]).to.eq(compiledFn)

@@ -9,7 +9,7 @@ const frameworkSpecificTemplates = {
   'vue@3': vueTemplates,
 }
 
-export async function guessTemplate<T> (framework: keyof typeof frameworkSpecificTemplates, cwd: string) {
+export async function guessTemplate<T>(framework: keyof typeof frameworkSpecificTemplates, cwd: string) {
   const templates = { ...frameworkAgnosticTemplates, ...frameworkSpecificTemplates[framework] }
 
   for (const [name, template] of Object.entries(templates)) {

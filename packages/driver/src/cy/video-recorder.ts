@@ -1,14 +1,15 @@
-export function create (Cypress) {
+export function create(Cypress) {
   // Only start recording with getUserMedia API if we're in firefox and video-enabled and run mode.
   // TODO: this logic should be cleaned up or gotten from some video-specific config value
   if (
-    Cypress.isBrowser('firefox')
-    && Cypress.config('video')
-    && !Cypress.config('isInteractive')
+    Cypress.isBrowser('firefox') &&
+    Cypress.config('video') &&
+    !Cypress.config('isInteractive') &&
     // navigator.mediaDevices will be undefined if the browser does not support display capture
-    && window.navigator.mediaDevices
+    window.navigator.mediaDevices
   ) {
-    window.navigator.mediaDevices.getUserMedia({
+    window.navigator.mediaDevices
+    .getUserMedia({
       audio: false,
       video: {
         // mediaSource "browser" is supported by a firefox user preference

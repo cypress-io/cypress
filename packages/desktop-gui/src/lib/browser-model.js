@@ -14,7 +14,7 @@ export default class Browser {
   @observable warning
   @observable isChosen = false
 
-  constructor (browser) {
+  constructor(browser) {
     this.displayName = browser.displayName
     this.name = browser.name
     this.family = browser.family

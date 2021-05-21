@@ -94,8 +94,7 @@ describe('webpack preprocessor - e2e', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        preprocessor()(file)
-        .catch((err) => {
+        preprocessor()(file).catch((err) => {
           expect(err.stack).to.include('Unexpected token')
           resolve()
         })
@@ -129,16 +128,14 @@ describe('webpack preprocessor - e2e', () => {
   })
 })
 
-function retry (fn, timeout = 1000) {
+function retry(fn, timeout = 1000) {
   let timedOut = false
 
-  setTimeout(() => timedOut = true, timeout)
+  setTimeout(() => (timedOut = true), timeout)
   const tryFn = () => {
     return Bluebird.try(() => {
       return fn()
-    })
-
-    .catch((err) => {
+    }).catch((err) => {
       if (timedOut) {
         throw err
       }

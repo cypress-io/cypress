@@ -6,7 +6,8 @@ const utils = require('./utils')
 const chalk = require('chalk')
 
 const start = () => {
-  return utils.lintFilesByText({
+  return utils
+  .lintFilesByText({
     // list only modified and added files
     getFilenames: () => sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n'),
     getFileText: (f) => sh.exec(`git show :${sh.ShellString(f)}`),

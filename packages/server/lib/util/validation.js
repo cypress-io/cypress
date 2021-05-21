@@ -16,11 +16,9 @@ const str = JSON.stringify
  * @param {string} type - The expected type name
  * @param {any} value - The actual value
  * @returns {string} Formatted error message
-*/
+ */
 const errMsg = (key, value, type) => {
-  return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
-    value,
-  )}\``
+  return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(value)}\``
 }
 
 const isFullyQualifiedUrl = (value) => {
@@ -117,7 +115,11 @@ const isValidRetriesConfig = (key, value) => {
     return true
   }
 
-  return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
+  return errMsg(
+    key,
+    value,
+    'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls'
+  )
 }
 
 const isValidFirefoxGcInterval = (key, value) => {
@@ -129,14 +131,20 @@ const isValidFirefoxGcInterval = (key, value) => {
     return val == null
   }
 
-  if (isIntervalValue(value)
-      || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
-          && isIntervalValue(value.runMode)
-          && isIntervalValue(value.openMode))) {
+  if (
+    isIntervalValue(value) ||
+    (_.isEqual(_.keys(value), ['runMode', 'openMode']) &&
+      isIntervalValue(value.runMode) &&
+      isIntervalValue(value.openMode))
+  ) {
     return true
   }
 
-  return errMsg(key, value, 'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values')
+  return errMsg(
+    key,
+    value,
+    'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values'
+  )
 }
 
 const isPlainObject = (key, value) => {
@@ -169,13 +177,15 @@ const isValidConfig = (key, config) => {
 
 const isOneOf = (...values) => {
   return (key, value) => {
-    if (values.some((v) => {
-      if (typeof value === 'function') {
-        return value(v)
-      }
+    if (
+      values.some((v) => {
+        if (typeof value === 'function') {
+          return value(v)
+        }
 
-      return v === value
-    })) {
+        return v === value
+      })
+    ) {
       return true
     }
 
@@ -198,7 +208,7 @@ module.exports = {
 
   isPlainObject,
 
-  isNumber (key, value) {
+  isNumber(key, value) {
     if (value == null || isNumber(value)) {
       return true
     }
@@ -206,7 +216,7 @@ module.exports = {
     return errMsg(key, value, 'a number')
   },
 
-  isNumberOrFalse (key, value) {
+  isNumberOrFalse(key, value) {
     if (isNumber(value) || isFalse(value)) {
       return true
     }
@@ -214,19 +224,15 @@ module.exports = {
     return errMsg(key, value, 'a number or false')
   },
 
-  isFullyQualifiedUrl (key, value) {
+  isFullyQualifiedUrl(key, value) {
     if (value == null || isFullyQualifiedUrl(value)) {
       return true
     }
 
-    return errMsg(
-      key,
-      value,
-      'a fully qualified URL (starting with `http://` or `https://`)',
-    )
+    return errMsg(key, value, 'a fully qualified URL (starting with `http://` or `https://`)')
   },
 
-  isBoolean (key, value) {
+  isBoolean(key, value) {
     if (value == null || _.isBoolean(value)) {
       return true
     }
@@ -234,7 +240,7 @@ module.exports = {
     return errMsg(key, value, 'a boolean')
   },
 
-  isString (key, value) {
+  isString(key, value) {
     if (value == null || isString(value)) {
       return true
     }
@@ -242,7 +248,7 @@ module.exports = {
     return errMsg(key, value, 'a string')
   },
 
-  isArray (key, value) {
+  isArray(key, value) {
     if (value == null || isArray(value)) {
       return true
     }
@@ -250,7 +256,7 @@ module.exports = {
     return errMsg(key, value, 'an array')
   },
 
-  isStringOrFalse (key, value) {
+  isStringOrFalse(key, value) {
     if (isString(value) || isFalse(value)) {
       return true
     }
@@ -258,7 +264,7 @@ module.exports = {
     return errMsg(key, value, 'a string or false')
   },
 
-  isStringOrArrayOfStrings (key, value) {
+  isStringOrArrayOfStrings(key, value) {
     if (isString(value) || isArrayOfStrings(value)) {
       return true
     }

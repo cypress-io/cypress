@@ -30,20 +30,22 @@ plugins.registerHandler((ipc) => {
 const API = {
   emitter: baseEmitter,
 
-  start ({ specs, config }) {
+  start({ specs, config }) {
     if (!plugins.has('dev-server:start')) {
       // TODO: add link to the documentation in the error message
-      throw new Error('It is required to register dev-server plugin that implements `dev-server:start` event for component testing.')
+      throw new Error(
+        'It is required to register dev-server plugin that implements `dev-server:start` event for component testing.'
+      )
     }
 
     return plugins.execute('dev-server:start', { specs, config })
   },
 
-  updateSpecs (specs) {
+  updateSpecs(specs) {
     return baseEmitter.emit('dev-server:specs:changed', specs)
   },
 
-  close () {
+  close() {
     debug('close dev-server')
     baseEmitter.emit('close')
 

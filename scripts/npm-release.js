@@ -50,7 +50,17 @@ const parseSemanticReleaseOutput = (output) => {
 const getNextVersion = async (name) => {
   // we cannot use the semantic-release javascript api
   // since it will break semantic-release-monorepo plugin
-  const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'])
+  const { stdout } = await execa('npx', [
+    'lerna',
+    'exec',
+    '--scope',
+    name,
+    '--',
+    'npx',
+    '--no-install',
+    'semantic-release',
+    '--dry-run',
+  ])
 
   return parseSemanticReleaseOutput(stdout).nextVersion
 }
@@ -116,7 +126,10 @@ const injectVersions = (packagesToRelease, versions, packages) => {
 
     if (packageJson.dependencies) {
       for (const dependency in packageJson.dependencies) {
-        if (packageJson.dependencies[dependency] === '0.0.0-development' || packageJson.dependencies[dependency] === '*') {
+        if (
+          packageJson.dependencies[dependency] === '0.0.0-development' ||
+          packageJson.dependencies[dependency] === '*'
+        ) {
           const version = versions[dependency].nextVersion || versions[dependency].currentVersion
 
           if (!version) {
@@ -142,7 +155,16 @@ const releasePackages = async (packages) => {
   // so we run them one by one to avoid this
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
+    const { stdout } = await execa('npx', [
+      'lerna',
+      'exec',
+      '--scope',
+      name,
+      '--',
+      'npx',
+      '--no-install',
+      'semantic-release',
+    ])
 
     console.log(`Released ${name} successfully:`)
     console.log(stdout)

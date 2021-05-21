@@ -31,14 +31,12 @@ class Todos extends Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <TodosContainer>
         <h2>Todos</h2>
         {this.state.todos.map((todo) => {
-          return (
-            <Todo todo={todo} key={todo.id} handleChecked={this.handleChecked} />
-          )
+          return <Todo todo={todo} key={todo.id} handleChecked={this.handleChecked} />
         })}
       </TodosContainer>
     )

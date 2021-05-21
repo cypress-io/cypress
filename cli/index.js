@@ -8,9 +8,7 @@ switch (args.exec) {
   case 'install':
     debug('installing Cypress from NPM')
 
-    require('./lib/tasks/install')
-    .start({ force: args.force })
-    .catch(util.logErrorExit1)
+    require('./lib/tasks/install').start({ force: args.force }).catch(util.logErrorExit1)
 
     break
   case 'verify':

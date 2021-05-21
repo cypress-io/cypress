@@ -1,9 +1,4 @@
-import {
-  Component,
-  OnInit,
-  Input,
-  ChangeDetectionStrategy,
-} from '@angular/core'
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core'
 
 @Component({
   selector: 'app-on-push-strat',
@@ -11,7 +6,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OnPushStratComponent implements OnInit {
-  @Input() data = '';
+  @Input() data = ''
 
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 }

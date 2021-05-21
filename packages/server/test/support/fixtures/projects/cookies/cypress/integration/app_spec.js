@@ -17,9 +17,7 @@ describe('Cookies', () => {
       expect(c.secure).to.eq(false)
       expect(c.expiry).to.be.a('number')
 
-      expect(c).to.have.keys(
-        'domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry',
-      )
+      expect(c).to.have.keys('domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry')
     })
 
     cy.getCookies()
@@ -35,9 +33,7 @@ describe('Cookies', () => {
       expect(c.secure).to.eq(false)
       expect(c.expiry).to.be.a('number')
 
-      expect(c).to.have.keys(
-        'domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry',
-      )
+      expect(c).to.have.keys('domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry')
     })
 
     cy.clearCookies().should('be.null')
@@ -51,16 +47,12 @@ describe('Cookies', () => {
       expect(c.secure).to.eq(true)
       expect(c.expiry).to.be.a('number')
 
-      expect(c).to.have.keys(
-        'domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry',
-      )
+      expect(c).to.have.keys('domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry')
     })
 
     cy.clearCookie('wtf').should('be.null')
     cy.getCookie('doesNotExist').should('be.null')
-    cy.document()
-    .its('cookie')
-    .should('be.empty')
+    cy.document().its('cookie').should('be.empty')
   })
 
   it('resets cookies between tests correctly', () => {
@@ -69,9 +61,9 @@ describe('Cookies', () => {
     })
 
     for (let i = 1; i <= 100; i++) {
-      (((i) => {
+      ;((i) => {
         cy.setCookie(`foo${i}`, `${i}`)
-      }))(i)
+      })(i)
     }
 
     cy.getCookies().should('have.length', 100)
@@ -84,14 +76,14 @@ describe('Cookies', () => {
   it('sends cookies to localhost:2121', () => {
     cy.clearCookies()
     cy.setCookie('asdf', 'jkl')
-    cy.request('http://localhost:2121/foo')
-    .its('body').should('deep.eq', { foo1: '1', asdf: 'jkl' })
+    cy.request('http://localhost:2121/foo').its('body').should('deep.eq', { foo1: '1', asdf: 'jkl' })
 
     cy.setCookie('wow', 'bob', { domain: 'brian.dev.local' })
     cy.request({
       url: 'http://localhost:2121/foo',
       domain: 'brian.dev.local',
     })
-    .its('body').should('deep.eq', { wow: 'bob' })
+    .its('body')
+    .should('deep.eq', { wow: 'bob' })
   })
 })

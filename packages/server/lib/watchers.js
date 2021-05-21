@@ -3,15 +3,15 @@ const chokidar = require('chokidar')
 const dependencyTree = require('dependency-tree')
 
 class Watchers {
-  constructor () {
+  constructor() {
     if (!(this instanceof Watchers)) {
-      return new Watchers
+      return new Watchers()
     }
 
     this.watchers = {}
   }
 
-  close () {
+  close() {
     return (() => {
       const result = []
 
@@ -23,7 +23,7 @@ class Watchers {
     })()
   }
 
-  watch (filePath, options = {}) {
+  watch(filePath, options = {}) {
     _.defaults(options, {
       useFsEvents: true,
       ignored: null,
@@ -51,11 +51,11 @@ class Watchers {
     return this
   }
 
-  watchTree (filePath, options = {}) {
+  watchTree(filePath, options = {}) {
     const files = dependencyTree.toList({
       filename: filePath,
       directory: process.cwd(),
-      filter (filePath) {
+      filter(filePath) {
         return filePath.indexOf('node_modules') === -1
       },
     })
@@ -65,13 +65,13 @@ class Watchers {
     })
   }
 
-  _add (filePath, watcher) {
+  _add(filePath, watcher) {
     this._remove(filePath)
 
     this.watchers[filePath] = watcher
   }
 
-  _remove (filePath) {
+  _remove(filePath) {
     let watcher
 
     if (!(watcher = this.watchers[filePath])) {

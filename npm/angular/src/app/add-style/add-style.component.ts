@@ -6,5 +6,5 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./add-style.component.css'],
 })
 export class AddStyleComponent implements OnInit {
-  ngOnInit () {}
+  ngOnInit() {}
 }

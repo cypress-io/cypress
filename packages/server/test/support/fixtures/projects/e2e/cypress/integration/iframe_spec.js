@@ -77,9 +77,10 @@ describe('iframes', () => {
 
   it('does not inject into xhrs', () => {
     cy.visit('http://localhost:1616/')
-    cy.window().then((win) => {
+    cy.window()
+    .then((win) => {
       return new Cypress.Promise((resolve) => {
-        const xhr = new win.XMLHttpRequest
+        const xhr = new win.XMLHttpRequest()
 
         xhr.open('GET', '/iframe')
         xhr.onload = () => {
@@ -88,7 +89,8 @@ describe('iframes', () => {
 
         return xhr.send()
       })
-    }).then((response) => {
+    })
+    .then((response) => {
       expect(response).not.to.include('document.domain')
     })
   })

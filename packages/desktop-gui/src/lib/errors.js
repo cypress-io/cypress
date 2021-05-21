@@ -1,46 +1,43 @@
 import _ from 'lodash'
 
 const errors = {
-  isAlreadyMember (err) {
+  isAlreadyMember(err) {
     return _.get(err, 'type') === 'ALREADY_MEMBER'
   },
 
-  isAlreadyRequested (err) {
+  isAlreadyRequested(err) {
     return _.get(err, 'type') === 'ALREADY_REQUESTED'
   },
 
-  isDenied (err) {
+  isDenied(err) {
     return _.get(err, 'type') === 'DENIED'
   },
 
-  isMissingProjectId (err) {
+  isMissingProjectId(err) {
     return _.get(err, 'type') === 'NO_PROJECT_ID'
   },
 
-  isNoConnection (err) {
+  isNoConnection(err) {
     return _.get(err, 'type') === 'NO_CONNECTION'
   },
 
-  isNotFound (err) {
+  isNotFound(err) {
     return _.get(err, 'type') === 'NOT_FOUND'
   },
 
-  isUnauthenticated (err) {
-    return (
-      _.get(err, 'type') === 'UNAUTHENTICATED'
-      || _.get(err, 'statusCode') === 401
-    )
+  isUnauthenticated(err) {
+    return _.get(err, 'type') === 'UNAUTHENTICATED' || _.get(err, 'statusCode') === 401
   },
 
-  isUnauthorized (err) {
+  isUnauthorized(err) {
     return _.get(err, 'statusCode') === 403
   },
 
-  isTimedOut (err) {
+  isTimedOut(err) {
     return _.get(err, 'type') === 'TIMED_OUT'
   },
 
-  isUnknown (err) {
+  isUnknown(err) {
     return _.get(err, 'type') === 'UNKNOWN'
   },
 }

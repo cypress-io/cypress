@@ -46,9 +46,7 @@ describe('http', function () {
         this.end()
       })
 
-      return new Http(httpOpts)
-      .handle({}, {})
-      .then(function () {
+      return new Http(httpOpts).handle({}, {}).then(function () {
         expect(incomingRequest, 'incomingRequest').to.be.calledOnce
         expect(incomingResponse, 'incomingResponse').to.be.calledOnce
         expect(error).to.not.be.called
@@ -63,9 +61,7 @@ describe('http', function () {
         this.end()
       })
 
-      return new Http(httpOpts)
-      .handle({}, {})
-      .then(function () {
+      return new Http(httpOpts).handle({}, {}).then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.not.be.called
         expect(error).to.be.calledOnce
@@ -85,9 +81,7 @@ describe('http', function () {
         this.end()
       })
 
-      return new Http(httpOpts)
-      .handle({}, {})
-      .then(function () {
+      return new Http(httpOpts).handle({}, {}).then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.be.calledOnce
         expect(error).to.be.calledOnce
@@ -147,14 +141,8 @@ describe('http', function () {
       middleware[HttpStages.IncomingResponse].push(incomingResponse2)
       middleware[HttpStages.Error].push(error2)
 
-      return new Http(httpOpts)
-      .handle({}, {})
-      .then(function () {
-        [
-          incomingRequest, incomingRequest2,
-          incomingResponse, incomingResponse2,
-          error, error2,
-        ].forEach(function (fn) {
+      return new Http(httpOpts).handle({}, {}).then(function () {
+        ;[incomingRequest, incomingRequest2, incomingResponse, incomingResponse2, error, error2].forEach(function (fn) {
           expect(fn).to.be.calledOnce
         })
       })

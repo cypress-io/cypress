@@ -8,14 +8,16 @@ const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
 const $errorMessages = require('./error_messages')
 
-const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
+const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(
+  ' '
+)
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
 
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
-    const stack = (new Error()).stack
+    const stack = new Error().stack
 
     err.stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn.name)
   }
@@ -50,7 +52,9 @@ const prepareErrorForSerialization = (err) => {
 }
 
 const wrapErr = (err) => {
-  if (!err) return
+  if (!err) {
+    return
+  }
 
   prepareErrorForSerialization(err)
 
@@ -78,19 +82,14 @@ const mergeErrProps = (origErr, ...newProps) => {
 }
 
 const stackWithReplacedProps = (err, props) => {
-  const {
-    message: originalMessage,
-    name: originalName,
-    stack: originalStack,
-  } = err
+  const { message: originalMessage, name: originalName, stack: originalStack } = err
 
-  const {
-    message: newMessage,
-    name: newName,
-  } = props
+  const { message: newMessage, name: newName } = props
 
   // if stack doesn't already exist, leave it as is
-  if (!originalStack) return originalStack
+  if (!originalStack) {
+    return originalStack
+  }
 
   let stack
 
@@ -131,9 +130,13 @@ const appendErrMsg = (err, errMsg) => {
   return modifyErrMsg(err, errMsg, (msg1, msg2) => {
     // we don't want to just throw in extra
     // new lines if there isn't even a msg
-    if (!msg1) return msg2
+    if (!msg1) {
+      return msg2
+    }
 
-    if (!msg2) return msg1
+    if (!msg2) {
+      return msg1
+    }
 
     return `${msg1}\n\n${msg2}`
   })
@@ -207,7 +210,7 @@ const warnByPath = (errPath, options = {}) => {
 }
 
 class InternalCypressError extends Error {
-  constructor (message) {
+  constructor(message) {
     super(message)
 
     this.name = 'InternalCypressError'
@@ -219,7 +222,7 @@ class InternalCypressError extends Error {
 }
 
 class CypressError extends Error {
-  constructor (message) {
+  constructor(message) {
     super(message)
 
     this.name = 'CypressError'
@@ -229,7 +232,7 @@ class CypressError extends Error {
     }
   }
 
-  setUserInvocationStack (stack) {
+  setUserInvocationStack(stack) {
     this.userInvocationStack = stack
 
     return this
@@ -259,20 +262,26 @@ const cypressErrByPath = (errPath, options = {}) => {
 }
 
 const replaceErrMsgTokens = (errMessage, args) => {
-  if (!errMessage) return errMessage
+  if (!errMessage) {
+    return errMessage
+  }
 
   const replace = (str, argValue, argKey) => {
     return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
   }
 
   const getMsg = function (args = {}) {
-    return _.reduce(args, (message, argValue, argKey) => {
-      if (_.isArray(message)) {
-        return _.map(message, (str) => replace(str, argValue, argKey))
-      }
+    return _.reduce(
+      args,
+      (message, argValue, argKey) => {
+        if (_.isArray(message)) {
+          return _.map(message, (str) => replace(str, argValue, argKey))
+        }
 
-      return replace(message, argValue, argKey)
-    }, errMessage)
+        return replace(message, argValue, argKey)
+      },
+      errMessage
+    )
   }
 
   // replace more than 2 newlines with exactly 2 newlines
@@ -347,7 +356,9 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
 const stackAndCodeFrameIndex = (err, userInvocationStack) => {
-  if (!userInvocationStack) return { stack: err.stack }
+  if (!userInvocationStack) {
+    return { stack: err.stack }
+  }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
     return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
@@ -398,7 +409,9 @@ const processErr = (errObj = {}, config) => {
 }
 
 const getStackFromErrArgs = ({ filename, lineno, colno }) => {
-  if (!filename) return undefined
+  if (!filename) {
+    return undefined
+  }
 
   const line = lineno != null ? `:${lineno}` : ''
   const column = lineno != null && colno != null ? `:${colno}` : ''
@@ -437,9 +450,14 @@ const errorFromErrorEvent = (event) => {
 
   // it's possible the error was thrown as a string (throw 'some error')
   // so create it in the case it's not already an object
-  const err = _.isObject(error) ? error : convertErrorEventPropertiesToObject({
-    message, filename, lineno, colno,
-  })
+  const err = _.isObject(error)
+    ? error
+    : convertErrorEventPropertiesToObject({
+        message,
+        filename,
+        lineno,
+        colno,
+      })
 
   err.docsUrl = docsUrl
 
@@ -467,9 +485,7 @@ const errorFromProjectRejectionEvent = (event) => {
 }
 
 const errorFromUncaughtEvent = (handlerType, event) => {
-  return handlerType === 'error' ?
-    errorFromErrorEvent(event) :
-    errorFromProjectRejectionEvent(event)
+  return handlerType === 'error' ? errorFromErrorEvent(event) : errorFromProjectRejectionEvent(event)
 }
 
 const logError = (Cypress, handlerType, err, handled = false) => {
@@ -487,7 +503,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
     consoleProps: () => {
       const consoleObj = {
         'Caught By': `"${handlerType}" handler`,
-        'Error': err,
+        Error: err,
       }
 
       return consoleObj

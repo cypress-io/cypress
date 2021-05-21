@@ -29,7 +29,7 @@ const long = (ms, alwaysIncludeSeconds = true) => {
 
   const secs = duration.seconds()
 
-  if (alwaysIncludeSeconds || (secs > 0)) {
+  if (alwaysIncludeSeconds || secs > 0) {
     word = secs === 1 ? 'second' : 'seconds'
     msg.push(`${secs} ${word}`)
   }

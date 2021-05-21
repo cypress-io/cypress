@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 import { createStory, createStorybookConfig } from 'stories/util'
 
@@ -22,18 +22,19 @@ export default createStorybookConfig({
 })
 
 export const PaddedBox = createStory<{
-    padding: Spacing
-  }>(({ padding }) => (
+  padding: Spacing
+}>(
+  ({ padding }) => (
     <div>
       <StoryHighlightWrapper>
-        <PaddedComponent padding={padding}>
-          {lorem}
-        </PaddedComponent>
+        <PaddedComponent padding={padding}>{lorem}</PaddedComponent>
       </StoryHighlightWrapper>
     </div>
-  ), {
+  ),
+  {
     padding: 'm',
-  })
+  }
+)
 
 // Required to prevent Storybook from separating into two words and creating unnecessary nesting
 PaddedBox.storyName = 'PaddedBox'

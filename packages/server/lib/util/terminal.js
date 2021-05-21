@@ -15,21 +15,11 @@ const getMaximumColumns = () => {
 }
 
 const getBordersLength = (left, right) => {
-  return _
-  .chain([left, right])
-  .compact()
-  .map(widestLine)
-  .sum()
-  .value()
+  return _.chain([left, right]).compact().map(widestLine).sum().value()
 }
 
 const renderTables = (...tables) => {
-  return _
-  .chain([])
-  .concat(tables)
-  .invokeMap('toString')
-  .join('\n')
-  .value()
+  return _.chain([]).concat(tables).invokeMap('toString').join('\n').value()
 }
 
 const getChars = (type) => {
@@ -38,28 +28,28 @@ const getChars = (type) => {
       return {
         'top-mid': '',
         'top-left': '  ┌',
-        'left': '  │',
+        left: '  │',
         'left-mid': '  ├',
-        'middle': '',
+        middle: '',
         'mid-mid': '',
-        'right': '│',
+        right: '│',
         'bottom-mid': '',
         'bottom-left': '  └',
       }
     case 'noBorder':
       return {
-        'top': '',
+        top: '',
         'top-mid': '',
         'top-left': '',
         'top-right': '',
-        'left': '   ',
+        left: '   ',
         'left-mid': '',
-        'middle': '',
-        'mid': '',
+        middle: '',
+        mid: '',
         'mid-mid': '',
-        'right': ' ',
+        right: ' ',
         'right-mid': '',
-        'bottom': '',
+        bottom: '',
         'bottom-left': '',
         'bottom-mid': '',
         'bottom-right': '',
@@ -69,10 +59,10 @@ const getChars = (type) => {
         // "top": ""
         'top-left': '  ┌',
         'top-mid': '',
-        'left': '  │',
+        left: '  │',
         'left-mid': '',
-        'middle': '',
-        'mid': '',
+        middle: '',
+        mid: '',
         'mid-mid': '',
         'right-mid': '',
         'bottom-mid': '',
@@ -80,43 +70,44 @@ const getChars = (type) => {
       }
     case 'pageDivider':
       return {
-        'top': '─',
+        top: '─',
         'top-mid': '',
         'top-left': '',
         'top-right': '',
-        'bottom': '',
+        bottom: '',
         'bottom-mid': '',
         'bottom-left': '',
         'bottom-right': '',
-        'left': '',
+        left: '',
         'left-mid': '',
-        'mid': '',
+        mid: '',
         'mid-mid': '',
-        'right': '',
+        right: '',
         'right-mid': '',
-        'middle': '',
+        middle: '',
       }
     case 'allBorders':
       return {
         // this is default from cli-table mostly just for debugging,
         // if you want to see where borders would be drawn
-        'top': '─',
+        top: '─',
         'top-mid': '┬',
         'top-left': '┌',
         'top-right': '┐',
-        'bottom': '─',
+        bottom: '─',
         'bottom-mid': '┴',
         'bottom-left': '└',
         'bottom-right': '┘',
-        'left': '│',
+        left: '│',
         'left-mid': '├',
-        'mid': '─',
+        mid: '─',
         'mid-mid': '┼',
-        'right': '│',
+        right: '│',
         'right-mid': '┤',
-        'middle': '│',
+        middle: '│',
       }
-    default: throw new Error(`Table chars type: "${type}" is not supported`)
+    default:
+      throw new Error(`Table chars type: "${type}" is not supported`)
   }
 }
 
@@ -187,9 +178,13 @@ const header = (message, options = {}) => {
   if (options.color) {
     const colors = [].concat(options.color)
 
-    message = _.reduce(colors, (memo, color) => {
-      return chalk[color](memo)
-    }, message)
+    message = _.reduce(
+      colors,
+      (memo, color) => {
+        return chalk[color](memo)
+      },
+      message
+    )
   }
 
   console.log(message) // eslint-disable-line no-console

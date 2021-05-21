@@ -50,8 +50,7 @@ describe('lib/gui/auth', function () {
     })
 
     it('uses random and server.port to form a URL along with environment info', function () {
-      return auth._buildFullLoginUrl(BASE_URL, this.server)
-      .then((url) => {
+      return auth._buildFullLoginUrl(BASE_URL, this.server).then((url) => {
         expect(url).to.eq(FULL_LOGIN_URL)
         expect(random.id).to.be.calledWith(32)
         expect(this.server.address).to.be.calledOnce
@@ -59,7 +58,8 @@ describe('lib/gui/auth', function () {
     })
 
     it('does not regenerate the state code', function () {
-      return auth._buildFullLoginUrl(BASE_URL, this.server)
+      return auth
+      ._buildFullLoginUrl(BASE_URL, this.server)
       .then(() => {
         return auth._buildFullLoginUrl(BASE_URL, this.server)
       })
@@ -69,8 +69,7 @@ describe('lib/gui/auth', function () {
     })
 
     it('uses utm code to form a trackable URL', function () {
-      return auth._buildFullLoginUrl(BASE_URL, this.server, 'GUI Tab')
-      .then((url) => {
+      return auth._buildFullLoginUrl(BASE_URL, this.server, 'GUI Tab').then((url) => {
         expect(url).to.eq(FULL_LOGIN_URL_UTM)
       })
     })
@@ -78,7 +77,8 @@ describe('lib/gui/auth', function () {
 
   context('._launchNativeAuth', function () {
     it('is catchable if `shell` does not exist', function () {
-      return auth._launchNativeAuth(REDIRECT_URL)
+      return auth
+      ._launchNativeAuth(REDIRECT_URL)
       .then(() => {
         throw new Error('This should not succeed')
       })
@@ -99,8 +99,7 @@ describe('lib/gui/auth', function () {
         sinon.stub(electron.shell, 'openExternal').resolves()
         const sendWarning = sinon.stub()
 
-        return auth._launchNativeAuth(REDIRECT_URL, sendWarning)
-        .then(() => {
+        return auth._launchNativeAuth(REDIRECT_URL, sendWarning).then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
           expect(sendWarning).to.not.be.called
         })
@@ -110,8 +109,7 @@ describe('lib/gui/auth', function () {
         sinon.stub(electron.shell, 'openExternal').rejects()
         const sendWarning = sinon.stub()
 
-        return auth._launchNativeAuth(REDIRECT_URL, sendWarning)
-        .then(() => {
+        return auth._launchNativeAuth(REDIRECT_URL, sendWarning).then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
           expect(sendWarning).to.be.calledWithMatch('warning', 'AUTH_COULD_NOT_LAUNCH_BROWSER', REDIRECT_URL)
         })

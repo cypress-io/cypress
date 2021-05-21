@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from './util'
@@ -12,7 +12,9 @@ export default createStorybookConfig({
 
 const Template: Story = () => (
   <div>
-    {Object.keys(typography).filter((key) => key !== 'type').map((key) => {
+    {Object.keys(typography)
+    .filter((key) => key !== 'type')
+    .map((key) => {
       const size = key.replace('text-', '')
 
       return (
@@ -22,9 +24,7 @@ const Template: Story = () => (
             marginBottom: '2em',
           }}
         >
-          <div className="text-mono-m">
-            {size}
-          </div>
+          <div className="text-mono-m">{size}</div>
           <div className={key}>The five boxing wizards jump quickly</div>
         </div>
       )

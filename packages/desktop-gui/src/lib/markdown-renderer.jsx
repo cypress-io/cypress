@@ -9,15 +9,15 @@ const md = new Markdown({
 })
 
 export default class MarkdownRenderer extends React.PureComponent {
-  componentDidMount () {
+  componentDidMount() {
     this.node.addEventListener('click', this._clickHandler)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.node.removeEventListener('click', this._clickHandler)
   }
 
-  _clickHandler (e) {
+  _clickHandler(e) {
     if (e.target.href) {
       e.preventDefault()
 
@@ -25,7 +25,7 @@ export default class MarkdownRenderer extends React.PureComponent {
     }
   }
 
-  render () {
+  render() {
     let renderFn = md.render
 
     if (this.props.noParagraphWrapper) {
@@ -34,11 +34,12 @@ export default class MarkdownRenderer extends React.PureComponent {
     }
 
     return (
-      <span ref={(node) => this.node = node}
+      <span
+        ref={(node) => (this.node = node)}
         dangerouslySetInnerHTML={{
           __html: renderFn.call(md, this.props.markdown),
-        }}>
-      </span>
+        }}
+      ></span>
     )
   }
 }

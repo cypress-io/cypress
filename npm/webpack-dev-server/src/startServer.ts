@@ -15,7 +15,10 @@ export interface StartDevServer extends UserWebpackDevServerOptions {
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, template, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
+export async function start(
+  { webpackConfig: userWebpackConfig, template, options, ...userOptions }: StartDevServer,
+  exitProcess = process.exit
+): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
@@ -70,7 +73,9 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       hot: false,
     }
   } else {
-    throw Error(`@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`)
+    throw Error(
+      `@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`
+    )
   }
 
   // @ts-ignore types for webpack v5 are incorrect?

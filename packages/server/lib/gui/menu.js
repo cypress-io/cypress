@@ -9,7 +9,7 @@ const open = require('../util/open')
 let onLogOutClicked = function () {}
 
 module.exports = {
-  set (options = {}) {
+  set(options = {}) {
     _.defaults(options, {
       withDevTools: false,
     })
@@ -17,7 +17,7 @@ module.exports = {
     // this set by modes/interactive and needs to be preserved if the menu
     // is set again by launcher when the Electron browser is run
     if (options.onLogOutClicked) {
-      ({ onLogOutClicked } = options)
+      ;({ onLogOutClicked } = options)
     }
 
     const template = [
@@ -26,7 +26,7 @@ module.exports = {
         submenu: [
           {
             label: 'Changelog',
-            click () {
+            click() {
               return shell.openExternal('https://on.cypress.io/changelog')
             },
           },
@@ -35,7 +35,7 @@ module.exports = {
           },
           {
             label: 'Manage Account',
-            click () {
+            click() {
               return shell.openExternal('https://on.cypress.io/dashboard')
             },
           },
@@ -48,7 +48,7 @@ module.exports = {
           },
           {
             label: 'View App Data',
-            click () {
+            click() {
               return open.opn(appData.path())
             },
           },
@@ -137,25 +137,25 @@ module.exports = {
         submenu: [
           {
             label: 'Support',
-            click () {
+            click() {
               return shell.openExternal('https://on.cypress.io/support')
             },
           },
           {
             label: 'Documentation',
-            click () {
+            click() {
               return shell.openExternal('https://on.cypress.io')
             },
           },
           {
             label: 'Download Chromium',
-            click () {
+            click() {
               return shell.openExternal('https://on.cypress.io/chromium-downloads')
             },
           },
           {
             label: 'Report an Issue',
-            click () {
+            click() {
               return shell.openExternal('https://on.cypress.io/new-issue')
             },
           },
@@ -173,37 +173,35 @@ module.exports = {
     }
 
     if (options.withDevTools) {
-      template.push(
-        {
-          label: 'Developer Tools',
-          submenu: [
-            {
-              label: 'Reload',
-              accelerator: 'CmdOrCtrl+R',
-              click: (item, focusedWindow) => {
-                if (focusedWindow) {
-                  return focusedWindow.reload()
-                }
-              },
+      template.push({
+        label: 'Developer Tools',
+        submenu: [
+          {
+            label: 'Reload',
+            accelerator: 'CmdOrCtrl+R',
+            click: (item, focusedWindow) => {
+              if (focusedWindow) {
+                return focusedWindow.reload()
+              }
             },
-            {
-              label: 'Toggle Developer Tools',
-              accelerator: (() => {
-                if (os.platform() === 'darwin') {
-                  return 'Alt+Command+I'
-                }
+          },
+          {
+            label: 'Toggle Developer Tools',
+            accelerator: (() => {
+              if (os.platform() === 'darwin') {
+                return 'Alt+Command+I'
+              }
 
-                return 'Ctrl+Shift+I'
-              })(),
-              click: (item, focusedWindow) => {
-                if (focusedWindow) {
-                  return focusedWindow.toggleDevTools()
-                }
-              },
+              return 'Ctrl+Shift+I'
+            })(),
+            click: (item, focusedWindow) => {
+              if (focusedWindow) {
+                return focusedWindow.toggleDevTools()
+              }
             },
-          ],
-        },
-      )
+          },
+        ],
+      })
     }
 
     const menu = Menu.buildFromTemplate(template)

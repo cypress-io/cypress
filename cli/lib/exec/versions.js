@@ -11,7 +11,8 @@ const getVersions = () => {
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
       let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY'))
 
-      return state.parseRealPlatformBinaryFolderAsync(envBinaryPath)
+      return state
+      .parseRealPlatformBinaryFolderAsync(envBinaryPath)
       .then((envBinaryDir) => {
         if (!envBinaryDir) {
           return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()

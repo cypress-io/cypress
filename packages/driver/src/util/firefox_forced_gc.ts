@@ -1,11 +1,11 @@
 import { isNumber, isNull } from 'lodash'
 
-function usingFirefoxWithGcBug (browser: Cypress.Browser) {
+function usingFirefoxWithGcBug(browser: Cypress.Browser) {
   // @see https://github.com/cypress-io/cypress/issues/8241
   return browser.family === 'firefox' && browser.majorVersion < 80
 }
 
-export function createIntervalGetter (Cypress: Cypress.Cypress) {
+export function createIntervalGetter(Cypress: Cypress.Cypress) {
   return () => {
     if (!usingFirefoxWithGcBug(Cypress.browser)) {
       return undefined
@@ -22,7 +22,7 @@ export function createIntervalGetter (Cypress: Cypress.Cypress) {
   }
 }
 
-export function install (Cypress: Cypress.Cypress & EventEmitter) {
+export function install(Cypress: Cypress.Cypress & EventEmitter) {
   if (!usingFirefoxWithGcBug(Cypress.browser)) {
     return
   }

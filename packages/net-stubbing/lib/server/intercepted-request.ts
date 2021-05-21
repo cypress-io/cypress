@@ -1,14 +1,8 @@
 import _ from 'lodash'
 import { IncomingMessage } from 'http'
 import { Readable } from 'stream'
-import {
-  CypressIncomingRequest,
-  CypressOutgoingResponse,
-} from '@packages/proxy'
-import {
-  NetEvent,
-  Subscription,
-} from '../types'
+import { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
+import { NetEvent, Subscription } from '../types'
 import { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
 import CyServer from '@packages/server'
@@ -43,7 +37,12 @@ export class InterceptedRequest {
   state: NetStubbingState
   socket: CyServer.Socket
 
-  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes'>) {
+  constructor(
+    opts: Pick<
+      InterceptedRequest,
+      'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes'
+    >
+  ) {
     this.id = _.uniqueId('interceptedRequest')
     this.req = opts.req
     this.res = opts.res
@@ -67,7 +66,7 @@ export class InterceptedRequest {
     this._onResponse(incomingRes, resStream)
   }
 
-  private addDefaultSubscriptions () {
+  private addDefaultSubscriptions() {
     if (this.subscriptionsByRoute.length) {
       throw new Error('cannot add default subscriptions to non-empty array')
     }
@@ -76,22 +75,27 @@ export class InterceptedRequest {
       const subscriptionsByRoute = {
         routeId: route.id,
         immediateStaticResponse: route.staticResponse,
-        subscriptions: [{
-          eventName: 'before:request',
-          await: !!route.hasInterceptor,
-          routeId: route.id,
-        },
-        ...(['response:callback', 'after:response', 'network:error'].map((eventName) => {
-          // notification-only default event
-          return { eventName, await: false, routeId: route.id }
-        }))],
+        subscriptions: [
+          {
+            eventName: 'before:request',
+            await: !!route.hasInterceptor,
+            routeId: route.id,
+          },
+          ...['response:callback', 'after:response', 'network:error'].map((eventName) => {
+            // notification-only default event
+            return { eventName, await: false, routeId: route.id }
+          }),
+        ],
       }
 
       this.subscriptionsByRoute.push(subscriptionsByRoute)
     }
   }
 
-  static resolveEventHandler (state: NetStubbingState, options: { eventId: string, changedData: any, stopPropagation: boolean }) {
+  static resolveEventHandler(
+    state: NetStubbingState,
+    options: { eventId: string; changedData: any; stopPropagation: boolean }
+  ) {
     const pendingEventHandler = state.pendingEventHandlers[options.eventId]
 
     if (!pendingEventHandler) {
@@ -103,7 +107,7 @@ export class InterceptedRequest {
     pendingEventHandler(options)
   }
 
-  addSubscription (subscription: Subscription) {
+  addSubscription(subscription: Subscription) {
     const subscriptionsByRoute = _.find(this.subscriptionsByRoute, { routeId: subscription.routeId })
 
     if (!subscriptionsByRoute) {
@@ -125,7 +129,11 @@ export class InterceptedRequest {
    * Subscriptions are run in order, first sorted by matched route order, then by subscription definition order.
    * Resolves with the updated object, or the original object if no changes have been made.
    */
-  async handleSubscriptions<D> ({ eventName, data, mergeChanges }: {
+  async handleSubscriptions<D>({
+    eventName,
+    data,
+    mergeChanges,
+  }: {
     eventName: string | string[]
     data: D
     /*
@@ -166,7 +174,7 @@ export class InterceptedRequest {
 
         _emit()
 
-        const { changedData, stopPropagation } = await p as any
+        const { changedData, stopPropagation } = (await p) as any
 
         stopPropagationNow = stopPropagation
 

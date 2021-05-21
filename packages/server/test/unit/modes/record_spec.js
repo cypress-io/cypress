@@ -136,7 +136,8 @@ describe('lib/modes/record', () => {
         const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
 
-        return recordMode.createRunAndRecordSpecs({
+        return recordMode
+        .createRunAndRecordSpecs({
           key: 'foo',
           sys: {},
           browser: {},
@@ -194,7 +195,8 @@ describe('lib/modes/record', () => {
         const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
 
-        return recordMode.createRunAndRecordSpecs({
+        return recordMode
+        .createRunAndRecordSpecs({
           key: 'foo',
           sys: {},
           browser: {},
@@ -222,10 +224,7 @@ describe('lib/modes/record', () => {
     })
 
     describe('with CI info', () => {
-      const specs = [
-        { relative: 'path/to/spec/a' },
-        { relative: 'path/to/spec/b' },
-      ]
+      const specs = [{ relative: 'path/to/spec/a' }, { relative: 'path/to/spec/b' }]
 
       beforeEach(function () {
         sinon.stub(ciProvider, 'provider').returns('circle')
@@ -275,7 +274,8 @@ describe('lib/modes/record', () => {
         const tag = 'nightly,develop'
         const testingType = 'e2e'
 
-        return recordMode.createRunAndRecordSpecs({
+        return recordMode
+        .createRunAndRecordSpecs({
           key,
           sys,
           specs,
@@ -339,7 +339,7 @@ describe('lib/modes/record', () => {
         runId: 'run-id-123',
         instanceId: 'id-123',
         captured: {
-          toString () {
+          toString() {
             return 'foobarbaz\n'
           },
         },
@@ -349,8 +349,7 @@ describe('lib/modes/record', () => {
     it('calls api.updateInstanceStdout', function () {
       api.updateInstanceStdout.resolves()
 
-      return recordMode.updateInstanceStdout(this.options)
-      .then(() => {
+      return recordMode.updateInstanceStdout(this.options).then(() => {
         expect(api.updateInstanceStdout).to.be.calledWith({
           runId: 'run-id-123',
           instanceId: 'id-123',
@@ -369,13 +368,14 @@ describe('lib/modes/record', () => {
 
       const options = {
         instanceId: 'id-123',
-        captured: { toString () {
-          return 'foobarbaz\n'
-        } },
+        captured: {
+          toString() {
+            return 'foobarbaz\n'
+          },
+        },
       }
 
-      return recordMode.updateInstanceStdout(options)
-      .then(() => {
+      return recordMode.updateInstanceStdout(options).then(() => {
         expect(logger.createException).not.to.be.called
       })
     })
@@ -397,8 +397,7 @@ describe('lib/modes/record', () => {
     it('calls api.createInstance', function () {
       api.createInstance.resolves()
 
-      return recordMode.createInstance(this.options)
-      .then(() => {
+      return recordMode.createInstance(this.options).then(() => {
         expect(api.createInstance).to.be.calledWith({
           runId: 'run-123',
           groupId: 'group-123',
@@ -418,13 +417,15 @@ describe('lib/modes/record', () => {
 
       sinon.spy(errors, 'get')
 
-      await expect(recordMode.createInstance({
-        runId: 'run-123',
-        groupId: 'group-123',
-        machineId: 'machine-123',
-        platform: {},
-        spec: { relative: 'cypress/integration/app_spec.coffee' },
-      })).to.be.rejected
+      await expect(
+        recordMode.createInstance({
+          runId: 'run-123',
+          groupId: 'group-123',
+          machineId: 'machine-123',
+          platform: {},
+          spec: { relative: 'cypress/integration/app_spec.coffee' },
+        })
+      ).to.be.rejected
 
       expect(errors.get).to.have.been.calledWith('DASHBOARD_CANNOT_PROCEED_IN_SERIAL')
     })
@@ -452,10 +453,12 @@ describe('lib/modes/record', () => {
       api.createRun.rejects(err)
 
       sinon.spy(errors, 'throw')
-      await expect(recordMode.createRun({
-        git: {},
-        recordKey: true, // instead of a string
-      })).to.be.rejected
+      await expect(
+        recordMode.createRun({
+          git: {},
+          recordKey: true, // instead of a string
+        })
+      ).to.be.rejected
 
       expect(errors.throw).to.have.been.calledWith('DASHBOARD_RECORD_KEY_NOT_VALID', 'undefined')
     })

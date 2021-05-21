@@ -47,30 +47,34 @@ program
     options.push('--skipLibCheck')
   }
 
-  const tasks = new Listr(projects.map((proj) => {
-    return {
-      title: proj.name,
-      task: () => {
-        const cwd = proj.path
-        const tsc = require.resolve('typescript/bin/tsc')
+  const tasks = new Listr(
+    projects.map((proj) => {
+      return {
+        title: proj.name,
+        task: () => {
+          const cwd = proj.path
+          const tsc = require.resolve('typescript/bin/tsc')
 
-        return execa(tsc, options, {
-          cwd,
-        }).catch((err) => {
-          throw {
-            name: proj.name,
-            err,
-          }
-        })
-      },
+          return execa(tsc, options, {
+            cwd,
+          }).catch((err) => {
+            throw {
+              name: proj.name,
+              err,
+            }
+          })
+        },
+      }
+    }),
+    {
+      concurrent: 4,
+      exitOnError: false,
+      renderer: program.ignoreProgress ? 'silent' : 'default',
     }
-  }), {
-    concurrent: 4,
-    exitOnError: false,
-    renderer: program.ignoreProgress ? 'silent' : 'default',
-  })
+  )
 
-  tasks.run()
+  tasks
+  .run()
   .then(() => {
     log('')
     log('Type check passed successfully.')

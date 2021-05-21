@@ -1,8 +1,7 @@
 /* eslint-disable no-undef */
 describe('fetch works', () => {
   it('sets polyfilled state', () => {
-    cy.visit('http://localhost:1818/first')
-    .then(() => {
+    cy.visit('http://localhost:1818/first').then(() => {
       expect(cy.state('fetchPolyfilled')).to.be.true
     })
   })

@@ -7,7 +7,7 @@ const execa = require('execa')
 
 /* eslint-disable no-console */
 
-function getNameAndBinary (args = process.argv) {
+function getNameAndBinary(args = process.argv) {
   const options = minimist(args)
 
   la(is.unemptyString(options.npm), 'missing --npm option', options)
@@ -39,7 +39,7 @@ function getNameAndBinary (args = process.argv) {
   }
 }
 
-function getJustVersion (npmNameOrUrl) {
+function getJustVersion(npmNameOrUrl) {
   la(is.unemptyString(npmNameOrUrl), 'missing NPM string', npmNameOrUrl)
 
   if (npmNameOrUrl.startsWith('cypress')) {
@@ -68,9 +68,7 @@ const shorten = (s) => {
  * Grabs the full commit SHA and its short version from CI environment variables
  */
 const getShortCommit = () => {
-  const sha =
-    process.env.APPVEYOR_REPO_COMMIT ||
-    process.env.CIRCLE_SHA1
+  const sha = process.env.APPVEYOR_REPO_COMMIT || process.env.CIRCLE_SHA1
 
   if (sha) {
     return {
@@ -107,10 +105,7 @@ const getCIBuildUrl = () => {
     // there is no single url, but we can form one
     // looks like this
     // https://ci.appveyor.com/project/cypress-io/cypress/builds/25882716/job/7iv75s2vjt5w4usf
-    return `${process.env.APPVEYOR_URL}/project/${
-      process.env.APPVEYOR_ACCOUNT_NAME}/${process.env.APPVEYOR_PROJECT_SLUG
-    }/builds/${process.env.APPVEYOR_BUILD_ID
-    }/job/${process.env.APPVEYOR_JOB_ID}`
+    return `${process.env.APPVEYOR_URL}/project/${process.env.APPVEYOR_ACCOUNT_NAME}/${process.env.APPVEYOR_PROJECT_SLUG}/builds/${process.env.APPVEYOR_BUILD_ID}/job/${process.env.APPVEYOR_JOB_ID}`
   }
 }
 

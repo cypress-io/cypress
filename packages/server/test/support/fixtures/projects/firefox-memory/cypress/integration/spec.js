@@ -11,17 +11,12 @@ Cypress.on('test:after:run', (attrs) => {
   }
 })
 
-function parse (obj) {
+function parse(obj) {
   if (!obj) {
     return
   }
 
-  const str = JSON.stringify(obj, [
-    'usedJSHeapSize',
-    'totalJSHeapSize',
-
-    'jsHeapSizeLimit',
-  ])
+  const str = JSON.stringify(obj, ['usedJSHeapSize', 'totalJSHeapSize', 'jsHeapSizeLimit'])
 
   return JSON.parse(str)
 }
@@ -55,8 +50,7 @@ describe('memory leak finder', function () {
   after(() => {
     duration = Date.now() - duration
 
-    cy
-    .task('stop:capture:memory')
+    cy.task('stop:capture:memory')
     .then(() => {
       return Cypress.backend('log:memory:pressure')
     })

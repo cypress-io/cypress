@@ -24,13 +24,15 @@ describe('e2e plugins', () => {
     const relativeSpecPath = path.join('dir&1%', '%dir2&', 's%p+ec&.js')
     const specPath = path.join(e2eProject, 'cypress', 'integration', relativeSpecPath)
 
-    return fs.outputFile(specPath, 'it(\'passes\', () => {})')
+    return fs
+    .outputFile(specPath, "it('passes', () => {})")
     .then(() => {
       return e2e.exec(this, {
         spec: specPath,
         sanitizeScreenshotDimensions: true,
       })
-    }).then(({ stdout }) => {
+    })
+    .then(({ stdout }) => {
       expect(stdout).to.include(`1 found (${relativeSpecPath})`)
       expect(stdout).to.include(`Running:  ${relativeSpecPath}`)
 

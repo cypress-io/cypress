@@ -38,9 +38,7 @@ describe('lib/exec/versions', function () {
     it('gets correct binary version if CYPRESS_RUN_BINARY', function () {
       sinon.stub(state, 'parseRealPlatformBinaryFolderAsync').resolves('/my/cypress/path')
       process.env.CYPRESS_RUN_BINARY = '/my/cypress/path'
-      state.getBinaryPkgAsync
-      .withArgs('/my/cypress/path')
-      .resolves({
+      state.getBinaryPkgAsync.withArgs('/my/cypress/path').resolves({
         version: '7.8.9',
       })
 
@@ -58,10 +56,10 @@ describe('lib/exec/versions', function () {
 
       return versions.getVersions().then((versions) => {
         expect(versions).to.deep.equal({
-          'package': '4.5.6',
-          'binary': '90.9.9',
-          'electronVersion': 'not found',
-          'electronNodeVersion': 'not found',
+          package: '4.5.6',
+          binary: '90.9.9',
+          electronVersion: 'not found',
+          electronNodeVersion: 'not found',
         })
       })
     })

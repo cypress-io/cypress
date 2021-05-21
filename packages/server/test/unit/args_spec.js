@@ -23,7 +23,7 @@ describe('lib/util/args', () => {
 
       expect(options).to.deep.equal({
         _: [],
-        'ci-build-id': 1e+100,
+        'ci-build-id': 1e100,
       })
     })
 
@@ -139,7 +139,12 @@ describe('lib/util/args', () => {
 
   context('--spec', () => {
     it('converts to array', function () {
-      const options = this.setup('--run-project', 'foo', '--spec', 'cypress/integration/a.js,cypress/integration/b.js,cypress/integration/c.js')
+      const options = this.setup(
+        '--run-project',
+        'foo',
+        '--spec',
+        'cypress/integration/a.js,cypress/integration/b.js,cypress/integration/c.js'
+      )
 
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/a.js`)
       expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/b.js`)
@@ -148,7 +153,7 @@ describe('lib/util/args', () => {
     })
 
     it('discards wrapping single quotes', function () {
-      const options = this.setup('--run-project', 'foo', '--spec', '\'cypress/integration/foo_spec.js\'')
+      const options = this.setup('--run-project', 'foo', '--spec', "'cypress/integration/foo_spec.js'")
 
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo_spec.js`)
     })
@@ -247,10 +252,7 @@ describe('lib/util/args', () => {
       // as mixed usage
       const nestedJSON = JSON.stringify(reporterOpts.jsonReporterOptions)
 
-      options = this.setup(
-        '--reporterOptions',
-        `reporterEnabled=JSON,jsonReporterOptions=${nestedJSON}`,
-      )
+      options = this.setup('--reporterOptions', `reporterEnabled=JSON,jsonReporterOptions=${nestedJSON}`)
 
       expect(options.config.reporterOptions).to.deep.eq({
         reporterEnabled: 'JSON',
@@ -315,13 +317,7 @@ describe('lib/util/args', () => {
 
       options = this.setup(
         '--config',
-        [
-          'pageLoadTimeout=10000',
-          'waitForAnimations=false',
-          `hosts=${hosts}`,
-          `blockHosts=${blockHosts}`,
-        ].join(','),
-
+        ['pageLoadTimeout=10000', 'waitForAnimations=false', `hosts=${hosts}`, `blockHosts=${blockHosts}`].join(',')
       )
 
       expect(options.config).to.deep.eq(config)
@@ -365,11 +361,8 @@ describe('lib/util/args', () => {
       this.obj = { config: { foo: 'bar' }, project: 'foo/bar' }
     })
 
-    it('rejects values which have an corresponding underscore\'d key', function () {
-      expect(argsUtil.toArray(this.obj)).to.deep.eq([
-        `--config=${JSON.stringify({ foo: 'bar' })}`,
-        '--project=foo/bar',
-      ])
+    it("rejects values which have an corresponding underscore'd key", function () {
+      expect(argsUtil.toArray(this.obj)).to.deep.eq([`--config=${JSON.stringify({ foo: 'bar' })}`, '--project=foo/bar'])
     })
   })
 
@@ -377,11 +370,7 @@ describe('lib/util/args', () => {
     beforeEach(function () {
       this.hosts = { a: 'b', b: 'c' }
       this.blockHosts = ['a.com', 'b.com']
-      this.specs = [
-        path.join(cwd, 'foo'),
-        path.join(cwd, 'bar'),
-        path.join(cwd, 'baz'),
-      ]
+      this.specs = [path.join(cwd, 'foo'), path.join(cwd, 'bar'), path.join(cwd, 'baz')]
 
       this.env = {
         foo: 'bar',
@@ -409,7 +398,7 @@ describe('lib/util/args', () => {
         '--config',
         `requestTimeout=1234,blockHosts=${s(this.blockHosts)},hosts=${s(this.hosts)}`,
         '--reporter-options=foo=bar',
-        '--spec=foo,bar,baz',
+        '--spec=foo,bar,baz'
       )
     })
 
@@ -573,9 +562,8 @@ describe('lib/util/args', () => {
       expect(options.proxyBypassList).to.eq('d,e,f,127.0.0.1,::1,localhost')
 
       expect(options.proxyBypassList).to.eq(process.env.NO_PROXY)
-    });
-
-    ['', 'false', '0'].forEach((override) => {
+    })
+    ;['', 'false', '0'].forEach((override) => {
       it(`doesn't load from Windows registry if HTTP_PROXY overridden with string '${override}'`, function () {
         sinon.stub(getWindowsProxyUtil, 'getWindowsProxy').returns()
         sinon.stub(os, 'platform').returns('win32')
@@ -593,7 +581,7 @@ describe('lib/util/args', () => {
       })
     })
 
-    it('doesn\'t mess with env vars if Windows registry doesn\'t have proxy', function () {
+    it("doesn't mess with env vars if Windows registry doesn't have proxy", function () {
       sinon.stub(getWindowsProxyUtil, 'getWindowsProxy').returns()
       sinon.stub(os, 'platform').returns('win32')
       const options = this.setup()
@@ -630,7 +618,7 @@ describe('lib/util/args', () => {
       expect(options.proxyBypassList).to.eq(process.env.NO_PROXY)
     })
 
-    it('sets a default localhost NO_PROXY if NO_PROXY = \'\'', function () {
+    it("sets a default localhost NO_PROXY if NO_PROXY = ''", function () {
       process.env.HTTP_PROXY = 'http://foo-bar.baz:123'
       process.env.NO_PROXY = ''
       const options = this.setup()
@@ -642,7 +630,7 @@ describe('lib/util/args', () => {
       expect(options.proxyBypassList).to.eq(process.env.NO_PROXY)
     })
 
-    it('does not set a default localhost NO_PROXY if NO_PROXY = \'<-loopback>\'', function () {
+    it("does not set a default localhost NO_PROXY if NO_PROXY = '<-loopback>'", function () {
       process.env.HTTP_PROXY = 'http://foo-bar.baz:123'
       process.env.NO_PROXY = '<-loopback>'
       const options = this.setup()

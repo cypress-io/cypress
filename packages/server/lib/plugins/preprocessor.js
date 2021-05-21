@@ -54,8 +54,9 @@ const API = {
 
   emitter: baseEmitter,
 
-  getFile (filePath, config) {
-    let fileObject; let fileProcessor
+  getFile(filePath, config) {
+    let fileObject
+    let fileProcessor
 
     debug(`getting file ${filePath}`)
     filePath = path.resolve(config.projectRoot, filePath)
@@ -69,15 +70,13 @@ const API = {
       // vs config.isInterativeMode
       const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
 
-      const baseFilePath = filePath
-      .replace(config.projectRoot, '')
-      .replace(config.integrationFolder, '')
+      const baseFilePath = filePath.replace(config.projectRoot, '').replace(config.integrationFolder, '')
 
-      fileObject = (fileObjects[filePath] = _.extend(new EE(), {
+      fileObject = fileObjects[filePath] = _.extend(new EE(), {
         filePath,
         shouldWatch,
         outputPath: appData.getBundledFilePath(config.projectRoot, baseFilePath),
-      }))
+      })
 
       fileObject.on('rerun', () => {
         debug('file object rerun event')
@@ -105,7 +104,7 @@ const API = {
     return preprocessor
   },
 
-  removeFile (filePath, config) {
+  removeFile(filePath, config) {
     let fileObject
 
     filePath = path.resolve(config.projectRoot, filePath)
@@ -129,7 +128,7 @@ const API = {
     return delete fileProcessors[filePath]
   },
 
-  close () {
+  close() {
     debug('close preprocessor')
 
     fileObjects = {}

@@ -2,7 +2,7 @@ import $ from 'cash-dom'
 
 const initialCounter = 0
 
-function increment ($counter) {
+function increment($counter) {
   // Cypress.log($counter)
   const counterEl = $counter[0]
   const value = parseInt(counterEl.innerText, 10)
@@ -10,7 +10,7 @@ function increment ($counter) {
   counterEl.innerHTML = value + 1
 }
 
-export default function counter (rootEl, id = 'counter-root') {
+export default function counter(rootEl, id = 'counter-root') {
   const $target = rootEl ? $(rootEl) : $(`<div id="${id}"/>`)
 
   $target.html('') // cleaning up between tests

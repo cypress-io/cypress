@@ -219,8 +219,7 @@ describe('lib/cors', () => {
     }
 
     const isNotMatch = (urlStr, origin) => {
-      expect(urlStr, `the url: '${urlStr}' matched origin protection space: '${origin}'`)
-      .not.to.satisfy(() => {
+      expect(urlStr, `the url: '${urlStr}' matched origin protection space: '${origin}'`).not.to.satisfy(() => {
         return cors.urlMatchesOriginProtectionSpace(urlStr, origin)
       })
     }

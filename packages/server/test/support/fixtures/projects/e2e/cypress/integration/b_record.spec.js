@@ -1,5 +1,3 @@
 describe('b spec', () => {
-  it('b test', () => {
-
-  })
+  it('b test', () => {})
 })

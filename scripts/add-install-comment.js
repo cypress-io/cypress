@@ -4,12 +4,7 @@
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')
-const {
-  getNameAndBinary,
-  getShortCommit,
-  getCIName,
-  getCIBuildUrl,
-} = require('./utils')
+const { getNameAndBinary, getShortCommit, getCIName, getCIBuildUrl } = require('./utils')
 const { addCommitComment } = require('@cypress/github-commit-status-check')
 const { stripIndent } = require('common-tags')
 

@@ -7,7 +7,7 @@ const system = require('./util/system')
 
 // strip everything but the file name to remove any sensitive
 // data in the path
-const pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig
+const pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/gi
 const pathSepRe = /[\/\\]+/
 const stripPath = (text) => {
   return (text || '').replace(pathRe, (path) => {
@@ -23,7 +23,7 @@ const stripPath = (text) => {
 // version: {}
 
 module.exports = {
-  getErr (err) {
+  getErr(err) {
     return {
       name: stripPath(err.name),
       message: stripPath(err.message),
@@ -31,34 +31,34 @@ module.exports = {
     }
   },
 
-  getVersion () {
+  getVersion() {
     return pkg.version
   },
 
-  getBody (err) {
-    return system.info()
-    .then((systemInfo) => {
-      return _.extend({
-        err: this.getErr(err),
-        version: this.getVersion(),
-      }, systemInfo)
+  getBody(err) {
+    return system.info().then((systemInfo) => {
+      return _.extend(
+        {
+          err: this.getErr(err),
+          version: this.getVersion(),
+        },
+        systemInfo
+      )
     })
   },
 
-  getAuthToken () {
+  getAuthToken() {
     return user.get().then((user) => {
       return user && user.authToken
     })
   },
 
-  create (err) {
-    if ((process.env['CYPRESS_INTERNAL_ENV'] !== 'production') ||
-       (process.env['CYPRESS_CRASH_REPORTS'] === '0')) {
+  create(err) {
+    if (process.env['CYPRESS_INTERNAL_ENV'] !== 'production' || process.env['CYPRESS_CRASH_REPORTS'] === '0') {
       return Promise.resolve()
     }
 
-    return Promise.join(this.getBody(err), this.getAuthToken())
-    .spread((body, authToken) => {
+    return Promise.join(this.getBody(err), this.getAuthToken()).spread((body, authToken) => {
       return api.createCrashReport(body, authToken)
     })
   },

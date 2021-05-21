@@ -11,30 +11,30 @@ describe('lib/util/strip_indent', () => {
       [Stack Trace]
     `
 
-    expect(str).to.eq(`
+    expect(str).to.eq(
+      `
 There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
 [Stack Trace]
-`.trimLeft())
+`.trimLeft()
+    )
   })
 
   it('works well with multi-line argument', () => {
-    const arg = [
-      '- a',
-      '- b',
-      '- c',
-    ].join('\n')
+    const arg = ['- a', '- b', '- c'].join('\n')
 
     const str = stripIndent`
       Something went wrong.
 
       ${arg}`
 
-    expect(str).to.eq(`
+    expect(str).to.eq(
+      `
 Something went wrong.
 
 - a
 - b
-- c`.trimLeft())
+- c`.trimLeft()
+    )
   })
 })

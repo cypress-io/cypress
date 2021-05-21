@@ -15,13 +15,7 @@ const clean = (str) => {
   // remove blank lines and slice off any line
   // starting with a caret because thats junk
   // from npm logs
-  return _
-  .chain(str)
-  .split('\n')
-  .compact()
-  .reject(anyLineWithCaret)
-  .join('\n')
-  .value()
+  return _.chain(str).split('\n').compact().reject(anyLineWithCaret).join('\n').value()
 }
 
 const env = _.omit(process.env, 'CYPRESS_DEBUG')

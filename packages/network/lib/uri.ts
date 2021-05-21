@@ -27,7 +27,7 @@ const parseClone = (urlObject) => {
 
 export const parse = url.parse
 
-export function stripProtocolAndDefaultPorts (urlToCheck) {
+export function stripProtocolAndDefaultPorts(urlToCheck) {
   // grab host which is 'hostname:port' only
   const { host, hostname, port } = url.parse(urlToCheck)
 
@@ -41,7 +41,7 @@ export function stripProtocolAndDefaultPorts (urlToCheck) {
   return host
 }
 
-export function removePort (urlObject) {
+export function removePort(urlObject) {
   const parsed = parseClone(urlObject)
 
   // set host to undefined else url.format(...) will ignore the port property
@@ -55,7 +55,7 @@ export function removePort (urlObject) {
   return parsed
 }
 
-export function removeDefaultPort (urlToCheck) {
+export function removeDefaultPort(urlToCheck) {
   let parsed = parseClone(urlToCheck)
 
   if (portIsDefault(parsed.port)) {
@@ -65,7 +65,7 @@ export function removeDefaultPort (urlToCheck) {
   return parsed
 }
 
-export function addDefaultPort (urlToCheck) {
+export function addDefaultPort(urlToCheck) {
   const parsed = parseClone(urlToCheck)
 
   if (!parsed.port) {
@@ -84,6 +84,6 @@ export function addDefaultPort (urlToCheck) {
   return parsed
 }
 
-export function getPath (urlToCheck) {
+export function getPath(urlToCheck) {
   return url.parse(urlToCheck).path
 }

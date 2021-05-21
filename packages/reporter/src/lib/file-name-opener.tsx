@@ -15,10 +15,12 @@ const FileNameOpener = observer((props: Props) => {
   const { originalFile, line, column } = props.fileDetails
 
   return (
-    <Tooltip title={'Open in IDE'} wrapperClassName={props.className} className='cy-tooltip'>
+    <Tooltip title={'Open in IDE'} wrapperClassName={props.className} className="cy-tooltip">
       <span>
         <FileOpener fileDetails={props.fileDetails}>
-          {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
+          {originalFile}
+          {!!line && `:${line}`}
+          {!!column && `:${column}`}
         </FileOpener>
       </span>
     </Tooltip>

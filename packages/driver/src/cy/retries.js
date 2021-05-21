@@ -5,7 +5,7 @@ const $errUtils = require('../cypress/error_utils')
 
 const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) => {
   return {
-    retry (fn, options, log) {
+    retry(fn, options, log) {
       // remove the runnables timeout because we are now in retry
       // mode and should be handling timing out ourselves and dont
       // want to accidentally time out via mocha
@@ -29,7 +29,7 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
         _runnableTimeout: runnableTimeout,
         _interval: 16,
         _retries: 0,
-        _start: new Date,
+        _start: new Date(),
         _name: current?.get('name'),
       })
 
@@ -39,7 +39,7 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
 
       // we calculate the total time we've been retrying
       // so we dont exceed the runnables timeout
-      const total = new Date - options._start
+      const total = new Date() - options._start
 
       options.total = total
 
@@ -48,7 +48,7 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
 
       // if our total exceeds the timeout OR the total + the interval
       // exceed the runnables timeout, then bail
-      if ((total + interval) >= options._runnableTimeout) {
+      if (total + interval >= options._runnableTimeout) {
         // snapshot the DOM since we are bailing
         // so the user can see the state we're in
         // when we fail
@@ -63,8 +63,7 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
         }
 
         let onFail
-
-        ({ error, onFail } = options)
+        ;({ error, onFail } = options)
 
         const prependMsg = $errUtils.errByPath('miscellaneous.retry_timed_out', {
           ms: options._runnableTimeout,
@@ -103,9 +102,7 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
         return state('canceled') || state('error') || runnableHasChanged()
       }
 
-      return Promise
-      .delay(interval)
-      .then(() => {
+      return Promise.delay(interval).then(() => {
         if (ended()) {
           return
         }

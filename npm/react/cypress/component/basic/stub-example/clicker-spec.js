@@ -28,9 +28,7 @@ describe('Clicker', () => {
     const onClick = cy.stub().as('clicker')
 
     mount(<Clicker click={onClick} />)
-    cy.get('button')
-    .click()
-    .click()
+    cy.get('button').click().click()
 
     // good practice 💡
     // auto-retry the stub until it was called twice

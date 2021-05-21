@@ -9,7 +9,13 @@ import $Cypress from '../..'
  * @param accessedProp the property name being accessed (Symbol/number properties are not intercepted)
  * @param value the right-hand side of an assignment operation (accessedObject.accessedProp = value)
  */
-export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {
+export function resolveWindowReference(
+  this: typeof $Cypress,
+  currentWindow: Window,
+  accessedObject: Window | any,
+  accessedProp: string,
+  value?: any
+) {
   const { dom, state } = this
 
   const getTargetValue = () => {
@@ -28,7 +34,7 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
       const targetLocation = resolveLocationReference(accessedObject)
 
       if (isValPassed) {
-        return targetLocation.href = value
+        return (targetLocation.href = value)
       }
 
       return targetLocation
@@ -45,7 +51,7 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
     if (dom.isWindow(accessedObject) && accessedProp === 'location') {
       const targetLocation = resolveLocationReference(accessedObject)
 
-      return targetLocation.href = value
+      return (targetLocation.href = value)
     }
 
     return (accessedObject[accessedProp] = value)
@@ -105,14 +111,14 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
  *
  * @param currentWindow the value of `globalThis` from the scope of the location reference in question
  */
-export function resolveLocationReference (currentWindow: Window) {
+export function resolveLocationReference(currentWindow: Window) {
   // @ts-ignore
   if (currentWindow.__cypressFakeLocation) {
     // @ts-ignore
     return currentWindow.__cypressFakeLocation
   }
 
-  function _resolveHref (href: string) {
+  function _resolveHref(href: string) {
     const a = currentWindow.document.createElement('a')
 
     a.href = href
@@ -121,32 +127,36 @@ export function resolveLocationReference (currentWindow: Window) {
     return a.href
   }
 
-  function assign (href: string) {
+  function assign(href: string) {
     return currentWindow.location.assign(_resolveHref(href))
   }
 
-  function replace (href: string) {
+  function replace(href: string) {
     return currentWindow.location.replace(_resolveHref(href))
   }
 
-  function setHref (href: string) {
-    return currentWindow.location.href = _resolveHref(href)
+  function setHref(href: string) {
+    return (currentWindow.location.href = _resolveHref(href))
   }
 
   const locationKeys = Object.keys(currentWindow.location)
 
   const fakeLocation = {}
 
-  _.reduce(locationKeys, (acc, cur) => {
-    // set a dummy value, the proxy will handle sets/gets
-    acc[cur] = Symbol.for('Proxied')
+  _.reduce(
+    locationKeys,
+    (acc, cur) => {
+      // set a dummy value, the proxy will handle sets/gets
+      acc[cur] = Symbol.for('Proxied')
 
-    return acc
-  }, {})
+      return acc
+    },
+    {}
+  )
 
   // @ts-ignore
-  return currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
-    get (_target, prop, _receiver) {
+  return (currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
+    get(_target, prop, _receiver) {
       if (prop === 'assign') {
         return assign
       }
@@ -157,12 +167,12 @@ export function resolveLocationReference (currentWindow: Window) {
 
       return currentWindow.location[prop]
     },
-    set (_obj, prop, value) {
+    set(_obj, prop, value) {
       if (prop === 'href') {
         return setHref(value)
       }
 
-      return currentWindow.location[prop] = value
+      return (currentWindow.location[prop] = value)
     },
-  })
+  }))
 }

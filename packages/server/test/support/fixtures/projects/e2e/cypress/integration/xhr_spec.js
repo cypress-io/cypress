@@ -3,7 +3,7 @@ describe('xhrs', () => {
   it('can encode + decode headers', () => {
     const getResp = () => {
       return {
-        'test': 'We’ll',
+        test: 'We’ll',
       }
     }
 
@@ -11,22 +11,22 @@ describe('xhrs', () => {
     cy.route(/api/, getResp()).as('getApi')
     cy.visit('/index.html')
     cy.window().then((win) => {
-      const xhr = new win.XMLHttpRequest
+      const xhr = new win.XMLHttpRequest()
 
       xhr.open('GET', '/api/v1/foo/bar?a=42')
 
       xhr.send()
     })
 
-    cy.wait('@getApi')
-    .its('url').should('include', 'api/v1')
+    cy.wait('@getApi').its('url').should('include', 'api/v1')
   })
 
   it('ensures that request headers + body go out and reach the server unscathed', () => {
     cy.visit('http://localhost:1919')
-    cy.window().then((win) => {
+    cy.window()
+    .then((win) => {
       return new Cypress.Promise((resolve) => {
-        const xhr = new win.XMLHttpRequest
+        const xhr = new win.XMLHttpRequest()
 
         xhr.open('POST', '/login')
         xhr.setRequestHeader('Content-Type', 'application/json')
@@ -36,11 +36,12 @@ describe('xhrs', () => {
           return resolve(JSON.parse(xhr.response))
         }
       })
-    }).then((resp) => {
-    // the server sends us back response JSON
-    // with the request details so we can verify
-    // that the backend server received exactly what we sent
-    // and the Cypress proxy did not modify this in any way
+    })
+    .then((resp) => {
+      // the server sends us back response JSON
+      // with the request details so we can verify
+      // that the backend server received exactly what we sent
+      // and the Cypress proxy did not modify this in any way
       expect(resp.body).to.deep.eq({ foo: 'bar' })
       expect(resp.headers).to.have.property('x-csrf-token', 'abc-123')
 
@@ -48,11 +49,12 @@ describe('xhrs', () => {
     })
   })
 
-  it('does not inject into json\'s contents from http server even requesting text/html', () => {
+  it("does not inject into json's contents from http server even requesting text/html", () => {
     cy.visit('http://localhost:1919')
-    cy.window().then((win) => {
+    cy.window()
+    .then((win) => {
       return new Cypress.Promise((resolve) => {
-        const xhr = new win.XMLHttpRequest
+        const xhr = new win.XMLHttpRequest()
 
         xhr.open('POST', '/html')
         xhr.setRequestHeader('Content-Type', 'text/html')
@@ -62,7 +64,8 @@ describe('xhrs', () => {
           return resolve(JSON.parse(xhr.response))
         }
       })
-    }).then((resp) => {
+    })
+    .then((resp) => {
       // even though our request is requesting text/html
       // the server sends us back json and the proxy will
       // not inject into json
@@ -70,11 +73,12 @@ describe('xhrs', () => {
     })
   })
 
-  it('does not inject into json\'s contents from file server even requesting text/html', () => {
+  it("does not inject into json's contents from file server even requesting text/html", () => {
     cy.visit('/')
-    cy.window().then((win) => {
+    cy.window()
+    .then((win) => {
       return new Cypress.Promise((resolve) => {
-        const xhr = new win.XMLHttpRequest
+        const xhr = new win.XMLHttpRequest()
 
         xhr.open('GET', '/static/content.json')
         xhr.setRequestHeader('Content-Type', 'text/html')
@@ -84,7 +88,8 @@ describe('xhrs', () => {
           return resolve(JSON.parse(xhr.response))
         }
       })
-    }).then((resp) => {
+    })
+    .then((resp) => {
       // even though our request is requesting text/html
       // the fil server sends us back json and the proxy will
       // not inject into json
@@ -105,13 +110,12 @@ describe('xhrs', () => {
       method: 'POST',
       url: '/foo',
       response: {
-        'bar': body,
+        bar: body,
       },
     })
 
-    cy.visit('/index.html')
-    .then((win) => {
-      const xhr = new win.XMLHttpRequest
+    cy.visit('/index.html').then((win) => {
+      const xhr = new win.XMLHttpRequest()
 
       xhr.open('POST', '/foo')
       xhr.send()
@@ -150,13 +154,11 @@ describe('xhrs', () => {
     it('request body', () => {
       cy.route('POST', /users/, { name: 'b' }).as('createUser')
       cy.get('#create').click()
-      cy.wait('@createUser').its('requestBody')
-      .should('deep.eq', { some: 'data' })
+      cy.wait('@createUser').its('requestBody').should('deep.eq', { some: 'data' })
     })
 
     it('aborts', () => {
-      cy.window()
-      .then((win) => {
+      cy.window().then((win) => {
         cy.route({
           method: 'POST',
           url: /users/,
@@ -164,8 +166,10 @@ describe('xhrs', () => {
           delay: 2000,
         }).as('createUser')
 
-        cy.get('#create').click().then(() => {
-          return win.location.href = '/index.html'
+        cy.get('#create')
+        .click()
+        .then(() => {
+          return (win.location.href = '/index.html')
         })
 
         cy.wait('@createUser').its('canceled').should('be.true')

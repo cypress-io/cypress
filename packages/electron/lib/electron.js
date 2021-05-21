@@ -16,28 +16,28 @@ fs = Promise.promisifyAll(fs)
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
  */
 const isSandboxNeeded = () => {
-  return (os.platform() === 'linux') && (process.geteuid() === 0)
+  return os.platform() === 'linux' && process.geteuid() === 0
 }
 
 module.exports = {
-  installIfNeeded () {
+  installIfNeeded() {
     return install.check()
   },
 
-  install (...args) {
+  install(...args) {
     debug('installing %o', { args })
 
     return install.package.apply(install, args)
   },
 
-  getElectronVersion () {
+  getElectronVersion() {
     return install.getElectronVersion()
   },
 
   /**
    * Returns the Node version bundled inside Electron.
    */
-  getElectronNodeVersion () {
+  getElectronNodeVersion() {
     debug('getting Electron Node version')
 
     const args = []
@@ -60,15 +60,14 @@ module.exports = {
 
     debug('Running Electron with %o %o', args, options)
 
-    return execa('electron', args, options)
-    .then((result) => result.stdout)
+    return execa('electron', args, options).then((result) => result.stdout)
   },
 
-  icons () {
+  icons() {
     return install.icons()
   },
 
-  cli (argv = []) {
+  cli(argv = []) {
     const opts = minimist(argv)
 
     debug('cli options %j', opts)
@@ -86,7 +85,7 @@ module.exports = {
     throw new Error('No path to your app was provided.')
   },
 
-  open (appPath, argv, cb) {
+  open(appPath, argv, cb) {
     debug('opening %s', appPath)
 
     appPath = path.resolve(appPath)
@@ -96,19 +95,22 @@ module.exports = {
     debug('dest path %s', dest)
 
     // make sure this path exists!
-    return fs.statAsync(appPath)
+    return fs
+    .statAsync(appPath)
     .then(() => {
       debug('appPath exists %s', appPath)
 
       // clear out the existing symlink
       return fs.removeAsync(dest)
-    }).then(() => {
+    })
+    .then(() => {
       const symlinkType = paths.getSymlinkType()
 
       debug('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
 
       return fs.ensureSymlinkAsync(appPath, dest, symlinkType)
-    }).then(() => {
+    })
+    .then(() => {
       const execPath = paths.getPathToExec()
 
       if (isSandboxNeeded()) {
@@ -135,8 +137,7 @@ module.exports = {
         argv.push('--enable-logging')
       }
 
-      return cp.spawn(execPath, argv, { stdio: 'inherit' })
-      .on('close', (code, signal) => {
+      return cp.spawn(execPath, argv, { stdio: 'inherit' }).on('close', (code, signal) => {
         debug('electron closing %o', { code, signal })
 
         if (signal) {
@@ -154,7 +155,8 @@ module.exports = {
 
         return process.exit(code)
       })
-    }).catch((err) => {
+    })
+    .catch((err) => {
       // eslint-disable-next-line no-console
       console.debug(err.stack)
 

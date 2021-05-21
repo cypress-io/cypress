@@ -5,5 +5,5 @@ import { Component, OnInit } from '@angular/core'
   templateUrl: './use-custom-element.component.html',
 })
 export class UseCustomElementComponent implements OnInit {
-  ngOnInit () {}
+  ngOnInit() {}
 }

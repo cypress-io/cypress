@@ -156,9 +156,12 @@ const create = (state, expect) => {
   }
 
   const ensureVisibility = (subject, onFail) => {
-    if (subject.length !== subject.filter(function () {
-      return !$dom.isHidden(this, 'isVisible()', { checkOpacity: false })
-    }).length) {
+    if (
+      subject.length !==
+      subject.filter(function () {
+        return !$dom.isHidden(this, 'isVisible()', { checkOpacity: false })
+      }).length
+    ) {
       const cmd = state('current').get('name')
       const reason = $dom.getReasonIsHidden(subject, { checkOpacity: false })
       const node = $dom.stringify(subject)
@@ -286,7 +289,7 @@ const create = (state, expect) => {
       })
 
       const element = $dom.stringify(el)
-      const elementInherited = (el !== elInherited) && $dom.stringify(elInherited)
+      const elementInherited = el !== elInherited && $dom.stringify(elInherited)
 
       const consoleProps = {
         'But it has CSS': `${cssProperty}: ${cssValue}`,

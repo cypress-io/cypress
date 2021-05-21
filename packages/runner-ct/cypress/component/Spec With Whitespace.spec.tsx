@@ -12,7 +12,7 @@ describe('Spec File with Whitespace', () => {
         // @ts-ignore - this is difficult to stub. Real one breaks things.
         eventManager={new FakeEventManager()}
         config={fakeConfig}
-      />,
+      />
     )
 
     // ensures that the spec was executed

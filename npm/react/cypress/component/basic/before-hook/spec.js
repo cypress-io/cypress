@@ -18,7 +18,7 @@ describe('mount in before hook', () => {
     mount(
       <Hello>
         <div className="inside">Inner div</div>
-      </Hello>,
+      </Hello>
     )
   })
 

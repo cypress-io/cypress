@@ -13,9 +13,7 @@ describe('products', () => {
 
     return getProducts().then((list) => {
       expect(list).to.have.length(1)
-      expect(fetchStub).to.have.been.calledOnce.and.have.been.calledWith(
-        'http://myapi.com/products',
-      )
+      expect(fetchStub).to.have.been.calledOnce.and.have.been.calledWith('http://myapi.com/products')
     })
   })
 })

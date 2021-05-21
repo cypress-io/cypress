@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 
 import { createStory, createStorybookConfig } from 'stories/util'
 
@@ -22,19 +22,18 @@ export default createStorybookConfig({
 })
 
 export const Elevation = createStory<{
-    elevation: SurfaceElevation
-  }>(({ elevation }) => (
+  elevation: SurfaceElevation
+}>(
+  ({ elevation }) => (
     <div>
-      <ElevationComponent elevation={elevation}>
-        {lorem}
-      </ElevationComponent>
+      <ElevationComponent elevation={elevation}>{lorem}</ElevationComponent>
       <br />
       <StoryHighlightWrapper>
-        <ElevationComponent elevation={elevation}>
-          {lorem}
-        </ElevationComponent>
+        <ElevationComponent elevation={elevation}>{lorem}</ElevationComponent>
       </StoryHighlightWrapper>
     </div>
-  ), {
+  ),
+  {
     elevation: 'bordered',
-  })
+  }
+)

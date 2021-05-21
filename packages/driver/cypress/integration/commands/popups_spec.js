@@ -15,7 +15,8 @@ describe('src/cy/commands/popups', () => {
     })
 
     it('logs the alert', () => {
-      cy.window().then((win) => {
+      cy.window()
+      .then((win) => {
         win.alert('fooooo')
       })
       .then(function () {
@@ -49,9 +50,11 @@ describe('src/cy/commands/popups', () => {
     })
 
     it('logs the confirm', () => {
-      cy.window().then((win) => {
+      cy.window()
+      .then((win) => {
         win.confirm('Delete hard drive?')
-      }).then(function () {
+      })
+      .then(function () {
         expect(this.logs.length).to.eq(1)
         expect(this.logs[0].get('name')).to.eq('confirm')
         expect(this.logs[0].get('message')).to.eq('Delete hard drive?')
@@ -69,10 +72,14 @@ describe('src/cy/commands/popups', () => {
     it('can turn on and off confirmation', () => {
       cy.on('window:confirm', (str) => {
         switch (str) {
-          case 'foo': return false
-          case 'bar': return true
-          case 'baz': return undefined
-          default: return
+          case 'foo':
+            return false
+          case 'bar':
+            return true
+          case 'baz':
+            return undefined
+          default:
+            return
         }
       })
 

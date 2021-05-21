@@ -7,10 +7,10 @@ import net from 'net'
  * Note: `server-destroy` NPM package cannot be used - it does not track
  * `secureConnection` events.
  */
-export function allowDestroy (server: net.Server) {
+export function allowDestroy(server: net.Server) {
   let connections: net.Socket[] = []
 
-  function trackConn (conn) {
+  function trackConn(conn) {
     connections.push(conn)
 
     conn.on('close', () => {

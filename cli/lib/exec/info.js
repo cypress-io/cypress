@@ -41,7 +41,8 @@ const formatCypressVariables = () => {
 methods.start = (options = {}) => {
   const args = ['--mode=info']
 
-  return spawn.start(args, {
+  return spawn
+  .start(args, {
     dev: options.dev,
   })
   .then(() => {

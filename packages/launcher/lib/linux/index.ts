@@ -7,11 +7,7 @@ import os from 'os'
 import path from 'path'
 import Bluebird from 'bluebird'
 
-function getLinuxBrowser (
-  name: string,
-  binary: string,
-  versionRegex: RegExp,
-): Promise<FoundBrowser> {
+function getLinuxBrowser(name: string, binary: string, versionRegex: RegExp): Promise<FoundBrowser> {
   const foundBrowser: any = {
     name,
     path: binary,
@@ -24,22 +20,16 @@ function getLinuxBrowser (
       return m[1]
     }
 
-    log(
-      'Could not extract version from stdout using regex: %o', {
-        stdout,
-        versionRegex,
-      },
-    )
+    log('Could not extract version from stdout using regex: %o', {
+      stdout,
+      versionRegex,
+    })
 
     throw notInstalledErr(binary)
   }
 
   const logAndThrowError = (err: Error) => {
-    log(
-      'Received error detecting browser binary: "%s" with error:',
-      binary,
-      err.message,
-    )
+    log('Received error detecting browser binary: "%s" with error:', binary, err.message)
 
     throw notInstalledErr(binary)
   }
@@ -55,15 +45,17 @@ function getLinuxBrowser (
   return getVersionString(binary)
   .tap(maybeSetSnapProfilePath)
   .then(getVersion)
-  .then((version: string): FoundBrowser => {
-    foundBrowser.version = version
+  .then(
+    (version: string): FoundBrowser => {
+      foundBrowser.version = version
 
-    return foundBrowser
-  })
+      return foundBrowser
+    }
+  )
   .catch(logAndThrowError)
 }
 
-export function getVersionString (path: string) {
+export function getVersionString(path: string) {
   log('finding version string using command "%s --version"', path)
 
   return Bluebird.resolve(utils.getOutput(path, ['--version']))
@@ -73,20 +65,16 @@ export function getVersionString (path: string) {
   .then(tap(partial(log, ['stdout: "%s"'])))
 }
 
-export function getVersionNumber (version: string, browser: Browser) {
+export function getVersionNumber(version: string, browser: Browser) {
   const regexExec = browser.versionRegex.exec(version) as Array<string>
 
   return regexExec ? regexExec[1] : version
 }
 
-export function getPathData (pathStr: string): PathData {
+export function getPathData(pathStr: string): PathData {
   return { path: pathStr }
 }
 
-export function detect (browser: Browser) {
-  return getLinuxBrowser(
-    browser.name,
-    browser.binary as string,
-    browser.versionRegex,
-  )
+export function detect(browser: Browser) {
+  return getLinuxBrowser(browser.name, browser.binary as string, browser.versionRegex)
 }

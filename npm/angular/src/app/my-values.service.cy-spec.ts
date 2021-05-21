@@ -1,8 +1,5 @@
 import { getTestBed } from '@angular/core/testing'
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing'
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing'
 import { MyValuesService } from './my-values.service'
 
 describe('MyValuesService', () => {
@@ -11,10 +8,7 @@ describe('MyValuesService', () => {
   before(() => {
     getTestBed().resetTestEnvironment()
 
-    getTestBed().initTestEnvironment(
-      BrowserDynamicTestingModule,
-      platformBrowserDynamicTesting(),
-    )
+    getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting())
 
     getTestBed().configureTestingModule({
       providers: [{ provide: MyValuesService, useClass: MyValuesService }],

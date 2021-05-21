@@ -73,13 +73,19 @@ describe('lib/modes/info', () => {
 
   it('adds profile for browser if folder exists', async () => {
     sinon.stub(detect, 'detect').resolves([chromeStable, firefoxDev])
-    sinon.stub(browserUtils, 'getBrowserPath')
-    .withArgs(chromeStable).returns('/path/to/user/chrome/profile')
-    .withArgs(firefoxDev).returns('/path/to/user/firefox/profile')
+    sinon
+    .stub(browserUtils, 'getBrowserPath')
+    .withArgs(chromeStable)
+    .returns('/path/to/user/chrome/profile')
+    .withArgs(firefoxDev)
+    .returns('/path/to/user/firefox/profile')
 
-    sinon.stub(fs, 'statAsync')
-    .withArgs('/path/to/user/chrome/profile').throws('No Chrome profile folder')
-    .withArgs('/path/to/user/firefox/profile').resolves({
+    sinon
+    .stub(fs, 'statAsync')
+    .withArgs('/path/to/user/chrome/profile')
+    .throws('No Chrome profile folder')
+    .withArgs('/path/to/user/firefox/profile')
+    .resolves({
       isDirectory: _.stubTrue,
     })
 

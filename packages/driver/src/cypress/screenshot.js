@@ -10,8 +10,8 @@ const reset = () => {
     disableTimersAndAnimations: true,
     screenshotOnRunFailure: true,
     blackout: [],
-    onBeforeScreenshot () {},
-    onAfterScreenshot () {},
+    onBeforeScreenshot() {},
+    onAfterScreenshot() {},
   }
 }
 
@@ -37,12 +37,12 @@ const normalizePadding = (padding) => {
         top = right = bottom = left = padding[0]
         break
       case 2:
-        top = (bottom = padding[0])
-        right = (left = padding[1])
+        top = bottom = padding[0]
+        right = left = padding[1]
         break
       case 3:
         top = padding[0]
-        right = (left = padding[1])
+        right = left = padding[1]
         bottom = padding[2]
         break
       case 4:
@@ -58,12 +58,7 @@ const normalizePadding = (padding) => {
     top = right = bottom = left = padding
   }
 
-  return [
-    top,
-    right,
-    bottom,
-    left,
-  ]
+  return [top, right, bottom, left]
 }
 
 const validateAndSetBoolean = (props, values, cmd, log, option) => {
@@ -155,10 +150,7 @@ const validate = (props, cmd, log) => {
       return !_.isNumber(value)
     })
 
-    if (
-      !_.isPlainObject(clip) || existsNonNumber ||
-      (_.sortBy(_.keys(clip)).join(',') !== 'height,width,x,y')
-    ) {
+    if (!_.isPlainObject(clip) || existsNonNumber || _.sortBy(_.keys(clip)).join(',') !== 'height,width,x,y') {
       $errUtils.throwErrByPath('screenshot.invalid_clip', {
         log,
         args: { cmd, arg: $utils.stringify(clip) },
@@ -170,10 +162,7 @@ const validate = (props, cmd, log) => {
 
   if (padding) {
     const isShorthandPadding = (value) => {
-      return _.isArray(value) &&
-        (value.length >= 1) &&
-        (value.length <= 4) &&
-        _.every(value, _.isFinite)
+      return _.isArray(value) && value.length >= 1 && value.length <= 4 && _.every(value, _.isFinite)
     }
 
     if (!(_.isFinite(padding) || isShorthandPadding(padding))) {
@@ -193,23 +182,23 @@ const validate = (props, cmd, log) => {
 }
 
 module.exports = {
-  reset () {
+  reset() {
     defaults = reset()
   },
 
-  getConfig () {
+  getConfig() {
     return _.cloneDeep(_.omit(defaults, 'onBeforeScreenshot', 'onAfterScreenshot'))
   },
 
-  onBeforeScreenshot ($el) {
+  onBeforeScreenshot($el) {
     return defaults.onBeforeScreenshot($el)
   },
 
-  onAfterScreenshot ($el, results) {
+  onAfterScreenshot($el, results) {
     return defaults.onAfterScreenshot($el, results)
   },
 
-  defaults (props) {
+  defaults(props) {
     const values = validate(props, 'Cypress.Screenshot.defaults')
 
     return _.extend(defaults, values)

@@ -11,7 +11,7 @@ it.skip('Cannot click on a button', () => {
   mount(
     <button style={{ pointerEvents: 'none' }} onClick={mock}>
       No pointer events
-    </button>,
+    </button>
   )
 
   cy.get('button').click()
@@ -22,14 +22,7 @@ it.skip('does not type into readonly input', () => {
   const ReadonlyInput = () => {
     const [value, setValue] = React.useState('')
 
-    return (
-      <input
-        aria-label="readonly"
-        readOnly
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-    )
+    return <input aria-label="readonly" readOnly value={value} onChange={(e) => setValue(e.target.value)} />
   }
 
   mount(<ReadonlyInput />)

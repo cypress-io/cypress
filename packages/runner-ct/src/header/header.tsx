@@ -22,7 +22,7 @@ export default class Header extends Component<HeaderProps> {
 
   @observable showingViewportMenu = false
 
-  render () {
+  render() {
     const { state, config } = this.props
 
     return (
@@ -33,40 +33,46 @@ export default class Header extends Component<HeaderProps> {
           'display-none': state.screenshotting,
         })}
       >
-        <div className='sel-url-wrap'>
+        <div className="sel-url-wrap">
           <Tooltip
-            title='Open Selector Playground'
+            title="Open Selector Playground"
             visible={selectorPlaygroundModel.isOpen ? false : null}
-            wrapperClassName='selector-playground-toggle-tooltip-wrapper'
-            className='cy-tooltip'
+            wrapperClassName="selector-playground-toggle-tooltip-wrapper"
+            className="cy-tooltip"
           >
             <button
-              aria-label='Open Selector Playground'
-              className='header-button selector-playground-toggle'
+              aria-label="Open Selector Playground"
+              className="header-button selector-playground-toggle"
               disabled={state.isLoading || state.isRunning}
               onClick={this._togglePlaygroundOpen}
             >
-              <i aria-hidden="true" className='fas fa-crosshairs' />
+              <i aria-hidden="true" className="fas fa-crosshairs" />
             </button>
           </Tooltip>
         </div>
-        <ul className='menu'>
+        <ul className="menu">
           <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
               {`${state.viewportWidth} `}
-              <span className='the-x'>x</span>
+              <span className="the-x">x</span>
               {` ${state.viewportHeight}`}
-              <i className='fas fa-fw fa-info-circle'></i>
+              <i className="fas fa-fw fa-info-circle"></i>
             </button>
-            <div className='popup-menu viewport-menu'>
+            <div className="popup-menu viewport-menu">
               {/* eslint-disable react/jsx-one-expression-per-line */}
-              <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
+              <p>
+                The <strong>viewport</strong> determines the width and height of your application. By default the
+                viewport will be
                 <strong>{state.defaults.viewportWidth}px</strong> by
-                <strong>{state.defaults.viewportHeight}px</strong> unless specified by a
-                <code>cy.viewport</code> command.
+                <strong>{state.defaults.viewportHeight}px</strong> unless specified by a<code>cy.viewport</code>{' '}
+                command.
               </p>
-              <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
-              <pre>{/* eslint-disable indent */}
+              <p>
+                Additionally you can override the default viewport dimensions by specifying these values in your{' '}
+                {configFileFormatted(config.configFile)}.
+              </p>
+              <pre>
+                {/* eslint-disable indent */}
                 {`{
   "viewportWidth": ${state.defaults.viewportWidth},
   "viewportHeight": ${state.defaults.viewportHeight}
@@ -74,8 +80,8 @@ export default class Header extends Component<HeaderProps> {
               </pre>
               {/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank' rel='noreferrer'>
-                  <i className='fas fa-info-circle'></i>
+                <a href="https://on.cypress.io/viewport" target="_blank" rel="noreferrer">
+                  <i className="fas fa-info-circle"></i>
                   Read more about viewport here.
                 </a>
               </p>
@@ -88,11 +94,11 @@ export default class Header extends Component<HeaderProps> {
     )
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
       this.props.state.updateWindowDimensions({
         headerHeight: this.headerRef.current.offsetHeight,

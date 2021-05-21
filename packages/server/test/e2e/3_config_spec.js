@@ -10,7 +10,7 @@ describe('e2e config', () => {
       snapshot: true,
       config: {
         env: {
-          scriptlet: '<script>alert(\'this should not break\')</script>',
+          scriptlet: "<script>alert('this should not break')</script>",
         },
       },
     })

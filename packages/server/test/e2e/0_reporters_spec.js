@@ -6,11 +6,7 @@ const Fixtures = require('../support/helpers/fixtures')
 
 const e2ePath = Fixtures.projectPath('e2e')
 
-const mochaAwesomes = [
-  'mochawesome-1.5.2',
-  'mochawesome-2.3.1',
-  'mochawesome-3.0.1',
-]
+const mochaAwesomes = ['mochawesome-1.5.2', 'mochawesome-2.3.1', 'mochawesome-3.0.1']
 
 describe('e2e reporters', () => {
   e2e.setup()
@@ -35,19 +31,18 @@ describe('e2e reporters', () => {
   })
 
   it('supports junit reporter and reporter options', function () {
-    return e2e.exec(this, {
+    return e2e
+    .exec(this, {
       spec: 'simple_passing_spec.js',
       snapshot: true,
       reporter: 'junit',
       reporterOptions: 'mochaFile=junit-output/result.[hash].xml,testCaseSwitchClassnameAndName=true',
     })
     .then(() => {
-      return glob(path.join(e2ePath, 'junit-output', 'result.*.xml'))
-      .then((paths) => {
+      return glob(path.join(e2ePath, 'junit-output', 'result.*.xml')).then((paths) => {
         expect(paths.length).to.eq(1)
 
-        return fs.readFileAsync(paths[0], 'utf8')
-        .then((str) => {
+        return fs.readFileAsync(paths[0], 'utf8').then((str) => {
           expect(str).to.include('<testsuite name="simple passing spec"')
           expect(str).to.include('<testcase name="passes"')
 
@@ -66,7 +61,8 @@ describe('e2e reporters', () => {
   })
 
   it('sends file to reporter', function () {
-    return e2e.exec(this, {
+    return e2e
+    .exec(this, {
       spec: 'simple_passing_spec.js',
       reporter: 'reporters/uses-file.js',
     })
@@ -79,7 +75,8 @@ describe('e2e reporters', () => {
   describe('mochawesome', () => {
     return mochaAwesomes.forEach((ma) => {
       it(`passes with ${ma} npm custom reporter`, function () {
-        return e2e.exec(this, {
+        return e2e
+        .exec(this, {
           spec: 'simple_passing_spec.js',
           snapshot: true,
           // cypress supports passing module name, relative path, or absolute path
@@ -87,7 +84,8 @@ describe('e2e reporters', () => {
         })
         .then(() => {
           if (ma === 'mochawesome-1.5.2') {
-            return fs.readFileAsync(path.join(e2ePath, 'mochawesome-reports', 'mochawesome.html'), 'utf8')
+            return fs
+            .readFileAsync(path.join(e2ePath, 'mochawesome-reports', 'mochawesome.html'), 'utf8')
             .then((xml) => {
               expect(xml).to.include('<h3 class="suite-title">simple passing spec</h3>')
 
@@ -95,8 +93,7 @@ describe('e2e reporters', () => {
             })
           }
 
-          return fs.readJsonAsync(path.join(e2ePath, 'mochawesome-report', 'mochawesome.json'))
-          .then((json) => {
+          return fs.readJsonAsync(path.join(e2ePath, 'mochawesome-report', 'mochawesome.json')).then((json) => {
             expect(json.stats).to.be.an('object')
 
             expect(json.stats.passes).to.eq(1)
@@ -105,7 +102,8 @@ describe('e2e reporters', () => {
       })
 
       it(`fails with ${ma} npm custom reporter`, function () {
-        return e2e.exec(this, {
+        return e2e
+        .exec(this, {
           spec: 'simple_failing_hook_spec.js',
           snapshot: true,
           expectedExitCode: 3,
@@ -113,7 +111,8 @@ describe('e2e reporters', () => {
         })
         .then(() => {
           if (ma === 'mochawesome-1.5.2') {
-            return fs.readFileAsync(path.join(e2ePath, 'mochawesome-reports', 'mochawesome.html'), 'utf8')
+            return fs
+            .readFileAsync(path.join(e2ePath, 'mochawesome-reports', 'mochawesome.html'), 'utf8')
             .then((xml) => {
               expect(xml).to.include('<h3 class="suite-title">simple failing hook spec</h3>')
 
@@ -121,8 +120,7 @@ describe('e2e reporters', () => {
             })
           }
 
-          return fs.readJsonAsync(path.join(e2ePath, 'mochawesome-report', 'mochawesome.json'))
-          .then((json) => {
+          return fs.readJsonAsync(path.join(e2ePath, 'mochawesome-report', 'mochawesome.json')).then((json) => {
             // mochawesome does not consider hooks to be
             // 'failures' but it does collect them in 'other'
             // HOWEVER we now change how mocha events fire to make mocha stats reflect ours
@@ -142,7 +140,8 @@ describe('e2e reporters', () => {
       spec: 'simple_passing_spec.js',
       snapshot: true,
       reporter: 'teamcity',
-      reporterOptions: 'topLevelSuite=top suite,flowId=12345,useStdError=\'true\',useStdError=\'true\',recordHookFailures=\'true\',actualVsExpected=\'true\'',
+      reporterOptions:
+        "topLevelSuite=top suite,flowId=12345,useStdError='true',useStdError='true',recordHookFailures='true',actualVsExpected='true'",
     })
   })
 })

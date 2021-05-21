@@ -17,13 +17,15 @@ const util = require('../util')
 const defaultBaseUrl = 'https://download.cypress.io/'
 
 const getProxyUrl = () => {
-  return process.env.HTTPS_PROXY ||
+  return (
+    process.env.HTTPS_PROXY ||
     process.env.https_proxy ||
     process.env.npm_config_https_proxy ||
     process.env.HTTP_PROXY ||
     process.env.http_proxy ||
     process.env.npm_config_proxy ||
     null
+  )
 }
 
 const getRealOsArch = () => {
@@ -95,9 +97,7 @@ const getUrl = (version) => {
 }
 
 const statusMessage = (err) => {
-  return (err.statusCode
-    ? [err.statusCode, err.statusMessage].join(' - ')
-    : err.toString())
+  return err.statusCode ? [err.statusCode, err.statusMessage].join(' - ') : err.toString()
 }
 
 const prettyDownloadErr = (err, version) => {
@@ -119,18 +119,15 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
 
-    return Promise.join(
-      util.getFileChecksum(filename),
-      util.getFileSize(filename),
-      (checksum, filesize) => {
-        if (checksum === expectedChecksum && filesize === expectedSize) {
-          debug('downloaded file has the expected checksum and size ✅')
+    return Promise.join(util.getFileChecksum(filename), util.getFileSize(filename), (checksum, filesize) => {
+      if (checksum === expectedChecksum && filesize === expectedSize) {
+        debug('downloaded file has the expected checksum and size ✅')
 
-          return
-        }
+        return
+      }
 
-        debug('raising error: checksum or file size mismatch')
-        const text = stripIndent`
+      debug('raising error: checksum or file size mismatch')
+      const text = stripIndent`
           Corrupted download
 
           Expected downloaded file to have checksum: ${expectedChecksum}
@@ -140,18 +137,16 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
           Computed size: ${filesize}
         `
 
-        debug(text)
+      debug(text)
 
-        throw new Error(text)
-      },
-    )
+      throw new Error(text)
+    })
   }
 
   if (expectedChecksum) {
     debug('only checking expected file checksum %d', expectedChecksum)
 
-    return util.getFileChecksum(filename)
-    .then((checksum) => {
+    return util.getFileChecksum(filename).then((checksum) => {
       if (checksum === expectedChecksum) {
         debug('downloaded file has the expected checksum ✅')
 
@@ -175,8 +170,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
     // which we can check against the file size
     debug('only checking expected file size %d', expectedSize)
 
-    return util.getFileSize(filename)
-    .then((filesize) => {
+    return util.getFileSize(filename).then((filesize) => {
       if (filesize === expectedSize) {
         debug('downloaded file has the expected size ✅')
 
@@ -218,7 +212,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
     const reqOptions = {
       url,
       proxy,
-      followRedirect (response) {
+      followRedirect(response) {
         const version = response.headers['x-version']
 
         debug('redirect version:', version)
@@ -254,8 +248,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
       // and have set it on the S3 object as user meta data, available via
       // these custom headers "x-amz-meta-..."
       // see https://github.com/cypress-io/cypress/pull/4092
-      expectedSize = response.headers['x-amz-meta-size'] ||
-        response.headers['content-length']
+      expectedSize = response.headers['x-amz-meta-size'] || response.headers['content-length']
 
       expectedChecksum = response.headers['x-amz-meta-checksum']
 
@@ -282,7 +275,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
-        `,
+        `
         )
 
         reject(err)
@@ -307,8 +300,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
     .on('finish', () => {
       debug('downloading finished')
 
-      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum)
-      .then(() => {
+      verifyDownloadedFile(downloadDestination, expectedSize, expectedChecksum).then(() => {
         return resolve(redirectVersion)
       }, reject)
     })
@@ -328,9 +320,11 @@ const start = (opts) => {
   }
 
   if (!progress) {
-    progress = { onProgress: () => {
-      return {}
-    } }
+    progress = {
+      onProgress: () => {
+        return {}
+      },
+    }
   }
 
   const url = getUrl(version)
@@ -342,7 +336,8 @@ const start = (opts) => {
   debug(`downloading cypress.zip to "${downloadDestination}"`)
 
   // ensure download dir exists
-  return fs.ensureDirAsync(path.dirname(downloadDestination))
+  return fs
+  .ensureDirAsync(path.dirname(downloadDestination))
   .then(() => {
     return getCA()
   })

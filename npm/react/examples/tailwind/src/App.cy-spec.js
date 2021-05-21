@@ -8,9 +8,7 @@ describe('Tailwind App', () => {
     mount(<App />)
     // it has expected colors and styles
     cy.get('h1.font-bold').should('have.css', 'font-weight', '700')
-    cy.get('button.text-white')
-    .should('have.css', 'color', 'rgb(255, 255, 255)')
-    .and('have.class', 'rounded')
+    cy.get('button.text-white').should('have.css', 'color', 'rgb(255, 255, 255)').and('have.class', 'rounded')
 
     cy.log('confirm rounded corners')
     cy.get('button.rounded').should(($el) => {

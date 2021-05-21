@@ -62,10 +62,6 @@ describe('RedBox 2', () => {
   })
 
   it('should be Red', () => {
-    cy.get('[data-cy=box]').should(
-      'have.css',
-      'background-color',
-      'rgb(255, 0, 0)',
-    )
+    cy.get('[data-cy=box]').should('have.css', 'background-color', 'rgb(255, 0, 0)')
   })
 })

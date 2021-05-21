@@ -18,12 +18,8 @@ shell.set('-e') // any error is fatal
 // https://www.appveyor.com/docs/environment-variables/
 
 const isRightBranch = () => {
-  const branch =
-    process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH ||
-    process.env.APPVEYOR_REPO_BRANCH
-  const shouldForceBinaryBuild = (
-    process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
-  ).includes('[build binary]')
+  const branch = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH || process.env.APPVEYOR_REPO_BRANCH
+  const shouldForceBinaryBuild = (process.env.APPVEYOR_REPO_COMMIT_MESSAGE || '').includes('[build binary]')
 
   const branchesToBuildBinary = ['develop', '7.0-release']
 
@@ -53,9 +49,7 @@ const filename = `cypress-v${version}.tgz`
 
 console.log('building version', version)
 
-shell.exec(
-  `node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`,
-)
+shell.exec(`node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`)
 
 const arch = os.arch()
 
@@ -76,9 +70,7 @@ const result = shell.exec('yarn list --dev --depth 0 || true', {
 
 if (result.stdout.includes('nodemon')) {
   console.error('Hmm, server package includes dev dependency "coveralls"')
-  console.error(
-    'which means somehow we are including dev dependencies in the output bundle',
-  )
+  console.error('which means somehow we are including dev dependencies in the output bundle')
 
   console.error('see https://github.com/cypress-io/cypress/issues/2896')
   process.exit(1)
@@ -114,16 +106,12 @@ if (isPullRequest()) {
 
   shell.exec('yarn binary-zip')
   shell.ls('-l', '*.zip')
-  shell.exec(
-    `node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`,
-  )
+  shell.exec(`node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`)
 
   shell.cat('binary-url.json')
-  shell.exec(
-    'node scripts/add-install-comment.js --npm npm-package-url.json --binary binary-url.json',
-  )
+  shell.exec('node scripts/add-install-comment.js --npm npm-package-url.json --binary binary-url.json')
 
   shell.exec(
-    'node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor',
+    'node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor'
   )
 }

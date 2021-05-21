@@ -14,15 +14,15 @@ export interface RouteProps {
 
 const Route = observer(({ model }: RouteProps) => (
   <tr className={cs('route-item', { 'no-responses': !model.numResponses })}>
-    <td className='route-method'>{model.method}</td>
-    <td className='route-url'>{model.url}</td>
-    <td className='route-is-stubbed'>{model.isStubbed ? 'Yes' : 'No'}</td>
-    <td className='route-alias'>
-      <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`} className='cy-tooltip'>
-        <span className='route-alias-name'>{model.alias}</span>
+    <td className="route-method">{model.method}</td>
+    <td className="route-url">{model.url}</td>
+    <td className="route-is-stubbed">{model.isStubbed ? 'Yes' : 'No'}</td>
+    <td className="route-alias">
+      <Tooltip placement="top" title={`Aliased this route as: '${model.alias}'`} className="cy-tooltip">
+        <span className="route-alias-name">{model.alias}</span>
       </Tooltip>
     </td>
-    <td className='route-num-responses'>{model.numResponses || '-'}</td>
+    <td className="route-num-responses">{model.numResponses || '-'}</td>
   </tr>
 ))
 
@@ -36,7 +36,9 @@ export interface RouteListProps {
 
 const RoutesList = observer(({ model }: RouteListProps) => (
   <tbody>
-    {_.map(model.routes, (route) => <Route key={route.id} model={route} />)}
+    {_.map(model.routes, (route) => (
+      <Route key={route.id} model={route} />
+    ))}
   </tbody>
 ))
 
@@ -50,13 +52,13 @@ const Routes = observer(({ model }: RoutesProps) => (
       'no-routes': !model.routes.length,
     })}
   >
-    <div className='instruments-container'>
-      <ul className='hooks-container'>
-        <li className='hook-item'>
+    <div className="instruments-container">
+      <ul className="hooks-container">
+        <li className="hook-item">
           <Collapsible
             header={`Routes (${model.routes.length})`}
-            headerClass='hook-header'
-            contentClass='instrument-content'
+            headerClass="hook-header"
+            contentClass="instrument-content"
           >
             <table>
               <thead>
@@ -66,7 +68,11 @@ const Routes = observer(({ model }: RoutesProps) => (
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>
-                    <Tooltip placement='top' title='Number of responses which matched this route' className='cy-tooltip'>
+                    <Tooltip
+                      placement="top"
+                      title="Number of responses which matched this route"
+                      className="cy-tooltip"
+                    >
                       <span>#</span>
                     </Tooltip>
                   </th>

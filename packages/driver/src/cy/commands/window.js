@@ -76,7 +76,7 @@ module.exports = (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    title (options = {}) {
+    title(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -98,7 +98,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return resolveTitle()
     },
 
-    window (options = {}) {
+    window(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -120,9 +120,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       // wrap retrying into its own
       // separate function
       const retryWindow = () => {
-        return Promise
-        .try(getWindow)
-        .catch((err) => {
+        return Promise.try(getWindow).catch((err) => {
           options.error = err
 
           return cy.retry(retryWindow, options)
@@ -140,7 +138,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    document (options = {}) {
+    document(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -163,9 +161,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       // wrap retrying into its own
       // separate function
       const retryDocument = () => {
-        return Promise
-        .try(getDocument)
-        .catch((err) => {
+        return Promise.try(getDocument).catch((err) => {
           options.error = err
 
           return cy.retry(retryDocument, options)
@@ -183,7 +179,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
-    viewport (presetOrWidth, heightOrOrientation, options = {}) {
+    viewport(presetOrWidth, heightOrOrientation, options = {}) {
       const userOptions = options
 
       if (_.isObject(heightOrOrientation)) {
@@ -203,7 +199,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         options._log = Cypress.log({
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             const obj = {}
 
             if (isPreset) {
@@ -275,7 +271,7 @@ module.exports = (Commands, Cypress, cy, state) => {
           }
         }
 
-        [width, height] = dimensions
+        ;[width, height] = dimensions
       } else if (widthAndHeightAreValidNumbers(presetOrWidth, heightOrOrientation)) {
         width = presetOrWidth
         height = heightOrOrientation
@@ -287,8 +283,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         throwErrBadArgs()
       }
 
-      return setViewportAndSynchronize(width, height)
-      .then((viewport) => {
+      return setViewportAndSynchronize(width, height).then((viewport) => {
         if (options._log) {
           options._log.set(viewport)
         }
@@ -296,6 +291,5 @@ module.exports = (Commands, Cypress, cy, state) => {
         return null
       })
     },
-
   })
 }

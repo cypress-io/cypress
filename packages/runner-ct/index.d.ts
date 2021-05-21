@@ -1,9 +1,8 @@
-
 /// <reference path="../../cli/types/cypress.d.ts" />
 
 declare module 'react-devtools-inline/frontend' {
-  export type DevtoolsProps = { browserTheme: 'dark' | 'light'}
-  export const initialize: (window: Window) => React.ComponentType<DevtoolsProps>;
+  export type DevtoolsProps = { browserTheme: 'dark' | 'light' }
+  export const initialize: (window: Window) => React.ComponentType<DevtoolsProps>
 }
 
 declare module 'react-devtools-inline/backend' {
@@ -11,7 +10,7 @@ declare module 'react-devtools-inline/backend' {
   export const activate: (window: Window) => void
 }
 
-declare module "*.scss" { 
+declare module '*.scss' {
   const value: Record<string, string>
   export default value
 }

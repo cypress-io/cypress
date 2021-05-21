@@ -36,12 +36,13 @@ const _isBrowser = (browser, matcher, errPrefix) => {
 }
 
 const isBrowser = (config, obj = '', errPrefix = '`Cypress.isBrowser()`') => {
-  return _
-  .chain(obj)
+  return _.chain(obj)
   .concat([])
   .map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
   .reduce((a, b) => {
-    if (!a) return b
+    if (!a) {
+      return b
+    }
 
     if (a.exclusive && b.exclusive) {
       return {

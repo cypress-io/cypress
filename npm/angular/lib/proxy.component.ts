@@ -5,9 +5,7 @@ import { Component, OnInit } from '@angular/core'
   template: '',
 })
 export class ProxyComponent implements OnInit {
-  constructor () {
-  }
+  constructor() {}
 
-  ngOnInit (): void {
-  }
+  ngOnInit(): void {}
 }

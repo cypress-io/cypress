@@ -1,5 +1,5 @@
 describe('character encoding tests', () => {
-  [
+  ;[
     {
       title: 'without gzip',
       extension: '.html',

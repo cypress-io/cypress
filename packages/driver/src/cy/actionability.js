@@ -31,7 +31,8 @@ const scrollBehaviorOptionsMap = {
 }
 
 const getPositionFromArguments = function (positionOrX, y, options) {
-  let position; let x
+  let position
+  let x
 
   if (_.isObject(positionOrX)) {
     options = positionOrX
@@ -62,7 +63,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
     elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromElViewport.x, fromElViewport.y)
 
     if (elAtCoords) {
-      return $elAtCoords = $dom.wrap(elAtCoords)
+      return ($elAtCoords = $dom.wrap(elAtCoords))
     }
   }
 
@@ -130,9 +131,9 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
         // we want to scroll in the opposite direction (up not down)
         // so just decrease the scrolled positions
-        $container.scrollTop((currentScrollTop - height))
+        $container.scrollTop(currentScrollTop - height)
 
-        return $container.scrollLeft((currentScrollLeft - width))
+        return $container.scrollLeft(currentScrollLeft - width)
       }
 
       const getAllScrollables = function (scrollables, $el) {
@@ -178,7 +179,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
           // if we got something AND
           let needle
 
-          if ($fixed && ((needle = $fixed.get(0), !elementsScrolledPast.includes(needle)))) {
+          if ($fixed && ((needle = $fixed.get(0)), !elementsScrolledPast.includes(needle))) {
             elementsScrolledPast.push($fixed.get(0))
 
             scrollContainerPastElement($scrollableContainer, $fixed)
@@ -187,7 +188,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
               // now that we've changed scroll positions
               // we must recalculate whether this element is covered
               // since the element's top / left positions change.
-              ({ fromElViewport } = getCoordinatesForEl(cy, $el, options))
+              ;({ fromElViewport } = getCoordinatesForEl(cy, $el, options))
 
               // this is a relative calculation based on the viewport
               // so these are the only coordinates we care about
@@ -219,9 +220,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
       }
 
       // start nudging
-      return scrollContainers(
-        getAllScrollables([], $el),
-      )
+      return scrollContainers(getAllScrollables([], $el))
     }
   }
 
@@ -232,7 +231,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
     if (log) {
       log.set({
-        consoleProps () {
+        consoleProps() {
           const obj = {}
 
           obj['Tried to Click'] = $dom.getElements($el)
@@ -344,7 +343,9 @@ const verify = function (cy, $el, options, callbacks) {
     }
 
     return () => {
-      if (style) style.remove()
+      if (style) {
+        style.remove()
+      }
     }
   }
 
@@ -398,7 +399,7 @@ const verify = function (cy, $el, options, callbacks) {
 
       // if force is true OR waitForAnimations is false
       // then do not perform these additional ensures...
-      if ((options.ensure.notAnimating) && (force !== true) && (options.waitForAnimations !== false)) {
+      if (options.ensure.notAnimating && force !== true && options.waitForAnimations !== false) {
         // store the coords that were absolute
         // from the window or from the viewport for sticky elements
         // (see https://github.com/cypress-io/cypress/pull/1478)
@@ -416,7 +417,9 @@ const verify = function (cy, $el, options, callbacks) {
         // to figure out if it's being covered by another element.
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
-        $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
+        $elAtCoords =
+          options.ensure.notCovered &&
+          ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
       }
 
       // pass our final object into onReady

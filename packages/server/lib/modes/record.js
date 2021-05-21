@@ -24,7 +24,8 @@ const specWriter = require('../util/spec_writer')
 const logException = (err) => {
   // give us up to 1 second to
   // create this exception report
-  return logger.createException(err)
+  return logger
+  .createException(err)
   .timeout(1000)
   .catch(() => {})
 }
@@ -38,9 +39,7 @@ const runningInternalTests = () => {
 const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
   // if we have a project id and we have a key
   // and record hasn't been set to true or false
-  return (projectId && options.key) && (
-    _.isUndefined(options.record)
-  )
+  return projectId && options.key && _.isUndefined(options.record)
 }
 
 const warnIfProjectIdButNoRecordOption = (projectId, options) => {
@@ -71,14 +70,14 @@ const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
 }
 
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
-  if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
+  if (!ciBuildId && !ciProvider.provider() && (parallel || group)) {
     errors.throw(
       'INDETERMINATE_CI_BUILD_ID',
       {
         group,
         parallel,
       },
-      ciProvider.detectableCiBuildIdProviders(),
+      ciProvider.detectableCiBuildIdProviders()
     )
   }
 }
@@ -97,7 +96,7 @@ const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group,
 const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
   // we've been given an explicit ciBuildId
   // but no parallel or group flag
-  if (ciBuildId && (!parallel && !group)) {
+  if (ciBuildId && !parallel && !group) {
     errors.throw('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
   }
 }
@@ -144,11 +143,7 @@ const uploadArtifacts = (options = {}) => {
       }
     }
 
-    return uploads.push(
-      upload.send(pathToFile, url)
-      .then(success)
-      .catch(fail),
-    )
+    return uploads.push(upload.send(pathToFile, url).then(success).catch(fail))
   }
 
   if (videoUploadUrl && shouldUploadVideo) {
@@ -168,9 +163,7 @@ const uploadArtifacts = (options = {}) => {
     console.log('  - Nothing to Upload')
   }
 
-  return Promise
-  .all(uploads)
-  .catch((err) => {
+  return Promise.all(uploads).catch((err) => {
     errors.warning('DASHBOARD_CANNOT_UPLOAD_RESULTS', err)
 
     return logException(err)
@@ -182,11 +175,13 @@ const updateInstanceStdout = (options = {}) => {
 
   const stdout = captured.toString()
 
-  return api.updateInstanceStdout({
+  return api
+  .updateInstanceStdout({
     runId,
     stdout,
     instanceId,
-  }).catch((err) => {
+  })
+  .catch((err) => {
     debug('failed updating instance stdout %o', {
       stack: err.stack,
     })
@@ -197,7 +192,8 @@ const updateInstanceStdout = (options = {}) => {
     if (err.statusCode !== 503) {
       return logException(err)
     }
-  }).finally(capture.restore)
+  })
+  .finally(capture.restore)
 }
 
 const postInstanceResults = (options = {}) => {
@@ -211,14 +207,22 @@ const postInstanceResults = (options = {}) => {
     return _.omit(screenshot, 'path')
   })
 
-  tests = tests && _.map(tests, (test) => {
-    return _.omit({
-      clientId: test.testId,
-      ...test,
-    }, 'title', 'body', 'testId')
-  })
+  tests =
+    tests &&
+    _.map(tests, (test) => {
+      return _.omit(
+        {
+          clientId: test.testId,
+          ...test,
+        },
+        'title',
+        'body',
+        'testId'
+      )
+    })
 
-  return api.postInstanceResults({
+  return api
+  .postInstanceResults({
     runId,
     instanceId,
     stats,
@@ -280,7 +284,19 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType } = options
+  let {
+    projectId,
+    recordKey,
+    platform,
+    git,
+    specPattern,
+    specs,
+    parallel,
+    ciBuildId,
+    group,
+    tags,
+    testingType,
+  } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -322,7 +338,8 @@ const createRun = Promise.method((options = {}) => {
   debugCiInfo('commit information %o', commit)
   debugCiInfo('CI provider information %o', ci)
 
-  return api.createRun({
+  return api
+  .createRun({
     specs,
     group,
     tags,
@@ -390,7 +407,8 @@ const createRun = Promise.method((options = {}) => {
           })
       }
     })
-  }).catch((err) => {
+  })
+  .catch((err) => {
     debug('failed creating run with status %d %o', err.statusCode, {
       stack: err.stack,
     })
@@ -528,7 +546,8 @@ const createInstance = (options = {}) => {
 
   spec = getSpecRelativePath(spec)
 
-  return api.createInstance({
+  return api
+  .createInstance({
     spec,
     runId,
     groupId,
@@ -550,17 +569,9 @@ const createInstance = (options = {}) => {
   })
 }
 
-const _postInstanceTests = ({
-  runId,
-  instanceId,
-  config,
-  tests,
-  hooks,
-  parallel,
-  ciBuildId,
-  group,
-}) => {
-  return api.postInstanceTests({
+const _postInstanceTests = ({ runId, instanceId, config, tests, hooks, parallel, ciBuildId, group }) => {
+  return api
+  .postInstanceTests({
     runId,
     instanceId,
     config,
@@ -573,7 +584,8 @@ const _postInstanceTests = ({
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern,
+  const {
+    specPattern,
     specs,
     sys,
     browser,
@@ -594,8 +606,7 @@ const createRunAndRecordSpecs = (options = {}) => {
   // we want to normalize this to an array to send to API
   const tags = _.split(options.tag, ',')
 
-  return commitInfo.commitInfo(projectRoot)
-  .then((git) => {
+  return commitInfo.commitInfo(projectRoot).then((git) => {
     debugCiInfo('found the following git information')
     debugCiInfo(git)
 
@@ -620,8 +631,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       projectId,
       specPattern,
       testingType,
-    })
-    .then((resp) => {
+    }).then((resp) => {
       if (!resp) {
         // if a forked run, can't record and can't be parallel
         // because the necessary env variables aren't present
@@ -650,13 +660,11 @@ const createRunAndRecordSpecs = (options = {}) => {
           parallel,
           ciBuildId,
           machineId,
-        })
-        .then((resp = {}) => {
+        }).then((resp = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
-          return _
-          .chain(resp)
+          return _.chain(resp)
           .pick('spec', 'claimedInstances', 'totalInstances')
           .extend({
             estimated: resp.estimatedWallClockDuration,
@@ -686,7 +694,8 @@ const createRunAndRecordSpecs = (options = {}) => {
           console.log('')
         }
 
-        return specWriter.countStudioUsage(spec.absolute)
+        return specWriter
+        .countStudioUsage(spec.absolute)
         .then((metadata) => {
           return postInstanceResults({
             group,
@@ -713,8 +722,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             shouldUploadVideo,
             screenshotUploadUrls,
             quiet,
-          })
-          .finally(() => {
+          }).finally(() => {
             // always attempt to upload stdout
             // even if uploading failed
             return updateInstanceStdout({
@@ -725,7 +733,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      const onTestsReceived = (async (runnables, cb) => {
+      const onTestsReceived = async (runnables, cb) => {
         // we failed createInstance earlier, nothing to do
         if (!instanceId) {
           return cb()
@@ -746,30 +754,38 @@ const createRunAndRecordSpecs = (options = {}) => {
             v._titlePath.splice(-1, 1, v.originalTitle)
           }
 
-          return _.pick({
-            ...v,
-            clientId: v.id,
-            config: v._testConfig || null,
-            title: v._titlePath,
-            hookIds: v.hooks.map((hook) => hook.hookId),
-          },
-          'clientId', 'body', 'title', 'config', 'hookIds')
+          return _.pick(
+            {
+              ...v,
+              clientId: v.id,
+              config: v._testConfig || null,
+              title: v._titlePath,
+              hookIds: v.hooks.map((hook) => hook.hookId),
+            },
+            'clientId',
+            'body',
+            'title',
+            'config',
+            'hookIds'
+          )
         })
         .value()
 
         const hooks = _.chain(r[1])
         .uniqBy('hookId')
         .map((v) => {
-          return _.pick({
-            ...v,
-            clientId: v.hookId,
-            title: [v.title],
-            type: v.hookName,
-          },
-          'clientId',
-          'type',
-          'title',
-          'body')
+          return _.pick(
+            {
+              ...v,
+              clientId: v.hookId,
+              title: [v.title],
+              type: v.hookName,
+            },
+            'clientId',
+            'type',
+            'title',
+            'body'
+          )
         })
         .value()
 
@@ -783,8 +799,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           parallel,
           ciBuildId,
           group,
-        })
-        .catch((err) => {
+        }).catch((err) => {
           onError(err)
 
           return responseDidFail
@@ -807,7 +822,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         }
 
         return cb(response)
-      })
+      }
 
       return runAllSpecs({
         runUrl,

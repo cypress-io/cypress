@@ -28,29 +28,29 @@ module.exports = {
     ${filenames.join('\n\t')}
     `)
 
-    return Promise.map(filenames, (f) => {
-      debug('started linting', f)
+    return Promise.map(
+      filenames,
+      (f) => {
+        debug('started linting', f)
 
-      const fileText = opts.getFileText(f)
+        const fileText = opts.getFileText(f)
 
-      debugTerse('file text:', fileText)
+        debugTerse('file text:', fileText)
 
-      if (!fileText.toString()) return
+        if (!fileText.toString()) return
 
-      const lintCommand = `./node_modules/.bin/eslint --stdin --stdin-filename ${sh.ShellString(f)} --color=true`
+        const lintCommand = `./node_modules/.bin/eslint --stdin --stdin-filename ${sh.ShellString(f)} --color=true`
 
-      return Promise.promisify(fileText.exec)(
-        lintCommand,
-        { silent: false, async: true },
-      )
-      .tapCatch(debugTerse)
-      .return(false)
-      .catchReturn(true)
-      .finally(() => {
-        debug('finished linting ', f)
-      })
-    }, { concurrency: 0 })
-    .then((results) => {
+        return Promise.promisify(fileText.exec)(lintCommand, { silent: false, async: true })
+        .tapCatch(debugTerse)
+        .return(false)
+        .catchReturn(true)
+        .finally(() => {
+          debug('finished linting ', f)
+        })
+      },
+      { concurrency: 0 }
+    ).then((results) => {
       const failCount = _.filter(results).length
 
       debug({ failCount })
@@ -74,14 +74,11 @@ module.exports = {
 
     const filenamesString = sh.ShellString(filenames.join(' '))
 
-    const lintCommand = opts.fix ?
-      `./node_modules/.bin/eslint --color=true --fix '' ${filenamesString}`
+    const lintCommand = opts.fix
+      ? `./node_modules/.bin/eslint --color=true --fix '' ${filenamesString}`
       : `./node_modules/.bin/eslint --color=true '' ${filenamesString}`
 
-    return Promise.promisify(sh.exec)(
-      lintCommand,
-      { silent: false, async: true },
-    )
+    return Promise.promisify(sh.exec)(lintCommand, { silent: false, async: true })
     .tapCatch(debugTerse)
     .return(false)
     .catchReturn(true)
@@ -92,7 +89,6 @@ module.exports = {
       }
     })
   },
-
 }
 
 const debugTerse = (...args) => {

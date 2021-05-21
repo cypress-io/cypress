@@ -3,20 +3,10 @@ import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
 
-import {
-  RequestMiddleware,
-} from '@packages/proxy'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
-} from '../../types'
+import { RequestMiddleware } from '@packages/proxy'
+import { CyHttpMessages, SERIALIZABLE_REQ_PROPS } from '../../types'
 import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
-import {
-  sendStaticResponse,
-  setDefaultHeaders,
-  mergeDeletedHeaders,
-  getBodyEncoding,
-} from '../util'
+import { sendStaticResponse, setDefaultHeaders, mergeDeletedHeaders, getBodyEncoding } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
 import { BackendRoute } from '../types'
 
@@ -89,9 +79,11 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.res.once('finish', async () => {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
-      data: request.includeBodyInAfterResponse ? {
-        finalResBody: request.res.body!,
-      } : {},
+      data: request.includeBodyInAfterResponse
+        ? {
+            finalResBody: request.res.body!,
+          }
+        : {},
       mergeChanges: _.noop,
     })
 
@@ -105,10 +97,12 @@ export const InterceptRequest: RequestMiddleware = async function () {
         return resolve()
       }
 
-      request.req.pipe(concatStream((reqBody) => {
-        req.body = reqBody
-        resolve()
-      }))
+      request.req.pipe(
+        concatStream((reqBody) => {
+          req.body = reqBody
+          resolve()
+        })
+      )
     })
   }
 
@@ -122,7 +116,10 @@ export const InterceptRequest: RequestMiddleware = async function () {
   const bodyIsBinary = bodyEncoding === 'binary'
 
   if (bodyIsBinary) {
-    debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+    debug('req.body contained non-utf8 characters, treating as binary content %o', {
+      requestId: request.id,
+      req: _.pick(this.req, 'url'),
+    })
   }
 
   // leave the requests that send a binary buffer unchanged

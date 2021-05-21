@@ -21,7 +21,13 @@ const preferredOpener = {
 }
 
 const availableEditors = [
-  { id: 'computer', name: 'On Computer', openerId: 'computer', isOther: false, description: 'Opens on computer etc etc' },
+  {
+    id: 'computer',
+    name: 'On Computer',
+    openerId: 'computer',
+    isOther: false,
+    description: 'Opens on computer etc etc',
+  },
   { id: 'atom', name: 'Atom', openerId: 'atom', isOther: false },
   { id: 'sublime', name: 'Sublime Text', openerId: 'sublime', isOther: false },
   { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
@@ -59,9 +65,16 @@ describe('<FileOpener />', () => {
     it('opens in preferred opener', () => {
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultProps} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultProps} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
-      cy.get('.file-opener').click().then(() => {
+      cy.get('.file-opener')
+      .click()
+      .then(() => {
         expect(openFile).to.be.calledWith(preferredOpener, fileDetails)
       })
     })
@@ -114,7 +127,12 @@ describe('<FileOpener />', () => {
       const setEditor = cy.stub()
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.get('.submit')
@@ -130,7 +148,12 @@ describe('<FileOpener />', () => {
       const setEditor = cy.stub()
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} setEditor={setEditor} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.contains('Other').click()
@@ -146,11 +169,18 @@ describe('<FileOpener />', () => {
     it('sets user editor when selected', () => {
       const setEditor = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} setUserEditor={setEditor}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} setUserEditor={setEditor}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.contains('Sublime Text').click()
-      cy.get('.submit').click().then(() => {
+      cy.get('.submit')
+      .click()
+      .then(() => {
         expect(setEditor).to.be.calledWith(availableEditors[2])
       })
     })
@@ -158,11 +188,18 @@ describe('<FileOpener />', () => {
     it('opens in correct editor when selected', () => {
       const openFile = cy.stub()
 
-      cy.render(render, <FileOpener {...defaultPropsModal} openFile={openFile}>Open in IDE</FileOpener>)
+      cy.render(
+        render,
+        <FileOpener {...defaultPropsModal} openFile={openFile}>
+          Open in IDE
+        </FileOpener>
+      )
 
       cy.get('.file-opener').click()
       cy.contains('Sublime Text').click()
-      cy.get('.submit').click().then(() => {
+      cy.get('.submit')
+      .click()
+      .then(() => {
         expect(openFile).to.be.calledWith(availableEditors[2], fileDetails)
       })
     })

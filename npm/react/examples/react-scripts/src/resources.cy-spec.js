@@ -8,9 +8,7 @@ describe.skip('static resources', () => {
   const findResource = (name) => {
     console.log(window.document)
 
-    return window.performance
-    .getEntriesByType('resource')
-    .find((item) => item.name.endsWith(name))
+    return window.performance.getEntriesByType('resource').find((item) => item.name.endsWith(name))
   }
 
   it('loads SVG', () => {

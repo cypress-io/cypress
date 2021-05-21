@@ -1,6 +1,6 @@
 const _ = require('lodash')
 
-function mutateConfiguration (testConfigOverride, config, env) {
+function mutateConfiguration(testConfigOverride, config, env) {
   const globalConfig = _.clone(config())
   const globalEnv = _.clone(env())
 
@@ -46,7 +46,7 @@ function mutateConfiguration (testConfigOverride, config, env) {
 
 // this is called during test onRunnable time
 // in order to resolve the test config upfront before test runs
-export function getResolvedTestConfigOverride (test) {
+export function getResolvedTestConfigOverride(test) {
   let curParent = test.parent
 
   const testConfig = [test._testConfig]
@@ -64,7 +64,7 @@ export function getResolvedTestConfigOverride (test) {
 
 class TestConfigOverride {
   private restoreTestConfigFn: Nullable<() => void> = null
-  restoreAndSetTestConfigOverrides (test, config, env) {
+  restoreAndSetTestConfigOverrides(test, config, env) {
     if (this.restoreTestConfigFn) this.restoreTestConfigFn()
 
     const resolvedTestConfig = test._testConfig || {}
@@ -73,6 +73,6 @@ class TestConfigOverride {
   }
 }
 
-export function create () {
+export function create() {
   return new TestConfigOverride()
 }

@@ -9,7 +9,7 @@ it('renders a list item', () => {
   mount(
     <ListItem>
       <ListItemText primary={'my example list item'} />
-    </ListItem>,
+    </ListItem>
   )
 
   cy.contains('my example list item')
@@ -19,10 +19,5 @@ it('renders a list item', () => {
 it('renders full list', () => {
   cy.viewport(500, 800)
   mount(<SimpleList />)
-  cy.contains('Drafts')
-  .click()
-  .wait(1000)
-  .click()
-  .wait(1000)
-  .click()
+  cy.contains('Drafts').click().wait(1000).click().wait(1000).click()
 })

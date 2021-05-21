@@ -9,13 +9,13 @@ class ViewStore {
     name: C.LOADING,
   }
 
-  @action showLoading () {
+  @action showLoading() {
     this.currentView = {
       name: C.LOADING,
     }
   }
 
-  @action showApp () {
+  @action showApp() {
     if (appStore.projectRoot) {
       this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectRoot))
     } else {
@@ -23,13 +23,13 @@ class ViewStore {
     }
   }
 
-  @action showIntro () {
+  @action showIntro() {
     this.currentView = {
       name: C.INTRO,
     }
   }
 
-  @action showProjectSpecs (project) {
+  @action showProjectSpecs(project) {
     this.currentView = {
       name: C.PROJECT_SPECS,
       project,
@@ -40,7 +40,7 @@ class ViewStore {
     return this._isView(C.PROJECT_SPECS)
   }
 
-  @action showProjectRuns (project) {
+  @action showProjectRuns(project) {
     this.currentView = {
       name: C.PROJECT_RUNS,
       project,
@@ -51,7 +51,7 @@ class ViewStore {
     return this._isView(C.PROJECT_RUNS)
   }
 
-  @action showProjectSettings (project) {
+  @action showProjectSettings(project) {
     this.currentView = {
       name: C.PROJECT_SETTINGS,
       project,
@@ -62,7 +62,7 @@ class ViewStore {
     return this._isView(C.PROJECT_SETTINGS)
   }
 
-  _isView (name) {
+  _isView(name) {
     return this.currentView.name === name
   }
 }

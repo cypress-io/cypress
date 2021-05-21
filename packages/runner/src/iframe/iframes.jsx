@@ -18,29 +18,26 @@ import util from '../lib/util'
 export default class Iframes extends Component {
   _disposers = []
 
-  render () {
+  render() {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
     return (
       <div
-        className={cs(
-          'iframes-container',
-          {
-            'has-error': !!scriptError,
-            'studio-is-open': studioRecorder.isOpen,
-            'studio-is-loading': studioRecorder.isLoading,
-            'studio-is-ready': studioRecorder.isReady,
-            'studio-is-failed': studioRecorder.isFailed,
-          },
-        )}
+        className={cs('iframes-container', {
+          'has-error': !!scriptError,
+          'studio-is-open': studioRecorder.isOpen,
+          'studio-is-loading': studioRecorder.isLoading,
+          'studio-is-ready': studioRecorder.isReady,
+          'studio-is-failed': studioRecorder.isFailed,
+        })}
         style={{
           top: headerHeight,
           left: this.props.state.absoluteReporterWidth,
         }}
       >
         <div
-          ref='container'
-          className='size-container'
+          ref="container"
+          className="size-container"
           style={{
             marginLeft,
             height,
@@ -49,10 +46,10 @@ export default class Iframes extends Component {
           }}
         />
         <ScriptError error={scriptError} />
-        <div className='cover' />
+        <div className="cover" />
         {studioRecorder.isLoading && (
           <div
-            className='studio-loading-cover'
+            className="studio-loading-cover"
             style={{
               marginLeft,
               height,
@@ -60,14 +57,16 @@ export default class Iframes extends Component {
               width,
             }}
           >
-            <div><i className='fa fa-spinner fa-spin' /></div>
+            <div>
+              <i className="fa fa-spinner fa-spin" />
+            </div>
           </div>
         )}
       </div>
     )
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.autIframe = new AutIframe(this.props.config)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
@@ -90,13 +89,17 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
-    }))
+    this._disposers.push(
+      autorun(() => {
+        this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
+      })
+    )
 
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
-    }))
+    this._disposers.push(
+      autorun(() => {
+        this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
+      })
+    )
 
     this.props.eventManager.start(this.props.config)
 
@@ -141,7 +144,7 @@ export default class Iframes extends Component {
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
-  _loadIframes (specPath) {
+  _loadIframes(specPath) {
     const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
@@ -183,7 +186,7 @@ export default class Iframes extends Component {
     }
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     const cb = this.props.state.callbackAfterUpdate
 
     if (cb) {
@@ -195,7 +198,7 @@ export default class Iframes extends Component {
     this.autIframe.printSelectorElementsToConsole()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.eventManager.notifyRunningSpec(null)
     this.props.eventManager.stop()
     this._disposers.forEach((dispose) => {
@@ -203,7 +206,7 @@ export default class Iframes extends Component {
     })
   }
 
-  getSizeContainer () {
+  getSizeContainer() {
     return this.refs.container
   }
 }

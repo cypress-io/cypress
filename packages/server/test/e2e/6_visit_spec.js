@@ -9,9 +9,12 @@ const e2e = require('../support/helpers/e2e').default
 // create an HTTPS server that forces TLSv1
 const startTlsV1Server = (port) => {
   return Bluebird.fromCallback((cb) => {
-    const opts = _.merge({
-      secureProtocol: 'TLSv1_server_method',
-    }, cert)
+    const opts = _.merge(
+      {
+        secureProtocol: 'TLSv1_server_method',
+      },
+      cert
+    )
 
     const serv = https.createServer(opts, (req, res) => {
       res.setHeader('content-type', 'text/html')
@@ -72,8 +75,7 @@ const onServer = function (app) {
 
     return setTimeout(() => {
       return res.send(`<html>timeout: <span>${ms}</span></html>`)
-    }
-    , ms)
+    }, ms)
   })
 
   app.get('/response_never_finishes', (req, res) => {
@@ -91,7 +93,7 @@ Content-Type: text/html
 Set-Cookie: foo=bar-${String.fromCharCode(1)}-baz
 
 foo\
-`,
+`
     )
 
     return res.connection.end()
@@ -132,11 +134,9 @@ describe('e2e visit', () => {
     e2e.it('passes', {
       spec: 'visit_spec.js',
       snapshot: true,
-      onRun (exec) {
-        return startTlsV1Server(6776)
-        .then((serv) => {
-          return exec()
-          .then(() => {
+      onRun(exec) {
+        return startTlsV1Server(6776).then((serv) => {
+          return exec().then(() => {
             return serv.destroy()
           })
         })
@@ -149,11 +149,9 @@ describe('e2e visit', () => {
         experimentalSourceRewriting: true,
       },
       snapshot: true,
-      onRun (exec) {
-        return startTlsV1Server(6776)
-        .then((serv) => {
-          return exec()
-          .then(() => {
+      onRun(exec) {
+        return startTlsV1Server(6776).then((serv) => {
+          return exec().then(() => {
             return serv.destroy()
           })
         })

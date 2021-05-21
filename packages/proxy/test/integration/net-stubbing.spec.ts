@@ -1,9 +1,5 @@
 import { NetworkProxy } from '../../'
-import {
-  netStubbingState as _netStubbingState,
-  NetStubbingState,
-  onNetEvent,
-} from '@packages/net-stubbing'
+import { netStubbingState as _netStubbingState, NetStubbingState, onNetEvent } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
 import sinon from 'sinon'
@@ -57,10 +53,12 @@ context('network stubbing', () => {
 
     destinationApp.get('/', (req, res) => res.send('it worked'))
 
-    server = allowDestroy(destinationApp.listen(() => {
-      destinationPort = server.address().port
-      done()
-    }))
+    server = allowDestroy(
+      destinationApp.listen(() => {
+        destinationPort = server.address().port
+        done()
+      })
+    )
   })
 
   afterEach(() => {
@@ -68,9 +66,7 @@ context('network stubbing', () => {
   })
 
   it('can make a vanilla request', (done) => {
-    supertest(app)
-    .get(`/http://localhost:${destinationPort}`)
-    .expect('it worked', done)
+    supertest(app).get(`/http://localhost:${destinationPort}`).expect('it worked', done)
   })
 
   it('does not add CORS headers to all responses', () => {
@@ -194,7 +190,10 @@ context('network stubbing', () => {
   })
 
   it('does not modify multipart/form-data files', async () => {
-    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64'
+    )
     let sendContentLength = ''
     let receivedContentLength = ''
     let realContentLength = ''
@@ -218,9 +217,7 @@ context('network stubbing', () => {
     })
 
     // capture unintercepted content-length
-    await supertest(app)
-    .post(`/http://localhost:${destinationPort}`)
-    .attach('file', png)
+    await supertest(app).post(`/http://localhost:${destinationPort}`).attach('file', png)
 
     netStubbingState.routes.push({
       id: '1',
@@ -251,9 +248,7 @@ context('network stubbing', () => {
     })
 
     // capture content-length after intercepting
-    await supertest(app)
-    .post(`/http://localhost:${destinationPort}`)
-    .attach('file', png)
+    await supertest(app).post(`/http://localhost:${destinationPort}`).attach('file', png)
 
     expect(sendContentLength).to.eq(receivedContentLength)
     expect(sendContentLength).to.eq(realContentLength)

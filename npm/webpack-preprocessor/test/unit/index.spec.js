@@ -38,10 +38,10 @@ describe('webpack preprocessor', function () {
     webpack.returns(this.compilerApi)
 
     this.statsApi = {
-      hasErrors () {
+      hasErrors() {
         return false
       },
-      toJson () {
+      toJson() {
         return { warnings: [], errors: [] }
       },
     }
@@ -120,11 +120,7 @@ describe('webpack preprocessor', function () {
           additionalEntries: ['entry-1.js', 'entry-2.js'],
         }).then(() => {
           expect(webpack).to.be.calledWithMatch({
-            entry: [
-              this.file.filePath,
-              'entry-1.js',
-              'entry-2.js',
-            ],
+            entry: [this.file.filePath, 'entry-1.js', 'entry-2.js'],
           })
         })
       })
@@ -152,9 +148,9 @@ describe('webpack preprocessor', function () {
       })
 
       describe('devtool', function () {
-        beforeEach((() => {
+        beforeEach(() => {
           sinon.stub(typescriptOverrides, 'overrideSourceMaps')
-        }))
+        })
 
         it('enables inline source maps', function () {
           return this.run().then(() => {
@@ -342,10 +338,10 @@ describe('webpack preprocessor', function () {
         const errsNoStack = ['foo', 'bar', 'baz']
 
         this.statsApi = {
-          hasErrors () {
+          hasErrors() {
             return true
           },
-          toJson () {
+          toJson() {
             return { errors: errs }
           },
         }

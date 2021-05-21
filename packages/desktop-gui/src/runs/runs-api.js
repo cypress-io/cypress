@@ -9,7 +9,8 @@ const isPolling = () => {
 const loadRuns = (runsStore) => {
   runsStore.setLoading(true)
 
-  ipc.getRuns()
+  ipc
+  .getRuns()
   .then((runs) => {
     runsStore.setRuns(runs)
 
@@ -26,7 +27,9 @@ const loadRuns = (runsStore) => {
 }
 
 const pollRuns = (runsStore) => {
-  if (pollId) return
+  if (pollId) {
+    return
+  }
 
   pollId = setInterval(() => {
     loadRuns(runsStore)

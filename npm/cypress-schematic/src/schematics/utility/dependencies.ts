@@ -13,18 +13,18 @@ import { JSONFile } from './json-file'
 const PKG_JSON_PATH = '/package.json'
 
 export enum NodeDependencyType {
-   Default = 'dependencies',
-   Dev = 'devDependencies',
-   Peer = 'peerDependencies',
-   Optional = 'optionalDependencies',
- }
+  Default = 'dependencies',
+  Dev = 'devDependencies',
+  Peer = 'peerDependencies',
+  Optional = 'optionalDependencies',
+}
 
 export interface NodeDependency {
-   type: NodeDependencyType
-   name: string
-   version: string
-   overwrite?: boolean
- }
+  type: NodeDependencyType
+  name: string
+  version: string
+  overwrite?: boolean
+}
 
 const ALL_DEPENDENCY_TYPE = [
   NodeDependencyType.Default,
@@ -33,11 +33,7 @@ const ALL_DEPENDENCY_TYPE = [
   NodeDependencyType.Peer,
 ]
 
-export function addPackageJsonDependency (
-  tree: Tree,
-  dependency: NodeDependency,
-  pkgJsonPath = PKG_JSON_PATH,
-): void {
+export function addPackageJsonDependency(tree: Tree, dependency: NodeDependency, pkgJsonPath = PKG_JSON_PATH): void {
   const json = new JSONFile(tree, pkgJsonPath)
 
   const { overwrite, type, name, version } = dependency
@@ -48,11 +44,7 @@ export function addPackageJsonDependency (
   }
 }
 
-export function removePackageJsonDependency (
-  tree: Tree,
-  name: string,
-  pkgJsonPath = PKG_JSON_PATH,
-): void {
+export function removePackageJsonDependency(tree: Tree, name: string, pkgJsonPath = PKG_JSON_PATH): void {
   const json = new JSONFile(tree, pkgJsonPath)
 
   for (const depType of ALL_DEPENDENCY_TYPE) {
@@ -60,11 +52,7 @@ export function removePackageJsonDependency (
   }
 }
 
-export function getPackageJsonDependency (
-  tree: Tree,
-  name: string,
-  pkgJsonPath = PKG_JSON_PATH,
-): NodeDependency | null {
+export function getPackageJsonDependency(tree: Tree, name: string, pkgJsonPath = PKG_JSON_PATH): NodeDependency | null {
   const json = new JSONFile(tree, pkgJsonPath)
 
   for (const depType of ALL_DEPENDENCY_TYPE) {

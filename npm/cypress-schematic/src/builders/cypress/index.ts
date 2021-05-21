@@ -16,23 +16,16 @@ import { CypressBuilderOptions } from './cypress-builder-options'
 
 export default createBuilder<CypressBuilderOptions>(runCypress)
 
-type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
-  Partial<CypressCommandLine.CypressOpenOptions>;
+type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> & Partial<CypressCommandLine.CypressOpenOptions>
 
-function runCypress (
-  options: CypressBuilderOptions,
-  context: BuilderContext,
-): Observable<BuilderOutput> {
+function runCypress(options: CypressBuilderOptions, context: BuilderContext): Observable<BuilderOutput> {
   options.env = options.env || {}
 
   if (options.tsConfig) {
     options.env.tsConfig = join(context.workspaceRoot, options.tsConfig)
   }
 
-  const workspace = new experimental.workspace.Workspace(
-    normalize(context.workspaceRoot),
-    new NodeJsSyncHost(),
-  )
+  const workspace = new experimental.workspace.Workspace(normalize(context.workspaceRoot), new NodeJsSyncHost())
 
   return workspace.loadWorkspaceFromHost(normalize('angular.json')).pipe(
     map(() => os.platform() === 'win32'),
@@ -53,15 +46,15 @@ function runCypress (
         catchError((error) => {
           return of({ success: false }).pipe(
             tap(() => context.reportStatus(`Error: ${error.message}`)),
-            tap(() => context.logger.error(error.message)),
+            tap(() => context.logger.error(error.message))
           )
-        }),
+        })
       )
-    }),
+    })
   )
 }
 
-function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOutput> {
+function initCypress(userOptions: CypressBuilderOptions): Observable<BuilderOutput> {
   const projectFolderPath = dirname(userOptions.projectPath)
 
   const defaultOptions: CypressOptions = {
@@ -88,15 +81,11 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   const { watch, headless } = userOptions
 
   return from(watch === false || headless ? run(options) : open(options)).pipe(
-    map((result: any) => ({ success: !result.totalFailed && !result.failures })),
+    map((result: any) => ({ success: !result.totalFailed && !result.failures }))
   )
 }
 
-export function startDevServer (
-  devServerTarget: string,
-  watch: boolean,
-  context: any,
-): Observable<string> {
+export function startDevServer(devServerTarget: string, watch: boolean, context: any): Observable<string> {
   const overrides = {
     watch,
   }
@@ -108,6 +97,6 @@ export function startDevServer (
       }
 
       return output.baseUrl as string
-    }),
+    })
   )
 }

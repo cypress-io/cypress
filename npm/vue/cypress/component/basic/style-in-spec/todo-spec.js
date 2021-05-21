@@ -19,10 +19,7 @@ it('injects local style', () => {
   }
 
   mount({ template, components }, { style })
-  cy.get('input[type=checkbox]')
-  .should('not.be.checked')
-  .check()
-  .should('be.checked')
+  cy.get('input[type=checkbox]').should('not.be.checked').check().should('be.checked')
 
   // once the checkbox is set, there should be class "done" on the component
   cy.get('.todo')

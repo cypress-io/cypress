@@ -29,8 +29,14 @@ const exit = (code = 0) => {
 }
 
 const showWarningForInvalidConfig = (options) => {
-  const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
-    if (!require('./config').getConfigKeys().find((configKey) => configKey === option)) {
+  const invalidConfigOptions = require('lodash')
+  .keys(options.config)
+  .reduce((invalid, option) => {
+    if (
+      !require('./config')
+      .getConfigKeys()
+      .find((configKey) => configKey === option)
+    ) {
       invalid.push(option)
     }
 
@@ -52,7 +58,8 @@ const exitErr = (err) => {
   // and exit with 1
   debug('exiting with err', err)
 
-  return require('./errors').logException(err)
+  return require('./errors')
+  .logException(err)
   .then(() => {
     debug('calling exit 1')
 
@@ -61,11 +68,11 @@ const exitErr = (err) => {
 }
 
 module.exports = {
-  isCurrentlyRunningElectron () {
+  isCurrentlyRunningElectron() {
     return require('./util/electron-app').isRunning()
   },
 
-  runElectron (mode, options) {
+  runElectron(mode, options) {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
@@ -111,13 +118,13 @@ module.exports = {
     })
   },
 
-  openProject (options) {
+  openProject(options) {
     // this code actually starts a project
     // and is spawned from nodemon
     return require('./open_project').open(options.project, options)
   },
 
-  start (argv = []) {
+  start(argv = []) {
     debug('starting cypress with argv %o', argv)
 
     // if the CLI passed "--" somewhere, we need to remove it
@@ -158,7 +165,8 @@ module.exports = {
     }
 
     // make sure we have the appData folder
-    return require('./util/app_data').ensure()
+    return require('./util/app_data')
+    .ensure()
     .then(() => {
       // else determine the mode by
       // the passed in arguments / options
@@ -191,7 +199,7 @@ module.exports = {
     })
   },
 
-  startInMode (mode, options) {
+  startInMode(mode, options) {
     debug('starting in mode %s with options %o', mode, options)
 
     switch (mode) {
@@ -200,13 +208,12 @@ module.exports = {
         .get('version')
         .then((version) => {
           return console.log(version) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'info':
-        return require('./modes/info')(options)
-        .then(exit0)
-        .catch(exitErr)
+        return require('./modes/info')(options).then(exit0).catch(exitErr)
 
       case 'smokeTest':
         return this.runElectron(mode, options)
@@ -220,50 +227,48 @@ module.exports = {
           }
 
           return 1
-        }).then(exit)
+        })
+        .then(exit)
         .catch(exitErr)
 
       case 'returnPkg':
         return require('./modes/pkg')(options)
         .then((pkg) => {
           return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'logs':
         // print the logs + exit
-        return require('./gui/logs').print()
-        .then(exit0)
-        .catch(exitErr)
+        return require('./gui/logs').print().then(exit0).catch(exitErr)
 
       case 'clearLogs':
         // clear the logs + exit
-        return require('./gui/logs').clear()
-        .then(exit0)
-        .catch(exitErr)
+        return require('./gui/logs').clear().then(exit0).catch(exitErr)
 
       case 'getKey':
         // print the key + exit
-        return require('./project-base').ProjectBase
-        .getSecretKeyByPath(options.projectRoot)
+        return require('./project-base')
+        .ProjectBase.getSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'generateKey':
         // generate + print the key + exit
-        return require('./project-base').ProjectBase
-        .generateSecretKeyByPath(options.projectRoot)
+        return require('./project-base')
+        .ProjectBase.generateSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'exitWithCode':
-        return require('./modes/exit')(options)
-        .then(exit)
-        .catch(exitErr)
+        return require('./modes/exit')(options).then(exit).catch(exitErr)
 
       case 'run':
         // run headlessly and exit

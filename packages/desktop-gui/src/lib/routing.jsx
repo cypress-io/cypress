@@ -5,13 +5,15 @@ import viewStore from './view-store'
 const Link = ({ children, to, onClick }) => {
   const navigate = (e) => {
     e.preventDefault()
-    if (onClick) onClick()
+    if (onClick) {
+      onClick()
+    }
 
     to.navigate()
   }
 
   return (
-    <a href='#' onClick={navigate} className={to.isActive() ? 'active' : ''}>
+    <a href="#" onClick={navigate} className={to.isActive() ? 'active' : ''}>
       {children}
     </a>
   )
@@ -39,7 +41,4 @@ const routes = {
   }),
 }
 
-export {
-  Link,
-  routes,
-}
+export { Link, routes }

@@ -33,13 +33,17 @@ const logoPaths: LogoOptions = {
 }
 
 const familyFallback = (browserKey: string) => {
-  return _.reduce(families, (found, regex, family) => {
-    if (found !== '') return found
+  return _.reduce(
+    families,
+    (found, regex, family) => {
+      if (found !== '') return found
 
-    if (regex.test(browserKey)) return family
+      if (regex.test(browserKey)) return family
 
-    return ''
-  }, '')
+      return ''
+    },
+    ''
+  )
 }
 
 const logoPath = (browserName: string) => {
@@ -55,10 +59,10 @@ interface Props {
 // browserName should be the browser's display name
 const BrowserIcon = ({ browserName }: Props) => {
   if (logoPath(browserName)) {
-    return <img className='browser-icon' src={logoPath(browserName)} alt={browserName} />
+    return <img className="browser-icon" src={logoPath(browserName)} alt={browserName} />
   }
 
-  return <i className='browser-icon fas fa-fw fa-globe' />
+  return <i className="browser-icon fas fa-fw fa-globe" />
 }
 
 export default BrowserIcon

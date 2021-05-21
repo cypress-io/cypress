@@ -3,7 +3,7 @@ const os = require('os')
 const opn = require('opn')
 
 module.exports = {
-  opn (arg, opts = {}) {
+  opn(arg, opts = {}) {
     if (os.platform() === 'darwin') {
       opts.args = '-R'
     }

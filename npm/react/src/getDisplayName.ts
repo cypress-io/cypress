@@ -8,10 +8,7 @@ const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
  * @param fallbackName {string} The alias, or fallback name to use when the name cannot be derived.
  * @link https://github.com/facebook/react-devtools/blob/master/backend/getDisplayName.js
  */
-export default function getDisplayName (
-  type: JSX,
-  fallbackName: string = 'Unknown',
-): string {
+export default function getDisplayName(type: JSX, fallbackName: string = 'Unknown'): string {
   const nameFromCache = cachedDisplayNames.get(type)
 
   if (nameFromCache != null) {
@@ -40,10 +37,7 @@ export default function getDisplayName (
     const moduleName = match[2]
 
     if (componentName && moduleName) {
-      if (
-        moduleName === componentName ||
-        moduleName.startsWith(`${componentName}.`)
-      ) {
+      if (moduleName === componentName || moduleName.startsWith(`${componentName}.`)) {
         displayName = componentName
       }
     }

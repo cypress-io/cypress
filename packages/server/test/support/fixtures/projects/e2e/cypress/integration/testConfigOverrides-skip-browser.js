@@ -1,5 +1,9 @@
 describe('suite', () => {
-  it('has invalid testConfigOverrides', {
-    browser: ['!electron'],
-  }, () => {})
+  it(
+    'has invalid testConfigOverrides',
+    {
+      browser: ['!electron'],
+    },
+    () => {}
+  )
 })

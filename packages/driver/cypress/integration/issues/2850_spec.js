@@ -19,7 +19,7 @@ describe('issue #2850: invoking cy.clock() before two visits', () => {
       cy.visit('/fixtures/generic.html')
       cy.window().then((win) => {
         // override the setTimeout function now
-        win.setTimeout = () => { }
+        win.setTimeout = () => {}
 
         // manually restore the clock
         clock.restore()

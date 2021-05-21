@@ -2,7 +2,7 @@
 import React from 'react'
 import Map from './map'
 
-export default function Contact (props) {
+export default function Contact(props) {
   return (
     <div>
       <address>

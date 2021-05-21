@@ -57,9 +57,6 @@ describe('Plugins with options', () => {
     // first plugin works
     cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
     // second plugin works
-    cy.window()
-    .its('Vue')
-    .invoke('anotherPluginMethod')
-    .should('equal', 'testing')
+    cy.window().its('Vue').invoke('anotherPluginMethod').should('equal', 'testing')
   })
 })

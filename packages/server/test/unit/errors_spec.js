@@ -19,9 +19,7 @@ describe('lib/errors', () => {
 
       expect(ret).to.be.undefined
 
-      const {
-        red,
-      } = style
+      const { red } = style
 
       expect(console.log).to.be.calledWithMatch(red.open)
 
@@ -35,9 +33,7 @@ describe('lib/errors', () => {
 
       expect(ret).to.be.undefined
 
-      const {
-        yellow,
-      } = style
+      const { yellow } = style
 
       expect(console.log).to.be.calledWithMatch(yellow.open)
 
@@ -86,8 +82,7 @@ describe('lib/errors', () => {
 
       const err = new Error('foo')
 
-      return errors.logException(err)
-      .then(() => {
+      return errors.logException(err).then(() => {
         expect(console.log).to.be.calledWith(chalk.red(err.stack))
 
         expect(logger.createException).to.be.calledWith(err)
@@ -100,8 +95,7 @@ describe('lib/errors', () => {
 
       const err = errors.get('NOT_LOGGED_IN')
 
-      return errors.logException(err)
-      .then(() => {
+      return errors.logException(err).then(() => {
         expect(console.log).not.to.be.calledWith(err.stack)
 
         expect(logger.createException).not.to.be.called
@@ -114,8 +108,7 @@ describe('lib/errors', () => {
 
       const err = new Error('foo')
 
-      return errors.logException(err)
-      .then(() => {
+      return errors.logException(err).then(() => {
         expect(console.log).not.to.be.calledWith(err.stack)
 
         expect(logger.createException).not.to.be.called
@@ -128,8 +121,7 @@ describe('lib/errors', () => {
 
       const err = errors.get('NOT_LOGGED_IN')
 
-      return errors.logException(err)
-      .then((ret) => {
+      return errors.logException(err).then((ret) => {
         expect(ret).to.be.undefined
       })
     })

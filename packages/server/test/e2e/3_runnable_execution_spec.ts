@@ -3,18 +3,20 @@ import Fixtures from '../support/helpers/fixtures'
 
 describe('e2e runnable execution', () => {
   e2e.setup({
-    servers: [{
-      port: 3434,
-      static: true,
-    },
-    {
-      port: 4545,
-      static: true,
-    },
-    {
-      port: 5656,
-      static: true,
-    }],
+    servers: [
+      {
+        port: 3434,
+        static: true,
+      },
+      {
+        port: 4545,
+        static: true,
+      },
+      {
+        port: 5656,
+        static: true,
+      },
+    ],
   })
 
   // navigation in before and in test body doesn't cause infinite loop

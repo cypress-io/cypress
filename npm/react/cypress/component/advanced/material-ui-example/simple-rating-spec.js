@@ -8,7 +8,7 @@ import Rating from '@material-ui/lab/Rating'
 import Typography from '@material-ui/core/Typography'
 import Box from '@material-ui/core/Box'
 
-export default function SimpleRating ({ onSetRating }) {
+export default function SimpleRating({ onSetRating }) {
   const [value, setValue] = React.useState(2)
 
   return (

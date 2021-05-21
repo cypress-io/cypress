@@ -26,7 +26,7 @@ const eventValidators = {
   'before:spec': isFunction,
   'dev-server:start': isFunction,
   'file:preprocessor': isFunction,
-  'task': isObject,
+  task: isObject,
 }
 
 const validateEvent = (event, handler, config) => {

@@ -8,7 +8,7 @@ describe('Mocking context', () => {
     mount(
       <ThemeContext.Provider value="mocked">
         <Toolbar />
-      </ThemeContext.Provider>,
+      </ThemeContext.Provider>
     )
 
     // the label "mocked" was passed through React context

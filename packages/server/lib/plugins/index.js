@@ -17,11 +17,15 @@ const register = (event, callback) => {
   debug(`register event '${event}'`)
 
   if (!_.isString(event)) {
-    throw new Error(`The plugin register function must be called with an event as its 1st argument. You passed '${event}'.`)
+    throw new Error(
+      `The plugin register function must be called with an event as its 1st argument. You passed '${event}'.`
+    )
   }
 
   if (!_.isFunction(callback)) {
-    throw new Error(`The plugin register function must be called with a callback function as its 2nd argument. You passed '${callback}'.`)
+    throw new Error(
+      `The plugin register function must be called with a callback function as its 2nd argument. You passed '${callback}'.`
+    )
   }
 
   registeredEvents[event] = callback
@@ -42,9 +46,11 @@ const init = (config, options) => {
 
   // test and warn for incompatible plugin
   try {
-    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
-      basedir: options.projectRoot,
-    }))
+    const retriesPluginPath = path.dirname(
+      resolve.sync('cypress-plugin-retries', {
+        basedir: options.projectRoot,
+      })
+    )
 
     options.onWarning(errors.get('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(options.projectRoot, retriesPluginPath)))
   } catch (e) {
@@ -59,7 +65,9 @@ const init = (config, options) => {
 
     // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
     const fulfill = (_fulfill) => (value) => {
-      if (fulfilled) return
+      if (fulfilled) {
+        return
+      }
 
       fulfilled = true
       _fulfill(value)
@@ -117,7 +125,9 @@ const init = (config, options) => {
     // alphabetize config by keys
     let orderedConfig = {}
 
-    Object.keys(config).sort().forEach((key) => orderedConfig[key] = config[key])
+    Object.keys(config)
+    .sort()
+    .forEach((key) => (orderedConfig[key] = config[key]))
     config = orderedConfig
 
     ipc.send('load', config)
@@ -168,7 +178,9 @@ const init = (config, options) => {
     const handleError = (err) => {
       debug('plugins process error:', err.stack)
 
-      if (!pluginsProcess) return // prevent repeating this in case of multiple errors
+      if (!pluginsProcess) {
+        return
+      } // prevent repeating this in case of multiple errors
 
       killPluginsProcess()
 
@@ -186,7 +198,9 @@ const init = (config, options) => {
 
     const handleWarning = (warningErr) => {
       debug('plugins process warning:', warningErr.stack)
-      if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
+      if (!pluginsProcess) {
+        return
+      } // prevent repeating this in case of multiple warnings
 
       return options.onWarning(warningErr)
     }

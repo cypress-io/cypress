@@ -10,11 +10,11 @@ import settings from './util/settings'
 const debug = Debug('cypress:server:project')
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
-  get projectType () {
+  get projectType() {
     return 'e2e'
   }
 
-  open (options: Record<string, unknown>) {
+  open(options: Record<string, unknown>) {
     this._server = new ServerE2E()
 
     return super.open(options, {
@@ -30,8 +30,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
           return updatedConfig
         })
         .then((cfg) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning)
-          .then(([port, warning]) => {
+          return this.server.open(cfg, this, options.onError, options.onWarning).then(([port, warning]) => {
             return {
               cfg,
               port,
@@ -41,7 +40,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
         })
       },
 
-      onAfterOpen ({ cfg }) {
+      onAfterOpen({ cfg }) {
         cfg.proxyServer = cfg.proxyUrl
 
         return cfg
@@ -49,7 +48,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     })
   }
 
-  _initPlugins (cfg, options) {
+  _initPlugins(cfg, options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
@@ -60,7 +59,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
-      onError (err) {
+      onError(err) {
         debug('got plugins error', err.stack)
 
         browsers.close()
@@ -71,9 +70,9 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     })
   }
 
-  close () {
+  close() {
     return super.close({
-      onClose () {
+      onClose() {
         preprocessor.close()
       },
     })

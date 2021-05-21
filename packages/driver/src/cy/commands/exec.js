@@ -5,7 +5,7 @@ const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
-    exec (cmd, options = {}) {
+    exec(cmd, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -23,7 +23,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: _.truncate(cmd, { length: 25 }),
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return consoleOutput
           },
         })
@@ -51,7 +51,7 @@ module.exports = (Commands, Cypress, cy) => {
           consoleOutput['Shell Used'] = result.shell
         }
 
-        if ((result.code === 0) || !options.failOnNonZeroExit) {
+        if (result.code === 0 || !options.failOnNonZeroExit) {
           return result
         }
 

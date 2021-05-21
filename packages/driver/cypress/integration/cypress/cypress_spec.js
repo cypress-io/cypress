@@ -30,7 +30,7 @@ describe('driver/src/cypress/index', () => {
         return Boolean(elem.getAttribute('foo'))
       }
 
-      const $foo = $('<div foo=\'bar\'>foo element</div>').appendTo(cy.$$('body'))
+      const $foo = $("<div foo='bar'>foo element</div>").appendTo(cy.$$('body'))
 
       cy.get(':foo').then(($el) => {
         expect($el.get(0)).to.eq($foo.get(0))
@@ -61,8 +61,7 @@ describe('driver/src/cypress/index', () => {
         },
       })
 
-      return CypressInstance.backend('foo')
-      .catch((err) => {
+      return CypressInstance.backend('foo').catch((err) => {
         expect(err.backend).to.be.true
 
         expect(err.stack).not.to.include('From previous event')
@@ -80,7 +79,8 @@ describe('driver/src/cypress/index', () => {
       return Cypress.backend('foo', foo)
       .then(() => {
         throw new Error('should not reach')
-      }).catch((e) => {
+      })
+      .catch((e) => {
         expect(e.message).to.eq('You requested a backend event we cannot handle: foo')
       })
     })
@@ -98,9 +98,11 @@ describe('driver/src/cypress/index', () => {
     it('returns false on non-cy objects', () => {
       expect(Cypress.isCy(undefined)).to.be.false
 
-      expect(Cypress.isCy(() => {
-        return {}
-      })).to.be.false
+      expect(
+        Cypress.isCy(() => {
+          return {}
+        })
+      ).to.be.false
     })
   })
 
@@ -110,11 +112,12 @@ describe('driver/src/cypress/index', () => {
         Cypress.log('My Log')
       }
 
-      expect(fn).to.throw().with.property('message')
+      expect(fn)
+      .to.throw()
+      .with.property('message')
       .and.include('`Cypress.log()` can only be called with an options object. Your argument was: `My Log`')
 
-      expect(fn).to.throw().with.property('docsUrl')
-      .and.eq('https://on.cypress.io/cypress-log')
+      expect(fn).to.throw().with.property('docsUrl').and.eq('https://on.cypress.io/cypress-log')
     })
 
     it('does not throw when Cypress.log() called outside of command', () => {
@@ -130,8 +133,12 @@ describe('driver/src/cypress/index', () => {
     it('throws when using Cypress.addAssertionCommand', () => {
       const addAssertionCommand = () => Cypress.addAssertionCommand()
 
-      expect(addAssertionCommand).to.throw().and.satisfy((err) => {
-        expect(err.message).to.include('You cannot use the undocumented private command interface: `addAssertionCommand`')
+      expect(addAssertionCommand)
+      .to.throw()
+      .and.satisfy((err) => {
+        expect(err.message).to.include(
+          'You cannot use the undocumented private command interface: `addAssertionCommand`'
+        )
 
         return true
       })
@@ -140,7 +147,9 @@ describe('driver/src/cypress/index', () => {
     it('throws when using Cypress.addUtilityCommand', () => {
       const addUtilityCommand = () => Cypress.addUtilityCommand()
 
-      expect(addUtilityCommand).to.throw().and.satisfy((err) => {
+      expect(addUtilityCommand)
+      .to.throw()
+      .and.satisfy((err) => {
         expect(err.message).to.include('You cannot use the undocumented private command interface: `addUtilityCommand`')
 
         return true

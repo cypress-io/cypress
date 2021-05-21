@@ -9,7 +9,7 @@ const { getAliasedRequests, isDynamicAliasingPossible } = require('../net-stubbi
 
 module.exports = (Commands, Cypress, cy, state) => {
   Commands.addAll({
-    focused (options = {}) {
+    focused(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -28,7 +28,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         options._log.set({
           $el,
-          consoleProps () {
+          consoleProps() {
             const ret = $el ? $dom.getElements($el) : '--nothing--'
 
             return {
@@ -48,9 +48,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       const resolveFocused = () => {
-        return Promise
-        .try(getFocused)
-        .then(($el) => {
+        return Promise.try(getFocused).then(($el) => {
           if (options.verify === false) {
             return $el
           }
@@ -70,11 +68,11 @@ module.exports = (Commands, Cypress, cy, state) => {
       return resolveFocused()
     },
 
-    get (selector, options = {}) {
+    get(selector, options = {}) {
       const userOptions = options
       const ctx = this
 
-      if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
+      if (userOptions === null || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
         return $errUtils.throwErrByPath('get.invalid_options', {
           args: { options: userOptions },
         })
@@ -100,7 +98,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         if (options._log == null) {
           options._log = Cypress.log({
             message: selector,
-            referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
+            referencesAlias: aliasObj != null && aliasObj.alias ? { name: aliasObj.alias } : undefined,
             aliasType,
             timeout: options.timeout,
             consoleProps: () => {
@@ -137,7 +135,7 @@ module.exports = (Commands, Cypress, cy, state) => {
             case 'dom':
               _.extend(consoleProps, {
                 Yielded: $dom.getElements(value),
-                Elements: (value != null ? value.length : undefined),
+                Elements: value != null ? value.length : undefined,
               })
 
               break
@@ -168,8 +166,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       // We want to strip everything after the last '.'
       // only when it is potentially a number or 'all'
-      if ((_.indexOf(selector, '.') === -1) ||
-        (_.keys(state('aliases')).includes(selector.slice(1)))) {
+      if (_.indexOf(selector, '.') === -1 || _.keys(state('aliases')).includes(selector.slice(1))) {
         toSelect = selector
       } else {
         allParts = _.split(selector, '.')
@@ -237,16 +234,16 @@ module.exports = (Commands, Cypress, cy, state) => {
             log(subject)
 
             return cy.verifyUpcomingAssertions(subject, options, {
-              onFail (err) {
+              onFail(err) {
                 // if we are failing because our aliased elements
                 // are less than what is expected then we know we
                 // need to requery for them and can thus replay
                 // the commands leading up to the alias
-                if ((err.type === 'length') && (err.actual < err.expected)) {
-                  return replayFrom = true
+                if (err.type === 'length' && err.actual < err.expected) {
+                  return (replayFrom = true)
                 }
               },
-              onRetry () {
+              onRetry() {
                 if (replayFrom) {
                   return replay()
                 }
@@ -258,9 +255,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
           // if this is a route command
           if (command.get('name') === 'route') {
-            if (!((_.indexOf(selector, '.') === -1) ||
-              (_.keys(state('aliases')).includes(selector.slice(1))))
-            ) {
+            if (!(_.indexOf(selector, '.') === -1 || _.keys(state('aliases')).includes(selector.slice(1)))) {
               allParts = _.split(selector, '.')
               const index = _.last(allParts)
 
@@ -406,7 +401,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       return resolveElements()
     },
 
-    root (options = {}) {
+    root(options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, { log: true })
@@ -436,254 +431,259 @@ module.exports = (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {
-    contains (subject, filter, text, options = {}) {
-      let userOptions = options
+  Commands.addAll(
+    { prevSubject: ['optional', 'window', 'document', 'element'] },
+    {
+      contains(subject, filter, text, options = {}) {
+        let userOptions = options
 
-      // nuke our subject if its present but not an element.
-      // in these cases its either window or document but
-      // we dont care.
-      // we'll null out the subject so it will show up as a parent
-      // command since its behavior is identical to using it
-      // as a parent command: cy.contains()
-      // don't nuke if subject is a shadow root, is a document not an element
-      if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
-        subject = null
-      }
-
-      if (_.isRegExp(text)) {
-        // .contains(filter, text)
-        // Do nothing
-      } else if (_.isObject(text)) {
-        // .contains(text, userOptions)
-        userOptions = text
-        text = filter
-        filter = ''
-      } else if (_.isUndefined(text)) {
-        // .contains(text)
-        text = filter
-        filter = ''
-      }
-
-      if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
-        $errUtils.throwErrByPath('contains.regex_conflict')
-      }
-
-      options = _.defaults({}, userOptions, { log: true, matchCase: true })
-
-      if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
-        $errUtils.throwErrByPath('contains.invalid_argument')
-      }
-
-      if (_.isBlank(text)) {
-        $errUtils.throwErrByPath('contains.empty_string')
-      }
-
-      const getPhrase = () => {
-        if (filter && subject) {
-          const node = $dom.stringify(subject, 'short')
-
-          return `within the element: ${node} and with the selector: '${filter}' `
+        // nuke our subject if its present but not an element.
+        // in these cases its either window or document but
+        // we dont care.
+        // we'll null out the subject so it will show up as a parent
+        // command since its behavior is identical to using it
+        // as a parent command: cy.contains()
+        // don't nuke if subject is a shadow root, is a document not an element
+        if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
+          subject = null
         }
 
-        if (filter) {
-          return `within the selector: '${filter}' `
+        if (_.isRegExp(text)) {
+          // .contains(filter, text)
+          // Do nothing
+        } else if (_.isObject(text)) {
+          // .contains(text, userOptions)
+          userOptions = text
+          text = filter
+          filter = ''
+        } else if (_.isUndefined(text)) {
+          // .contains(text)
+          text = filter
+          filter = ''
         }
 
-        if (subject) {
-          const node = $dom.stringify(subject, 'short')
-
-          return `within the element: ${node} `
+        if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
+          $errUtils.throwErrByPath('contains.regex_conflict')
         }
 
-        return ''
-      }
+        options = _.defaults({}, userOptions, { log: true, matchCase: true })
 
-      const getErr = (err) => {
-        const { type, negated } = err
+        if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
+          $errUtils.throwErrByPath('contains.invalid_argument')
+        }
 
-        if (type === 'existence') {
-          if (negated) {
-            return `Expected not to find content: '${text}' ${getPhrase()}but continuously found it.`
+        if (_.isBlank(text)) {
+          $errUtils.throwErrByPath('contains.empty_string')
+        }
+
+        const getPhrase = () => {
+          if (filter && subject) {
+            const node = $dom.stringify(subject, 'short')
+
+            return `within the element: ${node} and with the selector: '${filter}' `
           }
 
-          return `Expected to find content: '${text}' ${getPhrase()}but never did.`
-        }
-      }
-
-      let consoleProps
-
-      if (options.log !== false) {
-        consoleProps = {
-          Content: text,
-          'Applied To': $dom.getElements(subject || state('withinSubject')),
-        }
-
-        options._log = Cypress.log({
-          message: _.compact([filter, text]),
-          type: subject ? 'child' : 'parent',
-          timeout: options.timeout,
-          consoleProps: () => {
-            return consoleProps
-          },
-        })
-      }
-
-      const setEl = ($el) => {
-        if (options.log === false) {
-          return
-        }
-
-        consoleProps.Yielded = $dom.getElements($el)
-        consoleProps.Elements = $el != null ? $el.length : undefined
-
-        options._log.set({ $el })
-      }
-
-      // find elements by the :cy-contains psuedo selector
-      // and any submit inputs with the attributeContainsWord selector
-      const selector = $dom.getContainsSelector(text, filter, options)
-
-      const resolveElements = () => {
-        const getOptions = _.extend({}, options, {
-          // error: getErr(text, phrase)
-          withinSubject: subject || state('withinSubject') || cy.$$('body'),
-          filter: true,
-          log: false,
-          // retry: false ## dont retry because we perform our own element validation
-          verify: false, // dont verify upcoming assertions, we do that ourselves
-        })
-
-        return cy.now('get', selector, getOptions).then(($el) => {
-          if ($el && $el.length) {
-            $el = $dom.getFirstDeepestElement($el)
+          if (filter) {
+            return `within the selector: '${filter}' `
           }
 
-          setEl($el)
+          if (subject) {
+            const node = $dom.stringify(subject, 'short')
 
-          return cy.verifyUpcomingAssertions($el, options, {
-            onRetry: resolveElements,
-            onFail (err) {
-              switch (err.type) {
-                case 'length':
-                  if (err.expected > 1) {
-                    return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
-                  }
+            return `within the element: ${node} `
+          }
 
-                  break
-                case 'existence':
-                  return err.message = getErr(err)
-                default:
-                  break
-              }
+          return ''
+        }
+
+        const getErr = (err) => {
+          const { type, negated } = err
+
+          if (type === 'existence') {
+            if (negated) {
+              return `Expected not to find content: '${text}' ${getPhrase()}but continuously found it.`
+            }
+
+            return `Expected to find content: '${text}' ${getPhrase()}but never did.`
+          }
+        }
+
+        let consoleProps
+
+        if (options.log !== false) {
+          consoleProps = {
+            Content: text,
+            'Applied To': $dom.getElements(subject || state('withinSubject')),
+          }
+
+          options._log = Cypress.log({
+            message: _.compact([filter, text]),
+            type: subject ? 'child' : 'parent',
+            timeout: options.timeout,
+            consoleProps: () => {
+              return consoleProps
             },
           })
-        })
-      }
-
-      return Promise
-      .try(resolveElements)
-    },
-  })
-
-  Commands.addAll({ prevSubject: ['element', 'document'] }, {
-    within (subject, options, fn) {
-      let userOptions = options
-      const ctx = this
-
-      if (_.isUndefined(fn)) {
-        fn = userOptions
-        userOptions = {}
-      }
-
-      options = _.defaults({}, userOptions, { log: true })
-
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: subject,
-          message: '',
-          timeout: options.timeout,
-        })
-      }
-
-      if (!_.isFunction(fn)) {
-        $errUtils.throwErrByPath('within.invalid_argument', { onFail: options._log })
-      }
-
-      // reference the next command after this
-      // within.  when that command runs we'll
-      // know to remove withinSubject
-      const next = state('current').get('next')
-
-      // backup the current withinSubject
-      // this prevents a bug where we null out
-      // withinSubject when there are nested .withins()
-      // we want the inner within to restore the outer
-      // once its done
-      const prevWithinSubject = state('withinSubject')
-
-      state('withinSubject', subject)
-
-      // https://github.com/cypress-io/cypress/pull/8699
-      // An internal command is inserted to create a divider between
-      // commands inside within() callback and commands chained to it.
-      const restoreCmdIndex = state('index') + 1
-
-      cy.queue.splice(restoreCmdIndex, 0, {
-        args: [subject],
-        name: 'within-restore',
-        fn: (subject) => subject,
-      })
-
-      state('index', restoreCmdIndex)
-
-      fn.call(ctx, subject)
-
-      const cleanup = () => cy.removeListener('command:start', setWithinSubject)
-
-      // we need a mechanism to know when we should remove
-      // our withinSubject so we dont accidentally keep it
-      // around after the within callback is done executing
-      // so when each command starts, check to see if this
-      // is the command which references our 'next' and
-      // if so, remove the within subject
-      const setWithinSubject = (obj) => {
-        if (obj !== next) {
-          return
         }
 
-        // okay so what we're doing here is creating a property
-        // which stores the 'next' command which will reset the
-        // withinSubject.  If two 'within' commands reference the
-        // exact same 'next' command, then this prevents accidentally
-        // resetting withinSubject more than once.  If they point
-        // to differnet 'next's then its okay
-        if (next !== state('nextWithinSubject')) {
-          state('withinSubject', prevWithinSubject || null)
-          state('nextWithinSubject', next)
+        const setEl = ($el) => {
+          if (options.log === false) {
+            return
+          }
+
+          consoleProps.Yielded = $dom.getElements($el)
+          consoleProps.Elements = $el != null ? $el.length : undefined
+
+          options._log.set({ $el })
         }
 
-        // regardless nuke this listeners
-        cleanup()
-      }
+        // find elements by the :cy-contains psuedo selector
+        // and any submit inputs with the attributeContainsWord selector
+        const selector = $dom.getContainsSelector(text, filter, options)
 
-      // if next is defined then we know we'll eventually
-      // unbind these listeners
-      if (next) {
-        cy.on('command:start', setWithinSubject)
-      } else {
-        // remove our listener if we happen to reach the end
-        // event which will finalize cleanup if there was no next obj
-        cy.once('command:queue:before:end', () => {
+        const resolveElements = () => {
+          const getOptions = _.extend({}, options, {
+            // error: getErr(text, phrase)
+            withinSubject: subject || state('withinSubject') || cy.$$('body'),
+            filter: true,
+            log: false,
+            // retry: false ## dont retry because we perform our own element validation
+            verify: false, // dont verify upcoming assertions, we do that ourselves
+          })
+
+          return cy.now('get', selector, getOptions).then(($el) => {
+            if ($el && $el.length) {
+              $el = $dom.getFirstDeepestElement($el)
+            }
+
+            setEl($el)
+
+            return cy.verifyUpcomingAssertions($el, options, {
+              onRetry: resolveElements,
+              onFail(err) {
+                switch (err.type) {
+                  case 'length':
+                    if (err.expected > 1) {
+                      return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
+                    }
+
+                    break
+                  case 'existence':
+                    return (err.message = getErr(err))
+                  default:
+                    break
+                }
+              },
+            })
+          })
+        }
+
+        return Promise.try(resolveElements)
+      },
+    }
+  )
+
+  Commands.addAll(
+    { prevSubject: ['element', 'document'] },
+    {
+      within(subject, options, fn) {
+        let userOptions = options
+        const ctx = this
+
+        if (_.isUndefined(fn)) {
+          fn = userOptions
+          userOptions = {}
+        }
+
+        options = _.defaults({}, userOptions, { log: true })
+
+        if (options.log) {
+          options._log = Cypress.log({
+            $el: subject,
+            message: '',
+            timeout: options.timeout,
+          })
+        }
+
+        if (!_.isFunction(fn)) {
+          $errUtils.throwErrByPath('within.invalid_argument', { onFail: options._log })
+        }
+
+        // reference the next command after this
+        // within.  when that command runs we'll
+        // know to remove withinSubject
+        const next = state('current').get('next')
+
+        // backup the current withinSubject
+        // this prevents a bug where we null out
+        // withinSubject when there are nested .withins()
+        // we want the inner within to restore the outer
+        // once its done
+        const prevWithinSubject = state('withinSubject')
+
+        state('withinSubject', subject)
+
+        // https://github.com/cypress-io/cypress/pull/8699
+        // An internal command is inserted to create a divider between
+        // commands inside within() callback and commands chained to it.
+        const restoreCmdIndex = state('index') + 1
+
+        cy.queue.splice(restoreCmdIndex, 0, {
+          args: [subject],
+          name: 'within-restore',
+          fn: (subject) => subject,
+        })
+
+        state('index', restoreCmdIndex)
+
+        fn.call(ctx, subject)
+
+        const cleanup = () => cy.removeListener('command:start', setWithinSubject)
+
+        // we need a mechanism to know when we should remove
+        // our withinSubject so we dont accidentally keep it
+        // around after the within callback is done executing
+        // so when each command starts, check to see if this
+        // is the command which references our 'next' and
+        // if so, remove the within subject
+        const setWithinSubject = (obj) => {
+          if (obj !== next) {
+            return
+          }
+
+          // okay so what we're doing here is creating a property
+          // which stores the 'next' command which will reset the
+          // withinSubject.  If two 'within' commands reference the
+          // exact same 'next' command, then this prevents accidentally
+          // resetting withinSubject more than once.  If they point
+          // to differnet 'next's then its okay
+          if (next !== state('nextWithinSubject')) {
+            state('withinSubject', prevWithinSubject || null)
+            state('nextWithinSubject', next)
+          }
+
+          // regardless nuke this listeners
           cleanup()
+        }
 
-          state('withinSubject', null)
-        })
-      }
+        // if next is defined then we know we'll eventually
+        // unbind these listeners
+        if (next) {
+          cy.on('command:start', setWithinSubject)
+        } else {
+          // remove our listener if we happen to reach the end
+          // event which will finalize cleanup if there was no next obj
+          cy.once('command:queue:before:end', () => {
+            cleanup()
 
-      return subject
-    },
-  })
+            state('withinSubject', null)
+          })
+        }
+
+        return subject
+      },
+    }
+  )
 
   Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
     const userOptions = options || {}
@@ -697,7 +697,7 @@ module.exports = (Commands, Cypress, cy, state) => {
     if (options.log !== false) {
       options._log = Cypress.log({
         timeout: options.timeout,
-        consoleProps () {
+        consoleProps() {
           return consoleProps
         },
       })
@@ -716,15 +716,13 @@ module.exports = (Commands, Cypress, cy, state) => {
 
     const getShadowRoots = () => {
       // find all shadow roots of the subject(s), if any exist
-      const $el = subject
-      .map((i, node) => node.shadowRoot)
-      .filter((i, node) => node !== undefined && node !== null)
+      const $el = subject.map((i, node) => node.shadowRoot).filter((i, node) => node !== undefined && node !== null)
 
       setEl($el)
 
       return cy.verifyUpcomingAssertions($el, options, {
         onRetry: getShadowRoots,
-        onFail (err) {
+        onFail(err) {
           if (err.type !== 'existence') {
             return
           }

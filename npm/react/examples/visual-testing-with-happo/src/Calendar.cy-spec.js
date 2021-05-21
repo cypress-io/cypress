@@ -31,7 +31,7 @@ describe('Calendar heatmap', () => {
   // http://indiegamr.com/generate-repeatable-random-numbers-in-js/
   let seed = 6
 
-  function seededRandom (max, min) {
+  function seededRandom(max, min) {
     max = max || 1
     min = min || 0
 
@@ -71,7 +71,7 @@ describe('Calendar heatmap', () => {
           showWeekdayLabels={true}
           classForValue={classForValue}
         />
-      </>,
+      </>
     )
 
     // now we can do visual diffing
@@ -124,7 +124,7 @@ describe('Calendar heatmap', () => {
               fill: #ff0000
             }
         `,
-        },
+        }
       )
     })
 

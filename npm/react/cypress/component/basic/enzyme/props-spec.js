@@ -3,7 +3,7 @@ import React from 'react'
 import { mount } from '@cypress/react'
 
 class Foo extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -11,15 +11,15 @@ class Foo extends React.Component {
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     console.log('componentDidMount called')
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     console.log('componentDidUpdate called')
   }
 
-  render () {
+  render() {
     const { id, foo } = this.props
 
     return (

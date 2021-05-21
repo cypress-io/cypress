@@ -28,8 +28,8 @@ type FindPackageJsonResult =
  *
  * @returns {Object} Value, filename and indication if the iteration is done.
  */
-export function createFindPackageJsonIterator (rootPath = process.cwd()) {
-  function scanForPackageJson (cwd: string): FindPackageJsonResult {
+export function createFindPackageJsonIterator(rootPath = process.cwd()) {
+  function scanForPackageJson(cwd: string): FindPackageJsonResult {
     const packageJsonPath = findUp.sync('package.json', { cwd })
 
     if (!packageJsonPath) {
@@ -43,7 +43,7 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
     const packageData = JSON.parse(
       fs.readFileSync(packageJsonPath, {
         encoding: 'utf-8',
-      }),
+      })
     )
 
     return {
@@ -55,10 +55,7 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
 
   return {
     map: <TPayload>(
-      cb: (
-        data: PackageJsonLike,
-        packageJsonPath: string,
-      ) => { success: boolean, payload?: TPayload },
+      cb: (data: PackageJsonLike, packageJsonPath: string) => { success: boolean; payload?: TPayload }
     ) => {
       let stepPathToScan = rootPath
 
@@ -92,19 +89,16 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
   }
 }
 
-export function scanFSForAvailableDependency (cwd: string, lookingForDeps: Record<string, string>) {
-  const { success } = createFindPackageJsonIterator(cwd)
-  .map(({ dependencies, devDependencies }, path) => {
+export function scanFSForAvailableDependency(cwd: string, lookingForDeps: Record<string, string>) {
+  const { success } = createFindPackageJsonIterator(cwd).map(({ dependencies, devDependencies }, path) => {
     if (!dependencies && !devDependencies) {
       return { success: false }
     }
 
     return {
-      success: Object.entries({ ...dependencies, ...devDependencies })
-      .some(([dependency, version]) => {
+      success: Object.entries({ ...dependencies, ...devDependencies }).some(([dependency, version]) => {
         return (
-          Boolean(lookingForDeps[dependency])
-          && validateSemverVersion(version, lookingForDeps[dependency], dependency)
+          Boolean(lookingForDeps[dependency]) && validateSemverVersion(version, lookingForDeps[dependency], dependency)
         )
       }),
     }

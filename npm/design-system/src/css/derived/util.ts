@@ -25,7 +25,8 @@ export const modifySize = (size: TextSize, numberOfSizes: number): TextSize => {
 
   if (numberOfSizes > 0 && index + numberOfSizes < sizeArray.length) {
     return sizeArray[index + numberOfSizes]
-  } else if (numberOfSizes < 0 && index + numberOfSizes > -1) {
+  }
+  if (numberOfSizes < 0 && index + numberOfSizes > -1) {
     return sizeArray[index + numberOfSizes]
   }
 

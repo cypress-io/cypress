@@ -6,5 +6,5 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./ng-inline-svg.component.css'],
 })
 export class NgInlineSvgComponent implements OnInit {
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 }

@@ -15,7 +15,7 @@ const NODE_VERSION_RE = /^v(\d+\.\d+\.\d+)/m
  *   installed globally, like 6 or 10 (NVM path comes later)
  *   So this function only fixes the path, if the Node cannot be found on first attempt
  */
-function findNodeInFullPath () {
+function findNodeInFullPath() {
   debug('finding Node with $PATH %s', process.env.PATH)
 
   return Promise.fromCallback((cb) => {
@@ -41,12 +41,13 @@ function findNodeInFullPath () {
   })
 }
 
-function findNodeVersionFromPath (path) {
+function findNodeVersionFromPath(path) {
   if (!path) {
     return Promise.resolve(null)
   }
 
-  return execa.stdout(path, ['-v'])
+  return execa
+  .stdout(path, ['-v'])
   .then((stdout) => {
     debug('node -v returned %o', { stdout })
     const matches = NODE_VERSION_RE.exec(stdout)
@@ -66,13 +67,12 @@ function findNodeVersionFromPath (path) {
   })
 }
 
-function findNodePathAndVersion () {
-  return findNodeInFullPath()
-  .then((path) => {
-    return findNodeVersionFromPath(path)
-    .then((version) => {
+function findNodePathAndVersion() {
+  return findNodeInFullPath().then((path) => {
+    return findNodeVersionFromPath(path).then((version) => {
       return {
-        path, version,
+        path,
+        version,
       }
     })
   })

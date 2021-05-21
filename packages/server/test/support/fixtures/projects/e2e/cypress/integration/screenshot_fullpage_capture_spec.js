@@ -9,8 +9,7 @@ it('takes consistent fullPage captures', () => {
 
   cy.viewport(600, 200)
   cy.visit('http://localhost:3322/fullPage')
-  cy.screenshot('fullPage-original', options)
-  .then(() => {
+  cy.screenshot('fullPage-original', options).then(() => {
     // take 10 screenshots and check that they're all the same
     // to ensure fullPage screenshots are consistent
     const fn = function (index) {

@@ -10,13 +10,12 @@ describe('lib/util/ensure-url', function () {
     it('resolves if a URL connects', function () {
       const stub = sinon.stub(connect, 'getAddress').withArgs(80, 'foo.bar.invalid').resolves()
 
-      return isListening('http://foo.bar.invalid')
-      .then(() => {
+      return isListening('http://foo.bar.invalid').then(() => {
         expect(stub).to.be.calledOnce
       })
     })
 
-    it('rejects if a URL doesn\'t connect', function () {
+    it("rejects if a URL doesn't connect", function () {
       const stub = sinon.stub(connect, 'getAddress').withArgs(80, 'foo.bar.invalid').rejects()
 
       return isListening('http://foo.bar.invalid')

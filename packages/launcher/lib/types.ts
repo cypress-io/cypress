@@ -69,10 +69,7 @@ export type NotDetectedAtPathError = Error & { notDetectedAtPath: boolean }
 
 export type LauncherApi = {
   detect: (goalBrowsers?: Browser[]) => Bluebird<FoundBrowser[]>
-  detectByPath: (
-    path: string,
-    goalBrowsers?: Browser[]
-  ) => Promise<FoundBrowser>
+  detectByPath: (path: string, goalBrowsers?: Browser[]) => Promise<FoundBrowser>
   launch: (browser: FoundBrowser, url: string, args: string[]) => ChildProcess
 }
 

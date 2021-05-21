@@ -8,23 +8,23 @@ class ProjectsStore {
   @observable isLoading = false
   @observable _membershipRequestedIds = {}
 
-  @computed get chosen () {
+  @computed get chosen() {
     return _.find(this.projects, { isChosen: true })
   }
 
-  @computed get other () {
+  @computed get other() {
     return _.filter(this.projects, (project) => {
       return !project.isChosen
     })
   }
 
-  @computed get clientProjects () {
+  @computed get clientProjects() {
     return _.map(this.projects, (project) => {
       return _.pick(project, ['path', 'id'])
     })
   }
 
-  @action getProjectByPath (path) {
+  @action getProjectByPath(path) {
     if (!this.projects.length) {
       return this.addProject(path)
     }
@@ -32,7 +32,7 @@ class ProjectsStore {
     return _.find(this.projects, { path })
   }
 
-  @action addProject (path) {
+  @action addProject(path) {
     // projects are sorted by most recently used, so add a project to the start
     // or move it to the start if it already exists
     const existingIndex = _.findIndex(this.projects, { path })
@@ -50,17 +50,17 @@ class ProjectsStore {
     return project
   }
 
-  @action setLoading (isLoading) {
+  @action setLoading(isLoading) {
     this.isLoading = isLoading
   }
 
-  @action setProjects (projects) {
+  @action setProjects(projects) {
     this.projects = _.map(projects, (project) => {
       return new Project(project)
     })
   }
 
-  @action updateProjectsWithStatuses (projectsWithStatuses = []) {
+  @action updateProjectsWithStatuses(projectsWithStatuses = []) {
     const projectsIndex = _.keyBy(projectsWithStatuses, 'id') // index for quick lookup
 
     _.each(this.projects, (project) => {
@@ -72,7 +72,7 @@ class ProjectsStore {
     this.error = err
   }
 
-  setChosen (project) {
+  setChosen(project) {
     this.error = null
     _.each(this.projects, (project) => {
       project.isChosen = false
@@ -81,7 +81,7 @@ class ProjectsStore {
     project.isChosen = true
   }
 
-  @action removeProject ({ path }) {
+  @action removeProject({ path }) {
     const projectIndex = _.findIndex(this.projects, { path })
 
     if (projectIndex != null) {
@@ -89,17 +89,17 @@ class ProjectsStore {
     }
   }
 
-  serializeProjects () {
+  serializeProjects() {
     return _.map(this.projects, (project) => {
       return project.serialize()
     })
   }
 
-  membershipRequested (id) {
+  membershipRequested(id) {
     this._membershipRequestedIds[id] = true
   }
 
-  wasMembershipRequested (id) {
+  wasMembershipRequested(id) {
     return this._membershipRequestedIds[id] === true
   }
 }

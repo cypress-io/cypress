@@ -46,7 +46,9 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
 
-      cy.get('body').type('s').then(() => {
+      cy.get('body')
+      .type('s')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:stop')
       })
     })
@@ -58,7 +60,9 @@ describe('shortcuts', function () {
 
       runner.on.withArgs('paused').callArgWith(1, 'next command')
 
-      cy.get('body').type('s').then(() => {
+      cy.get('body')
+      .type('s')
+      .then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
     })
@@ -68,7 +72,9 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
 
-      cy.get('body').type('r').then(() => {
+      cy.get('body')
+      .type('r')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:restart')
       })
     })
@@ -78,27 +84,37 @@ describe('shortcuts', function () {
         expect(runner.emit).not.to.have.been.calledWith('focus:tests')
       })
 
-      cy.get('body').type('f').then(() => {
+      cy.get('body')
+      .type('f')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('focus:tests')
       })
     })
 
     it('continues resuming tests', () => {
-      cy.get('body').type('s').then(() => {
+      cy.get('body')
+      .type('s')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:stop')
       })
 
-      cy.get('body').type('c').then(() => {
+      cy.get('body')
+      .type('c')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:resume')
       })
     })
 
     it('go to next test', () => {
-      cy.get('body').type('s').then(() => {
+      cy.get('body')
+      .type('s')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:stop')
       })
 
-      cy.get('body').type('n').then(() => {
+      cy.get('body')
+      .type('n')
+      .then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:next')
       })
     })
@@ -117,7 +133,8 @@ describe('shortcuts', function () {
         // need to add an input since this environment is isolated
         $body.append('<input id="temp-input" />')
       })
-      .get('#temp-input').type('r', { force: true })
+      .get('#temp-input')
+      .type('r', { force: true })
       .then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
@@ -131,7 +148,7 @@ describe('shortcuts', function () {
       cy.get('button.restart').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
 
-      cy.window().then((win) => win.state.isRunning = true)
+      cy.window().then((win) => (win.state.isRunning = true))
       cy.get('button.stop').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Stop Running S')
     })

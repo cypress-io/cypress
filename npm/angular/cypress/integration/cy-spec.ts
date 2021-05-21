@@ -10,17 +10,13 @@ describe('Integration tests', () => {
     cy.log('About to try using *mount*')
     expect(() => {
       mount(undefined)
-    }).to.throw(
-      'Angular component test from an integration spec is not allowed',
-    )
+    }).to.throw('Angular component test from an integration spec is not allowed')
   })
 
   it('throws an Error if I try to use initEnv', () => {
     cy.log('About to try using *initEnv*')
     expect(() => {
       initEnv(undefined)
-    }).to.throw(
-      'Angular component test from an integration spec is not allowed',
-    )
+    }).to.throw('Angular component test from an integration spec is not allowed')
   })
 })

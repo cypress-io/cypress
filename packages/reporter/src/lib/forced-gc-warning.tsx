@@ -20,18 +20,18 @@ class ForcedGcWarning extends React.Component<Props> {
   persisted = false
   state: State
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props)
     this.state = {
       expanded: false,
     }
   }
 
-  _toggleExpando () {
+  _toggleExpando() {
     this.setState({ expanded: !this.state.expanded })
   }
 
-  _updateGcTimer () {
+  _updateGcTimer() {
     const { forcingGc } = this.props.appState
 
     if (!forcingGc) {
@@ -48,35 +48,41 @@ class ForcedGcWarning extends React.Component<Props> {
     }
   }
 
-  _renderDisabled () {
+  _renderDisabled() {
     return (
-      <div className='forced-gc-warning'>
+      <div className="forced-gc-warning">
         <div className={`gc-expando ${this.state.expanded ? 'expanded' : ''}`}>
           <p>
-            <strong>
-              Garbage Collection Interval: (disabled)
-            </strong>
-            <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
+            <strong>Garbage Collection Interval: (disabled)</strong>
+            <i className="fas fa-times clickable" onClick={() => this._toggleExpando()}></i>
           </p>
           <div>
             <p>
-              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling: <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a>
+              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling:{' '}
+              <a className="code-link" onClick={this._handleLink} href="https://on.cypress.io/firefox-gc-interval">
+                <code>firefoxGcInterval</code>
+              </a>
             </p>
             <p>
-              By default, <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a> is only enabled in  <strong>run mode</strong>.
+              By default,{' '}
+              <a className="code-link" onClick={this._handleLink} href="https://on.cypress.io/firefox-gc-interval">
+                <code>firefoxGcInterval</code>
+              </a>{' '}
+              is only enabled in <strong>run mode</strong>.
             </p>
+            <p>Running GC prevents Firefox from running out of memory during longer test runs.</p>
             <p>
-              Running GC prevents Firefox from running out of memory during longer test runs.
-            </p>
-            <p>
-              <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'>Learn more</a>.
+              <a className="code-link" onClick={this._handleLink} href="https://on.cypress.io/firefox-gc-interval">
+                Learn more
+              </a>
+              .
             </p>
           </div>
         </div>
-        <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
-          <span className='total-time'>
-            <i className='fas fa-ws fa-info-circle'></i>
-            GC Interval: <span className='gc-status'>disabled</span>
+        <div className="gc-status-bar clickable gc-not-running" onClick={() => this._toggleExpando()}>
+          <span className="total-time">
+            <i className="fas fa-ws fa-info-circle"></i>
+            GC Interval: <span className="gc-status">disabled</span>
           </span>
         </div>
       </div>
@@ -92,53 +98,65 @@ class ForcedGcWarning extends React.Component<Props> {
     this.props.events.emit('external:open', e.currentTarget.href)
   }
 
-  _renderForcedGcWarning () {
+  _renderForcedGcWarning() {
     const { forcingGc } = this.props.appState
 
     return (
-      <div className='forced-gc-warning'>
+      <div className="forced-gc-warning">
         <div className={`gc-expando ${this.state.expanded ? 'expanded' : ''}`}>
           <div>
             <p>
-              <strong>
-                Garbage Collection Interval: (enabled)
-              </strong>
-              <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
+              <strong>Garbage Collection Interval: (enabled)</strong>
+              <i className="fas fa-times clickable" onClick={() => this._toggleExpando()}></i>
             </p>
           </div>
           <div>
             <p>
-              Cypress will force Firefox to run Garbage Collection (GC) between tests based on the value of: <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a>
+              Cypress will force Firefox to run Garbage Collection (GC) between tests based on the value of:{' '}
+              <a className="code-link" onClick={this._handleLink} href="https://on.cypress.io/firefox-gc-interval">
+                <code>firefoxGcInterval</code>
+              </a>
+            </p>
+            <p>Running GC prevents Firefox from running out of memory during longer test runs.</p>
+            <p>
+              Running GC is an expensive operation that can take up to a few seconds to complete. During this time
+              Firefox may "freeze" and become unresponsive to user input.
             </p>
             <p>
-              Running GC prevents Firefox from running out of memory during longer test runs.
+              To improve performance, you can try setting{' '}
+              <a className="code-link" onClick={this._handleLink} href="https://on.cypress.io/firefox-gc-interval">
+                <code>firefoxGcInterval</code>
+              </a>{' '}
+              to a higher value, which will result in running GC less frequently.
             </p>
             <p>
-              Running GC is an expensive operation that can take up to a few seconds to complete. During this time Firefox may "freeze" and become unresponsive to user input.
-            </p>
-            <p>
-              To improve performance, you can try setting <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a> to a higher value, which will result in running GC less frequently.
-            </p>
-            <p>
-              <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'>Learn more</a>.
+              <a className="code-link" onClick={this._handleLink} href="https://on.cypress.io/firefox-gc-interval">
+                Learn more
+              </a>
+              .
             </p>
           </div>
         </div>
-        <div className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`} onClick={() => this._toggleExpando()}>
-          <span className='total-time' title='Total time spent running GC throughout this run'>
-            <i className='fas fa-ws fa-info-circle'></i>
-            GC Duration: <span className='gc-status'>{round(this.gcTotalMs / 1000, 2).toFixed(2)}</span>
+        <div
+          className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`}
+          onClick={() => this._toggleExpando()}
+        >
+          <span className="total-time" title="Total time spent running GC throughout this run">
+            <i className="fas fa-ws fa-info-circle"></i>
+            GC Duration: <span className="gc-status">{round(this.gcTotalMs / 1000, 2).toFixed(2)}</span>
           </span>
 
-          {forcingGc && <span className='status-text'>
-            <i className='fas fa-spinner fa-spin'></i> Running GC...
-          </span>}
+          {forcingGc && (
+            <span className="status-text">
+              <i className="fas fa-spinner fa-spin"></i> Running GC...
+            </span>
+          )}
         </div>
       </div>
     )
   }
 
-  render () {
+  render() {
     const { firefoxGcInterval } = this.props.appState
 
     if (isUndefined(firefoxGcInterval)) {

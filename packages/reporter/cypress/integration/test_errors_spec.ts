@@ -10,8 +10,8 @@ describe('test errors', () => {
   let runner: EventEmitter
 
   beforeEach(() => {
-    cy.fixture('runnables_error').then((_runnablesWithErr) => runnablesWithErr = _runnablesWithErr)
-    cy.fixture('command_error').then((_commandErr) => commandErr = _commandErr)
+    cy.fixture('runnables_error').then((_runnablesWithErr) => (runnablesWithErr = _runnablesWithErr))
+    cy.fixture('command_error').then((_commandErr) => (commandErr = _commandErr))
 
     runner = new EventEmitter()
 
@@ -44,7 +44,9 @@ describe('test errors', () => {
 
     it('clicking prints to console', () => {
       cy.spy(runner, 'emit')
-      cy.get('.runnable-err-print').click().should(() => {
+      cy.get('.runnable-err-print')
+      .click()
+      .should(() => {
         expect(runner.emit).to.be.calledWith('runner:console:error')
 
         // @ts-ignore
@@ -94,24 +96,21 @@ describe('test errors', () => {
       cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace').within(() => {
-        cy.get('.err-stack-line')
-        .should('have.length', 10)
-        .first().should('have.text', 'at foo.bar (my/app.js:2:7)')
+        cy.get('.err-stack-line').should('have.length', 10).first().should('have.text', 'at foo.bar (my/app.js:2:7)')
+
+        cy.get('.err-stack-line').eq(1).should('have.text', '  at baz.qux (cypress/integration/foo_spec.js:5:2)')
+
+        cy.get('.err-stack-line').eq(2).should('have.text', '  at space (cypress/integration/a b.js:34:99)')
+
+        cy.get('.err-stack-line').eq(3).should('have.text', 'At previous event:')
 
         cy.get('.err-stack-line')
-        .eq(1).should('have.text', '  at baz.qux (cypress/integration/foo_spec.js:5:2)')
+        .eq(4)
+        .should('have.text', '  at bar.baz (http://localhost:1234/me/dev/my/app.js:8:11)')
 
         cy.get('.err-stack-line')
-        .eq(2).should('have.text', '  at space (cypress/integration/a b.js:34:99)')
-
-        cy.get('.err-stack-line')
-        .eq(3).should('have.text', 'At previous event:')
-
-        cy.get('.err-stack-line')
-        .eq(4).should('have.text', '  at bar.baz (http://localhost:1234/me/dev/my/app.js:8:11)')
-
-        cy.get('.err-stack-line')
-        .eq(5).should('have.text', '  at callFn (cypress://../driver/src/cypress/runner.js:9:12)')
+        .eq(5)
+        .should('have.text', '  at callFn (cypress://../driver/src/cypress/runner.js:9:12)')
       })
     })
 
@@ -131,10 +130,12 @@ describe('test errors', () => {
       .first()
       .should('have.text', 'my/app.js:2:7')
 
-      cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(1)
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path')
+      .eq(1)
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
 
-      cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(2)
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path')
+      .eq(2)
       .should('have.text', 'cypress/integration/a b.js:34:99')
     })
 
@@ -150,8 +151,7 @@ describe('test errors', () => {
 
     it('does not turn lines without absoluteFile into links', () => {
       cy.contains('View stack trace').click()
-      cy.contains('.err-stack-line', 'http://localhost:1234/me/dev/my/app.js:8:11')
-      .find('a').should('not.exist')
+      cy.contains('.err-stack-line', 'http://localhost:1234/me/dev/my/app.js:8:11').find('a').should('not.exist')
     })
 
     it('does not turn anything after "From Node.js Internals" into links', () => {
@@ -203,8 +203,7 @@ describe('test errors', () => {
       })
 
       // renders /`bar/` as `bar`
-      cy.get('.runnable-err-message')
-      .should('contain', '`bar`')
+      cy.get('.runnable-err-message').should('contain', '`bar`')
 
       // renders **baz** as <strong>baz</strong>
       cy.get('.runnable-err-message')
@@ -240,9 +239,7 @@ describe('test errors', () => {
     })
 
     it('shows code frame when included on error', () => {
-      cy
-      .get('.test-err-code-frame')
-      .should('be.visible')
+      cy.get('.test-err-code-frame').should('be.visible')
 
       cy.percySnapshot()
     })
@@ -250,23 +247,17 @@ describe('test errors', () => {
     it('does not show code frame when not included on error', () => {
       commandErr.codeFrame = undefined
 
-      cy
-      .get('.test-err-code-frame')
-      .should('not.exist')
+      cy.get('.test-err-code-frame').should('not.exist')
     })
 
     it('use correct language class', () => {
-      cy
-      .get('.test-err-code-frame pre')
-      .should('have.class', 'language-javascript')
+      cy.get('.test-err-code-frame pre').should('have.class', 'language-javascript')
     })
 
     it('falls back to text language class', () => {
       // @ts-ignore
       commandErr.codeFrame.language = null
-      cy
-      .get('.test-err-code-frame pre')
-      .should('have.class', 'language-text')
+      cy.get('.test-err-code-frame pre').should('have.class', 'language-text')
     })
 
     it('displays tooltip on hover', () => {

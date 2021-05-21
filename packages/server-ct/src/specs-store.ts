@@ -10,7 +10,14 @@ interface SpecsWatcherOptions {
   onSpecsChanged: (specFiles: SpecFiles) => void
 }
 
-const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
+const COMMON_SEARCH_OPTIONS = [
+  'fixturesFolder',
+  'supportFile',
+  'projectRoot',
+  'javascripts',
+  'testFiles',
+  'ignoreTestFiles',
+]
 
 // TODO: shouldn't this be on the trailing edge, not leading?
 const debounce = (fn) => _.debounce(fn, 250, { leading: true })
@@ -19,19 +26,17 @@ export class SpecsStore {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
 
-  constructor (private cypressConfig) {
+  constructor(private cypressConfig) {}
 
-  }
-
-  get specDirectory () {
+  get specDirectory() {
     return this.cypressConfig.resolved.componentFolder.value
   }
 
-  get testFiles () {
+  get testFiles() {
     return this.cypressConfig.resolved.testFiles.value
   }
 
-  get watchOptions (): chokidar.WatchOptions {
+  get watchOptions(): chokidar.WatchOptions {
     return {
       cwd: this.specDirectory,
       ignored: this.cypressConfig.ignoreTestFiles,
@@ -39,14 +44,13 @@ export class SpecsStore {
     }
   }
 
-  storeSpecFiles (): Bluebird<void> {
-    return this.getSpecFiles()
-    .then((specFiles) => {
+  storeSpecFiles(): Bluebird<void> {
+    return this.getSpecFiles().then((specFiles) => {
       this.specFiles = specFiles
     })
   }
 
-  getSpecFiles (): Bluebird<SpecFiles> {
+  getSpecFiles(): Bluebird<SpecFiles> {
     const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
 
     searchOptions.searchFolder = this.specDirectory
@@ -55,7 +59,7 @@ export class SpecsStore {
     return findSpecsOfType(searchOptions)
   }
 
-  watch (options?: SpecsWatcherOptions) {
+  watch(options?: SpecsWatcherOptions) {
     this.watcher = chokidar.watch(this.cypressConfig.testFiles, this.watchOptions)
 
     if (options?.onSpecsChanged) {
@@ -74,7 +78,7 @@ export class SpecsStore {
     }
   }
 
-  reset (): void {
+  reset(): void {
     this.watcher?.removeAllListeners()
   }
 }

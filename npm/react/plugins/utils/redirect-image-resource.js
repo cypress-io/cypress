@@ -11,7 +11,7 @@ const fs = require('fs')
  *   image is "/__root/path/to/image.png"
  *   <img src={image} />
  */
-function staticResourceLoader () {
+function staticResourceLoader() {
   debug('loading static resource %s', this.resourcePath)
   debug('cwd', process.cwd())
   const relativeResourcePath = path.relative(process.cwd(), this.resourcePath)

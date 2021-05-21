@@ -1,12 +1,9 @@
 require('../../spec_helper')
 
 const { browsers } = require('@packages/launcher/lib/browsers')
-const {
-  returnDefaultBrowser,
-  browsersForCtInteractive,
-} = require(`${root}../lib/modes/interactive-ct`)
+const { returnDefaultBrowser, browsersForCtInteractive } = require(`${root}../lib/modes/interactive-ct`)
 
-function filterBrowsers (list) {
+function filterBrowsers(list) {
   return browsers.filter((browser) => list.includes(browser.name))
 }
 

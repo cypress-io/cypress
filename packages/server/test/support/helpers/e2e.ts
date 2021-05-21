@@ -67,7 +67,12 @@ const replaceStackTraceLines = (str) => {
 
 const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
   // get the padding for the existing browser string
-  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
+  const lengthOfExistingBrowserString = _.sum([
+    browserName.length,
+    version.length,
+    _.get(headless, 'length', 0),
+    whitespace.length,
+  ])
 
   // this ensures we add whitespace so the border is not shifted
   return key + customBrowserPath + _.padEnd('FooBrowser 88', lengthOfExistingBrowserString)
@@ -85,11 +90,11 @@ const replaceDurationFromReporter = (str, p1, p2, p3) => {
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
-const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
+const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, p1.length + p2.length + p3.length)
 
 const replaceCypressVersion = (str, p1, p2) => {
   // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
-  return _.padEnd(`${p1}1.2.3`, (p1.length + p2.length))
+  return _.padEnd(`${p1}1.2.3`, p1.length + p2.length)
 }
 
 // when swapping out the duration, ensure we pad the
@@ -109,7 +114,9 @@ const replaceScreenshotDims = (str, p1) => _.padStart('(YxX)', p1.length)
 const replaceUploadingResults = function (orig, ...rest) {
   const adjustedLength = Math.max(rest.length, 2)
   const match = rest.slice(0, adjustedLength - 2)
-  const results = match[1].split('\n').map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
+  const results = match[1]
+  .split('\n')
+  .map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
   .sort()
   .join('\n')
   const ret = match[0] + results + match[3]
@@ -122,7 +129,7 @@ const replaceUploadingResults = function (orig, ...rest) {
  * and returns everything AFTER that, which usually is just the
  * test summary table.
  * @param {string} stdout from the test run, probably normalized
-*/
+ */
 const leaveRunFinishedTable = (stdout) => {
   const index = stdout.indexOf('  (Run Finished)')
 
@@ -141,7 +148,8 @@ const normalizeStdout = function (str, options: any = {}) {
   str = str
   // /Users/jane/........../ -> //foo/bar/.projects/
   // (Required when paths are printed outside of our own formatting)
-  .split(pathUpToProjectName).join('/foo/bar/.projects')
+  .split(pathUpToProjectName)
+  .join('/foo/bar/.projects')
 
   // unless normalization is explicitly turned off then
   // always normalize the stdout replacing the browser text
@@ -248,14 +256,8 @@ const copy = function () {
     // copy each of the screenshots and videos
     // to artifacts using each basename of the folders
     return Bluebird.join(
-      screenshots.copy(
-        screenshotsFolder,
-        path.join(ca, path.basename(screenshotsFolder)),
-      ),
-      videoCapture.copy(
-        videosFolder,
-        path.join(ca, path.basename(videosFolder)),
-      ),
+      screenshots.copy(screenshotsFolder, path.join(ca, path.basename(screenshotsFolder))),
+      videoCapture.copy(videosFolder, path.join(ca, path.basename(videosFolder)))
     )
   }
 }
@@ -264,7 +266,7 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   // if we've been told to skip this test
   // or if we specified a particular browser and this
   // doesn't match the one we're currently trying to run...
-  if (skip || (specifiedBrowser && (specifiedBrowser !== browser))) {
+  if (skip || (specifiedBrowser && specifiedBrowser !== browser)) {
     // then skip this test
     return it.skip
   }
@@ -276,7 +278,7 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   return it
 }
 
-function getBrowsers (browserPattern) {
+function getBrowsers(browserPattern) {
   if (!browserPattern.length) {
     return DEFAULT_BROWSERS
   }
@@ -317,7 +319,7 @@ const localItFn = function (title, opts = {}) {
     snapshot: false,
     spec: 'no spec name supplied!',
     onStdout: _.noop,
-    onRun (execFn, browser, ctx) {
+    onRun(execFn, browser, ctx) {
       return execFn()
     },
   }
@@ -387,7 +389,6 @@ const maybeVerifyExitCode = (expectedExitCode, fn) => {
 }
 
 const e2e = {
-
   replaceStackTraceLines,
 
   normalizeStdout,
@@ -396,13 +397,13 @@ const e2e = {
 
   it: localItFn,
 
-  snapshot (...args) {
+  snapshot(...args) {
     args = _.compact(args)
 
     return snapshot.apply(null, args)
   },
 
-  setup (options = {}) {
+  setup(options = {}) {
     // cleanup old node_modules that may have been around from legacy tests
     before(() => {
       return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
@@ -452,7 +453,7 @@ const e2e = {
     })
   },
 
-  options (ctx, options = {}) {
+  options(ctx, options = {}) {
     if (options.inspectBrk != null) {
       throw new Error(`
       passing { inspectBrk: true } to e2e options is no longer supported
@@ -508,7 +509,7 @@ const e2e = {
     return options
   },
 
-  args (options = {}) {
+  args(options = {}) {
     debug('converting options to args %o', { options })
 
     const args = [
@@ -602,12 +603,11 @@ const e2e = {
     return args
   },
 
-  start (ctx, options = {}) {
+  start(ctx, options = {}) {
     options = this.options(ctx, options)
     const args = this.args(options)
 
-    return cypress.start(args)
-    .then(() => {
+    return cypress.start(args).then(() => {
       const { expectedExitCode } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
@@ -632,7 +632,7 @@ const e2e = {
         console.log(e2e.normalizeStdout(result.stdout))
     ```
    */
-  exec (ctx, options = {}) {
+  exec(ctx, options = {}) {
     debug('e2e exec options %o', options)
     options = this.options(ctx, options)
     debug('processed options %o', options)
@@ -640,7 +640,7 @@ const e2e = {
 
     const specifiedBrowser = process.env.BROWSER
 
-    if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
+    if (specifiedBrowser && ![].concat(options.browser).includes(specifiedBrowser)) {
       ctx.skip()
     }
 
@@ -758,24 +758,21 @@ const e2e = {
       // pipe these to our current process
       // so we can see them in the terminal
       // color it so we can tell which is test output
-      sp.stdout
-      .pipe(ColorOutput())
-      .pipe(process.stdout)
+      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
 
-      sp.stderr
-      .pipe(ColorOutput())
-      .pipe(process.stderr)
+      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
-      sp.stdout.on('data', (buf) => stdout += buf.toString())
-      sp.stderr.on('data', (buf) => stderr += buf.toString())
+      sp.stdout.on('data', (buf) => (stdout += buf.toString()))
+      sp.stderr.on('data', (buf) => (stderr += buf.toString()))
       sp.on('error', reject)
 
       return sp.on('exit', resolve)
-    }).tap(copy)
+    })
+    .tap(copy)
     .then(exit)
   },
 
-  sendHtml (contents) {
+  sendHtml(contents) {
     return function (req, res) {
       res.set('Content-Type', 'text/html')
 
@@ -790,13 +787,13 @@ const e2e = {
     }
   },
 
-  normalizeWebpackErrors (stdout) {
+  normalizeWebpackErrors(stdout) {
     return stdout
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
   },
 
-  normalizeRuns (runs) {
+  normalizeRuns(runs) {
     runs.forEach((run) => {
       run.tests.forEach((test) => {
         test.attempts.forEach((attempt) => {
@@ -813,7 +810,4 @@ const e2e = {
   },
 }
 
-export {
-  e2e as default,
-  expect,
-}
+export { e2e as default, expect }

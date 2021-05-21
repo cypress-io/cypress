@@ -17,12 +17,11 @@ let hasVisitedAboutBlank = null
 let currentlyVisitingAboutBlank = null
 let knownCommandCausedInstability = null
 
-const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers'
-.split(' ')
+const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers'.split(
+  ' '
+)
 
-const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
-.split(' ')
-.concat(REQUEST_URL_OPTS)
+const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'.split(' ').concat(REQUEST_URL_OPTS)
 
 const reset = (test = {}) => {
   knownCommandCausedInstability = false
@@ -62,13 +61,15 @@ const bothUrlsMatchAndRemoteHasHash = (current, remote) => {
   // the remote has a hash
   // or the last char of href
   // is a hash
-  return (remote.hash || remote.href.slice(-1) === '#') &&
-  // both must have the same origin
-  current.origin === remote.origin &&
+  return (
+    (remote.hash || remote.href.slice(-1) === '#') &&
+    // both must have the same origin
+    current.origin === remote.origin &&
     // both must have the same pathname
     current.pathname === remote.pathname &&
-      // both must have the same query params
-      current.search === remote.search
+    // both must have the same query params
+    current.search === remote.search
+  )
 }
 
 const cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) => {
@@ -122,7 +123,7 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
   debug('navigation changed:', url)
 
   // dont trigger for empty url's or about:blank
-  if (_.isEmpty(url) || (url === 'about:blank')) {
+  if (_.isEmpty(url) || url === 'about:blank') {
     return
   }
 
@@ -163,7 +164,7 @@ const navigationChanged = (Cypress, cy, state, source, arg) => {
     type: 'parent',
     end: true,
     snapshot: true,
-    consoleProps () {
+    consoleProps() {
       const obj = {
         'New Url': url,
       }
@@ -189,10 +190,10 @@ const formSubmitted = (Cypress, e) => {
     event: true,
     end: true,
     snapshot: true,
-    consoleProps () {
+    consoleProps() {
       return {
         'Originated From': e.target,
-        'Args': e,
+        Args: e,
       }
     },
   })
@@ -264,9 +265,10 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     message: '--waiting for new page to load--',
     event: true,
     timeout: options.timeout,
-    consoleProps () {
+    consoleProps() {
       return {
-        Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
+        Note:
+          "This event initially fires when your application fires its 'beforeunload' event and completes when your application fires its 'load' event after the next page loads.",
       }
     },
   })
@@ -376,11 +378,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 // object and send 'responseTimeout' as options.timeout
 // for the backend.
 const normalizeTimeoutOptions = (options) => {
-  return _
-  .chain(options)
-  .pick(REQUEST_URL_OPTS)
-  .extend({ timeout: options.responseTimeout })
-  .value()
+  return _.chain(options).pick(REQUEST_URL_OPTS).extend({ timeout: options.responseTimeout }).value()
 }
 
 module.exports = (Commands, Cypress, cy, state, config) => {
@@ -419,16 +417,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   }
 
   const requestUrl = (url, options = {}) => {
-    return Cypress.backend(
-      'resolve:url',
-      url,
-      normalizeTimeoutOptions(options),
-    )
-    .then((resp = {}) => {
+    return Cypress.backend('resolve:url', url, normalizeTimeoutOptions(options)).then((resp = {}) => {
       if (!resp.isOkStatusCode) {
         // if we didn't even get an OK response
         // then immediately die
-        const err = new Error
+        const err = new Error()
 
         err.gotResponse = true
         _.extend(err, resp)
@@ -438,7 +431,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       if (!resp.isHtml) {
         // throw invalid contentType error
-        const err = new Error
+        const err = new Error()
 
         err.invalidContentType = true
         _.extend(err, resp)
@@ -470,7 +463,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
   })
 
   Commands.addAll({
-    reload (...args) {
+    reload(...args) {
       let forceReload
       let userOptions
       const throwArgsErr = () => {
@@ -557,7 +550,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
     },
 
-    go (numberOrString, options = {}) {
+    go(numberOrString, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -615,9 +608,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             // with the remove window (just like cy.visit)
             const retWin = () => state('window')
 
-            return Promise
-            .delay(100)
-            .then(() => {
+            return Promise.delay(100).then(() => {
               knownCommandCausedInstability = false
 
               // if we've didUnload then we know we're
@@ -636,7 +627,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         .timeout(options.timeout, 'go')
         .catch(Promise.TimeoutError, () => {
           return timedOutWaitingForPageLoad(options.timeout, options._log)
-        }).finally(() => {
+        })
+        .finally(() => {
           if (typeof cleanup === 'function') {
             cleanup()
           }
@@ -647,8 +639,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       const goString = (str) => {
         switch (str) {
-          case 'forward': return goNumber(1)
-          case 'back': return goNumber(-1)
+          case 'forward':
+            return goNumber(1)
+          case 'back':
+            return goNumber(-1)
           default:
             $errUtils.throwErrByPath('go.invalid_direction', {
               onFail: options._log,
@@ -668,7 +662,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
     },
 
-    visit (url, options = {}) {
+    visit(url, options = {}) {
       if (options.url && url) {
         $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: options.url, url } })
       }
@@ -702,8 +696,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         log: true,
         responseTimeout: config('responseTimeout'),
         timeout: config('pageLoadTimeout'),
-        onBeforeLoad () {},
-        onLoad () {},
+        onBeforeLoad() {},
+        onLoad() {},
       })
 
       if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
@@ -738,7 +732,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           message,
           timeout: options.timeout,
-          consoleProps () {
+          consoleProps() {
             return consoleProps
           },
         })
@@ -879,7 +873,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         const existingHash = remote.hash || ''
         const existingAuth = remote.auth || ''
 
-        if (previousDomainVisited && (remote.originPolicy !== existing.originPolicy)) {
+        if (previousDomainVisited && remote.originPolicy !== existing.originPolicy) {
           // if we've already visited a new superDomain
           // then die else we'd be in a terrible endless loop
           // we also need to disable retries to prevent the endless loop
@@ -897,13 +891,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         if (bothUrlsMatchAndRemoteHasHash(current, remote)) {
           // https://github.com/cypress-io/cypress/issues/1311
           if (current.hash === remote.hash) {
-            consoleProps['Note'] = 'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.'
+            consoleProps['Note'] =
+              'Because this visit was to the same hash, the page did not reload and the onBeforeLoad and onLoad callbacks did not fire.'
 
             return onLoad({ runOnLoadCallback: false })
           }
 
-          return changeIframeSrc(remote.href, 'hashchange')
-          .then(onLoad)
+          return changeIframeSrc(remote.href, 'hashchange').then(onLoad)
         }
 
         if (existingHash) {
@@ -958,8 +952,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
             url = $Location.fullyQualifyUrl(url)
 
-            return changeIframeSrc(url, 'window:load')
-            .then(() => {
+            return changeIframeSrc(url, 'window:load').then(() => {
               return onLoad(resp)
             })
           }
@@ -988,9 +981,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           return Cypress.action('cy:collect:run:state')
           .then((a = []) => {
             // merge all the states together holla'
-            s = _.reduce(a, (memo, obj) => {
-              return _.extend(memo, obj)
-            }, s)
+            s = _.reduce(
+              a,
+              (memo, obj) => {
+                return _.extend(memo, obj)
+              },
+              s
+            )
 
             return Cypress.backend('preserve:run:state', s)
           })
@@ -999,10 +996,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             // origin but include the test that we're currently on
             const newUri = new UrlParse(remote.origin)
 
-            newUri
-            .set('pathname', existing.pathname)
-            .set('query', existing.search)
-            .set('hash', existing.hash)
+            newUri.set('pathname', existing.pathname).set('query', existing.search).set('hash', existing.hash)
 
             // replace is broken in electron so switching
             // to href for now
@@ -1083,8 +1077,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 
-          return aboutBlank(cy, win)
-          .then(() => {
+          return aboutBlank(cy, win).then(() => {
             currentlyVisitingAboutBlank = false
 
             return go()
@@ -1098,7 +1091,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       .timeout(options.timeout, 'visit')
       .catch(Promise.TimeoutError, () => {
         return timedOutWaitingForPageLoad(options.timeout, options._log)
-      }).finally(() => {
+      })
+      .finally(() => {
         if (typeof cleanup === 'function') {
           cleanup()
         }

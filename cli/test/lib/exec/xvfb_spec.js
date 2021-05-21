@@ -59,7 +59,8 @@ describe('lib/exec/xvfb', function () {
 
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
 
-      return xvfb.start()
+      return xvfb
+      .start()
       .then(() => {
         throw new Error('Should have thrown an error')
       })
@@ -75,7 +76,8 @@ describe('lib/exec/xvfb', function () {
 
       sinon.stub(xvfb._xvfb, 'startAsync').rejects(e)
 
-      return xvfb.start()
+      return xvfb
+      .start()
       .then(() => {
         throw new Error('Should have thrown an error')
       })

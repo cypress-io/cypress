@@ -3,7 +3,7 @@ import React from 'react'
 /**
  * Return the SVGs of the Action buttons in the Status Section.
  */
-const Svg = props => {
+const Svg = (props) => {
   if (props.action === 'undo') {
     return (
       <svg
@@ -23,7 +23,8 @@ const Svg = props => {
         />
       </svg>
     )
-  } else if (props.action === 'erase') {
+  }
+  if (props.action === 'erase') {
     return (
       <svg
         className="status__action-svg"
@@ -40,7 +41,8 @@ const Svg = props => {
         />
       </svg>
     )
-  } else if (props.action === 'hint') {
+  }
+  if (props.action === 'hint') {
     return (
       <svg
         className="status__action-svg"
@@ -95,7 +97,7 @@ const Svg = props => {
 /**
  * React component for the Action buttons in the Status Section.
  */
-export const Action = props => {
+export const Action = (props) => {
   return (
     <div
       className={
@@ -111,13 +113,7 @@ export const Action = props => {
     >
       <Svg action={props.action} />
       <p className="status__action-text">
-        {props.action === 'undo'
-          ? 'Undo'
-          : props.action === 'erase'
-          ? 'Erase'
-          : props.action === 'hint'
-          ? 'Hint'
-          : ''}
+        {props.action === 'undo' ? 'Undo' : props.action === 'erase' ? 'Erase' : props.action === 'hint' ? 'Hint' : ''}
       </p>
     </div>
   )

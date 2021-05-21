@@ -6,5 +6,5 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./bootstrap-button.component.css'],
 })
 export class BootstrapButtonComponent implements OnInit {
-  ngOnInit () {}
+  ngOnInit() {}
 }

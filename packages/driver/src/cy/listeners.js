@@ -41,7 +41,7 @@ const eventHasReturnValue = (e) => {
 }
 
 module.exports = {
-  bindTo (contentWindow, callbacks = {}) {
+  bindTo(contentWindow, callbacks = {}) {
     if (listenersAdded) {
       return
     }

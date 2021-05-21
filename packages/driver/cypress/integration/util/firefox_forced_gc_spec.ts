@@ -15,71 +15,87 @@ describe('driver/src/util/firefox_forced_gc', () => {
     }
 
     it('returns undefined if not in Firefox', () => {
-      expect(run({
-        browser: {
-          family: 'chrome',
-        },
-      })).to.be.undefined
+      expect(
+        run({
+          browser: {
+            family: 'chrome',
+          },
+        })
+      ).to.be.undefined
     })
 
     it('returns a number if firefoxGcInterval is a plain number', () => {
-      expect(run({
-        browser: {
-          family: 'firefox',
-          majorVersion: 79,
-        },
-        firefoxGcInterval: 99,
-      })).to.eq(99)
+      expect(
+        run({
+          browser: {
+            family: 'firefox',
+            majorVersion: 79,
+          },
+          firefoxGcInterval: 99,
+        })
+      ).to.eq(99)
     })
 
     it('returns null if firefoxGcInterval is null', () => {
-      expect(run({
-        browser: {
-          family: 'firefox',
-          majorVersion: 79,
-        },
-        firefoxGcInterval: null,
-      })).to.eq(null)
+      expect(
+        run({
+          browser: {
+            family: 'firefox',
+            majorVersion: 79,
+          },
+          firefoxGcInterval: null,
+        })
+      ).to.eq(null)
     })
 
     it('returns the appropriate interval for open mode', () => {
-      expect(run({
-        browser: {
-          family: 'firefox',
-          majorVersion: 79,
-        },
-        firefoxGcInterval: {
-          runMode: 10,
-          openMode: 20,
-        },
-        isInteractive: true,
-      })).to.eq(20)
+      expect(
+        run({
+          browser: {
+            family: 'firefox',
+            majorVersion: 79,
+          },
+          firefoxGcInterval: {
+            runMode: 10,
+            openMode: 20,
+          },
+          isInteractive: true,
+        })
+      ).to.eq(20)
     })
 
     it('returns the appropriate interval for run mode', () => {
-      expect(run({
-        browser: {
-          family: 'firefox',
-          majorVersion: 79,
-        },
-        firefoxGcInterval: {
-          runMode: 10,
-          openMode: 20,
-        },
-        isInteractive: false,
-      })).to.eq(10)
+      expect(
+        run({
+          browser: {
+            family: 'firefox',
+            majorVersion: 79,
+          },
+          firefoxGcInterval: {
+            runMode: 10,
+            openMode: 20,
+          },
+          isInteractive: false,
+        })
+      ).to.eq(10)
     })
 
-    it('has been correctly mounted at Cypress.getFirefoxGcInterval', {
-      // @ts-ignore
-      firefoxGcInterval: 5,
-    }, () => {
-      const real = Cypress.getFirefoxGcInterval
-      const fake = createIntervalGetter(Cypress)
+    it(
+      'has been correctly mounted at Cypress.getFirefoxGcInterval',
+      {
+        // @ts-ignore
+        firefoxGcInterval: 5,
+      },
+      () => {
+        const real = Cypress.getFirefoxGcInterval
+        const fake = createIntervalGetter(Cypress)
 
-      // conditional, so it can pass in non-ff browsers
-      expect(real()).to.eq(fake()).and.eq(Cypress.isBrowser('firefox') && Cypress.browser.majorVersion < 80 ? 5 : undefined)
-    })
+        // conditional, so it can pass in non-ff browsers
+        expect(real())
+        .to.eq(fake())
+        .and.eq(Cypress.isBrowser('firefox') && Cypress.browser.majorVersion < 80 ? 5 : undefined)
+      }
+    )
   })
 
   describe('#install', () => {
@@ -144,7 +160,8 @@ describe('driver/src/util/firefox_forced_gc', () => {
 
       install(MockCypress)
 
-      return fakeBeforeTestRun(0).then(() => {
+      return fakeBeforeTestRun(0)
+      .then(() => {
         fakeVisit()
 
         return fakeBeforeTestRun(1)
@@ -185,7 +202,8 @@ describe('driver/src/util/firefox_forced_gc', () => {
 
       install(MockCypress)
 
-      return fakeBeforeTestRun(0).then(() => {
+      return fakeBeforeTestRun(0)
+      .then(() => {
         return fakeBeforeTestRun(1)
       })
       .then(() => {
@@ -217,7 +235,8 @@ describe('driver/src/util/firefox_forced_gc', () => {
 
       install(MockCypress)
 
-      return fakeBeforeTestRun(0).then(() => {
+      return fakeBeforeTestRun(0)
+      .then(() => {
         return fakeBeforeTestRun(1)
       })
       .then(() => {

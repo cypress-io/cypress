@@ -14,7 +14,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "chalk": "2.4.2",
-    "chokidar": "3.2.2",
+    "chokidar": "^3.5.1",
     "debug": "4.3.2",
     "express": "4.17.1",
     "http-proxy": "1.18.1",

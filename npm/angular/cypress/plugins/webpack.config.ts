@@ -37,11 +37,7 @@ module.exports = {
         options: { esModules: true },
         enforce: 'post',
         include: path.join(__dirname, '../..', 'src'),
-        exclude: [
-          /\.(e2e|spec)\.ts$/,
-          /node_modules/,
-          /(ngfactory|ngstyle)\.js/,
-        ],
+        exclude: [/\.(e2e|spec)\.ts$/, /node_modules/, /(ngfactory|ngstyle)\.js/],
       },
       {
         // Mark files inside `@angular/core` as using SystemJS style dynamic imports.
@@ -72,23 +68,19 @@ module.exports = {
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        loader:
-          'file-loader?limit=10000&mimetype=image/svg+xml&name=assets/svgs/[name].[ext]',
+        loader: 'file-loader?limit=10000&mimetype=image/svg+xml&name=assets/svgs/[name].[ext]',
       },
       {
         test: /\.eot(\?v=\d+.\d+.\d+)?$/,
-        loader:
-          'file-loader?prefix=font/&limit=5000&name=assets/fonts/[name].[ext]',
+        loader: 'file-loader?prefix=font/&limit=5000&name=assets/fonts/[name].[ext]',
       },
       {
         test: /\.(woff|woff2)$/,
-        loader:
-          'file-loader?prefix=font/&limit=5000&name=assets/fonts/[name].[ext]',
+        loader: 'file-loader?prefix=font/&limit=5000&name=assets/fonts/[name].[ext]',
       },
       {
         test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        loader:
-          'file-loader?limit=10000&mimetype=application/octet-stream&name=assets/fonts/[name].[ext]',
+        loader: 'file-loader?limit=10000&mimetype=application/octet-stream&name=assets/fonts/[name].[ext]',
       },
     ],
   },
@@ -96,10 +88,7 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'test'),
     }),
-    new webpack.ContextReplacementPlugin(
-      /\@angular(\\|\/)core(\\|\/)f?esm5/,
-      path.join(__dirname, './src'),
-    ),
+    new webpack.ContextReplacementPlugin(/\@angular(\\|\/)core(\\|\/)f?esm5/, path.join(__dirname, './src')),
   ],
   performance: {
     hints: false,

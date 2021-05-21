@@ -11,11 +11,11 @@ interface Props {
 
 @observer
 class ErrorCodeFrame extends Component<Props> {
-  componentDidMount () {
+  componentDidMount() {
     Prism.highlightAllUnder(this.refs.codeFrame as ParentNode)
   }
 
-  render () {
+  render() {
     const { line, frame, language } = this.props.codeFrame
 
     // since we pull out 2 lines above the highlighted code, it will always
@@ -23,9 +23,9 @@ class ErrorCodeFrame extends Component<Props> {
     const highlightLine = Math.min(line, 3)
 
     return (
-      <div className='test-err-code-frame'>
+      <div className="test-err-code-frame">
         <FileNameOpener className="runnable-err-file-path" fileDetails={this.props.codeFrame} />
-        <pre ref='codeFrame' data-line={highlightLine}>
+        <pre ref="codeFrame" data-line={highlightLine}>
           <code className={`language-${language || 'text'}`}>{frame}</code>
         </pre>
       </div>

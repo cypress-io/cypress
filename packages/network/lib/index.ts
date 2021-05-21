@@ -5,14 +5,7 @@ import * as cors from './cors'
 import * as httpUtils from './http-utils'
 import * as uri from './uri'
 
-export {
-  agent,
-  blocked,
-  connect,
-  cors,
-  httpUtils,
-  uri,
-}
+export { agent, blocked, connect, cors, httpUtils, uri }
 
 export { allowDestroy } from './allow-destroy'
 

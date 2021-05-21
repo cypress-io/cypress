@@ -49,11 +49,7 @@ const intToRGBA = function (int) {
   const obj = Jimp.intToRGBA(int)
 
   if (debug.enabled) {
-    obj.name = colorString.to.keyword([
-      obj.r,
-      obj.g,
-      obj.b,
-    ])
+    obj.name = colorString.to.keyword([obj.r, obj.g, obj.b])
   }
 
   return obj
@@ -127,10 +123,11 @@ const captureAndCheck = function (data, automate, conditionFn) {
       debug('received screenshot data from automation layer', dataUrl.slice(0, 100))
 
       return Jimp.read(dataUriToBuffer(dataUrl))
-    }).then((image) => {
+    })
+    .then((image) => {
       debug(`read buffer to image ${image.bitmap.width} x ${image.bitmap.height}`)
 
-      if ((totalDuration > 1500) || conditionFn(data, image)) {
+      if (totalDuration > 1500 || conditionFn(data, image)) {
         debug('resolving with image %o', { tries, totalDuration })
 
         return { image, takenAt }
@@ -142,7 +139,7 @@ const captureAndCheck = function (data, automate, conditionFn) {
 }
 
 const isAppOnly = (data) => {
-  return (data.capture === 'viewport') || (data.capture === 'fullPage')
+  return data.capture === 'viewport' || data.capture === 'fullPage'
 }
 
 const isMultipart = (data) => {
@@ -153,7 +150,7 @@ const crop = function (image, dimensions, pixelRatio = 1) {
   debug('dimensions before are %o', dimensions)
 
   dimensions = _.transform(dimensions, (result, value, dimension) => {
-    return result[dimension] = value * pixelRatio
+    return (result[dimension] = value * pixelRatio)
   })
 
   debug('dimensions for cropping are %o', dimensions)
@@ -236,18 +233,9 @@ const multipartConditionFn = function (data, image) {
 }
 
 const stitchScreenshots = function (pixelRatio) {
-  const fullWidth = _
-  .chain(multipartImages)
-  .map('data.clip.width')
-  .min()
-  .multiply(pixelRatio)
-  .value()
+  const fullWidth = _.chain(multipartImages).map('data.clip.width').min().multiply(pixelRatio).value()
 
-  const fullHeight = _
-  .chain(multipartImages)
-  .sumBy('data.clip.height')
-  .multiply(pixelRatio)
-  .value()
+  const fullHeight = _.chain(multipartImages).sumBy('data.clip.height').multiply(pixelRatio).value()
 
   debug(`stitch ${multipartImages.length} images together`)
 
@@ -281,9 +269,7 @@ const getBuffer = function (details) {
     return Promise.resolve(details.buffer)
   }
 
-  return Promise
-  .promisify(details.image.getBuffer)
-  .call(details.image, Jimp.AUTO)
+  return Promise.promisify(details.image.getBuffer).call(details.image, Jimp.AUTO)
 }
 
 const getDimensions = function (details) {
@@ -313,14 +299,14 @@ const ensureSafePath = function (withoutExt, extension, num = 0) {
 
   debug('ensureSafePath %o', { withoutExt, extension, num, maxSafeBytes, maxSafePrefixBytes })
 
-  return fs.pathExists(fullPath)
-  .then((found) => {
+  return fs.pathExists(fullPath).then((found) => {
     if (found) {
       return ensureSafePath(withoutExt, extension, num + 1)
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
-    return fs.outputFileAsync(fullPath, '')
+    return fs
+    .outputFileAsync(fullPath, '')
     .then(() => fullPath)
     .catch((err) => {
       debug('received error when testing path %o', { err, fullPath, maxSafePrefixBytes, maxSafeBytes })
@@ -344,18 +330,12 @@ const sanitizeToString = (title) => {
 
 const getPath = function (data, ext, screenshotsFolder) {
   let names
-  const specNames = (data.specName || '')
-  .split(pathSeparatorRe)
+  const specNames = (data.specName || '').split(pathSeparatorRe)
 
   if (data.name) {
     names = data.name.split(pathSeparatorRe).map(sanitize)
   } else {
-    names = _
-    .chain(data.titles)
-    .map(sanitizeToString)
-    .join(RUNNABLE_SEPARATOR)
-    .concat([])
-    .value()
+    names = _.chain(data.titles).map(sanitizeToString).join(RUNNABLE_SEPARATOR).concat([]).value()
   }
 
   const index = names.length - 1
@@ -389,21 +369,19 @@ module.exports = {
 
   imagesMatch,
 
-  copy (src, dest) {
-    return fs
-    .copyAsync(src, dest, { overwrite: true })
-    .catch({ code: 'ENOENT' }, () => {})
+  copy(src, dest) {
+    return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => {})
   },
   // dont yell about ENOENT errors
 
-  get (screenshotsFolder) {
+  get(screenshotsFolder) {
     // find all files in all nested dirs
     screenshotsFolder = path.join(screenshotsFolder, '**', '*')
 
     return glob(screenshotsFolder, { nodir: true })
   },
 
-  capture (data, automate) {
+  capture(data, automate) {
     __ID__ = _.uniqueId('s')
 
     debug('capturing screenshot %o', data)
@@ -413,8 +391,7 @@ module.exports = {
     if (data.simple) {
       const takenAt = new Date().toJSON()
 
-      return automate(data)
-      .then((dataUrl) => {
+      return automate(data).then((dataUrl) => {
         return {
           takenAt,
           multipart: false,
@@ -437,7 +414,7 @@ module.exports = {
         debug(`multi-part ${data.current}/${data.total}`)
       }
 
-      if (multipart && (data.total > 1)) {
+      if (multipart && data.total > 1) {
         // keep previous screenshot partials around b/c if two screenshots are
         // taken in a row, the UI might not be caught up so we need something
         // to compare the new one to
@@ -452,7 +429,7 @@ module.exports = {
         multipartImages.push({ data, image, takenAt, __ID__ })
 
         if (data.current === data.total) {
-          ({ image } = stitchScreenshots(pixelRatio))
+          ;({ image } = stitchScreenshots(pixelRatio))
 
           return { image, pixelRatio, multipart, takenAt }
         }
@@ -479,17 +456,18 @@ module.exports = {
     })
   },
 
-  save (data, details, screenshotsFolder) {
-    return getPathToScreenshot(data, details, screenshotsFolder)
-    .then((pathToScreenshot) => {
+  save(data, details, screenshotsFolder) {
+    return getPathToScreenshot(data, details, screenshotsFolder).then((pathToScreenshot) => {
       debug('save', pathToScreenshot)
 
       return getBuffer(details)
       .then((buffer) => {
         return fs.outputFileAsync(pathToScreenshot, buffer)
-      }).then(() => {
+      })
+      .then(() => {
         return fs.statAsync(pathToScreenshot).get('size')
-      }).then((size) => {
+      })
+      .then((size) => {
         const dimensions = getDimensions(details)
 
         const { multipart, pixelRatio, takenAt } = details
@@ -509,18 +487,32 @@ module.exports = {
     })
   },
 
-  afterScreenshot (data, details) {
+  afterScreenshot(data, details) {
     const duration = new Date() - new Date(data.startTime)
 
     details = _.extend({}, data, details, { duration })
-    details = _.pick(details, 'testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
+    details = _.pick(
+      details,
+      'testAttemptIndex',
+      'size',
+      'takenAt',
+      'dimensions',
+      'multipart',
+      'pixelRatio',
+      'name',
+      'specName',
+      'testFailure',
+      'path',
+      'scaled',
+      'blackout',
+      'duration'
+    )
 
     if (!plugins.has('after:screenshot')) {
       return Promise.resolve(details)
     }
 
-    return plugins.execute('after:screenshot', details)
-    .then((updates) => {
+    return plugins.execute('after:screenshot', details).then((updates) => {
       if (!_.isPlainObject(updates)) {
         return details
       }
@@ -528,5 +520,4 @@ module.exports = {
       return _.extend(details, _.pick(updates, 'size', 'dimensions', 'path'))
     })
   },
-
 }

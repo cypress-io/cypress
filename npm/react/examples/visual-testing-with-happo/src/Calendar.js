@@ -8,7 +8,7 @@ import './styles.css'
 
 const today = new Date()
 
-export default function Calendar () {
+export default function Calendar() {
   const randomValues = getRange(200).map((index) => {
     return {
       date: shiftDate(today, -index),
@@ -33,9 +33,7 @@ export default function Calendar () {
         }}
         tooltipDataAttrs={(value) => {
           return {
-            'data-tip': `${value.date.toISOString().slice(0, 10)} has count: ${
-              value.count
-            }`,
+            'data-tip': `${value.date.toISOString().slice(0, 10)} has count: ${value.count}`,
           }
         }}
         showWeekdayLabels={true}
@@ -46,7 +44,7 @@ export default function Calendar () {
   )
 }
 
-function shiftDate (date, numDays) {
+function shiftDate(date, numDays) {
   const newDate = new Date(date)
 
   newDate.setDate(newDate.getDate() + numDays)
@@ -54,10 +52,10 @@ function shiftDate (date, numDays) {
   return newDate
 }
 
-function getRange (count) {
+function getRange(count) {
   return Array.from({ length: count }, (_, i) => i)
 }
 
-function getRandomInt (min, max) {
+function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }

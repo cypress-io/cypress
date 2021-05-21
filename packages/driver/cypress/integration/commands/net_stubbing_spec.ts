@@ -218,7 +218,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           hasInterceptor: true,
         }
 
-        cy.intercept(url, { middleware: true }, handler).as('get')
+        cy.intercept(url, { middleware: true }, handler)
+        .as('get')
         .then(() => {
           return $.get('/foo')
         })
@@ -260,7 +261,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           hasInterceptor: true,
         }
 
-        cy.intercept(url, { middleware: true }, handler).as('get')
+        cy.intercept(url, { middleware: true }, handler)
+        .as('get')
         .then(() => {
           return $.get('/foo')
         })
@@ -276,7 +278,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         win.eval(
           `fetch("/post-only", {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
-          });`,
+          });`
         )
       })
 
@@ -294,7 +296,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         win.eval(
           `fetch("/post-only", {
             method: 'post', // *GET, POST, PUT, DELETE, etc.
-          });`,
+          });`
         )
       })
 
@@ -310,7 +312,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     // https://github.com/cypress-io/cypress/issues/2372
     it.skip('warns if a percent-encoded URL is used', function () {
       cy.intercept('GET', '/foo%25bar').then(function () {
-        expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.intercept(), but cy.intercept() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
+        expect(Cypress.utils.warning).to.be.calledWith(
+          'A URL with percent-encoded characters was passed to cy.intercept(), but cy.intercept() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?'
+        )
       })
     })
 
@@ -325,8 +329,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('chains middleware with string matcher as expected', function () {
         const e: string[] = []
 
-        cy
-        .intercept('/dump-headers*', { middleware: true }, (req) => {
+        cy.intercept('/dump-headers*', { middleware: true }, (req) => {
           e.push('mware req handler')
           req.on('before:response', (res) => {
             e.push('mware before:response')
@@ -349,7 +352,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .then(() => {
           return $.get('/dump-headers')
         })
-        .wrap(e).should('have.all.members', [
+        .wrap(e)
+        .should('have.all.members', [
           'mware req handler',
           'normal req handler',
           'mware before:response',
@@ -366,7 +370,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             done()
           })
         })
-        .intercept('/dump-headers*', (req) => req.headers['x-foo'] = 'bar')
+        .intercept('/dump-headers*', (req) => (req.headers['x-foo'] = 'bar'))
         .then(() => {
           $.get('/dump-headers')
         })
@@ -395,7 +399,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
         .intercept('GET', '/mydata*', (req) => {
           req.reply({ body: [1, 2, 3, 4, 5] })
-        }).as('mydata')
+        })
+        .as('mydata')
         .then(() => {
           return $.getJSON('/mydata?abc')
         })
@@ -406,21 +411,27 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('sends a StaticResponse if the newest stub is a StaticResponse', function () {
         cy.intercept('/foo*', () => {
           throw new Error('this should not be called')
-        }).as('interceptor')
-        .intercept('/foo*', { body: 'something' }).as('staticresponse')
-        .intercept('/foo*').as('spy')
+        })
+        .as('interceptor')
+        .intercept('/foo*', { body: 'something' })
+        .as('staticresponse')
+        .intercept('/foo*')
+        .as('spy')
         .then(() => {
           return $.get('/foo')
         })
         .should('deep.eq', 'something')
         .wait('@spy')
         .wait('@staticresponse')
-        .get('@interceptor.all').should('have.length', 0)
+        .get('@interceptor.all')
+        .should('have.length', 0)
       })
 
       it('sends a StaticResponse if a request handler does not supply a response', function () {
-        cy.intercept('/foo*', { body: 'something' }).as('staticresponse')
-        .intercept('/foo*', () => { }).as('interceptor')
+        cy.intercept('/foo*', { body: 'something' })
+        .as('staticresponse')
+        .intercept('/foo*', () => {})
+        .as('interceptor')
         .then(() => {
           return $.get('/foo')
         })
@@ -435,21 +446,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(req.method).to.eq('PATCH')
 
             req.reply()
-          }).intercept('/dump-method', function (req) {
+          })
+          .intercept('/dump-method', function (req) {
             expect(req.method).to.eq('POST')
             req.method = 'PATCH'
-          }).intercept('/dump-method', function (req) {
+          })
+          .intercept('/dump-method', function (req) {
             expect(req.method).to.eq('GET')
             req.method = 'POST'
-          }).visit('/dump-method').contains('PATCH')
+          })
+          .visit('/dump-method')
+          .contains('PATCH')
         })
 
         it('stops passing request through once req.reply called', function () {
           cy.intercept('/dump-method', function (req) {
             throw new Error('this should not have been reached')
-          }).intercept('/dump-method', function (req) {
+          })
+          .intercept('/dump-method', function (req) {
             req.reply()
-          }).visit('/dump-method').contains('GET')
+          })
+          .visit('/dump-method')
+          .contains('GET')
         })
       })
 
@@ -459,12 +477,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             req.on('before:response', (res) => {
               expect(res.body).to.contain('new body')
             })
-          }).intercept('/dump-method', function (req) {
+          })
+          .intercept('/dump-method', function (req) {
             req.on('before:response', (res) => {
               expect(res.body).to.contain('GET')
               res.body = 'new body'
             })
-          }).visit('/dump-method')
+          })
+          .visit('/dump-method')
           .contains('new body')
         })
 
@@ -473,11 +493,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             req.on('before:response', (res) => {
               throw new Error('this should not have been reached')
             })
-          }).intercept('/dump-method', function (req) {
+          })
+          .intercept('/dump-method', function (req) {
             req.on('before:response', (res) => {
               res.send()
             })
-          }).visit('/dump-method').contains('GET')
+          })
+          .visit('/dump-method')
+          .contains('GET')
         })
       })
     })
@@ -516,7 +539,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('has displayName req for spies', function () {
-        cy.intercept('/foo*').as('getFoo')
+        cy.intercept('/foo*')
+        .as('getFoo')
         .then(() => {
           $.get('/foo')
         })
@@ -529,7 +553,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('has displayName req stub for stubs', function () {
-        cy.intercept('/foo*', { body: 'foo' }).as('getFoo')
+        cy.intercept('/foo*', { body: 'foo' })
+        .as('getFoo')
         .then(() => {
           $.get('/foo')
         })
@@ -542,7 +567,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('has displayName req fn for request handlers', function () {
-        cy.intercept('/foo*', () => {}).as('getFoo')
+        cy.intercept('/foo*', () => {})
+        .as('getFoo')
         .then(() => {
           $.get('/foo')
         })
@@ -558,7 +584,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it.skip('#consoleProps', function () {
         cy.intercept('*', {
           foo: 'bar',
-        }).as('foo').then(function () {
+        })
+        .as('foo')
+        .then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'route',
             Method: 'GET',
@@ -584,15 +612,23 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('is incremented to 2', function () {
-          cy.intercept(/foo/, {}).then(function () {
+          cy.intercept(/foo/, {})
+          .then(function () {
             $.get('/foo')
-          }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 1)
+          })
+          .wrap(this)
+          .invoke('lastLog.get', 'numResponses')
+          .should('eq', 1)
         })
 
         it('is incremented for each matching request', function () {
-          cy.intercept(/foo/, {}).then(function () {
+          cy.intercept(/foo/, {})
+          .then(function () {
             return Promise.all([$.get('/foo'), $.get('/foo'), $.get('/foo')])
-          }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 3)
+          })
+          .wrap(this)
+          .invoke('lastLog.get', 'numResponses')
+          .should('eq', 3)
         })
       })
     })
@@ -629,7 +665,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       // TODO: not currently implemented
       it.skip('fails when method is invalid', function (done) {
         testFail((err) => {
-          expect(err.message).to.include('cy.intercept() was called with an invalid method: \'POSTS\'.')
+          expect(err.message).to.include("cy.intercept() was called with an invalid method: 'POSTS'.")
 
           done()
         })
@@ -639,7 +675,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('requires a url when given a response', function (done) {
         testFail((err) => {
-          expect(err.message).to.include('The RouteMatcher does not contain any keys. You must pass something to match on.')
+          expect(err.message).to.include(
+            'The RouteMatcher does not contain any keys. You must pass something to match on.'
+          )
 
           done()
         })
@@ -649,7 +687,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('requires arguments', function (done) {
         testFail((err) => {
-          expect(err.message).to.include('An invalid RouteMatcher was supplied to `cy.intercept()`. The RouteMatcher does not contain any keys. You must pass something to match on.')
+          expect(err.message).to.include(
+            'An invalid RouteMatcher was supplied to `cy.intercept()`. The RouteMatcher does not contain any keys. You must pass something to match on.'
+          )
 
           done()
         })
@@ -660,7 +700,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('cannot merge url with url', function (done) {
         testFail((err) => {
-          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter')
+          expect(err.message).to.include(
+            'When invoking `cy.intercept()` with a `RouteMatcher` as the second parameter, `url` can only be specified as the first parameter'
+          )
 
           done()
         })
@@ -671,7 +713,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       it('cannot pass RouteMatcherOptions in 2nd arg with no handler', function (done) {
         testFail((err) => {
-          expect(err.message).to.include('When invoking \`cy.intercept()\` with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter.')
+          expect(err.message).to.include(
+            'When invoking `cy.intercept()` with a `RouteMatcher` as the second parameter, a handler (function or `StaticResponse`) must be specified as the third parameter.'
+          )
 
           done()
         })
@@ -683,7 +727,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       context('with invalid RouteMatcher', function () {
         it('requires unique header names', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('`FOO` was specified more than once in `headers`. Header fields can only be matched once (HTTP header field names are case-insensitive).')
+            expect(err.message).to.include(
+              '`FOO` was specified more than once in `headers`. Header fields can only be matched once (HTTP header field names are case-insensitive).'
+            )
 
             done()
           })
@@ -727,7 +773,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         it('errors on unknown prop', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('An unknown \`RouteMatcher\` property was passed: `wrong`')
+            expect(err.message).to.include('An unknown `RouteMatcher` property was passed: `wrong`')
 
             done()
           })
@@ -742,13 +788,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             done()
           })
 
-          cy
-          .intercept({ times: 9.75 })
+          cy.intercept({ times: 9.75 })
         })
       })
 
       context('with invalid handler', function () {
-        [false, null].forEach(function (handler) {
+        ;[false, null].forEach(function (handler) {
           const name = String(handler)
 
           it(`${name} fails`, function (done) {
@@ -766,7 +811,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       context('with invalid StaticResponse', function () {
-        [
+        ;[
           [
             'forceNetworkError set but not alone',
             {
@@ -863,8 +908,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       const url2 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url3)}`
       const url1 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url2)}`
 
-      cy.visit(url1)
-      .location('href').should('eq', url4)
+      cy.visit(url1).location('href').should('eq', url4)
     })
 
     context('can intercept against any domain', function () {
@@ -874,7 +918,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('different origin (HTTP)', function () {
-        cy.intercept('/foo*').as('foo')
+        cy.intercept('/foo*')
+        .as('foo')
         .then(() => {
           $.get('http://baz.foobar.com:3501/foo')
         })
@@ -887,19 +932,22 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(res.body).to.include('xhr fixture')
             res.body = 'replaced the body'
           })
-        }).as('foo')
+        })
+        .as('foo')
         .then(() => {
-          return $.get('http://baz.foobar.com:3501/fixtures/xhr.html')
-          .then((responseText) => {
+          return $.get('http://baz.foobar.com:3501/fixtures/xhr.html').then((responseText) => {
             expect(responseText).to.eq('replaced the body')
           })
         })
-        .wait('@foo').its('response.body').should('eq', 'replaced the body')
+        .wait('@foo')
+        .its('response.body')
+        .should('eq', 'replaced the body')
       })
 
       // @see https://github.com/cypress-io/cypress/issues/8487
       it('different origin (HTTPS)', function () {
-        cy.intercept('/foo*', 'somethin').as('foo')
+        cy.intercept('/foo*', 'somethin')
+        .as('foo')
         .then(() => {
           $.get('https://bar.foobar.com.invalid:3502/foo')
         })
@@ -912,14 +960,16 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(res.body).to.include('xhr fixture')
             res.body = 'replaced the body'
           })
-        }).as('foo')
+        })
+        .as('foo')
         .then(() => {
-          return $.get('https://bar.foobar.com:3502/fixtures/xhr.html')
-          .then((responseText) => {
+          return $.get('https://bar.foobar.com:3502/fixtures/xhr.html').then((responseText) => {
             expect(responseText).to.eq('replaced the body')
           })
         })
-        .wait('@foo').its('response.body').should('eq', 'replaced the body')
+        .wait('@foo')
+        .its('response.body')
+        .should('eq', 'replaced the body')
       })
     })
 
@@ -954,8 +1004,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
         .then(() => {
           // but now, the same ajax request succeeds, because the cy.intercept provides CORS
-          return $.ajax({ method: 'DELETE', url: corsUrl })
-          .then((res) => {
+          return $.ajax({ method: 'DELETE', url: corsUrl }).then((res) => {
             expect(res).to.eq('intercepted DELETE')
           })
         })
@@ -994,8 +1043,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('headers option is not set => no expose-header', () => {
-        cy
-        .intercept('/cors*', {})
+        cy.intercept('/cors*', {})
         .as('corsRequest')
         .then(() => {
           return $.get(corsUrl)
@@ -1009,16 +1057,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('headers option only has the accessible headers from the cors request => no expose-header', () => {
-        cy
-        .intercept('/cors*', {
+        cy.intercept('/cors*', {
           body: { success: true },
           headers: {
             'cache-control': 'no-cache',
             'content-language': 'en-US',
             'content-type': 'text/html',
-            'Expires': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            Expires: 'Wed, 21 Oct 2015 07:28:00 GMT',
             'Last-Modified': 'Wed, 21 Oct 2015 07:28:00 GMT',
-            'Pragma': 'no-cache',
+            Pragma: 'no-cache',
           },
         })
         .as('corsRequest')
@@ -1034,8 +1081,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('headers option does not have the accessible header => include expose-header', () => {
-        cy
-        .intercept('/cors*', {
+        cy.intercept('/cors*', {
           body: { success: true },
           headers: {
             'cache-control': 'no-cache',
@@ -1057,8 +1103,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('headers option has access-control-expose-headers => does not override', () => {
-        cy
-        .intercept('/cors*', {
+        cy.intercept('/cors*', {
           body: { success: true },
           headers: {
             'access-control-expose-headers': 'x-token',
@@ -1082,9 +1127,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
   context('stubbing with static responses', function () {
     it('can stub a response with static body as string', function (done) {
-      cy.intercept({
-        url: '*',
-      }, 'hello world').then(() => {
+      cy.intercept(
+        {
+          url: '*',
+        },
+        'hello world'
+      ).then(() => {
         $.get('/abc123').done((responseText, _, xhr) => {
           expect(xhr.status).to.eq(200)
           expect(responseText).to.eq('hello world')
@@ -1095,7 +1143,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can stub a cy.visit with static body', function () {
-      cy.intercept('/foo', '<html>hello cruel world</html>').visit('/foo').document().should('contain.text', 'hello cruel world')
+      cy.intercept('/foo', '<html>hello cruel world</html>')
+      .visit('/foo')
+      .document()
+      .should('contain.text', 'hello cruel world')
     })
 
     it('can stub a response with an empty StaticResponse', function (done) {
@@ -1123,20 +1174,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can use regular strings as response', function () {
-      cy.intercept('/foo*', 'foo bar baz').as('getFoo').then(function (win) {
+      cy.intercept('/foo*', 'foo bar baz')
+      .as('getFoo')
+      .then(function (win) {
         $.get('/foo')
-      }).wait('@getFoo').then(function (res) {
+      })
+      .wait('@getFoo')
+      .then(function (res) {
         expect(res.response!.body).to.eq('foo bar baz')
       })
     })
 
     it('can stub requests with uncommon HTTP methods', function () {
-      cy.intercept('PROPFIND', '/foo', 'foo bar baz').as('getFoo').then(function (win) {
+      cy.intercept('PROPFIND', '/foo', 'foo bar baz')
+      .as('getFoo')
+      .then(function (win) {
         $.ajax({
           url: '/foo',
           method: 'PROPFIND',
         })
-      }).wait('@getFoo').then(function (res) {
+      })
+      .wait('@getFoo')
+      .then(function (res) {
         expect(res.response!.body).to.eq('foo bar baz')
       })
     })
@@ -1144,9 +1203,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     it('can stub a response with an array', function (done) {
       const response = ['foo', 'bar', { foo: 'baz' }]
 
-      cy.intercept({
-        url: '*',
-      }, response).then(() => {
+      cy.intercept(
+        {
+          url: '*',
+        },
+        response
+      ).then(() => {
         $.get('/abc123').done((responseJson, _, xhr) => {
           expect(xhr.status).to.eq(200)
           expect(responseJson).to.deep.eq(response)
@@ -1158,9 +1220,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('does not drop falsy static responses', function (done) {
-      cy.intercept({
-        url: '*',
-      }, { body: false }).then(() => {
+      cy.intercept(
+        {
+          url: '*',
+        },
+        { body: false }
+      ).then(() => {
         $.get('/abc123').done((responseText, _, xhr) => {
           expect(xhr.status).to.eq(200)
           expect(responseText).to.eq(false)
@@ -1176,15 +1241,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         headers: {
           'content-type': 'application/json',
         },
-      }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
+      })
+      .as('getFoo')
+      .visit('http://localhost:3500/fixtures/jquery.html')
+      .window()
+      .then(function (win) {
         return new Promise(function (resolve) {
           $.get('/foo').done(_.ary(resolve, 0))
         })
-      }).wait('@getFoo').its('request.url').should('include', '/foo').visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
+      })
+      .wait('@getFoo')
+      .its('request.url')
+      .should('include', '/foo')
+      .visit('http://localhost:3500/fixtures/generic.html')
+      .window()
+      .then(function (win) {
         return new Promise(function (resolve) {
           $.get('/foo').done(_.ary(resolve, 0))
         })
-      }).wait('@getFoo').its('request.url').should('include', '/foo')
+      })
+      .wait('@getFoo')
+      .its('request.url')
+      .should('include', '/foo')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/15841
@@ -1218,11 +1296,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }
 
       it('with explicit StaticResponse', function (done) {
-        cy.intercept({
-          url: '*',
-        }, {
-          body: [],
-        }).then(assertEmptyArray(done))
+        cy.intercept(
+          {
+            url: '*',
+          },
+          {
+            body: [],
+          }
+        ).then(assertEmptyArray(done))
       })
 
       it('with body shorthand', function (done) {
@@ -1244,37 +1325,55 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     context('fixtures', function () {
       it('can stub a response with a JSON object', function () {
-        cy.intercept({
-          method: 'POST',
-          url: '/test-xhr',
-        }, {
-          fixture: 'valid.json',
-        }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+        cy.intercept(
+          {
+            method: 'POST',
+            url: '/test-xhr',
+          },
+          {
+            fixture: 'valid.json',
+          }
+        )
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
       })
 
       it('works with content-type override', function () {
-        cy.intercept({
-          method: 'POST',
-          url: '/test-xhr',
-        }, {
-          headers: {
-            'content-type': 'text/plain',
+        cy.intercept(
+          {
+            method: 'POST',
+            url: '/test-xhr',
           },
-          fixture: 'valid.json',
-        }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+          {
+            headers: {
+              'content-type': 'text/plain',
+            },
+            fixture: 'valid.json',
+          }
+        )
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', '"{\\"foo\\":1,\\"bar\\":{\\"baz\\":\\"cypress\\"}}"').should('be.visible')
       })
 
       it('works if the JSON file has null content', function () {
-        cy.intercept({
-          method: 'POST',
-          url: '/test-xhr',
-        }, {
-          fixture: 'null.json',
-        }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+        cy.intercept(
+          {
+            method: 'POST',
+            url: '/test-xhr',
+          },
+          {
+            fixture: 'null.json',
+          }
+        )
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
 
         cy.contains('#result', '""').should('be.visible')
       })
@@ -1343,13 +1442,16 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       cy.intercept('/post-only', function (req) {
         expect(req.body).to.eq('quuz')
         done()
-      }).intercept('/post-only', function (req) {
+      })
+      .intercept('/post-only', function (req) {
         expect(req.body).to.eq('quux')
         req.body = 'quuz'
-      }).intercept('/post-only', function (req) {
+      })
+      .intercept('/post-only', function (req) {
         expect(req.body).to.eq('foo-bar-baz')
         req.body = 'quux'
-      }).then(function () {
+      })
+      .then(function () {
         $.post('/post-only', 'foo-bar-baz')
       })
     })
@@ -1363,7 +1465,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy.visit({
           url: '/dump-headers',
           headers: {
-            'foo': 'bar',
+            foo: 'bar',
           },
         })
 
@@ -1394,14 +1496,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     it('can delete a request header', function () {
       cy.intercept('/dump-headers*', function (req) {
-        expect(req.headers).to.include({ 'foo': 'bar' })
+        expect(req.headers).to.include({ foo: 'bar' })
         delete req.headers['foo']
-      }).as('get')
+      })
+      .as('get')
       .then(() => {
         return $.get({
           url: '/dump-headers',
           headers: {
-            'foo': 'bar',
+            foo: 'bar',
           },
         })
       })
@@ -1460,14 +1563,20 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can reply with a JSON fixture', function () {
-      cy.intercept({
-        method: 'POST',
-        url: '/test-xhr',
-      }, (req) => {
-        req.reply({
-          fixture: 'valid.json',
-        })
-      }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+      cy.intercept(
+        {
+          method: 'POST',
+          url: '/test-xhr',
+        },
+        (req) => {
+          req.reply({
+            fixture: 'valid.json',
+          })
+        }
+      )
+      .visit('/fixtures/xhr-triggered.html')
+      .get('#trigger-xhr')
+      .click()
 
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
@@ -1532,10 +1641,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         statusCode: 200,
         body: 'foo',
         delay,
-      }).as('get')
-      .then(() => testDelay()).wait('@get')
-      .then(() => testDelay()).wait('@get')
-      .then(() => testDelay()).wait('@get')
+      })
+      .as('get')
+      .then(() => testDelay())
+      .wait('@get')
+      .then(() => testDelay())
+      .wait('@get')
+      .then(() => testDelay())
+      .wait('@get')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/15901
@@ -1563,7 +1676,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
                   throw new Error('before:response should not be reached')
                 }
               })
-            }).as('first')
+            })
+            .as('first')
             .intercept('/foo*', (req) => {
               // @ts-ignore
               req.on(eventName, (res) => {
@@ -1572,12 +1686,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
                   fixture: 'valid.json',
                 })
               })
-            }).as('second')
+            })
+            .as('second')
             .then(() => {
               return $.getJSON('/foo')
             })
-            .should('include', { 'foo': 1 })
-            .wait('@first').wait('@second')
+            .should('include', { foo: 1 })
+            .wait('@first')
+            .wait('@second')
             .then(() => {
               expect(beforeResponseCalled).to.eq(expectBeforeResponse)
             })
@@ -1588,7 +1704,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       context('errors', function () {
         it('when unknown eventName is passed', function (done) {
           testFail((err) => {
-            expect(err.message).to.contain('An invalid event name was passed as the first parameter to \`req.on()\`.')
+            expect(err.message).to.contain('An invalid event name was passed as the first parameter to `req.on()`.')
             done()
           })
 
@@ -1600,7 +1716,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         it('when no function is passed', function (done) {
           testFail((err) => {
-            expect(err.message).to.contain('\`req.on()\` requires the second parameter to be a function.')
+            expect(err.message).to.contain('`req.on()` requires the second parameter to be a function.')
             done()
           })
 
@@ -1613,7 +1729,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('body parsing', function () {
-      [
+      ;[
         ['application/json', '{"foo":"bar"}'],
         ['application/vnd.api+json', '{}'],
       ].forEach(([contentType, expectedBody]) => {
@@ -1625,7 +1741,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(req.body).to.deep.eq({ foo: 'bar' })
 
             p.resolve()
-          }).as('post')
+          })
+          .as('post')
           .then(() => {
             return $.ajax({
               url: '/post-only',
@@ -1633,23 +1750,27 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
               contentType,
               data: JSON.stringify({ foo: 'bar' }),
             })
-          }).then((responseText) => {
+          })
+          .then((responseText) => {
             expect(responseText).to.include(`request body:<br>${expectedBody}`)
 
             return p
           })
-          .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
+          .wait('@post')
+          .its('request.body')
+          .should('deep.eq', { foo: 'bar' })
         })
       })
 
-      it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
+      it("doesn't automatically parse JSON request bodies if content-type is wrong", function () {
         const p = Promise.defer()
 
         cy.intercept('/post-only', (req) => {
           expect(req.body).to.deep.eq(JSON.stringify({ foo: 'bar' }))
 
           p.resolve()
-        }).as('post')
+        })
+        .as('post')
         .then(() => {
           return $.ajax({
             url: '/post-only',
@@ -1657,8 +1778,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             contentType: 'text/html',
             data: JSON.stringify({ foo: 'bar' }),
           })
-        }).wrap(p)
-        .wait('@post').its('request.body').should('eq', JSON.stringify({ foo: 'bar' }))
+        })
+        .wrap(p)
+        .wait('@post')
+        .its('request.body')
+        .should('eq', JSON.stringify({ foo: 'bar' }))
       })
 
       it('sets body to string if JSON is malformed', function () {
@@ -1668,7 +1792,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           expect(req.body).to.deep.eq('{ foo::: }')
 
           p.resolve()
-        }).as('post')
+        })
+        .as('post')
         .then(() => {
           return $.ajax({
             url: '/post-only',
@@ -1678,25 +1803,31 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             data: '{ foo::: }',
           }).catch(() => p)
         })
-        .wait('@post').its('request.body').should('deep.eq', '{ foo::: }')
+        .wait('@post')
+        .its('request.body')
+        .should('deep.eq', '{ foo::: }')
       })
     })
 
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
-        cy.intercept('*', 'it worked').as('final')
+        cy.intercept('*', 'it worked')
+        .as('final')
         .intercept({
           query: {
             foo: 'b*r',
             baz: /quu[x]/,
           },
-        }).as('third')
+        })
+        .as('third')
         .intercept({
           path: '/abc?foo=bar&baz=qu*x*',
-        }).as('second')
+        })
+        .as('second')
         .intercept({
           pathname: '/abc',
-        }).as('first')
+        })
+        .as('first')
         .then(() => {
           return $.get('/abc?foo=bar&baz=quux')
         })
@@ -1731,8 +1862,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           cy.intercept('/foo/*', (req) => {
             expect(req.url).to.include('/foo/1')
             done()
-          })
-          .then(() => {
+          }).then(() => {
             $.ajax({ url: '/foo/1', cache: true })
           })
         })
@@ -1741,8 +1871,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           cy.intercept('/foo/*/bar', (req) => {
             expect(req.url).to.match(/\/foo\/1\/bar$/)
             done()
-          })
-          .then(() => {
+          }).then(() => {
             $.get({ url: '/foo/1/bar', cache: true })
           })
         })
@@ -1752,22 +1881,18 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         it('only uses each handler N times', function () {
           const third = sinon.stub()
 
-          cy
-          .intercept({ url: '/foo*', times: 3 }, 'fourth').as('4')
-          .intercept({ url: '/foo*', times: 2 }, third).as('3')
-          .intercept({ url: '/foo*', times: 2 }, 'second').as('2')
-          .intercept({ url: '/foo*', times: 1 }, 'first').as('1')
+          cy.intercept({ url: '/foo*', times: 3 }, 'fourth')
+          .as('4')
+          .intercept({ url: '/foo*', times: 2 }, third)
+          .as('3')
+          .intercept({ url: '/foo*', times: 2 }, 'second')
+          .as('2')
+          .intercept({ url: '/foo*', times: 1 }, 'first')
+          .as('1')
           .then(async () => {
             const expectGet = (expected) => $.get('/foo').then((res) => expect(res).to.eq(expected))
 
-            await Promise.mapSeries([
-              'first',
-              'second',
-              'second',
-              'fourth',
-              'fourth',
-              'fourth',
-            ], expectGet)
+            await Promise.mapSeries(['first', 'second', 'second', 'fourth', 'fourth', 'fourth'], expectGet)
 
             expect(third).to.be.calledTwice
 
@@ -1778,10 +1903,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
               })
             })
           })
-          .get('@1.all').should('have.length', 1)
-          .get('@2.all').should('have.length', 2)
-          .get('@3.all').should('have.length', 2)
-          .get('@4.all').should('have.length', 3)
+          .get('@1.all')
+          .should('have.length', 1)
+          .get('@2.all')
+          .should('have.length', 2)
+          .get('@3.all')
+          .should('have.length', 2)
+          .get('@4.all')
+          .should('have.length', 3)
         })
       })
     })
@@ -1823,7 +1952,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           return new Promise((resolve) => {
             $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseText')))
           })
-        }).should('include', {
+        })
+        .should('include', {
           status: 777,
           responseText: 'bar',
         })
@@ -1837,7 +1967,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           return new Promise((resolve) => {
             $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON')))
           })
-        }).should('deep.include', {
+        })
+        .should('deep.include', {
           status: 777,
           responseJSON: { bar: 'baz' },
         })
@@ -1851,10 +1982,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           return new Promise((resolve) => {
             $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON', 'getAllResponseHeaders')))
           })
-        }).should('deep.include', {
+        })
+        .should('deep.include', {
           status: 777,
           responseJSON: { bar: 'baz' },
-        }).invoke('getAllResponseHeaders')
+        })
+        .invoke('getAllResponseHeaders')
         .should('include', 'x-quux: quuz')
         .and('include', 'content-type: application/json')
       })
@@ -1862,8 +1995,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('can forceNetworkError', function (done) {
         cy.intercept('/foo*', function (req) {
           req.reply({ forceNetworkError: true })
-        })
-        .then(() => {
+        }).then(() => {
           $.get('/foo').fail((xhr) => {
             expect(xhr).to.include({
               status: 0,
@@ -1883,28 +2015,37 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           expect(req.method).to.eq('PATCH')
 
           req.reply()
-        }).intercept('/dump-method', function (req) {
+        })
+        .intercept('/dump-method', function (req) {
           expect(req.method).to.eq('POST')
           req.method = 'PATCH'
-        }).intercept('/dump-method', function (req) {
+        })
+        .intercept('/dump-method', function (req) {
           expect(req.method).to.eq('GET')
           req.method = 'POST'
-        }).visit('/dump-method').contains('PATCH')
+        })
+        .visit('/dump-method')
+        .contains('PATCH')
       })
 
       it('stops passing request through once req.reply called', function () {
         cy.intercept('/dump-method', function (req) {
           throw new Error('this should not have been reached')
-        }).intercept('/dump-method', function (req) {
+        })
+        .intercept('/dump-method', function (req) {
           req.reply()
-        }).visit('/dump-method').contains('GET')
+        })
+        .visit('/dump-method')
+        .contains('GET')
       })
     })
 
     context('errors', function () {
       it('fails test if req.reply is called twice in req handler', function (done) {
         testFail((err) => {
-          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
+          expect(err.message).to.contain(
+            '`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once'
+          )
           done()
         })
 
@@ -1968,7 +2109,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('can timeout in request handler', function (done) {
         testFail((err) => {
           Cypress.config('defaultCommandTimeout', 5000)
-          expect(err.message).to.match(/^A request callback passed to `cy.intercept\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+          expect(err.message).to.match(
+            /^A request callback passed to `cy.intercept\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./
+          )
 
           done()
         })
@@ -1987,7 +2130,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           expect(req.headers['content-length']).to.eq('0')
 
           done()
-        }).intercept('/post-only', function (req) {
+        })
+        .intercept('/post-only', function (req) {
           req.body = ''
         })
         .then(() => {
@@ -2000,7 +2144,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           expect(req.headers['content-length']).to.eq('18')
 
           done()
-        }).intercept('/post-only', function (req) {
+        })
+        .intercept('/post-only', function (req) {
           req.body = 'this is only ascii'
         })
         .then(() => {
@@ -2013,7 +2158,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           expect(req.headers['content-length']).to.eq('8')
 
           done()
-        }).intercept('/post-only', function (req) {
+        })
+        .intercept('/post-only', function (req) {
           req.body = '🙃🤔'
         })
         .then(() => {
@@ -2050,7 +2196,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
       .as('redirect')
-      .intercept('/fixtures/generic.html?t=*').as('dest')
+      .intercept('/fixtures/generic.html?t=*')
+      .as('dest')
       .then(() => fetch(url))
       .wait('@redirect')
       .wait('@dest')
@@ -2062,7 +2209,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       cy.intercept('/redirect*')
       .as('redirect')
-      .intercept('/fixtures/generic.html*').as('dest')
+      .intercept('/fixtures/generic.html*')
+      .as('dest')
       .then(() => fetch(url))
       .wait('@redirect')
       .wait('@dest')
@@ -2080,40 +2228,43 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           expect(res.statusCode).to.eq(200)
           res.send()
         })
-      })
-      .then(() => fetch(url))
+      }).then(() => fetch(url))
     })
 
-    it('intercepts cached responses as expected', {
-      browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
-    }, function () {
-      // use a queryparam to bust cache from previous runs of this test
-      const url = `/fixtures/generic.html?t=${Date.now()}`
-      let hits = 0
+    it(
+      'intercepts cached responses as expected',
+      {
+        browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
+      },
+      function () {
+        // use a queryparam to bust cache from previous runs of this test
+        const url = `/fixtures/generic.html?t=${Date.now()}`
+        let hits = 0
 
-      cy.intercept('/fixtures/generic.html*', (req) => {
-        req.reply((res) => {
-          // the second time the request is sent, headers should have been passed
-          // that result in Express serving a 304
-          // Cypress is not expected to understand cache mechanisms at this point -
-          // if the user wants to break caching, they can DIY by editing headers
-          const expectedStatusCode = [200, 304][hits]
+        cy.intercept('/fixtures/generic.html*', (req) => {
+          req.reply((res) => {
+            // the second time the request is sent, headers should have been passed
+            // that result in Express serving a 304
+            // Cypress is not expected to understand cache mechanisms at this point -
+            // if the user wants to break caching, they can DIY by editing headers
+            const expectedStatusCode = [200, 304][hits]
 
-          expect(expectedStatusCode).to.exist
-          expect(res.statusCode).to.eq(expectedStatusCode)
+            expect(expectedStatusCode).to.exist
+            expect(res.statusCode).to.eq(expectedStatusCode)
 
-          hits++
-          res.send()
+            hits++
+            res.send()
+          })
         })
-      })
-      .as('foo')
-      .then(() => _.times(2, () => fetch(url)))
-      .wait('@foo')
-      .wait('@foo')
-      .then(() => {
-        expect(hits).to.eq(2)
-      })
-    })
+        .as('foo')
+        .then(() => _.times(2, () => fetch(url)))
+        .wait('@foo')
+        .wait('@foo')
+        .then(() => {
+          expect(hits).to.eq(2)
+        })
+      }
+    )
 
     it('can intercept a large proxy response', function (done) {
       cy.intercept('/1mb', (req) => {
@@ -2138,8 +2289,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           res.setDelay(1000).send('delay worked')
         })
       }).then(() => {
-        $.get('/timeout')
-        .done((responseText) => {
+        $.get('/timeout').done((responseText) => {
           expect(Date.now() - this.start).to.be.closeTo(1100, 100)
           expect(responseText).to.include('delay worked')
 
@@ -2148,13 +2298,12 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    it('can \'delay\' a proxy response using Promise.delay', function (done) {
+    it("can 'delay' a proxy response using Promise.delay", function (done) {
       cy.intercept('/timeout*', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
-          return Promise.delay(1000)
-          .then(() => {
+          return Promise.delay(1000).then(() => {
             res.send('Promise.delay worked')
           })
         })
@@ -2238,28 +2387,33 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can reply with a JSON fixture', function () {
-      cy.intercept({
-        method: 'POST',
-        url: '/test-xhr',
-      }, (req) => {
-        req.url = '/timeout'
-        req.method = 'GET'
-        req.reply((res) => {
-          res.send({
-            headers: {
-              'content-type': 'application/json',
-            },
-            fixture: 'valid.json',
+      cy.intercept(
+        {
+          method: 'POST',
+          url: '/test-xhr',
+        },
+        (req) => {
+          req.url = '/timeout'
+          req.method = 'GET'
+          req.reply((res) => {
+            res.send({
+              headers: {
+                'content-type': 'application/json',
+              },
+              fixture: 'valid.json',
+            })
           })
-        })
-      }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+        }
+      )
+      .visit('/fixtures/xhr-triggered.html')
+      .get('#trigger-xhr')
+      .click()
 
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
     it('can delete a response header', function () {
-      cy
-      .then(() => {
+      cy.then(() => {
         const xhr = $.get('/json-content-type')
 
         return xhr.then(() => {
@@ -2271,7 +2425,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         req.reply((res) => {
           delete res.headers['content-type']
         })
-      }).as('get')
+      })
+      .as('get')
       .then(() => {
         const xhr = $.get('/json-content-type')
 
@@ -2284,10 +2439,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     context('body parsing', function () {
-      [
-        'application/json',
-        'application/vnd.api+json',
-      ].forEach((contentType) => {
+      ;['application/json', 'application/vnd.api+json'].forEach((contentType) => {
         it(`automatically parses ${contentType} response bodies`, function () {
           const p = Promise.defer()
 
@@ -2297,19 +2449,23 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
               expect(res.body).to.deep.eq({})
               p.resolve()
             })
-          }).as('get')
+          })
+          .as('get')
           .then(() => {
             return $.get(`/json-content-type?contentType=${encodeURIComponent(contentType)}`)
-          }).then((responseJson) => {
+          })
+          .then((responseJson) => {
             expect(responseJson).to.deep.eq({})
 
             return p
           })
-          .wait('@get').its('response.body').should('deep.eq', {})
+          .wait('@get')
+          .its('response.body')
+          .should('deep.eq', {})
         })
       })
 
-      it('doesn\'t automatically parse JSON response bodies if content-type is wrong', function () {
+      it("doesn't automatically parse JSON response bodies if content-type is wrong", function () {
         const p = Promise.defer()
 
         cy.intercept('/fixtures/json.txt*', (req) => {
@@ -2317,15 +2473,19 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(res.body).to.eq('{ "foo": "bar" }')
             p.resolve()
           })
-        }).as('get')
+        })
+        .as('get')
         .then(() => {
           return $.get('/fixtures/json.txt')
-        }).then((responseText) => {
+        })
+        .then((responseText) => {
           expect(responseText).to.deep.eq('{ "foo": "bar" }')
 
           return p
         })
-        .wait('@get').its('response.body').should('deep.eq', '{ "foo": "bar" }')
+        .wait('@get')
+        .its('response.body')
+        .should('deep.eq', '{ "foo": "bar" }')
       })
 
       it('sets body to string if JSON is malformed', function () {
@@ -2337,11 +2497,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(res.body).to.eq('{ foo:::: }')
             p.resolve()
           })
-        }).as('get')
+        })
+        .as('get')
         .then(() => {
           return $.get('/fixtures/invalid.json').catch(() => p)
         })
-        .wait('@get').its('response.body').should('deep.eq', '{ foo:::: }')
+        .wait('@get')
+        .its('response.body')
+        .should('deep.eq', '{ foo:::: }')
       })
     })
 
@@ -2351,14 +2514,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send('baz')
           })
-        })
-        .then(() => {
-          return $.get('/custom-headers')
-          .then((_a, _b, xhr) => {
+        }).then(() => {
+          return $.get('/custom-headers').then((_a, _b, xhr) => {
             expect(xhr.status).to.eq(200)
             expect(xhr.responseText).to.eq('baz')
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
+            expect(xhr.getAllResponseHeaders()).to.include('x-foo: bar')
           })
         })
       })
@@ -2368,14 +2528,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send({ baz: 'quux' })
           })
-        })
-        .then(() => {
-          return $.getJSON('/custom-headers')
-          .then((data, _b, xhr) => {
+        }).then(() => {
+          return $.getJSON('/custom-headers').then((data, _b, xhr) => {
             expect(xhr.status).to.eq(200)
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
-            .and.include('content-type: application/json')
+            expect(xhr.getAllResponseHeaders()).to.include('x-foo: bar').and.include('content-type: application/json')
 
             expect(data).to.deep.eq({ baz: 'quux' })
           })
@@ -2387,13 +2543,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send(777)
           })
-        })
-        .then(() => {
-          $.getJSON('/custom-headers')
-          .fail((xhr) => {
+        }).then(() => {
+          $.getJSON('/custom-headers').fail((xhr) => {
             expect(xhr.status).to.eq(777)
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
+            expect(xhr.getAllResponseHeaders()).to.include('x-foo: bar')
 
             expect(xhr.responseText).to.include('hello there')
 
@@ -2407,14 +2560,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send(777, 'bar')
           })
-        })
-        .then(() => {
-          $.get('/custom-headers')
-          .fail((xhr) => {
+        }).then(() => {
+          $.get('/custom-headers').fail((xhr) => {
             expect(xhr.status).to.eq(777)
             expect(xhr.responseText).to.eq('bar')
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
+            expect(xhr.getAllResponseHeaders()).to.include('x-foo: bar')
 
             done()
           })
@@ -2426,15 +2576,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send(777, { bar: 'baz' })
           })
-        })
-        .then(() => {
-          $.getJSON('/custom-headers')
-          .fail((xhr) => {
+        }).then(() => {
+          $.getJSON('/custom-headers').fail((xhr) => {
             expect(xhr.status).to.eq(777)
             expect(xhr.responseJSON).to.deep.eq({ bar: 'baz' })
-            expect(xhr.getAllResponseHeaders())
-            .to.include('x-foo: bar')
-            .and.include('content-type: application/json')
+            expect(xhr.getAllResponseHeaders()).to.include('x-foo: bar').and.include('content-type: application/json')
 
             done()
           })
@@ -2446,10 +2592,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send(777, { bar: 'baz' }, { 'x-quux': 'quuz' })
           })
-        })
-        .then(() => {
-          $.getJSON('/custom-headers')
-          .fail((xhr) => {
+        }).then(() => {
+          $.getJSON('/custom-headers').fail((xhr) => {
             expect(xhr.status).to.eq(777)
             expect(xhr.responseJSON).to.deep.eq({ bar: 'baz' })
             expect(xhr.getAllResponseHeaders())
@@ -2482,8 +2626,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send({ forceNetworkError: true })
           })
-        })
-        .then(() => {
+        }).then(() => {
           $.get('/foo').fail((xhr) => {
             expect(xhr).to.include({
               status: 0,
@@ -2531,12 +2674,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             expect(res.body).to.contain('new body')
           })
-        }).intercept('/dump-method', function (req) {
+        })
+        .intercept('/dump-method', function (req) {
           req.reply((res) => {
             expect(res.body).to.contain('GET')
             res.body = 'new body'
           })
-        }).visit('/dump-method')
+        })
+        .visit('/dump-method')
         .contains('new body')
       })
 
@@ -2545,18 +2690,23 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             throw new Error('this should not have been reached')
           })
-        }).intercept('/dump-method', function (req) {
+        })
+        .intercept('/dump-method', function (req) {
           req.reply((res) => {
             res.send()
           })
-        }).visit('/dump-method').contains('GET')
+        })
+        .visit('/dump-method')
+        .contains('GET')
       })
     })
 
     context('errors', function () {
       it('fails test if res.send is called twice in req handler', function (done) {
         testFail((err) => {
-          expect(err.message).to.contain('`res.send()` was called multiple times in a response handler, but the response can only be sent once.')
+          expect(err.message).to.contain(
+            '`res.send()` was called multiple times in a response handler, but the response can only be sent once.'
+          )
           done()
         })
 
@@ -2599,8 +2749,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply((res) => {
             res.send({ statusCode: 1 })
           })
-        })
-        .then(() => {
+        }).then(() => {
           $.get('/foo')
         })
       })
@@ -2608,7 +2757,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
         testFail((err) => {
           expect(err.message)
-          .to.contain('A callback was provided to intercept the upstream response, but a network error occurred while making the request:')
+          .to.contain(
+            'A callback was provided to intercept the upstream response, but a network error occurred while making the request:'
+          )
           .and.contain('Error: connect ECONNREFUSED 127.0.0.1:3333')
 
           done()
@@ -2621,34 +2772,39 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
-      it('doesn\'t fail test if network error occurs retrieving response and response is not intercepted', {
-        // TODO: for some reason, this test is busted in FF
-        browser: '!firefox',
-      }, function () {
-        cy.intercept('/should-err*', function (req) {
-          req.reply()
-        })
-        .as('err')
-        .then(function () {
-          return new Promise((resolve) => {
-            $.get('http://localhost:3333/should-err')
-            .fail((xhr) => {
-              expect(xhr).to.include({
-                status: 0,
-                statusText: 'error',
-              })
+      it(
+        "doesn't fail test if network error occurs retrieving response and response is not intercepted",
+        {
+          // TODO: for some reason, this test is busted in FF
+          browser: '!firefox',
+        },
+        function () {
+          cy.intercept('/should-err*', function (req) {
+            req.reply()
+          })
+          .as('err')
+          .then(function () {
+            return new Promise((resolve) => {
+              $.get('http://localhost:3333/should-err').fail((xhr) => {
+                expect(xhr).to.include({
+                  status: 0,
+                  statusText: 'error',
+                })
 
-              resolve()
+                resolve()
+              })
             })
           })
-        })
-        .wait('@err', { timeout: 50 })
-      })
+          .wait('@err', { timeout: 50 })
+        }
+      )
 
       it('can timeout in req.reply handler', function (done) {
         testFail((err) => {
           Cypress.config('defaultCommandTimeout', 5000)
-          expect(err.message).to.match(/^A response handler timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+          expect(err.message).to.match(
+            /^A response handler timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./
+          )
 
           done()
         })
@@ -2659,26 +2815,32 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           req.reply(() => {
             return Promise.delay(200)
           })
-        })
-        .visit('/timeout')
+        }).visit('/timeout')
       })
 
-      it('can timeout when retrieving upstream response', {
-        responseTimeout: 25,
-      }, function (done) {
-        cy.once('fail', (err) => {
-          expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
-          .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
+      it(
+        'can timeout when retrieving upstream response',
+        {
+          responseTimeout: 25,
+        },
+        function (done) {
+          cy.once('fail', (err) => {
+            expect(err.message)
+            .to.match(
+              /^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./
+            )
+            .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
-          done()
-        })
+            done()
+          })
 
-        cy.intercept('/timeout*', (req) => {
-          req.reply(_.noop)
-        }).then(() => {
-          $.get('/timeout?ms=50')
-        })
-      })
+          cy.intercept('/timeout*', (req) => {
+            req.reply(_.noop)
+          }).then(() => {
+            $.get('/timeout?ms=50')
+          })
+        }
+      )
     })
   })
 
@@ -2746,9 +2908,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         done()
       })
 
-      cy.intercept('/foo*')
-      .as('foo.bar')
-      .wait('@foo.bar.request', { timeout: 100 })
+      cy.intercept('/foo*').as('foo.bar').wait('@foo.bar.request', { timeout: 100 })
     })
 
     it('can incrementally wait on responses', function () {
@@ -2813,9 +2973,13 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     })
 
     it('can alias a route without stubbing it', function () {
-      cy.intercept(/fixtures\/app/).as('getFoo').then(function () {
+      cy.intercept(/fixtures\/app/)
+      .as('getFoo')
+      .then(function () {
         $.get('/fixtures/app.json')
-      }).wait('@getFoo').then(function (res) {
+      })
+      .wait('@getFoo')
+      .then(function (res) {
         const log = cy.queue.logs({
           displayName: 'req',
         })[0]
@@ -2833,18 +2997,22 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // @see https://github.com/cypress-io/cypress/issues/8999
     it('can spy on a 204 no body response', function () {
-      cy.intercept('/status-code*').as('status')
+      cy.intercept('/status-code*')
+      .as('status')
       .then(() => {
         $.get('/status-code?code=204')
       })
-      .wait('@status').its('response.statusCode').should('eq', 204)
+      .wait('@status')
+      .its('response.statusCode')
+      .should('eq', 204)
     })
 
     // @see https://github.com/cypress-io/cypress/issues/8934
     it('can spy on a 304 not modified image response', function () {
       const url = `/fixtures/media/cypress.png?i=${Date.now()}`
 
-      cy.intercept(url).as('image')
+      cy.intercept(url)
+      .as('image')
       .then(() => {
         $.get({ url, cache: true })
       })
@@ -2857,24 +3025,36 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .then(() => {
         $.get({ url, cache: true })
       })
-      .wait('@image').its('response.statusCode').should('eq', 200)
-      .wait('@image').its('response.statusCode').should('eq', 304)
+      .wait('@image')
+      .its('response.statusCode')
+      .should('eq', 200)
+      .wait('@image')
+      .its('response.statusCode')
+      .should('eq', 304)
     })
 
     // https://github.com/cypress-io/cypress/issues/14522
     it('different aliases are used for the same url', () => {
-      cy.intercept('/status-code*').as('status')
+      cy.intercept('/status-code*')
+      .as('status')
       .then(() => {
         $.get('/status-code?code=204')
       })
-      .wait('@status').its('response.statusCode').should('eq', 204)
+      .wait('@status')
+      .its('response.statusCode')
+      .should('eq', 204)
 
-      cy.intercept('/status-code*').as('status2')
+      cy.intercept('/status-code*')
+      .as('status2')
       .then(() => {
         $.get('/status-code?code=301')
       })
-      .wait('@status').its('response.statusCode').should('eq', 301)
-      .wait('@status2').its('response.statusCode').should('eq', 301)
+      .wait('@status')
+      .its('response.statusCode')
+      .should('eq', 301)
+      .wait('@status2')
+      .its('response.statusCode')
+      .should('eq', 301)
     })
 
     // https://github.com/cypress-io/cypress/issues/9549
@@ -2893,18 +3073,21 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .then(() => {
         $.get('/foo')
       })
-      .wait('@err').should('have.property', 'error')
+      .wait('@err')
+      .should('have.property', 'error')
       .and('include', {
         message: 'forceNetworkError called',
         name: 'Error',
       })
-      .get('@err').should('not.have.property', 'response')
+      .get('@err')
+      .should('not.have.property', 'response')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/15823
     it('can override an alias using .as', function () {
       cy.intercept('/users*').as('getUsers')
-      cy.intercept('/users*', { body: { data: 'fake data' }, statusCode: 200 }).as('getUsers')
+      cy.intercept('/users*', { body: { data: 'fake data' }, statusCode: 200 })
+      .as('getUsers')
       .then(() => {
         $.get('/users')
       })
@@ -2919,19 +3102,26 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         $.get('/foo')
         $.get('/foo')
       })
-      .wait('@a').its('response.body').should('eq', 'foo')
-      .wait('@a').its('response.body').should('eq', 'bar')
+      .wait('@a')
+      .its('response.body')
+      .should('eq', 'foo')
+      .wait('@a')
+      .its('response.body')
+      .should('eq', 'bar')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/9306
     context('cy.get(alias)', function () {
       it('gets the latest Interception by alias', function () {
-        cy.intercept('/foo*', { bar: 'baz' }).as('alias')
+        cy.intercept('/foo*', { bar: 'baz' })
+        .as('alias')
         .then(() => {
           $.get('/foo')
           $.get('/foo')
         })
-        .wait('@alias').wait('@alias').then((interception) => {
+        .wait('@alias')
+        .wait('@alias')
+        .then((interception) => {
           cy.get('@alias').then((interception2) => {
             expect(interception).to.not.be.null
             expect(interception).to.eq(interception2)
@@ -2940,12 +3130,14 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
 
       it('gets all aliased Interceptions by alias.all', function () {
-        cy.intercept('/foo*', { bar: 'baz' }).as('alias')
+        cy.intercept('/foo*', { bar: 'baz' })
+        .as('alias')
         .then(() => {
           $.get('/foo')
           $.get('/foo')
         })
-        .wait('@alias').wait('@alias')
+        .wait('@alias')
+        .wait('@alias')
 
         cy.get('@alias.all').then((interceptions) => {
           expect(interceptions).to.have.length(2)
@@ -2955,14 +3147,17 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       it('gets indexed Interception by alias.number', function () {
         let interception
 
-        cy.intercept('/foo*', { bar: 'baz' }).as('alias')
+        cy.intercept('/foo*', { bar: 'baz' })
+        .as('alias')
         .then(() => {
           $.get('/foo')
           $.get('/foo')
         })
-        .wait('@alias').then((_interception) => {
+        .wait('@alias')
+        .then((_interception) => {
           interception = _interception
-        }).wait('@alias')
+        })
+        .wait('@alias')
 
         cy.get('@alias.0').then((interception2) => {
           expect(interception).to.not.be.null
@@ -2978,7 +3173,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .then(() => {
           $.get('/foo')
         })
-        .wait('@alias').then((interception) => {
+        .wait('@alias')
+        .then((interception) => {
           cy.get('@alias').then((interception2) => {
             expect(interception).to.not.be.null
             expect(interception).to.eq(interception2)
@@ -3011,8 +3207,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.intercept('/foo', (req) => {
           req.alias = 'fromInterceptor'
-        })
-        .wait('@fromInterceptor', { timeout: 100 })
+        }).wait('@fromInterceptor', { timeout: 100 })
       })
 
       it('dynamic aliases are fulfilled before route aliases', function (done) {
@@ -3052,26 +3247,38 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     // @see https://github.com/cypress-io/cypress/issues/8695
     context('yields request', function () {
       it('when not intercepted', function () {
-        cy.intercept('/post-only').as('foo')
+        cy.intercept('/post-only')
+        .as('foo')
         .then(() => {
           $.post('/post-only', 'some body')
-        }).wait('@foo').its('request.body').should('eq', 'some body')
+        })
+        .wait('@foo')
+        .its('request.body')
+        .should('eq', 'some body')
       })
 
       it('when intercepted', function () {
         cy.intercept('/post-only', (req) => {
           req.body = 'changed'
-        }).as('foo')
+        })
+        .as('foo')
         .then(() => {
           $.post('/post-only', 'some body')
-        }).wait('@foo').its('request.body').should('eq', 'changed')
+        })
+        .wait('@foo')
+        .its('request.body')
+        .should('eq', 'changed')
       })
 
       it('when static response body is provided', function () {
-        cy.intercept('/post-only', { static: 'response' }).as('foo')
+        cy.intercept('/post-only', { static: 'response' })
+        .as('foo')
         .then(() => {
           $.post('/post-only', 'some body')
-        }).wait('@foo').its('request.body').should('eq', 'some body')
+        })
+        .wait('@foo')
+        .its('request.body')
+        .should('eq', 'some body')
       })
     })
 
@@ -3089,14 +3296,11 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }
 
       it('when not stubbed', function (done) {
-        cy.intercept('/xml*').as('foo')
-        .then(testResponse('<foo>bar</foo>', done))
+        cy.intercept('/xml*').as('foo').then(testResponse('<foo>bar</foo>', done))
       })
 
       it('when stubbed with StaticResponse', function (done) {
-        cy.intercept('/xml*', 'something different')
-        .as('foo')
-        .then(testResponse('something different', done))
+        cy.intercept('/xml*', 'something different').as('foo').then(testResponse('something different', done))
       })
 
       it('when stubbed with req.reply', function (done) {
@@ -3113,9 +3317,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
       context('when stubbed with fixture', function () {
         it('with cy.intercept', function (done) {
-          cy.intercept('/xml*', { fixture: 'null.json' })
-          .as('foo')
-          .then(testResponse('', done))
+          cy.intercept('/xml*', { fixture: 'null.json' }).as('foo').then(testResponse('', done))
         })
 
         it('with req.reply', function (done) {
@@ -3148,7 +3350,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     context('overwrite cy.intercept', () => {
       it('works with an alias by default', () => {
         // sanity test before testing it with the cy.intercept overwrite
-        cy.intercept('/foo*', 'my value').as('netAlias')
+        cy.intercept('/foo*', 'my value')
+        .as('netAlias')
         .then(() => {
           return $.get('/foo')
         })
@@ -3169,7 +3372,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           })
         })
 
-        cy.intercept('/foo*', 'my value').as('netAlias')
+        cy.intercept('/foo*', 'my value')
+        .as('netAlias')
         .then(() => {
           return $.get('/foo')
         })
@@ -3194,7 +3398,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           })
         })
 
-        cy.intercept('/foo*', 'my value').as('netAlias')
+        cy.intercept('/foo*', 'my value')
+        .as('netAlias')
         .then(() => {
           return $.get('/foo')
         })
@@ -3255,7 +3460,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
   context('unit tests', function () {
     context('#getDisplayUrlMatcher', function () {
-      function testDisplayUrl (title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
+      function testDisplayUrl(title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
         return it(title, function () {
           expect(getDisplayUrlMatcher(matcher)).to.eq(expectedDisplayUrl)
         })
@@ -3267,7 +3472,10 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       testDisplayUrl('with only path', '/foo', { path: '/foo' })
       testDisplayUrl('with only pathname', '/foo', { pathname: '/foo' })
       testDisplayUrl('with host + port', '{hostname: foo.net, port: 1234}', { hostname: 'foo.net', port: 1234 })
-      testDisplayUrl('with url and query', '{url: http://something, query: {a: b}}', { url: 'http://something', query: { a: 'b' } })
+      testDisplayUrl('with url and query', '{url: http://something, query: {a: b}}', {
+        url: 'http://something',
+        query: { a: 'b' },
+      })
     })
   })
 })

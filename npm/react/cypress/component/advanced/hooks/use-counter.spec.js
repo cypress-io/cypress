@@ -5,7 +5,7 @@ import { mountHook } from '@cypress/react'
 
 // testing example hook function from
 // https://dev.to/jooforja/12-recipes-for-testing-react-applications-using-testing-library-1bh2#hooks
-function useCounter () {
+function useCounter() {
   const [count, setCount] = useState(0)
   const increment = useCallback(() => setCount((x) => x + 1), [])
 

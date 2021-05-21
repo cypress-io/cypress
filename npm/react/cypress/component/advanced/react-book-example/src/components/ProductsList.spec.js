@@ -36,9 +36,7 @@ describe.skip('Selecting by React props and state', () => {
       cy.log('**cy.react**')
       // find the top level <ProductsContainer> that we have mounted
       // under imported name "ProductsList"
-      cy.react('ProductsContainer')
-      .first()
-      .should('have.class', 'product-container')
+      cy.react('ProductsContainer').first().should('have.class', 'product-container')
 
       // find all instances of <AProduct> component
       cy.react('AProduct').should('have.length', 2)
@@ -68,9 +66,7 @@ describe.skip('Selecting by React props and state', () => {
       .should('include', { myName: 'Second item' })
 
       // find component using state
-      cy.getReact('AProduct', { state: { myName: 'Second item' } }).should(
-        'exist',
-      )
+      cy.getReact('AProduct', { state: { myName: 'Second item' } }).should('exist')
     })
 
     it('chains getReact', () => {
@@ -89,15 +85,10 @@ describe.skip('Selecting by React props and state', () => {
     it('finds components by props and state', () => {
       // by clicking on the Order button we change the
       // internal state of that component
-      cy.contains('.product', 'First item')
-      .find('button.order')
-      .click()
-      .wait(1000)
+      cy.contains('.product', 'First item').find('button.order').click().wait(1000)
 
       // the component is there for sure, since the DOM has updated
-      cy.contains('.product', '1')
-      .find('.name')
-      .should('have.text', 'First item')
+      cy.contains('.product', '1').find('.name').should('have.text', 'First item')
 
       // now find that component using the state value
       cy.react('AProduct', { state: { orderCount: 1 } })
@@ -108,10 +99,7 @@ describe.skip('Selecting by React props and state', () => {
     it('finds components by props and state (click twice)', () => {
       // by clicking on the Order button we change the
       // internal state of that component
-      cy.contains('.product', 'First item')
-      .find('button.order')
-      .click()
-      .click()
+      cy.contains('.product', 'First item').find('button.order').click().click()
 
       // now find that component using the state value
       cy.react('AProduct', { state: { orderCount: 2 } })

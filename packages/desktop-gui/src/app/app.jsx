@@ -17,7 +17,7 @@ import Project from '../project/project'
 
 @observer
 class App extends Component {
-  componentDidMount () {
+  componentDidMount() {
     appApi.listenForMenuClicks()
 
     ipc.getOptions().then((options = {}) => {
@@ -29,10 +29,10 @@ class App extends Component {
     authApi.loadUser()
   }
 
-  render () {
+  render() {
     switch (viewStore.currentView.name) {
       case C.LOADING:
-        return <Loader color='#888' scale={0.5} />
+        return <Loader color="#888" scale={0.5} />
       case C.INTRO:
         return (
           <Layout>
@@ -42,7 +42,7 @@ class App extends Component {
       default:
         return (
           <Layout>
-            <Project project={viewStore.currentView.project} app={appStore}/>
+            <Project project={viewStore.currentView.project} app={appStore} />
           </Layout>
         )
     }

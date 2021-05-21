@@ -6,7 +6,7 @@ const _ = require('lodash')
 /**
  *
  * @param {{what: any, file: string, exactSpecName: string, store?: Function compare?: Function}}
-	*/
+ */
 const getSnapshot = (opts) => {
   let result = null
 
@@ -38,17 +38,16 @@ const getSnapshot = (opts) => {
 }
 
 const saveSnapshot = (opts) => {
-  opts = _.defaults(opts, {
-  })
+  opts = _.defaults(opts, {})
 
-  return snapshotCore.core(_.extend({},
-    opts,
-    {
+  return snapshotCore.core(
+    _.extend({}, opts, {
       ext: '.js',
       opts: {
         update: true,
       },
-    }))
+    })
+  )
 }
 
 module.exports = {

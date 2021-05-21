@@ -3,7 +3,15 @@
 import React, { useCallback, useMemo, useRef } from 'react'
 import cs from 'classnames'
 import { throttle } from 'lodash'
-import { SearchInput, FileTree, SpecificTreeNode, TreeFile, FileBase, TreeFolder, VirtualizedTreeRef } from '@cypress/design-system'
+import {
+  SearchInput,
+  FileTree,
+  SpecificTreeNode,
+  TreeFile,
+  FileBase,
+  TreeFolder,
+  VirtualizedTreeRef,
+} from '@cypress/design-system'
 
 import { useFuzzySort } from './useFuzzySort'
 
@@ -18,7 +26,7 @@ export interface SpecListProps {
   onFileClick: (path: string) => void
 }
 
-const fuzzyTransform = <T, >(node: T, indexes: number[]) => ({
+const fuzzyTransform = <T,>(node: T, indexes: number[]) => ({
   ...node,
   indexes,
 })
@@ -38,34 +46,39 @@ export const SpecList: React.FC<SpecListProps> = ({ searchRef, className, specs,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onInput = useMemo(() => throttle(setSearch, 100), [])
 
-  const onFilePress = useCallback((file: SpecificTreeNode<TreeFile<FileBase>>) => onFileClick(file.node.id), [onFileClick])
-  const onFolderKeyDown = useCallback((folder: SpecificTreeNode<TreeFolder<FileBase>>, event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (folder.isFirst && event.key === 'ArrowUp') {
-      event.preventDefault()
+  const onFilePress = useCallback((file: SpecificTreeNode<TreeFile<FileBase>>) => onFileClick(file.node.id), [
+    onFileClick,
+  ])
+  const onFolderKeyDown = useCallback(
+    (folder: SpecificTreeNode<TreeFolder<FileBase>>, event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (folder.isFirst && event.key === 'ArrowUp') {
+        event.preventDefault()
 
-      searchRef.current.focus()
-    }
-  }, [searchRef])
+        searchRef.current.focus()
+      }
+    },
+    [searchRef]
+  )
 
   const onEnter = useCallback(() => fileTreeRef.current.focus(), [])
 
-  const onVerticalArrowKey = useCallback((arrow: 'up' | 'down') => {
-    if (arrow === 'down') {
-      onEnter()
-    }
-  }, [onEnter])
+  const onVerticalArrowKey = useCallback(
+    (arrow: 'up' | 'down') => {
+      if (arrow === 'down') {
+        onEnter()
+      }
+    },
+    [onEnter]
+  )
 
   return (
-    <nav
-      className={cs(styles.nav, className)}
-      data-cy='specs-list'
-    >
+    <nav className={cs(styles.nav, className)} data-cy="specs-list">
       <SearchInput
         className={styles.searchInput}
         inputRef={searchRef}
-        placeholder='Find spec...'
+        placeholder="Find spec..."
         aria-label="Search specs"
-        data-cy='search-specs'
+        data-cy="search-specs"
         onInput={onInput}
         onEnter={onEnter}
         onVerticalArrowKey={onVerticalArrowKey}

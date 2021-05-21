@@ -25,7 +25,7 @@ export class Scroller {
   private _userScroll = true
   private _countUserScrollsTimeout?: TimeoutID
 
-  setContainer (container: Element, onUserScroll?: UserScrollCallback) {
+  setContainer(container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
 
     this._userScroll = true
@@ -34,7 +34,7 @@ export class Scroller {
     this._listenToScrolls(onUserScroll)
   }
 
-  _listenToScrolls (onUserScroll?: UserScrollCallback) {
+  _listenToScrolls(onUserScroll?: UserScrollCallback) {
     if (!this._container) return
 
     this._container.addEventListener('scroll', () => {
@@ -69,9 +69,11 @@ export class Scroller {
     })
   }
 
-  scrollIntoView (element: HTMLElement) {
+  scrollIntoView(element: HTMLElement) {
     if (!this._container) {
-      throw new Error('A container must be set on the scroller with `scroller.setContainer(container)` before trying to scroll an element into view')
+      throw new Error(
+        'A container must be set on the scroller with `scroller.setContainer(container)` before trying to scroll an element into view'
+      )
     }
 
     if (this._isFullyVisible(element)) {
@@ -91,14 +93,13 @@ export class Scroller {
     this._container.scrollTop = scrollTopGoal
   }
 
-  _isFullyVisible (element: HTMLElement) {
+  _isFullyVisible(element: HTMLElement) {
     if (!this._container) return false
 
-    return element.offsetTop - this._container.scrollTop > 0
-           && this._container.scrollTop > this._aboveBottom(element)
+    return element.offsetTop - this._container.scrollTop > 0 && this._container.scrollTop > this._aboveBottom(element)
   }
 
-  _aboveBottom (element: HTMLElement) {
+  _aboveBottom(element: HTMLElement) {
     // add padding, since commands expanding and collapsing can mess with
     // the offset, causing the running command to be half cut off
     // https://github.com/cypress-io/cypress/issues/228
@@ -108,24 +109,24 @@ export class Scroller {
     return element.offsetTop + element.clientHeight - containerHeight + PADDING
   }
 
-  getScrollTop () {
+  getScrollTop() {
     return this._container ? this._container.scrollTop : 0
   }
 
-  setScrollTop (scrollTop?: number | null) {
+  setScrollTop(scrollTop?: number | null) {
     if (this._container && scrollTop != null) {
       this._container.scrollTop = scrollTop
     }
   }
 
-  scrollToEnd () {
+  scrollToEnd() {
     if (!this._container) return
 
     this.setScrollTop(this._container.scrollHeight - this._container.clientHeight)
   }
 
   // for testing purposes
-  __reset () {
+  __reset() {
     this._container = null
     this._userScroll = true
     this._userScrollCount = 0

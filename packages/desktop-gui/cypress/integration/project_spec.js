@@ -6,7 +6,7 @@ describe('Project', function () {
     cy.fixture('projects_statuses').as('projectStatuses')
 
     cy.visitIndex().then((win) => {
-      ({ start: this.start, ipc: this.ipc } = win.App)
+      ;({ start: this.start, ipc: this.ipc } = win.App)
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)

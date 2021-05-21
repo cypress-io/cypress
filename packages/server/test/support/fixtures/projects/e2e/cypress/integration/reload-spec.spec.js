@@ -1,13 +1,9 @@
 top.count = top.count || 0
 
 describe('runner reload', () => {
-  before(() => {
+  before(() => {})
 
-  })
-
-  beforeEach(() => {
-
-  })
+  beforeEach(() => {})
 
   it('dummy test 1')
 
@@ -27,14 +23,9 @@ describe('runner reload', () => {
     }
   })
 
-  it('dummy test 2', () => {
+  it('dummy test 2', () => {})
 
-  })
-
-  afterEach(() => {
-
-  })
+  afterEach(() => {})
 })
 
-after(function () {
-})
+after(function () {})

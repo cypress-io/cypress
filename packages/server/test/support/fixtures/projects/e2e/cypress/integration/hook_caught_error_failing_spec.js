@@ -38,13 +38,7 @@ describe('s3a', () => {
   after(() => {
     // it should not have fired test:after:run
     // for t8a yet
-    expect(testAfterRuns).to.deep.eq([
-      't1a',
-      't2a',
-      't5a',
-      't6a',
-      't7a',
-    ])
+    expect(testAfterRuns).to.deep.eq(['t1a', 't2a', 't5a', 't6a', 't7a'])
   })
 
   it('t8a', () => {})
@@ -62,14 +56,6 @@ describe('s4a', () => {
 
 describe('s5a', () => {
   it('fires all test:after:run events', () => {
-    expect(testAfterRuns).to.deep.eq([
-      't1a',
-      't2a',
-      't5a',
-      't6a',
-      't7a',
-      't8a',
-      't10a',
-    ])
+    expect(testAfterRuns).to.deep.eq(['t1a', 't2a', 't5a', 't6a', 't7a', 't8a', 't10a'])
   })
 })

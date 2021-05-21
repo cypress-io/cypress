@@ -27,8 +27,12 @@ describe('Project Mode', function () {
     this.ipc.openProject.resolves(openProject.promise)
     this.start()
 
-    cy.get('footer').invoke('position').then(({ top }) => {
-      cy.get('footer').invoke('outerHeight').then((height) => {
+    cy.get('footer')
+    .invoke('position')
+    .then(({ top }) => {
+      cy.get('footer')
+      .invoke('outerHeight')
+      .then((height) => {
         expect(top).to.equal(Cypress.config('viewportHeight') - height)
       })
     })
@@ -57,9 +61,7 @@ describe('Project Mode', function () {
 
     it('shows project name in nav', function () {
       this.start()
-      cy.get('.main-nav .nav:first-child div')
-      .should('contain', this.config.projectName)
-      .and('not.contain', 'foo')
+      cy.get('.main-nav .nav:first-child div').should('contain', this.config.projectName).and('not.contain', 'foo')
     })
   })
 })

@@ -12,9 +12,9 @@ import * as windows from '../../../lib/gui/windows'
 describe('gui/dialog', () => {
   context('.show', () => {
     beforeEach(function () {
-      this.showOpenDialog = (dialog.showOpenDialog = sinon.stub().resolves({
+      this.showOpenDialog = dialog.showOpenDialog = sinon.stub().resolves({
         filePaths: [],
-      }))
+      })
     })
 
     it('calls dialog.showOpenDialog with args', function () {
@@ -56,10 +56,10 @@ describe('gui/dialog', () => {
 
   context('.showSaveDialog', () => {
     beforeEach(function () {
-      this.electronShowSaveDialog = (dialog.showSaveDialog = sinon.stub().resolves({
+      this.electronShowSaveDialog = dialog.showSaveDialog = sinon.stub().resolves({
         canceled: true,
         filePath: '',
-      }))
+      })
 
       this.integrationFolder = '/path/to/project/cypress/integration'
 
@@ -75,9 +75,12 @@ describe('gui/dialog', () => {
     it('sets default path to untitled.spec.js in integration folder', function () {
       showSaveDialog(this.integrationFolder)
 
-      expect(this.electronShowSaveDialog).to.be.calledWithMatch({}, {
-        defaultPath: path.join(this.integrationFolder, 'untitled.spec.js'),
-      })
+      expect(this.electronShowSaveDialog).to.be.calledWithMatch(
+        {},
+        {
+          defaultPath: path.join(this.integrationFolder, 'untitled.spec.js'),
+        }
+      )
     })
 
     it('resolves null when canceled', function () {

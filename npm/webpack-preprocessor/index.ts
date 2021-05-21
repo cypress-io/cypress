@@ -17,7 +17,7 @@ interface BundleObject {
 }
 
 // bundle promises from input spec filename to output bundled file paths
-let bundles: {[key: string]: BundleObject} = {}
+let bundles: { [key: string]: BundleObject } = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration
@@ -177,17 +177,14 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
     // file on disk
-    const outputPath = path.extname(file.outputPath) === '.js'
-      ? file.outputPath
-      : `${file.outputPath}.js`
+    const outputPath = path.extname(file.outputPath) === '.js' ? file.outputPath : `${file.outputPath}.js`
 
     const entry = [filePath].concat(options.additionalEntries || [])
 
     const watchOptions = options.watchOptions || {}
 
     // user can override the default options
-    const webpackOptions: webpack.Configuration = _
-    .chain(options.webpackOptions)
+    const webpackOptions: webpack.Configuration = _.chain(options.webpackOptions)
     .defaultTo(defaultWebpackOptions)
     .defaults({
       mode: defaultWebpackOptions.mode,
@@ -308,7 +305,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       latestBundle = createDeferred<string>()
       bundles[filePath].promise = latestBundle.promise
 
-      bundles[filePath].promise.finally(() => {
+      bundles[filePath].promise
+      .finally(() => {
         debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
         // when the bundling is finished, emit 'rerun' to let Cypress
         // know to rerun the spec, but NOT when it is the initial
@@ -364,7 +362,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
 // provide a clone of the default options
 Object.defineProperty(preprocessor, 'defaultOptions', {
-  get () {
+  get() {
     debug('get default options')
 
     return {
@@ -380,7 +378,7 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string | Error) {
+function cleanseError(err: string | Error) {
   let msg = typeof err === 'string' ? err : err.message
 
   return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')

@@ -1,5 +1,11 @@
 import savedState from './saved_state'
-import { Command, FileDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite } from './util/spec_writer'
+import {
+  Command,
+  FileDetails,
+  createNewTestInFile,
+  appendCommandsToTest,
+  createNewTestInSuite,
+} from './util/spec_writer'
 
 interface FileDetailsOptionalPosition {
   absoluteFile: string
@@ -17,21 +23,21 @@ interface SaveInfo {
 class StudioSaveError extends Error {
   static errMessage = (isSuite) => `Studio was unable to find your ${isSuite ? 'suite' : 'test'} in the spec file.`
 
-  constructor (isSuite) {
+  constructor(isSuite) {
     super(StudioSaveError.errMessage(isSuite))
     this.name = 'StudioSaveError'
   }
 }
 
 export const setStudioModalShown = () => {
-  return savedState.create()
-  .then((state) => {
+  return savedState.create().then((state) => {
     state.set('showedStudioModal', true)
   })
 }
 
 export const getStudioModalShown = () => {
-  return savedState.create()
+  return savedState
+  .create()
   .then((state) => state.get())
   .then((state) => !!state.showedStudioModal)
 }
@@ -53,8 +59,7 @@ export const save = (saveInfo: SaveInfo) => {
 
   return saveToFile()
   .then((success) => {
-    return setStudioModalShown()
-    .then(() => {
+    return setStudioModalShown().then(() => {
       if (!success) {
         throw new StudioSaveError(isSuite)
       }

@@ -15,11 +15,11 @@ const Highlight = ({ selector, appendTo, styles, showTooltip = true }) => {
             key={i}
             title={selector}
             visible={showTooltip}
-            placement='top-start'
+            placement="top-start"
             appendTo={appendTo}
             updateCue={updateCue}
           >
-            <div className='highlight' style={style} />
+            <div className="highlight" style={style} />
           </Tooltip>
         )
       })}
@@ -27,7 +27,7 @@ const Highlight = ({ selector, appendTo, styles, showTooltip = true }) => {
   )
 }
 
-function renderHighlight (container, props) {
+function renderHighlight(container, props) {
   render(<Highlight {...props} />, container)
 }
 

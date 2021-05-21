@@ -65,9 +65,7 @@ describe('cookies', () => {
       cy.clearCookie('wtf').should('be.null')
       cy.getCookie('doesNotExist').should('be.null')
 
-      cy.document()
-      .its('cookie')
-      .should('be.empty')
+      cy.document().its('cookie').should('be.empty')
     })
 
     it('resets cookies between tests correctly', () => {
@@ -99,8 +97,7 @@ describe('cookies', () => {
     it('sends cookies to localhost:2121', () => {
       cy.clearCookies()
       cy.setCookie('asdf', 'jkl')
-      cy.request(`${httpUrl}/requestCookies`)
-      .its('body').should('deep.eq', { asdf: 'jkl' })
+      cy.request(`${httpUrl}/requestCookies`).its('body').should('deep.eq', { asdf: 'jkl' })
     })
 
     it('handles expired cookies secure', () => {
@@ -135,12 +132,10 @@ describe('cookies', () => {
       cy.getCookies().should('have.length', 1)
 
       // secure cookies should have been attached
-      cy.request(`${httpsUrl}/requestCookies`)
-      .its('body').should('deep.eq', { shouldExpire: 'oneHour' })
+      cy.request(`${httpsUrl}/requestCookies`).its('body').should('deep.eq', { shouldExpire: 'oneHour' })
 
       // secure cookies should not have been attached
-      cy.request(`${httpUrl}/requestCookies`)
-      .its('body').should('deep.eq', {})
+      cy.request(`${httpUrl}/requestCookies`).its('body').should('deep.eq', {})
 
       cy.visit(`${httpsUrl}/expirationMaxAge`)
       cy.getCookies().should('be.empty')

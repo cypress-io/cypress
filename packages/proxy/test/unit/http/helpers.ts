@@ -1,6 +1,6 @@
 import { HttpMiddleware, _runStage } from '../../../lib/http'
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
+export function testMiddleware(middleware: HttpMiddleware<any>[], ctx = {}) {
   const fullCtx = {
     req: {},
     res: {},

@@ -54,11 +54,11 @@ export default class State {
 
   @observable.ref scriptError = null
 
-  constructor (reporterWidth = _defaults.reporterWidth) {
+  constructor(reporterWidth = _defaults.reporterWidth) {
     this.reporterWidth = reporterWidth
   }
 
-  @computed get scale () {
+  @computed get scale() {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
@@ -66,65 +66,73 @@ export default class State {
     return 1
   }
 
-  @computed get _containerWidth () {
+  @computed get _containerWidth() {
     return this.windowWidth - this.absoluteReporterWidth
   }
 
-  @computed get _containerHeight () {
+  @computed get _containerHeight() {
     return this.windowHeight - this.headerHeight
   }
 
-  @computed get marginLeft () {
-    return (this._containerWidth / 2) - (this.width / 2)
+  @computed get marginLeft() {
+    return this._containerWidth / 2 - this.width / 2
   }
 
-  @computed get displayScale () {
+  @computed get displayScale() {
     return Math.floor(this.scale * 100)
   }
 
-  @computed.struct get messageStyles () {
+  @computed.struct get messageStyles() {
     const actualHeight = this.height * this.scale
     const messageHeight = 33
     const nudge = 10
 
-    if ((actualHeight + messageHeight + (nudge * 2)) >= this._containerHeight) {
+    if (actualHeight + messageHeight + nudge * 2 >= this._containerHeight) {
       return { state: 'stationary' }
     }
 
     return {
       state: 'attached',
       styles: {
-        top: (actualHeight + this.headerHeight + nudge),
+        top: actualHeight + this.headerHeight + nudge,
       },
     }
   }
 
-  @action setIsLoading (isLoading) {
+  @action setIsLoading(isLoading) {
     this.isLoading = isLoading
   }
 
-  @action updateDimensions (width, height) {
+  @action updateDimensions(width, height) {
     this.width = width
     this.height = height
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
-    if (windowWidth != null) this.windowWidth = windowWidth
+  @action updateWindowDimensions({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+    if (windowWidth != null) {
+      this.windowWidth = windowWidth
+    }
 
-    if (windowHeight != null) this.windowHeight = windowHeight
+    if (windowHeight != null) {
+      this.windowHeight = windowHeight
+    }
 
-    if (reporterWidth != null) this.absoluteReporterWidth = reporterWidth
+    if (reporterWidth != null) {
+      this.absoluteReporterWidth = reporterWidth
+    }
 
-    if (headerHeight != null) this.headerHeight = headerHeight
+    if (headerHeight != null) {
+      this.headerHeight = headerHeight
+    }
   }
 
-  @action clearMessage () {
+  @action clearMessage() {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
   }
 
-  setCallbackAfterUpdate (cb) {
+  setCallbackAfterUpdate(cb) {
     this.callbackAfterUpdate = () => {
       this.setCallbackAfterUpdateToNull()
 
@@ -132,11 +140,11 @@ export default class State {
     }
   }
 
-  @action setCallbackAfterUpdateToNull () {
+  @action setCallbackAfterUpdateToNull() {
     this.callbackAfterUpdate = null
   }
 
-  @action resetUrl () {
+  @action resetUrl() {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl

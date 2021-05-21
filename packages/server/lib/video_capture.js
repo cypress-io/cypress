@@ -27,13 +27,15 @@ const deferredPromise = function () {
 }
 
 module.exports = {
-  generateFfmpegChaptersConfig (tests) {
+  generateFfmpegChaptersConfig(tests) {
     if (!tests) {
       return null
     }
 
-    const configString = tests.map((test) => {
-      return test.attempts.map((attempt, i) => {
+    const configString = tests
+    .map((test) => {
+      return test.attempts
+      .map((attempt, i) => {
         const { videoTimestamp, wallClockDuration } = attempt
         let title = test.title ? test.title.join(' ') : ''
 
@@ -48,37 +50,42 @@ module.exports = {
           `END=${videoTimestamp}`,
           `title=${title}`,
         ].join('\n')
-      }).join('\n')
-    }).join('\n')
+      })
+      .join('\n')
+    })
+    .join('\n')
 
     return `;FFMETADATA1\n${configString}`
   },
 
-  getMsFromDuration (duration) {
+  getMsFromDuration(duration) {
     return utils.timemarkToSeconds(duration) * 1000
   },
 
-  getCodecData (src) {
+  getCodecData(src) {
     return new Promise((resolve, reject) => {
       return ffmpeg()
       .on('stderr', (stderr) => {
         return debug('get codecData stderr log %o', { message: stderr })
-      }).on('codecData', resolve)
+      })
+      .on('codecData', resolve)
       .input(src)
       .format('null')
       .output(new BlackHoleStream())
       .run()
-    }).tap((data) => {
+    })
+    .tap((data) => {
       return debug('codecData %o', {
         src,
         data,
       })
-    }).tapCatch((err) => {
+    })
+    .tapCatch((err) => {
       return debug('getting codecData failed', { err })
     })
   },
 
-  getChapters (fileName) {
+  getChapters(fileName) {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
         if (err) {
@@ -90,16 +97,14 @@ module.exports = {
     })
   },
 
-  copy (src, dest) {
+  copy(src, dest) {
     debug('copying from %s to %s', src, dest)
 
-    return fs
-    .copyAsync(src, dest, { overwrite: true })
-    .catch({ code: 'ENOENT' }, () => {})
+    return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => {})
   },
   // dont yell about ENOENT errors
 
-  start (name, options = {}) {
+  start(name, options = {}) {
     const pt = stream.PassThrough()
     const ended = deferredPromise()
     let done = false
@@ -108,7 +113,7 @@ module.exports = {
     let writtenChunksCount = 0
 
     _.defaults(options, {
-      onError () {},
+      onError() {},
     })
 
     const endVideoCapture = function (waitForMoreChunksTimeout = 3000) {
@@ -196,13 +201,16 @@ module.exports = {
 
           return resolve({
             cmd,
-            startedVideoCapture: new Date,
+            startedVideoCapture: new Date(),
           })
-        }).on('codecData', (data) => {
+        })
+        .on('codecData', (data) => {
           return debug('capture codec data: %o', data)
-        }).on('stderr', (stderr) => {
+        })
+        .on('stderr', (stderr) => {
           return debug('capture stderr log %o', { message: stderr })
-        }).on('error', (err, stdout, stderr) => {
+        })
+        .on('error', (err, stdout, stderr) => {
           debug('capture errored: %o', { error: err.message, stdout, stderr })
 
           // bubble errors up
@@ -210,7 +218,8 @@ module.exports = {
 
           // reject the ended promise
           return ended.reject(err)
-        }).on('end', () => {
+        })
+        .on('end', () => {
           debug('capture ended')
 
           return ended.resolve()
@@ -232,17 +241,14 @@ module.exports = {
           // since video timestamp resets to 0, timestamps already written will be dropped
           // .outputOption('-vsync vfr')
         } else {
-          cmd
-          .inputFormat('image2pipe')
-          .inputOptions('-use_wallclock_as_timestamps 1')
+          cmd.inputFormat('image2pipe').inputOptions('-use_wallclock_as_timestamps 1')
         }
 
         return cmd.save(name)
       })
     }
 
-    return startCapturing()
-    .then(({ cmd, startedVideoCapture }) => {
+    return startCapturing().then(({ cmd, startedVideoCapture }) => {
       return {
         _pt: pt,
         cmd,
@@ -253,7 +259,7 @@ module.exports = {
     })
   },
 
-  async process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
+  async process(name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
     const metaFileName = `${name}.meta`
 
     const maybeGenerateMetaFile = Promise.method(() => {
@@ -270,21 +276,18 @@ module.exports = {
     let total = null
 
     return new Promise((resolve, reject) => {
-      debug('processing video from %s to %s video compression %o',
-        name, cname, videoCompression)
+      debug('processing video from %s to %s video compression %o', name, cname, videoCompression)
 
       const command = ffmpeg()
-      const outputOptions = [
-        '-preset fast',
-        `-crf ${videoCompression}`,
-      ]
+      const outputOptions = ['-preset fast', `-crf ${videoCompression}`]
 
       if (addChaptersMeta) {
         command.input(metaFileName)
         outputOptions.push('-map_metadata 1')
       }
 
-      command.input(name)
+      command
+      .input(name)
       .videoCodec('libx264')
       .outputOptions(outputOptions)
       // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
@@ -327,7 +330,8 @@ module.exports = {
         onProgress(1)
 
         // rename and obliterate the original
-        return fs.moveAsync(cname, name, {
+        return fs
+        .moveAsync(cname, name, {
           overwrite: true,
         })
         .then(() => {
@@ -338,8 +342,8 @@ module.exports = {
         .then(() => {
           return resolve()
         })
-      }).save(cname)
+      })
+      .save(cname)
     })
   },
-
 }

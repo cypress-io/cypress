@@ -30,7 +30,7 @@ describe('Component with router usage', () => {
     mount(
       <RouterContext.Provider value={router}>
         <RouterPage />
-      </RouterContext.Provider>,
+      </RouterContext.Provider>
     )
 
     cy.contains('Next.js route /testPath')
@@ -60,7 +60,7 @@ describe('Component with router usage', () => {
     mount(
       <RouterContext.Provider value={router}>
         <RouterPage />
-      </RouterContext.Provider>,
+      </RouterContext.Provider>
     )
 
     cy.get('button')

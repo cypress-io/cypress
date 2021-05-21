@@ -7,9 +7,7 @@ import * as ChildComponent from './ChildComponent'
 
 describe('Mocking', () => {
   it('named getRandomNumber imported in the child component', () => {
-    cy.stub(calc, 'getRandomNumber')
-    .as('lucky')
-    .returns(777)
+    cy.stub(calc, 'getRandomNumber').as('lucky').returns(777)
 
     mount(<ParentComponent />)
     cy.contains('.random', '777')

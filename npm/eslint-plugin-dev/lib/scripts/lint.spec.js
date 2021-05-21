@@ -42,7 +42,8 @@ beforeEach(() => {
   sinon.stub(process, 'exit')
 
   sh.exec
-  .withArgs(`git branch`).returns(sh.ShellString('* mybranch'))
+  .withArgs(`git branch`)
+  .returns(sh.ShellString('* mybranch'))
 
   .withArgs(`git diff --name-only --diff-filter=MA --staged`)
   .returns(getStagedFiles())
@@ -74,9 +75,7 @@ describe('lint-changed', () => {
   const filenames = 'bar.js baz.js foo.js'
 
   beforeEach(() => {
-    sh.exec
-    .withArgs(`./node_modules/.bin/eslint --color=true '' ${filenames}`)
-    .yields(null, 'success')
+    sh.exec.withArgs(`./node_modules/.bin/eslint --color=true '' ${filenames}`).yields(null, 'success')
   })
 
   it('lint success', async () => {
@@ -85,9 +84,7 @@ describe('lint-changed', () => {
   })
 
   it('lint failures', async () => {
-    sh.exec
-    .withArgs(`./node_modules/.bin/eslint --color=true '' ${filenames}`)
-    .yields('foo error')
+    sh.exec.withArgs(`./node_modules/.bin/eslint --color=true '' ${filenames}`).yields('foo error')
 
     await lintChanged.start()
     expect(process.exit).calledOnce
@@ -95,9 +92,7 @@ describe('lint-changed', () => {
 
   it('lint with --fix', async () => {
     process.argv = ['_', '_', '--fix']
-    sh.exec
-    .withArgs(`./node_modules/.bin/eslint --color=true --fix '' ${filenames}`)
-    .yields(null, 'success')
+    sh.exec.withArgs(`./node_modules/.bin/eslint --color=true --fix '' ${filenames}`).yields(null, 'success')
 
     await lintChanged.start()
     expect(process.exit).not.calledOnce
@@ -124,9 +119,7 @@ describe('lint-pre-push', () => {
 
 describe('lint-pre-commit', () => {
   beforeEach(() => {
-    sh.exec
-    .withArgs(`./node_modules/.bin/eslint --color=true --fix '' foo.js`)
-    .yields(null, 'success')
+    sh.exec.withArgs(`./node_modules/.bin/eslint --color=true --fix '' foo.js`).yields(null, 'success')
   })
 
   it('lint success', async () => {

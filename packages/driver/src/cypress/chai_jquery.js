@@ -88,7 +88,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         _.includes(actual, expected),
         `expected #{this} to contain ${message}`,
         `expected #{this} not to contain ${notMessage}`,
-        ...args,
+        ...args
       )
     }
 
@@ -98,7 +98,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       actual === expected,
       `expected #{this} to have ${message}`,
       `expected #{this} not to have ${notMessage}`,
-      ...args,
+      ...args
     )
   }
 
@@ -121,7 +121,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       wrap(this).hasClass(className),
       'expected #{this} to have class #{exp}',
       'expected #{this} not to have class #{exp}',
-      className,
+      className
     )
   })
 
@@ -134,18 +134,12 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       wrap(this).prop('id') === id,
       'expected #{this} to have id #{exp}',
       'expected #{this} not to have id #{exp}',
-      id,
+      id
     )
   })
 
   chai.Assertion.addMethod('html', function (html) {
-    assertDom(
-      this,
-      'html',
-      'expected #{this} to have HTML #{exp}',
-      'expected #{this} not to have HTML #{exp}',
-      html,
-    )
+    assertDom(this, 'html', 'expected #{this} to have HTML #{exp}', 'expected #{this} not to have HTML #{exp}', html)
 
     const actual = wrap(this).html()
 
@@ -157,20 +151,14 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'HTML #{exp}, but the HTML was #{act}',
       'HTML #{exp}',
       html,
-      actual,
+      actual
     )
   })
 
   chai.Assertion.addMethod('text', function (text) {
     text = maybeCastNumberToString(text)
 
-    assertDom(
-      this,
-      'text',
-      'expected #{this} to have text #{exp}',
-      'expected #{this} not to have text #{exp}',
-      text,
-    )
+    assertDom(this, 'text', 'expected #{this} to have text #{exp}', 'expected #{this} not to have text #{exp}', text)
 
     const actual = wrap(this).text()
 
@@ -182,7 +170,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'text #{exp}, but the text was #{act}',
       'text #{exp}',
       text,
-      actual,
+      actual
     )
   })
 
@@ -200,7 +188,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'value',
       'expected #{this} to have value #{exp}',
       'expected #{this} not to have value #{exp}',
-      value,
+      value
     )
 
     const actual = $el.val()
@@ -213,7 +201,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'value #{exp}, but the value was #{act}',
       'value #{exp}',
       value,
-      actual,
+      actual
     )
   })
 
@@ -224,12 +212,12 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       wrap(this).has(selector).length > 0,
       'expected #{this} to have descendants #{exp}',
       'expected #{this} not to have descendants #{exp}',
-      selector,
+      selector
     )
   })
 
   chai.Assertion.overwriteProperty('empty', (_super) => {
-    return (function (...args) {
+    return function (...args) {
       if ($dom.isDom(this._obj)) {
         return assert(
           this,
@@ -237,16 +225,16 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           wrap(this).is(':empty'),
           'expected #{this} to be #{exp}',
           'expected #{this} not to be #{exp}',
-          'empty',
+          'empty'
         )
       }
 
       return _super.apply(this, args)
-    })
+    }
   })
 
   chai.Assertion.overwriteMethod('match', (_super) => {
-    return (function (...args) {
+    return function (...args) {
       const selector = args[0]
 
       if ($dom.isDom(this._obj)) {
@@ -256,12 +244,12 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           wrap(this).is(selector),
           'expected #{this} to match #{exp}',
           'expected #{this} not to match #{exp}',
-          selector,
+          selector
         )
       }
 
       return _super.apply(this, args)
-    })
+    }
   })
 
   _.each(selectors, (selectorName, selector) => {
@@ -272,7 +260,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         wrap(this).is(`:${selector}`),
         'expected #{this} to be #{exp}',
         'expected #{this} not to be #{exp}',
-        selectorName,
+        selectorName
       )
     })
   })
@@ -284,7 +272,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         accessor,
         `expected #{this} to have ${description} #{exp}`,
         `expected #{this} not to have ${description} #{exp}`,
-        name,
+        name
       )
 
       const actual = wrap(this)[accessor](name)
@@ -297,7 +285,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           actual !== undefined,
           `expected #{this} to have ${description} #{exp}`,
           `expected #{this} not to have ${description} #{exp}`,
-          name,
+          name
         )
 
         // change the subject
@@ -305,16 +293,21 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       } else {
         // if we don't have an accessor here at all we need to
         // have a different failure message
-        let message; let negatedMessage
+        let message
+        let negatedMessage
 
         if (_.isUndefined(actual)) {
           message = `expected \#{this} to have ${description} ${inspect(name)}`
 
           negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)}`
         } else {
-          message = `expected \#{this} to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          message = `expected \#{this} to have ${description} ${inspect(
+            name
+          )} with the value \#{exp}, but the value was \#{act}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          negatedMessage = `expected \#{this} not to have ${description} ${inspect(
+            name
+          )} with the value \#{exp}, but the value was \#{act}`
         }
 
         // only cast .attr() as a string
@@ -325,15 +318,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           val = maybeCastNumberToString(val)
         }
 
-        assert(
-          this,
-          accessor,
-          (actual != null) && (actual === val),
-          message,
-          negatedMessage,
-          val,
-          actual,
-        )
+        assert(this, accessor, actual != null && actual === val, message, negatedMessage, val, actual)
       }
 
       return this

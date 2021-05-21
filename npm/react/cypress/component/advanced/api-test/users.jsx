@@ -1,14 +1,14 @@
 import React from 'react'
 
 export class Users extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       users: [],
     }
   }
 
-  componentDidMount () {
+  componentDidMount() {
     fetch('https://jsonplaceholder.cypress.io/users?_limit=3')
     .then((response) => {
       return response.json()
@@ -20,7 +20,7 @@ export class Users extends React.Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <div>
         {this.state.users.map((user) => (

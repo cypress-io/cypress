@@ -8,9 +8,7 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 import Markdown from 'markdown-it'
 
 const _copyErrorDetails = (err) => {
-  let details = [
-    `**Message:** ${err.message}`,
-  ]
+  let details = [`**Message:** ${err.message}`]
 
   if (err.details) {
     details.push(`**Details:** ${err.details}`)
@@ -40,7 +38,7 @@ const ErrorDetails = observer(({ err }) => {
   if (detailsBody) {
     return (
       <pre>
-        <details className='details-body'>
+        <details className="details-body">
           <summary>{detailsTitle}</summary>
           {detailsBody}
         </details>
@@ -48,24 +46,20 @@ const ErrorDetails = observer(({ err }) => {
     )
   }
 
-  return (
-    <pre>
-      {detailsTitle}
-    </pre>
-  )
+  return <pre>{detailsTitle}</pre>
 })
 
 @observer
 class ErrorMessage extends Component {
-  componentDidMount () {
+  componentDidMount() {
     this.errorMessageNode.addEventListener('click', this._clickHandler)
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.errorMessageNode.removeEventListener('click', this._clickHandler)
   }
 
-  _clickHandler (e) {
+  _clickHandler(e) {
     if (e.target.href) {
       e.preventDefault()
 
@@ -73,51 +67,50 @@ class ErrorMessage extends Component {
     }
   }
 
-  render () {
+  render() {
     let err = this.props.project.error
 
     return (
-      <div className='full-alert-container'>
-        <div className='full-alert alert alert-danger error'>
-          <p className='header'>
-            <i className='fas fa-exclamation-triangle'></i>{' '}
+      <div className="full-alert-container">
+        <div className="full-alert alert alert-danger error">
+          <p className="header">
+            <i className="fas fa-exclamation-triangle"></i>{' '}
             <strong>{err.title || 'An unexpected error occurred'}</strong>
           </p>
-          <span className='alert-content'>
-            <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
-              __html: md.render(err.message),
-            }}></div>
-            {err.details && (
-              <ErrorDetails err={err} />
-            )}
+          <span className="alert-content">
+            <div
+              ref={(node) => (this.errorMessageNode = node)}
+              dangerouslySetInnerHTML={{
+                __html: md.render(err.message),
+              }}
+            ></div>
+            {err.details && <ErrorDetails err={err} />}
             {err.portInUse && (
               <div>
                 <hr />
-                <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
+                <p>
+                  To fix, stop the other running process or change the port in{' '}
+                  {configFileFormatted(this.props.project.configFile)}
+                </p>
               </div>
             )}
             {err.stack2 && (
-              <details className='stacktrace'>
+              <details className="stacktrace">
                 <summary>Stack trace</summary>
                 <pre>{err.stack2}</pre>
               </details>
             )}
           </span>
           <button
-            className='btn btn-default btn-sm'
+            className="btn btn-default btn-sm"
             onClick={() => {
               _copyErrorDetails(err)
             }}
           >
-            <i className='fas fa-copy'></i>{' '}
-            Copy to Clipboard
+            <i className="fas fa-copy"></i> Copy to Clipboard
           </button>
-          <button
-            className='btn btn-default btn-sm'
-            onClick={this.props.onTryAgain}
-          >
-            <i className='fas fa-sync-alt'></i>{' '}
-            Try Again
+          <button className="btn btn-default btn-sm" onClick={this.props.onTryAgain}>
+            <i className="fas fa-sync-alt"></i> Try Again
           </button>
         </div>
       </div>

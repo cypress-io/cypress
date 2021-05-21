@@ -3,7 +3,7 @@ import { Button, Modal } from 'react-bootstrap'
 import { mount } from '@cypress/react'
 
 export class Example extends React.Component {
-  constructor (props, context) {
+  constructor(props, context) {
     super(props, context)
 
     this.handleShow = this.handleShow.bind(this)
@@ -14,19 +14,19 @@ export class Example extends React.Component {
     }
   }
 
-  handleClose () {
+  handleClose() {
     this.setState({ show: false })
   }
 
-  handleShow () {
+  handleShow() {
     this.setState({ show: true })
   }
 
-  render () {
+  render() {
     return (
       <div>
-        This text is all that renders. And the modal is not rendered, regardless
-        of whether it is contained within this div.
+        This text is all that renders. And the modal is not rendered, regardless of whether it is contained within this
+        div.
         <Modal show={this.state.show} onHide={this.handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Modal heading</Modal.Title>
@@ -34,9 +34,8 @@ export class Example extends React.Component {
           <Modal.Body>
             <h4>Text in a modal</h4>
             <p>
-              Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-              dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-              ac consectetur ac, vestibulum at eros.
+              Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget
+              quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
             </p>
           </Modal.Body>
           <Modal.Footer>

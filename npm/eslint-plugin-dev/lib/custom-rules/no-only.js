@@ -10,7 +10,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'stop .only\'s in spec files',
+      description: "stop .only's in spec files",
       category: 'Spec Issues',
     },
     messages: {
@@ -21,17 +21,17 @@ module.exports = {
     // fixable: 'code',
   },
 
-  create (context) {
+  create(context) {
     const sourceCode = context.getSourceCode()
 
-    function getPropertyText (node) {
+    function getPropertyText(node) {
       const lines = sourceCode.getText(node).split(astUtils.LINEBREAK_MATCHER)
 
       return lines[0]
     }
 
     return {
-      'CallExpression:exit' (node) {
+      'CallExpression:exit'(node) {
         const callee = node.callee
 
         if (node.type === 'CallExpression' && callee.type === 'MemberExpression' && callee.property.name === 'only') {

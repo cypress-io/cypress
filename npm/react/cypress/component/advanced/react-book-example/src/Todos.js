@@ -7,12 +7,7 @@ const Todos = ({ todos, select, selected }) => {
       {todos.map((todo) => {
         return (
           <React.Fragment key={todo.title}>
-            <h3
-              data-testid="item"
-              className={
-                selected && selected.title === todo.title ? 'selected' : ''
-              }
-            >
+            <h3 data-testid="item" className={selected && selected.title === todo.title ? 'selected' : ''}>
               {todo.title}
             </h3>
             <div>{todo.description}</div>
@@ -35,10 +30,8 @@ class TodosContainer extends React.Component {
     })
   }
 
-  render () {
-    return (
-      <Todos {...this.props} select={this.select} selected={this.state.todo} />
-    )
+  render() {
+    return <Todos {...this.props} select={this.select} selected={this.state.todo} />
   }
 }
 

@@ -4,10 +4,6 @@ const browsers = require(`${root}../lib/browsers`)
 const utils = require(`${root}../lib/browsers/utils`)
 const snapshot = require('snap-shot-it')
 
-const normalizeBrowsers = (message) => {
-  return message.replace(/(found are: ).*/, '$1chrome, firefox, electron')
-}
-
 // When we added component testing mode, we added the option for electron to be omitted
 const originalElectronVersion = process.versions.electron
 
@@ -54,17 +50,22 @@ describe('lib/browsers/index', () => {
         { name: 'bar', channel: 'stable' },
       ])
 
-      return browsers.ensureAndGetByNameOrPath('foo')
-      .then((browser) => {
+      return browsers.ensureAndGetByNameOrPath('foo').then((browser) => {
         expect(browser).to.deep.eq({ name: 'foo', channel: 'stable' })
       })
     })
 
     it('throws when no browser can be found', () => {
+      sinon.stub(utils, 'getBrowsers').resolves([
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ])
+
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
-        return snapshot(normalizeBrowsers(err.message))
+        return snapshot(err.message)
       })
     })
 
@@ -84,21 +85,26 @@ describe('lib/browsers/index', () => {
   })
 
   context('.open', () => {
-    it('throws an error if browser family doesn\'t exist', () => {
-      return browsers.open({
-        name: 'foo-bad-bang',
-        family: 'foo-bad',
-      }, {
-        browsers: [],
-      })
+    it("throws an error if browser family doesn't exist", () => {
+      return browsers
+      .open(
+        {
+          name: 'foo-bad-bang',
+          family: 'foo-bad',
+        },
+        {
+          browsers: [],
+        }
+      )
       .then((e) => {
-        throw new Error('should\'ve failed')
-      }).catch((err) => {
+        throw new Error("should've failed")
+      })
+      .catch((err) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
-        expect(err).to.have.property('message').to.contain('\'foo-bad-bang\' was not found on your system')
+        expect(err).to.have.property('message').to.contain("'foo-bad-bang' was not found on your system")
       })
     })
   })

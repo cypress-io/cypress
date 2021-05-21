@@ -12,12 +12,12 @@ describe('lib/plugins/child/task', () => {
     }
 
     this.events = {
-      '1': {
+      1: {
         event: 'task',
         handler: {
           'the:task': sinon.stub().returns('result'),
           'another:task': sinon.stub().returns('result'),
-          'a:third:task' () {
+          'a:third:task'() {
             return 'foo'
           },
         },
@@ -35,7 +35,7 @@ describe('lib/plugins/child/task', () => {
       expect(util.wrapChildPromise).to.be.called
       const result = util.wrapChildPromise.lastCall.args[1]('1')
 
-      expect(result.replace(/\s+/g, '')).to.equal('\'a:third:task\'(){return\'foo\'}')
+      expect(result.replace(/\s+/g, '')).to.equal("'a:third:task'(){return'foo'}")
     })
 
     it('returns an empty string if event handler cannot be found', function () {
@@ -75,7 +75,7 @@ describe('lib/plugins/child/task', () => {
       expect(result).to.equal('result')
     })
 
-    it('returns __cypress_unhandled__ if the task doesn\'t exist', function () {
+    it("returns __cypress_unhandled__ if the task doesn't exist", function () {
       task.wrap(this.ipc, this.events, this.ids, ['nope'])
 
       expect(util.wrapChildPromise.lastCall.args[1]('1')).to.equal('__cypress_unhandled__')

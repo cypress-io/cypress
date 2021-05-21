@@ -8,7 +8,8 @@ const getOsVersion = () => {
       return getos()
       .then((obj) => {
         return [obj.dist, obj.release].join(' - ')
-      }).catch(() => {
+      })
+      .catch(() => {
         return os.release()
       })
     }
@@ -18,9 +19,8 @@ const getOsVersion = () => {
 }
 
 module.exports = {
-  info () {
-    return getOsVersion()
-    .then((osVersion) => {
+  info() {
+    return getOsVersion().then((osVersion) => {
       return {
         osName: os.platform(),
         osVersion,

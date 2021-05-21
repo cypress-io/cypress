@@ -18,15 +18,11 @@ const TWO_MINUTES = humanInterval('2 minutes')
 
 let intervals
 
-let DELAYS = [
-  THIRTY_SECONDS,
-  SIXTY_SECONDS,
-  TWO_MINUTES,
-]
+let DELAYS = [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
 
 const runnerCapabilities = {
-  'dynamicSpecsInSerialMode': true,
-  'skipSpecAction': true,
+  dynamicSpecsInSerialMode: true,
+  skipSpecAction: true,
 }
 
 let responseCache = {}
@@ -34,11 +30,7 @@ let responseCache = {}
 intervals = process.env.API_RETRY_INTERVALS
 
 if (intervals) {
-  DELAYS = _
-  .chain(intervals)
-  .split(',')
-  .map(_.toNumber)
-  .value()
+  DELAYS = _.chain(intervals).split(',').map(_.toNumber).value()
 }
 
 const rp = request.defaults((params = {}, callback) => {
@@ -71,7 +63,7 @@ const rp = request.defaults((params = {}, callback) => {
     'request to url: %s with params: %j and token: %s',
     `${params.method} ${params.url}`,
     _.pick(params, 'body', 'headers'),
-    params.auth && params.auth.bearer,
+    params.auth && params.auth.bearer
   )
 
   return request[method](params, callback)
@@ -87,7 +79,7 @@ const rp = request.defaults((params = {}, callback) => {
 })
 
 const cacheResponse = (resp, params) => {
-  return responseCache[params.url] = resp
+  return (responseCache[params.url] = resp)
 }
 
 const getCachedResponse = (params) => {
@@ -105,28 +97,22 @@ const retryWithBackoff = (fn) => {
   }
 
   return (attempt = (retryIndex) => {
-    return Promise
-    .try(() => fn(retryIndex))
-    .catch(isRetriableError, (err) => {
+    return Promise.try(() => fn(retryIndex)).catch(isRetriableError, (err) => {
       if (retryIndex > DELAYS.length) {
         throw err
       }
 
       const delay = DELAYS[retryIndex]
 
-      errors.warning(
-        'DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
-          delay: humanTime.long(delay, false),
-          tries: DELAYS.length - retryIndex,
-          response: err,
-        },
-      )
+      errors.warning('DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
+        delay: humanTime.long(delay, false),
+        tries: DELAYS.length - retryIndex,
+        response: err,
+      })
 
       retryIndex++
 
-      return Promise
-      .delay(delay)
-      .then(() => {
+      return Promise.delay(delay).then(() => {
         debug(`retry #${retryIndex} after ${delay}ms`)
 
         return attempt(retryIndex)
@@ -155,20 +141,19 @@ const tagError = function (err) {
 
 // retry on timeouts, 5xx errors, or any error without a status code
 const isRetriableError = (err) => {
-  return (err instanceof Promise.TimeoutError) ||
-    (500 <= err.statusCode && err.statusCode < 600) ||
-    (err.statusCode == null)
+  return (
+    err instanceof Promise.TimeoutError || (500 <= err.statusCode && err.statusCode < 600) || err.statusCode == null
+  )
 }
 
 module.exports = {
   rp,
 
-  ping () {
-    return rp.get(apiRoutes.ping())
-    .catch(tagError)
+  ping() {
+    return rp.get(apiRoutes.ping()).catch(tagError)
   },
 
-  getMe (authToken) {
+  getMe(authToken) {
     return rp.get({
       url: apiRoutes.me(),
       json: true,
@@ -178,8 +163,9 @@ module.exports = {
     })
   },
 
-  getAuthUrls () {
-    return rp.get({
+  getAuthUrls() {
+    return rp
+    .get({
       url: apiRoutes.auth(),
       json: true,
       cacheable: true,
@@ -190,8 +176,9 @@ module.exports = {
     .catch(tagError)
   },
 
-  getOrgs (authToken) {
-    return rp.get({
+  getOrgs(authToken) {
+    return rp
+    .get({
       url: apiRoutes.orgs(),
       json: true,
       auth: {
@@ -201,8 +188,9 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjects (authToken) {
-    return rp.get({
+  getProjects(authToken) {
+    return rp
+    .get({
       url: apiRoutes.projects(),
       json: true,
       auth: {
@@ -212,8 +200,9 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProject (projectId, authToken) {
-    return rp.get({
+  getProject(projectId, authToken) {
+    return rp
+    .get({
       url: apiRoutes.project(projectId),
       json: true,
       auth: {
@@ -226,12 +215,13 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectRuns (projectId, authToken, options = {}) {
+  getProjectRuns(projectId, authToken, options = {}) {
     if (options.page == null) {
       options.page = 1
     }
 
-    return rp.get({
+    return rp
+    .get({
       url: apiRoutes.projectRuns(projectId),
       json: true,
       timeout: options.timeout != null ? options.timeout : 10000,
@@ -246,7 +236,7 @@ module.exports = {
     .catch(tagError)
   },
 
-  createRun (options = {}) {
+  createRun(options = {}) {
     return retryWithBackoff((attemptIndex) => {
       const body = {
         ..._.pick(options, [
@@ -266,7 +256,8 @@ module.exports = {
         runnerCapabilities,
       }
 
-      return rp.post({
+      return rp
+      .post({
         body,
         url: apiRoutes.runs(),
         json: true,
@@ -281,18 +272,14 @@ module.exports = {
     })
   },
 
-  createInstance (options = {}) {
+  createInstance(options = {}) {
     const { runId, timeout } = options
 
-    const body = _.pick(options, [
-      'spec',
-      'groupId',
-      'machineId',
-      'platform',
-    ])
+    const body = _.pick(options, ['spec', 'groupId', 'machineId', 'platform'])
 
     return retryWithBackoff((attemptIndex) => {
-      return rp.post({
+      return rp
+      .post({
         body,
         url: apiRoutes.instances(runId),
         json: true,
@@ -308,11 +295,12 @@ module.exports = {
     })
   },
 
-  postInstanceTests (options = {}) {
+  postInstanceTests(options = {}) {
     const { instanceId, runId, timeout, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
-      return rp.post({
+      return rp
+      .post({
         url: apiRoutes.instanceTests(instanceId),
         json: true,
         timeout: timeout || SIXTY_SECONDS,
@@ -328,9 +316,10 @@ module.exports = {
     })
   },
 
-  updateInstanceStdout (options = {}) {
+  updateInstanceStdout(options = {}) {
     return retryWithBackoff((attemptIndex) => {
-      return rp.put({
+      return rp
+      .put({
         url: apiRoutes.instanceStdout(options.instanceId),
         json: true,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
@@ -340,7 +329,6 @@ module.exports = {
         headers: {
           'x-cypress-run-id': options.runId,
           'x-cypress-request-attempt': attemptIndex,
-
         },
       })
       .catch(RequestErrors.StatusCodeError, formatResponseBody)
@@ -348,9 +336,10 @@ module.exports = {
     })
   },
 
-  postInstanceResults (options = {}) {
+  postInstanceResults(options = {}) {
     return retryWithBackoff((attemptIndex) => {
-      return rp.post({
+      return rp
+      .post({
         url: apiRoutes.instanceResults(options.instanceId),
         json: true,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
@@ -359,23 +348,16 @@ module.exports = {
           'x-cypress-run-id': options.runId,
           'x-cypress-request-attempt': attemptIndex,
         },
-        body: _.pick(options, [
-          'stats',
-          'tests',
-          'exception',
-          'video',
-          'screenshots',
-          'reporterStats',
-          'metadata',
-        ]),
+        body: _.pick(options, ['stats', 'tests', 'exception', 'video', 'screenshots', 'reporterStats', 'metadata']),
       })
       .catch(RequestErrors.StatusCodeError, formatResponseBody)
       .catch(tagError)
     })
   },
 
-  createCrashReport (body, authToken, timeout = 3000) {
-    return rp.post({
+  createCrashReport(body, authToken, timeout = 3000) {
+    return rp
+    .post({
       url: apiRoutes.exceptions(),
       json: true,
       body,
@@ -387,35 +369,33 @@ module.exports = {
     .catch(tagError)
   },
 
-  postLogout (authToken) {
-    return Promise.join(
-      this.getAuthUrls(),
-      machineId.machineId(),
-      (urls, machineId) => {
-        return rp.post({
-          url: urls.dashboardLogoutUrl,
-          json: true,
-          auth: {
-            bearer: authToken,
-          },
-          headers: {
-            'x-machine-id': machineId,
-          },
-        })
-        .catch({ statusCode: 401 }, () => {}) // do nothing on 401
-        .catch(tagError)
-      },
-    )
+  postLogout(authToken) {
+    return Promise.join(this.getAuthUrls(), machineId.machineId(), (urls, machineId) => {
+      return rp
+      .post({
+        url: urls.dashboardLogoutUrl,
+        json: true,
+        auth: {
+          bearer: authToken,
+        },
+        headers: {
+          'x-machine-id': machineId,
+        },
+      })
+      .catch({ statusCode: 401 }, () => {}) // do nothing on 401
+      .catch(tagError)
+    })
   },
 
-  createProject (projectDetails, remoteOrigin, authToken) {
+  createProject(projectDetails, remoteOrigin, authToken) {
     debug('create project with args %o', {
       projectDetails,
       remoteOrigin,
       authToken,
     })
 
-    return rp.post({
+    return rp
+    .post({
       url: apiRoutes.projects(),
       json: true,
       auth: {
@@ -435,8 +415,9 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectRecordKeys (projectId, authToken) {
-    return rp.get({
+  getProjectRecordKeys(projectId, authToken) {
+    return rp
+    .get({
       url: apiRoutes.projectRecordKeys(projectId),
       json: true,
       auth: {
@@ -446,8 +427,9 @@ module.exports = {
     .catch(tagError)
   },
 
-  requestAccess (projectId, authToken) {
-    return rp.post({
+  requestAccess(projectId, authToken) {
+    return rp
+    .post({
       url: apiRoutes.membershipRequests(projectId),
       json: true,
       auth: {
@@ -458,7 +440,7 @@ module.exports = {
     .catch(tagError)
   },
 
-  _projectToken (method, projectId, authToken) {
+  _projectToken(method, projectId, authToken) {
     return rp({
       method,
       url: apiRoutes.projectToken(projectId),
@@ -474,16 +456,17 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectToken (projectId, authToken) {
+  getProjectToken(projectId, authToken) {
     return this._projectToken('get', projectId, authToken)
   },
 
-  updateProjectToken (projectId, authToken) {
+  updateProjectToken(projectId, authToken) {
     return this._projectToken('put', projectId, authToken)
   },
 
-  getReleaseNotes (version) {
-    return rp.get({
+  getReleaseNotes(version) {
+    return rp
+    .get({
       url: onRoutes.releaseNotes(version),
       json: true,
     })
@@ -495,7 +478,7 @@ module.exports = {
     })
   },
 
-  clearCache () {
+  clearCache() {
     responseCache = {}
   },
 

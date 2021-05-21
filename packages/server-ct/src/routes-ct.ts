@@ -21,21 +21,13 @@ interface InitializeRoutes {
   onError: (...args: unknown[]) => any
 }
 
-export const createRoutes = ({
-  app,
-  config,
-  specsStore,
-  nodeProxy,
-  networkProxy,
-  project,
-}: InitializeRoutes) => {
+export const createRoutes = ({ app, config, specsStore, nodeProxy, networkProxy, project }: InitializeRoutes) => {
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
     const pathToFile = staticPkg.getPathToDist(req.params[0])
 
-    return send(req, pathToFile)
-    .pipe(res)
+    return send(req, pathToFile).pipe(res)
   })
 
   app.get('/__cypress/iframes/*', (req, res) => {
@@ -53,7 +45,10 @@ export const createRoutes = ({
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+        debug(
+          'Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available',
+          e
+        )
       }
     })
   })
@@ -67,7 +62,10 @@ export const createRoutes = ({
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
         // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+        debug(
+          'Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available',
+          e
+        )
       }
     })
   })

@@ -18,7 +18,8 @@ const loadProjects = (shouldLoad = true) => {
     projectsStore.setLoading(true)
   }
 
-  return ipc.getProjects()
+  return ipc
+  .getProjects()
   .then((ipcProjects) => {
     // extend the projects with data cached in local storage
     const cacheIndex = _.keyBy(localData.get('projects'), 'path')
@@ -50,7 +51,8 @@ const addProject = (path) => {
 
   project.setLoading(true)
 
-  return ipc.addProject(path)
+  return ipc
+  .addProject(path)
   .then((details) => {
     project.setLoading(false)
     project.update(details)
@@ -98,8 +100,7 @@ const runSpec = (project, spec, browser, specFilter) => {
     })
   }
 
-  return closeBrowser(null, spec)
-  .then(launchBrowser)
+  return closeBrowser(null, spec).then(launchBrowser)
 }
 
 const onBrowserClose = (project, spec) => {
@@ -131,10 +132,7 @@ const closeProject = (project) => {
   ipc.offOnProjectWarning()
   ipc.offOnConfigChanged()
 
-  return Promise.all([
-    onBrowserClose(project),
-    ipc.closeProject(),
-  ])
+  return Promise.all([onBrowserClose(project), ipc.closeProject()])
 }
 
 const openProject = (project) => {
@@ -146,7 +144,8 @@ const openProject = (project) => {
   }
 
   const updateProjectStatus = () => {
-    return ipc.getProjectStatus(project.clientDetails())
+    return ipc
+    .getProjectStatus(project.clientDetails())
     .then((projectDetails) => {
       project.update(projectDetails)
     })
@@ -190,7 +189,8 @@ const openProject = (project) => {
     project.addWarning(warning)
   })
 
-  return ipc.openProject(project.path)
+  return ipc
+  .openProject(project.path)
   .then((config = {}) => {
     updateConfig(config)
     const projectIdAndPath = { id: config.projectId, path: project.path }
@@ -210,8 +210,7 @@ const reopenProject = (project) => {
   project.clearError()
   project.dismissWarning()
 
-  return closeProject(project)
-  .then(() => {
+  return closeProject(project).then(() => {
     return openProject(project)
   })
 }
@@ -232,12 +231,15 @@ const updateProject = (project, projectDetails) => {
 }
 
 const getRecordKeys = () => {
-  return ipc.getRecordKeys()
-  .catch(ipc.isUnauthed, ipc.handleUnauthed)
-  // ignore error, settle for no keys
-  .catch(() => {
-    return []
-  })
+  return (
+    ipc
+    .getRecordKeys()
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    // ignore error, settle for no keys
+    .catch(() => {
+      return []
+    })
+  )
 }
 
 export default {

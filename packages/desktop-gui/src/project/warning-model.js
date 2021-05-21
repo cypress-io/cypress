@@ -6,20 +6,20 @@ class Warning {
   @observable isDismissed = false
   @observable isRetrying = false
 
-  constructor (props) {
+  constructor(props) {
     this.type = props.type
     this.message = props.message
   }
 
-  @computed get isRetryable () {
+  @computed get isRetryable() {
     return this.type === 'CANNOT_CONNECT_BASE_URL_WARNING'
   }
 
-  @action setDismissed (isDismissed) {
+  @action setDismissed(isDismissed) {
     this.isDismissed = isDismissed
   }
 
-  @action setRetrying (isRetrying) {
+  @action setRetrying(isRetrying) {
     this.isRetrying = isRetrying
   }
 }

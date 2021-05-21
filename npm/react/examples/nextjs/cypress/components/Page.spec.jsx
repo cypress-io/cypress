@@ -12,7 +12,7 @@ describe('NextJS page', () => {
     cy.contains('.search-text', 'You are searching for: Cypress')
   })
 
-  it('It doesn\'t run the `.getInitialProps()`', () => {
+  it("It doesn't run the `.getInitialProps()`", () => {
     mount(<IndexPage />)
 
     cy.get('[data-testid="server-result"').should('not.exist')
@@ -21,18 +21,12 @@ describe('NextJS page', () => {
   it('Allows to manually mock the server side props', () => {
     mount(<IndexPage asyncProp />)
 
-    cy.contains(
-      '`.getInitialProps()` was called and passed props to this component',
-    )
+    cy.contains('`.getInitialProps()` was called and passed props to this component')
   })
 
   it('can be tested with real .getInitialProps call', () => {
-    cy
-    .wrap(IndexPage.getServerSideProps())
-    .then((props) => mount(<IndexPage {...props} />))
+    cy.wrap(IndexPage.getServerSideProps()).then((props) => mount(<IndexPage {...props} />))
 
-    cy.contains(
-      '`.getInitialProps()` was called and passed props to this component',
-    )
+    cy.contains('`.getInitialProps()` was called and passed props to this component')
   })
 })

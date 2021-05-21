@@ -15,7 +15,18 @@ describe('<Button />', () => {
   it('ButtonSizes', () => {
     const ButtonSizes = () => (
       <div style={{ width: 500 }}>
-        {stories.buttonSizesWithSizes(['text-xs', 'text-s', 'text-ms', 'text-m', 'text-ml', 'text-l', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'])}
+        {stories.buttonSizesWithSizes([
+          'text-xs',
+          'text-s',
+          'text-ms',
+          'text-m',
+          'text-ml',
+          'text-l',
+          'text-xl',
+          'text-2xl',
+          'text-3xl',
+          'text-4xl',
+        ])}
       </div>
     )
 

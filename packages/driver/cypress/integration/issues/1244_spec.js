@@ -9,7 +9,10 @@ describe('issue 1244', () => {
     })
   })
 
-  for (const [el, target, action] of [['button', 'form', 'submit'], ['a', 'a', 'click']]) {
+  for (const [el, target, action] of [
+    ['button', 'form', 'submit'],
+    ['a', 'a', 'click'],
+  ]) {
     // <form> submit, <a> click
     describe(`<${target}> ${action}`, () => {
       it('correctly redirects when target=_top with target.target =', () => {
@@ -43,11 +46,15 @@ describe('issue 1244', () => {
       })
 
       it('maintains behavior when target=_blank,invalid', () => {
-        cy.get(`${el}.inline_blank`).click().then(() => {
+        cy.get(`${el}.inline_blank`)
+        .click()
+        .then(() => {
           cy.url().should('not.include', 'dom.html')
         })
 
-        cy.get(`${el}.inline_invalid`).click().then(() => {
+        cy.get(`${el}.inline_invalid`)
+        .click()
+        .then(() => {
           cy.url().should('not.include', 'dom.html')
         })
       })

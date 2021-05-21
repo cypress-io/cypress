@@ -1,7 +1,7 @@
 const _write = process.stdout.write
 
 module.exports = {
-  capture () {
+  capture() {
     const logs = []
 
     const write = process.stdout.write
@@ -22,7 +22,7 @@ module.exports = {
     }
   },
 
-  restore () {
+  restore() {
     process.stdout.write = _write
   },
 }

@@ -2,24 +2,22 @@ const _ = require('lodash')
 const $stackUtils = require('./stack_utils')
 
 class $Chainer {
-  constructor (userInvocationStack, specWindow) {
+  constructor(userInvocationStack, specWindow) {
     this.userInvocationStack = userInvocationStack
     this.specWindow = specWindow
     this.chainerId = _.uniqueId('chainer')
     this.firstCall = true
   }
 
-  static remove (key) {
+  static remove(key) {
     delete $Chainer.prototype[key]
   }
 
-  static add (key, fn) {
+  static add(key, fn) {
     $Chainer.prototype[key] = function (...args) {
       const userInvocationStack = this.useInitialStack
         ? this.userInvocationStack
-        : $stackUtils.normalizedUserInvocationStack(
-          (new this.specWindow.Error('command invocation stack')).stack,
-        )
+        : $stackUtils.normalizedUserInvocationStack(new this.specWindow.Error('command invocation stack').stack)
 
       // call back the original function with our new args
       // pass args an as array and not a destructured invocation
@@ -35,7 +33,7 @@ class $Chainer {
   }
 
   // creates a new chainer instance
-  static create (key, userInvocationStack, specWindow, args) {
+  static create(key, userInvocationStack, specWindow, args) {
     const chainer = new $Chainer(userInvocationStack, specWindow)
 
     // this is the first command chained off of cy, so we use

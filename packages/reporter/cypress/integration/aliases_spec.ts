@@ -46,19 +46,18 @@ describe('aliases', () => {
           aliasType: 'route',
           message: '@getUsers, function(){}',
           name: 'wait',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'getUsers',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'getUsers',
+              ordinal: '1st',
+            },
+          ],
         })
       })
 
       it('has correct alias class', () => {
-        cy.contains('.command-number', '1')
-        .parent()
-        .find('.command-alias')
-        .should('have.class', 'route')
+        cy.contains('.command-number', '1').parent().find('.command-alias').should('have.class', 'route')
       })
 
       it('render without a count', () => {
@@ -67,12 +66,11 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
-          cy.contains('.command-alias', '@getUsers')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@getUsers').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found an alias for: \'getUsers\'')
+          expect($tooltip).to.contain("Found an alias for: 'getUsers'")
         })
 
         cy.percySnapshot()
@@ -103,22 +101,26 @@ describe('aliases', () => {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'getPosts',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'getPosts',
+              ordinal: '1st',
+            },
+          ],
         })
 
         addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
-          referencesAlias: [{
-            cardinal: 2,
-            name: 'getPosts',
-            ordinal: '2nd',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 2,
+              name: 'getPosts',
+              ordinal: '2nd',
+            },
+          ],
         })
       })
 
@@ -133,12 +135,11 @@ describe('aliases', () => {
         .within(() => {
           cy.contains('.command-alias-count', '1')
 
-          cy.contains('.command-alias', '@getPosts')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found 1st alias for: \'getPosts\'')
+          expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")
         })
 
         cy.contains('.command-number', '2')
@@ -146,12 +147,11 @@ describe('aliases', () => {
         .within(() => {
           cy.contains('.command-alias-count', '2')
 
-          cy.contains('.command-alias', '@getPosts')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found 2nd alias for: \'getPosts\'')
+          expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'")
         })
       })
 
@@ -166,9 +166,7 @@ describe('aliases', () => {
       })
 
       it('render without counts in event commands when expanded', () => {
-        cy.get('.command-expander')
-        .first()
-        .click()
+        cy.get('.command-expander').first().click()
 
         cy.get('.command-wrapper')
         .first()
@@ -213,33 +211,39 @@ describe('aliases', () => {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'getPosts',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'getPosts',
+              ordinal: '1st',
+            },
+          ],
         })
 
         addCommand(runner, {
           aliasType: 'route',
           message: '@getUsers, function(){}',
           name: 'wait',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'getUsers',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'getUsers',
+              ordinal: '1st',
+            },
+          ],
         })
 
         addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
-          referencesAlias: [{
-            cardinal: 2,
-            name: 'getPosts',
-            ordinal: '2nd',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 2,
+              name: 'getPosts',
+              ordinal: '2nd',
+            },
+          ],
         })
       })
 
@@ -249,12 +253,11 @@ describe('aliases', () => {
         .within(() => {
           cy.contains('.command-alias-count', '1')
 
-          cy.contains('.command-alias', '@getPosts')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found 1st alias for: \'getPosts\'')
+          expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")
         })
 
         cy.contains('.command-number', '3')
@@ -262,12 +265,11 @@ describe('aliases', () => {
         .within(() => {
           cy.contains('.command-alias-count', '2')
 
-          cy.contains('.command-alias', '@getPosts')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@getPosts').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found 2nd alias for: \'getPosts\'')
+          expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'")
         })
 
         cy.percySnapshot()
@@ -292,19 +294,18 @@ describe('aliases', () => {
           aliasType: 'dom',
           message: '',
           name: 'get',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'barAlias',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'barAlias',
+              ordinal: '1st',
+            },
+          ],
         })
       })
 
       it('has correct alias class', () => {
-        cy.contains('.command-number', '1')
-        .parent()
-        .find('.command-alias')
-        .should('have.class', 'dom')
+        cy.contains('.command-number', '1').parent().find('.command-alias').should('have.class', 'dom')
       })
 
       it('render without a count', () => {
@@ -313,12 +314,11 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
-          cy.contains('.command-alias', '@barAlias')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@barAlias').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found an alias for: \'barAlias\'')
+          expect($tooltip).to.contain("Found an alias for: 'barAlias'")
         })
       })
     })
@@ -328,7 +328,7 @@ describe('aliases', () => {
         addCommand(runner, {
           state: 'passed',
           name: 'get',
-          message: '[attr=\'dropdown\']',
+          message: "[attr='dropdown']",
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
@@ -349,22 +349,26 @@ describe('aliases', () => {
           aliasType: 'dom',
           message: '',
           name: 'get',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'dropdown',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'dropdown',
+              ordinal: '1st',
+            },
+          ],
         })
 
         addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
-          referencesAlias: [{
-            cardinal: 2,
-            name: 'dropdown',
-            ordinal: '2nd',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 2,
+              name: 'dropdown',
+              ordinal: '2nd',
+            },
+          ],
         })
       })
 
@@ -374,12 +378,11 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
-          cy.contains('.command-alias', '@dropdown')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+          expect($tooltip).to.contain("Found an alias for: 'dropdown'")
         })
 
         cy.contains('.command-number', '2')
@@ -387,12 +390,11 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
-          cy.contains('.command-alias', '@dropdown')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+          expect($tooltip).to.contain("Found an alias for: 'dropdown'")
         })
       })
 
@@ -412,7 +414,7 @@ describe('aliases', () => {
         addCommand(runner, {
           state: 'passed',
           name: 'get',
-          message: '[attr=\'dropdown\']',
+          message: "[attr='dropdown']",
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
@@ -422,7 +424,7 @@ describe('aliases', () => {
         addCommand(runner, {
           state: 'passed',
           name: 'get',
-          message: '[attr=\'modal\']',
+          message: "[attr='modal']",
           alias: 'modal',
           aliasType: 'dom',
           event: true,
@@ -432,7 +434,7 @@ describe('aliases', () => {
         addCommand(runner, {
           state: 'passed',
           name: 'get',
-          message: '[attr=\'dropdown\']',
+          message: "[attr='dropdown']",
           alias: 'dropdown',
           aliasType: 'dom',
           event: true,
@@ -443,33 +445,39 @@ describe('aliases', () => {
           aliasType: 'dom',
           message: '',
           name: 'get',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'dropdown',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'dropdown',
+              ordinal: '1st',
+            },
+          ],
         })
 
         addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
-          referencesAlias: [{
-            cardinal: 1,
-            name: 'modal',
-            ordinal: '1st',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 1,
+              name: 'modal',
+              ordinal: '1st',
+            },
+          ],
         })
 
         addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
-          referencesAlias: [{
-            cardinal: 2,
-            name: 'dropdown',
-            ordinal: '2nd',
-          }],
+          referencesAlias: [
+            {
+              cardinal: 2,
+              name: 'dropdown',
+              ordinal: '2nd',
+            },
+          ],
         })
       })
 
@@ -483,12 +491,11 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
-          cy.contains('.command-alias', '@dropdown')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+          expect($tooltip).to.contain("Found an alias for: 'dropdown'")
         })
 
         cy.contains('.command-number', '3')
@@ -496,12 +503,11 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.command-alias-count').should('not.exist')
 
-          cy.contains('.command-alias', '@dropdown')
-          .trigger('mouseover')
+          cy.contains('.command-alias', '@dropdown').trigger('mouseover')
         })
 
         cy.get('.cy-tooltip span').should(($tooltip) => {
-          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+          expect($tooltip).to.contain("Found an alias for: 'dropdown'")
         })
       })
     })

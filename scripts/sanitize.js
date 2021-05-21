@@ -30,7 +30,8 @@ const sanitizeCliInfo = () => {
   }
 
   const sanitize = (chunk) => {
-    return chunk.replace(chromiumVersion, replaceChromiumVersion)
+    return chunk
+    .replace(chromiumVersion, replaceChromiumVersion)
     .replace(firefoxVersion, replaceFirefoxVersion)
     .replace(browserArgument, replaceBrowserArgument)
     .replace(systemMemory, replaceSystemMemory)

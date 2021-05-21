@@ -4,7 +4,8 @@ import orgsStore from './organizations-store'
 let pollId
 
 const getOrgs = () => {
-  ipc.getOrgs()
+  ipc
+  .getOrgs()
   .then((orgs = []) => {
     orgsStore.setOrgs(orgs)
 
@@ -25,7 +26,9 @@ const isPolling = () => {
 }
 
 const pollOrgs = () => {
-  if (pollId) return
+  if (pollId) {
+    return
+  }
 
   pollId = setInterval(() => {
     getOrgs()

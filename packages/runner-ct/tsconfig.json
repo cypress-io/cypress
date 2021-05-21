@@ -46,7 +46,7 @@
     // "baseUrl": "../",                       /* Base directory to resolve non-absolute module names. */
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
-    "types": [],                           /* Type declaration files to be included in compilation. */
+    "types": [] /* Type declaration files to be included in compilation. */,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -54,14 +54,6 @@
     "experimentalDecorators": true
     // "noResolve": true
   },
-  "include": [
-    "./lib/*.ts",
-    "./index.ts",
-    "./index.d.ts",
-    "./../ts/index.d.ts"
-  ],
-  "exclude": [
-    "dist",
-    "test"
-  ]
+  "include": ["./lib/*.ts", "./index.ts", "./index.d.ts", "./../ts/index.d.ts"],
+  "exclude": ["dist", "test"]
 }

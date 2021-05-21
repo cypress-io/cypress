@@ -10,7 +10,9 @@ const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={
 let sourceMapConsumers = {}
 
 const initializeSourceMapConsumer = (file, sourceMap) => {
-  if (!sourceMap) return Promise.resolve(null)
+  if (!sourceMap) {
+    return Promise.resolve(null)
+  }
 
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': require('source-map/lib/mappings.wasm'),
@@ -26,12 +28,16 @@ const initializeSourceMapConsumer = (file, sourceMap) => {
 const extractSourceMap = (file, fileContents) => {
   let sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
 
-  if (!sourceMapMatch) return null
+  if (!sourceMapMatch) {
+    return null
+  }
 
   const url = _.last(sourceMapMatch)
   const dataUrlMatch = url.match(regexDataUrl)
 
-  if (!dataUrlMatch) return null
+  if (!dataUrlMatch) {
+    return null
+  }
 
   const sourceMapBase64 = dataUrlMatch[1]
   const sourceMap = base64toJs(sourceMapBase64)
@@ -40,14 +46,18 @@ const extractSourceMap = (file, fileContents) => {
 }
 
 const getSourceContents = (filePath, sourceFile) => {
-  if (!sourceMapConsumers[filePath]) return null
+  if (!sourceMapConsumers[filePath]) {
+    return null
+  }
 
   try {
     return sourceMapConsumers[filePath].sourceContentFor(sourceFile)
   } catch (err) {
     // ignore the sourceFile not being in the source map. there's nothing we
     // can do about it and we don't want to thrown an exception
-    if (err && err.message.indexOf('not in the SourceMap') > -1) return
+    if (err && err.message.indexOf('not in the SourceMap') > -1) {
+      return
+    }
 
     throw err
   }
@@ -56,13 +66,16 @@ const getSourceContents = (filePath, sourceFile) => {
 const getSourcePosition = (filePath, position) => {
   const sourceMapConsumer = sourceMapConsumers[filePath]
 
-  if (!sourceMapConsumer) return null
+  if (!sourceMapConsumer) {
+    return null
+  }
 
   const sourcePosition = sourceMapConsumer.originalPositionFor(position)
   const { source, line, column } = sourcePosition
 
-  if (!source || line == null || column == null) return
-
+  if (!file || line == null || column == null) {
+    return
+  }
   // if the file is outside of the projectRoot
   // originalPositionFor will not provide the correct relative path
   // https://github.com/cypress-io/cypress/issues/16255

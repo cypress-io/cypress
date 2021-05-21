@@ -13,42 +13,44 @@ class UpdateStore {
   @observable state
   @observable.ref releaseNotes
 
-  constructor () {
+  constructor() {
     if (window.Cypress) {
       window.UpdateStore = this // for testing
     }
   }
 
-  @computed get updateAvailable () {
+  @computed get updateAvailable() {
     return this.version !== this.newVersion
   }
 
-  @computed get nonDismissedUpdateAvailable () {
+  @computed get nonDismissedUpdateAvailable() {
     return this.updateAvailable && this.newVersion !== this.dismissedUpdateVersion
   }
 
-  @computed get hasMatchingReleaseNotes () {
+  @computed get hasMatchingReleaseNotes() {
     return this.releaseNotes && this.releaseNotes.version === this.newVersion
   }
 
-  @action setVersion (version) {
-    if (version != null) this.version = this.newVersion = version
+  @action setVersion(version) {
+    if (version != null) {
+      this.version = this.newVersion = version
+    }
   }
 
-  @action setNewVersion (newVersion) {
+  @action setNewVersion(newVersion) {
     this.newVersion = newVersion
   }
 
-  @action setDismissedUpdateVersion () {
+  @action setDismissedUpdateVersion() {
     this.dismissedUpdateVersion = this.newVersion
     localData.set('dismissed-update-version', this.newVersion)
   }
 
-  @action setReleaseNotes (releaseNotes) {
+  @action setReleaseNotes(releaseNotes) {
     this.releaseNotes = releaseNotes
   }
 
-  @action setState (state) {
+  @action setState(state) {
     this.state = state
   }
 }

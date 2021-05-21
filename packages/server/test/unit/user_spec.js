@@ -59,8 +59,7 @@ describe('lib/user', () => {
 
       sinon.stub(cache, 'setUser').resolves()
 
-      return user.syncProfile('foo-123', 'bar-456')
-      .then(() => {
+      return user.syncProfile('foo-123', 'bar-456').then(() => {
         expect(api.getMe).to.be.calledWith('foo-123')
 
         expect(cache.setUser).to.be.calledWith({
@@ -75,7 +74,7 @@ describe('lib/user', () => {
   context('.getBaseLoginUrl', () => {
     it('calls api.getAuthUrls', () => {
       sinon.stub(api, 'getAuthUrls').resolves({
-        'dashboardAuthUrl': 'https://github.com/login',
+        dashboardAuthUrl: 'https://github.com/login',
       })
 
       return user.getBaseLoginUrl().then((url) => {
@@ -96,10 +95,12 @@ describe('lib/user', () => {
     it('throws NOT_LOGGED_IN when no authToken, tagged as api error', () => {
       sinon.stub(cache, 'getUser').resolves(null)
 
-      return user.ensureAuthToken()
+      return user
+      .ensureAuthToken()
       .then(() => {
         throw new Error('should have thrown an error')
-      }).catch((err) => {
+      })
+      .catch((err) => {
         const expectedErr = errors.get('NOT_LOGGED_IN')
 
         expect(err.message).to.eq(expectedErr.message)

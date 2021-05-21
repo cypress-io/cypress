@@ -19,7 +19,11 @@ const parseResult = (xml) => {
   const [name, time, tests, failures, skipped] = RESULT_REGEX.exec(xml).slice(1)
 
   return {
-    name, time, tests: Number(tests), failures: Number(failures), skipped: Number(skipped || 0),
+    name,
+    time,
+    tests: Number(tests),
+    failures: Number(failures),
+    skipped: Number(skipped || 0),
   }
 }
 
@@ -27,7 +31,8 @@ const total = { tests: 0, failures: 0, skipped: 0 }
 
 console.log(`Looking for reports in ${REPORTS_PATH}`)
 
-fse.readdir(REPORTS_PATH)
+fse
+.readdir(REPORTS_PATH)
 .catch((err) => {
   throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
 })
@@ -38,16 +43,29 @@ fse.readdir(REPORTS_PATH)
 
   if (!expectedResultCount) {
     console.log('Expecting at least 1 report...')
-    la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
+    la(
+      resultCount > 0,
+      'Expected at least 1 report, but found',
+      resultCount,
+      '. Verify that all tests ran as expected.'
+    )
   } else {
     console.log(`Expecting exactly ${expectedResultCount} reports...`)
-    la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
+    la(
+      expectedResultCount === resultCount,
+      'Expected',
+      expectedResultCount,
+      'reports, but found',
+      resultCount,
+      '. Verify that all tests ran as expected.'
+    )
   }
 
   return Bluebird.mapSeries(files, (file) => {
     console.log(`Checking that ${file} contains a valid report...`)
 
-    return fse.readFile(path.join(REPORTS_PATH, file))
+    return fse
+    .readFile(path.join(REPORTS_PATH, file))
     .catch((err) => {
       throw new Error(`Unable to read the report in ${file}: ${err.message}`)
     })
@@ -59,10 +77,17 @@ fse.readdir(REPORTS_PATH)
       }
     })
     .then(({ name, time, tests, failures, skipped }) => {
-      console.log(`Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tFailing: ${failures}\tSkipped: ${skipped}\tTotal time: ${time}`)
+      console.log(
+        `Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tFailing: ${failures}\tSkipped: ${skipped}\tTotal time: ${time}`
+      )
 
       la(tests > 0, 'Expected the total number of tests to be >0, but it was', tests, 'instead.')
-      la(failures === 0, 'Expected the number of failures to be equal to 0, but it was', failures, '. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.')
+      la(
+        failures === 0,
+        'Expected the number of failures to be equal to 0, but it was',
+        failures,
+        '. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.'
+      )
 
       total.tests += tests
       total.failures += failures

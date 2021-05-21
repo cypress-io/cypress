@@ -6,9 +6,7 @@ const calc = require('./calc')
 
 describe('Component', () => {
   it('mocks call from the component', () => {
-    cy.stub(calc, 'getRandomNumber')
-    .as('lucky')
-    .returns(777)
+    cy.stub(calc, 'getRandomNumber').as('lucky').returns(777)
 
     mount(<Component />)
   })

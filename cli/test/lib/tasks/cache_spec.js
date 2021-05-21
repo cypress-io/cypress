@@ -21,10 +21,10 @@ describe('lib/tasks/cache', () => {
     mockfs({
       '/.cache/Cypress': {
         '1.2.3': {
-          'Cypress': {
-            'file1': Buffer.from(new Array(32 * 1024).fill(1)),
-            'dir': {
-              'file2': Buffer.from(new Array(128 * 1042).fill(2)),
+          Cypress: {
+            file1: Buffer.from(new Array(32 * 1024).fill(1)),
+            dir: {
+              file2: Buffer.from(new Array(128 * 1042).fill(2)),
             },
           },
         },
@@ -121,10 +121,8 @@ describe('lib/tasks/cache', () => {
 
   describe('.clear', () => {
     it('deletes cache folder and everything inside it', () => {
-      return cache.clear()
-      .then(() => {
-        return fs.pathExistsAsync('/.cache/Cypress')
-        .then((exists) => {
+      return cache.clear().then(() => {
+        return fs.pathExistsAsync('/.cache/Cypress').then((exists) => {
           expect(exists).to.eql(false)
           defaultSnapshot()
         })
@@ -149,7 +147,7 @@ describe('lib/tasks/cache', () => {
       defaultSnapshot()
     })
 
-    it('doesn\'t delete any cache binaries', async () => {
+    it("doesn't delete any cache binaries", async () => {
       const dir = path.join(state.getCacheDir(), '2.3.4')
 
       await fs.removeAsync(dir)

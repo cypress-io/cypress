@@ -9,16 +9,14 @@ describe('network error handling', function () {
     it('works on the third try after two failed requests', function () {
       cy.visit({
         url: '/works-third-time/for-visit',
-      })
-      .contains('ok')
+      }).contains('ok')
     })
 
     it('works on the third try after two 500 errors', function () {
       cy.visit({
         url: '/works-third-time-else-500/500-for-visit',
         retryOnStatusCodeFailure: true,
-      })
-      .contains('ok')
+      }).contains('ok')
     })
 
     it('re-sends a <form> body on failures', function () {
@@ -28,8 +26,7 @@ describe('network error handling', function () {
       .get('input[type=text]')
       .type('bar')
 
-      cy.get('input[type=submit]')
-      .click()
+      cy.get('input[type=submit]').click()
 
       cy.contains('{"foo":"bar"}')
     })
@@ -45,8 +42,7 @@ describe('network error handling', function () {
     it('works on the third try after two failed requests', function () {
       cy.request({
         url: '/works-third-time/for-request',
-      })
-      .then(({ body }) => {
+      }).then(({ body }) => {
         expect(body).to.eq('ok')
       })
     })
@@ -55,8 +51,7 @@ describe('network error handling', function () {
       cy.request({
         url: '/works-third-time-else-500/500-for-request',
         retryOnStatusCodeFailure: true,
-      })
-      .then(({ body }) => {
+      }).then(({ body }) => {
         expect(body).to.eq('ok')
       })
     })

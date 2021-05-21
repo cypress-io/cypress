@@ -26,14 +26,11 @@ describe('package.json build', () => {
     sinon.stub(fs, 'outputJsonAsync').resolves()
   })
 
-  it('version', () => {
-    return makeUserPackageFile()
-    .tap(hasVersion)
+  it('author name and version', () => {
+    return makeUserPackageFile().tap(hasVersion).tap(hasVersion)
   })
 
   it('outputs expected properties', () => {
-    return makeUserPackageFile()
-    .then(changeVersion)
-    .then(snapshot)
+    return makeUserPackageFile().then(changeVersion).then(snapshot)
   })
 })

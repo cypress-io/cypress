@@ -14,11 +14,11 @@ class SelectorPlaygroundModel {
   @observable numElements = 0
   @observable method = methods[0]
 
-  @computed get selector () {
+  @computed get selector() {
     return this.method === 'get' ? this.getSelector : this.containsSelector
   }
 
-  @computed get infoHelp () {
+  @computed get infoHelp() {
     if (!this.isValid) {
       return 'Invalid selector'
     }
@@ -26,11 +26,11 @@ class SelectorPlaygroundModel {
     return this.numElements === 1 ? '1 matched element' : `${this.numElements} matched elements`
   }
 
-  @action toggleEnabled () {
+  @action toggleEnabled() {
     this.setEnabled(!this.isEnabled)
   }
 
-  @action setEnabled (isEnabled) {
+  @action setEnabled(isEnabled) {
     this.isEnabled = isEnabled
 
     if (!this.isEnabled) {
@@ -38,21 +38,21 @@ class SelectorPlaygroundModel {
     }
   }
 
-  @action toggleOpen () {
+  @action toggleOpen() {
     this.setOpen(!this.isOpen)
   }
 
-  @action setOpen (isOpen) {
+  @action setOpen(isOpen) {
     this.isOpen = isOpen
 
     this.setEnabled(this.isOpen)
   }
 
-  @action setShowingHighlight (isShowingHighlight) {
+  @action setShowingHighlight(isShowingHighlight) {
     this.isShowingHighlight = isShowingHighlight
   }
 
-  @action setSelector (selector) {
+  @action setSelector(selector) {
     if (this.method === 'get') {
       this.getSelector = selector
     } else {
@@ -60,19 +60,19 @@ class SelectorPlaygroundModel {
     }
   }
 
-  @action setNumElements (numElements) {
+  @action setNumElements(numElements) {
     this.numElements = numElements
   }
 
-  @action setValidity (isValid) {
+  @action setValidity(isValid) {
     this.isValid = isValid
   }
 
-  @action setMethod (method) {
+  @action setMethod(method) {
     this.method = method
   }
 
-  @action resetMethod () {
+  @action resetMethod() {
     this.method = methods[0]
   }
 }

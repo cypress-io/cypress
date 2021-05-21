@@ -6,7 +6,7 @@ import { Component, OnInit, Input } from '@angular/core'
   styleUrls: ['./input.component.css'],
 })
 export class InputComponent implements OnInit {
-  @Input() myInput = 4;
+  @Input() myInput = 4
 
-  ngOnInit () {}
+  ngOnInit() {}
 }

@@ -50,9 +50,10 @@ describe('lib/util/coerce', () => {
 
     // https://github.com/cypress-io/cypress/issues/8818
     it('coerces JSON string', () => {
-      expect(coerce('[{"type": "foo", "value": "bar"}, {"type": "fizz", "value": "buzz"}]')).to.deep.equal(
-        [{ 'type': 'foo', 'value': 'bar' }, { 'type': 'fizz', 'value': 'buzz' }],
-      )
+      expect(coerce('[{"type": "foo", "value": "bar"}, {"type": "fizz", "value": "buzz"}]')).to.deep.equal([
+        { type: 'foo', value: 'bar' },
+        { type: 'fizz', value: 'buzz' },
+      ])
     })
 
     // https://github.com/cypress-io/cypress/issues/8818
@@ -62,7 +63,10 @@ describe('lib/util/coerce', () => {
       const coercedCypressEnvVar = coerce(cypressEnvVar)
 
       expect(coercedCypressEnvVar).to.have.keys('stringified_json')
-      expect(coercedCypressEnvVar['stringified_json']).to.deep.equal([{ 'type': 'foo', 'value': 'bar' }, { 'type': 'fizz', 'value': 'buzz' }])
+      expect(coercedCypressEnvVar['stringified_json']).to.deep.equal([
+        { type: 'foo', value: 'bar' },
+        { type: 'fizz', value: 'buzz' },
+      ])
     })
 
     it('coerces array', () => {

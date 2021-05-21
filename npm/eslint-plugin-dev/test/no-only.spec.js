@@ -6,7 +6,7 @@ const _ = require('lodash')
 const ruleName = 'no-only'
 const pluginName = '__plugin__'
 
-function execute (file, options = {}) {
+function execute(file, options = {}) {
   const opts = _.defaultsDeep(options, {
     fix: true,
     config: {

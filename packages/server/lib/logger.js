@@ -36,24 +36,23 @@ const createFile = function (name, level, opts = {}) {
 
   _.extend(obj, opts)
 
-  return new (winston.transports.File)(obj)
+  return new winston.transports.File(obj)
 }
 
 const transports = [createFile('all', null, { handleExceptions: true })]
 
 if (process.env.CYPRESS_DEBUG) {
-  transports.push(new (winston.transports.Console)())
+  transports.push(new winston.transports.Console())
 }
 
-const logger = new (winston.Logger)({
+const logger = new winston.Logger({
   transports,
 
-  exitOnError (err) {
+  exitOnError(err) {
     // cannot use a reference here since
     // defaultErrorHandler does not exist yet
     return logger.defaultErrorHandler(err)
   },
-
 })
 
 logger.createException = (err) => {
@@ -100,7 +99,7 @@ logger.defaultErrorHandler = function (err) {
 }
 
 logger.setSettings = (obj) => {
-  return logger._settings = obj
+  return (logger._settings = obj)
 }
 
 logger.getSettings = () => {
@@ -112,22 +111,25 @@ logger.unsetSettings = () => {
 }
 
 logger.setErrorHandler = (fn) => {
-  return logger.errorHandler = fn
+  return (logger.errorHandler = fn)
 }
 
 logger.getData = function (obj) {
   const keys = ['level', 'message', 'timestamp', 'type']
 
-  return _.reduce(obj, (memo, value, key) => {
-    if (!keys.includes(key)) {
-      memo.data[key] = value
-    } else {
-      memo[key] = value
-    }
+  return _.reduce(
+    obj,
+    (memo, value, key) => {
+      if (!keys.includes(key)) {
+        memo.data[key] = value
+      } else {
+        memo[key] = value
+      }
 
-    return memo
-  }
-  , { data: {} })
+      return memo
+    },
+    { data: {} }
+  )
 }
 
 logger.normalize = (logs = []) => {
@@ -143,9 +145,12 @@ logger.getLogs = function () {
       order: 'desc',
     }
 
-    const t = logger.transports[transport] != null ? logger.transports[transport] : (() => {
-      throw new Error(`Log transport: '${transport}' does not exist!`)
-    })()
+    const t =
+      logger.transports[transport] != null
+        ? logger.transports[transport]
+        : (() => {
+            throw new Error(`Log transport: '${transport}' does not exist!`)
+          })()
 
     return t.query(opts, (err, results) => {
       if (err) {
@@ -172,7 +177,7 @@ logger.onLog = function (fn) {
 
       obj.type = data.type
       obj.data = _.omit(data, 'type')
-      obj.timestamp = new Date
+      obj.timestamp = new Date()
 
       return fn(obj)
     }
@@ -193,8 +198,7 @@ logger.log = _.wrap(logger.log, function (orig, ...args) {
   // should be cloning this last object
   // and not mutating it directly!
   if (_.isObject(last)) {
-    _.defaults(last,
-      { type: 'server' })
+    _.defaults(last, { type: 'server' })
   }
 
   return orig.apply(this, args)

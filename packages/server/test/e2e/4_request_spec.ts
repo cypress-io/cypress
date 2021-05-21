@@ -33,9 +33,7 @@ const onServer3 = function (app) {
 
 const onServer2 = function (app) {
   app.get('/statusCode', (req, res) => {
-    const {
-      code,
-    } = req.query
+    const { code } = req.query
 
     return res.sendStatus(code)
   })
@@ -81,8 +79,7 @@ const onServer = function (app) {
 
   app.get('/timeout', (req, res) => {
     setTimeout(() => {
-      res.set('Access-Control-Allow-Origin', '*')
-      .end('it worked')
+      res.set('Access-Control-Allow-Origin', '*').end('it worked')
     }, req.query.ms)
   })
 
@@ -137,34 +134,41 @@ const onServer = function (app) {
 
 describe('e2e requests', () => {
   e2e.setup({
-    servers: [{
-      port: 2290,
-      onServer,
-    }, {
-      port: 2291,
-      onServer,
-    }, {
-      port: 2292,
-      onServer,
-    }, {
-      port: 2293,
-      onServer,
-    }, {
-      port: 2294,
-      onServer: onServer2,
-    }, {
-      port: 2295,
-      onServer: onServer3,
-    }],
+    servers: [
+      {
+        port: 2290,
+        onServer,
+      },
+      {
+        port: 2291,
+        onServer,
+      },
+      {
+        port: 2292,
+        onServer,
+      },
+      {
+        port: 2293,
+        onServer,
+      },
+      {
+        port: 2294,
+        onServer: onServer2,
+      },
+      {
+        port: 2295,
+        onServer: onServer3,
+      },
+    ],
   })
 
   beforeEach(() => {
-    return counts = {
+    return (counts = {
       'localhost:2290': 0,
       'localhost:2291': 0,
       'localhost:2292': 0,
       'localhost:2293': 0,
-    }
+    })
   })
 
   e2e.it('passes', {
@@ -188,7 +192,7 @@ describe('e2e requests', () => {
       spec: 'request_status_code_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
-      onStdout (stdout) {
+      onStdout(stdout) {
         return stdout
         .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
         .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
@@ -202,7 +206,7 @@ describe('e2e requests', () => {
       spec: 'request_long_http_props_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
-      onStdout (stdout) {
+      onStdout(stdout) {
         return stdout
         .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
         .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')

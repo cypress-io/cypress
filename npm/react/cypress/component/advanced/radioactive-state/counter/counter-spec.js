@@ -8,13 +8,10 @@ describe('reactive-state Counter', () => {
     mount(
       <div className="App">
         <Counter />
-      </div>,
+      </div>
     )
 
-    cy.contains('.count', '0')
-    .click()
-    .click()
-    .click()
+    cy.contains('.count', '0').click().click().click()
 
     cy.contains('.count', '3')
   })

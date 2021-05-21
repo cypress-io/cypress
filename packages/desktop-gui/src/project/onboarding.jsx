@@ -8,22 +8,22 @@ import ipc from '../lib/ipc'
 
 @observer
 class OnBoarding extends Component {
-  componentDidMount () {
+  componentDidMount() {
     this._maybeShowModal()
   }
 
-  componentDidUpdate () {
+  componentDidUpdate() {
     this._maybeShowModal()
   }
 
-  _maybeShowModal () {
+  _maybeShowModal() {
     if (!this.showedModal && this.props.project.isNew) {
       this.showedModal = true
       this.props.project.openModal()
     }
   }
 
-  render () {
+  render() {
     const { project } = this.props
 
     let closeModal = () => {
@@ -32,38 +32,31 @@ class OnBoarding extends Component {
     }
 
     return (
-      <BootstrapModal
-        show={project.onBoardingModalOpen}
-        onHide={closeModal}
-        backdrop='static'
-      >
-        <div className='modal-body'>
-          <div className='empty-onboarding'>
+      <BootstrapModal show={project.onBoardingModalOpen} onHide={closeModal} backdrop="static">
+        <div className="modal-body">
+          <div className="empty-onboarding">
             <h1>To help you get started...</h1>
             <p>
               We've added some folders and example tests to your project. Try running the tests in the
               <strong onClick={this._openExampleSpec}>
-                <i className='far fa-folder'></i>{' '}
-                {project.integrationExampleName}{' '}
+                <i className="far fa-folder"></i> {project.integrationExampleName}{' '}
               </strong>
               folder or add your own test files to
               <strong onClick={this._openIntegrationFolder}>
-                <i className='far fa-folder'></i>{' '}
-                cypress/integration
-              </strong>.
+                <i className="far fa-folder"></i> cypress/integration
+              </strong>
+              .
             </p>
-            <div className='folder-preview-onboarding'>
+            <div className="folder-preview-onboarding">
               <ul>
                 <li>
                   <span>
-                    <i className='far fa-folder-open'></i>{' '}
-                    {project.name}
+                    <i className="far fa-folder-open"></i> {project.name}
                   </span>
                   <ul>
-                    <li className='app-code'>
-                      <span >
-                        <i className='far fa-folder'></i>{' '}
-                        ...
+                    <li className="app-code">
+                      <span>
+                        <i className="far fa-folder"></i> ...
                       </span>
                     </li>
                     {this._scaffoldedFiles(project.scaffoldedFiles, 'new-code')}
@@ -71,10 +64,8 @@ class OnBoarding extends Component {
                 </li>
               </ul>
             </div>
-            <div className='helper-line'>
-              <BootstrapModal.Dismiss className='btn btn-success'>
-                OK, got it!
-              </BootstrapModal.Dismiss>
+            <div className="helper-line">
+              <BootstrapModal.Dismiss className="btn btn-success">OK, got it!</BootstrapModal.Dismiss>
             </div>
           </div>
         </div>
@@ -82,7 +73,7 @@ class OnBoarding extends Component {
     )
   }
 
-  _scaffoldedFiles (files, className) {
+  _scaffoldedFiles(files, className) {
     files = _.sortBy(files, 'name')
 
     const notFolders = _.every(files, (file) => !file.children)
@@ -98,12 +89,9 @@ class OnBoarding extends Component {
         return (
           <li className={cs(className, 'new-item')} key={file.name}>
             <span>
-              <i className='far fa-folder-open'></i>{' '}
-              {file.name}
+              <i className="far fa-folder-open"></i> {file.name}
             </span>
-            <ul>
-              {this._scaffoldedFiles(file.children)}
-            </ul>
+            <ul>{this._scaffoldedFiles(file.children)}</ul>
           </li>
         )
       }
@@ -111,8 +99,7 @@ class OnBoarding extends Component {
       return (
         <li className={cs(className, 'new-item', { 'is-more': file.more })} key={file.name}>
           <span>
-            <i className='far fa-file-code'></i>{' '}
-            {file.name}
+            <i className="far fa-file-code"></i> {file.name}
           </span>
         </li>
       )

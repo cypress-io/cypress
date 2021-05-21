@@ -10,7 +10,7 @@ const onServer = function (app) {
     // reset the count anytime we visit first again
     count = 0
 
-    return res.send('<html><h1>first</h1><a href=\'/second\'>second</a></html>')
+    return res.send("<html><h1>first</h1><a href='/second'>second</a></html>")
   })
 
   app.get('/second', (req, res) => {
@@ -22,8 +22,7 @@ const onServer = function (app) {
   app.get('/slow', (req, res) => {
     return setTimeout(() => {
       return res.send('<html><h1>slow</h1></html>')
-    }
-    , 2000)
+    }, 2000)
   })
 
   app.get('/form', (req, res) => {
@@ -63,13 +62,16 @@ const onServer = function (app) {
 
 describe('e2e page_loading', () => {
   e2e.setup({
-    servers: [{
-      port: 1717,
-      onServer,
-    }, {
-      port: 17170,
-      static: true,
-    }],
+    servers: [
+      {
+        port: 1717,
+        onServer,
+      },
+      {
+        port: 17170,
+        static: true,
+      },
+    ],
   })
 
   // this tests that __cypress.initial is set correctly whilst navigating

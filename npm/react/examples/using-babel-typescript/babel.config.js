@@ -1,9 +1,5 @@
 module.exports = {
-  presets: [
-    '@babel/preset-env',
-    '@babel/preset-typescript',
-    '@babel/preset-react',
-  ],
+  presets: ['@babel/preset-env', '@babel/preset-typescript', '@babel/preset-react'],
   plugins: ['@babel/plugin-proposal-class-properties'],
   env: {
     // place plugins for Cypress tests into "test" environment
