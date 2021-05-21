@@ -23,9 +23,7 @@ describe('PrimengButtonComponent', () => {
     const fixture = mount(PrimengButtonComponent)
 
     fixture.detectChanges()
-    cy.get('#directive')
-    .should('have.text', 'Directive')
-    .should('have.css', 'background-color', 'rgb(33, 150, 243)')
+    cy.get('#directive').should('have.text', 'Directive').should('have.css', 'background-color', 'rgb(33, 150, 243)')
 
     cy.get('#component button')
     .should('have.text', 'Component')
@@ -38,9 +36,7 @@ describe('PrimengButtonComponent', () => {
     const fixture = mount(PrimengButtonComponent)
 
     fixture.detectChanges()
-    cy.get('#directive')
-    .should('have.text', 'Directive')
-    .should('have.css', 'background-color', 'rgb(33, 150, 243)')
+    cy.get('#directive').should('have.text', 'Directive').should('have.css', 'background-color', 'rgb(33, 150, 243)')
 
     cy.get('#component button')
     .should('have.text', 'Component')

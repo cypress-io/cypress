@@ -3,10 +3,7 @@ import { join, resolve } from 'path'
 import { expect } from 'chai'
 
 describe('@cypress/schematic: ng-add', () => {
-  const schematicRunner = new SchematicTestRunner(
-    'schematics',
-    join(__dirname, './../collection.json'),
-  )
+  const schematicRunner = new SchematicTestRunner('schematics', join(__dirname, './../collection.json'))
 
   let appTree: UnitTestTree
 
@@ -26,15 +23,29 @@ describe('@cypress/schematic: ng-add', () => {
   }
 
   beforeEach(async () => {
-    appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise()
-    appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
+    appTree = await schematicRunner
+    .runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions)
+    .toPromise()
+    appTree = await schematicRunner
+    .runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree)
+    .toPromise()
   })
 
   it('should create cypress files', async () => {
-    const files = ['cypress/integration/spec.ts', 'cypress/plugins/index.js', 'cypress/support/commands.ts', 'cypress/support/index.ts', 'cypress/tsconfig.json', 'cypress.json']
+    const files = [
+      'cypress/integration/spec.ts',
+      'cypress/plugins/index.js',
+      'cypress/support/commands.ts',
+      'cypress/support/index.ts',
+      'cypress/tsconfig.json',
+      'cypress.json',
+    ]
     const homePath = '/projects/sandbox/'
 
-    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
+    return schematicRunner
+    .runSchematicAsync('ng-add', {}, appTree)
+    .toPromise()
+    .then((tree) => {
       files.forEach((f) => {
         const pathToFile = resolve(homePath, f)
 

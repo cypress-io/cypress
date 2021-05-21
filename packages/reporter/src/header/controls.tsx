@@ -32,7 +32,15 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
       )}
       {ifThen(
         appState.isPaused,
-        <Tooltip placement="bottom" title="Resume" className="cy-tooltip">
+        <Tooltip
+          placement="bottom"
+          title={
+            <p>
+              Resume <span className="kbd">C</span>
+            </p>
+          }
+          className="cy-tooltip"
+        >
           <button aria-label="Resume" className="play" onClick={emit('resume')}>
             <i className="fas fa-play" />
           </button>
@@ -42,7 +50,11 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         !appState.isPaused,
         <Tooltip
           placement="bottom"
-          title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
+          title={
+            <p>
+              {appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling <span className="kbd">A</span>
+            </p>
+          }
           className="cy-tooltip"
         >
           <button
@@ -90,8 +102,17 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
       )}
       {ifThen(
         !!appState.nextCommandName,
-        <Tooltip placement="bottom" title={`Next: '${appState.nextCommandName}'`} className="cy-tooltip">
-          <button aria-label={`Next: '${appState.nextCommandName}'`} className="next" onClick={emit('next')}>
+        <Tooltip
+          placement="bottom"
+          title={
+            <p>
+              Next <span className="kbd">[N]:</span>
+              {appState.nextCommandName}
+            </p>
+          }
+          className="cy-tooltip"
+        >
+          <button aria-label={`Next '${appState.nextCommandName}'`} className="next" onClick={emit('next')}>
             <i className="fas fa-step-forward" />
           </button>
         </Tooltip>

@@ -6,5 +6,5 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./routing.component.css'],
 })
 export class RoutingComponent implements OnInit {
-  ngOnInit (): void {}
+  ngOnInit(): void {}
 }

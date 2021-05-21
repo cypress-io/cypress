@@ -9,7 +9,7 @@ export default createStorybookConfig({
   title: 'Core/Placeholder',
 })
 
-export const StyledText = createStory(() => (
+export const Placeholder = createStory(() => (
   <div>
     <div>
       <PlaceholderComponent>This is placeholder text</PlaceholderComponent>

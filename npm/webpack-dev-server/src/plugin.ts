@@ -41,7 +41,7 @@ export default class CypressCTOptionsPlugin {
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
 
-  constructor (options: CypressCTOptionsPluginOptionsWithEmitter) {
+  constructor(options: CypressCTOptionsPluginOptionsWithEmitter) {
     this.files = options.files
     this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
@@ -57,29 +57,23 @@ export default class CypressCTOptionsPlugin {
   }
 
   private setupCustomHMR = (compiler: webpack.Compiler) => {
-    compiler.hooks.afterCompile.tap(
-      'CypressCTOptionsPlugin',
-      (compilation) => {
-        const stats = compilation.getStats()
+    compiler.hooks.afterCompile.tap('CypressCTOptionsPlugin', (compilation) => {
+      const stats = compilation.getStats()
 
-        if (stats.hasErrors()) {
-          this.errorEmitted = true
-          this.devServerEvents.emit('dev-server:compile:error', stats.toJson().errors?.[0])
-        } else if (this.errorEmitted) {
-          // compilation succeed but assets haven't emitted to the output yet
-          this.devServerEvents.emit('dev-server:compile:error', null)
-        }
-      },
-    )
+      if (stats.hasErrors()) {
+        this.errorEmitted = true
+        this.devServerEvents.emit('dev-server:compile:error', stats.toJson().errors?.[0])
+      } else if (this.errorEmitted) {
+        // compilation succeed but assets haven't emitted to the output yet
+        this.devServerEvents.emit('dev-server:compile:error', null)
+      }
+    })
 
-    compiler.hooks.afterEmit.tap(
-      'CypressCTOptionsPlugin',
-      (compilation) => {
-        if (!compilation.getStats().hasErrors()) {
-          this.devServerEvents.emit('dev-server:compile:success')
-        }
-      },
-    )
+    compiler.hooks.afterEmit.tap('CypressCTOptionsPlugin', (compilation) => {
+      if (!compilation.getStats().hasErrors()) {
+        this.devServerEvents.emit('dev-server:compile:success')
+      }
+    })
   }
 
   /**
@@ -103,23 +97,23 @@ export default class CypressCTOptionsPlugin {
     // Webpack 5
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {
-      webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
-        'CypressCTOptionsPlugin',
-        (context) => this.pluginFunc(context as CypressCTWebpackContext),
-      )
+      webpack.NormalModule.getCompilationHooks(compilation).loader.tap('CypressCTOptionsPlugin', (context) => {
+        return this.pluginFunc(context as CypressCTWebpackContext)
+      })
 
       return
     }
 
     // Webpack 4
-    compilation.hooks.normalModuleLoader.tap(
-      'CypressCTOptionsPlugin',
-      (context) => this.pluginFunc(context as CypressCTWebpackContext),
-    )
-  };
+    compilation.hooks.normalModuleLoader.tap('CypressCTOptionsPlugin', (context) => {
+      return this.pluginFunc(context as CypressCTWebpackContext)
+    })
+  }
 
   apply(compiler: Compiler): void {
     this.setupCustomHMR(compiler)
-    compiler.hooks.compilation.tap('CypressCTOptionsPlugin', (compilation) => this.plugin(compilation as Webpack45Compilation))
+    compiler.hooks.compilation.tap('CypressCTOptionsPlugin', (compilation) => {
+      return this.plugin(compilation as Webpack45Compilation)
+    })
   }
 }

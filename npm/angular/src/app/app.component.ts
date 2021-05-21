@@ -7,12 +7,12 @@ import { HeroService } from './hero.service'
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  title = 'angular-project';
-  list: string[];
+  title = 'angular-project'
+  list: string[]
 
-  constructor (private service: HeroService) {}
+  constructor(private service: HeroService) {}
 
-  ngOnInit (): void {
+  ngOnInit(): void {
     this.list = this.service.getHeroes()
   }
 }

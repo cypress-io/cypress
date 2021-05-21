@@ -159,7 +159,7 @@
     "eol": "0.9.1",
     "eventsource": "1.0.7",
     "express-session": "1.16.1",
-    "express-useragent": "1.0.12",
+    "express-useragent": "1.0.15",
     "http-mitm-proxy": "0.7.0",
     "https-proxy-agent": "3.0.1",
     "istanbul": "0.4.5",

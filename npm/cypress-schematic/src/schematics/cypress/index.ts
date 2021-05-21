@@ -17,11 +17,7 @@ import { concat, Observable, of } from 'rxjs'
 import { concatMap, map } from 'rxjs/operators'
 
 import { addPackageJsonDependency, NodeDependencyType, removePackageJsonDependency } from '../utility/dependencies'
-import {
-  getAngularVersion,
-  getLatestNodeVersion,
-  NodePackage,
-} from '../utility'
+import { getAngularVersion, getLatestNodeVersion, NodePackage } from '../utility'
 import { relative, resolve } from 'path'
 import { JSONFile, JSONPath } from '../utility/json-file'
 
@@ -39,13 +35,13 @@ export default function (_options: any): Rule {
   }
 }
 
-function addPropertyToPackageJson (tree: Tree, path: JSONPath, value: JsonValue) {
+function addPropertyToPackageJson(tree: Tree, path: JSONPath, value: JsonValue) {
   const json = new JSONFile(tree, '/package.json')
 
   json.modify(path, value)
 }
 
-function updateDependencies (options: any): Rule {
+function updateDependencies(options: any): Rule {
   let removeDependencies: Observable<Tree>
 
   return (tree: Tree, context: SchematicContext): any => {
@@ -60,7 +56,7 @@ function updateDependencies (options: any): Rule {
           removePackageJsonDependency(tree, packageName)
 
           return tree
-        }),
+        })
       )
     }
 
@@ -78,7 +74,7 @@ function updateDependencies (options: any): Rule {
         })
 
         return tree
-      }),
+      })
     )
 
     if (options.removeProtractor) {
@@ -89,7 +85,7 @@ function updateDependencies (options: any): Rule {
   }
 }
 
-function addCypressTestScriptsToPackageJson (): Rule {
+function addCypressTestScriptsToPackageJson(): Rule {
   return (tree: Tree) => {
     addPropertyToPackageJson(tree, ['scripts'], {
       'cy:open': 'cypress open',
@@ -98,7 +94,7 @@ function addCypressTestScriptsToPackageJson (): Rule {
   }
 }
 
-function deleteDirectory (tree: Tree, path: string): void {
+function deleteDirectory(tree: Tree, path: string): void {
   try {
     tree.delete(path)
   } catch (e) {
@@ -106,7 +102,7 @@ function deleteDirectory (tree: Tree, path: string): void {
   }
 }
 
-function removeFiles (): Rule {
+function removeFiles(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     if (tree.exists('./angular.json')) {
       const angularJsonValue = getAngularJsonValue(tree)
@@ -141,7 +137,7 @@ function removeFiles (): Rule {
   }
 }
 
-function addCypressFiles (): Rule {
+function addCypressFiles(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.debug('Adding cypress files')
     const angularJsonValue = getAngularJsonValue(tree)
@@ -164,14 +160,14 @@ function addCypressFiles (): Rule {
               baseUrl,
               relativeToWorkspace,
             }),
-          ]),
+          ])
         )
-      }),
+      })
     )(tree, context)
   }
 }
 
-function getBaseUrl (project: { architect: { serve: { options: any } } }): string {
+function getBaseUrl(project: { architect: { serve: { options: any } } }): string {
   let options = { protocol: 'http', port: 4200, host: 'localhost' }
 
   if (project.architect?.serve?.options) {
@@ -184,13 +180,13 @@ function getBaseUrl (project: { architect: { serve: { options: any } } }): strin
   return `${options.protocol}://${options.host}:${options.port}`
 }
 
-function addNewCypressCommands (
+function addNewCypressCommands(
   tree: Tree,
   angularJsonVal: any,
   project: string,
   runJson: JsonObject,
   openJson: JsonObject,
-  removeProtractor: boolean,
+  removeProtractor: boolean
 ) {
   const projectArchitectJson = angularJsonVal['projects'][project]['architect']
 
@@ -204,13 +200,13 @@ function addNewCypressCommands (
   return tree.overwrite('./angular.json', JSON.stringify(angularJsonVal, null, 2))
 }
 
-function getAngularJsonValue (tree: Tree) {
+function getAngularJsonValue(tree: Tree) {
   const angularJson = new JSONFile(tree, './angular.json')
 
   return angularJson.get([]) as any
 }
 
-function modifyAngularJson (options: any): Rule {
+function modifyAngularJson(options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
     if (tree.exists('./angular.json')) {
       const angularJsonVal = getAngularJsonValue(tree)
@@ -246,9 +242,7 @@ function modifyAngularJson (options: any): Rule {
           },
         }
 
-        const configFile = projects[project].root
-          ? `${projects[project].root}/cypress.json`
-          : null
+        const configFile = projects[project].root ? `${projects[project].root}/cypress.json` : null
 
         if (configFile) {
           Object.assign(cypressRunJson.options, { configFile })
@@ -266,14 +260,7 @@ function modifyAngularJson (options: any): Rule {
 
         context.logger.debug(`Adding cypress-run and cypress-open commands in angular.json`)
 
-        addNewCypressCommands(
-          tree,
-          angularJsonVal,
-          project,
-          cypressRunJson,
-          cypressOpenJson,
-          options.removeProtractor,
-        )
+        addNewCypressCommands(tree, angularJsonVal, project, cypressRunJson, cypressOpenJson, options.removeProtractor)
       })
     } else {
       throw new SchematicsException('angular.json not found')
@@ -317,9 +304,7 @@ export const removeE2ELinting = (tree: Tree, angularJsonVal: any, project: strin
         return !pathIncludesE2e && path
       })
     } else {
-      filteredTsConfigPaths = !projectLintOptionsJson?.tsConfig?.includes('e2e')
-        ? projectLintOptionsJson?.tsConfig
-        : ''
+      filteredTsConfigPaths = !projectLintOptionsJson?.tsConfig?.includes('e2e') ? projectLintOptionsJson?.tsConfig : ''
     }
 
     projectLintOptionsJson['tsConfig'] = filteredTsConfigPaths

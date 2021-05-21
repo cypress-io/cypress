@@ -5,15 +5,7 @@ const fs = require('../lib/fs')
 
 // grab the current version and a few other properties
 // from the root package.json
-const {
-  version,
-  description,
-  homepage,
-  license,
-  bugs,
-  repository,
-  keywords,
-} = require('@packages/root')
+const { version, description, homepage, license, bugs, repository, keywords } = require('@packages/root')
 
 // the rest of properties should come from the package.json in CLI folder
 const packageJsonSrc = path.join('package.json')

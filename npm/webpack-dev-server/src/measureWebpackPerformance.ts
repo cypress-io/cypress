@@ -7,7 +7,7 @@ import chalk from 'chalk'
 // @ts-ignore
 import SpeedMeasurePlugin from 'speed-measure-webpack-plugin'
 
-export function measureWebpackPerformance (webpackConfig: Configuration): Configuration {
+export function measureWebpackPerformance(webpackConfig: Configuration): Configuration {
   if (!process.env.WEBPACK_PERF_MEASURE) {
     throw new Error('Performance monitoring is possible only with WEBPACK_PERF_MEASURE env variable set')
   }

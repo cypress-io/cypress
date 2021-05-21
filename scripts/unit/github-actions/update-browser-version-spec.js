@@ -23,9 +23,7 @@ const coreStub = () => {
 }
 
 const stubOmahaResult = (result) => {
-  nock('https://omahaproxy.appspot.com')
-  .get('/all.json')
-  .reply(200, result)
+  nock('https://omahaproxy.appspot.com').get('/all.json').reply(200, result)
 }
 
 const stubRepoVersions = ({ betaVersion, stableVersion }) => {
@@ -254,11 +252,14 @@ describe('update browser version github action', () => {
         latestStableVersion: '2.0',
       })
 
-      expect(fs.writeFileSync).to.be.calledWith('./browser-versions.json', `{
+      expect(fs.writeFileSync).to.be.calledWith(
+        './browser-versions.json',
+        `{
   "chrome:beta": "2.1",
   "chrome:stable": "2.0"
 }
-`)
+`
+      )
     })
   })
 
@@ -266,13 +267,11 @@ describe('update browser version github action', () => {
     it('updates pull request title', async () => {
       const github = {
         pulls: {
-          list: sinon.stub().returns(Promise.resolve(
-            {
-              data: [
-                { number: '123' },
-              ],
-            },
-          )),
+          list: sinon.stub().returns(
+            Promise.resolve({
+              data: [{ number: '123' }],
+            })
+          ),
           update: sinon.stub(),
         },
       }
@@ -310,11 +309,11 @@ describe('update browser version github action', () => {
     it('logs and does not attempt to update pull request title if PR cannot be found', async () => {
       const github = {
         pulls: {
-          list: sinon.stub().returns(Promise.resolve(
-            {
+          list: sinon.stub().returns(
+            Promise.resolve({
               data: [],
-            },
-          )),
+            })
+          ),
           update: sinon.stub(),
         },
       }

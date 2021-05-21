@@ -6,10 +6,7 @@ import {
   TestBed,
   TestModuleMetadata,
 } from '@angular/core/testing'
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing'
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing'
 import { CypressAngularConfig } from './config'
 import { injectStylesBeforeElement } from '@cypress/mount-utils'
 import { ProxyComponent } from './proxy.component'
@@ -19,24 +16,19 @@ let config: CypressAngularConfig = {
   log: false,
 }
 
-export function setConfig (c: CypressAngularConfig): void {
+export function setConfig(c: CypressAngularConfig): void {
   config = c
 }
 
-function init<T> (
-  component:
-    | Type<T>
-    | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
-  options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>,
+function init<T>(
+  component: Type<T> | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
+  options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>
 ): void {
   Cypress.log({ displayName: 'Unit Test', message: ['Init Environment'] })
 
   TestBed.resetTestEnvironment()
 
-  TestBed.initTestEnvironment(
-    BrowserDynamicTestingModule,
-    platformBrowserDynamicTesting(),
-  )
+  TestBed.initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting())
 
   const declarations = [ProxyComponent]
   const imports = []
@@ -109,20 +101,15 @@ function init<T> (
   injectStylesBeforeElement(config, document, el)
 }
 
-export function initEnv<T> (
-  component:
-    | Type<T>
-    | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
-  options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>,
+export function initEnv<T>(
+  component: Type<T> | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
+  options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>
 ): void {
   init(component, options)
   TestBed.compileComponents()
 }
 
-export function mount<T> (
-  component: Type<T>,
-  inputs?: object,
-): ComponentFixture<T> {
+export function mount<T>(component: Type<T>, inputs?: object): ComponentFixture<T> {
   // TODO improve logging using a full log instance
   Cypress.log({
     displayName: 'Unit Test',
@@ -141,18 +128,14 @@ export function mount<T> (
   return fixture
 }
 
-export function initEnvHtml<T> (
-  component:
-    | Type<T>
-    | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
-  options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>,
+export function initEnvHtml<T>(
+  component: Type<T> | (Partial<TestModuleMetadata> & Partial<CypressAngularConfig>),
+  options?: Partial<TestModuleMetadata> & Partial<CypressAngularConfig>
 ): void {
   init(component, options)
 }
 
-export function mountHtml (
-  htmlTemplate: string,
-): ComponentFixture<ProxyComponent> {
+export function mountHtml(htmlTemplate: string): ComponentFixture<ProxyComponent> {
   Cypress.log({
     displayName: 'Unit Test',
     message: [`Mounting **${htmlTemplate}**`],
@@ -173,6 +156,6 @@ export function mountHtml (
   return fixture
 }
 
-export function getCypressTestBed (): TestBed {
+export function getCypressTestBed(): TestBed {
   return getTestBed()
 }

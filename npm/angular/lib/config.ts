@@ -6,4 +6,4 @@ interface Config {
   log?: boolean
 }
 
-export type CypressAngularConfig = Partial<StyleOptions> & Partial<Config>;
+export type CypressAngularConfig = Partial<StyleOptions> & Partial<Config>

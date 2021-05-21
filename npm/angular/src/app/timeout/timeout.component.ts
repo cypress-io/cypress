@@ -5,9 +5,9 @@ import { Component } from '@angular/core'
   templateUrl: './timeout.component.html',
 })
 export class TimeoutComponent {
-  showMsg = false;
+  showMsg = false
 
-  submit () {
+  submit() {
     this.showMsg = true
     setTimeout(() => (this.showMsg = false), 20000)
   }

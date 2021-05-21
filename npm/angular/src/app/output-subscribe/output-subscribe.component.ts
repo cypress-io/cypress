@@ -5,10 +5,10 @@ import { Component, EventEmitter, Output } from '@angular/core'
   templateUrl: './output-subscribe.component.html',
 })
 export class OutputSubscribeComponent {
-  @Output() counterClick = new EventEmitter<number>();
-  counter = 0;
+  @Output() counterClick = new EventEmitter<number>()
+  counter = 0
 
-  onClick () {
+  onClick() {
     this.counter++
     this.counterClick.emit(this.counter)
   }

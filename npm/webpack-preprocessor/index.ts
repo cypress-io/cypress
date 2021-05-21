@@ -378,7 +378,7 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string | Error) {
+function cleanseError(err: string | Error) {
   let msg = typeof err === 'string' ? err : err.message
 
   return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')

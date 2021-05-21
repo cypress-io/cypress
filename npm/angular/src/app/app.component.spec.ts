@@ -28,8 +28,6 @@ describe('AppComponent', () => {
     fixture.detectChanges()
     const compiled = fixture.debugElement.nativeElement
 
-    expect(compiled.querySelector('.content span').textContent).toContain(
-      'angular-project app is running!',
-    )
+    expect(compiled.querySelector('.content span').textContent).toContain('angular-project app is running!')
   })
 })

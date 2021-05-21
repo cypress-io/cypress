@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core'
 @Injectable({ providedIn: 'root' })
 export class HeroService {
   /** GET heroes from the server */
-  getHeroes (): string[] {
+  getHeroes(): string[] {
     return ['toto', 'titi']
   }
 }

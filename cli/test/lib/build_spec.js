@@ -27,7 +27,7 @@ describe('package.json build', () => {
   })
 
   it('author name and version', () => {
-    return makeUserPackageFile().tap(hasAuthor).tap(hasVersion)
+    return makeUserPackageFile().tap(hasVersion).tap(hasVersion)
   })
 
   it('outputs expected properties', () => {

@@ -6,5 +6,5 @@ import { Component, OnInit } from '@angular/core'
   styleUrls: ['./primeng-button.component.scss'],
 })
 export class PrimengButtonComponent implements OnInit {
-  ngOnInit () {}
+  ngOnInit() {}
 }

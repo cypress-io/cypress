@@ -1,3 +1,5 @@
 {
-  "extends": ["../src/.eslintrc"]
+  "extends": [
+    "../src/.eslintrc"
+  ]
 }

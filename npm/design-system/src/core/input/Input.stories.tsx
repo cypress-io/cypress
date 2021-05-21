@@ -11,6 +11,7 @@ import { TextSize } from 'css'
 
 export default createStorybookConfig({
   title: 'Core/Input',
+  excludeStories: ['iconSizesWithSizes'],
 })
 
 export const Input = createStory(() => (
@@ -111,39 +112,42 @@ export const Icon = createStory(() => (
   </div>
 ))
 
+export const iconSizesWithSizes = (sizes: string[]) =>
+  sizes.map((key) => {
+    const size = key.replace('text-', '')
+
+    return (
+      <IconInputComponent
+        key={key}
+        label={{ type: 'aria', contents: `input size ${size}` }}
+        size={size as TextSize}
+        prefixIcon={{
+          icon: 'home',
+          onPress: action('onPrefixClick'),
+          'aria-label': 'onPrefixClick',
+        }}
+        suffixIcon={{
+          icon: 'times',
+          onPress: action('onSuffixClick'),
+          'aria-label': 'onSuffixClick',
+        }}
+      />
+    )
+  })
+
 export const IconSizes = createStory(() => (
   <div>
     <div style={{ width: 500 }}>
-      {Object.keys(typography)
-      .filter(
-        (key) =>
-          key !== 'type' &&
-          !key.startsWith('line-height') &&
-          !key.startsWith('text-mono') &&
-          key !== 'text-3xl' &&
-          key !== 'text-4xl'
-      )
-      .map((key) => {
-        const size = key.replace('text-', '')
-
-        return (
-          <IconInputComponent
-            key={key}
-            label={{ type: 'aria', contents: `input size ${size}` }}
-            size={size as TextSize}
-            prefixIcon={{
-              icon: 'home',
-              onPress: action('onPrefixClick'),
-              'aria-label': 'onPrefixClick',
-            }}
-            suffixIcon={{
-              icon: 'times',
-              onPress: action('onSuffixClick'),
-              'aria-label': 'onSuffixClick',
-            }}
-          />
+      {iconSizesWithSizes(
+        Object.keys(typography).filter(
+          (key) =>
+            key !== 'type' &&
+            !key.startsWith('line-height') &&
+            !key.startsWith('text-mono') &&
+            key !== 'text-3xl' &&
+            key !== 'text-4xl'
         )
-      })}
+      )}
     </div>
   </div>
 ))

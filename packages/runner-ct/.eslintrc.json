@@ -1,5 +1,8 @@
 {
-  "plugins": ["cypress", "@cypress/dev"],
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
   "extends": [
     "plugin:@cypress/dev/general",
     "plugin:@cypress/dev/tests",
@@ -20,7 +23,10 @@
         "unnamedComponents": "arrow-function"
       }
     ],
-    "react/jsx-boolean-value": ["error", "always"],
+    "react/jsx-boolean-value": [
+      "error",
+      "always"
+    ],
     "react/jsx-curly-brace-presence": [
       "error",
       {
@@ -31,7 +37,11 @@
     "react/jsx-filename-extension": [
       "warn",
       {
-        "extensions": [".js", ".jsx", ".tsx"]
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
       }
     ],
     "react/jsx-no-bind": [
@@ -53,17 +63,24 @@
     "react/no-array-index-key": "error",
     "react/no-unescaped-entities": "off",
     "react/prop-types": "off",
-    "quote-props": ["error", "as-needed"]
+    "quote-props": [
+      "error",
+      "as-needed"
+    ]
   },
   "overrides": [
     {
-      "files": ["lib/*"],
+      "files": [
+        "lib/*"
+      ],
       "rules": {
         "no-console": 1
       }
     },
     {
-      "files": ["**/*.json"],
+      "files": [
+        "**/*.json"
+      ],
       "rules": {
         "quotes": "off",
         "comma-dangle": "off"

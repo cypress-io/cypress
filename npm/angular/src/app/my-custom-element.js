@@ -1,4 +1,4 @@
-(function () {
+;(function () {
   const template = document.createElement('template')
 
   template.innerHTML = `
@@ -13,7 +13,7 @@
   `
 
   class MyCustomElement extends HTMLElement {
-    constructor () {
+    constructor() {
       super()
       this.attachShadow({ mode: 'open' })
       this.shadowRoot.appendChild(template.content.cloneNode(true))

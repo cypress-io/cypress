@@ -73,7 +73,9 @@ export async function start(
       hot: false,
     }
   } else {
-    throw Error(`@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`)
+    throw Error(
+      `@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`
+    )
   }
 
   // @ts-ignore types for webpack v5 are incorrect?

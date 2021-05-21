@@ -6,16 +6,14 @@ import { MyValuesService } from '../my-values.service'
   templateUrl: './service-stub.component.html',
 })
 export class ServiceStubComponent implements OnInit {
-  values: string[];
+  values: string[]
 
-  valuesObservable: string[];
+  valuesObservable: string[]
 
-  constructor (private myValuesService: MyValuesService) {}
+  constructor(private myValuesService: MyValuesService) {}
 
-  ngOnInit () {
+  ngOnInit() {
     this.values = this.myValuesService.getValues()
-    this.myValuesService
-    .getValuesObservable()
-    .subscribe((values) => (this.valuesObservable = values))
+    this.myValuesService.getValuesObservable().subscribe((values) => (this.valuesObservable = values))
   }
 }

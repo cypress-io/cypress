@@ -76,7 +76,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           debug('calling Node extract tool %s %o', zipFilePath, opts)
 
-          return unzipTools.extract(zipFilePath, opts)
+          return unzipTools
+          .extract(zipFilePath, opts)
           .then(() => {
             debug('node unzip finished')
 

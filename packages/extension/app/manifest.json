@@ -6,7 +6,14 @@
       "id": "automation-extension@cypress.io"
     }
   },
-  "permissions": ["cookies", "downloads", "tabs", "http://*/*", "https://*/*", "<all_urls>"],
+  "permissions": [
+    "cookies",
+    "downloads",
+    "tabs",
+    "http://*/*",
+    "https://*/*",
+    "<all_urls>"
+  ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAugoxpSqfoblTYUGvyXZpmBgjYQUY9k2Hx3PaDwquyaTH6GBxitwVMSu5sZuDYgPHpGYoF4ol6A4PZHhd6JvfuUDS9ZrxTW0XzP+dSS9AwmJo3uLuP88zBs4mhpje1+WE5NGM0pTzyCXYTPoyzyPRmToALWD96cahSGuhG8bSmaBw3py+16qNKm8SOlANbUvHtEaTpmrSWBUIq7YV8SIPLtR8G47vjqPTE1yEsBQ3GAgllhi0cJolwk/629fRLr3KVckICmU6spXD/jVhIgAeyHhFuFGYNuubzbel8trBVw5Q/HE5F6j66sBvEvW64tH4lPxnM5JPv0qie5wouPiT0wIDAQAB",
   "icons": {
     "16": "icons/icon_16x16.png",
@@ -22,7 +29,9 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"

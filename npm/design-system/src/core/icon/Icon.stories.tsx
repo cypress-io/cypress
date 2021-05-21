@@ -1,5 +1,4 @@
 import React from 'react'
-import { Story } from '@storybook/react'
 
 import { createStory, createStorybookConfig } from 'stories/util'
 
@@ -29,49 +28,52 @@ export default createStorybookConfig({
       },
     },
   },
+  excludeStories: ['IconLines'],
 })
 
-const Template: Story<{
-  font: string
-}> = ({ font }) => (
-  <div
-    style={
-      {
-        '--font-stack-sans': font,
-      } as React.CSSProperties
-    }
-  >
-    <IconComponent className={styles.icon} icon="check" size="xl" />
-    <IconComponent className={styles.icon} icon="exclamation" size="xl" />
-    <IconComponent className={styles.icon} icon="home" size="xl" />
-    <IconComponent className={styles.icon} icon="arrow-circle-up" size="xl" />
-    <br />
-    {Object.keys(typography)
-    .filter((key) => key !== 'type')
-    .map((key) => {
-      const size = key.replace('text-', '')
+export const iconLines = (sizes: string[]) =>
+  sizes
+  .filter((key) => key !== 'type')
+  .map((key) => {
+    const size = key.replace('text-', '')
 
-      return (
-        <div
-          key={key}
-          style={{
-            marginBottom: '2em',
-          }}
-        >
-          <div className="text-mono-m">{size}</div>
-          <Baseline className={key}>
-            <IconComponent className={styles.textIcon} icon="square" size={size as TextSize} />
-            <IconComponent className={styles.textIcon} icon="exclamation" size={size as TextSize} />
-            The five boxing wizards jump quickly
-            <IconComponent icon="exclamation" size={size as TextSize} />
-            <IconComponent icon="bell" size={size as TextSize} />
-          </Baseline>
-        </div>
-      )
-    })}
-  </div>
+    return (
+      <div
+        key={key}
+        style={{
+          marginBottom: '2em',
+        }}
+      >
+        <div className="text-mono-m">{size}</div>
+        <Baseline className={key}>
+          <IconComponent className={styles.textIcon} icon="square" size={size as TextSize} />
+          <IconComponent className={styles.textIcon} icon="exclamation" size={size as TextSize} />
+          The five boxing wizards jump quickly
+          <IconComponent icon="exclamation" size={size as TextSize} />
+          <IconComponent icon="bell" size={size as TextSize} />
+        </Baseline>
+      </div>
+    )
+  })
+
+export const Icon = createStory<{ font: string }>(
+  ({ font }) => (
+    <div
+      style={
+        {
+          '--font-stack-sans': font,
+        } as React.CSSProperties
+      }
+    >
+      <IconComponent className={styles.icon} icon="check" size="xl" />
+      <IconComponent className={styles.icon} icon="exclamation" size="xl" />
+      <IconComponent className={styles.icon} icon="home" size="xl" />
+      <IconComponent className={styles.icon} icon="arrow-circle-up" size="xl" />
+      <br />
+      {iconLines(Object.keys(typography))}
+    </div>
+  ),
+  {
+    font: fontOptions[0],
+  }
 )
-
-export const Icon = createStory(Template, {
-  font: fontOptions[0],
-})

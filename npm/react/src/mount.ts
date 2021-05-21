@@ -107,7 +107,8 @@ const _mount = (
 
     return (
       // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-      cy.wrap<React.ReactNode>(userComponent, { log: false })
+      cy
+      .wrap<React.ReactNode>(userComponent, { log: false })
       .as(displayName)
       .then(() => {
         return cy.wrap<MountReturn>(

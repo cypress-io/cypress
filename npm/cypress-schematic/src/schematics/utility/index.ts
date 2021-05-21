@@ -4,24 +4,24 @@ import { get } from 'http'
 import { getPackageJsonDependency } from './dependencies'
 
 export interface NodePackage {
-    name: string
-    version: string
-  }
+  name: string
+  version: string
+}
 
 export enum Paths {
-    AngularJson = './angular.json',
-  }
+  AngularJson = './angular.json',
+}
 
 export enum Configs {
-    JsonIndentLevel = 4,
-  }
+  JsonIndentLevel = 4,
+}
 
 export interface CypressOptions {
-    project?: string
-    __version__: number
-  }
+  project?: string
+  __version__: number
+}
 
-export function getAngularVersion (tree: Tree): number {
+export function getAngularVersion(tree: Tree): number {
   const packageNode = getPackageJsonDependency(tree, '@angular/core')
 
   const version = packageNode && packageNode.version.split('').find((char) => !!parseInt(char, 10))
@@ -30,11 +30,11 @@ export function getAngularVersion (tree: Tree): number {
 }
 
 /**
-   * Attempt to retrieve the latest package version from NPM
-   * Return an optional "latest" version in case of error
-   * @param packageName
-   */
-export function getLatestNodeVersion (packageName: string): Promise<NodePackage> {
+ * Attempt to retrieve the latest package version from NPM
+ * Return an optional "latest" version in case of error
+ * @param packageName
+ */
+export function getLatestNodeVersion(packageName: string): Promise<NodePackage> {
   const DEFAULT_VERSION = 'latest'
 
   return new Promise((resolve) => {
@@ -55,7 +55,7 @@ export function getLatestNodeVersion (packageName: string): Promise<NodePackage>
     }).on('error', () => resolve(buildPackage(packageName)))
   })
 
-  function buildPackage (name: string, version: string = DEFAULT_VERSION): NodePackage {
+  function buildPackage(name: string, version: string = DEFAULT_VERSION): NodePackage {
     return { name, version }
   }
 }

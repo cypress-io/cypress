@@ -1,5 +1,8 @@
 {
-  "extends": ["plugin:@cypress/dev/react", "plugin:@cypress/dev/tests"],
+  "extends": [
+    "plugin:@cypress/dev/react",
+    "plugin:@cypress/dev/tests"
+  ],
   "parser": "@typescript-eslint/parser",
   "settings": {
     "react": {
@@ -11,7 +14,11 @@
     "react/jsx-filename-extension": [
       "warn",
       {
-        "extensions": [".js", ".jsx", ".tsx"]
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
       }
     ]
   }
