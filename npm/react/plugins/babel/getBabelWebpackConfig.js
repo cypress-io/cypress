@@ -22,6 +22,27 @@ const webpackConfigLoadsBabel = {
   },
 }
 
+/**
+  * `on` and `config` are mandatory and must be forwarded from
+  * your plugins file (`cypress/plugins/index.js` by default).
+  * the third argument is an optional object with a `setWebpackConfig`
+  * property. It's a function that will receive the webpack configuration
+  * (after babel-loader is added) that allows you to further modify
+  * the webpack configuration
+  *
+  * @example
+  * module.exports = (on, config) => {   
+  *   require('@cypress/react/plugins/babel')(on, config, { 
+  *     setWebpackConfig: (webpackConfig) => {
+  *       webpackConfig.resolve.alias = {
+  *         '@my-monorepo/my-package': '../../my-package/src',
+  *       }
+  *       return webpackConfig       
+  *     }     
+  *   })
+  *   return config 
+  * }
+  */
 module.exports = (on, config, { setWebpackConfig } = { setWebpackConfig: null }) => {
   debug('env object %o', config.env)
 
