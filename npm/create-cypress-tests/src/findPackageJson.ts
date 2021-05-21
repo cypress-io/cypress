@@ -24,6 +24,21 @@ type FindPackageJsonResult =
     }
 
 /**
+ * Returns the parsed package.json at the provided path
+ */
+export function readPackageJsonSync (path: string): PackageJsonLike {
+  return JSON.parse(
+    fs.readFileSync(path, {
+      encoding: 'utf-8',
+    }),
+  )
+}
+
+export function writePackageJsonSync (path: string, data: PackageJsonLike) {
+  fs.writeFileSync(path, JSON.stringify(data))
+}
+
+/**
  * Return the parsed package.json that we find in a parent folder.
  *
  * @returns {Object} Value, filename and indication if the iteration is done.
@@ -40,11 +55,7 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
       }
     }
 
-    const packageData = JSON.parse(
-      fs.readFileSync(packageJsonPath, {
-        encoding: 'utf-8',
-      }),
-    )
+    const packageData = readPackageJsonSync(packageJsonPath)
 
     return {
       packageData,

@@ -1,7 +1,7 @@
 import chalk from 'chalk'
-import { createFindPackageJsonIterator } from '../../../findPackageJson'
+import { createFindPackageJsonIterator, readPackageJsonSync, writePackageJsonSync } from '../../../findPackageJson'
 import { Template } from '../Template'
-import { validateSemverVersion } from '../../../utils'
+import { installDependency, validateSemverVersion } from '../../../utils'
 import { MIN_SUPPORTED_VERSION } from '../../versions'
 import * as babel from '@babel/core'
 
@@ -58,5 +58,42 @@ export const ReactScriptsTemplate: Template = {
 
       return { success: false }
     })
+  },
+  customSetup: async (cwd, useYarn) => {
+    const packageJsonIterator = createFindPackageJsonIterator(cwd)
+
+    const eslintInPackageJson = packageJsonIterator.map((pkgJson, path) => {
+      if (!pkgJson.dependencies && !pkgJson.devDependencies) {
+        return { success: false }
+      }
+
+      const eslintConfig = pkgJson['eslintConfig']
+
+      return eslintConfig ? { success: true, payload: path } : { success: false }
+    })
+
+    if (!eslintInPackageJson.success || !eslintInPackageJson.payload) {
+      console.warn(
+        `It looks like you are not using a stock ${chalk.green(
+          'eslint',
+        )} config. You may want to install and use ${chalk.green('eslint-plugin-cypress')}`,
+      )
+
+      return
+    }
+
+    const packageJsonPath = eslintInPackageJson.payload
+
+    await installDependency('eslint-plugin-cypress', { useYarn })
+
+    const packageData = readPackageJsonSync(packageJsonPath)
+
+    const eslintConfig: any = packageData['eslintConfig']
+
+    eslintConfig['extends'] ??= []
+
+    eslintConfig['extends'].push('plugin:cypress/recommended')
+
+    writePackageJsonSync(packageJsonPath, packageData)
   },
 }

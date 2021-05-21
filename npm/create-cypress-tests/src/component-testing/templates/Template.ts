@@ -11,4 +11,5 @@ export interface Template<T = unknown> {
   ) => PluginsConfigAst
   dependencies: string[]
   printHelper?: () => void
+  customSetup?: (cypressProjectRoot: string, useYarn: boolean) => Promise<void>
 }

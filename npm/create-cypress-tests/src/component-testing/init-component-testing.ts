@@ -171,6 +171,8 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(`Let's setup everything for component testing with ${chalk.cyan(chosenTemplateName)}:`)
   console.log()
 
+  await chosenTemplate.customSetup?.(cypressProjectRoot, useYarn)
+
   await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)
   await injectAndShowPluginConfig(chosenTemplate, {
     templatePayload,
