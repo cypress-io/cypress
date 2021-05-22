@@ -3394,7 +3394,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_deep
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'deep.equal', value: Subject): Chainable<Subject>
+    (chainer: 'deep.equal' | 'deep.eq', value: Subject): Chainable<Subject>
     /**
      * Asserts that the target is not strictly (`===`) equal to either `null` or `undefined`. However, it’s often best to assert that the target is equal to its expected value.
      * @example
@@ -3555,7 +3555,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.members' | 'have.deep.members', values: any[]): Chainable<Subject>
+    (chainer: 'have.members' | 'have.deep.members' | 'have.all.members', values: any[]): Chainable<Subject>
     /**
      * Asserts that the target array has the same members as the given array where order matters.
      * @example
