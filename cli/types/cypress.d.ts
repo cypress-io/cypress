@@ -5091,16 +5091,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.match', value: string): Chainable<Subject>
-
-    // fallback
-    /**
-     * Create an assertion. Assertions are automatically retried until they pass or time out.
-     * Ctrl+Space will invoke auto-complete in most editors.
-     * @see https://on.cypress.io/should
-     */
-    (chainers: string, value?: any): Chainable<Subject>
-    (chainers: string, value: any, match: any): Chainable<Subject>
-
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      * Passing a function to `.should()` enables you to make multiple assertions on the yielded subject. This also gives you the opportunity to massage what you’d like to assert on.
