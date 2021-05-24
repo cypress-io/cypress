@@ -780,7 +780,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         it('string hostname must be a valid domain name', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('`hostname` must be a valid domain name.')
+            expect(err.message).to.include('`hostname` must be a valid host name or domain name.')
             done()
           })
 
