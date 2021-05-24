@@ -297,7 +297,7 @@ const docsUrlByParents = (msgPath) => {
 }
 
 const errByPath = (msgPath, args) => {
-  let msgValue = _.isObject(msgPath) ? msgPath : _.get($errorMessages, msgPath)
+  let msgValue = _.get($errorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -517,5 +517,4 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
-  errs: $errorMessages,
 }

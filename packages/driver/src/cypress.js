@@ -34,7 +34,7 @@ const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
 const $stackUtils = require('./cypress/stack_utils')
-const { errs, errByPath } = require('./cypress/error_utils')
+const { errByPath } = require('./cypress/error_utils')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -197,6 +197,7 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
+    this.specWindow = specWindow
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -602,9 +603,9 @@ class $Cypress {
     const r = this.cy.state('runnable')
 
     if (!r) {
-      const invocationStack = $stackUtils.getInvocationDetails(this.cy.state('specWindow'), this.config)?.stack
+      const invocationStack = $stackUtils.getInvocationDetails(this.specWindow, this.config)?.stack
 
-      throw errByPath(errs.currentTest.outside_test)
+      throw errByPath('currentTest.outside_test')
       .setUserInvocationStack(invocationStack)
     }
 
