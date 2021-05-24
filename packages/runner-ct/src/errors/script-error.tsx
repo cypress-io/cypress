@@ -11,7 +11,9 @@ const convert = new ansiToHtml({
 })
 
 export const ScriptError: React.FC<{ error: string }> = namedObserver('ScriptError', ({ error }) => {
-  if (!error) return null
+  if (!error) {
+    return null
+  }
 
   const errorHTML = convert.toHtml(error)
 

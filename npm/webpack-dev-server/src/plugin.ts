@@ -71,7 +71,7 @@ export default class CypressCTOptionsPlugin {
 
           // webpack 4: string[]
           // webpack 5: Error[]
-          const errors = stats.toJson().errors as Array<Error | string>
+          const errors = stats.toJson().errors as Array<Error | string> | undefined
 
           if (!errors || !errors.length) {
             return
