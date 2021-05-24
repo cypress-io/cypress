@@ -26041,7 +26041,7 @@ markdown-to-jsx@^7.1.0:
   resolved "https://registry.yarnpkg.com/markdown-to-jsx/-/markdown-to-jsx-7.1.2.tgz#19d3da4cd8864045cdd13a0d179147fbd6a088d4"
   integrity sha512-O8DMCl32V34RrD+ZHxcAPc2+kYytuDIoQYjY36RVdsLK7uHjgNVvFec4yv0X6LgB4YEZgSvK5QtFi5YVqEpoMA==
 
-marked-terminal@^4.0.0, marked-terminal@^4.1.1:
+marked-terminal@^4.0.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/marked-terminal/-/marked-terminal-4.1.1.tgz#34a6f063cd6cfe26bffaf5bac3724e24242168a9"
   integrity sha512-t7Mdf6T3PvOEyN01c3tYxDzhyKZ8xnkp8Rs6Fohno63L/0pFTJ5Qtwto2AQVuDtbQiWzD+4E5AAu1Z2iLc8miQ==
@@ -40734,7 +40734,7 @@ yargs@13.3.2, yargs@^13.3.0, yargs@^13.3.2:
     y18n "^4.0.0"
     yargs-parser "^13.1.2"
 
-yargs@16.2.0, yargs@^16.0.0, yargs@^16.0.3, yargs@^16.2.0:
+yargs@16.2.0, yargs@^16.0.0, yargs@^16.0.3:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-16.2.0.tgz#1c82bf0f6b6a66eafce7ef30e376f49a12477f66"
   integrity sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==
