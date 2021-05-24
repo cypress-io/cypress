@@ -1,6 +1,6 @@
 import { Url } from 'url'
 import debugModule from 'debug'
-import escapeRegExp from 'escape-string-regexp'
+import minimatch from 'minimatch'
 
 const debug = debugModule('cypress:network:client-certificates')
 
@@ -27,51 +27,39 @@ export class ParsedUrl {
         this.path = parsed.pathname
       }
     }
+
+    this.hostMatcher = new minimatch.Minimatch(this.host)
+    this.pathMatcher = new minimatch.Minimatch(this.path ?? '')
   }
 
   path: string | undefined;
   host: string;
   port: number | undefined;
+  hostMatcher: minimatch.IMinimatch;
+  pathMatcher: minimatch.IMinimatch;
 }
 
 export class UrlMatcher {
   static buildMatcherRule (url: string): ParsedUrl {
-    let parsed = new ParsedUrl(url)
-
-    parsed.host = this.createMatcherValue(parsed.host)
-    parsed.path = this.createMatcherValue(parsed.path)
-
-    return parsed
+    return new ParsedUrl(url)
   }
 
-  static matchUrl (parsedUrl: ParsedUrl, rule: ParsedUrl | undefined): boolean {
-    if (!parsedUrl || !rule) {
+  static matchUrl (hostname: string | undefined | null, path: string | undefined | null, port: number | undefined | null, rule: ParsedUrl | undefined): boolean {
+    if (!hostname || !rule) {
       return false
     }
 
-    let ret = new RegExp(rule.host).test(parsedUrl.host)
+    let ret = rule.hostMatcher.match(hostname)
 
     if (ret && rule.port) {
-      ret = rule.port === parsedUrl.port
+      ret = rule.port === port
     }
 
-    if (ret && rule.path) {
-      ret = new RegExp(rule.path).test(parsedUrl.path || '')
+    if (ret && rule.path && path) {
+      ret = rule.hostMatcher?.match(path)
     }
 
     return ret
-  }
-
-  static createMatcherValue (value: string | undefined): string {
-    if (!value) {
-      return ''
-    }
-
-    let escaped = escapeRegExp(value)
-
-    escaped = escaped.replace(/\\\*/g, '.+') // Replace all instances of '\*' with '.+'
-
-    return `^${escaped}$`
   }
 }
 
@@ -158,9 +146,9 @@ export class ClientCertificateStore {
       return null
     }
 
-    const parsedUrl = new ParsedUrl(requestUrl.href)
+    const port = !requestUrl.port ? undefined : parseInt(requestUrl.port)
     const matchingCerts = this._urlClientCertificates.filter((cert) => {
-      return UrlMatcher.matchUrl(parsedUrl, cert.matchRule)
+      return UrlMatcher.matchUrl(requestUrl.hostname, requestUrl.path, port, cert.matchRule)
     })
 
     switch (matchingCerts.length) {
