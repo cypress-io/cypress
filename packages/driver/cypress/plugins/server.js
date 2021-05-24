@@ -6,7 +6,6 @@ const http = require('http')
 const httpsProxy = require('@packages/https-proxy')
 const path = require('path')
 const Promise = require('bluebird')
-const concat = require('concat-stream')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
 
@@ -23,17 +22,6 @@ const createApp = (port) => {
 
   app.all('/no-cors', (req, res) => {
     res.end(req.method)
-  })
-
-  app.use(function (req, res, next) {
-    if (req.url.includes('/dump-raw-form-data') && req.get('content-type')?.includes('multipart/form-data')) {
-      req.pipe(concat(function (data) {
-        req.body = data
-        next()
-      }))
-    } else {
-      next()
-    }
   })
 
   app.use(require('cors')())
@@ -155,10 +143,6 @@ const createApp = (port) => {
   })
 
   app.all('/dump-octet-body', (req, res) => {
-    return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
-  })
-
-  app.all('/dump-raw-form-data', (req, res) => {
     return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
   })
 
