@@ -608,7 +608,9 @@ class $Cypress {
       .setUserInvocationStack(invocationStack)
     }
 
-    return r && r.ctx.currentTest || r
+    // if we're in a hook, ctx.currentTest is defined
+    // if we're in test body, r is the currentTest
+    return r.ctx.currentTest || r
   }
 
   static create (config) {
