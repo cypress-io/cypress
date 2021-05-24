@@ -168,13 +168,13 @@ module.exports = {
     return getExampleSpecs()
     .then(({ shortPaths, index }) => {
       return Promise.all(_.map(shortPaths, (file) => {
-        return this._removeFile(file, folder, config, index)
+        return this._removeFile(file, folder, index)
       }))
     }).then(() => {
       // remove folders after we've removed all files
       return getExampleSpecs(true).then(({ shortPaths }) => {
         return Promise.all(_.map(shortPaths, (folderPath) => {
-          return this._removeFolder(folderPath, folder, config)
+          return this._removeFolder(folderPath, folder)
         }))
       })
     })
@@ -244,31 +244,25 @@ module.exports = {
     })
   },
 
-  _removeFile (file, folder, config, index) {
+  _removeFile (file, folder, index) {
     const dest = path.join(folder, file)
 
-    return this._assertInFileTree(dest, config)
-    .then(() => {
-      return fileSizeIsSame(dest, index)
-      .then((isSame) => {
-        if (isSame) {
-          // catch all errors since the user may have already removed
-          // the file or changed permissions, etc.
-          return fs.unlinkAsync(dest).catch(_.noop)
-        }
-      })
+    return fileSizeIsSame(dest, index)
+    .then((isSame) => {
+      if (isSame) {
+        // catch all errors since the user may have already removed
+        // the file or changed permissions, etc.
+        return fs.unlinkAsync(dest).catch(_.noop)
+      }
     })
   },
 
-  _removeFolder (folderPath, folder, config) {
+  _removeFolder (folderPath, folder) {
     const dest = path.join(folder, folderPath)
 
-    return this._assertInFileTree(dest, config)
-    .then(() => {
-      // catch all errors since the user may have already removed
-      // the folder, changed permissions, added their own files to the folder, etc.
-      return fs.rmdirAsync(dest).catch(_.noop)
-    })
+    // catch all errors since the user may have already removed
+    // the folder, changed permissions, added their own files to the folder, etc.
+    return fs.rmdirAsync(dest).catch(_.noop)
   },
 
   verifyScaffolding (folder, fn) {
