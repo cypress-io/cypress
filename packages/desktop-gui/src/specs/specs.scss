@@ -323,6 +323,10 @@ $max-nesting-level: 14;
 .confirm-remove-scaffolded-files {
   h4 {
     line-height: 24px;
+
+    &.note {
+      font-style: italic;
+    }
   }
 }
 

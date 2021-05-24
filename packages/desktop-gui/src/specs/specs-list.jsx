@@ -528,6 +528,7 @@ class SpecsList extends Component {
         <div className='modal-body confirm-remove-scaffolded-files'>
           <BootstrapModal.Dismiss className='btn btn-link close'>&times;</BootstrapModal.Dismiss>
           <h4>Are you sure that you want to delete all example spec files?</h4>
+          <h4 className="note">Note: this will not delete any new or edited files.</h4>
         </div>
         <div className='modal-footer'>
           <BootstrapModal.Dismiss className='btn btn-link'>Cancel</BootstrapModal.Dismiss>
