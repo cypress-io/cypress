@@ -1308,7 +1308,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          command: yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
@@ -1360,7 +1360,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+            yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
       - store_test_results:
           path: npm/design-system/test_results
