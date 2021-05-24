@@ -7,5 +7,9 @@
   "reporter": "cypress-multi-reporters",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
+  },
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
   }
 }
