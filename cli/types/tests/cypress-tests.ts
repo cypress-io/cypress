@@ -674,8 +674,8 @@ namespace CypressTaskTests {
 }
 
 namespace CypressCurrentTest {
-  Cypress.currentTest.title
-  Cypress.currentTest.body
-  Cypress.currentTest.titlePath
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.body // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType ()=>string[]
   Cypress.currentTest() // $ExpectError
 }
