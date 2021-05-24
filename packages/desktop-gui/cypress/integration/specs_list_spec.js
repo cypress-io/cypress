@@ -118,6 +118,8 @@ describe('Specs List', function () {
       })
 
       it('does not display new user banner even when closed', function () {
+        this.ipc.hasOpenedCypress.resolves(false)
+
         cy.get('.new-user-banner').should('not.exist')
         cy.get('.new-project-banner').find('.close').click()
         cy.get('.new-project-banner').should('not.exist')
