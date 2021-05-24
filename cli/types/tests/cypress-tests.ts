@@ -672,3 +672,10 @@ namespace CypressTaskTests {
     val // $ExpectType unknown
   })
 }
+
+namespace CypressCurrentTest {
+  Cypress.currentTest.title
+  Cypress.currentTest.body
+  Cypress.currentTest.titlePath
+  Cypress.currentTest() // $ExpectError
+}

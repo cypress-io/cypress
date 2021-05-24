@@ -1281,19 +1281,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return null
     },
 
-    currentTest () {
-      const r = this.state('runnable')
-
-      if (!r) {
-        const err = new Error()
-
-        err.message = '`cy.currentTest` cannot be accessed outside a test or hook (it, before, after, beforeEach, afterEach)'
-        throw err
-      }
-
-      return r && r.ctx.currentTest || r
-    },
-
     onBeforeAppWindowLoad (contentWindow) {
       // we set window / document props before the window load event
       // so that we properly handle events coming from the application

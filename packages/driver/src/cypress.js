@@ -596,6 +596,19 @@ class $Cypress {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
+  get currentTest () {
+    const r = this.cy.state('runnable')
+
+    if (!r) {
+      const err = new Error()
+
+      err.message = '`cy.currentTest` cannot be accessed outside a test or hook (it, before, after, beforeEach, afterEach)'
+      throw err
+    }
+
+    return r && r.ctx.currentTest || r
+  }
+
   static create (config) {
     return new $Cypress(config)
   }

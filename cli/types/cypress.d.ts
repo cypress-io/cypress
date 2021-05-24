@@ -242,6 +242,12 @@ declare namespace Cypress {
     spec: Spec
 
     /**
+     * Currently executing test runnable instance.
+     */
+    currentTest: Mocha.Test
+
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
