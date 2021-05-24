@@ -1081,7 +1081,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         document: s.document,
         $autIframe: s.$autIframe,
         specWindow: s.specWindow,
-
       }
 
       // reset state back to empty object

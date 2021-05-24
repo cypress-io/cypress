@@ -246,7 +246,6 @@ declare namespace Cypress {
      */
     currentTest: Mocha.Test
 
-
     /**
      * Information about the browser currently running the tests
      */
