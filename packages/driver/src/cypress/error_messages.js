@@ -610,6 +610,13 @@ module.exports = {
     },
   },
 
+  currentTest: {
+    outside_test: {
+      message: `\`Cypress.currentTest\` cannot be accessed outside a test or hook (it, before, after, beforeEach, afterEach)`,
+      docsUrl: 'https://on.cypress.io/currentTest',
+    },
+  },
+
   invoke_its: {
     nonexistent_prop: {
       message: stripIndent`\

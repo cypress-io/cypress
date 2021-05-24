@@ -33,6 +33,8 @@ const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
+const $stackUtils = require('./cypress/stack_utils')
+const { errs, errByPath } = require('./cypress/error_utils')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -600,10 +602,10 @@ class $Cypress {
     const r = this.cy.state('runnable')
 
     if (!r) {
-      const err = new Error()
+      const invocationStack = $stackUtils.getInvocationDetails(this.cy.state('specWindow'), this.config)?.stack
 
-      err.message = '`cy.currentTest` cannot be accessed outside a test or hook (it, before, after, beforeEach, afterEach)'
-      throw err
+      throw errByPath(errs.currentTest.outside_test)
+      .setUserInvocationStack(invocationStack)
     }
 
     return r && r.ctx.currentTest || r

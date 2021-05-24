@@ -40,5 +40,14 @@ describe('currentTest', () => {
       expect(global_err).property('message').contain('outside a test')
       expect(suite_err).property('message').contain('outside a test')
     })
+
+    it('throws if outside test with codeframe', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.codeFrame.line).eq(4)
+        done()
+      })
+
+      throw global_err
+    })
   })
 })

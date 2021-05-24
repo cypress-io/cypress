@@ -170,6 +170,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   let stopped = false
   const commandFns = {}
 
+  state('specWindow', specWindow)
+
   const isStopped = () => {
     return stopped
   }
@@ -1078,6 +1080,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         window: s.window,
         document: s.document,
         $autIframe: s.$autIframe,
+        specWindow: s.specWindow,
+
       }
 
       // reset state back to empty object
