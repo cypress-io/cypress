@@ -148,4 +148,6 @@ This project is licensed under an MIT license.
 
 ## Community Recognition
 
-Inspired by [@briebug/cypress-schematic](https://github.com/briebug/cypress-schematic).
+The [Cypress Angular Schematic](https://www.npmjs.com/package/@cypress/schematic) package was made possible by the original work of the [Briebug](https://briebug.com/) team and the contributors of [@briebug/cypress-schematic](https://www.npmjs.com/package/@briebug/cypress-schematic).
+
+@briebug/cypress-schematic served as the starting point for improvements and new functionality the Cypress team will continue to develop along with the community.
