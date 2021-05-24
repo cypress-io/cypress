@@ -6,14 +6,14 @@ function urlShouldMatch (url: string, matcher: string) {
   let rule = UrlMatcher.buildMatcherRule(matcher)
   let parsedUrl = new ParsedUrl(url)
 
-  expect(UrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.true
+  expect(UrlMatcher.matchUrl(parsedUrl.host, parsedUrl.path, parsedUrl.port, rule), `'${url}' should match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.true
 }
 
 function urlShouldNotMatch (url: string, matcher: string) {
   let rule = UrlMatcher.buildMatcherRule(matcher)
   let parsedUrl = new ParsedUrl(url)
 
-  expect(UrlMatcher.matchUrl(parsedUrl, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.false
+  expect(UrlMatcher.matchUrl(parsedUrl.host, parsedUrl.path, parsedUrl.port, rule), `'${url}' should not match '${matcher}' (rule: ${JSON.stringify(rule)})`).to.be.false
 }
 
 function checkParsed (parsed: ParsedUrl, host: string, path: string | undefined, port: number | undefined) {
@@ -42,7 +42,6 @@ describe('lib/client-certificates', () => {
       let parsed = new ParsedUrl('https://a.host.*')
 
       expect(parsed.host).to.eq('a.host.*')
-      //expect(parsed.host).to.be.empty
 
       parsed = new ParsedUrl('https://*.host.com')
       expect(parsed.host).to.eq('*.host.com')
