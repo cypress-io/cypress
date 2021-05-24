@@ -50,7 +50,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
 
   debug('starting webpack dev server')
   let webpackDevServerConfig: WebpackDevServer.Configuration = {
-    ...userWebpackConfig.devServer,
+    ...userWebpackConfig?.devServer,
     hot: false,
   }
 
@@ -63,7 +63,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     }
   } else if (webpackDevServerPkg.version.match(/4\./)) {
     webpackDevServerConfig = {
-      ...userWebpackConfig.devServer,
+      ...userWebpackConfig?.devServer,
       devMiddleware: {
         publicPath: devServerPublicPathRoute,
       },

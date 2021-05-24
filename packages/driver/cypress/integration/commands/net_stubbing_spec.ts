@@ -1,3 +1,6 @@
+import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
+import { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
     // @ts-ignore
@@ -503,6 +506,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/9403
+      // see getDisplayUrlMatcher unit tests for more test cases
+      it('stringifies complex matchers', function () {
+        cy.intercept({ hostname: 'foo.net', port: 1234 }).then(function () {
+          expect(this.lastLog.get('url')).to.eq('{hostname: foo.net, port: 1234}')
+          expect(this.lastLog.get('method')).to.eq('*')
+        })
+      })
+
       it('has displayName req for spies', function () {
         cy.intercept('/foo*').as('getFoo')
         .then(() => {
@@ -668,6 +680,38 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy.intercept('/foo', { middleware: true })
       })
 
+      context('with an unexpected number of arguments', function () {
+        it('cy.intercept(url, handler?)', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('The `cy.intercept(url, handler?)` signature accepts a maximum of 2 arguments, but 3 arguments were passed.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept('/url', { forceNetworkError: true }, () => {})
+        })
+
+        it('cy.intercept(url, mergeRouteMatcher, handler)', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('The `cy.intercept(url, mergeRouteMatcher, handler)` signature accepts a maximum of 3 arguments, but 4 arguments were passed.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept('/url', { middleware: true }, { forceNetworkError: true }, () => {})
+        })
+
+        it('cy.intercept(method, url, handler?)', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('The `cy.intercept(method, url, handler?)` signature accepts a maximum of 3 arguments, but 4 arguments were passed.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept('POST', '/url', { forceNetworkError: true }, () => {})
+        })
+      })
+
       context('with invalid RouteMatcher', function () {
         it('requires unique header names', function (done) {
           testFail((err) => {
@@ -725,13 +769,22 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         })
 
         it('times must be a positive integer', function (done) {
-          cy.on('fail', function (err) {
+          testFail((err) => {
             expect(err.message).to.include('`times` must be a positive integer.')
             done()
           })
 
           cy
           .intercept({ times: 9.75 })
+        })
+
+        it('string hostname must be a valid domain name', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('`hostname` must be a valid host name or domain name.')
+            done()
+          })
+
+          cy.intercept({ hostname: 'http://website.web' })
         })
       })
 
@@ -2899,6 +2952,18 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       .wait('@getUsers')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/16451
+    it('yields the expected interception when two requests are raced', function () {
+      cy.intercept('/foo*', { times: 1 }, { delay: 100, body: 'bar' }).as('a')
+      cy.intercept('/foo*', { times: 1 }, 'foo').as('a')
+      cy.then(() => {
+        $.get('/foo')
+        $.get('/foo')
+      })
+      .wait('@a').its('response.body').should('eq', 'foo')
+      .wait('@a').its('response.body').should('eq', 'bar')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/9306
     context('cy.get(alias)', function () {
       it('gets the latest Interception by alias', function () {
@@ -3226,6 +3291,24 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.wait('@get.url')
       })
+    })
+  })
+
+  context('unit tests', function () {
+    context('#getDisplayUrlMatcher', function () {
+      function testDisplayUrl (title: string, expectedDisplayUrl: string, matcher: Partial<RouteMatcherOptions>) {
+        return it(title, function () {
+          expect(getDisplayUrlMatcher(matcher)).to.eq(expectedDisplayUrl)
+        })
+      }
+
+      testDisplayUrl('with only url', 'http://google.net', { url: 'http://google.net' })
+      testDisplayUrl('with url + method', 'http://google.net', { method: 'GET', url: 'http://google.net' })
+      testDisplayUrl('with regex url', '/foo/', { url: /foo/ })
+      testDisplayUrl('with only path', '/foo', { path: '/foo' })
+      testDisplayUrl('with only pathname', '/foo', { pathname: '/foo' })
+      testDisplayUrl('with host + port', '{hostname: foo.net, port: 1234}', { hostname: 'foo.net', port: 1234 })
+      testDisplayUrl('with url and query', '{url: http://something, query: {a: b}}', { url: 'http://something', query: { a: 'b' } })
     })
   })
 })

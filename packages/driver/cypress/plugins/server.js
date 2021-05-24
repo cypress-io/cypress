@@ -6,6 +6,8 @@ const http = require('http')
 const httpsProxy = require('@packages/https-proxy')
 const path = require('path')
 const Promise = require('bluebird')
+const multer = require('multer')
+const upload = multer({ dest: 'cypress/_test-output/' })
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 const httpPorts = [3500, 3501]
@@ -26,6 +28,7 @@ const createApp = (port) => {
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
+  app.use(bodyParser.raw())
   app.use(require('method-override')())
 
   app.head('/', (req, res) => {
@@ -137,6 +140,14 @@ const createApp = (port) => {
 
   app.get('/dump-headers', (req, res) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
+  })
+
+  app.all('/dump-octet-body', (req, res) => {
+    return res.send(`<html><body>it worked!<br>request body:<br>${req.body.toString()}</body></html>`)
+  })
+
+  app.all('/dump-form-data', upload.single('file'), (req, res) => {
+    return res.send(`<html><body>it worked!<br>request body:<br>${JSON.stringify(req.body)}<br>original name:<br>${req.file.originalname}</body></html>`)
   })
 
   app.get('/status-404', (req, res) => {
