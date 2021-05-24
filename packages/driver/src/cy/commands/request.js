@@ -282,7 +282,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         // Check if body is Blob.
         // construct.name is added because the parent of the Blob is not the same Blob
         // if it's generated from the test spec code.
-        if (requestOpts.body instanceof Blob || requestOpts?.body?.constructor.name === 'Blob') {
+        if (requestOpts.body instanceof Blob || requestOpts.body?.constructor.name === 'Blob') {
           requestOpts.bodyIsBase64Encoded = true
 
           return Cypress.Blob.blobToBase64String(requestOpts.body).then((str) => {
@@ -292,7 +292,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         // https://github.com/cypress-io/cypress/issues/1647
         // Handle if body is FormData
-        if (requestOpts.body instanceof FormData || requestOpts?.body?.constructor.name === 'FormData') {
+        if (requestOpts.body instanceof FormData || requestOpts.body?.constructor.name === 'FormData') {
           const boundary = '----CypressFormDataBoundary'
 
           // reset content-type
