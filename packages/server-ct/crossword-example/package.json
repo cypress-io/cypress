@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "babel-plugin-istanbul": "^6.0.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.12.1",
     "lodash": "^4.17.20",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
