@@ -933,9 +933,9 @@ module.exports = {
     intercept: {
       extra_arguments: ({ argsLength, overload }) => {
         return cyStripIndent(`\
-          ${cmd('intercept', overload.join(', '))} accepts a maximum of ${overload.length} arguments, but ${argsLength} arguments were passed.
+          The ${cmd('intercept', overload.join(', '))} signature accepts a maximum of ${overload.length} arguments, but ${argsLength} arguments were passed.
           
-          Did you intend to call a different \`cy.intercept()\` overload?`, 10)
+          Please refer to the docs for all accepted signatures for ${cmd('intercept')}.`, 10)
       },
       invalid_handler: ({ handler }) => {
         return cyStripIndent(`\

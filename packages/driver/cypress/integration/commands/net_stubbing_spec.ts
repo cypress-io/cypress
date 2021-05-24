@@ -683,7 +683,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       context('with an unexpected number of arguments', function () {
         it('cy.intercept(url, handler?)', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('`cy.intercept(url, handler?)` accepts a maximum of 2 arguments, but 3 arguments were passed.')
+            expect(err.message).to.include('The `cy.intercept(url, handler?)` signature accepts a maximum of 2 arguments, but 3 arguments were passed.')
             done()
           })
 
@@ -693,7 +693,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         it('cy.intercept(url, mergeRouteMatcher, handler)', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('`cy.intercept(url, mergeRouteMatcher, handler)` accepts a maximum of 3 arguments, but 4 arguments were passed.')
+            expect(err.message).to.include('The `cy.intercept(url, mergeRouteMatcher, handler)` signature accepts a maximum of 3 arguments, but 4 arguments were passed.')
             done()
           })
 
@@ -703,7 +703,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         it('cy.intercept(method, url, handler?)', function (done) {
           testFail((err) => {
-            expect(err.message).to.include('`cy.intercept(method, url, handler?)` accepts a maximum of 3 arguments, but 4 arguments were passed.')
+            expect(err.message).to.include('The `cy.intercept(method, url, handler?)` signature accepts a maximum of 3 arguments, but 4 arguments were passed.')
             done()
           })
 
