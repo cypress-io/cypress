@@ -21,9 +21,10 @@ const isRightBranch = () => {
   const branch =
     process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH ||
     process.env.APPVEYOR_REPO_BRANCH
-  const shouldForceBinaryBuild = (
-    process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
-  ).includes('[build binary]')
+  const shouldForceBinaryBuild = [
+    process.env.APPVEYOR_REPO_COMMIT_MESSAGE || '',
+    process.env.APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED || '',
+  ].some((message) => message.includes('[build binary]'))
 
   const branchesToBuildBinary = ['develop', '7.0-release']
 
@@ -31,9 +32,10 @@ const isRightBranch = () => {
 }
 
 const isForkedPullRequest = () => {
-  const repoName = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME
-
-  return repoName && repoName !== 'cypress-io/cypress'
+  // const repoName = process.env.APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME
+  //
+  // return repoName && repoName !== 'cypress-io/cypress'
+  return false // todo: revert back before merging
 }
 
 const shouldBuildBinary = () => {
