@@ -33,6 +33,10 @@ export type Webpack45Compilation = Compilation & {
   }
 }
 
+export const normalizeError = (error: Error | string) => {
+  return typeof error === 'string' ? error : error.message
+}
+
 export default class CypressCTOptionsPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string
@@ -64,7 +68,16 @@ export default class CypressCTOptionsPlugin {
 
         if (stats.hasErrors()) {
           this.errorEmitted = true
-          this.devServerEvents.emit('dev-server:compile:error', stats.toJson().errors?.[0])
+
+          // webpack 4: string[]
+          // webpack 5: Error[]
+          const errors = stats.toJson().errors as Array<Error | string> | undefined
+
+          if (!errors || !errors.length) {
+            return
+          }
+
+          this.devServerEvents.emit('dev-server:compile:error', normalizeError(errors[0]))
         } else if (this.errorEmitted) {
           // compilation succeed but assets haven't emitted to the output yet
           this.devServerEvents.emit('dev-server:compile:error', null)
