@@ -156,7 +156,7 @@
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
     "lerna": "3.20.2",
-    "lint-staged": "9.4.1",
+    "lint-staged": "11.0.0",
     "listr2": "1.3.12",
     "lodash": "4.17.21",
     "make-empty-github-commit": "1.2.0",
