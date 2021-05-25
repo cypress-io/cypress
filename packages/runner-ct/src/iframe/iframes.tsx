@@ -1,19 +1,18 @@
 import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
-import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { default as $Cypress } from '@packages/driver'
-import State from '../../src/lib/state'
 
+import State from '../../src/lib/state'
 import AutIframe from './aut-iframe'
 import { ScriptError } from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
-
 import IframeModel from './iframe-model'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import styles from '../app/RunnerCt.module.scss'
-import './iframes.scss'
 import eventManager from '../lib/event-manager'
+import { namedObserver } from '../lib/mobx'
+import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
@@ -22,134 +21,75 @@ export function getSpecUrl ({ namespace, spec }, prefix = '') {
 interface IFramesProps {
   state: State
   eventManager: typeof eventManager
-  config: any
+  config: Cypress.RuntimeConfigOptions
 }
 
-@observer
-export default class Iframes extends Component<IFramesProps> {
-  _disposers = []
-  containerRef = null
-  autIframe: AutIframe
-  iframeModel: IframeModel
+export const Iframes = namedObserver('Iframes', ({
+  config,
+  state,
+  eventManager,
+}: IFramesProps) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const autIframe = useRef(new AutIframe(config))
 
-  render () {
-    const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = this.props.state
+  const _toggleSnapshotHighlights = (snapshotProps) => {
+    state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
 
-    return (
-      <div
-        style={{
-          display: this.props.state.screenshotting ? 'inherit' : 'grid',
-        }}
-        className={cs('iframes-ct-container', {
-          'has-error': !!scriptError,
-          'iframes-ct-container-screenshotting': screenshotting,
-        })}
-      >
-        <div
-          ref={(container) => this.containerRef = container}
-          className={
-            cs('size-container', {
-              [styles.noSpecAut]: !this.props.state.spec,
-            })
-          }
-          style={{
-            height: viewportHeight,
-            width: viewportWidth,
-            transform: `scale(${screenshotting ? 1 : scale})`,
-          }}
-        />
-        <ScriptError error={scriptError} />
-        <div className='cover' />
-      </div>
-    )
+    if (state.snapshot.showingHighlights) {
+      const snapshot = snapshotProps.snapshots[state.snapshot.stateIndex]
+
+      autIframe.current.highlightEl(snapshot, snapshotProps)
+    } else {
+      autIframe.current.removeHighlights()
+    }
   }
 
-  componentDidMount () {
-    const config = this.props.config
+  const _changeSnapshotState = (snapshotProps, index) => {
+    const snapshot = snapshotProps.snapshots[index]
 
-    this.autIframe = new AutIframe(config)
+    state.setSnapshotIndex(index)
+    autIframe.current.restoreDom(snapshot)
 
-    this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
-    this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
-    this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
-    this.props.eventManager.on('script:error', this._setScriptError)
-
-    // TODO: need to take headless mode into account
-    // may need to not display reporter if more than 200 tests
-    this.props.eventManager.on('restart', () => {
-      this._run(this.props.state.spec, config)
-    })
-
-    this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
-
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
-    }))
-
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
-    }))
-
-    this.props.eventManager.start(this.props.config)
-
-    this.iframeModel = new IframeModel({
-      state: this.props.state,
-      restoreDom: this.autIframe.restoreDom,
-      highlightEl: this.autIframe.highlightEl,
-      detachDom: this.autIframe.detachDom,
-      snapshotControls: (snapshotProps) => (
-        <SnapshotControls
-          eventManager={this.props.eventManager}
-          snapshotProps={snapshotProps}
-          state={this.props.state}
-          onToggleHighlights={this._toggleSnapshotHighlights}
-          onStateChange={this._changeSnapshotState}
-        />
-      ),
-    })
-
-    this.iframeModel.listen()
-
-    this._disposers.push(autorun(() => {
-      const spec = this.props.state.spec
-
-      if (spec) {
-        this._run(spec, config)
-      }
-    }))
+    if (state.snapshot.showingHighlights && snapshotProps.$el) {
+      autIframe.current.highlightEl(snapshot, snapshotProps)
+    } else {
+      autIframe.current.removeHighlights()
+    }
   }
 
-  @action _setScriptError = (err: string | undefined) => {
-    this.props.state.scriptError = err
-  }
+  const _setScriptError = action((err: string | undefined) => {
+    state.scriptError = err
+  })
 
-  _run = (spec, config) => {
+  const _run = (spec, config) => {
     config.spec = spec
 
-    // this.props.eventManager.notifyRunningSpec(specPath)
-    // logger.clearLog()
-    this._setScriptError(undefined)
+    _setScriptError(undefined)
 
-    this.props.eventManager.setup(config)
+    eventManager.setup(config)
 
     // This is extremely required to not run test till devtools registered
-    when(() => this.props.state.readyToRunTests, () => {
-      window.Cypress.on('window:before:load', this.props.state.registerDevtools)
+    when(() => state.readyToRunTests, () => {
+      window.Cypress.on('window:before:load', state.registerDevtools)
 
-      const $autIframe = this._loadIframes(spec)
+      const $autIframe = _loadIframes(spec)
 
-      this.props.eventManager.initialize($autIframe, config)
+      eventManager.initialize($autIframe, config)
     })
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
-  _loadIframes (spec) {
-    const specSrc = getSpecUrl({ namespace: this.props.config.namespace, spec })
-    const $container = $Cypress.$(this.containerRef).empty()
-    const $autIframe = this.autIframe.create().appendTo($container)
+  const _loadIframes = (spec: Cypress.Cypress['spec']): JQuery<HTMLIFrameElement> => {
+    if (containerRef.current === null) {
+      return
+    }
 
-    this.autIframe.showBlankContents()
+    const specSrc = getSpecUrl({ namespace: config.namespace, spec })
+    const $container = $Cypress.$(containerRef.current).empty()
+    const $autIframe: JQuery<HTMLIFrameElement> = autIframe.current.create().appendTo($container)
+
+    autIframe.current.showBlankContents()
 
     // In mount mode we need to render something right from spec file
     // So load application tests to the aut frame
@@ -158,49 +98,103 @@ export default class Iframes extends Component<IFramesProps> {
     return $autIframe
   }
 
-  _toggleSnapshotHighlights = (snapshotProps) => {
-    this.props.state.snapshot.showingHighlights = !this.props.state.snapshot.showingHighlights
+  useEffect(() => {
+    eventManager.on('visit:failed', autIframe.current.showVisitFailure)
+    eventManager.on('before:screenshot', autIframe.current.beforeScreenshot)
+    eventManager.on('after:screenshot', autIframe.current.afterScreenshot)
+    eventManager.on('script:error', _setScriptError)
 
-    if (this.props.state.snapshot.showingHighlights) {
-      const snapshot = snapshotProps.snapshots[this.props.state.snapshot.stateIndex]
-
-      this.autIframe.highlightEl(snapshot, snapshotProps)
-    } else {
-      this.autIframe.removeHighlights()
-    }
-  }
-
-  _changeSnapshotState = (snapshotProps, index) => {
-    const snapshot = snapshotProps.snapshots[index]
-
-    this.props.state.snapshot.stateIndex = index
-    this.autIframe.restoreDom(snapshot)
-
-    if (this.props.state.snapshot.showingHighlights && snapshotProps.$el) {
-      this.autIframe.highlightEl(snapshot, snapshotProps)
-    } else {
-      this.autIframe.removeHighlights()
-    }
-  }
-
-  componentDidUpdate () {
-    this.props.state.callbackAfterUpdate?.()
-  }
-
-  _printSelectorElementsToConsole = () => {
-    this.autIframe.printSelectorElementsToConsole()
-  }
-
-  componentWillUnmount () {
-    this.props.eventManager.notifyRunningSpec(null)
-    this.props.eventManager.stop()
-    this._disposers.forEach((dispose) => {
-      dispose()
+    // TODO: need to take headless mode into account
+    // may need to not display reporter if more than 200 tests
+    eventManager.on('restart', () => {
+      _run(state.spec, config)
     })
-  }
 
-  getSizeContainer () {
-    // eslint-disable-next-line react/no-string-refs
-    return this.refs.container
-  }
-}
+    eventManager.on('print:selector:elements:to:console', autIframe.current.printSelectorElementsToConsole)
+
+    eventManager.start(config)
+
+    const disposers = [
+      autorun(() => {
+        autIframe.current.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
+      }),
+      autorun(() => {
+        autIframe.current.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
+      }),
+      autorun(() => {
+        if (state.spec) {
+          _run(state.spec, config)
+        }
+      }),
+    ]
+
+    const iframeModel = new IframeModel({
+      state,
+      restoreDom: autIframe.current.restoreDom,
+      highlightEl: autIframe.current.highlightEl,
+      detachDom: autIframe.current.detachDom,
+      snapshotControls: (snapshotProps) => (
+        <SnapshotControls
+          eventManager={eventManager}
+          snapshotProps={snapshotProps}
+          state={state}
+          onToggleHighlights={_toggleSnapshotHighlights}
+          onStateChange={_changeSnapshotState}
+        />
+      ),
+    })
+
+    iframeModel.listen()
+
+    return () => {
+      eventManager.notifyRunningSpec(null)
+      eventManager.stop()
+      disposers.forEach((dispose) => {
+        dispose()
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const isFirstRenderRef = useRef(true)
+
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+
+      return
+    }
+
+    state.callbackAfterUpdate?.()
+  })
+
+  const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = state
+
+  return (
+    <div
+      style={{
+        display: state.screenshotting ? 'inherit' : 'grid',
+      }}
+      className={cs('iframes-ct-container', {
+        'has-error': !!scriptError,
+        'iframes-ct-container-screenshotting': screenshotting,
+      })}
+    >
+      <div
+        ref={containerRef}
+        className={
+          cs('size-container', {
+            [styles.noSpecAut]: !state.spec,
+          })
+        }
+        style={{
+          height: viewportHeight,
+          width: viewportWidth,
+          transform: `scale(${screenshotting ? 1 : scale})`,
+        }}
+      />
+      <ScriptError error={scriptError} />
+      <div className='cover' />
+    </div>
+  )
+})

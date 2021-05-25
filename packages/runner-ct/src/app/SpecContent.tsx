@@ -3,7 +3,7 @@ import * as React from 'react'
 import SplitPane from 'react-split-pane'
 
 import Header from '../header/header'
-import Iframes from '../iframe/iframes'
+import { Iframes } from '../iframe/iframes'
 import { animationFrameDebounce } from '../lib/debounce'
 import { Message } from '../message/message'
 import { KeyboardHelper } from './KeyboardHelper'
