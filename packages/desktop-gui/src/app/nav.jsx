@@ -10,6 +10,41 @@ import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
 
+const docsMenuContent = [{
+  title: 'Get Started',
+  children: [{
+    text: 'Write your first test',
+    link: 'https://on.cypress.io',
+  }, {
+    text: 'Testing your app',
+    link: 'https://on.cypress.io',
+  }],
+}, {
+  title: 'References',
+  children: [{
+    text: 'Best practices',
+    link: 'https://on.cypress.io',
+  }, {
+    text: 'Configuration',
+    link: 'https://on.cypress.io',
+  }, {
+    text: 'API',
+    link: 'https://on.cypress.io',
+  }],
+}, {
+  title: 'Optimize Cypress in CI',
+  children: [{
+    text: 'Setting up CI',
+    link: 'https://on.cypress.io',
+  }, {
+    text: 'Debugging failed tests',
+    link: 'https://on.cypress.io',
+  }, {
+    text: 'Running tests faster',
+    link: 'https://on.cypress.io',
+  }],
+}]
+
 @observer
 export default class Nav extends Component {
   render () {
@@ -27,11 +62,7 @@ export default class Nav extends Component {
               <i className='fas fa-question-circle' /> Support
             </a>
           </li>
-          <li>
-            <a onClick={this._openDocs} href='#'>
-              <i className='fas fa-graduation-cap' /> Docs
-            </a>
-          </li>
+          {this._docsMenu()}
           {this._userStateButton()}
         </ul>
       </nav>
@@ -60,6 +91,28 @@ export default class Nav extends Component {
       <div className='logo'>
         <img src={require('@cypress/icons/dist/logo/cypress-inverse.png')} alt="Cypress" />
       </div>
+    )
+  }
+
+  _docsMenu = () => {
+    return (
+      <li className='docs-menu'>
+        <a onClick={this._openDocs} href='#'>
+          <i className='fas fa-graduation-cap' /> Docs
+        </a>
+        <div className='docs-dropdown'>
+          {docsMenuContent.map(({ title, children }) => (
+            <ul className='dropdown-column' key={title}>
+              <li className='column-title'>{title}</li>
+              {children.map((item) => (
+                <li className='column-item' key={item.text}>
+                  <a onClick={(e) => this._handleDocsClick(e, item)}><i className='far fa-file-alt' /><span>{item.text}</span><i className='fas fa-long-arrow-alt-right' /></a>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </li>
     )
   }
 
@@ -127,6 +180,18 @@ export default class Nav extends Component {
 
   _showLogin () {
     authStore.openLogin(null, 'Nav')
+  }
+
+  _handleDocsClick = (e, item) => {
+    e.preventDefault()
+
+    if (item.action) {
+      item.action()
+    }
+
+    if (item.link) {
+      ipc.externalOpen(item.link)
+    }
   }
 
   _openDocs (e) {

@@ -176,6 +176,59 @@
         background-color: #3b414a;
       }
     }
+
+    .docs-menu {
+      .docs-dropdown {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        display: none !important;
+        filter: drop-shadow(4px 8px 5px rgba(0, 0, 0, 0.1));
+        padding: 16px 14px;
+        position: absolute;
+        left: -400px;
+        right: -70px;
+        z-index: 1000;
+
+        .dropdown-column {
+          flex: 1;
+          list-style: none;
+          padding-left: 0;
+
+          .column-title {
+            color: #333;
+            font-size: 16px;
+            padding-bottom: 4px;
+          }
+
+          .column-item {
+            a {
+              background: #fff !important;
+              color: #444;
+
+              &:hover {
+                color: #333;
+              }
+
+              span {
+                padding: 0 4px;
+              }
+            }
+          }
+        }
+      }
+
+      &:hover {
+        a {
+          color: #fff;
+          background-color: #3b414a;
+        }
+
+        .docs-dropdown {
+          display: flex !important;
+        }
+      }
+    }
   }
 }
 
