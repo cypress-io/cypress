@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.1.0...@cypress/schematic-v1.2.0) (2021-05-21)
+
+
+### Features
+
+* schematic adds ng e2e to scripts ([#16565](https://github.com/cypress-io/cypress/issues/16565)) ([fd012e2](https://github.com/cypress-io/cypress/commit/fd012e2113f91fb1a9afba36ff55def756d14edb))
+
 # [@cypress/schematic-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.3...@cypress/schematic-v1.1.0) (2021-05-17)
 
 

@@ -1,3 +1,10 @@
+# [@cypress/react-v5.8.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.7.0...@cypress/react-v5.8.0) (2021-05-21)
+
+
+### Features
+
+* custom webpack config for react/plugins/babel ([#16597](https://github.com/cypress-io/cypress/issues/16597)) ([75c753b](https://github.com/cypress-io/cypress/commit/75c753be0ee302fed3559b633626036905a45c4d)), closes [#16596](https://github.com/cypress-io/cypress/issues/16596)
+
 # [@cypress/react-v5.7.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.6.0...@cypress/react-v5.7.0) (2021-05-12)
 
 
