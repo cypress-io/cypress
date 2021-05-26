@@ -180,15 +180,30 @@
     .docs-menu {
       .docs-dropdown {
         background: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.1);
         border-radius: 5px;
+        box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.1);
         display: none !important;
-        filter: drop-shadow(4px 8px 5px rgba(0, 0, 0, 0.1));
+        margin-top: 2px;
         padding: 16px 14px;
         position: absolute;
         left: -400px;
         right: -70px;
         z-index: 1000;
+
+
+        // caret
+        &:before {
+          position: absolute;
+          right: 90px;
+          margin-left: -20px;
+          top: -8px;
+          width: 0;
+          height: 0;
+          content:'';
+          border-left: 20px solid transparent;
+          border-right: 20px solid transparent;
+          border-bottom: 20px solid #fff;
+        }
 
         .dropdown-column {
           flex: 1;
