@@ -138,9 +138,13 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
 
 Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](https://on.cypress.io/parallelization)
 
+## Migrating from Protractor to Cypress?
+
+Read our [migration guide](https://on.cypress.io/protractor-to-cypress) to help you make the transition from Protractor to Cypress.
+
 ## Questions or Issues?
 
-Visit our [plugins discussion](https://github.com/cypress-io/cypress/discussions/categories/plugins) to ask questions or report issues related to this package. For a complete Protractor to Cypress migration guide [click here](https://on.cypress.io/protractor-to-cypress).
+Visit our [plugins discussion](https://github.com/cypress-io/cypress/discussions/categories/plugins) to ask questions or report issues related to this package.
 
 ## License
 
