@@ -1,0 +1,306 @@
+.settings {
+  .settings-project-id,
+  .settings-record-key {
+    display: none;
+  }
+
+  &.show-project-id .settings-project-id,
+  &.show-record-key .settings-record-key {
+    display: block;
+  }
+
+  .node-version {
+    .well {
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+
+    ul {
+      margin-top: 10px;
+    }
+
+    a>code {
+      color: #1079c3;
+
+      &:hover {
+        color: #0c65a5;
+        background-color: #e5ecf6;
+        border-bottom: 0;
+      }
+    }
+  }
+
+  .learn-more {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 13px;
+  }
+
+  h5 {
+    margin-top: 20px;
+    overflow: hidden;
+    line-height: 19px;
+
+    a {
+      font-weight: normal;
+      font-size: 12px;
+      position: relative;
+      top: 2px;
+    }
+  }
+
+  .envBracket {
+    padding-left: 30px;
+  }
+
+  .config-keys {
+    margin-bottom: 0;
+    line-height: 16px;
+
+    &>td {
+      padding: 2px 8px;
+      font-size: 13px;
+    }
+  }
+
+  .config-vars {
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background: #fff;
+    color: #eee;
+    margin: 0;
+    padding: 8px 12px;
+    font-family: $font-mono;
+    > span {
+      color: #000;
+    }
+
+    ol[role="tree"] {
+        > li > div{
+        display: none;
+      }
+    }
+
+    .key-value-pair-value {
+      margin-left: 2px;
+      display: inline-block;
+      line-height: 1;
+      padding: 2px;
+      border-bottom: 1px solid transparent
+    }
+
+    .key-value-pair-value:hover {
+      border-bottom: 1px dotted #777;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  .envFile, .env, .config, .cli, .plugin, .default {
+    font-family: $font-mono;
+    padding: 2px;
+  }
+
+  .envFile {
+    background-color: #fdf3e3;
+    color: #7B4804;
+  }
+
+  .env {
+    background-color: #dafff4;
+    color: #045431;
+  }
+
+  .config {
+    background-color: #cdedff;
+    color: #0C5263;
+  }
+
+  .cli {
+    background-color: #fce7e9;
+    color: #A21313;
+  }
+
+  .plugin {
+    background-color: #f0e7fc;
+    color: #134aa2;
+  }
+
+}
+
+.settings-wrapper {
+  padding: 20px;
+
+  pre {
+    border-radius: 3px;
+    background-color: #252831;
+    color: #eee;
+    padding: 10px;
+    font-family: $font-mono;
+    border: 0;
+  }
+
+  table tr:first-child td {
+    border-top: 0;
+  }
+
+  .rc-collapse-item {
+    margin-bottom: 0;
+    position: relative;
+    border-top: none;
+
+    &:first-child {
+      border-top: 1px solid #eee;
+    }
+  }
+
+  .rc-collapse-header {
+    cursor: pointer;
+    font-size: 1em;
+    position: relative;
+    left: -15px;
+    max-width: calc(100% - 85px);
+
+    .arrow {
+      @extend .#{$fa-css-prefix};
+      @extend .#{$fa-css-prefix}-caret-right;
+      @extend .#{$fa-css-prefix}-fw;
+      color: #777;
+      margin-right: 5px;
+    }
+  }
+
+  .rc-collapse-item-active .rc-collapse-header .arrow {
+    @extend .#{$fa-css-prefix}-caret-down;
+  }
+
+  .rc-collapse-content {
+    margin: 15px 8px 0;
+    overflow: hidden;
+  }
+
+  .rc-collapse-content-inactive {
+    display: none;
+  }
+
+  .rc-collapse-anim-active {
+    transition: height 0.2s ease-out;
+  }
+}
+
+.config-table {
+  margin: 10px 0;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.settings-record-key {
+  margin-bottom: 2em;
+
+  p.text-muted.manage-btn {
+    text-align: center;
+    margin-bottom: 0;
+    margin-top: 10px;
+  }
+
+  p.text-muted {
+    margin-bottom: 5px;
+  }
+
+  .empty-well {
+    margin: 10px 0;
+
+    button {
+      margin-top: 10px;
+    }
+  }
+}
+
+.loading-record-key {
+  color: #999;
+  margin: 1em;
+}
+
+.node-version-text {
+  margin-top: 15px;
+}
+
+.proxy-table, .node-table {
+  width: 100%;
+
+  th:first-child {
+    width: 150px;
+  }
+
+  .no-bypass {
+    opacity: .8;
+  }
+
+  td, th {
+    padding: 3px;
+  }
+}
+
+.editor-picker {
+  margin: 0;
+  padding: 0;
+
+  li {
+    list-style: none;
+  }
+
+  label {
+    margin: 0;
+    font-weight: normal;
+  }
+}
+
+.experiment-intro {
+  padding-bottom: 15px;
+  margin-bottom: 0px;
+  border-bottom: 1px solid #ddd;
+}
+
+.experiments-list {
+  padding-left: 0;
+
+  .experiment {
+    list-style: none;
+    margin-bottom: 15px;
+  }
+
+  .experiment-desc {
+    display: flex;
+    align-items: center;
+
+    p {
+      width: 80%;
+      margin-bottom: 0;
+    }
+
+    .experiment-status {
+      margin-left: auto;
+    }
+  }
+  
+  .experiment-header {
+    display: flex;
+    align-items: center;
+  }
+  
+  .experiment-status-sign {
+    margin-left: auto;
+    color: #9d9ea9;
+    line-height: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+
+    &.enabled {
+      color: #1aae73;
+    }
+  }
+}

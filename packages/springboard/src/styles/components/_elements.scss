@@ -1,0 +1,73 @@
+html {
+  position: relative;
+  height: 100%;
+}
+
+body {
+  // Margin bottom by footer height
+  padding-bottom: 18px;
+  // Margin bottom by nav heights
+}
+
+html, body {
+  background-color: transparent;
+  margin: 0 auto;
+  overflow: hidden;
+  height: 100%;
+}
+
+a {
+  color: $brand-primary;
+  cursor: pointer;
+
+  &:hover, &:focus, &:active {
+    cursor: pointer;
+    color: darken($brand-primary, 10%);
+  }
+}
+
+a, button {
+  &:focus {
+    outline: 0;
+  }
+}
+
+form {
+  overflow: auto;
+}
+
+h3, h4 {
+  font-family: $font-title;
+}
+
+h5 {
+  font-size: 15px;
+}
+
+h4 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+
+legend {
+  font-size: $font-size;
+  margin-bottom: 10px;
+  border-bottom-color: #eee;
+  color: #444;
+
+  a {
+    font-size: 13px;
+  }
+}
+
+code {
+  background-color: #f5f5f5;
+  color: #555;
+  font-family: $font-mono;
+  border: 1px solid #ddd;
+}
+
+pre code {
+  border: 0;
+}

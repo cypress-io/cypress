@@ -1,0 +1,55 @@
+$red-primary: #e94f5f;
+$light-gray: #EFF0F3;
+
+$brand-primary: #3284d4;
+$brand-success: #21C799;
+
+$pass: #08c18d;
+
+$footer-height: 20px;
+
+// Basics of a navbar
+$navbar-height:        30px;
+$navbar-margin-bottom: 0;
+$navbar-border-radius: 0;
+
+//=== Inverted navbar
+// Reset inverted navbar basics
+$navbar-inverse-color:               #f8f9fb;
+$navbar-inverse-bg:                  #252831;
+// $navbar-inverse-border:              darken($navbar-inverse-bg, 10%);
+
+// Inverted navbar links
+$navbar-inverse-link-color:          #e1e2e4;
+$navbar-inverse-link-hover-color:    #fff;
+$navbar-inverse-link-hover-bg:       #3b414a;
+$navbar-inverse-link-active-bg:      #3b414a;
+$navbar-inverse-link-disabled-color: #444;
+$navbar-inverse-brand-hover-bg:      #3b414a;
+
+//== Media queries breakpoints
+$screen-xs: 0px;    // Extra small screen / phone
+$screen-sm: 0px;    // Small screen / tablet
+$screen-md: 1200px; // Medium screen / desktop
+$screen-lg: 1200px; // Large screen / wide desktop
+
+//** Padding applied to the modal body
+$modal-inner-padding:         15px !default;
+//** Background color of modal content area
+$modal-content-bg:                             #fff !default;
+//** Modal content border color
+$modal-content-border-color:                   rgba(0,0,0,.2) !default;
+//** Modal content border color **for IE8**
+$modal-content-fallback-border-color:          #999 !default;
+
+$modal-lg: 400px !default;
+$modal-md: 400px !default;
+$modal-sm: 400px !default;
+
+// Typography
+$font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-serif: Garamond, Georgia, "Times New Roman", serif;
+$font-mono: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+$font-title: "Fira Sans", font-sans;
+$font-size: 16px;
+$line-height: 1.7em;

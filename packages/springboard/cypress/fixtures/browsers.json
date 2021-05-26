@@ -1,0 +1,29 @@
+[
+  {
+    "name": "chrome",
+    "displayName": "Chrome",
+    "family": "chromium",
+    "channel": "stable",
+    "version": "50.0.2661.86",
+    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "majorVersion": "50"
+  },
+  {
+    "name": "chromium",
+    "displayName": "Chromium",
+    "family": "chromium",
+    "channel": "stable",
+    "version": "49.0.2609.0",
+    "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+    "majorVersion": "49"
+  },
+  {
+    "name": "chrome",
+    "displayName": "Canary",
+    "family": "chromium",
+    "channel": "canary",
+    "version": "48.0",
+    "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
+    "majorVersion": "48"
+  }
+]

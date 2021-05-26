@@ -1,0 +1,52 @@
+ul.list-header {
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.list-as-table {
+  width: 100%;
+  max-width: 100%;
+  clear: both;
+  border-top: 0;
+  padding-left: 0;
+  background-color: transparent;
+  list-style-type: none;
+  overflow: auto;
+
+  .li {
+    overflow: auto;
+    border-bottom: 1px solid #eeeeee;
+    display: block;
+    vertical-align: top;
+    position: relative;
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    &>a {
+      float: left;
+      width: 100%;
+    }
+
+    .row-column-wrapper {
+      @include text-overflow-custom;
+      min-height: 1px;
+      vertical-align: top;
+      float: left;
+
+      &:last-child {
+        border-right: 0;
+      }
+
+
+    }
+    .row-column  {
+      padding: 4px 20px;
+    }
+
+    &:last-child>div>div {
+      border-bottom: 0;
+    }
+  }
+}

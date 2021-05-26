@@ -1,0 +1,34 @@
+{
+  "integration": [
+    {
+      "name": "app_spec.coffee",
+      "relative": "cypress\\integration\\app_spec.coffee"
+    },
+    {
+      "name": "accounts\\account_new_spec.coffee",
+      "relative": "cypress\\integration\\accounts\\account_new_spec.coffee"
+    },
+    {
+      "name": "accounts\\accounts_list_spec.coffee",
+      "relative": "cypress\\integration\\accounts\\accounts_list_spec.coffee"
+    },
+    {
+      "name": "admin_users\\admin_users_list_spec.coffee",
+      "relative": "cypress\\integration\\admin_users\\admin_users_list_spec.coffee"
+    },
+    {
+      "name": "admin_users\\admin\\foo_list_spec.coffee",
+      "relative": "cypress\\integration\\admin_users\\admin\\foo_list_spec.coffee"
+    }
+  ],
+  "unit": [
+    {
+      "name": "admin_users\\admin\\users\\last_list_spec.coffee",
+      "relative": "cypress\\unit\\admin_users\\admin\\users\\last_list_spec.coffee"
+    },
+    {
+      "name": "admin_users\\admin\\users\\all\\admin\\bar_list_spec.coffee",
+      "relative": "cypress\\unit\\admin_users\\admin\\users\\all\\admin\\bar_list_spec.coffee"
+    }
+  ]
+}

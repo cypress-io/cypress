@@ -1,0 +1,19 @@
+.arrow-box {
+  position: relative;
+  background: #eee;
+}
+
+.arrow-box:after {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(238, 238, 238, 0);
+  border-bottom-color: #eee;
+  border-width: 10px;
+  margin-left: -10px;
+}

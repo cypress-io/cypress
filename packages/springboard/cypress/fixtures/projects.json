@@ -1,0 +1,21 @@
+[
+  {
+    "id": "3d897a",
+    "path": "/Users/Jane/Projects/My-Fake-Project"
+  },
+  {
+    "path": "/Users/Jane/Projects/My-Other-Fake-Project"
+  },
+  {
+    "id": "9a89712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress"
+  },
+  {
+    "id": "d789712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/project1"
+  },
+  {
+    "id": "2289712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/project2"
+  }
+]

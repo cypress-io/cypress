@@ -1,0 +1,150 @@
+.update-modal.os-dialog {
+  background: #fff;
+  padding: 0;
+
+  a:hover {
+    cursor: pointer !important;
+  }
+
+  header {
+    border-bottom: solid 1px #E1E2E4;
+    padding: 1em 2em 0.4em;
+
+    i {
+      margin-right: 0.4rem;
+    }
+  }
+
+  .close {
+    border-radius: 3px;
+    font-size: 2.2rem;
+    padding: 0.5rem;
+    margin-right: 1.4rem;
+    margin-top: 1rem;
+
+    i {
+      width: 1em;
+    }
+
+    &:hover,
+    &:focus {
+      background: #E1E2E4;
+      color: #4D4D64;
+    }
+  }
+
+  section {
+    color: #505050;
+    padding: 1em 2em;
+  }
+
+  ol {
+    padding-left: 0;
+
+    li {
+      list-style: none;
+      margin: 1.7rem 0;
+
+      span {
+        display: block;
+        margin: 1.2rem 0;
+
+        &:last-child {
+          margin-top: 1.7rem;
+        }
+      }
+    }
+  }
+
+  p {
+    margin: 0 0 1.7rem;
+  }
+
+  .project-mode-instructions {
+    ol li:last-child {
+      margin-top: 2.2rem;
+    }
+  }
+
+  .global-mode-instructions {
+    ol {
+      padding-left: 1.5rem;
+
+      li {
+        list-style: decimal;
+      }
+    }
+  }
+
+  .copy-to-clipboard {
+    border: none;
+    color: #3284d4;
+    margin-left: 0.5rem;
+    width: 3rem;
+  }
+
+  .was-copied .copy-to-clipboard {
+    color: #21c799;
+    cursor: default;
+  }
+
+  .fa-asterisk {
+    color: #727474;
+  }
+
+  code {
+    background: #eff0f3;
+    border-radius: 3px;
+    border: none;
+    color: #333;
+    margin-left: 0.5rem;
+    padding: 0.5rem 0.2rem 0.5rem 0.8rem;
+  }
+
+  a > code {
+    color: $brand-primary;
+
+    &:hover,
+    &:focus {
+      color: #2c4d97;
+    }
+  }
+
+  .loading-release-notes section {
+    height: 100px;
+  }
+
+  .release-notes {
+    padding-bottom: 1em;
+  }
+
+  .update-cta {
+    font-size: 1.2em;
+    text-align: center;
+
+    button {
+      background: none;
+      color: #111;
+      border: solid 3px #111;
+      border-radius: 3px;
+      padding: 0.4em 3em;
+
+      &:hover {
+        background: #e3e3e3;
+      }
+    }
+  }
+
+  .external-link {
+    font-size: 1.2em;
+    padding-top: 0;
+    text-align: center;
+
+    button {
+      background: none;
+      color: #111;
+      border: none;
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+.btn-black {
+  background-color: #333;
+  font-weight: 500;
+  color: white;
+
+  &:hover, &:focus {
+    background-color: #242424;
+    color: white;
+  }
+
+  &:active, &:focus {
+    outline: 0
+  }
+}
+
+.btn-primary {
+  background-color: #3385d4;
+  border-color: #3385d4;
+
+  &:hover, &:focus {
+    background-color: darken(#3385d4, 10%);
+    border-color: darken(#3385d4, 10%);
+  }
+
+  &:active, &:focus {
+    outline: 0
+  }
+}
+
+.btn-wide {
+  padding: 8px 30px;
+  font-weight: 600;
+  font-size: 12px;
+}

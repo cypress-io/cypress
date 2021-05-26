@@ -1,0 +1,71 @@
+{
+  "integration": [
+    {
+      "name": "app_spec.coffee",
+      "absolute": "/user/project/cypress/integration/app_spec.coffee",
+      "relative": "cypress/integration/app_spec.coffee"
+    },
+    {
+      "name": "accounts/account_new_spec.coffee",
+      "absolute": "/user/project/cypress/integration/accounts/account_new_spec.coffee",
+      "relative": "cypress/integration/accounts/account_new_spec.coffee"
+    },
+    {
+      "name": "accounts/accounts_list_spec.coffee",
+      "absolute": "/user/project/cypress/integration/accounts/accounts_list_spec.coffee",
+      "relative": "cypress/integration/accounts/accounts_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin_users_list_spec.coffee",
+      "absolute": "/user/project/cypress/integration/admin_users/admin_users_list_spec.coffee",
+      "relative": "cypress/integration/admin_users/admin_users_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin.user/foo_list_spec.coffee",
+      "absolute": "/user/project/cypress/integration/admin_users/admin.user/foo_list_spec.coffee",
+      "relative": "cypress/integration/admin_users/admin.user/foo_list_spec.coffee"
+    }
+  ],
+  "component": [
+    {
+      "name": "admin_users/admin/users/bar_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/bar_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/bar_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/last_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/last_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/last_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/all/admin/one_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/all/admin/one_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/all/admin/one_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/all/admin/two_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/all/admin/two_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/all/admin/two_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/all/admin/three_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/all/admin/three_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/all/admin/three_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/all/admin/four_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/all/admin/four_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/all/admin/four_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/all/admin/five_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/all/admin/five_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/all/admin/five_list_spec.coffee"
+    },
+    {
+      "name": "admin_users/admin/users/all/admin/six_list_spec.coffee",
+      "absolute": "/user/project/cypress/unit/admin_users/admin/users/all/admin/six_list_spec.coffee",
+      "relative": "cypress/unit/admin_users/admin/users/all/admin/six_list_spec.coffee"
+    }
+  ]
+}

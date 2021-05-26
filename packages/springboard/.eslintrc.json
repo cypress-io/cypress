@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/tests",
+    "plugin:@cypress/dev/react"
+  ]
+}

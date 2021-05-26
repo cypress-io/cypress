@@ -1,0 +1,153 @@
+#app {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
+  position: fixed;
+  width: 100%;
+}
+
+.content-wrapper {
+  overflow: auto;
+}
+
+.helper-docs-append {
+  margin-top: 10px;
+
+  a {
+    cursor: pointer;
+  }
+}
+
+.helper-line {
+  text-align: center;
+  font-weight: normal;
+  position: absolute;
+  width: 100%;
+  bottom: 10px;
+  left: 0;
+
+  a {
+    color: #999;
+    display: block;
+    font-size: 14px;
+    padding: 10px 0;
+
+    &:hover {
+      cursor: pointer;
+      color: #ccc;
+    }
+  }
+
+  &>span {
+    display: inline-block;
+    position: relative;
+    font-size: 13px;
+
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      border-bottom: 1px solid #cdd1d9;
+      top: 50%;
+      width: 35px;
+    }
+    &:before {
+      right: 100%;
+      margin-right: 10px;
+    }
+    &:after {
+      left: 100%;
+      margin-left: 10px;
+    }
+
+  }
+
+}
+
+.btn:focus {
+  outline: 0 !important;
+}
+
+i.green {
+  color: #028863;
+}
+
+i.blue {
+  color: #3454c1;
+}
+
+i.red {
+  color: $red-primary;
+}
+
+i.orange {
+  color: #F5A327;
+}
+
+i.errored { color: #F5A327;}
+i.failed { color: #ec6573;}
+i.noTests { color: #F5A327;}
+i.passed { color: #1CB77E;}
+i.running { color: #428BCA;}
+i.overLimit { color: #F5A327;}
+i.timedOut { color: #F5A327;}
+
+.form-horizontal {
+  margin-bottom: 25px;
+
+  background-color: #fafafa;
+  border: 1px solid #eee;
+  padding: 15px 25px;
+
+  .empty-well {
+    background-color: white;
+  }
+
+  .btn-block {
+    margin-top: 25px;
+  }
+
+  p.text-muted {
+    margin-bottom: 20px;
+  }
+}
+
+.helper-docs-link {
+  cursor: pointer;
+}
+
+pre.line-nums {
+  padding-left: 15px;
+  counter-reset: line;
+
+  & > span {
+    display: block;
+
+    &:before {
+      counter-increment: line;
+      content: counter(line);
+      display: inline-block;
+      border-right: 1px solid #414344;
+      padding: 0 .5em 0 0;
+      margin-right: .5em;
+      color: #696c6d;
+    }
+  }
+}
+
+pre.copy-to-clipboard {
+  & > span, & > code {
+    padding-right: 15px;
+  }
+  
+  .action-copy {
+    float: right;
+    color: white;
+
+    &:hover {
+      color: #E2E8F0;
+    }
+  }
+}

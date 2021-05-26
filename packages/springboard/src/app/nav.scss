@@ -1,0 +1,273 @@
+.main-nav,
+.project-nav {
+  display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  .nav {
+    display: flex;
+    justify-content: space-between;
+
+    > li {
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.spacer {
+  flex-grow: 2;
+}
+
+.navbar-default {
+  background-color:#ececec;
+  box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
+  border-color: #c8c8c8;
+  z-index: 10;
+
+  .nav {
+    > .open {
+      > a, > a:hover {
+        background-color: #dedede;
+        color: #262626;
+      }
+    }
+
+    &.left-nav {
+      i {
+        font-size: 11px;
+        color: #555;
+        margin-right: 5px;
+        position: relative;
+        top: -1px;
+      }
+    }
+
+    > li {
+      display: flex;
+
+      > div,
+      > a {
+        align-items: center;
+        color: #444;
+        display: flex;
+        font-size: 13px;
+        justify-content: center;
+        padding: 13px 20px;
+      }
+
+      > a  {
+        &:hover, &:focus {
+          cursor: pointer;
+          background-color: #f3f3f3;
+        }
+
+        &.active {
+          background-color: #dedede;
+          color: #262626;
+        }
+
+        &.btn-link {
+          padding: 0 5px;
+
+          &:hover {
+            background-color:#ececec;
+          }
+        }
+      }
+
+      &.dropdown > a {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+    }
+  }
+
+  .browsers.nav {
+    align-items: center;
+    display: flex;
+
+    i {
+      font-size: 13px;
+
+      &.fa-firefox {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+
+.nav {
+  .user-avatar {
+    position: relative;
+    top: -1px;
+  }
+}
+
+.navbar .container-fluid {
+  padding: 0;
+
+  a:hover {
+    cursor: pointer;
+  }
+}
+.navbar-collapse {
+  padding-left: 0;
+}
+
+.navbar-inverse {
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.20);
+  background-color: #252831;
+
+  .logo {
+    padding: 5px 0;
+
+    img {
+      height: 30px;
+      margin-right: 20px;
+    }
+
+    span {
+      position: absolute;
+      top: 0;
+      right: 7px;
+      color: #969aa3;
+      font-size: 12px;
+    }
+  }
+
+  .nav {
+    .dropdown-chosen {
+      &:hover, &:focus {
+        background-color: #111;
+        color: #fff;
+      }
+    }
+
+    i {
+      font-size: 12px;
+    }
+
+    .dropdown-menu > li {
+      line-height: 30px;
+      font-size: 14px;
+      padding: 5px 15px;
+    }
+
+    .dropdown-chosen,
+    > li > div,
+    > li > a,
+    > li > span > a  {
+      color: $navbar-inverse-link-color;
+      line-height: 30px;
+      font-size: 14px;
+      padding: 5px 15px;
+      display: inline-block;
+    }
+
+    .dropdown-chosen,
+    > li > a,
+    > li > span > a  {
+      &:hover,
+      &:focus {
+        color: #fff;
+        background-color: #3b414a;
+      }
+    }
+  }
+}
+
+.browsers-list {
+  margin: 5px;
+
+  li {
+    padding: 9px 15px;
+    white-space: nowrap;
+  }
+
+  .dropdown-chosen {
+    align-items: center;
+    background: #f6f6f6;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    display: flex;
+    height: 34px;
+    padding: 0 7px;
+    justify-content: center;
+
+    img {
+      margin-right: 5px;
+    }
+
+    &.disabled,
+    &:active {
+      background-color: #dedede;
+    }
+  }
+
+  .dropdown-toggle {
+    margin-left: 4px;
+  }
+
+  .fa-check-circle, .fa-sync-alt {
+    margin-right: 5px;
+  }
+
+  .browser-icon {
+    color: #4573d9;
+    margin-right: 3px;
+    position: relative;
+    top: -1px;
+    width: 15px;
+    height: 15px;
+
+    &.fa-globe {
+      top: 0;
+    }
+  }
+
+  .dropdown-menu {
+    left: auto;
+    right: 0;
+  }
+}
+
+.nav .browser-info {
+  color: #999;
+  margin-left: 6px;
+  margin-right: 4px;
+}
+
+.nav .browser-warning {
+  color: $red-primary;
+  margin-left: 6px;
+  margin-right: 4px;
+}
+
+.browser-info-tooltip {
+  background: #ececec;
+  border-color: #c7c7c7;
+  color: #333;
+  max-width: 300px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  text-align: left;
+
+  svg {
+    fill: #ececec;
+    stroke: #c7c7c7;
+  }
+}
+
+.close-browser {
+  .btn {
+    padding: 6px 9px;
+    font-size: 13px;
+
+    i {
+      margin-right: 3px;
+    }
+  }
+}

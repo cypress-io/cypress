@@ -1,0 +1,422 @@
+{
+  "animationDistanceThreshold": 5,
+  "autoOpen": false,
+  "baseUrl": null,
+  "browsers": [
+    {
+      "name": "chrome",
+      "displayName": "Chrome",
+      "family": "chromium",
+      "channel": "stable",
+      "version": "78.0.3904.108",
+      "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "majorVersion": "78"
+    },
+    {
+      "name": "chromium",
+      "displayName": "Chromium",
+      "family": "chromium",
+      "channel": "stable",
+      "version": "74.0.3729.0",
+      "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
+      "majorVersion": "74"
+    },
+    {
+      "name": "chrome",
+      "displayName": "Canary",
+      "family": "chromium",
+      "channel": "canary",
+      "version": "80.0.3977.4",
+      "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+      "majorVersion": "80"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge",
+      "family": "chromium",
+      "channel": "stable",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge Beta",
+      "family": "chromium",
+      "channel": "beta",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge Canary",
+      "family": "chromium",
+      "channel": "canary",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge Dev",
+      "family": "chromium",
+      "channel": "dev",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
+      "majorVersion": "79"
+    },
+    {
+      "name": "electron",
+      "displayName": "Electron",
+      "family": "chromium",
+      "channel": "stable",
+      "version": "73.0.3683.121",
+      "path": "",
+      "majorVersion": "73",
+      "info": "Info about electron browser"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox",
+      "family": "firefox",
+      "channel": "stable",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox/Contents/MacOS/Firefox",
+      "majorVersion": "69"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox Developer Edition",
+      "channel": "dev",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox Developer/Contents/MacOS/Firefox Developer",
+      "majorVersion": "69"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox Nightly",
+      "channel": "beta",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox Nightly/Contents/MacOS/Firefox Nightly",
+      "majorVersion": "69"
+    },
+
+    {
+      "name": "custom",
+      "displayName": "Custom",
+      "channel": "dev",
+      "family": "custom",
+      "version": "4.3.2",
+      "path": "/Applications/Custom/Contents/MacOS/Custom",
+      "majorVersion": "4"
+    }
+  ],
+  "clientRoute": "/__/",
+  "clientUrl": "http://localhost:2020/__/",
+  "clientUrlDisplay": "http://localhost:2020",
+  "commandTimeout": 4000,
+  "cypressHostUrl": "http://localhost:2020",
+  "cypressEnv": "development",
+  "env": {},
+  "blockHosts": [
+    "www.google-analytics.com",
+    "hotjar.com"
+  ],
+  "execTimeout": 60000,
+  "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
+  "fixturesFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/fixtures",
+  "integrationExamplePath": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration/examples",
+  "integrationExampleName": "examples",
+  "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
+  "isHeadless": false,
+  "isNewProject": false,
+  "javascripts": [],
+  "morgan": true,
+  "namespace": "__cypress",
+  "numTestsKeptInMemory": 50,
+  "pageLoadTimeout": 30000,
+  "parentTestsFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress",
+  "parentTestsFolderDisplay": "cypress-example-kitchensink/cypress",
+  "port": 2020,
+  "projectId": "d8104707-a348-4653-baea-7da9c7d52448",
+  "projectName": "cypress-example-kitchensink",
+  "projectRoot": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
+  "report": false,
+  "reporter": "spec",
+  "requestTimeout": 5000,
+  "resolvedNodePath": null,
+  "resolvedNodeVersion": "1.2.3",
+  "hosts": {
+    "*.foobar.com": "127.0.0.1"
+  },
+  "scaffoldedFiles": [
+    {
+      "name": "cypress",
+      "children": [
+        {
+          "name": "integration",
+          "children": [
+            {
+              "name": "examples",
+              "children": [
+                {
+                  "name": "actions.spec.js"
+                },
+                {
+                  "name": "aliasing.spec.js"
+                },
+                {
+                  "name": "assertions.spec.js"
+                },
+                {
+                  "name": "connectors.spec.js"
+                },
+                {
+                  "name": "cookies.spec.js"
+                },
+                {
+                  "name": "cypress_api.spec.js"
+                },
+                {
+                  "name": "files.spec.js"
+                },
+                {
+                  "name": "local_storage.spec.js"
+                },
+                {
+                  "name": "location.spec.js"
+                },
+                {
+                  "name": "misc.spec.js"
+                },
+                {
+                  "name": "navigation.spec.js"
+                },
+                {
+                  "name": "network_requests.spec.js"
+                },
+                {
+                  "name": "querying.spec.js"
+                },
+                {
+                  "name": "spies_stubs_clocks.spec.js"
+                },
+                {
+                  "name": "traversal.spec.js"
+                },
+                {
+                  "name": "utilities.spec.js"
+                },
+                {
+                  "name": "viewport.spec.js"
+                },
+                {
+                  "name": "waiting.spec.js"
+                },
+                {
+                  "name": "window.spec.js"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fixtures",
+          "children": [
+            {
+              "name": "example.json"
+            }
+          ]
+        },
+        {
+          "name": "support",
+          "children": [
+            {
+              "name": "commands.js"
+            },
+            {
+              "name": "defaults.js"
+            },
+            {
+              "name": "index.js"
+            }
+          ]
+        },
+        {
+          "name": "plugins",
+          "children": [
+            {
+              "name": "index.js"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resolved": {
+    "animationDistanceThreshold": {
+      "from": "default",
+      "value": 5
+    },
+    "baseUrl": {
+      "from": "config",
+      "value": "http://localhost:8080"
+    },
+    "browsers": {
+      "from": "plugin",
+      "value": [
+        {
+          "name": "chrome",
+          "displayName": "Chrome",
+          "family": "chromium",
+          "version": "50.0.2661.86",
+          "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "majorVersion": "50"
+        },
+        {
+          "name": "chromium",
+          "displayName": "Chromium",
+          "family": "chromium",
+          "version": "49.0.2609.0",
+          "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+          "majorVersion": "49"
+        },
+        {
+          "name": "chrome",
+          "displayName": "Canary",
+          "family": "chromium",
+          "version": "48.0",
+          "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
+          "majorVersion": "48"
+        },
+        {
+          "name": "electron",
+          "family": "chromium",
+          "displayName": "Electron",
+          "path": "",
+          "version": "99.101.1234",
+          "majorVersion": "99"
+        }
+      ]
+    },
+    "commandTimeout": {
+      "from": "default",
+      "value": 4000
+    },
+    "env": {
+      "fileServerFolder": {
+        "from": "default",
+        "value": ""
+      },
+      "fixturesFolder": {
+        "from": "default",
+        "value": "cypress/fixtures"
+      },
+      "integrationFolder": {
+        "from": "envFile",
+        "value": "cypress/integration/project"
+      },
+      "numTestsKeptInMemory": {
+        "from": "cli",
+        "value": 10
+      }
+    },
+    "execTimeout": {
+      "from": "default",
+      "value": 60000
+    },
+    "fileServerFolder": {
+      "from": "default",
+      "value": null
+    },
+    "fixturesFolder": {
+      "from": "default",
+      "value": "cypress/fixtures"
+    },
+    "integrationFolder": {
+      "from": "envFile",
+      "value": "cypress/integration/project"
+    },
+    "numTestsKeptInMemory": {
+      "from": "cli",
+      "value": 10
+    },
+    "pageLoadTimeout": {
+      "from": "default",
+      "value": 30000
+    },
+    "pluginsFile": {
+      "from": "default",
+      "value": "cypress/plugins/index.js"
+    },
+    "port": {
+      "from": "default",
+      "value": 2020
+    },
+    "reporter": {
+      "from": "env",
+      "value": "mocha"
+    },
+    "requestTimeout": {
+      "from": "default",
+      "value": 5000
+    },
+    "responseTimeout": {
+      "from": "default",
+      "value": 20000
+    },
+    "supportFolder": {
+      "from": "default",
+      "value": "cypress/support"
+    },
+    "viewportHeight": {
+      "from": "default",
+      "value": 660
+    },
+    "viewportWidth": {
+      "from": "default",
+      "value": 1000
+    },
+    "waitForAnimations": {
+      "from": "default",
+      "value": true
+    },
+    "scrollBehavior": {
+      "from": "default",
+      "value": "top"
+    },
+    "watchForFileChanges": {
+      "from": "default",
+      "value": true
+    },
+    "blockHosts": {
+      "from": "config",
+      "value": [
+        "www.google-analytics.com",
+        "hotjar.com"
+      ]
+    },
+    "hosts": {
+      "from": "config",
+      "value": {
+        "*.foobar.com": "127.0.0.1",
+        "*.bazqux.com": "127.0.0.2"
+      }
+    }
+  },
+  "responseTimeout": 20000,
+  "socketId": null,
+  "socketIoCookie": "__socket.io",
+  "socketIoRoute": "/__socket.io",
+  "supportFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/support",
+  "viewportHeight": 660,
+  "viewportWidth": 1000,
+  "waitForAnimations": true,
+  "scrollBehavior": "top",
+  "watchForFileChanges": true,
+  "xhrRoute": "/xhrs/",
+  "xhrUrl": "__cypress/xhrs/"
+}

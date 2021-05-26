@@ -1,0 +1,137 @@
+.empty-onboarding {
+  margin: 0px auto 0;
+  overflow: auto;
+
+  strong {
+    margin-left: 4px;
+    white-space: nowrap;
+  }
+
+  strong:hover {
+    cursor: pointer;
+    border-bottom: 1px dotted #333;
+  }
+
+  hr {
+    margin: 5px 0;
+  }
+
+  h1 {
+    text-align: center;
+    color: $pass;
+    font-size: 18.5px;
+    margin: 0px 0 10px;
+  }
+
+  img {
+    text-align: center;
+    margin: 20px auto;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 21px;
+    margin-bottom: 0;
+
+    a {
+      border-bottom: 1px dotted lighten($brand-primary, 30%);
+    }
+
+  }
+
+  .helper-line {
+    bottom: 0;
+    position: inherit;
+  }
+
+  h6  {
+    margin-top: 30px;
+    font-weight: bold;
+    font-size: 14px;
+    font-style: italic;
+    color: #999;
+    margin-bottom: 2px;
+  }
+
+  .folder-preview-onboarding {
+    background-color: #fcfcfc;
+    padding: 0;
+    border: 1px solid #e9e9e9;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+    margin: 0 auto 10px;
+    color: #555;
+    margin-top: 10px;
+
+    ul {
+      list-style-type: none;
+      margin-left: 0;
+      font-size: 13.5px;
+      -webkit-padding-start: 0;
+
+
+      &>li {
+        position: relative;
+        margin: 3px 0;
+
+        &.app-code {
+          color: #aaa;
+          font-style: italic;
+          font-weight: 200;
+        }
+
+        &.new-code {
+          padding: 2px 0 0 31px;
+          margin-left: -30px;
+          margin-bottom: 0;
+          border-top: 1px solid lighten($pass, 54%);
+          background-color: lighten($pass, 58%);
+          overflow: auto;
+        }
+
+        &>ul {
+          padding-left: 20px;
+        }
+      }
+
+    }
+
+    &>ul {
+      margin-bottom: 0;
+      &>li {
+        margin-bottom: 0;
+        padding-left: 10px;
+      }
+    }
+
+    .new-item:after {
+      color: lighten($pass, 5%);
+      content: "+";
+      position: absolute;
+      top: 0;
+      left: 10px;
+    }
+
+    .new-item .new-item:after {
+      top: -2px;
+      left: -40px;
+    }
+
+    .new-item .new-item .new-item:after {
+      top: -2px;
+      left: -60px;
+    }
+
+    .new-item .new-item .new-item .new-item:after {
+      top: -2px;
+      left: -80px;
+    }
+
+    .is-more {
+      i {
+        display: none;
+      }
+
+      opacity: 0.7;
+    }
+  }
+}

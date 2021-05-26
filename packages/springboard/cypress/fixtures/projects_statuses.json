@@ -1,0 +1,67 @@
+[
+  {
+    "id": "pol9712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/My-Fake-Project",
+    "name": "My-Fake-Project",
+    "lastBuildStatus": "passed",
+    "lastBuildCreatedAt": "2017-01-02T18:43:56+00:00",
+    "public": true,
+    "orgName": "Jane Lane",
+    "repoUrl": "https://github.com/janelane/jekyl_blog",
+    "createdAt": "2016-04-05T18:43:56+00:00",
+    "updatedAt": "2016-04-12T18:43:56+00:00",
+    "orgId": 829,
+    "state": "VALID"
+  },
+  {
+    "path": "/Users/Jane/Projects/My-Other-Fake-Project"
+  },
+  {
+    "id": "9a89712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress",
+    "name": "My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress",
+    "lastBuildStatus": "failed",
+    "lastBuildCreatedAt": "2017-01-03T18:43:56+00:00",
+    "public": false,
+    "defaultOrg": false,
+    "orgName": "Osato Developers",
+    "repoUrl": "https://github.com/janelane/jekyl_blog",
+    "createdAt": "2016-04-05T18:43:56+00:00",
+    "updatedAt": "2016-04-12T18:43:56+00:00",
+    "orgId": 829,
+    "state": "VALID"
+  },
+  {
+    "id": "d789712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/project1",
+    "name": "Client Work",
+    "lastBuildStatus": "noTests",
+    "lastBuildCreatedAt": "2017-01-05T13:43:56+00:00",
+    "public": false,
+    "defaultOrg": false,
+    "orgName": "ACME Construction",
+    "repoUrl": "https://github.com/janelane/jekyl_blog",
+    "createdAt": "2016-04-05T18:43:56+00:00",
+    "updatedAt": "2016-04-12T18:43:56+00:00",
+    "orgId": 829,
+    "state": "VALID"
+  },
+  {
+    "id": "2289712jdha0wef082h98ha-8f98h3",
+    "path": "/Users/Jane/Projects/project2",
+    "name": "project2",
+    "lastBuildStatus": "running",
+    "lastBuildCreatedAt": "2017-01-01T18:43:56+00:00",
+    "public": true,
+    "defaultOrg": false,
+    "orgName": "Osato Developers",
+    "repoUrl": "https://github.com/janelane/jekyl_blog",
+    "createdAt": "2016-04-05T18:43:56+00:00",
+    "updatedAt": "2016-04-12T18:43:56+00:00",
+    "orgId": 829,
+    "state": "VALID"
+  },
+  {
+    "path": "/Users/Jane/Projects/project3"
+  }
+]

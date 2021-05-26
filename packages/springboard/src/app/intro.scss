@@ -1,0 +1,202 @@
+.intro {
+  flex-grow: 2;
+  overflow: auto;
+
+  .alert {
+    margin-bottom: 20px;
+
+    p {
+      line-height: 1.5em;
+    }
+
+    a {
+      border-bottom: 1px dotted lighten($brand-primary, 30%);
+    }
+  }
+
+  .mono {
+    font-family: $font-mono;
+    font-size: 1.1em;
+  }
+
+  h3 {
+    font-size: 16px;
+    margin: 10px 0 6px;
+  }
+
+  h1 {
+    color: #555;
+    font-family: $font-title;
+    font-weight: 400;
+    margin-top: 20px;
+    font-size: 20px;
+  }
+
+  &>p {
+    margin: 10px 0;
+    color: #636668;
+    font-size: 14px;
+    line-height: 21px;
+  }
+
+  pre {
+    clear: both;
+    border: 0;
+    background-color: #252831;
+    border-radius: 3px;
+    color: #eee;
+    margin-bottom: 15px;
+  }
+
+  .intro-content {
+    padding: 0 40px 10px;
+  }
+
+  .loader {
+    min-height: 100px;
+  }
+}
+
+.project-drop {
+  align-items: center;
+  background: #F6F7F8;
+  border: dashed 2px #e3e4e5;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 40px;
+  padding: 10px 15px;
+  height: 150px;
+
+  .fa-stack {
+  width: 3em;
+  height: 3em;
+  line-height: 3em;
+  }
+
+  .fas {
+    color: #d3d6d8;
+
+    &.fa-stack-2x {
+      font-size: 3em;
+    }
+
+    &.fa-stack-1x {
+      font-size: 1.2em;
+    }
+
+    &[class*="fa-plus"] {
+      position: relative;
+      color: #fff;
+      top: 3px;
+    }
+  }
+
+  p>a {
+    border-bottom: 1px dotted lighten($brand-primary, 30%);
+    color: lighten($brand-primary, 12%);
+
+    &:hover, &:focus, &:active {
+      text-decoration: none;
+      cursor: pointer !important;
+    }
+  }
+
+  p {
+    color: #939698;
+    font-size: 1.4em;
+  }
+
+  &.is-dragging-over {
+    background: #F6F7F8;
+    border: 2px solid lighten($brand-primary, 30%);
+  }
+}
+
+.projects-list {
+  margin-top: 15px;
+  min-height: 50px; // for loader
+  position: relative;
+
+  h1 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 0;
+  }
+
+  .alert {
+    margin-bottom: 0;
+  }
+
+  ul {
+    padding: 0;
+  }
+
+  li {
+    border-top: solid 1px #eee;
+    list-style: none;
+    margin: 0;
+    padding: 0 25px 0 0;
+    position: relative;
+
+    &:first-child {
+      border-top: none;
+    }
+
+    a {
+      display: block;
+      padding: 5px 0;
+      text-decoration: none;
+    }
+
+    button {
+      background: none;
+      border: none;
+      bottom: 0;
+      color: #d3d3d3;
+      position: absolute;
+      right: 0;
+      top: 0;
+
+      &:hover {
+        color: $red-primary;
+      }
+    }
+  }
+
+  .project-name,
+  .project-path {
+    display: inline-block;
+    line-height: 16px;
+  }
+
+  .project-name {
+    color: #666;
+    font-size: 14px;
+  }
+
+  a:hover,
+  a:active,
+  a:focus {
+    .project-name,
+    .project-path {
+      color: $brand-primary;
+    }
+  }
+
+  .project-path {
+    color: #8e8e8e;
+    font-size: 12px;
+    font-style: italic;
+    margin-left: 8px;
+  }
+}
+
+.local-install-notice {
+  padding: 20px 15px 15px;
+
+  &.alert.alert-dismissible .close {
+    top: 15px;
+  }
+}

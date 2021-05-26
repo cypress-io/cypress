@@ -1,0 +1,97 @@
+[
+  {
+    "timestamp": "2016-02-22T18:43:39+00:00",
+    "type": "error",
+    "message": "there was an error",
+    "data": {
+      "foo": "bar"
+    }
+  },
+  {
+    "timestamp": "2016-02-22T17:12:39+00:00",
+    "type": "warning",
+    "message": "there was a warning",
+    "data": {
+      "errno": 34,
+      "code": "ENOENT",
+      "path": "../WebApp-Node/test/folders",
+      "domainEmitter": {
+        "_readableState": {
+          "highWaterMark": 65536,
+          "buffer": [
+            
+          ],
+          "length": 0,
+          "pipes": {
+            "domain": {
+              "domain": null,
+              "_events": {
+                
+              },
+              "_maxListeners": 10,
+              "members": [
+                
+              ]
+            },
+            "_events": {
+              "end": [
+                null,
+                null,
+                null
+              ],
+              "error": [
+                null,
+                null,
+                null
+              ],
+              "close": [
+                null,
+                null,
+                null
+              ]
+            },
+            "_maxListeners": 10,
+            "writable": true,
+            "readable": true,
+            "paused": false,
+            "autoDestroy": true
+          },
+          "pipesCount": 1,
+          "flowing": true,
+          "ended": false,
+          "endEmitted": false,
+          "reading": true,
+          "calledRead": true,
+          "sync": false,
+          "needReadable": true,
+          "emittedReadable": false,
+          "readableListening": true,
+          "objectMode": false,
+          "defaultEncoding": "utf8",
+          "ranOut": true,
+          "awaitDrain": 0,
+          "readingMore": false,
+          "decoder": null,
+          "encoding": null
+        },
+        "readable": true,
+        "domain": {
+          "$ref": "$[\"error\"][\"domainEmitter\"][\"_readableState\"][\"pipes\"][\"domain\"]"
+        },
+        "_events": {
+          "end": [
+            null,
+            null
+          ]
+        },
+        "_maxListeners": 10,
+        "path": "../WebApp-Node/test/folders",
+        "fd": null,
+        "flags": "r",
+        "mode": 438,
+        "autoClose": true,
+        "destroyed": true
+      }
+    }
+  }
+]
