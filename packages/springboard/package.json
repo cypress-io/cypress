@@ -11,7 +11,7 @@
     "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project .",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project .",
-    "dev": "yarn start-test 5050 cypress:open",
+    "dev": "SPRINGBOARD=1 yarn start-test 5050 cypress:open",
     "postinstall": "echo '@packages/springboard needs: yarn build'",
     "start": "http-server -p 5050 dist",
     "watch": "yarn build --watch --progress"
