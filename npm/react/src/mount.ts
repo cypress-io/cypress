@@ -116,7 +116,7 @@ const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: Mount
 
     return (
       // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
-      cy.wrap<React.ReactNode>(userComponent)
+      cy.wrap<React.ReactNode>(userComponent, { log: false })
       .as(displayName)
       .then(() => {
         return cy.wrap<MountReturn>({
