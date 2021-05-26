@@ -3,6 +3,8 @@ import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
 import { cors } from '@packages/network'
 import debugModule from 'debug'
+import { Automation } from '../automation'
+import { ResourceType, BrowserPreRequest } from '@packages/proxy'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -142,7 +144,6 @@ type OnFn = (eventName: string, cb: Function) => void
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
 // CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-type ResourceType = 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
 const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'img': 'image',
@@ -150,15 +151,8 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-type RequestToBeSent = {
-  method: string
-  url: string
-  resoureType: ResourceType
-  originalResourceType: string | undefined
-}
-
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this._onNetworkRequestWillBeSent)
     sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
@@ -170,14 +164,15 @@ export class CdpAutomation {
   private _onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
-    const requestToBeSent: RequestToBeSent = {
+    const browserPreRequest: BrowserPreRequest = {
+      requestId: params.requestId,
       method: params.request.method,
       url: params.request.url,
-      resoureType: normalizeResourceType(params.type),
+      resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
     }
 
-    debugVerbose('request to be sent:', requestToBeSent)
+    this.automation.onBrowserPreRequest(browserPreRequest)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {

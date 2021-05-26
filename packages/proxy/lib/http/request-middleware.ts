@@ -4,16 +4,32 @@ import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
 import { HttpMiddleware } from './'
+import { BrowserPreRequest } from '../types'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
+  pendingBrowserPreRequests: Array<BrowserPreRequest>
 }>
 
 const debug = debugModule('cypress:proxy:http:request-middleware')
 
+const CorrelatePendingBrowserPreRequest: RequestMiddleware = function () {
+  // since we should receive browser pre-request data for all requests, do a simple first lookup here
+  const i = this.pendingBrowserPreRequests.findIndex((v: BrowserPreRequest) => {
+    return v.method === this.req.method && v.url === this.req.proxiedUrl
+  })
+
+  if (i > 0) {
+    this.req.browserPreRequest = this.pendingBrowserPreRequests[i]
+    this.pendingBrowserPreRequests.splice(i, 1)
+  }
+
+  this.next()
+}
+
 const LogRequest: RequestMiddleware = function () {
   debug('proxying request %o', {
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
+    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers', 'browserPreRequest'),
   })
 
   this.next()
@@ -140,6 +156,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 }
 
 export default {
+  CorrelatePendingBrowserPreRequest,
   LogRequest,
   MaybeEndRequestWithBufferedResponse,
   InterceptRequest,

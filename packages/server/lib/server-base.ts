@@ -12,7 +12,7 @@ import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, httpUtils, uri } from '@packages/network'
-import { NetworkProxy } from '@packages/proxy'
+import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
@@ -23,7 +23,6 @@ import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
-
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
@@ -234,6 +233,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
+  }
+
+  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   _createHttpServer (app): DestroyableHttpServer {

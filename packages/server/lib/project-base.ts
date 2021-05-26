@@ -357,7 +357,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
     }
 
-    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
+    const onBrowserPreRequest = (browserPreRequest) => {
+      this.server.addBrowserPreRequest(browserPreRequest)
+    }
+
+    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest)
 
     this.server.startWebsockets(this.automation, cfg, {
       onReloadBrowser: options.onReloadBrowser,

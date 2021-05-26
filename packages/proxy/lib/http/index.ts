@@ -3,6 +3,7 @@ import CyServer from '@packages/server'
 import {
   CypressIncomingRequest,
   CypressOutgoingResponse,
+  BrowserPreRequest,
 } from '@packages/proxy'
 import debugModule from 'debug'
 import ErrorMiddleware from './error-middleware'
@@ -187,6 +188,7 @@ export class Http {
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
+  pendingBrowserPreRequests: Array<BrowserPreRequest> = []
   request: any
   socket: CyServer.Socket
 
@@ -215,6 +217,7 @@ export class Http {
       config: this.config,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
+      pendingBrowserPreRequests: this.pendingBrowserPreRequests,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
@@ -253,9 +256,15 @@ export class Http {
 
   reset () {
     this.buffers.reset()
+    this.pendingBrowserPreRequests = []
   }
 
   setBuffer (buffer) {
     return this.buffers.set(buffer)
+  }
+
+  addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    debug('received browser pre-request: %o', browserPreRequest)
+    this.pendingBrowserPreRequests.push(browserPreRequest)
   }
 }
