@@ -97,6 +97,12 @@ function makeSassLoaders ({ modules }): RuleSetRule {
   }
 }
 
+// the chrome version should be synced with
+// npm/webpack-batteries-included-preprocessor/index.js and
+// packages/server/lib/browsers/chrome.ts
+const babelPresetEnvConfig = [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }]
+const babelPresetTypeScriptConfig = [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }]
+
 export const getCommonConfig = () => {
   const commonConfig: Configuration = {
     mode: 'none',
@@ -128,12 +134,9 @@ export const getCommonConfig = () => {
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
               ],
               presets: [
-                // the chrome version should be synced with
-                // npm/webpack-batteries-included-preprocessor/index.js and
-                // packages/server/lib/browsers/chrome.ts
-                [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }],
+                babelPresetEnvConfig,
                 require.resolve('@babel/preset-react'),
-                [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
+                babelPresetTypeScriptConfig,
               ],
               babelrc: false,
             },
@@ -216,8 +219,15 @@ export const getCommonConfig = () => {
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const getSimpleConfig = () => ({
+  node: {
+    fs: 'empty',
+    child_process: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    module: 'empty',
+  },
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js', '.ts', '.json'],
   },
 
   stats,
@@ -228,17 +238,36 @@ export const getSimpleConfig = () => ({
   module: {
     rules: [
       {
-        test: /\.(js)$/,
+        test: /\.(js|ts)$/,
         exclude: /node_modules/,
         use: {
           loader: require.resolve('babel-loader'),
           options: {
+            plugins: [
+              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+            ],
             presets: [
-              [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
+              babelPresetEnvConfig,
+              babelPresetTypeScriptConfig,
             ],
             babelrc: false,
           },
         },
+      },
+      // FIXME: we don't actually want or need wasm support in the
+      // multidomain bundle that uses this config, but we need to refactor
+      // the driver so that it doesn't load the wasm code in
+      // packages/driver/src/cypress/source_map_utils.js when creating
+      // the multidomain bundle. for now, this is necessary so the build
+      // doesn't fail
+      {
+        test: /\.wasm$/,
+        type: 'javascript/auto',
+        use: [
+          {
+            loader: require.resolve('arraybuffer-loader'),
+          },
+        ],
       },
     ],
   },

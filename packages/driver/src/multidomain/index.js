@@ -1,0 +1,48 @@
+import $Cypress from '../cypress'
+import $Cy from '../cypress/cy'
+import $Commands from '../cypress/commands'
+import $Log from '../cypress/log'
+
+export const initialize = (autWindow) => {
+  const specWindow = {
+    Error,
+  }
+  const Cypress = $Cypress.create({
+    browser: {
+      channel: 'stable',
+      displayName: 'Chrome',
+      family: 'chromium',
+      isChosen: true,
+      isHeaded: true,
+      isHeadless: false,
+      majorVersion: 90,
+      name: 'chrome',
+      path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      version: '90.0.4430.212',
+    },
+  })
+  const log = (...args) => {
+    return Cypress.log.apply(Cypress, args)
+  }
+  const cy = $Cy.create(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, log)
+
+  Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
+  Cypress.runner = {
+    addLog () {},
+  }
+
+  Cypress.state('window', autWindow)
+  Cypress.state('document', autWindow.document)
+  Cypress.state('runnable', {
+    ctx: {},
+    clearTimeout () {},
+    resetTimeout () {},
+    timeout () {},
+  })
+
+  $Commands.create(Cypress, cy, Cypress.state)
+
+  return {
+    cy,
+  }
+}
