@@ -5,7 +5,8 @@ import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import cwd from '../cwd'
 import savedState from '../saved_state'
-const cyDesktop = require('@packages/desktop-gui')
+const cyDesktopSpringboard = require('@packages/springboard')
+const cyDesktopGui = require('@packages/desktop-gui')
 
 const debug = Debug('cypress:server:windows')
 
@@ -21,7 +22,12 @@ let recentlyCreatedWindow = false
 const getUrl = function (type) {
   switch (type) {
     case 'INDEX':
-      return cyDesktop.getPathToIndex()
+      if (process.env.SPRINGBOARD) {
+        return cyDesktopSpringboard.getPathToIndex()
+      }
+
+      return cyDesktopGui.getPathToIndex()
+
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
   }

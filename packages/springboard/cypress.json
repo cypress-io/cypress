@@ -1,6 +1,5 @@
 {
-  "baseUrl": "http://localhost:5005",
-  "projectId": "ypt4pf",
+  "baseUrl": "http://localhost:5555",
   "viewportWidth": 800,
   "viewportHeight": 850,
   "env": {
@@ -12,10 +11,13 @@
     "openMode": 0
   },
   "nodeVersion": "system",
-  "testFiles": "**/*_spec.{js,jsx}",
-  "componentFolder": "src",
+  "testFiles": "**/*.spec.{ts,tsx}",
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
+  },
+  "component": {
+    "componentFolder": "cypress/component",
+    "testFiles": "**/*.spec.tsx"
   }
 }
