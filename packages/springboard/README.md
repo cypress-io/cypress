@@ -15,28 +15,28 @@ It replaces the original electron app, `desktop-gui`.
 
 ```bash
 ## from repo root
-yarn build --scope @packages/springboard
+yarn workspace @packages/springboard build
 ```
 
 ### For production
 
 ```bash
 ## from repo root
-yarn build-prod --scope @packages/springboard
+yarn workspace @packages/springboard build-prod
 ```
 
 ## Developing
 
 ```bash
 ## from repo root
-yarn dev --scope @packages/springboard
+yarn workspace @packages/springboard dev
 ```
 
 You probably want to start webpack in watch mode, too:
 
 ```bash
 ## from repo root
-yarn watch --scope @packages/springboard
+yarn workspace @packages/springboard watch
 ```
 
 ## Testing
