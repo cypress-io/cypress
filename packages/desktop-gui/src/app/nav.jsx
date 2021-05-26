@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import _ from 'lodash'
 import { Dropdown } from '@packages/ui-components'
 
 import appStore from '../lib/app-store'
@@ -9,41 +10,6 @@ import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
-
-const docsMenuContent = [{
-  title: 'Get Started',
-  children: [{
-    text: 'Write your first test',
-    link: 'https://on.cypress.io',
-  }, {
-    text: 'Testing your app',
-    link: 'https://on.cypress.io',
-  }],
-}, {
-  title: 'References',
-  children: [{
-    text: 'Best practices',
-    link: 'https://on.cypress.io',
-  }, {
-    text: 'Configuration',
-    link: 'https://on.cypress.io',
-  }, {
-    text: 'API',
-    link: 'https://on.cypress.io',
-  }],
-}, {
-  title: 'Optimize Cypress in CI',
-  children: [{
-    text: 'Setting up CI',
-    link: 'https://on.cypress.io',
-  }, {
-    text: 'Debugging failed tests',
-    link: 'https://on.cypress.io',
-  }, {
-    text: 'Running tests faster',
-    link: 'https://on.cypress.io',
-  }],
-}]
 
 @observer
 export default class Nav extends Component {
@@ -94,6 +60,52 @@ export default class Nav extends Component {
     )
   }
 
+  _docsMenuContent = () => {
+    // revert to a link in global mode
+    const showPromptOrLink = (promptSlug, link) => {
+      if (this.props.project && this.props.project.prompts) {
+        return { action: _.partial(this.props.project.prompts.openPrompt, promptSlug) }
+      }
+
+      return { link }
+    }
+
+    return [{
+      title: 'Get Started',
+      children: [{
+        text: 'Write your first test',
+        link: 'https://on.cypress.io',
+      }, {
+        text: 'Testing your app',
+        link: 'https://on.cypress.io',
+      }],
+    }, {
+      title: 'References',
+      children: [{
+        text: 'Best practices',
+        link: 'https://on.cypress.io',
+      }, {
+        text: 'Configuration',
+        link: 'https://on.cypress.io',
+      }, {
+        text: 'API',
+        link: 'https://on.cypress.io',
+      }],
+    }, {
+      title: 'Optimize Cypress in CI',
+      children: [{
+        text: 'Setting up CI',
+        ...showPromptOrLink('ci1', 'https://on.cypress.io'),
+      }, {
+        text: 'Debugging failed tests',
+        link: 'https://on.cypress.io',
+      }, {
+        text: 'Running tests faster',
+        link: 'https://on.cypress.io',
+      }],
+    }]
+  }
+
   _docsMenu = () => {
     return (
       <li className='docs-menu'>
@@ -101,10 +113,10 @@ export default class Nav extends Component {
           <i className='fas fa-graduation-cap' /> Docs
         </a>
         <div className='docs-dropdown'>
-          {docsMenuContent.map(({ title, children }) => (
+          {_.map(this._docsMenuContent(), ({ title, children }) => (
             <ul className='dropdown-column' key={title}>
               <li className='column-title'>{title}</li>
-              {children.map((item) => (
+              {_.map(children, (item) => (
                 <li className='column-item' key={item.text}>
                   <a onClick={(e) => this._handleDocsClick(e, item)}><i className='far fa-file-alt' /><span>{item.text}</span><i className='fas fa-long-arrow-alt-right' /></a>
                 </li>

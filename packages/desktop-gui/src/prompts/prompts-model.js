@@ -35,7 +35,7 @@ export default class Prompts {
   }
 
   @action closePrompt = (slug) => {
-    this[slug] = true
+    this[slug] = false
   }
 
   @action setPromptStates = (config) => {

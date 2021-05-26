@@ -5,10 +5,10 @@ import GlobalError from './global-error'
 import Footer from '../footer/footer'
 import LoginModal from '../auth/login-modal'
 
-export default ({ children }) => {
+export default ({ children, project }) => {
   return (
     <>
-      <Nav />
+      <Nav project={project} />
       {children}
       <Footer />
       <LoginModal />
