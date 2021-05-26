@@ -54,7 +54,7 @@
     "primeng": "11.3.2",
     "raw-loader": "1.0.0",
     "renderkid": "2.0.5",
-    "rxjs": "6.6.7",
+    "rxjs": "~6.6.0",
     "semantic-release": "17.4.2",
     "to-string-loader": "1.1.6",
     "ts-loader": "8.1.0",
