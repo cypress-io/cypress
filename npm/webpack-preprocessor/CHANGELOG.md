@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.8.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.7.0...@cypress/webpack-preprocessor-v5.8.0) (2021-05-13)
+
+
+### Features
+
+* **npm/webpack-preprocessor:** WIP support webpack 5 alongside webpack 4 ([#16493](https://github.com/cypress-io/cypress/issues/16493)) ([#16504](https://github.com/cypress-io/cypress/issues/16504)) ([c9fb982](https://github.com/cypress-io/cypress/commit/c9fb982ab120ed4c642466796ce4caeea14e0eb4))
+
 # [@cypress/webpack-preprocessor-v5.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.6.0...@cypress/webpack-preprocessor-v5.7.0) (2021-04-05)
 
 

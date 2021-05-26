@@ -92,6 +92,7 @@ function updateDependencies (options: any): Rule {
 function addCypressTestScriptsToPackageJson (): Rule {
   return (tree: Tree) => {
     addPropertyToPackageJson(tree, ['scripts'], {
+      'e2e': 'ng e2e',
       'cy:open': 'cypress open',
       'cy:run': 'cypress run',
     })
@@ -190,6 +191,7 @@ function addNewCypressCommands (
   project: string,
   runJson: JsonObject,
   openJson: JsonObject,
+  e2eJson: JsonObject,
   removeProtractor: boolean,
 ) {
   const projectArchitectJson = angularJsonVal['projects'][project]['architect']
@@ -198,7 +200,7 @@ function addNewCypressCommands (
   projectArchitectJson['cypress-open'] = openJson
 
   if (removeProtractor || !projectArchitectJson['e2e']) {
-    projectArchitectJson['e2e'] = openJson
+    projectArchitectJson['e2e'] = e2eJson
   }
 
   return tree.overwrite('./angular.json', JSON.stringify(angularJsonVal, null, 2))
@@ -221,8 +223,9 @@ function modifyAngularJson (options: any): Rule {
       }
 
       Object.keys(projects).forEach((project) => {
-        const cypressRunJson = {
-          builder: '@cypress/schematic:cypress',
+        const builder = '@cypress/schematic:cypress'
+        const runJson = {
+          builder,
           options: {
             devServerTarget: `${project}:serve`,
           },
@@ -233,9 +236,18 @@ function modifyAngularJson (options: any): Rule {
           },
         }
 
-        const cypressOpenJson = {
-          builder: '@cypress/schematic:cypress',
+        const openJson = {
+          builder,
           options: {
+            watch: true,
+            headless: false,
+          },
+        }
+
+        const e2eJson = {
+          builder,
+          options: {
+            devServerTarget: `${project}:serve`,
             watch: true,
             headless: false,
           },
@@ -251,8 +263,8 @@ function modifyAngularJson (options: any): Rule {
           : null
 
         if (configFile) {
-          Object.assign(cypressRunJson.options, { configFile })
-          Object.assign(cypressOpenJson.options, { configFile })
+          Object.assign(runJson.options, { configFile })
+          Object.assign(openJson.options, { configFile })
         }
 
         if (options.removeProtractor) {
@@ -270,8 +282,9 @@ function modifyAngularJson (options: any): Rule {
           tree,
           angularJsonVal,
           project,
-          cypressRunJson,
-          cypressOpenJson,
+          runJson,
+          openJson,
+          e2eJson,
           options.removeProtractor,
         )
       })
