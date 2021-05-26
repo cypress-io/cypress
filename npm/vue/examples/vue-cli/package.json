@@ -3,20 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "vue-cli-service build",
     "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
     "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run-ct",
+    "report:coverage": "nyc report",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "register-service-worker": "^1.7.1",
     "vue": "^2.6.11"
   },
   "devDependencies": {
+    "@cypress/code-coverage": "^3.9.5",
     "@cypress/vue": "file:../../dist",
     "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-pwa": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
-    "cypress-circleci-reporter": "0.2.0",
+    "babel-plugin-istanbul": "~6.0.0",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
     "vue-template-compiler": "^2.6.11"
   }
 }

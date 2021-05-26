@@ -1,3 +1,27 @@
+# [@cypress/design-system-v1.4.0](https://github.com/cypress-io/cypress/compare/@cypress/design-system-v1.3.0...@cypress/design-system-v1.4.0) (2021-05-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cypress-real-events to version 1.4.0 🌟 ([#16363](https://github.com/cypress-io/cypress/issues/16363)) ([38ab170](https://github.com/cypress-io/cypress/commit/38ab170fead2369bda0fa14a0cc89f505141e682))
+
+
+### Features
+
+* **design-system:** SpecList - FileTree - VirtualizedTree ([#16179](https://github.com/cypress-io/cypress/issues/16179)) ([a73adf2](https://github.com/cypress-io/cypress/commit/a73adf2b4959f72789fa7d0ff9d6b9f301296258))
+
+# [@cypress/design-system-v1.3.0](https://github.com/cypress-io/cypress/compare/@cypress/design-system-v1.2.0...@cypress/design-system-v1.3.0) (2021-04-26)
+
+
+### Bug Fixes
+
+* **ds:** make design-system tests display icons ([#16114](https://github.com/cypress-io/cypress/issues/16114)) ([480b4b0](https://github.com/cypress-io/cypress/commit/480b4b008c998fb68a45d1f98296a6b8aa500feb))
+
+
+### Features
+
+* Design System Setup ([#15776](https://github.com/cypress-io/cypress/issues/15776)) ([8eaf4b4](https://github.com/cypress-io/cypress/commit/8eaf4b478b1a359c9284d055634fb2032afda536))
+
 # [@cypress/design-system-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/design-system-v1.1.0...@cypress/design-system-v1.2.0) (2021-04-05)
 
 

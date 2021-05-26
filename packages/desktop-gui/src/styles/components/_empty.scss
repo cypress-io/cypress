@@ -11,9 +11,17 @@
   .btn {
     margin-top: 10px;
   }
+
+  .login-content {
+    padding: 10px 20px;
+  }
 }
 
-.empty-no-runs, .empty-log-in {
+.empty-no-runs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   h4 {
     color: #272B2F;
     font-family: $font-title;
@@ -33,84 +41,9 @@
     color: #272B2F;
     font-weight: 200;
   }
-}
 
-.empty-no-runs {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-
-  .what-is-dashboard {
-    background: #f8f8f8;
-    flex-grow: 2;
-    margin-top: 20px;
-    padding: 8px 50px 10px;
-    text-align: left;
-
-    .columns {
-      align-items: center;
-      justify-content: space-between;
-      display: flex;
-
-      .column {
-        align-items: center;
-        display: flex;
-        width: 30%;
-
-        svg {
-          color: $brand-primary;
-          flex-shrink: 0;
-          font-size: 54px;
-        }
-
-        span {
-          font-family: $font-title;
-          font-size: 15px;
-          margin-left: 15px;
-        }
-      }
-    }
-
-    @media (max-width: 800px) {
-      padding-left: 20px;
-      padding-right: 20px;
-
-      .columns .column svg {
-        font-size: 42px;
-      }
-    }
-
-    @media (max-width: 620px) {
-      padding-left: 40px;
-      padding-right: 40px;
-
-      .columns {
-        flex-direction: column;
-
-        .column {
-          padding-bottom: 15px;
-          width: 85%;
-
-          &:last-of-type {
-            padding-bottom: 0;
-          }
-        }
-      }
-    }
-  }
-}
-
-.empty-log-in {
-  h4 {
-    margin-top: 25px;
-  }
-
-  .login-content {
-    padding-top: 10px;
-  }
-
-  .dashboard-banner {
-    padding-top: 35px;
+  .btn-connect {
+    margin: 20px 0 10px;
   }
 }
 

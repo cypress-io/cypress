@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v2.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.0...@cypress/webpack-batteries-included-preprocessor-v2.2.1) (2021-04-15)
+
+
+### Bug Fixes
+
+* **@cypress/webpack-batteries-included-preprocessor:** Ensure typescript options are set if typescript path is provided ([#15991](https://github.com/cypress-io/cypress/issues/15991)) ([6885181](https://github.com/cypress-io/cypress/commit/688518126297c08fbfa572fcef10ee9bbf49b6c8))
+
 # [@cypress/webpack-batteries-included-preprocessor-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.1.5...@cypress/webpack-batteries-included-preprocessor-v2.2.0) (2021-04-05)
 
 

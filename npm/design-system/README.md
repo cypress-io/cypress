@@ -35,10 +35,10 @@ SCSS usage:
 
 ```scss
 // scoped within the *.scss file
-@use '@cypress/design-system/src/index.scss' as *;
+@use '@cypress/design-system' as *;
 
 // import variables and mixins throughout the whole project
-// or @import('@cypress/design-system/src/index.scss');
+// or @import('@cypress/design-system');
 
 .my-component {
   text-color: $accent-color-01;
@@ -75,3 +75,7 @@ TODO: Add netlify site support and static app wrapper
 2. Import the first component inside of RunnerCT
 3. Hook up tests to circle
 4. Publish the package on npm (switch `package.json`'s `publishConfig` to 'public' instead of 'restricted' and then merge into master)
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)

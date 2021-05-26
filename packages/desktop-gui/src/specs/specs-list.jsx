@@ -289,6 +289,10 @@ class SpecsList extends Component {
     specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
+  _openSpecFolder (specFolderPath, e) {
+    if (e.key === 'Enter' || e.keyCode === 32) specsStore.toggleExpandSpecFolder(specFolderPath)
+  }
+
   _createNewFile = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -338,10 +342,12 @@ class SpecsList extends Component {
         }><i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}{buttonText}</button>)
     }
 
+    const tabIndex = 0
+
     return (
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
-          <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
+          <div tabIndex={tabIndex} className="folder-name" onKeyDown={this._openSpecFolder.bind(this, spec)} onClick={this._selectSpecFolder.bind(this, spec)}>
             <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`} />
             {nestingLevel !== 0 ? <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`} /> : null}
             {

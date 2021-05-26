@@ -1,0 +1,60 @@
+{
+  "name": "@cypress/schematic",
+  "version": "0.0.0-development",
+  "description": "Official Cypress schematic for the Angular CLI",
+  "private": false,
+  "main": "./src",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:test": "tsc -p tsconfig.spec.json",
+    "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
+    "build:watch": "tsc -p tsconfig.json --watch",
+    "clean": "git checkout HEAD -- sandbox && git clean -f -d sandbox",
+    "launch": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic && cd ..",
+    "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic --removeProtractor=false && cd ..",
+    "link:sandbox": "yarn link && cd sandbox && yarn link @cypress/schematic",
+    "test:all": "yarn build:all && yarn test:schematics && yarn launch:test && yarn test:builders",
+    "test:builders": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/builders/cypress/index_spec.ts",
+    "test:schematics": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/schematics/cypress/index_spec.ts",
+    "test:e2e:sandbox": "cd sandbox && ng run sandbox:cypress-run",
+    "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
+  },
+  "dependencies": {
+    "@angular-devkit/architect": "^0.1200.0",
+    "@angular-devkit/core": "^12.0.0",
+    "@angular-devkit/schematics": "^12.0.0",
+    "@schematics/angular": "^12.0.0",
+    "jsonc-parser": "^3.0.0",
+    "rxjs": "~6.6.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/schematics-cli": "^12.0.0",
+    "@types/chai-enzyme": "0.6.7",
+    "@types/mocha": "8.0.3",
+    "@types/node": "^12.11.1",
+    "chai": "4.2.0",
+    "cypress": "0.0.0-development",
+    "mocha": "3.5.3",
+    "typescript": "~4.2.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/cypress-schematic#readme",
+  "author": "Cypress DX Team",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
+  "keywords": [
+    "schematics",
+    "cypress",
+    "e2e",
+    "testing"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "http://registry.npmjs.org/"
+  },
+  "builders": "./src/builders/builders.json",
+  "schematics": "./src/schematics/collection.json"
+}

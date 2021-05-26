@@ -40,10 +40,10 @@ module.exports = {
     }
   },
 
-  wrapChildPromise (ipc, invoke, ids, args = [], cb) {
+  wrapChildPromise (ipc, invoke, ids, args = []) {
     return Promise.try(() => {
       return invoke(ids.eventId, args)
-    }).then(cb)
+    })
     .then((value) => {
       // undefined is coerced into null when sent over ipc, but we need
       // to differentiate between them for 'task' event

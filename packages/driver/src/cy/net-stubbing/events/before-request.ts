@@ -24,11 +24,28 @@ type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
 const validEvents = ['before:response', 'response', 'after:response']
 
+const getDisplayUrl = (url: string) => {
+  if (url.startsWith(window.location.origin)) {
+    return url.slice(window.location.origin.length)
+  }
+
+  return url
+}
+
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
+    const message = _.compact([
+      request.request.method,
+      request.response && request.response.statusCode,
+      getDisplayUrl(request.request.url),
+      request.state,
+    ]).join(' ')
+
+    const displayName = route.handler ? (_.isFunction(route.handler) ? 'req fn' : 'req stub') : 'req'
+
     return Cypress.log({
       name: 'xhr',
-      displayName: 'req',
+      displayName,
       alias: route.alias,
       aliasType: 'route',
       type: 'parent',
@@ -47,7 +64,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       renderProps: () => {
         return {
           indicator: request.state === 'Complete' ? 'successful' : 'pending',
-          message: `${request.request.url} ${request.state}`,
+          message,
         }
       },
     })
@@ -94,24 +111,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       requestWaited: false,
       responseWaited: false,
       subscriptions: [],
-      on (eventName, handler) {
-        if (!validEvents.includes(eventName)) {
-          return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
-            args: {
-              validEvents,
-              eventName,
-            },
-          })
-        }
-
-        if (!_.isFunction(handler)) {
-          return $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
-        }
-
-        subscribe(eventName, handler)
-
-        return request
-      },
     }
   }
 
@@ -122,7 +121,24 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
-    on: request.on,
+    on (eventName, handler) {
+      if (!validEvents.includes(eventName)) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
+          args: {
+            validEvents,
+            eventName,
+          },
+        })
+      }
+
+      if (!_.isFunction(handler)) {
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
+      }
+
+      subscribe(eventName, handler)
+
+      return userReq
+    },
     continue (responseHandler?) {
       if (resolved) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.completion_called_after_resolved', { args: { cmd: 'continue' } })

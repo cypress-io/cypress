@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "cy:run": "node ../../../../../../scripts/cypress.js run-ct",
+    "cy:open": "node ../../../../../../scripts/cypress.js open-ct"
+  }
+}

@@ -2,7 +2,7 @@
 
 If you component imports its own style, the style should be applied during the Cypress test. But sometimes you need more power.
 
-You can 3 options to load additional styles:
+You can 2 options to load additional styles:
 
 ```js
 const myComponent = {
@@ -11,7 +11,6 @@ const myComponent = {
 
 mount(myComponent, {
   style: string, // load inline style CSS
-  cssFiles: string | string[], // load a single or a list of local CSS files
   stylesheets: string | string[] // load external stylesheets
 })
 ```
@@ -45,16 +44,6 @@ it('can be passed as an option', () => {
     'rgb(245, 146, 62)',
   )
 })
-```
-
-## Load local CSS file
-
-```js
-const cssFiles = 'cypress/integration/Button.css'
-const myComponent = {
-  template: '<button class="orange"><slot/></button>'
-}
-mount(myComponent, { cssFiles })
 ```
 
 ## Load external stylesheets
