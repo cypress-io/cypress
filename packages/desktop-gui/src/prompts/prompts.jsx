@@ -91,10 +91,10 @@ class CIPrompt extends Component {
 
   _viewMore = () => {
     ipc.externalOpen({
-      url: 'https://on.cypress.io/setup-ci',
+      url: 'https://on.cypress.io/ci',
       params: {
         utm_medium: ci_utm_medium,
-        utm_campaign: 'View More',
+        utm_campaign: 'Learn More',
       },
     })
   }

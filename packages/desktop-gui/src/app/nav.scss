@@ -184,9 +184,9 @@
         box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.1);
         display: none !important;
         margin-top: 2px;
-        padding: 16px 14px;
+        padding: 16px 20px;
         position: absolute;
-        left: -400px;
+        left: -420px;
         right: -70px;
         z-index: 1000;
 
@@ -212,8 +212,9 @@
 
           .column-title {
             color: #333;
-            font-size: 16px;
-            padding-bottom: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            padding-bottom: 2px;
           }
 
           .column-item {
@@ -226,7 +227,7 @@
               }
 
               span {
-                padding: 0 4px;
+                padding: 0 6px;
               }
             }
           }

@@ -70,32 +70,70 @@ export default class Nav extends Component {
       return { link }
     }
 
+    const utm_medium = 'Docs Menu'
+
     return [{
       title: 'Get Started',
       children: [{
         text: 'Write your first test',
-        link: 'https://on.cypress.io',
+        link: {
+          url: 'https://on.cypress.io/writing-first-test',
+          params: {
+            utm_medium,
+            utm_content: 'First Test',
+          },
+        },
       }, {
         text: 'Testing your app',
-        link: 'https://on.cypress.io',
+        link: {
+          url: 'https://on.cypress.io/testing-your-app',
+          params: {
+            utm_medium,
+            utm_content: 'Testing Your App',
+          },
+        },
       }],
     }, {
       title: 'References',
       children: [{
         text: 'Best practices',
-        link: 'https://on.cypress.io',
+        link: {
+          url: 'https://on.cypress.io/best-practices',
+          params: {
+            utm_medium,
+            utm_content: 'Best Practices',
+          },
+        },
       }, {
         text: 'Configuration',
-        link: 'https://on.cypress.io',
+        link: {
+          url: 'https://on.cypress.io/configuration',
+          params: {
+            utm_medium,
+            utm_content: 'Configuration',
+          },
+        },
       }, {
         text: 'API',
-        link: 'https://on.cypress.io',
+        link: {
+          url: 'https://on.cypress.io/api',
+          params: {
+            utm_medium,
+            utm_content: 'API',
+          },
+        },
       }],
     }, {
       title: 'Optimize Cypress in CI',
       children: [{
         text: 'Setting up CI',
-        ...showPromptOrLink('ci1', 'https://on.cypress.io'),
+        ...showPromptOrLink('ci1', {
+          url: 'https://on.cypress.io/ci',
+          params: {
+            utm_medium,
+            utm_content: 'Set Up CI',
+          },
+        }),
       }, {
         text: 'Debugging failed tests',
         link: 'https://on.cypress.io',
