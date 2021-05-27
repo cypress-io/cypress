@@ -91,4 +91,17 @@ const injectionConfig: webpack.Configuration = {
   },
 }
 
-export default [mainConfig, injectionConfig]
+// @ts-ignore
+const multiDomainConfig: webpack.Configuration = {
+  mode: 'development',
+  ...getSimpleConfig(),
+  entry: {
+    cypress_multidomain_runner: [path.resolve(__dirname, 'multidomain/index.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [mainConfig, injectionConfig, multiDomainConfig]
