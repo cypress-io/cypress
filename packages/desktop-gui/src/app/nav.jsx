@@ -136,7 +136,13 @@ export default class Nav extends Component {
         }),
       }, {
         text: 'Debugging failed tests',
-        link: 'https://on.cypress.io',
+        ...showPromptOrLink('dashboard1', {
+          url: 'https://on.cypress.io/features-dashboard',
+          params: {
+            utm_medium,
+            utm_content: 'Debugging',
+          },
+        }),
       }, {
         text: 'Running tests faster',
         link: 'https://on.cypress.io',

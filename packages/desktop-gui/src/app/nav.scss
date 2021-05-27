@@ -179,7 +179,7 @@
 
     .docs-menu {
       .docs-dropdown {
-        background: #fff;
+        background: $navbar-inverse-color;
         border-radius: 5px;
         box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.1);
         display: none !important;
@@ -202,7 +202,7 @@
           content:'';
           border-left: 20px solid transparent;
           border-right: 20px solid transparent;
-          border-bottom: 20px solid #fff;
+          border-bottom: 20px solid $navbar-inverse-color;
         }
 
         .dropdown-column {
