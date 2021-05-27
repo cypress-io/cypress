@@ -6,7 +6,7 @@ import LoginForm from '../auth/login-form'
 import { DashboardBranchHistory, CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild } from './prompt-images'
 import ipc from '../lib/ipc'
 
-const ci_utm_medium = 'CI Prompt 1'
+const ci1_utm_medium = 'CI Prompt 1'
 
 const ciProviders = [
   {
@@ -15,7 +15,7 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/setup-ci-circleci',
       params: {
-        utm_medium: ci_utm_medium,
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'Circle',
       },
     },
@@ -26,7 +26,7 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/github-actions',
       params: {
-        utm_medium: 'CI Prompt 1',
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'GitHub',
       },
     },
@@ -37,7 +37,7 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/bitbucket-pipelines',
       params: {
-        utm_medium: ci_utm_medium,
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'Bitbucket',
       },
     },
@@ -48,7 +48,7 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/gitlab-ci',
       params: {
-        utm_medium: ci_utm_medium,
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'GitLab',
       },
     },
@@ -59,7 +59,7 @@ const ciProviders = [
     link: {
       url: 'https://on.cypress.io/aws-codebuild',
       params: {
-        utm_medium: ci_utm_medium,
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'AWS',
       },
     },
@@ -83,7 +83,7 @@ class CIPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/setup-ci',
       params: {
-        utm_medium: ci_utm_medium,
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'Other',
       },
     })
@@ -93,7 +93,7 @@ class CIPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/ci',
       params: {
-        utm_medium: ci_utm_medium,
+        utm_medium: ci1_utm_medium,
         utm_campaign: 'Learn More',
       },
     })
@@ -104,12 +104,12 @@ class CIPrompt1 extends Component {
 
     return (
       <BootstrapModal
-        className="prompt"
+        className='prompt'
         show={prompts[this.slug]}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
-          <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
+          <BootstrapModal.Dismiss className='btn btn-link close'><i className='fas fa-times' /></BootstrapModal.Dismiss>
           <div className='text-content'>
             <h2>Optimize Cypress in CI</h2>
             <p>We've created these guides to help you maximize how you're running tests in CI.</p>
@@ -145,6 +145,7 @@ class CIPrompt1 extends Component {
 @observer
 class DashboardPrompt1 extends Component {
   slug = 'dashboard1'
+  utm_medium = 'Dashboard Prompt 1'
 
   _closeModal = () => {
     this.props.prompts.closePrompt(this.slug)
@@ -156,7 +157,7 @@ class DashboardPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/analytics',
       params: {
-        utm_medium: 'Dashboard Prompt 1',
+        utm_medium: this.utm_medium,
         utm_campaign: 'Analytics',
       },
     })
@@ -167,7 +168,7 @@ class DashboardPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/flake-management',
       params: {
-        utm_medium: 'Dashboard Prompt 1',
+        utm_medium: this.utm_medium,
         utm_campaign: 'Flaky Tests',
       },
     })
@@ -178,7 +179,7 @@ class DashboardPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/test-failures',
       params: {
-        utm_medium: 'Dashboard Prompt 1',
+        utm_medium: this.utm_medium,
         utm_campaign: 'Debug',
       },
     })
@@ -189,12 +190,12 @@ class DashboardPrompt1 extends Component {
 
     return (
       <BootstrapModal
-        className="prompt"
+        className='prompt'
         show={prompts[this.slug]}
         onHide={this._closeModal}
       >
         <div className='modal-body'>
-          <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
+          <BootstrapModal.Dismiss className='btn btn-link close'><i className='fas fa-times' /></BootstrapModal.Dismiss>
           <div className='text-content'>
             <h2>Debug Tests in CI Faster</h2>
             <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
