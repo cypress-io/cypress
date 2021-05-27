@@ -41,7 +41,7 @@ class App extends Component {
         )
       default:
         return (
-          <Layout project={viewStore.currentView.project}>
+          <Layout>
             <Project project={viewStore.currentView.project} app={appStore}/>
           </Layout>
         )
