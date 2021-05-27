@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime'
 import 'cypress-real-events/support'
+import '@percy/cypress'
 import './storybook'
 
 // Need to register these once per app. Depending which components are consumed

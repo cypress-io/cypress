@@ -1,3 +1,31 @@
+# [@cypress/schematic-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.1.0...@cypress/schematic-v1.2.0) (2021-05-21)
+
+
+### Features
+
+* schematic adds ng e2e to scripts ([#16565](https://github.com/cypress-io/cypress/issues/16565)) ([fd012e2](https://github.com/cypress-io/cypress/commit/fd012e2113f91fb1a9afba36ff55def756d14edb))
+
+# [@cypress/schematic-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.3...@cypress/schematic-v1.1.0) (2021-05-17)
+
+
+### Features
+
+* update angular schematic and sandbox to v12 ([#16534](https://github.com/cypress-io/cypress/issues/16534)) ([278006d](https://github.com/cypress-io/cypress/commit/278006d061df27684bbdd7f5a65229902870b551))
+
+# [@cypress/schematic-v1.0.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.2...@cypress/schematic-v1.0.3) (2021-05-13)
+
+
+### Bug Fixes
+
+* angular schematic readme update. add check to make sure e2e folder exists to avoid deletion error. ([#16506](https://github.com/cypress-io/cypress/issues/16506)) ([ae33b5c](https://github.com/cypress-io/cypress/commit/ae33b5c449e7009a6b1e8f9ef71a47fea435a87f))
+
+# [@cypress/schematic-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.1...@cypress/schematic-v1.0.2) (2021-05-12)
+
+
+### Bug Fixes
+
+* update schematic readme with examples ([#16485](https://github.com/cypress-io/cypress/issues/16485)) ([9b7fc46](https://github.com/cypress-io/cypress/commit/9b7fc4659b503e778baca79dff8688c0a6056d5d))
+
 # [@cypress/schematic-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.0...@cypress/schematic-v1.0.1) (2021-05-12)
 
 

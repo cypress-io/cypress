@@ -55,7 +55,7 @@
     "@storybook/addon-links": "^6.1.21",
     "@storybook/preset-typescript": "^3.0.0",
     "@storybook/react": "^6.1.21",
-    "@storybook/testing-react": "0.0.12--canary.21.ebe57b5.0",
+    "@storybook/testing-react": "^0.0.12",
     "@types/node": "14.14.31",
     "@types/react-virtualized-auto-sizer": "^1.0.0",
     "@types/react-window": "^1.8.2",
@@ -66,6 +66,8 @@
     "cypress-real-events": "1.4.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
     "postcss": "^8.2.8",
     "react": "16.8.6",
     "react-dom": "16.8.6",
@@ -99,7 +101,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "author": "Cypress.io",
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/design-system/#readme",
   "keywords": [
     "design-system",
     "cypress",
