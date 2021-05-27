@@ -3,6 +3,7 @@ const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
 const configOptions = require('../config_options')
+const path = require('path')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -244,10 +245,30 @@ const isValidClientCertificatesSet = (key, certsForUrls) => {
         return `\`clientCertificates[${i}].certs[${j}]\` must have either PEM or PFX defined`
       }
 
+      if (certInfo.pfx) {
+        if (path.isAbsolute(certInfo.pfx)) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].pfx`, certInfo.pfx, 'a relative filepath')
+        }
+      }
+
       if (certInfo.cert) {
+        if (path.isAbsolute(certInfo.cert)) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].cert`, certInfo.cert, 'a relative filepath')
+        }
+
         if (!certInfo.key) {
           return errMsg(`clientCertificates[${i}].certs[${j}].key`, certInfo.key, 'a key filepath')
         }
+
+        if (path.isAbsolute(certInfo.key)) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].key`, certInfo.key, 'a relative filepath')
+        }
+      }
+    }
+
+    for (let k = 0; k < certsForUrl.ca.length; k++) {
+      if (path.isAbsolute(certsForUrl.ca[k])) {
+        return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
       }
     }
   }

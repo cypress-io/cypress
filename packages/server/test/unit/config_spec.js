@@ -977,6 +977,43 @@ describe('lib/config', () => {
 
           return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a key filepath')
         })
+
+        it('detects PEM cert absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].cert` to be a relative filepath')
+        })
+
+        it('detects PEM key absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a relative filepath')
+        })
+
+        it('detects PFX absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = undefined
+          cfg.clientCertificates[0].certs[0].pfx = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].pfx` to be a relative filepath')
+        })
+
+        it('detects CA absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].ca[0] = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].ca[0]` to be a relative filepath')
+        })
       })
     })
   })

@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import Forge from 'node-forge'
 import fs from 'fs-extra'
-import path from 'path'
 import { clientCertificates as networkClientCertificates } from '@packages/network'
 import { clientCertificateStore } from '@packages/network/lib/agent'
 const { pki, asn1, pkcs12, util } = Forge
@@ -14,7 +13,7 @@ const debug = Debug('cypress:server:client-certificates')
  * @param config
  */
 export function loadClientCertificateConfig (config) {
-  const { clientCertificates, projectRoot } = config
+  const { clientCertificates } = config
 
   let index = 0
 
@@ -22,10 +21,6 @@ export function loadClientCertificateConfig (config) {
     // The basic validation of the certificate configuration has already been done by this point
     // within the 'isValidClientCertificatesSet' function within packages/server/lib/util/validation.js
     if (clientCertificates) {
-      if (!projectRoot) {
-        throw new Error('projectRoot is not supplied')
-      }
-
       clientCertificates.forEach((item) => {
         debug(`loading client cert at index ${index}`)
 
@@ -35,7 +30,7 @@ export function loadClientCertificateConfig (config) {
           item.ca.forEach((ca: string) => {
             if (ca) {
               debug(`loading CA cert from '${ca}'`)
-              const caRaw = loadBinaryFromFile(projectRoot, ca)
+              const caRaw = loadBinaryFromFile(ca)
 
               try {
                 pki.certificateFromPem(caRaw)
@@ -67,7 +62,7 @@ export function loadClientCertificateConfig (config) {
             )
 
             debug(`loading PEM cert from '${cert.cert}'`)
-            const pemRaw = loadBinaryFromFile(projectRoot, cert.cert)
+            const pemRaw = loadBinaryFromFile(cert.cert)
             let pemParsed = undefined
 
             try {
@@ -82,11 +77,11 @@ export function loadClientCertificateConfig (config) {
 
             if (cert.passphrase) {
               debug(`loading PEM passphrase from '${cert.passphrase}'`)
-              passphrase = loadTextFromFile(projectRoot, cert.passphrase)
+              passphrase = loadTextFromFile(cert.passphrase)
             }
 
             debug(`loading PEM key from '${cert.key}'`)
-            const pemKeyRaw = loadBinaryFromFile(projectRoot, cert.key)
+            const pemKeyRaw = loadBinaryFromFile(cert.key)
 
             try {
               if (passphrase) {
@@ -125,11 +120,11 @@ export function loadClientCertificateConfig (config) {
 
             if (cert.passphrase) {
               debug(`loading PFX passphrase from '${cert.passphrase}'`)
-              passphrase = loadTextFromFile(projectRoot, cert.passphrase)
+              passphrase = loadTextFromFile(cert.passphrase)
             }
 
             debug(`loading PFX cert from '${cert.pfx}'`)
-            const pfxRaw = loadBinaryFromFile(projectRoot, cert.pfx)
+            const pfxRaw = loadBinaryFromFile(cert.pfx)
             const pfxParsed = loadPfx(pfxRaw, passphrase)
 
             urlClientCertificates.clientCertificates.pfx.push(
@@ -164,32 +159,16 @@ export function loadClientCertificateConfig (config) {
   }
 }
 
-function createAbsoluteFilepath (root: string, filepath: string): string {
-  if (!filepath) {
-    throw new Error('filepath is not defined')
-  }
+function loadBinaryFromFile (filepath: string): Buffer {
+  debug(`loadCertificateFile: ${filepath}`)
 
-  if (filepath.startsWith('/')) {
-    return filepath
-  }
-
-  return path.isAbsolute(filepath) ? filepath : path.join(root, filepath)
+  return fs.readFileSync(filepath)
 }
 
-function loadBinaryFromFile (projectRoot: string, filepath: string): Buffer {
-  let retrievePath: string = createAbsoluteFilepath(projectRoot, filepath)
+function loadTextFromFile (filepath: string): string {
+  debug(`loadPassphraseFile: ${filepath}`)
 
-  debug(`loadCertificateFile: ${retrievePath}`)
-
-  return fs.readFileSync(retrievePath)
-}
-
-function loadTextFromFile (projectRoot: string, filepath: string): string {
-  let retrievePath: string = createAbsoluteFilepath(projectRoot, filepath)
-
-  debug(`loadPassphraseFile: ${retrievePath}`)
-
-  return fs.readFileSync(retrievePath, 'utf8').toString()
+  return fs.readFileSync(filepath, 'utf8').toString()
 }
 
 /**
