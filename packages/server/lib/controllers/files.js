@@ -51,6 +51,20 @@ module.exports = {
     })
   },
 
+  handleMultidomainIframe (req, res) {
+    const iframePath = cwd('lib', 'html', 'multidomain-iframe.html')
+    const domain = decodeURI(req.params.domain)
+
+    const iframeOptions = {
+      domain: 'localhost',
+      title: `Cypress for ${domain}`,
+    }
+
+    debug('multidomain iframe with options %o', iframeOptions)
+
+    res.render(iframePath, iframeOptions)
+  },
+
   getSpecs (spec, config, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"

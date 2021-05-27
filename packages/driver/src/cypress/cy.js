@@ -1028,7 +1028,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         let onpl; let r
 
         try {
-          setWindowDocumentProps(getContentWindow($autIframe), state)
+          const autWindow = getContentWindow($autIframe)
+
+          setWindowDocumentProps(autWindow, state)
 
           // we may need to update the url now
           urlNavigationEvent('load')
@@ -1037,14 +1039,25 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // because they would have been automatically applied during
           // onBeforeAppWindowLoad, but in the case where we visited
           // about:blank in a visit, we do need these
-          contentWindowListeners(getContentWindow($autIframe))
+          contentWindowListeners(autWindow)
 
           Cypress.action('app:window:load', state('window'))
 
-          // we are now stable again which is purposefully
-          // the last event we call here, to give our event
-          // listeners time to be invoked prior to moving on
-          return stability.isStable(true, 'load')
+          // FIXME: temporary hard-coded hack to get multidomain working
+          if (autWindow.location.port !== '3501') {
+            // we are now stable again which is purposefully
+            // the last event we call here, to give our event
+            // listeners time to be invoked prior to moving on
+            return stability.isStable(true, 'load')
+          }
+
+          Cypress.once('cross:domain:window:load', () => {
+            Cypress.once('cross:domain:driver:ready', () => {
+              stability.isStable(true, 'load')
+            })
+
+            Cypress.action('cy:switch:domain', 'localhost:3501')
+          })
         } catch (err) {
           let e = err
 

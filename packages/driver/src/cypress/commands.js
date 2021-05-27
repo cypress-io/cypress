@@ -38,6 +38,7 @@ const builtInCommands = [
   require('../cy/commands/window'),
   require('../cy/commands/xhr'),
   require('../cy/net-stubbing').addCommand,
+  require('../cy/multidomain').addCommands,
 ]
 
 const getTypeByPrevSubject = (prevSubject) => {

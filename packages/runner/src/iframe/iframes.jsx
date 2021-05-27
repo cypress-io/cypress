@@ -90,6 +90,8 @@ export default class Iframes extends Component {
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
 
+    this.props.eventManager.on('switch:domain', this._addCrossDomainIframe)
+
     this._disposers.push(autorun(() => {
       this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
     }))
@@ -148,14 +150,30 @@ export default class Iframes extends Component {
 
     this.autIframe.showBlankContents()
 
+    this._addIframe({
+      $container,
+      id: `Your Spec: ${specSrc}`,
+      src: specSrc,
+    })
+
+    return $autIframe
+  }
+
+  _addCrossDomainIframe = (domain) => {
+    this._addIframe({
+      $container: $(this.refs.container),
+      id: `Cypress (${domain})`,
+      src: `http://${domain}/${this.props.config.namespace}/multidomain-iframes/${encodeURIComponent(domain)}`,
+    })
+  }
+
+  _addIframe ({ $container, id, src }) {
     const $specIframe = $('<iframe />', {
-      id: `Your Spec: '${specSrc}'`,
+      id,
       class: 'spec-iframe',
     }).appendTo($container)
 
-    $specIframe.prop('src', specSrc)
-
-    return $autIframe
+    $specIframe.prop('src', src)
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {
