@@ -190,7 +190,7 @@
         border-radius: 5px;
         box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.1);
         display: flex;
-        gap: 20px;
+        gap: 30px;
         margin: 0;
         padding: 16px 20px;
         z-index: 1000;
@@ -212,7 +212,7 @@
 
           .column-item {
             a {
-              background: #fff !important;
+              background: $navbar-inverse-color !important;
               color: #444;
 
               &:hover {

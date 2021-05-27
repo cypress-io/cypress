@@ -29,7 +29,7 @@ const DocsMenu = observer(() => {
     }, {
       name: 'offset',
       options: {
-        offset: [window.innerWidth > 550 ? -150 : 0, 0],
+        offset: [window.innerWidth > 550 ? -175 : 0, 0],
       },
     }],
   })
@@ -118,6 +118,7 @@ const DocsMenu = observer(() => {
       }],
     }, {
       title: 'Optimize Cypress in CI',
+      itemIcon: 'far fa-lightbulb',
       children: [{
         text: 'Setting up CI',
         ...showPromptOrLink('ci1', {
@@ -151,13 +152,13 @@ const DocsMenu = observer(() => {
         </a>
         {open && (
           <div className='popper docs-dropdown' ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
-            {_.map(_docsMenuContent(), ({ title, children }) => (
+            {_.map(_docsMenuContent(), ({ title, children, itemIcon }) => (
               <ul className='dropdown-column' key={title}>
                 <li className='column-title'>{title}</li>
                 {_.map(children, (item) => (
                   <li className='column-item' key={item.text}>
                     <a onClick={(e) => _handleDocsClick(e, item)}>
-                      <i className='far fa-file-alt' />
+                      <i className={itemIcon || item.icon || 'far fa-file-alt'} />
                       <span>{item.text}</span>
                       <i className='fas fa-long-arrow-alt-right' />
                     </a>
