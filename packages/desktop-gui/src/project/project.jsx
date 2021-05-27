@@ -16,7 +16,6 @@ import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
 import ErrorMessage from './error-message'
 import WarningMessage from './warning-message'
-import Prompts from '../prompts/prompts'
 
 @observer
 class Project extends Component {
@@ -55,7 +54,6 @@ class Project extends Component {
           {this._currentView()}
         </div>
         <OnBoarding project={this.props.project}/>
-        <Prompts project={this.props.project} />
       </>
     )
   }

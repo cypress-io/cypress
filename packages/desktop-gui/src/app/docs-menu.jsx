@@ -2,12 +2,16 @@ import React, { useState } from 'react'
 import { observer } from 'mobx-react'
 import _ from 'lodash'
 import { usePopper } from 'react-popper'
+import cs from 'classnames'
 
 import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
+import Prompts from '../prompts/prompts'
 
 // docs menu must be a functional component to use popper
 const DocsMenu = observer(() => {
+  const { project } = viewStore.currentView
+
   // popper intentionally needs useState for refs rather than useRef
   const [referenceElement, setReferenceElement] = useState(null)
   const [popperElement, setPopperElement] = useState(null)
@@ -21,29 +25,21 @@ const DocsMenu = observer(() => {
       name: 'arrow',
       options: {
         element: arrowElement,
-        padding: 10,
       },
     }, {
-      name: 'flip',
-      enabled: true,
-    }, {
-      name: 'preventOverflow',
+      name: 'offset',
       options: {
-        rootBoundary: 'document',
+        offset: [window.innerWidth > 550 ? -150 : 0, 0],
       },
     }],
   })
 
-  // const _openDocs = (e) => {
-  //   e.preventDefault()
-  //   ipc.externalOpen({
-  //     url: 'https://on.cypress.io/docs',
-  //     params: {
-  //       utm_medium: 'Nav',
-  //       utm_campaign: 'Docs',
-  //     },
-  //   })
-  // }
+  const _openMenu = () => {
+    if (!project.prompts.anyOpen) {
+      setOpen(true)
+    }
+  }
+  const _closeMenu = () => setOpen(false)
 
   const _handleDocsClick = (e, item) => {
     e.preventDefault()
@@ -60,8 +56,6 @@ const DocsMenu = observer(() => {
   const _docsMenuContent = () => {
     // revert to a link in global mode
     const showPromptOrLink = (promptSlug, link) => {
-      const { project } = viewStore.currentView
-
       if (project && project.prompts) {
         return { action: _.partial(project.prompts.openPrompt, promptSlug) }
       }
@@ -151,18 +145,22 @@ const DocsMenu = observer(() => {
 
   return (
     <>
-      <li className='docs-menu' onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <li className={cs('docs-menu', { active: open || project.prompts.anyOpen })} onMouseEnter={_openMenu} onMouseLeave={_closeMenu}>
         <a ref={setReferenceElement}>
           <i className='fas fa-graduation-cap' /> Docs
         </a>
         {open && (
-          <div className='docs-dropdown' ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
+          <div className='popper docs-dropdown' ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
             {_.map(_docsMenuContent(), ({ title, children }) => (
               <ul className='dropdown-column' key={title}>
                 <li className='column-title'>{title}</li>
                 {_.map(children, (item) => (
                   <li className='column-item' key={item.text}>
-                    <a onClick={(e) => _handleDocsClick(e, item)}><i className='far fa-file-alt' /><span>{item.text}</span><i className='fas fa-long-arrow-alt-right' /></a>
+                    <a onClick={(e) => _handleDocsClick(e, item)}>
+                      <i className='far fa-file-alt' />
+                      <span>{item.text}</span>
+                      <i className='fas fa-long-arrow-alt-right' />
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -171,6 +169,7 @@ const DocsMenu = observer(() => {
           </div>
         )}
       </li>
+      <Prompts project={project} referenceElement={referenceElement} />
     </>
   )
 })

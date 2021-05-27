@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, extendObservable } from 'mobx'
+import { action, computed, extendObservable } from 'mobx'
 import interval from 'human-interval'
 
 const prompts = [{
@@ -28,6 +28,10 @@ export default class Prompts {
     })
 
     extendObservable(this, props)
+  }
+
+  @computed get anyOpen () {
+    return !!_.find(prompts, ({ slug }) => this[slug])
   }
 
   @action openPrompt = (slug) => {

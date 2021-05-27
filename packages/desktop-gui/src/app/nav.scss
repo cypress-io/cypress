@@ -178,7 +178,7 @@
     }
 
     .docs-menu {
-      &:hover {
+      &.active {
         a {
           color: #fff;
           background-color: #3b414a;
@@ -224,25 +224,6 @@
               }
             }
           }
-        }
-
-        .arrow,
-        .arrow::before {
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          background: inherit;
-        }
-
-        .arrow {
-          visibility: hidden;
-          top: -4px;
-        }
-
-        .arrow::before {
-          visibility: visible;
-          content: '';
-          transform: rotate(45deg);
         }
       }
     }

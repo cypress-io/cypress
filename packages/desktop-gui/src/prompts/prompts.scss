@@ -1,15 +1,38 @@
 .prompt {
-  .modal-content {
-    background: $navbar-inverse-color;
-  }
+  background: $navbar-inverse-color;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.2);
+  width: 400px;
+  z-index: 1020;
 
-  .modal-body {
+  .prompt-body {
     font-family: $font-poppins;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+
+    a, .btn-link {
+      color: $brand-primary;
+
+      &:hover, &:focus, &:active {
+        color: darken($brand-primary, 10%);
+      }
+    }
 
     .close {
       top: 0;
+      color: #000;
+      text-shadow: 0 1px 0 #fff;
+      opacity: 0.2;
+
+      &:hover, &:focus, &:active {
+        color: #000;
+        opacity: 0.5;
+      }
+
+      i {
+        font-size: 18px;
+      }
     }
 
     .text-content {
@@ -116,6 +139,25 @@
       .svg-wrapper {
         padding: 5px 15px 20px;
       }
+    }
+  }
+
+  ::-webkit-scrollbar {
+    width: 18px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #d9d9d9;
+    border-radius: 20px;
+    border: 5px solid transparent;
+    background-clip: content-box;
+
+    &:hover {
+      background-color: #ccc;
     }
   }
 }

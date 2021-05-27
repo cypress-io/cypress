@@ -1,76 +1,105 @@
-import React, { Component } from 'react'
+import React, { Component, useState } from 'react'
 import { observer } from 'mobx-react'
-import BootstrapModal from 'react-bootstrap-modal'
+import { usePopper } from 'react-popper'
 
 import LoginForm from '../auth/login-form'
 import { DashboardBranchHistory, CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild } from './prompt-images'
 import ipc from '../lib/ipc'
 
-const ci1_utm_medium = 'CI Prompt 1'
+const Prompt = observer(({ children, isOpen, referenceElement }) => {
+  const [popperElement, setPopperElement] = useState(null)
+  const [arrowElement, setArrowElement] = useState(null)
 
-const ciProviders = [
-  {
-    name: 'Circle CI',
-    icon: CircleCI,
-    link: {
-      url: 'https://on.cypress.io/setup-ci-circleci',
-      params: {
-        utm_medium: ci1_utm_medium,
-        utm_campaign: 'Circle',
+  const { styles: popperStyles, attributes: popperAttributes } = usePopper(referenceElement, popperElement, {
+    placement: 'bottom',
+    strategy: 'fixed',
+    modifiers: [{
+      name: 'arrow',
+      options: {
+        element: arrowElement,
       },
-    },
-  },
-  {
-    name: 'GitHub Actions',
-    icon: GitHubActions,
-    link: {
-      url: 'https://on.cypress.io/github-actions',
-      params: {
-        utm_medium: ci1_utm_medium,
-        utm_campaign: 'GitHub',
+    }, {
+      name: 'offset',
+      options: {
+        offset: [-100, 0],
       },
-    },
-  },
-  {
-    name: 'Bitbucket',
-    icon: Bitbucket,
-    link: {
-      url: 'https://on.cypress.io/bitbucket-pipelines',
-      params: {
-        utm_medium: ci1_utm_medium,
-        utm_campaign: 'Bitbucket',
-      },
-    },
-  },
-  {
-    name: 'GitLab CI/CD',
-    icon: GitLab,
-    link: {
-      url: 'https://on.cypress.io/gitlab-ci',
-      params: {
-        utm_medium: ci1_utm_medium,
-        utm_campaign: 'GitLab',
-      },
-    },
-  },
-  {
-    name: 'AWS CodeBuild',
-    icon: AWSCodeBuild,
-    link: {
-      url: 'https://on.cypress.io/aws-codebuild',
-      params: {
-        utm_medium: ci1_utm_medium,
-        utm_campaign: 'AWS',
-      },
-    },
-  },
-]
+    }],
+  })
+
+  if (!isOpen) return null
+
+  return (
+    <div className='popper prompt' ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
+      {children}
+      <div className='arrow' ref={setArrowElement} style={popperStyles.arrow} />
+    </div>
+  )
+})
 
 @observer
 class CIPrompt1 extends Component {
   slug = 'ci1'
+  utm_medium = 'CI Prompt 1'
 
-  _closeModal = () => {
+  ciProviders = [
+    {
+      name: 'Circle CI',
+      icon: CircleCI,
+      link: {
+        url: 'https://on.cypress.io/setup-ci-circleci',
+        params: {
+          utm_medium: this.utm_medium,
+          utm_campaign: 'Circle',
+        },
+      },
+    },
+    {
+      name: 'GitHub Actions',
+      icon: GitHubActions,
+      link: {
+        url: 'https://on.cypress.io/github-actions',
+        params: {
+          utm_medium: this.utm_medium,
+          utm_campaign: 'GitHub',
+        },
+      },
+    },
+    {
+      name: 'Bitbucket',
+      icon: Bitbucket,
+      link: {
+        url: 'https://on.cypress.io/bitbucket-pipelines',
+        params: {
+          utm_medium: this.utm_medium,
+          utm_campaign: 'Bitbucket',
+        },
+      },
+    },
+    {
+      name: 'GitLab CI/CD',
+      icon: GitLab,
+      link: {
+        url: 'https://on.cypress.io/gitlab-ci',
+        params: {
+          utm_medium: this.utm_medium,
+          utm_campaign: 'GitLab',
+        },
+      },
+    },
+    {
+      name: 'AWS CodeBuild',
+      icon: AWSCodeBuild,
+      link: {
+        url: 'https://on.cypress.io/aws-codebuild',
+        params: {
+          utm_medium: this.utm_medium,
+          utm_campaign: 'AWS',
+        },
+      },
+    },
+  ]
+
+  _close = () => {
     this.props.prompts.closePrompt(this.slug)
     ipc.setPromptShown(this.slug)
   }
@@ -83,7 +112,7 @@ class CIPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/setup-ci',
       params: {
-        utm_medium: ci1_utm_medium,
+        utm_medium: this.utm_medium,
         utm_campaign: 'Other',
       },
     })
@@ -93,29 +122,30 @@ class CIPrompt1 extends Component {
     ipc.externalOpen({
       url: 'https://on.cypress.io/ci',
       params: {
-        utm_medium: ci1_utm_medium,
+        utm_medium: this.utm_medium,
         utm_campaign: 'Learn More',
       },
     })
   }
 
   render () {
-    const { prompts } = this.props
+    const { prompts, referenceElement } = this.props
 
     return (
-      <BootstrapModal
-        className='prompt'
-        show={prompts[this.slug]}
-        onHide={this._closeModal}
+      <Prompt
+        isOpen={prompts[this.slug]}
+        referenceElement={referenceElement}
       >
-        <div className='modal-body'>
-          <BootstrapModal.Dismiss className='btn btn-link close'><i className='fas fa-times' /></BootstrapModal.Dismiss>
+        <div className='prompt-body'>
+          <button className='btn btn-link close' onClick={this._close}>
+            <i className='fas fa-times' />
+          </button>
           <div className='text-content'>
             <h2>Optimize Cypress in CI</h2>
             <p>We've created these guides to help you maximize how you're running tests in CI.</p>
           </div>
           <div className='ci-providers'>
-            { ciProviders.map((provider) => {
+            { this.ciProviders.map((provider) => {
               const { name, icon: Icon, link } = provider
 
               return (
@@ -132,12 +162,12 @@ class CIPrompt1 extends Component {
           <div className='prompt-buttons'>
             <button className='btn btn-success' onClick={this._viewMore}>Learn More</button>
             <br />
-            <BootstrapModal.Dismiss className='btn btn-link'>
+            <button className='btn btn-link' onClick={this._closeModal}>
               Close
-            </BootstrapModal.Dismiss>
+            </button>
           </div>
         </div>
-      </BootstrapModal>
+      </Prompt>
     )
   }
 }
@@ -147,7 +177,7 @@ class DashboardPrompt1 extends Component {
   slug = 'dashboard1'
   utm_medium = 'Dashboard Prompt 1'
 
-  _closeModal = () => {
+  _close = () => {
     this.props.prompts.closePrompt(this.slug)
     ipc.setPromptShown(this.slug)
   }
@@ -186,16 +216,17 @@ class DashboardPrompt1 extends Component {
   }
 
   render () {
-    const { prompts } = this.props
+    const { prompts, referenceElement } = this.props
 
     return (
-      <BootstrapModal
-        className='prompt'
-        show={prompts[this.slug]}
-        onHide={this._closeModal}
+      <Prompt
+        isOpen={prompts[this.slug]}
+        referenceElement={referenceElement}
       >
-        <div className='modal-body'>
-          <BootstrapModal.Dismiss className='btn btn-link close'><i className='fas fa-times' /></BootstrapModal.Dismiss>
+        <div className='prompt-body'>
+          <button className='btn btn-link close' onClick={this._close}>
+            <i className='fas fa-times' />
+          </button>
           <div className='text-content'>
             <h2>Debug Tests in CI Faster</h2>
             <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
@@ -217,23 +248,23 @@ class DashboardPrompt1 extends Component {
               buttonClassName='btn btn-success'
               buttonContent='Get Started'
             />
-            <BootstrapModal.Dismiss className='btn btn-link'>
+            <button className='btn btn-link' onClick={this._closeModal}>
               No Thanks
-            </BootstrapModal.Dismiss>
+            </button>
           </div>
         </div>
-      </BootstrapModal>
+      </Prompt>
     )
   }
 }
 
-const Prompts = observer(({ project }) => {
+const Prompts = observer(({ project, referenceElement }) => {
   const { prompts } = project
 
   return (
     <>
-      <CIPrompt1 prompts={prompts} />
-      <DashboardPrompt1 prompts={prompts} />
+      <CIPrompt1 prompts={prompts} referenceElement={referenceElement} />
+      <DashboardPrompt1 prompts={prompts} referenceElement={referenceElement} />
     </>
   )
 })
