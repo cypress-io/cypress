@@ -1,50 +1,39 @@
 .prompt {
+  .modal-content {
+    background: $navbar-inverse-color;
+  }
+
   .modal-body {
     font-family: $font-poppins;
+    padding-left: 20px;
+    padding-right: 20px;
 
     .close {
       top: 0;
     }
 
     .text-content {
-      p {
-        font-size: 14px;
-        line-height: 22px;
-
-        a {
-          font-weight: 500;
-        }
-
-        .font-bold {
-          font-weight: 600;
-        }
+      p, ul {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 25px;
       }
 
-      .info-box {
-        margin-top: 25px;
+      h2 {
+        color: $brand-success;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 32px;
+        margin: 5px 0 10px;
+      }
 
-        h2 {
-          font-size: 22px;
-          font-weight: 700;
-          line-height: 32px;
-          margin: 5px 0 10px;
+      ul {
+        margin-top: 0;
+        padding-left: 24px;
+      }
 
-          i {
-            margin-right: 3px;
-          }
-        }
-
-        p, ul {
-          font-size: 17px;
-          font-weight: 500;
-          line-height: 25px;
-          margin-bottom: 5px;
-        }
-
-        ul {
-          margin-top: 0;
-          padding-left: 24px;
-        }
+      .text-bold {
+        font-weight: 600;
       }
     }
 
@@ -73,7 +62,7 @@
       grid-template-columns: 1fr 1fr;
       column-gap: 14px;
       row-gap: 14px;
-      padding: 25px 10px 20px;
+      padding: 15px 0;
 
       .ci-provider-button {
         display: flex;
@@ -97,7 +86,7 @@
           flex-grow: 1;
           font-weight: 500;
           text-align: left;
-          margin-right: auto;
+          margin-left: 8px;
         }
       }
 
@@ -115,7 +104,7 @@
       background: #082336;
       border-radius: 6px;
       box-shadow: 0 4px 17px rgba(0, 0, 0, 0.25);
-      margin: 30px;
+      margin: 20px 10px 25px;
 
       .frame-title {
         color: #fff;

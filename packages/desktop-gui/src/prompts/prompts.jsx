@@ -67,7 +67,7 @@ const ciProviders = [
 ]
 
 @observer
-class CIPrompt extends Component {
+class CIPrompt1 extends Component {
   slug = 'ci1'
 
   _closeModal = () => {
@@ -111,10 +111,8 @@ class CIPrompt extends Component {
         <div className='modal-body'>
           <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
           <div className='text-content'>
-            <div className='info-box'>
-              <h2><i className='fas fa-graduation-cap' /> Continuous Integration</h2>
-              <p>We've created these guides to help you maximize how you're running tests in CI.</p>
-            </div>
+            <h2>Optimize Cypress in CI</h2>
+            <p>We've created these guides to help you maximize how you're running tests in CI.</p>
           </div>
           <div className='ci-providers'>
             { ciProviders.map((provider) => {
@@ -122,8 +120,8 @@ class CIPrompt extends Component {
 
               return (
                 <button className='ci-provider-button' onClick={() => this._openProviderLink(link)} key={name}>
+                  <Icon width={18} height={18} />
                   <span>{name}</span>
-                  <Icon width={20} height={20} />
                 </button>
               )
             }) }
@@ -145,12 +143,45 @@ class CIPrompt extends Component {
 }
 
 @observer
-class DashboardPrompt extends Component {
+class DashboardPrompt1 extends Component {
   slug = 'dashboard1'
 
   _closeModal = () => {
     this.props.prompts.closePrompt(this.slug)
     ipc.setPromptShown(this.slug)
+  }
+
+  _openAnalytics = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/analytics',
+      params: {
+        utm_medium: 'Dashboard Prompt 1',
+        utm_campaign: 'Analytics',
+      },
+    })
+  }
+
+  _openFlakyTests = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/flake-management',
+      params: {
+        utm_medium: 'Dashboard Prompt 1',
+        utm_campaign: 'Flaky Tests',
+      },
+    })
+  }
+
+  _openDebug = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/test-failures',
+      params: {
+        utm_medium: 'Dashboard Prompt 1',
+        utm_campaign: 'Debug',
+      },
+    })
   }
 
   render () {
@@ -165,14 +196,13 @@ class DashboardPrompt extends Component {
         <div className='modal-body'>
           <BootstrapModal.Dismiss className='btn btn-link close'><i className="fas fa-times" /></BootstrapModal.Dismiss>
           <div className='text-content'>
-            <div className='info-box'>
-              <h2><i className='fas fa-graduation-cap' /> Debug Tests Faster</h2>
-              <ul>
-                <li>Run tests in parallel</li>
-                <li>Identify flaky tests</li>
-                <li>Never debug a failed test in the terminal again</li>
-              </ul>
-            </div>
+            <h2>Debug Tests in CI Faster</h2>
+            <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
+            <ul>
+              <li>See <a onClick={this._openAnalytics}>test performance</a> over time</li>
+              <li>Identify <a onClick={this._openFlakyTests}>flaky tests</a></li>
+              <li>Never <a onClick={this._openDebug}>debug a failed test</a> in the terminal again</li>
+            </ul>
           </div>
           <div className='dashboard-frame'>
             <div className='frame-title'>Previous Runs</div>
@@ -182,6 +212,7 @@ class DashboardPrompt extends Component {
           </div>
           <div className='prompt-buttons'>
             <LoginForm
+              utm='Dashboard Prompt 1'
               buttonClassName='btn btn-success'
               buttonContent='Get Started'
             />
@@ -200,8 +231,8 @@ const Prompts = observer(({ project }) => {
 
   return (
     <>
-      <CIPrompt prompts={prompts} />
-      <DashboardPrompt prompts={prompts} />
+      <CIPrompt1 prompts={prompts} />
+      <DashboardPrompt1 prompts={prompts} />
     </>
   )
 })
