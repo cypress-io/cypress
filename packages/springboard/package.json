@@ -19,10 +19,8 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
-    "mobx": "5.15.4",
-    "mobx-react": "6.1.8",
-    "react": "16.8.6",
-    "react-dom": "16.8.6"
+    "vue": "3.0.11",
+    "vue-loader": "16.2.0"
   },
   "devDependencies": {
     "@packages/web-config": "0.0.0-development",
