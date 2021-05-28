@@ -145,9 +145,9 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     npm dist-tag add cypress@X.Y.Z
     ```
 
-10. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json):
+10. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json). This will also ensure the binary for the version is downloadable for each system.
     ```shell
-    yarn run binary-release --version X.Y.Z
+    yarn binary-release --version X.Y.Z
     ```
 
 11. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
