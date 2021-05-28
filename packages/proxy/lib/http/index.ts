@@ -8,6 +8,7 @@ import {
 import debugModule, { Debug } from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
+import { GetPreRequestCb, PreRequests } from './util/prerequests'
 import { IncomingMessage } from 'http'
 import { NetStubbingState } from '@packages/net-stubbing'
 import Bluebird from 'bluebird'
@@ -41,7 +42,7 @@ type HttpMiddlewareCtx<T> = {
   debug: Debug
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getPreRequest: (cb: (browserPreRequest?: BrowserPreRequest) => void) => void
+  getPreRequest: (cb: GetPreRequestCb) => void
 } & T
 
 export const defaultMiddleware = {
@@ -184,12 +185,7 @@ export class Http {
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
-  pendingBrowserPreRequests: Array<BrowserPreRequest> = []
-  requestsPendingPreRequestCbs: Array<{
-    cb: (browserPreRequest: BrowserPreRequest) => void
-    method: string
-    proxiedUrl: string
-  }> = []
+  preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
 
@@ -218,13 +214,12 @@ export class Http {
       config: this.config,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
-      pendingBrowserPreRequests: this.pendingBrowserPreRequests,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       debug: (formatter, ...args) => {
-        debugRequests(`%s %s %s: ${formatter}`, ctx.stage, ctx.req.method, ctx.req.url, ...args)
+        debugRequests(`%s %s %s: ${formatter}`, ctx.stage, ctx.req.method, ctx.req.proxiedUrl, ...args)
       },
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({
@@ -233,40 +228,7 @@ export class Http {
         })
       },
       getPreRequest: (cb) => {
-        const i = this.pendingBrowserPreRequests.findIndex((v: BrowserPreRequest) => {
-          return v.method === ctx.req.method && v.url === ctx.req.proxiedUrl
-        })
-
-        if (i !== -1) {
-          const [preRequest] = this.pendingBrowserPreRequests.splice(i, 1)
-
-          return cb(preRequest)
-        }
-
-        let timeout = setTimeout(() => {
-          ctx.debug('500ms passed without a pre-request, continuing to wait')
-
-          timeout = setTimeout(() => {
-            ctx.debug('10000ms more passed without a pre-request, continuing request with an empty pre-request field!')
-
-            this.requestsPendingPreRequestCbs.splice(this.requestsPendingPreRequestCbs.indexOf(requestPendingPreRequestCb))
-            cb()
-          }, 10000)
-        }, 500)
-
-        const startedMs = Date.now()
-
-        const requestPendingPreRequestCb = {
-          cb: (browserPreRequest) => {
-            debug('received pre-request after %dms', Date.now() - startedMs)
-            clearTimeout(timeout)
-            cb(browserPreRequest)
-          },
-          proxiedUrl: ctx.req.proxiedUrl,
-          method: ctx.req.method,
-        }
-
-        this.requestsPendingPreRequestCbs.push(requestPendingPreRequestCb)
+        this.preRequests.get(ctx.req, ctx.debug, cb)
       },
     }
 
@@ -296,8 +258,7 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.pendingBrowserPreRequests = []
-    this.requestsPendingPreRequestCbs = []
+    this.preRequests = new PreRequests()
   }
 
   setBuffer (buffer) {
@@ -307,16 +268,6 @@ export class Http {
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     debug('received browser pre-request: %o', browserPreRequest)
 
-    const i = this.requestsPendingPreRequestCbs.findIndex((v) => {
-      return browserPreRequest.method === v.method && browserPreRequest.url === v.proxiedUrl
-    })
-
-    if (i !== -1) {
-      const [{ cb }] = this.requestsPendingPreRequestCbs.splice(i, 1)
-
-      return cb(browserPreRequest)
-    }
-
-    this.pendingBrowserPreRequests.push(browserPreRequest)
+    this.preRequests.addPending(browserPreRequest)
   }
 }
