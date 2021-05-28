@@ -185,10 +185,9 @@ module.exports = {
       win.maximize()
     }
 
-    automation.use(_getAutomation(win, preferences, automation))
-
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
+    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
