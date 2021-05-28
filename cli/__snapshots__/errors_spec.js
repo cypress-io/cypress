@@ -37,6 +37,7 @@ exports['errors individual has the following errors 1'] = [
   "invalidCypressEnv",
   "invalidRunProjectPath",
   "invalidSmokeTestDisplayError",
+  "invalidTestingType",
   "missingApp",
   "missingDependency",
   "missingXvfb",

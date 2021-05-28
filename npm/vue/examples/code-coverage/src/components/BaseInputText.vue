@@ -1,5 +1,5 @@
 <template>
-  <input type="text" class="input" :value="value" v-on="listeners" />
+  <input type="text" class="input" :value="value" v-on:input="input" />
 </template>
 
 <script>
@@ -10,14 +10,9 @@ export default {
       default: "",
     },
   },
-  computed: {
-    listeners() {
-      return {
-        // Pass all component listeners directly to input
-        ...this.$listeners,
-        // Override input listener to work with v-model
-        input: (event) => this.$emit("input", event.target.value),
-      };
+  methods: {
+    input(event) {
+       this.$emit("input", event.target.value)
     },
   },
 };

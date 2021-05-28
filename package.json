@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "7.2.0",
+  "version": "7.4.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -158,7 +158,7 @@
     "lerna": "3.20.2",
     "lint-staged": "9.4.1",
     "listr": "0.14.3",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "make-empty-github-commit": "1.2.0",
     "minimist": "1.2.5",
     "mocha": "3.5.3",
@@ -205,7 +205,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress",
-  "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },
@@ -234,8 +233,7 @@
       "**/@ffmpeg-installer",
       "**/@ffmpeg-installer/**",
       "**/webpack-preprocessor/babel-loader",
-      "**/webpack-batteries-included-preprocessor/ts-loader",
-      "**/cypress-circleci-reporter"
+      "**/webpack-batteries-included-preprocessor/ts-loader"
     ]
   },
   "lint-staged": {

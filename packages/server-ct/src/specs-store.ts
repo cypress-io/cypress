@@ -24,7 +24,11 @@ export class SpecsStore {
   }
 
   get specDirectory () {
-    return this.cypressConfig.componentFolder || '.'
+    return this.cypressConfig.resolved.componentFolder.value
+  }
+
+  get testFiles () {
+    return this.cypressConfig.resolved.testFiles.value
   }
 
   get watchOptions (): chokidar.WatchOptions {
@@ -46,6 +50,7 @@ export class SpecsStore {
     const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
 
     searchOptions.searchFolder = this.specDirectory
+    searchOptions.testFiles = this.testFiles
 
     return findSpecsOfType(searchOptions)
   }

@@ -65,7 +65,7 @@ npm install --save-dev cypress @cypress/react @cypress/webpack-dev-server
 You can use our command line wizard to give you instructions on configuring this plugin. It will try to determine which framework or bundling tool you are using and give you instructions on right configuration.
 
 ```sh
-npx create-cypress-tests --component-testing
+npx create-cypress-tests --component-tests
 ```
 
 Or continue with manual installation in the plugin file
@@ -397,6 +397,10 @@ Because finding and modifying Webpack settings while running this plugin is done
 DEBUG=@cypress/react,find-webpack
 ```
 
+## Changelog
+
+[Changelog](./CHANGELOG.md)
+
 ## Related tools
 
 Same feature for unit testing components from other frameworks using Cypress
@@ -404,6 +408,6 @@ Same feature for unit testing components from other frameworks using Cypress
 - [@cypress/vue](https://github.com/cypress-io/cypress/tree/develop/npm/vue)
 - [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
-- [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
+- [@cypress/angular](https://github.com/bahmutov/@cypress/angular)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)

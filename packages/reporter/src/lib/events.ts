@@ -152,6 +152,8 @@ const events: Events = {
     }))
 
     localBus.on('next', action('next', () => {
+      appState.resume()
+      statsStore.resume()
       runner.emit('runner:next')
     }))
 
