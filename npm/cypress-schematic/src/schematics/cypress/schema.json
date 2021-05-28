@@ -1,17 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "CypressIoSchematics",
-  "title": "Cypress Install Schema",
+  "$id": "cypress-schematic",
+  "title": "Cypress ng-add schematic",
   "type": "object",
   "properties": {
-    "removeProtractor": {
-      "description": "When true, the protractor dependency and e2e directory will be removed from the project",
+    "e2eUpdate": {
       "type": "boolean",
-      "$default": {
-        "$source": "argv",
-        "index": 0
-      },
-      "x-prompt": "Would you like to remove Protractor from the project? If yes, this will remove Protractor files and the e2e folder, and Cypress will be the default for `ng e2e`. Otherwise, Cypress will run alongside Protractor with its own commands."
+      "default": true,
+      "description": "When true, `ng e2e` will be added or updated to use Cypress",
+      "x-prompt": "Would you like the default `ng e2e` command to use Cypress? [ Protractor to Cypress Migration Guide: https://on.cypress.io/protractor-to-cypress ]"
     }
   },
   "required": []
