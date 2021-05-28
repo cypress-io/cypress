@@ -35,6 +35,7 @@ function createEntry () {
         declaration: true,
         sourceMap: true,
         inlineSources: true,
+        exclude: ['**/*.spec.tsx'],
       }),
       resolve(),
       json(),
