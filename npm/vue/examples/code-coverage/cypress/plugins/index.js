@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 const { startDevServer } = require('@cypress/webpack-dev-server')
-const webpackConfig = require('@vue/cli-service/webpack.config')
+const webpackConfig = require('../../webpack.config')
 
 /**
  * @type Cypress.PluginConfig
@@ -12,6 +12,8 @@ module.exports = (on, config) => {
       webpackConfig,
     })
   })
+
+  require('@cypress/code-coverage/task')(on, config)
 
   return config
 }
