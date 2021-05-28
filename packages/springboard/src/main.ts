@@ -1,13 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-
-declare global {
-  interface Window {
-    App: {
-      start: () => void
-    }
-  }
-}
+import 'windi.css'
 
 window.App = {
   start () {
