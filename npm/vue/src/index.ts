@@ -1,8 +1,13 @@
 /// <reference types="cypress" />
 import { Component, ComponentPublicInstance } from 'vue'
 import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
+import {
+  injectStylesBeforeElement,
+  StyleOptions,
+  ROOT_ID,
+  setupHooks,
+} from '@cypress/mount-utils'
 
-const ROOT_ID = '__cy_root'
 const DEFAULT_COMP_NAME = 'unknown'
 
 // when we mount a Vue component, we add it to the global Cypress object
@@ -17,17 +22,6 @@ declare global {
   }
 }
 
-interface StyleOptions{
-  /**
-   * @deprecated all server options are used now so there is no need for this option anymore
-   */
-  style?: string
-  /**
-   * @deprecated all server options are used now so there is no need for this option anymore
-   */
-  stylesheets?: string | string[]
-}
-
 type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
   log?: boolean
   /**
@@ -37,7 +31,7 @@ type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
     use?: MountingOptions<Props>['global']['plugins']
     mixin?: MountingOptions<Props>['global']['mixins']
   }
-} & StyleOptions
+} & Partial<StyleOptions>
 
 let initialInnerHtml = ''
 
@@ -53,30 +47,6 @@ Cypress.on('run:start', () => {
     document.head.innerHTML = initialInnerHtml
   })
 })
-
-function setupStyles (el: HTMLElement, options: StyleOptions) {
-  if (typeof options.stylesheets === 'string') {
-    options.stylesheets = [options.stylesheets]
-  }
-
-  if (Array.isArray(options.stylesheets)) {
-    options.stylesheets.forEach((href) => {
-      const link = document.createElement('link')
-
-      link.type = 'text/css'
-      link.rel = 'stylesheet'
-      link.href = href
-      el.append(link)
-    })
-  }
-
-  if (options.style) {
-    const style = document.createElement('style')
-
-    style.appendChild(document.createTextNode(options.style))
-    el.append(style)
-  }
-}
 
 export function mount<Props = any> (
   comp: Component<Props>,
@@ -102,7 +72,7 @@ export function mount<Props = any> (
 
     let el = document.getElementById(ROOT_ID)
 
-    setupStyles(el, options)
+    injectStylesBeforeElement(options, document, el)
 
     // merge the extensions with global
     if (options.extensions) {
@@ -151,3 +121,5 @@ export function mountCallback<Props = any> (
 ): () => void {
   return () => mount<Props>(component, options)
 }
+
+setupHooks()

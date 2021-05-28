@@ -24,6 +24,7 @@ function createEntry (options) {
     external: [
       'vue',
       '@vue/test-utils',
+      '@cypress/mount-utils',
       '@cypress/webpack-dev-server',
     ],
     plugins: [

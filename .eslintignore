@@ -32,6 +32,8 @@ packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescrip
 npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
 npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
 
+npm/cypress-schematic/src/**/*.js
+
 **/.projects
 **/*.d.ts
 **/package-lock.json

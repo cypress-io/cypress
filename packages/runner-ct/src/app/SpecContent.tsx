@@ -3,8 +3,8 @@ import * as React from 'react'
 import SplitPane from 'react-split-pane'
 
 import Header from '../header/header'
-import Iframes from '../iframe/iframes'
-import { debounce } from '../lib/debounce'
+import { Iframes } from '../iframe/iframes'
+import { animationFrameDebounce } from '../lib/debounce'
 import { Message } from '../message/message'
 import { KeyboardHelper } from './KeyboardHelper'
 import { NoSpec } from './NoSpec'
@@ -50,7 +50,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
             ? props.state.pluginsHeight
           // show the small not resize-able panel with buttons or nothing
             : props.state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
-        onChange={debounce(updatePluginsHeight)}
+        onChange={animationFrameDebounce(updatePluginsHeight)}
       >
         <div className={cs(
           'runner',
@@ -95,7 +95,7 @@ const SpecContentWrapper = namedObserver('SpecContentWrapper', (props: React.Pro
         maxSize={hideReporterIfNecessary(props.state, () => 600)}
         defaultSize={hideReporterIfNecessary(props.state, () => props.state.reporterWidth)}
         className='primary'
-        onChange={debounce(updateReporterWidth)}
+        onChange={animationFrameDebounce(updateReporterWidth)}
       >
         {props.children}
       </SplitPane>

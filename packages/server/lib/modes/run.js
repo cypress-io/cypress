@@ -1049,9 +1049,7 @@ module.exports = {
    * in the same browser
    */
   writeVideoFrameCallback () {
-    if (this.currentWriteVideoFrameCallback) {
-      return this.currentWriteVideoFrameCallback(...arguments)
-    }
+    return this.currentWriteVideoFrameCallback(...arguments)
   },
 
   waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
@@ -1061,8 +1059,10 @@ module.exports = {
 
     // short circuit current browser callback so that we
     // can rewire it without relaunching the browser
-    this.currentWriteVideoFrameCallback = writeVideoFrame
-    options.writeVideoFrame = this.writeVideoFrameCallback.bind(this)
+    if (writeVideoFrame) {
+      this.currentWriteVideoFrameCallback = writeVideoFrame
+      options.writeVideoFrame = this.writeVideoFrameCallback.bind(this)
+    }
 
     // without this the run mode is only setting new spec
     // path for next spec in launch browser.
@@ -1638,6 +1638,7 @@ module.exports = {
               specPattern,
               runAllSpecs,
               onError,
+              quiet: options.quiet,
             })
           }
 

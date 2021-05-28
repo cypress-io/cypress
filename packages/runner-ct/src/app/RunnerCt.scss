@@ -11,7 +11,7 @@
 body, html {
   font-size: 1rem !important;
   font-family: $font-stack-sans;
-  font-size: $text-base;
+  font-size: text(m);
 
   * :focus {
     outline-offset: 1px;
@@ -23,13 +23,18 @@ body, html {
 
 .reporter {
   .runnable-header {
-    box-shadow: $shadow;
+    box-shadow: shadow(m);
   }
 }
 
 .runner {
   // @include checkerboard();
    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZGJkYmRiIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiNjNGM0YzQiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
+}
+
+.aut-iframe-screenshotting {
+  height: min(100vh, 100%) !important;
+  overflow: scroll !important;
 }
 
 // Prevent left-most Resizer from showing up when the pane is hidden.

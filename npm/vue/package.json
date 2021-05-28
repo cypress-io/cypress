@@ -13,6 +13,7 @@
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
+    "@cypress/mount-utils": "0.0.0-development",
     "@vue/test-utils": "^2.0.0-rc.4"
   },
   "devDependencies": {
@@ -32,11 +33,12 @@
     "babel-plugin-istanbul": "6.0.0",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
-    "cypress-circleci-reporter": "0.2.0",
     "debug": "4.3.2",
     "eslint-plugin-vue": "^6.2.2",
     "find-webpack": "2.1.0",
     "mocha": "7.1.1",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
     "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",
     "rollup-plugin-typescript2": "^0.29.0",
@@ -69,8 +71,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://on.cypress.io/component-testing",
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/vue/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

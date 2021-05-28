@@ -1,6 +1,7 @@
 # Each line is a file pattern followed by one or more owners.
 
 # Test Runner team are owners of code within root packages and cli
+/browser-versions.json  @cypress-io/test-runner
 /cli/  @cypress-io/test-runner
 /packages/coffee/  @cypress-io/test-runner
 /packages/datetime-utils/  @cypress-io/test-runner

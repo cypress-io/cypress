@@ -14,10 +14,17 @@ interface Options {
 }
 
 export interface StartDevServer {
-  /* this is the Cypress options object */
+  /**
+   * the Cypress options object
+   */
   options: Options
-  /* support passing a path to the user's webpack config */
-  viteConfig?: UserConfig // TODO: implement taking in the user's vite configuration. Right now we don't
+  /**
+   * By default, vite will use your vite.config file to
+   * Start the server. If you need additional plugins or
+   * to override some options, you can do so using this.
+   * @optional
+   */
+  viteConfig?: UserConfig
 }
 
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
@@ -30,20 +37,29 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents)]
+  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
   // Could we resolve this usage in test-utils?
-  finalConfig.resolve = finalConfig.resolve || {}
-  finalConfig.resolve.alias = {
-    ...finalConfig.resolve.alias,
-    '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
-  },
+  try {
+    finalConfig.resolve = finalConfig.resolve || {}
+    finalConfig.resolve.alias = {
+      ...finalConfig.resolve.alias,
+      '@vue/compiler-core': resolve(dirname(require.resolve('@vue/compiler-core')), 'dist', 'compiler-core.cjs.js'),
+    }
+  } catch (e) {
+    // Vue 3 is not installed
+  }
 
   finalConfig.server = finalConfig.server || {}
 
-  finalConfig.server.port = await getPort({ port: 3000, host: 'localhost' }),
+  finalConfig.server.port = await getPort({ port: finalConfig.server.port || 3000, host: 'localhost' }),
+
+  // Ask vite to pre-optimize all dependencies of the specs
+  finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
+
+  finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
