@@ -1,4 +1,6 @@
-@use '../../index.scss' as *;
+@use 'baseColors' as *;
+@use 'semanticColors' as *;
+@use 'typography' as *;
 
 $left-nav-width: 48px;
 $icon-color: $metal-20;
@@ -33,7 +35,7 @@ $active-color: $brand-01;
 
 .item {
   height: 100%;
-  font-size: $text-ml;
+  font-size: text(ml);
   cursor: pointer;
   color: $icon-color;
 

@@ -167,16 +167,16 @@ describe('lib/cypress', () => {
     }
   })
 
-  afterEach(() => {
-    Fixtures.remove()
-
-    // make sure every project
-    // we spawn is closed down
+  afterEach(async () => {
     try {
-      return openProject.close()
+      // make sure every project
+      // we spawn is closed down
+      await openProject.close()
     } catch (e) {
       // ...
     }
+
+    Fixtures.remove()
   })
 
   context('test browsers', () => {

@@ -217,6 +217,11 @@ const invalidCypressEnv = {
   exitCode: 11,
 }
 
+const invalidTestingType = {
+  description: 'Invalid testingType',
+  solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
+}
+
 /**
  * This error happens when CLI detects that the child Test Runner process
  * was killed with a signal, like SIGBUS
@@ -407,5 +412,6 @@ module.exports = {
     childProcessKilled,
     incompatibleHeadlessFlags,
     invalidRunProjectPath,
+    invalidTestingType,
   },
 }
