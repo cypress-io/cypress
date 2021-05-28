@@ -11,7 +11,7 @@
     "build:watch": "tsc -p tsconfig.json --watch",
     "clean": "git checkout HEAD -- sandbox && git clean -f -d sandbox",
     "launch": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic && cd ..",
-    "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic --removeProtractor=false && cd ..",
+    "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic && cd ..",
     "link:sandbox": "yarn link && cd sandbox && yarn link @cypress/schematic",
     "test:all": "yarn build:all && yarn test:schematics && yarn launch:test && yarn test:builders",
     "test:builders": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/builders/cypress/index_spec.ts",

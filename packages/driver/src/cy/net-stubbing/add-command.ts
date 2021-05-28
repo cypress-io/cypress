@@ -20,9 +20,13 @@ import {
   getBackendStaticResponse,
   hasStaticResponseKeys,
 } from './static-response-utils'
+import {
+  getRouteMatcherLogConfig,
+} from './route-matcher-log'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
+import isValidDomain from 'is-valid-domain'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
@@ -126,6 +130,10 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
+  if (_.isString(routeMatcher.hostname) && !isValidDomain(routeMatcher.hostname, { allowUnicode: true })) {
+    return err('`hostname` must be a valid host name or domain name.')
+  }
+
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
     return err('`port` must be a number or a list of numbers.')
   }
@@ -162,61 +170,6 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
 
 export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   const { emitNetEvent } = registerEvents(Cypress, cy)
-
-  function getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
-    let obj: Partial<Cypress.LogConfig> = {
-      name: 'route',
-      instrument: 'route',
-      isStubbed,
-      numResponses: 0,
-      consoleProps: () => {
-        return {
-          Method: obj.method,
-          URL: obj.url,
-          Status: obj.status,
-          'Route Matcher': matcher,
-          'Static Response': staticResponse,
-          Alias: alias,
-        }
-      },
-    }
-
-    ;['method', 'url'].forEach((k) => {
-      if (matcher[k]) {
-        obj[k] = String(matcher[k]) // stringify RegExp
-      } else {
-        obj[k] = '*'
-      }
-    })
-
-    if (staticResponse) {
-      if (staticResponse.statusCode) {
-        obj.status = staticResponse.statusCode
-      } else {
-        obj.status = 200
-      }
-
-      if (staticResponse.body) {
-        obj.response = String(staticResponse.body)
-      } else {
-        obj.response = '< empty body >'
-      }
-    }
-
-    if (!obj.response) {
-      if (isStubbed) {
-        obj.response = '< callback function >'
-      } else {
-        obj.response = '< passthrough >'
-      }
-    }
-
-    if (alias) {
-      obj.alias = alias
-    }
-
-    return Cypress.log(obj)
-  }
 
   function addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
     const routeId = getUniqueId()
@@ -270,7 +223,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     state('routes')[routeId] = {
-      log: getNewRouteLog(matcher, !!handler, alias, staticResponse),
+      log: Cypress.log(getRouteMatcherLogConfig(matcher, !!handler, alias, staticResponse)),
       options: matcher,
       handler,
       hitCount: 0,
@@ -286,6 +239,17 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher | RouteMatcherOptions, arg2?: RouteHandler) {
+    const checkExtraArguments = (overload: string[]) => {
+      if (arguments.length > overload.length) {
+        $errUtils.throwErrByPath('net_stubbing.intercept.extra_arguments', {
+          args: {
+            overload,
+            argsLength: arguments.length,
+          },
+        })
+      }
+    }
+
     function getMatcherOptions (): RouteMatcherOptions {
       if (isStringMatcher(matcher) && hasOnlyRouteMatcherKeys(handler)) {
         // url, mergeRouteMatcher, handler
@@ -297,6 +261,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         if (!arg2) {
           return $errUtils.throwErrByPath('net_stubbing.intercept.handler_required')
         }
+
+        checkExtraArguments(['url', 'mergeRouteMatcher', 'handler'])
 
         const opts = {
           url: matcher,
@@ -314,6 +280,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
         handler = arg2
 
+        checkExtraArguments(['method', 'url', 'handler?'])
+
         return {
           method: matcher,
           url,
@@ -322,6 +290,8 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
       if (isStringMatcher(matcher)) {
         // url, handler?
+        checkExtraArguments(['url', 'handler?'])
+
         return {
           url: matcher,
         }
