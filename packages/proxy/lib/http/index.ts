@@ -5,7 +5,7 @@ import {
   CypressOutgoingResponse,
   BrowserPreRequest,
 } from '@packages/proxy'
-import debugModule from 'debug'
+import debugModule, { Debug } from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { IncomingMessage } from 'http'
@@ -18,6 +18,7 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 
 const debug = debugModule('cypress:proxy:http')
+const debugRequests = debugModule('cypress-verbose:proxy:http')
 
 export enum HttpStages {
   IncomingRequest,
@@ -36,9 +37,11 @@ export type HttpMiddlewareStacks = {
 type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
-
+  stage: HttpStages
+  debug: Debug
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
+  getPreRequest: (cb: (browserPreRequest?: BrowserPreRequest) => void) => void
 } & T
 
 export const defaultMiddleware = {
@@ -84,9 +87,7 @@ type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
 }>
 
 export function _runStage (type: HttpStages, ctx: any) {
-  const stage = HttpStages[type]
-
-  debug('Entering stage %o', { stage })
+  const stage = ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = () => {
     const middlewares = ctx.middleware[type]
@@ -132,8 +133,6 @@ export function _runStage (type: HttpStages, ctx: any) {
         return resolve()
       }
 
-      debug('Running middleware %o', { stage, middlewareName })
-
       const fullCtx = {
         next: () => {
           copyChangedCtx()
@@ -148,7 +147,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end()
         },
         onError: (error: Error) => {
-          debug('Error in middleware %o', { stage, middlewareName, error })
+          ctx.debug('Error in middleware %o', { stage, middlewareName, error })
 
           if (type === HttpStages.Error) {
             return
@@ -175,9 +174,6 @@ export function _runStage (type: HttpStages, ctx: any) {
   }
 
   return runMiddlewareStack()
-  .then(() => {
-    debug('Leaving stage %o', { stage })
-  })
 }
 
 export class Http {
@@ -189,6 +185,11 @@ export class Http {
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   pendingBrowserPreRequests: Array<BrowserPreRequest> = []
+  requestsPendingPreRequestCbs: Array<{
+    cb: (browserPreRequest: BrowserPreRequest) => void
+    method: string
+    proxiedUrl: string
+  }> = []
   request: any
   socket: CyServer.Socket
 
@@ -222,11 +223,50 @@ export class Http {
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       socket: this.socket,
+      debug: (formatter, ...args) => {
+        debugRequests(`%s %s %s: ${formatter}`, ctx.stage, ctx.req.method, ctx.req.url, ...args)
+      },
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({
           resHeaders: ctx.incomingRes.headers,
           ...opts,
         })
+      },
+      getPreRequest: (cb) => {
+        const i = this.pendingBrowserPreRequests.findIndex((v: BrowserPreRequest) => {
+          return v.method === ctx.req.method && v.url === ctx.req.proxiedUrl
+        })
+
+        if (i !== -1) {
+          const [preRequest] = this.pendingBrowserPreRequests.splice(i, 1)
+
+          return cb(preRequest)
+        }
+
+        let timeout = setTimeout(() => {
+          ctx.debug('500ms passed without a pre-request, continuing to wait')
+
+          timeout = setTimeout(() => {
+            ctx.debug('10000ms more passed without a pre-request, continuing request with an empty pre-request field!')
+
+            this.requestsPendingPreRequestCbs.splice(this.requestsPendingPreRequestCbs.indexOf(requestPendingPreRequestCb))
+            cb()
+          }, 10000)
+        }, 500)
+
+        const startedMs = Date.now()
+
+        const requestPendingPreRequestCb = {
+          cb: (browserPreRequest) => {
+            debug('received pre-request after %dms', Date.now() - startedMs)
+            clearTimeout(timeout)
+            cb(browserPreRequest)
+          },
+          proxiedUrl: ctx.req.proxiedUrl,
+          method: ctx.req.method,
+        }
+
+        this.requestsPendingPreRequestCbs.push(requestPendingPreRequestCb)
       },
     }
 
@@ -257,6 +297,7 @@ export class Http {
   reset () {
     this.buffers.reset()
     this.pendingBrowserPreRequests = []
+    this.requestsPendingPreRequestCbs = []
   }
 
   setBuffer (buffer) {
@@ -265,6 +306,17 @@ export class Http {
 
   addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     debug('received browser pre-request: %o', browserPreRequest)
+
+    const i = this.requestsPendingPreRequestCbs.findIndex((v) => {
+      return browserPreRequest.method === v.method && browserPreRequest.url === v.proxiedUrl
+    })
+
+    if (i !== -1) {
+      const [{ cb }] = this.requestsPendingPreRequestCbs.splice(i, 1)
+
+      return cb(browserPreRequest)
+    }
+
     this.pendingBrowserPreRequests.push(browserPreRequest)
   }
 }
