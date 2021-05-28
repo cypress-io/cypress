@@ -38,6 +38,7 @@ function createEntry (options) {
       globals: {
         vue: 'Vue',
         '@vue/test-utils': 'VueTestUtils',
+        '@cypress/mount-utils': 'MountUtils',
       },
       exports: 'auto',
     },
