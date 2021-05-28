@@ -232,6 +232,7 @@
     "nohoist": [
       "**/@ffmpeg-installer",
       "**/@ffmpeg-installer/**",
+      "**/vue/**",
       "**/webpack-preprocessor/babel-loader",
       "**/webpack-batteries-included-preprocessor/ts-loader"
     ]

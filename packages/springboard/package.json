@@ -34,5 +34,10 @@
     "dist",
     "lib",
     "!lib/**/*_spec.jsx"
-  ]
+  ],
+  "workspaces": {
+    "nohoist": [
+      "**"
+    ]
+  }
 }

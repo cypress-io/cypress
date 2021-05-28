@@ -1,14 +1,15 @@
 {
+  "files": ["./vue-shims.d.ts"],
   "compilerOptions": {
     /* Basic Options */
-    "target": "es2015",
+    "target": "esnext",
     "module": "commonjs",
     /*
      * Allow javascript files to be compiled.
      * Override this in modules that need JS
      */
     "allowJs": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "noImplicitAny": false,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
@@ -28,6 +29,7 @@
     // "traceResolution": true,
     "strict": false,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     /**
      * Skip type checking of all declaration files (*.d.ts).
      * TODO: Look into changing this in the future
@@ -42,11 +44,10 @@
     // "noFallthroughCasesInSwitch": true,    /* Report errors for fallthrough cases in switch statement. */
     /* Module Resolution Options */
     // "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-    // "baseUrl": "../",                       /* Base directory to resolve non-absolute module names. */
-    // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
+    "baseUrl": "./",                       /* Base directory to resolve non-absolute module names. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [] /* List of folders to include type definitions from. */
-    "types": ["node", "chrome", "./cypress/support"],                           /* Type declaration files to be included in compilation. */
+    "types": ["node", "chrome", "./cypress/support", "./index", "./vue-shims"],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
