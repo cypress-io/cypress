@@ -110,7 +110,6 @@ describe('lib/agent', function () {
         name: 'with an HTTPS upstream',
         proxyUrl: `https://localhost:${PROXY_PORT}`,
         httpsProxy: true,
-        httpsPki: true,
       },
       {
         name: 'with an HTTP upstream requiring auth',
@@ -161,20 +160,6 @@ describe('lib/agent', function () {
               }
             }
 
-            if (testCase.httpsProxy) {
-              clientCertificateStore.clear()
-              const certAndKey = createCertAndKey()
-              const pemCert = pki.certificateToPem(certAndKey[0])
-
-              this.clientCert = pemCert
-              const testCerts = new UrlClientCertificates(`https://localhost`)
-
-              testCerts.clientCertificates = new ClientCertificates()
-              testCerts.clientCertificates.cert.push(pemCert)
-              testCerts.clientCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
-              clientCertificateStore.addClientCertificatesForUrl(testCerts)
-            }
-
             this.debugProxy = new DebuggingProxy(options)
 
             return this.debugProxy.start(PROXY_PORT)
@@ -210,15 +195,6 @@ describe('lib/agent', function () {
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
-            }
-
-            if (this.clientCert) {
-              // If a client cert has been assigned to a TLS connection, the key for the TLSSocket
-              // will include the public certificate
-              const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
-
-              expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
-              expect(socketKey[0]).to.contain(this.clientCert, 'A client cert should be been used for the TLS Socket')
             }
           })
         })
@@ -434,6 +410,101 @@ describe('lib/agent', function () {
           })
           .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
             expect(spy).to.be.calledOnce
+          })
+        })
+      })
+    })
+  })
+
+  context('CombinedAgent with client certificates', function () {
+    const proxyUrl = `https://localhost:${PROXY_PORT}`
+
+    before(function () {
+      this.servers = new Servers()
+
+      return this.servers.start(HTTP_PORT, HTTPS_PORT)
+    })
+
+    after(function () {
+      return this.servers.stop()
+    })
+
+    ;[
+      {
+        name: 'should present a client certificate',
+        peresentClientCertificate: true,
+      },
+      {
+        name: 'should present not a client certificate',
+        peresentClientCertificate: false,
+      },
+    ].slice().map((testCase) => {
+      context(testCase.name, function () {
+        beforeEach(function () {
+          // PROXY vars should override npm_config vars, so set them to cause failures if they are used
+          // @see https://github.com/cypress-io/cypress/pull/8295
+          process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+          process.env.npm_config_noproxy = 'just,some,nonsense'
+
+          process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxyUrl
+          process.env.NO_PROXY = ''
+
+          this.agent = new CombinedAgent()
+
+          this.request = request.defaults({
+            proxy: null,
+            agent: this.agent,
+          })
+
+          let options: any = {
+            keepRequests: true,
+            https: this.servers.https,
+            auth: false,
+          }
+
+          if (testCase.peresentClientCertificate) {
+            clientCertificateStore.clear()
+            const certAndKey = createCertAndKey()
+            const pemCert = pki.certificateToPem(certAndKey[0])
+
+            this.clientCert = pemCert
+            const testCerts = new UrlClientCertificates(`https://localhost`)
+
+            testCerts.clientCertificates = new ClientCertificates()
+            testCerts.clientCertificates.cert.push(pemCert)
+            testCerts.clientCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
+            clientCertificateStore.addClientCertificatesForUrl(testCerts)
+          }
+
+          this.debugProxy = new DebuggingProxy(options)
+
+          return this.debugProxy.start(PROXY_PORT)
+        })
+
+        afterEach(function () {
+          this.debugProxy.stop()
+        })
+
+        it('Client certificate presneted if appropriate', function () {
+          return this.request({
+            url: `https://localhost:${HTTPS_PORT}/get`,
+          }).then((body) => {
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            if (this.clientCert) {
+              // If a client cert has been assigned to a TLS connection, the key for the TLSSocket
+              // will include the public certificate
+              const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+
+              expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+              expect(socketKey[0]).to.contain(this.clientCert, 'A client cert should be been used for the TLS Socket')
+            }
           })
         })
       })

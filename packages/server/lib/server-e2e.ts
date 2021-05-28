@@ -8,7 +8,7 @@ import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
-import { concatStream, cors } from '@packages/network'
+import { concatStream, cors, clientCertificates } from '@packages/network'
 import { createInitialWorkers } from '@packages/rewriter'
 import errors from './errors'
 import fileServer from './file_server'
@@ -19,7 +19,6 @@ import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
-import { loadClientCertificateConfig } from './client-certificates'
 
 type WarningErr = Record<string, any>
 
@@ -67,7 +66,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       this._nodeProxy = httpProxy.createProxyServer()
       this._socket = new SocketE2E(config)
 
-      loadClientCertificateConfig(config)
+      clientCertificates.loadClientCertificateConfig(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()
