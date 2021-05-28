@@ -92,7 +92,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 
 2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](./packages/example) to that new version.
 
-3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`
+3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
     ```shell
     yarn move-binaries --sha <commit sha> --version <new target version>
     ```
