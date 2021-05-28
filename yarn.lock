@@ -2957,6 +2957,11 @@
   resolved "https://registry.yarnpkg.com/@ffprobe-installer/win32-x64/-/win32-x64-4.1.0.tgz#ed3e8a329eeb6c0625ac439e31ad9ec43001b33c"
   integrity sha512-gPW2FZxexzCAOhGch0JFkeSSln+wcL5d1JDlJwfSJVEAShHf9MmxiWq0NpHoCSzFvK5qwl0C58KG180eKvd3mA==
 
+"@fontsource/fira-sans@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@fontsource/fira-sans/-/fira-sans-4.3.0.tgz#65c2b68a9a7fa722e34f68010bd66741efa75440"
+  integrity sha512-G9s++5PNTYvMgzMe4OtVQLvvHprP/Y3Q0bMlUcvySBRq20hglBPTV70Q0TPS7cIvprmdz1hk3kWEeBBtK7fcSg==
+
 "@fontsource/mulish@4.3.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@fontsource/mulish/-/mulish-4.3.0.tgz#cab651cc6f4cb4f532358e3a4958fdef610e9583"
@@ -19120,10 +19125,6 @@ fined@^1.0.1:
     object.defaults "^1.1.0"
     object.pick "^1.2.0"
     parse-filepath "^1.0.1"
-
-fira@cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d:
-  version "1.0.0"
-  resolved "https://codeload.github.com/cypress-io/fira/tar.gz/fb63362742eea8cdce0d90825ab9264d77719e3d"
 
 firefox-profile@4.0.0:
   version "4.0.0"
