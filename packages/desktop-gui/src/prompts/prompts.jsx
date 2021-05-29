@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import { usePopper } from 'react-popper'
 
 import LoginForm from '../auth/login-form'
-import { DashboardBranchHistory, CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild } from './prompt-images'
+import { DashboardBranchHistory, CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild, CISingleIcon, CIMultiIcon } from './prompt-images'
 import ipc from '../lib/ipc'
 
 const Prompt = observer(({ children, isOpen, referenceElement }) => {
@@ -238,7 +238,7 @@ class DashboardPrompt1 extends Component {
           </div>
           <div className='dashboard-frame'>
             <div className='frame-title'>Previous Runs</div>
-            <div className='svg-wrapper'>
+            <div className='main-content-wrapper'>
               <DashboardBranchHistory height='100%' width='100%' />
             </div>
           </div>
@@ -258,13 +258,122 @@ class DashboardPrompt1 extends Component {
   }
 }
 
+@observer
+class DashboardPrompt2 extends Component {
+  slug = 'dashboard2'
+  utm_medium = 'Dashboard Prompt 2'
+
+  _close = () => {
+    this.props.prompts.closePrompt(this.slug)
+    ipc.setPromptShown(this.slug)
+  }
+
+  _openParallelization = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/parallelization',
+      params: {
+        utm_medium: this.utm_medium,
+        utm_campaign: 'Parallelization',
+      },
+    })
+  }
+
+  _openSmartOrchestration = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/run-failed-specs-first',
+      params: {
+        utm_medium: this.utm_medium,
+        utm_campaign: 'Failed Specs First',
+      },
+    })
+  }
+
+  _openLoadBalancing = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/load-balancing',
+      params: {
+        utm_medium: this.utm_medium,
+        utm_campaign: 'Load Balancing',
+      },
+    })
+  }
+
+  render () {
+    const { prompts, referenceElement } = this.props
+
+    return (
+      <Prompt
+        isOpen={prompts[this.slug] || true}
+        referenceElement={referenceElement}
+      >
+        <div className='prompt-body'>
+          <button className='btn btn-link close' onClick={this._close}>
+            <i className='fas fa-times' />
+          </button>
+          <div className='text-content'>
+            <h2>Speed up test runs in CI</h2>
+            <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
+            <ul>
+              <li>Run test spec files <a onClick={this._openParallelization}>simultaneously</a></li>
+              <li>Prioritize <a onClick={this._openSmartOrchestration}>failed specs first</a> to quickly verify latest changes</li>
+              <li>Optimize <a onClick={this._openLoadBalancing}>CI resources</a></li>
+            </ul>
+          </div>
+          <div className='dashboard-frame'>
+            <div className='frame-title'>CI Run Time</div>
+            <div className='main-content-wrapper'>
+              <div className='ci-run-time'>
+                <div className='ci-icon'>
+                  <CIMultiIcon height={20} width={20} />
+                </div>
+                <div className='ci-runtime'>
+                  <div className='runtime-bar-wrapper'>
+                    <div className='runtime-bar runtime-bar-short' />
+                    <i className='fas fa-bolt' />
+                  </div>
+                  <span><span className='bold'>5 mins</span> with Parallelization</span>
+                </div>
+                <div className='ci-icon'>
+                  <CISingleIcon height={20} width={20} />
+                </div>
+                <div className='ci-runtime'>
+                  <div className='runtime-bar-wrapper'>
+                    <div className='runtime-bar runtime-bar-long' />
+                  </div>
+                  <span><span className='bold'>12 mins</span> without Parallelization</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className='prompt-buttons'>
+            <LoginForm
+              utm='Dashboard Prompt 1'
+              buttonClassName='btn btn-success'
+              buttonContent='Get Started'
+            />
+            <button className='btn btn-link' onClick={this._closeModal}>
+              No Thanks
+            </button>
+          </div>
+        </div>
+      </Prompt>
+    )
+  }
+}
+
 const Prompts = observer(({ project, referenceElement }) => {
+  if (project.isLoading) return null
+
   const { prompts } = project
 
   return (
     <>
       <CIPrompt1 prompts={prompts} referenceElement={referenceElement} />
       <DashboardPrompt1 prompts={prompts} referenceElement={referenceElement} />
+      <DashboardPrompt2 prompts={prompts} referenceElement={referenceElement} />
     </>
   )
 })

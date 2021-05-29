@@ -2,15 +2,21 @@ import _ from 'lodash'
 import { action, computed, extendObservable } from 'mobx'
 import interval from 'human-interval'
 
-const prompts = [{
-  slug: 'ci1',
-  interval: interval('4 days'),
-  noProjectId: true,
-}, {
-  slug: 'dashboard1',
-  interval: interval('7 days'),
-  noProjectId: true,
-}]
+const prompts = _.sortBy([
+  {
+    slug: 'ci1',
+    interval: interval('4 days'),
+    noProjectId: true,
+  }, {
+    slug: 'dashboard1',
+    interval: interval('7 days'),
+    noProjectId: true,
+  }, {
+    slug: 'dashboard2',
+    interval: interval('70 days'),
+    noProjectId: true,
+  },
+], 'interval')
 
 export default class Prompts {
   _promptsShown

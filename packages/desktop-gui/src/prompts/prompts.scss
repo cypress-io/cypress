@@ -127,17 +127,69 @@
       background: #082336;
       border-radius: 6px;
       box-shadow: 0 4px 17px rgba(0, 0, 0, 0.25);
-      margin: 20px 10px 25px;
+      margin: 20px 20px 25px;
 
       .frame-title {
         color: #fff;
-        font-size: 12px;
-        font-weight: 500;
+        font-size: 14px;
+        font-weight: 600;
         padding: 15px 20px 0;
       }
 
-      .svg-wrapper {
+      .main-content-wrapper {
         padding: 5px 15px 20px;
+      }
+
+      .ci-run-time {
+        color: #fff;
+        display: grid;
+        gap: 12px 10px;
+        grid-template-columns: 18px 1fr;
+        padding: 10px 10px 0;
+
+        .ci-icon {
+          text-align: right;
+
+          svg {
+            margin-top: -2px;
+          }
+        }
+
+        .ci-runtime {
+          span {
+            font-size: 13px;
+
+            &.bold {
+              font-weight: 500;
+            }
+          }
+
+          .runtime-bar-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+
+            .runtime-bar {
+              height: 18px;
+              border-radius: 2px;
+
+              &.runtime-bar-short {
+                background: $brand-success;
+                width: 42%;
+              }
+
+              &.runtime-bar-long {
+                background: #9D9EA9;
+                width: 100%;
+              }
+            }
+
+            i {
+              font-size: 18px;
+              margin-left: 8px;
+            }
+          }
+        }
       }
     }
   }

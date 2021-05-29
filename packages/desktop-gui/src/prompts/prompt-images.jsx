@@ -342,3 +342,35 @@ export const AWSCodeBuild = (props) => {
     </svg>
   )
 }
+
+export const CISingleIcon = (props) => {
+  return (
+    <svg
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect x={6} y={7} width={18} height={3} rx={2} fill="currentColor" />
+    </svg>
+  )
+}
+
+export const CIMultiIcon = (props) => {
+  return (
+    <svg
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect x={5} width={18} height={3} rx={2} fill="currentColor" />
+      <rect y={8} width={18} height={3} rx={2} fill="currentColor" />
+      <rect x={11} y={16} width={12} height={3} rx={2} fill="currentColor" />
+    </svg>
+  )
+}
