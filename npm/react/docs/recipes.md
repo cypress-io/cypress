@@ -59,12 +59,14 @@ If you have your own Webpack config, you can use included plugins file to load i
 ```js
 // cypress/plugins/index.js
 module.exports = (on, config) => {
-  // from the root of the project (folder with cypress.json file)
-  config.env.webpackFilename = 'webpack.config.js'
-  require('@cypress/react/plugins/load-webpack')(on, config)
+  // the path is relative to cypress.json
+  const webpackFilename = './src/webpack.config.js';
+  config.env.webpackFilename = webpackFilename;
+  config.env.coverage = false;
+  require('@cypress/react/plugins/load-webpack')(on, config, {webpackFilename});
   // IMPORTANT to return the config object
   // with the any changed environment variables
-  return config
+  return config;
 }
 ```
 
