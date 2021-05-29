@@ -306,7 +306,7 @@ class DashboardPrompt2 extends Component {
 
     return (
       <Prompt
-        isOpen={prompts[this.slug] || true}
+        isOpen={prompts[this.slug]}
         referenceElement={referenceElement}
       >
         <div className='prompt-body'>
