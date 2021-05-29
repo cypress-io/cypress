@@ -365,7 +365,7 @@ class DashboardPrompt2 extends Component {
 }
 
 const Prompts = observer(({ project, referenceElement }) => {
-  if (project.isLoading) return null
+  if (!project || project.isLoading) return null
 
   const { prompts } = project
 

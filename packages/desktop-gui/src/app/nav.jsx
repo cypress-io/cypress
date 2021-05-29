@@ -126,17 +126,6 @@ export default class Nav extends Component {
     authStore.openLogin(null, 'Nav')
   }
 
-  _openDocs (e) {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/docs',
-      params: {
-        utm_medium: 'Nav',
-        utm_campaign: 'Docs',
-      },
-    })
-  }
-
   _openSupport (e) {
     e.preventDefault()
     ipc.externalOpen({

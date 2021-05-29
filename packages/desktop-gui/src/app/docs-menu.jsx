@@ -35,13 +35,25 @@ const DocsMenu = observer(() => {
   })
 
   const _openMenu = () => {
-    if (!project.prompts.anyOpen) {
+    if (!project || !project.prompts.anyOpen) {
       setOpen(true)
     }
   }
+
   const _closeMenu = () => setOpen(false)
 
-  const _handleDocsClick = (e, item) => {
+  const _openDocs = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/docs',
+      params: {
+        utm_medium: 'Nav',
+        utm_campaign: 'Docs',
+      },
+    })
+  }
+
+  const _handleMenuClick = (e, item) => {
     e.preventDefault()
 
     if (item.action) {
@@ -53,7 +65,7 @@ const DocsMenu = observer(() => {
     }
   }
 
-  const _docsMenuContent = () => {
+  const _menuContent = () => {
     // revert to a link in global mode
     const showPromptOrLink = (promptSlug, link) => {
       if (project && project.prompts) {
@@ -144,20 +156,22 @@ const DocsMenu = observer(() => {
     }]
   }
 
+  const active = open || (project && project.prompts.anyOpen)
+
   return (
     <>
-      <li className={cs('docs-menu', { active: open || project.prompts.anyOpen })} onMouseEnter={_openMenu} onMouseLeave={_closeMenu}>
-        <a ref={setReferenceElement}>
+      <li className={cs('docs-menu', { active })} onMouseEnter={_openMenu} onMouseLeave={_closeMenu}>
+        <a onClick={_openDocs} ref={setReferenceElement}>
           <i className='fas fa-graduation-cap' /> Docs
         </a>
         {open && (
           <div className='popper docs-dropdown' ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
-            {_.map(_docsMenuContent(), ({ title, children, itemIcon }) => (
+            {_.map(_menuContent(), ({ title, children, itemIcon }) => (
               <ul className='dropdown-column' key={title}>
                 <li className='column-title'>{title}</li>
                 {_.map(children, (item) => (
                   <li className='column-item' key={item.text}>
-                    <a onClick={(e) => _handleDocsClick(e, item)}>
+                    <a onClick={(e) => _handleMenuClick(e, item)}>
                       <i className={itemIcon || item.icon || 'far fa-file-alt'} />
                       <span>{item.text}</span>
                       <i className='fas fa-long-arrow-alt-right' />
