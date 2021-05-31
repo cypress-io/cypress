@@ -23,7 +23,7 @@
 
 ✅  Scaffold base Cypress files and directories
 
-✅  Optional: prompt you to remove Protractor and reconfigure default `ng e2e` command to use Cypress.
+✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress.
 
 ## Usage ⏯
 
@@ -44,7 +44,7 @@ To run Cypress headlessly via `run` mode within your project:
 ng run {project-name}:cypress-run
 ```
 
-If you have chosen to remove Protractor, you can also run Cypress in `open` mode using this command:
+If you have chosen to add or update the `ng e2e` command, you can also run Cypress in `open` mode using this:
 
 ```shell script
 ng e2e
@@ -72,7 +72,7 @@ Before running Cypress in `open` mode, ensure that you have started your applica
 }
 ```
 
-Read our docs to learn more about [launching browsers](http://on.cypress.io/launching-browsers) with Cypress.
+Read our docs to learn more about [launching browsers](https://on.cypress.io/launching-browsers) with Cypress.
 
 ### Recording test results to the Cypress Dashboard
 
@@ -94,7 +94,7 @@ We recommend setting your [Cypress Dashboard](https://docs.cypress.io/guides/das
 }
 ```
 
-Read our docs to learn more about [recording test results](http://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction).
+Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://docs.cypress.io/guides/dashboard/introduction).
 
 ### Specifying a custom `cypress.json` config file
 
@@ -115,7 +115,7 @@ It may be useful to have different Cypress configuration files per environment (
 }
 ```
 
-Read our docs to learn more about all the [configuration options](http://on.cypress.io/configuration) Cypress offers.
+Read our docs to learn more about all the [configuration options](https://on.cypress.io/configuration) Cypress offers.
 
 ### Running Cypress in parallel mode within CI
 
@@ -136,11 +136,15 @@ Read our docs to learn more about all the [configuration options](http://on.cypr
 }
 ```
 
-Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](http://on.cypress.io/parallelization)
+Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](https://on.cypress.io/parallelization)
+
+## Migrating from Protractor to Cypress?
+
+Read our [migration guide](https://on.cypress.io/protractor-to-cypress) to help you make the transition from Protractor to Cypress.
 
 ## Questions or Issues?
 
-Visit our [plugins discussion](https://github.com/cypress-io/cypress/discussions/categories/plugins) to ask questions or report issues.
+Visit our [plugins discussion](https://github.com/cypress-io/cypress/discussions/categories/plugins) to ask questions or report issues related to this package.
 
 ## License
 
@@ -148,4 +152,6 @@ This project is licensed under an MIT license.
 
 ## Community Recognition
 
-Inspired by [@briebug/cypress-schematic](https://github.com/briebug/cypress-schematic).
+The [Cypress Angular Schematic](https://www.npmjs.com/package/@cypress/schematic) package was made possible by the original work of the [Briebug](https://briebug.com/) team and the contributors of [@briebug/cypress-schematic](https://www.npmjs.com/package/@briebug/cypress-schematic).
+
+@briebug/cypress-schematic served as the starting point for improvements and new functionality the Cypress team will continue to develop along with the community.
