@@ -85,7 +85,7 @@ cy.request({
   method: "POST",
   body: {}
 }).then((resp) => {
-  resp // $ExpectType Response
+  resp // $ExpectType Response<any>
   resp.redirectedToUrl // $ExpectType string | undefined
   resp.redirects // $ExpectType string[] | undefined
   resp.headers // $ExpectType { [key: string]: string | string[]; }
@@ -98,6 +98,30 @@ cy.request({
   qs: {
     param: 'someValue'
   }
+})
+
+// Users can specify body type.
+// https://github.com/cypress-io/cypress/issues/9109
+interface ReqBody {
+  x: number
+  y: string
+}
+
+cy.request<ReqBody>('http://goooooogle.com', {})
+.then((resp) => {
+  resp // $ExpectType Response<ReqBody>
+})
+
+cy.request<ReqBody>('post', 'http://goooooogle.com', {})
+.then((resp) => {
+  resp // $ExpectType Response<ReqBody>
+})
+
+cy.request<ReqBody>({
+  url: 'http://goooooogle.com',
+  body: {}
+}).then((resp) => {
+  resp // $ExpectType Response<ReqBody>
 })
 
 // if you want a separate variable, you need specify its type
