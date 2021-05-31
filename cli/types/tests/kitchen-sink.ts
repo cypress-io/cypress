@@ -102,26 +102,26 @@ cy.request({
 
 // Users can specify body type.
 // https://github.com/cypress-io/cypress/issues/9109
-interface ReqBody {
+interface ResBody {
   x: number
   y: string
 }
 
-cy.request<ReqBody>('http://goooooogle.com', {})
+cy.request<ResBody>('http://goooooogle.com', {})
 .then((resp) => {
-  resp // $ExpectType Response<ReqBody>
+  resp // $ExpectType Response<ResBody>
 })
 
-cy.request<ReqBody>('post', 'http://goooooogle.com', {})
+cy.request<ResBody>('post', 'http://goooooogle.com', {})
 .then((resp) => {
-  resp // $ExpectType Response<ReqBody>
+  resp // $ExpectType Response<ResBody>
 })
 
-cy.request<ReqBody>({
+cy.request<ResBody>({
   url: 'http://goooooogle.com',
   body: {}
 }).then((resp) => {
-  resp // $ExpectType Response<ReqBody>
+  resp // $ExpectType Response<ResBody>
 })
 
 // if you want a separate variable, you need specify its type
