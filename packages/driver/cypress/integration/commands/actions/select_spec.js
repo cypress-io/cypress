@@ -215,6 +215,10 @@ describe('src/cy/commands/actions/select', () => {
       .invoke('val').should('eq', 'bar')
     })
 
+    it('selects items with the value which has &nbsp;', () => {
+      cy.get('select[name=movies]').select('gone&nbsp;with&nbsp;the&nbsp;wind')
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {

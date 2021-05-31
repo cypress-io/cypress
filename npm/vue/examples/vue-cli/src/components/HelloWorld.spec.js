@@ -2,7 +2,7 @@ import { mount } from '@cypress/vue'
 import HelloWorld from './HelloWorld.vue'
 
 describe('<Logo />', () => {
-  it('contains an svg', () => {
+  it('contains the default slot in its h1', () => {
     const slotContent = 'Welcome to testing in Vue CLI'
 
     mount(HelloWorld, {

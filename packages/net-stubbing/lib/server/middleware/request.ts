@@ -118,15 +118,16 @@ export const InterceptRequest: RequestMiddleware = async function () {
     throw new Error('req.body must be a string or a Buffer')
   }
 
-  const encoding = getBodyEncoding(req)
+  const bodyEncoding = getBodyEncoding(req)
+  const bodyIsBinary = bodyEncoding === 'binary'
 
-  if (encoding === 'binary') {
+  if (bodyIsBinary) {
     debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
   }
 
   // leave the requests that send a binary buffer unchanged
   // but we can work with the "normal" string requests
-  if (encoding !== 'binary') {
+  if (!bodyIsBinary) {
     req.body = req.body.toString('utf8')
   }
 
@@ -141,7 +142,18 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // resolve and propagate any changes to the URL
     request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
 
-    _.merge(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
+    // if the body is binary, don't recursively merge it or it will get
+    // incorrectly converted from a Buffer into an array
+    // @see https://github.com/cypress-io/cypress/issues/15898
+    const serializableProps = _.without(SERIALIZABLE_REQ_PROPS, 'body')
+
+    _.merge(before, _.pick(after, serializableProps))
+
+    if (bodyIsBinary) {
+      before.body = after.body
+    } else {
+      _.merge(before, { body: after.body })
+    }
 
     mergeDeletedHeaders(before, after)
   }

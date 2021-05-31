@@ -127,6 +127,18 @@ describe('src/cy/commands/assertions', () => {
       }).should('deep.eq', { foo: 'baz' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/16006
+    it(`shows all .should('contain') assertions when chained after .should('be.visible')`, function () {
+      cy.get('#data-number')
+      .should('be.visible')
+      .should('contain', 'span')
+      .should('contain', 'with')
+      .then(function () {
+        expect(this.logs[2].get('message')).to.contain('**span**')
+        expect(this.logs[3].get('message')).to.contain('**with**')
+      })
+    })
+
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
@@ -834,6 +846,20 @@ describe('src/cy/commands/assertions', () => {
       cy.get('button:first').then(($button) => {
         expect($button).to.be.visible
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/16570
+    it('handles BigInt correctly', (done) => {
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'assert') {
+          cy.removeAllListeners('log:added')
+          expect(log.get('message')).to.eq('expected **2n** to equal **2n**')
+
+          done()
+        }
+      })
+
+      expect(2n).to.equal(2n)
     })
 
     it('#consoleProps for regular objects', (done) => {
@@ -2492,7 +2518,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('button:first').should('have.focus')
         .then(() => {
-          expect(stub).to.be.calledThrice
+          expect(stub).to.be.calledTwice
         })
       })
     })

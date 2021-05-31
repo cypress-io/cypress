@@ -5,6 +5,7 @@ describe('per-test config', () => {
     ranFirefox: false,
     ranChrome: false,
     ranChromium: false,
+    ranElectron: false,
   }
 
   after(function () {
@@ -15,6 +16,7 @@ describe('per-test config', () => {
         ranChrome: false,
         ranChromium: false,
         ranFirefox: true,
+        ranElectron: false,
       })
     }
 
@@ -23,6 +25,7 @@ describe('per-test config', () => {
         ranChrome: true,
         ranChromium: false,
         ranFirefox: false,
+        ranElectron: false,
       })
     }
 
@@ -31,6 +34,16 @@ describe('per-test config', () => {
         ranChrome: false,
         ranChromium: true,
         ranFirefox: false,
+        ranElectron: false,
+      })
+    }
+
+    if (Cypress.browser.name === 'electron') {
+      return expect(testState).deep.eq({
+        ranChrome: false,
+        ranChromium: false,
+        ranFirefox: false,
+        ranElectron: true,
       })
     }
 
@@ -83,6 +96,13 @@ describe('per-test config', () => {
   }, () => {
     testState.ranFirefox = true
     expect(Cypress.browser.name).eq('firefox')
+  })
+
+  it('can specify only run in electron', {
+    browser: 'electron',
+  }, () => {
+    testState.ranElectron = true
+    expect(Cypress.browser.name).eq('electron')
   })
 
   describe('mutating global config via Cypress.config and Cypress.env', () => {

@@ -931,23 +931,29 @@ module.exports = {
         You passed: ${format(staticResponse)}`, 8)
     },
     intercept: {
+      extra_arguments: ({ argsLength, overload }) => {
+        return cyStripIndent(`\
+          The ${cmd('intercept', overload.join(', '))} signature accepts a maximum of ${overload.length} arguments, but ${argsLength} arguments were passed.
+          
+          Please refer to the docs for all accepted signatures for ${cmd('intercept')}.`, 10)
+      },
       invalid_handler: ({ handler }) => {
-        return stripIndent`\
+        return cyStripIndent(`\
           ${cmd('intercept')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
-          You passed: ${format(handler)}`
+          You passed: ${format(handler)}`, 10)
       },
       invalid_middleware_handler: ({ handler }) => {
-        return stripIndent`\
+        return cyStripIndent(`\
           ${cmd('intercept')}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
 
-          You passed: ${format(handler)}`
+          You passed: ${format(handler)}`, 10)
       },
       invalid_route_matcher: ({ message, matcher }) => {
-        return stripIndent`\
+        return cyStripIndent(`\
           An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
-          You passed: ${format(matcher)}`
+          You passed: ${format(matcher)}`, 10)
       },
       no_duplicate_url: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
       handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
