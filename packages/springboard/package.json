@@ -1,0 +1,36 @@
+{
+  "name": "@packages/springboard",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "lib/gui.js",
+  "scripts": {
+    "build": "webpack",
+    "build-prod": "cross-env NODE_ENV=production yarn build",
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
+    "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project .",
+    "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project .",
+    "dev": "SPRINGBOARD=1 yarn start-test 5050 cypress:open",
+    "postinstall": "echo '@packages/springboard needs: yarn build'",
+    "start": "http-server -p 5050 dist",
+    "watch": "yarn build --watch --progress"
+  },
+  "dependencies": {
+    "bluebird": "3.5.3",
+    "classnames": "2.3.1",
+    "vue": "3.0.11",
+    "vue-loader": "16.2.0"
+  },
+  "devDependencies": {
+    "@packages/web-config": "0.0.0-development",
+    "cross-env": "6.0.3",
+    "webpack": "4.44.2",
+    "webpack-cli": "3.3.2"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "!lib/**/*_spec.jsx"
+  ]
+}
