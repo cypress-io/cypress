@@ -65,7 +65,13 @@ export const InterceptResponse: ResponseMiddleware = async function () {
   }
 
   const mergeChanges = (before: CyHttpMessages.IncomingResponse, after: CyHttpMessages.IncomingResponse) => {
-    _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
+    _.mergeWith(before, _.pick(after, SERIALIZABLE_RES_PROPS), (_a, b) => {
+      if (b instanceof Buffer) {
+        return b
+      }
+
+      return undefined
+    })
 
     mergeDeletedHeaders(before, after)
   }

@@ -18,3 +18,11 @@ export function parseJsonBody (message: CyHttpMessages.BaseMessage) {
     // invalid JSON
   }
 }
+
+export function stringifyJsonObject (message: CyHttpMessages.BaseMessage) {
+  if (!hasJsonContentType(message.headers)) {
+    return
+  }
+
+  message.body = JSON.stringify(message.body)
+}
