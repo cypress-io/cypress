@@ -154,3 +154,7 @@ cy.window().then(window => {
 
   window.eval('1')
 })
+
+const a = 1
+// $ExpectError
+a.should("be.visible")
