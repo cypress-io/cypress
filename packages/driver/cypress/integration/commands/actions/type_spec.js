@@ -688,7 +688,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('errors when misconfigured', { keystrokeDelay: 'asd' }, () => {
+    it('errors when invalid delay', { keystrokeDelay: 'asd' }, () => {
       cy.on('fail', (err) => {
         expect(err.message).to.eq('`cy.type()` must be called with a valid `delay`. Your delay was: `asd`')
       })
