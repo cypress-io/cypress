@@ -1638,6 +1638,10 @@ module.exports = {
       message: `Typing into a datetime input with ${cmd('type')} requires a valid datetime with the format \`YYYY-MM-DDThh:mm\`, for example \`2017-06-01T08:30\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
+    invalid_delay: {
+      message: `${cmd('type')} must be called with a valid \`delay\`. Your delay was: \`{{delay}}\``,
+      docsUrl: 'https://on.cypress.io/type',
+    },
     invalid_month: {
       message: `Typing into a \`month\` input with ${cmd('type')} requires a valid month with the format \`YYYY-MM\`. You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',

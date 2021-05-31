@@ -130,6 +130,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })
     }
 
+    if (!_.isNumber(options.delay)) {
+      $errUtils.throwErrByPath('type.invalid_delay', {
+        onFail: options._log,
+        args: { delay: options.delay },
+      })
+    }
+
     chars = `${chars}`
 
     const win = state('window')

@@ -678,38 +678,56 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo{enter}bar{leftarrow}')
     })
 
+    it('delay will override global keystrokeDelay', { keystrokeDelay: 1000 }, () => {
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}', { delay: 5 })
+      .then(() => {
+        expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
+      })
+    })
+
+    it('errors when misconfigured', { keystrokeDelay: 'asd' }, () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`cy.type()` must be called with a valid `delay`. Your delay was: `asd`')
+      })
+
+      cy.get(':text:first').type('foo')
+    })
+
     describe('zero delay', () => {
-      it('does not increase the timeout delta when delay is 0', () => {
+      it('does not increase the timeout delta when delay is 0', { keystrokeDelay: 0 }, () => {
         cy.spy(cy, 'timeout')
 
-        cy.get(':text:first').type('foo{enter}', { delay: 0 }).then(() => {
+        cy.get(':text:first').type('foo{enter}').then(() => {
           expect(cy.timeout).not.to.be.calledWith(40, true, 'type')
         })
       })
 
-      it('does not increase the timeout delta when delay is false', () => {
+      it('does not increase the timeout delta when delay is false', { keystrokeDelay: false }, () => {
         cy.spy(cy, 'timeout')
 
-        cy.get(':text:first').type('foo{enter}', { delay: false }).then(() => {
+        cy.get(':text:first').type('foo{enter}').then(() => {
           expect(cy.timeout).not.to.be.calledWith(40, true, 'type')
         })
       })
 
-      it('does not add delay to delta for each key sequence when delay is 0', () => {
+      it('does not add delay to delta for each key sequence when delay is 0', { keystrokeDelay: 0 }, () => {
         cy.spy(cy, 'timeout')
 
         cy.get(':text:first')
-        .type('foo{enter}bar{leftarrow}', { delay: 0 })
+        .type('foo{enter}bar{leftarrow}')
         .then(() => {
           expect(cy.timeout).not.to.be.calledWith(10 * 8, true, 'type')
         })
       })
 
-      it('does not add delay to delta for each key sequence when delay is false', () => {
+      it('does not add delay to delta for each key sequence when delay is false', { keystrokeDelay: false }, () => {
         cy.spy(cy, 'timeout')
 
         cy.get(':text:first')
-        .type('foo{enter}bar{leftarrow}', { delay: false })
+        .type('foo{enter}bar{leftarrow}')
         .then(() => {
           expect(cy.timeout).not.to.be.calledWith(10 * 8, true, 'type')
         })
