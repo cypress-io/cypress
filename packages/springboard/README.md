@@ -4,7 +4,7 @@ Springboard is next-gen react application that is rendered by Electron. This act
 
 It replaces the original electron app, `desktop-gui`.
 
-**The Desktop GUI has the following responsibilities:**
+**Springbord has the following responsibilities:**
 
 - Allow users to log in through the Dashboard Service.
 - Select testing mode (E2E, Component, Node.js)
