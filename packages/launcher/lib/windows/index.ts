@@ -15,6 +15,13 @@ function formFullAppPath (name: string) {
   ].map(normalize)
 }
 
+function formChromeBetaAppPath () {
+  return [
+    'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
+    'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
+  ].map(normalize)
+}
+
 function formChromiumAppPath () {
   const exe = 'C:/Program Files (x86)/Google/chrome-win32/chrome.exe'
 
@@ -78,6 +85,7 @@ type WindowsBrowserPaths = {
 const formPaths: WindowsBrowserPaths = {
   chrome: {
     stable: formFullAppPath,
+    beta: formChromeBetaAppPath,
     canary: formChromeCanaryAppPath,
   },
   chromium: {

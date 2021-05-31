@@ -44,5 +44,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/cypress-io/cypress.git",
-  "author": "Cypress.io team"
+  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/create-cypress-tests/#readme"
 }

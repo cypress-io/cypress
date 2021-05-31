@@ -41,6 +41,22 @@ exports['windows browser detection detects browsers as expected 1'] = [
   {
     "name": "chrome",
     "family": "chromium",
+    "channel": "beta",
+    "displayName": "Chrome Beta",
+    "versionRegex": {},
+    "binary": "google-chrome-beta",
+    "path": "C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe",
+    "version": "6.7.8",
+    "findAppParams": {
+      "appName": "Google Chrome Beta.app",
+      "executable": "Contents/MacOS/Google Chrome Beta",
+      "appId": "com.google.Chrome.beta",
+      "versionProperty": "KSVersion"
+    }
+  },
+  {
+    "name": "chrome",
+    "family": "chromium",
     "channel": "canary",
     "displayName": "Canary",
     "versionRegex": {},
@@ -179,6 +195,12 @@ exports['windows browser detection detects browsers as expected 1'] = [
     }
   }
 ]
+
+exports['windows browser detection detects 64-bit Chrome Beta app path 1'] = {
+  "name": "chrome",
+  "version": "9.0.1",
+  "path": "C:/Program Files/Google/Chrome Beta/Application/chrome.exe"
+}
 
 exports['windows browser detection detects new Chrome 64-bit app path 1'] = {
   "name": "chrome",

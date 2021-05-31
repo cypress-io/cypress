@@ -1,3 +1,14 @@
+# [create-cypress-tests-v1.1.1](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.0...create-cypress-tests-v1.1.1) (2021-05-10)
+
+
+### Bug Fixes
+
+* add return config for vitejs templates ([69d9de5](https://github.com/cypress-io/cypress/commit/69d9de581a03dce8e3535917a4cdcea8fa4eb6e9))
+* add return config for vueCli and vueWebpack ([9c12ee6](https://github.com/cypress-io/cypress/commit/9c12ee6d8467c65414ab2d413a9c45b2bbec64e9))
+* remove all of rollup, not supported anymore ([f8a71e7](https://github.com/cypress-io/cypress/commit/f8a71e75ae8208dc628d342cb1054c12f98338e9))
+* typo in the final message (run vs run-ct) ([294db04](https://github.com/cypress-io/cypress/commit/294db04f042dba86b69bb15d847c80a2c4202e80))
+* vueCli and webpack key vue@2 fix when guessing ([89f1bb9](https://github.com/cypress-io/cypress/commit/89f1bb9bc6bd987fbf6679a9d955c3587e69aa61))
+
 # [create-cypress-tests-v1.1.0](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.0.1...create-cypress-tests-v1.1.0) (2021-04-05)
 
 

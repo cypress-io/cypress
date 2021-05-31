@@ -4,8 +4,8 @@ import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'
 
-async function startSpiedVideoCapture (filename) {
-  const props = await videoCapture.start(filename)
+async function startSpiedVideoCapture (filename, options = {}) {
+  const props = await videoCapture.start(filename, options)
 
   const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${filename}':
 Output file #0 does not contain any stream\n`
@@ -81,6 +81,30 @@ describe('Video Capture', () => {
       writeVideoFrameAsBuffer('foobar')
 
       await expect(endVideoCaptureResult).rejectedWith(END_OF_FILE_ERROR)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/16648
+    context('deduping frames', async () => {
+      it('does not dedupe when not webminput', async () => {
+        const { writeVideoFrameAsBuffer, _pt } = await startSpiedVideoCapture(tmpFilename)
+
+        writeVideoFrameAsBuffer('foo')
+        writeVideoFrameAsBuffer('foo')
+        writeVideoFrameAsBuffer('foo')
+        writeVideoFrameAsBuffer('foo')
+        expect(_pt.write).callCount(4)
+        // await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
+      })
+    })
+
+    it('does dedupe when webminput', async () => {
+      const { writeVideoFrameAsBuffer, _pt } = await startSpiedVideoCapture(tmpFilename, { webmInput: true })
+
+      writeVideoFrameAsBuffer('foo')
+      writeVideoFrameAsBuffer('foo')
+      writeVideoFrameAsBuffer('foo')
+      writeVideoFrameAsBuffer('foo')
+      expect(_pt.write).calledOnce
     })
   })
 })

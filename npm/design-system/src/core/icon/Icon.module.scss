@@ -20,4 +20,8 @@ $icon-size: 1em - $icon-margin * 2;
 
     bottom: auto;
   }
+
+  &.sizeWithoutCenter {
+    bottom: auto;
+  }
 }

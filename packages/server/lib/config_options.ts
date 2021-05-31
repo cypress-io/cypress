@@ -5,7 +5,7 @@ const v = require('./util/validation')
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
 // - cypress.schema.json
 //
-// Add options in alphabetical order
+// Add options in alphabetical order for better readability
 
 export const options = [
   {
@@ -57,6 +57,10 @@ export const options = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: v.isNumber,
+  }, {
+    name: 'devServerPublicPathRoute',
+    defaultValue: '/__cypress/src',
+    isInternal: true,
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -227,9 +231,9 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
-    name: 'devServerPublicPathRoute',
-    defaultValue: '/__cypress/src',
-    isInternal: true,
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
@@ -291,10 +295,6 @@ export const options = [
     name: 'waitForAnimations',
     defaultValue: true,
     validation: v.isBoolean,
-  }, {
-    name: 'scrollBehavior',
-    defaultValue: 'top',
-    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,
