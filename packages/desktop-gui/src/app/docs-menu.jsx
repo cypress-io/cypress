@@ -57,6 +57,7 @@ const DocsMenu = observer(() => {
     e.preventDefault()
 
     if (item.action) {
+      _closeMenu()
       item.action()
     }
 
@@ -151,7 +152,13 @@ const DocsMenu = observer(() => {
         }),
       }, {
         text: 'Running tests faster',
-        link: 'https://on.cypress.io',
+        ...showPromptOrLink('dashboard2', {
+          url: 'https://on.cypress.io/parallelization',
+          params: {
+            utm_medium,
+            utm_content: 'Parallelization',
+          },
+        }),
       }],
     }]
   }
