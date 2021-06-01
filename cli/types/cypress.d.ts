@@ -8,6 +8,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = 'portrait' | 'landscape'
   type PrevSubject = 'optional' | 'element' | 'document' | 'window'
+  type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
   interface CommandOptions {
@@ -250,6 +251,11 @@ declare namespace Cypress {
      * Internal class for LocalStorage management.
      */
     LocalStorage: LocalStorage
+
+    /**
+     * Current testing type, determined by the Test Runner chosen to run.
+     */
+    testingType: TestingType
 
     /**
      * Fire automation:request event for internal use.
@@ -2799,7 +2805,7 @@ declare namespace Cypress {
     /**
      * Type of test and associated runner that was launched.
      */
-    testingType: 'e2e' | 'component'
+    testingType: TestingType
     /**
      * Cypress version.
      */
