@@ -1,3 +1,10 @@
+# [@cypress/react-v5.9.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.1...@cypress/react-v5.9.0) (2021-05-31)
+
+
+### Features
+
+* react-scripts. allow parametrise webpack config path ([#16644](https://github.com/cypress-io/cypress/issues/16644)) ([c618d30](https://github.com/cypress-io/cypress/commit/c618d30f3df99394df5c0b81ea3817caf0a7eaf4))
+
 # [@cypress/react-v5.8.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.0...@cypress/react-v5.8.1) (2021-05-26)
 
 
