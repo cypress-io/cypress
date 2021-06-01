@@ -15,9 +15,6 @@ import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
-import { CdpAutomation } from './cdp_automation'
-import * as CriClient from './cri-client'
-import * as protocol from './protocol'
 
 const errors = require('../errors')
 
@@ -374,12 +371,12 @@ export async function open (browser: Browser, url, options: any = {}, automation
     ],
   })
 
-  let cdpPort
+  let remotePort
 
   if (hasCdp) {
-    cdpPort = await getPort()
+    remotePort = await getPort()
 
-    defaultLaunchOptions.args.push(`--remote-debugging-port=${cdpPort}`)
+    defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }
 
   if (browser.isHeadless) {
@@ -511,18 +508,11 @@ export async function open (browser: Browser, url, options: any = {}, automation
     MOZ_HEADLESS_HEIGHT: '1081',
   })
 
-  await Promise.all([
-    firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort }),
-    hasCdp ? protocol.getWsTargetFor(cdpPort).then(async (wsUrl) => {
-      const criClient = await CriClient.create(wsUrl, options.onError)
-
-      // @ts-ignore
-      automation.use(CdpAutomation(criClient.send))
-    }) : Promise.resolve(),
-  ])
-  .catch((err) => {
+  try {
+    firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort })
+  } catch (err) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  })
+  }
 
   if (os.platform() === 'win32') {
     // override the .kill method for Windows so that the detached Firefox process closes between specs
