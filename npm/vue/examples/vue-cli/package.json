@@ -13,7 +13,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "register-service-worker": "^1.7.1",
-    "vue": "^2.6.11"
+    "vue": "^3.0.11"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.9.5",
