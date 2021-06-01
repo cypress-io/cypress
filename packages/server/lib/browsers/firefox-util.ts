@@ -6,6 +6,8 @@ import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
+import { CdpAutomation } from './cdp_automation'
+import * as CriClient from './cri-client'
 
 const errors = require('../errors')
 
@@ -93,6 +95,14 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
+function setupRemote (remotePort, automation) {
+  protocol.getWsTargetFor(remotePort).then(async (wsUrl) => {
+    const criClient = await CriClient.create(wsUrl, options.onError)
+
+    CdpAutomation(criClient.send)
+  })
+}
+
 const logGcDetails = () => {
   const reducedTimings = {
     ...timings,
@@ -158,14 +168,17 @@ export default {
   },
 
   setup ({
+    automation,
     extensions,
     url,
     marionettePort,
     foxdriverPort,
+    remotePort,
   }) {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
+      remotePort && setupRemote(remotePort, automation),
     ])
   },
 

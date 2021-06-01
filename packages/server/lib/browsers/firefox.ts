@@ -356,7 +356,9 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function open (browser: Browser, url, options: any = {}): Promise<BrowserInstance> {
+export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
+  // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
+  const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -368,6 +370,14 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
+
+  let remotePort
+
+  if (hasCdp) {
+    remotePort = await getPort()
+
+    defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
+  }
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -498,10 +508,11 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
     MOZ_HEADLESS_HEIGHT: '1081',
   })
 
-  await firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort })
-  .catch((err) => {
+  try {
+    firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort })
+  } catch (err) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  })
+  }
 
   if (os.platform() === 'win32') {
     // override the .kill method for Windows so that the detached Firefox process closes between specs
