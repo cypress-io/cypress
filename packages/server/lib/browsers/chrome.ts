@@ -174,12 +174,6 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
   .return()
 }
 
-const getRemoteDebuggingPort = async () => {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  return port || utils.getPort()
-}
-
 /**
  * Merge the different `--load-extension` arguments into one.
  *
@@ -448,7 +442,7 @@ export = {
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
     const [port, preferences] = await Bluebird.all([
-      getRemoteDebuggingPort(),
+      protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
 

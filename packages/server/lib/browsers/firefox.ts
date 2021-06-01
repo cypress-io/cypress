@@ -15,6 +15,7 @@ import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
+import { getRemoteDebuggingPort } from './protocol'
 
 const errors = require('../errors')
 
@@ -374,7 +375,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   let remotePort
 
   if (hasCdp) {
-    remotePort = await getPort()
+    remotePort = await getRemoteDebuggingPort()
 
     defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
   }
@@ -509,7 +510,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   })
 
   try {
-    firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort })
+    await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
   } catch (err) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
   }
