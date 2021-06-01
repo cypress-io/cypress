@@ -1491,7 +1491,7 @@ jobs:
       - install-required-node
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: NODE_ENV=production yarn
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
@@ -1517,7 +1517,7 @@ jobs:
           repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
-          command: yarn --production
+          command: NODE_ENV=production yarn
           working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
