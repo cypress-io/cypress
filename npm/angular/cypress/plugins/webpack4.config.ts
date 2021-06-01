@@ -13,7 +13,7 @@ module.exports = {
       {
         enforce: 'pre',
         test: /\.js$/,
-        use: 'source-map-loader',
+        loader: 'source-map-loader',
       },
       {
         test: /\.ts$/,
@@ -33,10 +33,8 @@ module.exports = {
       },
       {
         test: /\.(js|ts)$/,
-        use: {
-          loader: 'istanbul-instrumenter-loader',
-          options: { esModules: true },
-        },
+        loader: 'istanbul-instrumenter-loader',
+        options: { esModules: true },
         enforce: 'post',
         include: path.join(__dirname, '../..', 'src'),
         exclude: [
@@ -53,7 +51,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: 'raw-loader',
+        loader: 'raw-loader',
       },
       {
         test: /(\.scss|\.sass)$/,
@@ -61,35 +59,35 @@ module.exports = {
       },
       {
         test: /\.html$/,
-        use: 'raw-loader',
+        loader: 'raw-loader',
         exclude: [path.join(__dirname, '../../src/index.html')],
       },
       {
         test: /\.(jpe?g|png|gif)$/i,
-        use: 'file-loader?name=assets/images/[name].[ext]',
+        loader: 'file-loader?name=assets/images/[name].[ext]',
       },
       {
         test: /\.(mp4|webm|ogg)$/i,
-        use: 'file-loader?name=assets/videos/[name].[ext]',
+        loader: 'file-loader?name=assets/videos/[name].[ext]',
       },
       {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        use:
+        loader:
           'file-loader?limit=10000&mimetype=image/svg+xml&name=assets/svgs/[name].[ext]',
       },
       {
         test: /\.eot(\?v=\d+.\d+.\d+)?$/,
-        use:
+        loader:
           'file-loader?prefix=font/&limit=5000&name=assets/fonts/[name].[ext]',
       },
       {
         test: /\.(woff|woff2)$/,
-        use:
+        loader:
           'file-loader?prefix=font/&limit=5000&name=assets/fonts/[name].[ext]',
       },
       {
         test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        use:
+        loader:
           'file-loader?limit=10000&mimetype=application/octet-stream&name=assets/fonts/[name].[ext]',
       },
     ],
@@ -105,5 +103,14 @@ module.exports = {
   ],
   performance: {
     hints: false,
+  },
+  node: {
+    global: true,
+    crypto: 'empty',
+    process: false,
+    module: false,
+    clearImmediate: false,
+    setImmediate: false,
+    fs: 'empty',
   },
 }
