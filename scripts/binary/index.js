@@ -13,7 +13,7 @@ const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const questionsRemain = require('@cypress/questions-remain')
 const R = require('ramda')
-const urlExist = require('url-exist')
+const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
 const ask = require('./ask')
@@ -161,13 +161,19 @@ const deploy = {
       { platform: 'win32', arch: 'x64' },
     ]
 
+    const urlExists = (url) => {
+      return rp.head(url)
+      .then(() => true)
+      .catch(() => false)
+    }
+
     const checkSystem = ({ platform, arch }) => {
       const url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
       const system = `${platform}-${arch}`
 
       process.stdout.write(`Checking for ${chalk.yellow(system)} at ${chalk.cyan(url)} ... `)
 
-      return urlExist(url)
+      return urlExists(url)
       .then((exists) => {
         const result = exists ? '✅' : '❌'
 
@@ -192,7 +198,7 @@ const deploy = {
     .map((result) => {
       const { exists, platform, arch, url } = result
 
-      if (exists) return
+      if (exists) return result
 
       console.log(`
   ${chalk.yellow('Platform')}: ${platform}
