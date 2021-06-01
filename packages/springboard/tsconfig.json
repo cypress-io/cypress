@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es2015",
+    "target": "esnext",
     "module": "commonjs",
     /*
      * Allow javascript files to be compiled.

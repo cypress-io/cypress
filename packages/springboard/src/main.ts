@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import 'windi.css'
 import App from './App.vue'
 
 declare global {
