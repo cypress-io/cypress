@@ -76,6 +76,8 @@ cy.wrap('tester').should('contain', 'test')
 
 cy.wrap({ a: 1 }).should('deep.equal', { a: 1 })
 
+cy.wrap({ a: 1 }).should('deep.eq', { a: 1 })
+
 cy.wrap(1).should('exist')
 
 cy.wrap(1).should('eq', 1)
@@ -116,6 +118,8 @@ cy.wrap([1, 2, 3]).should('have.length.lte', 4)
 cy.wrap('foo').should('have.length.lte', 4)
 
 cy.wrap([1, 2, 3]).should('have.members', [2, 1, 3])
+
+cy.wrap([1, 2, 3]).should('have.all.members', [2, 1, 3])
 
 cy.wrap([1, 2, 3]).should('have.ordered.members', [1, 2, 3])
 
