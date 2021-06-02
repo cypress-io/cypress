@@ -26,6 +26,17 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
+const SendToDriver: RequestMiddleware = function () {
+  const { browserPreRequest } = this.req
+
+  // for now, we only care about sending xhr and fetch to the browser
+  if (browserPreRequest && ['xhr', 'fetch'].includes(browserPreRequest.resourceType)) {
+    this.socket.toDriver('proxy:incoming:request', browserPreRequest)
+  }
+
+  this.next()
+}
+
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const buffer = this.buffers.take(this.req.proxiedUrl)
 
@@ -149,6 +160,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   CorrelateBrowserPreRequest,
   LogRequest,
+  SendToDriver,
   MaybeEndRequestWithBufferedResponse,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,
