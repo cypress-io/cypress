@@ -29,8 +29,7 @@ const LogRequest: RequestMiddleware = function () {
 const SendToDriver: RequestMiddleware = function () {
   const { browserPreRequest } = this.req
 
-  // for now, we only care about sending xhr and fetch to the browser
-  if (browserPreRequest && ['xhr', 'fetch'].includes(browserPreRequest.resourceType)) {
+  if (browserPreRequest) {
     this.socket.toDriver('proxy:incoming:request', browserPreRequest)
   }
 
