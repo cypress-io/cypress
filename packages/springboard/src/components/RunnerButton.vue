@@ -3,9 +3,8 @@
 </template>
 
 <script lang="ts">
-import { useStore } from '../store'
-import { TestingType } from '../types/shared'
 import { defineComponent, PropType } from 'vue'
+import { TestingType } from '../types/shared'
 
 export default defineComponent({
   props: {
@@ -14,13 +13,5 @@ export default defineComponent({
       required: true
     }
   },
-
-  setup() {
-    const store = useStore()
-
-    return {
-      defaultType: store.getState().testingType
-    }
-  }
 })
 </script>
