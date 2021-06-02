@@ -44,6 +44,6 @@ export const Step = defineComponent({
   },
 
   setup (props, ctx) {
-    return () => h('div', props, ctx.slots)
+    return () => h('div', { ...props, class: 'p-3' }, ctx.slots)
   },
 })

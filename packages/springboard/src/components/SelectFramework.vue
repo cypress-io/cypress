@@ -1,6 +1,13 @@
 <template>
   <p>
-    You chose: {{ testingType }}.
+    <select>
+      <option>
+        React
+      </option>
+      <option>
+        Vue
+      </option>
+    </select>
   </p>
   <p>
     To finish configuring your project
@@ -18,7 +25,7 @@ export default defineComponent({
     const store = useStore()
 
     return {
-      testingType: store.getState().testingType
+      state: store.getState()
     }
   }
 })
