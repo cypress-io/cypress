@@ -1,13 +1,15 @@
 <template>
   <div class="flex justify-center flex-col items-center">
-    <p>
+    <h2>
       Welcome! What kind of tests would you like to run?
-    </p>
+    </h2>
 
     <div>
-      <runner-button 
+      <RunnerButton 
         v-for="testingType of testingTypes"
+        inputName="testingType"
         :testingType="testingType"
+        :selected="state.testingType === testingType"
         @click="selectTestingType(testingType)"
       />
     </div>
@@ -34,7 +36,8 @@ export default defineComponent({
 
     return {
       testingTypes: markRaw(testingTypes),
-      selectTestingType
+      selectTestingType,
+      state: store.getState()
     }
   }
 })
