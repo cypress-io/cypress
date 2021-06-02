@@ -1044,7 +1044,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           Cypress.action('app:window:load', state('window'))
 
           // FIXME: temporary hard-coded hack to get multidomain working
-          if (autWindow.location.port !== '3501') {
+          if (!autWindow.location.pathname.includes('multidomain-aut')) {
             // we are now stable again which is purposefully
             // the last event we call here, to give our event
             // listeners time to be invoked prior to moving on
