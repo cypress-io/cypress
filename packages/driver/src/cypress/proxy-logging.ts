@@ -63,7 +63,7 @@ export class ProxyLogging {
     this.unmatchedLogs.push({ data, log })
   }
 
-  private takeUnmatchedLog (filterFn: (unmatchedLog: UnmatchedLog) => boolean): UnmatchedLog {
+  private takeUnmatchedLog (filterFn: (unmatchedLog: UnmatchedLog) => boolean): Cypress.Log | undefined {
     for (const i in this.unmatchedLogs) {
       const unmatchedLog = this.unmatchedLogs[i]
 
@@ -71,8 +71,9 @@ export class ProxyLogging {
 
       this.unmatchedLogs.splice(i as unknown as number, 1)
 
-      return unmatchedLog
+      return unmatchedLog.log
     }
-    throw new Error('unmatched log')
+
+    return
   }
 }

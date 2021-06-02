@@ -34,16 +34,16 @@ const getDisplayUrl = (url: string) => {
 
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
+    const proxyLog = Cypress.ProxyLogging.getInterceptLog(request)
+
     const message = _.compact([
       request.request.method,
       request.response && request.response.statusCode,
       getDisplayUrl(request.request.url),
       request.state,
     ]).join(' ')
-
     const displayName = route.handler ? (_.isFunction(route.handler) ? 'req fn' : 'req stub') : 'req'
-
-    return Cypress.log({
+    const logConfig: Partial<Cypress.LogConfig> = {
       name: 'xhr',
       displayName,
       alias: route.alias,
@@ -67,7 +67,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
           message,
         }
       },
-    })
+    }
+
+    return proxyLog ? proxyLog.set(logConfig) : Cypress.log(logConfig)
   }
 
   const { data: req, requestId, subscription } = frame
