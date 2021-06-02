@@ -1,12 +1,10 @@
 <template>
   <div class="shop-home">
-    <router-link
-      :to="{ name: 'order' }"
-      tag="button"
-      class="order"
-    >
-      Place Your Order
-    </router-link>
+    <router-link 
+      :to="{ name: 'order' }" 
+      custom v-slot="{ navigate }">     
+      <button class="order" @click="navigate">Place Your Order</button>
+     </router-link>
     <br>
     <h4>Or select a popular option:</h4>
     <router-link

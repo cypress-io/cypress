@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.3.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.2.0...@cypress/schematic-v1.3.0) (2021-05-26)
+
+
+### Features
+
+* update @cypress/schematic to NOT remove e2e folder or dependencies.  ([#16692](https://github.com/cypress-io/cypress/issues/16692)) ([8b5bad0](https://github.com/cypress-io/cypress/commit/8b5bad096574128ea405d9cd8ffee1457fc0f595))
+
 # [@cypress/schematic-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.1.0...@cypress/schematic-v1.2.0) (2021-05-21)
 
 
