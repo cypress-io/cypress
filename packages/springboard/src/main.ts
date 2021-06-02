@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import { store } from './store'
 
 declare global {
   interface Window {
@@ -12,6 +13,8 @@ declare global {
 window.App = {
   start () {
     const app = createApp(App)
+
+    app.use(store)
 
     app.mount('#app')
   },

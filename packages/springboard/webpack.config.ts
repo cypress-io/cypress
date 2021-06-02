@@ -18,6 +18,11 @@ const config: webpack.Configuration = {
         test: /.vue$/,
         loader: 'vue-loader',
       },
+      {
+        test: /\.ts$/,
+        loader: 'ts-loader',
+        options: { appendTsSuffixTo: [/\.vue$/] },
+      },
     ],
   },
   output: {

@@ -25,6 +25,7 @@
   "devDependencies": {
     "@packages/web-config": "0.0.0-development",
     "cross-env": "6.0.3",
+    "ts-loader": "^8.0.5",
     "webpack": "4.44.2",
     "webpack-cli": "3.3.2"
   },
