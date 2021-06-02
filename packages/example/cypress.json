@@ -1,4 +1,7 @@
 {
-  "projectId": "2pz86o"
+  "projectId": "2pz86o",
+  "supportFile": false,
+  "pluginFiles": false,
+  "fixtureFolder": false
 }
   
