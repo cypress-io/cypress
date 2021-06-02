@@ -1,9 +1,19 @@
 import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-import webpack from 'webpack'
+import webpack, { Plugin } from 'webpack'
 import { VueLoaderPlugin } from 'vue-loader'
+import WindiCSS from 'windicss-webpack-plugin'
 
 const common = getCommonConfig()
+
+// existing webpack config relating to styles
+// has some conflicts with windicss.
+// vue-loader gives us most of these things out of the box,
+// like scoped css, etc, so just remove them for now.
+common.module!.rules = common.module!.rules.filter((x) => {
+  return !['css', 's[ac]ss'].some((x) => x.match(x))
+})
+
 // @ts-ignore
 const config: webpack.Configuration = {
   ...common,
@@ -13,7 +23,10 @@ const config: webpack.Configuration = {
   module: {
     ...common.module!,
     rules: [
-      ...common.module!.rules,
+      {
+        test: /css$/i,
+        loader: ['style-loader', 'css-loader'],
+      },
       {
         test: /.vue$/,
         loader: 'vue-loader',
@@ -31,15 +44,17 @@ const config: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
+const htmlWebpackPlugin = new HtmlWebpackPlugin({
+  template: path.resolve(__dirname, './src/index.html'),
+  env: process.env.NODE_ENV,
+  inject: false,
+}) as unknown as Plugin
+
 config.plugins = [
   // @ts-ignore
   ...config.plugins,
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, './src/index.html'),
-    env: process.env.NODE_ENV,
-    inject: false,
-  }),
+  htmlWebpackPlugin,
+  new WindiCSS(),
   new VueLoaderPlugin(),
 ]
 

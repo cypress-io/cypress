@@ -1,6 +1,5 @@
 <template>
-  <button>{{ testingType }}</button>
-  {{defaultType}}
+  <button class="border-2 border-gray-500 mx-2">{{ testingType }}</button>
 </template>
 
 <script lang="ts">

@@ -27,7 +27,9 @@
     "cross-env": "6.0.3",
     "ts-loader": "^8.0.5",
     "webpack": "4.44.2",
-    "webpack-cli": "3.3.2"
+    "webpack-cli": "3.3.2",
+    "windicss": "3.0.12",
+    "windicss-webpack-plugin": "0.6.1"
   },
   "files": [
     "dist",

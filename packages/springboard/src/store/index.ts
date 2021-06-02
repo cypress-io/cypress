@@ -7,7 +7,7 @@ interface State {
 
 function createInitialState (): State {
   return {
-    testingType: 'component',
+    testingType: undefined,
   }
 }
 
@@ -27,6 +27,15 @@ class Store {
   getState () {
     return readonly(this.state)
   }
+
+  setTestingType (testingType: TestingType) {
+    this.state.testingType = testingType
+  }
+}
+
+// useful for testing
+export function createStore () {
+  return new Store(createInitialState())
 }
 
 export const store = new Store(createInitialState())
