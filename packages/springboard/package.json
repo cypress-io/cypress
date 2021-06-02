@@ -30,11 +30,6 @@
     "windicss": "3.0.12",
     "windicss-webpack-plugin": "0.6.1"
   },
-  "workspaces": {
-    "nohoist": [
-      "**"
-    ]
-  },
   "files": [
     "dist",
     "lib",
