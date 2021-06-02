@@ -59,4 +59,42 @@ function addImageRedirect (webpackOptions) {
   }
 }
 
-module.exports = { addImageRedirect }
+/**
+ * Finds the ModuleScopePlugin plugin and adds given folder
+ * to that list. This allows react-scripts to import folders
+ * outside of the default "/src" folder.
+ * WARNING modifies the input webpack options argument.
+ * @see https://github.com/bahmutov/cypress-react-unit-test/issues/289
+ * @param {string} folderName Folder to add, should be absolute
+ */
+function allowModuleSourceInPlace (folderName, webpackOptions) {
+  if (!folderName) {
+    return
+  }
+
+  if (!webpackOptions.resolve) {
+    return
+  }
+
+  if (!Array.isArray(webpackOptions.resolve.plugins)) {
+    return
+  }
+
+  const moduleSourcePlugin = webpackOptions.resolve.plugins.find((plugin) => {
+    return Array.isArray(plugin.appSrcs)
+  })
+
+  if (!moduleSourcePlugin) {
+    debug('cannot find module source plugin')
+
+    return
+  }
+
+  debug('found module source plugin %o', moduleSourcePlugin)
+  if (!moduleSourcePlugin.appSrcs.includes(folderName)) {
+    moduleSourcePlugin.appSrcs.push(folderName)
+    debug('added folder %s to allowed sources', folderName)
+  }
+}
+
+module.exports = { addImageRedirect, allowModuleSourceInPlace }
