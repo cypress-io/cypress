@@ -1,18 +1,16 @@
 <template>
-  <div class="flex justify-center flex-col items-center">
-    <h2>
-      Welcome! What kind of tests would you like to run?
-    </h2>
+  <h2 class="text-xl text-left my-4 mx-2">
+    Welcome! What kind of tests would you like to run?
+  </h2>
 
-    <div>
-      <RunnerButton 
-        v-for="testingType of testingTypes"
-        inputName="testingType"
-        :testingType="testingType"
-        :selected="state.testingType === testingType"
-        @click="selectTestingType(testingType)"
-      />
-    </div>
+  <div class="text-center" >
+    <RunnerButton 
+      v-for="testingType of testingTypes"
+      inputName="testingType"
+      :testingType="testingType"
+      :selected="state.testingType === testingType"
+      @click="selectTestingType(testingType)"
+    />
   </div>
 </template>
 

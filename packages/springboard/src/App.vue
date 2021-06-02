@@ -1,40 +1,45 @@
 <template>
-  <div class="flex justify-between bg-gray-200">
-    Cypress Dashboard
+<div class="h-screen bg-white">
+  <div class="h-60">
+    <div class="flex justify-between">
+      Cypress Dashboard
 
-    <button>Log in</button>
+      <button>Log in</button>
+    </div>
+
+    <step-container
+      :currentStep="currentStep"
+    >
+      <step :stepNumber="1">
+        <select-runner />
+      </step>
+
+      <step :stepNumber="2">
+        <select-framework />
+      </step>
+
+      <step :stepNumber="3">
+        <install-dependencies />
+      </step>
+    </step-container>
   </div>
-
-  <step-container
-    :currentStep="currentStep"
-  >
-    <step :stepNumber="1">
-      <select-runner />
-    </step>
-
-    <step :stepNumber="2">
-      <select-framework />
-    </step>
-
-    <step :stepNumber="3">
-      <install-dependencies />
-    </step>
-  </step-container>
-
-  <button 
-    v-if="currentStep > 1"
-    @click="goBack"
-  >
-    Previous Step
-  </button>
-
   <div class="flex justify-center">
     <button 
+      class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
+      :class="currentStep > 1 ? '': 'invisible'"
+      @click="goBack"
+    >
+      Previous Step
+    </button>
+    <button
+      class="bg-blue-500 text-white m-5 px-4 py-2 rounded" 
       @click="goNext"
     >
       Next Step
     </button>
   </div>
+  
+</div>
 </template>
 
 <script lang="ts">
