@@ -255,6 +255,10 @@ module.exports = {
 
         case 'symbol':
           return ctx.stylize(value.toString(), 'symbol')
+
+        case 'bigint':
+          return ctx.stylize(`${value.toString() }n`, 'bigint')
+
         default:
           null
       }

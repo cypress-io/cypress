@@ -58,7 +58,7 @@ const renameSupportFolder = (obj) => {
 
 module.exports = {
   _pathToFile (projectRoot, file) {
-    return path.join(projectRoot, file)
+    return path.isAbsolute(file) ? file : path.join(projectRoot, file)
   },
 
   _err (type, file, err) {

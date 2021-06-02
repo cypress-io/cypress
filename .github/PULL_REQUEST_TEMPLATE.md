@@ -5,10 +5,10 @@
 - Make sure you set the correct base branch based on what packages you're changing: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#branches
 -->
 
-- Closes <!-- issue number here. e.g. "Closes #1234" -->
+- Closes <!-- link to the issue here, if there is one -->
 
 ### User facing changelog
-<!-- Explain the change(s) for every user to read in our changelog. Examples: https://on.cypress.io/changelog-->
+<!-- Explain the change(s) for every user to read in our changelog. Examples: https://on.cypress.io/changelog -->
 
 ### Additional details
 <!-- Examples:
