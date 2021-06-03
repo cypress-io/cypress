@@ -1,7 +1,8 @@
 {
   "name": "@cypress/react",
   "version": "0.0.0-development",
-  "description": "Unit test React components using Cypress",
+  "description": "Test React components using Cypress",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
     "build": "rimraf dist && yarn rollup -c rollup.config.js",

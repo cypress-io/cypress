@@ -2,6 +2,7 @@
   "name": "@cypress/vue",
   "version": "0.0.0-development",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
     "build": "rimraf dist && yarn rollup -c rollup.config.js",
