@@ -1,4 +1,5 @@
-it('verifies initial implementation of sibling iframe and switchToDomain', (done) => {
+// FIXME: Skip this for now since it's flaky
+it.skip('verifies initial implementation of sibling iframe and switchToDomain', (done) => {
   top.addEventListener('message', (event) => {
     if (event.data && event.data.text) {
       expect(event.data.text).to.equal('Some text in the cross-domain AUT')
