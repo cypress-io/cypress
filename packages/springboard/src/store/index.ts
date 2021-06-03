@@ -45,8 +45,8 @@ class Store {
 }
 
 // useful for testing
-export function createStore () {
-  return new Store(createInitialState())
+export function createStore (initialState: State = createInitialState()) {
+  return new Store(initialState)
 }
 
 export const store = new Store(createInitialState())

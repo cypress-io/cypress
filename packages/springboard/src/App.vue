@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen bg-white">
-    <div class="h-60">
+    <div>
       <div class="flex justify-between p-2 bg-gray-900 text-white">
         Cypress Dashboard
 

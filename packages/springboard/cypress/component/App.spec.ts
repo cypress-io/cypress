@@ -3,6 +3,7 @@ import 'windi.css'
 
 import App from '../../src/App.vue'
 import { createStore } from '../../src/store'
+import { frameworks } from '../../src/supportedFrameworks'
 
 describe('App', () => {
   it('does not render previous button on first step', () => {
@@ -45,11 +46,22 @@ describe('App', () => {
     // go to next step
     cy.get('button').contains('Next Step').click()
 
-    cy.get('[data-cy="select-framework"]').select('React 16 x Webpack 4')
+    const reactWebpack = frameworks.find((x) => x.displayName === 'React 16 x Webpack 4')!
+
+    cy.get('[data-cy="select-framework"]').select(reactWebpack.displayName)
     cy.get('button').contains('Next Step').click()
 
     // last step
-    cy.get('div').contains('Time to install dependencies')
+
+    for (const dep of reactWebpack.dependencies) {
+      cy.get('[data-cy=dep]').contains(dep.packageName)
+    }
+
+    const deps = reactWebpack.dependencies.map((x) => x.packageName).join(' ')
+
+    cy.get('code').contains(`yarn add ${deps} --dev`)
+
+    cy.get('div').contains('We need you to install these dev dependencies.')
 
     // "Next Step" is now "Launch" - there is no next step.
     cy.get('button').contains('Launch')
