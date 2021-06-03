@@ -1,8 +1,8 @@
 import { ComponentOptions, h } from 'vue'
-import SelectFramework from './components/SelectFramework.vue'
-import InstallDependencies from './components/InstallDependencies.vue'
-import { TestingType } from './types/shared'
-import { defineWizardStep } from './wizards/shared'
+import SelectFramework from '../components/SelectFramework.vue'
+import InstallDependencies from '../components/InstallDependencies.vue'
+import { TestingType } from '../types/shared'
+import { defineWizardStep } from './shared'
 
 interface WizardDeclaration {
   name: string
