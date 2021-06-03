@@ -110,7 +110,7 @@ export const frameworks: SupportedFramework[] = [
     displayName: 'Vue 2 x Nuxt',
     template: 'nuxt (vue 2)',
     images: ['vue', 'nuxt'],
-    dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(4)],
+    dependencies: [cypressVue, cypressWebpackDevServer, htmlWebpackPlugin(4)],
   },
   {
     id: '7',
@@ -119,6 +119,6 @@ export const frameworks: SupportedFramework[] = [
     library: 'vue 3',
     bundler: 'vite',
     images: ['vue', 'vite'],
-    dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(4)],
+    dependencies: [cypressVue, cypressWebpackDevServer, htmlWebpackPlugin(4)],
   },
 ]
