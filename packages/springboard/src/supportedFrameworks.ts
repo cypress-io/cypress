@@ -17,6 +17,7 @@ export interface Dependency {
 interface SupportedBase {
   id: string
   displayName: string
+  images: string[]
   dependencies: Dependency[]
 }
 
@@ -66,6 +67,7 @@ export const frameworks: SupportedFramework[] = [
     displayName: 'React 16 x Webpack 4',
     library: 'react 16',
     bundler: 'webpack 4',
+    images: ['react', 'webpack'],
     dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(4)],
   },
   {
@@ -74,14 +76,49 @@ export const frameworks: SupportedFramework[] = [
     displayName: 'React 17 x Webpack 5',
     library: 'react 17',
     bundler: 'webpack 5',
+    images: ['react', 'webpack'],
     dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(5)],
   },
   {
     id: '3',
     type: 'libraries',
-    displayName: 'Vue 3 x Webpack 3',
+    displayName: 'Vue 3 x Webpack 4',
     library: 'vue 3',
     bundler: 'webpack 4',
+    images: ['webpack', 'vue'],
     dependencies: [cypressVue, cypressWebpackDevServer, htmlWebpackPlugin(4)],
+  },
+  {
+    id: '4',
+    type: 'template',
+    displayName: 'ReactJs 17 x NextJs 10 (Webpack 4)',
+    template: 'next.js (webpack 4)',
+    images: ['react', 'nextjs'],
+    dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(4)],
+  },
+  {
+    id: '5',
+    type: 'template',
+    displayName: 'ReactJs 17 x NextJs 10 (Webpack 5)',
+    template: 'next.js (webpack 5)',
+    images: ['react', 'nextjs'],
+    dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(5)],
+  },
+  {
+    id: '6',
+    type: 'template',
+    displayName: 'Vue 2 x Nuxt',
+    template: 'nuxt (vue 2)',
+    images: ['vue', 'nuxt'],
+    dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(4)],
+  },
+  {
+    id: '7',
+    type: 'libraries',
+    displayName: 'Vue 3 x Vite',
+    library: 'vue 3',
+    bundler: 'vite',
+    images: ['vue', 'vite'],
+    dependencies: [cypressReact, cypressWebpackDevServer, htmlWebpackPlugin(4)],
   },
 ]

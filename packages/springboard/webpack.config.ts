@@ -1,6 +1,6 @@
 import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
-import path from 'path'
-import webpack, { Plugin } from 'webpack'
+import * as path from 'path'
+import { Plugin, Configuration } from 'webpack'
 import { VueLoaderPlugin } from 'vue-loader'
 import WindiCSS from 'windicss-webpack-plugin'
 
@@ -14,9 +14,8 @@ common.module!.rules = common.module!.rules.filter((x) => {
   return !['css', 's[ac]ss'].some((x) => x.match(x))
 })
 
-// @ts-ignore
-const config: webpack.Configuration = {
-  ...common,
+const config: Configuration = {
+  ...common as Configuration,
   entry: {
     app: path.resolve(__dirname, 'src/main'),
   },
@@ -36,6 +35,10 @@ const config: webpack.Configuration = {
         loader: 'ts-loader',
         options: { appendTsSuffixTo: [/\.vue$/] },
       },
+      {
+        test: /\.(jpe?g|gif|png|svg)$/,
+        loader: 'file-loader?name=assets/[name].[ext]',
+      },
     ],
   },
   output: {
@@ -51,8 +54,7 @@ const htmlWebpackPlugin = new HtmlWebpackPlugin({
 }) as unknown as Plugin
 
 config.plugins = [
-  // @ts-ignore
-  ...config.plugins,
+  ...config.plugins!,
   htmlWebpackPlugin,
   new WindiCSS(),
   new VueLoaderPlugin(),
@@ -62,6 +64,7 @@ config.resolve = {
   ...config.resolve,
   alias: {
     bluebird: require.resolve('bluebird'),
+    '@assets': path.resolve(__dirname, 'assets'),
   },
 }
 

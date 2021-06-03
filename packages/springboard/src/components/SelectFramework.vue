@@ -1,4 +1,10 @@
 <template>
+  <p v-if="images" class="text-center m-3">
+    <template v-for="(img, i) of images">
+      <img class="w-20 h-20 inline m-3" :src="`${require(`@assets/${img}.svg`)}`">
+      <span v-if="i < (images.length - 1)">x</span>
+    </template>
+  </p>
   <p>
     <select
      data-cy="select-framework"
@@ -44,6 +50,7 @@ export default defineComponent({
     return {
       selectedFrameworkId,
       frameworks: markRaw(frameworks),
+      images: computed(() => selectedFramework.value && selectedFramework.value.images)
     }
   }
 })
