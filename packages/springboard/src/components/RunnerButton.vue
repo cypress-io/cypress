@@ -9,6 +9,7 @@
       class="mr-3" 
       :name="testingType"
       :id="testingType"
+      :class="selected ? 'border-blue-500': 'border-gray-500' " 
       :checked="selected"
     />
       <img

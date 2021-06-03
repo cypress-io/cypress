@@ -27,6 +27,7 @@ describe('App', () => {
     cy.get('button').contains('Previous Step').click()
 
     cy.get('label[for="component"]').click()
+    // select e2e
 
     // go to next step
     cy.get('button').contains('Next Step').click()

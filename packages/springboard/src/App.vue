@@ -47,8 +47,6 @@ import { computed, defineComponent, markRaw, ref } from 'vue'
 import { testingTypes } from './types/shared'
 import RunnerButton from './components/RunnerButton.vue'
 import SelectWizard from './components/SelectWizard.vue'
-import SelectFramework from './components/SelectFramework.vue'
-import InstallDependencies from './components/InstallDependencies.vue'
 import { wizards } from './wizards'
 import { useStore } from './store'
 
@@ -57,19 +55,13 @@ export default defineComponent({
 
   components: {
     RunnerButton,
-    SelectFramework,
     SelectWizard,
-    InstallDependencies,
   },
 
   setup() {
     const store = useStore()
 
     const currentStep = ref<number>(0)
-
-    const goBack = () => {
-      currentStep.value -= 1
-    }
 
     const selectedWizard =  computed(() => 
       store.getState().testingType
@@ -79,10 +71,16 @@ export default defineComponent({
 
     const goNext = () => {
       if (!selectedWizard.value || currentStep.value === selectedWizard.value.steps.length) {
+        // we are done!
+        // launch browser, or whatever
         return
       }
 
       currentStep.value += 1
+    }
+
+    const goBack = () => {
+      currentStep.value -= 1
     }
 
     const lastStepOfWorkflow = computed(() => {
@@ -99,10 +97,9 @@ export default defineComponent({
     })
 
     return {
-      lastStepOfWorkflow,
       testingTypes: markRaw(testingTypes),
-      nextStepText,
       selectedWizard,
+      nextStepText,
       currentStep,
       goNext,
       goBack,
