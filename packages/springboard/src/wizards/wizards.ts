@@ -3,14 +3,18 @@ import SelectFramework from '../components/SelectFramework.vue'
 import InstallDependencies from '../components/InstallDependencies.vue'
 import { TestingType } from '../types/shared'
 import { defineWizardStep } from './shared'
+import { useStore } from '../store'
 
-interface WizardDeclaration {
-  name: string
-  steps: Array<{
+interface Step {
     number: number
     name: string
     component: ConcreteComponent
-  }>
+    canGoNextStep(): boolean
+}
+
+interface WizardDeclaration {
+  name: string
+  steps: Step[]
 }
 
 const componentTestingWizard: WizardDeclaration = {
@@ -19,13 +23,20 @@ const componentTestingWizard: WizardDeclaration = {
     {
       number: 1,
       name: 'select-framework',
-      // TODO: type .vue shim properly.
       component: SelectFramework,
+      canGoNextStep () {
+        const store = useStore()
+
+        return !!store.getState().component.framework
+      },
     },
     {
       number: 2,
       name: 'install-dependencies',
       component: InstallDependencies,
+      canGoNextStep () {
+        return true
+      },
     },
   ],
 }
@@ -41,6 +52,9 @@ const e2eTestingWizard: WizardDeclaration = {
           return () => h('div', 'TODO: Figure out wizard workflow for e2e.')
         },
       }),
+      canGoNextStep () {
+        return true
+      },
     },
   ],
 }

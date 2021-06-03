@@ -7,25 +7,14 @@
         <button>Log in</button>
       </div>
 
-      <SelectWizard v-if="currentStep === 0" />
-
-      <div 
-        v-if="selectedWizard"
-        v-for="step in selectedWizard.steps" 
-        :key="step.name"
-      >
-        <component 
-          :is="step.component" 
-          v-if="step.number === currentStep"
-          @setNextStepStatus="setNextStepStatus"
-        />
-      </div>
+      <SelectWizard v-if="!currentStep" />
+      <component v-else :is="currentStep.component" />
     </div>
 
     <div class="flex justify-center">
       <button 
         class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
-        :class="{ 'invisible': currentStep === 0 }" 
+        :class="{ 'invisible': !currentStep }" 
         @click="goBack"
       >
         Previous Step
@@ -63,7 +52,7 @@ export default defineComponent({
   setup() {
     const store = useStore()
 
-    const currentStep = ref<number>(0)
+    const currentStepNumber = ref<number>(0)
 
     const selectedWizard =  computed(() => 
       store.getState().testingType
@@ -72,24 +61,24 @@ export default defineComponent({
     )
 
     const goNext = () => {
-      if (!selectedWizard.value || currentStep.value === selectedWizard.value.steps.length) {
+      if (!selectedWizard.value || currentStepNumber.value === selectedWizard.value.steps.length) {
         // we are done!
         // launch browser, or whatever
         return
       }
 
-      currentStep.value += 1
+      currentStepNumber.value += 1
     }
 
     const goBack = () => {
-      if (currentStep.value > 0) {
-        currentStep.value -= 1
+      if (currentStepNumber.value > 0) {
+        currentStepNumber.value -= 1
       }
     }
 
     const lastStepOfWorkflow = computed(() => {
       return selectedWizard.value && 
-        selectedWizard.value.steps.length <= currentStep.value
+        selectedWizard.value.steps.length <= currentStepNumber.value
     })
 
     const nextStepText = computed(() => {
@@ -100,17 +89,12 @@ export default defineComponent({
       return 'Next Step'
     })
 
-    const canGoNextStep = ref(true)
-
-    const setNextStepStatus = (val: boolean) => {
-      canGoNextStep.value = val
-    }
+    const currentStep = computed(() => selectedWizard.value ? selectedWizard.value.steps[currentStepNumber.value - 1] : undefined)
 
     return {
       testingTypes: markRaw(testingTypes),
       selectedWizard,
-      setNextStepStatus,
-      canGoNextStep,
+      canGoNextStep: computed(() => currentStep.value ? currentStep.value.canGoNextStep() : !!selectedWizard.value),
       nextStepText,
       currentStep,
       goNext,
