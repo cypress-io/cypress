@@ -58,6 +58,7 @@ declare namespace Cypress {
       indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
       message?: string
     }
+    browserPreRequest?: any
   }
 
   interface State {

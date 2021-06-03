@@ -42,7 +42,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       getDisplayUrl(request.request.url),
       request.state,
     ]).join(' ')
-    const displayName = route.handler ? (_.isFunction(route.handler) ? 'req fn' : 'req stub') : 'req'
+    const displayName = route.handler ? (_.isFunction(route.handler) ? 'intercept fn' : 'intercept stub') : 'intercept'
     const logConfig: Partial<Cypress.LogConfig> = {
       name: 'xhr',
       displayName,

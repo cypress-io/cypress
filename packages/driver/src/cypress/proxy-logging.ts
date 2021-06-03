@@ -1,6 +1,7 @@
 import { Interception } from '@packages/net-stubbing/lib/types'
+import { BrowserPreRequest } from '@packages/proxy/lib/types'
 
-const getDisplayUrl = (url: string) => {
+function getDisplayUrl (url: string) {
   if (url.startsWith(window.location.origin)) {
     return url.slice(window.location.origin.length)
   }
@@ -8,30 +9,32 @@ const getDisplayUrl = (url: string) => {
   return url
 }
 
-function getRequestLogConfig (data): Partial<Cypress.LogConfig> {
+function getRequestLogConfig (browserPreRequest: BrowserPreRequest): Partial<Cypress.LogConfig> {
   return {
     name: 'xhr',
-    displayName: data.resourceType,
+    displayName: browserPreRequest.resourceType,
     type: 'parent',
     event: true,
-    method: data.method,
+    url: browserPreRequest.url,
+    method: browserPreRequest.method,
     consoleProps: () => {
       return {
-        Method: data.method,
-        URL: data.url,
+        Method: browserPreRequest.method,
+        URL: browserPreRequest.url,
       }
     },
     renderProps: () => {
       return {
         indicator: 'successful',
-        message: `${data.method} ${getDisplayUrl(data.url)}`,
+        message: `${browserPreRequest.method} ${getDisplayUrl(browserPreRequest.url)}`,
       }
     },
+    browserPreRequest,
   }
 }
 
 type UnmatchedLog = {
-  data: any
+  browserPreRequest: BrowserPreRequest
   log: Cypress.Log
 }
 
@@ -39,28 +42,28 @@ export class ProxyLogging {
   unmatchedLogs: Array<UnmatchedLog> = []
 
   constructor (private Cypress: Cypress.Cypress) {
-    Cypress.on('proxy:incoming:request', (data) => {
-      this.logProxyIncomingRequest(data)
+    Cypress.on('proxy:incoming:request', (browserPreRequest) => {
+      this.logProxyIncomingRequest(browserPreRequest)
     })
   }
 
   getXhrLog (xhr) {
     const { method, url } = xhr
 
-    return this.takeUnmatchedLog((log) => log.data.url === url && log.data.method === method)
+    return this.takeUnmatchedLog(({ browserPreRequest }) => browserPreRequest.url === url && browserPreRequest.method === method)
   }
 
   getInterceptLog (interception: Interception) {
     const { method, url } = interception.request
 
-    return this.takeUnmatchedLog((log) => log.data.url === url && log.data.method === method)
+    return this.takeUnmatchedLog(({ browserPreRequest }) => browserPreRequest.url === url && browserPreRequest.method === method)
   }
 
-  private logProxyIncomingRequest (data) {
-    const log = this.Cypress.log(getRequestLogConfig(data))
+  private logProxyIncomingRequest (browserPreRequest) {
+    const log = this.Cypress.log(getRequestLogConfig(browserPreRequest))
 
     log.end()
-    this.unmatchedLogs.push({ data, log })
+    this.unmatchedLogs.push({ browserPreRequest, log })
   }
 
   private takeUnmatchedLog (filterFn: (unmatchedLog: UnmatchedLog) => boolean): Cypress.Log | undefined {
