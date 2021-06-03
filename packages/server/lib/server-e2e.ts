@@ -423,9 +423,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obsfucated by the proxying so this is not an ideal solution
-        _.assign(options, {
+        _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          headers: {
+            'x-cypress-resolving-url': '1',
+          },
         })
       }
 

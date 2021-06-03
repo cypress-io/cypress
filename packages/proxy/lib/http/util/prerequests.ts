@@ -23,6 +23,8 @@ export class PreRequests {
     if (i !== -1) {
       const [preRequest] = this.pendingBrowserPreRequests.splice(i, 1)
 
+      ctxDebug('matches pending pre-request %o', preRequest)
+
       return cb(preRequest)
     }
 
@@ -42,7 +44,7 @@ export class PreRequests {
 
     const requestPendingPreRequestCb = {
       cb: (browserPreRequest) => {
-        ctxDebug('received pre-request after %dms', Date.now() - startedMs)
+        ctxDebug('received pre-request after %dms %o', Date.now() - startedMs, browserPreRequest)
         clearTimeout(timeout)
         remove()
         cb(browserPreRequest)
