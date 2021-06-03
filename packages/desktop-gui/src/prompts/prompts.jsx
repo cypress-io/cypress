@@ -141,8 +141,8 @@ class CIPrompt1 extends Component {
             <i className='fas fa-times' />
           </button>
           <div className='text-content'>
-            <h2>Optimize Cypress in CI</h2>
-            <p>We've created these guides to help you maximize how you're running tests in CI.</p>
+            <h2>Setting up CI</h2>
+            <p>We've created these guides to help you optimize how you're running tests in CI.</p>
           </div>
           <div className='ci-providers'>
             { this.ciProviders.map((provider) => {
@@ -162,7 +162,7 @@ class CIPrompt1 extends Component {
           <div className='prompt-buttons'>
             <button className='btn btn-success' onClick={this._viewMore}>Learn More</button>
             <br />
-            <button className='btn btn-link' onClick={this._closeModal}>
+            <button className='btn btn-link' onClick={this._close}>
               Close
             </button>
           </div>
@@ -173,6 +173,7 @@ class CIPrompt1 extends Component {
 }
 
 @observer
+// eslint-disable-next-line no-unused-vars
 class DashboardPrompt1 extends Component {
   slug = 'dashboard1'
   utm_medium = 'Dashboard Prompt 1'
@@ -248,7 +249,7 @@ class DashboardPrompt1 extends Component {
               buttonClassName='btn btn-success'
               buttonContent='Get Started'
             />
-            <button className='btn btn-link' onClick={this._closeModal}>
+            <button className='btn btn-link' onClick={this._close}>
               No Thanks
             </button>
           </div>
@@ -259,44 +260,22 @@ class DashboardPrompt1 extends Component {
 }
 
 @observer
-class DashboardPrompt2 extends Component {
-  slug = 'dashboard2'
-  utm_medium = 'Dashboard Prompt 2'
+class OrchestrationPrompt1 extends Component {
+  slug = 'orchestration1'
+  utm_medium = 'Orchestration Prompt 1'
 
   _close = () => {
     this.props.prompts.closePrompt(this.slug)
     ipc.setPromptShown(this.slug)
   }
 
-  _openParallelization = (e) => {
+  _openLearnMore = (e) => {
     e.preventDefault()
     ipc.externalOpen({
-      url: 'https://on.cypress.io/parallelization',
+      url: 'https://on.cypress.io/smart-orchestration',
       params: {
         utm_medium: this.utm_medium,
-        utm_campaign: 'Parallelization',
-      },
-    })
-  }
-
-  _openSmartOrchestration = (e) => {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/run-failed-specs-first',
-      params: {
-        utm_medium: this.utm_medium,
-        utm_campaign: 'Failed Specs First',
-      },
-    })
-  }
-
-  _openLoadBalancing = (e) => {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/load-balancing',
-      params: {
-        utm_medium: this.utm_medium,
-        utm_campaign: 'Load Balancing',
+        utm_campaign: 'Learn More',
       },
     })
   }
@@ -314,12 +293,12 @@ class DashboardPrompt2 extends Component {
             <i className='fas fa-times' />
           </button>
           <div className='text-content'>
-            <h2>Speed up test runs in CI</h2>
-            <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
+            <h2>Running tests faster in CI</h2>
+            <p>With <span className='text-bold'>Smart Orchestration</span> you can:</p>
             <ul>
-              <li>Run test spec files <a onClick={this._openParallelization}>simultaneously</a></li>
-              <li>Prioritize <a onClick={this._openSmartOrchestration}>failed specs first</a> to quickly verify latest changes</li>
-              <li>Optimize <a onClick={this._openLoadBalancing}>CI resources</a></li>
+              <li>Run spec files in parallel</li>
+              <li>Prioritize failed specs to run first to verify latest changes</li>
+              <li>Cancel CI runs on first test failure</li>
             </ul>
           </div>
           <div className='dashboard-frame'>
@@ -349,13 +328,12 @@ class DashboardPrompt2 extends Component {
             </div>
           </div>
           <div className='prompt-buttons'>
-            <LoginForm
-              utm='Dashboard Prompt 1'
-              buttonClassName='btn btn-success'
-              buttonContent='Get Started'
-            />
-            <button className='btn btn-link' onClick={this._closeModal}>
-              No Thanks
+            <button className='btn btn-success' onClick={this._openLearnMore}>
+              Learn More
+            </button>
+            <br />
+            <button className='btn btn-link' onClick={this._close}>
+              Close
             </button>
           </div>
         </div>
@@ -372,8 +350,9 @@ const Prompts = observer(({ project, referenceElement }) => {
   return (
     <>
       <CIPrompt1 prompts={prompts} referenceElement={referenceElement} />
-      <DashboardPrompt1 prompts={prompts} referenceElement={referenceElement} />
-      <DashboardPrompt2 prompts={prompts} referenceElement={referenceElement} />
+      {/* TODO: finish designs for prompts */}
+      {/*<DashboardPrompt1 prompts={prompts} referenceElement={referenceElement} />*/}
+      <OrchestrationPrompt1 prompts={prompts} referenceElement={referenceElement} />
     </>
   )
 })

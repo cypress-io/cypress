@@ -7,13 +7,14 @@ const prompts = _.sortBy([
     slug: 'ci1',
     interval: interval('4 days'),
     noProjectId: true,
-  }, {
-    slug: 'dashboard1',
-    interval: interval('7 days'),
-    noProjectId: true,
-  }, {
-    slug: 'dashboard2',
-    interval: interval('70 days'),
+  },
+  // {
+  //   slug: 'dashboard1',
+  //   interval: interval('7 days'),
+  //   noProjectId: true,
+  // },
+  {
+    slug: 'orchestration1',
     noProjectId: true,
   },
 ], 'interval')
@@ -83,13 +84,14 @@ export default class Prompts {
   _shouldShowPrompt = (prompt) => {
     const timeSinceOpened = Date.now() - this.firstOpened
 
-    // prompt has not been shown
+    // prompt has been shown
     if (this._promptsShown && this._promptsShown[prompt.slug]) {
       return false
     }
 
     // enough time has passed
-    if (timeSinceOpened < prompt.interval) {
+    // no interval indicates never being shown automatically
+    if (!prompt.interval || timeSinceOpened < prompt.interval) {
       return false
     }
 

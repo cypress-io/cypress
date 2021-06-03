@@ -79,7 +79,7 @@ const DocsMenu = observer(() => {
     const utm_medium = 'Docs Menu'
 
     return [{
-      title: 'Get Started',
+      title: 'Get started',
       children: [{
         text: 'Write your first test',
         link: {
@@ -130,7 +130,7 @@ const DocsMenu = observer(() => {
         },
       }],
     }, {
-      title: 'Optimize Cypress in CI',
+      title: 'Do more in CI',
       itemIcon: 'far fa-lightbulb',
       children: [{
         text: 'Setting up CI',
@@ -142,17 +142,8 @@ const DocsMenu = observer(() => {
           },
         }),
       }, {
-        text: 'Debugging failed tests',
-        ...showPromptOrLink('dashboard1', {
-          url: 'https://on.cypress.io/features-dashboard',
-          params: {
-            utm_medium,
-            utm_content: 'Debugging',
-          },
-        }),
-      }, {
         text: 'Running tests faster',
-        ...showPromptOrLink('dashboard2', {
+        ...showPromptOrLink('orchestration1', {
           url: 'https://on.cypress.io/parallelization',
           params: {
             utm_medium,
@@ -181,7 +172,7 @@ const DocsMenu = observer(() => {
                     <a onClick={(e) => _handleMenuClick(e, item)}>
                       <i className={itemIcon || item.icon || 'far fa-file-alt'} />
                       <span>{item.text}</span>
-                      <i className='fas fa-long-arrow-alt-right' />
+                      { item.link && <i className='fas fa-long-arrow-alt-right' /> }
                     </a>
                   </li>
                 ))}
