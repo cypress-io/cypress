@@ -21,12 +21,12 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue'
 import { useStore } from '../store'
 import DependencyItem from './DependencyItem.vue'
 import TerminalCommand from './TerminalCommand.vue'
-import { defineWizardStep } from '../wizards/shared'
 
-export default defineWizardStep({
+export default defineComponent({
   components: {
     DependencyItem,
     TerminalCommand

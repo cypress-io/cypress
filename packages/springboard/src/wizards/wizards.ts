@@ -2,7 +2,6 @@ import { ConcreteComponent, h } from 'vue'
 import SelectFramework from '../components/SelectFramework.vue'
 import InstallDependencies from '../components/InstallDependencies.vue'
 import { TestingType } from '../types/shared'
-import { defineWizardStep } from './shared'
 import { useStore } from '../store'
 
 interface Step {
@@ -47,11 +46,11 @@ const e2eTestingWizard: WizardDeclaration = {
     {
       number: 1,
       name: 'unknown',
-      component: defineWizardStep({
+      component: {
         setup () {
           return () => h('div', 'TODO: Figure out wizard workflow for e2e.')
         },
-      }),
+      },
       canGoNextStep () {
         return true
       },

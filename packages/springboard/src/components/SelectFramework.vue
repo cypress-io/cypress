@@ -3,6 +3,7 @@
     <select
      data-cy="select-framework"
      v-model="selectedFramework"
+     @change="selectFramework(framework)"
     >
       <option 
         v-for="framework of frameworks"
@@ -23,11 +24,10 @@
 
 <script lang="ts">
 import { useStore } from '../store'
-import { computed, markRaw, onMounted } from 'vue'
+import { computed, defineComponent, markRaw, onMounted } from 'vue'
 import { frameworks } from '../supportedFrameworks'
-import { defineWizardStep } from '../wizards/shared'
 
-export default defineWizardStep({
+export default defineComponent({
   setup(props, ctx) {
     const store = useStore()
 
@@ -52,10 +52,15 @@ export default defineWizardStep({
       }
     })
 
+    function selectFramework(fw){
+      console.log(fw)
+    }
+
     return {
       selectedFramework,
       state: store.getState(),
-      frameworks: markRaw(frameworks)
+      frameworks: markRaw(frameworks),
+      selectFramework
     }
   }
 })
