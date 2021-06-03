@@ -19,5 +19,7 @@
 </template>
 
 <script lang="ts">
-export default {}
+import { defineWizardStep } from '../wizards/shared'
+
+export default defineWizardStep({})
 </script>

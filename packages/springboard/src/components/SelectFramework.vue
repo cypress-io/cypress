@@ -1,12 +1,17 @@
 <template>
   <p>
-    <select data-cy="select-framework">
-      <option>
-        React
+    <select
+     data-cy="select-framework"
+     v-model="selectedFramework"
+    >
+      <option 
+        v-for="framework of frameworks"
+        :key="framework.displayName"
+        :value="framework.id"
+      >
+        {{ framework.displayName }}
       </option>
-      <option>
-        Vue
-      </option>
+      <option value="none" disabled>Select framework</option>
     </select>
   </p>
   <p>
@@ -18,14 +23,39 @@
 
 <script lang="ts">
 import { useStore } from '../store'
-import { defineComponent } from 'vue'
+import { computed, markRaw, onMounted } from 'vue'
+import { frameworks } from '../supportedFrameworks'
+import { defineWizardStep } from '../wizards/shared'
 
-export default defineComponent({
-  setup() {
+export default defineWizardStep({
+  setup(props, ctx) {
     const store = useStore()
 
+    onMounted(() => {
+      // we should detect the user's framework if possible
+      // detectUserFramework().then(result => {
+      //   ... set default framework
+      //   ... ctx.emit('setNextStepStatus', true) // allow to proceed 
+      // })
+      ctx.emit('setNextStepStatus', false)
+    })
+
+    const selectedFramework = computed({
+      get() {
+        return store.getState().component.framework
+          ? store.getState().component.framework!.id
+          : 'none'
+      },
+      set(id: string) {
+        store.setComponentFramework(frameworks.find(x => x.id === id)!)
+        ctx.emit('setNextStepStatus', true)
+      }
+    })
+
     return {
-      state: store.getState()
+      selectedFramework,
+      state: store.getState(),
+      frameworks: markRaw(frameworks)
     }
   }
 })

@@ -1,14 +1,16 @@
-import { defineComponent, h, DefineComponent } from 'vue'
+import { ComponentOptions, h } from 'vue'
 import SelectFramework from './components/SelectFramework.vue'
 import InstallDependencies from './components/InstallDependencies.vue'
 import { TestingType } from './types/shared'
+import { defineWizardStep } from './wizards/shared'
 
 interface WizardDeclaration {
   name: string
   steps: Array<{
     number: number
     name: string
-    component: DefineComponent
+    // is this the correct definition?
+    component: ComponentOptions
   }>
 }
 
@@ -19,12 +21,12 @@ const componentTestingWizard: WizardDeclaration = {
       number: 1,
       name: 'select-framework',
       // TODO: type .vue shim properly.
-      component: SelectFramework as unknown as DefineComponent,
+      component: SelectFramework as unknown as any,
     },
     {
       number: 2,
       name: 'install-dependencies',
-      component: InstallDependencies as unknown as DefineComponent,
+      component: InstallDependencies as unknown as any,
     },
   ],
 }
@@ -35,9 +37,9 @@ const e2eTestingWizard: WizardDeclaration = {
     {
       number: 1,
       name: 'unknown',
-      component: defineComponent({
-        render () {
-          return h('div', 'TODO: Figure out wizard workflow for e2e.')
+      component: defineWizardStep({
+        setup () {
+          return () => h('div', 'TODO: Figure out wizard workflow for e2e.')
         },
       }),
     },

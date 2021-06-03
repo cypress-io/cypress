@@ -5,7 +5,20 @@ import App from '../../src/App.vue'
 import { createStore } from '../../src/store'
 
 describe('App', () => {
-  it('renders', () => {
+  it('does not render previous button on first step', () => {
+    const store = createStore()
+
+    mount(App, {
+      global: {
+        plugins: [store],
+      },
+    })
+
+    cy.get('button[cy-data="previous"]').should('not.exist')
+    cy.get('button').contains('Next Step').should('exist').should('be.disabled')
+  })
+
+  it('completes workflow for component testing', () => {
     const store = createStore()
 
     mount(App, {
@@ -32,7 +45,7 @@ describe('App', () => {
     // go to next step
     cy.get('button').contains('Next Step').click()
 
-    cy.get('[data-cy="select-framework"]').select('React')
+    cy.get('[data-cy="select-framework"]').select('React 16 x Webpack 4')
     cy.get('button').contains('Next Step').click()
 
     // last step

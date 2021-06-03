@@ -17,6 +17,7 @@
         <component 
           :is="step.component" 
           v-if="step.number === currentStep"
+          @setNextStepStatus="setNextStepStatus"
         />
       </div>
     </div>
@@ -24,16 +25,17 @@
     <div class="flex justify-center">
       <button 
         class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
-        :class="{ invisible: currentStep === 0 }" 
+        :class="{ 'invisible': currentStep === 0 }" 
         @click="goBack"
       >
         Previous Step
       </button>
 
       <button
-        :disabled="!selectedTestingType"
+        :disabled="!selectedTestingType || !canGoNextStep"
+        data-cy="previous"
         class="bg-blue-500 text-white m-5 px-4 py-2 rounded" 
-        :class="{ 'opacity-50': !selectedTestingType }"
+        :class="{ 'opacity-50': !selectedTestingType || !canGoNextStep }"
         @click="goNext"
       >
         {{ nextStepText }}
@@ -80,7 +82,9 @@ export default defineComponent({
     }
 
     const goBack = () => {
-      currentStep.value -= 1
+      if (currentStep.value > 0) {
+        currentStep.value -= 1
+      }
     }
 
     const lastStepOfWorkflow = computed(() => {
@@ -96,9 +100,17 @@ export default defineComponent({
       return 'Next Step'
     })
 
+    const canGoNextStep = ref(true)
+
+    const setNextStepStatus = (val: boolean) => {
+      canGoNextStep.value = val
+    }
+
     return {
       testingTypes: markRaw(testingTypes),
       selectedWizard,
+      setNextStepStatus,
+      canGoNextStep,
       nextStepText,
       currentStep,
       goNext,
