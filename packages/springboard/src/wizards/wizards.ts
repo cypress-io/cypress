@@ -1,4 +1,4 @@
-import { ComponentOptions, h } from 'vue'
+import { ConcreteComponent, h } from 'vue'
 import SelectFramework from '../components/SelectFramework.vue'
 import InstallDependencies from '../components/InstallDependencies.vue'
 import { TestingType } from '../types/shared'
@@ -9,8 +9,7 @@ interface WizardDeclaration {
   steps: Array<{
     number: number
     name: string
-    // is this the correct definition?
-    component: ComponentOptions
+    component: ConcreteComponent
   }>
 }
 
@@ -21,12 +20,12 @@ const componentTestingWizard: WizardDeclaration = {
       number: 1,
       name: 'select-framework',
       // TODO: type .vue shim properly.
-      component: SelectFramework as unknown as any,
+      component: SelectFramework,
     },
     {
       number: 2,
       name: 'install-dependencies',
-      component: InstallDependencies as unknown as any,
+      component: InstallDependencies,
     },
   ],
 }
