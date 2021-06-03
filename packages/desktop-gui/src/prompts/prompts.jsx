@@ -6,7 +6,7 @@ import LoginForm from '../auth/login-form'
 import { DashboardBranchHistory, CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild, CISingleIcon, CIMultiIcon } from './prompt-images'
 import ipc from '../lib/ipc'
 
-const Prompt = observer(({ children, isOpen, referenceElement }) => {
+const Prompt = observer(({ children, isOpen, referenceElement, className }) => {
   const [popperElement, setPopperElement] = useState(null)
   const [arrowElement, setArrowElement] = useState(null)
 
@@ -29,7 +29,7 @@ const Prompt = observer(({ children, isOpen, referenceElement }) => {
   if (!isOpen) return null
 
   return (
-    <div className='popper prompt' ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
+    <div className={`popper prompt ${className}`} ref={setPopperElement} style={popperStyles.popper} {...popperAttributes.popper}>
       {children}
       <div className='arrow' ref={setArrowElement} style={popperStyles.arrow} />
     </div>
@@ -135,6 +135,7 @@ class CIPrompt1 extends Component {
       <Prompt
         isOpen={prompts[this.slug]}
         referenceElement={referenceElement}
+        className='prompt-ci1'
       >
         <div className='prompt-body'>
           <button className='btn btn-link close' onClick={this._close}>
@@ -287,6 +288,7 @@ class OrchestrationPrompt1 extends Component {
       <Prompt
         isOpen={prompts[this.slug]}
         referenceElement={referenceElement}
+        className='prompt-orchestration1'
       >
         <div className='prompt-body'>
           <button className='btn btn-link close' onClick={this._close}>

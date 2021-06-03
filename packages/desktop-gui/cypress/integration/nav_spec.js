@@ -99,25 +99,13 @@ describe('Navigation', function () {
       it('opens dismissible ci1 prompt', function () {
         cy.contains('Setting up CI').click()
         cy.get('.docs-dropdown').should('not.exist')
-        cy.contains('Optimize Cypress in CI').should('be.visible')
-        cy.get('.close').click()
-        cy.get('.prompt-body').should('not.exist')
+        cy.get('.prompt-ci1').should('be.visible')
       })
 
-      it('opens dismissible dashboard1 prompt', function () {
-        cy.contains('Debugging failed tests').click()
-        cy.get('.docs-dropdown').should('not.exist')
-        cy.contains('Debug Tests in CI Faster').should('be.visible')
-        cy.get('.close').click()
-        cy.get('.prompt-body').should('not.exist')
-      })
-
-      it('opens dismissible dashboard2 prompt', function () {
+      it('opens dismissible orchestration1 prompt', function () {
         cy.contains('Running tests faster').click()
         cy.get('.docs-dropdown').should('not.exist')
-        cy.contains('Speed up test runs in CI').should('be.visible')
-        cy.get('.close').click()
-        cy.get('.prompt-body').should('not.exist')
+        cy.get('.prompt-orchestration1').should('be.visible')
       })
     })
   })
