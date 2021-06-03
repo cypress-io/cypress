@@ -1,6 +1,6 @@
 <template>
-  <p v-if="images" class="text-center m-3">
-    <template v-for="(img, i) of images">
+  <p class="text-center m-3 h-20">
+    <template v-if="images" v-for="(img, i) of images">
       <img class="w-20 h-20 inline m-3" :src="`${require(`@assets/${img}.svg`)}`">
       <span v-if="i < (images.length - 1)">x</span>
     </template>
