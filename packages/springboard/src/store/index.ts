@@ -1,13 +1,20 @@
+import { SupportedFramework } from '../supportedFrameworks'
 import { reactive, readonly, inject, App } from 'vue'
 import { TestingType } from '../types/shared'
 
 interface State {
   testingType: TestingType | undefined
+  component: {
+    framework: SupportedFramework | undefined
+  }
 }
 
 function createInitialState (): State {
   return {
     testingType: undefined,
+    component: {
+      framework: undefined,
+    },
   }
 }
 
@@ -31,11 +38,15 @@ class Store {
   setTestingType (testingType: TestingType) {
     this.state.testingType = testingType
   }
+
+  setComponentFramework (framework: SupportedFramework) {
+    this.state.component.framework = framework
+  }
 }
 
 // useful for testing
-export function createStore () {
-  return new Store(createInitialState())
+export function createStore (initialState: State = createInitialState()) {
+  return new Store(initialState)
 }
 
 export const store = new Store(createInitialState())

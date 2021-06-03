@@ -2,6 +2,7 @@
   "baseUrl": "http://localhost:5555",
   "viewportWidth": 800,
   "viewportHeight": 850,
+  "fixturesFolder": false,
   "env": {
     "webpackFilename": "webpack.config.ts",
     "coverage": false
