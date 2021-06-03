@@ -32,6 +32,7 @@ function getSnapshotGenerator ({
   nodeModulesOnly,
   projectBaseDir,
   snapshotCacheDir,
+  mksnapshotBin,
   snapshotEntryFile,
   snapshotMetaPrevFile,
   usePreviousSnapshotMetadata,
@@ -48,6 +49,7 @@ function getSnapshotGenerator ({
 
   return new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
     cacheDir: snapshotCacheDir,
+    mksnapshotBin,
     previousDeferred,
     previousHealthy,
     previousNoRewrite,
@@ -98,6 +100,7 @@ module.exports = async function installSnapshot ({
   nodeModulesOnly,
   projectBaseDir,
   snapshotCacheDir,
+  mksnapshotBin,
   snapshotEntryFile,
   snapshotMetaFile,
   snapshotMetaPrevFile,
@@ -113,6 +116,7 @@ module.exports = async function installSnapshot ({
       nodeModulesOnly,
       projectBaseDir,
       snapshotCacheDir,
+      mksnapshotBin,
       snapshotEntryFile,
       snapshotMetaFile,
       snapshotMetaPrevFile,
