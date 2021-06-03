@@ -3,10 +3,10 @@
     Welcome! What kind of tests would you like to run?
   </h2>
 
-  <div class="text-center" >
+  <div class="text-center">
     <RunnerButton 
       v-for="testingType of testingTypes"
-      inputName="testingType"
+      :key="testingType"
       :testingType="testingType"
       :selected="selectedTestingType === testingType"
       @click="selectTestingType(testingType)"

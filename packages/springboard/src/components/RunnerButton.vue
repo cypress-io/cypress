@@ -1,12 +1,12 @@
 <template>
   <label 
     class="text-left inline-block border-2 rounded-lg mx-2 p-3 w-xs cursor-pointer" 
-    :class="selected ? 'border-blue-500': 'border-gray-500' " 
-    @click="$emit('click')">
+    :class="selected ? 'border-blue-500': 'border-gray-500'" 
+  >
     <input 
       type="radio" 
       class="mr-3" 
-      name="testingType"
+      :name="testingType"
       :checked="selected"
     />
       <img
@@ -22,12 +22,7 @@ import { defineComponent, PropType } from 'vue'
 import { TestingType } from '../types/shared'
 
 export default defineComponent({
-  emits: ["click"],
   props: {
-    inputName: {
-      type: String,
-      required: true
-    },
     testingType: {
       type: String as PropType<TestingType>,
       required: true
