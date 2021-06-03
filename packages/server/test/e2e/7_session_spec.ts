@@ -1,6 +1,6 @@
 import e2e from '../support/helpers/e2e'
 import parser from 'cookie-parser'
-
+import BodyParser from 'body-parser'
 const onServer = function (app) {
   app.use(parser())
 
@@ -12,6 +12,8 @@ const onServer = function (app) {
 
     next()
   })
+
+  app.use(BodyParser.urlencoded())
 
   app.get('/link', (req, res) => {
     res.send('<html><h1>link</h1><a href=\'https://www.foo.com:44665/cross_origin\'>second</a></html>')
@@ -39,27 +41,37 @@ const onServer = function (app) {
     })()</script></body>`)
   })
 
-  app.get('/redirect', (req, res) => {
-    res.redirect(302)
-  })
-
-  app.get('/keep_open', (req, res) => {
-    // dont respond
-  })
-
   app.get('/form', (req, res) => {
     res.send(`\
 <html>
 <h1>form</h1>
-<form method='POST' action='https://www.foo.com:44665/submit'>
-  <input type='submit' name='foo' value='bar' />
+<form method='POST' action='/submit'>
+  <input name='delay' />
 </form>
 </html>\
 `)
   })
 
   app.post('/submit', (req, res) => {
-    res.redirect('https://www.foo.com:44665/cross_origin')
+    if (req.body.delay) {
+      return setTimeout(() => {
+        res.redirect('/home')
+      }, +req.body.delay)
+    }
+
+    res.redirect('/home')
+  })
+
+  app.get('/home', (req, res) => {
+    res.send('<html><h1>home</h1></html>')
+  })
+
+  app.get('/redirect', (req, res) => {
+    res.redirect(302)
+  })
+
+  app.get('/keep_open', (req, res) => {
+    // dont respond
   })
 
   app.get('/javascript', (req, res) => {

@@ -1423,17 +1423,17 @@ module.exports = {
       },
       duplicateName: {
         message: stripIndent`
-        You may not call ${cmd('session')} with an previously used name and different options. If you want to specify different options, please use a unique name other than **{{name}}**.
+        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{name}}**.
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
         message: stripIndent`
-        No session has been defined with name:
+        No session is defined with the name
           **{{name}}**
-        In order to use ${cmd('session')}, provide a \`stepsFunction\` as the second argument:
+        In order to use ${cmd('session')}, provide a \`setupFn\` as the second argument:
 
-        \`cy.session(name, stepsFn)\`
+        \`cy.session(name, setupFn)\`
         `,
         docsUrl: 'https://on.cypress.io/session',
       },

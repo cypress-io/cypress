@@ -37,7 +37,27 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
   })
 
   app.get('/__cypress/automation/getLocalStorage', (req, res) => {
-    res.send('<html><body><script>window.parent.postMessage({value: JSON.stringify(window.localStorage), type: "localStorage"}, "*")</script></body></html>')
+    res.send(`<html><body><script>(${(function () {
+      const _localStorageStr = JSON.stringify(window.localStorage)
+      const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
+      const _sessionStorageStr = JSON.stringify(window.sessionStorage)
+      const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
+
+      const value = {}
+
+      if (_localStorage) {
+        value.localStorage = _localStorage
+      }
+
+      if (_sessionStorage) {
+        value.sessionStorage = _sessionStorage
+      }
+
+      window.parent.postMessage({
+        value,
+        type: 'localStorage',
+      }, '*')
+    }).toString()})()</script></body></html>`)
   })
 
   /* eslint-disable no-undef */
@@ -49,24 +69,35 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true
     res.send(`<html><body><script>(${(function () {
       window.onmessage = function (event) {
-        const data = event.data
+        const msg = event.data
 
-        if (data.type === 'set:localStorage:data') {
-          if (data.clear) {
-            window.localStorage.clear()
+        if (msg.type === 'set:storage:data') {
+          const { data } = msg
+
+          const setData = (storageData, type) => {
+            if (!storageData) return
+
+            const { clear, value } = storageData
+
+            if (clear) {
+              window[type].clear()
+            }
+
+            if (value) {
+              Object.keys(value).forEach((key) => {
+                window[type].setItem(key, value[key])
+              })
+            }
           }
 
-          if (data.value) {
-            Object.keys(data.value).forEach((key) => {
-              window.localStorage.setItem(key, data.value[key])
-            })
-          }
+          setData(data.localStorage, 'localStorage')
+          setData(data.sessionStorage, 'sessionStorage')
 
-          window.parent.postMessage({ type: 'set:localStorage:complete' }, '*')
+          window.parent.postMessage({ type: 'set:storage:complete' }, '*')
         }
       }
 
-      window.parent.postMessage({ type: 'set:localStorage:load' }, '*')
+      window.parent.postMessage({ type: 'set:storage:load' }, '*')
     }).toString()})()</script></body></html>`)
   })
   /* eslint-enable no-undef */

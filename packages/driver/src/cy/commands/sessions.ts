@@ -2,12 +2,12 @@ import _ from 'lodash'
 import $ from 'jquery'
 
 import $Location from '../../cypress/location'
-import $errUtils, { errs, throwErrByPath } from '../../cypress/error_utils'
-import $stackUtils from '../../cypress/stack_utils'
+import $errUtils, { errs } from '../../cypress/error_utils'
 
-type LocalStorageData = {origin: string, value: object}
-type LocalStorageOptions = {origin: string, value?: object, clear?: boolean}
+// type LocalStorageData = {origin: string, localStorage?: object, sessionStorage?: object}
+// type LocalStorageOptions = {origin: string, localStorage?: object, sessionStorage?: object, clear?: boolean}
 
+const currentTestRegisteredSessions = new Map()
 const getSessionDetails = (sessState) => {
   return {
     name: sessState.name,
@@ -89,7 +89,7 @@ export default function (Commands, Cypress, cy) {
     ) as string[]
   }
 
-  async function _setLocalStorageOnOrigins (originOptions) {
+  async function _setStorageOnOrigins (originOptions) {
     const specWindow = cy.state('specWindow')
 
     const current_origin = $Location.create(window.location.href).origin
@@ -97,14 +97,22 @@ export default function (Commands, Cypress, cy) {
     const current_origin_options_index = _.findIndex(originOptions, { origin: current_origin })
 
     if (current_origin_options_index !== -1) {
-      const currentOriginOptions = originOptions.splice(current_origin_options_index, 1)[0]
+      const opts = originOptions.splice(current_origin_options_index, 1)[0]
 
-      if (currentOriginOptions.clear) {
-        window.localStorage.clear()
+      if (!_.isEmpty(opts.localStorage)) {
+        if (opts.localStorage.clear) {
+          window.localStorage.clear()
+        }
+
+        _.each(opts.localStorage.value, (val, key) => localStorage.setItem(key, val))
       }
 
-      if (currentOriginOptions.value) {
-        _.each(currentOriginOptions.value, (val, key) => localStorage.setItem(key, val))
+      if (opts.sessionStorage) {
+        if (opts.sessionStorage.clear) {
+          window.sessionStorage.clear()
+        }
+
+        _.each(opts.sessionStorage.value, (val, key) => sessionStorage.setItem(key, val))
       }
     }
 
@@ -139,15 +147,15 @@ export default function (Commands, Cypress, cy) {
       onPostMessage = (event) => {
         const data = event.data
 
-        if (data.type === 'set:localStorage:load') {
+        if (data.type === 'set:storage:load') {
           if (!event.source) {
             throw new Error('failed to get localStorage')
           }
 
           const opts = _.find(originOptions, { origin: event.origin })!
 
-          event.source.postMessage({ type: 'set:localStorage:data', value: opts.value || {}, clear: opts.clear }, '*')
-        } else if (data.type === 'set:localStorage:complete') {
+          event.source.postMessage({ type: 'set:storage:data', data: opts }, '*')
+        } else if (data.type === 'set:storage:complete') {
           successOrigins.push(event.origin)
           if (successOrigins.length === origins.length) {
             resolve()
@@ -161,7 +169,7 @@ export default function (Commands, Cypress, cy) {
     .catch((err) => {
       Cypress.log({
         name: 'warning',
-        message: `failed to set session data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
+        message: `failed to set session storage on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
       })
     })
     .finally(() => {
@@ -187,7 +195,7 @@ export default function (Commands, Cypress, cy) {
 
   interface defineSessionOpts {
     name: string
-    steps: Function
+    setupFn: Function
     validate?: Function
     before?: Function
     after?: Function
@@ -195,20 +203,20 @@ export default function (Commands, Cypress, cy) {
 
   const sessions = {
 
-    defineSession (name: string | defineSessionOpts, stepsFn?: Function, options = {} as defineSessionOpts) {
+    defineSession (name: string | defineSessionOpts, setupFn?: Function, options = {} as defineSessionOpts) {
       throwIfNoSessionSupport()
 
       if (_.isObject(name)) {
         options = name as defineSessionOpts
         name = options.name
-        stepsFn = options.steps
+        setupFn = options.setupFn
       }
 
       if (!name) {
         $errUtils.throwErrByPath(errs.sessions.defineSession.missing_argument, { args: { name: 'name' } })
       }
 
-      if (!stepsFn) {
+      if (!setupFn) {
         $errUtils.throwErrByPath(errs.sessions.defineSession.missing_argument, { args: { name: 'steps function' } })
       }
 
@@ -216,18 +224,11 @@ export default function (Commands, Cypress, cy) {
         name,
         cookies: null,
         localStorage: null,
-        steps: stepsFn,
+        setupFn,
         hydrated: false,
         after: options.after,
         before: options.before,
         validate: options.validate,
-      }
-
-      if (getActiveSession(sess_state.name)) {
-        const invocationStack = $stackUtils.getInvocationDetails(cy.state('specWindow'), Cypress.config)?.stack
-
-        throw $errUtils.errByPath(errs.sessions.defineSession.duplicateName, { name: sess_state.name })
-        .setUserInvocationStack(invocationStack)
       }
 
       setActiveSession({ [sess_state.name]: sess_state })
@@ -246,19 +247,31 @@ export default function (Commands, Cypress, cy) {
       window.sessionStorage.clear()
 
       await Promise.all([
-        sessions.clearLocalStorage(),
+        sessions.clearStorage(),
         sessions.clearCookies(),
       ])
     },
 
     async setSessionData (data) {
-      window.localStorage.clear()
-      window.sessionStorage.clear()
       const allHtmlOrigins = await getAllHtmlOrigins()
-      const originsToClearOnly = _.filter(allHtmlOrigins, (origin) => !_.find(data.localStorage, { origin })).map((origin) => ({ origin, clear: true }))
-      const originOptions = originsToClearOnly.concat(data.localStorage.map((v) => ({ ...v, clear: true })))
 
-      await Promise.all([_setLocalStorageOnOrigins(originOptions), Cypress.automation('clear:cookies', null)])
+      let _localStorage = data.localStorage || []
+      let _sessionStorage = data.sessionStorage || []
+
+      _.each(allHtmlOrigins, (v) => {
+        if (!_.find(_localStorage, v)) {
+          _localStorage = _localStorage.concat({ origin: v, clear: true })
+        }
+
+        if (!_.find(_sessionStorage, v)) {
+          _sessionStorage = _sessionStorage.concat({ origin: v, clear: true })
+        }
+      })
+
+      await Promise.all([
+        sessions.setStorage({ localStorage: _localStorage, sessionStorage: _sessionStorage }),
+        Cypress.automation('clear:cookies', null),
+      ])
 
       await sessions.setCookies(data.cookies)
     },
@@ -275,89 +288,15 @@ export default function (Commands, Cypress, cy) {
       return Cypress.automation('clear:cookies', await sessions.getCookies())
     },
 
-    async getCurrentSessionData (options) {
-      const opts = _.defaults(options, {
-        exclude: false,
-      })
-
-      let exlcudeLS = _.get(opts.exclude, 'localStorage')
-      let excludeCookies = _.get(opts.exclude, 'cookies')
-
-      let LS = [] as LocalStorageData[]
-
-      if (exlcudeLS !== true) {
-        LS = await sessions.getLocalStorage({ origin: '*' })
-
-        if (_.isString(exlcudeLS) || _.isObject(exlcudeLS)) {
-          exlcudeLS = [].concat(exlcudeLS)
-          _.each(exlcudeLS, (filter: {origin?: string|RegExp, key?: string|RegExp}) => {
-            if (_.isString(filter) || _.isRegExp(filter)) {
-              filter = { key: filter }
-            }
-
-            const matchOrigin = !filter.origin ?
-              () => true :
-              _.isRegExp(filter.origin) ?
-                (target) => target.match(filter.origin)
-                : (target) => target === filter.origin
-
-            const matchValue = _.isRegExp(filter.key) ?
-              (target) => target.match(filter.key)
-              : (target) => filter.key === target
-
-            LS = _.flatMap(LS, (target) => {
-              if (matchOrigin(target.origin)) {
-                // if there's no filter criteria, exclude everything
-                if (!filter.key) return []
-
-                target.value = _.cloneDeepWith(target.value, (value) => {
-                  if (_.isObject(value)) {
-                    return _.omitBy(value, (__, key) => matchValue(key))
-                  }
-
-                  // clone like normal
-                  return
-                })
-              }
-
-              if (_.isEmpty(target.value)) {
-                return []
-              }
-
-              return [target]
-            })
-          })
-        }
-      }
+    async getCurrentSessionData () {
+      const storage = await sessions.getStorage({ origin: '*' })
 
       let cookies = [] as any[]
 
-      if (excludeCookies !== true) {
-        cookies = await Cypress.automation('get:cookies', {})
-
-        if (_.isObjectLike(excludeCookies)) {
-          excludeCookies = [].concat(excludeCookies)
-          _.each(excludeCookies, (filter: {domain?: string | RegExp, name?: string | RegExp}) => {
-            if (_.isString(filter) || _.isRegExp(filter)) {
-              filter = { name: filter }
-            }
-
-            const matchDomain = !filter.domain ? true : _.isRegExp(filter.domain) ? (target) => target.match(filter.domain) : (target) => target === filter.domain
-            const matchName = !filter.name ? true : _.isRegExp(filter.name) ? (target) => target.match(filter.name) : (target) => target === filter.name
-
-            cookies = _.flatMap(cookies, (target) => {
-              if (matchDomain === true || matchDomain(target.domain)) {
-                if (matchName === true || matchName(target.name)) return []
-              }
-
-              return [target]
-            })
-          })
-        }
-      }
+      cookies = await Cypress.automation('get:cookies', {})
 
       const ses = {
-        localStorage: LS,
+        ...storage,
         cookies,
       }
 
@@ -368,10 +307,8 @@ export default function (Commands, Cypress, cy) {
       return Cypress.backend('get:session', name)
     },
 
-    async saveSession (name: string, options) {
-      const ses = await sessions.getCurrentSessionData({
-        exclude: options.exclude,
-      })
+    async saveSession (name: string) {
+      const ses = await sessions.getCurrentSessionData()
 
       return Cypress.backend('save:session', { ...ses, name })
     },
@@ -384,11 +321,11 @@ export default function (Commands, Cypress, cy) {
      *      send a message telling our proxy server to intercept the next req to the https domain,
      *      then follow 2)
      */
-    async getLocalStorage (options = {}) {
+    async getStorage (options = {}) {
       const specWindow = cy.state('specWindow')
 
       if (!_.isObject(options)) {
-        throw new Error('getLocalStorage() takes an object')
+        throw new Error('getStorage() takes an object')
       }
 
       const opts = _.defaults({}, options, {
@@ -399,21 +336,51 @@ export default function (Commands, Cypress, cy) {
 
       const origins = await mapOrigins(opts.origin)
 
-      const results = [] as LocalStorageData[]
+      const getResults = () => {
+        return results
+        // return _.omitBy(results, _.isEmpty)
+      }
+      const results = {
+        localStorage: [] as any[],
+        sessionStorage: [] as any[],
+      }
+
+      function pushValue (origin, value) {
+        if (!_.isEmpty(value.localStorage)) {
+          results.localStorage.push({ origin, value: value.localStorage })
+        }
+
+        if (!_.isEmpty(value.sessionStorage)) {
+          results.sessionStorage.push({ origin, value: value.sessionStorage })
+        }
+      }
 
       const currentOriginIndex = origins.indexOf(current_origin)
 
       if (currentOriginIndex !== -1) {
         origins.splice(currentOriginIndex, 1)
-        const value = JSON.parse(JSON.stringify(window.localStorage))
+        // localStorage.length propery is not always accurate, we must stringify to check for entries
+        // for ex) try setting localStorge.key = 'val' and reading localStorage.length, may be 0.
+        const _localStorageStr = JSON.stringify(window.localStorage)
+        const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
+        const _sessionStorageStr = JSON.stringify(window.sessionStorage)
+        const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
 
-        if (!_.isEmpty(value)) {
-          results.push({ origin: current_origin, value })
+        const value = {} as any
+
+        if (_localStorage) {
+          value.localStorage = _localStorage
         }
+
+        if (_sessionStorage) {
+          value.sessionStorage = _sessionStorage
+        }
+
+        pushValue(current_origin, value)
       }
 
       if (_.isEmpty(origins)) {
-        return results
+        return getResults()
       }
 
       if (current_origin.startsWith('https:')) {
@@ -434,22 +401,17 @@ export default function (Commands, Cypress, cy) {
       let onPostMessage
       const successOrigins = [] as string[]
 
-      const crossOriginResults: LocalStorageData[] = []
-
       await new Promise((resolve) => {
         onPostMessage = ((event) => {
           const data = event.data
 
           if (data.type !== 'localStorage') return
 
-          const value = JSON.parse(data.value)
+          const value = data.value
+
+          pushValue(event.origin, value)
 
           successOrigins.push(event.origin)
-
-          if (!_.isEmpty(value)) {
-            crossOriginResults.push({ origin: event.origin, value })
-          }
-
           if (successOrigins.length === origins.length) {
             resolve()
           }
@@ -460,7 +422,7 @@ export default function (Commands, Cypress, cy) {
       .catch((err) => {
         Cypress.log({
           name: 'warning',
-          message: `failed to set session data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
+          message: `failed to set session storage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
         })
       })
       .finally(() => {
@@ -468,30 +430,53 @@ export default function (Commands, Cypress, cy) {
         $iframeContainer.remove()
       })
 
-      return [...results, ...crossOriginResults]
+      return getResults()
     },
 
-    async clearLocalStorage () {
+    async clearStorage () {
       const origins = await getAllHtmlOrigins()
 
       const originOptions = origins.map((v) => ({ origin: v, clear: true }))
 
-      await sessions.setLocalStorage(originOptions)
+      await sessions.setStorage({
+        localStorage: originOptions,
+        sessionStorage: originOptions,
+      })
     },
 
-    async setLocalStorage (options: LocalStorageOptions[]) {
+    async setStorage (options: any, clearAll = false) {
       const current_origin = $Location.create(window.location.href).origin as string
 
-      const originOptions = _.chain([] as LocalStorageOptions[])
-      .concat(options)
-      .map((v) => ({ ...v, origin: v.origin && v.origin !== 'current_origin' ? $Location.create(v.origin).origin : current_origin }))
-      .value() as LocalStorageOptions[]
+      const mapToCurrentOrigin = (v) => ({ ...v, origin: (v.origin && v.origin !== 'current_origin') ? $Location.create(v.origin).origin : current_origin })
 
-      await _setLocalStorageOnOrigins(originOptions)
+      const mappedLocalStorage = _.map(options.localStorage, (v) => {
+        const mapped = { origin: v.origin, localStorage: _.pick(v, 'value', 'clear') }
+
+        if (clearAll) {
+          mapped.localStorage.clear = true
+        }
+
+        return mapped
+      }).map(mapToCurrentOrigin)
+
+      const mappedSessionStorage = _.map(options.sessionStorage, (v) => {
+        const mapped = { origin: v.origin, sessionStorage: _.pick(v, 'value', 'clear') }
+
+        if (clearAll) {
+          mapped.sessionStorage.clear = true
+        }
+
+        return mapped
+      }).map(mapToCurrentOrigin)
+
+      const storageOptions = _.map(_.groupBy(mappedLocalStorage.concat(mappedSessionStorage), 'origin'), (v) => _.merge({}, ...v))
+
+      await _setStorageOnOrigins(storageOptions)
     },
 
     registerSessionHooks () {
       Cypress.on('test:before:run:async', () => {
+        currentTestRegisteredSessions.clear()
         Cypress.action('cy:url:changed', '')
 
         return Cypress.action('cy:visit:blank')
@@ -510,7 +495,7 @@ export default function (Commands, Cypress, cy) {
   }
 
   Commands.addAll({
-    session (name, stepsFn?: Function, options: {
+    session (name, setupFn?: Function, options: {
       validate?: Function
     } = {}) {
       throwIfNoSessionSupport()
@@ -546,28 +531,34 @@ export default function (Commands, Cypress, cy) {
 
       let existingSession = getActiveSession(name)
 
-      if (existingSession) {
-        if (stepsFn) {
-          if (existingSession.steps.toString().trim() !== stepsFn.toString().trim()) {
+      if (!setupFn) {
+        if (!existingSession || !currentTestRegisteredSessions.has(name)) {
+          $errUtils.throwErrByPath('sessions.session.not_found', { args: { name } })
+        }
+      } else {
+        const isUniqSessionDefinition = !existingSession || existingSession.setupFn.toString().trim() !== setupFn.toString().trim()
+
+        if (isUniqSessionDefinition) {
+          if (currentTestRegisteredSessions.has(name)) {
             throw $errUtils.errByPath(errs.sessions.session.duplicateName, { name: existingSession.name })
           }
-        }
-      }
 
-      if (!existingSession) {
-        if (!stepsFn) {
-          throwErrByPath(errs.sessions.session.not_found, { args: { name } })
+          existingSession = sessions.defineSession({
+            name,
+            setupFn,
+            validate: options.validate,
+          })
         }
-
-        existingSession = sessions.defineSession({
-          name,
-          steps: stepsFn,
-          validate: options.validate,
-        })
       }
 
       const wrap = (obj) => {
         // await a returned chainer OR promises
+        if (obj === undefined) {
+          return cy.then(() => {
+            return cy.state('current').get('prev')?.attributes?.subject
+          })
+        }
+
         if (Cypress.isCy(obj)) {
           return obj
         }
@@ -588,14 +579,12 @@ export default function (Commands, Cypress, cy) {
 
         const serverStoredSession = await sessions.getSession(existingSession.name).catch(_.noop)
 
-        if (serverStoredSession && serverStoredSession.steps === existingSession.steps.toString()) {
-          existingSession.localStorage = serverStoredSession.localStorage
-          existingSession.cookies = serverStoredSession.cookies
+        if (serverStoredSession && serverStoredSession.setupFn === existingSession.setupFn.toString()) {
+          _.extend(existingSession, serverStoredSession)
           existingSession.hydrated = true
         }
       }
 
-      // return wrap(initialize(), { log: false })
       wrap(initialize())
       cy.then(async () => {
         Cypress.log({
@@ -607,27 +596,40 @@ export default function (Commands, Cypress, cy) {
         }
 
         if (existingSession.validate) {
-          return wrap(existingSession.validate())
+          return wrap(existingSession.validate(existingSession))
         }
 
         return true
       })
       .then(async (isValid) => {
         if (isValid === false) {
+          if (existingSession.hydrated) {
+            const __log = Cypress.log({
+              name: 'session',
+              sessionInfo: getSessionDetails(existingSession),
+              message: `invalidated **${existingSession.name}**`,
+              state: 'failed',
+            })
+
+            setTimeout(() => {
+              __log.set({
+                state: 'failed',
+              })
+            })
+          } else {
+            // using a brand new session
+          }
+
           return false
         }
 
         _log.set({
-          message: 'using saved session',
+          message: `using saved session **${existingSession.name}**`,
           // consoleProps: { table: [() => ({ name: 'foo', data: [{ foo: true, bar: true }] })] },
           // consoleProps: () => getConsoleProps(sess_state),
 
           // state: 'passed',
         })
-
-        if (existingSession.before) {
-          wrap(existingSession.before())
-        }
 
         await sessions.setSessionData(existingSession)
 
@@ -637,33 +639,13 @@ export default function (Commands, Cypress, cy) {
       .then(async (alreadyHydrated) => {
         if (alreadyHydrated) return
 
-        // _log.set({
-        //   message: sess_state.hydrated ? 'session invalidated, using new session' : 'using new session',
-        // })
-
-        // Cypress.log({
-        //   name: 'session',
-        //   message: `**${sess_state.name}** - using new session`,
-        //   type: 'parent',
-        //   sessionInfo: { name: sess_state.name },
-        //   state: 'pending',
-        //   consoleProps: () => getConsoleProps(sess_state),
-        // })
-
-        if (existingSession.before) {
-          wrap(existingSession.before())
-        }
-
         cy.then(() => sessions.clearCurrentSessionData())
 
-        .then(() => existingSession.steps())
+        .then(() => existingSession.setupFn())
 
         .then(() => {
-          wrap(sessions.getCurrentSessionData({
-            exclude: options.exclude,
-          }).then((data) => {
-            existingSession.cookies = data.cookies
-            existingSession.localStorage = data.localStorage
+          wrap(sessions.getCurrentSessionData().then((data) => {
+            _.extend(existingSession, data)
             existingSession.hydrated = true
 
             setActiveSession({ [existingSession.name]: existingSession })
