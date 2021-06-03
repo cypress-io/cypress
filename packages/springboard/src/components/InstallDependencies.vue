@@ -5,21 +5,39 @@
       You need these ones:
 
       <ul class="list-disc list-inside">
-        <li>Webpack dev server</li>
-        <li>@cypress/react</li>
+        <li 
+          v-for="dep of dependencies"
+          :key="dep"
+        >
+          {{ dep }}
+        </li>
       </ul>
 
     </p>
 
     <p>
-      Just run <code>npm install @cypress/react @cypress/wepback-dev-server 
+      Just run <code>npm install {{ dependencies.join(', ') }}
       and you are ready to go!</code>
     </p>
   </div>
 </template>
 
 <script lang="ts">
+import { useStore } from '../store'
 import { defineWizardStep } from '../wizards/shared'
 
-export default defineWizardStep({})
+export default defineWizardStep({
+  setup() {
+    const store = useStore()
+
+    const framework = store.getState().component.framework
+    if (!framework) {
+      throw Error(`store.state.component.framework must be set before using this component. This should never happen.`)
+    }
+
+    return {
+      dependencies: framework.dependencies
+    }
+  }
+})
 </script>

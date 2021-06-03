@@ -11,6 +11,7 @@ type ProjectTemplate = 'react-scripts' | 'vue-cli' | 'next.js (webpack 4)' | 'ne
 interface SupportedBase {
   id: string
   displayName: string
+  dependencies: string[]
 }
 
 interface SupportedLibraryCombination extends SupportedBase {
@@ -33,6 +34,7 @@ export const frameworks: SupportedFramework[] = [
     displayName: 'React 16 x Webpack 4',
     library: 'react 16',
     bundler: 'webpack 4',
+    dependencies: ['@cypress/react', '@cypress/webpack-dev-server', ' html-webpack-plugin@4'],
   },
   {
     id: '2',
@@ -40,6 +42,7 @@ export const frameworks: SupportedFramework[] = [
     displayName: 'React 17 x Webpack 5',
     library: 'react 17',
     bundler: 'webpack 5',
+    dependencies: ['@cypress/react', '@cypress/webpack-dev-server', ' html-webpack-plugin@5'],
   },
   {
     id: '3',
@@ -47,5 +50,6 @@ export const frameworks: SupportedFramework[] = [
     displayName: 'Vue 3 x Webpack 3',
     library: 'vue 3',
     bundler: 'webpack 4',
+    dependencies: ['@cypress/vue@next', '@cypress/webpack-dev-server', ' html-webpack-plugin@4'],
   },
 ]
