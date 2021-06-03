@@ -2,8 +2,7 @@
   <p>
     <select
      data-cy="select-framework"
-     v-model="selectedFramework"
-     @change="selectFramework(framework)"
+     v-model="selectedFrameworkId"
     >
       <option 
         v-for="framework of frameworks"
@@ -23,44 +22,28 @@
 </template>
 
 <script lang="ts">
+import { computed, defineComponent, markRaw } from 'vue'
 import { useStore } from '../store'
-import { computed, defineComponent, markRaw, onMounted } from 'vue'
 import { frameworks } from '../supportedFrameworks'
 
 export default defineComponent({
   setup(props, ctx) {
     const store = useStore()
 
-    onMounted(() => {
-      // we should detect the user's framework if possible
-      // detectUserFramework().then(result => {
-      //   ... set default framework
-      //   ... ctx.emit('setNextStepStatus', true) // allow to proceed 
-      // })
-      ctx.emit('setNextStepStatus', false)
-    })
+    const selectedFramework = computed(() => store.getState().component.framework)
 
-    const selectedFramework = computed({
+    const selectedFrameworkId = computed({
       get() {
-        return store.getState().component.framework
-          ? store.getState().component.framework!.id
-          : 'none'
+        return selectedFramework.value ? selectedFramework.value.id : 'none'
       },
       set(id: string) {
         store.setComponentFramework(frameworks.find(x => x.id === id)!)
-        ctx.emit('setNextStepStatus', true)
       }
     })
 
-    function selectFramework(fw){
-      console.log(fw)
-    }
-
     return {
-      selectedFramework,
-      state: store.getState(),
+      selectedFrameworkId,
       frameworks: markRaw(frameworks),
-      selectFramework
     }
   }
 })
