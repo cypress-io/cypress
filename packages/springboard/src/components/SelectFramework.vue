@@ -1,6 +1,6 @@
 <template>
   <p>
-    <select>
+    <select data-cy="select-framework">
       <option>
         React
       </option>

@@ -1,56 +1,53 @@
 <template>
-<div class="h-screen bg-white">
-  <div class="h-60">
-    <div class="flex justify-between p-2 bg-gray-900 text-white">
-      Cypress Dashboard
+  <div class="h-screen bg-white">
+    <div class="h-60">
+      <div class="flex justify-between p-2 bg-gray-900 text-white">
+        Cypress Dashboard
 
-      <button>Log in</button>
+        <button>Log in</button>
+      </div>
+
+      <SelectWizard v-if="currentStep === 0" />
+
+      <div 
+        v-if="selectedWizard"
+        v-for="step in selectedWizard.steps" 
+        :key="step.name"
+      >
+        <component 
+          :is="step.component" 
+          v-if="step.number === currentStep"
+        />
+      </div>
     </div>
 
-    <step-container
-      :currentStep="currentStep"
-    >
-      <step :stepNumber="1">
-        <select-runner />
-      </step>
+    <div class="flex justify-center">
+      <button 
+        class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
+        :class="{ invisible: currentStep === 0 }" 
+        @click="goBack"
+      >
+        Previous Step
+      </button>
 
-      <step :stepNumber="2">
-        <div>You chose {{ selectedTestingType }}</div>
-        <select-framework v-if="selectedTestingType === 'component'" />
-        <div v-else> e2e was chosen</div>
-      </step>
-
-      <step :stepNumber="3">
-        <install-dependencies />
-      </step>
-    </step-container>
+      <button
+        :disabled="!selectedTestingType"
+        class="bg-blue-500 text-white m-5 px-4 py-2 rounded" 
+        :class="{ 'opacity-50': !selectedTestingType }"
+        @click="goNext"
+      >
+        {{ nextStepText }}
+      </button>
+    </div>
   </div>
-  <div class="flex justify-center">
-    <button 
-      class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
-      :class="currentStep > 1 ? undefined : 'invisible'" @click="goBack"
-    >
-      Previous Step
-    </button>
-    <button
-      class="bg-blue-500 text-white m-5 px-4 py-2 rounded" 
-      @click="goNext"
-    >
-      Next Step
-    </button>
-  </div>
-  
-</div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, markRaw, ref } from 'vue'
 import { testingTypes } from './types/shared'
 import RunnerButton from './components/RunnerButton.vue'
-import { Step, StepContainer } from './components/StepContainer'
-import SelectRunner from './components/SelectRunner.vue'
-import SelectFramework from './components/SelectFramework.vue'
-import InstallDependencies from './components/InstallDependencies.vue'
+import SelectWizard from './components/SelectWizard.vue'
+import { wizards } from './wizards'
 import { useStore } from './store'
 
 export default defineComponent({
@@ -58,35 +55,51 @@ export default defineComponent({
 
   components: {
     RunnerButton,
-    SelectFramework,
-    SelectRunner,
-    InstallDependencies,
-    StepContainer,
-    Step
+    SelectWizard,
   },
 
   setup() {
     const store = useStore()
 
-    const currentStep = ref<number>(1)
+    const currentStep = ref<number>(0)
+
+    const selectedWizard =  computed(() => 
+      store.getState().testingType
+        ? wizards[store.getState().testingType!]
+        : undefined
+    )
 
     const goNext = () => {
-      if (currentStep.value === 3) {
+      if (!selectedWizard.value || currentStep.value === selectedWizard.value.steps.length) {
         // we are done!
         // launch browser, or whatever
         return
       }
 
       currentStep.value += 1
-
     }
 
     const goBack = () => {
       currentStep.value -= 1
     }
 
+    const lastStepOfWorkflow = computed(() => {
+      return selectedWizard.value && 
+        selectedWizard.value.steps.length <= currentStep.value
+    })
+
+    const nextStepText = computed(() => {
+      if (lastStepOfWorkflow.value) {
+        return 'Launch'
+      }
+
+      return 'Next Step'
+    })
+
     return {
       testingTypes: markRaw(testingTypes),
+      selectedWizard,
+      nextStepText,
       currentStep,
       goNext,
       goBack,

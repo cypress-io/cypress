@@ -7,6 +7,7 @@ describe('App', () => {
   })
 
   it('navigates to the landing page', () => {
-    cy.get('div').contains('Welcome to the app!')
+    cy.get('div').contains('Cypress Dashboard')
+    cy.get('div').contains('Welcome! What kind of tests would you like to run?')
   })
 })
