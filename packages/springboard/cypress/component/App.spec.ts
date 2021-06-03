@@ -15,10 +15,10 @@ describe('App', () => {
     })
 
     cy.get('div').contains('Cypress Dashboard')
-    cy.get('p').contains('Welcome! What kind of tests would you like to run?')
+    cy.get('div').contains('Welcome! What kind of tests would you like to run?')
 
     // select e2e
-    cy.get('button').contains('e2e').click()
+    cy.get('label[for="e2e"]').click()
 
     // go to next step
     cy.get('button').contains('Next Step').click()
@@ -26,18 +26,18 @@ describe('App', () => {
     // actually, we want CT! go back!
     cy.get('button').contains('Previous Step').click()
 
-    // select e2e
-    cy.get('button').contains('component').click()
+    cy.get('label[for="component"]').click()
 
     // go to next step
     cy.get('button').contains('Next Step').click()
 
-    cy.get('p').contains('You chose: component')
-
-    // go to next step
+    cy.get('[data-cy="select-framework"]').select('React')
     cy.get('button').contains('Next Step').click()
 
-    // last step, time to install dependencies.
-    cy.get('p').contains('Time to install dependencies.')
+    // last step
+    cy.get('div').contains('Time to install dependencies')
+
+    // "Next Step" is now "Launch" - there is no next step.
+    cy.get('button').contains('Launch')
   })
 })

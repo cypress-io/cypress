@@ -2,11 +2,13 @@
   <label 
     class="text-left inline-block border-2 rounded-lg mx-2 p-3 w-xs cursor-pointer" 
     :class="selected ? 'border-blue-500': 'border-gray-500'" 
+    :for="testingType"
   >
     <input 
       type="radio" 
       class="mr-3" 
       :name="testingType"
+      :id="testingType"
       :checked="selected"
     />
       <img
