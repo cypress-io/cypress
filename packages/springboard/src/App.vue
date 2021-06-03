@@ -49,7 +49,7 @@ import { computed, defineComponent, markRaw, ref } from 'vue'
 import { testingTypes } from './types/shared'
 import RunnerButton from './components/RunnerButton.vue'
 import SelectWizard from './components/SelectWizard.vue'
-import { wizards } from './wizards'
+import { wizards } from './wizards/wizards'
 import { useStore } from './store'
 
 export default defineComponent({
