@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
-    "html-webpack-plugin": "4"
+    "html-webpack-plugin": "4",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }
