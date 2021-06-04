@@ -8,6 +8,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = 'portrait' | 'landscape'
   type PrevSubject = 'optional' | 'element' | 'document' | 'window'
+  type TestingType = 'e2e' | 'component'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
   interface CommandOptions {
@@ -250,6 +251,11 @@ declare namespace Cypress {
      * Internal class for LocalStorage management.
      */
     LocalStorage: LocalStorage
+
+    /**
+     * Current testing type, determined by the Test Runner chosen to run.
+     */
+    testingType: TestingType
 
     /**
      * Fire automation:request event for internal use.
@@ -1464,7 +1470,7 @@ declare namespace Cypress {
      * @example
      *    cy.request('http://dev.local/seed')
      */
-    request(url: string, body?: RequestBody): Chainable<Response>
+    request<T = any>(url: string, body?: RequestBody): Chainable<Response<T>>
     /**
      * Make an HTTP request with specific method.
      *
@@ -1472,7 +1478,7 @@ declare namespace Cypress {
      * @example
      *    cy.request('POST', 'http://localhost:8888/users', {name: 'Jane'})
      */
-    request(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response>
+    request<T = any>(method: HttpMethod, url: string, body?: RequestBody): Chainable<Response<T>>
     /**
      * Make an HTTP request with specific behavior.
      *
@@ -1483,7 +1489,7 @@ declare namespace Cypress {
      *      followRedirect: false // turn off following redirects
      *    })
      */
-    request(options: Partial<RequestOptions>): Chainable<Response>
+    request<T = any>(options: Partial<RequestOptions>): Chainable<Response<T>>
 
     /**
      * Get the root DOM element.
@@ -2799,7 +2805,7 @@ declare namespace Cypress {
     /**
      * Type of test and associated runner that was launched.
      */
-    testingType: 'e2e' | 'component'
+    testingType: TestingType
     /**
      * Cypress version.
      */
@@ -5496,9 +5502,9 @@ declare namespace Cypress {
     consoleProps(): ObjectLike
   }
 
-  interface Response {
+  interface Response<T> {
     allRequestResponses: any[]
-    body: any
+    body: T
     duration: number
     headers: { [key: string]: string | string[] }
     isOkStatusCode: boolean

@@ -12,6 +12,7 @@ describe('e2e headless', function () {
         'CI': process.env.CI,
         'EXPECT_HEADLESS': '1',
       },
+      video: false,
     },
     headed: false,
     snapshot: true,
