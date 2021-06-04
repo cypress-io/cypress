@@ -7,6 +7,8 @@ interface IpcResponseMeta {
   senderId: number
 }
 
+// stub out for the purpose of testing - window.ipc
+// does not exist in the iframe.
 const ipc = window.ipc ? window.ipc : {
   on () {},
   send () {},
