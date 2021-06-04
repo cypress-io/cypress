@@ -5,6 +5,10 @@ declare global {
     App: {
       start: () => void
     }
+    ipc: {
+      send: (...args: unknown) => void
+      on: (event: string, ...args: unknown[]) => void
+    }
   }
 }
 

@@ -25,6 +25,7 @@ const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
+const { getPackageManager } = require('../util/detect-package-manager')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -37,6 +38,9 @@ const nullifyUnserializableValues = (obj) => {
 }
 
 const handleEvent = function (options, bus, event, id, type, arg) {
+  // unified GUI event interface is a bit different
+  // to support better static typing.
+
   debug('got request for event: %s, %o', type, arg)
 
   _.defaults(options, {
@@ -75,6 +79,20 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   }
 
   switch (type) {
+    case 'get:package-manager': {
+      return getPackageManager()
+        .then((pkg) => {
+          return sendResponse({ type: 'success', event: 'get:package-manager', data: pkg })
+        })
+        .catch((err) => {
+          return sendErr({
+            type: 'error', 
+            event: 'get:package-manager', 
+            data: 'Could not detect package manager'
+          })
+        })
+    }
+
     case 'on:menu:clicked':
       return onBus('menu:item:clicked')
 

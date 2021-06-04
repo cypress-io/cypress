@@ -40,6 +40,7 @@ import RunnerButton from './components/RunnerButton.vue'
 import SelectWizard from './components/SelectWizard.vue'
 import { wizards } from './wizards/wizards'
 import { useStore } from './store'
+import { ipcBus } from './ipcBus'
 
 export default defineComponent({
   name: 'App',
@@ -61,6 +62,8 @@ export default defineComponent({
     )
 
     const goNext = () => {
+      ipcBus.send('get:package-manager', undefined)
+
       if (!selectedWizard.value || currentStepNumber.value === selectedWizard.value.steps.length) {
         // we are done!
         // launch browser, or whatever

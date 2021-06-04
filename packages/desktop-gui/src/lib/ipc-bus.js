@@ -108,8 +108,11 @@ const ipcBus = (...args) => {
 
   args = nullifyUnserializableValues(args)
 
+  const send = ['request', id].concat(args)
+  console.log('here', send)
   // pass in request, id, and remaining args
-  ipc.send(...['request', id].concat(args))
+  // ipc.send(...['request', id].concat(args))
+  ipc.send(...send)
 
   return fn()
 }
