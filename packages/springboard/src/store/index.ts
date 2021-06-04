@@ -2,10 +2,18 @@ import { SupportedFramework } from '../supportedFrameworks'
 import { reactive, readonly, inject, App } from 'vue'
 import { TestingType } from '../types/shared'
 
+type PackageManagerType = 'yarn' | 'npm' | undefined
+
+interface PackageManager {
+  type: PackageManagerType
+  loaded: boolean
+}
+
 interface State {
   testingType: TestingType | undefined
   component: {
     framework: SupportedFramework | undefined
+    packageManager: PackageManager
   }
 }
 
@@ -14,6 +22,10 @@ function createInitialState (): State {
     testingType: undefined,
     component: {
       framework: undefined,
+      packageManager: {
+        loaded: false,
+        type: undefined,
+      },
     },
   }
 }
@@ -39,6 +51,13 @@ class Store {
     this.state.testingType = testingType
   }
 
+  setPackageManager (type: PackageManagerType) {
+    this.state.component.packageManager = {
+      type,
+      loaded: true,
+    }
+  }
+
   setComponentFramework (framework: SupportedFramework) {
     this.state.component.framework = framework
   }
@@ -52,10 +71,14 @@ export function createStore (initialState: State = createInitialState()) {
 export const store = new Store(createInitialState())
 
 export const useStore = (): Store => {
+  // try provide via `inject`
   const _store = inject<Store>(storeKey)
 
+  // we need to access the store *outside* the Vue hierarchy sometimes,
+  // for example to respond to events from the ipc,
+  // so we just return the global singleton.
   if (!_store) {
-    throw Error('`store` not found. Did you forget to do `app.use(store)`?')
+    return store
   }
 
   return _store

@@ -40,7 +40,7 @@ import RunnerButton from './components/RunnerButton.vue'
 import SelectWizard from './components/SelectWizard.vue'
 import { wizards } from './wizards/wizards'
 import { useStore } from './store'
-import { ipcBus } from './ipcBus'
+import { ipcBus } from './ipc'
 
 export default defineComponent({
   name: 'App',

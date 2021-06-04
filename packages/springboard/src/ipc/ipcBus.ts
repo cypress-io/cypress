@@ -1,29 +1,45 @@
 import { EventEmitter } from 'events'
+import { ipcBus } from './index'
 
-export interface IpcResponseMeta {
+interface IpcResponseMeta {
   ports: number[]
   sender: EventEmitter
   senderId: number
 }
 
-type EventMap = Record<string, any>;
+/**
+ * Electron IPC returns itself (an EventEmitter) as the first argument,
+ * and the payload as the second.
+ * packages/server responds to *every* event with 'response'
+ * This is a wrapper to make usage a bit more ergonomic and type safe.
+ *
+ * packages/server should respond with the following signature:
+ * return sendResponse({ type: 'success', event: 'get:package-manager', data: pkg })
+ */
+window.ipc.on('response', <P extends { event: string }>(_meta: IpcResponseMeta, payload: P) => {
+  ipcBus.emit(payload.event, payload)
+})
 
-type EventKey<T extends EventMap> = string & keyof T;
-type EventReceiver<T> = (params: T) => void;
+type EventMap = Record<string, any>
+type EventKey<T extends EventMap> = string & keyof T
+type EventReceiver<T> = (...params: T[]) => void
 
-interface Emitter<S extends EventMap, T extends EventMap> {
-  on<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>): void;
-  send<K extends EventKey<S>>(eventName: K, params: S[K]): void;
-}
+export class IpcBus<S extends EventMap, T extends EventMap> {
+  private listeners: Record<string, Array<(...args: unknown[]) => void>> = {}
 
-export class IpcBus<S extends EventMap, T extends EventMap> implements Emitter<S, T> {
-  private ipc = window.ipc
+  emit (key: string, ...args: unknown[]) {
+    if (!this.listeners[key]) {
+      return
+    }
 
-  on<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>) {
-    this.ipc.on(eventName, fn);
+    this.listeners[key].forEach((fn) => fn(...args))
   }
 
-  send<K extends EventKey<T>>(eventName: K, params: S[K]): void {
-    this.ipc.send('request', Math.random(), eventName, params);
+  send<K extends EventKey<S>> (key: K, payload: S[K]) {
+    window.ipc.send('request', Math.random(), key, payload)
+  }
+
+  on<K extends EventKey<T>> (key: K, fn: EventReceiver<T[K]>) {
+    this.listeners[key] = (this.listeners[key] || []).concat(fn)
   }
 }

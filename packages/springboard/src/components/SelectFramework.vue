@@ -24,6 +24,7 @@
     To finish configuring your project
     we need to install some dependencies and create
     a few files.
+    Pkg: {{ pkg }}
   </p>
 </template>
 
@@ -48,6 +49,7 @@ export default defineComponent({
     })
 
     return {
+      pkg: computed(() => store.getState().component.packageManager.type),
       selectedFrameworkId,
       frameworks: markRaw(frameworks),
       images: computed(() => selectedFramework.value && selectedFramework.value.images)

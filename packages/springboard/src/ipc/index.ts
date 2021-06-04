@@ -1,20 +1,19 @@
-import { IpcBus, IpcResponseMeta } from './ipcBus'
+import { IpcBus } from '../ipc/ipcBus'
+import { useStore } from '../store'
 
-interface IpcSendEvents {
+interface ReceiveEvents {
+  'get:package-manager': {
+    data: 'yarn' | 'npm'
+    type: 'success' | 'error'
+  }
+}
+
+interface SendEvents {
   'get:package-manager': undefined
 }
 
-interface IpcReceiveEvent<Data> {
-  status: 'success' | 'error'
-  data: Data
-}
+export const ipcBus = new IpcBus<SendEvents, ReceiveEvents>()
 
-interface IpcReceiveEvents {
-  'response'
-  'get:package-manager': (
-    meta: IpcResponseMeta, 
-    payload: IpcReceiveEvent<{ data: 'yarn' | 'npm' }>
-  ) => any
-}
-
-
+ipcBus.on('get:package-manager', (payload) => {
+  useStore().setPackageManager(payload.data)
+})
