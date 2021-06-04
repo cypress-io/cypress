@@ -1,6 +1,6 @@
 {
-  "name": "cypress-react-template",
-  "version": "0.1.0",
+  "name": "find-webpack",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "cy:open": "node ../../../../scripts/cypress open-ct",
@@ -17,7 +17,6 @@
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",
-    "@cypress/webpack-dev-server": "0.0.0-development",
     "html-webpack-plugin": "4"
   }
 }
