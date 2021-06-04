@@ -1,5 +1,5 @@
 import { SupportedFramework } from '../supportedFrameworks'
-import { reactive, readonly, inject, App } from 'vue'
+import { reactive, readonly, inject, App, getCurrentInstance } from 'vue'
 import { TestingType } from '../types/shared'
 
 type PackageManagerType = 'yarn' | 'npm' | undefined
@@ -9,7 +9,7 @@ interface PackageManager {
   loaded: boolean
 }
 
-interface State {
+export interface State {
   testingType: TestingType | undefined
   component: {
     framework: SupportedFramework | undefined
@@ -71,14 +71,17 @@ export function createStore (initialState: State = createInitialState()) {
 export const store = new Store(createInitialState())
 
 export const useStore = (): Store => {
-  // try provide via `inject`
+  if (!getCurrentInstance()) {
+    // we are *outside* the Vue hierarchy.
+    // Eg: using the store to respond to events from the ipc.
+    // so we just return the global singleton.
+    return store
+  }
+
   const _store = inject<Store>(storeKey)
 
-  // we need to access the store *outside* the Vue hierarchy sometimes,
-  // for example to respond to events from the ipc,
-  // so we just return the global singleton.
   if (!_store) {
-    return store
+    throw Error('store could not be injected. Did you forgot to do app.provide(store)?')
   }
 
   return _store

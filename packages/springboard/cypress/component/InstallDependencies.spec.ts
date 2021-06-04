@@ -15,6 +15,10 @@ describe('InstallDependencies', () => {
       testingType: 'component',
       component: {
         framework: frameworks[0],
+        packageManager: {
+          loaded: false,
+          type: undefined,
+        },
       },
     })
 

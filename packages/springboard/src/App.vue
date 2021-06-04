@@ -97,7 +97,10 @@ export default defineComponent({
     return {
       testingTypes: markRaw(testingTypes),
       selectedWizard,
-      canGoNextStep: computed(() => currentStep.value ? currentStep.value.canGoNextStep() : !!selectedWizard.value),
+      canGoNextStep: computed(() => currentStep.value 
+        ? currentStep.value.canGoNextStep() 
+        : !!selectedWizard.value
+      ),
       nextStepText,
       currentStep,
       goNext,

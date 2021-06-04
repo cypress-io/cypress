@@ -7,6 +7,11 @@ interface IpcResponseMeta {
   senderId: number
 }
 
+const ipc = window.ipc ? window.ipc : {
+  on () {},
+  send () {},
+}
+
 /**
  * Electron IPC returns itself (an EventEmitter) as the first argument,
  * and the payload as the second.
@@ -16,7 +21,7 @@ interface IpcResponseMeta {
  * packages/server should respond with the following signature:
  * return sendResponse({ type: 'success', event: 'get:package-manager', data: pkg })
  */
-window.ipc.on('response', <P extends { event: string }>(_meta: IpcResponseMeta, payload: P) => {
+ipc.on('response', <P extends { event: string }>(_meta: IpcResponseMeta, payload: P) => {
   ipcBus.emit(payload.event, payload)
 })
 
@@ -36,7 +41,7 @@ export class IpcBus<S extends EventMap, T extends EventMap> {
   }
 
   send<K extends EventKey<S>> (key: K, payload: S[K]) {
-    window.ipc.send('request', Math.random(), key, payload)
+    ipc.send('request', Math.random(), key, payload)
   }
 
   on<K extends EventKey<T>> (key: K, fn: EventReceiver<T[K]>) {

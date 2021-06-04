@@ -59,7 +59,7 @@ describe('App', () => {
 
     const deps = reactWebpack.dependencies.map((x) => x.packageName).join(' ')
 
-    cy.get('code').contains(`yarn add ${deps} --dev`)
+    cy.get('code').contains(`npm install ${deps} --dev`)
 
     cy.get('div').contains('We need you to install these dev dependencies.')
 

@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { useStore } from '../store'
 import DependencyItem from './DependencyItem.vue'
 import TerminalCommand from './TerminalCommand.vue'
@@ -40,8 +40,17 @@ export default defineComponent({
       throw Error(`store.state.component.framework must be set before using this component. This should never happen.`)
     }
 
+    const installCommand = computed(() => {
+      const type = store.getState().component.packageManager.type
+      if (type === 'yarn') {
+        return 'yarn add'
+      }
+
+      return 'npm install'
+    })
+
     // TODO: We should detect whether they are using npm or yarn.
-    const command = `yarn add ${framework.dependencies.map(dep => dep.packageName).join(' ')} --dev`
+    const command = `${installCommand.value} ${framework.dependencies.map(dep => dep.packageName).join(' ')} --dev`
 
     return {
       dependencies: framework.dependencies,
