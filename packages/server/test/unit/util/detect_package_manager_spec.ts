@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import path from 'path'
 import fs from 'fs'
-import { getPackageManager, clearCache } from '../../../src/utils/detectPackageManager'
+import { getPackageManager, clearCache } from '../../../lib/util/detect-package-manager'
 
 describe('detectPackageManager', () => {
   beforeEach(() => {
