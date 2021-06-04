@@ -2,6 +2,7 @@ describe('Navigation', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
     cy.fixture('config').as('config')
+    cy.fixture('specs').as('specs')
 
     cy.visitIndex().then(function (win) {
       let start = win.App.start
@@ -15,12 +16,16 @@ describe('Navigation', function () {
       cy.stub(this.ipc, 'logOut').resolves({})
       cy.stub(this.ipc, 'pingApiServer').resolves()
       cy.stub(this.ipc, 'externalOpen')
+      cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
 
       this.getOptions = this.util.deferred()
       cy.stub(this.ipc, 'getOptions').returns(this.getOptions.promise)
 
       this.getCurrentUser = this.util.deferred()
       cy.stub(this.ipc, 'getCurrentUser').returns(this.getCurrentUser.promise)
+
+      this.openProject = this.util.deferred()
+      cy.stub(this.ipc, 'openProject').resolves(this.openProject.promise)
 
       start()
     })
@@ -83,29 +88,143 @@ describe('Navigation', function () {
     context('with a project', function () {
       beforeEach(function () {
         this.getOptions.resolve({ projectRoot: '/foo/bar' })
-
-        cy.stub(this.ipc, 'openProject').resolves(this.config)
-        cy.stub(this.ipc, 'getSpecs').yields(null, [])
-
-        cy.get('.docs-menu').trigger('mouseover')
-        cy.get('.docs-dropdown').should('be.visible')
       })
 
       it('closes off hover', function () {
+        this.openProject.resolve(this.config)
+
+        cy.get('.docs-menu').trigger('mouseover')
+        cy.get('.docs-dropdown').should('be.visible')
+
         cy.get('.docs-menu').trigger('mouseout')
         cy.get('.docs-dropdown').should('not.exist')
       })
 
-      it('opens dismissible ci1 prompt', function () {
-        cy.contains('Setting up CI').click()
-        cy.get('.docs-dropdown').should('not.exist')
-        cy.get('.prompt-ci1').should('be.visible')
-      })
+      describe('prompts', function () {
+        describe('ci1', function () {
+          it('is not open by default', function () {
+            cy.get('.prompt-ci1').should('not.exist')
+          })
 
-      it('opens dismissible orchestration1 prompt', function () {
-        cy.contains('Running tests faster').click()
-        cy.get('.docs-dropdown').should('not.exist')
-        cy.get('.prompt-orchestration1').should('be.visible')
+          context('opens on click', function () {
+            beforeEach(function () {
+              this.openProject.resolve(this.config)
+
+              cy.get('.docs-menu').trigger('mouseover')
+              cy.get('.docs-dropdown').should('be.visible')
+              cy.contains('Setting up CI').click()
+            })
+
+            it('opens on menu item click', function () {
+              // should open in beforeEach
+              cy.get('.prompt-ci1').should('be.visible')
+              cy.get('.docs-dropdown').should('not.exist')
+
+              cy.percySnapshot()
+            })
+
+            it('is dismissible from X icon', function () {
+              cy.get('.close').click()
+              cy.get('.prompt-ci1').should('not.exist')
+            })
+
+            it('is dismissible from close button', function () {
+              cy.get('.prompt-ci1').contains('Close').click()
+              cy.get('.prompt-ci1').should('not.exist')
+            })
+
+            it('links to various ci providers', function () {
+              cy.get('.ci-provider-button').click({ multiple: true })
+              cy.wrap(this.ipc.externalOpen).should('have.callCount', 5)
+            })
+
+            it('links to more information', function () {
+              cy.get('.see-other-guides').click()
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/setup-ci' })
+
+              cy.get('.prompt-ci1').contains('Learn More').click()
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/ci' })
+            })
+          })
+
+          context('opens automatically', function () {
+            beforeEach(function () {
+              // 5 days from firstOpened in fixture
+              cy.clock(1609891200000)
+            })
+
+            it('opens when after 4 days from first open and no projectId', function () {
+              this.openProject.resolve({
+                ...this.config,
+                projectId: null,
+              })
+
+              cy.get('.prompt-ci1').should('be.visible')
+            })
+
+            it('does not open when projectId exists', function () {
+              // projectId exists in fixture
+              this.openProject.resolve(this.config)
+
+              cy.get('.prompt-ci1').should('not.exist')
+            })
+
+            it('does not open when another prompt has been shown recently', function () {
+              this.openProject.resolve({
+                ...this.config,
+                projectId: null,
+                state: {
+                  ...this.config.state,
+                  promptsShown: {
+                    // within 24 hours before the stubbed current time
+                    dashboard1: 1609891100000,
+                  },
+                },
+              })
+
+              cy.get('.prompt-ci1').should('not.exist')
+            })
+          })
+        })
+
+        describe('orchestration1', function () {
+          it('is not open by default', function () {
+            cy.get('.prompt-orchestration1').should('not.exist')
+          })
+
+          context('opens on click', function () {
+            beforeEach(function () {
+              this.openProject.resolve(this.config)
+
+              cy.get('.docs-menu').trigger('mouseover')
+              cy.get('.docs-dropdown').should('be.visible')
+              cy.contains('Running tests faster').click()
+            })
+
+            it('opens on menu item click', function () {
+              // should open in beforeEach
+              cy.get('.prompt-orchestration1').should('be.visible')
+              cy.get('.docs-dropdown').should('not.exist')
+
+              cy.percySnapshot()
+            })
+
+            it('is dismissible from X icon', function () {
+              cy.get('.close').click()
+              cy.get('.prompt-orchestration1').should('not.exist')
+            })
+
+            it('is dismissible from close button', function () {
+              cy.get('.prompt-orchestration1').contains('Close').click()
+              cy.get('.prompt-orchestration1').should('not.exist')
+            })
+
+            it('links to more information', function () {
+              cy.get('.prompt-orchestration1').contains('Learn More').click()
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/smart-orchestration' })
+            })
+          })
+        })
       })
     })
   })
