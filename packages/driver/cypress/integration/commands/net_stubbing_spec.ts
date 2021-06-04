@@ -2369,6 +2369,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         .wait('@get').its('response.body').should('deep.eq', '{ "foo": "bar" }')
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/16722
+      it('doesn\'t automatically parse response bodies if content is binary', function () {
+        const expectedBody = [120, 42, 7]
+        const assertBody = (body: ArrayBuffer) => {
+          const uint8 = new Uint8Array(body)
+
+          expectedBody.forEach((value, index) => {
+            expect(uint8[index]).to.eq(value)
+          })
+        }
+
+        cy.intercept('/binary*', (req) => {
+          req.on('response', (res) => {
+            expect(_.isArrayBuffer(res.body)).to.eq(true)
+            assertBody(res.body)
+          })
+        }).as('get')
+        .visit('/fixtures/display-binary.html')
+        .wait('@get').its('response.body').should(assertBody)
+        .get('#result').should('have.text', expectedBody.join(', '))
+      })
+
       it('sets body to string if JSON is malformed', function () {
         const p = Promise.defer()
 
