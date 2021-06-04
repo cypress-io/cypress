@@ -38,9 +38,6 @@ const nullifyUnserializableValues = (obj) => {
 }
 
 const handleEvent = function (options, bus, event, id, type, arg) {
-  // unified GUI event interface is a bit different
-  // to support better static typing.
-
   debug('got request for event: %s, %o', type, arg)
 
   _.defaults(options, {
@@ -79,6 +76,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   }
 
   switch (type) {
+    // unified GUI event
+    // all payloads should be formatted like this:
+    // { type: 'success' | 'error', event: string, payload: any }
     case 'get:package-manager': {
       return getPackageManager()
       .then((pkg) => {
