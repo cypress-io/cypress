@@ -81,16 +81,16 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   switch (type) {
     case 'get:package-manager': {
       return getPackageManager()
-        .then((pkg) => {
-          return sendResponse({ type: 'success', event: 'get:package-manager', data: pkg })
+      .then((pkg) => {
+        return sendResponse({ type: 'success', event: 'get:package-manager', data: pkg })
+      })
+      .catch((err) => {
+        return sendErr({
+          type: 'error',
+          event: 'get:package-manager',
+          data: 'Could not detect package manager',
         })
-        .catch((err) => {
-          return sendErr({
-            type: 'error', 
-            event: 'get:package-manager', 
-            data: 'Could not detect package manager'
-          })
-        })
+      })
     }
 
     case 'on:menu:clicked':
