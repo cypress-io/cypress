@@ -14,18 +14,23 @@
     "dev": "SPRINGBOARD=1 yarn start-test 5050 cypress:open",
     "postinstall": "echo '@packages/springboard needs: yarn build'",
     "start": "http-server -p 5050 dist",
-    "watch": "yarn build --watch --progress"
+    "watch": "yarn build --watch --progress",
+    "test:unit": "mocha -r @packages/ts/register test/**/*.spec.ts test/*.spec.ts --exit"
   },
   "dependencies": {
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
+    "execa": "^5.0.0",
     "vue": "3.0.11"
   },
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
+    "chai": "^4.2.0",
     "cross-env": "6.0.3",
+    "mocha": "^8.1.3",
     "ts-loader": "^8.0.5",
+    "typescript": "^4.2.3",
     "vue-loader": "16.2.0",
     "webpack": "4.44.2",
     "webpack-cli": "3.3.2",
