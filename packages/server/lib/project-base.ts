@@ -187,7 +187,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         lastOpened: now,
       }
 
-      if (!cfg.state.firstOpened) {
+      if (!cfg.state || !cfg.state.firstOpened) {
         stateToSave.firstOpened = now
       }
 
