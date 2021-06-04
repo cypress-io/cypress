@@ -1,3 +1,11 @@
+# [@cypress/react-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.0...@cypress/react-v5.9.1) (2021-06-04)
+
+
+### Bug Fixes
+
+* **cypress/react:** add default webpack config path ([#16813](https://github.com/cypress-io/cypress/issues/16813)) ([0348170](https://github.com/cypress-io/cypress/commit/03481703c997088a3e7ef5ed3b55d9fee01821a0))
+* **npm/react:** webpack config sample bug ([#16737](https://github.com/cypress-io/cypress/issues/16737)) ([98fe58c](https://github.com/cypress-io/cypress/commit/98fe58cce3dd42fc6ca4616a9ed3c9da7b33794c))
+
 # [@cypress/react-v5.9.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.1...@cypress/react-v5.9.0) (2021-05-31)
 
 
