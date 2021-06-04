@@ -6,7 +6,7 @@ const { addCypressToWebpackEslintRulesInPlace } = require('../utils/eslint-helpe
 const { getTranspileFolders } = require('../utils/get-transpile-folders')
 const { addFolderToBabelLoaderTranspileInPlace } = require('../utils/babel-helpers')
 
-module.exports = function findReactScriptsWebpackConfig (config, { webpackConfigPath }) {
+module.exports = function findReactScriptsWebpackConfig (config, { webpackConfigPath = 'react-scripts/config/webpack.config' }) {
   // this is required because
   // 1) we use our own HMR and we don't need react-refresh transpiling overhead
   // 2) it doesn't work with process.env=test @see https://github.com/cypress-io/cypress-realworld-app/pull/832
