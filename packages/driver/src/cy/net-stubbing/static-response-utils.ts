@@ -5,6 +5,7 @@ import {
   BackendStaticResponse,
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
+import { deepCopyArrayBuffer } from './utils'
 import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
@@ -110,6 +111,8 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
   if (!_.isUndefined(staticResponse.body)) {
     if (_.isString(staticResponse.body)) {
       backendStaticResponse.body = staticResponse.body
+    } else if (_.isArrayBuffer(staticResponse.body)) {
+      backendStaticResponse.body = deepCopyArrayBuffer(staticResponse.body)
     } else {
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
       _.set(backendStaticResponse, 'headers.content-type', 'application/json')

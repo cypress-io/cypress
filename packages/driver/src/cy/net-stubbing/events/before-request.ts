@@ -7,7 +7,7 @@ import {
   SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
-import { parseJsonBody } from './utils'
+import { parseJsonBody, stringifyJsonBody, mergeWithArrayBuffer } from './utils'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
@@ -74,7 +74,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const { routeId } = subscription
   const route = getRoute(routeId)
 
-  parseJsonBody(req)
+  const bodyParsed = parseJsonBody(req)
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -235,12 +235,12 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     continueSent = true
 
     // copy changeable attributes of userReq to req
-    _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
+    mergeWithArrayBuffer(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
 
     updateRequest(req)
 
-    if (_.isObject(req.body)) {
-      req.body = JSON.stringify(req.body)
+    if (bodyParsed) {
+      stringifyJsonBody(req)
     }
 
     resolve({
