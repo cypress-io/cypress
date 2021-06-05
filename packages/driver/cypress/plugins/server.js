@@ -100,6 +100,12 @@ const createApp = (port) => {
     return res.send(Buffer.from(uint8))
   })
 
+  app.post('/binary', (req, res) => {
+    res.setHeader('Content-Type', 'application/octet-stream')
+
+    return res.send(req.body)
+  })
+
   app.get('/1mb', (req, res) => {
     return res.type('text').send('X'.repeat(1024 * 1024))
   })
