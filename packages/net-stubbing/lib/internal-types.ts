@@ -70,9 +70,9 @@ export declare namespace NetEvent {
   }
 
   export namespace ToServer {
-    export interface AddRoute {
+    export interface AddRoute<StaticResponse> {
       routeMatcher: AnnotatedRouteMatcherOptions
-      staticResponse?: BackendStaticResponseWithArrayBuffer
+      staticResponse?: StaticResponse
       hasInterceptor: boolean
       routeId: string
     }
