@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import {
   StaticResponse,
-  BackendStaticResponse,
+  BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
 import { deepCopyArrayBuffer } from './utils'
@@ -96,8 +96,8 @@ function getFixtureOpts (fixture: string): FixtureOpts {
   return { filePath, encoding }
 }
 
-export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
-  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
+export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {
+  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
 
   if (staticResponse.delayMs) {
     // support deprecated `delayMs` usage

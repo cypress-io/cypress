@@ -11,7 +11,9 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
+
+export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -70,7 +72,7 @@ export declare namespace NetEvent {
   export namespace ToServer {
     export interface AddRoute {
       routeMatcher: AnnotatedRouteMatcherOptions
-      staticResponse?: BackendStaticResponse
+      staticResponse?: BackendStaticResponseWithArrayBuffer
       hasInterceptor: boolean
       routeId: string
     }
