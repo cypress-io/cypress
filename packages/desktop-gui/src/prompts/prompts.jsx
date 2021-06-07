@@ -172,92 +172,6 @@ class CIPrompt1 extends Component {
   }
 }
 
-// @observer
-// class DashboardPrompt1 extends Component {
-//   slug = 'dashboard1'
-//   utm_medium = 'Dashboard Prompt 1'
-//
-//   _close = () => {
-//     this.props.prompts.closePrompt(this.slug)
-//     ipc.setPromptShown(this.slug)
-//   }
-//
-//   _openAnalytics = (e) => {
-//     e.preventDefault()
-//     ipc.externalOpen({
-//       url: 'https://on.cypress.io/analytics',
-//       params: {
-//         utm_medium: this.utm_medium,
-//         utm_campaign: 'Analytics',
-//       },
-//     })
-//   }
-//
-//   _openFlakyTests = (e) => {
-//     e.preventDefault()
-//     ipc.externalOpen({
-//       url: 'https://on.cypress.io/flake-management',
-//       params: {
-//         utm_medium: this.utm_medium,
-//         utm_campaign: 'Flaky Tests',
-//       },
-//     })
-//   }
-//
-//   _openDebug = (e) => {
-//     e.preventDefault()
-//     ipc.externalOpen({
-//       url: 'https://on.cypress.io/test-failures',
-//       params: {
-//         utm_medium: this.utm_medium,
-//         utm_campaign: 'Debug',
-//       },
-//     })
-//   }
-//
-//   render () {
-//     const { prompts, referenceElement } = this.props
-//
-//     return (
-//       <Prompt
-//         isOpen={prompts[this.slug]}
-//         referenceElement={referenceElement}
-//       >
-//         <div className='prompt-body'>
-//           <button className='btn btn-link close' onClick={this._close}>
-//             <i className='fas fa-times' />
-//           </button>
-//           <div className='text-content'>
-//             <h2>Debug Tests in CI Faster</h2>
-//             <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
-//             <ul>
-//               <li>See <a onClick={this._openAnalytics}>test performance</a> over time</li>
-//               <li>Identify <a onClick={this._openFlakyTests}>flaky tests</a></li>
-//               <li>Never <a onClick={this._openDebug}>debug a failed test</a> in the terminal again</li>
-//             </ul>
-//           </div>
-//           <div className='dashboard-frame'>
-//             <div className='frame-title'>Previous Runs</div>
-//             <div className='main-content-wrapper'>
-//               <DashboardBranchHistory height='100%' width='100%' />
-//             </div>
-//           </div>
-//           <div className='prompt-buttons'>
-//             <LoginForm
-//               utm='Dashboard Prompt 1'
-//               buttonClassName='btn btn-success'
-//               buttonContent='Get Started'
-//             />
-//             <button className='btn btn-link' onClick={this._close}>
-//               No Thanks
-//             </button>
-//           </div>
-//         </div>
-//       </Prompt>
-//     )
-//   }
-// }
-
 @observer
 class OrchestrationPrompt1 extends Component {
   slug = 'orchestration1'
@@ -350,8 +264,6 @@ const Prompts = observer(({ project, referenceElement }) => {
   return (
     <>
       <CIPrompt1 prompts={prompts} referenceElement={referenceElement} />
-      {/* TODO: finish designs for prompts */}
-      {/*<DashboardPrompt1 prompts={prompts} referenceElement={referenceElement} />*/}
       <OrchestrationPrompt1 prompts={prompts} referenceElement={referenceElement} />
     </>
   )

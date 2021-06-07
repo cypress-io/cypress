@@ -8,11 +8,6 @@ const prompts = _.sortBy([
     interval: interval('4 days'),
     noProjectId: true,
   },
-  // {
-  //   slug: 'dashboard1',
-  //   interval: interval('7 days'),
-  //   noProjectId: true,
-  // },
   {
     slug: 'orchestration1',
     noProjectId: true,
