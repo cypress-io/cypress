@@ -497,13 +497,16 @@ describe('lib/agent', function () {
               })
             }
 
-            if (this.clientCert) {
-              // If a client cert has been assigned to a TLS connection, the key for the TLSSocket
-              // will include the public certificate
-              const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
 
-              expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
-              expect(socketKey[0]).to.contain(this.clientCert, 'A client cert should be been used for the TLS Socket')
+            expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+
+            // If a client cert has been assigned to a TLS connection, the key for the TLSSocket
+            // will include the public certificate
+            if (this.clientCert) {
+              expect(socketKey[0]).to.contain(this.clientCert, 'A client cert should be used for the TLS Socket')
+            } else {
+              expect(socketKey[0]).not.to.contain(this.clientCert, 'A client cert should not be used for the TLS Socket')
             }
           })
         })
