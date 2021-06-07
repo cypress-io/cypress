@@ -79,7 +79,7 @@ describe('Navigation', function () {
       })
 
       it('prompt links fall back to dashboard links', function () {
-        cy.contains('Setting up CI').click().then(() => {
+        cy.contains('Set up CI').click().then(() => {
           expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/ci' })
         })
       })
@@ -102,17 +102,13 @@ describe('Navigation', function () {
 
       describe('prompts', function () {
         describe('ci1', function () {
-          it('is not open by default', function () {
-            cy.get('.prompt-ci1').should('not.exist')
-          })
-
           context('opens on click', function () {
             beforeEach(function () {
               this.openProject.resolve(this.config)
 
               cy.get('.docs-menu').trigger('mouseover')
               cy.get('.docs-dropdown').should('be.visible')
-              cy.contains('Setting up CI').click()
+              cy.contains('Set up CI').click()
             })
 
             it('opens on menu item click', function () {
@@ -153,13 +149,24 @@ describe('Navigation', function () {
               cy.clock(1609891200000)
             })
 
-            it('opens when after 4 days from first open and no projectId', function () {
+            it('opens when after 4 days from first open, no projectId, and not already shown', function () {
               this.openProject.resolve({
                 ...this.config,
                 projectId: null,
+                state: {
+                  ...this.config.state,
+                  promptsShown: {},
+                },
               })
 
               cy.get('.prompt-ci1').should('be.visible')
+            })
+
+            it('does not open when previously shown', function () {
+              // fixture marks prompt as shown
+              this.openProject.resolve(this.config)
+
+              cy.get('.prompt-ci1').should('not.exist')
             })
 
             it('does not open when projectId exists', function () {
@@ -198,7 +205,7 @@ describe('Navigation', function () {
 
               cy.get('.docs-menu').trigger('mouseover')
               cy.get('.docs-dropdown').should('be.visible')
-              cy.contains('Running tests faster').click()
+              cy.contains('Run tests faster').click()
             })
 
             it('opens on menu item click', function () {

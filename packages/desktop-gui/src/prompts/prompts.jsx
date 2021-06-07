@@ -2,8 +2,7 @@ import React, { Component, useState } from 'react'
 import { observer } from 'mobx-react'
 import { usePopper } from 'react-popper'
 
-import LoginForm from '../auth/login-form'
-import { DashboardBranchHistory, CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild, CISingleIcon, CIMultiIcon } from './prompt-images'
+import { CircleCI, GitHubActions, Bitbucket, GitLab, AWSCodeBuild, CISingleIcon, CIMultiIcon } from './prompt-images'
 import ipc from '../lib/ipc'
 
 const Prompt = observer(({ children, isOpen, referenceElement, className }) => {
@@ -142,8 +141,8 @@ class CIPrompt1 extends Component {
             <i className='fas fa-times' />
           </button>
           <div className='text-content'>
-            <h2>Setting up CI</h2>
-            <p>We've created these guides to help you optimize how you're running tests in CI.</p>
+            <h2>Set up CI</h2>
+            <p>Optimize how you run tests in CI by following these guides.</p>
           </div>
           <div className='ci-providers'>
             { this.ciProviders.map((provider) => {
@@ -173,92 +172,91 @@ class CIPrompt1 extends Component {
   }
 }
 
-@observer
-// eslint-disable-next-line no-unused-vars
-class DashboardPrompt1 extends Component {
-  slug = 'dashboard1'
-  utm_medium = 'Dashboard Prompt 1'
-
-  _close = () => {
-    this.props.prompts.closePrompt(this.slug)
-    ipc.setPromptShown(this.slug)
-  }
-
-  _openAnalytics = (e) => {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/analytics',
-      params: {
-        utm_medium: this.utm_medium,
-        utm_campaign: 'Analytics',
-      },
-    })
-  }
-
-  _openFlakyTests = (e) => {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/flake-management',
-      params: {
-        utm_medium: this.utm_medium,
-        utm_campaign: 'Flaky Tests',
-      },
-    })
-  }
-
-  _openDebug = (e) => {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/test-failures',
-      params: {
-        utm_medium: this.utm_medium,
-        utm_campaign: 'Debug',
-      },
-    })
-  }
-
-  render () {
-    const { prompts, referenceElement } = this.props
-
-    return (
-      <Prompt
-        isOpen={prompts[this.slug]}
-        referenceElement={referenceElement}
-      >
-        <div className='prompt-body'>
-          <button className='btn btn-link close' onClick={this._close}>
-            <i className='fas fa-times' />
-          </button>
-          <div className='text-content'>
-            <h2>Debug Tests in CI Faster</h2>
-            <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
-            <ul>
-              <li>See <a onClick={this._openAnalytics}>test performance</a> over time</li>
-              <li>Identify <a onClick={this._openFlakyTests}>flaky tests</a></li>
-              <li>Never <a onClick={this._openDebug}>debug a failed test</a> in the terminal again</li>
-            </ul>
-          </div>
-          <div className='dashboard-frame'>
-            <div className='frame-title'>Previous Runs</div>
-            <div className='main-content-wrapper'>
-              <DashboardBranchHistory height='100%' width='100%' />
-            </div>
-          </div>
-          <div className='prompt-buttons'>
-            <LoginForm
-              utm='Dashboard Prompt 1'
-              buttonClassName='btn btn-success'
-              buttonContent='Get Started'
-            />
-            <button className='btn btn-link' onClick={this._close}>
-              No Thanks
-            </button>
-          </div>
-        </div>
-      </Prompt>
-    )
-  }
-}
+// @observer
+// class DashboardPrompt1 extends Component {
+//   slug = 'dashboard1'
+//   utm_medium = 'Dashboard Prompt 1'
+//
+//   _close = () => {
+//     this.props.prompts.closePrompt(this.slug)
+//     ipc.setPromptShown(this.slug)
+//   }
+//
+//   _openAnalytics = (e) => {
+//     e.preventDefault()
+//     ipc.externalOpen({
+//       url: 'https://on.cypress.io/analytics',
+//       params: {
+//         utm_medium: this.utm_medium,
+//         utm_campaign: 'Analytics',
+//       },
+//     })
+//   }
+//
+//   _openFlakyTests = (e) => {
+//     e.preventDefault()
+//     ipc.externalOpen({
+//       url: 'https://on.cypress.io/flake-management',
+//       params: {
+//         utm_medium: this.utm_medium,
+//         utm_campaign: 'Flaky Tests',
+//       },
+//     })
+//   }
+//
+//   _openDebug = (e) => {
+//     e.preventDefault()
+//     ipc.externalOpen({
+//       url: 'https://on.cypress.io/test-failures',
+//       params: {
+//         utm_medium: this.utm_medium,
+//         utm_campaign: 'Debug',
+//       },
+//     })
+//   }
+//
+//   render () {
+//     const { prompts, referenceElement } = this.props
+//
+//     return (
+//       <Prompt
+//         isOpen={prompts[this.slug]}
+//         referenceElement={referenceElement}
+//       >
+//         <div className='prompt-body'>
+//           <button className='btn btn-link close' onClick={this._close}>
+//             <i className='fas fa-times' />
+//           </button>
+//           <div className='text-content'>
+//             <h2>Debug Tests in CI Faster</h2>
+//             <p>With the <span className='text-bold'>Cypress Dashboard</span> you can:</p>
+//             <ul>
+//               <li>See <a onClick={this._openAnalytics}>test performance</a> over time</li>
+//               <li>Identify <a onClick={this._openFlakyTests}>flaky tests</a></li>
+//               <li>Never <a onClick={this._openDebug}>debug a failed test</a> in the terminal again</li>
+//             </ul>
+//           </div>
+//           <div className='dashboard-frame'>
+//             <div className='frame-title'>Previous Runs</div>
+//             <div className='main-content-wrapper'>
+//               <DashboardBranchHistory height='100%' width='100%' />
+//             </div>
+//           </div>
+//           <div className='prompt-buttons'>
+//             <LoginForm
+//               utm='Dashboard Prompt 1'
+//               buttonClassName='btn btn-success'
+//               buttonContent='Get Started'
+//             />
+//             <button className='btn btn-link' onClick={this._close}>
+//               No Thanks
+//             </button>
+//           </div>
+//         </div>
+//       </Prompt>
+//     )
+//   }
+// }
 
 @observer
 class OrchestrationPrompt1 extends Component {
@@ -295,12 +293,12 @@ class OrchestrationPrompt1 extends Component {
             <i className='fas fa-times' />
           </button>
           <div className='text-content'>
-            <h2>Running tests faster in CI</h2>
+            <h2>Run tests faster in CI</h2>
             <p>With <span className='text-bold'>Smart Orchestration</span> you can:</p>
             <ul>
               <li>Run spec files in parallel</li>
-              <li>Prioritize failed specs to run first to verify latest changes</li>
-              <li>Cancel CI runs on first test failure</li>
+              <li>Prioritize failed specs to run first</li>
+              <li>Cancel CI runs on test failure</li>
             </ul>
           </div>
           <div className='dashboard-frame'>

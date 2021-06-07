@@ -410,7 +410,11 @@
   "responseTimeout": 20000,
   "state": {
     "firstOpened": 1609459200000,
-    "lastOpened": 1609459200000
+    "lastOpened": 1609459200000,
+    "promptsShown": {
+      "ci1": 1609459200000,
+      "orchestration1": 1609459200000
+    }
   },
   "socketId": null,
   "socketIoCookie": "__socket.io",

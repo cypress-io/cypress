@@ -52,6 +52,9 @@ export default class Prompts {
   @action setPromptStates = (config) => {
     const { state, projectId } = config
 
+    // if no state (due to error) then no prompts are shown
+    if (!state) return
+
     this.firstOpened = state.firstOpened
     this.lastOpened = state.lastOpened
     this._promptsShown = state.promptsShown

@@ -29,7 +29,7 @@ const DocsMenu = observer(() => {
     }, {
       name: 'offset',
       options: {
-        offset: [window.innerWidth > 550 ? -175 : 0, 0],
+        offset: [window.innerWidth > 550 ? -150 : 0, 0],
       },
     }],
   })
@@ -130,10 +130,10 @@ const DocsMenu = observer(() => {
         },
       }],
     }, {
-      title: 'Do more in CI',
+      title: 'Run in CI',
       itemIcon: 'far fa-lightbulb',
       children: [{
-        text: 'Setting up CI',
+        text: 'Set up CI',
         ...showPromptOrLink('ci1', {
           url: 'https://on.cypress.io/ci',
           params: {
@@ -142,7 +142,7 @@ const DocsMenu = observer(() => {
           },
         }),
       }, {
-        text: 'Running tests faster',
+        text: 'Run tests faster',
         ...showPromptOrLink('orchestration1', {
           url: 'https://on.cypress.io/parallelization',
           params: {
