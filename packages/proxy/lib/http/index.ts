@@ -5,7 +5,7 @@ import {
   CypressOutgoingResponse,
   BrowserPreRequest,
 } from '@packages/proxy'
-import debugModule, { Debug } from 'debug'
+import Debug from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { GetPreRequestCb, PreRequests } from './util/prerequests'
@@ -18,8 +18,8 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 
-const debug = debugModule('cypress:proxy:http')
-const debugRequests = debugModule('cypress-verbose:proxy:http')
+const debug = Debug('cypress:proxy:http')
+const debugRequests = Debug('cypress-verbose:proxy:http')
 
 export enum HttpStages {
   IncomingRequest,
@@ -38,8 +38,9 @@ export type HttpMiddlewareStacks = {
 type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
+  correlatePreRequests?: boolean
   stage: HttpStages
-  debug: Debug
+  debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => void
@@ -53,6 +54,7 @@ export const defaultMiddleware = {
 
 export type ServerCtx = Readonly<{
   config: CyServer.Config
+  correlatePreRequests?: boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
   netStubbingState: NetStubbingState
@@ -180,6 +182,7 @@ export function _runStage (type: HttpStages, ctx: any) {
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
+  correlatePreRequests?: boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
   getRemoteState: () => any
@@ -194,6 +197,7 @@ export class Http {
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
     this.config = opts.config
+    this.correlatePreRequests = opts.correlatePreRequests
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
     this.middleware = opts.middleware
@@ -212,6 +216,7 @@ export class Http {
       res,
       buffers: this.buffers,
       config: this.config,
+      correlatePreRequests: this.correlatePreRequests,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,

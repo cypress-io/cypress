@@ -23,6 +23,7 @@ import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
@@ -81,6 +82,8 @@ const setProxiedUrl = function (req) {
 const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
+
+const shouldCorrelatePreRequests = ({ family, majorVersion }) => family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
@@ -201,10 +204,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return this._fileServer.token
     }
 
+    const correlatePreRequests = shouldCorrelatePreRequests(config.browser)
+
     this._netStubbingState = netStubbingState()
     // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
+      correlatePreRequests,
       getRemoteState,
       getFileServerToken,
       socket: this.socket,
