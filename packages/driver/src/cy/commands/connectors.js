@@ -55,7 +55,7 @@ module.exports = function (Commands, Cypress, cy, state) {
     }
 
     const options = _.defaults({}, userOptions, {
-      timeout: cy.timeout(),
+      timeout: Cypress.config('defaultCommandTimeout'),
     })
 
     // clear the timeout since we are handling

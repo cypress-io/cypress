@@ -9,11 +9,10 @@ import State from '../lib/state'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import { ExtendedConfigOptions } from '../app/RunnerCt'
 
 interface HeaderProps {
   state: State
-  config: ExtendedConfigOptions
+  config: Cypress.RuntimeConfigOptions
 }
 
 @observer
@@ -43,8 +42,8 @@ export default class Header extends Component<HeaderProps> {
             <button
               aria-label='Open Selector Playground'
               className='header-button selector-playground-toggle'
-              onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
+              onClick={this._togglePlaygroundOpen}
             >
               <i aria-hidden="true" className='fas fa-crosshairs' />
             </button>
@@ -53,27 +52,33 @@ export default class Header extends Component<HeaderProps> {
         <ul className='menu'>
           <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              {state.viewportWidth} <span className='the-x'>x</span> {state.viewportHeight}
+              {`${state.viewportWidth} `}
+              <span className='the-x'>x</span>
+              {` ${state.viewportHeight}`}
               <i className='fas fa-fw fa-info-circle'></i>
             </button>
             <div className='popup-menu viewport-menu'>
+              {/* eslint-disable react/jsx-one-expression-per-line */}
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
                 <strong>{state.defaults.viewportWidth}px</strong> by
                 <strong>{state.defaults.viewportHeight}px</strong> unless specified by a
-                <code>cy.viewport</code> command.</p>
+                <code>cy.viewport</code> command.
+              </p>
               <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
               <pre>{/* eslint-disable indent */}
                 {`{
   "viewportWidth": ${state.defaults.viewportWidth},
   "viewportHeight": ${state.defaults.viewportHeight}
 }`}
-              </pre>{/* eslint-enable indent */}
+              </pre>
+              {/* eslint-enable indent */}
               <p>
-                <a href='https://on.cypress.io/viewport' target='_blank'>
+                <a href='https://on.cypress.io/viewport' target='_blank' rel='noreferrer'>
                   <i className='fas fa-info-circle'></i>
                   Read more about viewport here.
                 </a>
               </p>
+              {/* eslint-enable react/jsx-one-expression-per-line */}
             </div>
           </li>
         </ul>

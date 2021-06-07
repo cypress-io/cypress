@@ -1,8 +1,10 @@
 /* global Cypress */
 /// <reference types="cypress" />
 
+import debugFn from 'debug'
 import * as path from 'path'
 import { CypressCTWebpackContext } from './plugin'
+const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 /**
  * @param {ComponentSpec} file spec to create import string from.
@@ -15,8 +17,8 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
   return `"${filename}": {
-    shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
-    load: () => import(${JSON.stringify(path.resolve(projectRoot, file.relative))} ${magicComments}),
+    shouldLoad: () => document.location.pathname.includes("${encodeURI(file.absolute)}"),
+    load: () => import("${file.absolute}" ${magicComments}),
     chunkName: "${chunkName}",
   }`
 }
@@ -38,6 +40,8 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
  */
 function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = []): string {
   if (!Array.isArray(files)) return `{}`
+
+  debug(`projectRoot: ${projectRoot}, files: ${files.map((f) => f.absolute).join(',')}`)
 
   return `{${files.map((f, i) => {
     return makeImport(f, f.name, `spec-${i}`, projectRoot)

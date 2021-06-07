@@ -48,6 +48,43 @@ const escapedRetryDuration = /TORA(\d+)/g
 
 export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 
+// extract the 'Difference' section from a snap-shot-it error message
+const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
+const expectedAddedVideoSnapshotLines = [
+  'Warning: We failed processing this video.',
+  'This error will not alter the exit code.', '',
+  'TimeoutError: operation timed out',
+  '[stack trace lines]', '', '',
+  '│ Video:        false                                                                            │',
+]
+const expectedDeletedVideoSnapshotLines = [
+  '│ Video:        true                                                                             │',
+  '(Video)', '',
+  '-  Started processing:  Compressing to 32 CRF',
+]
+
+const isVideoSnapshotError = (err: Error) => {
+  const [added, deleted] = [[], []]
+  const matches = diffRe.exec(err.message)
+
+  if (!matches || !matches.length) {
+    return false
+  }
+
+  const lines = matches[1].split('\n')
+
+  for (const line of lines) {
+    // past this point, the content is variable - mp4 path length
+    if (line.includes('Finished processing:')) break
+
+    if (line.charAt(0) === '+') added.push(line.slice(1).trim())
+
+    if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
+  }
+
+  return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
+}
+
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
@@ -416,7 +453,6 @@ const e2e = {
 
       if (process.env.NO_EXIT) {
         Fixtures.scaffoldWatch()
-        process.env.CYPRESS_INTERNAL_E2E_TESTS
       }
 
       sinon.stub(process, 'exit')
@@ -701,10 +737,20 @@ const e2e = {
 
         const str = normalizeStdout(stdout, options)
 
-        if (options.originalTitle) {
-          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
-        } else {
-          snapshot(str)
+        try {
+          if (options.originalTitle) {
+            snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+          } else {
+            snapshot(str)
+          }
+        } catch (err) {
+          // firefox has issues with recording video. for now, ignore snapshot diffs that only differ in this error.
+          // @see https://github.com/cypress-io/cypress/pull/16731
+          if (!(options.browser === 'firefox' && isVideoSnapshotError(err))) {
+            throw err
+          }
+
+          console.warn('(e2e warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
         }
       }
 

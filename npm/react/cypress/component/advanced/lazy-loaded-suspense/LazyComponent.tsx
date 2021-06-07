@@ -1,6 +1,9 @@
 import * as React from 'react'
 
-const LazyDog = React.lazy(() => import(/* webpackChunkName: "Dog" */ './Dog'))
+const LazyDog = React.lazy(() => {
+  return import(/* webpackChunkName: "Dog" */ './Dog')
+  .then((comp) => new Promise((resolve) => setTimeout(() => resolve(comp), 10)))
+})
 
 interface LazyComponentProps {}
 

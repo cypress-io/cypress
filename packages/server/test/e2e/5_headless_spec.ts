@@ -12,6 +12,7 @@ describe('e2e headless', function () {
         'CI': process.env.CI,
         'EXPECT_HEADLESS': '1',
       },
+      video: false,
     },
     headed: false,
     snapshot: true,
@@ -40,10 +41,9 @@ describe('e2e headless', function () {
     })
   })
 
-  e2e.it('launches maximized by default in headless mode (1280x720)', {
-    browser: 'chrome',
+  e2e.it('launches maximized by default in headless mode (1920x1080)', {
     headed: false,
     project: Fixtures.projectPath('screen-size'),
-    spec: '720p.spec.js',
+    spec: 'default_size.spec.js',
   })
 })

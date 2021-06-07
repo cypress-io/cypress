@@ -9,6 +9,7 @@ const { ProjectE2E } = require('./project-e2e')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
+const runEvents = require('./plugins/run_events')
 
 const moduleFactory = () => {
   let openProject = null
@@ -123,12 +124,23 @@ const moduleFactory = () => {
             })
           }
 
+          const afterSpec = () => {
+            if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
+
+            return runEvents.execute('after:spec', cfg, spec)
+          }
+
           const { onBrowserClose } = options
 
           options.onBrowserClose = () => {
             if (spec && spec.absolute) {
               preprocessor.removeFile(spec.absolute, cfg)
             }
+
+            afterSpec(cfg, spec)
+            .catch((err) => {
+              openProject.options.onError(err)
+            })
 
             if (onBrowserClose) {
               return onBrowserClose()
@@ -144,11 +156,53 @@ const moduleFactory = () => {
               spec.relative,
             )
 
-            return browsers.open(browser, options, automation)
+            return Promise.try(() => {
+              if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
+                return runEvents.execute('before:spec', cfg, spec)
+              }
+            })
+            .then(() => {
+              return browsers.open(browser, options, automation)
+            })
           }
 
           return relaunchBrowser()
         })
+      })
+    },
+
+    getSpecs (cfg) {
+      return specsUtil.find(cfg)
+      .then((specs = []) => {
+        // TODO merge logic with "run.js"
+        if (debug.enabled) {
+          const names = _.map(specs, 'name')
+
+          debug(
+            'found %s using spec pattern \'%s\': %o',
+            pluralize('spec', names.length, true),
+            cfg.testFiles,
+            names,
+          )
+        }
+
+        const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
+
+        if (componentTestingEnabled) {
+          // separate specs into integration and component lists
+          // note: _.remove modifies the array in place and returns removed elements
+          const component = _.remove(specs, { specType: 'component' })
+
+          return {
+            integration: specs,
+            component,
+          }
+        }
+
+        // assumes all specs are integration specs
+        return {
+          integration: specs,
+        }
       })
     },
 
@@ -181,15 +235,14 @@ const moduleFactory = () => {
         return get()
         .then(sendIfChanged)
         .catch(options.onError)
-      },
-      250, { leading: true })
+      }, 250, { leading: true })
 
       const createSpecsWatcher = (cfg) => {
         // TODO I keep repeating this to get the resolved value
         // probably better to have a single function that does this
-        const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+        const componentTestingEnabled = _.get(cfg, 'resolved.testingType.value', 'e2e') === 'component'
 
-        debug('createSpecWatch component testing enabled', experimentalComponentTestingEnabled)
+        debug('createSpecWatch component testing enabled', componentTestingEnabled)
 
         if (!this.specsWatcher) {
           debug('watching integration test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
@@ -205,7 +258,7 @@ const moduleFactory = () => {
           this.specsWatcher.on('unlink', checkForSpecUpdates)
         }
 
-        if (experimentalComponentTestingEnabled && !this.componentSpecsWatcher) {
+        if (componentTestingEnabled && !this.componentSpecsWatcher) {
           debug('watching component test files: %s in %s', cfg.testFiles, cfg.componentFolder)
 
           this.componentSpecsWatcher = chokidar.watch(cfg.testFiles, {
@@ -225,38 +278,7 @@ const moduleFactory = () => {
         .then((cfg) => {
           createSpecsWatcher(cfg)
 
-          return specsUtil.find(cfg)
-          .then((specs = []) => {
-            // TODO merge logic with "run.js"
-            if (debug.enabled) {
-              const names = _.map(specs, 'name')
-
-              debug(
-                'found %s using spec pattern \'%s\': %o',
-                pluralize('spec', names.length, true),
-                cfg.testFiles,
-                names,
-              )
-            }
-
-            const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
-
-            if (experimentalComponentTestingEnabled) {
-              // separate specs into integration and component lists
-              // note: _.remove modifies the array in place and returns removed elements
-              const component = _.remove(specs, { specType: 'component' })
-
-              return {
-                integration: specs,
-                component,
-              }
-            }
-
-            // assumes all specs are integration specs
-            return {
-              integration: specs,
-            }
-          })
+          return this.getSpecs(cfg)
         })
       }
 
@@ -283,10 +305,10 @@ const moduleFactory = () => {
     },
 
     closeOpenProjectAndBrowsers () {
-      return Promise.all([
-        this.closeBrowser(),
-        openProject ? openProject.close() : undefined,
-      ])
+      return this.closeBrowser()
+      .then(() => {
+        return openProject && openProject.close()
+      })
       .then(() => {
         reset()
 
@@ -307,7 +329,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = args.componentTesting ? new ProjectCt(path) : new ProjectE2E(path)
+      openProject = args.testingType === 'component' ? new ProjectCt(path) : new ProjectE2E(path)
 
       _.defaults(options, {
         onReloadBrowser: () => {
@@ -331,6 +353,9 @@ const moduleFactory = () => {
       return openProject.open({ ...options, testingType: args.testingType })
       .return(this)
     },
+
+    // for testing purposes
+    __reset: reset,
   }
 }
 

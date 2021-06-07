@@ -1,3 +1,79 @@
+# [@cypress/webpack-dev-server-v1.3.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.3.0...@cypress/webpack-dev-server-v1.3.1) (2021-05-26)
+
+
+### Bug Fixes
+
+* encodeURI to correctly load specs with white space ([#16416](https://github.com/cypress-io/cypress/issues/16416)) ([116fe64](https://github.com/cypress-io/cypress/commit/116fe649d74e54da9dd84bf126f08f4b9162c5d3))
+* Properly typecheck webpack-dev-server and fix several undefined issues ([#16503](https://github.com/cypress-io/cypress/issues/16503)) ([4bb1ecd](https://github.com/cypress-io/cypress/commit/4bb1ecd077fc3724e6c127982f98e1e6b0f1bb98))
+
+# [@cypress/webpack-dev-server-v1.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.2.0...@cypress/webpack-dev-server-v1.3.0) (2021-05-13)
+
+
+### Features
+
+* support webpack dev server v4 ([#16414](https://github.com/cypress-io/cypress/issues/16414)) ([0cea625](https://github.com/cypress-io/cypress/commit/0cea625f359ef554e87600ef7e7c3afa4e36da4d))
+
+# [@cypress/webpack-dev-server-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.6...@cypress/webpack-dev-server-v1.2.0) (2021-05-11)
+
+
+### Features
+
+* exclude html pwa plugin in webpack dev server ([#16388](https://github.com/cypress-io/cypress/issues/16388)) ([14c2292](https://github.com/cypress-io/cypress/commit/14c22929badfe56385260a49336cf29e10902470))
+
+# [@cypress/webpack-dev-server-v1.1.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.5...@cypress/webpack-dev-server-v1.1.6) (2021-04-30)
+
+
+### Bug Fixes
+
+* update docs ([#16266](https://github.com/cypress-io/cypress/issues/16266)) ([72e064b](https://github.com/cypress-io/cypress/commit/72e064bd0705ae39830a2be2052534699862551a))
+
+# [@cypress/webpack-dev-server-v1.1.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.4...@cypress/webpack-dev-server-v1.1.5) (2021-04-26)
+
+
+### Bug Fixes
+
+* **component-testing:** correct imports for relative paths in cypress.json  ([#16056](https://github.com/cypress-io/cypress/issues/16056)) ([10b89f8](https://github.com/cypress-io/cypress/commit/10b89f8d587d331256549c3ab7662f119df7a0f1))
+* **webpack-dev-server:** remove hard dependency on html-webpack-plugin v4  ([#16108](https://github.com/cypress-io/cypress/issues/16108)) ([4cfe4b1](https://github.com/cypress-io/cypress/commit/4cfe4b1971c615d615c05ce35b9f7dd5ef8315fc))
+* remove lazy-compile-webpack-plugin, make html-webpack-plugin a dependency ([#15954](https://github.com/cypress-io/cypress/issues/15954)) ([19136b6](https://github.com/cypress-io/cypress/commit/19136b6a131cffc31899c754cccce64ce1b4fb87))
+* run-ct does not hang on windows anymore ([#16022](https://github.com/cypress-io/cypress/issues/16022)) ([6c12a6c](https://github.com/cypress-io/cypress/commit/6c12a6c7b706ee4f708a9d19c62f18cd0838a433))
+
+# [@cypress/webpack-dev-server-v1.1.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.3...@cypress/webpack-dev-server-v1.1.4) (2021-04-21)
+
+
+### Bug Fixes
+
+* **webpack:** allow load custom asset on windows ([#16099](https://github.com/cypress-io/cypress/issues/16099)) ([7340851](https://github.com/cypress-io/cypress/commit/7340851097c792ca0d8d3157c3d803dccdd905d2)), closes [#16097](https://github.com/cypress-io/cypress/issues/16097)
+
+# [@cypress/webpack-dev-server-v1.1.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.2...@cypress/webpack-dev-server-v1.1.3) (2021-04-13)
+
+
+### Bug Fixes
+
+* ensure root el mounting exists, remove userland html webpack plugin ([#15870](https://github.com/cypress-io/cypress/issues/15870)) ([726120d](https://github.com/cypress-io/cypress/commit/726120da183cb6d89c83181761d21f09844a9fc2))
+* make component testing windows compatible ([#15889](https://github.com/cypress-io/cypress/issues/15889)) ([602c762](https://github.com/cypress-io/cypress/commit/602c762cfd707ae497273ac38206d7f9d8545439))
+* remove lazy-compile-webpack-plugin ([#15964](https://github.com/cypress-io/cypress/issues/15964)) ([dcf3b14](https://github.com/cypress-io/cypress/commit/dcf3b14f3668cba8e19cf4eecd80db0c726f4248))
+* **webpack-dev-server:** remove output.publicPath from webpack-dev-server ([#15839](https://github.com/cypress-io/cypress/issues/15839)) ([8e894a0](https://github.com/cypress-io/cypress/commit/8e894a0fdb899be8dd8993319c9297ea73c10321))
+
+
+### Reverts
+
+* Revert "fix: ensure root el mounting exists, remove userland html webpack plugin (#15870)" (#15949) ([1d271ea](https://github.com/cypress-io/cypress/commit/1d271ea209c9d5116d61ed9b147a75eda6a61210)), closes [#15870](https://github.com/cypress-io/cypress/issues/15870) [#15949](https://github.com/cypress-io/cypress/issues/15949)
+
+# [@cypress/webpack-dev-server-v1.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.1...@cypress/webpack-dev-server-v1.1.2) (2021-04-06)
+
+
+### Bug Fixes
+
+* **component-testing:** Correctly specify @cypress/webpack-dev-server peerDependencies ([#15820](https://github.com/cypress-io/cypress/issues/15820)) ([519b29c](https://github.com/cypress-io/cypress/commit/519b29cb897af59b84dc2f35752f785985348f2d))
+
+# [@cypress/webpack-dev-server-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.0...@cypress/webpack-dev-server-v1.1.1) (2021-04-05)
+
+
+### Bug Fixes
+
+* **@cypress/react:** Devtools unpredictable resets ([#15612](https://github.com/cypress-io/cypress/issues/15612)) ([b1f831a](https://github.com/cypress-io/cypress/commit/b1f831a86a8bcc6646067bc8a9e67871026ff575)), closes [#15634](https://github.com/cypress-io/cypress/issues/15634)
+* **component-testing:** Fix webpack-dev-server deps validation crash ([#15708](https://github.com/cypress-io/cypress/issues/15708)) ([254eb47](https://github.com/cypress-io/cypress/commit/254eb47d91c75a9f56162e7493ab83e5be169935))
+
 # [@cypress/webpack-dev-server-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.0.4...@cypress/webpack-dev-server-v1.1.0) (2021-03-15)
 
 

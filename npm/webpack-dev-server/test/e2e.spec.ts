@@ -53,7 +53,7 @@ const config = {
   projectRoot: root,
   supportFile: '',
   isTextTerminal: true,
-  webpackDevServerPublicPathRoute: root,
+  devServerPublicPathRoute: root,
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
@@ -117,7 +117,11 @@ describe('#startDevServer', () => {
     exitSpy()
 
     return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:error', () => {
+      devServerEvents.on('dev-server:compile:error', (err: string) => {
+        expect(err).to.contain('./test/fixtures/compilation-fails.spec.js 1:5')
+        expect(err).to.contain('Module parse failed: Unexpected token (1:5)')
+        expect(err).to.contain('You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders')
+        expect(err).to.contain('> this is an invalid spec file')
         expect(exitSpy.calledOnce).to.be.true
         close(() => res())
       })

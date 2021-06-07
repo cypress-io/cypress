@@ -3,16 +3,17 @@ import inquirer from 'inquirer'
 import { scanFSForAvailableDependency } from '../findPackageJson'
 import { installDependency } from '../utils'
 
-async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue'> {
+async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue@2' | 'vue@3'> {
   // please sort this alphabetically
   const frameworks = {
-    react: () => scanFSForAvailableDependency(cwd, ['react', 'react-dom']),
-    vue: () => scanFSForAvailableDependency(cwd, ['vue']),
+    react: () => scanFSForAvailableDependency(cwd, { react: '*', 'react-dom': '*' }),
+    'vue@2': () => scanFSForAvailableDependency(cwd, { vue: '2.x' }),
+    'vue@3': () => scanFSForAvailableDependency(cwd, { vue: '3.x' }),
   }
 
   const guesses = Object.keys(frameworks).filter((framework) => {
     return frameworks[framework as keyof typeof frameworks]()
-  }) as Array<'react' | 'vue'>
+  }) as Array<'react' | 'vue@2' | 'vue@3'>
 
   // found 1 precise guess. Continue
   if (guesses.length === 1) {

@@ -25,7 +25,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const branchesToBuildBinary = ['develop', 'sem-next-ver']
+  const branchesToBuildBinary = ['develop', '7.0-release']
 
   return branchesToBuildBinary.includes(branch) || shouldForceBinaryBuild
 }

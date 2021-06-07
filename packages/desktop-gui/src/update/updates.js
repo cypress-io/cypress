@@ -5,16 +5,23 @@ import updateStore from '../update/update-store'
 import ipc from '../lib/ipc'
 import { useLifecycle } from '../lib/use-lifecycle'
 
+let initialLaunch = true
+
 const checkForUpdate = () => {
   ipc.offUpdaterCheck()
 
-  ipc.updaterCheck()
+  ipc.updaterCheck({
+    initialLaunch,
+    testingType: 'e2e',
+  })
   .then((version) => {
     if (version) updateStore.setNewVersion(version)
   })
   .catch((error) => {
     console.warn('Error checking for updates:', error) // eslint-disable-line no-console
   })
+
+  initialLaunch = false
 }
 
 export const useUpdateChecker = () => {

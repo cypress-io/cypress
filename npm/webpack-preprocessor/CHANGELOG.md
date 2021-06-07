@@ -1,3 +1,24 @@
+# [@cypress/webpack-preprocessor-v5.9.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.8.0...@cypress/webpack-preprocessor-v5.9.0) (2021-05-26)
+
+
+### Features
+
+* **npm/webpack-preprocessor:** WIP support webpack 5 alongside webpack 4 ([#16493](https://github.com/cypress-io/cypress/issues/16493)) ([d37fa84](https://github.com/cypress-io/cypress/commit/d37fa84d327091b5bb552d7670e6bcb7fd2d3199))
+
+# [@cypress/webpack-preprocessor-v5.8.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.7.0...@cypress/webpack-preprocessor-v5.8.0) (2021-05-13)
+
+
+### Features
+
+* **npm/webpack-preprocessor:** WIP support webpack 5 alongside webpack 4 ([#16493](https://github.com/cypress-io/cypress/issues/16493)) ([#16504](https://github.com/cypress-io/cypress/issues/16504)) ([c9fb982](https://github.com/cypress-io/cypress/commit/c9fb982ab120ed4c642466796ce4caeea14e0eb4))
+
+# [@cypress/webpack-preprocessor-v5.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.6.0...@cypress/webpack-preprocessor-v5.7.0) (2021-04-05)
+
+
+### Features
+
+* create new spec file from desktop-gui ([#15335](https://github.com/cypress-io/cypress/issues/15335)) ([3700fe7](https://github.com/cypress-io/cypress/commit/3700fe7271b016f8a89c5a7a4c40d0af62155b45))
+
 # [@cypress/webpack-preprocessor-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.5.0...@cypress/webpack-preprocessor-v5.6.0) (2021-02-16)
 
 

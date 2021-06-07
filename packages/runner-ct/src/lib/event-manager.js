@@ -224,7 +224,11 @@ const eventManager = {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
-    window.Cypress = Cypress
+    // since CT AUT shares the window with the spec, we don't want to overwrite
+    // our spec Cypress instance with the component's Cypress instance
+    if (window.top === window) {
+      window.Cypress = Cypress
+    }
 
     this._addCypressListeners(Cypress)
 
@@ -432,6 +436,10 @@ const eventManager = {
 
   on (event, ...args) {
     localBus.on(event, ...args)
+  },
+
+  off (event, ...args) {
+    localBus.off(event, ...args)
   },
 
   notifyRunningSpec (specFile) {

@@ -1,10 +1,12 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import getDisplayName from './getDisplayName'
-import { injectStylesBeforeElement } from './utils'
-import { setupHooks } from './hooks'
-
-const ROOT_ID = '__cy_root'
+import {
+  injectStylesBeforeElement,
+  StyleOptions,
+  ROOT_ID,
+  setupHooks,
+} from '@cypress/mount-utils'
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
@@ -28,7 +30,7 @@ const injectStyles = (options: MountOptions) => {
  * @example
  ```
   import Hello from './hello.jsx'
-  import {mount} from '@cypress/react'
+  import { mount } from '@cypress/react'
   it('works', () => {
     mount(<Hello onClick={cy.stub()} />)
     // use Cypress commands
@@ -36,30 +38,33 @@ const injectStyles = (options: MountOptions) => {
   })
  ```
  **/
-export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
+export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => _mount('mount', jsx, options)
+
+let lastMountedReactDom: (typeof ReactDOM) | undefined
+
+/**
+ * @see `mount`
+ * @param type The type of mount executed
+ * @param rerenderKey If specified, use the provided key rather than generating a new one
+ */
+const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string): globalThis.Cypress.Chainable<MountReturn> => {
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
   const displayName = options.alias || componentName
-  const message = options.alias
-    ? `<${componentName} ... /> as "${options.alias}"`
-    : `<${componentName} ... />`
 
-  // @ts-ignore
-  let logInstance: Cypress.Log
+  const jsxComponentName = `<${componentName} ... />`
+
+  const message = options.alias
+    ? `${jsxComponentName} as "${options.alias}"`
+    : jsxComponentName
 
   return cy
-  .then(() => {
-    if (options.log !== false) {
-      logInstance = Cypress.log({
-        name: 'mount',
-        message: [message],
-      })
-    }
-  })
   .then(injectStyles(options))
   .then(() => {
     const reactDomToUse = options.ReactDom || ReactDOM
+
+    lastMountedReactDom = reactDomToUse
 
     const el = document.getElementById(ROOT_ID)
 
@@ -71,9 +76,9 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
       )
     }
 
-    const key =
+    const key = rerenderKey ??
         // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
-        (Cypress?.mocha?.getRunner()?.test?.title || '') + Math.random()
+        (Cypress?.mocha?.getRunner()?.test?.title as string || '') + Math.random()
     const props = {
       key,
     }
@@ -85,62 +90,55 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
     )
     // since we always surround the component with a fragment
     // let's get back the original component
-    // @ts-ignore
-    const userComponent = reactComponent.props.children
+    const userComponent = (reactComponent.props as {
+        key: string
+        children: React.ReactNode
+      }).children
 
     reactDomToUse.render(reactComponent, el)
 
-    if (logInstance) {
-      const logConsoleProps = {
-        // @ts-ignore protect the use of jsx functional components use ReactNode
-        props: jsx.props,
-        description: 'Mounts React component',
-        home: 'https://github.com/cypress-io/cypress',
-      }
-      const componentElement = el.children[0]
-
-      if (componentElement) {
-        // @ts-ignore
-        logConsoleProps.yielded = reactDomToUse.findDOMNode(componentElement)
-      }
-
-      logInstance.set('consoleProps', () => logConsoleProps)
-
-      if (el.children.length) {
-        logInstance.set(
-          '$el',
-            (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-        )
-      }
+    if (options.log !== false) {
+      Cypress.log({
+        name: type,
+        type: 'parent',
+        message: [message],
+        $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+        consoleProps: () => {
+          return {
+            // @ts-ignore protect the use of jsx functional components use ReactNode
+            props: jsx.props,
+            description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
+            home: 'https://github.com/cypress-io/cypress',
+          }
+        },
+      }).snapshot('mounted').end()
     }
 
     return (
-      cy
-      .wrap(userComponent, { log: false })
+      // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
+      cy.wrap<React.ReactNode>(userComponent, { log: false })
       .as(displayName)
+      .then(() => {
+        return cy.wrap<MountReturn>({
+          component: userComponent,
+          rerender: (newComponent) => _mount('rerender', newComponent, options, key),
+          unmount: () => _unmount({ boundComponentMessage: jsxComponentName, log: true }),
+        }, { log: false })
+      })
       // by waiting, we delaying test execution for the next tick of event loop
       // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
       .wait(0, { log: false })
-      .then(() => {
-        if (logInstance) {
-          logInstance.snapshot('mounted')
-          logInstance.end()
-        }
-
-        // by returning undefined we keep the previous subject
-        // which is the mounted component
-        return undefined
-      })
     )
-  })
+  // Bluebird types are terrible. I don't think the return type can be carried without this cast
+  }) as unknown as globalThis.Cypress.Chainable<MountReturn>
 }
 
 /**
  * Removes the mounted component. Notice this command automatically
  * queues up the `unmount` into Cypress chain, thus you don't need `.then`
  * to call it.
- * @see https://github.com/bahmutov/@cypress/react/tree/main/cypress/component/basic/unmount
+ * @see https://github.com/cypress-io/cypress/tree/develop/npm/react/cypress/component/basic/unmount
  * @example
   ```
   import { mount, unmount } from '@cypress/react'
@@ -152,23 +150,45 @@ export const mount = (jsx: React.ReactNode, options: MountOptions = {}) => {
   })
   ```
  */
-export const unmount = (options = { log: true }) => {
+export const unmount = (options = { log: true }): globalThis.Cypress.Chainable<JQuery<HTMLElement>> => _unmount(options)
+
+const _unmount = (options: { boundComponentMessage?: string, log: boolean }) => {
   return cy.then(() => {
     const selector = `#${ROOT_ID}`
 
     return cy.get(selector, { log: false }).then(($el) => {
-      const wasUnmounted = ReactDOM.unmountComponentAtNode($el[0])
+      if (lastMountedReactDom) {
+        const wasUnmounted = lastMountedReactDom.unmountComponentAtNode($el[0])
 
-      if (wasUnmounted && options.log) {
-        cy.log('Unmounted component at', $el)
+        if (wasUnmounted && options.log) {
+          Cypress.log({
+            name: 'unmount',
+            type: 'parent',
+            message: [options.boundComponentMessage ?? 'Unmounted component'],
+            consoleProps: () => {
+              return {
+                description: 'Unmounts React component',
+                parent: $el[0],
+                home: 'https://github.com/cypress-io/cypress',
+              }
+            },
+          })
+        }
       }
     })
   })
 }
 
-beforeEach(() => {
-  unmount()
-})
+// Cleanup before each run
+// NOTE: we cannot use unmount here because
+// we are not in the context of a test
+const preMountCleanup = () => {
+  const el = document.getElementById(ROOT_ID)
+
+  if (el && lastMountedReactDom) {
+    lastMountedReactDom.unmountComponentAtNode(el)
+  }
+}
 
 /**
  * Creates new instance of `mount` function with default options
@@ -199,56 +219,18 @@ export const createMount = (defaultOptions: MountOptions) => {
 }
 
 /** @deprecated Should be removed in the next major version */
+// TODO: Remove
 export default mount
 
 // I hope to get types and docs from functions imported from ./index one day
 // but for now have to document methods in both places
 // like this: import {mount} from './index'
-
+// TODO: Clean up types
 export interface ReactModule {
   name: string
   type: string
   location: string
   source: string
-}
-
-/**
- * Additional styles to inject into the document.
- * A component might need 3rd party libraries from CDN,
- * local CSS files and custom styles.
- */
-export interface StyleOptions {
-  /**
-   * Creates <link href="..." /> element for each stylesheet
-   * @alias stylesheet
-   */
-  stylesheets: string | string[]
-  /**
-   * Creates <link href="..." /> element for each stylesheet
-   * @alias stylesheets
-   */
-  stylesheet: string | string[]
-  /**
-   * Creates <style>...</style> element and inserts given CSS.
-   * @alias styles
-   */
-  style: string | string[]
-  /**
-   * Creates <style>...</style> element for each given CSS text.
-   * @alias style
-   */
-  styles: string | string[]
-  /**
-   * Loads each file and creates a <style>...</style> element
-   * with the loaded CSS
-   * @alias cssFile
-   */
-  cssFiles: string | string[]
-  /**
-   * Single CSS file to load into a <style></style> element
-   * @alias cssFile
-   */
-  cssFile: string | string[]
 }
 
 export interface MountReactComponentOptions {
@@ -267,6 +249,23 @@ export interface MountReactComponentOptions {
 }
 
 export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>
+
+export interface MountReturn {
+  /**
+   * The component that was rendered.
+   */
+  component: React.ReactNode
+  /**
+   * Rerenders the specified component with new props. This allows testing of components that store state (`setState`)
+   * or have asynchronous updates (`useEffect`, `useLayoutEffect`).
+   */
+  rerender: (component: React.ReactNode) => globalThis.Cypress.Chainable<MountReturn>
+  /**
+   * Removes the mounted component.
+   * @see `unmount`
+   */
+  unmount: () => globalThis.Cypress.Chainable<JQuery<HTMLElement>>
+}
 
 /**
  * The `type` property from the transpiled JSX object.
@@ -324,4 +323,4 @@ export declare namespace Cypress {
 // it is required to unmount component in beforeEach hook in order to provide a clean state inside test
 // because `mount` can be called after some preparation that can side effect unmount
 // @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
-setupHooks(unmount)
+setupHooks(preMountCleanup)

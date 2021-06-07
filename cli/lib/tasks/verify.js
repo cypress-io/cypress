@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const chalk = require('chalk')
-const Listr = require('listr')
+const { Listr } = require('listr2')
 const debug = require('debug')('cypress:cli')
 const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
@@ -190,7 +190,7 @@ function testBinary (version, binaryDir, options) {
 
   const tasks = new Listr([
     {
-      title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
+      options: { title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)) },
       task: (ctx, task) => {
         debug('clearing out the verified version')
 
@@ -218,7 +218,7 @@ function testBinary (version, binaryDir, options) {
         })
       },
     },
-  ], rendererOptions)
+  ], { rendererOptions })
 
   return tasks.run()
 }

@@ -1,7 +1,7 @@
 import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
@@ -321,6 +321,10 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOption
       return false
     }
 
+    if ($elements.isButtonLike(el) && !options.force) {
+      return false
+    }
+
     const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
 
     if (isNumberInputType) {
@@ -473,10 +477,15 @@ const validateTyping = (
   if (isDate) {
     dateChars = dateRe.exec(chars)
 
+    const dateExists = (date) => {
+      // dayjs rounds up dates that don't exist to valid dates
+      return dayjs(date, 'YYYY-MM-DD').format('YYYY-MM-DD') === date
+    }
+
     if (
       _.isString(chars) &&
       dateChars &&
-      moment(dateChars[0]).isValid()
+      dateExists(dateChars[0])
     ) {
       skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
 

@@ -1,24 +1,22 @@
 import cs from 'classnames'
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import State from '../lib/state'
 import { Hidden } from '../lib/Hidden'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import styles from './RunnerCt.module.scss'
-import { observer } from 'mobx-react'
+import { namedObserver } from '../lib/mobx'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
-import { UIPlugin } from '../plugins/UIPlugin'
+
+import styles from './RunnerCt.module.scss'
 
 interface PluginsProps {
   state: State
   pluginsHeight: number
-  pluginRootContainer: React.MutableRefObject<HTMLDivElement>
 }
 
-export const Plugins = observer(
-  function Plugins (props: PluginsProps) {
-    function onClick (plugin: UIPlugin) {
-      return props.state.openDevtoolsPlugin(plugin)
-    }
+export const Plugins = namedObserver('Plugins',
+  (props: PluginsProps) => {
+    const ref = React.useRef<HTMLDivElement>(null)
 
     return (
       <Hidden
@@ -30,10 +28,12 @@ export const Plugins = observer(
           {props.state.plugins.map((plugin) => (
             <button
               key={plugin.name}
-              onClick={() => onClick(plugin)}
               className={cs(styles.ctPluginToggleButton)}
+              onClick={() => props.state.toggleDevtoolsPlugin(plugin, ref.current)}
             >
-              <span className={styles.ctPluginsName}>{plugin.name}</span>
+              <span className={styles.ctPluginsName}>
+                {plugin.name}
+              </span>
               <div
                 className={cs(styles.ctTogglePluginsSectionButton, {
                   [styles.ctTogglePluginsSectionButtonOpen]: props.state.isAnyDevtoolsPluginOpen,
@@ -47,16 +47,11 @@ export const Plugins = observer(
             </button>
           ))}
         </div>
-
-        <Hidden
-          type="layout"
-          ref={props.pluginRootContainer}
+        <div
+          ref={ref}
           className={styles.ctPluginsContainer}
-          // deal with jumps when inspecting element
-          hidden={!props.state.isAnyDevtoolsPluginOpen}
           style={{ height: props.pluginsHeight - PLUGIN_BAR_HEIGHT }}
         />
       </Hidden>
     )
-  },
-)
+  })

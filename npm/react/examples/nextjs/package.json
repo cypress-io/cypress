@@ -15,12 +15,12 @@
   "devDependencies": {
     "@cypress/react": "file:../../dist",
     "@mdx-js/loader": "^1.6.16",
-    "@next/mdx": "10.0.7",
+    "@next/mdx": "10.1.2",
     "@zeit/next-sass": "^1.0.1",
     "check-code-coverage": "1.9.2",
-    "cypress-circleci-reporter": "0.2.0",
-    "next": "10.0.7",
-    "webpack": "^4.44.2"
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1",
+    "next": "10.1.2"
   },
   "license": "MIT"
 }

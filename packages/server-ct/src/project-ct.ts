@@ -2,12 +2,11 @@ import Debug from 'debug'
 import config from '@packages/server/lib/config'
 import plugins from '@packages/server/lib/plugins'
 import devServer from '@packages/server/lib/plugins/dev-server'
-import { ProjectBase } from '@packages/server/lib/project-base'
+import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
 import { ServerCt } from './server-ct'
 import { SpecsStore } from './specs-store'
-import { options } from '@packages/server/lib/config_options'
 
 export * from '@packages/server/lib/project-base'
 
@@ -24,22 +23,12 @@ export class ProjectCt extends ProjectBase<ServerCt> {
    * 2. otherwise, use 500/500 by default.
    */
   addComponentTestingUniqueDefaults (cfg: Record<string, unknown>) {
-    const defaultViewport = options.reduce<Record<string, number>>((acc, curr) => {
-      if (curr.name === 'viewportHeight') {
-        return { ...acc, viewportHeight: curr.defaultValue as number }
-      }
-
-      if (curr.name === 'viewportWidth') {
-        return { ...acc, viewportWidth: curr.defaultValue as number }
-      }
-
-      return acc
-    }, {})
+    const rawJson = cfg.rawJson as Cfg
 
     return {
       ...cfg,
-      viewportHeight: cfg.viewportHeight !== defaultViewport.viewportHeight ? cfg.viewportHeight : 500,
-      viewportWidth: cfg.viewportWidth !== defaultViewport.viewportWidth ? cfg.viewportWidth : 500,
+      viewportHeight: rawJson.viewportHeight ?? 500,
+      viewportWidth: rawJson.viewportWidth ?? 500,
     }
   }
 
@@ -86,6 +75,12 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
+      onError (err) {
+        debug('plugins failed with error', err)
+
+        options.onError(err)
+      },
+      onWarning: options.onWarning,
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
@@ -109,7 +104,17 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       })
       .then((specs) => {
         return devServer.start({ specs, config: modifiedConfig })
-        .then(({ port }) => {
+        .then((devServerOptions) => {
+          if (!devServerOptions) {
+            throw new Error([
+              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+              'Make sure that the dev-server:start function returns an object.',
+              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+            ].join('\n'))
+          }
+
+          const { port } = devServerOptions
+
           modifiedConfig.baseUrl = `http://localhost:${port}`
 
           const specsStore = new SpecsStore(cfg)

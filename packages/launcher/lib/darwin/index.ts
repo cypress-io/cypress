@@ -19,6 +19,12 @@ export const browsers: Detectors = {
       appId: 'com.google.Chrome',
       versionProperty: 'KSVersion',
     },
+    beta: {
+      appName: 'Google Chrome Beta.app',
+      executable: 'Contents/MacOS/Google Chrome Beta',
+      appId: 'com.google.Chrome.beta',
+      versionProperty: 'KSVersion',
+    },
     canary: {
       appName: 'Google Chrome Canary.app',
       executable: 'Contents/MacOS/Google Chrome Canary',

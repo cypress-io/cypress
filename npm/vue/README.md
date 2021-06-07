@@ -3,15 +3,12 @@
 [![NPM][npm-icon] ][npm-url]
 
 [![semantic-release][semantic-image] ][semantic-url]
-[![renovate-app badge][renovate-badge]][renovate-app]
 
 > Browser-based Component Testing for Vue.js with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
 >
 **✨ New** We're growing the Cypress Community Discord. We have dedicated sections on Component Testing. 👉 [Join now](https://discord.com/invite/TmzTGUW) and let's chat!
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
-
-**🚧 Notice** We are in the middle of moving into the Cypress NPM org, so any references to `cypress-vue-unit-test` should be switched to `@cypress/vue`. Once complete, this repository will be archived.
 
 ### What is @cypress/vue?
 This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
@@ -25,26 +22,63 @@ It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood
 
 ## Installation
 
-<p align="center">
-  <img src="./docs/commands.gif" width="400px" alt="Terminal typing vue add cypress-experimental"/>
-</p>
+- Requires Cypress v7.0.0 or later
+- Requires [Node](https://nodejs.org/en/) version 12 or above
+- Supports webpack-based projects, vite in alpha, if you would like us to support another, please [create an issue](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm:%20@cypress/vue&template=3-feature.md) or, if an issue already exists subscribe to it.
 
-- Requires Cypress v4.5.0 or later
-- Requires [Node](https://nodejs.org/en/) version 8 or above
-- Only supporting webpack-based projects
-- Installation via Vue CLI recommended, read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
+Now you are ready to install.
 
-### Vue CLI Installation
+### Manual Installation
 
-> Vue CLI v3+
+Using [@cypress/webpack-dev-server](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
 
-_Recommended_: One step install to existing projects with Vue CLI via [experimental plugin](https://github.com/jessicasachs/vue-cli-plugin-cypress-experimental), read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
+```js
+// cypress/plugins/index.js
+const webpack = require('@cypress/webpack-dev-server')
+const webpackOptions = {
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+      },
+    ],
+  },
+}
 
-```sh
-vue add cypress-experimental
+const options = {
+  // send in the options from your webpack.config.js, so it works the same
+  // as your app's code
+  webpackOptions,
+  watchOptions: {},
+}
+
+module.exports = (on) => {
+  on('dev-server:start', webpack(options))
+}
 ```
 
-If you want to install this package manually, follow [manual install](./docs/manual-install.md)
+Install dev dependencies
+
+```shell
+npm i -D @cypress/webpack-dev-server \
+  vue-loader vue-template-compiler css-loader
+```
+
+And write a test
+
+```js
+import Hello from '../../components/Hello.vue'
+import { mountCallback } from '@cypress/vue'
+
+describe('Hello.vue', () => {
+  beforeEach(mountCallback(Hello))
+
+  it('shows hello', () => {
+    cy.contains('Hello World!')
+  })
+})
+```
 
 ## Usage and Examples
 
@@ -82,8 +116,6 @@ mount(Todo, {
 
 See examples below for details.
 
-<a name="global-vue-extensions"/>
-
 ### Global Vue Options
 
 You can pass extensions (global components, mixins, modules to use)
@@ -95,9 +127,7 @@ the `options`.
 - `mixin` (alias `mixins`) - list of global mixins, see [Mixins](cypress/component/basic/mixins) example
 - `filters` - hash of global filters, see [Filters](cypress/component/basic/filters) example
 
-<a name="intro-example"/>
-
-### The intro example
+### intro example
 
 Take a look at the first Vue v2 example:
 [Declarative Rendering](https://vuejs.org/v2/guide/#Declarative-Rendering).
@@ -164,9 +194,7 @@ the reference `Cypress.vue.$data` and via GUI. The full power of the
 
 ![Hello world tested](images/spec.png)
 
-<a name="list-example"/>
-
-### The list example
+### list example
 
 There is a list example next in the Vue docs.
 
@@ -232,8 +260,6 @@ describe('Declarative rendering', () => {
 ```
 
 ![List tested](images/list-spec.png)
-
-<a name="handling-user-input"/>
 
 ### Handling User Input
 
@@ -357,8 +383,6 @@ describe('Several components', () => {
   })
 })
 ```
-
-<a name="spying-example"/>
 
 ### Spying example
 
@@ -553,91 +577,7 @@ Repo | Description
 [vue-component-test-example](https://github.com/bahmutov/vue-component-test-example) | Scaffolded Vue CLI v3 project with added component tests, read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/).
 <!-- prettier-ignore-end -->
 
-## Known problems
 
-<a name="bundling"/>
-
-## Bundling
-
-How do we load this Vue file into the testing code? Using webpack preprocessor. Note that this module ships with [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#compatibility) 2.x that requires Webpack 4.x. If you have Webpack 3.x please add `@cypress/webpack-preprocessor v1.x`.
-
-<a name="short-way"/>
-
-### Short way
-
-#### For Webpack Users
-
-Your project probably already has `webpack.config.js` setup to transpile
-`.vue` files. To load these files in the Cypress tests, grab the webpack
-processor included in this module, and load it from the `cypress/plugins/index.js`
-file.
-
-```js
-const {
-  onFilePreprocessor,
-} = require('@cypress/vue/preprocessor/webpack')
-module.exports = (on) => {
-  on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
-}
-```
-
-Cypress should be able to import `.vue` files in the tests
-
-<a name="manual"/>
-
-### Manual
-
-Using [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress-webpack-preprocessor#readme) and [vue-loader](https://github.com/vuejs/vue-loader).
-You can use [cypress/plugins/index.js](cypress/plugins/index.js) to load `.vue` files
-using `vue-loader`.
-
-```js
-// cypress/plugins/index.js
-const webpack = require('@cypress/webpack-preprocessor')
-const webpackOptions = {
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader',
-      },
-    ],
-  },
-}
-
-const options = {
-  // send in the options from your webpack.config.js, so it works the same
-  // as your app's code
-  webpackOptions,
-  watchOptions: {},
-}
-
-module.exports = (on) => {
-  on('file:preprocessor', webpack(options))
-}
-```
-
-Install dev dependencies
-
-```shell
-npm i -D @cypress/webpack-preprocessor \
-  vue-loader vue-template-compiler css-loader
-```
-
-And write a test
-
-```js
-import Hello from '../../components/Hello.vue'
-import { mountCallback } from '@cypress/vue'
-
-describe('Hello.vue', () => {
-  beforeEach(mountCallback(Hello))
-
-  it('shows hello', () => {
-    cy.contains('Hello World!')
-  })
-})
-```
 
 ## Code coverage
 
@@ -659,26 +599,21 @@ If you want to disable code coverage instrumentation and reporting, use `--env c
 
 We were in the middle of moving into the Cypress NPM org, so any references to `cypress-vue-unit-test` should be switched to `@cypress/vue`. Once complete, the old repository will be archived.
 
-<a name="#development"/>
-
 ## Development
 
-To see all local tests, install dependencies, build the code and open Cypress in GUI mode
+To see all local tests, install dependencies, build the code and open Cypress using the open-ct command
 
 ```sh
-npm install
-npm run build
+yarn install
+yarn workspace @cypress/vue build
 ```
 
-The build is done using `tsc` that transpiles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
+The build is done using `rollup`. It bundles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
 
 ```sh
-npm run cy:open
+# cypress open-ct
+yarn workspace @cypress/vue cy:open
 ```
-
-and clicking on any component spec
-
-![Component specs](images/component-specs.png)
 
 Larger tests that use full application and run on CI (see [circle.yml](circle.yml)) are located in the folder [examples](examples).
 
@@ -696,8 +631,6 @@ If some deeply nested objects are abbreviated and do not print fully, set the ma
 DEBUG=@cypress/vue DEBUG_DEPTH=10
 ```
 
-<a name="#related"/>
-
 ## Related info
 
 - [Testing Vue web applications with Vuex data store & REST backend](https://www.cypress.io/blog/2017/11/28/testing-vue-web-application-with-vuex-data-store-and-rest-backend/)
@@ -706,37 +639,18 @@ DEBUG=@cypress/vue DEBUG_DEPTH=10
 - [Learn TDD in Vue](https://learntdd.in/vue)
 - [@cypress/vue vs vue-test-utils](https://codingitwrong.com/2018/03/04/comparing-vue-component-testing-tools.html)
 
-```js
-const {
-  onFileDefaultPreprocessor,
-} = require('@cypress/vue/preprocessor/webpack')
-
-module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config)
-  on('file:preprocessor', onFileDefaultPreprocessor(config))
-
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
-}
-```
-
 ## Blog posts
 
 - [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
-
-<a name="#other"/>
 
 ## Test adapters for other frameworks
 
 - [@cypress/react](https://github.com/cypress-io/@cypress/react)
 - [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
 - [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
-- [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
+- [@cypress/angular](https://github.com/bahmutov/@cypress/angular)
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
-
-<a name="#maintainers"/>
 
 ## Maintainers
 
@@ -754,6 +668,10 @@ Support: if you find any problems with this module, [tweet](https://twitter.com/
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
 
 This project is licensed under the terms of the [MIT license](/LICENSE).
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)
 
 ## Badges
 

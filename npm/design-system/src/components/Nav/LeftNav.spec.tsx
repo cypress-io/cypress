@@ -4,6 +4,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
+import { mountAndSnapshot } from 'util/testing'
 import { NavItem } from './types'
 import { LeftNav } from './LeftNav'
 
@@ -43,7 +44,7 @@ describe('LeftNav', () => {
   })
 
   it('renders a stack of items', () => {
-    mount(<LeftNav items={items} />)
+    mountAndSnapshot(<LeftNav items={items} />)
 
     cy.get('nav').should('exist')
   })
@@ -59,7 +60,8 @@ describe('LeftNav', () => {
           href: '#foo',
         },
       },
-    ]} />)
+    ]}
+    />)
 
     cy.get('a').first().eq(0).click().url().should('include', '#foo')
   })
@@ -71,7 +73,8 @@ describe('LeftNav', () => {
         <div style={{
           height: 1000,
           width: 1000,
-        }}>
+        }}
+        >
           This is the main page content
         </div>
       </div>

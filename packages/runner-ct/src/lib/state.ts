@@ -116,7 +116,7 @@ export default class State {
 
   @observable automation = automation.CONNECTING
 
-  @observable.ref scriptError = null
+  @observable.ref scriptError: string | undefined
 
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
@@ -137,7 +137,7 @@ export default class State {
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
     isSpecsListOpen = true,
-  }) {
+  }, config: Cypress.RuntimeConfigOptions) {
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
@@ -145,6 +145,11 @@ export default class State {
     this.specListWidth = specListWidth
     this.runMode = runMode
     this.multiSpecs = multiSpecs
+
+    // TODO: Refactor so `config` is only needed in MobX, not passed separately to arbitrary components
+    if (config.isTextTerminal) {
+      this.isSpecsListOpen = false
+    }
 
     // TODO: receive chosen spec from state and set it here
   }
@@ -218,6 +223,12 @@ export default class State {
     this.viewportWidth = dimensions.viewportWidth
   }
 
+  @action toggleIsSpecsListOpen () {
+    this.isSpecsListOpen = !this.isSpecsListOpen
+
+    return this.isSpecsListOpen
+  }
+
   @action setIsSpecsListOpen (open: boolean) {
     this.isSpecsListOpen = open
   }
@@ -282,7 +293,7 @@ export default class State {
   }
 
   @action updateSpecByUrl (specUrl) {
-    const foundSpec = _.find(this.specs, { name: specUrl })
+    const foundSpec = _.find(this.specs, { name: decodeURI(specUrl) })
 
     if (foundSpec) {
       this.spec = foundSpec
@@ -329,19 +340,29 @@ export default class State {
     }
   }
 
-  loadReactDevTools = (rootElement: HTMLElement) => {
+  loadReactDevTools = () => {
     return import(/* webpackChunkName: "ctChunk-reactdevtools" */ '../plugins/ReactDevtools')
     .then(action((ReactDevTools) => {
       this.plugins = [
-        ReactDevTools.create(rootElement),
+        ReactDevTools.create(),
       ]
     }))
   }
 
   @action
-  initializePlugins = (config: Cypress.RuntimeConfigOptions, rootElement: HTMLElement) => {
+  setShowSnapshotHighlight = (showingHighlights: boolean) => {
+    this.snapshot.showingHighlights = showingHighlights
+  }
+
+  @action
+  setSnapshotIndex = (stateIndex: number) => {
+    this.snapshot.stateIndex = stateIndex
+  }
+
+  @action
+  initializePlugins = (config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions) => {
     if (config.env.reactDevtools && !config.isTextTerminal) {
-      this.loadReactDevTools(rootElement)
+      this.loadReactDevTools()
       .then(action(() => {
         this.readyToRunTests = true
       }))
@@ -370,7 +391,7 @@ export default class State {
   }
 
   @action
-  openDevtoolsPlugin = (plugin: UIPlugin) => {
+  toggleDevtoolsPlugin = (plugin: UIPlugin, domElement: HTMLElement) => {
     if (this.activePlugin === plugin.name) {
       plugin.unmount()
       this.setActivePlugin(null)
@@ -378,17 +399,12 @@ export default class State {
       // if the aspect ratio is very long on the Y axis.
       this.pluginsHeight = PLUGIN_BAR_HEIGHT
     } else {
-      plugin.mount()
       this.setActivePlugin(plugin.name)
       // set this to force the AUT to resize vertically if the aspect ratio is very long
       // on the Y axis.
       this.pluginsHeight = DEFAULT_PLUGINS_HEIGHT
+      plugin.mount(domElement)
     }
-  }
-
-  @action
-  toggleDevtoolsPlugin = () => {
-    this.openDevtoolsPlugin(this.plugins[0]) // temporal solution change when will be more than 1 plugin
   }
 
   @computed
@@ -398,6 +414,6 @@ export default class State {
 
   @computed
   get isAnyPluginToShow () {
-    return this.plugins.length > 0
+    return Boolean(this.plugins.length > 0 && this.spec)
   }
 }

@@ -197,21 +197,21 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail1');\n    }"
+          "body": "() => {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail2');\n    }"
+          "body": "() => {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail3');\n    }"
+          "body": "() => {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -222,7 +222,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -283,7 +283,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -324,7 +324,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -344,7 +344,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -364,7 +364,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -440,7 +440,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function () {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
+          "body": "() => {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
           "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
@@ -480,7 +480,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function () {\n    throw new Error('fails2');\n  }",
+          "body": "() => {\n    throw new Error('fails2');\n  }",
           "displayError": "Error: fails2\n      [stack trace lines]",
           "attempts": [
             {
@@ -554,28 +554,28 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n    cy.wait(100);\n  }"
+          "body": "() => {\n    cy.wait(100);\n  }"
         },
         {
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n    cy.wait(200);\n  }"
+          "body": "() => {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n    cy.wait(200);\n  }"
+          "body": "() => {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n    cy.wait(100);\n  }"
+          "body": "() => {\n    cy.wait(100);\n  }"
         }
       ],
       "tests": [
@@ -585,7 +585,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t1').should('eq', 't1');\n  }",
+          "body": "() => {\n    cy.wrap('t1').should('eq', 't1');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -604,7 +604,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t2').should('eq', 't2');\n  }",
+          "body": "() => {\n    cy.wrap('t2').should('eq', 't2');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -623,7 +623,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t3').should('eq', 't3');\n  }",
+          "body": "() => {\n    cy.wrap('t3').should('eq', 't3');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -676,7 +676,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n    cy.wait(1000);\n  }"
+          "body": "() => {\n    cy.wait(1000);\n  }"
         }
       ],
       "tests": [
@@ -686,7 +686,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap(true).should('be.true');\n  }",
+          "body": "() => {\n    cy.wrap(true).should('be.true');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -761,21 +761,21 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail1');\n    }"
+          "body": "() => {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail2');\n    }"
+          "body": "() => {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail3');\n    }"
+          "body": "() => {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -786,7 +786,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -847,7 +847,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -888,7 +888,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -908,7 +908,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -928,7 +928,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1004,7 +1004,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function () {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
+          "body": "() => {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
           "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
@@ -1044,7 +1044,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function () {\n    throw new Error('fails2');\n  }",
+          "body": "() => {\n    throw new Error('fails2');\n  }",
           "displayError": "Error: fails2\n      [stack trace lines]",
           "attempts": [
             {
@@ -1118,28 +1118,28 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n    cy.wait(100);\n  }"
+          "body": "() => {\n    cy.wait(100);\n  }"
         },
         {
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n    cy.wait(200);\n  }"
+          "body": "() => {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n    cy.wait(200);\n  }"
+          "body": "() => {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n    cy.wait(100);\n  }"
+          "body": "() => {\n    cy.wait(100);\n  }"
         }
       ],
       "tests": [
@@ -1149,7 +1149,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t1').should('eq', 't1');\n  }",
+          "body": "() => {\n    cy.wrap('t1').should('eq', 't1');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1168,7 +1168,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t2').should('eq', 't2');\n  }",
+          "body": "() => {\n    cy.wrap('t2').should('eq', 't2');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1187,7 +1187,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t3').should('eq', 't3');\n  }",
+          "body": "() => {\n    cy.wrap('t3').should('eq', 't3');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1240,7 +1240,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n    cy.wait(1000);\n  }"
+          "body": "() => {\n    cy.wait(1000);\n  }"
         }
       ],
       "tests": [
@@ -1250,7 +1250,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap(true).should('be.true');\n  }",
+          "body": "() => {\n    cy.wrap(true).should('be.true');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1325,21 +1325,21 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail1');\n    }"
+          "body": "() => {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail2');\n    }"
+          "body": "() => {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail3');\n    }"
+          "body": "() => {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -1350,7 +1350,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1411,7 +1411,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1452,7 +1452,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -1472,7 +1472,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -1492,7 +1492,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1568,7 +1568,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function () {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
+          "body": "() => {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
           "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
@@ -1608,7 +1608,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function () {\n    throw new Error('fails2');\n  }",
+          "body": "() => {\n    throw new Error('fails2');\n  }",
           "displayError": "Error: fails2\n      [stack trace lines]",
           "attempts": [
             {
@@ -1682,28 +1682,28 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n    cy.wait(100);\n  }"
+          "body": "() => {\n    cy.wait(100);\n  }"
         },
         {
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n    cy.wait(200);\n  }"
+          "body": "() => {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n    cy.wait(200);\n  }"
+          "body": "() => {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n    cy.wait(100);\n  }"
+          "body": "() => {\n    cy.wait(100);\n  }"
         }
       ],
       "tests": [
@@ -1713,7 +1713,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t1').should('eq', 't1');\n  }",
+          "body": "() => {\n    cy.wrap('t1').should('eq', 't1');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1732,7 +1732,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t2').should('eq', 't2');\n  }",
+          "body": "() => {\n    cy.wrap('t2').should('eq', 't2');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1751,7 +1751,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap('t3').should('eq', 't3');\n  }",
+          "body": "() => {\n    cy.wrap('t3').should('eq', 't3');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1804,7 +1804,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n    cy.wait(1000);\n  }"
+          "body": "() => {\n    cy.wait(1000);\n  }"
         }
       ],
       "tests": [
@@ -1814,7 +1814,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function () {\n    cy.wrap(true).should('be.true');\n  }",
+          "body": "() => {\n    cy.wrap(true).should('be.true');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1889,21 +1889,21 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail1');\n    }"
+          "body": "() => {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail2');\n    }"
+          "body": "() => {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail3');\n    }"
+          "body": "() => {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -1914,7 +1914,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2004,7 +2004,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2074,7 +2074,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -2094,7 +2094,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -2114,7 +2114,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
@@ -2190,7 +2190,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "t1"
           ],
           "state": "failed",
-          "body": "function () {\n    var test = cy.state('test');\n    throw new Error(\"\".concat(test.title, \" attempt #\").concat(cy.state('test').currentRetry()));\n  }",
+          "body": "() => {\n    const test = cy.state('test');\n    throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`);\n  }",
           "displayError": "Error: t1 attempt #1\n      [stack trace lines]",
           "attempts": [
             {
@@ -2259,7 +2259,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {// pass\n  }",
+          "body": "() => {// pass\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -2334,21 +2334,21 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail1');\n    }"
+          "body": "() => {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail2');\n    }"
+          "body": "() => {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail3');\n    }"
+          "body": "() => {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -2359,7 +2359,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2449,7 +2449,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2519,7 +2519,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -2539,7 +2539,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -2559,7 +2559,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
@@ -2635,7 +2635,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "t1"
           ],
           "state": "failed",
-          "body": "function () {\n    var test = cy.state('test');\n    throw new Error(\"\".concat(test.title, \" attempt #\").concat(cy.state('test').currentRetry()));\n  }",
+          "body": "() => {\n    const test = cy.state('test');\n    throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`);\n  }",
           "displayError": "Error: t1 attempt #1\n      [stack trace lines]",
           "attempts": [
             {
@@ -2704,7 +2704,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {// pass\n  }",
+          "body": "() => {// pass\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -2779,21 +2779,21 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail1');\n    }"
+          "body": "() => {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail2');\n    }"
+          "body": "() => {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function () {\n      throw new Error('fail3');\n    }"
+          "body": "() => {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -2804,7 +2804,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2894,7 +2894,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2964,7 +2964,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -2984,7 +2984,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": null,
           "attempts": [
             {
@@ -3004,7 +3004,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function () {}",
+          "body": "() => {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
@@ -3080,7 +3080,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "t1"
           ],
           "state": "failed",
-          "body": "function () {\n    var test = cy.state('test');\n    throw new Error(\"\".concat(test.title, \" attempt #\").concat(cy.state('test').currentRetry()));\n  }",
+          "body": "() => {\n    const test = cy.state('test');\n    throw new Error(`${test.title} attempt #${cy.state('test').currentRetry()}`);\n  }",
           "displayError": "Error: t1 attempt #1\n      [stack trace lines]",
           "attempts": [
             {
@@ -3149,7 +3149,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {// pass\n  }",
+          "body": "() => {// pass\n  }",
           "displayError": null,
           "attempts": [
             {

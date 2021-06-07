@@ -1,0 +1,27 @@
+# Each line is a file pattern followed by one or more owners.
+
+# Test Runner team are owners of code within root packages and cli
+/browser-versions.json  @cypress-io/test-runner
+/cli/  @cypress-io/test-runner
+/packages/coffee/  @cypress-io/test-runner
+/packages/datetime-utils/  @cypress-io/test-runner
+/packages/desktop-gui/  @cypress-io/test-runner
+/packages/driver/  @cypress-io/test-runner
+/packages/electron/  @cypress-io/test-runner
+/packages/example/  @cypress-io/test-runner
+/packages/extension/  @cypress-io/test-runner
+/packages/https-proxy/  @cypress-io/test-runner
+/packages/launcher/  @cypress-io/test-runner
+/packages/net-stubbing/  @cypress-io/test-runner
+/packages/network/  @cypress-io/test-runner
+/packages/proxy/  @cypress-io/test-runner
+/packages/reporter/  @cypress-io/test-runner
+/packages/rewriter/  @cypress-io/test-runner
+/packages/root/  @cypress-io/test-runner
+/packages/runner/  @cypress-io/test-runner
+/packages/server/  @cypress-io/test-runner
+/packages/socket/  @cypress-io/test-runner
+/packages/static/  @cypress-io/test-runner
+/packages/ts/  @cypress-io/test-runner
+/packages/ui-components/  @cypress-io/test-runner
+/packages/web-config/  @cypress-io/test-runner

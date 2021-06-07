@@ -1,10 +1,16 @@
 import * as React from 'react'
 import hotkeys from 'hotkeys-js'
 
-export function useGlobalHotKey (shortcut: string, handler: () => void) {
+export const useGlobalHotKey = (shortcut: string, handler: () => void) => {
   React.useEffect(() => {
-    hotkeys(shortcut, handler)
+    // Provide a clean handler since we assert that `handler` has no args
+    hotkeys(shortcut, (event) => {
+      handler()
+
+      event.preventDefault()
+      event.stopPropagation()
+    })
 
     return () => hotkeys.unbind(shortcut)
-  }, [shortcut])
+  }, [shortcut, handler])
 }

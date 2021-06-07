@@ -1,11 +1,18 @@
-const cp = require('child_process')
-const percyHealthCheck = require('@percy/cypress/task')
-const useMyWebpack = require('cypress-react-unit-test/plugins/load-webpack')
+const express = require('express')
+const { startDevServer } = require('@cypress/webpack-dev-server')
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const webpackConfig = require('../../webpack.config').default
 
-cp.exec('http-server -p 5005 dist')
+express().use(express.static('dist')).listen(5005)
 
 module.exports = (on, config) => {
-  on('task', percyHealthCheck)
+  if (config.testingType === 'component') {
+    on('dev-server:start', (options) => {
+      return startDevServer({ options, webpackConfig })
+    })
+  } else {
+    on('file:preprocessor', webpackPreprocessor())
+  }
 
-  return useMyWebpack(on, config)
+  return config
 }

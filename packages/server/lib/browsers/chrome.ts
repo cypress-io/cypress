@@ -7,6 +7,7 @@ import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
+import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -91,6 +92,9 @@ const DEFAULT_ARGS = [
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
+  // Simulate when chrome needs an update.
+  // This prevents an 'update' from displaying til the given date
+  `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
 
   // These flags are for webcam/WebRTC testing
@@ -428,9 +432,9 @@ export = {
     if (isHeadless) {
       args.push('--headless')
 
-      // set the window size for headless to a better default
+      // set default headless size to 1920x1080
       // https://github.com/cypress-io/cypress/issues/6210
-      args.push('--window-size=1280,720')
+      args.push('--window-size=1920,1080')
     }
 
     // force ipv4
@@ -493,7 +497,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
+    const launchedBrowser = await launch(browser, 'about:blank', args)
 
     la(launchedBrowser, 'did not get launched browser instance')
 
@@ -506,6 +510,9 @@ export = {
 
     await criClient.ensureMinimumProtocolVersion('1.3')
     .catch((err) => {
+      // if this minumum chrome version changes, sync it with
+      // packages/web-config/webpack.config.base.ts and
+      // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
 
@@ -514,6 +521,7 @@ export = {
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
 
+    /* @ts-expect-error */
     launchedBrowser.kill = async (...args) => {
       debug('closing remote interface client')
 

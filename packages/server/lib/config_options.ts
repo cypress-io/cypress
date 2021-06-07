@@ -5,7 +5,7 @@ const v = require('./util/validation')
 // - cli/types/index.d.ts (including allowed config options on TestOptions)
 // - cypress.schema.json
 //
-// Add options in alphabetical order
+// Add options in alphabetical order for better readability
 
 export const options = [
   {
@@ -58,6 +58,10 @@ export const options = [
     defaultValue: 4000,
     validation: v.isNumber,
   }, {
+    name: 'devServerPublicPathRoute',
+    defaultValue: '/__cypress/src',
+    isInternal: true,
+  }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
     validation: v.isString,
@@ -75,12 +79,12 @@ export const options = [
     defaultValue: 60000,
     validation: v.isNumber,
   }, {
-    name: 'experimentalComponentTesting',
+    name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalFetchPolyfill',
+    name: 'experimentalInteractiveRunEvents',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
@@ -173,6 +177,9 @@ export const options = [
     defaultValue: null,
     validation: v.isString,
   }, {
+    name: 'redirectionLimit',
+    defaultValue: 20,
+  }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: v.isString,
@@ -220,9 +227,9 @@ export const options = [
     defaultValue: '/__socket.io',
     isInternal: true,
   }, {
-    name: 'webpackDevServerPublicPathRoute',
-    defaultValue: '/__cypress/src',
-    isInternal: true,
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',
@@ -285,10 +292,6 @@ export const options = [
     defaultValue: true,
     validation: v.isBoolean,
   }, {
-    name: 'scrollBehavior',
-    defaultValue: 'top',
-    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
-  }, {
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: v.isBoolean,
@@ -304,6 +307,10 @@ export const breakingOptions = [
     name: 'blacklistHosts',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
+  }, {
+    name: 'experimentalComponentTesting',
+    errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
+    isWarning: false,
   }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
