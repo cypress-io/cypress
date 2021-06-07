@@ -5,10 +5,9 @@ import eventManager from '../lib/event-manager'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class IframeModel {
-  constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
+  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls }) {
     this.state = state
     this.detachDom = detachDom
-    this.removeHeadStyles = removeHeadStyles
     this.restoreDom = restoreDom
     this.highlightEl = highlightEl
     this.snapshotControls = snapshotControls

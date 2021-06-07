@@ -50,7 +50,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome89-ff86
+      - image: cypress/browsers:node14.16.0-chrome90-ff88
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -59,7 +59,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome89-ff86
+      - image: cypress/browsers:node14.16.0-chrome90-ff88
         user: node
     environment:
       PLATFORM: linux
@@ -915,7 +915,6 @@ jobs:
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
     <<: *defaults
-    resource_class: medium
     parameters:
       <<: *defaultsParameters
       required_env_var:
@@ -1115,6 +1114,7 @@ jobs:
 
   runner-integration-tests-firefox:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1196,6 +1196,7 @@ jobs:
 
   desktop-gui-component-tests:
     <<: *defaults
+    resource_class: medium
     parallelism: 1
     steps:
       - restore_cached_workspace
@@ -1308,7 +1309,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          command: yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/vite-dev-server
       - store_test_results:
           path: npm/vite-dev-server/test_results
@@ -1327,7 +1328,7 @@ jobs:
   npm-vue:
     <<: *defaults
     resource_class: medium
-    parallelism: 4
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
@@ -1353,10 +1354,37 @@ jobs:
           command: yarn workspace @cypress/design-system build
       - run:
           name: Run tests
-          command: yarn test --reporter cypress-circleci-reporter --reporter-options resultsDir=./test_results
+          # will use PERCY_TOKEN environment variable if available
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn test --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json
           working_directory: npm/design-system
       - store_test_results:
           path: npm/design-system/test_results
+      - store-npm-logs
+
+  npm-angular:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - restore_cache:
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-npm-angular-babel-cache
+      - run:
+          name: Build
+          command: yarn workspace @cypress/angular build
+      - run:
+          name: Run tests
+          command: yarn test-ci
+          working_directory: npm/angular
+      - store_test_results:
+          path: npm/angular/test_results
+      - store_artifacts:
+          path: npm/angular/test_results
       - store-npm-logs
 
   npm-react:
@@ -2019,6 +2047,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-react:
+        requires:
+          - build
+    - npm-angular:
         requires:
           - build
     - npm-mount-utils:

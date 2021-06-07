@@ -116,7 +116,7 @@ export default class State {
 
   @observable automation = automation.CONNECTING
 
-  @observable.ref scriptError = null
+  @observable.ref scriptError: string | undefined
 
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
@@ -347,6 +347,16 @@ export default class State {
         ReactDevTools.create(),
       ]
     }))
+  }
+
+  @action
+  setShowSnapshotHighlight = (showingHighlights: boolean) => {
+    this.snapshot.showingHighlights = showingHighlights
+  }
+
+  @action
+  setSnapshotIndex = (stateIndex: number) => {
+    this.snapshot.stateIndex = stateIndex
   }
 
   @action

@@ -115,7 +115,7 @@ index 0ef9f80..4cd787e 100644
      catch (e) {
          return false;
 diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
-index 4b7c234..95469f7 100644
+index 4b7c234..15ed5b1 100644
 --- a/node_modules/socket.io-parser/dist/is-binary.js
 +++ b/node_modules/socket.io-parser/dist/is-binary.js
 @@ -1,6 +1,7 @@
@@ -126,7 +126,7 @@ index 4b7c234..95469f7 100644
  const withNativeArrayBuffer = typeof ArrayBuffer === "function";
  const isView = (obj) => {
      return typeof ArrayBuffer.isView === "function"
-@@ -22,13 +23,18 @@ const withNativeFile = typeof File === "function" ||
+@@ -22,16 +23,21 @@ const withNativeFile = typeof File === "function" ||
  function isBinary(obj) {
      return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj))) ||
          (withNativeBlob && obj instanceof Blob) ||
@@ -146,7 +146,11 @@ index 4b7c234..95469f7 100644
 +    known.push(obj)
      if (Array.isArray(obj)) {
          for (let i = 0, l = obj.length; i < l; i++) {
-             if (hasBinary(obj[i])) {
+-            if (hasBinary(obj[i])) {
++            if (hasBinary(obj[i], known)) {
+                 return true;
+             }
+         }
 @@ -43,10 +49,10 @@ function hasBinary(obj, toJSON) {
      if (obj.toJSON &&
          typeof obj.toJSON === "function" &&
