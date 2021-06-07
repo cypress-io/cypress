@@ -1,5 +1,5 @@
 const path = require('path')
-const { VueLoaderPlugin } = require('vue-loader')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
@@ -32,6 +32,7 @@ module.exports = {
     new HtmlWebpackPlugin(),
   ],
   resolve: {
+    alias: { vue: 'vue/dist/vue.esm.js' },
     extensions: ['*', '.js', '.vue', '.json'],
   },
   stats: {

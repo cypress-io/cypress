@@ -1,7 +1,8 @@
 // A basic webpack configuration
 // The default for running tests in this project
 // https://vue-loader.vuejs.org/guide/#manual-setup
-const { VueLoaderPlugin } = require('vue-loader')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 const pkg = require('package.json')
 
@@ -17,8 +18,9 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      vue$: 'vue/dist/vue.esm-bundler.js',
+      // point at the built file
       '@cypress/vue': path.join(__dirname, pkg.main),
+      vue: 'vue/dist/vue.esm.js',
     },
   },
   module: {

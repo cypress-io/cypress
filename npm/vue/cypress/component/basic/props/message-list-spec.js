@@ -29,12 +29,16 @@ describe('Props', () => {
 
     it('shows messages', () => {
       getItems().should('not.exist')
-      // after mounting we can set props using "vueWrapper.setProps"
+      // after mounting we can set props using "Cypress.vue"
       cy.log('setting messages').then(() => {
-        Cypress.vueWrapper.setProps({ messages: ['one', 'two'] })
+        Cypress.vue.messages = ['one', 'two']
       })
 
       getItems().should('have.length', 2)
+      cy.then(() => {
+        Cypress.vue.messages.push('three')
+        getItems().should('have.length', 3)
+      })
     })
   })
 

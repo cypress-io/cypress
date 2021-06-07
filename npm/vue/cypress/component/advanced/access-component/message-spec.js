@@ -15,6 +15,11 @@ describe('Message', () => {
       cy.wrap(Cypress).its('vue.message').should('equal', 'hey')
     })
 
+    it('has no cat property', () => {
+      createCmp({ cat: 'hey', message: 'hey' })
+      cy.wrap(Cypress).its('vue').should('not.have.property', 'cat')
+    })
+
     it('Paco is the default author', () => {
       createCmp({ message: 'hey' })
       cy.wrap(Cypress).its('vue.author').should('equal', 'Paco')
@@ -60,10 +65,14 @@ describe('Message', () => {
 
     it('triggers a message-clicked event clicked', () => {
       createCmp({ message: 'Cat' }).then(() => {
+        const stub = cy.spy()
+
+        Cypress.vue.$on('message-clicked', stub)
         cy.get('.message')
         .click()
         .then(() => {
-          expect(Cypress.vueWrapper.emitted()).to.have.property('message-clicked')
+          expect(stub).to.be.calledOnce
+          expect(stub).to.be.calledWith('Cat')
         })
       })
     })

@@ -28,8 +28,8 @@ describe('Card', () => {
 
   it('renders scopedSlots', () => {
     mount(Card, {
-      slots: {
-        default: '<template #default="props"><p>Yay! {{props.content}}</p></template>',
+      scopedSlots: {
+        default: '<p>Yay! {{props.content}}</p>',
       },
     })
 

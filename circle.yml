@@ -1328,7 +1328,7 @@ jobs:
   npm-vue:
     <<: *defaults
     resource_class: medium
-    parallelism: 3
+    parallelism: 4
     steps:
       - restore_cached_workspace
       - run:

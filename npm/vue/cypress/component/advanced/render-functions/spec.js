@@ -1,6 +1,5 @@
 /// <reference types="cypress" />
 import { mount } from '@cypress/vue'
-import { h as createElement } from 'vue'
 
 describe('Single render function component', () => {
   // the component definition
@@ -119,19 +118,18 @@ describe('Component with slot', () => {
 describe('Component with arguments', () => {
   // the component definition
   const appComponent = {
-    render () {
+    render (createElement) {
       let a = this.elementtype.split(',')
 
       return createElement(
         a[0],
         {
-          id: a[3],
-          style: {
-            color: a[1],
-            'font-size': `${a[2]}pt`,
+          attrs: {
+            id: a[3],
+            style: `color:${a[1]};font-size:${a[2]};`,
           },
         },
-        this.$slots.default ? this.$slots.default() : '<EMPTY>',
+        this.$slots.default || '<EMPTY>',
       )
     },
     props: {
@@ -146,7 +144,7 @@ describe('Component with arguments', () => {
     // we want to use custom app component above
     extensions: {
       components: {
-        appComponent,
+        'app-component': appComponent,
       },
     },
   }
@@ -170,13 +168,13 @@ describe('Component with arguments', () => {
     cy.contains('h3', 'Hello Peter').should(
       'have.attr',
       'style',
-      'color: red; font-size: 30pt;',
+      'color:red;font-size:30;',
     )
 
     cy.contains('p', 'Hello John').should(
       'have.attr',
       'style',
-      'color: green; font-size: 30pt;',
+      'color:green;font-size:30;',
     )
   })
 
@@ -191,7 +189,7 @@ describe('Component with arguments', () => {
     cy.contains('<EMPTY>').should(
       'have.attr',
       'style',
-      'color: red; font-size: 30pt;',
+      'color:red;font-size:30;',
     )
   })
 })

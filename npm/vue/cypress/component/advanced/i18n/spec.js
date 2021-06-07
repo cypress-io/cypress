@@ -1,7 +1,8 @@
 /// <reference types="cypress" />
+import Vue from 'vue'
 import TranslatedMessageWithJSON from './TranslatedJSONMessage.vue'
 import TranslatedMessageI18nBlock from './TranslatedI18nMessage.vue'
-import { createI18n } from 'vue-i18n'
+import VueI18n from 'vue-i18n'
 import { mount } from '@cypress/vue'
 import messages from './translations.json'
 
@@ -21,11 +22,13 @@ function expectHelloWorldGreeting () {
 }
 
 describe('VueI18n', () => {
+  Vue.use(VueI18n)
+
   describe('with i18n block', () => {
     beforeEach(() => {
-      const i18n = createI18n({ locale: 'en' })
+      const i18n = new VueI18n({ locale: 'en' })
 
-      mount(TranslatedMessageI18nBlock, { global: { plugins: [i18n] } })
+      mount(TranslatedMessageI18nBlock, { i18n })
     })
 
     it('shows HelloWorld for all locales', expectHelloWorldGreeting)
@@ -33,9 +36,9 @@ describe('VueI18n', () => {
 
   describe('with messages argument', () => {
     beforeEach(() => {
-      const i18n = createI18n({ locale: 'en', messages })
+      const i18n = new VueI18n({ locale: 'en', messages })
 
-      mount(TranslatedMessageWithJSON, { global: { plugins: [i18n] } })
+      mount(TranslatedMessageWithJSON, { i18n })
     })
 
     it('shows HelloWorld for all locales', expectHelloWorldGreeting)

@@ -82,4 +82,6 @@ export default [
   createEntry({ format: 'es', input: 'src/index.ts', isBrowser: true }),
   createEntry({ format: 'iife', input: 'src/index.ts', isBrowser: true }),
   createEntry({ format: 'cjs', input: 'src/index.ts', isBrowser: false }),
+  createEntry({ format: 'cjs', input: 'src/support.js', isBrowser: false }),
+  createEntry({ format: 'cjs', input: 'src/plugins/webpack/index.js', isBrowser: false }),
 ]
