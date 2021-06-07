@@ -61,6 +61,13 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
 
+  // routing for the dynamic iframe html
+  app.get('/__cypress/multidomain-iframes/:domain', (req, res) => {
+    debug('handling multidomain iframe for domain: %s', decodeURI(req.params.domain))
+
+    files.handleMultidomainIframe(req, res)
+  })
+
   app.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })

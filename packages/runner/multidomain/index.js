@@ -1,15 +1,6 @@
 import { initialize } from '@packages/driver/src/multidomain'
 
-const autWindow = window.parent.frames[0]
-
-const { cy } = initialize(autWindow)
-
-autWindow.onReady = () => {
-  cy.now('get', 'p').then(($el) => {
-    // eslint-disable-next-line no-console
-    console.log('got the paragaph with text:', $el.text())
-  })
-}
+initialize(window.parent.frames[0])
 
 /*
 
