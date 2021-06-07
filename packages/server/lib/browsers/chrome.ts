@@ -92,6 +92,9 @@ const DEFAULT_ARGS = [
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
+  // Simulate when chrome needs an update.
+  // This prevents an 'update' from displaying til the given date
+  `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
 
   // These flags are for webcam/WebRTC testing

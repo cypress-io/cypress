@@ -14,7 +14,6 @@ describe('@cypress/schematic: ng-add', () => {
     name: 'workspace',
     newProjectRoot: 'projects',
     version: '6.0.0',
-    defaultProject: 'sandbox',
   }
 
   const appOptions = {

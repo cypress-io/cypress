@@ -2,14 +2,13 @@
 // https://github.com/vuejs/vuex/tree/dev/examples/counter
 import Counter from './Counter.vue'
 import store from './store'
-import Vuex from 'vuex'
 import { mountCallback } from '@cypress/vue'
 
 /* eslint-env mocha */
 describe('Vuex Counter', () => {
   // configure component
   const extensions = {
-    plugins: [Vuex],
+    plugins: [store],
     components: {
       Counter,
     },
