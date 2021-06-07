@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, extendObservable } from 'mobx'
+import { action, computed, observable, extendObservable } from 'mobx'
 import interval from 'human-interval'
 
 const prompts = _.sortBy([
@@ -15,6 +15,7 @@ const prompts = _.sortBy([
 ], 'interval')
 
 export default class Prompts {
+  @observable _automaticOpen = false
   _promptsShown
   _hasProjectId
 
@@ -36,12 +37,18 @@ export default class Prompts {
     return !!_.find(prompts, ({ slug }) => this[slug])
   }
 
+  @computed get utm_content () {
+    return this._automaticOpen ? 'Automatic' : 'Manual'
+  }
+
   @action openPrompt = (slug) => {
     this[slug] = true
+    this._automaticOpen = false
   }
 
   @action closePrompt = (slug) => {
     this[slug] = false
+    this._automaticOpen = false
   }
 
   @action setPromptStates = (config) => {
@@ -61,6 +68,7 @@ export default class Prompts {
     for (const prompt of prompts) {
       if (this._shouldShowPrompt(prompt)) {
         this.openPrompt(prompt.slug)
+        this._automaticOpen = true
 
         // only show one prompt at a time
         return

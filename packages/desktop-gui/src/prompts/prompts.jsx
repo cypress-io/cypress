@@ -1,4 +1,5 @@
 import React, { Component, useState } from 'react'
+import { computed } from 'mobx'
 import { observer } from 'mobx-react'
 import { usePopper } from 'react-popper'
 
@@ -40,63 +41,76 @@ class CIPrompt1 extends Component {
   slug = 'ci1'
   utm_medium = 'CI Prompt 1'
 
-  ciProviders = [
-    {
-      name: 'Circle CI',
-      icon: CircleCI,
-      link: {
-        url: 'https://on.cypress.io/setup-ci-circleci',
-        params: {
-          utm_medium: this.utm_medium,
-          utm_campaign: 'Circle',
+  @computed get utm_content () {
+    const { prompts } = this.props
+
+    return prompts ? prompts.utm_content : undefined
+  }
+
+  @computed get ciProviders () {
+    return [
+      {
+        name: 'Circle CI',
+        icon: CircleCI,
+        link: {
+          url: 'https://on.cypress.io/setup-ci-circleci',
+          params: {
+            utm_medium: this.utm_medium,
+            utm_campaign: 'Circle',
+            utm_content: this.utm_content,
+          },
         },
       },
-    },
-    {
-      name: 'GitHub Actions',
-      icon: GitHubActions,
-      link: {
-        url: 'https://on.cypress.io/github-actions',
-        params: {
-          utm_medium: this.utm_medium,
-          utm_campaign: 'GitHub',
+      {
+        name: 'GitHub Actions',
+        icon: GitHubActions,
+        link: {
+          url: 'https://on.cypress.io/github-actions',
+          params: {
+            utm_medium: this.utm_medium,
+            utm_campaign: 'GitHub',
+            utm_content: this.utm_content,
+          },
         },
       },
-    },
-    {
-      name: 'Bitbucket',
-      icon: Bitbucket,
-      link: {
-        url: 'https://on.cypress.io/bitbucket-pipelines',
-        params: {
-          utm_medium: this.utm_medium,
-          utm_campaign: 'Bitbucket',
+      {
+        name: 'Bitbucket',
+        icon: Bitbucket,
+        link: {
+          url: 'https://on.cypress.io/bitbucket-pipelines',
+          params: {
+            utm_medium: this.utm_medium,
+            utm_campaign: 'Bitbucket',
+            utm_content: this.utm_content,
+          },
         },
       },
-    },
-    {
-      name: 'GitLab CI/CD',
-      icon: GitLab,
-      link: {
-        url: 'https://on.cypress.io/gitlab-ci',
-        params: {
-          utm_medium: this.utm_medium,
-          utm_campaign: 'GitLab',
+      {
+        name: 'GitLab CI/CD',
+        icon: GitLab,
+        link: {
+          url: 'https://on.cypress.io/gitlab-ci',
+          params: {
+            utm_medium: this.utm_medium,
+            utm_campaign: 'GitLab',
+            utm_content: this.utm_content,
+          },
         },
       },
-    },
-    {
-      name: 'AWS CodeBuild',
-      icon: AWSCodeBuild,
-      link: {
-        url: 'https://on.cypress.io/aws-codebuild',
-        params: {
-          utm_medium: this.utm_medium,
-          utm_campaign: 'AWS',
+      {
+        name: 'AWS CodeBuild',
+        icon: AWSCodeBuild,
+        link: {
+          url: 'https://on.cypress.io/aws-codebuild',
+          params: {
+            utm_medium: this.utm_medium,
+            utm_campaign: 'AWS',
+            utm_content: this.utm_content,
+          },
         },
       },
-    },
-  ]
+    ]
+  }
 
   _close = () => {
     this.props.prompts.closePrompt(this.slug)
@@ -113,6 +127,7 @@ class CIPrompt1 extends Component {
       params: {
         utm_medium: this.utm_medium,
         utm_campaign: 'Other',
+        utm_content: this.utm_content,
       },
     })
   }
@@ -123,6 +138,7 @@ class CIPrompt1 extends Component {
       params: {
         utm_medium: this.utm_medium,
         utm_campaign: 'Learn More',
+        utm_content: this.utm_content,
       },
     })
   }

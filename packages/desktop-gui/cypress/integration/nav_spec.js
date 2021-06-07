@@ -134,12 +134,22 @@ describe('Navigation', function () {
               cy.wrap(this.ipc.externalOpen).should('have.callCount', 5)
             })
 
-            it('links to more information', function () {
+            it('links to more information with correct utm_content', function () {
               cy.get('.see-other-guides').click()
-              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/setup-ci' })
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+                url: 'https://on.cypress.io/setup-ci',
+                params: {
+                  utm_content: 'Manual',
+                },
+              })
 
               cy.get('.prompt-ci1').contains('Learn More').click()
-              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', { url: 'https://on.cypress.io/ci' })
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+                url: 'https://on.cypress.io/ci',
+                params: {
+                  utm_content: 'Manual',
+                },
+              })
             })
           })
 
@@ -160,6 +170,33 @@ describe('Navigation', function () {
               })
 
               cy.get('.prompt-ci1').should('be.visible')
+            })
+
+            it('sends correct utm_content when opened', function () {
+              this.openProject.resolve({
+                ...this.config,
+                projectId: null,
+                state: {
+                  ...this.config.state,
+                  promptsShown: {},
+                },
+              })
+
+              cy.get('.see-other-guides').click()
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+                url: 'https://on.cypress.io/setup-ci',
+                params: {
+                  utm_content: 'Automatic',
+                },
+              })
+
+              cy.get('.prompt-ci1').contains('Learn More').click()
+              cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {
+                url: 'https://on.cypress.io/ci',
+                params: {
+                  utm_content: 'Automatic',
+                },
+              })
             })
 
             it('does not open when previously shown', function () {
