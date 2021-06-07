@@ -8,7 +8,6 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - fix-darwin-build-example-issue
 
 defaults: &defaults
   parallelism: 1
@@ -1475,7 +1474,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-darwin-build-example-issue" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
