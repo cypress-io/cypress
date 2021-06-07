@@ -303,6 +303,16 @@ const Log = function (cy, state, config, obj) {
       return _.pick(attributes, args)
     },
 
+    publicInterface () {
+      return {
+        get: _.bind(this.get, this),
+        on: _.bind(this.on, this),
+        off: _.bind(this.off, this),
+        pick: _.bind(this.pick, this),
+        attributes,
+      }
+    },
+
     snapshot (name, options = {}) {
       // bail early and don't snapshot if we're in headless mode
       // or we're not storing tests

@@ -27,7 +27,7 @@ const driverToSocketEvents = 'backend:request automation:request mocha recorder:
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart'.split(' ')
-const socketToDriverEvents = 'net:event proxy:incoming:request script:error'.split(' ')
+const socketToDriverEvents = 'net:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 const localBus = new EventEmitter()

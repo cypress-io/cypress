@@ -20,7 +20,6 @@ const $SetterGetter = require('./cypress/setter_getter')
 const $Log = require('./cypress/log')
 const $Location = require('./cypress/location')
 const $LocalStorage = require('./cypress/local_storage')
-const { ProxyLogging } = require('./cypress/proxy-logging')
 const $Mocha = require('./cypress/mocha')
 const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
@@ -154,8 +153,6 @@ class $Cypress {
     }
 
     this.Cookies = $Cookies.create(config.namespace, d)
-
-    this.ProxyLogging = new ProxyLogging(this)
 
     return this.action('cypress:config', config)
   }

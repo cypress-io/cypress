@@ -4,7 +4,6 @@
 declare namespace Cypress {
   interface Actions {
     (action: 'net:event', frame: any)
-    (action: 'proxy:incoming:request', data: any)
   }
 
   interface cy {
@@ -20,8 +19,6 @@ declare namespace Cypress {
 
   interface Cypress {
     backend: (eventName: string, ...args: any[]) => Promise<any>
-    // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
-    ProxyLogging: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
     resolveWindowReference: any
     resolveLocationReference: any
@@ -58,7 +55,6 @@ declare namespace Cypress {
       indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
       message?: string
     }
-    browserPreRequest?: any
   }
 
   interface State {
