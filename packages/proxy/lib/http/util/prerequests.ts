@@ -46,15 +46,11 @@ export class PreRequests {
     }
 
     let timeout = setTimeout(() => {
-      ctxDebug('500ms passed without a pre-request, continuing to wait')
+      metrics.neverReceivedPreRequest.push({ url: req.proxiedUrl })
+      ctxDebug('500ms passed without a pre-request, continuing request with an empty pre-request field!')
 
-      timeout = setTimeout(() => {
-        metrics.neverReceivedPreRequest.push({ url: req.proxiedUrl })
-        ctxDebug('10000ms more passed without a pre-request, continuing request with an empty pre-request field!')
-
-        remove()
-        cb()
-      }, 10000)
+      remove()
+      cb()
     }, 500)
 
     const startedMs = Date.now()
