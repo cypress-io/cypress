@@ -92,7 +92,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 
 2. If there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, update the corresponding dependency in [`packages/example`](./packages/example) to that new version.
 
-3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`
+3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder for `<new target version>`. This also purges the cloudflare cache for this version.
     ```shell
     yarn move-binaries --sha <commit sha> --version <new target version>
     ```
@@ -145,9 +145,9 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     npm dist-tag add cypress@X.Y.Z
     ```
 
-10. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json):
+10. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json). This will also ensure the binary for the version is downloadable for each system.
     ```shell
-    yarn run binary-release --version X.Y.Z
+    yarn binary-release --version X.Y.Z
     ```
 
 11. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).

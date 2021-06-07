@@ -7,6 +7,7 @@
     "binary-build": "node ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
+    "binary-ensure": "node ./scripts/binary.js ensure",
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
@@ -237,14 +238,8 @@
     ]
   },
   "lint-staged": {
-    "*.coffee": [
-      "yarn stop-only --folder",
-      "git add"
-    ],
-    "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix",
-      "git add"
-    ]
+    "*.coffee": "yarn stop-only --folder",
+    "*.{js,jsx,ts,tsx,json,eslintrc}": "eslint --fix"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
