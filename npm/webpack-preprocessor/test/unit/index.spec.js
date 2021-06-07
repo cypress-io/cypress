@@ -334,8 +334,10 @@ describe('webpack preprocessor', function () {
 
       it('it rejects with error when an err', function () {
         this.compilerApi.run.yields(this.err)
+        expect(preprocessor.__bundles()[this.file.filePath]).to.be.undefined
 
         return this.run().catch((err) => {
+          expect(preprocessor.__bundles()[this.file.filePath].deferreds).to.be.empty
           expect(err.stack).to.equal(this.err.stack)
         })
       })
