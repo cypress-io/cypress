@@ -94,7 +94,11 @@ describe('webpack preprocessor', function () {
         expect(preprocessor.__bundles()[this.file.filePath]).to.be.undefined
 
         return this.run().then(() => {
+          // resolve prop should not exist, since promise should have been resolved.
+          expect(preprocessor.__bundles()[this.file.filePath].promise).not.to.have.property('resolve')
+          expect(preprocessor.__bundles()[this.file.filePath].promise).not.to.have.property('reject')
           expect(preprocessor.__bundles()[this.file.filePath].deferreds).to.be.empty
+          expect(preprocessor.__bundles()[this.file.filePath].promise).to.be.instanceOf(Promise)
           expect(webpack).to.be.called
         })
       })
@@ -337,7 +341,10 @@ describe('webpack preprocessor', function () {
         expect(preprocessor.__bundles()[this.file.filePath]).to.be.undefined
 
         return this.run().catch((err) => {
+          expect(preprocessor.__bundles()[this.file.filePath].promise).not.to.have.property('resolve')
+          expect(preprocessor.__bundles()[this.file.filePath].promise).not.to.have.property('reject')
           expect(preprocessor.__bundles()[this.file.filePath].deferreds).to.be.empty
+          expect(preprocessor.__bundles()[this.file.filePath].promise).to.be.instanceOf(Promise)
           expect(err.stack).to.equal(this.err.stack)
         })
       })
