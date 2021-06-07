@@ -91,7 +91,10 @@ describe('webpack preprocessor', function () {
       })
 
       it('runs webpack', function () {
+        expect(preprocessor.__bundles()[this.file.filePath]).to.be.undefined
+
         return this.run().then(() => {
+          expect(preprocessor.__bundles()[this.file.filePath].deferreds).to.be.empty
           expect(webpack).to.be.called
         })
       })

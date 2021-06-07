@@ -297,6 +297,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // Seems to be a race condition where changing file before next tick
       // does not cause build to rerun
       Promise.delay(0).then(() => {
+        if (!bundles[filePath]) {
+          return
+        }
+
         bundles[filePath].deferreds.forEach((deferred) => {
           deferred.resolve(outputPath)
         })
@@ -384,6 +388,12 @@ Object.defineProperty(preprocessor, 'defaultOptions', {
 // @ts-ignore
 preprocessor.__reset = () => {
   bundles = {}
+}
+
+// for testing purposes, but do not add this to the typescript interface
+// @ts-ignore
+preprocessor.__bundles = () => {
+  return bundles
 }
 
 function cleanseError (err: string) {
