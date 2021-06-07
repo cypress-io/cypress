@@ -53,7 +53,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
+  open (config: Record<string, any> = {}, project, onError, onWarning, correlateBrowserPreRequests) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -70,11 +70,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         return this._getRemoteState()
       }
 
-      this.createNetworkProxy(config, getRemoteState)
+      this.createNetworkProxy(config, getRemoteState, correlateBrowserPreRequests)
 
-      // TODO: this does not look like a good idea
-      // since we would be spawning new workers on every
-      // open + close of a project...
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
       }

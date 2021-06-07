@@ -443,6 +443,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.server.changeToUrl(url)
   }
 
+  shouldCorrelateBrowserPreRequests () {
+    const { family, majorVersion } = this.browser
+
+    return family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
+  }
+
   setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
     this.spec = spec
     this.browser = browser

@@ -83,8 +83,6 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-const shouldCorrelatePreRequests = ({ family, majorVersion }) => family === 'chromium' || (family === 'firefox' && majorVersion >= 86)
-
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
@@ -199,12 +197,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState) {
+  createNetworkProxy (config, getRemoteState, correlatePreRequests) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
-
-    const correlatePreRequests = shouldCorrelatePreRequests(config.browser)
 
     this._netStubbingState = netStubbingState()
     // @ts-ignore

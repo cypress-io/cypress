@@ -45,7 +45,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
 
         return this._initPlugins(cfgForComponentTesting, options)
         .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
+          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning, this.shouldCorrelateBrowserPreRequests())
           .then(([port, warning]) => {
             return {
               cfg,
