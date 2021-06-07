@@ -213,4 +213,4 @@ This project only transpiles the library, to see it in action:
 
 - Install dependencies `yarn`
 - Compile the library `yarn build` or `yarn watch` for watch mode
-- Open Cypress with `yar cy:open`
+- Open Cypress with `yarn cy:open`
