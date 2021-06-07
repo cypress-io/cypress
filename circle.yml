@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - optimize-ci-resource-classes
+        - fix-darwin-build-example-issue
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +42,6 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - optimize-ci-resource-classes
   requires:
     - create-build-artifacts
 
@@ -1476,7 +1475,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "optimize-ci-resource-classes" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-darwin-build-example-issue" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2111,7 +2110,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - build
     - test-kitchensink:
@@ -2123,7 +2121,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - build
     - create-build-artifacts:
@@ -2173,7 +2170,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2181,7 +2177,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2190,7 +2185,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
 
@@ -2215,7 +2209,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
 
@@ -2287,7 +2280,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - darwin-create-build-artifacts
 
@@ -2299,7 +2291,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - darwin-create-build-artifacts
 
