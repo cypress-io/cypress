@@ -443,7 +443,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.server.changeToUrl(url)
   }
 
-  shouldCorrelateBrowserPreRequests () {
+  shouldCorrelatePreRequests = () => {
+    if (!this.browser) {
+      return false
+    }
+
     const { family, majorVersion } = this.browser
 
     return family === 'chromium' || (family === 'firefox' && majorVersion >= 86)

@@ -20,7 +20,7 @@ const LogRequest: RequestMiddleware = function () {
 }
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
-  if (!this.correlatePreRequests) {
+  if (!this.shouldCorrelatePreRequests()) {
     return this.next()
   }
 

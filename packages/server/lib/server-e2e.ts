@@ -53,7 +53,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning, correlateBrowserPreRequests) {
+  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -70,7 +70,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         return this._getRemoteState()
       }
 
-      this.createNetworkProxy(config, getRemoteState, correlateBrowserPreRequests)
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
 
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()

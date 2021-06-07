@@ -38,7 +38,7 @@ export type HttpMiddlewareStacks = {
 type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
-  correlatePreRequests?: boolean
+  shouldCorrelatePreRequests: () => boolean
   stage: HttpStages
   debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
@@ -54,7 +54,7 @@ export const defaultMiddleware = {
 
 export type ServerCtx = Readonly<{
   config: CyServer.Config
-  correlatePreRequests?: boolean
+  shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
   netStubbingState: NetStubbingState
@@ -182,7 +182,7 @@ export function _runStage (type: HttpStages, ctx: any) {
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
-  correlatePreRequests?: boolean
+  shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
   getRemoteState: () => any
@@ -197,7 +197,7 @@ export class Http {
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
     this.config = opts.config
-    this.correlatePreRequests = opts.correlatePreRequests
+    this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
     this.middleware = opts.middleware
@@ -216,7 +216,7 @@ export class Http {
       res,
       buffers: this.buffers,
       config: this.config,
-      correlatePreRequests: this.correlatePreRequests,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,

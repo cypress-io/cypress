@@ -30,7 +30,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
           return updatedConfig
         })
         .then((cfg) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelateBrowserPreRequests())
+          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
             return {
               cfg,
