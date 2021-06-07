@@ -1,17 +1,18 @@
 <template>
-  <div class="h-screen bg-white">
+  <div class="h-150 max-w-200 mx-auto rounded-xl bg-white relative">
     <div>
       <div class="flex justify-between p-2 bg-gray-900 text-white">
         Cypress Dashboard
 
         <button>Log in</button>
       </div>
-
-      <SelectWizard v-if="!currentStep" />
-      <component v-else :is="currentStep.component" />
+      <div class="flex flex-col justify-center h-120 p-2">
+        <SelectWizard v-if="!currentStep" />
+        <component v-else :is="currentStep.component" />
+      </div>
     </div>
 
-    <div class="flex justify-center">
+    <div class="text-right absolute bottom-2 right-2">
       <button 
         class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
         :class="{ 'invisible': !currentStep }" 
