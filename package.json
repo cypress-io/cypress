@@ -238,14 +238,8 @@
     ]
   },
   "lint-staged": {
-    "*.coffee": [
-      "yarn stop-only --folder",
-      "git add"
-    ],
-    "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix",
-      "git add"
-    ]
+    "*.coffee": "yarn stop-only --folder",
+    "*.{js,jsx,ts,tsx,json,eslintrc}": "eslint --fix"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
