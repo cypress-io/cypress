@@ -1,4 +1,4 @@
-export default (props) => {
+export const visitFailure = (props) => {
   const { status, statusText, contentType } = props
 
   const getContentType = () => {

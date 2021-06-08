@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
+import { visitFailure } from '@packages/runner-shared'
 
 import dom from '../lib/dom'
 import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
-import visitFailure from './visit-failure'
 import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import studioRecorder from '../studio/studio-recorder'
