@@ -32,6 +32,10 @@ function removeOne<T> (a: Array<T>, predicate: (v: T) => boolean): T | void {
   }
 }
 
+function matches (preRequest: BrowserPreRequest, req: Pick<CypressIncomingRequest, 'proxiedUrl' | 'method'>) {
+  return preRequest.method === req.method && preRequest.url === req.proxiedUrl
+}
+
 export type GetPreRequestCb = (browserPreRequest?: BrowserPreRequest) => void
 
 export class PreRequests {
@@ -46,7 +50,7 @@ export class PreRequests {
     metrics.proxyRequestsReceived++
 
     const pendingBrowserPreRequest = removeOne(this.pendingBrowserPreRequests, (browserPreRequest) => {
-      return browserPreRequest.method === req.method && browserPreRequest.url === req.proxiedUrl
+      return matches(browserPreRequest, req)
     })
 
     if (pendingBrowserPreRequest) {
@@ -93,7 +97,7 @@ export class PreRequests {
     metrics.browserPreRequestsReceived++
 
     const requestPendingPreRequestCb = removeOne(this.requestsPendingPreRequestCbs, (req) => {
-      return req.method === browserPreRequest.method && req.proxiedUrl === browserPreRequest.url
+      return matches(browserPreRequest, req)
     })
 
     if (requestPendingPreRequestCb) {
