@@ -63,11 +63,11 @@ export class PreRequests {
 
     const timeout = setTimeout(() => {
       metrics.neverReceivedPreRequest.push({ url: req.proxiedUrl })
-      ctxDebug('10000ms passed without a pre-request, continuing request with an empty pre-request field!')
+      ctxDebug('500ms passed without a pre-request, continuing request with an empty pre-request field!')
 
       remove()
       cb()
-    }, 10000)
+    }, 500)
 
     const startedMs = Date.now()
     const remove = _.once(() => removeOne(this.requestsPendingPreRequestCbs, (v) => v === requestPendingPreRequestCb))
