@@ -5,6 +5,7 @@ import { cors } from '@packages/network'
 import debugModule from 'debug'
 import { Automation } from '../automation'
 import { ResourceType, BrowserPreRequest } from '@packages/proxy'
+import 'chrome'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
