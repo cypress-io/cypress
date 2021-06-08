@@ -4,6 +4,6 @@
   "description": "Scripts related to snapshotting the app.",
   "main": "./snapshot.js",
   "dependencies": {
-    "v8-snapshot": "^0.3.1"
+    "v8-snapshot": "^0.4.0"
   }
 }

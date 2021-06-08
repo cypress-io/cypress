@@ -2122,7 +2122,7 @@
     ajv "^6.12.0"
     ajv-keywords "^3.4.1"
 
-"@electron/get@^1.0.1", "@electron/get@^1.12.2", "@electron/get@^1.6.0":
+"@electron/get@^1.0.1", "@electron/get@^1.12.4", "@electron/get@^1.6.0":
   version "1.12.4"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.12.4.tgz#a5971113fc1bf8fa12a8789dc20152a7359f06ab"
   integrity sha512-6nr9DbJPUR9Xujw6zD3y+rS95TyItEVM0NVjt1EehY2vUWfIgPiIPVHxCvaTS0xr2B+DRxovYVKbuOWqC35kjg==
@@ -5228,6 +5228,19 @@
     dom-accessibility-api "^0.5.4"
     lz-string "^1.4.4"
     pretty-format "^26.6.2"
+
+"@thlorenz/electron-mksnapshot@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@thlorenz/electron-mksnapshot/-/electron-mksnapshot-0.1.0.tgz#5c6fb24af1175d7ebdf573d7e2da268ba390da37"
+  integrity sha512-TPavOZ0QMTMEHxioPmVErubFmqZ4h/EuZnpAkLnbcbZcVmupEZibTzYLdlEd7ie/ib7hJAAC7pTJRhGdJQpuww==
+  dependencies:
+    "@electron/get" "^1.12.4"
+    debug "^4.3.1"
+    extract-zip "^2.0.1"
+    fs-extra "^10.0.0"
+    supports-color "^9.0.1"
+    temp "^0.9.4"
+    tslib "^2.2.0"
 
 "@thlorenz/marionette-client@^2.0.0":
   version "2.0.0"
@@ -14333,16 +14346,6 @@ electron-is-dev@^1.0.1:
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
   integrity sha512-R1oD5gMBPS7PVU8gJwH6CtT0e6VSoD0+SzSnYpNm+dBkcijgA+K7VAMHDfnRq/lkKPZArpzplTW6jfiMYosdzw==
 
-electron-mksnapshot@^12.0.0:
-  version "12.0.0"
-  resolved "https://registry.yarnpkg.com/electron-mksnapshot/-/electron-mksnapshot-12.0.0.tgz#dfddce589528825f1de33d65fbb6bdd9c1692323"
-  integrity sha512-Ha9bD2Io34dUMDotJQN3CL3UKHdHW/DwlHj5+MS6qqhLvQjvqqwriO1TgU+F32sDLDpUi8E38DADpEkQamGK6Q==
-  dependencies:
-    "@electron/get" "^1.12.2"
-    extract-zip "^2.0.0"
-    fs-extra "^7.0.1"
-    temp "^0.8.3"
-
 electron-notarize@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/electron-notarize/-/electron-notarize-1.0.0.tgz#bc925b1ccc3f79e58e029e8c4706572b01a9fd8f"
@@ -14418,10 +14421,10 @@ electron-to-chromium@^1.3.723:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.743.tgz#fcec24d6d647cb84fd796b42caa1b4039a180894"
   integrity sha512-K2wXfo9iZQzNJNx67+Pld0DRF+9bYinj62gXCdgPhcu1vidwVuLPHQPPFnCdO55njWigXXpfBiT90jGUPbw8Zg==
 
-electron@12.0.0:
-  version "12.0.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-12.0.0.tgz#b3b1d88cc64622e59c637521da5a6b6ab4df4eb5"
-  integrity sha512-p6oxZ4LG82hopPGAsIMOjyoL49fr6cexyFNH0kADA9Yf+mJ72DN7bjvBG+6V7r6QKhwYgsSsW8RpxBeVOUbxVQ==
+electron@12.0.10:
+  version "12.0.10"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-12.0.10.tgz#d0879ff005a200d5b08dbfb3e5bbea744d38c71a"
+  integrity sha512-qaNvFG4AgeuT3PkSljQ9MlY7hz87wIwJ5cmSZ1453IVsUd0BV7pcaLViSpR1bRSqxetDDWxCLtCp0N9RXeDZww==
   dependencies:
     "@electron/get" "^1.0.1"
     "@types/node" "^14.6.2"
@@ -16118,7 +16121,7 @@ extract-zip@^1.0.3, extract-zip@^1.7.0:
     mkdirp "^0.5.4"
     yauzl "^2.10.0"
 
-extract-zip@^2.0.0:
+extract-zip@^2.0.0, extract-zip@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-2.0.1.tgz#663dca56fe46df890d5f131ef4a06d22bb8ba13a"
   integrity sha512-GDhU9ntwuKyGXdZBUgTIe+vXnWj0fppUEtMDL0+idd5Sta8TGpHssn/eusA9mrPr9qNDym6SxAYZjNvCn/9RBg==
@@ -17119,6 +17122,15 @@ fs-extra@9.0.0:
     graceful-fs "^4.2.0"
     jsonfile "^6.0.1"
     universalify "^1.0.0"
+
+fs-extra@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-10.0.0.tgz#9ff61b655dde53fb34a82df84bb214ce802e17c1"
+  integrity sha512-C5owb14u9eJwizKGdchcDUQeFtlSHHthBk8pbX9Vc1PFZrLombudjDnNns88aYslCyF6IY5SUw3Roz6xShcEIQ==
+  dependencies:
+    graceful-fs "^4.2.0"
+    jsonfile "^6.0.1"
+    universalify "^2.0.0"
 
 fs-extra@^3.0.0:
   version "3.0.1"
@@ -18497,6 +18509,11 @@ has-flag@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
+
+has-flag@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-5.0.0.tgz#36e12f0b14052d6ffc8007c6f768a87623f6f692"
+  integrity sha512-dmhh9fPE7WRat4yiFvyhXh7LytudXDcE89VEdR3sxfWQKtFPr7jpXip5H402aeFfA36ucqSKecGEapc7N44k+g==
 
 has-glob@^0.1.1:
   version "0.1.1"
@@ -33124,6 +33141,13 @@ supports-color@^7.0.0, supports-color@^7.1.0:
   dependencies:
     has-flag "^4.0.0"
 
+supports-color@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-9.0.1.tgz#bcc43ff901cb8088d680144ac0b6553d242abd26"
+  integrity sha512-e8HnXOAd61fVNyYRcKoqGNpnpceN/+IbDlWCBVjeqfASq/kbH4JwNj1Y4TFrve+w838Ff4eupPKXtY03zhCBKQ==
+  dependencies:
+    has-flag "^5.0.0"
+
 supports-hyperlinks@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/supports-hyperlinks/-/supports-hyperlinks-1.0.1.tgz#71daedf36cc1060ac5100c351bb3da48c29c0ef7"
@@ -33387,11 +33411,19 @@ temp-write@^3.4.0:
     temp-dir "^1.0.0"
     uuid "^3.0.1"
 
-temp@^0.8.1, temp@^0.8.3:
+temp@^0.8.1:
   version "0.8.4"
   resolved "https://registry.yarnpkg.com/temp/-/temp-0.8.4.tgz#8c97a33a4770072e0a05f919396c7665a7dd59f2"
   integrity sha512-s0ZZzd0BzYv5tLSptZooSjK8oj6C+c19p7Vqta9+6NPOf7r+fxq0cJe6/oN4LTC79sy5NY8ucOJNgwsKCSbfqg==
   dependencies:
+    rimraf "~2.6.2"
+
+temp@^0.9.4:
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/temp/-/temp-0.9.4.tgz#cd20a8580cb63635d0e4e9d4bd989d44286e7620"
+  integrity sha512-yYrrsWnrXMcdsnu/7YMYAofM1ktpL5By7vZhf15CrXijWWrEYZks5AXBudalfSWJLlnen/QUJUB5aoB0kqZUGA==
+  dependencies:
+    mkdirp "^0.5.1"
     rimraf "~2.6.2"
 
 tempy@^1.0.0:
@@ -34113,6 +34145,11 @@ tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
   integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
+
+tslib@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
+  integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
 
 tslint@5.14.0:
   version "5.14.0"
@@ -35031,14 +35068,16 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz#2de19618c66dc247dcfb6f99338035d8245a2cee"
   integrity sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==
 
-v8-snapshot@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.3.1.tgz#ed9d8efe90b33c7ab5c6df9d3889ca8232cbf860"
-  integrity sha512-fMQzWup4+L/3zryh1jQ47rkCs1k3d8z0CT/8tw/uNIbPZ1PDQ/FC/3mbCwM8p3kiPQU4zbUPqxu1/pPbrtdo7g==
+v8-snapshot@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.4.0.tgz#e7438038c60398aa33137b5d0fddefb723f7cc21"
+  integrity sha512-DO+QABeqEO22bk+SXX9R472HwrJLULlKQlU07QDNg0UAnEgPDMV7mUknrzzN3F7x8hUstHJ9HY1sh5RU/3YbZA==
   dependencies:
+    "@thlorenz/electron-mksnapshot" "^0.1.0"
     ansi-colors "^4.1.1"
     debug "^4.1.1"
     packherd "^0.3.1"
+    resolve-from "^5.0.0"
     snapbuild-darwin-x64 "^0.2.2"
     supports-color "^8.1.1"
     terser "^5.3.2"
