@@ -113,6 +113,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.ensureProp(this._cfg, 'open')
   }
 
+  get state () {
+    return this.cfg.state
+  }
+
   open (options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
@@ -176,9 +180,21 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       options.onSavedStateChanged = (state) => this.saveState(state)
 
+      // save the last time they opened the project
+      // along with the first time they opened it
+      const now = Date.now()
+      const stateToSave = {
+        lastOpened: now,
+      }
+
+      if (!cfg.state || !cfg.state.firstOpened) {
+        stateToSave.firstOpened = now
+      }
+
       return Bluebird.join(
         this.watchSettingsAndStartWebsockets(options, cfg),
         this.scaffold(cfg),
+        this.saveState(stateToSave),
       )
       .then(() => {
         return Bluebird.join(

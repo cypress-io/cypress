@@ -336,6 +336,20 @@ describe('src/cy/commands/location', () => {
       cy.location().should('have.property', 'pathname').and('match', /users/)
     })
 
+    // https://github.com/cypress-io/cypress/issues/16463
+    it('eventually returns a given key', function () {
+      cy.stub(cy, 'getRemoteLocation')
+      .onFirstCall().returns('')
+      .onSecondCall().returns({
+        pathname: '/my/path',
+      })
+
+      cy.location('pathname').should('equal', '/my/path')
+      .then(() => {
+        expect(cy.getRemoteLocation).to.have.been.calledTwice
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
