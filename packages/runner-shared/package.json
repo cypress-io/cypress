@@ -1,0 +1,17 @@
+{
+  "name": "@packages/runner-shared",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {},
+  "dependencies": {
+    "@cypress/react-tooltip": "0.5.3",
+    "classnames": "2.3.1",
+    "lodash": "4.17.21",
+    "mobx": "5.15.4",
+    "mobx-react": "6.1.8",
+    "react": "16.8.6",
+    "react-dom": "16.8.6"
+  },
+  "devDependencies": {}
+}

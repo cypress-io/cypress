@@ -1,3 +1,6 @@
+@import '../variables.scss';
+@import '../mixins.scss';
+
 .runner {
   .snapshot-controls {
     display: flex;
