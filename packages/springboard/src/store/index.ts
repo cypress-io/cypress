@@ -4,6 +4,8 @@ import { TestingType } from '../types/shared'
 
 interface State {
   testingType: TestingType | undefined
+  firstOpen: boolean
+  hasDismissedHelper: boolean
   component: {
     framework: SupportedFramework | undefined
   }
@@ -11,6 +13,8 @@ interface State {
 
 function createInitialState (): State {
   return {
+    firstOpen: true,
+    hasDismissedHelper: false,
     testingType: undefined,
     component: {
       framework: undefined,
@@ -39,14 +43,21 @@ class Store {
     this.state.testingType = testingType
   }
 
+  setDismissedHelper (hasDismissed) {
+    this.state.hasDismissedHelper = hasDismissed
+  }
+
   setComponentFramework (framework: SupportedFramework) {
     this.state.component.framework = framework
   }
 }
 
 // useful for testing
-export function createStore (initialState: State = createInitialState()) {
-  return new Store(initialState)
+export function createStore (stateOverrides = {}) {
+  return new Store({
+    ...createInitialState(),
+    ...stateOverrides,
+  })
 }
 
 export const store = new Store(createInitialState())
