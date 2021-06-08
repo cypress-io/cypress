@@ -5498,6 +5498,8 @@ declare namespace Cypress {
     message: any
     /** Set to false if you want to control the finishing of the command in the log yourself */
     autoEnd: boolean
+    /** Set to false if you want to control the finishing of the command in the log yourself */
+    end: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }

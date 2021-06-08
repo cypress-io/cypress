@@ -6,9 +6,10 @@
   <h1>Multidomain AUT</h1>
   <p>Some text in the cross-domain AUT</p>
   <script>
-    setTimeout(() => {
-      window.onReady()
-    }, 500)
+    // currently this is hard-coded, but will be dynamically injected in the future
+    document.domain = 'localhost'
+
+    top.postMessage('app:cross:domain:window:load', '*')
   </script>
 </body>
 </html>

@@ -40,7 +40,19 @@ export const initialize = (autWindow) => {
     timeout () {},
   })
 
-  $Commands.create(Cypress, cy, Cypress.state)
+  $Commands.create(Cypress, cy, Cypress.state, Cypress.config)
+
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.message === 'run:in:domain') {
+      const stringifiedTestFn = event.data.data
+
+      autWindow.eval(`(${stringifiedTestFn})()`)
+    }
+  }, false)
+
+  top.postMessage('cross:domain:driver:ready', '*')
+
+  autWindow.cy = cy
 
   return {
     cy,

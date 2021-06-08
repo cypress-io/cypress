@@ -25,7 +25,7 @@ const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:for
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed switch:domain'.split(' ')
 const socketRerunEvents = 'runner:restart'.split(' ')
 const socketToDriverEvents = 'net:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
@@ -278,6 +278,20 @@ const eventManager = {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    top.addEventListener('message', (event) => {
+      switch (event.data) {
+        case 'app:cross:domain:window:load':
+          return Cypress.action('app:cross:domain:window:load')
+        case 'cross:domain:driver:ready':
+          this.crossDomainDriverWindow = event.source
+
+          return Cypress.action('runner:cross:domain:driver:ready')
+        default:
+          // eslint-disable-next-line no-console
+          console.log('Unknown postMessage:', event.data)
+      }
+    }, false)
   },
 
   start (config) {
@@ -470,6 +484,10 @@ const eventManager = {
       if (studioRecorder.isOpen && test.state !== 'passed') {
         studioRecorder.testFailed()
       }
+    })
+
+    Cypress.on('cross:domain:message', (message, data) => {
+      this.crossDomainDriverWindow.postMessage({ message, data }, '*')
     })
   },
 
