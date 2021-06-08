@@ -1,3 +1,5 @@
+/// <reference types='chrome'/>
+
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
