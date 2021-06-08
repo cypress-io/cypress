@@ -45,13 +45,13 @@ export class PreRequests {
       return cb(preRequest)
     }
 
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       metrics.neverReceivedPreRequest.push({ url: req.proxiedUrl })
-      ctxDebug('500ms passed without a pre-request, continuing request with an empty pre-request field!')
+      ctxDebug('10000ms passed without a pre-request, continuing request with an empty pre-request field!')
 
       remove()
       cb()
-    }, 500)
+    }, 10000)
 
     const startedMs = Date.now()
     const remove = () => this.requestsPendingPreRequestCbs.splice(this.requestsPendingPreRequestCbs.indexOf(requestPendingPreRequestCb))
@@ -74,6 +74,10 @@ export class PreRequests {
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {
+    if (this.pendingBrowserPreRequests.indexOf(browserPreRequest) !== -1) {
+      return
+    }
+
     metrics.browserPreRequestsReceived++
 
     debugVerbose('received browser pre-request: %o', browserPreRequest)
