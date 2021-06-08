@@ -155,7 +155,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 
 export class CdpAutomation {
   constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
-    onFn('Network.requestWillBeSent', this._onNetworkRequestWillBeSent)
+    onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
@@ -163,7 +163,7 @@ export class CdpAutomation {
     })
   }
 
-  private _onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
     const browserPreRequest: BrowserPreRequest = {
