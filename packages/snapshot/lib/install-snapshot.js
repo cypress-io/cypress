@@ -96,7 +96,7 @@ function getSnapshotGenerator ({
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
  */
 module.exports = async function installSnapshot ({
-  cypressAppSnapshotFile,
+  cypressAppSnapshotDir,
   nodeModulesOnly,
   projectBaseDir,
   snapshotCacheDir,
@@ -124,11 +124,12 @@ module.exports = async function installSnapshot ({
     })
 
     await snapshotGenerator.createScript()
-    snapshotGenerator.makeSnapshot()
+    const { v8ContextFile } = await snapshotGenerator.makeSnapshot()
+    const cypressAppSnapshotFile = path.join(cypressAppSnapshotDir, v8ContextFile)
 
     // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
     await fs.copyFile(
-      path.join(projectBaseDir, 'v8_context_snapshot.bin'),
+      path.join(projectBaseDir, v8ContextFile),
       cypressAppSnapshotFile,
     )
 

@@ -9,7 +9,7 @@ const projectBaseDir = path.join(__dirname, '../../')
 const appEntryFile = require.resolve('../server/index.js')
 
 // TODO(thlorenz): this is most likely different when creating prod artifacts
-const cypressAppSnapshotFile = (() => {
+const cypressAppSnapshotDir = (() => {
   const electronPackageDir = path.join(projectBaseDir, 'packages/electron')
   const cypressAppDir = path.join(
     electronPackageDir,
@@ -18,7 +18,7 @@ const cypressAppSnapshotFile = (() => {
 
   return path.join(
     cypressAppDir,
-    'Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/v8_context_snapshot.x86_64.bin',
+    'Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/',
   )
 })()
 
@@ -38,7 +38,7 @@ const LOG_INFO = '(snap|pack)*:(info|warn|error)'
  * @property {string} LOG_VERBOSE            - logs all snapshot related messages
  * @property {string} appEntryFile           - the app entry file used to generate the, see snapshotEntryFile
  *
- * @property {string} cypressAppSnapshotFile - the location from where the Cypress app loads the snapshot
+ * @property {string} cypressAppSnapshotDir  - the location from where the Cypress app loads the snapshot
  * @property {boolean} nodeModulesOnly       - if `true` then no application files are included in the snapshot
  * @property {Function} pathsMapper          - maps paths to work around edge cases
  * @property {string} projectBaseDir         - the base dir of the project being snapshotted
@@ -99,7 +99,7 @@ module.exports = function createConfig (env) {
     LOG_VERBOSE,
 
     appEntryFile,
-    cypressAppSnapshotFile,
+    cypressAppSnapshotDir,
     metaFile,
     nodeModulesOnly,
     pathsMapper,
