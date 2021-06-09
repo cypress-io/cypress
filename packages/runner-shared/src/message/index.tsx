@@ -1,10 +1,19 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { forwardRef } from 'react'
-import State from '../lib/state'
 
 interface MessageProps {
-  state: State
+  state: {
+    messageTitle?: string
+    messageControls?: unknown
+    messageDescription: string
+    messageType?: string
+    messageStyles: {
+      state: string
+      styles: React.CSSProperties
+      messageType: string
+    }
+  }
 }
 
 export const Message = observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {

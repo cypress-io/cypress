@@ -6,6 +6,7 @@ import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
 import { $ } from '@packages/driver'
+import { Message } from '@packages/runner-shared'
 
 import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
@@ -13,7 +14,6 @@ import State from '../lib/state'
 
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
-import Message from '../message/message'
 import Resizer from './resizer'
 import StudioModals from '../studio/studio-modals'
 

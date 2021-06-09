@@ -1,11 +1,11 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
+import { Message } from '@packages/runner-shared'
 
 import Header from '../header/header'
 import { Iframes } from '../iframe/iframes'
 import { animationFrameDebounce } from '../lib/debounce'
-import { Message } from '../message/message'
 import { KeyboardHelper } from './KeyboardHelper'
 import { NoSpec } from './NoSpec'
 import { Plugins } from './Plugins'
@@ -70,7 +70,19 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
                 <KeyboardHelper />
               </NoSpec>
             )}
-          <Message state={props.state} />
+          <Message
+            state={{
+              messageTitle: props.state.messageTitle,
+              messageControls: props.state.messageControls,
+              messageDescription: props.state.messageDescription,
+              messageType: props.state.messageType,
+              messageStyles: {
+                state: props.state.messageStyles.state,
+                styles: props.state.messageStyles.styles,
+                messageType: props.state.messageType,
+              },
+            }}
+          />
         </div>
         <Plugins
           key="plugins"
