@@ -8,8 +8,7 @@ import State from '../lib/state'
 import util from '../lib/util'
 
 import RunnerCt from './RunnerCt'
-import { AutomationDisconnected } from '@packages/runner-shared'
-import NoAutomation from '../errors/no-automation'
+import { AutomationDisconnected, NoAutomation } from '@packages/runner-shared'
 
 const automationElementId = '__cypress-string'
 

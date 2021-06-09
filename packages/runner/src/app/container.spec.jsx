@@ -4,8 +4,7 @@ import sinon from 'sinon'
 
 import App from './app'
 import automation from '../lib/automation'
-import { AutomationDisconnected } from '@packages/runner-shared'
-import NoAutomation from '../errors/no-automation'
+import { AutomationDisconnected, NoAutomation } from '@packages/runner-shared'
 import NoSpec from '../errors/no-spec'
 import State from '../lib/state'
 

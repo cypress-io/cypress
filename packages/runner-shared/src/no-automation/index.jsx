@@ -48,7 +48,7 @@ const browserPicker = (browsers, onLaunchBrowser) => {
   )
 }
 
-export default ({ browsers, onLaunchBrowser }) => (
+export const NoAutomation = ({ browsers, onLaunchBrowser }) => (
   <div className='runner automation-failure'>
     <div className='automation-message'>
       <p>Whoops, we can't run your tests.</p>

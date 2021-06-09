@@ -12,4 +12,6 @@ export * from './script-error'
 
 export * from './automation-disconnected'
 
+export * from './no-automation'
+
 export * from './mobx'

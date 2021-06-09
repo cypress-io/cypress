@@ -3,7 +3,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
-import NoAutomation from './no-automation'
+import { NoAutomation } from '@packages/runner-shared'
 
 const noBrowsers = []
 const browsersWithChosen = [
