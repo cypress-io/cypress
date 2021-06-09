@@ -1,6 +1,7 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { forwardRef } from 'react'
+import './message.scss'
 
 interface MessageProps {
   state: {
