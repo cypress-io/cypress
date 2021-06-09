@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
+import { eventManager } from '@packages/runner-shared'
 
-import eventManager from '../lib/event-manager'
 import { StudioInstructionsModal } from './studio-modals'
 
 class Studio extends Component {
@@ -17,19 +17,22 @@ class Studio extends Component {
 
     return (
       <div className='header-popup studio'>
+        {/* eslint-disable react/jsx-no-bind */}
         <StudioInstructionsModal open={this.state.modalOpen} close={() => this.setState({ modalOpen: false })} />
         <div className='text-block'>
           <span className={cs('icon', { 'is-active': model.isActive && !model.isFailed && hasUrl })}>
             <i className='fas' />
-          </span>{' '}
-          <span className='title'>Studio</span>{' '}
+          </span>
+          {' '}
+          <span className='title'>Studio</span>
+          {' '}
           <span className='beta'>Beta</span>
         </div>
         <div className='text-block'>
-          <a href='#' onClick={this._showModal} className={cs('available-commands', { 'link-disabled': model.isLoading })}>Available Commands</a>
+          <a href='#' className={cs('available-commands', { 'link-disabled': model.isLoading })} onClick={this._showModal}>Available Commands</a>
         </div>
         <div className='text-block'>
-          <a href={!model.isLoading ? 'https://on.cypress.io/studio-beta' : undefined} target='_blank' className={cs('give-feedback', { 'link-disabled': model.isLoading })}>Give Feedback</a>
+          <a href={!model.isLoading ? 'https://on.cypress.io/studio-beta' : undefined} target='_blank' className={cs('give-feedback', { 'link-disabled': model.isLoading })} rel="noreferrer">Give Feedback</a>
         </div>
         <div className='studio-controls'>
           <Tooltip
@@ -98,4 +101,4 @@ class Studio extends Component {
   }
 }
 
-export default Studio
+export { Studio }

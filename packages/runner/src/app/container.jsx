@@ -2,13 +2,16 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import automation from '../lib/automation'
-import eventManager from '../lib/event-manager'
 import State from '../lib/state'
 import util from '../lib/util'
 
 import App from './app'
-import { AutomationDisconnected, NoAutomation } from '@packages/runner-shared'
+import {
+  AutomationDisconnected,
+  NoAutomation,
+  eventManager,
+  automation,
+} from '@packages/runner-shared'
 import NoSpec from '../errors/no-spec'
 
 const automationElementId = '__cypress-string'

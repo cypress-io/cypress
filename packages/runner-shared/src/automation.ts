@@ -1,4 +1,4 @@
-export default {
+export const automation = {
   CONNECTING: 'CONNECTING',
   MISSING: 'MISSING',
   CONNECTED: 'CONNECTED',

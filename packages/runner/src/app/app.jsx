@@ -6,7 +6,11 @@ import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
 import { $ } from '@packages/driver'
-import { Message, errorMessages } from '@packages/runner-shared'
+import {
+  Message,
+  errorMessages,
+  StudioModals,
+} from '@packages/runner-shared'
 
 import util from '../lib/util'
 import State from '../lib/state'
@@ -14,7 +18,6 @@ import State from '../lib/state'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
-import StudioModals from '../studio/studio-modals'
 
 @observer
 class App extends Component {

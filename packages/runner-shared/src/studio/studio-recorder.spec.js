@@ -1,9 +1,9 @@
 import sinon from 'sinon'
 import $ from 'jquery'
 import driver from '@packages/driver'
+import { eventManager } from '@packages/runner-shared'
 
 import studioRecorder, { StudioRecorder } from './studio-recorder'
-import eventManager from '../lib/event-manager'
 
 const createEvent = (props) => {
   return {

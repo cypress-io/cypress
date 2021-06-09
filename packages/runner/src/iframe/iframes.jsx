@@ -10,9 +10,9 @@ import {
   selectorPlaygroundModel,
   AutIframe,
   logger,
+  studioRecorder,
 } from '@packages/runner-shared'
 
-import studioRecorder from '../studio/studio-recorder'
 import util from '../lib/util'
 
 @observer

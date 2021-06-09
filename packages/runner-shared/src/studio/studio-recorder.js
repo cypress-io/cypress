@@ -1,8 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
-
-import eventManager from '../lib/event-manager'
+import { eventManager } from '@packages/runner-shared'
 
 const saveErrorMessage = (message) => {
   return `\
@@ -542,4 +541,4 @@ export class StudioRecorder {
   }
 }
 
-export default new StudioRecorder()
+export const studioRecorder = new StudioRecorder()

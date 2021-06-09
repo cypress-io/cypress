@@ -6,7 +6,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import Studio from './studio'
 import { StudioInstructionsModal } from './studio-modals'
-import eventManager from '../lib/event-manager'
+import { eventManager } from '@packages/runner-shared'
 
 const createModel = (props) => {
   return {

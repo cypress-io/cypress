@@ -5,9 +5,10 @@ import { action } from 'mobx'
 
 import { client } from '@packages/socket'
 
-import automation from './automation'
-import studioRecorder from '../studio/studio-recorder'
-import { selectorPlaygroundModel, logger } from '@packages/runner-shared'
+import { studioRecorder } from './studio'
+import { automation } from './automation'
+import { logger } from './logger'
+import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress, { $ } from '@packages/driver'
 
@@ -46,7 +47,7 @@ if (window.Cypress) {
  */
 let Cypress
 
-const eventManager = {
+export const eventManager = {
   reporterBus,
 
   getCypress () {
@@ -647,5 +648,3 @@ const eventManager = {
     ws.emit('save:app:state', state)
   },
 }
-
-export default eventManager

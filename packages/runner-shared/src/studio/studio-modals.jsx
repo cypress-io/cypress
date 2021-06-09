@@ -3,9 +3,9 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
+import { eventManager } from '@packages/runner-shared'
 
-import eventManager from '../lib/event-manager'
-import studioRecorder from './studio-recorder'
+import { studioRecorder } from './studio-recorder'
 
 @observer
 export class StudioInstructionsModal extends Component {
@@ -19,7 +19,10 @@ export class StudioInstructionsModal extends Component {
       >
         <div className='body'>
           <h1 className='title'>
-            <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
+            <i className='fas fa-magic icon' />
+            {' '}
+Studio
+            <span className='beta'>BETA</span>
           </h1>
           <div className='content center'>
             <div className='text'>
@@ -27,15 +30,29 @@ export class StudioInstructionsModal extends Component {
             </div>
             <div className='text center-box'>
               <ul>
-                <li><pre>.check()</pre></li>
-                <li><pre>.click()</pre></li>
-                <li><pre>.select()</pre></li>
-                <li><pre>.type()</pre></li>
-                <li><pre>.uncheck()</pre></li>
+                <li>
+                  <pre>.check()</pre>
+                </li>
+                <li>
+                  <pre>.click()</pre>
+                </li>
+                <li>
+                  <pre>.select()</pre>
+                </li>
+                <li>
+                  <pre>.type()</pre>
+                </li>
+                <li>
+                  <pre>.uncheck()</pre>
+                </li>
               </ul>
             </div>
             <div className='text'>
-              This feature is currently in Beta and we will be adding more commands and abilities in the future. Your <a href='https://on.cypress.io/studio-beta' target='_blank'>feedback</a> will be highly influential to our team.
+              This feature is currently in Beta and we will be adding more commands and abilities in the future. Your
+              {' '}
+              <a href='https://on.cypress.io/studio-beta' target='_blank' rel="noreferrer">feedback</a>
+              {' '}
+will be highly influential to our team.
             </div>
           </div>
           <div className='controls'>
@@ -44,7 +61,7 @@ export class StudioInstructionsModal extends Component {
         </div>
         <button className='close-button' onClick={this.props.close}>
           <VisuallyHidden>Close</VisuallyHidden>
-          <span aria-hidden>
+          <span aria-hidden={true}>
             <i className='fas fa-times' />
           </span>
         </button>
@@ -65,7 +82,10 @@ export class StudioInitModal extends Component {
       >
         <div className='body'>
           <h1 className='title'>
-            <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
+            <i className='fas fa-magic icon' />
+            {' '}
+Studio
+            <span className='beta'>BETA</span>
           </h1>
           <div className='gif'>
             <img src={require('../../static/studio.gif')} alt='Studio' />
@@ -81,7 +101,7 @@ export class StudioInitModal extends Component {
         </div>
         <button className='close-button' onClick={this._close}>
           <VisuallyHidden>Close</VisuallyHidden>
-          <span aria-hidden>
+          <span aria-hidden={true}>
             <i className='fas fa-times' />
           </span>
         </button>
@@ -111,13 +131,15 @@ export class StudioSaveModal extends Component {
       >
         <div className='body'>
           <h1 className='title'>
-            <i className='fas fa-magic icon' /> Save New Test
+            <i className='fas fa-magic icon' />
+            {' '}
+Save New Test
           </h1>
           <div className='content'>
             <form onSubmit={this._save}>
               <div className='text'>
                 <label className='text-strong' htmlFor='testName'>Test Name</label>
-                <input id='testName' type='text' value={this.name} onChange={this._onInputChange} required />
+                <input id='testName' type='text' value={this.name} required={true} onChange={this._onInputChange} />
               </div>
               <div className='center'>
                 <button className='btn-main' type='submit' disabled={!this.name}>
@@ -129,7 +151,7 @@ export class StudioSaveModal extends Component {
         </div>
         <button className='close-button' onClick={studioRecorder.closeSaveModal}>
           <VisuallyHidden>Close</VisuallyHidden>
-          <span aria-hidden>
+          <span aria-hidden={true}>
             <i className='fas fa-times' />
           </span>
         </button>
@@ -158,4 +180,4 @@ const StudioModals = () => (
   </>
 )
 
-export default StudioModals
+export { StudioModals }

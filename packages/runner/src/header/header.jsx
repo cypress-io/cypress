@@ -7,10 +7,13 @@ import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
-import { SelectorPlayground, selectorPlaygroundModel } from '@packages/runner-shared'
-import Studio from '../studio/studio'
-import studioRecorder from '../studio/studio-recorder'
-import eventManager from '../lib/event-manager'
+import {
+  SelectorPlayground,
+  selectorPlaygroundModel,
+  eventManager,
+  Studio,
+  studioRecorder,
+} from '@packages/runner-shared'
 
 @observer
 export default class Header extends Component {

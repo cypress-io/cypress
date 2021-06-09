@@ -2,10 +2,10 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import { Dialog } from '@reach/dialog'
+import { eventManager } from '@packages/runner-shared'
 
 import StudioModals, { StudioInstructionsModal, StudioInitModal, StudioSaveModal } from './studio-modals'
 import studioRecorder from './studio-recorder'
-import eventManager from '../lib/event-manager'
 
 describe('<StudioModals />', () => {
   beforeEach(() => {
@@ -27,7 +27,7 @@ describe('<StudioModals />', () => {
 
   describe('<StudioInstructionsModal />', () => {
     it('passes open prop to dialog', () => {
-      const component = shallow(<StudioInstructionsModal open={false} close={() => {}} />)
+      const component = shallow(<StudioInstructionsModal open={false} close={sinon.stub()} />)
 
       expect(component.find(Dialog)).to.have.prop('isOpen', false)
 
