@@ -599,9 +599,9 @@ export const eventManager = {
     localBus.on(event, ...args)
   },
 
-  // off (event, ...args) {
-  //   localBus.off(event, ...args)
-  // },
+  off (event, ...args) {
+    localBus.off(event, ...args)
+  },
 
   notifyRunningSpec (specFile) {
     ws.emit('spec:changed', specFile)

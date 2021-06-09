@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { action } from 'mobx'
 
 import { selectorPlaygroundModel } from '../selector-playground'
-// import studioRecorder from '../studio/studio-recorder'
+import { studioRecorder } from '../studio'
 
 export class IframeModel {
   constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, eventManager }) {
@@ -75,9 +75,9 @@ export class IframeModel {
       return this._testsRunningError()
     }
 
-    // if (studioRecorder.isOpen) {
-    //   return this._studioOpenError()
-    // }
+    if (studioRecorder.isOpen) {
+      return this._studioOpenError()
+    }
 
     const { snapshots } = snapshotProps
 
