@@ -7,15 +7,21 @@ function dist (...args) {
   return path.join(...paths)
 }
 
+function getContents (filename) {
+  return fs.readFile(dist(filename))
+}
+
 module.exports = {
   getPathToDist (...args) {
     return dist(...args)
   },
 
-  getInjectionContents (type) {
-    const name = type === 'multidomain' ? 'injection_multidomain' : 'injection'
+  getInjectionContents () {
+    return getContents('injection.js')
+  },
 
-    return fs.readFile(dist(`${name}.js`))
+  getMultidomainInjectionContents () {
+    return getContents('injection_multidomain.js')
   },
 
   getPathToIndex () {

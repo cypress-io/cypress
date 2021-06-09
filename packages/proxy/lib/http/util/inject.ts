@@ -22,7 +22,7 @@ export function full (domain) {
 }
 
 export function fullMultidomain (domain) {
-  return runner.getInjectionContents('multidomain').then((contents) => {
+  return runner.getMultidomainInjectionContents().then((contents) => {
     return oneLine`
       <script type='text/javascript'>
         document.domain = '127.0.0.1';
