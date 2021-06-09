@@ -5,8 +5,7 @@ import { visitFailure } from '../visit-failure'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { dom } from '../dom'
 import { logger } from '../logger'
-
-// import studioRecorder from '../studio/studio-recorder'
+import { studioRecorder } from '../studio'
 
 export class AutIframe {
   constructor (config, eventManager) {
@@ -398,15 +397,15 @@ export class AutIframe {
     }
   }
 
-  // startStudio = () => {
-  //   if (studioRecorder.isLoading) {
-  //     studioRecorder.start(this._body()[0])
-  //   }
-  // }
+  startStudio = () => {
+    if (studioRecorder.isLoading) {
+      studioRecorder.start(this._body()[0])
+    }
+  }
 
-  // reattachStudio = () => {
-  //   if (studioRecorder.isActive) {
-  //     studioRecorder.attachListeners(this._body()[0])
-  //   }
-  // }
+  reattachStudio = () => {
+    if (studioRecorder.isActive) {
+      studioRecorder.attachListeners(this._body()[0])
+    }
+  }
 }

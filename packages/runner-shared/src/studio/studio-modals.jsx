@@ -88,7 +88,7 @@ Studio
             <span className='beta'>BETA</span>
           </h1>
           <div className='gif'>
-            <img src={require('../../static/studio.gif')} alt='Studio' />
+            <img src={require('../static/studio.gif')} alt='Studio' />
           </div>
           <div className='content center'>
             <div className='text'>
