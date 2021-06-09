@@ -176,6 +176,57 @@
         background-color: #3b414a;
       }
     }
+
+    .docs-menu {
+      &.active {
+        a {
+          color: #fff;
+          background-color: #3b414a;
+        }
+      }
+
+      .docs-dropdown {
+        background: $navbar-inverse-color;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 30px;
+        margin: 0;
+        padding: 16px 20px;
+        z-index: 1000;
+
+        @media screen and (max-width: 525px) {
+          flex-direction: column;
+        }
+
+        .dropdown-column {
+          list-style: none;
+          padding-left: 0;
+
+          .column-title {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            padding-bottom: 2px;
+          }
+
+          .column-item {
+            a {
+              background: $navbar-inverse-color !important;
+              color: #444;
+
+              &:hover {
+                color: #333;
+              }
+
+              span {
+                padding: 0 6px;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
 
