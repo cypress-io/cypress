@@ -6,6 +6,8 @@ describe('http/request-middleware', function () {
   it('exports the members in the correct order', function () {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
+      'CorrelateBrowserPreRequest',
+      'SendToDriver',
       'MaybeEndRequestWithBufferedResponse',
       'InterceptRequest',
       'RedirectToClientRouteIfUnloaded',

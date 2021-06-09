@@ -228,6 +228,8 @@ export const moveBinaries = async (args = []) => {
     })
   }
 
+  await uploadUtils.purgeDesktopAppAllPlatforms(releaseOptions.version, zipName)
+
   // return all available information
   return { lastBuilds, testRunners }
 }

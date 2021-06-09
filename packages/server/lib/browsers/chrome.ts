@@ -92,6 +92,9 @@ const DEFAULT_ARGS = [
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
+  // Simulate when chrome needs an update.
+  // This prevents an 'update' from displaying til the given date
+  `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
 
   // These flags are for webcam/WebRTC testing
@@ -243,13 +246,13 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError) {
+const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
   debug('connecting to Chrome remote interface at random port %d', port)
 
-  return protocol.getWsTargetFor(port)
+  return protocol.getWsTargetFor(port, browserDisplayName)
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
@@ -495,7 +498,7 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
+    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 

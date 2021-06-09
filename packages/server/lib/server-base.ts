@@ -196,7 +196,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState) {
+  createNetworkProxy (config, getRemoteState, shouldCorrelatePreRequests) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -205,6 +205,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
+      shouldCorrelatePreRequests,
       getRemoteState,
       getFileServerToken,
       socket: this.socket,

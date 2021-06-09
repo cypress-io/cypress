@@ -20,6 +20,10 @@ const LogRequest: RequestMiddleware = function () {
 }
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
+  if (!this.shouldCorrelatePreRequests()) {
+    return this.next()
+  }
+
   if (this.req.headers['x-cypress-resolving-url']) {
     this.debug('skipping prerequest for resolve:url')
     delete this.req.headers['x-cypress-resolving-url']

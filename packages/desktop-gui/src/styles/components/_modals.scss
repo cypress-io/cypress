@@ -5,6 +5,7 @@
 .close {
   position: relative;
   top: 5px;
+
   &:hover, &:focus, &:active {
     cursor: pointer;
   }
@@ -37,4 +38,25 @@
   color: #888;
   clear: both;
   display: block;
+}
+
+.popper {
+  .arrow,
+  .arrow::before {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: inherit;
+  }
+
+  .arrow {
+    visibility: hidden;
+    top: -4px;
+  }
+
+  .arrow::before {
+    visibility: visible;
+    content: '';
+    transform: rotate(45deg);
+  }
 }
