@@ -5,7 +5,6 @@ const path = require('path')
 const chalk = require('chalk')
 const debug = require('debug')('cypress:cli')
 const { Listr } = require('listr2')
-const verbose = require('@cypress/listr-verbose-renderer')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const { stripIndent } = require('common-tags')
@@ -16,6 +15,7 @@ const state = require('./state')
 const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
+const verbose = require('../VerboseRenderer')
 
 const getNpmArgv = () => {
   const json = process.env.npm_config_argv
