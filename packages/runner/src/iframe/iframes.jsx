@@ -121,7 +121,13 @@ export default class Iframes extends Component {
   }
 
   @action _setScriptError = (err) => {
-    this.props.state.scriptError = err
+    if (err && 'error' in err) {
+      this.props.state.scriptError = err.error
+    }
+
+    if (!err) {
+      this.props.state.scriptError = null
+    }
   }
 
   _run = (config) => {

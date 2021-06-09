@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { Message } from '@packages/runner-shared'
+import { Message, namedObserver } from '@packages/runner-shared'
 
 import Header from '../header/header'
 import { Iframes } from '../iframe/iframes'
@@ -16,7 +16,6 @@ import EventManager from '../lib/event-manager'
 import { hideIfScreenshotting, hideReporterIfNecessary } from '../lib/hideGuard'
 
 import styles from './RunnerCt.module.scss'
-import { namedObserver } from '../lib/mobx'
 
 interface SpecContentProps {
   state: State

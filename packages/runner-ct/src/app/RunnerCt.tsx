@@ -20,7 +20,7 @@ import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
-import { namedObserver } from '../lib/mobx'
+import { namedObserver } from '@packages/runner-shared'
 import { SpecList } from './SpecList/SpecList'
 import { NoSpec } from './NoSpec'
 
