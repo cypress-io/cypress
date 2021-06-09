@@ -8,7 +8,7 @@ import State from '../lib/state'
 import util from '../lib/util'
 
 import App from './app'
-import AutomationDisconnected from '../errors/automation-disconnected'
+import { AutomationDisconnected } from '@packages/runner-shared'
 import NoAutomation from '../errors/no-automation'
 import NoSpec from '../errors/no-spec'
 

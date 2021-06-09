@@ -10,4 +10,6 @@ export * from './selector-playground'
 
 export * from './script-error'
 
+export * from './automation-disconnected'
+
 export * from './mobx'

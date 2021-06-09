@@ -2,7 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
-import AutomationDisconnected from './automation-disconnected'
+import { AutomationDisconnected } from '@packages/runner-shared'
 
 describe('<AutomationDisconnected />', () => {
   it('renders the message', () => {
