@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 
-export default {
+export const logger = {
   log (...args) {
     console.log(...args)
   },

@@ -3,11 +3,15 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
-import { SnapshotControls, ScriptError, IframeModel, selectorPlaygroundModel } from '@packages/runner-shared'
+import {
+  SnapshotControls,
+  ScriptError,
+  IframeModel,
+  selectorPlaygroundModel,
+  AutIframe,
+  logger,
+} from '@packages/runner-shared'
 
-import AutIframe from './aut-iframe'
-
-import logger from '../lib/logger'
 import studioRecorder from '../studio/studio-recorder'
 import util from '../lib/util'
 
@@ -65,7 +69,7 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    this.autIframe = new AutIframe(this.props.config)
+    this.autIframe = new AutIframe(this.props.config, this.props.eventManager)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)

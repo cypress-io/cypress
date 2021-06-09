@@ -6,9 +6,8 @@ import { action } from 'mobx'
 import { client } from '@packages/socket'
 
 import automation from './automation'
-import logger from './logger'
 import studioRecorder from '../studio/studio-recorder'
-import { selectorPlaygroundModel } from '@packages/runner-shared'
+import { selectorPlaygroundModel, logger } from '@packages/runner-shared'
 
 import $Cypress, { $ } from '@packages/driver'
 

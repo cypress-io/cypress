@@ -2,10 +2,16 @@ import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
 import { default as $Cypress } from '@packages/driver'
-import { SnapshotControls, ScriptError, namedObserver, IframeModel, selectorPlaygroundModel } from '@packages/runner-shared'
+import {
+  SnapshotControls,
+  ScriptError,
+  namedObserver,
+  IframeModel,
+  selectorPlaygroundModel,
+  AutIframe,
+} from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
-import AutIframe from './aut-iframe'
 import styles from '../app/RunnerCt.module.scss'
 import eventManager from '../lib/event-manager'
 import './iframes.scss'
@@ -26,7 +32,7 @@ export const Iframes = namedObserver('Iframes', ({
   eventManager,
 }: IFramesProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const autIframe = useRef(new AutIframe(config))
+  const autIframe = useRef(new AutIframe(config, eventManager))
 
   const _toggleSnapshotHighlights = (snapshotProps) => {
     state.setShowSnapshotHighlight(!state.snapshot.showingHighlights)
