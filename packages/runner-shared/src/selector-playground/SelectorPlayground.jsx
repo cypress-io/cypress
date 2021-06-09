@@ -4,6 +4,7 @@ import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
+import './selector-playground.scss'
 
 const defaultCopyText = 'Copy to clipboard'
 const defaultPrintText = 'Print to console'
