@@ -31,7 +31,7 @@ function renderHighlight (container, props) {
   render(<Highlight {...props} />, container)
 }
 
-export default {
+export const selectorPlaygroundHighlight = {
   render: renderHighlight,
   unmount: unmountComponentAtNode,
 }
