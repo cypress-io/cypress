@@ -62,7 +62,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
           },
         )}
         >
-          <Header {...props} />
+          <Header {...props} eventManager={props.eventManager} />
           {props.state.spec
             ? <Iframes {...props} />
             : (

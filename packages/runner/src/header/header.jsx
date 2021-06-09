@@ -7,7 +7,7 @@ import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
-import SelectorPlayground from '../selector-playground/selector-playground'
+import { SelectorPlayground } from '@packages/runner-shared'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import Studio from '../studio/studio'
 import studioRecorder from '../studio/studio-recorder'
@@ -100,7 +100,10 @@ export default class Header extends Component {
             </div>
           </li>
         </ul>
-        <SelectorPlayground model={selectorPlaygroundModel} />
+        <SelectorPlayground
+          model={selectorPlaygroundModel}
+          eventManager={eventManager}
+        />
         <Studio model={studioRecorder} hasUrl={!!state.url} />
       </header>
     )

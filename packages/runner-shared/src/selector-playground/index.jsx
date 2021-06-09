@@ -5,8 +5,6 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
-import eventManager from '../lib/event-manager'
-
 const defaultCopyText = 'Copy to clipboard'
 const defaultPrintText = 'Print to console'
 
@@ -216,7 +214,7 @@ class SelectorPlayground extends Component {
   }
 
   _printToConsole = () => {
-    eventManager.emit('print:selector:elements:to:console')
+    this.props.eventManager.emit('print:selector:elements:to:console')
     this._setPrintText('Printed!')
   }
 
@@ -244,4 +242,4 @@ class SelectorPlayground extends Component {
   }
 }
 
-export default SelectorPlayground
+export { SelectorPlayground }

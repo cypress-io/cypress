@@ -5,14 +5,16 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import State from '../lib/state'
+import { SelectorPlayground } from '@packages/runner-shared'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
-import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import eventManager from '../lib/event-manager'
 
 interface HeaderProps {
   state: State
   config: Cypress.RuntimeConfigOptions
+  eventManager: typeof eventManager
 }
 
 @observer
@@ -22,7 +24,7 @@ export default class Header extends Component<HeaderProps> {
   @observable showingViewportMenu = false
 
   render () {
-    const { state, config } = this.props
+    const { state, config, eventManager } = this.props
 
     return (
       <header
@@ -82,7 +84,10 @@ export default class Header extends Component<HeaderProps> {
             </div>
           </li>
         </ul>
-        <SelectorPlayground model={selectorPlaygroundModel} />
+        <SelectorPlayground
+          model={selectorPlaygroundModel}
+          eventManager={eventManager}
+        />
       </header>
     )
   }
