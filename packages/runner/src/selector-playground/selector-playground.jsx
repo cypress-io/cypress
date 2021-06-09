@@ -188,6 +188,7 @@ class SelectorPlayground extends Component {
 
   _copyToClipboard = () => {
     try {
+      // eslint-disable-next-line react/no-string-refs
       this.refs.copyText.select()
       const successful = document.execCommand('copy')
 
