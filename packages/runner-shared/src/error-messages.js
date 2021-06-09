@@ -1,4 +1,4 @@
-export default {
+export const errorMessages = {
   reporterError (err, specPath) {
     if (!err) return null
 

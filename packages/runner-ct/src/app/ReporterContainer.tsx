@@ -3,10 +3,9 @@ import cs from 'classnames'
 import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
 
-import errorMessages from '../errors/error-messages'
+import { errorMessages, namedObserver } from '@packages/runner-shared'
 import EventManager from '../lib/event-manager'
 import State from '../lib/state'
-import { namedObserver } from '../lib/mobx'
 import { ReporterHeader } from './ReporterHeader'
 import { NoSpec } from './NoSpec'
 
