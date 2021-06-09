@@ -9,6 +9,7 @@ import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
+import DocsMenu from './docs-menu'
 
 @observer
 export default class Nav extends Component {
@@ -27,11 +28,7 @@ export default class Nav extends Component {
               <i className='fas fa-question-circle' /> Support
             </a>
           </li>
-          <li>
-            <a onClick={this._openDocs} href='#'>
-              <i className='fas fa-graduation-cap' /> Docs
-            </a>
-          </li>
+          <DocsMenu />
           {this._userStateButton()}
         </ul>
       </nav>
@@ -127,17 +124,6 @@ export default class Nav extends Component {
 
   _showLogin () {
     authStore.openLogin(null, 'Nav')
-  }
-
-  _openDocs (e) {
-    e.preventDefault()
-    ipc.externalOpen({
-      url: 'https://on.cypress.io/docs',
-      params: {
-        utm_medium: 'Nav',
-        utm_campaign: 'Docs',
-      },
-    })
   }
 
   _openSupport (e) {

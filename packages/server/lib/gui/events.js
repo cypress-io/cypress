@@ -420,6 +420,16 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .removeScaffoldedFiles()
       .then(sendNull)
 
+    case 'set:prompt:shown':
+      return openProject.getProject()
+      .saveState({
+        promptsShown: {
+          ...openProject.getProject().state.promptsShown,
+          [arg]: Date.now(),
+        },
+      })
+      .then(sendNull)
+
     case 'ping:api:server':
       const apiUrl = konfig('api_url')
 

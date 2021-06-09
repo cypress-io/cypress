@@ -3,6 +3,7 @@ import { action, computed, observable, toJS } from 'mobx'
 
 import Browser from '../lib/browser-model'
 import Warning from './warning-model'
+import Prompts from '../prompts/prompts-model'
 
 const cacheProps = [
   'id',
@@ -68,6 +69,7 @@ export default class Project {
   @observable resolvedNodeVersion
   // should never change after first set
   @observable path
+  @observable prompts = new Prompts()
   // not observable
   dismissedWarnings = {}
 

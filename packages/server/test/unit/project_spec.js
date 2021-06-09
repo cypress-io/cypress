@@ -262,21 +262,6 @@ describe('lib/project-e2e', () => {
       })
     })
 
-    it('updates config.state when saved state changes', function () {
-      sinon.spy(this.project, 'saveState')
-
-      const options = {}
-
-      return this.project.open(options)
-      .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
-      .then(() => this.project.getConfig())
-      .then((config) => {
-        expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
-
-        expect(config.state).to.eql({ autoScrollingEnabled: false })
-      })
-    })
-
     // TODO: skip this for now
     it.skip('watches cypress.json', function () {
       return this.server.open().bind(this).then(() => {
@@ -368,6 +353,52 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       .then(() => {
         expect(system.info).not.to.be.called
         expect(runEvents.execute).not.to.be.calledWith('before:run')
+      })
+    })
+
+    describe('saved state', function () {
+      beforeEach(function () {
+        this._time = 1609459200000
+        this._dateStub = sinon.stub(Date, 'now').returns(this._time)
+      })
+
+      it('sets firstOpened and lastOpened on first open', function () {
+        return this.project.open({})
+        .then(() => this.project.getConfig())
+        .then((config) => {
+          expect(config.state).to.eql({ firstOpened: this._time, lastOpened: this._time })
+        })
+      })
+
+      it('only sets lastOpened on subsequent opens', function () {
+        return this.project.open({})
+        .then(() => {
+          this._dateStub.returns(this._time + 100000)
+        })
+        .then(() => this.project.open({}))
+        .then(() => this.project.getConfig())
+        .then((config) => {
+          expect(config.state).to.eql({ firstOpened: this._time, lastOpened: this._time + 100000 })
+        })
+      })
+
+      it('updates config.state when saved state changes', function () {
+        sinon.spy(this.project, 'saveState')
+
+        const options = {}
+
+        return this.project.open(options)
+        .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
+        .then(() => this.project.getConfig())
+        .then((config) => {
+          expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
+
+          expect(config.state).to.eql({
+            autoScrollingEnabled: false,
+            firstOpened: this._time,
+            lastOpened: this._time,
+          })
+        })
       })
     })
   })

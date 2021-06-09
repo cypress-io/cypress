@@ -75,5 +75,6 @@ register('new:project:banner:closed')
 register('has:opened:cypress')
 register('remove:scaffolded:files')
 register('set:clipboard:text')
+register('set:prompt:shown')
 
 export default ipc
