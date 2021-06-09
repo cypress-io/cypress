@@ -10,8 +10,6 @@ module.exports = (on, config) => {
       webpackFileName: './webpack.config.js'
     });
   }
-
-  return config; // IMPORTANT to return a config
 };
 `
 
@@ -26,7 +24,5 @@ module.exports = (on, config) => {
       webpackFileName: 'config/webpack.config.js'
     });
   }
-
-  return config; // IMPORTANT to return a config
 };
 `

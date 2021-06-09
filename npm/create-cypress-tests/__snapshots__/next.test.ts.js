@@ -7,7 +7,5 @@ module.exports = (on, config) => {
   if (config.testingType === "component") {
     injectDevServer(on, config);
   }
-
-  return config; // IMPORTANT to return a config
 };
 `
