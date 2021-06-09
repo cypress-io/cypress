@@ -21,9 +21,6 @@ interface Defaults {
   messageType: string
   messageControls: unknown
 
-  width: number
-  height: number
-
   reporterWidth: number | null
   pluginsHeight: number | null
   specListWidth: number | null
@@ -47,9 +44,6 @@ const _defaults: Defaults = {
   messageDescription: null,
   messageType: '',
   messageControls: null,
-
-  width: 500,
-  height: 500,
 
   viewportHeight: 500,
   viewportWidth: 500,
@@ -198,7 +192,7 @@ export default class State {
   }
 
   @computed.struct get messageStyles () {
-    const actualHeight = this.height * this.scale
+    const actualHeight = this.viewportHeight * this.scale
     const messageHeight = 33
     const nudge = 10
 
@@ -218,9 +212,9 @@ export default class State {
     this.screenshotting = screenshotting
   }
 
-  @action updateAutViewportDimensions (dimensions: { viewportWidth: number, viewportHeight: number }) {
-    this.viewportHeight = dimensions.viewportHeight
-    this.viewportWidth = dimensions.viewportWidth
+  @action updateDimensions (viewportWidth: number, viewportHeight: number) {
+    this.viewportHeight = viewportHeight
+    this.viewportWidth = viewportWidth
   }
 
   @action toggleIsSpecsListOpen () {

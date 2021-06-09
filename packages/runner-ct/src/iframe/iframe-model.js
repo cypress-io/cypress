@@ -48,7 +48,7 @@ export default class IframeModel {
   }
 
   _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
-    this.state.updateAutViewportDimensions({ viewportWidth, viewportHeight })
+    this.state.updateDimensions(viewportWidth, viewportHeight)
 
     if (cb) {
       this.state.setCallbackAfterUpdate(cb)
@@ -73,6 +73,10 @@ export default class IframeModel {
     if (this.state.isRunning) {
       return this._testsRunningError()
     }
+
+    // studio
+    // studio
+    // studio
 
     const { snapshots } = snapshotProps
 
@@ -205,6 +209,11 @@ export default class IframeModel {
     this.state.messageTitle = 'Cannot show Snapshot while tests are running'
     this.state.messageType = 'warning'
   }
+
+  // _studioOpenError () {
+  //   this.state.messageTitle = 'Cannot show Snapshot while creating commands in Studio'
+  //   this.state.messageType = 'warning'
+  // }
 
   _storeOriginalState () {
     const finalSnapshot = this.detachDom()

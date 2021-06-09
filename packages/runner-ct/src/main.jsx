@@ -62,7 +62,7 @@ const Runner = {
       Runner.state = state
       Runner.configureMobx = configure
 
-      state.updateAutViewportDimensions({ viewportWidth: config.viewportWidth, viewportHeight: config.viewportHeight })
+      state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
       render(<Container config={config} state={state} />, el)
     })()

@@ -6,10 +6,9 @@ import selectorPlaygroundModel from '../selector-playground/selector-playground-
 import studioRecorder from '../studio/studio-recorder'
 
 export default class IframeModel {
-  constructor ({ state, detachDom, removeHeadStyles, restoreDom, highlightEl, snapshotControls }) {
+  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls }) {
     this.state = state
     this.detachDom = detachDom
-    this.removeHeadStyles = removeHeadStyles
     this.restoreDom = restoreDom
     this.highlightEl = highlightEl
     this.snapshotControls = snapshotControls
@@ -229,8 +228,10 @@ export default class IframeModel {
       htmlAttrs,
       snapshot: finalSnapshot,
       url: this.state.url,
-      viewportWidth: this.state.width,
-      viewportHeight: this.state.height,
+      // TODO: use same attr for both runner and runner-ct states.
+      // these refer to the same thing - the viewport dimensions.
+      viewportWidth: this.state.width || this.state.viewportWidth,
+      viewportHeight: this.state.height || this.state.viewportHeight,
     }
   }
 
