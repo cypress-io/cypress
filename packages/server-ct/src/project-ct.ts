@@ -88,6 +88,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
       updatedConfig.componentTesting = true
+      updatedConfig.resolved.testingType = { value: 'component' }
 
       debug('updated config: %o', updatedConfig)
 
