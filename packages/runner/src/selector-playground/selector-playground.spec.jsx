@@ -4,9 +4,7 @@ import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Tooltip from '@cypress/react-tooltip'
-
-import eventManager from '../lib/event-manager'
-import SelectorPlayground from './selector-playground'
+import { SelectorPlayground } from '@packages/runner-shared'
 
 const createModel = (props) => _.extend({
   method: 'get',
@@ -184,8 +182,15 @@ describe('<SelectorPlayground />', () => {
     })
 
     it('prints to console when clicked', () => {
-      sinon.stub(eventManager, 'emit')
-      const component = mount(<SelectorPlayground model={model} />)
+      const eventManager = {
+        emit: sinon.stub(),
+      }
+      const component = mount(
+        <SelectorPlayground
+          model={model}
+          eventManager={eventManager}
+        />,
+      )
 
       component.find('.print-to-console').simulate('click')
       expect(eventManager.emit).to.be.calledWith('print:selector:elements:to:console')
@@ -194,14 +199,31 @@ describe('<SelectorPlayground />', () => {
     })
 
     it('sets tooltip text to "Printed!" when successful', () => {
-      const component = mount(<SelectorPlayground model={model} />)
+      const eventManager = {
+        emit: sinon.stub(),
+      }
+      const component = mount(
+        <SelectorPlayground
+          model={model}
+          eventManager={eventManager}
+        />,
+      )
 
       component.find('.print-to-console').simulate('click')
       expect(component.find(Tooltip).at(3)).to.have.prop('title', 'Printed!')
     })
 
     it('resets tooltip text when mousing out of button', () => {
-      const component = mount(<SelectorPlayground model={model} />)
+      const eventManager = {
+        emit: sinon.stub(),
+      }
+      const component = mount(
+        <SelectorPlayground
+          model={model}
+          eventManager={eventManager}
+        />,
+      )
+
       const randomEl = document.createElement('div')
 
       component.find('.print-to-console').simulate('click')

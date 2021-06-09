@@ -6,7 +6,7 @@ import driver from '@packages/driver'
 import Tooltip from '@cypress/react-tooltip'
 
 import eventManager from '../lib/event-manager'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import { selectorPlaygroundModel } from '@packages/runner-shared'
 import studioRecorder from '../studio/studio-recorder'
 
 import Header from './header'

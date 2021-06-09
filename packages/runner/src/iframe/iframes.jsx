@@ -3,12 +3,11 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
-import { SnapshotControls, ScriptError, IframeModel } from '@packages/runner-shared'
+import { SnapshotControls, ScriptError, IframeModel, selectorPlaygroundModel } from '@packages/runner-shared'
 
 import AutIframe from './aut-iframe'
 
 import logger from '../lib/logger'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import studioRecorder from '../studio/studio-recorder'
 import util from '../lib/util'
 

@@ -77,4 +77,4 @@ class SelectorPlaygroundModel {
   }
 }
 
-export default new SelectorPlaygroundModel()
+export const selectorPlaygroundModel = new SelectorPlaygroundModel()

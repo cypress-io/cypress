@@ -5,10 +5,9 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import State from '../lib/state'
-import { SelectorPlayground } from '@packages/runner-shared'
+import { SelectorPlayground, selectorPlaygroundModel } from '@packages/runner-shared'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import eventManager from '../lib/event-manager'
 
 interface HeaderProps {

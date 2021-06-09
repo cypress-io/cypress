@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 
-// import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import { selectorPlaygroundModel } from '../selector-playground'
 // import studioRecorder from '../studio/studio-recorder'
 
 export class IframeModel {
@@ -39,7 +39,7 @@ export class IframeModel {
     this.state.isLoading = false
     this.state.isRunning = true
     this.state.resetUrl()
-    // selectorPlaygroundModel.setEnabled(false)
+    selectorPlaygroundModel.setEnabled(false)
     this._reset()
     this._clearMessage()
   }

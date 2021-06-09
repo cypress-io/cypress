@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
-import { visitFailure, blankContents } from '@packages/runner-shared'
+import { visitFailure, blankContents, selectorPlaygroundModel } from '@packages/runner-shared'
 
 import dom from '../lib/dom'
 import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import studioRecorder from '../studio/studio-recorder'
 
 export default class AutIframe {
