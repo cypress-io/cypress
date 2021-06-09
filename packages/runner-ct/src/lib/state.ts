@@ -324,7 +324,7 @@ export default class State {
   }
 
   runMultiMode = async () => {
-    const eventManager = require('./event-manager').default
+    const eventManager = require('@packages/runner-shared').eventManager
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)

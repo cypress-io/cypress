@@ -14,13 +14,12 @@ library.add(fas)
 library.add(fab)
 
 import State from '../lib/state'
-import EventManager from '../lib/event-manager'
+import { eventManager as EventManager, namedObserver } from '@packages/runner-shared'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
-import { namedObserver } from '@packages/runner-shared'
 import { SpecList } from './SpecList/SpecList'
 import { NoSpec } from './NoSpec'
 
@@ -50,7 +49,7 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
-const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
+const buildNavItems = (eventManager: typeof eventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
   {
     id: 'file-explorer-nav',
     title: 'File Explorer',

@@ -5,15 +5,14 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import State from '../lib/state'
-import { SelectorPlayground, selectorPlaygroundModel } from '@packages/runner-shared'
+import { SelectorPlayground, selectorPlaygroundModel, eventManager as EventManager } from '@packages/runner-shared'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
-import eventManager from '../lib/event-manager'
 
 interface HeaderProps {
   state: State
   config: Cypress.RuntimeConfigOptions
-  eventManager: typeof eventManager
+  eventManager: typeof EventManager
 }
 
 @observer

@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { Message, namedObserver } from '@packages/runner-shared'
+import { Message, namedObserver, eventManager as EventManager } from '@packages/runner-shared'
 
 import Header from '../header/header'
 import { Iframes } from '../iframe/iframes'
@@ -12,7 +12,6 @@ import { Plugins } from './Plugins'
 import { ReporterContainer } from './ReporterContainer'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
 import State from '../lib/state'
-import EventManager from '../lib/event-manager'
 import { hideIfScreenshotting, hideReporterIfNecessary } from '../lib/hideGuard'
 
 import styles from './RunnerCt.module.scss'

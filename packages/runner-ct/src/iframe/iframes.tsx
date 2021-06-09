@@ -9,11 +9,11 @@ import {
   IframeModel,
   selectorPlaygroundModel,
   AutIframe,
+  eventManager as EventManager,
 } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
 import styles from '../app/RunnerCt.module.scss'
-import eventManager from '../lib/event-manager'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
@@ -22,7 +22,7 @@ export function getSpecUrl ({ namespace, spec }, prefix = '') {
 
 interface IFramesProps {
   state: State
-  eventManager: typeof eventManager
+  eventManager: typeof EventManager
   config: Cypress.RuntimeConfigOptions
 }
 
