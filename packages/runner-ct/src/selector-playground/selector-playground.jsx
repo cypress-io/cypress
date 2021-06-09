@@ -113,7 +113,7 @@ class SelectorPlayground extends Component {
           {' Learn more'}
         </a>
         <button className='close' onClick={this._togglePlaygroundOpen}>
-x
+          x
         </button>
       </div>
     )

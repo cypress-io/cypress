@@ -44,7 +44,8 @@ class SelectorPlayground extends Component {
           >
             <button
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
-              onClick={this._toggleEnablingSelectorPlayground}>
+              onClick={this._toggleEnablingSelectorPlayground}
+            >
               <span className='fa-stack'>
                 <i className='far fa-square fa-stack-1x'></i>
                 <i className='fas fa-mouse-pointer fa-stack-1x'></i>
@@ -57,7 +58,9 @@ class SelectorPlayground extends Component {
           >
             {this._methodSelector()}
             <span>(</span>
-            <span>{'\''}</span>
+            <span>
+              {'\''}
+            </span>
             <div className='selector-input'>
               <input
                 ref={(node) => this._input = node}
@@ -67,15 +70,17 @@ class SelectorPlayground extends Component {
                 onFocus={this._setHighlight(true)}
               />
             </div>
-            <span>{'\''}</span>
+            <span>
+              {'\''}
+            </span>
             <span>)</span>
+            {/* eslint-disable-next-line react/no-string-refs */}
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
             <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
-                  <i className='fas fa-exclamation-triangle'></i>
-                }
+                  <i className='fas fa-exclamation-triangle' />}
               </span>
             </Tooltip>
           </div>
@@ -102,11 +107,13 @@ class SelectorPlayground extends Component {
             </button>
           </Tooltip>
         </div>
-        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
-          <i className='fas fa-question-circle'></i>{' '}
-          Learn more
+        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noreferrer">
+          <i className='fas fa-question-circle'></i>
+          {' Learn more'}
         </a>
-        <button className='close' onClick={this._togglePlaygroundOpen}>x</button>
+        <button className='close' onClick={this._togglePlaygroundOpen}>
+          x
+        </button>
       </div>
     )
   }
@@ -143,7 +150,8 @@ class SelectorPlayground extends Component {
     return (
       <span className={cs('method', {
         'is-showing': this.showingMethodPicker,
-      })}>
+      })}
+      >
         <button onClick={this._toggleMethodPicker}>
           <i className='fas fa-caret-down'></i>{' '}
           cy.{model.method}
