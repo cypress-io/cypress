@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
-import { visitFailure, blankContents, selectorPlaygroundModel } from '@packages/runner-shared'
+import { visitFailure, blankContents, selectorPlaygroundModel, dom } from '@packages/runner-shared'
 
-import dom from '../lib/dom'
 import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
 import studioRecorder from '../studio/studio-recorder'

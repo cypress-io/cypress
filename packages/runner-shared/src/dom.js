@@ -1,10 +1,10 @@
 import _ from 'lodash'
 
 import { $ } from '@packages/driver'
-import { selectorPlaygroundHighlight } from '@packages/runner-shared'
+import { selectorPlaygroundHighlight } from './selector-playground'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
 // This disables the CSSExtractWebpackPlugin and allows us to get the CSS as a raw string instead of saving it to a separate file.
-import selectorPlaygroundCSS from '!@packages/runner-shared/src/selector-playground/selector-playground.scss'
+import selectorPlaygroundCSS from '!./selector-playground/selector-playground.scss'
 
 const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')
@@ -443,7 +443,7 @@ function removeBlackouts ($body) {
   $body.find('.__cypress-blackout').remove()
 }
 
-export default {
+export const dom = {
   addBlackout,
   removeBlackouts,
   addElementBoxModelLayers,

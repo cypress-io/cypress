@@ -19,3 +19,5 @@ export * from './mobx'
 export * from './error-messages'
 
 export * from './iframe'
+
+export * from './dom'
