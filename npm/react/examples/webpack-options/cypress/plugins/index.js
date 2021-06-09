@@ -31,7 +31,4 @@ module.exports = (on, config) => {
 
   process.env.BABEL_ENV = 'test' // this is required to load commonjs babel plugin
   on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
-
-  // if adding code coverage, important to return updated config
-  return config
 }

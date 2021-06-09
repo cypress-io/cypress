@@ -5,8 +5,4 @@ const injectWebpackWithBabelDevServer = require('@cypress/react/plugins/babel')
 
 module.exports = (on, config) => {
   injectWebpackWithBabelDevServer(on, config)
-
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
 }

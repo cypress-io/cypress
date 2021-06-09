@@ -13,7 +13,6 @@ export const NextTemplate: Template = {
   dependencies: ['@cypress/webpack-dev-server'],
   getPluginsCodeAst: () => {
     return {
-      requiresReturnConfig: true,
       RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/next\')'),
       IfComponentTestingPluginsAst: babel.template.ast([
         'injectDevServer(on, config)',

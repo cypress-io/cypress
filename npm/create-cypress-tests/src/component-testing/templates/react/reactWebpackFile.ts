@@ -18,7 +18,6 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
       : './webpack.config.js'
 
     return {
-      requiresReturnConfig: true,
       RequireAst: babel.template.ast('const injectDevServer = require("@cypress/react/plugins/load-webpack")'),
       IfComponentTestingPluginsAst: babel.template.ast([
         'injectDevServer(on, config, {',

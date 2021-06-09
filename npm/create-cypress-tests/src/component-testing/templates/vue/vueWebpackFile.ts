@@ -16,7 +16,6 @@ export const VueWebpackTemplate: Template<{ webpackConfigPath: string }> = {
       : './webpack.config.js'
 
     return {
-      requiresReturnConfig: true,
       RequireAst: babel.template.ast([
         'const { startDevServer } = require("@cypress/webpack-dev-server")',
 

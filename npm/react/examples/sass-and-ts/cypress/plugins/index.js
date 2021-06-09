@@ -6,8 +6,4 @@ module.exports = (on, config) => {
   injectWebpackDevServer(on, config, {
     webpackFilename: 'webpack.config.js',
   })
-
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
 }

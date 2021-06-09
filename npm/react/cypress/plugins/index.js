@@ -68,6 +68,4 @@ module.exports = (on, config) => {
   on('dev-server:start', (options) => {
     return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
   })
-
-  return config
 }

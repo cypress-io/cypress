@@ -16,7 +16,6 @@ export const ReactScriptsTemplate: Template = {
   },
   getPluginsCodeAst: () => {
     return {
-      requiresReturnConfig: true,
       RequireAst: babel.template.ast('const injectDevServer = require(\'@cypress/react/plugins/react-scripts\')'),
       IfComponentTestingPluginsAst: babel.template.ast([
         'injectDevServer(on, config)',
