@@ -25,7 +25,7 @@ const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
-const socketRerunEvents = 'runner:restart'.split(' ')
+const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
@@ -96,6 +96,15 @@ const eventManager = {
     ws.on('watched:file:changed', () => {
       studioRecorder.cancel()
       rerun()
+    })
+
+    ws.on('component:specs:changed', (specs) => {
+      state.setSpecs(specs)
+    })
+
+    ws.on('dev-server:hmr:error', (error) => {
+      Cypress.stop()
+      localBus.emit('script:error', error)
     })
 
     _.each(socketRerunEvents, (event) => {
@@ -288,10 +297,15 @@ const eventManager = {
   setup (config) {
     Cypress = this.Cypress = $Cypress.create(config)
 
+    // TODO: this was CT only before. Does this make sense for e2e too?
     // expose Cypress globally
-    window.Cypress = Cypress
+    // since CT AUT shares the window with the spec, we don't want to overwrite
+    // our spec Cypress instance with the component's Cypress instance
+    if (window.top === window) {
+      window.Cypress = Cypress
+    }
 
-    this._addListeners()
+    this._addListeners(Cypress)
 
     ws.emit('watch:test:file', config.spec)
   },
@@ -583,6 +597,10 @@ const eventManager = {
   on (event, ...args) {
     localBus.on(event, ...args)
   },
+
+  // off (event, ...args) {
+  //   localBus.off(event, ...args)
+  // },
 
   notifyRunningSpec (specFile) {
     ws.emit('spec:changed', specFile)

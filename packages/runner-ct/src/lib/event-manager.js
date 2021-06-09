@@ -6,6 +6,7 @@ import { action } from 'mobx'
 import { client } from '@packages/socket'
 
 import automation from './automation'
+import studioRecorder from '../studio/studio-recorder'
 import { logger } from '@packages/runner-shared'
 
 import $Cypress, { $ } from '@packages/driver'
@@ -26,6 +27,7 @@ const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:event script:error'.split(' ')
+const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
@@ -80,9 +82,20 @@ const eventManager = {
         case 'change:cookie':
           Cypress.Cookies.log(data.message, data.cookie, data.removed)
           break
+        case 'create:download':
+          Cypress.downloads.start(data)
+          break
+        case 'complete:download':
+          Cypress.downloads.end(data)
+          break
         default:
           break
       }
+    })
+
+    ws.on('watched:file:changed', () => {
+      studioRecorder.cancel()
+      rerun()
     })
 
     ws.on('component:specs:changed', (specs) => {
@@ -101,6 +114,12 @@ const eventManager = {
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
         Cypress.emit(event, ...args)
+      })
+    })
+
+    _.each(localToReporterEvents, (event) => {
+      localBus.on(event, (...args) => {
+        reporterBus.emit(event, ...args)
       })
     })
 
@@ -191,7 +210,62 @@ const eventManager = {
       ws.emit('open:file', url)
     })
 
+    const studioInit = () => {
+      ws.emit('studio:init', (showedStudioModal) => {
+        if (!showedStudioModal) {
+          studioRecorder.showInitModal()
+        } else {
+          rerun()
+        }
+      })
+    }
+
+    reporterBus.on('studio:init:test', (testId) => {
+      studioRecorder.setTestId(testId)
+
+      studioInit()
+    })
+
+    reporterBus.on('studio:init:suite', (suiteId) => {
+      studioRecorder.setSuiteId(suiteId)
+
+      studioInit()
+    })
+
+    reporterBus.on('studio:cancel', () => {
+      studioRecorder.cancel()
+      rerun()
+    })
+
+    reporterBus.on('studio:remove:command', (commandId) => {
+      studioRecorder.removeLog(commandId)
+    })
+
+    reporterBus.on('studio:save', () => {
+      studioRecorder.startSave()
+    })
+
+    localBus.on('studio:start', () => {
+      studioRecorder.closeInitModal()
+      rerun()
+    })
+
+    localBus.on('studio:save', (saveInfo) => {
+      ws.emit('studio:save', saveInfo, (err) => {
+        if (err) {
+          reporterBus.emit('test:set:state', studioRecorder.saveError(err), _.noop)
+        }
+      })
+    })
+
+    localBus.on('studio:cancel', () => {
+      studioRecorder.cancel()
+      rerun()
+    })
+
     const $window = $(window)
+
+    $window.on('hashchange', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
@@ -226,11 +300,12 @@ const eventManager = {
     // expose Cypress globally
     // since CT AUT shares the window with the spec, we don't want to overwrite
     // our spec Cypress instance with the component's Cypress instance
+    // ...
     if (window.top === window) {
       window.Cypress = Cypress
     }
 
-    this._addCypressListeners(Cypress)
+    this._addListeners(Cypress)
 
     ws.emit('watch:test:file', config.spec)
   },
@@ -255,7 +330,12 @@ const eventManager = {
             return
           }
 
+          this._restoreStudioFromState(state)
+
+          this._initializeStudio(config)
+
           const runnables = Cypress.runner.normalizeAll(state.tests)
+
           const run = () => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
@@ -292,7 +372,7 @@ const eventManager = {
     })
   },
 
-  _addCypressListeners (Cypress) {
+  _addListeners (Cypress) {
     Cypress.on('message', (msg, data, cb) => {
       ws.emit('client:request', msg, data, cb)
     })
@@ -309,18 +389,29 @@ const eventManager = {
       }
 
       return new Promise((resolve) => {
-        reporterBus.emit('reporter:collect:run:state', resolve)
+        reporterBus.emit('reporter:collect:run:state', (reporterState) => {
+          resolve({
+            ...reporterState,
+            studioTestId: studioRecorder.testId,
+            studioSuiteId: studioRecorder.suiteId,
+            studioUrl: studioRecorder.url,
+          })
+        })
       })
     })
 
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
+      this._interceptStudio(displayProps)
+
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
+
+      this._interceptStudio(displayProps)
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -377,6 +468,22 @@ const eventManager = {
       Cypress.stop()
       localBus.emit('script:error', err)
     })
+
+    Cypress.on('test:before:run:async', (test) => {
+      if (studioRecorder.suiteId) {
+        studioRecorder.setTestId(test.id)
+      }
+
+      if (studioRecorder.hasRunnableId && test.invocationDetails) {
+        studioRecorder.setFileDetails(test.invocationDetails)
+      }
+    })
+
+    Cypress.on('test:after:run', (test) => {
+      if (studioRecorder.isOpen && test.state !== 'passed') {
+        studioRecorder.testFailed()
+      }
+    })
   },
 
   _runDriver (state) {
@@ -394,6 +501,7 @@ const eventManager = {
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
       scrollTop: state.scrollTop,
+      studioActive: studioRecorder.hasRunnableId,
     })
   },
 
@@ -410,6 +518,9 @@ const eventManager = {
     // when we are re-running we first
     // need to stop cypress always
     Cypress.stop()
+
+    studioRecorder.setInactive()
+    selectorPlaygroundModel.setOpen(false)
 
     return this._restart()
     .then(() => {
@@ -428,6 +539,55 @@ const eventManager = {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
+  },
+
+  _restoreStudioFromState (state) {
+    if (state.studioTestId) {
+      studioRecorder.setTestId(state.studioTestId)
+    }
+
+    if (state.studioSuiteId) {
+      studioRecorder.setSuiteId(state.studioSuiteId)
+    }
+
+    if (state.studioUrl) {
+      studioRecorder.setUrl(state.studioUrl)
+    }
+  },
+
+  _initializeStudio (config) {
+    if (studioRecorder.hasRunnableId) {
+      studioRecorder.startLoading()
+
+      if (studioRecorder.suiteId) {
+        Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
+
+        // root runnable always has id of r1
+        // and does not have invocationDetails so we must set manually from config
+        if (studioRecorder.suiteId === 'r1') {
+          studioRecorder.setFileDetails({
+            absoluteFile: config.spec.absolute,
+            line: null,
+            column: null,
+          })
+        }
+      } else if (studioRecorder.testId) {
+        Cypress.runner.setOnlyTestId(studioRecorder.testId)
+      }
+    }
+  },
+
+  _interceptStudio (displayProps) {
+    if (studioRecorder.isActive) {
+      displayProps.hookId = studioRecorder.hookId
+
+      if (displayProps.name === 'visit' && displayProps.state === 'failed') {
+        studioRecorder.testFailed()
+        reporterBus.emit('test:set:state', studioRecorder.testError, _.noop)
+      }
+    }
+
+    return displayProps
   },
 
   emit (event, ...args) {
