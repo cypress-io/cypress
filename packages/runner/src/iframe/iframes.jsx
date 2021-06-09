@@ -3,11 +3,10 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
-import { SnapshotControls, ScriptError } from '@packages/runner-shared'
+import { SnapshotControls, ScriptError, IframeModel } from '@packages/runner-shared'
 
 import AutIframe from './aut-iframe'
 
-import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import studioRecorder from '../studio/studio-recorder'
@@ -101,9 +100,9 @@ export default class Iframes extends Component {
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
-      removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
+      eventManager: this.props.eventManager,
       detachDom: this.autIframe.detachDom,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls

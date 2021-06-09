@@ -1,45 +1,45 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 
-import eventManager from '../lib/event-manager'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import studioRecorder from '../studio/studio-recorder'
+// import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+// import studioRecorder from '../studio/studio-recorder'
 
-export default class IframeModel {
-  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls }) {
+export class IframeModel {
+  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, eventManager }) {
     this.state = state
     this.detachDom = detachDom
     this.restoreDom = restoreDom
     this.highlightEl = highlightEl
     this.snapshotControls = snapshotControls
+    this.eventManager = eventManager
 
     this._reset()
   }
 
   listen () {
-    eventManager.on('run:start', action('run:start', this._beforeRun))
-    eventManager.on('run:end', action('run:end', this._afterRun))
+    this.eventManager.on('run:start', action('run:start', this._beforeRun))
+    this.eventManager.on('run:end', action('run:end', this._afterRun))
 
-    eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
-    eventManager.on('config', action('config', (config) => {
+    this.eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
+    this.eventManager.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))
 
-    eventManager.on('url:changed', action('url:changed', this._updateUrl))
-    eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
+    this.eventManager.on('url:changed', action('url:changed', this._updateUrl))
+    this.eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
 
-    eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
-    eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
+    this.eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
+    this.eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
 
-    eventManager.on('pin:snapshot', action('pin:snapshot', this._pinSnapshot))
-    eventManager.on('unpin:snapshot', action('unpin:snapshot', this._unpinSnapshot))
+    this.eventManager.on('pin:snapshot', action('pin:snapshot', this._pinSnapshot))
+    this.eventManager.on('unpin:snapshot', action('unpin:snapshot', this._unpinSnapshot))
   }
 
   _beforeRun = () => {
     this.state.isLoading = false
     this.state.isRunning = true
     this.state.resetUrl()
-    selectorPlaygroundModel.setEnabled(false)
+    // selectorPlaygroundModel.setEnabled(false)
     this._reset()
     this._clearMessage()
   }
@@ -75,9 +75,9 @@ export default class IframeModel {
       return this._testsRunningError()
     }
 
-    if (studioRecorder.isOpen) {
-      return this._studioOpenError()
-    }
+    // if (studioRecorder.isOpen) {
+    //   return this._studioOpenError()
+    // }
 
     const { snapshots } = snapshotProps
 
@@ -172,7 +172,7 @@ export default class IframeModel {
     const { snapshots } = snapshotProps
 
     if (!snapshots || !snapshots.length) {
-      eventManager.snapshotUnpinned()
+      this.eventManager.snapshotUnpinned()
       this._setMissingSnapshotMessage()
 
       return
