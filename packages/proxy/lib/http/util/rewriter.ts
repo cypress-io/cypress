@@ -1,6 +1,7 @@
 import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
+import { CypressWantsInjection } from '../../types'
 
 export type SecurityOpts = {
   isHtml?: boolean
@@ -11,7 +12,7 @@ export type SecurityOpts = {
 
 export type InjectionOpts = {
   domainName: string
-  wantsInjection: WantsInjection
+  wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: any
 }
 
@@ -19,8 +20,6 @@ const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
-
-type WantsInjection = 'full' | 'partial' | false
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
@@ -30,6 +29,8 @@ function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
+    case 'fullMultidomain':
+      return inject.fullMultidomain(domainName)
     case 'partial':
       return inject.partial(domainName)
     default:

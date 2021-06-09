@@ -12,8 +12,10 @@ module.exports = {
     return dist(...args)
   },
 
-  getInjectionContents () {
-    return fs.readFile(dist('injection.js'))
+  getInjectionContents (type) {
+    const name = type === 'multidomain' ? 'injection_multidomain' : 'injection'
+
+    return fs.readFile(dist(`${name}.js`))
   },
 
   getPathToIndex () {

@@ -1043,26 +1043,30 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           Cypress.action('app:window:load', state('window'))
 
-          // FIXME: temporary hard-coded hack to get multidomain working
-          if (!autWindow?.location?.pathname?.includes('multidomain-aut')) {
-            // we are now stable again which is purposefully
-            // the last event we call here, to give our event
-            // listeners time to be invoked prior to moving on
-            return stability.isStable(true, 'load')
-          }
+          // we are now stable again which is purposefully
+          // the last event we call here, to give our event
+          // listeners time to be invoked prior to moving on
+          return stability.isStable(true, 'load')
+        } catch (err) {
+          // we failed setting the remote window props which
+          // means the page navigated to a different domain
 
-          Cypress.once('cross:domain:window:load', () => {
-            Cypress.once('cross:domain:driver:ready', () => {
-              stability.isStable(true, 'load')
+          // temporary hack so that other tests expecting cross-origin
+          // failures still fail as expected
+          if (state('anticipateMultidomain')) {
+            Cypress.once('cross:domain:window:load', () => {
+              Cypress.once('cross:domain:driver:ready', () => {
+                stability.isStable(true, 'load')
+              })
+
+              Cypress.action('cy:switch:domain', '127.0.0.1:3501')
             })
 
-            Cypress.action('cy:switch:domain', 'localhost:3501')
-          })
-        } catch (err) {
+            return
+          }
+
           let e = err
 
-          // we failed setting the remote window props
-          // which means we're in a cross domain failure
           // check first to see if you have a callback function
           // defined and let the page load change the error
           onpl = state('onPageLoadErr')

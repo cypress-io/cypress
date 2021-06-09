@@ -13,12 +13,14 @@ export type CypressIncomingRequest = Request & {
   followRedirect?: boolean
 }
 
+export type CypressWantsInjection = 'full' | 'fullMultidomain' | 'partial' | false
+
 /**
  * An outgoing response to an incoming request to the Cypress web server.
  */
 export type CypressOutgoingResponse = Response & {
   isInitial: null | boolean
-  wantsInjection: 'full' | 'partial' | false
+  wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: null | boolean
   body?: string | Readable
 }

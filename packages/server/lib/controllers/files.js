@@ -56,7 +56,7 @@ module.exports = {
     const domain = decodeURI(req.params.domain)
 
     const iframeOptions = {
-      domain: 'localhost',
+      domain: '127.0.0.1',
       title: `Cypress for ${domain}`,
     }
 

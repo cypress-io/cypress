@@ -48,6 +48,8 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer)
 
 function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
+    if (req.proxiedUrl.includes('127.0.0.1:3501')) return true
+
     return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
 
@@ -236,6 +238,10 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
     if (!resContentTypeIs(this.incomingRes, 'text/html') || !isReqMatchOriginPolicy) {
       return false
+    }
+
+    if (this.req.proxiedUrl.includes('127.0.0.1:3501')) {
+      return 'fullMultidomain'
     }
 
     if (this.res.isInitial) {
