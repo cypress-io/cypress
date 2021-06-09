@@ -2,16 +2,14 @@ import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
 import { default as $Cypress } from '@packages/driver'
-import { SnapshotControls } from '@packages/runner-shared'
+import { SnapshotControls, ScriptError, namedObserver } from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
 import AutIframe from './aut-iframe'
-import { ScriptError } from '../errors/script-error'
 import IframeModel from './iframe-model'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import styles from '../app/RunnerCt.module.scss'
 import eventManager from '../lib/event-manager'
-import { namedObserver } from '../lib/mobx'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {

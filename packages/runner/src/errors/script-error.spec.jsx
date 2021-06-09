@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import ScriptError from './script-error'
+import { ScriptError } from '@packages/runner-shared'
 
 describe('<ScriptError />', () => {
   it('renders nothing when there is no script error', () => {

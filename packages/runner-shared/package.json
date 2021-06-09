@@ -6,6 +6,7 @@
   "scripts": {},
   "dependencies": {
     "@cypress/react-tooltip": "0.5.3",
+    "ansi-to-html": "0.6.14",
     "classnames": "2.3.1",
     "lodash": "4.17.21",
     "mobx": "5.15.4",

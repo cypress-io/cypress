@@ -3,10 +3,9 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
-import { SnapshotControls } from '@packages/runner-shared'
+import { SnapshotControls, ScriptError } from '@packages/runner-shared'
 
 import AutIframe from './aut-iframe'
-import ScriptError from '../errors/script-error'
 
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
