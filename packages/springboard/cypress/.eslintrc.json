@@ -4,5 +4,10 @@
   ],
   "env": {
     "cypress/globals": true
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-no-bind": "off"
   }
 }
