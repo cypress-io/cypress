@@ -171,7 +171,7 @@ export const Iframes = namedObserver('Iframes', ({
     state.callbackAfterUpdate?.()
   })
 
-  const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = state
+  const { height, width, scriptError, scale, screenshotting } = state
 
   return (
     <div
@@ -191,8 +191,8 @@ export const Iframes = namedObserver('Iframes', ({
           })
         }
         style={{
-          height: viewportHeight,
-          width: viewportWidth,
+          height,
+          width,
           transform: `scale(${screenshotting ? 1 : scale})`,
         }}
       />

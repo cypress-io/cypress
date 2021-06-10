@@ -52,23 +52,23 @@ export default class Header extends Component<HeaderProps> {
         <ul className='menu'>
           <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
-              {`${state.viewportWidth} `}
+              {`${state.width} `}
               <span className='the-x'>x</span>
-              {` ${state.viewportHeight}`}
+              {` ${state.height}`}
               <i className='fas fa-fw fa-info-circle'></i>
             </button>
             <div className='popup-menu viewport-menu'>
               {/* eslint-disable react/jsx-one-expression-per-line */}
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
-                <strong>{state.defaults.viewportWidth}px</strong> by
-                <strong>{state.defaults.viewportHeight}px</strong> unless specified by a
+                <strong>{state.defaults.width}px</strong> by
+                <strong>{state.defaults.height}px</strong> unless specified by a
                 <code>cy.viewport</code> command.
               </p>
               <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
               <pre>{/* eslint-disable indent */}
                 {`{
-  "viewportWidth": ${state.defaults.viewportWidth},
-  "viewportHeight": ${state.defaults.viewportHeight}
+  "viewportWidth": ${state.defaults.width},
+  "viewportHeight": ${state.defaults.height}
 }`}
               </pre>
               {/* eslint-enable indent */}

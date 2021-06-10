@@ -26,8 +26,8 @@ interface Defaults {
   specListWidth: number | null
   isSpecsListOpen: boolean
 
-  viewportHeight: number
-  viewportWidth: number
+  height: number
+  width: number
 
   url: string
   highlightUrl: boolean
@@ -45,8 +45,8 @@ const _defaults: Defaults = {
   messageType: '',
   messageControls: null,
 
-  viewportHeight: 500,
-  viewportWidth: 500,
+  height: 500,
+  width: 500,
 
   pluginsHeight: PLUGIN_BAR_HEIGHT,
 
@@ -105,8 +105,8 @@ export default class State {
   @observable windowWidth = 0
   @observable windowHeight = 0
 
-  @observable viewportWidth = _defaults.viewportWidth
-  @observable viewportHeight = _defaults.viewportHeight
+  @observable width = _defaults.width
+  @observable height = _defaults.height
 
   @observable automation = automation.CONNECTING
 
@@ -169,10 +169,10 @@ export default class State {
       return 1
     }
 
-    if (autAreaWidth < this.viewportWidth || autAreaHeight < this.viewportHeight) {
+    if (autAreaWidth < this.width || autAreaHeight < this.height) {
       return Math.min(
-        autAreaWidth / this.viewportWidth,
-        autAreaHeight / this.viewportHeight,
+        autAreaWidth / this.width,
+        autAreaHeight / this.height,
       )
     }
 
@@ -192,7 +192,7 @@ export default class State {
   }
 
   @computed.struct get messageStyles () {
-    const actualHeight = this.viewportHeight * this.scale
+    const actualHeight = this.height * this.scale
     const messageHeight = 33
     const nudge = 10
 
@@ -212,9 +212,9 @@ export default class State {
     this.screenshotting = screenshotting
   }
 
-  @action updateDimensions (viewportWidth: number, viewportHeight: number) {
-    this.viewportHeight = viewportHeight
-    this.viewportWidth = viewportWidth
+  @action updateDimensions (width: number, height: number) {
+    this.height = height
+    this.width = width
   }
 
   @action toggleIsSpecsListOpen () {

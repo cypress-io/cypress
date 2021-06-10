@@ -10,7 +10,7 @@
      */
     "allowJs": true,
     "jsx": "react",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
     // "checkJs": true,                       /* Report errors in .js files. */
@@ -27,7 +27,7 @@
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
     /* Strict Type-Checking Options */
     // "traceResolution": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     /**
      * Skip type checking of all declaration files (*.d.ts).
@@ -56,6 +56,8 @@
   },
   "include": [
     "./lib/*.ts",
+    "./src*.ts",
+    "./src*.tsx",
     "./index.ts",
     "./index.d.ts",
     "./../ts/index.d.ts"
