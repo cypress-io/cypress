@@ -177,30 +177,6 @@
 
 ### Bug Fixes
 
-* Revert cypress.json changes ([#15499](https://github.com/cypress-io/cypress/issues/15499)) ([237c426](https://github.com/cypress-io/cypress/commit/237c426707714a287ff20ef2bdabff5f0c39e93a))
-
-# [@cypress/react-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.1...@cypress/react-v5.1.0) (2021-03-15)
-
-
-### Bug Fixes
-
-* removing test for previous undesireable behavior ([#15458](https://github.com/cypress-io/cypress/issues/15458)) ([35dde75](https://github.com/cypress-io/cypress/commit/35dde753560e9d53d1c49131187ff30d8e31fc75))
-* **@cypress/react:** Correctly unmount react components ([#15250](https://github.com/cypress-io/cypress/issues/15250)) ([6b515c7](https://github.com/cypress-io/cypress/commit/6b515c777ca2fa599f21dc47d181fd28a7eb6db0))
-* **component-testing:** ensure to call unmount after each test ([#15385](https://github.com/cypress-io/cypress/issues/15385)) ([153fc51](https://github.com/cypress-io/cypress/commit/153fc515a53343758393db795879a64494374551))
-* make webpack-dev-server a peer dependency ([#15163](https://github.com/cypress-io/cypress/issues/15163)) ([fa969fb](https://github.com/cypress-io/cypress/commit/fa969fba78d86494b5d920f573768677301fad13))
-
-
-### Features
-
-* support ct/e2e specific overrides in cypress.json ([#15444](https://github.com/cypress-io/cypress/issues/15444)) ([a94c9d5](https://github.com/cypress-io/cypress/commit/a94c9d5ef0da8559f20391fc14396d71fdca7a2f))
-* **@cypress/react:** Make correct plugins for different adapters/bundlers ([#15337](https://github.com/cypress-io/cypress/issues/15337)) ([fc30118](https://github.com/cypress-io/cypress/commit/fc301182523f0a645bfb17ea3b541644b9732dd0)), closes [#9116](https://github.com/cypress-io/cypress/issues/9116)
-* create-cypress-tests installation wizard ([#9563](https://github.com/cypress-io/cypress/issues/9563)) ([c405ee8](https://github.com/cypress-io/cypress/commit/c405ee89ef5321df6151fdeec1e917ac952c0d38)), closes [#9116](https://github.com/cypress-io/cypress/issues/9116)
-* Use lazy compilation for webpack-dev-server by default  ([#15158](https://github.com/cypress-io/cypress/issues/15158)) ([f237050](https://github.com/cypress-io/cypress/commit/f237050fdb49e4e59c07a70bb178d88d0e7387a8))
-
-# [@cypress/react-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.0.0...@cypress/react-v5.0.1) (2021-02-17)
-
-### Bug Fixes
-
 * update dependencies of npm/react-vue ([#15095](https://github.com/cypress-io/cypress/issues/15095)) ([e028262](https://github.com/cypress-io/cypress/commit/e028262aed485865c4f40162c1f8102970ef91f8))
 * **component-testing:** make content adjust to size of window ([#14876](https://github.com/cypress-io/cypress/issues/14876)) ([4cf3896](https://github.com/cypress-io/cypress/commit/4cf3896ecbb074831709f73f22768457fdaf5779))
 

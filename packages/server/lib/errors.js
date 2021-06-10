@@ -843,7 +843,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-        This usually indicates there was a problem opening the Chrome browser.
+        This usually indicates there was a problem opening the ${arg3} browser.
 
         The CDP port requested was ${chalk.yellow(arg1)}.
 
@@ -865,7 +865,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${arg1.stack}`
     case 'CDP_RETRYING_CONNECTION':
-      return `Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
+      return `Failed to connect to ${arg2}, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
       return stripIndent`\
         Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`

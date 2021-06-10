@@ -53,7 +53,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
+  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -72,11 +72,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         return this._getRemoteState()
       }
 
-      this.createNetworkProxy(config, getRemoteState)
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
 
-      // TODO: this does not look like a good idea
-      // since we would be spawning new workers on every
-      // open + close of a project...
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
       }
@@ -425,9 +422,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obsfucated by the proxying so this is not an ideal solution
-        _.assign(options, {
+        _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          headers: {
+            'x-cypress-resolving-url': '1',
+          },
         })
       }
 

@@ -289,6 +289,7 @@ describe('lib/browsers/electron', () => {
       this.newWin = {
         maximize: sinon.stub(),
         setSize: sinon.stub(),
+        webContents: this.win.webContents,
       }
 
       this.preferences = { ...this.options }

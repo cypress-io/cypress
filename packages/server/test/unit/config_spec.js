@@ -1537,7 +1537,6 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            clientPkiCertificates: { value: [], from: 'default' },
             component: { from: 'default', value: {} },
             clientCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },

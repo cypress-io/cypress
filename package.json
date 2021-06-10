@@ -1,18 +1,19 @@
 {
   "name": "cypress",
-  "version": "7.4.0",
+  "version": "7.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
     "binary-build": "node ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
+    "binary-ensure": "node ./scripts/binary.js ensure",
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "build": "lerna run build --stream",
-    "build-prod": "lerna run build-prod --stream",
+    "build": "lerna run build --stream --ignore create-cypress-tests && lerna run build --stream --scope create-cypress-tests",
+    "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && lerna run build-prod --stream --scope create-cypress-tests",
     "bump": "node ./scripts/binary.js bump",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
@@ -156,8 +157,8 @@
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
     "lerna": "3.20.2",
-    "lint-staged": "9.4.1",
-    "listr": "0.14.3",
+    "lint-staged": "11.0.0",
+    "listr2": "3.8.3",
     "lodash": "4.17.21",
     "make-empty-github-commit": "1.2.0",
     "minimist": "1.2.5",
@@ -237,14 +238,8 @@
     ]
   },
   "lint-staged": {
-    "*.coffee": [
-      "yarn stop-only --folder",
-      "git add"
-    ],
-    "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix",
-      "git add"
-    ]
+    "*.coffee": "yarn stop-only --folder",
+    "*.{js,jsx,ts,tsx,json,eslintrc}": "eslint --fix"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",

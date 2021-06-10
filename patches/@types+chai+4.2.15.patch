@@ -1,0 +1,16 @@
+diff --git a/node_modules/@types/chai/index.d.ts b/node_modules/@types/chai/index.d.ts
+index da5992c..67bafac 100644
+--- a/node_modules/@types/chai/index.d.ts
++++ b/node_modules/@types/chai/index.d.ts
+@@ -1949,6 +1949,8 @@ declare module "chai" {
+     export = chai;
+ }
+ 
+-interface Object {
+-    should: Chai.Assertion;
+-}
++// const a = 1; a.should(1); doesn't work with Cypress
++// https://github.com/cypress-io/cypress/issues/16548
++// interface Object {
++//     should: Chai.Assertion;
++// }

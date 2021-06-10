@@ -9,11 +9,10 @@ import State from '../lib/state'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import { ExtendedConfigOptions } from '../app/RunnerCt'
 
 interface HeaderProps {
   state: State
-  config: ExtendedConfigOptions
+  config: Cypress.RuntimeConfigOptions
 }
 
 @observer
