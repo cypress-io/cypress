@@ -2,10 +2,10 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import { Dialog } from '@reach/dialog'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
-import StudioModals, { StudioInstructionsModal, StudioInitModal, StudioSaveModal } from './studio-modals'
-import studioRecorder from './studio-recorder'
+import { StudioModals, StudioInstructionsModal, StudioInitModal, StudioSaveModal } from './studio-modals'
+import { studioRecorder } from './studio-recorder'
 
 describe('<StudioModals />', () => {
   beforeEach(() => {

@@ -3,7 +3,7 @@ import $ from 'jquery'
 import driver from '@packages/driver'
 import { eventManager } from '@packages/runner-shared'
 
-import studioRecorder, { StudioRecorder } from './studio-recorder'
+import { StudioRecorder, studioRecorder } from './studio-recorder'
 
 const createEvent = (props) => {
   return {
@@ -42,7 +42,7 @@ describe('StudioRecorder', () => {
     sinon.restore()
   })
 
-  it('exports a singleton by default', () => {
+  it('exports a singleton by named export', () => {
     expect(studioRecorder).to.be.instanceOf(StudioRecorder)
   })
 

@@ -3,7 +3,10 @@
   "version": "0.0.0-development",
   "private": true,
   "main": "src/index.ts",
-  "scripts": {},
+  "scripts": {
+    "test": "yarn test-unit",
+    "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.* --exit"
+  },
   "dependencies": {
     "@cypress/react-tooltip": "0.5.3",
     "ansi-to-html": "0.6.14",
@@ -14,5 +17,16 @@
     "react": "16.8.6",
     "react-dom": "16.8.6"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@packages/driver": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "@packages/web-config": "0.0.0-development",
+    "chai": "4.2.0",
+    "chai-enzyme": "1.0.0-beta.1",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-react-16": "1.15.2",
+    "mocha": "7.0.1",
+    "sinon": "7.5.0",
+    "sinon-chai": "3.3.0"
+  }
 }

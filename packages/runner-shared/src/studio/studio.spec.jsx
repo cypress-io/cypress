@@ -1,12 +1,11 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
-
 import Tooltip from '@cypress/react-tooltip'
 
-import Studio from './studio'
+import { Studio } from './studio'
 import { StudioInstructionsModal } from './studio-modals'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 const createModel = (props) => {
   return {
