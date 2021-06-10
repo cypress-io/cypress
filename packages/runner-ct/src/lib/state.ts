@@ -1,8 +1,8 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
-import automation from './automation'
 import { UIPlugin } from '../plugins/UIPlugin'
 import { nanoid } from 'nanoid'
+import { automation } from '@packages/runner-shared'
 import {
   DEFAULT_REPORTER_WIDTH,
   LEFT_NAV_WIDTH,
