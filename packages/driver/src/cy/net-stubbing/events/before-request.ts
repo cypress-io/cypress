@@ -34,8 +34,6 @@ const getDisplayUrl = (url: string) => {
 
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
-    const proxyLog = Cypress.ProxyLogging.getInterceptLog(request)
-
     const message = _.compact([
       request.request.method,
       request.response && request.response.statusCode,
@@ -68,6 +66,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         }
       },
     }
+
+    // because `before:request` happens after the proxy layer has emitted `proxy:incoming:request`,
+    // there can already be an existing log item for this request.
+    const proxyLog = Cypress.ProxyLogging.getInterceptLog(request)
 
     return proxyLog ? proxyLog.set(logConfig) : Cypress.log(logConfig)
   }
