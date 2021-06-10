@@ -1,9 +1,8 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { Message, namedObserver, eventManager as EventManager } from '@packages/runner-shared'
+import { Message, namedObserver, eventManager as EventManager, Header } from '@packages/runner-shared'
 
-import Header from '../header/header'
 import { Iframes } from '../iframe/iframes'
 import { animationFrameDebounce } from '../lib/debounce'
 import { KeyboardHelper } from './KeyboardHelper'
@@ -19,7 +18,10 @@ import styles from './RunnerCt.module.scss'
 interface SpecContentProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: {
+    configFile: string
+    [key: string]: unknown
+  }
 }
 
 interface SpecContentWrapperProps {
@@ -60,7 +62,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
           },
         )}
         >
-          <Header {...props} eventManager={props.eventManager} />
+          <Header {...props} runner='ct' />
           {props.state.spec
             ? <Iframes {...props} />
             : (

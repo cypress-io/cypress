@@ -10,9 +10,8 @@ import {
   eventManager,
   studioRecorder,
   Studio,
+  Header,
 } from '@packages/runner-shared'
-
-import Header from './header'
 
 const getState = (props) => _.extend({
   defaults: {},
@@ -23,6 +22,7 @@ const propsWithState = (stateProps, configProps = {}) =>
   ({
     state: getState(stateProps),
     config: configProps,
+    runner: 'e2e',
   })
 
 describe('<Header />', () => {
@@ -299,7 +299,7 @@ describe('<Header />', () => {
 
   describe('viewport info', () => {
     it('has menu-open class on button click', () => {
-      const component = shallow(<Header {...propsWithState()} />)
+      const component = mount(<Header {...propsWithState()} />)
 
       component.find('.viewport-info button').simulate('click')
       expect(component.find('.viewport-info')).to.have.className('menu-open')
@@ -307,14 +307,14 @@ describe('<Header />', () => {
 
     it('displays width, height, and display scale', () => {
       const state = { width: 1, height: 2, displayScale: 3 }
-      const component = shallow(<Header {...propsWithState(state)} />)
+      const component = mount(<Header {...propsWithState(state)} />)
 
       expect(component.find('.viewport-info button').text()).to.contain('1 x 2 (3%)')
     })
 
     it('displays default width and height in menu', () => {
       const state = { defaults: { width: 4, height: 5 } }
-      const component = shallow(<Header {...propsWithState(state)} />)
+      const component = mount(<Header {...propsWithState(state)} />)
 
       expect(component.find('.viewport-menu pre').text()).to.contain('"viewportWidth": 4')
       expect(component.find('.viewport-menu pre').text()).to.contain('"viewportHeight": 5')

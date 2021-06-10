@@ -10,12 +10,12 @@ import {
   Message,
   errorMessages,
   StudioModals,
+  Header,
 } from '@packages/runner-shared'
 
 import util from '../lib/util'
 import State from '../lib/state'
 
-import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
 
@@ -55,7 +55,7 @@ class App extends Component {
           className='runner container'
           style={{ left: this.props.state.absoluteReporterWidth }}
         >
-          <Header ref='header' {...this.props} />
+          <Header ref='header' runner='e2e' {...this.props} />
           <Iframes ref='iframes' {...this.props} />
           <Message ref='message' state={this.props.state} />
           {this.props.children}

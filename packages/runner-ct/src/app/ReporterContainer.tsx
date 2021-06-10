@@ -13,7 +13,10 @@ import styles from './RunnerCt.module.scss'
 interface ReporterContainerProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: {
+    configFile: string
+    [key: string]: unknown
+  }
 }
 
 export const ReporterContainer = namedObserver('ReporterContainer',

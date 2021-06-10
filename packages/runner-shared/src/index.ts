@@ -29,3 +29,9 @@ export * from './event-manager'
 export * from './automation'
 
 export * from './studio'
+
+export * from './viewport-info'
+
+export * from './config-file-formatted'
+
+export * from './header'

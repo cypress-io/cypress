@@ -49,7 +49,7 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
-const buildNavItems = (eventManager: typeof eventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
+const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
   {
     id: 'file-explorer-nav',
     title: 'File Explorer',

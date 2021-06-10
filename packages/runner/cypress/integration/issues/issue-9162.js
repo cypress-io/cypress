@@ -11,6 +11,12 @@ describe('issue 9162', () => {
 
   it('tests does not hang even if there is a fail in before().', function () {
     cy.contains('expected true to be false')
+    /* ==== Generated with Cypress Studio ==== */
+    cy.get('.runnable-err-name > .fas').click()
+    cy.get('.runnable-err-name > .fas').click()
+    cy.get('.command-pin').click()
+    cy.get('.runnable-failed > :nth-child(1) > .runnable-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-header-text > .runnable-controls > :nth-child(1) > .fas').click()
+    /* ==== End Cypress Studio ==== */
   })
 })
 
