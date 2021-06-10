@@ -45,7 +45,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
 
         return this._initPlugins(cfgForComponentTesting, options)
         .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
+          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
             return {
               cfg,
@@ -88,6 +88,13 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
       updatedConfig.componentTesting = true
+
+      // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+      // But if we don't return it in the plugins function, it never gets set
+      // Since there is no chance that it will have any other value here, we set it to "component"
+      // This allows users to not return config in the `cypress/plugins/index.js` file
+      // https://github.com/cypress-io/cypress/issues/16860
+      updatedConfig.resolved.testingType = { value: 'component' }
 
       debug('updated config: %o', updatedConfig)
 
