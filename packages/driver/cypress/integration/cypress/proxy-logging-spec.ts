@@ -34,6 +34,25 @@ describe('Proxy Logging', () => {
       it('intercepted fetches are correlated', (done) => {
         let xhrLogCount = 0
 
+        const expectIntercept = (log) => {
+          // next the proxy-logging log will be updated with the intercept
+          expect(log).to.include({
+            name: 'xhr',
+            displayName: 'intercept',
+            url: 'http://localhost:3500/foo',
+          })
+
+          // because there was a pre-request, this should exist on the log object
+          expect(log.browserPreRequest).to.include({
+            method: 'GET',
+            url: log.url,
+          })
+
+          expect(xhrLogCount).to.eq(1)
+
+          done()
+        }
+
         cy.on('log:added', ({ name }) => name === 'xhr' && xhrLogCount++)
         cy.intercept('/foo')
         .then(() => {
@@ -41,22 +60,12 @@ describe('Proxy Logging', () => {
             // route instrument log updates first
             expect(log).to.include({ name: 'route' })
             cy.once('log:changed', (log) => {
-              // next the proxy-logging log will be updated with the intercept
-              expect(log).to.include({
-                name: 'xhr',
-                displayName: 'intercept',
-                url: 'http://localhost:3500/foo',
-              })
-
-              // because there was a pre-request, this should exist on the log object
-              expect(log.browserPreRequest).to.include({
-                method: 'GET',
-                url: log.url,
-              })
-
-              expect(xhrLogCount).to.eq(1)
-
-              done()
+              try {
+                expectIntercept(log)
+              } catch (err) {
+                cy.log('expectIntercept failed:', log)
+                cy.once('log:changed', expectIntercept)
+              }
             })
           })
 
