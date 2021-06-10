@@ -4,11 +4,13 @@ import { action, computed, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, createRef } from 'react'
 import Tooltip from '@cypress/react-tooltip'
+// import State from '../lib/state'
+// @ts-ignore
 import { $ } from '@packages/driver'
 
-import { configFileFormatted } from '../lib/config-file-formatted'
 import {
   SelectorPlayground,
+  ViewportInfo,
   selectorPlaygroundModel,
   eventManager,
   Studio,
@@ -78,30 +80,20 @@ export default class Header extends Component {
             </span>
           </form>
         </div>
-        <ul className='menu'>
-          <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
-            <button onClick={this._toggleViewportMenu}>
-              {state.width} <span className='the-x'>x</span> {state.height} <span className='viewport-scale'>({state.displayScale}%)</span>
-              <i className='fas fa-fw fa-info-circle' />
-            </button>
-            <div className='popup-menu viewport-menu'>
-              <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
-              <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
-              <pre>{/* eslint-disable indent */}
-                {`{
-  "viewportWidth": ${state.defaults.width},
-  "viewportHeight": ${state.defaults.height}
-}`}
-              </pre>{/* eslint-enable indent */}
-              <p>
-                <a href='https://on.cypress.io/viewport' target='_blank'>
-                  <i className='fas fa-info-circle' />
-                  Read more about viewport here.
-                </a>
-              </p>
-            </div>
-          </li>
-        </ul>
+
+        <ViewportInfo
+          showingViewportMenu={this.showingViewportMenu}
+          width={state.width}
+          height={state.height}
+          config={config}
+          displayScale={state.displayScale}
+          defaults={{
+            width: state.defaults.width,
+            height: state.defaults.height,
+          }}
+          toggleViewportMenu={this._toggleViewportMenu}
+        />
+
         <SelectorPlayground
           model={selectorPlaygroundModel}
           eventManager={eventManager}
@@ -134,14 +126,18 @@ export default class Header extends Component {
     }
   }
 
+  _togglePlaygroundOpen = () => {
+    selectorPlaygroundModel.toggleOpen()
+  }
+
+  @action _toggleViewportMenu = () => {
+    this.showingViewportMenu = !this.showingViewportMenu
+  }
+
   _updateWindowDimensions = () => {
     this.props.state.updateWindowDimensions({
       headerHeight: $(this.refs.header).outerHeight(),
     })
-  }
-
-  _togglePlaygroundOpen = () => {
-    selectorPlaygroundModel.toggleOpen()
   }
 
   _openUrl = () => {
@@ -172,9 +168,5 @@ export default class Header extends Component {
 
   _cancelStudio = () => {
     eventManager.emit('studio:cancel')
-  }
-
-  @action _toggleViewportMenu = () => {
-    this.showingViewportMenu = !this.showingViewportMenu
   }
 }
