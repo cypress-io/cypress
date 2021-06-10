@@ -17,7 +17,8 @@ interface HeaderProps {
 
 @observer
 export default class Header extends Component<HeaderProps> {
-  headerRef = React.createRef()
+  headerRef = React.createRef<HTMLHeadElement>()
+  previousSelectorPlaygroundOpen: boolean
 
   @observable showingViewportMenu = false
 

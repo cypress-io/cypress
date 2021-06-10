@@ -105,9 +105,6 @@ export default class State {
   @observable windowWidth = 0
   @observable windowHeight = 0
 
-  @observable width = _defaults.width
-  @observable height = _defaults.height
-
   @observable automation = automation.CONNECTING
 
   @observable.ref scriptError: string | undefined
@@ -243,13 +240,21 @@ export default class State {
     this.specListWidth = width
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight }: { windowWidth?: number, windowHeight?: number }) {
+  @action updateWindowDimensions ({
+    windowWidth,
+    windowHeight,
+    headerHeight,
+  }: { windowWidth?: number, windowHeight?: number, headerHeight?: number }) {
     if (windowWidth) {
       this.windowWidth = windowWidth
     }
 
     if (windowHeight) {
       this.windowHeight = windowHeight
+    }
+
+    if (headerHeight) {
+      this.headerHeight = headerHeight
     }
   }
 
