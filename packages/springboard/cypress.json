@@ -19,6 +19,6 @@
   },
   "component": {
     "componentFolder": "cypress/component",
-    "testFiles": "**/*.spec.ts"
+    "testFiles": "**/*.spec.*"
   }
 }

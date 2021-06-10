@@ -1,6 +1,15 @@
 <template>
-  <span class="closeButton">❌</span>
+  <span class="closeButton" role="button">❌</span>
 </template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  setup() {},
+});
+</script>
+
 
 <style lang="scss" scoped>
 .closeButton {

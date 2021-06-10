@@ -1,10 +1,5 @@
 <template>
-  <div
-    class="overlay"
-    ref="overlay"
-    @click.self="$emit('close')"
-    @keypress.esc="$emit('close')"
-  >
+  <div class="overlay" ref="overlay" @click.self="$emit('close')" role="dialog">
     <div class="wrapper">
       <CloseButton @click="$emit('close')"></CloseButton>
       <div class="content">
@@ -15,25 +10,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent } from "vue";
 import CloseButton from "./CloseButton.vue";
 
 export default defineComponent({
-  setup() {
-    const overlay = ref<HTMLElement | null>(null);
-    onMounted(() => {
-      if (overlay && overlay.value) {
-        overlay.value.focus();
-      }
-    });
-    return {
-      overlay,
-    };
-  },
   components: {
     CloseButton,
   },
-  emits: ["close"],
+  emits: {
+    close: null,
+  },
 });
 </script>
 

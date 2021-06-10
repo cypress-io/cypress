@@ -1,13 +1,19 @@
 <template>
   <div class="welcomeWrapper">
-    <CloseButton @click="close" />
+    <CloseButton data-cy="closeWithButton" @click="close" />
     <h3 class="title">Welcome to Cypress!</h3>
     <p class="subtitle">
       Cypress allows you to write both e2e (end-to-end) and component tests.
     </p>
     <p class="buttonWrapper">
-      <button class="underline" @click="close">No thanks</button>
-      <button class="outlineButton" @click="showHelper = true">
+      <button class="underline" data-cy="closeWithText" @click="close">
+        No thanks
+      </button>
+      <button
+        class="outlineButton"
+        data-cy="openHelper"
+        @click="showHelper = true"
+      >
         Help me choose >
       </button>
     </p>
