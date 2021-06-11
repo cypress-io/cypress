@@ -22,6 +22,8 @@ class Container extends Component {
     super(...args)
 
     this.randomString = `${Math.random()}`
+
+    this._onLaunchBrowser = this._onLaunchBrowser.bind(this)
   }
 
   componentDidMount () {
@@ -61,14 +63,6 @@ class Container extends Component {
     )
   }
 
-  _noSpec () {
-    return (
-      <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
-        {this._automationElement()}
-      </NoSpec>
-    )
-  }
-
   _checkSpecFile = () => {
     if (this.props.util.hasSpecFile()) {
       this.forceUpdate()
@@ -79,13 +73,25 @@ class Container extends Component {
     return (
       <NoAutomation
         browsers={this.props.config.browsers}
-        onLaunchBrowser={(browser) => this.props.eventManager.launchBrowser(browser)}
+        onLaunchBrowser={this._onLaunchBrowser}
       />
     )
   }
 
+  _onLaunchBrowser (browser) {
+    this.props.eventManager.launchBrowser(browser)
+  }
+
   _automationDisconnected () {
     return <AutomationDisconnected onReload={this.props.eventManager.launchBrowser} />
+  }
+
+  _noSpec () {
+    return (
+      <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
+        {this._automationElement()}
+      </NoSpec>
+    )
   }
 }
 

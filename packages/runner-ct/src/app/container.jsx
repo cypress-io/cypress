@@ -2,16 +2,17 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
+import State from '../lib/state'
+import util from '../lib/util'
+
+import RunnerCt from './RunnerCt'
 import {
   eventManager,
   automation,
   AutomationDisconnected,
   NoAutomation,
 } from '@packages/runner-shared'
-import State from '../lib/state'
-import util from '../lib/util'
-
-import RunnerCt from './RunnerCt'
+// ...
 
 const automationElementId = '__cypress-string'
 
