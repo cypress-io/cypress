@@ -736,7 +736,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('throws when test config keystrokeDelay is invalid', { keystrokeDelay: false }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('The test configuration `keystrokeDelay` option must be 0 (zero) or a positive number. You passed: `false`')
-          expect(err.docsUrl).to.equal('https://on.cypress.io/writing-and-organizing-tests')
+          expect(err.docsUrl).to.equal('https://on.cypress.io/test-configuration')
           done()
         })
 

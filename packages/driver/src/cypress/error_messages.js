@@ -682,7 +682,7 @@ module.exports = {
     },
     invalid_per_test_delay: {
       message: `The test configuration \`keystrokeDelay\` option must be 0 (zero) or a positive number. You passed: \`{{delay}}\``,
-      docsUrl: 'https://on.cypress.io/writing-and-organizing-tests',
+      docsUrl: 'https://on.cypress.io/test-configuration',
     },
   },
 
