@@ -4,7 +4,7 @@ import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Tooltip from '@cypress/react-tooltip'
-import { SelectorPlayground } from '@packages/runner-shared'
+import { SelectorPlayground } from './SelectorPlayground'
 
 const createModel = (props) => _.extend({
   method: 'get',
