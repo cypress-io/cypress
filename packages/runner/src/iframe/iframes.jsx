@@ -105,7 +105,6 @@ export default class Iframes extends Component {
       state: this.props.state,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
-      eventManager: this.props.eventManager,
       detachDom: this.autIframe.detachDom,
       snapshotControls: (snapshotProps) => (
         <SnapshotControls

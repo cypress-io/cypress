@@ -10,7 +10,8 @@ interface ViewportInfoProps {
   height: number
   displayScale: number | undefined
   config: {
-    configFile: unknown // I think this might be Cypress.RuntimeConfigOptions
+    configFile: unknown // Similar to Cypress.RuntimeConfigOptions, but has some extra properties
+    [key: string]: unknown
   }
   defaults: {
     width: number

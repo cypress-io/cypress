@@ -3,36 +3,36 @@ import { action } from 'mobx'
 
 import { selectorPlaygroundModel } from '../selector-playground'
 import { studioRecorder } from '../studio'
+import { eventManager } from '../event-manager'
 
 export class IframeModel {
-  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls, eventManager }) {
+  constructor ({ state, detachDom, restoreDom, highlightEl, snapshotControls }) {
     this.state = state
     this.detachDom = detachDom
     this.restoreDom = restoreDom
     this.highlightEl = highlightEl
     this.snapshotControls = snapshotControls
-    this.eventManager = eventManager
 
     this._reset()
   }
 
   listen () {
-    this.eventManager.on('run:start', action('run:start', this._beforeRun))
-    this.eventManager.on('run:end', action('run:end', this._afterRun))
+    eventManager.on('run:start', action('run:start', this._beforeRun))
+    eventManager.on('run:end', action('run:end', this._afterRun))
 
-    this.eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
-    this.eventManager.on('config', action('config', (config) => {
+    eventManager.on('viewport:changed', action('viewport:changed', this._updateViewport))
+    eventManager.on('config', action('config', (config) => {
       this._updateViewport(_.map(config, 'viewportHeight', 'viewportWidth'))
     }))
 
-    this.eventManager.on('url:changed', action('url:changed', this._updateUrl))
-    this.eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
+    eventManager.on('url:changed', action('url:changed', this._updateUrl))
+    eventManager.on('page:loading', action('page:loading', this._updateLoadingUrl))
 
-    this.eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
-    this.eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
+    eventManager.on('show:snapshot', action('show:snapshot', this._setSnapshots))
+    eventManager.on('hide:snapshot', action('hide:snapshot', this._clearSnapshots))
 
-    this.eventManager.on('pin:snapshot', action('pin:snapshot', this._pinSnapshot))
-    this.eventManager.on('unpin:snapshot', action('unpin:snapshot', this._unpinSnapshot))
+    eventManager.on('pin:snapshot', action('pin:snapshot', this._pinSnapshot))
+    eventManager.on('unpin:snapshot', action('unpin:snapshot', this._unpinSnapshot))
   }
 
   _beforeRun = () => {
@@ -172,7 +172,7 @@ export class IframeModel {
     const { snapshots } = snapshotProps
 
     if (!snapshots || !snapshots.length) {
-      this.eventManager.snapshotUnpinned()
+      eventManager.snapshotUnpinned()
       this._setMissingSnapshotMessage()
 
       return
@@ -230,8 +230,8 @@ export class IframeModel {
       url: this.state.url,
       // TODO: use same attr for both runner and runner-ct states.
       // these refer to the same thing - the viewport dimensions.
-      viewportWidth: this.state.width || this.state.viewportWidth,
-      viewportHeight: this.state.height || this.state.viewportHeight,
+      viewportWidth: this.state.width,
+      viewportHeight: this.state.height,
     }
   }
 
