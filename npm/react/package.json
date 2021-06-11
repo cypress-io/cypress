@@ -147,10 +147,6 @@
     {
       "name": "Jessica Sachs",
       "social": "@JessicaSachs"
-    },
-    {
-      "name": "Lachlan Miller",
-      "social": "@lmiller1990"
     }
   ],
   "unpkg": "dist/cypress-react.browser.js",
