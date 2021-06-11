@@ -66,12 +66,13 @@ describe('lib/browsers/chrome', () => {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send.callCount).to.equal(4)
+        expect(this.criClient.send.callCount).to.equal(5)
         expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.criClient.send).to.have.been.calledWith('Page.enable')
         expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
+        expect(this.criClient.send).to.have.been.calledWith('Network.enable')
       })
     })
 
