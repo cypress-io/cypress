@@ -145,7 +145,7 @@ Go
           width={state.width}
           height={state.height}
           config={config}
-          displayScale={state.displayScale}
+          displayScale={this.props.runner === 'e2e' ? state.displayScale : undefined}
           defaults={{
             width: state.defaults.width,
             height: state.defaults.height,
