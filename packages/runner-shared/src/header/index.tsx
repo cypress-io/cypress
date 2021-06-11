@@ -94,7 +94,7 @@ export class Header extends Component<HeaderProps> {
           <div className='menu-buttons'>
             <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
             <button type='submit' className='btn-submit' disabled={!this.urlInput}>
-Go
+              {` Go`}
               <i className='fas fa-arrow-right' />
             </button>
           </div>
