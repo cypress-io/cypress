@@ -2,7 +2,6 @@
   "name": "@cypress/react",
   "version": "0.0.0-development",
   "description": "Test React components using Cypress",
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
     "build": "rimraf dist && yarn rollup -c rollup.config.js",
@@ -119,6 +118,7 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/react/#readme",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact&template=1-bug-report.md&title=",
   "keywords": [
     "react",
@@ -126,6 +126,32 @@
     "cypress-io",
     "test",
     "testing"
+  ],
+  "contributors": [
+    {
+      "name": "Dmitriy Kovalenko",
+      "social": "@dmtrKovalenko"
+    },
+    {
+      "name": "Brian Mann",
+      "social": "@brian-mann"
+    },
+    {
+      "name": "Barthélémy Ledoux",
+      "social": "@elevatebart"
+    },
+    {
+      "name": "Lachlan Miller",
+      "social": "@lmiller1990"
+    },
+    {
+      "name": "Jessica Sachs",
+      "social": "@JessicaSachs"
+    },
+    {
+      "name": "Lachlan Miller",
+      "social": "@lmiller1990"
+    }
   ],
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",

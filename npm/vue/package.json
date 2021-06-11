@@ -2,7 +2,6 @@
   "name": "@cypress/vue",
   "version": "0.0.0-development",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
     "build": "rimraf dist && yarn rollup -c rollup.config.js",
@@ -72,10 +71,21 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/vue/#readme",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",
     "vue"
+  ],
+  "contributors": [
+    {
+      "name": "Jessica Sachs",
+      "social": "@JessicaSachs"
+    },
+    {
+      "name": "Amir Rustamzadeh",
+      "social": "@amirrustam"
+    }
   ],
   "unpkg": "dist/cypress-vue.browser.js",
   "module": "dist/cypress-vue.esm-bundler.js",
