@@ -491,6 +491,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/keyboard-api
+     */
+     Keyboard: {
+      defaults(options: Partial<ScreenshotDefaultsOptions>): void
+    }
+
+    /**
      * @see https://on.cypress.io/api/api-server
      */
     Server: {
@@ -2682,12 +2689,6 @@ declare namespace Cypress {
      * @default {}
      */
     e2e: ResolvedConfigOptions
-
-    /**
-     * Time, in milliseconds, between in each keystroke. (Pass false or 0 to disable)
-     * @default 10
-     */
-     keystrokeDelay: number | false
   }
 
   /**
@@ -2840,6 +2841,18 @@ declare namespace Cypress {
      * @default {}
      */
     env: object
+  }
+
+  /**
+   * Options for Cypress.Keyboard.defaults()
+   */
+  interface KeyboardDefaultsOptions {
+    /**
+    * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
+    *
+    * @default 10
+    */
+    keystrokeDelay: number
   }
 
   /**

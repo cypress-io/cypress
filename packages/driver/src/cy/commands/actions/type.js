@@ -24,7 +24,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      delay: config('keystrokeDelay') || 0,
+      delay: config('keystrokeDelay') || $Keyboard.getConfig().keystrokeDelay,
       release: true,
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
@@ -130,10 +130,27 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    if (!_.isNumber(options.delay)) {
-      $errUtils.throwErrByPath('type.invalid_delay', {
+    const isInvalidDelay = (delay) => {
+      return delay !== undefined && (!_.isNumber(delay) || delay < 0)
+    }
+
+    if (isInvalidDelay(userOptions.delay)) {
+      $errUtils.throwErrByPath('keyboard.invalid_delay', {
         onFail: options._log,
-        args: { delay: options.delay },
+        args: {
+          cmd: 'type',
+          docsPath: 'type',
+          option: 'delay',
+          delay: userOptions.delay,
+        },
+      })
+    }
+
+    // specific error if test config keystrokeDelay is invalid
+    if (isInvalidDelay(config('keystrokeDelay'))) {
+      $errUtils.throwErrByPath('keyboard.invalid_per_test_delay', {
+        onFail: options._log,
+        args: { delay: config('keystrokeDelay') },
       })
     }
 

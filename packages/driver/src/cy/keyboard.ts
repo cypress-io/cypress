@@ -10,6 +10,7 @@ import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
 import { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
+import $utils from '../cypress/utils'
 import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
@@ -1320,10 +1321,56 @@ const create = (Cypress, state) => {
   return new Keyboard(Cypress, state)
 }
 
+let _defaults
+
+const reset = () => {
+  _defaults = {
+    keystrokeDelay: 10,
+  }
+}
+
+reset()
+
+const getConfig = () => {
+  return _.clone(_defaults)
+}
+
+const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
+  if (!_.isPlainObject(props)) {
+    $errUtils.throwErrByPath('keyboard.invalid_arg', {
+      args: { arg: $utils.stringify(props) },
+    })
+  }
+
+  if (!('keystrokeDelay' in props)) {
+    return getConfig()
+  }
+
+  if (!_.isNumber(props.keystrokeDelay) || props.keystrokeDelay! < 0) {
+    $errUtils.throwErrByPath('keyboard.invalid_delay', {
+      args: {
+        cmd: 'Cypress.Keyboard.defaults',
+        docsPath: 'keyboard-api',
+        option: 'keystrokeDelay',
+        delay: $utils.stringify(props.keystrokeDelay),
+      },
+    })
+  }
+
+  _.extend(_defaults, {
+    keystrokeDelay: props.keystrokeDelay,
+  })
+
+  return getConfig()
+}
+
 export {
   create,
+  defaults,
+  getConfig,
   getKeymap,
   modifiersToString,
+  reset,
   toModifiersEventOptions,
   fromModifierEventOptions,
 }

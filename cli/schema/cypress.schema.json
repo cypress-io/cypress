@@ -278,14 +278,6 @@
           "type": "boolean",
           "default": false,
           "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
-        },
-        "keystrokeDelay": {
-          "type": [
-            "number",
-            "boolean"
-          ],
-          "default": 10,
-          "description": "Time, in milliseconds, between in each keystroke. (Pass false or 0 to disable)"
         }
       }
     }
