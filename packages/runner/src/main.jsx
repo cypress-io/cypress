@@ -6,7 +6,7 @@ import { utils as driverUtils } from '@packages/driver'
 import App from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
-import { Container } from '@packages/runner-shared'
+import { Container, eventManager } from '@packages/runner-shared'
 import util from './lib/util'
 
 configure({ enforceActions: 'always' })
@@ -28,10 +28,12 @@ const Runner = {
       const container = (
         <Container
           config={config}
+          runner='e2e'
           state={state}
           App={App}
           NoSpec={NoSpec}
           hasSpecFile={util.hasSpecFile}
+          eventManager={eventManager}
         />
       )
 

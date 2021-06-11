@@ -4,8 +4,9 @@ import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 import defaultEvents from '@packages/reporter/src/lib/events'
 
+import App from './app/RunnerCt'
 import State from './lib/state'
-import Container from './app/container'
+import { Container, eventManager } from '@packages/runner-shared'
 import util from './lib/util'
 
 // to support async/await
@@ -64,7 +65,18 @@ const Runner = {
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
-      render(<Container config={config} state={state} />, el)
+      const container = (
+        <Container
+          config={config}
+          runner='ct'
+          state={state}
+          App={App}
+          hasSpecFile={util.hasSpecFile}
+          eventManager={eventManager}
+        />
+      )
+
+      render(container, el)
     })()
   },
 }
