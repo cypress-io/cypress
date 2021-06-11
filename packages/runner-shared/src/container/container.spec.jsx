@@ -4,7 +4,6 @@ import sinon from 'sinon'
 
 import App from '@packages/runner/src/app/app'
 import { AutomationDisconnected } from '../automation-disconnected'
-// import { eventManager } from '../event-manager'
 import { automation } from '../automation'
 import { NoAutomation } from '../no-automation'
 import { automationElementId } from '../automation-element'
