@@ -1,13 +1,10 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import {
-  AutomationDisconnected,
-  NoAutomation,
-  automation,
-  automationElementId,
-  AutomationElement,
-} from '@packages/runner-shared'
+import { AutomationDisconnected } from '../automation-disconnected'
+import { automation } from '../automation'
+import { NoAutomation } from '../no-automation'
+import { automationElementId, AutomationElement } from '../automation-element'
 
 @observer
 export class Container extends Component {

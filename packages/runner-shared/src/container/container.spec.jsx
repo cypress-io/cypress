@@ -2,14 +2,19 @@ import React from 'react'
 import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
-import App from './app'
-import { AutomationDisconnected, NoAutomation, automation } from '@packages/runner-shared'
-import NoSpec from '../errors/no-spec'
-import State from '../lib/state'
+import App from '@packages/runner/src/app/app'
+import { AutomationDisconnected } from '../automation-disconnected'
+// import { eventManager } from '../event-manager'
+import { automation } from '../automation'
+import { NoAutomation } from '../no-automation'
+import { automationElementId } from '../automation-element'
+import NoSpec from '@packages/runner/src/errors/no-spec'
 
-import Container, { automationElementId } from './container'
+import { Container } from '.'
 
 const createProps = () => ({
+  runner: 'e2e',
+  hasSpecFile: sinon.stub(),
   config: {
     browsers: [],
     integrationFolder: '',
@@ -17,6 +22,15 @@ const createProps = () => ({
     projectName: '',
     viewportHeight: 0,
     viewportWidth: 0,
+    spec: {
+      name: 'test/spec.js',
+      relative: './this/is/a/test/spec.js',
+      absolute: '/Users/me/code/this/is/a/test/spec.js',
+    },
+    state: {
+      autoScrollingEnabled: true,
+      reporterWidth: 300,
+    },
   },
   eventManager: {
     addGlobalListeners: sinon.spy(),
@@ -26,11 +40,19 @@ const createProps = () => ({
       emit: () => {},
       on: () => {},
     },
+    on: () => {},
+    start: () => {},
+    setup: () => {},
   },
-  state: new State(),
-  util: {
-    hasSpecFile: sinon.stub(),
+  state: {
+    automation: undefined,
+    defaults: {
+      width: 500,
+      height: 500,
+    },
   },
+  App,
+  NoSpec,
 })
 
 describe('<Container />', () => {
@@ -51,12 +73,11 @@ describe('<Container />', () => {
       const props = createProps()
 
       props.state.automation = automation.CONNECTING
-      component = shallow(<Container {...props} />)
+      component = mount(<Container {...props} />)
     })
 
     it('renders the automation element alone', () => {
       expect(component.find(`#${automationElementId}`)).to.exist
-      expect(component.find(`#${automationElementId}`).parent()).not.to.exist
     })
   })
 
@@ -115,7 +136,7 @@ describe('<Container />', () => {
     beforeEach(() => {
       props = createProps()
       props.state.automation = automation.CONNECTED
-      props.util.hasSpecFile.returns(false)
+      props.hasSpecFile.returns(false)
       component = shallow(<Container {...props} />)
     })
 
@@ -123,35 +144,11 @@ describe('<Container />', () => {
       expect(component.find(NoSpec)).to.have.prop('config', props.config)
     })
 
-    it('renders the automation element', () => {
-      expect(component.find(`#${automationElementId}`)).to.exist
-    })
-
     it('renders the app when hash changes with and has a spec file', () => {
-      props.util.hasSpecFile.returns(true)
+      props.hasSpecFile.returns(true)
       component.find(NoSpec).prop('onHashChange')()
       component.update()
       expect(component.find(App)).to.exist
-    })
-  })
-
-  describe('when automation is connected and there is a spec file', () => {
-    let props
-    let component
-
-    beforeEach(() => {
-      props = createProps()
-      props.state.automation = automation.CONNECTED
-      props.util.hasSpecFile.returns(true)
-      component = shallow(<Container {...props} />)
-    })
-
-    it('renders <App />', () => {
-      expect(component.find(App)).to.exist
-    })
-
-    it('renders the automation element', () => {
-      expect(component.find(`#${automationElementId}`)).to.exist
     })
   })
 })

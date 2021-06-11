@@ -14,7 +14,6 @@ import {
 } from '@packages/runner-shared'
 
 import util from '../lib/util'
-import State from '../lib/state'
 
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
@@ -252,7 +251,6 @@ App.propTypes = {
       on: PropTypes.func.isRequired,
     }).isRequired,
   }).isRequired,
-  state: PropTypes.instanceOf(State).isRequired,
 }
 
 export default App
