@@ -3,8 +3,11 @@ import React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 
+import App from './app/app'
+import NoSpec from './errors/no-spec'
 import State from './lib/state'
-import Container from './app/container'
+import { Container } from '@packages/runner-shared'
+import util from './lib/util'
 
 configure({ enforceActions: 'always' })
 
@@ -22,7 +25,17 @@ const Runner = {
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
-      render(<Container config={config} state={state} />, el)
+      const container = (
+        <Container
+          config={config}
+          state={state}
+          App={App}
+          NoSpec={NoSpec}
+          hasSpecFile={util.hasSpecFile}
+        />
+      )
+
+      render(container, el)
     })()
   },
 }

@@ -1,23 +1,17 @@
 import { observer } from 'mobx-react'
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import State from '../lib/state'
-import util from '../lib/util'
-
-import App from './app'
 import {
   AutomationDisconnected,
   NoAutomation,
   eventManager,
   automation,
 } from '@packages/runner-shared'
-import NoSpec from '../errors/no-spec'
 
-const automationElementId = '__cypress-string'
+export const automationElementId = '__cypress-string'
 
 @observer
-class Container extends Component {
+export class Container extends Component {
   constructor (...args) {
     super(...args)
 
@@ -43,7 +37,7 @@ class Container extends Component {
         return this._automationDisconnected()
       case automation.CONNECTED:
       default:
-        return this.props.util.hasSpecFile() ? this._app() : this._noSpec()
+        return this.props.hasSpecFile() ? this._app() : this._noSpec()
     }
   }
 
@@ -56,15 +50,17 @@ class Container extends Component {
   }
 
   _app () {
+    const { App, ...rest } = this.props
+
     return (
-      <App {...this.props}>
+      <App {...rest}>
         {this._automationElement()}
       </App>
     )
   }
 
   _checkSpecFile = () => {
-    if (this.props.util.hasSpecFile()) {
+    if (this.props.hasSpecFile()) {
       this.forceUpdate()
     }
   }
@@ -87,6 +83,8 @@ class Container extends Component {
   }
 
   _noSpec () {
+    const { NoSpec } = this.props
+
     return (
       <NoSpec config={this.props.config} onHashChange={this._checkSpecFile}>
         {this._automationElement()}
@@ -97,14 +95,4 @@ class Container extends Component {
 
 Container.defaultProps = {
   eventManager,
-  util,
 }
-
-Container.propTypes = {
-  config: PropTypes.object.isRequired,
-  state: PropTypes.instanceOf(State),
-}
-
-export { automationElementId }
-
-export default Container
