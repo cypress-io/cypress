@@ -5,13 +5,10 @@ import sinon from 'sinon'
 import driver from '@packages/driver'
 import Tooltip from '@cypress/react-tooltip'
 
-import {
-  selectorPlaygroundModel,
-  eventManager,
-  studioRecorder,
-  Studio,
-  Header,
-} from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
+import { Studio, studioRecorder } from '../studio'
+import { selectorPlaygroundModel } from '../selector-playground'
+import { Header } from '.'
 
 const getState = (props) => _.extend({
   defaults: {},
