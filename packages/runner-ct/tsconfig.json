@@ -10,7 +10,7 @@
      */
     "allowJs": true,
     "jsx": "react",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
     // "checkJs": true,                       /* Report errors in .js files. */
