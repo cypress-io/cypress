@@ -85,15 +85,22 @@ const componentTestingEnabled = (config) => {
   return componentTestingEnabled && !isDefault(config, 'componentFolder')
 }
 
-const isNewProject = (integrationFolder) => {
+const isNewProject = (config) => {
   // logic to determine if new project
-  // 1. component testing is not enabled
-  // 2. there are no files in 'integrationFolder'
-  // 3. there is the same number of files in 'integrationFolder'
-  // 4. the files are named the same as the example files
-  // 5. the bytes of the files match the example files
+  // 1. 'integrationFolder' is still the default
+  // 2. component testing is not enabled
+  // 3. there are no files in 'integrationFolder'
+  // 4. there is the same number of files in 'integrationFolder'
+  // 5. the files are named the same as the example files
+  // 6. the bytes of the files match the example files
+
+  const { integrationFolder } = config
 
   debug('determine if new project by globbing files in %o', { integrationFolder })
+
+  if (!isDefault(config, 'integrationFolder')) {
+    return Promise.resolve(false)
+  }
 
   // checks for file up to 3 levels deep
   return glob('{*,*/*,*/*/*}', { cwd: integrationFolder, realpath: true, nodir: true })
@@ -105,7 +112,7 @@ const isNewProject = (integrationFolder) => {
     debug('- empty?', isEmpty(files))
     if (isEmpty(files)) {
       return true
-    } // 1
+    }
 
     return getExampleSpecs()
     .then((exampleSpecs) => {
@@ -114,14 +121,14 @@ const isNewProject = (integrationFolder) => {
       debug('- different number of files?', numFilesDifferent)
       if (numFilesDifferent) {
         return false
-      } // 2
+      }
 
       const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
 
       debug('- different file names?', filesNamesDifferent)
       if (filesNamesDifferent) {
         return false
-      } // 3
+      }
 
       return filesSizesAreSame(files, exampleSpecs.index)
     })

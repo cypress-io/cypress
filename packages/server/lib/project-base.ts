@@ -519,7 +519,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         throw new Error('Missing integration folder')
       }
 
-      return this.determineIsNewProject(cfg.integrationFolder)
+      return this.determineIsNewProject(cfg)
       .then((untouchedScaffold) => {
         const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
 
