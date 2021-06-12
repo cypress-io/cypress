@@ -1,6 +1,5 @@
 import { find } from 'lodash'
 import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
-import { deepCopyArrayBuffer, setArrayBufferPrototype } from '../utils'
 
 export function hasJsonContentType (headers: { [k: string]: string }) {
   const contentType = find(headers, (v, k) => /^content-type$/i.test(k))
@@ -26,20 +25,4 @@ export function parseJsonBody (message: CyHttpMessages.BaseMessage): boolean {
 
 export function stringifyJsonBody (message: CyHttpMessages.BaseMessage) {
   message.body = JSON.stringify(message.body)
-}
-
-export function mergeWithArrayBuffer (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
-  _.mergeWith(before, after, (_a, b) => {
-    if (_.isArrayBuffer(b)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const copiedBuffer = deepCopyArrayBuffer(b)
-
-      // return copiedBuffer
-      setArrayBufferPrototype(b)
-
-      return b
-    }
-
-    return undefined
-  })
 }

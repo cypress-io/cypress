@@ -7,7 +7,7 @@ import {
   SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
-import { parseJsonBody, stringifyJsonBody, mergeWithArrayBuffer } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
@@ -235,7 +235,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     continueSent = true
 
     // copy changeable attributes of userReq to req
-    mergeWithArrayBuffer(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
+    _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
 
     updateRequest(req)
 

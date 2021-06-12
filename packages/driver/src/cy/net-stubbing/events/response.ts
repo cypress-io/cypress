@@ -12,7 +12,7 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import { parseJsonBody, stringifyJsonBody, mergeWithArrayBuffer } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
 
@@ -100,7 +100,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
     responseSent = true
 
     // copy changeable attributes of userRes to res
-    mergeWithArrayBuffer(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
+    _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
 
     finishResponseStage(res)
 
