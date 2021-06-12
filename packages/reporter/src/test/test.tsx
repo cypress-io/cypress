@@ -36,12 +36,21 @@ class StudioControls extends Component<StudioControlsProps> {
     this.props.events.emit('studio:save')
   }
 
+  _copyToClipboard = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:copy:to:clipboard', () => {
+
+    })
+  }
+
   render () {
     const { studioIsNotEmpty } = this.props.model
 
     return (
       <div className='studio-controls'>
         <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <button className='studio-copy' disabled={!studioIsNotEmpty} onClick={this._copyToClipboard}>Copy to Clipboard</button>
         <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
       </div>
     )

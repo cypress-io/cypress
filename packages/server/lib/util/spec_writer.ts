@@ -126,6 +126,14 @@ export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
   return body
 }
 
+export const convertCommandsToText = (commands: Command[]) => {
+  const program = b.program([])
+
+  addCommandsToBody(program.body, commands)
+
+  return recast.print(program)
+}
+
 export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
   const { line, column } = fileDetails
 

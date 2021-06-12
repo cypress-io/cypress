@@ -237,6 +237,14 @@ const eventManager = {
       studioRecorder.startSave()
     })
 
+    reporterBus.on('studio:copy:to:clipboard', (cb) => {
+      ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
+        if (cb) {
+          cb(commandsText)
+        }
+      })
+    })
+
     localBus.on('studio:start', () => {
       studioRecorder.closeInitModal()
       rerun()
