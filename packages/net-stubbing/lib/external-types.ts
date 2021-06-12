@@ -79,7 +79,7 @@ export namespace CyHttpMessages {
     /**
      * The headers of the HTTP message.
      */
-    headers: { [key: string]: string }
+    headers: { [key: string]: string | string[] }
   }
 
   export type IncomingResponse = BaseMessage & {

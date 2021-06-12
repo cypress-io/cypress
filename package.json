@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "7.4.0",
+  "version": "7.5.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -12,8 +12,8 @@
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "build": "lerna run build --stream",
-    "build-prod": "lerna run build-prod --stream",
+    "build": "lerna run build --stream --ignore create-cypress-tests && lerna run build --stream --scope create-cypress-tests",
+    "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && lerna run build-prod --stream --scope create-cypress-tests",
     "bump": "node ./scripts/binary.js bump",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",

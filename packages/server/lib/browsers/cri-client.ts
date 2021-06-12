@@ -30,12 +30,14 @@ namespace CRI {
     'Page.navigate' |
     'Page.startScreencast' |
     'Page.screencastFrameAck' |
-    'Page.setDownloadBehavior'
+    'Page.setDownloadBehavior' |
+    string
 
   export type EventName =
     'Page.screencastFrame' |
     'Page.downloadWillBegin' |
-    'Page.downloadProgress'
+    'Page.downloadProgress' |
+    string
 }
 
 /**
