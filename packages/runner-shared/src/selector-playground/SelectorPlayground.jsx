@@ -154,7 +154,7 @@ class SelectorPlayground extends Component {
       >
         <button onClick={this._toggleMethodPicker}>
           <i className='fas fa-caret-down'></i>
-          {` cy. ${model.method}`}
+          {` cy.${model.method}`}
         </button>
         <div className='method-picker'>
           {_.map(methods, (method) => (
