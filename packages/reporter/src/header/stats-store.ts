@@ -8,12 +8,15 @@ export interface StatsStoreStartInfo {
   numPassed?: number
   numFailed?: number
   numPending?: number
+  showOnlyFailedTest?: boolean
 }
 
 const defaults = {
   numPassed: 0,
   numFailed: 0,
   numPending: 0,
+
+  showOnlyFailedTest: false,
 
   _startTime: null,
   _currentTime: null,
@@ -23,6 +26,8 @@ class StatsStore {
   @observable numPassed: number = defaults.numPassed
   @observable numFailed: number = defaults.numFailed
   @observable numPending: number = defaults.numPending
+
+  @observable showOnlyFailedTest: boolean = defaults.showOnlyFailedTest
 
   @observable _startTime: number | null = defaults._startTime
   @observable _currentTime: number | null = defaults._startTime;
@@ -40,12 +45,14 @@ class StatsStore {
     return this._currentTime - this._startTime
   }
 
-  start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }: StatsStoreStartInfo) {
+  start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0, showOnlyFailedTest = false }: StatsStoreStartInfo) {
     if (this._startTime) return
 
     this.numPassed = numPassed
     this.numFailed = numFailed
     this.numPending = numPending
+
+    this.showOnlyFailedTest = showOnlyFailedTest
 
     this._startTime = new Date(startTime).getTime()
     this._updateCurrentTime()
@@ -70,6 +77,11 @@ class StatsStore {
     const countKey = `num${_.capitalize(type)}`
 
     this[countKey] = this[countKey] + 1
+  }
+
+  @action
+  toggleShowOnlyFailedTest () {
+    this.showOnlyFailedTest = !this.showOnlyFailedTest
   }
 
   pause () {

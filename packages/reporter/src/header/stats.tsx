@@ -6,6 +6,21 @@ import { StatsStore } from './stats-store'
 const count = (num: number) => num > 0 ? num : '--'
 const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
 
+const showTestFailedResults = (cb) => {
+  addClassToElement('runnable-passed', 'is-hidden')
+  addClassToElement('runnable-skipped', 'is-hidden')
+
+  return cb()
+}
+
+const addClassToElement = (elem, classToAdd) => {
+  const elements = Array.from(document.getElementsByClassName(elem))
+
+  elements.forEach((element) => {
+    element.classList.toggle(classToAdd)
+  })
+}
+
 interface Props {
   stats: StatsStore
 }
@@ -17,7 +32,7 @@ const Stats = observer(({ stats }: Props) => (
       <span className='visually-hidden'>Passed:</span>
       <span className='num'>{count(stats.numPassed)}</span>
     </li>
-    <li className='failed'>
+    <li className={`${stats.showOnlyFailedTest ? 'is-failed-test-pinned' : ''} failed`} onClick={() => showTestFailedResults(() => stats.toggleShowOnlyFailedTest())}>
       <i aria-hidden="true" className='fas fa-times' />
       <span className='visually-hidden'>Failed:</span>
       <span className='num'>{count(stats.numFailed)}</span>

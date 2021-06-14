@@ -79,11 +79,18 @@
       padding: 10px 5px;
 
       &.passed {
-        color: #23AE89;
+        color: #23ae89;
       }
 
       &.failed {
-        color: #E94B3B;
+        color: #e94b3b;
+        &.is-failed-test-pinned {
+          background: lighten($pinned, 40%);
+          border-left: 2px solid $pinned;
+        }
+        &:hover {
+          cursor: pointer;
+        }
       }
 
       &.pending {
@@ -120,7 +127,7 @@
       margin-right: 5px;
 
       label {
-        background-color: #CC4239;
+        background-color: #cc4239;
       }
     }
 
