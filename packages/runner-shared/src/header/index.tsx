@@ -8,7 +8,8 @@ import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
 
 import { ViewportInfo } from '../viewport-info'
-import { SelectorPlayground, selectorPlaygroundModel } from '../selector-playground'
+import { SelectorPlayground } from '../selector-playground/SelectorPlayground'
+import { selectorPlaygroundModel } from '../selector-playground'
 import { Studio, studioRecorder } from '../studio'
 import { eventManager } from '../event-manager'
 

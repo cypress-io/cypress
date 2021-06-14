@@ -10,10 +10,6 @@ export * from './selector-playground'
 
 export * from './script-error'
 
-export * from './automation-disconnected'
-
-export * from './no-automation'
-
 export * from './mobx'
 
 export * from './error-messages'
@@ -37,5 +33,3 @@ export * from './config-file-formatted'
 export * from './header'
 
 export * from './container'
-
-export * from './automation-element'
