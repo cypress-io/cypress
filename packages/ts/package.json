@@ -5,18 +5,16 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-unit": "node test",
     "test-watch": "echo 'no watching of tests'"
   },
   "dependencies": {
-    "debug": "4.3.2"
-  },
-  "devDependencies": {
-    "ts-node": "5.0.1"
+    "dirt-simple-file-cache": "^0.4.0",
+    "packherd": "^0.5.0"
   },
   "files": [
-    "register.js"
+    "register.js",
+    "hook-require.js"
   ]
 }
