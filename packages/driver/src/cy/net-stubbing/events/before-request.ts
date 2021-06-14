@@ -121,6 +121,33 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
+    get query () {
+      const url = new URL(req.url)
+      const urlSearchParams = new URLSearchParams(url.search)
+      const result = {}
+
+      for (let pair of urlSearchParams.entries()) {
+        result[pair[0]] = pair[1]
+      }
+
+      return result
+    },
+
+    set query (userQuery) {
+      const url = new URL(req.url)
+      const urlSearchParams = new URLSearchParams(userQuery)
+
+      url.search = urlSearchParams.toString()
+      req.url = url.toString()
+    },
+
+    get url () {
+      return req.url
+    },
+
+    set url (userUrl) {
+      req.url = userUrl
+    },
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {

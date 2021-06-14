@@ -1679,6 +1679,43 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       cy.visit('/fixtures/utf8-post.html')
     })
 
+    // https://github.com/cypress-io/cypress/issues/16327
+    context('request url querystring', () => {
+      it('parse query correctly', () => {
+        cy.intercept({ url: '/users*' }, (req) => {
+          expect(req.query).to.deep.equal({ someKey: 'someValue' })
+        }).as('getUrl')
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users?someKey=someValue')
+          xhr.send()
+        })
+
+        cy.wait('@getUrl')
+      })
+
+      it('reconcile changes on query to url', () => {
+        cy.intercept({ url: '/users*' }, (req) => {
+          req.query = {
+            a: 'b',
+          }
+
+          expect(req.url).to.eq('http://localhost:3500/users?a=b')
+        }).as('getUrl')
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users?someKey=someValue')
+          xhr.send()
+        })
+
+        cy.wait('@getUrl')
+      })
+    })
+
     context('request events', function () {
       context('can end response', () => {
         for (const eventName of ['before:response', 'response']) {
