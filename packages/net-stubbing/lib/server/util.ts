@@ -241,7 +241,8 @@ export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncod
 
   // a simple heuristic for detecting UTF8 encoded requests
   if (req.headers && req.headers['content-type']) {
-    const contentType = req.headers['content-type'].toLowerCase()
+    const contentTypeHeader = req.headers['content-type'] as string
+    const contentType = contentTypeHeader.toLowerCase()
 
     if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
       return 'utf8'

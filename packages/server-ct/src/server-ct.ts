@@ -13,7 +13,7 @@ type WarningErr = Record<string, any>
 const debug = Debug('cypress:server-ct:server')
 
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config, specsStore, project, onError, onWarning) {
+  open (config, specsStore, project, onError, onWarning, shouldCorrelatePreRequests) {
     debug('server open')
 
     return Bluebird.try(() => {
@@ -35,7 +35,7 @@ export class ServerCt extends ServerBase<SocketCt> {
         return this._getRemoteState()
       }
 
-      this.createNetworkProxy(config, getRemoteState)
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
 
       createRoutes({
         app,
