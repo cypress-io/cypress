@@ -4,7 +4,6 @@ import { action, computed, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, createRef } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-// @ts-ignore - TS said `$` is not exported.
 import { $ } from '@packages/driver'
 
 import { ViewportInfo } from '../viewport-info'

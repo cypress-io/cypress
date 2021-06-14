@@ -33,16 +33,15 @@ export const ViewportInfo: React.FC<ViewportInfoProps> = namedObserver('Viewport
     <ul className='menu'>
       <li className={cs('viewport-info', { 'menu-open': showingViewportMenu })}>
         <button onClick={toggleViewportMenu}>
-          {`${width} `}
-
+          {width}
+          {' '}
           <span className='the-x'>x</span>
-          {` ${height}`}
-
-          {displayScale && (
-            <span className='viewport-scale'>
-              {` (${displayScale}%)`}
-            </span>
-          )}
+          {' '}
+          {height}
+          {' '}
+          <span className='viewport-scale'>
+            {displayScale && `(${displayScale}%)`}
+          </span>
           <i className='fas fa-fw fa-info-circle'></i>
         </button>
         <div className='popup-menu viewport-menu'>
