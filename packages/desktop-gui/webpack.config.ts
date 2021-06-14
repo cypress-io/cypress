@@ -4,7 +4,7 @@ import webpack from 'webpack'
 
 // @ts-ignore
 const config: webpack.Configuration = {
-  ...getCommonConfig(),
+  ...getCommonConfig({ plugins: [['relay', { 'artifactDirectory': './src/__generated__' }]] }),
   entry: {
     app: path.resolve(__dirname, 'src/main'),
   },
@@ -34,6 +34,7 @@ config.resolve = {
     'mobx-react': require.resolve('mobx-react'),
     'react': require.resolve('react'),
     'react-dom': require.resolve('react-dom'),
+    'graphql': require.resolve('graphql'),
   },
 }
 

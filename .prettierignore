@@ -1,1 +1,12 @@
-**/*
+# exclude everything
+/*
+
+# except /packages/desktop-gui/src/**/*
+!/packages/
+/packages/*
+!/packages/desktop-gui
+/packages/desktop-gui/*
+!/packages/desktop-gui/src
+/packages/desktop-gui/src/**/*.*
+!/packages/desktop-gui/src/**/*.tsx
+!/packages/desktop-gui/src/**/*.jsx

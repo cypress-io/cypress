@@ -33,7 +33,9 @@ class AuthApi {
 
       return null
     })
-    .catch({ alreadyOpen: true }, () => {})
+    .catch({ alreadyOpen: true }, () => {
+      //
+    })
   }
 
   logOut () {

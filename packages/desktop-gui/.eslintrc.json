@@ -1,9 +1,17 @@
 {
-  "plugins": [
-    "@cypress/dev"
-  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@cypress/dev", "@typescript-eslint"],
   "extends": [
     "plugin:@cypress/dev/tests",
-    "plugin:@cypress/dev/react"
-  ]
+    "plugin:@cypress/dev/react",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "react/jsx-filename-extension": [1, { "extensions": [".tsx", ".jsx"] }],
+    "react/react-in-jsx-scope": 0,
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "space-before-function-paren": 0,
+    "@typescript-eslint/ban-ts-comment": 0
+  }
 }

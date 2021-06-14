@@ -23,6 +23,14 @@ const save = _.debounce((editor) => {
   .catch(() => {}) // ignore errors
 }, 500)
 
+// const filePreference = graphql`
+//   fragment FilePreference_frag on App {
+//     editors {
+//     }
+//     chosenEditor
+//   }
+// `
+
 const FilePreference = observer(() => {
   const state = useLocalStore(() => ({
     editors: [],

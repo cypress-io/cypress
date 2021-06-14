@@ -11,9 +11,7 @@ export class Orgs {
 
   @action setOrgs (orgs) {
     this.orgs = _.map(orgs, (org) => {
-      return (
-        new Org(org)
-      )
+      return new Org(org)
     })
 
     this.isLoading = false

@@ -11,7 +11,7 @@ const Link = ({ children, to, onClick }) => {
   }
 
   return (
-    <a href='#' onClick={navigate} className={to.isActive() ? 'active' : ''}>
+    <a href="#" onClick={navigate} className={to.isActive() ? 'active' : ''}>
       {children}
     </a>
   )
@@ -39,7 +39,4 @@ const routes = {
   }),
 }
 
-export {
-  Link,
-  routes,
-}
+export { Link, routes }

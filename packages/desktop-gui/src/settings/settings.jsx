@@ -3,6 +3,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import Collapse, { Panel } from 'rc-collapse'
 import { isEmpty } from 'lodash'
+import { graphql } from 'react-relay'
 
 import Configuration from './configuration'
 import ProjectId from './project-id'
@@ -18,6 +19,18 @@ if (window.Cypress) {
   // expose object to allow stubbing experimental data during tests
   window.experimental = experimental
 }
+
+// const settingsQuery = graphql`
+//   query Settings_Query {
+//     ...Configuration
+//     ...ProjectId
+//     ...RecordKey
+//     ...NodeVersion
+//     ...ProxySettings
+//     ...FilePreference
+//     ...Experiments
+//   }
+// `
 
 const Settings = observer(({ project, app }) => {
   const { resolvedNodeVersion } = project

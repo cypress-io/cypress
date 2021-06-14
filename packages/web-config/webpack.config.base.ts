@@ -97,7 +97,11 @@ function makeSassLoaders ({ modules }): RuleSetRule {
   }
 }
 
-export const getCommonConfig = () => {
+interface AdditionalBabelConfig {
+  plugins?: any[]
+}
+
+export const getCommonConfig = (babelConfig: AdditionalBabelConfig = {}) => {
   const commonConfig: Configuration = {
     mode: 'none',
     node: {
@@ -126,7 +130,7 @@ export const getCommonConfig = () => {
                 // "istanbul",
                 [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
-              ],
+              ].concat(babelConfig.plugins ?? []),
               presets: [
                 // the chrome version should be synced with
                 // npm/webpack-batteries-included-preprocessor/index.js and

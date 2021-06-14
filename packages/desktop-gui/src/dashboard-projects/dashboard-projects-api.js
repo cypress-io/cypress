@@ -4,16 +4,19 @@ import dashboardProjectsStore from './dashboard-projects-store'
 let pollId
 
 const getDashboardProjects = () => {
-  ipc.getDashboardProjects().then((projects = []) => {
-    dashboardProjectsStore.setProjects(projects)
+  ipc
+    .getDashboardProjects()
+    .then((projects = []) => {
+      dashboardProjectsStore.setProjects(projects)
 
-    return null
-  }).catch(ipc.isUnauthed, ipc.handleUnauthed)
-  .catch((err) => {
-    dashboardProjectsStore.setError(err)
+      return null
+    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
+    .catch((err) => {
+      dashboardProjectsStore.setError(err)
 
-    return null
-  })
+      return null
+    })
 
   return null
 }
@@ -36,13 +39,14 @@ const stopPollingDashboardProjects = () => {
 }
 
 const setupDashboardProject = (projectDetails) => {
-  return ipc.setupDashboardProject(projectDetails)
-  .then((project) => {
-    dashboardProjectsStore.addProject(project)
+  return ipc
+    .setupDashboardProject(projectDetails)
+    .then((project) => {
+      dashboardProjectsStore.addProject(project)
 
-    return project
-  })
-  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+      return project
+    })
+    .catch(ipc.isUnauthed, ipc.handleUnauthed)
 }
 
 const setProjectId = (id) => {

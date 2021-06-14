@@ -2,8 +2,8 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Loader from 'react-loader'
+import { graphql } from 'relay-runtime'
 
-import appApi from '../lib/app-api'
 import C from '../lib/constants'
 import ipc from '../lib/ipc'
 import appStore from '../lib/app-store'
@@ -15,10 +15,20 @@ import Intro from './intro'
 import Layout from './layout'
 import Project from '../project/project'
 
+graphql`
+  query appQuery {
+    app {
+      options {
+        os
+      }
+    }
+  }
+`
+
 @observer
 class App extends Component {
   componentDidMount () {
-    appApi.listenForMenuClicks()
+    // appApi.listenForMenuClicks() // TIM -  Whats this ??
 
     ipc.getOptions().then((options = {}) => {
       updateStore.setVersion(options.version)

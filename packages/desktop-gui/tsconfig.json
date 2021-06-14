@@ -8,7 +8,7 @@
      * Override this in modules that need JS
      */
     "allowJs": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "noImplicitAny": false,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
@@ -46,10 +46,13 @@
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [] /* List of folders to include type definitions from. */
-    "types": ["node", "chrome"],                           /* Type declaration files to be included in compilation. */
+    "types": [
+      "node",
+      "chrome"
+    ] /* Type declaration files to be included in compilation. */,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true
-  },
+  }
 }

@@ -7,6 +7,7 @@ import ipc from './lib/ipc'
 import handleGlobalErrors from './lib/handle-global-errors'
 
 import App from './app/app'
+import { CyRelayProvider } from './relay/CyRelayProvider'
 
 configureMobx({ enforceActions: 'observed' })
 
@@ -20,6 +21,10 @@ window.App = {
   ipc, // for stubbing in tests
 
   start () {
-    render(<App />, document.getElementById('app'))
+    render(
+      <CyRelayProvider>
+        <App />
+      </CyRelayProvider>, document.getElementById('app'),
+    )
   },
 }
