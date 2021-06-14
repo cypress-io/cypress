@@ -1906,7 +1906,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         .then(($iframe) => {
           const iframeText = $iframe[0].contentDocument.body.innerText
 
-          expect(iframeText).to.include('foo bar baz\n\nabc')
+          expect(iframeText).to.include('foo bar baz\nabc')
         })
       })
     })
