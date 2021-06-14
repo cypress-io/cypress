@@ -329,20 +329,6 @@ const create = function (Cypress, cy) {
           return false
         }
 
-        // if we already have a log
-        // then just update its attrs from
-        // the new log
-        const l = cmd.getLastLog()
-
-        if (l) {
-          l.merge(log)
-
-          // and make sure we return false
-          // which prevents a new log from
-          // being added
-          return false
-        }
-
         return insertNewLog(log)
       }
 
