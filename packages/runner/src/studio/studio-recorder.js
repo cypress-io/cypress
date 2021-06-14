@@ -262,6 +262,32 @@ export class StudioRecorder {
     this._clearPreviousMouseEvent()
   }
 
+  copyToClipboard = (commandsText, cb) => {
+    const callback = () => {
+      if (cb) {
+        cb(commandsText)
+      }
+    }
+
+    // clipboard API is not supported without secure context
+    if (window.isSecureContext && navigator.clipboard) {
+      navigator.clipboard.writeText(commandsText).then(callback)
+    } else {
+      const textArea = document.createElement('textarea')
+
+      textArea.value = commandsText
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = 0
+
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      textArea.remove()
+
+      callback()
+    }
+  }
+
   _trustEvent = (event) => {
     // only capture events sent by the actual user
     // but disable the check if we're in a test

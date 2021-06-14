@@ -239,9 +239,7 @@ const eventManager = {
 
     reporterBus.on('studio:copy:to:clipboard', (cb) => {
       ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
-        if (cb) {
-          cb(commandsText)
-        }
+        studioRecorder.copyToClipboard(commandsText, cb)
       })
     })
 

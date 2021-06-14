@@ -59,7 +59,7 @@ class Studio extends Component {
             </button>
           </Tooltip>
           <Tooltip
-            title='Save Test'
+            title='Save Commands'
             className='cy-tooltip'
             visible={model.isLoading ? false : null}
           >
