@@ -8,100 +8,111 @@
       </div>
       <div class="flex flex-col justify-center h-120 p-2">
         <SelectWizard v-if="!currentStep" />
+        <!-- Dynamically grabs a component that implements the current step's API -->
         <component v-else :is="currentStep.component" />
       </div>
     </div>
 
     <div class="text-right absolute bottom-2 right-2">
-      <button 
-        class="text-blue-500 m-5 px-4 py-2 rounded border-blue-500 border-1 border-inset"
-        :class="{ 'invisible': !currentStep }" 
-        @click="goBack"
-      >
+      <BaseButton outline v-show="currentStep" @click="goBack">
         Previous Step
-      </button>
+      </BaseButton>
 
-      <button
+      <BaseButton
         :disabled="!selectedTestingType || !canGoNextStep"
         data-cy="previous"
-        class="bg-blue-500 text-white m-5 px-4 py-2 rounded" 
-        :class="{ 'opacity-50': !selectedTestingType || !canGoNextStep }"
+        primary
         @click="goNext"
       >
         {{ nextStepText }}
-      </button>
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, markRaw, ref } from 'vue'
-import { testingTypes } from './types/shared'
-import RunnerButton from './components/RunnerButton.vue'
-import SelectWizard from './components/SelectWizard.vue'
-import { wizards } from './wizards/wizards'
-import { useStore } from './store'
+import { computed, defineComponent, markRaw, ref } from "vue";
+import { testingTypes } from "./types/shared";
+import RunnerButton from "./components/RunnerButton.vue";
+import SelectWizard from "./components/SelectWizard.vue";
+import { wizards } from "./wizards/wizards";
+import { useStore } from "./store";
+import BaseButton from "./components/BaseButton.vue";
 
 export default defineComponent({
-  name: 'App',
+  name: "App",
 
   components: {
     RunnerButton,
     SelectWizard,
+    BaseButton,
   },
 
   setup() {
-    const store = useStore()
+    const store = useStore();
 
-    const currentStepNumber = ref<number>(0)
+    const currentStepNumber = ref<number>(0);
 
-    const selectedWizard =  computed(() => 
+    const selectedWizard = computed(() =>
       store.getState().testingType
         ? wizards[store.getState().testingType!]
         : undefined
-    )
+    );
 
     const goNext = () => {
-      if (!selectedWizard.value || currentStepNumber.value === selectedWizard.value.steps.length) {
+      if (
+        !selectedWizard.value ||
+        currentStepNumber.value === selectedWizard.value.steps.length
+      ) {
         // we are done!
         // launch browser, or whatever
-        return
+        return;
       }
 
-      currentStepNumber.value += 1
-    }
+      currentStepNumber.value += 1;
+    };
 
     const goBack = () => {
       if (currentStepNumber.value > 0) {
-        currentStepNumber.value -= 1
+        currentStepNumber.value -= 1;
       }
-    }
+    };
 
     const lastStepOfWorkflow = computed(() => {
-      return selectedWizard.value && 
+      return (
+        selectedWizard.value &&
         selectedWizard.value.steps.length <= currentStepNumber.value
-    })
+      );
+    });
 
     const nextStepText = computed(() => {
       if (lastStepOfWorkflow.value) {
-        return 'Launch'
+        return "Launch";
       }
 
-      return 'Next Step'
-    })
+      return "Next Step";
+    });
 
-    const currentStep = computed(() => selectedWizard.value ? selectedWizard.value.steps[currentStepNumber.value - 1] : undefined)
+    const currentStep = computed(() =>
+      selectedWizard.value
+        ? selectedWizard.value.steps[currentStepNumber.value - 1]
+        : undefined
+    );
 
     return {
       testingTypes: markRaw(testingTypes),
       selectedWizard,
-      canGoNextStep: computed(() => currentStep.value ? currentStep.value.canGoNextStep() : !!selectedWizard.value),
+      canGoNextStep: computed(() =>
+        currentStep.value
+          ? currentStep.value.canGoNextStep()
+          : !!selectedWizard.value
+      ),
       nextStepText,
       currentStep,
       goNext,
       goBack,
-      selectedTestingType: computed(() => store.getState().testingType)
-    }
-  }
-})
+      selectedTestingType: computed(() => store.getState().testingType),
+    };
+  },
+});
 </script>
