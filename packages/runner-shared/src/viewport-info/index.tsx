@@ -50,7 +50,7 @@ export const ViewportInfo: React.FC<ViewportInfoProps> = namedObserver('Viewport
           <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be
             <strong>{` ${defaults.width}`}px</strong> by
             <strong>{` ${defaults.height}`}px</strong> unless specified by a
-            <code>cy.viewport</code> command.
+            {' '}<code>cy.viewport</code> command.
           </p>
           <p>Additionally you can override the default viewport dimensions by specifying these values in your {configFileFormatted(config.configFile)}.</p>
           <pre>{/* eslint-disable indent */}
