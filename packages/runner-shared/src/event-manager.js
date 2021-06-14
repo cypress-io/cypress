@@ -298,7 +298,6 @@ export const eventManager = {
   setup (config) {
     Cypress = this.Cypress = $Cypress.create(config)
 
-    // TODO: this was CT only before. Does this make sense for e2e too?
     // expose Cypress globally
     // since CT AUT shares the window with the spec, we don't want to overwrite
     // our spec Cypress instance with the component's Cypress instance
