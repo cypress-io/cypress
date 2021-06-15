@@ -3,10 +3,12 @@ import CyServer from '@packages/server'
 import {
   CypressIncomingRequest,
   CypressOutgoingResponse,
+  BrowserPreRequest,
 } from '@packages/proxy'
-import debugModule from 'debug'
+import Debug from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
+import { GetPreRequestCb, PreRequests } from './util/prerequests'
 import { IncomingMessage } from 'http'
 import { NetStubbingState } from '@packages/net-stubbing'
 import Bluebird from 'bluebird'
@@ -16,7 +18,7 @@ import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 
-const debug = debugModule('cypress:proxy:http')
+const debugRequests = Debug('cypress-verbose:proxy:http')
 
 export enum HttpStages {
   IncomingRequest,
@@ -35,9 +37,12 @@ export type HttpMiddlewareStacks = {
 type HttpMiddlewareCtx<T> = {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
-
+  shouldCorrelatePreRequests: () => boolean
+  stage: HttpStages
+  debug: Debug.Debugger
   middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
+  getPreRequest: (cb: GetPreRequestCb) => void
 } & T
 
 export const defaultMiddleware = {
@@ -48,6 +53,7 @@ export const defaultMiddleware = {
 
 export type ServerCtx = Readonly<{
   config: CyServer.Config
+  shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
   netStubbingState: NetStubbingState
@@ -82,10 +88,8 @@ type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   skipMiddleware: (name: string) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any) {
-  const stage = HttpStages[type]
-
-  debug('Entering stage %o', { stage })
+export function _runStage (type: HttpStages, ctx: any, onError) {
+  ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = () => {
     const middlewares = ctx.middleware[type]
@@ -131,8 +135,6 @@ export function _runStage (type: HttpStages, ctx: any) {
         return resolve()
       }
 
-      debug('Running middleware %o', { stage, middlewareName })
-
       const fullCtx = {
         next: () => {
           copyChangedCtx()
@@ -147,21 +149,19 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end()
         },
         onError: (error: Error) => {
-          debug('Error in middleware %o', { stage, middlewareName, error })
+          ctx.debug('Error in middleware %o', { middlewareName, error })
 
           if (type === HttpStages.Error) {
             return
           }
 
           ctx.error = error
-
-          _end(_runStage(HttpStages.Error, ctx))
+          onError(error)
+          _end(_runStage(HttpStages.Error, ctx, onError))
         },
-
         skipMiddleware: (name) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
         },
-
         ...ctx,
       }
 
@@ -174,19 +174,18 @@ export function _runStage (type: HttpStages, ctx: any) {
   }
 
   return runMiddlewareStack()
-  .then(() => {
-    debug('Leaving stage %o', { stage })
-  })
 }
 
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
+  shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
+  preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
 
@@ -195,6 +194,7 @@ export class Http {
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
     this.config = opts.config
+    this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
     this.middleware = opts.middleware
@@ -213,27 +213,43 @@ export class Http {
       res,
       buffers: this.buffers,
       config: this.config,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       socket: this.socket,
+      debug: (formatter, ...args) => {
+        debugRequests(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+      },
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({
           resHeaders: ctx.incomingRes.headers,
           ...opts,
         })
       },
+      getPreRequest: (cb) => {
+        this.preRequests.get(ctx.req, ctx.debug, cb)
+      },
     }
 
-    return _runStage(HttpStages.IncomingRequest, ctx)
+    const onError = () => {
+      if (ctx.req.browserPreRequest) {
+        // browsers will retry requests in the event of network errors, but they will not send pre-requests,
+        // so try to re-use the current browserPreRequest for the next retry
+        ctx.debug('Re-using pre-request data %o', ctx.req.browserPreRequest)
+        this.addPendingBrowserPreRequest(ctx.req.browserPreRequest)
+      }
+    }
+
+    return _runStage(HttpStages.IncomingRequest, ctx, onError)
     .then(() => {
       if (ctx.incomingRes) {
-        return _runStage(HttpStages.IncomingResponse, ctx)
+        return _runStage(HttpStages.IncomingResponse, ctx, onError)
       }
 
-      return debug('warning: Request was not fulfilled with a response.')
+      return ctx.debug('Warning: Request was not fulfilled with a response.')
     })
   }
 
@@ -253,9 +269,14 @@ export class Http {
 
   reset () {
     this.buffers.reset()
+    this.preRequests = new PreRequests()
   }
 
   setBuffer (buffer) {
     return this.buffers.set(buffer)
+  }
+
+  addPendingBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    this.preRequests.addPending(browserPreRequest)
   }
 }
