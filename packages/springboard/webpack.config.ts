@@ -1,6 +1,6 @@
 import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import * as path from 'path'
-import { Plugin, Configuration } from 'webpack'
+import type { Plugin, Configuration } from 'webpack'
 import { VueLoaderPlugin } from 'vue-loader'
 import WindiCSS from 'windicss-webpack-plugin'
 

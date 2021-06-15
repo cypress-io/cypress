@@ -17,14 +17,19 @@
     "watch": "yarn build --watch --progress"
   },
   "dependencies": {
+    "@apollo/client": "^3.3.20",
+    "@vue/apollo-composable": "^4.0.0-alpha.12",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
+    "graphql-tag": "^2.12.4",
+    "p-defer": "^3.0.0",
     "vue": "3.0.11"
   },
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "cross-env": "6.0.3",
+    "graphql": "^15.5.0",
     "ts-loader": "^8.0.5",
     "vue-loader": "16.2.0",
     "webpack": "4.44.2",

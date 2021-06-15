@@ -35,6 +35,8 @@
 </template>
 
 <script lang="ts">
+import { provideApolloClient } from '@vue/apollo-composable'
+import { apolloClient } from './graphql/apolloClient'
 import { computed, defineComponent, markRaw, ref } from 'vue'
 import { testingTypes } from './types/shared'
 import RunnerButton from './components/RunnerButton.vue'
@@ -51,6 +53,7 @@ export default defineComponent({
   },
 
   setup() {
+    provideApolloClient(apolloClient)
     const store = useStore()
 
     const currentStepNumber = ref<number>(0)

@@ -5,6 +5,8 @@ const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
+const { execute, parse } = require('graphql')
+
 const dialog = require('./dialog')
 const pkg = require('./package')
 const logs = require('./logs')
@@ -25,6 +27,8 @@ const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
+const { DataContext } = require('../graphql/util/DataContext')
+const { graphqlSchema } = require('../graphql/server')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -458,7 +462,37 @@ module.exports = {
 
   start (options, bus) {
     // curry left options
-    return ipc.on('request', _.partial(this.handleEvent, options, bus))
+    ipc.on('request', _.partial(this.handleEvent, options, bus))
+
+    // Add a GraphQL handler
+    ipc.on('graphql', async (evt, { id, params, variables }) => {
+      try {
+        const result = await execute({
+          schema: graphqlSchema,
+          document: parse(params.text),
+          operationName: params.name,
+          variableValues: variables,
+          contextValue: new DataContext(options),
+        })
+
+        evt.sender.send('graphql:response', {
+          id,
+          result,
+        })
+      } catch (e) {
+        evt.sender.send('graphql:response', {
+          id,
+          result: {
+            data: null,
+            errors: [{
+              name: e.name,
+              message: e.message,
+              stack: e.stack,
+            }],
+          },
+        })
+      }
+    })
   },
 
 }
