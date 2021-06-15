@@ -39,11 +39,8 @@ export class SpecsStore {
     }
   }
 
-  storeSpecFiles (): Bluebird<void> {
-    return this.getSpecFiles()
-    .then((specFiles) => {
-      this.specFiles = specFiles
-    })
+  setSpecFiles (specFiles: SpecFiles) {
+    this.specFiles = specFiles
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {

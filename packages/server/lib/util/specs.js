@@ -220,8 +220,30 @@ const find = (config, specPattern) => {
 
     searchOptions.searchFolder = config.componentFolder
 
-    return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.COMPONENT))
+    const componentTests = findSpecsOfType(searchOptions, specPattern).then((specs) => {
+      return specs.map((spec) => {
+        return {
+          ...spec,
+          specType: SPEC_TYPES.COMPONENT,
+          source: 'cypress',
+        }
+      })
+    })
+
+    const storybookTests = findSpecsOfType({
+      ...searchOptions,
+      testFiles: ['**/*.stories.{js,jsx,ts,tsx}'],
+    }, specPattern).then((specs) => {
+      return specs.map((spec) => {
+        return {
+          ...spec,
+          specType: SPEC_TYPES.COMPONENT,
+          source: 'storybook',
+        }
+      })
+    })
+
+    return Promise.all([componentTests, storybookTests]).then(([components, storybooks]) => [...components, ...storybooks])
   }
 
   const printFoundSpecs = (foundSpecs) => {

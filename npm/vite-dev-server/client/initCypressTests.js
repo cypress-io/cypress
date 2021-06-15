@@ -2,9 +2,12 @@
 // it will be used to load and kick start the selected spec
 
 const supportPath = import.meta.env.__cypress_supportPath
-const originAutUrl = import.meta.env.__cypress_originAutUrl
+const originAutUrl = import.meta.env.__cypress_originUrlRootPath
+const originUrlPrefix = import.meta.env.__cypress_originUrlPrefix
 
-const specPath = window.location.pathname.replace(originAutUrl, '')
+let specPath = window.location.pathname.replace(originAutUrl, '').replace(originUrlPrefix, '')
+
+console.log(originAutUrl, originUrlPrefix, specPath)
 
 const importsToLoad = [() => import(/* @vite-ignore */ specPath)]
 
