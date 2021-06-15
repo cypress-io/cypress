@@ -1683,6 +1683,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     context('request url querystring', () => {
       it('parse query correctly', () => {
         cy.intercept({ url: '/users*' }, (req) => {
+          expect(req.query.someKey).to.deep.equal('someValue')
           expect(req.query).to.deep.equal({ someKey: 'someValue' })
         }).as('getUrl')
 
@@ -1696,41 +1697,65 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
         cy.wait('@getUrl')
       })
 
-      it('reconcile changes on query to url', () => {
-        cy.intercept({ url: '/users*' }, (req) => {
-          req.query = {
-            a: 'b',
-          }
+      context('reconcile changes', () => {
+        it('by assigning a new query parameter obj', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+            }
 
-          expect(req.url).to.eq('http://localhost:3500/users?a=b')
-        }).as('getUrl')
+            expect(req.url).to.eq('http://localhost:3500/users?a=b')
+          }).as('getUrl')
 
-        cy.window().then((win) => {
-          const xhr = new win.XMLHttpRequest()
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
 
-          xhr.open('GET', '/users?someKey=someValue')
-          xhr.send()
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
         })
 
-        cy.wait('@getUrl')
-      })
+        it('by setting new properties', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            expect(req.query.a).to.eq('b')
+            req.query.c = 'd'
 
-      it('reconcile changes on query to url', () => {
-        cy.intercept({ url: '/users*' }, (req) => {
-          expect(req.query.a).to.eq('b')
-          req.query.c = 'd'
+            expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+          }).as('getUrl')
 
-          expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
-        }).as('getUrl')
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
 
-        cy.window().then((win) => {
-          const xhr = new win.XMLHttpRequest()
+            xhr.open('GET', '/users?a=b')
+            xhr.send()
+          })
 
-          xhr.open('GET', '/users?a=b')
-          xhr.send()
+          cy.wait('@getUrl')
         })
 
-        cy.wait('@getUrl')
+        it('by doing both', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+            }
+
+            expect(req.query.a).to.eq('b')
+            req.query.c = 'd'
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
       })
     })
 

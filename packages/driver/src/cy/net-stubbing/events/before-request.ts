@@ -119,32 +119,47 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   let resolved = false
   let handlerCompleted = false
 
+  const updateUrlParams = (paramsObj) => {
+    const url = new URL(req.url)
+    const urlSearchParams = new URLSearchParams(paramsObj)
+
+    url.search = urlSearchParams.toString()
+    req.url = url.toString()
+  }
+
+  const createQueryProxy = (obj) => {
+    return new Proxy(obj, {
+      set (target, key, value) {
+        target[key] = value
+
+        updateUrlParams(target)
+
+        return true
+      },
+    })
+  }
+
+  let queryObj = {}
+  const url = new URL(req.url)
+  const urlSearchParams = new URLSearchParams(url.search)
+
+  for (let pair of urlSearchParams.entries()) {
+    queryObj[pair[0]] = pair[1]
+  }
+  let queryProxy = createQueryProxy(queryObj)
+
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
     get query () {
-      const url = new URL(req.url)
-      const urlSearchParams = new URLSearchParams(url.search)
-      const result = {}
-
-      for (let pair of urlSearchParams.entries()) {
-        result[pair[0]] = pair[1]
-      }
-
-      return result
+      return queryProxy
     },
-
     set query (userQuery) {
-      const url = new URL(req.url)
-      const urlSearchParams = new URLSearchParams(userQuery)
-
-      url.search = urlSearchParams.toString()
-      req.url = url.toString()
+      updateUrlParams(userQuery)
+      queryProxy = createQueryProxy(userQuery)
     },
-
     get url () {
       return req.url
     },
-
     set url (userUrl) {
       req.url = userUrl
     },
