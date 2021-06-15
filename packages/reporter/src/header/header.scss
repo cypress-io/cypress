@@ -79,11 +79,11 @@
       padding: 10px 5px;
 
       &.passed {
-        color: #23ae89;
+        color: #23AE89;
       }
 
       &.failed {
-        color: #e94b3b;
+        color: #E94B3B;
         &.is-failed-test-pinned {
           background: lighten($pinned, 40%);
           border-left: 2px solid $pinned;
@@ -132,7 +132,7 @@
       margin-right: 5px;
 
       label {
-        background-color: #cc4239;
+        background-color: #CC4239;
       }
     }
 
