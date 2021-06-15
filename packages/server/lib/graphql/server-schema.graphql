@@ -3,6 +3,10 @@
 
 
 type App {
+  """The current version of the cypress runner"""
+  cypressVersion: String
+  field: String
+
   """This is an app with a name"""
   name: String
   options: AppOptions
@@ -49,6 +53,7 @@ type Mutation {
   addProject: Query
   closeBrowser: Query
   closeProject: Query
+  externalOpen: Boolean
   logOut: Query
   removeProject: Query
   setScaffoldPaths: ProjectConfig
@@ -76,7 +81,8 @@ type ProjectConfig {
 }
 
 type Query {
-  app: App
+  app: App!
+  currentProject: Project
   projects: [Project]
 }
 

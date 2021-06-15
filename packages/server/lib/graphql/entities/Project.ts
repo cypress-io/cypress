@@ -11,6 +11,11 @@ import { File } from './File'
   },
 })
 export class Project {
+  @nxs.queryField(() => ({ type: 'Project' }))
+  static currentProject () {
+    return {}
+  }
+
   @nxs.queryField(() => {
     return {
       type: nxs.list(Project),

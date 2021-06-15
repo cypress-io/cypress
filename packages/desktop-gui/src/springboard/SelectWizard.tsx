@@ -10,7 +10,7 @@ export const SelectWizard = (props) => {
       </h2>
 
       <div className="max-w-128 mx-auto my-0">
-        {showNewUserFlow && <NewUserWelcome />}
+        {props.showNewUserFlow && <NewUserWelcome />}
       </div>
 
       <div className="text-center">

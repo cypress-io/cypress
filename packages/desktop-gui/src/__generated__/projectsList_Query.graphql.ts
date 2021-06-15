@@ -11,7 +11,7 @@ export type projectsList_QueryResponse = {
         readonly options: {
             readonly os: string | null;
         } | null;
-    } | null;
+    };
 };
 export type projectsList_Query = {
     readonly response: projectsList_QueryResponse;

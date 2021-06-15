@@ -1,7 +1,10 @@
+import { nonNull } from 'nexus'
 import { nxs } from 'nexus-decorators'
 import { DataContext } from '../util/DataContext'
 import { AppOptions } from './AppOptions'
 import { Project } from './Project'
+
+let i = 0
 
 @nxs.objectType({
   definition (t) {
@@ -13,16 +16,26 @@ import { Project } from './Project'
 export class App {
   @nxs.queryField(() => {
     return {
-      type: 'App',
+      type: nonNull('App'),
     }
   })
   static app () {
-    return {}
+    return new App()
   }
+
+  @nxs.field.string()
+  field () {}
 
   @nxs.field.list.type(() => Project)
   recentProjects (args, ctx: DataContext) {
     return []
+  }
+
+  @nxs.field.string({
+    description: 'The current version of the cypress runner',
+  })
+  get cypressVersion () {
+    return i++
   }
 
   organizations (args, ctx: DataContext) {

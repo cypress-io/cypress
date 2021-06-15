@@ -6,8 +6,9 @@ import { render } from 'react-dom'
 import ipc from './lib/ipc'
 import handleGlobalErrors from './lib/handle-global-errors'
 
-import App from './app/app'
+// import App from './app/app'
 import { CyRelayProvider } from './relay/CyRelayProvider'
+import { AppSpringboard } from './springboard/AppSpringboard'
 
 configureMobx({ enforceActions: 'observed' })
 
@@ -20,11 +21,12 @@ if (window.env === 'test' || window.env === 'development') {
 window.App = {
   ipc, // for stubbing in tests
 
-  start () {
+  start() {
     render(
       <CyRelayProvider>
-        <App />
-      </CyRelayProvider>, document.getElementById('app'),
+        <AppSpringboard />
+      </CyRelayProvider>,
+      document.getElementById('app'),
     )
   },
 }

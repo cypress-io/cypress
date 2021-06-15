@@ -1,4 +1,9 @@
 import * as React from 'react'
+import { graphql } from 'relay-runtime'
+import {
+  useAppSpringboardQuery,
+  useAppSpringboardQueryLoader,
+} from '../__generated__/AppSpringboardQuery.graphql'
 import { SelectWizard } from './SelectWizard'
 
 export interface AppSpringboardProps {
@@ -6,13 +11,38 @@ export interface AppSpringboardProps {
   children: React.ReactChildren
 }
 
-export const AppSpringboard: React.FC<AppSpringboardProps> = (props) => {
+graphql`
+  query AppSpringboardQuery {
+    app {
+      cypressVersion
+    }
+  }
+`
+
+export const AppSpringboard: React.FC<AppSpringboardProps> = (props = {}) => {
+  const result = useAppSpringboardQuery()
+  const [fetcher, fetch] = useAppSpringboardQueryLoader()
+
+  React.useEffect(() => {
+    const x = setInterval(() => {
+      console.log('abc')
+
+      fetch({}, { fetchPolicy: 'network-only' })
+    }, 500)
+
+    return () => {
+      clearInterval(x)
+    }
+  }, [fetch])
+
   const goBack = (e) => {
     //
   }
   const goNext = (e) => {
     //
   }
+
+  return <h1>{result.app.cypressVersion}</h1>
 
   return (
     <div className="h-150 max-w-200 mx-auto rounded-xl bg-white relative">
@@ -22,7 +52,7 @@ export const AppSpringboard: React.FC<AppSpringboardProps> = (props) => {
           <button>Log in</button>
         </div>
         <div className="flex flex-col justify-center h-120 p-2">
-          {props.isCurrentStep ? props.children : <SelectWizard />}
+          {/* {props.isCurrentStep ? props.children : <SelectWizard />} */}
         </div>
       </div>
 

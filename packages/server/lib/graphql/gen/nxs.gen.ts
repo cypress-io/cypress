@@ -84,6 +84,8 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 
 export interface NexusGenFieldTypes {
   App: { // field return type
+    cypressVersion: string | null; // String
+    field: string | null; // String
     name: string | null; // String
     options: NexusGenRootTypes['AppOptions'] | null; // AppOptions
     recentProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
@@ -120,6 +122,7 @@ export interface NexusGenFieldTypes {
     addProject: NexusGenRootTypes['Query'] | null; // Query
     closeBrowser: NexusGenRootTypes['Query'] | null; // Query
     closeProject: NexusGenRootTypes['Query'] | null; // Query
+    externalOpen: boolean | null; // Boolean
     logOut: NexusGenRootTypes['Query'] | null; // Query
     removeProject: NexusGenRootTypes['Query'] | null; // Query
     setScaffoldPaths: NexusGenRootTypes['ProjectConfig'] | null; // ProjectConfig
@@ -137,7 +140,8 @@ export interface NexusGenFieldTypes {
     todo: string | null; // ID
   }
   Query: { // field return type
-    app: NexusGenRootTypes['App'] | null; // App
+    app: NexusGenRootTypes['App']; // App!
+    currentProject: NexusGenRootTypes['Project'] | null; // Project
     projects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
   }
   Release: { // field return type
@@ -155,6 +159,8 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
+    cypressVersion: 'String'
+    field: 'String'
     name: 'String'
     options: 'AppOptions'
     recentProjects: 'Project'
@@ -191,6 +197,7 @@ export interface NexusGenFieldTypeNames {
     addProject: 'Query'
     closeBrowser: 'Query'
     closeProject: 'Query'
+    externalOpen: 'Boolean'
     logOut: 'Query'
     removeProject: 'Query'
     setScaffoldPaths: 'ProjectConfig'
@@ -209,6 +216,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    currentProject: 'Project'
     projects: 'Project'
   }
   Release: { // field return type name

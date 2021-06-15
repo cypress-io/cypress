@@ -5,27 +5,23 @@
 import { CacheConfig, ConcreteRequest, FetchPolicy, IEnvironment, RenderPolicy, VariablesOf } from "relay-runtime";
 import { EnvironmentProviderOptions, LoadQueryOptions, PreloadedQuery, loadQuery, useLazyLoadQuery, usePreloadedQuery, useQueryLoader } from "react-relay";
 
-export type appQueryVariables = {};
-export type appQueryResponse = {
+export type AppSpringboardQueryVariables = {};
+export type AppSpringboardQueryResponse = {
     readonly app: {
-        readonly options: {
-            readonly os: string | null;
-        } | null;
+        readonly cypressVersion: string | null;
     };
 };
-export type appQuery = {
-    readonly response: appQueryResponse;
-    readonly variables: appQueryVariables;
+export type AppSpringboardQuery = {
+    readonly response: AppSpringboardQueryResponse;
+    readonly variables: AppSpringboardQueryVariables;
 };
 
 
 
 /*
-query appQuery {
+query AppSpringboardQuery {
   app {
-    options {
-      os
-    }
+    cypressVersion
   }
 }
 */
@@ -43,19 +39,8 @@ var v0 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "AppOptions",
-        "kind": "LinkedField",
-        "name": "options",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "os",
-            "storageKey": null
-          }
-        ],
+        "kind": "ScalarField",
+        "name": "cypressVersion",
         "storageKey": null
       }
     ],
@@ -67,7 +52,7 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "appQuery",
+    "name": "AppSpringboardQuery",
     "selections": (v0/*: any*/),
     "type": "Query",
     "abstractKey": null
@@ -76,44 +61,44 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "appQuery",
+    "name": "AppSpringboardQuery",
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "f29d06af49c15cc0c847c93c42391cfe",
+    "cacheID": "62ea69141c912948d124f0d7de18cfba",
     "id": null,
     "metadata": {},
-    "name": "appQuery",
+    "name": "AppSpringboardQuery",
     "operationKind": "query",
-    "text": "query appQuery {\n  app {\n    options {\n      os\n    }\n  }\n}\n"
+    "text": "query AppSpringboardQuery {\n  app {\n    cypressVersion\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = 'c3358f94c4f818d22687b9f0a6b6dcd5';
+(node as any).hash = '988aa42c699c823e9be5676c3b227667';
 
 export default node;
 
-export function loadAppQuery<TEnvironmentProviderOptions extends EnvironmentProviderOptions = {}>(
+export function loadAppSpringboardQuery<TEnvironmentProviderOptions extends EnvironmentProviderOptions = {}>(
   environment: IEnvironment,
-  variables: VariablesOf<appQuery> = {},
+  variables: VariablesOf<AppSpringboardQuery> = {},
   options?: LoadQueryOptions,
   environmentProviderOptions?: TEnvironmentProviderOptions,
-): PreloadedQuery<appQuery, TEnvironmentProviderOptions> {
+): PreloadedQuery<AppSpringboardQuery, TEnvironmentProviderOptions> {
   return loadQuery(environment, node, variables, options, environmentProviderOptions)
 }
-export function useAppQuery(variables: VariablesOf<appQuery> = {}, options?: {
+export function useAppSpringboardQuery(variables: VariablesOf<AppSpringboardQuery> = {}, options?: {
   fetchKey?: string | number;
   fetchPolicy?: FetchPolicy;
   networkCacheConfig?: CacheConfig;
   UNSTABLE_renderPolicy?: RenderPolicy;
 }) {
-  return useLazyLoadQuery<appQuery>(node, variables, options)
+  return useLazyLoadQuery<AppSpringboardQuery>(node, variables, options)
 }
-export function useAppQueryLoader(initialQueryReference?: PreloadedQuery<appQuery> | null) {
+export function useAppSpringboardQueryLoader(initialQueryReference?: PreloadedQuery<AppSpringboardQuery> | null) {
   return useQueryLoader(node, initialQueryReference)
 }
-export function usePreloadedAppQuery(preloadedQuery: PreloadedQuery<appQuery>, options?: {
+export function usePreloadedAppSpringboardQuery(preloadedQuery: PreloadedQuery<AppSpringboardQuery>, options?: {
   UNSTABLE_renderPolicy?: RenderPolicy;
 }) {
-  return usePreloadedQuery<appQuery>(node, preloadedQuery, options)
+  return usePreloadedQuery<AppSpringboardQuery>(node, preloadedQuery, options)
 }
