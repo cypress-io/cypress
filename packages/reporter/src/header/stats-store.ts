@@ -9,6 +9,7 @@ export interface StatsStoreStartInfo {
   numFailed?: number
   numPending?: number
   showOnlyFailedTest?: boolean
+  _isRunOver?: boolean
 }
 
 const defaults = {
@@ -20,6 +21,7 @@ const defaults = {
 
   _startTime: null,
   _currentTime: null,
+  _isRunOver: false,
 }
 
 class StatsStore {
@@ -31,6 +33,7 @@ class StatsStore {
 
   @observable _startTime: number | null = defaults._startTime
   @observable _currentTime: number | null = defaults._startTime;
+  @observable _isRunOver: boolean | null = defaults._isRunOver;
   [key: string]: any
 
   private _interval?: IntervalID;
@@ -95,6 +98,7 @@ class StatsStore {
   end () {
     this._stopTimer()
     this._updateCurrentTime()
+    this._isRunOver = true
   }
 
   reset () {

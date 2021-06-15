@@ -32,7 +32,7 @@ const Stats = observer(({ stats }: Props) => (
       <span className='visually-hidden'>Passed:</span>
       <span className='num'>{count(stats.numPassed)}</span>
     </li>
-    <li className={`${stats.showOnlyFailedTest ? 'is-failed-test-pinned' : ''} failed`} onClick={() => showTestFailedResults(() => stats.toggleShowOnlyFailedTest())}>
+    <li className={`${stats.showOnlyFailedTest ? 'is-failed-test-pinned' : ''} ${!stats._isRunOver ? 'is-disabled' : ''} failed`} onClick={() => showTestFailedResults(() => stats.toggleShowOnlyFailedTest())}>
       <i aria-hidden="true" className='fas fa-times' />
       <span className='visually-hidden'>Failed:</span>
       <span className='num'>{count(stats.numFailed)}</span>

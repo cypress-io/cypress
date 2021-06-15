@@ -89,7 +89,12 @@
           border-left: 2px solid $pinned;
         }
         &:hover {
+          background: #e3dfdf;
           cursor: pointer;
+          transition: background 0.3s ease-in;
+        }
+        &.is-disabled {
+          pointer-events: none;
         }
       }
 
