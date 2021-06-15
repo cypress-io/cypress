@@ -23,7 +23,6 @@ import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
-
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
