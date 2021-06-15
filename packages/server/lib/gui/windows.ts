@@ -6,6 +6,7 @@ import Debug from 'debug'
 import cwd from '../cwd'
 import savedState from '../saved_state'
 const cyDesktopSpringboard = require('@packages/springboard')
+const cyDesktopSpringboardReact = require('@packages/springboard-react')
 const cyDesktopGui = require('@packages/desktop-gui')
 
 const debug = Debug('cypress:server:windows')
@@ -24,6 +25,10 @@ const getUrl = function (type) {
     case 'INDEX':
       if (process.env.SPRINGBOARD) {
         return cyDesktopSpringboard.getPathToIndex()
+      }
+
+      if (process.env.SPRINGBOARD_REACT) {
+        return cyDesktopSpringboardReact.getPathToIndex()
       }
 
       return cyDesktopGui.getPathToIndex()

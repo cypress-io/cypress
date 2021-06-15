@@ -55,7 +55,7 @@ const stats = {
   timings: true,
 }
 
-function makeSassLoaders ({ modules }): RuleSetRule {
+function makeSassLoaders ({ modules, postcssPlugins }): RuleSetRule {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -75,7 +75,7 @@ function makeSassLoaders ({ modules }): RuleSetRule {
       {
         loader: require.resolve('postcss-loader'),
         options: {
-          plugins: [
+          plugins: postcssPlugins || [
             require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
           ],
         },
@@ -97,7 +97,11 @@ function makeSassLoaders ({ modules }): RuleSetRule {
   }
 }
 
-export const getCommonConfig = () => {
+interface GetCommonConfig {
+  postcssPlugins?: any[]
+}
+
+export const getCommonConfig = ({ postcssPlugins }: GetCommonConfig = {}) => {
   const commonConfig: Configuration = {
     mode: 'none',
     node: {
@@ -146,8 +150,8 @@ export const getCommonConfig = () => {
             { loader: MiniCSSExtractWebpackPlugin.loader },
           ],
         },
-        makeSassLoaders({ modules: false }),
-        makeSassLoaders({ modules: true }),
+        makeSassLoaders({ modules: false, postcssPlugins }),
+        makeSassLoaders({ modules: true, postcssPlugins }),
         {
           test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
