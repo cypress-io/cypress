@@ -119,6 +119,22 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   let resolved = false
   let handlerCompleted = false
 
+  const createQueryObject = () => {
+    try {
+      const url = new URL(req.url)
+      const urlSearchParams = new URLSearchParams(url.search)
+      const result = {}
+
+      for (let pair of urlSearchParams.entries()) {
+        result[pair[0]] = pair[1]
+      }
+
+      return result
+    } catch { // invalid url
+      return {}
+    }
+  }
+
   const updateUrlParams = (paramsObj) => {
     const url = new URL(req.url)
     const urlSearchParams = new URLSearchParams(paramsObj)
@@ -139,13 +155,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     })
   }
 
-  let queryObj = {}
-  const url = new URL(req.url)
-  const urlSearchParams = new URLSearchParams(url.search)
-
-  for (let pair of urlSearchParams.entries()) {
-    queryObj[pair[0]] = pair[1]
-  }
+  let queryObj = createQueryObject()
   let queryProxy = createQueryProxy(queryObj)
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
