@@ -7,13 +7,21 @@ function dist (...args) {
   return path.join(...paths)
 }
 
+function getContents (filename) {
+  return fs.readFile(dist(filename))
+}
+
 module.exports = {
   getPathToDist (...args) {
     return dist(...args)
   },
 
   getInjectionContents () {
-    return fs.readFile(dist('injection.js'))
+    return getContents('injection.js')
+  },
+
+  getMultidomainInjectionContents () {
+    return getContents('injection_multidomain.js')
   },
 
   getPathToIndex () {

@@ -79,19 +79,6 @@ mainConfig.resolve = {
 }
 
 // @ts-ignore
-const injectionConfig: webpack.Configuration = {
-  ...getSimpleConfig(),
-  mode: 'production',
-  entry: {
-    injection: [path.resolve(__dirname, 'injection/index.js')],
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-  },
-}
-
-// @ts-ignore
 const multiDomainConfig: webpack.Configuration = {
   mode: 'development',
   ...getSimpleConfig(),
@@ -104,4 +91,35 @@ const multiDomainConfig: webpack.Configuration = {
   },
 }
 
-export default [mainConfig, injectionConfig, multiDomainConfig]
+// @ts-ignore
+const mainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection: [path.resolve(__dirname, 'injection/main.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+// @ts-ignore
+const multidomainInjectionConfig: webpack.Configuration = {
+  ...getSimpleConfig(),
+  mode: 'production',
+  entry: {
+    injection_multidomain: [path.resolve(__dirname, 'injection/multidomain.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+}
+
+export default [
+  mainConfig,
+  mainInjectionConfig,
+  multiDomainConfig,
+  multidomainInjectionConfig,
+]
