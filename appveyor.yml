@@ -9,6 +9,7 @@ branches:
 environment:
   # use matching version of Node.js
   nodejs_version: "14.16.0"
+  DEBUG: electron-builder
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
