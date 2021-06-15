@@ -11,10 +11,19 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return 'e2e'
   }
 
+  async _initPlugins (cfg, options) {
+    const modifiedConfig = await super._initPlugins(cfg, options)
+
+    await this.initSpecListWatcher(modifiedConfig)
+
+    return modifiedConfig
+  }
+
   open (options: Record<string, unknown>) {
     this._server = new ServerE2E()
 
     return super.open(options, {
+      // @ts-ignore
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then((cfg) => {

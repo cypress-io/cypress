@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
-import { findSpecsOfType } from '@packages/server/lib/util/specs'
+import { findSpecsOfType } from './util/specs'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
@@ -13,18 +13,27 @@ interface SpecsWatcherOptions {
 const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
 
 // TODO: shouldn't this be on the trailing edge, not leading?
-const debounce = (fn) => _.debounce(fn, 250, { leading: true })
+const debounce = (fn: () => void) => _.debounce(fn, 250, { leading: true })
+
+type RunnerType = 'ct' | 'e2e'
 
 export class SpecsStore {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
 
-  constructor (private cypressConfig) {
-
-  }
+  constructor (
+    private cypressConfig: Record<string, any>,
+    private runner: RunnerType,
+  ) {}
 
   get specDirectory () {
-    return this.cypressConfig.resolved.componentFolder.value
+    if (this.runner === 'e2e') {
+      return this.cypressConfig.resolved.integrationFolder.value
+    }
+
+    if (this.runner === 'ct') {
+      return this.cypressConfig.resolved.componentFolder.value
+    }
   }
 
   get testFiles () {

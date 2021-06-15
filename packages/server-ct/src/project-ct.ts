@@ -1,13 +1,17 @@
 import Debug from 'debug'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
-import specsUtil from '@packages/server/lib/util/specs'
 import { ServerCt } from './server-ct'
-import { SpecsStore } from './specs-store'
+import { SpecsStore } from '@packages/server/lib/specs-store'
 
 export * from '@packages/server/lib/project-base'
 
 const debug = Debug('cypress:server-ct:project')
+
+interface InitPlugins {
+  cfg: any
+  specsStore: SpecsStore
+}
 
 export class ProjectCt extends ProjectBase<ServerCt> {
   get projectType (): 'ct' {
@@ -37,6 +41,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     this._server = new ServerCt()
 
     return super.open(options, {
+      // @ts-ignore - Bluebird is giving me grief.
       onOpen: (cfg) => {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
 
@@ -67,51 +72,40 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     options.onError(err)
   }
 
-  _initPlugins (cfg, options) {
-    return super._initPlugins(cfg, options)
-    .then((modifiedConfig) => {
-      // now that plugins have been initialized, we want to execute
-      // the plugin event for 'dev-server:start' and get back
-      // @ts-ignore - let's not attempt to TS all the things in packages/server
+  async _initPlugins (cfg, options): Promise<InitPlugins> {
+    const modifiedConfig = await super._initPlugins(cfg, options)
+    const specs = await this.findProjectSpecs(modifiedConfig)
+    const devServerOptions = await devServer.start({ specs, config: modifiedConfig })
 
-      return specsUtil.find(modifiedConfig)
-      .filter((spec: Cypress.Cypress['spec']) => {
-        return spec.specType === 'component'
-      })
-      .then((specs) => {
-        return devServer.start({ specs, config: modifiedConfig })
-        .then((devServerOptions) => {
-          if (!devServerOptions) {
-            throw new Error([
-              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-              'Make sure that the dev-server:start function returns an object.',
-              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
-            ].join('\n'))
-          }
+    if (!devServerOptions) {
+      throw new Error([
+        'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+        'Make sure that the dev-server:start function returns an object.',
+        'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+      ].join('\n'))
+    }
 
-          const { port } = devServerOptions
+    const { port } = devServerOptions
 
-          modifiedConfig.baseUrl = `http://localhost:${port}`
+    modifiedConfig.baseUrl = `http://localhost:${port}`
 
-          const specsStore = new SpecsStore(cfg)
+    const specsStore = new SpecsStore(cfg, 'ct')
 
-          specsStore.watch({
-            onSpecsChanged: (specs) => {
-              // send new files to dev server
-              devServer.updateSpecs(specs)
+    specsStore.watch({
+      onSpecsChanged: (specs) => {
+        // send new files to dev server
+        devServer.updateSpecs(specs)
 
-              // send new files to frontend
-              this.server.sendSpecList(specs)
-            },
-          })
-
-          return specsStore.storeSpecFiles()
-          .return({
-            specsStore,
-            cfg: modifiedConfig,
-          })
-        })
-      })
+        // send new files to frontend
+        this.server.sendSpecList(specs)
+      },
     })
+
+    await specsStore.storeSpecFiles()
+
+    return {
+      specsStore,
+      cfg: modifiedConfig,
+    }
   }
 }
