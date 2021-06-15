@@ -100,6 +100,10 @@ describe('header', () => {
     it('displays "--" if no time taken', () => {
       cy.get('.duration .num').should('have.text', '--')
     })
+
+    it('button to filter test is disabled by default', () => {
+      cy.get('.failed').should('have.class', 'is-disabled')
+    })
   })
 
   describe('controls', () => {
