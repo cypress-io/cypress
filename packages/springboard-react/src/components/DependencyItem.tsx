@@ -1,3 +1,4 @@
+import gql from 'graphql-tag'
 import * as React from 'react'
 
 interface DependencyItemProps {
@@ -6,6 +7,13 @@ interface DependencyItemProps {
     description: string
   }
 }
+
+export const DependencyItemFragment = gql`
+  fragment DependencyItem on WizardDependency {
+    packageName
+    description
+  }
+`
 
 export const DependencyItem: React.FC<DependencyItemProps> = (props) => {
   return (

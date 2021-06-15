@@ -24,7 +24,13 @@ const ipcLink = new ApolloLink((op) => {
 })
 
 // Cache implementation
-const cache = new InMemoryCache()
+const cache = new InMemoryCache({
+  typePolicies: {
+    Wizard: {
+      keyFields: [],
+    },
+  },
+})
 
 // Create the apollo client
 export const apolloClient = new ApolloClient({

@@ -31,6 +31,9 @@ export const fetchGraphql = async function fetchGraphql (
 ) {
   const dfd = pDefer()
   const ipcId = Math.random().toString()
+  const queryText = print(op.query)
+
+  // console.log(ipcId, queryText)
 
   dfd.promise.finally(() => {
     ipcInFlight.delete(ipcId)
@@ -42,7 +45,7 @@ export const fetchGraphql = async function fetchGraphql (
   ipc.send('graphql', {
     id: ipcId,
     params: {
-      text: print(op.query),
+      text: queryText,
       name: op.operationName,
     },
     variables: op.variables,

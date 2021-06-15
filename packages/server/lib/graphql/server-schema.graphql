@@ -27,6 +27,11 @@ type Browser {
   todo: ID
 }
 
+enum CurrentStep {
+  installDependencies
+  selectFramework
+}
+
 type Dashboard {
   todo: ID
 }
@@ -57,6 +62,9 @@ type Mutation {
   logOut: Query
   removeProject: Query
   setScaffoldPaths: ProjectConfig
+  wizardSetComponentFramework: Query
+  wizardSetDismissedHelper: Wizard
+  wizardSetTestingType(type: String): Query
 }
 
 interface Node {
@@ -84,6 +92,7 @@ type Query {
   app: App!
   currentProject: Project
   projects: [Project]
+  wizard: Wizard
 }
 
 """A release of the test runner"""
@@ -100,4 +109,22 @@ type User {
   displayName: String
   email: String
   name: String
+}
+
+"""Groups all actions & data associated with the onboarding wizard"""
+type Wizard {
+  """Whether we can go to the previous step in the onboarding flow"""
+  canGoBackStep: Boolean
+
+  """Whether we can go to the next step in the onboarding flow"""
+  canGoNextStep: Boolean
+  currentStep: CurrentStep
+  dependenciesToInstall: [WizardDependency]
+  packageManager: String
+  showNewUserWelcome: Boolean
+}
+
+type WizardDependency {
+  description: String
+  packageName: String
 }

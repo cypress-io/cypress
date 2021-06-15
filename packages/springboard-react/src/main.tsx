@@ -3,6 +3,8 @@ import * as React from 'react'
 import './main.scss'
 
 import { SpringboardApp } from './SpringboardApp'
+import { ApolloProvider } from '@apollo/client'
+import { apolloClient } from './graphql/apolloClient'
 
 declare global {
   interface Window {
@@ -12,7 +14,12 @@ declare global {
 
 window.App = {
   start() {
-    ReactDOM.render(<SpringboardApp />, document.getElementById('app'))
+    ReactDOM.render(
+      <ApolloProvider client={apolloClient}>
+        <SpringboardApp />
+      </ApolloProvider>,
+      document.getElementById('app'),
+    )
   },
 }
 

@@ -75,9 +75,11 @@ function makeSassLoaders ({ modules, postcssPlugins }): RuleSetRule {
       {
         loader: require.resolve('postcss-loader'),
         options: {
-          plugins: postcssPlugins || [
-            require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-          ],
+          postcssOptions: {
+            plugins: postcssPlugins || [
+              require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
+            ],
+          },
         },
       },
       {

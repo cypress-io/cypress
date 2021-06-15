@@ -1,11 +1,22 @@
 import React from 'react'
-import { DependencyItem } from './DependencyItem'
+import { DependencyItem, DependencyItemFragment } from './DependencyItem'
 import { TerminalCommand } from './TerminalCommand'
 import type { Dependency } from '../types/supportedFrameworks'
+import gql from 'graphql-tag'
 
 interface InstallDependenciesProps {
   dependencies: Dependency[]
 }
+
+export const InstallDependenciesFragment = gql`
+  fragment InstallDependencies on Wizard {
+    packageManager
+    dependenciesToInstall {
+      ...DependencyItem
+    }
+  }
+  ${DependencyItemFragment}
+`
 
 export const InstallDependencies: React.FC<InstallDependenciesProps> = (
   props,
@@ -17,7 +28,6 @@ export const InstallDependencies: React.FC<InstallDependenciesProps> = (
           <p className="text-center p-4 text-xl">
             We need you to install these dev dependencies.
           </p>
-
           <ul>
             {props.dependencies.map((dependency) => (
               <DependencyItem

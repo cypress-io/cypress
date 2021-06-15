@@ -18,18 +18,17 @@ export const TerminalCommand: React.FC<TerminalCommandProps> = (props) => {
 
   return (
     <div className="flex h-10 w-100 bg-gray-900">
-      <div className="py-1 flex w-100 flex items-center">
-        <code className="text-yellow-200 px-2">
-          $
-        </code>
-        <code className="text-white overflow-scroll flex items-center mr-2" id="command" style={{ whiteSpace: 'nowrap' }}>
+      <div className="py-1 w-100 flex items-center">
+        <code className="text-yellow-200 px-2">$</code>
+        <code
+          className="text-white overflow-scroll flex items-center mr-2"
+          id="command"
+          style={{ whiteSpace: 'nowrap' }}
+        >
           {props.command}
         </code>
       </div>
-      <button
-        onClick={copyToClipboard}
-        className="bg-gray-300 px-2 py-1"
-      >
+      <button onClick={copyToClipboard} className="bg-gray-300 px-2 py-1">
         CP
       </button>
     </div>

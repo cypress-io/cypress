@@ -1,6 +1,15 @@
+import gql from 'graphql-tag'
 import React from 'react'
 import { SelectWizard } from './components/SelectWizard'
 import { testingTypes } from './types/shared'
+
+gql`
+  query SpringboardAppQuery {
+    app {
+      cypressVersion
+    }
+  }
+`
 
 export const SpringboardApp = (props) => {
   const { currentStep } = props
@@ -43,84 +52,9 @@ export const SpringboardApp = (props) => {
           }`}
           onClick={goNext}
         >
-          {props.nextStepText}
+          Next Step
         </button>
       </div>
     </div>
   )
 }
-
-// <script lang="ts">
-// import { provideApolloClient } from '@vue/apollo-composable'
-// import { apolloClient } from './graphql/apolloClient'
-// import { computed, defineComponent, markRaw, ref } from 'vue'
-// import { testingTypes } from './types/shared'
-// import RunnerButton from './components/RunnerButton.vue'
-// import SelectWizard from './components/SelectWizard.vue'
-// import { wizards } from './wizards/wizards'
-// import { useStore } from './store'
-
-// export default defineComponent({
-//   name: 'App',
-
-//   components: {
-//     RunnerButton,
-//     SelectWizard,
-//   },
-
-//   setup() {
-//     provideApolloClient(apolloClient)
-//     const store = useStore()
-
-//     const currentStepNumber = ref<number>(0)
-
-//     const selectedWizard =  computed(() =>
-//       store.getState().testingType
-//         ? wizards[store.getState().testingType!]
-//         : undefined
-//     )
-
-//     const goNext = () => {
-//       if (!selectedWizard.value || currentStepNumber.value === selectedWizard.value.steps.length) {
-//         // we are done!
-//         // launch browser, or whatever
-//         return
-//       }
-
-//       currentStepNumber.value += 1
-//     }
-
-//     const goBack = () => {
-//       if (currentStepNumber.value > 0) {
-//         currentStepNumber.value -= 1
-//       }
-//     }
-
-//     const lastStepOfWorkflow = computed(() => {
-//       return selectedWizard.value &&
-//         selectedWizard.value.steps.length <= currentStepNumber.value
-//     })
-
-//     const nextStepText = computed(() => {
-//       if (lastStepOfWorkflow.value) {
-//         return 'Launch'
-//       }
-
-//       return 'Next Step'
-//     })
-
-//     const currentStep = computed(() => selectedWizard.value ? selectedWizard.value.steps[currentStepNumber.value - 1] : undefined)
-
-//     return {
-//       testingTypes: markRaw(testingTypes),
-//       selectedWizard,
-//       canGoNextStep: computed(() => currentStep.value ? currentStep.value.canGoNextStep() : !!selectedWizard.value),
-//       nextStepText,
-//       currentStep,
-//       goNext,
-//       goBack,
-//       selectedTestingType: computed(() => store.getState().testingType)
-//     }
-//   }
-// })
-// </script>

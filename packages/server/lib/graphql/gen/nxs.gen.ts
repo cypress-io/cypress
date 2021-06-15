@@ -18,6 +18,7 @@ import type { Organization } from "./../entities/Organization"
 import type { ProjectConfig } from "./../entities/ProjectConfig"
 import type { Release } from "./../entities/Release"
 import type { User } from "./../entities/User"
+import type { Wizard, WizardDependency } from "./../entities/Wizard"
 import type { core, connectionPluginCore } from "nexus"
 
 declare global {
@@ -43,6 +44,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  CurrentStep: "installDependencies" | "selectFramework"
   SpecType: "component" | "integration"
 }
 
@@ -69,6 +71,8 @@ export interface NexusGenObjects {
   Query: {};
   Release: Release;
   User: User;
+  Wizard: Wizard;
+  WizardDependency: WizardDependency;
 }
 
 export interface NexusGenInterfaces {
@@ -126,6 +130,9 @@ export interface NexusGenFieldTypes {
     logOut: NexusGenRootTypes['Query'] | null; // Query
     removeProject: NexusGenRootTypes['Query'] | null; // Query
     setScaffoldPaths: NexusGenRootTypes['ProjectConfig'] | null; // ProjectConfig
+    wizardSetComponentFramework: NexusGenRootTypes['Query'] | null; // Query
+    wizardSetDismissedHelper: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetTestingType: NexusGenRootTypes['Query'] | null; // Query
   }
   Organization: { // field return type
     name: string | null; // String
@@ -143,6 +150,7 @@ export interface NexusGenFieldTypes {
     app: NexusGenRootTypes['App']; // App!
     currentProject: NexusGenRootTypes['Project'] | null; // Project
     projects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
+    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   Release: { // field return type
     todo: string | null; // ID
@@ -151,6 +159,18 @@ export interface NexusGenFieldTypes {
     displayName: string | null; // String
     email: string | null; // String
     name: string | null; // String
+  }
+  Wizard: { // field return type
+    canGoBackStep: boolean | null; // Boolean
+    canGoNextStep: boolean | null; // Boolean
+    currentStep: NexusGenEnums['CurrentStep'] | null; // CurrentStep
+    dependenciesToInstall: Array<NexusGenRootTypes['WizardDependency'] | null> | null; // [WizardDependency]
+    packageManager: string | null; // String
+    showNewUserWelcome: boolean | null; // Boolean
+  }
+  WizardDependency: { // field return type
+    description: string | null; // String
+    packageName: string | null; // String
   }
   Node: { // field return type
     id: string | null; // ID
@@ -201,6 +221,9 @@ export interface NexusGenFieldTypeNames {
     logOut: 'Query'
     removeProject: 'Query'
     setScaffoldPaths: 'ProjectConfig'
+    wizardSetComponentFramework: 'Query'
+    wizardSetDismissedHelper: 'Wizard'
+    wizardSetTestingType: 'Query'
   }
   Organization: { // field return type name
     name: 'String'
@@ -218,6 +241,7 @@ export interface NexusGenFieldTypeNames {
     app: 'App'
     currentProject: 'Project'
     projects: 'Project'
+    wizard: 'Wizard'
   }
   Release: { // field return type name
     todo: 'ID'
@@ -227,12 +251,29 @@ export interface NexusGenFieldTypeNames {
     email: 'String'
     name: 'String'
   }
+  Wizard: { // field return type name
+    canGoBackStep: 'Boolean'
+    canGoNextStep: 'Boolean'
+    currentStep: 'CurrentStep'
+    dependenciesToInstall: 'WizardDependency'
+    packageManager: 'String'
+    showNewUserWelcome: 'Boolean'
+  }
+  WizardDependency: { // field return type name
+    description: 'String'
+    packageName: 'String'
+  }
   Node: { // field return type name
     id: 'ID'
   }
 }
 
 export interface NexusGenArgTypes {
+  Mutation: {
+    wizardSetTestingType: { // args
+      type?: string | null; // String
+    }
+  }
 }
 
 export interface NexusGenAbstractTypeMembers {

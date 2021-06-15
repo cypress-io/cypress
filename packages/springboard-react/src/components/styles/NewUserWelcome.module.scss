@@ -1,5 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .welcomeWrapper {
-  @apply p-8 m-4 pb-10 bg-blue-200 rounded-xl max-w-128 relative grid gap-4;
+  @apply p-8 m-4 pb-10 bg-blue-200 rounded-xl relative grid gap-4;
 }
 
 .buttonWrapper {
@@ -12,7 +16,7 @@
 }
 
 .title {
-  @apply text-size-1.5rem;
+  @apply text-lg;
 }
 
 .subtitle {
@@ -20,10 +24,10 @@
 }
 
 button {
-  @apply px-2 py-0.5 text-blue-900 text-size-0.8rem;
+  @apply px-2 py-0.5 text-blue-900 text-sm;
   @apply hover:opacity-70;
 }
 
 .outlineButton {
-  @apply border-blue-900 border-width-1px border-solid rounded-xl;
+  @apply border-blue-900 border border-solid rounded-xl;
 }

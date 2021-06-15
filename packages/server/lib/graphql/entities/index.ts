@@ -23,3 +23,5 @@ export * from './ProjectConfig'
 export * from './Release'
 
 export * from './User'
+
+export * from './Wizard'

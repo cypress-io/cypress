@@ -1,28 +1,34 @@
 import React, { useState } from 'react'
 import { BaseModal } from './BaseModal'
 import { CloseButton } from './CloseButton'
+import styles from './styles/NewUserWelcome.module.scss'
 
 interface NewUserWelcomeProps {
   onClose?: React.MouseEventHandler<any>
 }
 
 export const NewUserWelcome: React.FC<NewUserWelcomeProps> = (props) => {
+  const { onClose = () => {} } = props
   const [showHelper, setShowHelper] = useState(false)
 
   return (
     <>
-      <div className="welcomeWrapper">
-        <CloseButton data-cy="closeWithButton" onClick={close} />
-        <h3 className="title">Welcome to Cypress!</h3>
-        <p className="subtitle">
+      <div className={styles.welcomeWrapper}>
+        <CloseButton data-cy="closeWithButton" onClick={onClose} />
+        <h3 className={styles.title}>Welcome to Cypress!</h3>
+        <p className={styles.subtitle}>
           Cypress allows you to write both e2e (end-to-end) and component tests.
         </p>
-        <p className="buttonWrapper">
-          <button className="underline" data-cy="closeWithText" onClick={close}>
+        <p className={styles.buttonWrapper}>
+          <button
+            className={styles.underline}
+            data-cy="closeWithText"
+            onClick={onClose}
+          >
             No thanks
           </button>
           <button
-            className="outlineButton"
+            className={styles.outlineButton}
             data-cy="openHelper"
             onClick={() => setShowHelper(true)}
           >
@@ -38,27 +44,3 @@ export const NewUserWelcome: React.FC<NewUserWelcomeProps> = (props) => {
     </>
   )
 }
-
-// <script lang="ts">
-// import { defineComponent, ref } from "vue";
-// import BaseModal from "./BaseModal.vue";
-// import CloseButton from "./CloseButton.vue";
-
-// export default defineComponent({
-//   emits: ["close"],
-//   components: {
-//     BaseModal,
-//     CloseButton,
-//   },
-//   setup(_, { emit }) {
-//     return {
-//       showHelper: ref(false),
-//       close: () => emit("close"),
-//     };
-//   },
-// });
-// </script>
-
-// <style scoped lang="scss">
-
-// </style>

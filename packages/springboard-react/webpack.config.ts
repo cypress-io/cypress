@@ -5,14 +5,14 @@ import {
 import path from 'path'
 import type webpack from 'webpack'
 
+const common = getCommonConfig({ postcssPlugins: [
+  require('tailwindcss'),
+  require('autoprefixer'),
+] })
+
 // @ts-ignore
 const config: webpack.Configuration = {
-  ...getCommonConfig({
-    postcssPlugins: [
-      require('tailwindcss'),
-      require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
-    ],
-  }),
+  ...common,
   entry: {
     app: path.resolve(__dirname, 'src/main'),
   },
