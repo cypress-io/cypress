@@ -1,23 +1,29 @@
 import React, { Component } from 'react'
+import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
 
 import eventManager from '../lib/event-manager'
 import { StudioInstructionsModal } from './studio-modals'
 
+@observer
 class Studio extends Component {
   constructor (props) {
     super(props)
 
-    this.state = { modalOpen: false }
+    this.state = {
+      modalOpen: false,
+      copySuccess: false,
+    }
   }
 
   render () {
     const { model, hasUrl } = this.props
+    const { modalOpen, copySuccess } = this.state
 
     return (
       <div className='header-popup studio'>
-        <StudioInstructionsModal open={this.state.modalOpen} close={() => this.setState({ modalOpen: false })} />
+        <StudioInstructionsModal open={modalOpen} close={() => this.setState({ modalOpen: false })} />
         <div className='text-block'>
           <span className={cs('icon', { 'is-active': model.isActive && !model.isFailed && hasUrl })}>
             <i className='fas' />
@@ -59,13 +65,30 @@ class Studio extends Component {
             </button>
           </Tooltip>
           <Tooltip
+            title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
+            className='cy-tooltip'
+            visible={model.isLoading || model.isEmpty ? false : null}
+            updateCue={copySuccess}
+          >
+            <button
+              className={cs('header-button button-studio button-studio-copy', {
+                'button-success': copySuccess,
+              })}
+              disabled={model.isLoading || model.isEmpty}
+              onClick={this._copy}
+              onMouseLeave={this._endCopySuccess}
+            >
+              <i className={copySuccess ? 'fas fa-clipboard-check' : 'fas fa-clipboard'} />
+            </button>
+          </Tooltip>
+          <Tooltip
             title='Save Commands'
             className='cy-tooltip'
-            visible={model.isLoading ? false : null}
+            visible={model.isLoading || model.isEmpty ? false : null}
           >
             <button
               className='header-button button-studio button-studio-save'
-              disabled={model.isLoading}
+              disabled={model.isLoading || model.isEmpty}
               onClick={this._save}
             >
               <i className='fas fa-save' />
@@ -93,8 +116,22 @@ class Studio extends Component {
     eventManager.emit('restart')
   }
 
+  _copy = () => {
+    if (this.state.copySuccess) return
+
+    eventManager.emit('studio:copy:to:clipboard', () => {
+      this.setState({ copySuccess: true })
+    })
+  }
+
   _save = () => {
     this.props.model.startSave()
+  }
+
+  _endCopySuccess = () => {
+    if (this.state.copySuccess) {
+      this.setState({ copySuccess: false })
+    }
   }
 }
 

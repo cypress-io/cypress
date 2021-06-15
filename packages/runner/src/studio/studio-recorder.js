@@ -273,6 +273,8 @@ export class StudioRecorder {
     if (window.isSecureContext && navigator.clipboard) {
       navigator.clipboard.writeText(commandsText).then(callback)
     } else {
+      // create the textarea in our document rather than this._body
+      // as to not interfere with the app in the aut
       const textArea = document.createElement('textarea')
 
       textArea.value = commandsText

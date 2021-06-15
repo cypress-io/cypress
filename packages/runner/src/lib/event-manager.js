@@ -248,6 +248,12 @@ const eventManager = {
       rerun()
     })
 
+    localBus.on('studio:copy:to:clipboard', (cb) => {
+      ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
+        studioRecorder.copyToClipboard(commandsText, cb)
+      })
+    })
+
     localBus.on('studio:save', (saveInfo) => {
       ws.emit('studio:save', saveInfo, (err) => {
         if (err) {

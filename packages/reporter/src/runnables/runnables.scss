@@ -411,11 +411,25 @@
       }
     }
 
+    .studio-copy-wrapper {
+      margin-left: auto;
+
+      .studio-copy {
+        border: 2px solid #3386d4;
+        color: #3386d4;
+
+        &.studio-copy-success {
+          border-color: $pass;
+          color: $pass;
+        }
+      }
+    }
+
     .studio-save {
       background-color: #3386d4;
       color: #fff;
       display: none;
-      margin-left: auto;
+      margin-left: 10px;
 
       &:hover {
         background-color: darken(#3386d4, 10%);
