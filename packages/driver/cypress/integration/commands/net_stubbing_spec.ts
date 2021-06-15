@@ -1714,6 +1714,24 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.wait('@getUrl')
       })
+
+      it('reconcile changes on query to url', () => {
+        cy.intercept({ url: '/users*' }, (req) => {
+          expect(req.query.a).to.eq('b')
+          req.query.c = 'd'
+
+          expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+        }).as('getUrl')
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users?a=b')
+          xhr.send()
+        })
+
+        cy.wait('@getUrl')
+      })
     })
 
     context('request events', function () {
