@@ -7,17 +7,16 @@ const count = (num: number) => num > 0 ? num : '--'
 const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
 
 const showTestFailedResults = (cb) => {
-  addClassToElement('runnable-passed', 'is-hidden')
-  addClassToElement('runnable-skipped', 'is-hidden')
+  addToggleToElement('runnables', 'is-hidden')
 
   return cb()
 }
 
-const addClassToElement = (elem, classToAdd) => {
-  const elements = Array.from(document.getElementsByClassName(elem))
+const addToggleToElement = (el, classToToggle) => {
+  const elements = Array.from(document.getElementsByClassName(el))
 
   elements.forEach((element) => {
-    element.classList.toggle(classToAdd)
+    element.classList.toggle(classToToggle)
   })
 }
 

@@ -185,10 +185,6 @@
       border-left: 5px solid $pass;
     }
 
-    &.runnable-passed.is-hidden {
-      display: none;
-    }
-
     .runnable-retried > div > .runnable-wrapper,
     .runnable-retried > div > .runnable-instruments {
       border-left: 5px solid $retried;
@@ -270,6 +266,10 @@
         display: flex;
       }
     }
+  }
+
+  .is-hidden > .runnable-passed, .runnable-pending {
+    display: none;
   }
 
   .runnable-instruments {
