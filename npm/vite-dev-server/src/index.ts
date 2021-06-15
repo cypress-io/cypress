@@ -1,13 +1,14 @@
 import { debug as debugFn } from 'debug'
-import { Server } from 'http'
 import { start as createDevServer, StartDevServer } from './startServer'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
 export { StartDevServer }
 
+type DoneCallback = () => unknown
+
 export interface ResolvedDevServerConfig {
   port: number
-  server: Server
+  close: (done?: DoneCallback) => void
 }
 
 export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
@@ -18,5 +19,5 @@ export async function startDevServer (startDevServerArgs: StartDevServer): Promi
 
   debug('Component testing vite server started on port', port)
 
-  return { port, server: app.httpServer }
+  return { port, close: () => app.httpServer.close() }
 }
