@@ -2,6 +2,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 
 import { StatsStore } from './stats-store'
+import Tooltip from '@cypress/react-tooltip'
 
 const count = (num: number) => num > 0 ? num : '--'
 const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
@@ -31,11 +32,13 @@ const Stats = observer(({ stats }: Props) => (
       <span className='visually-hidden'>Passed:</span>
       <span className='num'>{count(stats.numPassed)}</span>
     </li>
-    <li className={`${stats.showOnlyFailedTest ? 'is-failed-test-pinned' : ''} ${(!stats._isRunOver && stats.numFailed <= 0) ? 'is-disabled' : ''} failed`} onClick={() => showTestFailedResults(() => stats.toggleShowOnlyFailedTest())}>
-      <i aria-hidden="true" className='fas fa-times' />
-      <span className='visually-hidden'>Failed:</span>
-      <span className='num'>{count(stats.numFailed)}</span>
-    </li>
+    <Tooltip placement='top' title={`${(!stats._isRunOver && stats.numFailed <= 0) ? '' : 'Filter by failing tests'}`} className='cy-tooltip'>
+      <li className={`${stats.showOnlyFailedTest ? 'is-failed-test-pinned' : ''} ${(!stats._isRunOver && stats.numFailed <= 0) ? 'is-disabled' : ''} failed`} onClick={() => showTestFailedResults(() => stats.toggleShowOnlyFailedTest())}>
+        <i aria-hidden="true" className='fas fa-times' />
+        <span className='visually-hidden'>Failed:</span>
+        <span className='num'>{count(stats.numFailed)}</span>
+      </li>
+    </Tooltip>
     <li className='pending'>
       <i aria-hidden="true" className='fas fa-circle-notch' />
       <span className='visually-hidden'>Pending:</span>
