@@ -10,6 +10,7 @@ import path from 'path'
 import R from 'ramda'
 
 import commitInfo from '@cypress/commit-info'
+import plugins from './plugins'
 import pkg from '@packages/root'
 import { RunnablesStore } from '@packages/reporter'
 import { ServerCt } from '@packages/server-ct'
@@ -738,6 +739,22 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return user.ensureAuthToken()
     .then((authToken) => {
       return api.requestAccess(projectId, authToken)
+    })
+  }
+
+  _initPlugins (cfg, options) {
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    const allowedCfg = config.allowed(cfg)
+
+    return plugins.init(allowedCfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError: this._onError,
+      onWarning: options.onWarning,
     })
   }
 
