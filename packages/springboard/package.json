@@ -35,6 +35,7 @@
   "files": [
     "dist",
     "lib",
-    "!lib/**/*_spec.jsx"
+    "!lib/**/*_spec.jsx",
+    "assets"
   ]
 }
