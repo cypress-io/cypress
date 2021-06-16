@@ -89,7 +89,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   protected ensureProp = ensureProp
 
-  get projectType () {
+  get projectType (): 'ct' | 'e2e' | 'base' {
     if (this.constructor === ProjectBase) {
       return 'base'
     }

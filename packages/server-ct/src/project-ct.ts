@@ -5,15 +5,15 @@ import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
+import { SpecsStore } from '@packages/server/lib/specs-store'
 import { ServerCt } from './server-ct'
-import { SpecsStore } from './specs-store'
 
 export * from '@packages/server/lib/project-base'
 
 const debug = Debug('cypress:server-ct:project')
 
 export class ProjectCt extends ProjectBase<ServerCt> {
-  get projectType () {
+  get projectType (): 'ct' {
     return 'ct'
   }
 

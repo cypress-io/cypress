@@ -10,7 +10,7 @@ import settings from './util/settings'
 const debug = Debug('cypress:server:project')
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
-  get projectType () {
+  get projectType (): 'e2e' {
     return 'e2e'
   }
 
