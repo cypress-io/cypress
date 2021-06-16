@@ -14,13 +14,12 @@ library.add(fas)
 library.add(fab)
 
 import State from '../lib/state'
-import EventManager from '../lib/event-manager'
+import { eventManager as EventManager, namedObserver } from '@packages/runner-shared'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
-import { namedObserver } from '../lib/mobx'
 import { SpecList } from './SpecList/SpecList'
 import { NoSpec } from './NoSpec'
 

@@ -3,8 +3,8 @@ import { shallow } from 'enzyme'
 import sinon from 'sinon'
 import driver from '@packages/driver'
 
+import { Message } from '@packages/runner-shared'
 import * as reporter from '@packages/reporter'
-import Message from '../message/message'
 import State from '../lib/state'
 
 const Reporter = reporter.Reporter = () => <div />
