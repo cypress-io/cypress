@@ -41,7 +41,6 @@ export default function (options: Schema): Rule {
       options.project = workspace.extensions.defaultProject
     }
 
-    console.log('🚀 ~ file: index.ts ~ line 40 ~ return ~ options', options)
     //@ts-ignore
     const project = workspace.projects.get(options.project)
 
