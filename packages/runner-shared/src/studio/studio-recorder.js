@@ -1,7 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 const saveErrorMessage = (message) => {
   return `\

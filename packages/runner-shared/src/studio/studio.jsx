@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 import { StudioInstructionsModal } from './studio-modals'
 
@@ -23,7 +23,7 @@ class Studio extends Component {
 
     return (
       <div className='header-popup studio'>
-        <StudioInstructionsModal open={modalOpen} close={() => this.setState({ modalOpen: false })} />
+        <StudioInstructionsModal open={modalOpen} close={this._closeModal} />
         <div className='text-block'>
           <span className={cs('icon', { 'is-active': model.isActive && !model.isFailed && hasUrl })}>
             <i className='fas' />
@@ -107,6 +107,10 @@ class Studio extends Component {
     if (this.props.model.isLoading) return
 
     this.setState({ modalOpen: true })
+  }
+
+  _closeModal = () => {
+    this.setState({ modalOpen: false })
   }
 
   _close = () => {
