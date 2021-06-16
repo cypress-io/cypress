@@ -1,19 +1,20 @@
 import Debug from 'debug'
-import config from '@packages/server/lib/config'
-import plugins from '@packages/server/lib/plugins'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
-import settings from '@packages/server/lib/util/settings'
-import specsUtil from '@packages/server/lib/util/specs'
 import { ServerCt } from './server-ct'
-import { SpecsStore } from './specs-store'
+import { SpecsStore } from '@packages/server/lib/specs-store'
 
 export * from '@packages/server/lib/project-base'
 
 const debug = Debug('cypress:server-ct:project')
 
+interface InitPlugins {
+  cfg: any
+  specsStore: SpecsStore
+}
+
 export class ProjectCt extends ProjectBase<ServerCt> {
-  get projectType () {
+  get projectType (): 'ct' {
     return 'ct'
   }
 
@@ -40,6 +41,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     this._server = new ServerCt()
 
     return super.open(options, {
+      // @ts-ignore - Bluebird is giving me grief.
       onOpen: (cfg) => {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
 
@@ -64,85 +66,46 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     })
   }
 
-  _initPlugins (cfg, options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    const allowedCfg = config.allowed(cfg)
+  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
+    debug('plugins failed with error', err)
 
-    return plugins.init(allowedCfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
-      onError (err) {
-        debug('plugins failed with error', err)
+    options.onError(err)
+  }
 
-        options.onError(err)
+  async _initPlugins (cfg, options): Promise<InitPlugins> {
+    const modifiedConfig = await super._initPlugins(cfg, options)
+    const specs = await this.findProjectSpecs(modifiedConfig)
+    const devServerOptions = await devServer.start({ specs, config: modifiedConfig })
+
+    if (!devServerOptions) {
+      throw new Error([
+        'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+        'Make sure that the dev-server:start function returns an object.',
+        'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+      ].join('\n'))
+    }
+
+    const { port } = devServerOptions
+
+    modifiedConfig.baseUrl = `http://localhost:${port}`
+
+    const specsStore = new SpecsStore(cfg, 'ct')
+
+    specsStore.watch({
+      onSpecsChanged: (specs) => {
+        // send new files to dev server
+        devServer.updateSpecs(specs)
+
+        // send new files to frontend
+        this.server.sendSpecList(specs)
       },
-      onWarning: options.onWarning,
     })
-    .then((modifiedCfg) => {
-      debug('plugin config yielded: %o', modifiedCfg)
 
-      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+    await specsStore.storeSpecFiles()
 
-      updatedConfig.componentTesting = true
-
-      // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-      // But if we don't return it in the plugins function, it never gets set
-      // Since there is no chance that it will have any other value here, we set it to "component"
-      // This allows users to not return config in the `cypress/plugins/index.js` file
-      // https://github.com/cypress-io/cypress/issues/16860
-      updatedConfig.resolved.testingType = { value: 'component' }
-
-      debug('updated config: %o', updatedConfig)
-
-      return updatedConfig
-    })
-    .then((modifiedConfig) => {
-      // now that plugins have been initialized, we want to execute
-      // the plugin event for 'dev-server:start' and get back
-      // @ts-ignore - let's not attempt to TS all the things in packages/server
-
-      return specsUtil.find(modifiedConfig)
-      .filter((spec: Cypress.Cypress['spec']) => {
-        return spec.specType === 'component'
-      })
-      .then((specs) => {
-        return devServer.start({ specs, config: modifiedConfig })
-        .then((devServerOptions) => {
-          if (!devServerOptions) {
-            throw new Error([
-              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-              'Make sure that the dev-server:start function returns an object.',
-              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
-            ].join('\n'))
-          }
-
-          const { port } = devServerOptions
-
-          modifiedConfig.baseUrl = `http://localhost:${port}`
-
-          const specsStore = new SpecsStore(cfg)
-
-          specsStore.watch({
-            onSpecsChanged: (specs) => {
-              // send new files to dev server
-              devServer.updateSpecs(specs)
-
-              // send new files to frontend
-              this.server.sendSpecList(specs)
-            },
-          })
-
-          return specsStore.storeSpecFiles()
-          .return({
-            specsStore,
-            cfg: modifiedConfig,
-          })
-        })
-      })
-    })
+    return {
+      specsStore,
+      cfg: modifiedConfig,
+    }
   }
 }

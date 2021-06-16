@@ -5,9 +5,9 @@ import send from 'send'
 import { NetworkProxy } from '@packages/proxy'
 import { handle, serve, serveChunk } from '@packages/runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
+import { SpecsStore } from '@packages/server/lib/specs-store'
 import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
-import { SpecsStore } from './specs-store'
 
 const debug = Debug('cypress:server:routes')
 

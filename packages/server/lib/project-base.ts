@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
@@ -10,6 +8,7 @@ import path from 'path'
 import R from 'ramda'
 
 import commitInfo from '@cypress/commit-info'
+import plugins from './plugins'
 import pkg from '@packages/root'
 import { RunnablesStore } from '@packages/reporter'
 import { ServerCt } from '@packages/server-ct'
@@ -34,6 +33,7 @@ import keys from './util/keys'
 import settings from './util/settings'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
+import { SpecsStore } from './specs-store'
 
 interface CloseOptions {
   onClose: () => any
@@ -56,12 +56,13 @@ const debugScaffold = Debug('cypress:server:scaffold')
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
-  protected options?: Record<string, any>
+  protected options: Record<string, any> | undefined
   protected spec: Cypress.Cypress['spec'] | null
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
-  private _recordTests = null
+  private _recordTests?: (runnables: any, cb: () => void) => Bluebird<void>
+  private generatedProjectIdTimestamp?: number
 
   public browser: any
 
@@ -89,7 +90,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   protected ensureProp = ensureProp
 
-  get projectType () {
+  get projectType (): 'ct' | 'e2e' | 'base' {
     if (this.constructor === ProjectBase) {
       return 'base'
     }
@@ -117,7 +118,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.cfg.state
   }
 
-  open (options = {}, callbacks: OpenOptions) {
+  open (options: Record<string, any> = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
@@ -183,8 +184,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       // save the last time they opened the project
       // along with the first time they opened it
       const now = Date.now()
-      const stateToSave = {
+      const stateToSave: {
+        lastOpened: number
+        firstOpened: number | undefined
+      } = {
         lastOpened: now,
+        firstOpened: undefined,
       }
 
       if (!cfg.state || !cfg.state.firstOpened) {
@@ -244,6 +249,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       if (this._server) {
         return this._server.reset()
       }
+
+      return
     })
   }
 
@@ -281,6 +288,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
       })
     }
+
+    return
   }
 
   watchPluginsFile (cfg, options) {
@@ -377,7 +386,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
-    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest)
+    this._automation = new Automation(cfg.namespace as string, cfg.socketIoCookie as string, cfg.screenshotsFolder as string, onBrowserPreRequest)
 
     this.server.startWebsockets(this.automation, cfg, {
       onReloadBrowser: options.onReloadBrowser,
@@ -408,7 +417,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         if (this._recordTests) {
           await this._recordTests(runnables, cb)
 
-          this._recordTests = null
+          this._recordTests = undefined
 
           return
         }
@@ -435,6 +444,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             this.emit('end', stats)
           })
         }
+
+        return
       },
     })
   }
@@ -489,7 +500,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (options = {}): Bluebird<Cfg> {
+  getConfig (options: Record<string, any> | undefined = {}): Bluebird<Cfg> {
     if (options == null) {
       options = this.options
     }
@@ -636,7 +647,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const scaffolds = []
 
-    const push = scaffolds.push.bind(scaffolds)
+    const push = scaffolds.push.bind(scaffolds) as (...items: any[]) => number
 
     // TODO: we are currently always scaffolding support
     // even when headlessly - this is due to a major breaking
@@ -672,7 +683,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     logger.info('Writing Project ID', _.clone(attrs))
 
-    this.generatedProjectIdTimestamp = new Date()
+    this.generatedProjectIdTimestamp = Date.now()
 
     return settings
     .write(this.projectRoot, attrs)
@@ -738,6 +749,52 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return user.ensureAuthToken()
     .then((authToken) => {
       return api.requestAccess(projectId, authToken)
+    })
+  }
+
+  // ProjectBase should be an abstract class. Then we'd mark _onError as abstract,
+  // requiring the user to implement a project specific _onError handler.
+  // TODO: Make ProjectBase abstract.
+  _onError (err: Error, options: Record<string, any>): void {
+    throw Error(`_onError must be implemented by the super class!`)
+  }
+
+  _initPlugins (cfg, options) {
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    const allowedCfg = config.allowed(cfg)
+
+    return plugins.init(allowedCfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError: (err: Error) => this._onError(err, options),
+      onWarning: options.onWarning,
+    })
+    .then((modifiedCfg) => {
+      debug('plugin config yielded: %o', modifiedCfg)
+
+      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+      if (this.projectType === 'base') {
+        throw Error('_initPlugins must be called on either ProjectCt or ProjectE2E')
+      }
+
+      if (this.projectType === 'ct') {
+        // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+        // But if we don't return it in the plugins function, it never gets set
+        // Since there is no chance that it will have any other value here, we set it to "component"
+        // This allows users to not return config in the `cypress/plugins/index.js` file
+        // https://github.com/cypress-io/cypress/issues/16860
+        updatedConfig.resolved.testingType = { value: 'component' }
+        updatedConfig.componentTesting = this.projectType === 'ct'
+      }
+
+      debug('updated config: %o', updatedConfig)
+
+      return updatedConfig
     })
   }
 
@@ -815,7 +872,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         debug(`got ${projects.length} projects`)
         const projectsIndex = _.keyBy(projects, 'id')
 
-        return Bluebird.all(_.map(clientProjects, (clientProject) => {
+        return Bluebird.all(_.map(clientProjects, (clientProject: { path: string, id: string }) => {
           debug('looking at', clientProject.path)
           // not a CI project, just mark as valid and return
           if (!clientProject.id) {
@@ -922,11 +979,48 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
+  findProjectSpecs (cfg) {
+    return specsUtil.find(cfg)
+    .filter((spec: Cypress.Cypress['spec']) => {
+      if (this.projectType === 'ct') {
+        return spec.specType === 'component'
+      }
+
+      if (this.projectType === 'e2e') {
+        return spec.specType === 'integration'
+      }
+
+      throw Error(`Only e2e and ct projects can have specs.`)
+    })
+  }
+
+  async initSpecListWatcher (cfg: Record<string, any>) {
+    // get initial specs
+    await this.findProjectSpecs(cfg)
+    // const specs = await this.findProjectSpecs(cfg)
+    const specsStore = new SpecsStore(cfg, 'e2e')
+
+    specsStore.watch({
+      onSpecsChanged: (specs) => {
+        // send new files to frontend
+        // eg: this.server.socket.sendSpecList(specs)
+      },
+    })
+
+    await specsStore.storeSpecFiles()
+
+    return {
+      specsStore,
+      cfg,
+    }
+  }
+
   // Given a path to the project, finds all specs
   // returns list of specs with respect to the project root
   static findSpecs (projectRoot, specPattern) {
     debug('finding specs for project %s', projectRoot)
     la(check.unemptyString(projectRoot), 'missing project path', projectRoot)
+    // @ts-ignore
     la(check.maybe.unemptyString(specPattern), 'invalid spec pattern', specPattern)
 
     // if we have a spec pattern
@@ -944,6 +1038,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     .then((cfg) => {
       return specsUtil.find(cfg, specPattern)
     }).then(R.prop('integration'))
+    // @ts-ignore
     .then(R.map(R.prop('name')))
   }
 }

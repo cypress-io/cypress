@@ -1,34 +1,31 @@
 import Debug from 'debug'
 import browsers from './browsers'
-import config from './config'
-import plugins from './plugins'
 import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
 import { ServerE2E } from './server-e2e'
-import settings from './util/settings'
 
 const debug = Debug('cypress:server:project')
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
-  get projectType () {
+  get projectType (): 'e2e' {
     return 'e2e'
+  }
+
+  async _initPlugins (cfg, options) {
+    const modifiedConfig = await super._initPlugins(cfg, options)
+
+    await this.initSpecListWatcher(modifiedConfig)
+
+    return modifiedConfig
   }
 
   open (options: Record<string, unknown>) {
     this._server = new ServerE2E()
 
     return super.open(options, {
+      // @ts-ignore
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
-        .then((modifiedCfg) => {
-          debug('plugin config yielded: %o', modifiedCfg)
-
-          const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
-
-          debug('updated config: %o', updatedConfig)
-
-          return updatedConfig
-        })
         .then((cfg) => {
           return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
@@ -49,26 +46,12 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     })
   }
 
-  _initPlugins (cfg, options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    cfg = config.allowed(cfg)
+  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
+    debug('got plugins error', err.stack)
 
-    return plugins.init(cfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
-      onError (err) {
-        debug('got plugins error', err.stack)
+    browsers.close()
 
-        browsers.close()
-
-        options.onError(err)
-      },
-      onWarning: options.onWarning,
-    })
+    options.onError(err)
   }
 
   close () {
