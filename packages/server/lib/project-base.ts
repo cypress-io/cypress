@@ -154,6 +154,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
+
+      return
     })
     .then(callbacks.onOpen)
     .tap(({ cfg, port, warning }) => {
@@ -202,10 +204,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         this.saveState(stateToSave),
       )
       .then(() => {
-        return Bluebird.join(
+        // @ts-ignore - Bluebird types have problems?
+        return Bluebird.all([
           this.checkSupportFile(cfg),
           this.watchPluginsFile(cfg, options),
-        )
+        ])
       })
       .then(() => {
         if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
@@ -218,6 +221,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             system: _.pick(sys, 'osName', 'osVersion'),
           }
 
+          // @ts-ignore - Bluebird types
           return runEvents.execute('before:run', cfg, beforeRunDetails)
         })
       })
@@ -273,6 +277,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     .then((config) => {
       if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
+      // @ts-ignore - Bluebird types
       return runEvents.execute('after:run', config)
     })
   }
@@ -379,7 +384,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         })
       }
 
-      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
+      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot) as any
     }
 
     const onBrowserPreRequest = (browserPreRequest) => {
@@ -1036,7 +1041,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // TODO: handle wild card pattern or spec filename
     .then((cfg) => {
       return specsUtil.find(cfg, specPattern)
-    }).then(R.prop('integration'))
+    }).then(R.prop('integration') as any)
     // @ts-ignore
     .then(R.map(R.prop('name')))
   }
