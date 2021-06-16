@@ -7,6 +7,7 @@ import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
+import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
@@ -91,6 +92,9 @@ const DEFAULT_ARGS = [
   '--safebrowsing-disable-download-protection',
   '--disable-client-side-phishing-detection',
   '--disable-component-update',
+  // Simulate when chrome needs an update.
+  // This prevents an 'update' from displaying til the given date
+  `--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   '--disable-default-apps',
 
   // These flags are for webcam/WebRTC testing
@@ -173,12 +177,6 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
   .return()
 }
 
-const getRemoteDebuggingPort = async () => {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  return port || utils.getPort()
-}
-
 /**
  * Merge the different `--load-extension` arguments into one.
  *
@@ -248,13 +246,13 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError) {
+const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
   debug('connecting to Chrome remote interface at random port %d', port)
 
-  return protocol.getWsTargetFor(port)
+  return protocol.getWsTargetFor(port, browserDisplayName)
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
@@ -334,7 +332,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    CdpAutomation(client.send),
+    new CdpAutomation(client.send, client.on, automation),
   )
 }
 
@@ -428,9 +426,9 @@ export = {
     if (isHeadless) {
       args.push('--headless')
 
-      // set the window size for headless to a better default
+      // set default headless size to 1920x1080
       // https://github.com/cypress-io/cypress/issues/6210
-      args.push('--window-size=1280,720')
+      args.push('--window-size=1920,1080')
     }
 
     // force ipv4
@@ -447,7 +445,7 @@ export = {
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
     const [port, preferences] = await Bluebird.all([
-      getRemoteDebuggingPort(),
+      protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
 
@@ -493,19 +491,22 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
+    const launchedBrowser = await launch(browser, 'about:blank', args)
 
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
+    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
     await criClient.ensureMinimumProtocolVersion('1.3')
     .catch((err) => {
+      // if this minumum chrome version changes, sync it with
+      // packages/web-config/webpack.config.base.ts and
+      // npm/webpack-batteries-included-preprocessor/index.js
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
 
@@ -514,6 +515,7 @@ export = {
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
 
+    /* @ts-expect-error */
     launchedBrowser.kill = async (...args) => {
       debug('closing remote interface client')
 

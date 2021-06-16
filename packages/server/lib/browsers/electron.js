@@ -35,7 +35,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options) {
+const _getAutomation = function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -43,7 +43,15 @@ const _getAutomation = function (win, options) {
     })
   })
 
-  const automation = CdpAutomation(sendCommand)
+  const on = (eventName, cb) => {
+    win.webContents.debugger.on('message', (event, method, params) => {
+      if (method === eventName) {
+        cb(params)
+      }
+    })
+  }
+
+  const automation = new CdpAutomation(sendCommand, on, parent)
 
   if (!options.onScreencastFrame) {
     // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
@@ -153,18 +161,33 @@ module.exports = {
       },
     }
 
+    if (options.browser.isHeadless) {
+      // prevents a tiny 1px padding around the window
+      // causing screenshots/videos to be off by 1px
+      options.resizable = false
+    }
+
     return _.defaultsDeep({}, options, defaults)
   },
 
   _getAutomation,
 
-  _render (url, projectRoot, automation, options = {}) {
-    const win = Windows.create(projectRoot, options)
+  _render (url, automation, preferences = {}, options = {}) {
+    const win = Windows.create(options.projectRoot, preferences)
 
-    automation.use(_getAutomation(win, options))
+    if (preferences.browser.isHeadless) {
+      // seemingly the only way to force headless to a certain screen size
+      // electron BrowserWindow constructor is not respecting width/height preferences
+      win.setSize(preferences.width, preferences.height)
+    } else if (options.isTextTerminal) {
+      // we maximize in headed mode as long as it's run mode
+      // this is consistent with chrome+firefox headed
+      win.maximize()
+    }
 
-    return this._launch(win, url, automation, options)
-    .tap(_maybeRecordVideo(win.webContents, options))
+    return this._launch(win, url, automation, preferences)
+    .tap(_maybeRecordVideo(win.webContents, preferences))
+    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {
@@ -235,7 +258,7 @@ module.exports = {
       return this._enableDebugger(win.webContents)
     })
     .then(() => {
-      return this._handleDownloads(win.webContents, options.downloadsFolder, automation)
+      return this._handleDownloads(win, options.downloadsFolder, automation)
     })
     .return(win)
   },
@@ -291,8 +314,8 @@ module.exports = {
     return webContents.debugger.sendCommand('Console.enable')
   },
 
-  _handleDownloads (webContents, dir, automation) {
-    webContents.session.on('will-download', (event, downloadItem) => {
+  _handleDownloads (win, dir, automation) {
+    const onWillDownload = (event, downloadItem) => {
       const savePath = path.join(dir, downloadItem.getFilename())
 
       automation.push('create:download', {
@@ -307,9 +330,16 @@ module.exports = {
           id: downloadItem.getETag(),
         })
       })
-    })
+    }
 
-    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+    const { session } = win.webContents
+
+    session.on('will-download', onWillDownload)
+
+    // avoid adding redundant `will-download` handlers if session is reused for next spec
+    win.on('closed', () => session.removeListener('will-download', onWillDownload))
+
+    return win.webContents.debugger.sendCommand('Page.setDownloadBehavior', {
       behavior: 'allow',
       downloadPath: dir,
     })
@@ -381,7 +411,10 @@ module.exports = {
 
       debug('launching browser window to url: %s', url)
 
-      return this._render(url, projectRoot, automation, preferences)
+      return this._render(url, automation, preferences, {
+        projectRoot: options.projectRoot,
+        isTextTerminal: options.isTextTerminal,
+      })
       .then(async (win) => {
         await _installExtensions(win, launchOptions.extensions, options)
 
@@ -406,6 +439,11 @@ module.exports = {
           })],
           browserWindow: win,
           kill () {
+            if (this.isProcessExit) {
+              // if the process is exiting, all BrowserWindows will be destroyed anyways
+              return
+            }
+
             return tryToCall(win, 'destroy')
           },
           removeAllListeners () {

@@ -2,7 +2,7 @@ import Debug from 'debug'
 import config from '@packages/server/lib/config'
 import plugins from '@packages/server/lib/plugins'
 import devServer from '@packages/server/lib/plugins/dev-server'
-import { ProjectBase } from '@packages/server/lib/project-base'
+import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
 import { ServerCt } from './server-ct'
@@ -17,14 +17,33 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return 'ct'
   }
 
-  open (options) {
+  /**
+   * override default viewport for component testing
+   * 1. if user specified viewport values in their cypress.json, use those.
+   * 2. otherwise, use 500/500 by default.
+   */
+  addComponentTestingUniqueDefaults (cfg: Record<string, unknown>) {
+    const rawJson = cfg.rawJson as Cfg
+
+    return {
+      ...cfg,
+      viewportHeight: rawJson.viewportHeight ?? 500,
+      viewportWidth: rawJson.viewportWidth ?? 500,
+    }
+  }
+
+  changeToUrl (targetUrl: string) {
+    this.server.socket.changeToUrl(targetUrl)
+  }
+
+  open (options: Record<string, unknown>) {
     this._server = new ServerCt()
 
     return super.open(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
+          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
             return {
               cfg,
@@ -53,6 +72,13 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError (err) {
+        debug('plugins failed with error', err)
+
+        options.onError(err)
+      },
+      onWarning: options.onWarning,
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
@@ -60,6 +86,13 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
       updatedConfig.componentTesting = true
+
+      // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+      // But if we don't return it in the plugins function, it never gets set
+      // Since there is no chance that it will have any other value here, we set it to "component"
+      // This allows users to not return config in the `cypress/plugins/index.js` file
+      // https://github.com/cypress-io/cypress/issues/16860
+      updatedConfig.resolved.testingType = { value: 'component' }
 
       debug('updated config: %o', updatedConfig)
 
@@ -76,7 +109,17 @@ export class ProjectCt extends ProjectBase<ServerCt> {
       })
       .then((specs) => {
         return devServer.start({ specs, config: modifiedConfig })
-        .then(({ port }) => {
+        .then((devServerOptions) => {
+          if (!devServerOptions) {
+            throw new Error([
+              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+              'Make sure that the dev-server:start function returns an object.',
+              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+            ].join('\n'))
+          }
+
+          const { port } = devServerOptions
+
           modifiedConfig.baseUrl = `http://localhost:${port}`
 
           const specsStore = new SpecsStore(cfg)

@@ -103,6 +103,8 @@ https://on.cypress.io/api/task
      CypressError: \`cy.task('errors')\` failed with the following error:
 
 > Error thrown in task handler
+
+https://on.cypress.io/api/task
       [stack trace lines]
   
   From Node.js Internals:

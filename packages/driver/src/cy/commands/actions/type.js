@@ -24,7 +24,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      delay: 10,
+      delay: config('keystrokeDelay') || $Keyboard.getConfig().keystrokeDelay,
       release: true,
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
@@ -127,6 +127,30 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       $errUtils.throwErrByPath('type.empty_string', {
         onFail: options._log,
         args: { chars },
+      })
+    }
+
+    const isInvalidDelay = (delay) => {
+      return delay !== undefined && (!_.isNumber(delay) || delay < 0)
+    }
+
+    if (isInvalidDelay(userOptions.delay)) {
+      $errUtils.throwErrByPath('keyboard.invalid_delay', {
+        onFail: options._log,
+        args: {
+          cmd: 'type',
+          docsPath: 'type',
+          option: 'delay',
+          delay: userOptions.delay,
+        },
+      })
+    }
+
+    // specific error if test config keystrokeDelay is invalid
+    if (isInvalidDelay(config('keystrokeDelay'))) {
+      $errUtils.throwErrByPath('keyboard.invalid_per_test_delay', {
+        onFail: options._log,
+        args: { delay: config('keystrokeDelay') },
       })
     }
 
@@ -282,7 +306,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // for the total number of keys we're about to
           // type, ensure we raise the timeout to account
           // for the delay being added to each keystroke
-          return cy.timeout(totalKeys * options.delay, true, 'type')
+          if (options.delay) {
+            return cy.timeout(totalKeys * options.delay, true, 'type')
+          }
         },
 
         onEvent: updateTable || _.noop,
@@ -500,9 +526,29 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      const node = $dom.stringify($el)
+      const callTypeCmd = ($el) => {
+        return cy.now('type', $el, '{selectall}{del}', {
+          $el,
+          log: false,
+          verify: false, // handle verification ourselves
+          _log: options._log,
+          force: options.force,
+          timeout: options.timeout,
+          interval: options.interval,
+          waitForAnimations: options.waitForAnimations,
+          animationDistanceThreshold: options.animationDistanceThreshold,
+          scrollBehavior: options.scrollBehavior,
+        }).then(() => {
+          if (options._log) {
+            options._log.snapshot().end()
+          }
 
-      if (!$dom.isTextLike($el.get(0))) {
+          return null
+        })
+      }
+
+      const throwError = ($el) => {
+        const node = $dom.stringify($el)
         const word = $utils.plural(subject, 'contains', 'is')
 
         $errUtils.throwErrByPath('clear.invalid_element', {
@@ -511,24 +557,34 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         })
       }
 
-      return cy.now('type', $el, '{selectall}{del}', {
-        $el,
-        log: false,
-        verify: false, // handle verification ourselves
-        _log: options._log,
-        force: options.force,
-        timeout: options.timeout,
-        interval: options.interval,
-        waitForAnimations: options.waitForAnimations,
-        animationDistanceThreshold: options.animationDistanceThreshold,
-        scrollBehavior: options.scrollBehavior,
-      }).then(() => {
-        if (options._log) {
-          options._log.snapshot().end()
+      if (!$dom.isTextLike($el.get(0))) {
+        options.ensure = {
+          position: true,
+          visibility: true,
+          notDisabled: true,
+          notAnimating: true,
+          notCovered: true,
+          notReadonly: true,
         }
 
-        return null
-      })
+        return $actionability.verify(cy, $el, options, {
+          onScroll ($el, type) {
+            return Cypress.action('cy:scrolled', $el, type)
+          },
+
+          onReady ($elToClick) {
+            let activeElement = $elements.getActiveElByDocument($elToClick)
+
+            if (!options.force && activeElement === null || !$dom.isTextLike($elToClick.get(0))) {
+              throwError($el)
+            }
+
+            return callTypeCmd($elToClick)
+          },
+        })
+      }
+
+      return callTypeCmd($el)
     }
 
     return Promise

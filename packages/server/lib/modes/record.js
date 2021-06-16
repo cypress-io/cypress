@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const chalk = require('chalk')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:record')
+const debugCiInfo = require('debug')('cypress:server:record:ci-info')
 const Promise = require('bluebird')
 const isForkPr = require('is-fork-pr')
 const commitInfo = require('@cypress/commit-info')
@@ -11,22 +12,14 @@ const logger = require('../logger')
 const errors = require('../errors')
 const capture = require('../capture')
 const upload = require('../upload')
+const Config = require('../config')
 const env = require('../util/env')
 const keys = require('../util/keys')
 const terminal = require('../util/terminal')
-const humanTime = require('../util/human_time')
 const ciProvider = require('../util/ci_provider')
 const settings = require('../util/settings')
-
-const onBeforeRetry = (details) => {
-  return errors.warning(
-    'DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
-      delay: humanTime.long(details.delay, false),
-      tries: details.total - details.retryIndex,
-      response: details.err,
-    },
-  )
-}
+const testsUtils = require('../util/tests_utils')
+const specWriter = require('../util/spec_writer')
 
 const logException = (err) => {
   // give us up to 1 second to
@@ -58,6 +51,23 @@ const warnIfProjectIdButNoRecordOption = (projectId, options) => {
     // record mode
     return errors.warning('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', projectId)
   }
+}
+
+const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
+  const errMsg = parallel ? 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL' : 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL'
+
+  const errToThrow = errors.get(errMsg, {
+    response: err,
+    flags: {
+      group,
+      ciBuildId,
+    },
+  })
+
+  // tells error handler to exit immediately without running anymore specs
+  errToThrow.isFatalApiErr = true
+
+  throw errToThrow
 }
 
 const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
@@ -103,7 +113,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
+  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   let count = 0
@@ -116,8 +126,10 @@ const uploadArtifacts = (options = {}) => {
 
   const send = (pathToFile, url) => {
     const success = () => {
-      // eslint-disable-next-line no-console
-      return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      }
     }
 
     const fail = (err) => {
@@ -126,8 +138,10 @@ const uploadArtifacts = (options = {}) => {
         stack: err.stack,
       })
 
-      // eslint-disable-next-line no-console
-      return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      }
     }
 
     return uploads.push(
@@ -149,7 +163,7 @@ const uploadArtifacts = (options = {}) => {
     })
   }
 
-  if (!uploads.length) {
+  if (!uploads.length && !quiet) {
     // eslint-disable-next-line no-console
     console.log('  - Nothing to Upload')
   }
@@ -164,19 +178,15 @@ const uploadArtifacts = (options = {}) => {
 }
 
 const updateInstanceStdout = (options = {}) => {
-  const { instanceId, captured } = options
+  const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
 
-  const makeRequest = () => {
-    return api.updateInstanceStdout({
-      stdout,
-      instanceId,
-    })
-  }
-
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
-  .catch((err) => {
+  return api.updateInstanceStdout({
+    runId,
+    stdout,
+    instanceId,
+  }).catch((err) => {
     debug('failed updating instance stdout %o', {
       stack: err.stack,
     })
@@ -190,57 +200,41 @@ const updateInstanceStdout = (options = {}) => {
   }).finally(capture.restore)
 }
 
-const updateInstance = (options = {}) => {
-  const { instanceId, results, group, parallel, ciBuildId } = options
-  let { stats, tests, hooks, video, screenshots, reporterStats, error } = results
+const postInstanceResults = (options = {}) => {
+  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
+  let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
-  const cypressConfig = options.config
 
   // get rid of the path property
   screenshots = _.map(screenshots, (screenshot) => {
     return _.omit(screenshot, 'path')
   })
 
-  const makeRequest = () => {
-    return api.updateInstance({
-      stats,
-      tests,
-      error,
-      video,
-      hooks,
-      instanceId,
-      screenshots,
-      reporterStats,
-      cypressConfig,
-    })
-  }
+  tests = tests && _.map(tests, (test) => {
+    return _.omit({
+      clientId: test.testId,
+      ...test,
+    }, 'title', 'body', 'testId')
+  })
 
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  return api.postInstanceResults({
+    runId,
+    instanceId,
+    stats,
+    tests,
+    exception: error,
+    video,
+    reporterStats,
+    screenshots,
+    metadata,
+  })
   .catch((err) => {
     debug('failed updating instance %o', {
       stack: err.stack,
     })
 
-    if (parallel) {
-      return errors.throw('DASHBOARD_CANNOT_PROCEED_IN_PARALLEL', {
-        response: err,
-        flags: {
-          group,
-          ciBuildId,
-        },
-      })
-    }
-
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
-
-    // dont log exceptions if we have a 503 status code
-    if (err.statusCode !== 503) {
-      return logException(err)
-      .return(null)
-    }
-
-    return null
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
@@ -260,7 +254,7 @@ const getCommitFromGitOrCi = (git) => {
 
 const usedTestsMessage = (limit, phrase) => {
   if (_.isFinite(limit)) {
-    return `The limit is ${chalk.blue(limit)} ${phrase} recordings.`
+    return `The limit is ${chalk.blue(limit)} ${phrase} results.`
   }
 
   return ''
@@ -286,7 +280,7 @@ const createRun = Promise.method((options = {}) => {
     ciBuildId: null,
   })
 
-  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, projectRoot } = options
+  let { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, projectRoot, testingType } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -318,30 +312,30 @@ const createRun = Promise.method((options = {}) => {
   specs = _.map(specs, getSpecRelativePath)
 
   const commit = getCommitFromGitOrCi(git)
-
-  debug('commit information from Git or from environment variables')
-  debug(commit)
-
-  const makeRequest = () => {
-    return api.createRun({
-      specs,
-      group,
-      tags,
-      parallel,
-      platform,
-      ciBuildId,
-      projectId,
-      recordKey,
-      specPattern,
-      ci: {
-        params: ciProvider.ciParams(),
-        provider: ciProvider.provider(),
-      },
-      commit,
-    })
+  const ci = {
+    params: ciProvider.ciParams(),
+    provider: ciProvider.provider(),
   }
 
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
+  // write git commit and CI provider information
+  // in its own log source to expose separately
+  debugCiInfo('commit information %o', commit)
+  debugCiInfo('CI provider information %o', ci)
+
+  return api.createRun({
+    specs,
+    group,
+    tags,
+    parallel,
+    platform,
+    ciBuildId,
+    projectId,
+    recordKey,
+    specPattern,
+    testingType,
+    ci,
+    commit,
+  })
   .tap((response) => {
     if (!(response && response.warnings && response.warnings.length)) {
       return
@@ -524,23 +518,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       default:
-        if (parallel) {
-          return errors.throw('DASHBOARD_CANNOT_PROCEED_IN_PARALLEL', {
-            response: err,
-            flags: {
-              group,
-              ciBuildId,
-            },
-          })
-        }
-
-        // warn the user that assets will be not recorded
-        errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
-
-        // report on this exception
-        // and return null
-        return logException(err)
-        .return(null)
+        throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
     }
   })
 })
@@ -550,46 +528,67 @@ const createInstance = (options = {}) => {
 
   spec = getSpecRelativePath(spec)
 
-  const makeRequest = () => {
-    return api.createInstance({
-      spec,
-      runId,
-      groupId,
-      platform,
-      machineId,
-    })
-  }
+  return api.createInstance({
+    spec,
+    runId,
+    groupId,
+    platform,
+    machineId,
+  })
 
-  return api.retryWithBackoff(makeRequest, { onBeforeRetry })
   .catch((err) => {
     debug('failed creating instance %o', {
       stack: err.stack,
     })
 
-    if (parallel) {
-      return errors.throw('DASHBOARD_CANNOT_PROCEED_IN_PARALLEL', {
-        response: err,
-        flags: {
-          group,
-          ciBuildId,
-        },
-      })
-    }
+    throwDashboardCannotProceed({
+      err,
+      group,
+      ciBuildId,
+      parallel,
+    })
+  })
+}
 
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
-
-    // dont log exceptions if we have a 503 status code
-    if (err.statusCode !== 503) {
-      return logException(err)
-      .return(null)
-    }
-
-    return null
+const _postInstanceTests = ({
+  runId,
+  instanceId,
+  config,
+  tests,
+  hooks,
+  parallel,
+  ciBuildId,
+  group,
+}) => {
+  return api.postInstanceTests({
+    runId,
+    instanceId,
+    config,
+    tests,
+    hooks,
+  })
+  .catch((err) => {
+    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
 const createRunAndRecordSpecs = (options = {}) => {
-  const { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group } = options
+  const { specPattern,
+    specs,
+    sys,
+    browser,
+    projectId,
+    config,
+    projectRoot,
+    runAllSpecs,
+    parallel,
+    ciBuildId,
+    group,
+    project,
+    onError,
+    testingType,
+    quiet,
+  } = options
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
@@ -597,8 +596,8 @@ const createRunAndRecordSpecs = (options = {}) => {
 
   return commitInfo.commitInfo(projectRoot)
   .then((git) => {
-    debug('found the following git information')
-    debug(git)
+    debugCiInfo('found the following git information')
+    debugCiInfo(git)
 
     const platform = {
       osCpus: sys.osCpus,
@@ -621,6 +620,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       ciBuildId,
       projectId,
       specPattern,
+      testingType,
     })
     .then((resp) => {
       if (!resp) {
@@ -637,8 +637,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let instanceId = null
 
       const beforeSpecRun = (spec) => {
-        debug('before spec run %o', { spec })
-
+        project.setOnTestsReceived(onTestsReceived)
         capture.restore()
 
         captured = capture.stdout()
@@ -654,7 +653,6 @@ const createRunAndRecordSpecs = (options = {}) => {
           machineId,
         })
         .then((resp = {}) => {
-          resp = resp || {}
           instanceId = resp.instanceId
 
           // pull off only what we need
@@ -671,29 +669,35 @@ const createRunAndRecordSpecs = (options = {}) => {
       const afterSpecRun = (spec, results, config) => {
         // dont do anything if we failed to
         // create the instance
-        if (!instanceId) {
+        if (!instanceId || results.skippedSpec) {
           return
         }
 
         debug('after spec run %o', { spec })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+        if (!quiet) {
+          // eslint-disable-next-line no-console
+          console.log('')
 
-        terminal.header('Uploading Results', {
-          color: ['blue'],
-        })
+          terminal.header('Uploading Results', {
+            color: ['blue'],
+          })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+          // eslint-disable-next-line no-console
+          console.log('')
+        }
 
-        return updateInstance({
-          group,
-          config,
-          results,
-          parallel,
-          ciBuildId,
-          instanceId,
+        return specWriter.countStudioUsage(spec.absolute)
+        .then((metadata) => {
+          return postInstanceResults({
+            group,
+            config,
+            results,
+            parallel,
+            ciBuildId,
+            instanceId,
+            metadata,
+          })
         })
         .then((resp) => {
           if (!resp) {
@@ -709,6 +713,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             videoUploadUrl,
             shouldUploadVideo,
             screenshotUploadUrls,
+            quiet,
           })
           .finally(() => {
             // always attempt to upload stdout
@@ -721,9 +726,94 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
+      const onTestsReceived = (async (runnables, cb) => {
+        // we failed createInstance earlier, nothing to do
+        if (!instanceId) {
+          return cb()
+        }
+
+        // runnables will be null when there' no tests
+        // this also means runtimeConfig will be missing
+        runnables = runnables || {}
+
+        const r = testsUtils.flattenSuiteIntoRunnables(runnables)
+        const runtimeConfig = runnables.runtimeConfig
+        const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
+
+        const tests = _.chain(r[0])
+        .uniqBy('id')
+        .map((v) => {
+          if (v.originalTitle) {
+            v._titlePath.splice(-1, 1, v.originalTitle)
+          }
+
+          return _.pick({
+            ...v,
+            clientId: v.id,
+            config: v._testConfig || null,
+            title: v._titlePath,
+            hookIds: v.hooks.map((hook) => hook.hookId),
+          },
+          'clientId', 'body', 'title', 'config', 'hookIds')
+        })
+        .value()
+
+        const hooks = _.chain(r[1])
+        .uniqBy('hookId')
+        .map((v) => {
+          return _.pick({
+            ...v,
+            clientId: v.hookId,
+            title: [v.title],
+            type: v.hookName,
+          },
+          'clientId',
+          'type',
+          'title',
+          'body')
+        })
+        .value()
+
+        const responseDidFail = {}
+        const response = await _postInstanceTests({
+          runId,
+          instanceId,
+          config: resolvedRuntimeConfig,
+          tests,
+          hooks,
+          parallel,
+          ciBuildId,
+          group,
+        })
+        .catch((err) => {
+          onError(err)
+
+          return responseDidFail
+        })
+
+        if (response === responseDidFail) {
+          // dont call the cb, let the browser hang until it's killed
+          return
+        }
+
+        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
+          errors.warning('DASHBOARD_CANCEL_SKIPPED_SPEC')
+
+          // set a property on the response so the browser runner
+          // knows not to start executing tests
+          project.emit('end', { skippedSpec: true, stats: {} })
+
+          // dont call the cb, let the browser hang until it's killed
+          return
+        }
+
+        return cb(response)
+      })
+
       return runAllSpecs({
         runUrl,
         parallel,
+        onTestsReceived,
         beforeSpecRun,
         afterSpecRun,
       })
@@ -736,7 +826,9 @@ module.exports = {
 
   createInstance,
 
-  updateInstance,
+  postInstanceResults,
+
+  _postInstanceTests,
 
   updateInstanceStdout,
 

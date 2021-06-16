@@ -1,13 +1,20 @@
+@use '../../variables.scss' as *;
+
 .specs-list-search-input-container {
   display: flex;
   justify-content: flex-start;
   align-items: center;
   position: sticky;
   top: 0;
-  width: calc(100% - 40px);
-
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: white;
+  box-shadow: $shadow-xs;
+  z-index: 1;
+  
   input { 
-    width: calc(100% - 20px);
+    width: 100%;
     font-size: 18px;
     height: 32px;
     color: #848484;

@@ -133,9 +133,9 @@ describe('lib/plugins/index', () => {
 
     it('sends \'load\' event with config via ipc', () => {
       ipc.on.withArgs('loaded').yields([])
-      const config = { pluginsFile: 'cypress-plugin' }
+      const config = { pluginsFile: 'cypress-plugin', testingType: 'e2e' }
 
-      return plugins.init(config, getOptions()).then(() => {
+      return plugins.init(config, getOptions({ testingType: 'e2e' })).then(() => {
         expect(ipc.send).to.be.calledWith('load', {
           ...config,
           ...configExtras,

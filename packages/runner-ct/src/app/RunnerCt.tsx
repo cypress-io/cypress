@@ -1,87 +1,148 @@
 import cs from 'classnames'
-import { observer } from 'mobx-react'
 import * as React from 'react'
-
-import { Reporter } from '@packages/reporter/src/main'
-
-import errorMessages from '../errors/error-messages'
-import State from '../lib/state'
-
-import SplitPane from 'react-split-pane'
-import Header from '../header/header'
-import Iframes from '../iframe/iframes'
-import Message from '../message/message'
-import { EmptyReporterHeader, ReporterHeader } from './ReporterHeader'
-import EventManager from '../lib/event-manager'
-import { Hidden } from '../lib/Hidden'
-import { SpecList } from '../SpecList'
-import { Burger } from '../icons/Burger'
-import { ResizableBox } from '../lib/ResizableBox'
-import { useWindowSize } from '../lib/useWindowSize'
-import { useGlobalHotKey } from '../lib/useHotKey'
-
-import './RunnerCt.scss'
-import { KeyboardHelper, NoSpecSelected } from './NoSpecSelected'
 import { useScreenshotHandler } from './useScreenshotHandler'
+import { NavItem } from '@cypress/design-system'
+import SplitPane from 'react-split-pane'
 
-interface AppProps {
+// Need to register these once per app. Depending which components are consumed
+// from @cypress/design-system, different icons are required.
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+
+library.add(fas)
+library.add(fab)
+
+import State from '../lib/state'
+import { eventManager as EventManager, namedObserver } from '@packages/runner-shared'
+import { useGlobalHotKey } from '../lib/useHotKey'
+import { animationFrameDebounce } from '../lib/debounce'
+import { LeftNavMenu } from './LeftNavMenu'
+import { SpecContent } from './SpecContent'
+import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
+import { SpecList } from './SpecList/SpecList'
+import { NoSpec } from './NoSpec'
+
+import styles from './RunnerCt.module.scss'
+import './RunnerCt.scss'
+
+interface RunnerCtProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: Cypress.RuntimeConfigOptions & Cypress.ResolvedConfigOptions
 }
 
-const DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH = 355
-// needs to account for the left bar + the margins around the viewport
-const VIEWPORT_SIDE_MARGIN = 40 + 17
+export const DEFAULT_PLUGINS_HEIGHT = 300
 
-const App: React.FC<AppProps> = observer(
-  function App (props: AppProps) {
+export const PLUGIN_BAR_HEIGHT = 40
+
+export const LEFT_NAV_WIDTH = 48
+
+export const DEFAULT_REPORTER_WIDTH = 355
+
+export const DEFAULT_LIST_WIDTH = 300
+
+export const HEADER_HEIGHT = 40
+
+export const AUT_IFRAME_MARGIN = {
+  X: 8,
+  Y: 16,
+}
+
+const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
+  {
+    id: 'file-explorer-nav',
+    title: 'File Explorer',
+    _index: 0,
+    icon: 'copy',
+    interaction: {
+      type: 'js',
+      onClick: () => toggleIsSetListOpen(),
+    },
+  },
+  {
+    id: 'docs-nav',
+    title: 'Cypress Documentation',
+    location: 'bottom',
+    icon: 'book',
+    interaction: {
+      type: 'anchor',
+      href: 'https://on.cypress.io/component-testing',
+      onClick: ({ event }) => {
+        if (!event.currentTarget?.href) {
+          return
+        }
+
+        event.preventDefault()
+        eventManager.reporterBus.emit('external:open', event.currentTarget.href)
+      },
+    },
+  },
+]
+
+const removeRelativeRegexp = /\.\.\//gi
+
+const RunnerCt = namedObserver('RunnerCt',
+  (props: RunnerCtProps) => {
     const searchRef = React.useRef<HTMLInputElement>(null)
     const splitPaneRef = React.useRef<{ splitPane: HTMLDivElement }>(null)
-    const pluginRootContainer = React.useRef<null | HTMLDivElement>(null)
 
     const { state, eventManager, config } = props
-    const isOpenMode = !config.isTextTerminal
 
-    const [pluginsHeight, setPluginsHeight] = React.useState(500)
-    const [isResizing, setIsResizing] = React.useState(false)
-    const [isSpecsListOpen, setIsSpecsListOpen] = React.useState(isOpenMode)
-    const [drawerWidth, setDrawerWidth] = React.useState(300)
-    const windowSize = useWindowSize()
-    const [leftSideOfSplitPaneWidth, setLeftSideOfSplitPaneWidth] = React.useState(DEFAULT_LEFT_SIDE_OF_SPLITPANE_WIDTH)
-    const headerRef = React.useRef(null)
+    const [activeIndex, setActiveIndex] = React.useState<number>(0)
 
-    const runSpec = (spec: Cypress.Cypress['spec']) => {
-      setIsSpecsListOpen(false)
-      state.setSingleSpec(spec)
-    }
+    // TODO: Fix ids
+    const runSpec = React.useCallback((path: string) => {
+      setActiveIndex(0)
+      // We request an absolute path from the dev server but the spec list displays relative paths
+      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+      const filePath = path.replace(removeRelativeRegexp, '')
+      const selectedSpec = props.state.specs.find((spec) => spec.absolute.includes(filePath))
 
-    function monitorWindowResize () {
-      // I can't use forwardref in class based components
-      // Header still is a class component
-      // FIXME: use a forwardRef when available
-      const header = headerRef.current.headerRef
-
-      function onWindowResize () {
-        state.updateWindowDimensions({
-          windowWidth: window.innerWidth,
-          windowHeight: window.innerHeight,
-          reporterWidth: leftSideOfSplitPaneWidth + VIEWPORT_SIDE_MARGIN,
-          headerHeight: header.offsetHeight || 0,
-        })
+      if (!selectedSpec) {
+        throw Error(`Could not find spec matching ${path}.`)
       }
 
-      window.addEventListener('resize', onWindowResize)
-      window.dispatchEvent(new Event('resize'))
-    }
+      state.setSingleSpec(selectedSpec)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state])
 
-    React.useEffect(() => {
-      if (pluginRootContainer.current) {
-        state.initializePlugins(config, pluginRootContainer.current)
+    const toggleIsSpecsListOpen = React.useCallback((override?: boolean) => {
+      // Clear selected index on match
+      setActiveIndex((prevIndex) => override || prevIndex !== 0 ? 0 : undefined)
+
+      let newVal: boolean
+
+      if (override !== undefined) {
+        state.setIsSpecsListOpen(override)
+        newVal = override
+      } else {
+        newVal = state.toggleIsSpecsListOpen()
       }
 
-      monitorWindowResize()
-    }, [])
+      props.eventManager.saveState({ ctIsSpecsListOpen: newVal })
+
+      return newVal
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.eventManager])
+
+    const navItems = React.useMemo(() =>
+      buildNavItems(props.eventManager, toggleIsSpecsListOpen)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    , [props.eventManager, toggleIsSpecsListOpen])
+
+    const focusSpecsList = React.useCallback(() => {
+      toggleIsSpecsListOpen(true)
+
+      // a little trick to focus field on the next tick of event loop
+      // to prevent the handled keydown/keyup event to fill input with "/"
+      setTimeout(() => {
+        searchRef.current?.focus()
+      }, 0)
+    }, [toggleIsSpecsListOpen])
+
+    useGlobalHotKey('ctrl+b,command+b', toggleIsSpecsListOpen)
+    useGlobalHotKey('/', focusSpecsList)
 
     useScreenshotHandler({
       state,
@@ -89,193 +150,99 @@ const App: React.FC<AppProps> = observer(
       splitPaneRef,
     })
 
-    function focusSpecsList () {
-      setIsSpecsListOpen(true)
-
-      // a little trick to focus field on the next tick of event loop
-      // to prevent the handled keydown/keyup event to fill input with "/"
-      setTimeout(() => {
-        searchRef.current?.focus()
-      }, 0)
+    // Inner function should probably be memoed, but I will avoid it until we see data requiring it
+    const persistWidth = (prop: 'ctReporterWidth' | 'ctSpecListWidth') => {
+      return (newWidth: number) => {
+        props.eventManager.saveState({ [prop]: newWidth })
+      }
     }
 
-    useGlobalHotKey('ctrl+b,command+b', () => {
-      setIsSpecsListOpen((isOpenNow) => !isOpenNow)
-    })
+    React.useEffect(() => {
+      state.initializePlugins(config)
+      const onWindowResize = animationFrameDebounce(() =>
+        state.updateWindowDimensions({
+          windowWidth: window.innerWidth,
+          windowHeight: window.innerHeight,
+        }))
 
-    useGlobalHotKey('/', focusSpecsList)
+      window.addEventListener('resize', onWindowResize)
+      window.dispatchEvent(new Event('resize'))
 
-    function onSplitPaneChange (newWidth: number) {
-      setLeftSideOfSplitPaneWidth(newWidth)
-      state.updateWindowDimensions({
-        reporterWidth: newWidth + VIEWPORT_SIDE_MARGIN,
-        windowWidth: null,
-        windowHeight: null,
-        headerHeight: null,
-      })
+      return () => window.removeEventListener('resize', onWindowResize)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const updateSpecListWidth = (width: number) => {
+      state.updateSpecListWidth(width)
     }
 
     return (
-      <>
-        <main className="app-ct">
-          {isOpenMode && (
-            <div
-              className={cs(
-                'specs-list-drawer',
-                {
-                  'display-none': state.screenshotting,
-                },
-              )}
-              style={{
-                transform: isSpecsListOpen ? `translateX(0)` : `translateX(-${drawerWidth - 20}px)`,
-              }}
-            >
-              <ResizableBox
-                disabled={!isSpecsListOpen}
-                width={drawerWidth}
-                onIsResizingChange={setIsResizing}
-                onWidthChange={setDrawerWidth}
-                className="specs-list-container"
-                data-cy="specs-list-resize-box"
-                minWidth={200}
-                maxWidth={windowSize.width / 100 * 80} // 80vw
-              >
-                <nav>
-                  <a
-                    id="menu-toggle"
-                    onClick={() => setIsSpecsListOpen(!isSpecsListOpen)}
-                    className="menu-toggle"
-                    aria-label="Open the menu"
-                  >
-                    <Burger />
-                  </a>
-                </nav>
-                <SpecList
-                  specs={state.specs}
-                  inputRef={searchRef}
-                  selectedSpecs={state.spec ? [state.spec.absolute] : []}
-                  onSelectSpec={runSpec}
-                />
-              </ResizableBox>
-            </div>
+      <SplitPane
+        split="vertical"
+        allowResize={false}
+        maxSize={hideIfScreenshotting(state, () => 50)}
+        minSize={hideIfScreenshotting(state, () => 50)}
+        defaultSize={hideIfScreenshotting(state, () => 50)}
+      >
+        {state.screenshotting
+          ? <span />
+          : (
+            <LeftNavMenu
+              activeIndex={activeIndex}
+              items={navItems}
+            />
           )}
+        <SplitPane
+          ref={splitPaneRef}
+          split="vertical"
+          minSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? 30 : 0)}
+          maxSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? 600 : 0)}
+          defaultSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? state.specListWidth : 0)}
+          className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
+          pane2Style={{
+            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+          }}
+          onDragFinished={persistWidth('ctSpecListWidth')}
+          onChange={animationFrameDebounce(updateSpecListWidth)}
+        >
+          {
+            state.specs.length < 1 ? (
+              <NoSpec message="No specs found">
+                <p className={styles.noSpecsDescription}>
+                  Create a new spec file in
+                  {' '}
+                  <span className={styles.folder}>
+                    {
+                      props.config.componentFolder
+                        ? props.config.componentFolder.replace(props.config.projectRoot, '')
+                        : 'the component specs folder'
+                    }
+                  </span>
+                  {' '}
+                  and it will immediately appear here.
+                </p>
+              </NoSpec>
+            ) : (
+              <SpecList
+                searchRef={searchRef}
+                className={cs(styles.specsList, {
+                  'display-none': hideSpecsListIfNecessary(state),
+                })}
+                specs={props.state.specs}
+                selectedFile={state.spec ? state.spec.relative : undefined}
+                onFileClick={runSpec}
+              />
+            )
+          }
 
-          <div className={cs('app-wrapper', {
-            'with-specs-drawer': isOpenMode,
-            'app-wrapper-screenshotting': state.screenshotting,
-          })}>
-            <SplitPane
-              split="vertical"
-              primary="first"
-              // @ts-expect-error split-pane ref types are weak so we are using our custom type for ref
-              ref={splitPaneRef}
-              minSize={state.screenshotting ? 0 : 100}
-              // calculate maxSize of IFRAMES preview to not cover specs list and command log
-              maxSize={state.screenshotting ? 0 : 400}
-              defaultSize={state.screenshotting ? 0 : 355}
-              onDragStarted={() => setIsResizing(true)}
-              onDragFinished={() => setIsResizing(false)}
-              onChange={onSplitPaneChange}
-              style={{ overflow: 'unset' }}
-              className={cs('reporter-pane', { 'is-reporter-resizing': isResizing })}
-            >
-              <div style={{ height: '100%' }}>
-                {state.spec ? (
-                  <Reporter
-                    runMode={state.runMode}
-                    runner={eventManager.reporterBus}
-                    className={cs({ 'display-none': state.screenshotting })}
-                    spec={state.spec}
-                    specRunId={state.specRunId}
-                    allSpecs={state.multiSpecs}
-                    error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
-                    firefoxGcInterval={config.firefoxGcInterval}
-                    resetStatsOnSpecChange={state.runMode === 'single'}
-                    renderReporterHeader={(props) => <ReporterHeader {...props} />}
-                    experimentalStudioEnabled={false}
-                  />
-                ) : (
-                  <div className="reporter">
-                    <EmptyReporterHeader />
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList} />
-                  </div>
-                )}
-              </div>
-              <SplitPane
-                primary="second"
-                split="horizontal"
-                onChange={setPluginsHeight}
-                allowResize={state.isAnyDevtoolsPluginOpen}
-                onDragStarted={() => setIsResizing(true)}
-                onDragFinished={() => setIsResizing(false)}
-                size={
-                  state.isAnyDevtoolsPluginOpen
-                    ? pluginsHeight
-                    // show the small not resize-able panel with buttons or nothing
-                    : state.isAnyPluginToShow ? 30 : 0
-                }
-              >
-                <div className={cs('runner runner-ct container', { screenshotting: state.screenshotting })}>
-                  <Header {...props} ref={headerRef}/>
-                  {!state.spec ? (
-                    <NoSpecSelected onSelectSpecRequest={focusSpecsList}>
-                      <KeyboardHelper />
-                    </NoSpecSelected>
-                  ) : (
-                    <Iframes {...props} />
-                  )}
-                  <Message state={state}/>
-                </div>
-
-                <Hidden type="layout" hidden={!state.isAnyPluginToShow} className="ct-plugins">
-                  <div className="ct-plugins-header">
-                    {state.plugins.map((plugin) => (
-                      <button
-                        key={plugin.name}
-                        onClick={() => state.openDevtoolsPlugin(plugin)}
-                        className={cs('ct-plugin-toggle-button', {
-                          'ct-plugin-toggle-button-selected': state.activePlugin === plugin.name,
-                        })}
-                      >
-                        {plugin.name}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={state.toggleDevtoolsPlugin}
-                      className={cs('ct-toggle-plugins-section-button ', {
-                        'ct-toggle-plugins-section-button-open': state.isAnyDevtoolsPluginOpen,
-                      })}
-                    >
-                      <i className="fas fa-chevron-up"/>
-                    </button>
-                  </div>
-
-                  <Hidden
-                    type="layout"
-                    ref={pluginRootContainer}
-                    className="ct-devtools-container"
-                    // deal with jumps when inspecting element
-                    hidden={!state.isAnyDevtoolsPluginOpen}
-                    style={{ height: pluginsHeight - 30 }}
-                  />
-                </Hidden>
-              </SplitPane>
-            </SplitPane>
-          </div>
-          {/* these pixels help ensure the browser has painted when taking a screenshot */}
-          <div className='screenshot-helper-pixels'>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-            <div/>
-          </div>
-        </main>
-      </>
+          <SpecContent
+            state={props.state}
+            eventManager={props.eventManager}
+            config={props.config}
+          />
+        </SplitPane>
+      </SplitPane>
     )
-  },
-)
+  })
 
-export default App
+export default React.memo(RunnerCt, () => true)

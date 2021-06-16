@@ -3,12 +3,23 @@ import Promise from 'bluebird'
 import * as recast from 'recast'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
+import { expect } from 'chai'
 
 import Fixtures from '../../support/helpers/fixtures'
 import { fs } from '../../../lib/util/fs'
-import { generateCypressCommand, addCommandsToBody, generateTest, appendCommandsToTest, createNewTestInSuite } from '../../../lib/util/spec_writer'
+import {
+  generateCypressCommand,
+  addCommandsToBody,
+  generateTest,
+  appendCommandsToTest,
+  createNewTestInSuite,
+  createNewTestInFile,
+  createFile, countStudioUsage,
+} from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
+const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
+const writtenSpec = Fixtures.get('projects/studio/cypress/integration/written.spec.js')
 
 const exampleTestCommands = [
   {
@@ -28,9 +39,11 @@ const verifyOutput = (ast) => {
 }
 
 describe('lib/util/spec_writer', () => {
+  let readFile
+
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
-    sinon.stub(fs, 'readFile').resolves(mockSpec)
+    readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
       snapshot(output)
 
@@ -169,6 +182,41 @@ describe('lib/util/spec_writer', () => {
         line: 30,
         column: 12,
       }, exampleTestCommands, 'test added to describe with config')
+    })
+  })
+
+  describe('#createNewTestInFile', () => {
+    it('can create a new test in the root of a file', () => {
+      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to file')
+    })
+
+    it('preserves comments in a completely empty spec', () => {
+      readFile.resolves(emptyCommentsSpec)
+      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to empty file')
+    })
+  })
+
+  describe('#createFile', () => {
+    it('creates a new file with templated comments', () => {
+      createFile('/path/to/project/cypress/integration/my_new_spec.js')
+    })
+  })
+
+  describe('#countStudioUsage', () => {
+    it('returns 0s when nothing was created with Studio', () => {
+      return countStudioUsage('').then(({ studioCreated, studioExtended }) => {
+        expect(studioCreated).to.eq(0)
+        expect(studioExtended).to.eq(0)
+      })
+    })
+
+    it('returns accurate counts of Studio usage', () => {
+      readFile.resolves(writtenSpec)
+
+      return countStudioUsage('').then(({ studioCreated, studioExtended }) => {
+        expect(studioCreated).to.eq(2)
+        expect(studioExtended).to.eq(4)
+      })
     })
   })
 })

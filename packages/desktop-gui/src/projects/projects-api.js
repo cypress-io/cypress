@@ -102,7 +102,7 @@ const runSpec = (project, spec, browser, specFilter) => {
   .then(launchBrowser)
 }
 
-const closeBrowser = (project, spec) => {
+const onBrowserClose = (project, spec) => {
   if (!spec) {
     specsStore.setChosenSpec(null)
   }
@@ -112,6 +112,10 @@ const closeBrowser = (project, spec) => {
   }
 
   ipc.offLaunchBrowser()
+}
+
+const closeBrowser = (project, spec) => {
+  onBrowserClose(project, spec)
 
   return ipc.closeBrowser()
 }
@@ -127,10 +131,10 @@ const closeProject = (project) => {
   ipc.offOnProjectWarning()
   ipc.offOnConfigChanged()
 
-  return Promise.join(
-    closeBrowser(project),
+  return Promise.all([
+    onBrowserClose(project),
     ipc.closeProject(),
-  )
+  ])
 }
 
 const openProject = (project) => {
@@ -160,10 +164,10 @@ const openProject = (project) => {
       ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
     })
 
-    project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
+    project.prompts.setPromptStates(config)
   }
 
   ipc.onFocusTests(() => {

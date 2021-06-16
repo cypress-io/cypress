@@ -45,12 +45,12 @@ describe('header', () => {
       cy.wrap(runner.emit).should('be.calledWith', 'focus:tests')
     })
 
-    it('shows \'Tests\' when >= 400px wide', () => {
+    it('shows \'Tests\' when >= 398px wide', () => {
       cy.get('.focus-tests span').should('be.visible')
     })
 
-    it('hides \'Tests\' < 400px wide', () => {
-      cy.viewport(399, 450)
+    it('hides \'Tests\' < 398px wide', () => {
+      cy.viewport(397, 450)
       cy.get('.focus-tests span').should('not.be.visible')
     })
   })
@@ -125,14 +125,14 @@ describe('header', () => {
 
         it('has tooltip with right title when auto-scrolling is enabled', () => {
           cy.get('.toggle-auto-scrolling').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Disable Auto-scrolling')
+          cy.get('.cy-tooltip').should('have.text', 'Disable Auto-scrolling A')
         })
 
         it('has tooltip with right title when auto-scrolling is disabled', () => {
           runner.emit('reporter:start', { autoScrollingEnabled: false })
 
           cy.get('.toggle-auto-scrolling').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Enable Auto-scrolling')
+          cy.get('.cy-tooltip').should('have.text', 'Enable Auto-scrolling A')
         })
 
         it('emits save:state event when clicked', () => {
@@ -193,7 +193,7 @@ describe('header', () => {
 
       it('displays tooltip for play button', () => {
         cy.get('.play').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Resume')
+        cy.get('.cy-tooltip').should('have.text', 'Resume C')
       })
 
       it('emits runner:resume when play button is clicked', () => {
@@ -208,7 +208,7 @@ describe('header', () => {
 
       it('displays tooltip for next button', () => {
         cy.get('.next').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', `Next: 'find'`)
+        cy.get('.cy-tooltip').should('have.text', `Next [N]:find`)
       })
 
       it('emits runner:next when next button is clicked', () => {

@@ -27,6 +27,7 @@ describe('e2e studio', function () {
     project,
     spec: 'extend.spec.js',
     snapshot: true,
+    browser: 'electron',
     onRun (exec) {
       return exec().then(() => snapshotFile('extend.spec.js'))
     },
@@ -37,6 +38,7 @@ describe('e2e studio', function () {
   e2e.it('creates new test', {
     project,
     spec: 'new.spec.js',
+    browser: 'electron',
     snapshot: true,
     onRun (exec) {
       return exec().then(() => snapshotFile('new.spec.js'))
@@ -47,6 +49,7 @@ describe('e2e studio', function () {
     project,
     spec: 'external.spec.js',
     snapshot: true,
+    browser: 'electron',
     onRun (exec) {
       return exec()
       // we snapshot the original spec to make sure it does NOT get written there

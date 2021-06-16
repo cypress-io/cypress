@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Adds Cypress to an Angular project.",
+      "factory": "./cypress/index",
+      "schema": "./cypress/schema.json"
+    }
+  }
+}

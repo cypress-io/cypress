@@ -23,7 +23,7 @@ import statusCode from './util/status_code'
 type WarningErr = Record<string, any>
 
 const fullyQualifiedRe = /^https?:\/\//
-const textHtmlContentTypeRe = /^text\/html/i
+const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const debug = Debug('cypress:server:server-e2e')
 
@@ -32,7 +32,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
     // want to match anything starting with 'text/html'
     // including 'text/html;charset=utf-8' and 'Text/HTML'
     // https://github.com/cypress-io/cypress/issues/8506
-    return textHtmlContentTypeRe.test(contentType)
+    return htmlContentTypesRe.test(contentType)
   }
 
   const body = _.invoke(responseBuffer, 'toString')
@@ -53,7 +53,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
+  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -70,11 +70,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         return this._getRemoteState()
       }
 
-      this.createNetworkProxy(config, getRemoteState)
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
 
-      // TODO: this does not look like a good idea
-      // since we would be spawning new workers on every
-      // open + close of a project...
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
       }
@@ -108,6 +105,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
           return reject(this.portInUseErr(port))
         }
       }
+
+      debug('createServer connecting to server')
 
       this.server.on('connect', this.onConnect.bind(this))
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
@@ -421,9 +420,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obsfucated by the proxying so this is not an ideal solution
-        _.assign(options, {
+        _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          headers: {
+            'x-cypress-resolving-url': '1',
+          },
         })
       }
 

@@ -1,15 +1,16 @@
 import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
-import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
+import { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
+import $utils from '../cypress/utils'
 import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
@@ -321,6 +322,10 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOption
       return false
     }
 
+    if ($elements.isButtonLike(el) && !options.force) {
+      return false
+    }
+
     const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
 
     if (isNumberInputType) {
@@ -473,10 +478,15 @@ const validateTyping = (
   if (isDate) {
     dateChars = dateRe.exec(chars)
 
+    const dateExists = (date) => {
+      // dayjs rounds up dates that don't exist to valid dates
+      return dayjs(date, 'YYYY-MM-DD').format('YYYY-MM-DD') === date
+    }
+
     if (
       _.isString(chars) &&
       dateChars &&
-      moment(dateChars[0]).isValid()
+      dateExists(dateChars[0])
     ) {
       skipCheckUntilIndex = _getEndIndex(chars, dateChars[0])
 
@@ -831,9 +841,14 @@ export class Keyboard {
 
     return Promise
     .each(typeKeyFns, (fn) => {
+      if (options.delay) {
+        return Promise
+        .try(fn)
+        .delay(options.delay)
+      }
+
       return Promise
       .try(fn)
-      .delay(options.delay)
     })
     .then(() => {
       if (options.release !== false) {
@@ -1306,10 +1321,56 @@ const create = (Cypress, state) => {
   return new Keyboard(Cypress, state)
 }
 
+let _defaults
+
+const reset = () => {
+  _defaults = {
+    keystrokeDelay: 10,
+  }
+}
+
+reset()
+
+const getConfig = () => {
+  return _.clone(_defaults)
+}
+
+const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
+  if (!_.isPlainObject(props)) {
+    $errUtils.throwErrByPath('keyboard.invalid_arg', {
+      args: { arg: $utils.stringify(props) },
+    })
+  }
+
+  if (!('keystrokeDelay' in props)) {
+    return getConfig()
+  }
+
+  if (!_.isNumber(props.keystrokeDelay) || props.keystrokeDelay! < 0) {
+    $errUtils.throwErrByPath('keyboard.invalid_delay', {
+      args: {
+        cmd: 'Cypress.Keyboard.defaults',
+        docsPath: 'keyboard-api',
+        option: 'keystrokeDelay',
+        delay: $utils.stringify(props.keystrokeDelay),
+      },
+    })
+  }
+
+  _.extend(_defaults, {
+    keystrokeDelay: props.keystrokeDelay,
+  })
+
+  return getConfig()
+}
+
 export {
   create,
+  defaults,
+  getConfig,
   getKeymap,
   modifiersToString,
+  reset,
   toModifiersEventOptions,
   fromModifierEventOptions,
 }

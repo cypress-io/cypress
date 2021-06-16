@@ -1,9 +1,10 @@
 import * as React from 'react'
-import { observer } from 'mobx-react'
 import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import Stats from '@packages/reporter/src/header/stats'
 import Controls from '@packages/reporter/src/header/controls'
 import { StatsStore } from '@packages/reporter/src/header/stats-store'
+import { namedObserver } from '@packages/runner-shared'
+import styles from './ReporterHeader.module.scss'
 
 export const EmptyReporterHeader: React.FC = () => {
   return (
@@ -13,14 +14,13 @@ export const EmptyReporterHeader: React.FC = () => {
   )
 }
 
-export const ReporterHeader: React.FC<ReporterHeaderProps> = observer(
-  function ReporterHeader ({ statsStore, appState }) {
+export const ReporterHeader: React.FC<ReporterHeaderProps> = namedObserver('ReporterHeader',
+  ({ statsStore, appState }) => {
     return (
-      <header>
+      <header className={styles.ctReporterHeader}>
         <Stats stats={statsStore} />
         <div className='spacer' />
         <Controls appState={appState} />
       </header>
     )
-  },
-)
+  })

@@ -29,15 +29,20 @@ describe('Error Boundary', () => {
   })
 
   it('on error, display fallback UI', () => {
-    try {
-      mount(
-        <ErrorBoundary name="ChildWithError">
-          <ChildWithError />
-        </ErrorBoundary>,
-      )
-    } catch (e) {
-      // do nothing
-    }
+    // Error boundaries do not stop an uncaught error from propagating.
+    // Cypress will fail on uncaught exceptions by default, so we need to suppress that behavior.
+    cy.on('uncaught:exception', (err) => {
+      // Assert that we are only suppressing the default behavior for the error we expect.
+      expect(err.message.includes('I crashed!')).to.be.true
+
+      return false
+    })
+
+    mount(
+      <ErrorBoundary name="ChildWithError">
+        <ChildWithError />
+      </ErrorBoundary>,
+    )
 
     cy.get('header h1').should('contain', 'Something went wrong.')
     cy.get('header h3').should('contain', 'ChildWithError failed to load')

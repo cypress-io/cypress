@@ -66,11 +66,13 @@ register('request:access')
 register('setup:dashboard:project')
 register('set:project:id')
 register('show:directory:dialog')
+register('show:new:spec:dialog')
 register('updater:check', false)
 register('updater:run', false)
 register('window:open')
 register('window:close')
 register('onboarding:closed')
 register('set:clipboard:text')
+register('set:prompt:shown')
 
 export default ipc

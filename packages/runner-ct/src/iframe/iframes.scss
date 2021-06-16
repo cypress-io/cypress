@@ -1,19 +1,20 @@
+@use '../variables.scss' as *;
+
 .iframes-ct-container {
-  margin: 8px;
+  margin: 0 8px;
+  padding: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .iframes-ct-container-screenshotting {
   margin: 0;
+  padding: 0;
 }
-
 
 .size-container {
-  width: 100%;
   overflow: auto;
-  background: none;
-  box-shadow: none;
-}
-
-.app-ct .runner {
-  background: unset;
+  box-shadow: shadow(m);
+  max-width: 100%;
 }

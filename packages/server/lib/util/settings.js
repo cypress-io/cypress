@@ -58,7 +58,7 @@ const renameSupportFolder = (obj) => {
 
 module.exports = {
   _pathToFile (projectRoot, file) {
-    return path.join(projectRoot, file)
+    return path.isAbsolute(file) ? file : path.join(projectRoot, file)
   },
 
   _err (type, file, err) {
@@ -203,6 +203,14 @@ module.exports = {
     .catch({ code: 'ENOENT' }, () => {
       return this._write(file, {})
     }).then((json = {}) => {
+      if (this.isComponentTesting(options) && 'component' in json) {
+        json = { ...json, ...json.component }
+      }
+
+      if (!this.isComponentTesting(options) && 'e2e' in json) {
+        json = { ...json, ...json.e2e }
+      }
+
       const changed = this._applyRewriteRules(json)
 
       // if our object is unchanged

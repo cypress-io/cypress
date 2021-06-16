@@ -14,7 +14,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return 'e2e'
   }
 
-  open (options) {
+  open (options: Record<string, unknown>) {
     this._server = new ServerE2E()
 
     return super.open(options, {
@@ -30,7 +30,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
           return updatedConfig
         })
         .then((cfg) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning)
+          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
             return {
               cfg,
@@ -59,6 +59,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return plugins.init(cfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
       onError (err) {
         debug('got plugins error', err.stack)
 
