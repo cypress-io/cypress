@@ -56,5 +56,8 @@
     "registry": "http://registry.npmjs.org/"
   },
   "builders": "./src/builders/builders.json",
-  "schematics": "./src/schematics/collection.json"
+  "schematics": "./src/schematics/collection.json",
+  "ng-add": {
+    "save": "devDependencies"
+  }
 }

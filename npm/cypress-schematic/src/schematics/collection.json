@@ -4,7 +4,6 @@
     "ng-add": {
       "description": "Adds Cypress to an Angular project.",
       "factory": "./cypress/index",
-      "save": "devDependencies",
       "schema": "./cypress/schema.json"
     }
   }
