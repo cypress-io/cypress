@@ -237,7 +237,7 @@
       .studio-controls {
         display: flex;
 
-        .studio-save {
+        .studio-save, .studio-copy {
           display: block;
         }
       }
@@ -417,10 +417,24 @@
       .studio-copy {
         border: 2px solid #3386d4;
         color: #3386d4;
+        display: none;
+        font-size: 14px;
+        padding: 2.5px 16px;
+
+        &:hover, &:focus {
+          background-color: rgba(0, 0, 0, 0.05)
+        }
 
         &.studio-copy-success {
           border-color: $pass;
           color: $pass;
+        }
+
+        &[disabled],
+        &[disabled]:hover,
+        &[disabled]:active {
+          background-color: #fff;
+          opacity: 0.5;
         }
       }
     }
