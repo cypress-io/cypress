@@ -32,6 +32,7 @@ import { escapeFilenameInUrl } from './util/escape_filename'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import settings from './util/settings'
+import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 
@@ -281,6 +282,26 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
       })
     }
+  }
+
+  _onError (err: Error, options: Record<string, any>): void {
+    throw Error(`_onError must be implemented by the super class!`)
+  }
+
+  _initPlugins (cfg, options) {
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    const allowedCfg = config.allowed(cfg)
+
+    return plugins.init(allowedCfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError: (err: Error) => this._onError(err, options),
+      onWarning: options.onWarning,
+    })
   }
 
   watchPluginsFile (cfg, options) {

@@ -1,9 +1,7 @@
 import Debug from 'debug'
 import config from '@packages/server/lib/config'
-import plugins from '@packages/server/lib/plugins'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
-import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { ServerCt } from './server-ct'
@@ -64,24 +62,18 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     })
   }
 
+  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
+    debug('plugins failed with error', err)
+
+    options.onError(err)
+  }
+
   _initPlugins (cfg, options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    const allowedCfg = config.allowed(cfg)
-
-    return plugins.init(allowedCfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
-      onError (err) {
-        debug('plugins failed with error', err)
-
-        options.onError(err)
-      },
-      onWarning: options.onWarning,
-    })
+    return super._initPlugins(cfg, options)
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
 

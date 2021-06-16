@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
-import { findSpecsOfType } from '@packages/server/lib/util/specs'
+import { findSpecsOfType } from './util/specs'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
