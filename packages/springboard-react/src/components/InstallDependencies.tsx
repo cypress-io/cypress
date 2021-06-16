@@ -43,36 +43,3 @@ export const InstallDependencies: React.FC<InstallDependenciesProps> = (
     </div>
   )
 }
-
-{
-  /* <script lang="ts">
-import { defineComponent } from 'vue'
-import { useStore } from '../store'
-import DependencyItem from './DependencyItem.vue'
-import TerminalCommand from './TerminalCommand.vue'
-
-export default defineComponent({
-  components: {
-    DependencyItem,
-    TerminalCommand
-  },
-
-  setup() {
-    const store = useStore()
-
-    const framework = store.getState().component.framework
-    if (!framework) {
-      throw Error(`store.state.component.framework must be set before using this component. This should never happen.`)
-    }
-
-    // TODO: We should detect whether they are using npm or yarn.
-    const command = `yarn add ${framework.dependencies.map(dep => dep.packageName).join(' ')} --dev`
-
-    return {
-      dependencies: framework.dependencies,
-      command
-    }
-  }
-})
-</script> */
-}

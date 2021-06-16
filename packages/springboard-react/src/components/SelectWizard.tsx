@@ -1,15 +1,18 @@
+import React from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
-import React, { ChangeEventHandler, useState } from 'react'
 import type { TestingType } from '../types/shared'
 import { NewUserWelcome } from './NewUserWelcome'
 import { RunnerButton } from './RunnerButton'
+import { DismissNewUserWelcomeMutationDocument, SelectWizardQueryDocument } from '../generated/graphql'
 
 interface SelectWizardProps {
   testingTypes: TestingType[]
   showNewUserFlow: boolean
+  setTestingType?: any
+  selectedTestingType: string | undefined
 }
 
-const SelectWizardQuery = gql`
+gql`
   query SelectWizardQuery {
     app {
       cypressVersion
@@ -20,7 +23,7 @@ const SelectWizardQuery = gql`
   }
 `
 
-const DismissNewUserWelcome = gql`
+gql`
   mutation DismissNewUserWelcomeMutation {
     wizardSetDismissedHelper {
       showNewUserWelcome
@@ -29,16 +32,8 @@ const DismissNewUserWelcome = gql`
 `
 
 export const SelectWizard: React.FC<SelectWizardProps> = (props) => {
-  const { data, loading, error } = useQuery(SelectWizardQuery)
-  const [dismissNewUserWelcome] = useMutation(DismissNewUserWelcome)
-  // const [setSelectedTestingType] = useMutation(SetSelectedTestingTypeMutation)
-
-  const [selectedTestingType, setSelectedTestingType] = useState<string>()
-  const selectTestingType = (testingType: TestingType): ChangeEventHandler<HTMLInputElement> => {
-    return (e) => {
-      setSelectedTestingType(e.target.value)
-    }
-  }
+  const { data, loading, error } = useQuery(SelectWizardQueryDocument)
+  const [dismissNewUserWelcome] = useMutation(DismissNewUserWelcomeMutationDocument)
 
   if (error) {
     return <div>{JSON.stringify(error)}</div>
@@ -63,8 +58,8 @@ export const SelectWizard: React.FC<SelectWizardProps> = (props) => {
           <RunnerButton
             key={testingType}
             testingType={testingType}
-            selected={selectedTestingType === testingType}
-            onChange={selectTestingType(testingType)}
+            selected={props.selectedTestingType === testingType}
+            onChange={props.setTestingType(testingType)}
           />
         ))}
       </div>

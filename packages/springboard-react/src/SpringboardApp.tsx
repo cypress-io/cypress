@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
-import React from 'react'
+import React, { useState } from 'react'
 import { SelectWizard } from './components/SelectWizard'
-import { testingTypes } from './types/shared'
+import { TestingType, testingTypes } from './types/shared'
 
 gql`
   query SpringboardAppQuery {
@@ -16,6 +16,13 @@ export const SpringboardApp = (props) => {
   const goBack = () => {}
   const goNext = () => {}
 
+  const [selectedTestingType, setSelectedTestingType] = useState<string>()
+  const selectTestingType = (testingType: TestingType): React.ChangeEventHandler<HTMLInputElement> => {
+    return (e) => {
+      setSelectedTestingType(testingType)
+    }
+  }
+
   return (
     <div className="h-150 max-w-200 mx-auto rounded-xl bg-white relative">
       <div>
@@ -25,7 +32,7 @@ export const SpringboardApp = (props) => {
         </div>
         <div className="flex flex-col justify-center h-120 p-2">
           {!currentStep ? (
-            <SelectWizard testingTypes={testingTypes} showNewUserFlow />
+            <SelectWizard selectedTestingType={selectedTestingType} setTestingType={selectTestingType} testingTypes={testingTypes} showNewUserFlow />
           ) : (
             currentStep.component
           )}
@@ -43,10 +50,10 @@ export const SpringboardApp = (props) => {
         </button>
 
         <button
-          disabled={!props.selectedTestingType || !props.canGoNextStep}
+          disabled={!selectedTestingType}
           data-cy="previous"
           className={`bg-blue-500 text-white m-5 px-4 py-2 rounded ${
-            !props.selectedTestingType || !props.canGoNextStep
+            !selectedTestingType
               ? 'opacity-50'
               : ''
           }`}

@@ -1,1 +1,5 @@
-**/*
+/*
+
+!/packages
+/packages/*
+!/packages/springboard-react

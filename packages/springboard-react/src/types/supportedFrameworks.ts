@@ -6,7 +6,12 @@
 
 type Library = 'react 16' | 'react 17' | 'vue 2' | 'vue 3'
 type Bundler = 'vite' | 'webpack 4' | 'webpack 5'
-type ProjectTemplate = 'react-scripts' | 'vue-cli' | 'next.js (webpack 4)' | 'next.js (webpack 5)' | 'nuxt (vue 2)'
+type ProjectTemplate =
+  | 'react-scripts'
+  | 'vue-cli'
+  | 'next.js (webpack 4)'
+  | 'next.js (webpack 5)'
+  | 'nuxt (vue 2)'
 
 export interface Dependency {
   packageName: string
@@ -48,14 +53,16 @@ const cypressVue: Dependency = {
 
 export const cypressWebpackDevServer: Dependency = {
   packageName: '@cypress/webpack-dev-server',
-  description: 'Cypress will use your existing build configuration to bundle and run your tests.',
+  description:
+    'Cypress will use your existing build configuration to bundle and run your tests.',
   link: '?',
 }
 
 const htmlWebpackPlugin = (version: number): Dependency => {
   return {
     packageName: `html-webpack-plugin@${version}`,
-    description: 'Ensure all your bundled code is correct injected into the base html template.',
+    description:
+      'Ensure all your bundled code is correct injected into the base html template.',
     link: '?',
   }
 }
