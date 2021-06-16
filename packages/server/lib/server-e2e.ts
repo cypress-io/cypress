@@ -53,7 +53,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests) {
+  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests, specsStore) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
@@ -85,6 +85,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         networkProxy: this._networkProxy,
         onError,
         project,
+        specsStore,
       })
 
       return this.createServer(app, config, project, this.request, onWarning)

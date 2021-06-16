@@ -34,6 +34,7 @@ module.exports = {
     config.platform = os.platform()
     config.arch = os.arch()
     config.spec = spec
+    config.specs = options.specsStore.specFiles
     config.browser = browser
 
     debug('serving runner index.html with config %o',

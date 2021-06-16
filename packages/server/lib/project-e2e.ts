@@ -14,9 +14,12 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
   async _initPlugins (cfg, options) {
     const modifiedConfig = await super._initPlugins(cfg, options)
 
-    await this.initSpecListWatcher(modifiedConfig)
+    const { specsStore } = await this.initSpecListWatcher(modifiedConfig)
 
-    return modifiedConfig
+    return {
+      cfg,
+      specsStore,
+    }
   }
 
   open (options: Record<string, unknown>) {
@@ -26,8 +29,8 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
       // @ts-ignore
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
-        .then((cfg) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
+        .then(({ cfg, specsStore }) => {
+          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests, specsStore)
           .then(([port, warning]) => {
             return {
               cfg,

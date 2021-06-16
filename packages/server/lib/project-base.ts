@@ -996,14 +996,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   async initSpecListWatcher (cfg: Record<string, any>) {
     // get initial specs
-    await this.findProjectSpecs(cfg)
     // const specs = await this.findProjectSpecs(cfg)
     const specsStore = new SpecsStore(cfg, 'e2e')
 
     specsStore.watch({
       onSpecsChanged: (specs) => {
         // send new files to frontend
-        // eg: this.server.socket.sendSpecList(specs)
+        this.server.socket.sendSpecList(specs)
       },
     })
 
