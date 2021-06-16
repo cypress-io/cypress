@@ -124,7 +124,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
 
           modifiedConfig.baseUrl = `http://localhost:${port}`
 
-          const specsStore = new SpecsStore(cfg)
+          const specsStore = new SpecsStore(cfg, 'ct')
 
           specsStore.watch({
             onSpecsChanged: (specs) => {
