@@ -17,7 +17,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     const { specsStore } = await this.initSpecListWatcher(modifiedConfig)
 
     return {
-      cfg,
+      cfg: modifiedConfig,
       specsStore,
     }
   }
