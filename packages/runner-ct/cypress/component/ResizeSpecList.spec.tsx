@@ -3,7 +3,7 @@ import React from 'react'
 import { mount } from '@cypress/react'
 import RunnerCt from '../../src/app/RunnerCt'
 import '@packages/runner/src/main.scss'
-import eventManager from '../../src/lib/event-manager'
+import { eventManager } from '@packages/runner-shared'
 import { testSpecFile } from '../fixtures/testSpecFile'
 import { makeState, fakeConfig, getPort } from './utils'
 

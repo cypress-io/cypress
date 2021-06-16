@@ -24,9 +24,8 @@
     "nyc": "14.1.1",
     "sass": "1.32.11",
     "sass-loader": "7.3.1",
-    "vue": "2.6.12",
-    "vue-loader": "15.9.6",
-    "vue-template-compiler": "2.6.12",
+    "vue": "3.0.11",
+    "vue-loader": "16.2.0",
     "webpack": "4.46.0"
   },
   "license": "MIT",

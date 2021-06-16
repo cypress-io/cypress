@@ -14,6 +14,8 @@ const create = (state) => {
 
         return location
       } catch (e) {
+        // it is possible we do not have access to the location
+        // for example, if the app has redirected to a 2nd domain
         return ''
       }
     },
