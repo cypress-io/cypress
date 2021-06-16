@@ -6,8 +6,7 @@ import BootstrapModal from 'react-bootstrap-modal'
 
 import ipc from '../lib/ipc'
 
-@observer
-class OnBoarding extends Component {
+const OnBoarding = observer(class OnBoarding extends Component {
   componentDidMount () {
     this._maybeShowModal()
   }
@@ -126,6 +125,6 @@ class OnBoarding extends Component {
   _openIntegrationFolder = () => {
     ipc.openFinder(this.props.project.integrationFolder)
   }
-}
+})
 
 export default OnBoarding

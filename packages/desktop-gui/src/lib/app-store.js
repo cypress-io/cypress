@@ -1,36 +1,53 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import localData from '../lib/local-data'
 import updateStore from '../update/update-store'
 
 class AppStore {
-  @observable cypressEnv
-  @observable os
-  @observable projectRoot = null
-  @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
-  @observable error
-  @observable proxyServer
-  @observable proxyBypassList
-  @observable proxySource
+  cypressEnv;
+  os;
+  projectRoot = null;
+  localInstallNoticeDismissed = localData.get('local-install-notice-dimissed');
+  error;
+  proxyServer;
+  proxyBypassList;
+  proxySource;
 
   constructor () {
+    makeObservable(this, {
+      cypressEnv: observable,
+      os: observable,
+      projectRoot: observable,
+      localInstallNoticeDismissed: observable,
+      error: observable,
+      proxyServer: observable,
+      proxyBypassList: observable,
+      proxySource: observable,
+      displayVersion: computed,
+      isDev: computed,
+      isGlobalMode: computed,
+      set: action,
+      setLocalInstallNoticeDismissed: action,
+      setError: action,
+    })
+
     if (window.Cypress) {
       window.AppStore = this // for testing
     }
   }
 
-  @computed get displayVersion () {
+  get displayVersion () {
     return this.isDev ? `${updateStore.version} (dev)` : updateStore.version
   }
 
-  @computed get isDev () {
+  get isDev () {
     return this.cypressEnv === 'development'
   }
 
-  @computed get isGlobalMode () {
+  get isGlobalMode () {
     return !this.projectRoot
   }
 
-  @action set (props) {
+  set (props) {
     if (props.cypressEnv != null) this.cypressEnv = props.cypressEnv
 
     if (props.os != null) this.os = props.os
@@ -42,12 +59,12 @@ class AppStore {
     this.proxySource = props.proxySource || this.proxySource
   }
 
-  @action setLocalInstallNoticeDismissed (isDismissed) {
+  setLocalInstallNoticeDismissed (isDismissed) {
     this.localInstallNoticeDismissed = isDismissed
     localData.set('local-install-notice-dimissed', isDismissed)
   }
 
-  @action setError (err) {
+  setError (err) {
     this.error = err
   }
 }

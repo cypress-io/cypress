@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 
 interface DefaultAppState {
   forcingGc: boolean
@@ -22,18 +22,31 @@ const defaults: DefaultAppState = {
 }
 
 class AppState {
-  @observable autoScrollingEnabled = true
-  @observable forcingGc = defaults.forcingGc
-  @observable isPaused = defaults.isPaused
-  @observable isRunning = defaults.isRunning
-  @observable nextCommandName = defaults.nextCommandName
-  @observable pinnedSnapshotId = defaults.pinnedSnapshotId
-  @observable firefoxGcInterval = defaults.firefoxGcInterval
-  @observable studioActive = defaults.studioActive
+  autoScrollingEnabled = true;
+  forcingGc = defaults.forcingGc;
+  isPaused = defaults.isPaused;
+  isRunning = defaults.isRunning;
+  nextCommandName = defaults.nextCommandName;
+  pinnedSnapshotId = defaults.pinnedSnapshotId;
+  firefoxGcInterval = defaults.firefoxGcInterval;
+  studioActive = defaults.studioActive;
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
+
+  constructor () {
+    makeObservable(this, {
+      autoScrollingEnabled: observable,
+      forcingGc: observable,
+      isPaused: observable,
+      isRunning: observable,
+      nextCommandName: observable,
+      pinnedSnapshotId: observable,
+      firefoxGcInterval: observable,
+      studioActive: observable,
+    })
+  }
 
   startRunning () {
     this.isRunning = true

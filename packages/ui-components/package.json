@@ -31,7 +31,7 @@
     "cypress-multi-reporters": "1.4.0",
     "file-loader": "4.3.0",
     "lodash": "4.17.19",
-    "mobx": "5.15.4",
+    "mobx": "^6.3.2",
     "mobx-react": "6.1.7",
     "prop-types": "15.7.2",
     "react": "16.8.6",

@@ -114,8 +114,7 @@ export interface RunnablesProps {
   appState?: AppState
 }
 
-@observer
-class Runnables extends Component<RunnablesProps> {
+const Runnables = observer(class Runnables extends Component<RunnablesProps> {
   render () {
     const { error, runnablesStore, spec } = this.props
 
@@ -140,7 +139,7 @@ class Runnables extends Component<RunnablesProps> {
       }
     }))
   }
-}
+})
 
 export { RunnablesList }
 

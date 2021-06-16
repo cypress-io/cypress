@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import AgentModel, { AgentProps } from '../agents/agent-model'
 import CommandModel, { CommandProps } from '../commands/command-model'
 import { HookProps } from '../hooks/hook-model'
@@ -40,8 +40,8 @@ type RunnableType = 'test' | 'suite'
 type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 
 export class RunnablesStore {
-  @observable isReady = defaults.isReady
-  @observable runnables: RunnableArray = []
+  isReady = defaults.isReady;
+  runnables: RunnableArray = [];
   /**
    * Stores a list of all the runables files where the reporter
    * has passed without any specific order.
@@ -49,7 +49,7 @@ export class RunnablesStore {
    * key: spec FilePath
    * content: RunableArray
    */
-  @observable runnablesHistory: Record<string, RunnableArray> = {}
+  runnablesHistory: Record<string, RunnableArray> = {};
 
   runningSpec: string | null = null
 
@@ -68,6 +68,13 @@ export class RunnablesStore {
   showingSnapshot = defaults.showingSnapshot
 
   constructor ({ appState, scroller }: Props) {
+    makeObservable(this, {
+      isReady: observable,
+      runnables: observable,
+      runnablesHistory: observable,
+      setRunningSpec: action,
+    })
+
     this.appState = appState
     this.scroller = scroller
   }
@@ -216,7 +223,6 @@ export class RunnablesStore {
     this._runnablesQueue = []
   }
 
-  @action
   setRunningSpec (specPath: string) {
     const previousSpec = this.runningSpec
 

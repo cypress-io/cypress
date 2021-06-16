@@ -2,8 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import TimerStore from './duration-timer-store'
 
-@observer
-export default class TimerDisplay extends Component {
+const TimerDisplay = observer(class TimerDisplay extends Component {
   constructor (...props) {
     super(...props)
 
@@ -26,4 +25,6 @@ export default class TimerDisplay extends Component {
       </span>
     )
   }
-}
+})
+
+export default TimerDisplay

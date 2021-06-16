@@ -1,6 +1,6 @@
 /* eslint-disable padding-line-between-statements */
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { computed, observable, makeObservable } from 'mobx'
 
 import { FileDetails } from '@packages/ui-components'
 
@@ -34,25 +34,38 @@ export interface ErrProps {
 }
 
 export default class Err {
-  @observable name = ''
-  @observable message = ''
-  @observable stack = ''
-  @observable sourceMappedStack = ''
-  @observable.ref parsedStack: ParsedStackLine[] = []
-  @observable docsUrl = '' as string | string[]
-  @observable templateType = ''
+  name = '';
+  message = '';
+  stack = '';
+  sourceMappedStack = '';
+  parsedStack: ParsedStackLine[] = [];
+  docsUrl = '' as string | string[];
+  templateType = '';
   // @ts-ignore
-  @observable.ref codeFrame: CodeFrame
+  codeFrame: CodeFrame;
 
   constructor (props?: Partial<ErrProps>) {
+    makeObservable(this, {
+      name: observable,
+      message: observable,
+      stack: observable,
+      sourceMappedStack: observable,
+      parsedStack: observable.ref,
+      docsUrl: observable,
+      templateType: observable,
+      codeFrame: observable.ref,
+      displayMessage: computed,
+      isCommandErr: computed,
+    })
+
     this.update(props)
   }
 
-  @computed get displayMessage () {
+  get displayMessage () {
     return _.compact([this.name, this.message]).join(': ')
   }
 
-  @computed get isCommandErr () {
+  get isCommandErr () {
     return /(AssertionError|CypressError)/.test(this.name)
   }
 

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import cs from 'classnames'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -21,11 +21,24 @@ const fixMouseOut = (fn, getTarget) => (e) => {
   fn(e)
 }
 
-@observer
-class SelectorPlayground extends Component {
-  @observable copyText = defaultCopyText
-  @observable printText = defaultPrintText
-  @observable showingMethodPicker = false
+const SelectorPlayground = observer(class SelectorPlayground extends Component {
+  copyText = defaultCopyText;
+  printText = defaultPrintText;
+  showingMethodPicker = false;
+
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      copyText: observable,
+      printText: observable,
+      showingMethodPicker: observable,
+      _setShowingMethodPicker: action,
+      _setMethod: action,
+      _setCopyText: action,
+      _setPrintText: action,
+    })
+  }
 
   render () {
     const { model } = this.props
@@ -180,11 +193,11 @@ class SelectorPlayground extends Component {
     this._setShowingMethodPicker(!this.showingMethodPicker)
   }
 
-  @action _setShowingMethodPicker (isShowing) {
+  _setShowingMethodPicker (isShowing) {
     this.showingMethodPicker = isShowing
   }
 
-  @action _setMethod (method) {
+  _setMethod (method) {
     if (method !== this.props.model.method) {
       this.props.model.setMethod(method)
     }
@@ -206,7 +219,7 @@ class SelectorPlayground extends Component {
     }
   }
 
-  @action _setCopyText (text) {
+  _setCopyText (text) {
     this.copyText = text
   }
 
@@ -219,7 +232,7 @@ class SelectorPlayground extends Component {
     this._setPrintText('Printed!')
   }
 
-  @action _setPrintText (text) {
+  _setPrintText (text) {
     this.printText = text
   }
 
@@ -241,6 +254,6 @@ class SelectorPlayground extends Component {
     model.setSelector(e.target.value)
     model.setShowingHighlight(true)
   }
-}
+})
 
 export { SelectorPlayground }

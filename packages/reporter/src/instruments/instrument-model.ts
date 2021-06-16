@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 
 export interface AliasObject {
   name: string
@@ -24,17 +24,29 @@ export interface InstrumentProps {
 }
 
 export default class Log {
-  @observable.ref alias?: Alias = null
-  @observable aliasType?: string | null = null
-  @observable displayName?: string
-  @observable id?: number
-  @observable name?: string
-  @observable message?: string
-  @observable type?: string
-  @observable state?: string | null
-  @observable.ref referencesAlias?: Alias = null
+  alias?: Alias = null;
+  aliasType?: string | null = null;
+  displayName?: string;
+  id?: number;
+  name?: string;
+  message?: string;
+  type?: string;
+  state?: string | null;
+  referencesAlias?: Alias = null;
 
   constructor (props: InstrumentProps) {
+    makeObservable(this, {
+      alias: observable.ref,
+      aliasType: observable,
+      displayName: observable,
+      id: observable,
+      name: observable,
+      message: observable,
+      type: observable,
+      state: observable,
+      referencesAlias: observable.ref,
+    })
+
     this.id = props.id
     this.alias = props.alias
     this.aliasType = props.aliasType

@@ -67,8 +67,7 @@ export interface RunnableProps {
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-@observer
-class Runnable extends Component<RunnableProps> {
+const Runnable = observer(class Runnable extends Component<RunnableProps> {
   static defaultProps = {
     appState,
   }
@@ -87,7 +86,7 @@ class Runnable extends Component<RunnableProps> {
       </li>
     )
   }
-}
+})
 
 export { Suite }
 

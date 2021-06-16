@@ -11,8 +11,7 @@ import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
 import DocsMenu from './docs-menu'
 
-@observer
-export default class Nav extends Component {
+const Nav = observer(class Nav extends Component {
   render () {
     return (
       <nav className='main-nav navbar navbar-inverse'>
@@ -136,4 +135,6 @@ export default class Nav extends Component {
       },
     })
   }
-}
+})
+
+export default Nav

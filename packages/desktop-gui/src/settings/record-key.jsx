@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -32,10 +32,20 @@ const showLogin = () => {
   authStore.openLogin(null, 'Settings Tab')
 }
 
-@observer
-class RecordKey extends Component {
-  @observable key = null
-  @observable isLoading = false
+const RecordKey = observer(class RecordKey extends Component {
+  key = null;
+  isLoading = false;
+
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      key: observable,
+      isLoading: observable,
+      _setLoading: action,
+      _setKey: action,
+    })
+  }
 
   componentDidMount () {
     this.wasAuthenticated = authStore.isAuthenticated
@@ -65,11 +75,11 @@ class RecordKey extends Component {
     })
   }
 
-  @action _setLoading (isLoading) {
+  _setLoading (isLoading) {
     this.isLoading = isLoading
   }
 
-  @action _setKey (key) {
+  _setKey (key) {
     if (key) this.key = key
   }
 
@@ -156,6 +166,6 @@ class RecordKey extends Component {
       </div>
     )
   }
-}
+})
 
 export default RecordKey

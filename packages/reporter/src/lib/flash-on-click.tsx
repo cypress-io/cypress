@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Children, cloneElement, Component, MouseEvent, ReactElement, ReactNode } from 'react'
@@ -11,8 +11,7 @@ interface Props {
   shouldShowMessage?: (() => boolean)
 }
 
-@observer
-class FlashOnClick extends Component<Props> {
+const FlashOnClick = observer(class FlashOnClick extends Component<Props> {
   static propTypes = {
     message: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
@@ -23,7 +22,16 @@ class FlashOnClick extends Component<Props> {
     shouldShowMessage: () => true,
   }
 
-  @observable _show = false
+  _show = false;
+
+  constructor (props: Props) {
+    super(props)
+
+    makeObservable(this, {
+      _show: observable,
+      _onClick: action,
+    })
+  }
 
   render () {
     const child = Children.only<ReactNode>(this.props.children)
@@ -35,7 +43,7 @@ class FlashOnClick extends Component<Props> {
     )
   }
 
-  @action _onClick = (e: MouseEvent) => {
+  _onClick = (e: MouseEvent) => {
     const { onClick, shouldShowMessage } = this.props
 
     onClick(e)
@@ -45,7 +53,7 @@ class FlashOnClick extends Component<Props> {
     setTimeout(action('hide:console:message', () => {
       this._show = false
     }), 1500)
-  }
-}
+  };
+})
 
 export default FlashOnClick

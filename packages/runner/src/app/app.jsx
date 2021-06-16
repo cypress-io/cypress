@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
@@ -18,9 +18,16 @@ import util from '../lib/util'
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
 
-@observer
-class App extends Component {
-  @observable isReporterResizing = false
+const App = observer(class App extends Component {
+  isReporterResizing = false;
+
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      isReporterResizing: observable,
+    })
+  }
 
   render () {
     /**
@@ -221,7 +228,7 @@ class App extends Component {
   componentWillUnmount () {
     $(this.props.window).off('resize', this._onWindowResize)
   }
-}
+})
 
 App.defaultProps = {
   window,

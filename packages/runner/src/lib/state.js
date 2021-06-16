@@ -1,4 +1,4 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import { automation } from '@packages/runner-shared'
 
 const _defaults = {
@@ -20,45 +20,79 @@ const _defaults = {
 export default class State {
   defaults = _defaults
 
-  @observable isLoading = true
-  @observable isRunning = false
+  isLoading = true;
+  isRunning = false;
 
-  @observable messageTitle = _defaults.messageTitle
-  @observable messageDescription = _defaults.messageDescription
-  @observable messageType = _defaults.messageType
-  @observable.ref messageControls = _defaults.messageControls
+  messageTitle = _defaults.messageTitle;
+  messageDescription = _defaults.messageDescription;
+  messageType = _defaults.messageType;
+  messageControls = _defaults.messageControls;
 
-  @observable snapshot = {
+  snapshot = {
     showingHighlights: true,
     stateIndex: 0,
-  }
+  };
 
-  @observable url = _defaults.url
-  @observable highlightUrl = _defaults.highlightUrl
-  @observable isLoadingUrl = _defaults.isLoadingUrl
+  url = _defaults.url;
+  highlightUrl = _defaults.highlightUrl;
+  isLoadingUrl = _defaults.isLoadingUrl;
 
-  @observable width = _defaults.width
-  @observable height = _defaults.height
+  width = _defaults.width;
+  height = _defaults.height;
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
-  @observable reporterWidth = _defaults.reporterWidth
+  reporterWidth = _defaults.reporterWidth;
   // what the dom reports, always in pixels
-  @observable absoluteReporterWidth = 0
-  @observable headerHeight = 0
+  absoluteReporterWidth = 0;
+  headerHeight = 0;
 
-  @observable windowWidth = 0
-  @observable windowHeight = 0
+  windowWidth = 0;
+  windowHeight = 0;
 
-  @observable automation = automation.CONNECTING
+  automation = automation.CONNECTING;
 
-  @observable.ref scriptError = null
+  scriptError = null;
 
   constructor (reporterWidth = _defaults.reporterWidth) {
+    makeObservable(this, {
+      isLoading: observable,
+      isRunning: observable,
+      messageTitle: observable,
+      messageDescription: observable,
+      messageType: observable,
+      messageControls: observable.ref,
+      snapshot: observable,
+      url: observable,
+      highlightUrl: observable,
+      isLoadingUrl: observable,
+      width: observable,
+      height: observable,
+      reporterWidth: observable,
+      absoluteReporterWidth: observable,
+      headerHeight: observable,
+      windowWidth: observable,
+      windowHeight: observable,
+      automation: observable,
+      scriptError: observable.ref,
+      scale: computed,
+      _containerWidth: computed,
+      _containerHeight: computed,
+      marginLeft: computed,
+      displayScale: computed,
+      messageStyles: computed.struct,
+      setIsLoading: action,
+      updateDimensions: action,
+      updateWindowDimensions: action,
+      clearMessage: action,
+      setCallbackAfterUpdateToNull: action,
+      resetUrl: action,
+    })
+
     this.reporterWidth = reporterWidth
   }
 
-  @computed get scale () {
+  get scale () {
     if (this._containerWidth < this.width || this._containerHeight < this.height) {
       return Math.min(this._containerWidth / this.width, this._containerHeight / this.height, 1)
     }
@@ -66,23 +100,23 @@ export default class State {
     return 1
   }
 
-  @computed get _containerWidth () {
+  get _containerWidth () {
     return this.windowWidth - this.absoluteReporterWidth
   }
 
-  @computed get _containerHeight () {
+  get _containerHeight () {
     return this.windowHeight - this.headerHeight
   }
 
-  @computed get marginLeft () {
+  get marginLeft () {
     return (this._containerWidth / 2) - (this.width / 2)
   }
 
-  @computed get displayScale () {
+  get displayScale () {
     return Math.floor(this.scale * 100)
   }
 
-  @computed.struct get messageStyles () {
+  get messageStyles () {
     const actualHeight = this.height * this.scale
     const messageHeight = 33
     const nudge = 10
@@ -99,16 +133,16 @@ export default class State {
     }
   }
 
-  @action setIsLoading (isLoading) {
+  setIsLoading (isLoading) {
     this.isLoading = isLoading
   }
 
-  @action updateDimensions (width, height) {
+  updateDimensions (width, height) {
     this.width = width
     this.height = height
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+  updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
     if (windowWidth != null) this.windowWidth = windowWidth
 
     if (windowHeight != null) this.windowHeight = windowHeight
@@ -118,7 +152,7 @@ export default class State {
     if (headerHeight != null) this.headerHeight = headerHeight
   }
 
-  @action clearMessage () {
+  clearMessage () {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
@@ -132,11 +166,11 @@ export default class State {
     }
   }
 
-  @action setCallbackAfterUpdateToNull () {
+  setCallbackAfterUpdateToNull () {
     this.callbackAfterUpdate = null
   }
 
-  @action resetUrl () {
+  resetUrl () {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl

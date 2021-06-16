@@ -1,14 +1,25 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 
 import DashboardProject from './dashboard-project-model'
 
 export class DashboardProjects {
-  @observable projects = []
-  @observable error = null
-  @observable isLoaded = false
+  projects = [];
+  error = null;
+  isLoaded = false;
 
-  @action setProjects (projects) {
+  constructor () {
+    makeObservable(this, {
+      projects: observable,
+      error: observable,
+      isLoaded: observable,
+      setProjects: action,
+      addProject: action,
+      setError: action,
+    })
+  }
+
+  setProjects (projects) {
     this.projects = _.map(projects, (project) => {
       return new DashboardProject(project)
     })
@@ -16,11 +27,11 @@ export class DashboardProjects {
     this.isLoaded = true
   }
 
-  @action addProject (project) {
+  addProject (project) {
     this.projects.push(new DashboardProject(project))
   }
 
-  @action setError (err) {
+  setError (err) {
     this.error = err
   }
 

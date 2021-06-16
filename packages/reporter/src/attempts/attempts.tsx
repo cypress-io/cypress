@@ -64,8 +64,7 @@ interface AttemptProps {
   scrollIntoView: Function
 }
 
-@observer
-class Attempt extends Component<AttemptProps> {
+const Attempt = observer(class Attempt extends Component<AttemptProps> {
   componentDidUpdate () {
     this.props.scrollIntoView()
   }
@@ -94,7 +93,7 @@ class Attempt extends Component<AttemptProps> {
       </li>
     )
   }
-}
+})
 
 const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
   return (<ul className={cs('attempts', {

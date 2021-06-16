@@ -1,30 +1,49 @@
 import _ from 'lodash'
-import { computed, observable, action } from 'mobx'
+import { computed, observable, action, makeObservable } from 'mobx'
 import Project from '../project/project-model'
 
 class ProjectsStore {
-  @observable projects = []
-  @observable error = null
-  @observable isLoading = false
-  @observable _membershipRequestedIds = {}
+  projects = [];
+  error = null;
+  isLoading = false;
+  _membershipRequestedIds = {};
 
-  @computed get chosen () {
+  constructor () {
+    makeObservable(this, {
+      projects: observable,
+      error: observable,
+      isLoading: observable,
+      _membershipRequestedIds: observable,
+      chosen: computed,
+      other: computed,
+      clientProjects: computed,
+      getProjectByPath: action,
+      addProject: action,
+      setLoading: action,
+      setProjects: action,
+      updateProjectsWithStatuses: action,
+      setError: action,
+      removeProject: action,
+    })
+  }
+
+  get chosen () {
     return _.find(this.projects, { isChosen: true })
   }
 
-  @computed get other () {
+  get other () {
     return _.filter(this.projects, (project) => {
       return !project.isChosen
     })
   }
 
-  @computed get clientProjects () {
+  get clientProjects () {
     return _.map(this.projects, (project) => {
       return _.pick(project, ['path', 'id'])
     })
   }
 
-  @action getProjectByPath (path) {
+  getProjectByPath (path) {
     if (!this.projects.length) {
       return this.addProject(path)
     }
@@ -32,7 +51,7 @@ class ProjectsStore {
     return _.find(this.projects, { path })
   }
 
-  @action addProject (path) {
+  addProject (path) {
     // projects are sorted by most recently used, so add a project to the start
     // or move it to the start if it already exists
     const existingIndex = _.findIndex(this.projects, { path })
@@ -50,17 +69,17 @@ class ProjectsStore {
     return project
   }
 
-  @action setLoading (isLoading) {
+  setLoading (isLoading) {
     this.isLoading = isLoading
   }
 
-  @action setProjects (projects) {
+  setProjects (projects) {
     this.projects = _.map(projects, (project) => {
       return new Project(project)
     })
   }
 
-  @action updateProjectsWithStatuses (projectsWithStatuses = []) {
+  updateProjectsWithStatuses (projectsWithStatuses = []) {
     const projectsIndex = _.keyBy(projectsWithStatuses, 'id') // index for quick lookup
 
     _.each(this.projects, (project) => {
@@ -68,9 +87,9 @@ class ProjectsStore {
     })
   }
 
-  @action setError = (err = {}) => {
+  setError = (err = {}) => {
     this.error = err
-  }
+  };
 
   setChosen (project) {
     this.error = null
@@ -81,7 +100,7 @@ class ProjectsStore {
     project.isChosen = true
   }
 
-  @action removeProject ({ path }) {
+  removeProject ({ path }) {
     const projectIndex = _.findIndex(this.projects, { path })
 
     if (projectIndex != null) {

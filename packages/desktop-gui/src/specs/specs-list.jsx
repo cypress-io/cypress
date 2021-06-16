@@ -54,8 +54,7 @@ const sortedSpecList = (specs) => {
 
 // Note: this component can be mounted and unmounted
 // if you need to persist the data through mounts, "save" it in the specsStore
-@observer
-class SpecsList extends Component {
+const SpecsList = observer(class SpecsList extends Component {
   constructor (props) {
     super(props)
     this.state = {
@@ -458,6 +457,6 @@ class SpecsList extends Component {
   _removeFirstTestBanner = () => {
     this.setState({ firstTestBannerDismissed: true })
   }
-}
+})
 
 export default SpecsList

@@ -1,25 +1,35 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 class Warning {
-  @observable type
-  @observable message
-  @observable isDismissed = false
-  @observable isRetrying = false
+  type;
+  message;
+  isDismissed = false;
+  isRetrying = false;
 
   constructor (props) {
+    makeObservable(this, {
+      type: observable,
+      message: observable,
+      isDismissed: observable,
+      isRetrying: observable,
+      isRetryable: computed,
+      setDismissed: action,
+      setRetrying: action,
+    })
+
     this.type = props.type
     this.message = props.message
   }
 
-  @computed get isRetryable () {
+  get isRetryable () {
     return this.type === 'CANNOT_CONNECT_BASE_URL_WARNING'
   }
 
-  @action setDismissed (isDismissed) {
+  setDismissed (isDismissed) {
     this.isDismissed = isDismissed
   }
 
-  @action setRetrying (isRetrying) {
+  setRetrying (isRetrying) {
     this.isRetrying = isRetrying
   }
 }

@@ -17,8 +17,7 @@ import SpecsList from '../specs/specs-list'
 import ErrorMessage from './error-message'
 import WarningMessage from './warning-message'
 
-@observer
-class Project extends Component {
+const Project = observer(class Project extends Component {
   componentDidMount () {
     const { project } = this.props
 
@@ -114,6 +113,6 @@ class Project extends Component {
       warning.setRetrying(false)
     })
   }
-}
+})
 
 export default Project

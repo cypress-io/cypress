@@ -1,26 +1,42 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import User from '../lib/user-model'
 
 class AuthStore {
-  @observable isLoading = true
-  @observable isShowingLogin = false
-  @observable loginUTM = null
-  @observable user = null
-  @observable message = null
+  isLoading = true;
+  isShowingLogin = false;
+  loginUTM = null;
+  user = null;
+  message = null;
 
-  @computed get isAuthenticated () {
+  constructor () {
+    makeObservable(this, {
+      isLoading: observable,
+      isShowingLogin: observable,
+      loginUTM: observable,
+      user: observable,
+      message: observable,
+      isAuthenticated: computed,
+      setLoading: action,
+      setMessage: action,
+      openLogin: action,
+      closeLogin: action,
+      setUser: action,
+    })
+  }
+
+  get isAuthenticated () {
     return !!this.user && !!this.user.authToken
   }
 
-  @action setLoading (isLoading) {
+  setLoading (isLoading) {
     this.isLoading = isLoading
   }
 
-  @action setMessage (message) {
+  setMessage (message) {
     this.message = message
   }
 
-  @action openLogin (onCloseCb, loginUTM = null) {
+  openLogin (onCloseCb, loginUTM = null) {
     this.onCloseCb = onCloseCb
 
     this.setMessage(null)
@@ -28,7 +44,7 @@ class AuthStore {
     this.loginUTM = loginUTM
   }
 
-  @action closeLogin () {
+  closeLogin () {
     if (this.onCloseCb) {
       this.onCloseCb(this.isAuthenticated)
     }
@@ -38,7 +54,7 @@ class AuthStore {
     this.loginUTM = false
   }
 
-  @action setUser (user) {
+  setUser (user) {
     const isValid = user && user.authToken
 
     this.user = isValid ? new User(user) : null

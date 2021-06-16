@@ -1,22 +1,35 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 
 import Run from './run-model'
 import dayjs from 'dayjs'
 
 export class RunsStore {
-  @observable runs = []
-  @observable error = null
-  @observable isLoading = false
-  @observable isLoaded = false
-  @observable lastUpdated
+  runs = [];
+  error = null;
+  isLoading = false;
+  isLoaded = false;
+  lastUpdated;
 
-  @action setLoading (isLoading) {
+  constructor () {
+    makeObservable(this, {
+      runs: observable,
+      error: observable,
+      isLoading: observable,
+      isLoaded: observable,
+      lastUpdated: observable,
+      setLoading: action,
+      setRuns: action,
+      setError: action,
+    })
+  }
+
+  setLoading (isLoading) {
     this.isLoading = isLoading
     this.error = null
   }
 
-  @action setRuns (runs) {
+  setRuns (runs) {
     this.runs = _.map(runs, (run) => {
       return new Run(run)
     })
@@ -27,7 +40,7 @@ export class RunsStore {
     this.isLoaded = true
   }
 
-  @action setError (err) {
+  setError (err) {
     this.error = err
     this.isLoading = false
   }

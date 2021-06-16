@@ -1,5 +1,5 @@
 /* global Cypress, JSX */
-import { action, runInAction } from 'mobx'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
 import PropTypes from 'prop-types'
@@ -46,124 +46,125 @@ export interface MultiReporterProps extends BaseReporterProps{
   allSpecs: Array<Cypress.Cypress['spec']>
 }
 
-@observer
-class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
-  static propTypes = {
-    error: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      link: PropTypes.string,
-      callout: PropTypes.string,
-      message: PropTypes.string.isRequired,
-    }),
-    runner: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-    spec: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      relative: PropTypes.string.isRequired,
-      absolute: PropTypes.string.isRequired,
-    }),
-    experimentalStudioEnabled: PropTypes.bool,
-  }
-
-  static defaultProps = {
-    runMode: 'single',
-    appState,
-    events,
-    runnablesStore,
-    scroller,
-    statsStore,
-  }
-
-  render () {
-    const {
-      appState,
-      className,
-      runMode,
-      runnablesStore,
-      scroller,
-      error,
-      events,
-      statsStore,
-      experimentalStudioEnabled,
-      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
-    } = this.props
-
-    return (
-      <div className={cs(className, 'reporter', {
-        multiSpecs: runMode === 'multi',
-        'experimental-studio-enabled': experimentalStudioEnabled,
-        'studio-active': appState.studioActive,
-      })}>
-        {renderReporterHeader({ appState, statsStore })}
-        {this.props.runMode === 'single' ? (
-          <Runnables
-            appState={appState}
-            error={error}
-            runnablesStore={runnablesStore}
-            scroller={scroller}
-            spec={this.props.spec}
-          />
-        ) : this.props.allSpecs.map((spec) => (
-          <Runnables
-            key={spec.relative}
-            appState={appState}
-            error={error}
-            runnablesStore={runnablesStore}
-            scroller={scroller}
-            spec={spec}
-          />
-        ))}
-
-        <ForcedGcWarning
-          appState={appState}
-          events={events}
-        />
-      </div>
-    )
-  }
-
-  // this hook will only trigger if we switch spec file at runtime
-  // it never happens in normal e2e but can happen in component-testing mode
-  componentDidUpdate (newProps: BaseReporterProps) {
-    this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
-
-    if (
-      this.props.resetStatsOnSpecChange &&
-      this.props.specRunId !== newProps.specRunId
-    ) {
-      runInAction('reporter:stats:reset', () => {
-        this.props.statsStore.reset()
-      })
+const Reporter = observer(
+  class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
+    static propTypes = {
+      error: PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        link: PropTypes.string,
+        callout: PropTypes.string,
+        message: PropTypes.string.isRequired,
+      }),
+      runner: PropTypes.shape({
+        emit: PropTypes.func.isRequired,
+        on: PropTypes.func.isRequired,
+      }).isRequired,
+      spec: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        relative: PropTypes.string.isRequired,
+        absolute: PropTypes.string.isRequired,
+      }),
+      experimentalStudioEnabled: PropTypes.bool,
     }
-  }
 
-  componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
-
-    action('set:scrolling', () => {
-      appState.setAutoScrolling(appState.autoScrollingEnabled)
-    })()
-
-    this.props.events.init({
+    static defaultProps = {
+      runMode: 'single',
       appState,
+      events,
       runnablesStore,
       scroller,
       statsStore,
-    })
+    }
 
-    this.props.events.listen(runner)
+    render () {
+      const {
+        appState,
+        className,
+        runMode,
+        runnablesStore,
+        scroller,
+        error,
+        events,
+        statsStore,
+        experimentalStudioEnabled,
+        renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
+      } = this.props
 
-    shortcuts.start()
-    EQ.init()
-    this.props.runnablesStore.setRunningSpec(spec.relative)
-  }
+      return (
+        <div className={cs(className, 'reporter', {
+          multiSpecs: runMode === 'multi',
+          'experimental-studio-enabled': experimentalStudioEnabled,
+          'studio-active': appState.studioActive,
+        })}>
+          {renderReporterHeader({ appState, statsStore })}
+          {this.props.runMode === 'single' ? (
+            <Runnables
+              appState={appState}
+              error={error}
+              runnablesStore={runnablesStore}
+              scroller={scroller}
+              spec={this.props.spec}
+            />
+          ) : this.props.allSpecs.map((spec) => (
+            <Runnables
+              key={spec.relative}
+              appState={appState}
+              error={error}
+              runnablesStore={runnablesStore}
+              scroller={scroller}
+              spec={spec}
+            />
+          ))}
 
-  componentWillUnmount () {
-    shortcuts.stop()
-  }
-}
+          <ForcedGcWarning
+            appState={appState}
+            events={events}
+          />
+        </div>
+      )
+    }
+
+    // this hook will only trigger if we switch spec file at runtime
+    // it never happens in normal e2e but can happen in component-testing mode
+    componentDidUpdate (newProps: BaseReporterProps) {
+      this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
+
+      if (
+        this.props.resetStatsOnSpecChange &&
+        this.props.specRunId !== newProps.specRunId
+      ) {
+        action('reporter:stats:reset', () => {
+          this.props.statsStore.reset()
+        })()
+      }
+    }
+
+    componentDidMount () {
+      const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
+
+      action('set:scrolling', () => {
+        appState.setAutoScrolling(appState.autoScrollingEnabled)
+      })()
+
+      this.props.events.init({
+        appState,
+        runnablesStore,
+        scroller,
+        statsStore,
+      })
+
+      this.props.events.listen(runner)
+
+      shortcuts.start()
+      EQ.init()
+      this.props.runnablesStore.setRunningSpec(spec.relative)
+    }
+
+    componentWillUnmount () {
+      shortcuts.stop()
+    }
+  },
+)
 
 declare global {
   interface Window {

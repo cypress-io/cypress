@@ -6,8 +6,7 @@ import authApi from './auth-api'
 import authStore from './auth-store'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
-@observer
-class LoginForm extends Component {
+const LoginForm = observer(class LoginForm extends Component {
   static defaultProps = {
     onSuccess () {},
     buttonClassName: 'btn btn-login btn-primary btn-wide',
@@ -129,6 +128,6 @@ class LoginForm extends Component {
       })
     })
   }
-}
+})
 
 export default LoginForm

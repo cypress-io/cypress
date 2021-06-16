@@ -8,8 +8,7 @@ import Select from 'react-select'
 import authStore from '../auth/auth-store'
 import { gravatarUrl } from '../lib/utils'
 
-@observer
-class OrgSelector extends Component {
+const OrgSelector = observer(class OrgSelector extends Component {
   static propTypes = {
     orgs: PropTypes.array.isRequired,
     selectedOrgId: PropTypes.string,
@@ -85,6 +84,6 @@ class OrgSelector extends Component {
 
     this.props.onUpdateSelectedOrgId(selectedOrgId)
   }
-}
+})
 
 export default OrgSelector

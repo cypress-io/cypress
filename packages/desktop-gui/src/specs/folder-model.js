@@ -1,25 +1,35 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 export default class Folder {
-  @observable path
-  @observable displayName
-  @observable specType
-  @observable isExpanded = true
-  @observable children = []
+  path;
+  displayName;
+  specType;
+  isExpanded = true;
+  children = [];
 
   isFolder = true
 
   constructor ({ path, displayName, specType }) {
+    makeObservable(this, {
+      path: observable,
+      displayName: observable,
+      specType: observable,
+      isExpanded: observable,
+      children: observable,
+      hasChildren: computed,
+      setExpanded: action,
+    })
+
     this.path = path
     this.displayName = displayName
     this.specType = specType || 'integration'
   }
 
-  @computed get hasChildren () {
+  get hasChildren () {
     return this.children.length
   }
 
-  @action setExpanded (isExpanded) {
+  setExpanded (isExpanded) {
     this.isExpanded = isExpanded
   }
 }

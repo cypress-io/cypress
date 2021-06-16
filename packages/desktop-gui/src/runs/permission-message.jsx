@@ -9,8 +9,7 @@ import projectsStore from '../projects/projects-store'
 const SUCCESS = 'SUCCESS'
 const FAILURE = 'FAILURE'
 
-@observer
-class PermissionMessage extends Component {
+const PermissionMessage = observer(class PermissionMessage extends Component {
   constructor (props) {
     super(props)
 
@@ -147,6 +146,6 @@ class PermissionMessage extends Component {
       result: error ? FAILURE : SUCCESS,
     })
   }
-}
+})
 
 export default PermissionMessage

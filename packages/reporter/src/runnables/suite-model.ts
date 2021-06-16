@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { computed, observable, makeObservable } from 'mobx'
 import Runnable, { RunnableProps } from './runnable-model'
 import TestModel, { TestProps, TestState } from '../test/test-model'
 
@@ -9,10 +9,24 @@ export interface SuiteProps extends RunnableProps {
 }
 
 export default class Suite extends Runnable {
-  @observable children: Array<TestModel | Suite> = []
+  children: Array<TestModel | Suite> = [];
   type = 'suite'
 
-  @computed get state (): TestState {
+  constructor (props: RunnableProps, level: number) {
+    super(props, level)
+
+    makeObservable(this, {
+      children: observable,
+      state: computed,
+      _childStates: computed,
+      hasRetried: computed,
+      _anyChildrenFailed: computed,
+      _allChildrenPassedOrPending: computed,
+      _allChildrenPending: computed,
+    })
+  }
+
+  get state (): TestState {
     if (this._anyChildrenFailed) {
       return 'failed'
     }
@@ -28,27 +42,27 @@ export default class Suite extends Runnable {
     return 'processing'
   }
 
-  @computed get _childStates () {
+  get _childStates () {
     return _.map(this.children, 'state')
   }
 
-  @computed get hasRetried (): boolean {
+  get hasRetried (): boolean {
     return _.some(this.children, (v) => v.hasRetried)
   }
 
-  @computed get _anyChildrenFailed () {
+  get _anyChildrenFailed () {
     return _.some(this._childStates, (state) => {
       return state === 'failed'
     })
   }
 
-  @computed get _allChildrenPassedOrPending () {
+  get _allChildrenPassedOrPending () {
     return !this._childStates.length || _.every(this._childStates, (state) => {
       return state === 'passed' || state === 'pending'
     })
   }
 
-  @computed get _allChildrenPending () {
+  get _allChildrenPending () {
     return !!this._childStates.length
             && _.every(this._childStates, (state) => {
               return state === 'pending'

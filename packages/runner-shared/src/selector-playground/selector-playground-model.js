@@ -1,24 +1,49 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 const methods = ['get', 'contains']
 
 class SelectorPlaygroundModel {
   methods = methods
 
-  @observable getSelector = 'body'
-  @observable containsSelector = 'Hello, World'
-  @observable isOpen = false
-  @observable isEnabled = false
-  @observable isShowingHighlight = false
-  @observable isValid = true
-  @observable numElements = 0
-  @observable method = methods[0]
+  getSelector = 'body';
+  containsSelector = 'Hello, World';
+  isOpen = false;
+  isEnabled = false;
+  isShowingHighlight = false;
+  isValid = true;
+  numElements = 0;
+  method = methods[0];
 
-  @computed get selector () {
+  constructor () {
+    makeObservable(this, {
+      getSelector: observable,
+      containsSelector: observable,
+      isOpen: observable,
+      isEnabled: observable,
+      isShowingHighlight: observable,
+      isValid: observable,
+      numElements: observable,
+      method: observable,
+      selector: computed,
+      infoHelp: computed,
+      toggleEnabled: action,
+      setEnabled: action,
+      toggleOpen: action,
+      setOpen: action,
+      setShowingHighlight: action,
+      setSelector: action,
+      setNumElements: action,
+      setValidity: action,
+      setMethod: action,
+      resetMethod: action,
+    })
+  }
+
+  get selector () {
     return this.method === 'get' ? this.getSelector : this.containsSelector
   }
 
-  @computed get infoHelp () {
+  get infoHelp () {
     if (!this.isValid) {
       return 'Invalid selector'
     }
@@ -26,11 +51,11 @@ class SelectorPlaygroundModel {
     return this.numElements === 1 ? '1 matched element' : `${this.numElements} matched elements`
   }
 
-  @action toggleEnabled () {
+  toggleEnabled () {
     this.setEnabled(!this.isEnabled)
   }
 
-  @action setEnabled (isEnabled) {
+  setEnabled (isEnabled) {
     this.isEnabled = isEnabled
 
     if (!this.isEnabled) {
@@ -38,21 +63,21 @@ class SelectorPlaygroundModel {
     }
   }
 
-  @action toggleOpen () {
+  toggleOpen () {
     this.setOpen(!this.isOpen)
   }
 
-  @action setOpen (isOpen) {
+  setOpen (isOpen) {
     this.isOpen = isOpen
 
     this.setEnabled(this.isOpen)
   }
 
-  @action setShowingHighlight (isShowingHighlight) {
+  setShowingHighlight (isShowingHighlight) {
     this.isShowingHighlight = isShowingHighlight
   }
 
-  @action setSelector (selector) {
+  setSelector (selector) {
     if (this.method === 'get') {
       this.getSelector = selector
     } else {
@@ -60,19 +85,19 @@ class SelectorPlaygroundModel {
     }
   }
 
-  @action setNumElements (numElements) {
+  setNumElements (numElements) {
     this.numElements = numElements
   }
 
-  @action setValidity (isValid) {
+  setValidity (isValid) {
     this.isValid = isValid
   }
 
-  @action setMethod (method) {
+  setMethod (method) {
     this.method = method
   }
 
-  @action resetMethod () {
+  resetMethod () {
     this.method = methods[0]
   }
 }

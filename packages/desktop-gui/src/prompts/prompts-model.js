@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable, extendObservable } from 'mobx'
+import { action, computed, observable, extendObservable, makeObservable } from 'mobx'
 import interval from 'human-interval'
 
 const prompts = _.sortBy([
@@ -15,11 +15,20 @@ const prompts = _.sortBy([
 ], 'interval')
 
 export default class Prompts {
-  @observable _automaticOpen = false
+  _automaticOpen = false;
   _promptsShown
   _hasProjectId
 
   constructor () {
+    makeObservable(this, {
+      _automaticOpen: observable,
+      anyOpen: computed,
+      utm_content: computed,
+      openPrompt: action,
+      closePrompt: action,
+      setPromptStates: action,
+    })
+
     this._initialize()
   }
 
@@ -33,25 +42,25 @@ export default class Prompts {
     extendObservable(this, props)
   }
 
-  @computed get anyOpen () {
+  get anyOpen () {
     return !!_.find(prompts, ({ slug }) => this[slug])
   }
 
-  @computed get utm_content () {
+  get utm_content () {
     return this._automaticOpen ? 'Automatic' : 'Manual'
   }
 
-  @action openPrompt = (slug) => {
+  openPrompt = (slug) => {
     this[slug] = true
     this._automaticOpen = false
-  }
+  };
 
-  @action closePrompt = (slug) => {
+  closePrompt = (slug) => {
     this[slug] = false
     this._automaticOpen = false
-  }
+  };
 
-  @action setPromptStates = (config) => {
+  setPromptStates = (config) => {
     const { state, projectId } = config
 
     // if no state (due to error) then no prompts are shown
@@ -74,7 +83,7 @@ export default class Prompts {
         return
       }
     }
-  }
+  };
 
   _promptShownRecently = () => {
     if (!this._promptsShown) return false

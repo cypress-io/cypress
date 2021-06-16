@@ -3,8 +3,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
-@observer
-class WarningMessage extends Component {
+const WarningMessage = observer(class WarningMessage extends Component {
   render () {
     const { warning } = this.props
     const warningText = warning.message.split('\n').join('<br />')
@@ -34,6 +33,6 @@ class WarningMessage extends Component {
       </div>
     )
   }
-}
+})
 
 export default WarningMessage

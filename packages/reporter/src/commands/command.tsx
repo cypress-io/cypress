@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
 // @ts-ignore
@@ -150,15 +150,24 @@ interface Props {
   runnablesStore: RunnablesStore
 }
 
-@observer
-class Command extends Component<Props> {
-  @observable isOpen = false
+const Command = observer(class Command extends Component<Props> {
+  isOpen = false;
   private _showTimeout?: TimeoutID
 
   static defaultProps = {
     appState,
     events,
     runnablesStore,
+  }
+
+  constructor (props: Props) {
+    super(props)
+
+    makeObservable(this, {
+      isOpen: observable,
+      _toggleOpen: action,
+      _onClick: action,
+    })
   }
 
   render () {
@@ -266,13 +275,13 @@ class Command extends Component<Props> {
     return !this.props.appState.isRunning && this._isPinned()
   }
 
-  @action _toggleOpen = (e: MouseEvent) => {
+  _toggleOpen = (e: MouseEvent) => {
     e.stopPropagation()
 
     this.isOpen = !this.isOpen
-  }
+  };
 
-  @action _onClick = () => {
+  _onClick = () => {
     if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model
@@ -286,7 +295,7 @@ class Command extends Component<Props> {
       this.props.events.emit('pin:snapshot', id)
       this.props.events.emit('show:command', this.props.model.id)
     }
-  }
+  };
 
   // snapshot rules
   //
@@ -340,7 +349,7 @@ class Command extends Component<Props> {
 
     events.emit('studio:remove:command', model.number)
   }
-}
+})
 
 export { Aliases, AliasesReferences, Message, Progress }
 

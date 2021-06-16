@@ -13,8 +13,7 @@ interface State {
   expanded: boolean
 }
 
-@observer
-class ForcedGcWarning extends React.Component<Props> {
+const ForcedGcWarning = observer(class ForcedGcWarning extends React.Component<Props> {
   gcStartMs: number | null = null
   gcTotalMs: number = 0
   persisted = false
@@ -154,6 +153,6 @@ class ForcedGcWarning extends React.Component<Props> {
 
     return this._renderForcedGcWarning()
   }
-}
+})
 
 export default ForcedGcWarning

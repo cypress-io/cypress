@@ -1,17 +1,24 @@
-import { computed, observable } from 'mobx'
+import { computed, observable, makeObservable } from 'mobx'
 
 export default class User {
-  @observable name
-  @observable email
-  @observable authToken
+  name;
+  email;
+  authToken;
 
   constructor (user) {
+    makeObservable(this, {
+      name: observable,
+      email: observable,
+      authToken: observable,
+      displayName: computed,
+    })
+
     this.name = user.name
     this.email = user.email
     this.authToken = user.authToken
   }
 
-  @computed get displayName () {
+  get displayName () {
     return this.name || this.email
   }
 }

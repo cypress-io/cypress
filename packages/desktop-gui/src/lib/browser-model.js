@@ -1,20 +1,35 @@
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 
 export default class Browser {
-  @observable displayName
-  @observable name
-  @observable family
-  @observable channel
-  @observable version
-  @observable path
-  @observable profilePath
-  @observable majorVersion
-  @observable info
-  @observable custom
-  @observable warning
-  @observable isChosen = false
+  displayName;
+  name;
+  family;
+  channel;
+  version;
+  path;
+  profilePath;
+  majorVersion;
+  info;
+  custom;
+  warning;
+  isChosen = false;
 
   constructor (browser) {
+    makeObservable(this, {
+      displayName: observable,
+      name: observable,
+      family: observable,
+      channel: observable,
+      version: observable,
+      path: observable,
+      profilePath: observable,
+      majorVersion: observable,
+      info: observable,
+      custom: observable,
+      warning: observable,
+      isChosen: observable,
+    })
+
     this.displayName = browser.displayName
     this.name = browser.name
     this.family = browser.family

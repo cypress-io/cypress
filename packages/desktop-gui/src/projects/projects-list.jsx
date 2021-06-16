@@ -22,8 +22,7 @@ const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
   </li>
 ))
 
-@observer
-class ProjectsList extends Component {
+const ProjectsList = observer(class ProjectsList extends Component {
   componentDidMount () {
     projectsApi.loadProjects()
   }
@@ -72,6 +71,6 @@ class ProjectsList extends Component {
       </ul>
     )
   }
-}
+})
 
 export default ProjectsList

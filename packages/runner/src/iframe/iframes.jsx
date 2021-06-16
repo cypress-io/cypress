@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { action, autorun } from 'mobx'
+import { action, autorun, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
@@ -15,9 +15,16 @@ import {
 
 import util from '../lib/util'
 
-@observer
-export default class Iframes extends Component {
+const Iframes = observer(class Iframes extends Component {
   _disposers = []
+
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      _setScriptError: action,
+    })
+  }
 
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
@@ -121,7 +128,7 @@ export default class Iframes extends Component {
     this._run(this.props.config)
   }
 
-  @action _setScriptError = (err) => {
+  _setScriptError = (err) => {
     if (err && 'error' in err) {
       this.props.state.scriptError = err.error
     }
@@ -129,7 +136,7 @@ export default class Iframes extends Component {
     if (!err) {
       this.props.state.scriptError = null
     }
-  }
+  };
 
   _run = (config) => {
     const specPath = util.specPath()
@@ -212,4 +219,6 @@ export default class Iframes extends Component {
   getSizeContainer () {
     return this.refs.container
   }
-}
+})
+
+export default Iframes

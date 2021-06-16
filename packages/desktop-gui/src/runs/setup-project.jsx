@@ -15,8 +15,7 @@ import orgsApi from '../organizations/organizations-api'
 import dashboardProjectsStore from '../dashboard-projects/dashboard-projects-store'
 import dashboardProjectsApi from '../dashboard-projects/dashboard-projects-api'
 
-@observer
-class SetupProject extends Component {
+const SetupProject = observer(class SetupProject extends Component {
   static propTypes = {
     project: PropTypes.object,
     onSetup: PropTypes.func.isRequired,
@@ -390,6 +389,6 @@ class SetupProject extends Component {
       return project
     })
   }
-}
+})
 
 export default SetupProject

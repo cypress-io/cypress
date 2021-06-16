@@ -6,8 +6,7 @@ import { BrowserIcon, Dropdown } from '@packages/ui-components'
 import MarkdownRenderer from '../lib/markdown-renderer'
 import projectsApi from '../projects/projects-api'
 
-@observer
-export default class Browsers extends Component {
+const Browsers = observer(class Browsers extends Component {
   render () {
     const project = this.props.project
 
@@ -111,4 +110,6 @@ export default class Browsers extends Component {
       </span>
     )
   }
-}
+})
+
+export default Browsers

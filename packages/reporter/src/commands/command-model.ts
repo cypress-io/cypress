@@ -1,4 +1,4 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 import Err from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
@@ -25,38 +25,57 @@ export interface CommandProps extends InstrumentProps {
 }
 
 export default class Command extends Instrument {
-  @observable.struct renderProps: RenderProps = {}
-  @observable err = new Err({})
-  @observable event?: boolean = false
-  @observable isLongRunning = false
-  @observable number?: number
-  @observable numElements: number
-  @observable timeout?: number
-  @observable visible?: boolean = true
-  @observable wallClockStartedAt?: string
-  @observable duplicates: Array<Command> = []
-  @observable isDuplicate = false
-  @observable hookId: string
-  @observable isStudio: boolean
+  renderProps: RenderProps = {};
+  err = new Err({});
+  event?: boolean = false;
+  isLongRunning = false;
+  number?: number;
+  numElements: number;
+  timeout?: number;
+  visible?: boolean = true;
+  wallClockStartedAt?: string;
+  duplicates: Array<Command> = [];
+  isDuplicate = false;
+  hookId: string;
+  isStudio: boolean;
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
 
-  @computed get displayMessage () {
+  get displayMessage () {
     return this.renderProps.message || this.message
   }
 
-  @computed get numDuplicates () {
+  get numDuplicates () {
     // and one to include self so it's the total number of same events
     return this.duplicates.length + 1
   }
 
-  @computed get hasDuplicates () {
+  get hasDuplicates () {
     return this.numDuplicates > 1
   }
 
   constructor (props: CommandProps) {
     super(props)
+
+    makeObservable(this, {
+      renderProps: observable.struct,
+      err: observable,
+      event: observable,
+      isLongRunning: observable,
+      number: observable,
+      numElements: observable,
+      timeout: observable,
+      visible: observable,
+      wallClockStartedAt: observable,
+      duplicates: observable,
+      isDuplicate: observable,
+      hookId: observable,
+      isStudio: observable,
+      displayMessage: computed,
+      numDuplicates: computed,
+      hasDuplicates: computed,
+    })
 
     this.err.update(props.err)
     this.event = props.event

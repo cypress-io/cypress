@@ -4,8 +4,7 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import Select from 'react-select'
 
-@observer
-class ProjectSelector extends Component {
+const ProjectSelector = observer(class ProjectSelector extends Component {
   static propTypes = {
     projects: PropTypes.array.isRequired,
     selectedProjectId: PropTypes.string,
@@ -44,6 +43,6 @@ class ProjectSelector extends Component {
   _updateSelectedProject = (selectedOption) => {
     this.props.onUpdateSelectedProjectId(selectedOption.value)
   }
-}
+})
 
 export default ProjectSelector

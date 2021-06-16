@@ -1,21 +1,33 @@
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 
 import C from './constants'
 import projectsStore from '../projects/projects-store'
 import appStore from './app-store'
 
 class ViewStore {
-  @observable currentView = {
+  currentView = {
     name: C.LOADING,
+  };
+
+  constructor () {
+    makeObservable(this, {
+      currentView: observable,
+      showLoading: action,
+      showApp: action,
+      showIntro: action,
+      showProjectSpecs: action,
+      showProjectRuns: action,
+      showProjectSettings: action,
+    })
   }
 
-  @action showLoading () {
+  showLoading () {
     this.currentView = {
       name: C.LOADING,
     }
   }
 
-  @action showApp () {
+  showApp () {
     if (appStore.projectRoot) {
       this.showProjectSpecs(projectsStore.getProjectByPath(appStore.projectRoot))
     } else {
@@ -23,13 +35,13 @@ class ViewStore {
     }
   }
 
-  @action showIntro () {
+  showIntro () {
     this.currentView = {
       name: C.INTRO,
     }
   }
 
-  @action showProjectSpecs (project) {
+  showProjectSpecs (project) {
     this.currentView = {
       name: C.PROJECT_SPECS,
       project,
@@ -40,7 +52,7 @@ class ViewStore {
     return this._isView(C.PROJECT_SPECS)
   }
 
-  @action showProjectRuns (project) {
+  showProjectRuns (project) {
     this.currentView = {
       name: C.PROJECT_RUNS,
       project,
@@ -51,7 +63,7 @@ class ViewStore {
     return this._isView(C.PROJECT_RUNS)
   }
 
-  @action showProjectSettings (project) {
+  showProjectSettings (project) {
     this.currentView = {
       name: C.PROJECT_SETTINGS,
       project,

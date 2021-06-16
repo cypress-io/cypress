@@ -55,8 +55,7 @@ const ErrorDetails = observer(({ err }) => {
   )
 })
 
-@observer
-class ErrorMessage extends Component {
+const ErrorMessage = observer(class ErrorMessage extends Component {
   componentDidMount () {
     this.errorMessageNode.addEventListener('click', this._clickHandler)
   }
@@ -123,6 +122,6 @@ class ErrorMessage extends Component {
       </div>
     )
   }
-}
+})
 
 export default ErrorMessage

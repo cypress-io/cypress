@@ -1,17 +1,29 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { computed, observable, makeObservable } from 'mobx'
 
 export default class Spec {
-  @observable path
-  @observable name
-  @observable absolute
-  @observable displayName
+  path;
+  name;
+  absolute;
+  displayName;
   // TODO clarify the role of "type" vs "specType"
-  @observable type
-  @observable specType // "integration" | "component"
-  @observable isChosen = false
+  type;
+  specType; // "integration" | "component"
+  isChosen = false;
 
   constructor ({ path, name, absolute, relative, displayName, type, specType }) {
+    makeObservable(this, {
+      path: observable,
+      name: observable,
+      absolute: observable,
+      displayName: observable,
+      type: observable,
+      specType: observable,
+      isChosen: observable,
+      hasChildren: computed,
+      file: computed,
+    })
+
     this.path = path
     this.name = name
     this.absolute = absolute
@@ -21,11 +33,11 @@ export default class Spec {
     this.specType = specType || 'integration'
   }
 
-  @computed get hasChildren () {
+  get hasChildren () {
     return false
   }
 
-  @computed get file () {
+  get file () {
     return _.pick(this, 'name', 'absolute', 'relative')
   }
 }

@@ -1,6 +1,6 @@
 import cs from 'classnames'
 
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, createRef } from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -54,15 +54,31 @@ type E2EHeaderProps = StateE2E & HeaderBaseProps
 
 type HeaderProps = CtHeaderProps | E2EHeaderProps
 
-@observer
-export class Header extends Component<HeaderProps> {
-  @observable showingViewportMenu = false
-  @observable urlInput = ''
-  @observable previousSelectorPlaygroundOpen: boolean = false
-  @observable previousRecorderIsOpen: boolean = false
+export const Header = observer(class Header extends Component<HeaderProps> {
+  showingViewportMenu = false;
+  urlInput = '';
+  previousSelectorPlaygroundOpen: boolean = false;
+  previousRecorderIsOpen: boolean = false;
 
   urlInputRef = createRef<HTMLInputElement>()
   headerRef = createRef<HTMLHeadElement>()
+
+  constructor (props: HeaderProps) {
+    super(props)
+
+    makeObservable(this, {
+      showingViewportMenu: observable,
+      urlInput: observable,
+      previousSelectorPlaygroundOpen: observable,
+      previousRecorderIsOpen: observable,
+      componentDidMount: action,
+      componentDidUpdate: action,
+      _toggleViewportMenu: action,
+      _studioNeedsUrl: computed,
+      _onUrlInput: action,
+      _visitUrlInput: action,
+    })
+  }
 
   get studioForm () {
     if (this.props.runner !== 'e2e') {
@@ -163,14 +179,14 @@ export class Header extends Component<HeaderProps> {
     )
   }
 
-  @action componentDidMount () {
+  componentDidMount () {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     this.previousRecorderIsOpen = studioRecorder.isOpen
 
     this.urlInput = this.props.config.baseUrl ? `${this.props.config.baseUrl}/` : ''
   }
 
-  @action componentDidUpdate () {
+  componentDidUpdate () {
     if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
       this._updateWindowDimensions()
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
@@ -190,9 +206,9 @@ export class Header extends Component<HeaderProps> {
     selectorPlaygroundModel.toggleOpen()
   }
 
-  @action _toggleViewportMenu = () => {
+  _toggleViewportMenu = () => {
     this.showingViewportMenu = !this.showingViewportMenu
-  }
+  };
 
   _updateWindowDimensions = () => {
     if (!this.headerRef.current) {
@@ -212,7 +228,7 @@ export class Header extends Component<HeaderProps> {
     window.open(this.props.state.url)
   }
 
-  @computed get _studioNeedsUrl () {
+  get _studioNeedsUrl () {
     if (this.props.runner !== 'e2e') {
       return
     }
@@ -220,13 +236,13 @@ export class Header extends Component<HeaderProps> {
     return studioRecorder.needsUrl && !this.props.state.url
   }
 
-  @action _onUrlInput = (e) => { // : React.FormEvent<HTMLInputElement>) => {
+  _onUrlInput = (e) => { // : React.FormEvent<HTMLInputElement>) => {
     if (!this._studioNeedsUrl) return
 
     this.urlInput = e.target.value
-  }
+  };
 
-  @action _visitUrlInput = (e: React.FormEvent<HTMLFormElement>) => {
+  _visitUrlInput = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!this._studioNeedsUrl) return
@@ -234,9 +250,9 @@ export class Header extends Component<HeaderProps> {
     studioRecorder.visitUrl(this.urlInput)
 
     this.urlInput = ''
-  }
+  };
 
   _cancelStudio = () => {
     eventManager.emit('studio:cancel')
   }
-}
+})

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import React, { Component } from 'react'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 
 import appStore from '../lib/app-store'
@@ -11,9 +11,17 @@ import viewStore from '../lib/view-store'
 
 import ProjectsList from '../projects/projects-list'
 
-@observer
-class Default extends Component {
-  @observable isDraggingOver
+const Default = observer(class Default extends Component {
+  isDraggingOver;
+
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      isDraggingOver: observable,
+      _setDragging: action,
+    })
+  }
 
   componentDidMount () {
     // silly idiosyncrancies of the drag-n-drop API
@@ -115,9 +123,9 @@ class Default extends Component {
     return false
   }
 
-  @action _setDragging = (isDraggingOver) => {
+  _setDragging = (isDraggingOver) => {
     this.isDraggingOver = isDraggingOver
-  }
+  };
 
   _nope (e) {
     e.preventDefault()
@@ -128,6 +136,6 @@ class Default extends Component {
   _openHelp () {
     ipc.externalOpen('https://on.cypress.io/installing-via-npm')
   }
-}
+})
 
 export default Default

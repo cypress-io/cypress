@@ -18,8 +18,7 @@ interface StudioControlsProps {
   model: TestModel
 }
 
-@observer
-class StudioControls extends Component<StudioControlsProps> {
+const StudioControls = observer(class StudioControls extends Component<StudioControlsProps> {
   static defaultProps = {
     events,
   }
@@ -46,7 +45,7 @@ class StudioControls extends Component<StudioControlsProps> {
       </div>
     )
   }
-}
+})
 
 interface TestProps {
   events: Events
@@ -56,8 +55,7 @@ interface TestProps {
   model: TestModel
 }
 
-@observer
-class Test extends Component<TestProps> {
+const Test = observer(class Test extends Component<TestProps> {
   static defaultProps = {
     events,
     appState,
@@ -156,6 +154,6 @@ class Test extends Component<TestProps> {
 
     events.emit('studio:init:test', model.id)
   }
-}
+})
 
 export default Test

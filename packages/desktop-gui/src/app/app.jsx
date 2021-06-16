@@ -15,8 +15,7 @@ import Intro from './intro'
 import Layout from './layout'
 import Project from '../project/project'
 
-@observer
-class App extends Component {
+const App = observer(class App extends Component {
   componentDidMount () {
     appApi.listenForMenuClicks()
 
@@ -47,6 +46,6 @@ class App extends Component {
         )
     }
   }
-}
+})
 
 export default App

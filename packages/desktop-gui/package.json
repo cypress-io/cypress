@@ -39,7 +39,7 @@
     "human-interval": "1.0.0",
     "lodash": "4.17.21",
     "markdown-it": "11.0.0",
-    "mobx": "5.15.4",
+    "mobx": "^6.3.2",
     "mobx-react": "6.1.8",
     "mobx-react-devtools": "6.1.1",
     "prop-types": "15.7.2",

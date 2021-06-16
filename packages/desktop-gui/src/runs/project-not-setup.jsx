@@ -9,8 +9,7 @@ import LoginForm from '../auth/login-form'
 import DashboardBanner from './dashboard-banner'
 import WhatIsDashboard from './what-is-dashboard'
 
-@observer
-export default class ProjectNotSetup extends Component {
+const ProjectNotSetup = observer(class ProjectNotSetup extends Component {
   static propTypes = {
     project: PropTypes.object,
   }
@@ -129,4 +128,6 @@ export default class ProjectNotSetup extends Component {
       this.setState({ setupProjectOpen: isAuthenticated })
     })
   }
-}
+})
+
+export default ProjectNotSetup

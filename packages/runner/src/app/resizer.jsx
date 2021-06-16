@@ -1,7 +1,17 @@
-import { action } from 'mobx'
+import { action, makeObservable } from 'mobx'
 import React, { Component } from 'react'
 
 class Resizer extends Component {
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      _startResize: action,
+      _resize: action,
+      _endResize: action,
+    })
+  }
+
   render () {
     return (
       <div
@@ -20,14 +30,14 @@ class Resizer extends Component {
     document.addEventListener('mouseup', this._endResize)
   }
 
-  @action _startResize = (e) => {
+  _startResize = (e) => {
     e.preventDefault()
 
     this._isDragging = true
     this.props.onResizeStart()
-  }
+  };
 
-  @action _resize = (e) => {
+  _resize = (e) => {
     const minWidth = 0
     const maxWidth = this.props.state.windowWidth
 
@@ -42,15 +52,15 @@ class Resizer extends Component {
 
       this.props.onResize(width)
     }
-  }
+  };
 
-  @action _endResize = () => {
+  _endResize = () => {
     if (this._isDragging) {
       this.props.onResizeEnd()
     }
 
     this._isDragging = false
-  }
+  };
 
   componentWillUnmount () {
     document.removeEventListener('mousemove', this._resize)

@@ -13,8 +13,7 @@ const close = () => {
 
 // LoginContent is a separate component so that it pings the api
 // server whenever it is displayed
-@observer
-class LoginContent extends Component {
+const LoginContent = observer(class LoginContent extends Component {
   state = {
     isLoading: true,
     hasApiServer: false,
@@ -131,7 +130,7 @@ class LoginContent extends Component {
   _openAPIHelp () {
     ipc.externalOpen('https://on.cypress.io/help-connect-to-api')
   }
-}
+})
 
 const Login = observer(() => (
   <BootstrapModal

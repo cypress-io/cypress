@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
@@ -12,36 +12,62 @@ import { LogProps } from '../runnables/runnables-store'
 import Log from '../instruments/instrument-model'
 
 export default class Attempt {
-  @observable agents: Agent[] = []
-  @observable commands: Command[] = []
-  @observable err = new Err({})
-  @observable hooks: Hook[] = []
+  agents: Agent[] = [];
+  commands: Command[] = [];
+  err = new Err({});
+  hooks: Hook[] = [];
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @observable isActive: boolean | null = null
-  @observable routes: Route[] = []
-  @observable _state?: TestState | null = null
-  @observable _invocationCount: number = 0
-  @observable invocationDetails?: FileDetails
-  @observable hookCount: { [name in HookName]: number } = {
+  isActive: boolean | null = null;
+  routes: Route[] = [];
+  _state?: TestState | null = null;
+  _invocationCount: number = 0;
+  invocationDetails?: FileDetails;
+  hookCount: { [name in HookName]: number } = {
     'before all': 0,
     'before each': 0,
     'after all': 0,
     'after each': 0,
     'test body': 0,
     'studio commands': 0,
-  }
-  @observable _isOpen: boolean|null = null
+  };
+  _isOpen: boolean|null = null;
 
-  @observable isOpenWhenLast: boolean | null = null
+  isOpenWhenLast: boolean | null = null;
   _callbackAfterUpdate: Function | null = null
   testId: string
 
-  @observable id: number
+  id: number;
   test: Test
 
   _logs: {[key: string]: Log} = {}
 
   constructor (props: TestProps, test: Test) {
+    makeObservable(this, {
+      agents: observable,
+      commands: observable,
+      err: observable,
+      hooks: observable,
+      isActive: observable,
+      routes: observable,
+      _state: observable,
+      _invocationCount: observable,
+      invocationDetails: observable,
+      hookCount: observable,
+      _isOpen: observable,
+      isOpenWhenLast: observable,
+      id: observable,
+      hasCommands: computed,
+      isLongRunning: computed,
+      _hasLongRunningCommand: computed,
+      state: computed,
+      isLast: computed,
+      isOpen: computed,
+      studioIsNotEmpty: computed,
+      start: action,
+      update: action,
+      finish: action,
+    })
+
     this.testId = props.id
     this.id = props.currentRetry || 0
     this.test = test
@@ -57,29 +83,29 @@ export default class Attempt {
     _.each(props.routes, this.addLog)
   }
 
-  @computed get hasCommands () {
+  get hasCommands () {
     return !!this.commands.length
   }
 
-  @computed get isLongRunning () {
+  get isLongRunning () {
     return this.isActive && this._hasLongRunningCommand
   }
 
-  @computed get _hasLongRunningCommand () {
+  get _hasLongRunningCommand () {
     return _.some(this.commands, (command) => {
       return command.isLongRunning
     })
   }
 
-  @computed get state () {
+  get state () {
     return this._state || (this.isActive ? 'active' : 'processing')
   }
 
-  @computed get isLast () {
+  get isLast () {
     return this.id === this.test.lastAttempt.id
   }
 
-  @computed get isOpen () {
+  get isOpen () {
     if (this._isOpen !== null) {
       return this._isOpen
     }
@@ -88,7 +114,7 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
-  @computed get studioIsNotEmpty () {
+  get studioIsNotEmpty () {
     return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
   }
 
@@ -137,11 +163,11 @@ export default class Attempt {
     .last()
   }
 
-  @action start () {
+  start () {
     this.isActive = true
   }
 
-  @action update (props: UpdatableTestProps) {
+  update (props: UpdatableTestProps) {
     if (props.state) {
       this._state = props.state
     }
@@ -161,7 +187,7 @@ export default class Attempt {
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  finish (props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false
   }

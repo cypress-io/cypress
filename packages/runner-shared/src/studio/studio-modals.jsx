@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
@@ -7,8 +7,7 @@ import { eventManager } from '@packages/runner-shared'
 
 import { studioRecorder } from './studio-recorder'
 
-@observer
-export class StudioInstructionsModal extends Component {
+export const StudioInstructionsModal = observer(class StudioInstructionsModal extends Component {
   render () {
     return (
       <Dialog
@@ -68,10 +67,9 @@ will be highly influential to our team.
       </Dialog>
     )
   }
-}
+})
 
-@observer
-export class StudioInitModal extends Component {
+export const StudioInitModal = observer(class StudioInitModal extends Component {
   render () {
     return (
       <Dialog
@@ -115,11 +113,19 @@ Studio
   }
 
   _start = () => eventManager.emit('studio:start')
-}
+})
 
-@observer
-export class StudioSaveModal extends Component {
-  @observable name = ''
+export const StudioSaveModal = observer(class StudioSaveModal extends Component {
+  name = '';
+
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      name: observable,
+      _onInputChange: action,
+    })
+  }
 
   render () {
     return (
@@ -159,10 +165,9 @@ Save New Test
     )
   }
 
-  @action
   _onInputChange = (e) => {
     this.name = e.target.value
-  }
+  };
 
   _save = (e) => {
     e.preventDefault()
@@ -171,7 +176,7 @@ Save New Test
 
     studioRecorder.save(this.name)
   }
-}
+})
 
 const StudioModals = () => (
   <>

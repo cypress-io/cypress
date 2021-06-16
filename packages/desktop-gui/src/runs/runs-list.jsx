@@ -22,8 +22,7 @@ import ProjectNotSetup from './project-not-setup'
 import DashboardBanner from './dashboard-banner'
 import WhatIsDashboard from './what-is-dashboard'
 
-@observer
-class RunsList extends Component {
+const RunsList = observer(class RunsList extends Component {
   state = {
     recordKey: null,
     isLoading: true,
@@ -411,6 +410,6 @@ class RunsList extends Component {
   _openAPIHelp () {
     ipc.externalOpen('https://on.cypress.io/help-connect-to-api')
   }
-}
+})
 
 export default RunsList

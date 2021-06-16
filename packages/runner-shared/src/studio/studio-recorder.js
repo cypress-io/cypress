@@ -1,4 +1,4 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
 import { eventManager } from '@packages/runner-shared'
@@ -33,46 +33,89 @@ const internalMouseEvents = [
 ]
 
 export class StudioRecorder {
-  @observable testId = null
-  @observable suiteId = null
-  @observable initModalIsOpen = false
-  @observable saveModalIsOpen = false
-  @observable logs = []
-  @observable isLoading = false
-  @observable isActive = false
-  @observable url = null
-  @observable isFailed = false
-  @observable _hasStarted = false
+  testId = null;
+  suiteId = null;
+  initModalIsOpen = false;
+  saveModalIsOpen = false;
+  logs = [];
+  isLoading = false;
+  isActive = false;
+  url = null;
+  isFailed = false;
+  _hasStarted = false;
 
   fileDetails = null
   _currentId = 1
   _previousMouseEvent = null
 
-  @computed get hasRunnableId () {
+  constructor () {
+    makeObservable(this, {
+      testId: observable,
+      suiteId: observable,
+      initModalIsOpen: observable,
+      saveModalIsOpen: observable,
+      logs: observable,
+      isLoading: observable,
+      isActive: observable,
+      url: observable,
+      isFailed: observable,
+      _hasStarted: observable,
+      hasRunnableId: computed,
+      isOpen: computed,
+      isEmpty: computed,
+      isReady: computed,
+      hookId: computed,
+      needsUrl: computed,
+      testError: computed,
+      setTestId: action,
+      setSuiteId: action,
+      clearRunnableIds: action,
+      showInitModal: action,
+      closeInitModal: action,
+      showSaveModal: action,
+      closeSaveModal: action,
+      startLoading: action,
+      setInactive: action,
+      setUrl: action,
+      testFailed: action,
+      start: action,
+      stop: action,
+      reset: action,
+      cancel: action,
+      startSave: action,
+      save: action,
+      visitUrl: action,
+      _recordEvent: action,
+      _removeLastLogIfType: action,
+      removeLog: action,
+    })
+  }
+
+  get hasRunnableId () {
     return !!this.testId || !!this.suiteId
   }
 
-  @computed get isOpen () {
+  get isOpen () {
     return this.isActive || this.isLoading || this._hasStarted
   }
 
-  @computed get isEmpty () {
+  get isEmpty () {
     return this.logs.length === 0
   }
 
-  @computed get isReady () {
+  get isReady () {
     return this.isOpen && this.isEmpty && !this.isLoading && !this.isFailed
   }
 
-  @computed get hookId () {
+  get hookId () {
     return `${this.testId}-studio`
   }
 
-  @computed get needsUrl () {
+  get needsUrl () {
     return this.isActive && !this.url && !this.isFailed
   }
 
-  @computed get testError () {
+  get testError () {
     return {
       id: this.testId,
       state: 'failed',
@@ -94,51 +137,51 @@ export class StudioRecorder {
     }
   }
 
-  @action setTestId = (testId) => {
+  setTestId = (testId) => {
     this.testId = testId
-  }
+  };
 
-  @action setSuiteId = (suiteId) => {
+  setSuiteId = (suiteId) => {
     this.suiteId = suiteId
     this.testId = null
-  }
+  };
 
-  @action clearRunnableIds = () => {
+  clearRunnableIds = () => {
     this.testId = null
     this.suiteId = null
-  }
+  };
 
-  @action showInitModal = () => {
+  showInitModal = () => {
     this.initModalIsOpen = true
-  }
+  };
 
-  @action closeInitModal = () => {
+  closeInitModal = () => {
     this.initModalIsOpen = false
-  }
+  };
 
-  @action showSaveModal = () => {
+  showSaveModal = () => {
     this.saveModalIsOpen = true
-  }
+  };
 
-  @action closeSaveModal = () => {
+  closeSaveModal = () => {
     this.saveModalIsOpen = false
-  }
+  };
 
-  @action startLoading = () => {
+  startLoading = () => {
     this.isLoading = true
-  }
+  };
 
-  @action setInactive = () => {
+  setInactive = () => {
     this.isActive = false
-  }
+  };
 
-  @action setUrl = (url) => {
+  setUrl = (url) => {
     this.url = url
-  }
+  };
 
-  @action testFailed = () => {
+  testFailed = () => {
     this.isFailed = true
-  }
+  };
 
   setFileDetails = (fileDetails) => {
     this.fileDetails = fileDetails
@@ -152,7 +195,7 @@ export class StudioRecorder {
     return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
   }
 
-  @action start = (body) => {
+  start = (body) => {
     this.isActive = true
     this.isLoading = false
     this.logs = []
@@ -164,16 +207,16 @@ export class StudioRecorder {
     }
 
     this.attachListeners(body)
-  }
+  };
 
-  @action stop = () => {
+  stop = () => {
     this.removeListeners()
 
     this.isActive = false
     this.isLoading = false
-  }
+  };
 
-  @action reset = () => {
+  reset = () => {
     this.stop()
 
     this.logs = []
@@ -181,22 +224,22 @@ export class StudioRecorder {
     this._hasStarted = false
     this._currentId = 1
     this.isFailed = false
-  }
+  };
 
-  @action cancel = () => {
+  cancel = () => {
     this.reset()
     this.clearRunnableIds()
-  }
+  };
 
-  @action startSave = () => {
+  startSave = () => {
     if (this.suiteId) {
       this.showSaveModal()
     } else {
       this.save()
     }
-  }
+  };
 
-  @action save = (testName = null) => {
+  save = (testName = null) => {
     this.closeSaveModal()
     this.stop()
 
@@ -206,9 +249,9 @@ export class StudioRecorder {
       isSuite: !!this.suiteId,
       testName,
     })
-  }
+  };
 
-  @action visitUrl = (url = this.url) => {
+  visitUrl = (url = this.url) => {
     this.setUrl(url)
 
     this.Cypress.cy.visit(this.url)
@@ -219,7 +262,7 @@ export class StudioRecorder {
       name: 'visit',
       message: this.url,
     })
-  }
+  };
 
   attachListeners = (body) => {
     if (this.isFailed) return
@@ -369,7 +412,7 @@ export class StudioRecorder {
     return true
   }
 
-  @action _recordEvent = (event) => {
+  _recordEvent = (event) => {
     if (this.isFailed || !this._trustEvent(event)) return
 
     const $el = $(event.target)
@@ -414,17 +457,17 @@ export class StudioRecorder {
       name,
       message,
     })
-  }
+  };
 
-  @action _removeLastLogIfType = (selector) => {
+  _removeLastLogIfType = (selector) => {
     const lastLog = this.logs[this.logs.length - 1]
 
     if (lastLog.selector === selector && lastLog.name === 'type') {
       return this.removeLog(lastLog.id)
     }
-  }
+  };
 
-  @action removeLog = (commandId) => {
+  removeLog = (commandId) => {
     const index = this.logs.findIndex((command) => command.id === commandId)
     const log = this.logs[index]
 
@@ -433,7 +476,7 @@ export class StudioRecorder {
     this._generateBothLogs(log).forEach((commandLog) => {
       eventManager.emit('reporter:log:remove', commandLog)
     })
-  }
+  };
 
   _generateLog = ({ id, name, message, type, number }) => {
     return {

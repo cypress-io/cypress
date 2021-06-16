@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 
 export interface AgentProps extends InstrumentProps {
@@ -7,11 +7,16 @@ export interface AgentProps extends InstrumentProps {
 }
 
 export default class Agent extends Instrument {
-  @observable callCount: number = 0
-  @observable functionName: string
+  callCount: number = 0;
+  functionName: string;
 
   constructor (props: AgentProps) {
     super(props)
+
+    makeObservable(this, {
+      callCount: observable,
+      functionName: observable,
+    })
 
     this.callCount = props.callCount
     this.functionName = props.functionName

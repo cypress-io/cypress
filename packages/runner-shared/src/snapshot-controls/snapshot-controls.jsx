@@ -1,13 +1,20 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { action } from 'mobx'
+import { action, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import './snapshot-controls.scss'
 
-@observer
-class SnapshotControls extends Component {
+const SnapshotControls = observer(class SnapshotControls extends Component {
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      _toggleHighlights: action,
+    })
+  }
+
   render () {
     return (
       <span
@@ -67,13 +74,13 @@ class SnapshotControls extends Component {
     this.props.eventManager.snapshotUnpinned()
   }
 
-  @action _toggleHighlights = () => {
+  _toggleHighlights = () => {
     this.props.onToggleHighlights(this.props.snapshotProps)
-  }
+  };
 
   _changeState = (index) => action('change:snapshot:state', () => {
     this.props.onStateChange(this.props.snapshotProps, index)
   })
-}
+})
 
 export { SnapshotControls }

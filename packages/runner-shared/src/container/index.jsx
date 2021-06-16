@@ -6,8 +6,7 @@ import { automation } from '../automation'
 import { NoAutomation } from '../no-automation'
 import { automationElementId, AutomationElement } from '../automation-element'
 
-@observer
-export class Container extends Component {
+export const Container = observer(class Container extends Component {
   constructor (...args) {
     super(...args)
 
@@ -98,4 +97,4 @@ export class Container extends Component {
       this.forceUpdate()
     }
   }
-}
+})

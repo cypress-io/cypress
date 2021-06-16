@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable, toJS } from 'mobx'
+import { action, computed, observable, toJS, makeObservable } from 'mobx'
 
 import Browser from '../lib/browser-model'
 import Warning from './warning-model'
@@ -40,46 +40,102 @@ export default class Project {
   static UNAUTHORIZED = 'UNAUTHORIZED'
 
   // persisted with api
-  @observable id
-  @observable name
-  @observable public
-  @observable lastBuildStatus
-  @observable lastBuildCreatedAt
-  @observable orgName
-  @observable orgId
-  @observable defaultOrg
+  id;
+  name;
+  public;
+  lastBuildStatus;
+  lastBuildCreatedAt;
+  orgName;
+  orgId;
+  defaultOrg;
   // comes from ipc, but not persisted
-  @observable state = Project.VALID
+  state = Project.VALID;
   // local state
-  @observable isChosen = false
-  @observable isLoading = false
-  @observable isNew = false
-  @observable browsers = []
-  @observable onBoardingModalOpen = false
-  @observable browserState = 'closed'
-  @observable resolvedConfig
-  @observable error
+  isChosen = false;
+  isLoading = false;
+  isNew = false;
+  browsers = [];
+  onBoardingModalOpen = false;
+  browserState = 'closed';
+  resolvedConfig;
+  error;
   /** @type {{[key: string] : {warning:Error & {dismissed: boolean}}}} */
-  @observable _warnings = {}
-  @observable apiError
-  @observable parentTestsFolderDisplay
-  @observable integrationExampleName
-  @observable scaffoldedFiles = []
-  @observable resolvedNodePath
-  @observable resolvedNodeVersion
+  _warnings = {};
+  apiError;
+  parentTestsFolderDisplay;
+  integrationExampleName;
+  scaffoldedFiles = [];
+  resolvedNodePath;
+  resolvedNodeVersion;
   // should never change after first set
-  @observable path
-  @observable prompts = new Prompts()
+  path;
+  prompts = new Prompts();
   // not observable
   dismissedWarnings = {}
 
   constructor (props) {
+    makeObservable(this, {
+      id: observable,
+      name: observable,
+      public: observable,
+      lastBuildStatus: observable,
+      lastBuildCreatedAt: observable,
+      orgName: observable,
+      orgId: observable,
+      defaultOrg: observable,
+      state: observable,
+      isChosen: observable,
+      isLoading: observable,
+      isNew: observable,
+      browsers: observable,
+      onBoardingModalOpen: observable,
+      browserState: observable,
+      resolvedConfig: observable,
+      error: observable,
+      _warnings: observable,
+      apiError: observable,
+      parentTestsFolderDisplay: observable,
+      integrationExampleName: observable,
+      scaffoldedFiles: observable,
+      resolvedNodePath: observable,
+      resolvedNodeVersion: observable,
+      path: observable,
+      prompts: observable,
+      displayName: computed,
+      displayPath: computed,
+      isUnauthorized: computed,
+      isValid: computed,
+      isInvalid: computed,
+      isSetupForRecording: computed,
+      otherBrowsers: computed,
+      chosenBrowser: computed,
+      defaultBrowser: computed,
+      warnings: computed,
+      update: action,
+      setLoading: action,
+      openModal: action,
+      closeModal: action,
+      browserOpening: action,
+      browserOpened: action,
+      browserClosed: action,
+      setBrowsers: action,
+      setChosenBrowser: action,
+      setOnBoardingConfig: action,
+      setResolvedConfig: action,
+      setError: action,
+      clearError: action,
+      addWarning: action,
+      dismissWarning: action,
+      setApiError: action,
+      setChosenBrowserFromLocalStorage: action,
+    })
+
     this.path = props.path
 
     this.update(props)
   }
 
-  @computed get displayName () {
+  get displayName () {
     if (this.name) return this.name
 
     // need normalize windows paths with \ before split
@@ -89,7 +145,7 @@ export default class Project {
     return _.truncate(lastDir, { length: 60 })
   }
 
-  @computed get displayPath () {
+  get displayPath () {
     const maxPathLength = 45
 
     if (this.path.length <= maxPathLength) return this.path
@@ -99,39 +155,39 @@ export default class Project {
     return '...'.concat(truncatedPath)
   }
 
-  @computed get isUnauthorized () {
+  get isUnauthorized () {
     return this.state === Project.UNAUTHORIZED
   }
 
-  @computed get isValid () {
+  get isValid () {
     return this.state === Project.VALID
   }
 
-  @computed get isInvalid () {
+  get isInvalid () {
     return this.state === Project.INVALID
   }
 
-  @computed get isSetupForRecording () {
+  get isSetupForRecording () {
     return this.id && this.isValid
   }
 
-  @computed get otherBrowsers () {
+  get otherBrowsers () {
     return _.filter(this.browsers, { isChosen: false })
   }
 
-  @computed get chosenBrowser () {
+  get chosenBrowser () {
     return _.find(this.browsers, { isChosen: true })
   }
 
-  @computed get defaultBrowser () {
+  get defaultBrowser () {
     return this.browsers[0]
   }
 
-  @computed get warnings () {
+  get warnings () {
     return _.reject(this._warnings, { isDismissed: true })
   }
 
-  @action update (props) {
+  update (props) {
     if (!props) return
 
     _.each(validProps, (prop) => {
@@ -143,31 +199,31 @@ export default class Project {
     if (props[prop] != null) this[prop] = props[prop]
   }
 
-  @action setLoading (isLoading) {
+  setLoading (isLoading) {
     this.isLoading = isLoading
   }
 
-  @action openModal () {
+  openModal () {
     this.onBoardingModalOpen = true
   }
 
-  @action closeModal () {
+  closeModal () {
     this.onBoardingModalOpen = false
   }
 
-  @action browserOpening () {
+  browserOpening () {
     this.browserState = 'opening'
   }
 
-  @action browserOpened () {
+  browserOpened () {
     this.browserState = 'opened'
   }
 
-  @action browserClosed () {
+  browserClosed () {
     this.browserState = 'closed'
   }
 
-  @action setBrowsers (browsers = []) {
+  setBrowsers (browsers = []) {
     if (browsers.length) {
       this.browsers = _.map(browsers, (browser) => {
         return new Browser(browser)
@@ -192,7 +248,7 @@ export default class Project {
     }
   }
 
-  @action setChosenBrowser (browser, { save } = {}) {
+  setChosenBrowser (browser, { save } = {}) {
     _.each(this.browsers, (browser) => {
       browser.isChosen = false
     })
@@ -204,7 +260,7 @@ export default class Project {
     browser.isChosen = true
   }
 
-  @action setOnBoardingConfig (config) {
+  setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
@@ -214,22 +270,22 @@ export default class Project {
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 
-  @action setResolvedConfig (resolved) {
+  setResolvedConfig (resolved) {
     this.resolvedConfig = resolved
   }
 
-  @action setError (err = {}) {
+  setError (err = {}) {
     // for some reason, the original `stack` is unavailable on `err` once it is set on the model
     // `stack2` remains usable though, for some reason
     err.stack2 = err.stack
     this.error = err
   }
 
-  @action clearError () {
+  clearError () {
     this.error = null
   }
 
-  @action addWarning (warning) {
+  addWarning (warning) {
     const type = warning.type
 
     if (type && this._warnings[type] && this._warnings[type].isDismissed) {
@@ -239,7 +295,7 @@ export default class Project {
     this._warnings[type] = new Warning(warning)
   }
 
-  @action dismissWarning (warning) {
+  dismissWarning (warning) {
     if (!warning) {
       // calling with no warning clears all warnings
       return _.each(this._warnings, ((warning) => {
@@ -250,11 +306,11 @@ export default class Project {
     warning.setDismissed(true)
   }
 
-  @action setApiError = (err = {}) => {
+  setApiError = (err = {}) => {
     this.apiError = err
-  }
+  };
 
-  @action setChosenBrowserFromLocalStorage (ls) {
+  setChosenBrowserFromLocalStorage (ls) {
     let filter = {}
 
     try {

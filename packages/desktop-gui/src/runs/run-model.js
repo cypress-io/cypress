@@ -1,10 +1,14 @@
 import { assign } from 'lodash'
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 
 export default class Run {
-  @observable id
+  id;
 
   constructor (options) {
+    makeObservable(this, {
+      id: observable,
+    })
+
     assign(this, options)
   }
 }

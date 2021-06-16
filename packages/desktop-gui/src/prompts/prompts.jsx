@@ -1,5 +1,5 @@
 import React, { Component, useState } from 'react'
-import { computed } from 'mobx'
+import { computed, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import { usePopper } from 'react-popper'
 
@@ -36,18 +36,26 @@ const Prompt = observer(({ children, isOpen, referenceElement, className }) => {
   )
 })
 
-@observer
-class CIPrompt1 extends Component {
+const CIPrompt1 = observer(class CIPrompt1 extends Component {
   slug = 'ci1'
   utm_medium = 'CI Prompt 1'
 
-  @computed get utm_content () {
+  constructor (props) {
+    super(props)
+
+    makeObservable(this, {
+      utm_content: computed,
+      ciProviders: computed,
+    })
+  }
+
+  get utm_content () {
     const { prompts } = this.props
 
     return prompts ? prompts.utm_content : undefined
   }
 
-  @computed get ciProviders () {
+  get ciProviders () {
     return [
       {
         name: 'Circle CI',
@@ -186,10 +194,9 @@ class CIPrompt1 extends Component {
       </Prompt>
     )
   }
-}
+})
 
-@observer
-class OrchestrationPrompt1 extends Component {
+const OrchestrationPrompt1 = observer(class OrchestrationPrompt1 extends Component {
   slug = 'orchestration1'
   utm_medium = 'Orchestration Prompt 1'
 
@@ -270,7 +277,7 @@ class OrchestrationPrompt1 extends Component {
       </Prompt>
     )
   }
-}
+})
 
 const Prompts = observer(({ project, referenceElement }) => {
   if (!project || project.isLoading) return null

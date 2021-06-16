@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import path from 'path'
 
 import localData from '../lib/local-data'
@@ -55,24 +55,50 @@ export class SpecsStore {
    *
    * @memberof SpecsStore
    */
-  @observable _files = []
-  @observable chosenSpecPath
-  @observable error
-  @observable isLoading = false
-  @observable filter
-  @observable selectedSpec
-  @observable newSpecAbsolutePath
-  @observable showNewSpecWarning = false
+  _files = [];
+  chosenSpecPath;
+  error;
+  isLoading = false;
+  filter;
+  selectedSpec;
+  newSpecAbsolutePath;
+  showNewSpecWarning = false;
 
-  @computed get specs () {
+  constructor () {
+    makeObservable(this, {
+      _files: observable,
+      chosenSpecPath: observable,
+      error: observable,
+      isLoading: observable,
+      filter: observable,
+      selectedSpec: observable,
+      newSpecAbsolutePath: observable,
+      showNewSpecWarning: observable,
+      specs: computed,
+      loading: action,
+      setSpecs: action,
+      setChosenSpec: action,
+      setChosenSpecByRelativePath: action,
+      setNewSpecPath: action,
+      dismissNewSpecWarning: action,
+      setExpandSpecFolder: action,
+      toggleExpandSpecFolder: action,
+      setExpandSpecChildren: action,
+      setFilter: action,
+      clearFilter: action,
+      setSelectedSpec: action,
+    })
+  }
+
+  get specs () {
     return this._tree(this._files)
   }
 
-  @action loading (bool) {
+  loading (bool) {
     this.isLoading = bool
   }
 
-  @action setSpecs (specsByType) {
+  setSpecs (specsByType) {
     this._files = _.flatten(_.map(specsByType, (specs, type) => {
       return _.map(specs, (spec) => {
         return _.extend({}, spec, { specType: type })
@@ -86,11 +112,11 @@ export class SpecsStore {
     this.isLoading = false
   }
 
-  @action setChosenSpec (spec) {
+  setChosenSpec (spec) {
     this.chosenSpecPath = spec ? formRelativePath(spec) : null
   }
 
-  @action setChosenSpecByRelativePath (relativePath) {
+  setChosenSpecByRelativePath (relativePath) {
     // find an actual spec using relative path
     if (relativePath === allIntegrationSpecsSpec.relative) {
       this.chosenSpecPath = relativePath
@@ -110,24 +136,24 @@ export class SpecsStore {
     }
   }
 
-  @action setNewSpecPath (absolutePath) {
+  setNewSpecPath (absolutePath) {
     this.newSpecAbsolutePath = absolutePath
     this.dismissNewSpecWarning()
   }
 
-  @action dismissNewSpecWarning = () => {
+  dismissNewSpecWarning = () => {
     this.showNewSpecWarning = false
-  }
+  };
 
-  @action setExpandSpecFolder (spec, isExpanded) {
+  setExpandSpecFolder (spec, isExpanded) {
     spec.setExpanded(isExpanded)
   }
 
-  @action toggleExpandSpecFolder (spec) {
+  toggleExpandSpecFolder (spec) {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setExpandSpecChildren (spec, isExpanded) {
+  setExpandSpecChildren (spec, isExpanded) {
     this._depthFirstIterateSpecs(spec, (specOrFolder) => {
       if (specOrFolder.isFolder) {
         specOrFolder.setExpanded(isExpanded)
@@ -135,7 +161,7 @@ export class SpecsStore {
     })
   }
 
-  @action setFilter (project, filter = null) {
+  setFilter (project, filter = null) {
     if (!filter) {
       return this.clearFilter(project)
     }
@@ -145,13 +171,13 @@ export class SpecsStore {
     this.filter = filter
   }
 
-  @action clearFilter (project) {
+  clearFilter (project) {
     localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
   }
 
-  @action setSelectedSpec (spec) {
+  setSelectedSpec (spec) {
     this.selectedSpec = spec
   }
 
