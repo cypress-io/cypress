@@ -642,7 +642,7 @@ namespace CypressTestConfigOverridesTests {
   describe('suite', {
     browser: {family: 'firefox'},
     baseUrl: 'www.example.com',
-    keystrokeDelay: false, // $ExpectError
+    keystrokeDelay: false // $ExpectError
     foo: 'foo' // $ExpectError
   }, () => {})
 
