@@ -20,14 +20,11 @@ type RunnerType = 'ct' | 'e2e'
 export class SpecsStore {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
-  #cypressConfig: Record<string, any>
 
   constructor (
-    cypressConfig: Record<string, any>,
+    private cypressConfig: Record<string, any>,
     private runner: RunnerType,
-  ) {
-    this.cypressConfig = cypressConfig
-  }
+  ) {}
 
   get specDirectory () {
     if (this.runner === 'e2e') {
