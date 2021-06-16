@@ -76,6 +76,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     options.onError(err)
   }
 
+  // @ts-ignore - Bluebird types have problems?
   async _initPlugins (cfg, options): Promise<InitPlugins> {
     let modifiedConfig = await super._initPlugins(cfg, options)
     const specs = await this.findProjectSpecs(modifiedConfig)
