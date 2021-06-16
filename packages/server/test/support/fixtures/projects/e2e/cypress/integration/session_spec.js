@@ -36,7 +36,6 @@ describe('cross origin automations', function () {
 
     .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.2:44665', 'current_origin'] }))
     .then((result) => {
-      console.log(result)
       expect(result).deep.eq({
         localStorage: [
           { origin: 'https://localhost:4466', value: { key1: 'val1' } },
@@ -56,7 +55,6 @@ describe('cross origin automations', function () {
 
     .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.2:44665', 'current_origin'] }))
     .then((result) => {
-      console.log({ result })
       expect(result).deep.eq({
         localStorage: [
           { origin: 'https://localhost:4466', value: { key1: 'val' } },
@@ -78,22 +76,26 @@ describe('cross origin automations', function () {
     .then(() => {
       expect(window.localStorage.key2).eq('val2')
     })
-
-    // .then(() => {
-    //   return Cypress.session.setStorage([
-    //     // set localStorage on different origin
-    //     { origin: 'https://127.0.0.2:44665', localStorage: { key2: 'val' }, clear: true },
-    //     // set localStorage on current origin
-    //     { localStorage: { key3: 'val' }, clear: true },
-    //   ])
-    // })
-    // .then(() => Cypress.session.getStorage({ origin: ['current_url', 'https://127.0.0.2:44665'] }))
-    // .then((result) => {
-    //   expect(result).deep.eq([
-    //     { origin: 'https://localhost:4466', localStorage: { key3: 'val' } },
-    //     { origin: 'https://127.0.0.2:44665', localStorage: { key2: 'val' } },
-    //   ])
-    // })
+    .then(() => {
+      return Cypress.session.setStorage({
+        localStorage: [
+        // set localStorage on different origin
+          { origin: 'https://127.0.0.2:44665', value: { key2: 'val' }, clear: true },
+          // set localStorage on current origin
+          { value: { key3: 'val' }, clear: true },
+        ],
+      })
+    })
+    .then(() => Cypress.session.getStorage({ origin: ['current_url', 'https://127.0.0.2:44665'] }))
+    .then((result) => {
+      expect(result).deep.eq({
+        localStorage: [
+          { origin: 'https://localhost:4466', value: { key3: 'val' } },
+          { origin: 'https://127.0.0.2:44665', value: { key2: 'val' } },
+        ],
+        sessionStorage: [],
+      })
+    })
   })
 
   it('get localStorage from all origins', () => {
@@ -117,6 +119,28 @@ describe('cross origin automations', function () {
     .then(() => Cypress.session.getStorage({ origin: '*' }))
     .then((result) => {
       expect(result.localStorage).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }])
+    })
+  })
+})
+
+describe('args', () => {
+  it('accepts string or object as id', () => {
+    cy.session('some-name', () => {})
+    cy.session({ name: 'some-name', zkey: 'val' }, () => {})
+  })
+
+  it('uses sorted stringify and rejects duplicate registrations', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('previously used name')
+      done()
+    })
+
+    cy.session({ name: 'bob', key: 'val' }, () => {
+      // foo
+    })
+
+    cy.session({ key: 'val', name: 'bob' }, () => {
+      // bar
     })
   })
 })
@@ -252,167 +276,6 @@ describe('save/restore session with cookies and localStorage', () => {
   })
 })
 
-// describe('can exclude localStorage', () => {
-//   const setup = () => {
-//     cy.visit('https://localhost:4466/cross_origin_iframe/cookies')
-//     cy.then(() => {
-//       window.localStorage.foo = '1'
-//       window.localStorage.foobar = '2'
-//       window.localStorage.foobarbaz = '3'
-//     })
-//   }
-
-//   it('exclude-origin-string', () => {
-//     cy.session('exclude-origin-string', setup, {
-//       exclude: {
-//         localStorage: { origin: 'https://localhost:4466' },
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
-//         localStorage: [
-//           { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
-
-//         ],
-//       })
-//     })
-//   })
-
-//   it('exclude-origin-regex', () => {
-//     cy.session('exclude-origin-regex', setup, {
-//       exclude: {
-//         localStorage: {
-//           origin: /127/,
-//         },
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
-//         localStorage: [
-//           { origin: 'https://localhost:4466', value: { foo: '1', foobar: '2', foobarbaz: '3' } },
-//         ],
-//       })
-//     })
-//   })
-
-//   it('exclude-value-string', () => {
-//     cy.session('exclude-value-string', setup, {
-//       exclude: {
-//       // coerced into { key: 'name' }
-//         localStorage: 'foobar',
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
-//         localStorage: [
-//           { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
-//           { origin: 'https://localhost:4466', value: { foo: '1', foobarbaz: '3' } },
-//         ],
-//       })
-//     })
-//   })
-
-//   it('exclude-regex', () => {
-//     cy.session('exclude-regex', setup, {
-//       exclude: {
-//       // coerced into { value: /bar/ }
-//         localStorage: /bar/,
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
-//         localStorage: [
-//           { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
-//           { origin: 'https://localhost:4466', value: { foo: '1' } },
-//         ],
-//       })
-//     })
-//   })
-
-//   it('exclude-value-regex', () => {
-//     cy.session('exclude-value-regex', setup, {
-//       exclude: {
-//         localStorage: { key: /foo/ },
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies', '/cross_origin_iframe/cookies'],
-//         localStorage: [
-//           { origin: 'https://127.0.0.2:44665', value: { name: 'cookies' } },
-//         ],
-//       })
-//     })
-//   })
-// })
-
-// describe('can exclude cookies', () => {
-//   const setup = () => {
-//     cy.visit('https://localhost:4466/cross_origin_iframe/cookies')
-//   }
-
-//   it('exclude-domain-regex', () => {
-//     cy.session('exclude-domain-regex', setup, {
-//       exclude: {
-//         cookies: {
-//           domain: /localh/,
-//         },
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies'],
-//       })
-//     })
-//   })
-
-//   it('exclude-domain-string', () => {
-//     cy.session('exclude-domain-string', setup, {
-//       exclude: {
-//         cookies: {
-//           domain: 'localhost',
-//         },
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/set-localStorage/cookies'],
-//       })
-//     })
-//   })
-
-//   it('exclude-regex', () => {
-//     cy.session('exclude-name-regex', setup, {
-//       exclude: {
-//         cookies: /set/,
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/cross_origin_iframe/cookies'],
-//       })
-//     })
-//   })
-
-//   it('exclude-name-string', () => {
-//     cy.session('exclude-name-string', setup, {
-//       exclude: {
-//       // coerced into { key: 'name' }
-//         cookies: { name: '/set-localStorage/cookies' },
-//       },
-//     })
-//     .then((sessionData) => {
-//       expectSessionData(sessionData, {
-//         cookies: ['/cross_origin_iframe/cookies'],
-//       })
-//     })
-//   })
-// })
-
 describe('multiple sessions in test', () => {
   it('switch session during test', () => {
     sessionUser('alice')
@@ -470,157 +333,197 @@ describe('multiple sessions in test - can switch without redefining', () => {
   })
 })
 
-describe('options.validate called on subsequent sessions', () => {
-  const steps = Cypress.sinon.stub().callsFake(() => {
-    Cypress.log({
-      message: 'steps',
-    })
+function SuiteWithValidateFn (id, fn) {
+  const setupFn = Cypress.sinon.stub().callsFake(() => {
+    cy.log('setupFn')
   })
   const validate = Cypress.sinon.stub().callsFake(() => {
     Cypress.log({
       message: 'validate',
     })
 
-    expect(validate.callCount, 'validate is called before options.before').eq(steps.callCount)
+    cy.url().should('eq', 'about:blank')
+
+    return fn(validate.callCount)
   })
 
   beforeEach(() => {
-    cy.session('hooks_user_validate', steps, {
+    cy.session(id, setupFn, {
       validate,
     })
   })
 
   it('t1', () => {
-    expect(steps).calledOnce
-    expect(validate).not.called
+    cy.url().should('eq', 'about:blank')
+
+    expect(setupFn).calledOnce
+    expect(validate).calledOnce
   })
 
   it('t2', () => {
-    expect(steps).calledOnce
-    expect(validate).calledOnce
+    cy.url().should('eq', 'about:blank')
+    expect(setupFn).calledTwice
+    expect(validate).calledThrice
   })
-})
+}
 
 describe('options.validate reruns steps when returning false', () => {
-  const steps = Cypress.sinon.stub().callsFake(() => {
-    cy.wrap('foo').then(() => {
-      localStorage.foo = 'val'
-    })
-  })
-  const validate = Cypress.sinon.stub().callsFake(() => {
-    return false
-  })
-
-  beforeEach(() => {
-    cy.session('hooks_user_validate_false', steps, {
-      validate,
-    })
-  })
-
-  it('t1', () => {
-    expect(steps).calledOnce
-    expect(validate).not.called
-  })
-
-  it('t2', () => {
-    expect(validate).calledOnce
-    expect(steps).calledTwice
+  SuiteWithValidateFn('validate_return_false', (callCount) => {
+    return callCount !== 2
   })
 })
 
 describe('options.validate reruns steps when resolving false', () => {
-  const steps = Cypress.sinon.stub().callsFake(() => {
-    cy.wrap('foo').then(() => {
-      localStorage.foo = 'val'
+  SuiteWithValidateFn('validate_resolve_false', (callCount) => {
+    return Promise.resolve(callCount !== 2)
+  })
+})
+
+describe('options.validate reruns steps when rejecting', () => {
+  SuiteWithValidateFn('validate_reject', (callCount) => {
+    if (callCount === 2) {
+      return Promise.reject(new Error('rejected validate'))
+    }
+  })
+})
+
+describe('options.validate reruns steps when resolving false in cypress command', () => {
+  SuiteWithValidateFn('validate_resolve_false_command', (callCount) => {
+    cy.request('https://127.0.0.2:44665/redirect').then((res) => {
+      return callCount !== 2
     })
-  })
-  const validate = Cypress.sinon.stub().callsFake(() => {
-    return Promise.resolve(false)
-  })
-
-  beforeEach(() => {
-    cy.session('hooks_user_validate_false_2', steps, {
-      validate,
-    })
-  })
-
-  it('t1', () => {
-    expect(steps).calledOnce
-    expect(validate).not.called
-  })
-
-  it('t2', () => {
-    expect(validate).calledOnce
-    expect(steps).calledTwice
   })
 })
 
 describe('options.validate reruns steps when resolving false in cypress chainer', () => {
-  let lastLog = null
-  const steps = Cypress.sinon.stub().callsFake(() => {
-    cy.wrap('setup').then(() => {
-      localStorage.foo = 'val'
+  SuiteWithValidateFn('validate_resolve_false_command_2', (callCount) => {
+    cy.wrap('validate wrap 1')
+    cy.wrap('validate wrap 2').then(() => {
+      return callCount !== 2
     })
-  })
-  const validate = Cypress.sinon.stub().callsFake(() => {
-    cy.wrap('wrap 1')
-
-    cy.wrap('wrap 2').then(() => {
-      return false
-    })
-  })
-
-  beforeEach(() => {
-    cy.on('log:added', (attrs) => {
-      if (attrs.name === 'session') {
-        lastLog = attrs
-      }
-    })
-
-    cy.session('hooks_user_validate_false_3', steps, {
-      validate,
-    })
-  })
-
-  it('t1', () => {
-    expect(steps).calledOnce
-    expect(validate).not.called
-  })
-
-  it('t2', () => {
-    expect(validate).calledOnce
-    expect(steps).calledTwice
-    expect(lastLog.message).include('invalidated')
   })
 })
 
-// NOTE: we dont support validate function throwing
-describe.skip('options.validate reruns steps when throwing', () => {
-  const steps = Cypress.sinon.stub().callsFake(() => {
-    cy.wrap('foo').then(() => {
-      localStorage.foo = 'val'
+describe('options.validate reruns steps when failing cypress command', () => {
+  SuiteWithValidateFn('validate_resolve_false_command_2', (callCount) => {
+    cy.wrap('validate wrap 1')
+    cy.wrap('validate wrap 2').then(() => {
+      return callCount !== 2
     })
-  })
-  const validate = Cypress.sinon.stub().callsFake(() => {
-    cy.wrap('foo', { timeout: 100 }).should('eq', 'bar')
-  })
 
-  beforeEach(() => {
-    cy.session('hooks_user_validate_false_3', steps, {
-      validate,
-    })
-  })
+    if ([1, 3].includes(callCount)) return
 
-  it('t1', () => {
-    expect(steps).calledOnce
-    expect(validate).not.called
+    cy.get('h1', { timeout: 100 }).should('contain', 'does not exist')
+    cy.get('h1').should('contain', 'hi')
   })
+})
 
-  it('t2', (done) => {
-    expect(validate).calledOnce
-    expect(steps).calledTwice
-    cy.then(() => {
+describe('options.validate failing test', () => {
+  it('test fails when options.validate after setup fails command', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('foo')
+      expect(err.message).contain('session validate hook')
+      expect(err.message).not.contain('not from Cypress')
+
       done()
+    })
+
+    cy.session('user_validate_fails_after_setup_1', () => {
+      cy.log('setupFn')
+    }, {
+      validate () {
+        cy.wrap('foo', { timeout: 30 }).should('eq', 'bar')
+      },
+    })
+  })
+
+  it('test fails when options.validate after setup throws', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('validate error')
+      expect(err.message).contain('session validate hook')
+      expect(err.message).not.contain('not from Cypress')
+
+      done()
+    })
+
+    cy.session('user_validate_fails_after_setup_2', () => {
+      cy.log('setupFn')
+    }, {
+      validate () {
+        throw new Error('validate error')
+      },
+    })
+  })
+
+  it('test fails when options.validate after setup rejects', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('validate error')
+      expect(err.message).contain('session validate hook')
+      expect(err.message).not.contain('not from Cypress')
+      done()
+    })
+
+    cy.session('user_validate_fails_after_setup_3', () => {
+      cy.log('setupFn')
+    }, {
+      validate () {
+        return Promise.reject(new Error('validate error'))
+      },
+    })
+  })
+
+  it('test fails when options.validate after setup returns false', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('returned false')
+      expect(err.message).contain('session validate hook')
+      expect(err.message).not.contain('not from Cypress')
+      done()
+    })
+
+    cy.session('user_validate_fails_after_setup_4', () => {
+      cy.log('setupFn')
+    }, {
+      validate () {
+        return false
+      },
+    })
+  })
+
+  it('test fails when options.validate after setup resolves false', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('callback resolved false')
+      expect(err.message).contain('session validate hook')
+      expect(err.message).not.contain('not from Cypress')
+      done()
+    })
+
+    cy.session('user_validate_fails_after_setup_5', () => {
+      cy.log('setupFn')
+    }, {
+      validate () {
+        return Promise.resolve(false)
+      },
+    })
+  })
+
+  // TODO: cy.validate that will fail, hook into event, soft-reload inside and test everything is halted
+  // Look at other tests for cancellation
+  // make error collapsible by default
+
+  it('test fails when options.validate after setup returns Chainer<false>', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).contain('callback resolved false')
+      expect(err.message).contain('session validate hook')
+      expect(err.message).not.contain('not from Cypress')
+      done()
+    })
+
+    cy.session('user_validate_fails_after_setup', () => {
+      cy.log('setupFn')
+    }, {
+      validate () {
+        return cy.wrap(false)
+      },
     })
   })
 })
@@ -654,12 +557,31 @@ describe('can wait for a js redirect with an assertion', () => {
   })
 })
 
+describe('same session name, different options, multiple tests', () => {
+  it('t1', () => {
+    cy.session('bob', () => {
+      localStorage.bob = '1'
+    })
+    .then(() => {
+      expect(localStorage.bob).eq('1')
+    })
+  })
+
+  it('t2', () => {
+    cy.session('bob', () => {
+      localStorage.bob = '2'
+    })
+    .then(() => {
+      expect(localStorage.bob).eq('2')
+    })
+  })
+})
+
 describe('consoleProps', () => {
   let log = null
 
   beforeEach(() => {
     cy.on('log:added', (__, _log) => {
-      console.log(_log.get('name'))
       if (_log.get('name') === 'session') {
         log = _log
       }
@@ -721,28 +643,6 @@ describe('consoleProps', () => {
   })
 })
 
-describe('same session name, different options, multiple tests', () => {
-  it('t1', () => {
-    cy.session('bob', () => {
-      localStorage.bob = '1'
-      console.log('bob session 1')
-    })
-    .then(() => {
-      expect(localStorage.bob).eq('1')
-    })
-  })
-
-  it('t2', () => {
-    cy.session('bob', () => {
-      localStorage.bob = '2'
-      console.log('bob session 2')
-    })
-    .then(() => {
-      expect(localStorage.bob).eq('2')
-    })
-  })
-})
-
 describe('errors', () => {
   it('throws error when experimentalSessionSupport not enabled', { experimentalSessionSupport: false }, (done) => {
     cy.on('fail', ({ message }) => {
@@ -753,15 +653,15 @@ describe('errors', () => {
     cy.session('sessions-not-enabled')
   })
 
-  it('throws if session has not been defined', (done) => {
+  it('throws if session has not been defined during current test', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).contain('session')
+      expect(err.message)
+      .contain('session')
       .contain('No session is defined with')
       .contain('**bob**')
 
       expect(err.docsUrl).eq('https://on.cypress.io/session')
-      expect(err.codeFrame.frame, 'has accurate codeframe')
-      .contain('session')
+      expect(err.codeFrame.frame, 'has accurate codeframe').contain('session')
 
       done()
     })
@@ -769,7 +669,18 @@ describe('errors', () => {
     cy.session('bob')
   })
 
-  it('throws if multiple session calls with same name but different options', () => {
+  it('throws if multiple session calls with same name but different options', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message)
+      expect(err.message).contain('previously used name')
+      .contain('**duplicate-session**')
+
+      expect(err.docsUrl).eq('https://on.cypress.io/session')
+      expect(err.codeFrame.frame, 'has accurate codeframe').contain('session')
+
+      done()
+    })
+
     cy.session('duplicate-session', () => {
       // function content
       window.localStorage.one = 'value'

@@ -1415,7 +1415,6 @@ module.exports = {
   },
 
   sessions: {
-
     session: {
       missing_argument: {
         message: `${cmd('session')} requires a {{name}}.`,

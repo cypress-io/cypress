@@ -67,7 +67,7 @@ const onServer = function (app) {
   })
 
   app.get('/redirect', (req, res) => {
-    res.redirect(302)
+    res.redirect('/home')
   })
 
   app.get('/keep_open', (req, res) => {

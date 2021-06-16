@@ -203,6 +203,8 @@ export default class Attempt {
 
     const hook = this.hooks[hookIndex]
 
+    if (!hook) return
+
     hook.addCommand(command)
 
     // make sure that hooks are in order of invocation

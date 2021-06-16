@@ -32,6 +32,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 
 interface TestErrorProps {
   model: Attempt
+  onPrintToConsole?: Function
 }
 
 const TestError = observer((props: TestErrorProps) => {
@@ -39,9 +40,9 @@ const TestError = observer((props: TestErrorProps) => {
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = () => {
+  const onPrint = props.onPrintToConsole || (() => {
     events.emit('show:error', props.model)
-  }
+  })
 
   const _onPrintClick = (e: MouseEvent) => {
     e.stopPropagation()

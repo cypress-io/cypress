@@ -22,6 +22,7 @@ export interface CommandProps extends InstrumentProps {
   wallClockStartedAt?: string
   hookId: string
   isStudio?: boolean
+  showError?: boolean
 }
 
 export default class Command extends Instrument {
@@ -38,6 +39,7 @@ export default class Command extends Instrument {
   @observable isDuplicate = false
   @observable hookId: string
   @observable isStudio: boolean
+  @observable showError?: boolean = false
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -59,6 +61,7 @@ export default class Command extends Instrument {
     super(props)
 
     this.err.update(props.err)
+    this.showError = props.showError
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
@@ -77,6 +80,7 @@ export default class Command extends Instrument {
 
     this.err.update(props.err)
     this.event = props.event
+    this.showError = props.showError
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
