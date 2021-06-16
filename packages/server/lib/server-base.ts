@@ -23,6 +23,16 @@ import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { ProjectE2E } from './project-e2e'
+import { SpecsStore } from './specs-store'
+
+export interface OpenServerOptions<Project = ProjectE2E | ProjectCt> {
+  project: Project
+  specsStore: SpecsStore
+  onError: (err: Error) => void
+  onWarning: (warning: any) => void
+  shouldCorrelatePreRequests: () => boolean
+}
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',

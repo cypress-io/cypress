@@ -20,33 +20,30 @@ type RunnerType = 'ct' | 'e2e'
 export class SpecsStore {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
-  #cypressConfig: Record<string, any>
 
   constructor (
-    cypressConfig: Record<string, any>,
+    private cypressConfig: Record<string, any>,
     private runner: RunnerType,
-  ) {
-    this.#cypressConfig = cypressConfig
-  }
+  ) {}
 
   get specDirectory () {
     if (this.runner === 'e2e') {
-      return this.#cypressConfig.resolved.integrationFolder.value
+      return this.cypressConfig.resolved.integrationFolder.value
     }
 
     if (this.runner === 'ct') {
-      return this.#cypressConfig.resolved.componentFolder.value
+      return this.cypressConfig.resolved.componentFolder.value
     }
   }
 
   get testFiles () {
-    return this.#cypressConfig.resolved.testFiles.value
+    return this.cypressConfig.resolved.testFiles.value
   }
 
   get watchOptions (): chokidar.WatchOptions {
     return {
       cwd: this.specDirectory,
-      ignored: this.#cypressConfig.ignoreTestFiles,
+      ignored: this.cypressConfig.ignoreTestFiles,
       ignoreInitial: true,
     }
   }
@@ -59,7 +56,7 @@ export class SpecsStore {
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {
-    const searchOptions = _.pick(this.#cypressConfig, COMMON_SEARCH_OPTIONS)
+    const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
 
     searchOptions.searchFolder = this.specDirectory
     searchOptions.testFiles = this.testFiles
@@ -68,7 +65,7 @@ export class SpecsStore {
   }
 
   watch (options?: SpecsWatcherOptions) {
-    this.watcher = chokidar.watch(this.#cypressConfig.testFiles, this.watchOptions)
+    this.watcher = chokidar.watch(this.cypressConfig.testFiles, this.watchOptions)
 
     if (options?.onSpecsChanged) {
       const onSpecsChanged = debounce(async () => {

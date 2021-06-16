@@ -43,11 +43,15 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     return super.open(options, {
       // @ts-ignore - Bluebird is giving me grief.
       onOpen: (cfg) => {
-        const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
-
-        return this._initPlugins(cfgForComponentTesting, options)
+        return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
+          return this.server.open(cfg, {
+            specsStore,
+            project: this,
+            onError: options.onError as any,
+            onWarning: options.onWarning as any,
+            shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+          })
           .then(([port, warning]) => {
             return {
               cfg,
@@ -73,7 +77,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
   }
 
   async _initPlugins (cfg, options): Promise<InitPlugins> {
-    const modifiedConfig = await super._initPlugins(cfg, options)
+    let modifiedConfig = await super._initPlugins(cfg, options)
     const specs = await this.findProjectSpecs(modifiedConfig)
     const devServerOptions = await devServer.start({ specs, config: modifiedConfig })
 
@@ -88,6 +92,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     const { port } = devServerOptions
 
     modifiedConfig.baseUrl = `http://localhost:${port}`
+    modifiedConfig = this.addComponentTestingUniqueDefaults(modifiedConfig)
 
     const specsStore = new SpecsStore(cfg, 'ct')
 

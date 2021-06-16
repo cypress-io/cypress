@@ -30,7 +30,13 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests, specsStore)
+          return this.server.open(cfg, {
+            onError: options.onError as any,
+            onWarning: options.onWarning as any,
+            project: this,
+            shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+            specsStore,
+          })
           .then(([port, warning]) => {
             return {
               cfg,

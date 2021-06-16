@@ -18,7 +18,7 @@ interface InitializeRoutes {
   project: ProjectCt
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
-  onError: (...args: unknown[]) => any
+  onError: (error: Error) => any
 }
 
 export const createRoutes = ({
@@ -78,7 +78,6 @@ export const createRoutes = ({
 
   app.get(config.clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
-    debug(specsStore)
 
     serve(req, res, {
       config,

@@ -3,17 +3,24 @@ import Debug from 'debug'
 import httpProxy from 'http-proxy'
 import httpsProxy from '@packages/https-proxy'
 import logger from '@packages/server/lib/logger'
-import { ServerBase } from '@packages/server/lib/server-base'
+import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import { createRoutes } from './routes-ct'
 import { SocketCt } from './socket-ct'
+import { ProjectCt } from './project-ct'
 
 type WarningErr = Record<string, any>
 
 const debug = Debug('cypress:server-ct:server')
 
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config, specsStore, project, onError, onWarning, shouldCorrelatePreRequests) {
+  open (config, {
+    specsStore,
+    project,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+  }: OpenServerOptions<ProjectCt>) {
     debug('server open')
 
     return Bluebird.try(() => {

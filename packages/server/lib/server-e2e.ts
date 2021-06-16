@@ -13,12 +13,13 @@ import { createInitialWorkers } from '@packages/rewriter'
 import errors from './errors'
 import fileServer from './file_server'
 import logger from './logger'
-import { ServerBase } from './server-base'
+import { OpenServerOptions, ServerBase } from './server-base'
 import { SocketE2E } from './socket-e2e'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
+import { ProjectE2E } from './project-e2e'
 
 type WarningErr = Record<string, any>
 
@@ -53,7 +54,13 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests, specsStore) {
+  open (config: Record<string, any> = {}, {
+    project,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+    specsStore,
+  }: OpenServerOptions<ProjectE2E>) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)
