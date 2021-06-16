@@ -345,7 +345,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         // so seems we just need to pass plugin.name
         // @ts-ignore
         compiler.hooks.compile.tap(plugin, onCompile)
-      } else {
+      } else if ('plugin' in compiler) {
+        // @ts-ignore
         compiler.plugin('compile', onCompile)
       }
     }
@@ -396,7 +397,7 @@ preprocessor.__bundles = () => {
   return bundles
 }
 
-function cleanseError (err: string | Error) {
+function cleanseError (err: string | webpack.StatsError) {
   let msg = typeof err === 'string' ? err : err.message
 
   return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
