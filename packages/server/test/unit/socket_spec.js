@@ -38,9 +38,17 @@ describe('lib/socket', () => {
 
   context('integration', () => {
     beforeEach(function (done) {
+      const noop = () => {}
+
       // create a for realz socket.io connection
       // so we can test server emit / client emit events
-      this.server.open(this.cfg)
+      this.server.open(this.cfg, {
+        project: this.project,
+        onError: noop,
+        onWarning: noop,
+        shouldCorrelatePreRequests: noop,
+        specsStore: {},
+      })
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
@@ -556,7 +564,15 @@ describe('lib/socket', () => {
       sinon.stub(SocketE2E.prototype, 'createIo').returns(this.io)
       sinon.stub(preprocessor.emitter, 'on')
 
-      return this.server.open(this.cfg)
+      const noop = () => {}
+
+      return this.server.open(this.cfg, {
+        project: this.project,
+        onError: noop,
+        onWarning: noop,
+        shouldCorrelatePreRequests: noop,
+        specsStore: {},
+      })
       .then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
 

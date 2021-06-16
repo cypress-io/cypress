@@ -74,6 +74,8 @@ describe('Server', () => {
             return rp(options)
           }
 
+          const noop = () => {}
+
           return Promise.all([
             // open our https server
             httpsServer.start(8443),
@@ -81,7 +83,13 @@ describe('Server', () => {
             // and open our cypress server
             (this.server = new ServerE2E()),
 
-            this.server.open(cfg)
+            this.server.open(cfg, {
+              project: this.project,
+              onError: noop,
+              onWarning: noop,
+              shouldCorrelatePreRequests: noop,
+              specsStore: {},
+            })
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },

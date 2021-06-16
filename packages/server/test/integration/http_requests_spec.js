@@ -135,7 +135,13 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new ServerE2E(new Watchers())),
 
-            this.server.open(cfg, this.project, noop, noop, noop, {})
+            this.server.open(cfg, {
+              project: this.project,
+              onError: noop,
+              onWarning: noop,
+              shouldCorrelatePreRequests: noop,
+              specsStore: {},
+            })
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },

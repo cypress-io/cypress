@@ -50,7 +50,6 @@ export class ServerCt extends ServerBase<SocketCt> {
         specsStore,
         nodeProxy: this.nodeProxy,
         networkProxy: this.networkProxy,
-        onError,
         project,
       })
 

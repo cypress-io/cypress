@@ -18,7 +18,6 @@ interface InitializeRoutes {
   project: ProjectCt
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
-  onError: (error: Error) => any
 }
 
 export const createRoutes = ({
