@@ -47,7 +47,7 @@
     "jsdom": "14.1.0",
     "lodash": "4.17.21",
     "mobx": "^6.3.2",
-    "mobx-react": "6.1.8",
+    "mobx-react": "^7.2.0",
     "mocha": "7.0.1",
     "prismjs": "1.21.0",
     "prop-types": "15.7.2",

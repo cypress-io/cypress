@@ -10,7 +10,7 @@ export interface RunnableProps {
 export default class Runnable {
   id: string;
   shouldRender: boolean = false;
-  title?: string;
+  title?: string | undefined;
   level: number;
   hooks: Array<HookProps> = [];
 

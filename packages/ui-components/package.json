@@ -32,7 +32,7 @@
     "file-loader": "4.3.0",
     "lodash": "4.17.19",
     "mobx": "^6.3.2",
-    "mobx-react": "6.1.7",
+    "mobx-react": "^7.2.0",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",

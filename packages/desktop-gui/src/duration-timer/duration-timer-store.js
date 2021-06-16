@@ -9,6 +9,8 @@ class TimerStore {
   startTime;
 
   constructor (startTime) {
+    this.timer = new Timer()
+    this.startTime = dayjs(startTime)
     makeObservable(this, {
       isRunning: observable,
       timer: observable,
@@ -18,9 +20,6 @@ class TimerStore {
       startTimer: action,
       resetTimer: action,
     })
-
-    this.timer = new Timer()
-    this.startTime = dayjs(startTime)
   }
 
   get mainDisplay () {

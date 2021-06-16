@@ -12,7 +12,7 @@ import viewStore from '../lib/view-store'
 import ProjectsList from '../projects/projects-list'
 
 const Default = observer(class Default extends Component {
-  isDraggingOver;
+  isDraggingOver = false;
 
   constructor (props) {
     super(props)

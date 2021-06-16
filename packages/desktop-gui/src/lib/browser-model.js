@@ -15,6 +15,17 @@ export default class Browser {
   isChosen = false;
 
   constructor (browser) {
+    this.displayName = browser.displayName
+    this.name = browser.name
+    this.family = browser.family
+    this.channel = browser.channel
+    this.version = browser.version
+    this.path = browser.path
+    this.profilePath = browser.profilePath
+    this.majorVersion = browser.majorVersion
+    this.info = browser.info
+    this.custom = browser.custom
+    this.warning = browser.warning
     makeObservable(this, {
       displayName: observable,
       name: observable,
@@ -29,17 +40,5 @@ export default class Browser {
       warning: observable,
       isChosen: observable,
     })
-
-    this.displayName = browser.displayName
-    this.name = browser.name
-    this.family = browser.family
-    this.channel = browser.channel
-    this.version = browser.version
-    this.path = browser.path
-    this.profilePath = browser.profilePath
-    this.majorVersion = browser.majorVersion
-    this.info = browser.info
-    this.custom = browser.custom
-    this.warning = browser.warning
   }
 }

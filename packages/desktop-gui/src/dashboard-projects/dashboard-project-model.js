@@ -15,6 +15,18 @@ export default class DashboardProject {
   orgDefault;
 
   constructor (project) {
+    this.id = project.id
+    this.name = project.name
+    this.repoUrl = project.repoUrl
+    this.createdAt = project.createdAt
+    this.updatedAt = project.updatedAt
+    this.public = project.public
+    this.lastBuildStatus = project.lastBuildStatus
+    this.lastBuildCreatedAt = project.lastBuildCreatedAt
+    this.runCompletionDelay = project.runCompletionDelay
+    this.orgId = project.orgId
+    this.orgName = project.orgName
+    this.orgDefault = project.orgDefault
     makeObservable(this, {
       id: observable,
       name: observable,
@@ -30,19 +42,6 @@ export default class DashboardProject {
       orgDefault: observable,
       hasLastBuild: computed,
     })
-
-    this.id = project.id
-    this.name = project.name
-    this.repoUrl = project.repoUrl
-    this.createdAt = project.createdAt
-    this.updatedAt = project.updatedAt
-    this.public = project.public
-    this.lastBuildStatus = project.lastBuildStatus
-    this.lastBuildCreatedAt = project.lastBuildCreatedAt
-    this.runCompletionDelay = project.runCompletionDelay
-    this.orgId = project.orgId
-    this.orgName = project.orgName
-    this.orgDefault = project.orgDefault
   }
 
   get hasLastBuild () {

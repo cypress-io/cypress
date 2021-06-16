@@ -27,7 +27,7 @@
     "lodash": "4.17.21",
     "markdown-it": "11.0.0",
     "mobx": "^6.3.2",
-    "mobx-react": "6.1.8",
+    "mobx-react": "^7.2.0",
     "prismjs": "1.21.0",
     "prop-types": "15.7.2",
     "react": "16.8.6",

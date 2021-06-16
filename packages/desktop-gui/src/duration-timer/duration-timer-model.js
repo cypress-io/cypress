@@ -6,14 +6,13 @@ export default class Timer {
   milliseconds;
 
   constructor (initialMilliseconds = 0) {
+    this.milliseconds = initialMilliseconds
+    this.id = uniqueId()
     makeObservable(this, {
       milliseconds: observable,
       reset: action,
       display: computed,
     })
-
-    this.milliseconds = initialMilliseconds
-    this.id = uniqueId()
   }
 
   reset () {
