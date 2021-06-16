@@ -302,6 +302,25 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
     })
+    .then((modifiedCfg) => {
+      debug('plugin config yielded: %o', modifiedCfg)
+      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+      if (this.projectType === 'ct') {
+        updatedConfig.componentTesting = true
+
+        // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+        // But if we don't return it in the plugins function, it never gets set
+        // Since there is no chance that it will have any other value here, we set it to "component"
+        // This allows users to not return config in the `cypress/plugins/index.js` file
+        // https://github.com/cypress-io/cypress/issues/16860
+        updatedConfig.resolved.testingType = { value: 'component' }
+      }
+
+      debug('updated config: %o', updatedConfig)
+
+      return updatedConfig
+    })
   }
 
   watchPluginsFile (cfg, options) {

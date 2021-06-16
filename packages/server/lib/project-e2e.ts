@@ -1,6 +1,5 @@
 import Debug from 'debug'
 import browsers from './browsers'
-import config from './config'
 import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
 import { ServerE2E } from './server-e2e'
@@ -18,15 +17,6 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return super.open(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
-        .then((modifiedCfg) => {
-          debug('plugin config yielded: %o', modifiedCfg)
-
-          const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
-
-          debug('updated config: %o', updatedConfig)
-
-          return updatedConfig
-        })
         .then((cfg) => {
           return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
