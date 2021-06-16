@@ -126,6 +126,8 @@ describe('Routes', () => {
 
           cfg.pluginsFile = false
 
+          const noop = () => {}
+
           return Promise.all([
             // open our https server
             httpsServer.start(8443),
@@ -133,7 +135,7 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new ServerE2E(new Watchers())),
 
-            this.server.open(cfg, this.project)
+            this.server.open(cfg, this.project, noop, noop, noop, {})
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },
