@@ -1,5 +1,5 @@
 import { action, computed, observable } from 'mobx'
-import automation from './automation'
+import { automation } from '@packages/runner-shared'
 
 const _defaults = {
   messageTitle: null,
