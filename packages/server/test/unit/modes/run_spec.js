@@ -669,6 +669,11 @@ describe('lib/modes/run', () => {
         video: true,
         videosFolder: 'videos',
         integrationFolder: '/path/to/integrationFolder',
+        resolved: {
+          integrationFolder: {
+            integrationFolder: { value: '/path/to/integrationFolder', from: 'config' },
+          },
+        },
       })
 
       sinon.stub(specsUtil, 'find').resolves([

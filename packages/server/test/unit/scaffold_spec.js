@@ -101,7 +101,7 @@ describe('lib/scaffold', () => {
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        const file = path.join(cfg, '1-getting-started', 'todo.spec.js')
+        const file = path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
         // different in file size
