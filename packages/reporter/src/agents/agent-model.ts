@@ -13,13 +13,12 @@ export default class Agent extends Instrument {
   constructor (props: AgentProps) {
     super(props)
 
+    this.callCount = props.callCount
+    this.functionName = props.functionName
     makeObservable(this, {
       callCount: observable,
       functionName: observable,
     })
-
-    this.callCount = props.callCount
-    this.functionName = props.functionName
   }
 
   update (props: AgentProps) {

@@ -42,9 +42,10 @@ export default class Err {
   docsUrl = '' as string | string[];
   templateType = '';
   // @ts-ignore
-  codeFrame: CodeFrame;
+  codeFrame: CodeFrame | undefined = undefined;
 
   constructor (props?: Partial<ErrProps>) {
+    this.update(props)
     makeObservable(this, {
       name: observable,
       message: observable,
@@ -57,8 +58,6 @@ export default class Err {
       displayMessage: computed,
       isCommandErr: computed,
     })
-
-    this.update(props)
   }
 
   get displayMessage () {

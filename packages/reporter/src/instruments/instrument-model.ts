@@ -24,17 +24,26 @@ export interface InstrumentProps {
 }
 
 export default class Log {
-  alias?: Alias = null;
-  aliasType?: string | null = null;
-  displayName?: string;
-  id?: number;
-  name?: string;
-  message?: string;
-  type?: string;
-  state?: string | null;
-  referencesAlias?: Alias = null;
+  alias?: Alias | undefined = null;
+  aliasType?: string | undefined | null = null;
+  displayName?: string | undefined;
+  id?: number | undefined;
+  name?: string | undefined;
+  message?: string | undefined;
+  type?: string | undefined;
+  state?: string | undefined | null;
+  referencesAlias?: Alias | undefined = null;
 
   constructor (props: InstrumentProps) {
+    this.id = props.id
+    this.alias = props.alias
+    this.aliasType = props.aliasType
+    this.displayName = props.displayName
+    this.name = props.name
+    this.message = props.message
+    this.type = props.type
+    this.state = props.state
+    this.referencesAlias = props.referencesAlias
     makeObservable(this, {
       alias: observable.ref,
       aliasType: observable,
@@ -46,16 +55,6 @@ export default class Log {
       state: observable,
       referencesAlias: observable.ref,
     })
-
-    this.id = props.id
-    this.alias = props.alias
-    this.aliasType = props.aliasType
-    this.displayName = props.displayName
-    this.name = props.name
-    this.message = props.message
-    this.type = props.type
-    this.state = props.state
-    this.referencesAlias = props.referencesAlias
   }
 
   update (props: InstrumentProps) {

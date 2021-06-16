@@ -58,6 +58,17 @@ export default class Command extends Instrument {
   constructor (props: CommandProps) {
     super(props)
 
+    this.err.update(props.err)
+    this.event = props.event
+    this.number = props.number
+    this.numElements = props.numElements
+    this.renderProps = props.renderProps || {}
+    this.timeout = props.timeout
+    this.visible = props.visible
+    this.wallClockStartedAt = props.wallClockStartedAt
+    this.hookId = props.hookId
+    this.isStudio = !!props.isStudio
+
     makeObservable(this, {
       renderProps: observable.struct,
       err: observable,
@@ -76,17 +87,6 @@ export default class Command extends Instrument {
       numDuplicates: computed,
       hasDuplicates: computed,
     })
-
-    this.err.update(props.err)
-    this.event = props.event
-    this.number = props.number
-    this.numElements = props.numElements
-    this.renderProps = props.renderProps || {}
-    this.timeout = props.timeout
-    this.visible = props.visible
-    this.wallClockStartedAt = props.wallClockStartedAt
-    this.hookId = props.hookId
-    this.isStudio = !!props.isStudio
 
     this._checkLongRunning()
   }

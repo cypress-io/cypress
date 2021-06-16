@@ -45,8 +45,8 @@ export default class Test extends Runnable {
   type = 'test'
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
-  hooks: HookProps[]
-  invocationDetails?: FileDetails
+  hooks: HookProps[] = []
+  invocationDetails?: FileDetails = undefined
 
   attempts: Attempt[] = [];
   _isOpen: boolean | null = null;

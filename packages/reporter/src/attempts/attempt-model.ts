@@ -42,6 +42,16 @@ export default class Attempt {
   _logs: {[key: string]: Log} = {}
 
   constructor (props: TestProps, test: Test) {
+    this.testId = props.id
+    this.id = props.currentRetry || 0
+    this.test = test
+    this._state = props.state
+    this.err.update(props.err)
+
+    this.invocationDetails = props.invocationDetails
+
+    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
+
     makeObservable(this, {
       agents: observable,
       commands: observable,
@@ -67,16 +77,6 @@ export default class Attempt {
       update: action,
       finish: action,
     })
-
-    this.testId = props.id
-    this.id = props.currentRetry || 0
-    this.test = test
-    this._state = props.state
-    this.err.update(props.err)
-
-    this.invocationDetails = props.invocationDetails
-
-    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
 
     _.each(props.agents, this.addLog)
     _.each(props.commands, this.addLog)

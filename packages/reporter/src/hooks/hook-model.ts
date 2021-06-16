@@ -19,9 +19,9 @@ export interface HookProps {
 export default class Hook implements HookProps {
   hookId: string;
   hookName: HookName;
-  hookNumber?: number;
+  hookNumber?: number = undefined;
   invocationDetails?: FileDetails;
-  invocationOrder?: number;
+  invocationOrder?: number = undefined;
   commands: CommandModel[] = [];
   isStudio: boolean;
   failed = false;
@@ -30,6 +30,10 @@ export default class Hook implements HookProps {
   private _currentNumber = 1
 
   constructor (props: HookProps) {
+    this.hookId = props.hookId
+    this.hookName = props.hookName
+    this.invocationDetails = props.invocationDetails
+    this.isStudio = !!props.isStudio
     makeObservable(this, {
       hookId: observable,
       hookName: observable,
@@ -43,11 +47,6 @@ export default class Hook implements HookProps {
       hasFailedCommand: computed,
       showStudioPrompt: computed,
     })
-
-    this.hookId = props.hookId
-    this.hookName = props.hookName
-    this.invocationDetails = props.invocationDetails
-    this.isStudio = !!props.isStudio
   }
 
   get aliasesWithDuplicates () {

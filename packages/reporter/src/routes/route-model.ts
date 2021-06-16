@@ -16,6 +16,10 @@ export default class Route extends Instrument {
 
   constructor (props: RouteProps) {
     super(props)
+    this.isStubbed = props.isStubbed
+    this.method = props.method
+    this.numResponses = props.numResponses
+    this.url = props.url
 
     makeObservable(this, {
       isStubbed: observable,
@@ -23,11 +27,6 @@ export default class Route extends Instrument {
       numResponses: observable,
       url: observable,
     })
-
-    this.isStubbed = props.isStubbed
-    this.method = props.method
-    this.numResponses = props.numResponses
-    this.url = props.url
   }
 
   update (props: RouteProps) {

@@ -7,11 +7,11 @@ class UpdateStore {
   SHOW_RELEASE_NOTES = 'SHOW_RELEASE_NOTES'
   SHOW_INSTRUCTIONS = 'SHOW_INSTRUCTIONS'
 
-  version;
-  newVersion;
+  version = undefined;
+  newVersion = undefined;
   dismissedUpdateVersion = localData.get('dismissed-update-version');
-  state;
-  releaseNotes;
+  state = undefined;
+  releaseNotes = undefined;
 
   constructor () {
     makeObservable(this, {
