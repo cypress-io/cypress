@@ -75,6 +75,14 @@ module.exports = (Commands, Cypress, cy) => {
       const getLocation = () => {
         const location = cy.getRemoteLocation()
 
+        if (location === '') {
+          // maybe the page's domain is "invisible" to us
+          // and we cannot get the location. Return null
+          // so the command keeps retrying, maybe there is
+          // a redirect that puts us on the domain we can access
+          return null
+        }
+
         return _.isString(key)
           // use existential here because we only want to throw
           // on null or undefined values (and not empty strings)

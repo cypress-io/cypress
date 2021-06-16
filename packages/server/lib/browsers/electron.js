@@ -35,7 +35,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options) {
+const _getAutomation = function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -43,7 +43,15 @@ const _getAutomation = function (win, options) {
     })
   })
 
-  const automation = CdpAutomation(sendCommand)
+  const on = (eventName, cb) => {
+    win.webContents.debugger.on('message', (event, method, params) => {
+      if (method === eventName) {
+        cb(params)
+      }
+    })
+  }
+
+  const automation = new CdpAutomation(sendCommand, on, parent)
 
   if (!options.onScreencastFrame) {
     // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
@@ -177,10 +185,9 @@ module.exports = {
       win.maximize()
     }
 
-    automation.use(_getAutomation(win, preferences))
-
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
+    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {

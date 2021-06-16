@@ -1,8 +1,8 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
-import automation from './automation'
 import { UIPlugin } from '../plugins/UIPlugin'
 import { nanoid } from 'nanoid'
+import { automation } from '@packages/runner-shared'
 import {
   DEFAULT_REPORTER_WIDTH,
   LEFT_NAV_WIDTH,
@@ -21,16 +21,13 @@ interface Defaults {
   messageType: string
   messageControls: unknown
 
-  width: number
-  height: number
-
   reporterWidth: number | null
   pluginsHeight: number | null
   specListWidth: number | null
   isSpecsListOpen: boolean
 
-  viewportHeight: number
-  viewportWidth: number
+  height: number
+  width: number
 
   url: string
   highlightUrl: boolean
@@ -48,11 +45,8 @@ const _defaults: Defaults = {
   messageType: '',
   messageControls: null,
 
-  width: 500,
   height: 500,
-
-  viewportHeight: 500,
-  viewportWidth: 500,
+  width: 500,
 
   pluginsHeight: PLUGIN_BAR_HEIGHT,
 
@@ -110,9 +104,6 @@ export default class State {
 
   @observable windowWidth = 0
   @observable windowHeight = 0
-
-  @observable viewportWidth = _defaults.viewportWidth
-  @observable viewportHeight = _defaults.viewportHeight
 
   @observable automation = automation.CONNECTING
 
@@ -175,10 +166,10 @@ export default class State {
       return 1
     }
 
-    if (autAreaWidth < this.viewportWidth || autAreaHeight < this.viewportHeight) {
+    if (autAreaWidth < this.width || autAreaHeight < this.height) {
       return Math.min(
-        autAreaWidth / this.viewportWidth,
-        autAreaHeight / this.viewportHeight,
+        autAreaWidth / this.width,
+        autAreaHeight / this.height,
       )
     }
 
@@ -218,9 +209,9 @@ export default class State {
     this.screenshotting = screenshotting
   }
 
-  @action updateAutViewportDimensions (dimensions: { viewportWidth: number, viewportHeight: number }) {
-    this.viewportHeight = dimensions.viewportHeight
-    this.viewportWidth = dimensions.viewportWidth
+  @action updateDimensions (width: number, height: number) {
+    this.height = height
+    this.width = width
   }
 
   @action toggleIsSpecsListOpen () {
@@ -249,13 +240,21 @@ export default class State {
     this.specListWidth = width
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight }: { windowWidth?: number, windowHeight?: number }) {
+  @action updateWindowDimensions ({
+    windowWidth,
+    windowHeight,
+    headerHeight,
+  }: { windowWidth?: number, windowHeight?: number, headerHeight?: number }) {
     if (windowWidth) {
       this.windowWidth = windowWidth
     }
 
     if (windowHeight) {
       this.windowHeight = windowHeight
+    }
+
+    if (headerHeight) {
+      this.headerHeight = headerHeight
     }
   }
 
@@ -330,7 +329,7 @@ export default class State {
   }
 
   runMultiMode = async () => {
-    const eventManager = require('./event-manager').default
+    const eventManager = require('@packages/runner-shared').eventManager
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)

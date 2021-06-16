@@ -1,10 +1,15 @@
 import { Http, ServerCtx } from './http'
+import { BrowserPreRequest } from './types'
 
 export class NetworkProxy {
   http: Http
 
   constructor (opts: ServerCtx) {
     this.http = new Http(opts)
+  }
+
+  addPendingBrowserPreRequest (preRequest: BrowserPreRequest) {
+    this.http.addPendingBrowserPreRequest(preRequest)
   }
 
   handleHttpRequest (req, res) {
