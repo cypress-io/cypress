@@ -22,7 +22,7 @@ import {
   NodePackage,
 } from '../utility'
 import { relative, resolve } from 'path'
-import { JSONFile, JSONPath } from '../utility/json-file'
+import { JSONFile, JSONPath } from '../utility/jsonFile'
 
 export default function (_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
