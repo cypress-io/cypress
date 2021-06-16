@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { runInAction } from 'mobx'
-import EventManager from '../lib/event-manager'
+import { eventManager as EventManager } from '@packages/runner-shared'
 import State from '../lib/state'
 
 /**
