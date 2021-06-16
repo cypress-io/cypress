@@ -6,16 +6,17 @@ import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
 import { $ } from '@packages/driver'
+import {
+  Message,
+  errorMessages,
+  StudioModals,
+  Header,
+} from '@packages/runner-shared'
 
-import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
-import State from '../lib/state'
 
-import Header from '../header/header'
 import Iframes from '../iframe/iframes'
-import Message from '../message/message'
 import Resizer from './resizer'
-import StudioModals from '../studio/studio-modals'
 
 @observer
 class App extends Component {
@@ -53,7 +54,7 @@ class App extends Component {
           className='runner container'
           style={{ left: this.props.state.absoluteReporterWidth }}
         >
-          <Header ref='header' {...this.props} />
+          <Header ref='header' runner='e2e' {...this.props} />
           <Iframes ref='iframes' {...this.props} />
           <Message ref='message' state={this.props.state} />
           {this.props.children}
@@ -250,7 +251,6 @@ App.propTypes = {
       on: PropTypes.func.isRequired,
     }).isRequired,
   }).isRequired,
-  state: PropTypes.instanceOf(State).isRequired,
 }
 
 export default App
