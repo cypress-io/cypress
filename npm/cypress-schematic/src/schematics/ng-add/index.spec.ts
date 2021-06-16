@@ -30,7 +30,7 @@ describe('@cypress/schematic: ng-add', () => {
   })
 
   it('should create cypress files', async () => {
-    const files = ['cypress/integration/spec.ts', 'cypress/plugins/index.js', 'cypress/support/commands.ts', 'cypress/support/index.ts', 'cypress/tsconfig.json', 'cypress.json']
+    const files = ['cypress/integration/spec.ts', 'cypress/plugins/index.ts', 'cypress/support/commands.ts', 'cypress/support/index.ts', 'cypress/tsconfig.json', 'cypress.json']
     const homePath = '/projects/sandbox/'
 
     return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
