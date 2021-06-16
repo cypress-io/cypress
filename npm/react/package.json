@@ -4,7 +4,8 @@
   "description": "Unit test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && yarn rollup -c rollup.config.js",
+    "prebuild": "rimraf dist",
+    "build": "rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct",
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",

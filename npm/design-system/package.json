@@ -4,7 +4,8 @@
   "description": "Styles, standards, and components used throughout Cypress",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf dist && yarn rollup -c rollup.config.js",
+    "prebuild": "rimraf dist",
+    "build": "rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "build-storybook": "build-storybook",
     "build-style-types": "tsm \"src/css/derived/*.scss\" --nameFormat none --exportType default",
