@@ -372,20 +372,23 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       config.baseUrl = `http://localhost:${port}`
     }
 
-    // specsStore.watch({
-    //   onSpecsChanged: (specs) => {
-    //     // both e2e and CT watch the specs and send them to the
-    //     // client to be shown in the SpecList.
-    //     this.server.sendSpecList(specs)
+    specsStore.watch({
+      onSpecsChanged: (specs) => {
+        console.log('LACHLAN: OnSpecsChangedCb')
+        // both e2e and CT watch the specs and send them to the
+        // client to be shown in the SpecList.
+        console.log('LACHLAN: sendSpecList')
+        this.server.sendSpecList(specs)
 
-    //     if (this.projectType === 'ct') {
-    //       // ct uses the dev-server to build and bundle the speces.
-    //       // send new files to dev server
-    //       devServer.updateSpecs(specs)
-    //     }
-    //   },
-    // })
+        if (this.projectType === 'ct') {
+          // ct uses the dev-server to build and bundle the speces.
+          // send new files to dev server
+          devServer.updateSpecs(specs)
+        }
+      },
+    })
 
+    console.log('LACHLAN: storeSpecFiles')
     return specsStore.storeSpecFiles()
     .return({
       specsStore,

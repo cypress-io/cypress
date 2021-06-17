@@ -51,15 +51,20 @@ export class SpecsStore {
   storeSpecFiles (): Bluebird<void> {
     return this.getSpecFiles()
     .then((specFiles) => {
+      console.log('LACHLAN: assign specFiles')
       this.specFiles = specFiles
     })
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {
+    console.log('LACHLAN: getting searchOptions')
     const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
+    console.log('LACHLAN: searchOptions', searchOptions)
 
     searchOptions.searchFolder = this.specDirectory
+    console.log('LACHLAN: serachFolder', searchOptions.searchFolder)
     searchOptions.testFiles = this.testFiles
+    console.log('LACHLAN: testFiles', searchOptions.testFiles)
 
     return findSpecsOfType(searchOptions)
   }
