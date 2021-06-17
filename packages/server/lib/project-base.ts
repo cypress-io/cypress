@@ -374,10 +374,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     specsStore.watch({
       onSpecsChanged: (specs) => {
-        console.log('LACHLAN: OnSpecsChangedCb')
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-        console.log('LACHLAN: sendSpecList')
         this.server.sendSpecList(specs)
 
         if (this.projectType === 'ct') {
@@ -388,7 +386,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       },
     })
 
-    console.log('LACHLAN: storeSpecFiles')
     return specsStore.storeSpecFiles()
     .return({
       specsStore,

@@ -35,9 +35,7 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   la(check.maybe.strings(specPattern), 'invalid spec pattern', specPattern)
 
-  console.log('LACHLAN: searchFolderPath', searchOptions.searchFolder)
   const searchFolderPath = searchOptions.searchFolder
-  console.log('LACHLAN: findSpecsOfType', searchFolderPath)
 
   la(check.unemptyString(searchFolderPath), 'expected spec folder path in', searchOptions)
 

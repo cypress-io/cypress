@@ -3,6 +3,7 @@ require('../spec_helper')
 const R = require('ramda')
 const _ = require('lodash')
 const path = require('path')
+const chokidar = require('chokidar')
 const EE = require('events')
 const http = require('http')
 const Promise = require('bluebird')
@@ -123,6 +124,7 @@ describe('lib/cypress', () => {
     // force cypress to call directly into main without
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
+    sinon.stub(chokidar, 'watch').returns({ on: () => {}, removeAllListeners: () => {} })
     sinon.stub(plugins, 'init').resolves(undefined)
     sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
