@@ -19,5 +19,5 @@ export async function startDevServer (startDevServerArgs: StartDevServer): Promi
 
   debug('Component testing vite server started on port', port)
 
-  return { port, close: () => app.httpServer.close() }
+  return { port, close: app.httpServer.close }
 }
