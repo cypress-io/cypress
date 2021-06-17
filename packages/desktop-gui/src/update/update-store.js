@@ -7,17 +7,16 @@ class UpdateStore {
   SHOW_RELEASE_NOTES = 'SHOW_RELEASE_NOTES'
   SHOW_INSTRUCTIONS = 'SHOW_INSTRUCTIONS'
 
-  version = undefined;
-  newVersion = undefined;
-  dismissedUpdateVersion = localData.get('dismissed-update-version');
-  state = undefined;
-  releaseNotes = undefined;
+  version;
+  newVersion;
+  state;
+  releaseNotes;
 
   constructor () {
     makeObservable(this, {
       version: observable,
       newVersion: observable,
-      dismissedUpdateVersion: observable,
+      dismissedUpdateVersion: computed,
       state: observable,
       releaseNotes: observable.ref,
       updateAvailable: computed,
@@ -33,6 +32,10 @@ class UpdateStore {
     if (window.Cypress) {
       window.UpdateStore = this // for testing
     }
+  }
+
+  get dismissedUpdateVersion () {
+    return localData.get('dismissed-update-version')
   }
 
   get updateAvailable () {
@@ -56,7 +59,6 @@ class UpdateStore {
   }
 
   setDismissedUpdateVersion () {
-    this.dismissedUpdateVersion = this.newVersion
     localData.set('dismissed-update-version', this.newVersion)
   }
 
