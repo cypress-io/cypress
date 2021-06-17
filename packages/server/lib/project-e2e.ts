@@ -3,8 +3,14 @@ import browsers from './browsers'
 import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
 import { ServerE2E } from './server-e2e'
+import { SocketE2E } from './socket-e2e'
+import routes from './routes'
 
 const debug = Debug('cypress:server:project')
+
+function createRoutes (...args) {
+  return routes.apply(null, args)
+}
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
   get projectType (): 'e2e' {
@@ -18,7 +24,16 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore, startSpecWatcher }) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
+          return this.server.open(cfg, {
+            project: this,
+            onError: options.onError,
+            onWarning: options.onWarning,
+            shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+            projectType: 'e2e',
+            SocketCtor: SocketE2E,
+            createRoutes,
+            specsStore,
+          })
           .then(([port, warning]) => {
             return {
               cfg,
