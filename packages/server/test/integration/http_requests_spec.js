@@ -24,12 +24,17 @@ const { ProjectE2E } = require(`${root}lib/project-e2e`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const resolve = require(`${root}lib/util/resolve`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
 const runner = require(`${root}../runner/lib/resolve-dist`)
+
+function createRoutes (...args) {
+  return require(`${root}lib/routes`).apply(null, args)
+}
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -133,7 +138,12 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new ServerE2E(new Watchers())),
 
-            this.server.open(cfg, this.project)
+            this.server.open(cfg, {
+              SocketCtor: SocketE2E,
+              createRoutes,
+              project: this.project,
+              projectType: 'e2e',
+            })
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },
