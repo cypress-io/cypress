@@ -261,32 +261,27 @@ export class StudioRecorder {
     this._clearPreviousMouseEvent()
   }
 
-  copyToClipboard = (commandsText, cb) => {
-    const callback = () => {
-      if (cb) {
-        cb(commandsText)
-      }
-    }
-
+  copyToClipboard = (commandsText) => {
     // clipboard API is not supported without secure context
     if (window.isSecureContext && navigator.clipboard) {
-      navigator.clipboard.writeText(commandsText).then(callback)
-    } else {
-      // create the textarea in our document rather than this._body
-      // as to not interfere with the app in the aut
-      const textArea = document.createElement('textarea')
-
-      textArea.value = commandsText
-      textArea.style.position = 'fixed'
-      textArea.style.opacity = 0
-
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand('copy')
-      textArea.remove()
-
-      callback()
+      return navigator.clipboard.writeText(commandsText)
     }
+
+    // fallback to creating invisible textarea
+    // create the textarea in our document rather than this._body
+    // as to not interfere with the app in the aut
+    const textArea = document.createElement('textarea')
+
+    textArea.value = commandsText
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = 0
+
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    textArea.remove()
+
+    return Promise.resolve()
   }
 
   _trustEvent = (event) => {

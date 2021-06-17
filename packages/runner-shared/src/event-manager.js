@@ -248,7 +248,8 @@ export const eventManager = {
 
     reporterBus.on('studio:copy:to:clipboard', (cb) => {
       ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
-        studioRecorder.copyToClipboard(commandsText, cb)
+        studioRecorder.copyToClipboard(commandsText)
+        .then(cb)
       })
     })
 
@@ -259,7 +260,8 @@ export const eventManager = {
 
     localBus.on('studio:copy:to:clipboard', (cb) => {
       ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
-        studioRecorder.copyToClipboard(commandsText, cb)
+        studioRecorder.copyToClipboard(commandsText)
+        .then(cb)
       })
     })
 
