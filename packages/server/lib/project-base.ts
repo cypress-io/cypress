@@ -364,14 +364,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     specs: Cypress.Cypress['spec'][]
     config: any
   }) {
+    const specsStore = new SpecsStore(config, this.projectType)
+
     if (this.projectType === 'e2e') {
       return {
         cfg: config,
         specsStore: {},
       }
     }
-
-    const specsStore = new SpecsStore(config, this.projectType)
 
     if (this.projectType === 'ct') {
       const { port } = await this.startCtDevServer(specs, config)
