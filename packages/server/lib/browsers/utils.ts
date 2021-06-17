@@ -244,7 +244,7 @@ export = {
       const version = process.versions.chrome || ''
 
       if (version) {
-        majorVersion = parseFloat(version.split('.')[0])
+        majorVersion = parseFloat(version.split('.')[0]) || version
       }
 
       const electronBrowser: FoundBrowser = {
