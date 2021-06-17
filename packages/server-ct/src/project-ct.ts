@@ -1,5 +1,4 @@
 import Debug from 'debug'
-import config from '@packages/server/lib/config'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import specsUtil from '@packages/server/lib/util/specs'
@@ -74,24 +73,6 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     // prevent tampering with the
     // internals and breaking cypress
     return super._initPlugins(cfg, options)
-    .then((modifiedCfg) => {
-      debug('plugin config yielded: %o', modifiedCfg)
-
-      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
-
-      updatedConfig.componentTesting = true
-
-      // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-      // But if we don't return it in the plugins function, it never gets set
-      // Since there is no chance that it will have any other value here, we set it to "component"
-      // This allows users to not return config in the `cypress/plugins/index.js` file
-      // https://github.com/cypress-io/cypress/issues/16860
-      updatedConfig.resolved.testingType = { value: 'component' }
-
-      debug('updated config: %o', updatedConfig)
-
-      return updatedConfig
-    })
     .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'dev-server:start' and get back
