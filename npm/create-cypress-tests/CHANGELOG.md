@@ -1,3 +1,10 @@
+# [create-cypress-tests-v1.1.2](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.1...create-cypress-tests-v1.1.2) (2021-06-17)
+
+
+### Bug Fixes
+
+* case issue create cypress tests with `react/plugins/load-webpack` ([#16961](https://github.com/cypress-io/cypress/issues/16961)) ([c37ecea](https://github.com/cypress-io/cypress/commit/c37ecea3ca462015637515b331d1c9828ac1ed29)), closes [#16960](https://github.com/cypress-io/cypress/issues/16960)
+
 # [create-cypress-tests-v1.1.1](https://github.com/cypress-io/cypress/compare/create-cypress-tests-v1.1.0...create-cypress-tests-v1.1.1) (2021-05-10)
 
 
