@@ -17,13 +17,14 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return super.open(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
-        .then(({ cfg, specs, startSpecWatcher }) => {
+        .then(({ cfg, specsStore, startSpecWatcher }) => {
           return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
             return {
               cfg,
               port,
               warning,
+              specsStore,
               startSpecWatcher,
             }
           })

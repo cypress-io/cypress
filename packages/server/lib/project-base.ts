@@ -159,7 +159,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .then(callbacks.onOpen)
-    .tap(({ cfg, port, warning, startSpecWatcher }) => {
+    .tap(({ cfg, port }) => {
       // if we didnt have a cfg.port
       // then get the port once we
       // open the server
@@ -171,9 +171,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .tap(callbacks.onAfterOpen)
-    .then(({ cfg, port, warning, startSpecWatcher }) => {
+    .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
       // store the cfg from
       // opening the server
+      this.specsStore = specsStore
       this._cfg = cfg
 
       debug('project config: %o', _.omit(cfg, 'resolved'))
@@ -263,6 +264,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.browser = null
 
     return Bluebird.join(
+      this.specsStore?.watcher?.close(),
       this.server?.close(),
       this.watchers?.close(),
       options?.onClose(),
@@ -372,8 +374,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     config: any
   }) {
     const specsStore = new SpecsStore(config, this.projectType)
-
-    this.specsStore = specsStore
 
     if (this.projectType === 'ct') {
       const { port } = await this.startCtDevServer(specs, config)

@@ -45,6 +45,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
               cfg,
               port,
               warning,
+              specsStore,
               startSpecWatcher,
             }
           })
