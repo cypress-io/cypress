@@ -159,7 +159,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .then(callbacks.onOpen)
-    .tap(({ cfg, port, warning }) => {
+    .tap(({ cfg, port, warning, startSpecWatcher }) => {
       // if we didnt have a cfg.port
       // then get the port once we
       // open the server
@@ -171,7 +171,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .tap(callbacks.onAfterOpen)
-    .then(({ cfg, port, warning }) => {
+    .then(({ cfg, port, warning, startSpecWatcher }) => {
       // store the cfg from
       // opening the server
       this._cfg = cfg
@@ -201,6 +201,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         this.saveState(stateToSave),
       )
       .then(() => {
+        // start watching specs
+        // whenever a spec file is added or removed, we notify the
+        // <SpecList>
+        startSpecWatcher()
+
         return Bluebird.join(
           this.checkSupportFile(cfg),
           this.watchPluginsFile(cfg, options),
@@ -376,24 +381,27 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       config.baseUrl = `http://localhost:${port}`
     }
 
-    specsStore.watch({
-      onSpecsChanged: (specs) => {
+    const startSpecWatcher = () => {
+      return specsStore.watch({
+        onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-        this.server.sendSpecList(specs)
+          this.server.sendSpecList(specs)
 
-        if (this.projectType === 'ct') {
+          if (this.projectType === 'ct') {
           // ct uses the dev-server to build and bundle the speces.
           // send new files to dev server
-          devServer.updateSpecs(specs)
-        }
-      },
-    })
+            devServer.updateSpecs(specs)
+          }
+        },
+      })
+    }
 
     return specsStore.storeSpecFiles()
     .return({
       specsStore,
       cfg: config,
+      startSpecWatcher,
     })
   }
 

@@ -38,13 +38,14 @@ export class ProjectCt extends ProjectBase<ServerCt> {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
 
         return this._initPlugins(cfgForComponentTesting, options)
-        .then(({ cfg, specsStore }) => {
+        .then(({ cfg, specsStore, startSpecWatcher }) => {
           return this.server.open(cfg, specsStore, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
           .then(([port, warning]) => {
             return {
               cfg,
               port,
               warning,
+              startSpecWatcher,
             }
           })
         })
