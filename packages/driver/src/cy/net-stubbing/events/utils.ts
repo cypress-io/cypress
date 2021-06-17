@@ -7,14 +7,22 @@ export function hasJsonContentType (headers: { [k: string]: string }) {
   return contentType && /^application\/.*json/i.test(contentType)
 }
 
-export function parseJsonBody (message: CyHttpMessages.BaseMessage) {
+export function parseJsonBody (message: CyHttpMessages.BaseMessage): boolean {
   if (!hasJsonContentType(message.headers)) {
-    return
+    return false
   }
 
   try {
     message.body = JSON.parse(message.body)
+
+    return true
   } catch (e) {
     // invalid JSON
   }
+
+  return false
+}
+
+export function stringifyJsonBody (message: CyHttpMessages.BaseMessage) {
+  message.body = JSON.stringify(message.body)
 }
