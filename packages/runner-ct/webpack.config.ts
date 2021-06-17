@@ -65,51 +65,59 @@ const commonConfig = getCommonConfig()
 // })
 
 // @ts-ignore
-const babelLoader = _.find(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
-  return _.includes(rule.use.loader, 'babel-loader')
-})
+// const babelLoader = _.find(commonConfig.module.rules, (rule) => {
+//   // @ts-ignore
+//   return _.includes(rule.use.loader, 'babel-loader')
+// })
 
 // @ts-ignore
-babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  languages: ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
-  plugins: ['line-numbers', 'line-highlight'],
-  theme: 'default',
-  css: false,
-}])
+// babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
+//   languages: ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+//   plugins: ['line-numbers', 'line-highlight'],
+//   theme: 'default',
+//   css: false,
+// }])
 
-let pngRule
+// let pngRule
 // @ts-ignore
-const nonPngRules = _.filter(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
-  if (rule.test.toString().includes('png')) {
-    pngRule = rule
+// const nonPngRules = _.filter(commonConfig.module.rules, (rule) => {
+//   // @ts-ignore
+//   if (rule.test.toString().includes('png')) {
+//     pngRule = rule
 
-    return false
-  }
+//     return false
+//   }
 
-  return true
-})
+//   return true
+// })
 
-pngRule.use[0].options = {
-  name: '[name].[ext]',
-  outputPath: 'img',
-  publicPath: '/__cypress/runner/img/',
-}
+// pngRule.use[0].options = {
+//   name: '[name].[ext]',
+//   outputPath: 'img',
+//   publicPath: '/__cypress/runner/img/',
+// }
+
+// commonConfig.module!.rules = commonConfig.module!.rules.filter((x) => {
+//   return !['css', 's[ac]ss'].some((x) => x.match(x))
+// })
 
 // @ts-ignore
 const config: webpack.Configuration = {
   ...commonConfig,
-  module: {
-    rules: [
-      ...nonPngRules,
-      pngRule,
-      {
-        test: /.vue$/,
-        loader: 'vue-loader',
-      },
-    ],
-  },
+  // module: {
+  //   rules: [
+  // ...nonPngRules,
+  // pngRule,
+  // {
+  //   test: /css$/i,
+  //   loader: ['style-loader', 'css-loader'],
+  // },
+  // {
+  //   test: /.vue$/,
+  //   loader: 'vue-loader',
+  // },
+  // ],
+  // },
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/index.js')],
   },
@@ -128,8 +136,8 @@ config.plugins = [
     template: path.resolve(__dirname, './static/index.html'),
     inject: false,
   }),
-  new WindiCSS(),
-  new VueLoaderPlugin(),
+  // new WindiCSS(),
+  // new VueLoaderPlugin(),
 ]
 
 config.resolve = {

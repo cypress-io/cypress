@@ -91,37 +91,37 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     } = this.props
 
     return (
-      <div></div>
-      // <div className={cs(className, 'reporter', {
-      //   multiSpecs: runMode === 'multi',
-      //   'experimental-studio-enabled': experimentalStudioEnabled,
-      //   'studio-active': appState.studioActive,
-      // })}>
-      //   {renderReporterHeader({ appState, statsStore })}
-      //   {this.props.runMode === 'single' ? (
-      //     <Runnables
-      //       appState={appState}
-      //       error={error}
-      //       runnablesStore={runnablesStore}
-      //       scroller={scroller}
-      //       spec={this.props.spec}
-      //     />
-      //   ) : this.props.allSpecs.map((spec) => (
-      //     <Runnables
-      //       key={spec.relative}
-      //       appState={appState}
-      //       error={error}
-      //       runnablesStore={runnablesStore}
-      //       scroller={scroller}
-      //       spec={spec}
-      //     />
-      //   ))}
+      // <div></div>
+      <div className={cs(className, 'reporter', {
+        multiSpecs: runMode === 'multi',
+        'experimental-studio-enabled': experimentalStudioEnabled,
+        'studio-active': appState.studioActive,
+      })}>
+        {renderReporterHeader({ appState, statsStore })}
+        {this.props.runMode === 'single' ? (
+          <Runnables
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={this.props.spec}
+          />
+        ) : this.props.allSpecs.map((spec) => (
+          <Runnables
+            key={spec.relative}
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={spec}
+          />
+        ))}
 
-    //   <ForcedGcWarning
-    //     appState={appState}
-    //     events={events}
-    //   />
-    // </div>
+        <ForcedGcWarning
+          appState={appState}
+          events={events}
+        />
+      </div>
     )
   }
 

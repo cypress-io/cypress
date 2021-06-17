@@ -11964,6 +11964,16 @@ babel-preset-stage-3@^6.24.1:
     babel-plugin-transform-exponentiation-operator "^6.24.1"
     babel-plugin-transform-object-rest-spread "^6.22.0"
 
+babel-preset-typescript-vue3@2.0.12:
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/babel-preset-typescript-vue3/-/babel-preset-typescript-vue3-2.0.12.tgz#d3ab9fac9e631c8fddb7550c2216bfd29f8157bc"
+  integrity sha512-Asp5oXEWfUaOC9gKjsaSRtmQOZ1hTjz+RkIoiiZQTqEdmcEDwhh7gbzozSxN64DXgfv8RW1TfA6Ts9qn3i6hgg==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.0.0"
+    "@babel/plugin-transform-typescript" "^7.3.2"
+    "@babel/preset-typescript" "^7.3.3"
+    "@vue/compiler-sfc" "^3.0.5"
+
 babel-preset-typescript-vue@^1.0.3:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/babel-preset-typescript-vue/-/babel-preset-typescript-vue-1.1.1.tgz#6a617dcb0ee26f911735d5f2bbe530286b2c7c02"
@@ -16072,6 +16082,14 @@ deep-object-diff@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/deep-object-diff/-/deep-object-diff-1.1.0.tgz#d6fabf476c2ed1751fc94d5ca693d2ed8c18bc5a"
   integrity sha512-b+QLs5vHgS+IoSNcUE4n9HP2NwcHj7aqnJWsjPtuG75Rh5TOaGt0OjAYInh77d5T16V5cRDC+Pw/6ZZZiETBGw==
+
+deepdash@5.3.9:
+  version "5.3.9"
+  resolved "https://registry.yarnpkg.com/deepdash/-/deepdash-5.3.9.tgz#2aa92570d7b1787ed281e2fafe0be24df00ddfe4"
+  integrity sha512-GRzJ0q9PDj2T+J2fX+b+TlUa2NlZ11l6vJ8LHNKVGeZ8CfxCuJaCychTq07iDRTvlfO8435jlvVS1QXBrW9kMg==
+  dependencies:
+    lodash "^4.17.21"
+    lodash-es "^4.17.21"
 
 deepmerge@3.2.0:
   version "3.2.0"
@@ -25451,7 +25469,7 @@ lockfile@1.0.4, lockfile@^1.0.4:
   dependencies:
     signal-exit "^3.0.2"
 
-lodash-es@^4.17.20, lodash-es@^4.17.5:
+lodash-es@^4.17.20, lodash-es@^4.17.21, lodash-es@^4.17.5:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
@@ -38825,6 +38843,14 @@ uuid@^7.0.3:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
   integrity sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==
 
+v-tooltip@4.0.0-alpha.1:
+  version "4.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/v-tooltip/-/v-tooltip-4.0.0-alpha.1.tgz#0a4658342b681d87fa16fe0d423e871937943f33"
+  integrity sha512-TTNLJ/IVyoburxW0M3gxHhRb+d18xbozI5c0q2LCqIw4YUZzLKCG0ufx72d+j/1Xkqam9kDNHZChZq4KfsVpvw==
+  dependencies:
+    "@popperjs/core" "^2.6.0"
+    vue-resize "^2.0.0-alpha.1"
+
 v8-compile-cache@2.0.3, v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.0.3.tgz#00f7494d2ae2b688cfe2899df6ed2c54bef91dbe"
@@ -39343,19 +39369,19 @@ vue-i18n@9.0.0-rc.6:
     "@intlify/shared" "9.0.0-rc.6"
     "@vue/devtools-api" "^6.0.0-beta.5"
 
-vue-loader@16.1.2:
-  version "16.1.2"
-  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-16.1.2.tgz#5c03b6c50d2a5f983c7ceba15c50d78ca2b298f4"
-  integrity sha512-8QTxh+Fd+HB6fiL52iEVLKqE9N1JSlMXLR92Ijm6g8PZrwIxckgpqjPDWRP5TWxdiPaHR+alUWsnu1ShQOwt+Q==
+vue-loader@16, vue-loader@16.2.0:
+  version "16.2.0"
+  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-16.2.0.tgz#046a53308dd47e58efe20ddec1edec027ce3b46e"
+  integrity sha512-TitGhqSQ61RJljMmhIGvfWzJ2zk9m1Qug049Ugml6QP3t0e95o0XJjk29roNEiPKJQBEi8Ord5hFuSuELzSp8Q==
   dependencies:
     chalk "^4.1.0"
     hash-sum "^2.0.0"
     loader-utils "^2.0.0"
 
-vue-loader@16.2.0:
-  version "16.2.0"
-  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-16.2.0.tgz#046a53308dd47e58efe20ddec1edec027ce3b46e"
-  integrity sha512-TitGhqSQ61RJljMmhIGvfWzJ2zk9m1Qug049Ugml6QP3t0e95o0XJjk29roNEiPKJQBEi8Ord5hFuSuELzSp8Q==
+vue-loader@16.1.2:
+  version "16.1.2"
+  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-16.1.2.tgz#5c03b6c50d2a5f983c7ceba15c50d78ca2b298f4"
+  integrity sha512-8QTxh+Fd+HB6fiL52iEVLKqE9N1JSlMXLR92Ijm6g8PZrwIxckgpqjPDWRP5TWxdiPaHR+alUWsnu1ShQOwt+Q==
   dependencies:
     chalk "^4.1.0"
     hash-sum "^2.0.0"
@@ -39372,6 +39398,11 @@ vue-loader@^15.9.2:
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
+vue-resize@^2.0.0-alpha.1:
+  version "2.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/vue-resize/-/vue-resize-2.0.0-alpha.1.tgz#43eeb79e74febe932b9b20c5c57e0ebc14e2df3a"
+  integrity sha512-7+iqOueLU7uc9NrMfrzbG8hwMqchfVfSzpVlCMeJQe4pyibqyoifDNbKTZvwxZKDvGkB+PdFeKvnGZMoEb8esg==
+
 vue-router@^4.0.0:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-4.0.3.tgz#8b26050c88b2dec7e27a88835f71046b365823ec"
@@ -39385,7 +39416,7 @@ vue-style-loader@4.1.2:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
-vue-style-loader@^4.1.0, vue-style-loader@^4.1.2:
+vue-style-loader@4.1.3, vue-style-loader@^4.1.0, vue-style-loader@^4.1.2:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/vue-style-loader/-/vue-style-loader-4.1.3.tgz#6d55863a51fa757ab24e89d9371465072aa7bc35"
   integrity sha512-sFuh0xfbtpRlKfm39ss/ikqs9AbKCoXZBpHeVZ8Tx650o0k0q/YCM7FRvigtxpACezfq6af+a7JeqVTWvncqDg==
@@ -39405,6 +39436,11 @@ vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+
+vue3-blocks-tree@0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/vue3-blocks-tree/-/vue3-blocks-tree-0.5.2.tgz#d3096d8fb9376078c89ac96d8eeacaf726b4b435"
+  integrity sha512-IhG+RiKmqYvVU+nht7qW7tAWNFNsZA+R+DyoxdtYMF0LoKODnhrwTuqURNlpvKlZEIRLqOoycvtmn42NRG1aoA==
 
 vue@3:
   version "3.1.1"

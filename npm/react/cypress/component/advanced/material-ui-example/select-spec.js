@@ -249,21 +249,21 @@ export default function SimpleSelect () {
   )
 }
 
-it('renders selects', () => {
-  cy.viewport(1200, 600)
+// it('renders selects', () => {
+//   cy.viewport(1200, 600)
 
-  mount(<SimpleSelect />, {
-    stylesheets: [
-      'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap',
-      'https://fonts.googleapis.com/icon?family=Material+Icons',
-    ],
-  })
+//   mount(<SimpleSelect />, {
+//     stylesheets: [
+//       'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap',
+//       'https://fonts.googleapis.com/icon?family=Material+Icons',
+//     ],
+//   })
 
-  cy.get('#demo-simple-select').click()
-  cy.contains('[role=option]', 'Twenty')
-  .should('be.visible')
-  .click()
+//   cy.get('#demo-simple-select').click()
+//   cy.contains('[role=option]', 'Twenty')
+//   .should('be.visible')
+//   .click()
 
-  // check that other select has changed
-  cy.contains('#demo-simple-select-outlined', 'Twenty').should('be.visible')
-})
+//   // check that other select has changed
+//   cy.contains('#demo-simple-select-outlined', 'Twenty').should('be.visible')
+// })

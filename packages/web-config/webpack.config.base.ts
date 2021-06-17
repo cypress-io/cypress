@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
 const webpack = require('webpack')
 import { RuleSetRule, DefinePlugin, Configuration } from 'webpack'
+import { VueLoaderPlugin } from 'vue-loader'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
@@ -60,11 +61,14 @@ function makeSassLoaders ({ modules, postcssPlugins }): RuleSetRule {
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
 
+  exclude.push(/\.vue\.(s?[ac]ss)/)
+
   return {
     test: modules ? /\.modules?\.s[ac]ss$/i : /\.s[ac]ss$/i,
     exclude,
     enforce: 'pre',
     use: [
+
       {
         loader: require.resolve('css-loader'),
         options: {
@@ -123,6 +127,10 @@ export const getCommonConfig = ({ postcssPlugins }: GetCommonConfig = {}) => {
     module: {
       rules: [
         {
+          test: /\.vue$/,
+          loader: 'vue-loader',
+        },
+        {
           test: /\.(ts|js|jsx|tsx)$/,
           exclude: /node_modules/,
           use: {
@@ -137,6 +145,7 @@ export const getCommonConfig = ({ postcssPlugins }: GetCommonConfig = {}) => {
                 // the chrome version should be synced with
                 // npm/webpack-batteries-included-preprocessor/index.js and
                 // packages/server/lib/browsers/chrome.ts
+                require.resolve('babel-preset-typescript-vue3'),
                 [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }],
                 require.resolve('@babel/preset-react'),
                 [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
@@ -145,22 +154,24 @@ export const getCommonConfig = ({ postcssPlugins }: GetCommonConfig = {}) => {
             },
           },
         },
-        {
-          test: /\.s?css$/,
-          exclude: /node_modules/,
-          use: [
-            { loader: MiniCSSExtractWebpackPlugin.loader },
-          ],
-        },
         makeSassLoaders({ modules: false, postcssPlugins }),
         makeSassLoaders({ modules: true, postcssPlugins }),
         {
-          test: /\.(eot|svg|ttf|woff|woff2)$/,
+          test: /\.vue\.(s?[ac]ss)$/,
+          use: [{ loader: 'vue-style-loader' }, { loader: 'css-loader' }, { loader: 'sass-loader' }],
+        },
+        {
+          test: /(?<!\.vue)\.(s?[ac]ss)$/,
+          use: [MiniCSSExtractWebpackPlugin.loader],
+        },
+        {
+          test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
           use: [
             {
-              loader: require.resolve('file-loader'),
+              loader: 'file-loader',
               options: {
-                name: './fonts/[name].[ext]',
+                name: '[name].[ext]',
+                outputPath: 'fonts/',
               },
             },
           ],
@@ -191,6 +202,7 @@ export const getCommonConfig = ({ postcssPlugins }: GetCommonConfig = {}) => {
     plugins: [
       new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
       new MiniCSSExtractWebpackPlugin(),
+      new VueLoaderPlugin(),
 
       // Enable source maps / eval maps
       // 'EvalDevtoolModulePlugin' is used in development

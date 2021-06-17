@@ -8,11 +8,15 @@
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
+    "cypress:open:ct": "ts-node ../../scripts/cypress open-ct --project .",
     "watch": "yarn build-for-tests --watch --progress"
   },
   "dependencies": {
+    "deepdash": "5.3.9",
     "jquery": "3.6.0",
-    "vue": "3"
+    "v-tooltip": "4.0.0-alpha.1",
+    "vue": "3",
+    "vue3-blocks-tree": "0.5.2"
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",

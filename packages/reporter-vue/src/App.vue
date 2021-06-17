@@ -1,48 +1,82 @@
 <template>
-  <span v-if="isLoading">Loading...</span>
-  <RunnableList
-    v-else-if="isReady"
-    :runnables="runnables"
-    :key="runnables.file"
-  >
-    <!-- {{ runnables }} -->
-    <!-- <template #="{ runnable }">
-      <li>{{ runnable }}</li>
-    </template> -->
-  </RunnableList>
-  <span v-else-if="isError">Errored</span>
+  <div class="vueApp">
+    <BaseModal @close="showModal = false" v-if="showModal">
+      <template #body>Content</template>
+    </BaseModal>
+    <!-- <ReporterLoading v-if="runnerState === 'loading'" />
+    <ReporterError v-if="runnerState === 'error'" />
+    <ReporterNoTests v-if="runnerState === 'noTests'" :spec="state.spec" />
+    <RunnablesList v-if="runnerState === 'ready'" /> -->
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, Ref, computed, reactive } from "vue";
-import RunnableList from "./RunnableList.vue";
+import ReporterLoading from "./views/ReporterLoading.vue";
+import ReporterError from "./views/ReporterError.vue";
+import ReporterNoTests from "./views/ReporterNoTests.vue";
+import RunnablesList from "./runnables/RunnablesList.vue";
+import BaseModal from "./components/BaseModal.vue";
 
 // type RunnerState = "loading" | "error" | "ready";
+// interface Runnables {}
+
 export default defineComponent({
   props: ["state", "reporterBus"],
-  components: { RunnableList },
+  components: {
+    BaseModal,
+    ReporterLoading,
+    ReporterError,
+    ReporterNoTests,
+    RunnablesList,
+  },
   setup(props) {
     const runner = props.reporterBus;
     const runnerState = ref("loading");
     const runnables = ref({});
     runner.on("run:start", (arg, arg2) => {});
 
-    runner.on("runnables:ready", (rootRunnable = {}) => {
-      runnerState.value = "ready";
+    runner.on("runnables:ready", (rootRunnable) => {
       runnables.value = rootRunnable;
+      if (!rootRunnable) {
+        runnerState.value = "noTests";
+        return;
+      }
+      runnerState.value = "ready";
     });
     return {
-      isReady: computed(() => runnerState.value === "ready"),
-      isLoading: computed(() => runnerState.value === "loading"),
-      isError: computed(() => runnerState.value === "error"),
+      showModal: ref(true),
+      runnerState,
       runnables,
+      state: props.state,
     };
-
-    // Object.keys(window.ReporterOptions).forEach((key) => {
-    //   provide(key, window.ReporterOptions[key]);
-    // });
-    // console.log(window.ReporterOptions);
-    // return { reporterOptions: computed(() => window.ReporterOptions) };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.vueApp {
+  padding: 0 2rem;
+}
+
+.fade-enter-active {
+  animation: fade 0.5s;
+}
+.fade-leave-active {
+  animation: fade 0.5s reverse;
+}
+
+@keyframes fade {
+  0% {
+    transform: opacity(0);
+  }
+
+  50% {
+    transform: opacity(0.5)''
+  }
+
+  100% {
+    transform: opacity(1);
+  }
+}
+</style>
