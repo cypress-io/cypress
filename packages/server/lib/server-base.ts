@@ -9,6 +9,7 @@ import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import { AddressInfo } from 'net'
 import url from 'url'
+import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, httpUtils, uri } from '@packages/network'
@@ -179,7 +180,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }: OpenServerOptions) {
     debug('server open')
 
-    // la(_.isPlainObject(config), 'expected plain config object', config)
+    la(_.isPlainObject(config), 'expected plain config object', config)
 
     return Bluebird.try(() => {
       if (!config.baseUrl && projectType === 'ct') {
