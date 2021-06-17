@@ -2,6 +2,7 @@ import Debug from 'debug'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import { ServerCt } from './server-ct'
 import { createRoutes } from './routes-ct'
+import { SocketCt } from './socket-ct'
 
 export * from '@packages/server/lib/project-base'
 
@@ -45,6 +46,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
             onError: options.onError,
             onWarning: options.onWarning,
             shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+            SocketCtor: SocketCt,
             project: this,
             projectType: 'ct',
             createRoutes,

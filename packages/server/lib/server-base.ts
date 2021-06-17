@@ -43,6 +43,7 @@ export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
   project: ProjectE2E | ProjectCt
+  SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
   projectType: 'ct' | 'e2e'
   onError: unknown // (...args: unknown[]) => void
@@ -175,6 +176,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     specsStore,
     createRoutes,
     projectType,
+    SocketCtor,
   }: OpenServerOptions) {
     debug('server open')
 
@@ -194,10 +196,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         target: projectType === 'ct' ? config.baseUrl : undefined,
       })
 
-      this._socket = (projectType === 'e2e'
-        ? new SocketE2E(config)
-        : new SocketCt(config)
-      ) as TSocket
+      this._socket = new SocketCtor(config) as TSocket
 
       const getRemoteState = () => {
         return this._getRemoteState()

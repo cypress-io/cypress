@@ -3,6 +3,7 @@ import browsers from './browsers'
 import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
 import { ServerE2E } from './server-e2e'
+import { SocketE2E } from './socket-e2e'
 
 const debug = Debug('cypress:server:project')
 
@@ -26,6 +27,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
             project: this,
             onError: options.onError,
             onWarning: options.onWarning,
+            SocketCtor: SocketE2E,
             shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
             projectType: 'e2e',
             specsStore,
