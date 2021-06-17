@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express from 'express'
+import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
@@ -13,7 +13,7 @@ import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { SocketCt } from '@packages/server-ct'
+import { ProjectCt, SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
@@ -24,6 +24,8 @@ import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
+import { ProjectE2E } from './project-e2e'
+import { SpecsStore } from './specs-store'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -87,14 +89,14 @@ const notSSE = (req, res) => {
 export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
-  project: any // ProjectE2E | ProjectCt
+  project: ProjectE2E | ProjectCt
   SocketCtor: typeof SocketE2E | typeof SocketCt
-  specsStore: any // SpecsStore
+  specsStore: SpecsStore
   projectType: 'ct' | 'e2e'
-  onError: unknown // (...args: unknown[]) => void
-  onWarning: unknown // (...args: unknown[]) => void
+  onError: unknown
+  onWarning: unknown
   shouldCorrelatePreRequests: () => boolean
-  createRoutes: any
+  createRoutes: (...args: any) => any
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -156,9 +158,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   createServer (
-    app: any, // Express,
+    app: Express,
     config: Record<string, any>,
-    project: any, // ProjectE2E | ProjectCt,
+    project: ProjectE2E | ProjectCt,
     request: unknown,
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]> {
