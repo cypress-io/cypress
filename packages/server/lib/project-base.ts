@@ -65,7 +65,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
-  private specsStore?: SpecsStore
 
   public browser: any
 
@@ -174,7 +173,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
       // store the cfg from
       // opening the server
-      this.specsStore = specsStore
       this._cfg = cfg
 
       debug('project config: %o', _.omit(cfg, 'resolved'))
@@ -264,11 +262,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.browser = null
 
     return Bluebird.join(
-      this.specsStore?.watcher?.close(),
       this.server?.close(),
       this.watchers?.close(),
       options?.onClose(),
-      this.specsStore?.watcher?.close(),
     )
     .then(() => {
       process.chdir(localCwd)
