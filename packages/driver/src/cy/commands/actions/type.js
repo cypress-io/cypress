@@ -24,7 +24,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      delay: 10,
+      delay: config('keystrokeDelay') || $Keyboard.getConfig().keystrokeDelay,
       release: true,
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
@@ -127,6 +127,30 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       $errUtils.throwErrByPath('type.empty_string', {
         onFail: options._log,
         args: { chars },
+      })
+    }
+
+    const isInvalidDelay = (delay) => {
+      return delay !== undefined && (!_.isNumber(delay) || delay < 0)
+    }
+
+    if (isInvalidDelay(userOptions.delay)) {
+      $errUtils.throwErrByPath('keyboard.invalid_delay', {
+        onFail: options._log,
+        args: {
+          cmd: 'type',
+          docsPath: 'type',
+          option: 'delay',
+          delay: userOptions.delay,
+        },
+      })
+    }
+
+    // specific error if test config keystrokeDelay is invalid
+    if (isInvalidDelay(config('keystrokeDelay'))) {
+      $errUtils.throwErrByPath('keyboard.invalid_per_test_delay', {
+        onFail: options._log,
+        args: { delay: config('keystrokeDelay') },
       })
     }
 
@@ -282,7 +306,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           // for the total number of keys we're about to
           // type, ensure we raise the timeout to account
           // for the delay being added to each keystroke
-          return cy.timeout(totalKeys * options.delay, true, 'type')
+          if (options.delay) {
+            return cy.timeout(totalKeys * options.delay, true, 'type')
+          }
         },
 
         onEvent: updateTable || _.noop,
