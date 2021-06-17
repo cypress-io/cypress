@@ -366,13 +366,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }) {
     const specsStore = new SpecsStore(config, this.projectType)
 
-    if (this.projectType === 'e2e') {
-      return {
-        cfg: config,
-        specsStore: {},
-      }
-    }
-
     if (this.projectType === 'ct') {
       const { port } = await this.startCtDevServer(specs, config)
 
@@ -392,6 +385,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
       },
     })
+
+    if (this.projectType === 'e2e') {
+      return {
+        cfg: config,
+        specsStore: {},
+      }
+    }
 
     return specsStore.storeSpecFiles()
     .return({
