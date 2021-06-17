@@ -1,0 +1,40 @@
+{
+  "name": "@packages/reporter-vue",
+  "version": "0.0.0-development",
+  "private": true,
+  "browser": "src/main.tsx",
+  "scripts": {
+    "build-for-tests": "webpack",
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "node ../../scripts/cypress open --project .",
+    "cypress:run": "node ../../scripts/cypress run --project .",
+    "watch": "yarn build-for-tests --watch --progress"
+  },
+  "dependencies": {
+    "jquery": "3.6.0",
+    "vue": "3"
+  },
+  "devDependencies": {
+    "@cypress/react-tooltip": "0.5.3",
+    "@cypress/vue": "0.0.0-development",
+    "@packages/driver": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "@packages/web-config": "0.0.0-development",
+    "cross-env": "6.0.3",
+    "cypress-multi-reporters": "1.4.0",
+    "cypress-real-events": "1.4.0",
+    "graphql": "^15.5.0",
+    "lodash": "4.17.21",
+    "markdown-it": "11.0.0",
+    "sinon": "7.5.0",
+    "ts-loader": "^8.0.5",
+    "vue-loader": "16.2.0",
+    "webpack": "4.44.2",
+    "webpack-cli": "3.3.2",
+    "windicss": "3.0.12",
+    "windicss-webpack-plugin": "0.6.1"
+  },
+  "files": [
+    "lib"
+  ]
+}

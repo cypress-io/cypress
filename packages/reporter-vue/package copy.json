@@ -1,0 +1,45 @@
+{
+  "name": "@packages/springboard",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "lib/gui.js",
+  "scripts": {
+    "build": "webpack",
+    "build-prod": "cross-env NODE_ENV=production yarn build",
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
+    "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project .",
+    "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project .",
+    "dev": "SPRINGBOARD=1 yarn start-test 5050 cypress:open",
+    "postinstall": "echo '@packages/springboard needs: yarn build'",
+    "start": "http-server -p 5050 dist",
+    "watch": "yarn build --watch --progress"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.3.20",
+    "@vue/apollo-composable": "^4.0.0-alpha.12",
+    "bluebird": "3.5.3",
+    "classnames": "2.3.1",
+    "graphql-tag": "^2.12.4",
+    "p-defer": "^3.0.0",
+    "vue": "3.0.11"
+  },
+  "devDependencies": {
+    "@cypress/vue": "0.0.0-development",
+    "@packages/web-config": "0.0.0-development",
+    "cross-env": "6.0.3",
+    "graphql": "^15.5.0",
+    "ts-loader": "^8.0.5",
+    "vue-loader": "16.2.0",
+    "webpack": "4.44.2",
+    "webpack-cli": "3.3.2",
+    "windicss": "3.0.12",
+    "windicss-webpack-plugin": "0.6.1"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "!lib/**/*_spec.jsx"
+  ]
+}
