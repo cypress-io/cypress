@@ -18,7 +18,12 @@ process.env.CYPRESS_INTERNAL_ENV = 'development'
 const CA = require('@packages/https-proxy').CA
 const Config = require('../../lib/config')
 const { ServerE2E } = require('../../lib/server-e2e')
+const { SocketE2E } = require('../../lib/socket-e2e')
 const { _getArgs } = require('../../lib/browsers/chrome')
+
+function createRoutes (...args) {
+  return require('../../lib/routes').apply(null, args)
+}
 
 const CHROME_PATH = 'google-chrome'
 const URLS_UNDER_TEST = [
@@ -350,7 +355,11 @@ describe('Proxy Performance', function () {
 
           cyServer = new ServerE2E()
 
-          return cyServer.open(config)
+          return cyServer.open(config, {
+            SocketCtor: SocketE2E,
+            createRoutes,
+            projectType: 'e2e',
+          })
         }),
       )
     })
