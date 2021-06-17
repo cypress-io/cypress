@@ -1540,7 +1540,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
+          recordMode.throwIfNoProjectId(projectId, settings.configFile(projectRoot, options))
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }
@@ -1618,7 +1618,7 @@ module.exports = {
           }
 
           if (record) {
-            const { projectName } = config
+            const { projectName, projectRoot } = config
 
             return recordMode.createRunAndRecordSpecs({
               tag,

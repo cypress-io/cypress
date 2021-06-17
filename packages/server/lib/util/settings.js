@@ -97,8 +97,27 @@ module.exports = {
     return options.testingType === 'component'
   },
 
-  configFile (options = {}) {
-    return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  configFile (projectRoot, options = {}) {
+    const ls = fs.readdirSync(projectRoot)
+
+    if (options.configFile === false) {
+      return false
+    }
+
+    if (options.configFile) {
+      return options.configFile
+    }
+
+    if (ls.includes('cypress.json')) {
+      return 'cypress.json'
+    }
+
+    if (ls.includes('cypress.js')) {
+      return 'cypress.js'
+    }
+
+    // Default is to create a new `cypress.json` file if one does not exist.
+    return 'cypress.json'
   },
 
   id (projectRoot, options = {}) {
@@ -124,8 +143,8 @@ module.exports = {
       // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
-      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
-    }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
+      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
+    }).catch({ code: 'EACCES' }, () => {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {
@@ -144,7 +163,31 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
+    const requireAsync = (file) => {
+      return Promise.try(() => {
+        const config = require(file)
+
+        // if it is not `cypress.js` just return it as-is.
+        if (!file.endsWith('cypress.js')) {
+          return config
+        }
+
+        // otherwise, if it is cypress.js, we grab the runner-specific settings.
+        if (this.isComponentTesting(options)) {
+          return config.component || {}
+        }
+
+        // additional, if config does *not* contain `e2e` but we are in `e2e` mode,
+        // it probably means the user is an e2e user who would like to use cypress.js
+        // instead of cypress.json. Just use the file as is.
+        return config.e2e || config
+      })
+    }
+
+    return requireAsync(file)
+    .catch({ code: 'MODULE_NOT_FOUND' }, () => {
+      return this._write(file, {})
+    })
     .catch({ code: 'ENOENT' }, () => {
       return this._write(file, {})
     }).then((json = {}) => {
@@ -211,7 +254,7 @@ module.exports = {
   },
 
   pathToConfigFile (projectRoot, options = {}) {
-    const configFile = this.configFile(options)
+    const configFile = this.configFile(projectRoot, options)
 
     return configFile && this._pathToFile(projectRoot, configFile)
   },
