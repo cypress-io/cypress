@@ -1,7 +1,8 @@
 module.exports = {
   ...require('../../.releaserc.base'),
   branches: [
-    'npm/vue/v2',
+    'next/npm/vue',
+    { name: 'npm/vue/v2', range: '2.X.X' },
     { name: 'master', channel: 'next', prerelease: 'beta' },
   ],
 }
