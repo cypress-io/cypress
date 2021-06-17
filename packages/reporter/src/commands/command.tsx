@@ -16,6 +16,7 @@ import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import CommandModel from './command-model'
 import TestError from '../errors/test-error'
+import Collapsible from '../collapsible/collapsible'
 
 const md = new Markdown()
 
@@ -222,7 +223,12 @@ class Command extends Component<Props> {
               </span>
             </div>
             <Progress model={model} />
-            {model.showError && <TestError model={model} onPrintToConsole={this._onClick}/>}
+
+            {model.showError && <Collapsible
+              header={'Cause'}
+            >
+              <TestError model={model} onPrintToConsole={this._onClick}/>
+            </Collapsible>}
           </div>
         </FlashOnClick>
         {this._duplicates()}

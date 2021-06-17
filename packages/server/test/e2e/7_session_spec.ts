@@ -19,6 +19,10 @@ const onServer = function (app) {
     res.send('<html><h1>link</h1><a href=\'https://www.foo.com:44665/cross_origin\'>second</a></html>')
   })
 
+  app.get('/status/:code', (req, res) => {
+    res.sendStatus(+req.params.code)
+  })
+
   app.get('/cross_origin', (req, res) => {
     res.send('<html><h1>cross origin</h1></html>')
   })

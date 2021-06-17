@@ -418,6 +418,14 @@ describe('options.validate reruns steps when failing cypress command', () => {
   })
 })
 
+describe('options.validate reruns steps when failing cy.request', () => {
+  SuiteWithValidateFn('validate_resolve_false_command_2', (callCount) => {
+    const status = callCount === 2 ? 500 : 200
+
+    cy.request(`https://127.0.0.2:44665/status/${status}`)
+  })
+})
+
 describe('options.validate failing test', () => {
   it('test fails when options.validate after setup fails command', (done) => {
     cy.on('fail', (err) => {
