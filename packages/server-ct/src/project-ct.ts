@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
-import specsUtil from '@packages/server/lib/util/specs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { ServerCt } from './server-ct'
 
@@ -73,47 +72,37 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     // prevent tampering with the
     // internals and breaking cypress
     return super._initPlugins(cfg, options)
-    .then((modifiedConfig) => {
-      // now that plugins have been initialized, we want to execute
-      // the plugin event for 'dev-server:start' and get back
-      // @ts-ignore - let's not attempt to TS all the things in packages/server
+    .then(({ specs, cfg: modifiedConfig }) => {
+      return devServer.start({ specs, config: modifiedConfig })
+      .then((devServerOptions) => {
+        if (!devServerOptions) {
+          throw new Error([
+            'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+            'Make sure that the dev-server:start function returns an object.',
+            'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
+          ].join('\n'))
+        }
 
-      return specsUtil.find(modifiedConfig)
-      .filter((spec: Cypress.Cypress['spec']) => {
-        return spec.specType === 'component'
-      })
-      .then((specs) => {
-        return devServer.start({ specs, config: modifiedConfig })
-        .then((devServerOptions) => {
-          if (!devServerOptions) {
-            throw new Error([
-              'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-              'Make sure that the dev-server:start function returns an object.',
-              'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
-            ].join('\n'))
-          }
+        const { port } = devServerOptions
 
-          const { port } = devServerOptions
+        modifiedConfig.baseUrl = `http://localhost:${port}`
 
-          modifiedConfig.baseUrl = `http://localhost:${port}`
+        const specsStore = new SpecsStore(cfg, 'ct')
 
-          const specsStore = new SpecsStore(cfg, 'ct')
+        specsStore.watch({
+          onSpecsChanged: (specs) => {
+            // send new files to dev server
+            devServer.updateSpecs(specs)
 
-          specsStore.watch({
-            onSpecsChanged: (specs) => {
-              // send new files to dev server
-              devServer.updateSpecs(specs)
+            // send new files to frontend
+            this.server.sendSpecList(specs)
+          },
+        })
 
-              // send new files to frontend
-              this.server.sendSpecList(specs)
-            },
-          })
-
-          return specsStore.storeSpecFiles()
-          .return({
-            specsStore,
-            cfg: modifiedConfig,
-          })
+        return specsStore.storeSpecFiles()
+        .return({
+          specsStore,
+          cfg: modifiedConfig,
         })
       })
     })

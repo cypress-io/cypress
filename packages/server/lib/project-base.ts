@@ -320,7 +320,25 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       debug('updated config: %o', updatedConfig)
 
-      return updatedConfig
+      return Bluebird.resolve(updatedConfig)
+    })
+    .then(async (modifiedConfig) => {
+      const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
+        if (this.projectType === 'ct') {
+          return spec.specType === 'component'
+        }
+
+        if (this.projectType === 'e2e') {
+          return spec.specType === 'integration'
+        }
+
+        throw Error(`Cannot return specType for projectType: ${this.projectType}`)
+      })
+
+      return {
+        specs,
+        cfg: modifiedConfig,
+      }
     })
   }
 
