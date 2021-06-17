@@ -673,6 +673,13 @@ This project is licensed under the terms of the [MIT license](/LICENSE).
 
 [Changelog](./CHANGELOG.md)
 
+# Branches
+
+On `master` we deliver vue 3 compatible packages.
+On `npm/vue/v2` we deliver vue 2 compatible packages
+
+You should find on all other branches vue 3 compatible code
+
 ## Badges
 
 Let the world know your project is using Cypress.io to test with this cool badge
