@@ -14,5 +14,6 @@ SyntaxError: <path>/_test-output/syntax_error_spec.js: Unexpected token (1:18)
 `
 
 exports['webpack preprocessor - e2e has less verbose "Module not found" error 1'] = `
-Webpack CompLooked for and couldn't find the file at the following paths:resolve './does/not-exist' in '<path>/_test-output'
+Webpack Compilation Error
+Module not found: Error: Can't resolve './does/not-exist' in '<path>/_test-output'
 `

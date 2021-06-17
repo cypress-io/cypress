@@ -61,6 +61,11 @@ const cleanModuleNotFoundError = (err: Error) => {
 
   if (!message.includes('Module not found')) return err
 
+  // Webpack 5 error messages are much less verbose. No need to clean.
+  if ('NormalModule' in webpack) {
+    return err
+  }
+
   const startIndex = message.lastIndexOf('resolve ')
   const endIndex = message.lastIndexOf(`doesn't exist`) + `doesn't exist`.length
   const partToReplace = message.substring(startIndex, endIndex)
