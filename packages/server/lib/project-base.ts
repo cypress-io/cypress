@@ -338,10 +338,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
 
       return this.initSpecStore({ specs, config: modifiedConfig })
-      // return {
-      //   specs,
-      //   cfg: modifiedConfig,
-      // }
     })
   }
 
