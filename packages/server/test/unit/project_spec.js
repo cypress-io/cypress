@@ -718,7 +718,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls plugins.init when file changes', function () {
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
+      return this.project.watchPluginsFile(this.config, {
+        onError: () => {},
+      }).then(() => {
         this.project.watchers.watchTree.firstCall.args[1].onChange()
 
         expect(plugins.init).to.be.calledWith(this.config)
