@@ -261,7 +261,7 @@ module.exports = {
       if (isSame) {
         // catch all errors since the user may have already removed
         // the file or changed permissions, etc.
-        return fs.unlinkAsync(dest).catch(_.noop)
+        return fs.removeAsync(dest).catch(_.noop)
       }
     })
   },
@@ -271,7 +271,7 @@ module.exports = {
 
     // catch all errors since the user may have already removed
     // the folder, changed permissions, added their own files to the folder, etc.
-    return fs.rmdirAsync(dest).catch(_.noop)
+    return fs.removeAsync(dest).catch(_.noop)
   },
 
   verifyScaffolding (folder, fn) {
