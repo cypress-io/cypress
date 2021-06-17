@@ -61,10 +61,6 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     options.onError(err)
   }
 
-  _initPlugins (cfg, options) {
-    return super._initPlugins(cfg, options)
-  }
-
   close () {
     return super.close({
       onClose () {

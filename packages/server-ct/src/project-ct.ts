@@ -76,12 +76,4 @@ export class ProjectCt extends ProjectBase<ServerCt> {
 
     options.onError(err)
   }
-
-  _initPlugins (cfg, options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    return super._initPlugins(cfg, options)
-  }
 }
