@@ -11,6 +11,10 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return 'e2e'
   }
 
+  createRoutes (...args) {
+    return require('./routes').apply(null, args)
+  }
+
   open (options: Record<string, unknown>) {
     this._server = new ServerE2E()
 
@@ -18,7 +22,15 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore, startSpecWatcher }) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
+          return this.server.open(cfg, {
+            project: this,
+            onError: options.onError,
+            onWarning: options.onWarning,
+            shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+            projectType: 'e2e',
+            specsStore,
+            createRoutes: this.createRoutes,
+          })
           .then(([port, warning]) => {
             return {
               cfg,

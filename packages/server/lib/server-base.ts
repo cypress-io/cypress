@@ -3,17 +3,19 @@ import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express from 'express'
+import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import { AddressInfo } from 'net'
 import url from 'url'
+import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
+import { createInitialWorkers } from '@packages/rewriter'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { SocketCt } from '@packages/server-ct'
+import { ProjectCt, SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
@@ -23,6 +25,8 @@ import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { ProjectE2E } from './project-e2e'
+import { SpecsStore } from './specs-store'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -34,6 +38,18 @@ const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 
 const debug = Debug('cypress:server:server-base')
+
+export type WarningErr = Record<string, any>
+
+export interface OpenServerOptions {
+  project: ProjectE2E | ProjectCt
+  specsStore: SpecsStore
+  projectType: 'ct' | 'e2e'
+  onError: unknown // (...args: unknown[]) => void
+  onWarning: unknown // (...args: unknown[]) => void
+  shouldCorrelatePreRequests: () => boolean
+  createRoutes: any
+}
 
 const _isNonProxiedRequest = (req) => {
   // proxied HTTP requests have a URL like: "http://example.com/foo"
@@ -139,6 +155,75 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
+  }
+
+  createServer (
+    app: Express,
+    config: Record<string, any>,
+    project: ProjectE2E | ProjectCt,
+    request: unknown,
+    onWarning: unknown,
+  ): Bluebird<[number, WarningErr?]> {
+    throw Error('`createServer must be implemented by super class!`')
+  }
+
+  open (config: Record<string, any> = {}, {
+    project,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+    specsStore,
+    createRoutes,
+    projectType,
+  }: OpenServerOptions) {
+    debug('server open')
+
+    la(_.isPlainObject(config), 'expected plain config object', config)
+
+    return Bluebird.try(() => {
+      if (!config.baseUrl) {
+        throw new Error('ServerCt#open called without config.baseUrl.')
+      }
+
+      const app = this.createExpressApp(config)
+
+      logger.setSettings(config)
+
+      // TODO: Can we just pass config.baseUrl regardless of project type?
+      this._nodeProxy = httpProxy.createProxyServer({
+        target: projectType === 'ct' ? config.baseUrl : undefined,
+      })
+
+      this._socket = (projectType === 'e2e'
+        ? new SocketE2E(config)
+        : new SocketCt(config)
+      ) as TSocket
+
+      const getRemoteState = () => {
+        return this._getRemoteState()
+      }
+
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+      if (config.experimentalSourceRewriting) {
+        createInitialWorkers()
+      }
+
+      this.createHosts(config.hosts)
+
+      createRoutes({
+        app,
+        config,
+        specsStore,
+        getRemoteState,
+        nodeProxy: this.nodeProxy,
+        networkProxy: this._networkProxy,
+        onError,
+        project,
+      })
+
+      return this.createServer(app, config, project, this.request, onWarning)
+    })
   }
 
   createExpressApp (config) {

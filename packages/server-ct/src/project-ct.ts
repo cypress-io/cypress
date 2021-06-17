@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
 import { ServerCt } from './server-ct'
+import { createRoutes } from './routes-ct'
 
 export * from '@packages/server/lib/project-base'
 
@@ -39,7 +40,15 @@ export class ProjectCt extends ProjectBase<ServerCt> {
 
         return this._initPlugins(cfgForComponentTesting, options)
         .then(({ cfg, specsStore, startSpecWatcher }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning, this.shouldCorrelatePreRequests)
+          return this.server.open(cfg, {
+            specsStore,
+            onError: options.onError,
+            onWarning: options.onWarning,
+            shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+            project: this,
+            projectType: 'ct',
+            createRoutes,
+          })
           .then(([port, warning]) => {
             return {
               cfg,
