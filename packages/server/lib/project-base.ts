@@ -35,6 +35,8 @@ import settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
+import devServer from './plugins/dev-server'
+import { SpecsStore } from './specs-store'
 
 interface CloseOptions {
   onClose: () => any
@@ -322,7 +324,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       return Bluebird.resolve(updatedConfig)
     })
-    .then(async (modifiedConfig) => {
+    .then(async (modifiedConfig: any) => {
       const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
         if (this.projectType === 'ct') {
           return spec.specType === 'component'
@@ -335,10 +337,63 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         throw Error(`Cannot return specType for projectType: ${this.projectType}`)
       })
 
-      return {
-        specs,
-        cfg: modifiedConfig,
-      }
+      return this.initSpecStore({ specs, config: modifiedConfig })
+      // return {
+      //   specs,
+      //   cfg: modifiedConfig,
+      // }
+    })
+  }
+
+  async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
+    // CT uses a dev-server to build the bundle.
+    // We start the dev server here.
+    const devServerOptions = await devServer.start({ specs, config })
+
+    if (!devServerOptions) {
+      throw new Error([
+        'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+        'Make sure that the dev-server:start function returns an object.',
+        'For example: on("dev-server:start", () => startWebpackDevServer({ webpackConfig }))',
+      ].join('\n'))
+    }
+
+    return { port: devServerOptions.port }
+  }
+
+  async initSpecStore ({
+    specs,
+    config,
+  }: {
+    specs: Cypress.Cypress['spec'][]
+    config: any
+  }) {
+    const specsStore = new SpecsStore(config, this.projectType)
+
+    if (this.projectType === 'ct') {
+      const { port } = await this.startCtDevServer(specs, config)
+
+      config.baseUrl = `http://localhost:${port}`
+    }
+
+    specsStore.watch({
+      onSpecsChanged: (specs) => {
+        // both e2e and CT watch the specs and send them to the
+        // client to be shown in the SpecList.
+        this.server.sendSpecList(specs)
+
+        if (this.projectType === 'ct') {
+          // ct uses the dev-server to build and bundle the speces.
+          // send new files to dev server
+          devServer.updateSpecs(specs)
+        }
+      },
+    })
+
+    return specsStore.storeSpecFiles()
+    .return({
+      specsStore,
+      cfg: config,
     })
   }
 

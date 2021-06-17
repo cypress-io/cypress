@@ -1,7 +1,5 @@
 import Debug from 'debug'
-import devServer from '@packages/server/lib/plugins/dev-server'
 import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
-import { SpecsStore } from '@packages/server/lib/specs-store'
 import { ServerCt } from './server-ct'
 
 export * from '@packages/server/lib/project-base'
@@ -72,39 +70,5 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     // prevent tampering with the
     // internals and breaking cypress
     return super._initPlugins(cfg, options)
-    .then(({ specs, cfg: modifiedConfig }) => {
-      return devServer.start({ specs, config: modifiedConfig })
-      .then((devServerOptions) => {
-        if (!devServerOptions) {
-          throw new Error([
-            'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
-            'Make sure that the dev-server:start function returns an object.',
-            'For example: on("dev-server:star", () => startWebpackDevServer({ webpackConfig }))',
-          ].join('\n'))
-        }
-
-        const { port } = devServerOptions
-
-        modifiedConfig.baseUrl = `http://localhost:${port}`
-
-        const specsStore = new SpecsStore(cfg, 'ct')
-
-        specsStore.watch({
-          onSpecsChanged: (specs) => {
-            // send new files to dev server
-            devServer.updateSpecs(specs)
-
-            // send new files to frontend
-            this.server.sendSpecList(specs)
-          },
-        })
-
-        return specsStore.storeSpecFiles()
-        .return({
-          specsStore,
-          cfg: modifiedConfig,
-        })
-      })
-    })
   }
 }
