@@ -517,4 +517,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     return this.httpsProxy.connect(req, socket, head)
   }
+
+  sendSpecList (specs) {
+    return this.socket.sendSpecList(specs)
+  }
 }

@@ -85,8 +85,4 @@ export class ServerCt extends ServerBase<SocketCt> {
       })
     })
   }
-
-  sendSpecList (specs) {
-    return this.socket.sendSpecList(specs)
-  }
 }
