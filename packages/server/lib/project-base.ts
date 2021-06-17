@@ -65,6 +65,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
+  private specsStore?: SpecsStore
 
   public browser: any
 
@@ -260,6 +261,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.server?.close(),
       this.watchers?.close(),
       options?.onClose(),
+      this.specsStore?.watcher?.close(),
     )
     .then(() => {
       process.chdir(localCwd)
@@ -365,6 +367,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     config: any
   }) {
     const specsStore = new SpecsStore(config, this.projectType)
+
+    this.specsStore = specsStore
 
     if (this.projectType === 'ct') {
       const { port } = await this.startCtDevServer(specs, config)
