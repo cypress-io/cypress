@@ -181,7 +181,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     la(_.isPlainObject(config), 'expected plain config object', config)
 
     return Bluebird.try(() => {
-      if (!config.baseUrl) {
+      if (!config.baseUrl && projectType === 'ct') {
         throw new Error('ServerCt#open called without config.baseUrl.')
       }
 
