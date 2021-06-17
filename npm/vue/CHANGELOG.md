@@ -1,3 +1,10 @@
+# [@cypress/vue-v2.2.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.3...@cypress/vue-v2.2.4) (2021-06-17)
+
+
+### Bug Fixes
+
+* mention branches in the readme ([5443262](https://github.com/cypress-io/cypress/commit/54432628d442b0bdcae143cd4b38291e3dfc5c0d))
+
 # [@cypress/vue-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.2...@cypress/vue-v2.2.3) (2021-05-11)
 
 
