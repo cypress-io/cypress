@@ -127,10 +127,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     })
   }
 
-  createRoutes (...args) {
-    return require('./routes').apply(null, args)
-  }
-
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
