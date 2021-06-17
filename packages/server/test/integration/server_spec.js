@@ -8,7 +8,12 @@ const evilDns = require('evil-dns')
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
+
+function createRoutes (...args) {
+  return require(`${root}lib/routes`).apply(null, args)
+}
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'
 
@@ -81,7 +86,11 @@ describe('Server', () => {
             // and open our cypress server
             (this.server = new ServerE2E()),
 
-            this.server.open(cfg)
+            this.server.open(cfg, {
+              SocketCtor: SocketE2E,
+              createRoutes,
+              projectType: 'e2e',
+            })
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },

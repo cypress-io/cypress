@@ -17,6 +17,10 @@ const open = require(`${root}lib/util/open`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
 
+function createRoutes (...args) {
+  return require(`${root}lib/routes`).apply(null, args)
+}
+
 describe('lib/socket', () => {
   beforeEach(function () {
     Fixtures.scaffold()
@@ -40,7 +44,11 @@ describe('lib/socket', () => {
     beforeEach(function (done) {
       // create a for realz socket.io connection
       // so we can test server emit / client emit events
-      this.server.open(this.cfg)
+      this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        projectType: 'e2e',
+      })
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
@@ -556,7 +564,11 @@ describe('lib/socket', () => {
       sinon.stub(SocketE2E.prototype, 'createIo').returns(this.io)
       sinon.stub(preprocessor.emitter, 'on')
 
-      return this.server.open(this.cfg)
+      return this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        projectType: 'e2e',
+      })
       .then(() => {
         this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
 

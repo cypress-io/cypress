@@ -1,19 +1,15 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import httpProxy from 'http-proxy'
 import isHtml from 'is-html'
-import la from 'lazy-ass'
 import _ from 'lodash'
 import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
-import { createInitialWorkers } from '@packages/rewriter'
 import errors from './errors'
 import fileServer from './file_server'
-import logger from './logger'
-import { ServerBase } from './server-base'
+import { OpenServerOptions, ServerBase } from './server-base'
 import { SocketE2E } from './socket-e2e'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
@@ -53,42 +49,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning, shouldCorrelatePreRequests) {
-    debug('server open')
-
-    la(_.isPlainObject(config), 'expected plain config object', config)
-
-    return Bluebird.try(() => {
-      const app = this.createExpressApp(config)
-
-      logger.setSettings(config)
-
-      this._nodeProxy = httpProxy.createProxyServer()
-      this._socket = new SocketE2E(config)
-
-      const getRemoteState = () => {
-        return this._getRemoteState()
-      }
-
-      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
-
-      if (config.experimentalSourceRewriting) {
-        createInitialWorkers()
-      }
-
-      this.createHosts(config.hosts)
-
-      this.createRoutes({
-        app,
-        config,
-        getRemoteState,
-        networkProxy: this._networkProxy,
-        onError,
-        project,
-      })
-
-      return this.createServer(app, config, project, this.request, onWarning)
-    })
+  open (config: Record<string, any> = {}, options: OpenServerOptions) {
+    return super.open(config, { ...options, projectType: 'e2e' })
   }
 
   createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {

@@ -13,6 +13,7 @@ let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const pkg = require('@packages/root')
@@ -30,6 +31,10 @@ const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
 const runner = require(`${root}../runner/lib/resolve-dist`)
+
+function createRoutes (...args) {
+  return require(`${root}lib/routes`).apply(null, args)
+}
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -133,7 +138,12 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new ServerE2E(new Watchers())),
 
-            this.server.open(cfg, this.project)
+            this.server.open(cfg, {
+              SocketCtor: SocketE2E,
+              project: this.project,
+              createRoutes,
+              projectType: 'e2e',
+            })
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },

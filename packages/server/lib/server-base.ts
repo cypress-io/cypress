@@ -23,6 +23,7 @@ import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { createInitialWorkers } from '@packages/rewriter'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -83,6 +84,19 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
+export type WarningErr = Record<string, any>
+
+export interface OpenServerOptions {
+  project: any // ProjectE2E | ProjectCt
+  SocketCtor: typeof SocketE2E | typeof SocketCt
+  specsStore: any // SpecsStore
+  projectType: 'ct' | 'e2e'
+  onError: unknown // (...args: unknown[]) => void
+  onWarning: unknown // (...args: unknown[]) => void
+  shouldCorrelatePreRequests: () => boolean
+  createRoutes: any
+}
+
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
@@ -139,6 +153,73 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
+  }
+
+  createServer (
+    app: any, // Express,
+    config: Record<string, any>,
+    project: any, // ProjectE2E | ProjectCt,
+    request: unknown,
+    onWarning: unknown,
+  ): Bluebird<[number, WarningErr?]> {
+    throw Error('`createServer must be implemented by super class!`')
+  }
+
+  open (config: Record<string, any> = {}, {
+    project,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+    specsStore,
+    createRoutes,
+    projectType,
+    SocketCtor,
+  }: OpenServerOptions) {
+    debug('server open')
+
+    // la(_.isPlainObject(config), 'expected plain config object', config)
+
+    return Bluebird.try(() => {
+      if (!config.baseUrl && projectType === 'ct') {
+        throw new Error('ServerCt#open called without config.baseUrl.')
+      }
+
+      const app = this.createExpressApp(config)
+
+      logger.setSettings(config)
+
+      // TODO: Can we just pass config.baseUrl regardless of project type?
+      this._nodeProxy = httpProxy.createProxyServer({
+        target: projectType === 'ct' ? config.baseUrl : undefined,
+      })
+
+      this._socket = new SocketCtor(config) as TSocket
+
+      const getRemoteState = () => {
+        return this._getRemoteState()
+      }
+
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+      if (config.experimentalSourceRewriting) {
+        createInitialWorkers()
+      }
+
+      this.createHosts(config.hosts)
+
+      createRoutes({
+        app,
+        config,
+        specsStore,
+        getRemoteState,
+        nodeProxy: this.nodeProxy,
+        networkProxy: this._networkProxy,
+        onError,
+        project,
+      })
+
+      return this.createServer(app, config, project, this.request, onWarning)
+    })
   }
 
   createExpressApp (config) {
