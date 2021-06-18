@@ -81,6 +81,8 @@ function makeSassLoaders ({ modules, postcssPlugins }): RuleSetRule {
         options: {
           postcssOptions: {
             plugins: postcssPlugins || [
+              // require('postcss-import'),
+              // require('tailwindcss'),
               require('autoprefixer')({ overrideBrowserslist: ['last 2 versions'], cascade: false }),
             ],
           },

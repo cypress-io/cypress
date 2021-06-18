@@ -1,13 +1,16 @@
 // debugger
 import $ from 'jquery'
-import { createApp, h } from 'vue'
-import App from './App.vue'
-
-// import { start } from 'node:repl'
+import { createApp } from "vue";
+import App from "./App.vue";
+import { createPinia } from 'pinia'
 
 export function start (opts) {
-  window.ReporterOptions = opts
-  createApp(App, { ...opts }).mount('#vue-app')
+  const reporterBus = opts.reporterBus
+  const state = opts.state
+  const app = createApp(App, { reporterBus, state })
+  app.use(createPinia())
+  app.mount("#vue-app");
+
 }
 /* global Cypress, JSX */
 // import { action, runInAction } from 'mobx'

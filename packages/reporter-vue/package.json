@@ -15,7 +15,8 @@
     "deepdash": "5.3.9",
     "jquery": "3.6.0",
     "v-tooltip": "4.0.0-alpha.1",
-    "vue": "3",
+    "vue": "3.1.1",
+    "pinia": "next",
     "vue3-blocks-tree": "0.5.2"
   },
   "devDependencies": {
