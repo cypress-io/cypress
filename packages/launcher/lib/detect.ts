@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import { compact, extend, find } from 'lodash'
 import os from 'os'
+import type { Browser as PlaywrightBrowser } from 'playwright'
 import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
@@ -92,6 +93,47 @@ function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
   return Bluebird.map([browser], checkOneBrowser)
 }
 
+/**
+ * Retrieves the browser details for the given playwright browser type
+ * @param browserType the playwright browser type
+ * @returns
+ */
+function checkBrowserFamily (browserType: string): Bluebird<(boolean | FoundBrowser)[]> {
+  const playwright = require('playwright')
+
+  return new Bluebird.Promise((resolve, reject) => {
+    //
+    log(`looking up ${browserType} in playwright`)
+    const browserInstance = playwright[browserType]
+
+    browserInstance.launch({}).then((instance: PlaywrightBrowser) => {
+      const browserVersion: string = instance.version()
+      const majorVersion = browserVersion.split('.').shift()
+
+      log(`${browserType} with version ${browserVersion} detected in playwright`)
+
+      instance.close().then(() => {
+        log(`${browserType} in playwright closed`)
+        const foundBrowser: FoundBrowser = {
+          name: browserType,
+          launchEngine: 'playwright',
+          family: 'playwright',
+          channel: 'nightly',
+          displayName: `Playwright ${browserType} ${browserVersion}`,
+          version: browserVersion,
+          path: browserInstance.executablePath(),
+          majorVersion,
+        }
+
+        resolve([foundBrowser])
+      }).catch((err: Error) => reject(err))
+    }).catch((err: Error) => {
+      log(`browser ${browserType} is not available in playwright`)
+      reject(err)
+    })
+  })
+}
+
 function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   const platform = os.platform()
   const pickBrowserProps = pick([
@@ -162,9 +204,42 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   log('detecting if the following browsers are present %o', goalBrowsers)
 
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
+  .then(detectPlaywrightBrowsers)
   .then(flatten)
   .then(compactFalse)
   .then(removeDuplicates)
+}
+
+/**
+ * Merges the list of Cypress detected browsers with the available browsers through Playwright
+ * Note: If Playwright is not installed the lsit of detected browsers won't change.
+ * @param foundBrowsers the list of found browsers by Cypress
+ * @returns
+ */
+export const detectPlaywrightBrowsers = (foundBrowsers: FoundBrowser[]): Bluebird<(boolean | FoundBrowser)[]> => {
+  // Check if the feature flag Playwright is enabled, if not return only the found browsers
+  if (process.env.INCLUDE_PLAYWRIGHT_BROWSERS !== 'true') {
+    return Bluebird.resolve(foundBrowsers)
+  }
+
+  // If the feature flag is enabled, check if the playwright package is installed
+  try {
+    // If the playwright package is not installe this will throw an error similar to:
+    // Cannot find module 'playwright' Require stack:
+    require.resolve('playwright')
+
+    // Detect all supported browsers
+    const supportedBrowsers = ['chromium', 'firefox', 'webkit']
+    const combineBrowsers = (playwrightBrowsers: FoundBrowser[]): Bluebird<(boolean | FoundBrowser)[]> => {
+      return Bluebird.resolve([...foundBrowsers, ...playwrightBrowsers])
+    }
+
+    return Bluebird.mapSeries(supportedBrowsers, checkBrowserFamily).then(combineBrowsers)
+  } catch (err: unknown) {
+    log('Playwright module does not exist, skipping Playwright browser detection')
+
+    return Bluebird.resolve(foundBrowsers)
+  }
 }
 
 export const detectByPath = (

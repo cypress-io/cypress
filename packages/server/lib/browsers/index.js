@@ -7,7 +7,7 @@ const errors = require('../errors')
 const check = require('check-more-types')
 
 // returns true if the passed string is a known browser family name
-const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
+const isBrowserFamily = check.oneOf(['chromium', 'firefox', 'webkit', 'playwright'])
 
 let instance = null
 
@@ -44,6 +44,13 @@ const kill = function (unbind, isProcessExit) {
 
 const getBrowserLauncher = function (browser) {
   debug('getBrowserLauncher %o', { browser })
+
+  // If the launch engine or browser family is playwright, we always use the playwright launcher
+  if (browser.family === 'playwright' || browser.launchEngine === 'playwright') {
+    return require('./playwright')
+  }
+
+  //
   if (!isBrowserFamily(browser.family)) {
     debug('unknown browser family', browser.family)
   }

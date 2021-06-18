@@ -49,7 +49,7 @@ const isValidBrowser = (browser) => {
   }
 
   // TODO: this is duplicated with browsers/index
-  const knownBrowserFamilies = ['chromium', 'firefox']
+  const knownBrowserFamilies = ['chromium', 'firefox', 'webkit', 'playwright']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
