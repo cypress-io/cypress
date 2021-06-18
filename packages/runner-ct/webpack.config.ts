@@ -21,20 +21,31 @@ babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
   css: false,
 }])
 
-let pngRule
-// @ts-ignore
-const nonPngRules = _.filter(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
-  if (rule.test.toString().includes('png')) {
-    pngRule = rule
-
-    return false
+const { pngRule, nonPngRules } = commonConfig!.module!.rules!.reduce<{
+  nonPngRules: webpack.RuleSetRule[]
+  pngRule: webpack.RuleSetRule | undefined
+}>((acc, rule) => {
+  if (rule?.test?.toString().includes('png')) {
+    return {
+      ...acc,
+      pngRule: rule,
+    }
   }
 
-  return true
+  return {
+    ...acc,
+    nonPngRules: [...acc.nonPngRules, rule],
+  }
+}, {
+  nonPngRules: [],
+  pngRule: undefined,
 })
 
-pngRule.use[0].options = {
+if (!pngRule || !pngRule.use) {
+  throw Error('Could not find png loader')
+}
+
+(pngRule.use as webpack.RuleSetLoader[])[0].options = {
   name: '[name].[ext]',
   outputPath: 'img',
   publicPath: '/__cypress/runner/img/',

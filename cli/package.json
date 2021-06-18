@@ -20,7 +20,6 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/listr-verbose-renderer": "^0.4.1",
     "@cypress/request": "^2.88.5",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^14.14.31",
@@ -37,7 +36,8 @@
     "commander": "^5.1.0",
     "common-tags": "^1.8.0",
     "dayjs": "^1.10.4",
-    "debug": "4.3.2",
+    "debug": "^4.3.2",
+    "enquirer": "^2.3.6",
     "eventemitter2": "^6.4.3",
     "execa": "4.1.0",
     "executable": "^4.1.1",

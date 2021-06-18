@@ -12,7 +12,7 @@ import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, httpUtils, uri } from '@packages/network'
-import { NetworkProxy } from '@packages/proxy'
+import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
@@ -197,7 +197,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState) {
+  createNetworkProxy (config, getRemoteState, shouldCorrelatePreRequests) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -206,6 +206,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
+      shouldCorrelatePreRequests,
       getRemoteState,
       getFileServerToken,
       socket: this.socket,
@@ -234,6 +235,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
+  }
+
+  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
