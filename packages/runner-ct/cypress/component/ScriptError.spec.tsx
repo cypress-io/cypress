@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { mount } from '@cypress/react'
-import ScriptError from '../../src/errors/script-error'
+import { ScriptError } from '@packages/runner-shared'
 
 describe('ScriptError', () => {
   it('renders an error', () => {

@@ -164,10 +164,10 @@ const openProject = (project) => {
       ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
     })
 
-    project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
+    project.prompts.setPromptStates(config)
   }
 
   ipc.onFocusTests(() => {
