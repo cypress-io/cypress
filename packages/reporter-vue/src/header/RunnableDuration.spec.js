@@ -3,7 +3,7 @@ import RunnableDuration from './RunnableDuration.vue'
 import { h } from 'vue'
 
 // const stat = '[data-cy=stat]'
-const durations = [123.20, 20, 1, 0]
+const durations = [109240192, 10219.291, 123.20, 24, 1, 0]
 
 const style = {
   display: 'grid',

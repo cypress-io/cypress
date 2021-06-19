@@ -14,6 +14,9 @@
 
     <!-- Controls (auto-scrolling and play-pause) -->
     <template #controls>
+      <!-- <PlayControl @click="playControlClicked">
+      <AutoScrollControl @click="autoScrollClicked"/> -->
+
       <HotkeyTooltip :content="playControl.text" :hotkey="playControl.hotkey">
           <button @click="playControl.method">
             <i :class="`fas ${reporter.state === 'running' ? 'fa-pause' : 'fa-redo'}`"/>
@@ -65,12 +68,6 @@ const autoScrollingClass = computed(() => {
   return [
     reporter.autoScrolling ? 'auto-scrolling-enabled' : 'auto-scrolling-disabled',
     'auto-scrolling'
-  ]
-})
-
-const headerClass = computed(() => {
-  return [
-    'reporter-header',
   ]
 })
 </script>
