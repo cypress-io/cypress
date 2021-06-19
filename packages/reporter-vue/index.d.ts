@@ -13,6 +13,7 @@ declare namespace Cypress {
      * Custom command to take a percy snapshot of the current DOM
      * @example cy.percySnapshot()
     */
-    percySnapshot (): Chainable
+    percySnapshot(): Chainable
+    mount(): Chainable
   }
 }

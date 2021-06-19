@@ -7,6 +7,10 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
+  "component": {
+    "testFiles": "**/*.spec.*",
+    "componentFolder": "src"
+  },
   "retries": {
     "runMode": 2,
     "openMode": 0

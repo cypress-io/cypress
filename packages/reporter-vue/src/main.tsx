@@ -1,13 +1,21 @@
 // debugger
 import $ from 'jquery'
-import { createApp } from "vue";
+import { createApp, h } from "vue";
 import App from "./App.vue";
 import { createPinia } from 'pinia'
+import Chakra, { CThemeProvider } from '@chakra-ui/vue'
+import { usePlugins } from './plugins'
 
-export function start (opts) {
+export function start(opts) {
   const reporterBus = opts.reporterBus
   const state = opts.state
-  const app = createApp(App, { reporterBus, state })
+  const app = createApp({
+    render() {
+      return h(CThemeProvider, [h(App)])
+    }
+  }, { reporterBus, state })
+  
+  usePlugins().forEach(app.use)
   app.use(createPinia())
   app.mount("#vue-app");
 

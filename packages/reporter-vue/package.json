@@ -14,9 +14,9 @@
   "dependencies": {
     "deepdash": "5.3.9",
     "jquery": "3.6.0",
+    "pinia": "next",
     "v-tooltip": "4.0.0-alpha.1",
     "vue": "3.1.1",
-    "pinia": "next",
     "vue3-blocks-tree": "0.5.2"
   },
   "devDependencies": {
@@ -25,6 +25,9 @@
     "@packages/driver": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
     "cross-env": "6.0.3",
     "cypress-multi-reporters": "1.4.0",
     "cypress-real-events": "1.4.0",

@@ -67,5 +67,5 @@
     "src/*.tsx",
     "./src/**/*.ts",
     "./src/**/*.tsx"
-  ]
+, "src/header/ReporterHeader.spec.js", "src/components/BaseModal.spec.js", "src/App.spec.js", "src/header/Tooltip.jsx"  ]
 }

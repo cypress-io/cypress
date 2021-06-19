@@ -1,33 +1,50 @@
 <template>
-  {{ store.number }}
-  <button @click="store.number++">increment</button>
+  <div>{{ store.counter }}</div>
 </template>
 
 <script lang="ts">
-import { defineStore } from 'pinia'
-import { defineComponent } from "vue";
+import { defineComponent, watch } from "vue";
+import { defineStore } from "pinia";
+import { useMagicKeys } from './composables/core'
+// import ReporterHeader from "./header/ReporterHeader.vue";
 
 
-// useStore could be anything like useUser, useCart
 const useStore = defineStore({
-  // unique id of the store across your application
-  id: 'storeId',
-  state(){
-    return {number: 0}
+  id: "main",
+  state: () => ({
+    counter: 0,
+  }),
+  getters: {
+    // type is automatically inferred because we are not using `this`
+    doubleCount: (state) => state.counter * 2,
+    // here we need to add the type ourselves (using JSDoc in JS). We can also
+    // use this to document the getter
+    /**
+     * Returns the counter value times two plus one.
+     *
+     * @returns {number}
+     */
+    doubleCountPlusOne() {
+      // autocompletion ✨
+      return this.doubleCount + 1;
+    },
   },
-  actions: {
-    increment() {
-      this.number++
-    }
-  }
-})
+});
 
 export default defineComponent({
   name: "App",
   props: ["reporterBus", "state"],
+  // components: { ReporterHeader },
   setup(props) {
-    const store = useStore()
-    return { store }
-  }
+    const keys = useMagicKeys()
+    // watch(keys.r, rerun)
+    // watch(keys.b, stopRunning)
+    // watch(keys.a, toggleAutoScrolling)
+
+    const store = useStore();
+
+    // store.number;
+    return { store };
+  },
 });
 </script>

@@ -1,48 +1,25 @@
-// const cp = require('child_process')
+// // const cp = require('child_process')
 
-// cp.exec('http-server -p 5006 dist')
+// // cp.exec('http-server -p 5006 dist')
 
-const express = require('express')
+// const express = require('express')
 
-express().use(express.static('dist')).listen(5006)
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on: Function, config) => {
-  if (config.testingType === 'e2e') {
+// express().use(express.static('dist')).listen(5006)
+// /**
+//  * @type {Cypress.PluginConfig}
+//  */
+// module.exports = (on: Function) => {
+// }
 
-  } else {
-    // const { startDevServer } = require('@cypress/webpack-dev-server')
-    // const webpackConfig = {
-    //   resolve: {
-    //     extensions: ['.js', '.ts', '.jsx', '.tsx'],
-    //   },
-    //   mode: 'development',
-    //   devtool: false,
-    //   output: {
-    //     publicPath: '/',
-    //     chunkFilename: '[name].bundle.js',
-    //   },
-    //   // TODO: update with valid configuration for your components
-    //   module: {
-    //     rules: [
-    //       {
-    //         test: /\.(js|jsx|mjs|ts|tsx)$/,
-    //         loader: 'babel-loader',
-    //         options: { ...babelConfig, cacheDirectory: path.resolve(__dirname, '.babel-cache') },
-    //       },
-    //     ],
-    //   },
-    // }
+const { startDevServer } = require('@cypress/webpack-dev-server')
 
-    // on('dev-server:start', (options) => {
-    //   return startDevServer({ options, webpackConfig })
-    // })
-  }
+module.exports = (on, config) => {
+  on('dev-server:start', (options) => {
+    return startDevServer({
+      webpackConfig: require('@vue/cli-service/webpack.config'),
+      options,
+    })
+  })
 
   return config
-}
-
-module.exports = () => {
-  return
 }

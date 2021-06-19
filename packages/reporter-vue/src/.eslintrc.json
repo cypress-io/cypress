@@ -9,9 +9,18 @@
       "version": "16.12"
     }
   },
+  "plugins": [
+    "cypress"
+  ],
+  "env": {
+    "cypress/globals": true
+  },
   "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-no-bind": "off",
     "arrow-body-style": "off",
     "no-unused-vars": "off",
+    "react/"
     "react/jsx-filename-extension": [
       "warn",
       {

@@ -1,0 +1,13 @@
+.tooltip {
+  display: inline-flex;
+  grid-gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyboardTooltip {
+  border: 1px solid white;
+  padding: 0 0.25rem;
+  display: inline-block;
+}

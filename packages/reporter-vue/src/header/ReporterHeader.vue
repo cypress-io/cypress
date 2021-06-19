@@ -1,0 +1,94 @@
+<template>
+  <ReporterHeaderLayout data-cy="reporter-header">
+    <!-- Three stats (passed, failed, pending)-->
+    <template #runnables>
+      <RunnableStat type="passed" :number="stats.numberOfPassed"/>
+      <RunnableStat type="failed" :number="stats.numberOfFailed"/>
+      <RunnableStat type="pending" :number="stats.numberOfPending"/>
+    </template>
+
+    <!-- Timer -->
+    <template #duration>
+      <RunnableDuration class="duration" :duration="stats.duration" />
+    </template>
+
+    <!-- Controls (auto-scrolling and play-pause) -->
+    <template #controls>
+      <HotkeyTooltip :content="playControl.text" :hotkey="playControl.hotkey">
+          <button @click="playControl.method">
+            <i :class="`fas ${reporter.state === 'running' ? 'fa-pause' : 'fa-redo'}`"/>
+          </button>
+        </HotkeyTooltip>
+
+        <HotkeyTooltip :content="autoScrollText" hotkey="A">
+          <button @click="reporter.toggleAutoScrolling" :aria-label="autoScrollText" :class="autoScrollingClass">
+            <span class="auto-scrolling-icon" />
+            <i class="fas fa-arrows-alt-v"/>
+          </button>
+        </HotkeyTooltip>
+    </template>
+  </ReporterHeaderLayout>
+</template>
+
+<script lang="ts" setup>
+import { useStatsStore, useReporterStore } from "../store";
+import RunnableStat from "./RunnableStat.vue";
+import RunnableDuration from './RunnableDuration.vue'
+import {HotkeyTooltip} from './Tooltip'
+import ReporterHeaderLayout from './ReporterHeaderLayout.vue'
+import { computed } from 'vue'
+import text from '../i18n'
+
+const reporter = useReporterStore()
+const stats = useStatsStore()
+
+const playControl = computed(() => {
+  if (reporter.state === 'running') {
+    return {
+      text: text.stopTests,
+      method: reporter.stopRunning,
+      hotkey: 'B'
+    }
+  }
+  return {
+    text: text.rerunTests,
+    method: reporter.rerun,
+    hotkey: 'R'
+  }
+})
+
+const autoScrollText = computed(() => {
+  return reporter.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
+})
+
+const autoScrollingClass = computed(() => {
+  return [
+    reporter.autoScrolling ? 'auto-scrolling-enabled' : 'auto-scrolling-disabled',
+    'auto-scrolling'
+  ]
+})
+
+const headerClass = computed(() => {
+  return [
+    'reporter-header',
+  ]
+})
+</script>
+
+<style lang="scss" scoped>
+
+.auto-scrolling {
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  display: inline-block;
+}
+
+.auto-scrolling-enabled {
+  background: yellow;
+}
+
+.auto-scrolling-disabled {
+  background: gray;
+}
+</style>
