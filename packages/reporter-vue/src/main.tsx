@@ -11,7 +11,6 @@ export function start(opts) {
   const state = opts.state
   const app = createApp({
     render() {
-      // return h(CThemeProvider, [h(App)])
       return h(App, {
         reporterBus,
         state

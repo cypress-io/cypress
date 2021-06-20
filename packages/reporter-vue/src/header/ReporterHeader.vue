@@ -55,7 +55,7 @@ const playControl = computed(() => {
   }
   return {
     text: text.rerunTests,
-    method: reporter.rerun,
+    method: reporter.restart,
     hotkey: 'R'
   }
 })

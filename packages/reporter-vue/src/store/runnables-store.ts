@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import _ from 'lodash'
+import { nextTick } from 'vue'
 import type { Runnable, RootRunnable, Suite, Test, TestOrSuite, Hook } from '../runnables/types'
+// import { useStatsStore } from './stat'
 
 export interface RunnablesStore {
   rootRunnable: RootRunnable | null
@@ -15,50 +17,6 @@ const defaultRootRunnable: RootRunnable = {
   type: 'suite'
 }
 
-function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[], hooks: Hook[], level: number, testsById): (Suite | Test)[] {
-  // @ts-ignore
-  return _.map(runnables, (runnableProps: Test | Suite) => {
-    return  createRunnable(type, runnableProps, hooks, level, testsById)
-  })
-}
-
-function createRunnableChildren({ tests = [], suites = [], hooks = [] }: RootRunnable, level: number, testsById: Record<string, Test>) {
-  return createRunnables('test', tests, hooks, level, testsById).concat(
-    createRunnables('suite', suites, hooks, level, testsById),
-  )
-}
-
-function createRunnable (type, props, hooks: Hook[], level: number, testsById) {
-  props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
-  if (type === 'suite') {
-    return createSuite(props as Suite, level, testsById)
-  } else {
-    return createTest(props as Test, testsById)
-  }
-}
-
-function createTest(props, testsById): Test {
-  const test = props
-  test.hooks = [
-    ...props.hooks,
-    {
-      hookId: props.id.toString(),
-      hookName: 'test body',
-      invocationDetails: props.invocationDetails,
-    }
-  ]
-
-  testsById[test.id] = test
-
-  return test
-}
-
-function createSuite(props: Suite, level, testsById): Suite {
-  return {
-    ...props,
-    children: createRunnableChildren(props, ++level, testsById),
-  }
-}
 
 export const useRunnablesStore = defineStore({
   id: 'runnables',
@@ -67,22 +25,51 @@ export const useRunnablesStore = defineStore({
       rootRunnable: defaultRootRunnable,
     }
   },
+  actions: {
+    updateTest(props) {
+      nextTick(() => {
+        this.tests[props.id] = props
+      })
+      
+      debugger;
+      // props
+    },
+    runnableStarted(runnable) {
+      nextTick(() => {
+        this.tests[runnable.id].state = 'running'
+      })
+      
+    },
+    runnableFinished(runnable) {
+      nextTick(() => {
+        this.tests[runnable.id].state = 'passed'
+      })
+      
+    },
+    addLog(props) {
+      this.tests[props.testId]
+    }
+  },
   getters: {
-    working(): true {
-      return true
+    noTests(store) {
+      return this.tests.length <= 0
     },
     allRunnables() {
       const testsById = {}
+      debugger;
       return {
         runnables: createRunnableChildren(this.rootRunnable, 0, testsById),
         testsById
       }
     },
     runnables(): (Test | Suite)[] { return this.allRunnables.runnables },
-    testsById(): Record<string, Test> {
+    tests(): Record<string, Test> {
+      debugger;
       return this.allRunnables.testsById
     },
-    isReady: store => store.allRunnables.runnables.length,
+    numberOfTests: state => _.keys(state.tests).length,
+    hasTests: state => state.numberOfTests > 0,
+    hasSingleTest: state => state.numberOfTests === 1,
   }
 })
 
@@ -280,3 +267,50 @@ export const useRunnablesStore = defineStore({
 // }
   // */
 
+
+
+function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[], hooks: Hook[], level: number, testsById): (Suite | Test)[] {
+  // @ts-ignore
+  return _.map(runnables, (runnableProps: Test | Suite) => {
+    return  createRunnable(type, runnableProps, hooks, level, testsById)
+  })
+}
+
+function createRunnableChildren({ tests = [], suites = [], hooks = [] }: RootRunnable, level: number, testsById: Record<string, Test>) {
+  return createRunnables('test', tests, hooks, level, testsById).concat(
+    createRunnables('suite', suites, hooks, level, testsById),
+  )
+}
+
+function createRunnable (type, props, hooks: Hook[], level: number, testsById) {
+  props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
+  if (type === 'suite') {
+    return createSuite(props as Suite, level, testsById)
+  } else {
+    return createTest(props as Test, testsById)
+  }
+}
+
+function createTest(props, testsById): Test {
+  const test = props
+  test.state = 'pending'
+  test.hooks = [
+    ...props.hooks,
+    {
+      hookId: props.id.toString(),
+      hookName: 'test body',
+      invocationDetails: props.invocationDetails,
+    }
+  ]
+
+  testsById[test.id] = test
+
+  return test
+}
+
+function createSuite(props: Suite, level, testsById): Suite {
+  return {
+    ...props,
+    children: createRunnableChildren(props, ++level, testsById),
+  }
+}

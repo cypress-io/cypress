@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
-
-var globalID;
+import { useRunnablesStore } from './runnables-store'
 
 export type StatType = 'pending' | 'passed' | 'failed'
 export interface StatsStore {
-  numberOfFailed: number
-  numberOfPassed: number
-  numberOfPending: number
+  // numberOfFailed: number
+  // numberOfPassed: number
+  // numberOfPending: number
   startTime: number,
   currentTime: number,
   raf: null
+  // runnablesStore: any
 }
 
 // TODO: how do you "pick" or "partial"?
@@ -22,9 +22,9 @@ export interface StatsStore {
 
 export const defaultStats = {
   startTime: 0,
-  numberOfFailed: 0,
-  numberOfPassed: 0,
-  numberOfPending: 0,
+  // numberOfFailed: 0,
+  // numberOfPassed: 0,
+  // numberOfPending: 0,
   currentTime: 0,
   raf: null
 }
@@ -32,20 +32,17 @@ export const defaultStats = {
 export const useStatsStore = defineStore({
   id: 'stats',
   state (): StatsStore {
-    return defaultStats
+    return {
+      ...defaultStats,
+      runnablesStore: useRunnablesStore()
+    }
   },
   actions: {
-    increment () {
-      this.numberOfFailed++
-    },
     start({
-      startTime = defaultStats.startTime,
-      numberOfPassed,
-      numberOfFailed,
-      numberOfPending }: Partial<StatsStore>) {
-      this.numberOfFailed = numberOfFailed
-      this.numberOfPassed = numberOfPassed
-      this.numberOfPending = numberOfPending
+      startTime = defaultStats.startTime,}: Partial<StatsStore>) {
+      // this.numberOfFailed = numberOfFailed
+      // this.numberOfPassed = numberOfPassed
+      // this.numberOfPending = numberOfPending
       this.startTime = new Date(startTime).getTime()
       this.currentTime = Date.now()
 
@@ -69,6 +66,11 @@ export const useStatsStore = defineStore({
       }
 
       return store.currentTime - store.startTime
+    },
+    stats() {
+      // return this.runnablesStore.testsArray.reduce((t, acc) => {
+      //   acc[t.state]++
+      // }, {})
     }
   }
 })

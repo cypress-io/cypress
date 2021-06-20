@@ -1,9 +1,9 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 
 import { start } from '@packages/reporter-vue/src/main'
 
 export const ReporterContainer = React.memo((props) => {
-  useLayoutEffect(() => {
+  useEffect(() => {
     start({
       reporterBus: props.eventManager.reporterBus,
       state: props.state,

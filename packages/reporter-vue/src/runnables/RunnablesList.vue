@@ -1,71 +1,47 @@
 <template>
-  <div>Runnables List</div>
-  <!-- {{ root }} -->
-  <Suspense>
-    <template #fallback>
-      Loading
-    </template>
-
-    <!-- {{ runnablesStore.rootRunnable }} -->
-    <ul class="runnables">
-    <!-- {{ runnablesStore.runnables }} -->
-      <li v-for="runnable in runnablesStore.runnables" :key="runnable.id">
-        <!-- {{ runnable.title }} -->
-        <!-- <BaseAccordion> -->
-          <!-- <template #header>{{ runnable.title }}</template> -->
-        <!-- <Runnable :runnable="runnable"> -->
-          <!-- <Suite :runnable="runnable" v-if="runnable.type === 'suite'"></Suite> -->
-          <!-- <Test :runnable="runnable" v-if="runnable.type === 'test'"></Test> -->
-        <!-- </Runnable> -->
-        <RunnableSuite :runnable="runnable">
-        </RunnableSuite>
-
-            <!-- </Runnable> -->
-        <!-- </BaseAccordion> -->
-      </li>
-    </ul>
-  </Suspense>
+  <!-- Recursively calls into itself to generate all of the suites -->
+  <ul class="runnables">
+    <li v-for="runnable in theRunnables" :key="runnable.id"> 
+      <Suite :suite="runnable" v-if="runnable.type === 'suite'">
+        <RunnablesList :runnables="runnable.children" />
+      </Suite>
+      <Test :test="runnable" v-if="runnable.type === 'test'">
+      </Test>
+    </li>
+  </ul>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, h, computed, watch } from "vue";
-import { useRunnablesStore } from '../store'
-import Runnable from './Runnable.vue'
-import BaseAccordion from '../components/BaseAccordion.vue'
+import { defineComponent, computed } from "vue";
+import type { PropType } from 'vue'
+import type { Suite as SuiteType, Test as TestType } from './types'
 import Suite from './suites/RunnableSuite.vue'
 import Test from './tests/RunnableTest.vue'
-
-import RunnableSuite from './suites/RunnableSuite.vue'
+import { useRunnablesStore } from '../store'
 
 export default defineComponent({
-  props: {
-    // loaded: false,
-    runnables: Object,
-    root: null
-  },
   components: {
-    Runnable,
-    BaseAccordion,
-    RunnableSuite,
     Suite,
     Test
   },
-  setup(props) {
-    
-    // return {
-      // ...
-      // root: computed(() => props.root),
-      // children: props.root
-    // }
-    const runnablesStore = useRunnablesStore()
-
-    // watch(runnablesStore, () => console.log(runnablesStore.runnables))
-    return {
-      runnablesStore,
-      runnableComponent: (runnable) => runnable.type === 'suite' ? Suite : Test
-      // tests: computed(() => props.root.tests)
-      // tests: computed(() => props.root ? props.root.tests : []),
+  name: 'runnables-list',
+  props: {
+    runnables: {
+      type: Object as PropType<SuiteType | TestType>
     }
+  },
+  setup(props) {
+    return { theRunnables: props.runnables }
+    // return {
+      // runnables: store.runnables,
+    // }
   }
-});
+})
+
 </script>
+
+<style scoped lang="scss">
+.runnables {
+  padding: 0.25rem;
+}
+</style>

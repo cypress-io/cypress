@@ -131,6 +131,10 @@ export const getCommonConfig = ({ postcssPlugins }: GetCommonConfig = {}) => {
         {
           test: /\.vue$/,
           loader: 'vue-loader',
+          options: {
+            compilerOptions: {
+            },
+          },
         },
         {
           test: /\.(ts|js|jsx|tsx)$/,
