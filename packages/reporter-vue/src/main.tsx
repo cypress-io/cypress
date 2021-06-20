@@ -3,19 +3,24 @@ import $ from 'jquery'
 import { createApp, h } from "vue";
 import App from "./App.vue";
 import { createPinia } from 'pinia'
-import Chakra, { CThemeProvider } from '@chakra-ui/vue'
-import { usePlugins } from './plugins'
+// import Chakra, { CThemeProvider } from '@chakra-ui/vue'
+import { useTooltip } from './plugins/VTooltip'
 
 export function start(opts) {
   const reporterBus = opts.reporterBus
   const state = opts.state
   const app = createApp({
     render() {
-      return h(CThemeProvider, [h(App)])
+      // return h(CThemeProvider, [h(App)])
+      return h(App, {
+        reporterBus,
+        state
+      })
     }
   }, { reporterBus, state })
   
-  usePlugins().forEach(app.use)
+  // usePlugins().forEach(app.use)
+  app.use(useTooltip()[0])
   app.use(createPinia())
   app.mount("#vue-app");
 

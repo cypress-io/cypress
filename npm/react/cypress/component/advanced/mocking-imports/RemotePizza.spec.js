@@ -22,3 +22,61 @@ describe('RemotePizza', () => {
     cy.get('@fetchMock').should('have.been.calledOnce')
   })
 })
+
+describe('RemotefwefewfPizza', () => {
+  beforeEach(() => {
+    cy.spy()
+  })
+
+  before(() => {
+    cy.log()
+  })
+  it('mocks naoi3wefoiwejfnamed import from services', () => {
+    cy.stub(services, 'fetchIngredients')
+    .resolves({ args: { ingredients } })
+    .as('fetchMock')
+
+    mount(<RemotePizza />)
+    cy.contains('button', /cook/i).click()
+
+    for (const ingredient of ingredients) {
+      cy.contains(ingredient)
+    }
+
+    cy.get('@fetchMock').should('have.been.calledOnce')
+  })
+
+  it('oeiwjfowejfgewiof naoi3wefoiwejfnamed import from services', () => {
+    cy.stub(services, 'fetchIngredients')
+    .resolves({ args: { ingredients } })
+    .as('fetchMock')
+
+    mount(<RemotePizza />)
+    cy.contains('button', /cook/i).click()
+
+    for (const ingredient of ingredients) {
+      cy.contains(ingredient)
+    }
+
+    cy.get('@fetchMock').should('have.been.calledOnce')
+  })
+})
+
+
+before(() => {
+  console.log('im a hook')
+})
+it('root lievei it naoi3wefoiwejfnamed import from services', () => {
+    cy.stub(services, 'fetchIngredients')
+    .resolves({ args: { ingredients } })
+    .as('fetchMock')
+
+    mount(<RemotePizza />)
+    cy.contains('button', /cook/i).click()
+
+    for (const ingredient of ingredients) {
+      cy.contains(ingredient)
+    }
+
+    cy.get('@fetchMock').should('have.been.calledOnce')
+  })
