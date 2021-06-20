@@ -2,6 +2,7 @@
   <BaseAccordion initially-open>
     <template #header>
       {{ suite.title }}
+      State: {{ suite.state }}
     </template>
     <slot></slot>
   </BaseAccordion>

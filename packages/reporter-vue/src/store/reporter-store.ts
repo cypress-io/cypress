@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { useRunnablesStore } from './runnables-store'
 import { RootRunnable, Test } from '../runnables/types'
-// import debug from 'debug'
 
 export type ReporterState = 'idle' | 'running' | 'stopped' | 'paused'
 
@@ -35,7 +34,9 @@ export const useReporterStore = defineStore({
       // initialized = true
       bus.on('runnables:ready',
         (rootRunnable: RootRunnable) => {
-          this.runnablesStore.rootRunnable = rootRunnable 
+          debugger;
+          this.runnablesStore.rootRunnable = rootRunnable
+          debugger;
           // this.runnablesStore.init(rootRunnable)
           
         })
@@ -46,7 +47,7 @@ export const useReporterStore = defineStore({
 
       bus.on('run:start', (props) => {
         // debugger;
-        this.ready = true
+        // this.ready = true
       })
 
         bus.on('reporter:log:state:changed', (log) => {

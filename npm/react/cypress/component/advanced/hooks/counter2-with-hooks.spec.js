@@ -7,6 +7,7 @@ import Counter2WithHooks from './counter2-with-hooks.jsx'
 
 describe('0 describe', function () {
   it('0.1 it', function () {
+    expect(true).to.be(false)
     mount(<Counter2WithHooks />, { React, ReactDom })
     cy.contains('0')
     cy.document().should('have.property', 'title', 'You clicked 0 times')

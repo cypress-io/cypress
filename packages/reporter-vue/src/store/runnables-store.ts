@@ -17,7 +17,6 @@ const defaultRootRunnable: RootRunnable = {
   type: 'suite'
 }
 
-
 export const useRunnablesStore = defineStore({
   id: 'runnables',
   state (): RunnablesStore {
@@ -27,44 +26,44 @@ export const useRunnablesStore = defineStore({
   },
   actions: {
     updateTest(props) {
-      nextTick(() => {
         this.tests[props.id] = props
-      })
-      
-      debugger;
-      // props
     },
     runnableStarted(runnable) {
-      nextTick(() => {
+      // nextTick(() => {
         this.tests[runnable.id].state = 'running'
-      })
+      // })
       
     },
     runnableFinished(runnable) {
-      nextTick(() => {
-        this.tests[runnable.id].state = 'passed'
-      })
-      
+      // nextTick(() => {
+      this.tests[runnable.id].state = 'passed'
+      debugger;
+      // })
     },
     addLog(props) {
       this.tests[props.testId]
-    }
+    },
   },
   getters: {
     noTests(store) {
       return this.tests.length <= 0
     },
+    isReady() {
+      return this.rootRunnable.id !== ''
+    },
     allRunnables() {
       const testsById = {}
-      debugger;
+      // debugger;
       return {
         runnables: createRunnableChildren(this.rootRunnable, 0, testsById),
         testsById
       }
     },
-    runnables(): (Test | Suite)[] { return this.allRunnables.runnables },
+    runnables(): (Test | Suite)[] {
+      // debugger;
+      return this.allRunnables.runnables
+    },
     tests(): Record<string, Test> {
-      debugger;
       return this.allRunnables.testsById
     },
     numberOfTests: state => _.keys(state.tests).length,
@@ -300,6 +299,7 @@ function createTest(props, testsById): Test {
       hookId: props.id.toString(),
       hookName: 'test body',
       invocationDetails: props.invocationDetails,
+
     }
   ]
 

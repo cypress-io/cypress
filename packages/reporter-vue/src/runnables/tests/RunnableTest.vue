@@ -2,6 +2,7 @@
   <div :class="classNames">
     {{ props.test.title }}
     {{ props.test.state }}
+    Parent: {{ props.test.parentId }}
     <!-- {{props.test.title}} -->
   </div>
 </template>
