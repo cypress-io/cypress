@@ -10,6 +10,7 @@ const config = require(`${root}lib/config`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { Automation } = require(`${root}lib/automation`)
+const { SpecsStore } = require(`${root}/lib/specs-store`)
 const exec = require(`${root}lib/exec`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const { fs } = require(`${root}lib/util/fs`)
@@ -44,6 +45,7 @@ describe('lib/socket', () => {
       this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
+        specsStore: new SpecsStore({}, 'e2e'),
         projectType: 'e2e',
       })
       .then(() => {
@@ -564,6 +566,7 @@ describe('lib/socket', () => {
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
+        specsStore: new SpecsStore({}, 'e2e'),
         projectType: 'e2e',
       })
       .then(() => {

@@ -22,6 +22,7 @@ const EventSource = require('eventsource')
 const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const { SpecsStore } = require(`${root}/lib/specs-store`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
@@ -138,6 +139,7 @@ describe('Routes', () => {
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
               project: this.project,
+              specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               projectType: 'e2e',
             })
