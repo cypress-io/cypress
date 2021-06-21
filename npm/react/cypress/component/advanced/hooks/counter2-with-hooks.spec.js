@@ -54,7 +54,7 @@ describe('0 describe', function () {
     cy.document().should('have.property', 'title', 'You clicked 2 times')
   })
 
-  it('0.3 it', function () {
+  it.skip('0.3 it', function () {
     mount(<Counter2WithHooks />, { React, ReactDom })
     cy.contains('0')
     cy.document().should('have.property', 'title', 'You clicked 0 times')

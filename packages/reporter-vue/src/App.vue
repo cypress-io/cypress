@@ -4,7 +4,7 @@
     <RunnableHeader>
       {{ store.spec.name }}
     </RunnableHeader>
-    <RunnablesList v-if="store.ready" :runnables="store.runnables" />
+    <RunnablesList v-if="store.ready" :runnables="store.runnablesTree" />
     <div v-else>Loading</div>
   </div>
 </template>
@@ -17,13 +17,7 @@ import ReporterHeader from './header/ReporterHeader.vue'
 import RunnableHeader from './runnables/RunnableHeader.vue'
 import RunnablesList from './runnables/RunnablesList.vue'
 import { useMagicKeys } from './composables/core'
-// import TestReporterList from './TestReporterList.vue'
 
-const { z } = useMagicKeys()
-  watch(z, () => {
-    console.log('z')
-    // reporterStore.restart()
-  })
 
 export default defineComponent({
   components: {
@@ -36,6 +30,12 @@ export default defineComponent({
   setup(props) {
     window.reporterBus = props.reporterBus
     const store = useStore()
+    
+    const { r } = useMagicKeys()
+    watch(r, () => {
+      store.restart()
+    })
+
     store.init(props.reporterBus, props.state)
     return {
       store
