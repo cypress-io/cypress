@@ -4,14 +4,9 @@ import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
 import { ServerE2E } from './server-e2e'
 import { SocketE2E } from './socket-e2e'
-import routes from './routes'
-import { InitializeRoutes } from '../../server-ct/src/routes-ct'
+import { createRoutes } from './routes'
 
 const debug = Debug('cypress:server:project')
-
-function createRoutes (args: InitializeRoutes) {
-  return routes.call(null, args)
-}
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
   get projectType (): 'e2e' {

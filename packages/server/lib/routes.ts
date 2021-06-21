@@ -17,9 +17,10 @@ import staticCtrl from './controllers/static'
 
 const debug = Debug('cypress:server:routes')
 
-export default ({
+export const createRoutes = ({
   app,
   config,
+  specsStore,
   getRemoteState,
   networkProxy,
   project,
@@ -104,6 +105,7 @@ export default ({
       config,
       project,
       getRemoteState,
+      specsStore,
     })
   })
 

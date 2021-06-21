@@ -31,10 +31,7 @@ const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
 const runner = require(`${root}../runner/lib/resolve-dist`)
-
-function createRoutes (...args) {
-  return require(`${root}lib/routes`).apply(null, args)
-}
+const { createRoutes } = require(`${root}lib/routes`)
 
 zlib = Promise.promisifyAll(zlib)
 

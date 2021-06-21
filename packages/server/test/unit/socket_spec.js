@@ -16,10 +16,7 @@ const { fs } = require(`${root}lib/util/fs`)
 const open = require(`${root}lib/util/open`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 const firefoxUtil = require(`${root}lib/browsers/firefox-util`).default
-
-function createRoutes (...args) {
-  return require(`${root}lib/routes`).apply(null, args)
-}
+const { createRoutes } = require(`${root}lib/routes`)
 
 describe('lib/socket', () => {
   beforeEach(function () {
