@@ -1758,6 +1758,45 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
           cy.wait('@getUrl')
         })
+
+        it('by deleting query member', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+              c: 'd',
+            }
+
+            delete req.query.c
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by setting new url', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.url = 'http://localhost:3500/users?a=b'
+
+            expect(req.query).to.deep.eq({ a: 'b' })
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
       })
     })
 

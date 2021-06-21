@@ -152,6 +152,14 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
         return true
       },
+
+      deleteProperty (target, key) {
+        delete target[key]
+
+        updateUrlParams(target)
+
+        return true
+      },
     })
   }
 
@@ -172,6 +180,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     },
     set url (userUrl) {
       req.url = userUrl
+
+      // reset query variables
+      queryObj = createQueryObject()
+      queryProxy = createQueryProxy(queryObj)
     },
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
