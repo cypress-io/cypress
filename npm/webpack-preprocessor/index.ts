@@ -402,6 +402,8 @@ preprocessor.__bundles = () => {
   return bundles
 }
 
+// @ts-ignore - webpack.StatsError is unique to webpack 5
+// TODO: Remove this when we update to webpack 5.
 function cleanseError (err: string | webpack.StatsError) {
   let msg = typeof err === 'string' ? err : err.message
 
