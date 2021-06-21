@@ -27,6 +27,7 @@ import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import { ProjectE2E } from './project-e2e'
 import { SpecsStore } from './specs-store'
+import { InitializeRoutes } from '../../server-ct/src/routes-ct'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -94,10 +95,10 @@ export interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
   projectType: 'ct' | 'e2e'
-  onError: unknown
-  onWarning: unknown
+  onError: any
+  onWarning: any
   shouldCorrelatePreRequests: () => boolean
-  createRoutes: (...args: any[]) => any
+  createRoutes: (args: InitializeRoutes) => any
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -216,7 +217,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         specsStore,
         getRemoteState,
         nodeProxy: this.nodeProxy,
-        networkProxy: this._networkProxy,
+        networkProxy: this._networkProxy!,
         onError,
         project,
       })

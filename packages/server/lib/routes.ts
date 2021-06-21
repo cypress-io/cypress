@@ -14,7 +14,6 @@ import xhrs from './controllers/xhrs'
 import client from './controllers/client'
 import files from './controllers/files'
 import staticCtrl from './controllers/static'
-import { ProjectE2E } from './project-e2e'
 
 const debug = Debug('cypress:server:routes')
 
@@ -25,7 +24,7 @@ export default ({
   networkProxy,
   project,
   onError,
-}: InitializeRoutes<ProjectE2E> & { getRemoteState: () => any }) => {
+}: InitializeRoutes & { getRemoteState: () => any }) => {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {

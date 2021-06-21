@@ -8,15 +8,17 @@ import xhrs from '@packages/server/lib/controllers/xhrs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
+import { ProjectE2E } from '../../server/lib/project-e2e'
 
 const debug = Debug('cypress:server:routes')
 
-export interface InitializeRoutes<Project> {
+export interface InitializeRoutes {
   app: Express
   specsStore: SpecsStore
   config: Record<string, any>
-  project: Project
+  project: ProjectCt | ProjectE2E
   nodeProxy: httpProxy
+  getRemoteState: (() => any) | undefined
   networkProxy: NetworkProxy
   onError: (...args: unknown[]) => any
 }
@@ -28,7 +30,7 @@ export const createRoutes = ({
   nodeProxy,
   networkProxy,
   project,
-}: InitializeRoutes<ProjectCt>) => {
+}: InitializeRoutes) => {
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
@@ -81,7 +83,7 @@ export const createRoutes = ({
 
     serve(req, res, {
       config,
-      project,
+      project: project as ProjectCt,
       specsStore,
     })
   })
