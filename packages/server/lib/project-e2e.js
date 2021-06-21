@@ -1,25 +1,29 @@
-import Debug from 'debug'
-import browsers from './browsers'
-import preprocessor from './plugins/preprocessor'
-import { ProjectBase } from './project-base'
-import { ServerE2E } from './server-e2e'
-import { SocketE2E } from './socket-e2e'
-import routes from './routes'
-import { InitializeRoutes } from '../../server-ct/src/routes-ct'
-
-const debug = Debug('cypress:server:project')
-
-function createRoutes (args: InitializeRoutes) {
-  return routes.call(null, args)
+'use strict'
+let __importDefault = (this && this.__importDefault) || function (mod) {
+  return (mod && mod.__esModule) ? mod : { 'default': mod }
 }
 
-export class ProjectE2E extends ProjectBase<ServerE2E> {
-  get projectType (): 'e2e' {
+Object.defineProperty(exports, '__esModule', { value: true })
+exports.ProjectE2E = void 0
+
+const debug_1 = __importDefault(require('debug'))
+const browsers_1 = __importDefault(require('./browsers'))
+const preprocessor_1 = __importDefault(require('./plugins/preprocessor'))
+const project_base_1 = require('./project-base')
+const server_e2e_1 = require('./server-e2e')
+const socket_e2e_1 = require('./socket-e2e')
+const routes_1 = __importDefault(require('./routes'))
+const debug = debug_1.default('cypress:server:project')
+
+function createRoutes (...args) {
+  return routes_1.default.apply(null, args)
+}
+class ProjectE2E extends project_base_1.ProjectBase {
+  get projectType () {
     return 'e2e'
   }
-
-  open (options: Record<string, unknown>) {
-    this._server = new ServerE2E()
+  open (options) {
+    this._server = new server_e2e_1.ServerE2E()
 
     return super.open(options, {
       onOpen: (cfg) => {
@@ -31,7 +35,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
             onWarning: options.onWarning,
             shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
             projectType: 'e2e',
-            SocketCtor: SocketE2E,
+            SocketCtor: socket_e2e_1.SocketE2E,
             createRoutes,
             specsStore,
           })
@@ -46,7 +50,6 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
           })
         })
       },
-
       onAfterOpen ({ cfg }) {
         cfg.proxyServer = cfg.proxyUrl
 
@@ -54,24 +57,20 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
       },
     })
   }
-
-  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
+  _onError (err, options) {
     debug('got plugins error', err.stack)
-
-    browsers.close()
-
+    browsers_1.default.close()
     options.onError(err)
   }
-
   _initPlugins (cfg, options) {
     return super._initPlugins(cfg, options)
   }
-
   close () {
     return super.close({
       onClose () {
-        preprocessor.close()
+        preprocessor_1.default.close()
       },
     })
   }
 }
+exports.ProjectE2E = ProjectE2E

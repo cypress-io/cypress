@@ -24,7 +24,7 @@ export default ({
   networkProxy,
   project,
   onError,
-}: InitializeRoutes & { getRemoteState: () => any }) => {
+}: InitializeRoutes) => {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {

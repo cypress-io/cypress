@@ -18,8 +18,8 @@ export interface InitializeRoutes {
   config: Record<string, any>
   project: ProjectCt | ProjectE2E
   nodeProxy: httpProxy
-  getRemoteState: (() => any) | undefined
   networkProxy: NetworkProxy
+  getRemoteState: () => any
   onError: (...args: unknown[]) => any
 }
 
