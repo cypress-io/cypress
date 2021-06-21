@@ -19,7 +19,6 @@ export const useStore = defineStore({
   },
   actions: {
     init(bus, state = {}) {
-      eventManager.bind(this.bus)
       
       this.originalValues = state
 
