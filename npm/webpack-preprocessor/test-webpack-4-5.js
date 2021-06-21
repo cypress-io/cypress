@@ -3,7 +3,7 @@ const pkg = require('./package.json')
 const fs = require('fs')
 
 const main = async () => {
-  const originalPkg = JSON.stringify(pkg)
+  const originalPkg = JSON.stringify(pkg, null, 2)
 
   const resetPkg = async () => {
     fs.writeFileSync('package.json', originalPkg, 'utf8')
