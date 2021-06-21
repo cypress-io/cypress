@@ -47,6 +47,9 @@ const getExampleSpecs = (foldersOnly = false) => {
 }
 
 const getIndexedExample = (file, index) => {
+  console.log('getting inndexed example', file)
+  console.log(getPathFromIntegrationFolder(file))
+
   return index[getPathFromIntegrationFolder(file)]
 }
 
@@ -62,13 +65,10 @@ const getFileSize = (file) => {
 
 const fileSizeIsSame = (file, index) => {
   console.log(file)
-
-  const filePath = convertPathForOS(file)
-
-  console.log(filePath)
+  console.log(getIndexedExample(file, index))
 
   return Promise.join(
-    getFileSize(filePath),
+    getFileSize(file),
     getFileSize(getIndexedExample(file, index)),
   ).spread((fileSize, originalFileSize) => {
     return fileSize === originalFileSize
