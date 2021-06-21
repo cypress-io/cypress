@@ -5,18 +5,19 @@ const fs = require('fs')
 const main = async () => {
   const originalPkg = JSON.stringify(pkg)
 
-  const resetPkg = () => {
+  const resetPkg = async () => {
     fs.writeFileSync('package.json', JSON.stringify(originalPkg, null, 2))
+    await execa('yarn', ['install'], { stdio: 'inherit' })
   }
 
-  const checkExit = ({ exitCode, step }) => {
+  const checkExit = async ({ exitCode, step }) => {
     if (typeof exitCode !== 'number') {
       // eslint-disable-next-line no-console
       console.error(`${step} finished with missing exit code from execa (received ${exitCode})`)
     }
 
     if (step === 'e2e' || (step === 'unit' && exitCode !== 0)) {
-      resetPkg()
+      await resetPkg()
       process.exit(exitCode)
     }
   }
@@ -34,11 +35,11 @@ const main = async () => {
 
   const unit = await execa('yarn', ['test-unit'], { stdio: 'inherit' })
 
-  checkExit({ exitCode: unit.exitCode, step: 'unit' })
+  await checkExit({ exitCode: unit.exitCode, step: 'unit' })
 
   const e2e = await execa('yarn', ['test-e2e'], { stdio: 'inherit' })
 
-  checkExit({ exitCode: e2e.exitCode, step: 'e2e' })
+  await checkExit({ exitCode: e2e.exitCode, step: 'e2e' })
 }
 
 // execute main function if called from command line
