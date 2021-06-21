@@ -17,8 +17,13 @@ const getPathFromIntegrationFolder = (file) => {
   // always try with posix paths first and fallback to win if failed
   // using path.sep will not work since sometimes posix paths are used
   // in our scaffolding even when on windows
-  return file.substring(file.indexOf('integration/') + 'integration/'.length) ||
-    file.substring(file.indexOf('integration\\') + 'integration\\'.length)
+  const index = file.indexOf('integration/')
+
+  if (index > -1) {
+    return file.substring(index + 'integration/'.length)
+  }
+
+  return file.substring(file.indexOf('integration\\') + 'integration\\'.length)
 }
 
 const isDifferentNumberOfFiles = (files, exampleSpecs) => {
