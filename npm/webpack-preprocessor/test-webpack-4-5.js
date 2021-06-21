@@ -6,7 +6,7 @@ const main = async () => {
   const originalPkg = JSON.stringify(pkg)
 
   const resetPkg = async () => {
-    fs.writeFileSync('package.json', JSON.stringify(originalPkg, null, 2))
+    fs.writeFileSync('package.json', originalPkg, 'utf8')
     await execa('yarn', ['install'], { stdio: 'inherit' })
   }
 
