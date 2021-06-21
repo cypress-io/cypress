@@ -13,9 +13,7 @@ const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
 const getPathFromIntegrationFolder = (file) => {
-  const integrationFolder = `integration${path.sep}`
-
-  return file.substring(file.indexOf(integrationFolder) + integrationFolder.length)
+  return file.substring(file.indexOf('integration/') + 'integration/'.length)
 }
 
 const isDifferentNumberOfFiles = (files, exampleSpecs) => {
