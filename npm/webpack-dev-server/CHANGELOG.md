@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v1.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.3.1...@cypress/webpack-dev-server-v1.4.0) (2021-06-17)
+
+
+### Features
+
+* **npm/webpack-dev-server,runner-ct:** Normalize webpack errors + general React/TS improvements ([#16613](https://github.com/cypress-io/cypress/issues/16613)) ([c0fc23a](https://github.com/cypress-io/cypress/commit/c0fc23a052e53354a8300dd3f783cb161ae161e1))
+
 # [@cypress/webpack-dev-server-v1.3.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.3.0...@cypress/webpack-dev-server-v1.3.1) (2021-05-26)
 
 
