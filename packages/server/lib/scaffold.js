@@ -58,8 +58,13 @@ const fileSizeIsSame = (file, index) => {
     getFileSize(file),
     getFileSize(getIndexedExample(file, index)),
   ).spread((fileSize, originalFileSize) => {
+    console.log(fileSize)
+    console.log(originalFileSize)
+
     return fileSize === originalFileSize
-  }).catch(() => {
+  }).catch((e) => {
+    console.log(e)
+
     // if the file does not exist, return false
     return false
   })
@@ -254,8 +259,6 @@ module.exports = {
   _removeFile (file, folder, index) {
     const dest = path.join(folder, file)
 
-    console.log(dest)
-
     return fileSizeIsSame(dest, index)
     .then((isSame) => {
       console.log(isSame)
@@ -270,8 +273,6 @@ module.exports = {
 
   _removeFolder (folderPath, folder) {
     const dest = path.join(folder, folderPath)
-
-    console.log(dest)
 
     // catch all errors since the user may have already removed
     // the folder, changed permissions, added their own files to the folder, etc.
