@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
+const os = require('os')
 const cypressEx = require('@packages/example')
 const { fs } = require('./util/fs')
 const glob = require('./util/glob')
@@ -17,6 +18,8 @@ const getPathFromIntegrationFolder = (file) => {
 }
 
 const convertPathForOS = (filePath) => {
+  // converts posix paths for current OS
+  // on posix systems nothing changes, but it fixes the path for win32
   return filePath.split(path.posix.sep).join(path.sep)
 }
 
@@ -44,7 +47,7 @@ const getExampleSpecs = (foldersOnly = false) => {
 }
 
 const getIndexedExample = (file, index) => {
-  return convertPathForOS(index[getPathFromIntegrationFolder(file)])
+  return index[getPathFromIntegrationFolder(file)]
 }
 
 const filesNamesAreDifferent = (files, index) => {
@@ -58,10 +61,14 @@ const getFileSize = (file) => {
 }
 
 const fileSizeIsSame = (file, index) => {
-  console.log(getIndexedExample(file, index))
+  console.log(file)
+
+  const filePath = convertPathForOS(file)
+
+  console.log(filePath)
 
   return Promise.join(
-    getFileSize(file),
+    getFileSize(filePath),
     getFileSize(getIndexedExample(file, index)),
   ).spread((fileSize, originalFileSize) => {
     return fileSize === originalFileSize
