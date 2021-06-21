@@ -30,6 +30,7 @@ export default defineComponent({
   props: ['reporterBus', 'state'],
   setup(props) {
     window.reporterBus = props.reporterBus
+    window.vueInitialState = props.state
     const store = useStore()
     
     const { r } = useMagicKeys()

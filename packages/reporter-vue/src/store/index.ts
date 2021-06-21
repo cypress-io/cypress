@@ -4,6 +4,8 @@ export * from './runnables-store'
 import _ from 'lodash'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
+import { useStatsStore } from './stats-store'
+
 
 import type { Runnable, RootRunnable, Suite, Test, TestOrSuite, Hook } from '../runnables/types'
 
@@ -14,11 +16,13 @@ export const useStore = defineStore({
       bus: window.reporterBus,
       runnables: {},
       runnablesTree: {},
-      originalValues: {}
+      originalValues: window.vueInitialState,
+      // statsStore: useStatsStore()
     }
   },
   actions: {
     init(bus, state = {}) {
+      const statsStore = useStatsStore()
       
       this.originalValues = state
 
@@ -27,8 +31,17 @@ export const useStore = defineStore({
         this.setRunnablesFromRoot(rootRunnable)
       })
       
+      this.bus.on('reporter:start', () => {
+        statsStore.start()
+      })
+
+      this.bus.on('run:end', () => {
+        statsStore.stop()
+      })
+
       this.bus.on('reporter:restart:test:run', () => {
         this.$reset()
+        statsStore.$reset()
         this.bus.emit('reporter:restarted')
       })
 
@@ -49,9 +62,21 @@ export const useStore = defineStore({
           })
           
         }
+        
 
         test.state = props.state
         syncNodeWithTree(test, this.runnablesTree)
+      })
+
+      this.bus.on('paused', (nextCommandName: string) => {
+        // appState.pause(nextCommandName)
+
+        // this.statsStore.pause()
+      })
+  
+      this.bus.on('run:end', () => {
+        // this.end()
+        // this.statsStore.stop()
       })
     },
     setRunnablesFromRoot(rootRunnable) {
@@ -67,8 +92,8 @@ export const useStore = defineStore({
     spec: state => state.originalValues.spec || {},
     ready: state => state.runnables !== null,
     specName: state => state.spec.name,
-    tests: state => _.filter(state.runnablesById, r => r.type === 'test'),
-    suites: state => _.filter(state.runnablesById, r => r.type === 'suite'),
+    tests: state => _.filter(state.runnables, r => r.type === 'test'),
+    suites: state => _.filter(state.runnables, r => r.type === 'suite'),
   }
 })
 
@@ -114,7 +139,6 @@ function createRunnable(type, props, hooks: Hook[], level: number, runnablesById
 
 function createTest(props): Test {
   const test = props
-  test.state = 'pending'
   test.hooks = [
     ...props.hooks,
     {

@@ -1,30 +1,17 @@
 import { defineStore } from 'pinia'
-import { useRunnablesStore } from './runnables-store'
+import { useStore } from './index'
+import _, { defaults } from 'lodash'
 
 export type StatType = 'pending' | 'passed' | 'failed'
 export interface StatsStore {
-  // numberOfFailed: number
-  // numberOfPassed: number
-  // numberOfPending: number
   startTime: number,
   currentTime: number,
   raf: null
-  // runnablesStore: any
-}
 
-// TODO: how do you "pick" or "partial"?
-// export interface StatsStoreStartInfo {
-//   startTime: StartTime,
-//   numberOfFailed: number,
-//   numberOfPassed: number,
-//   numberOfPending: number,
-// }
+}
 
 export const defaultStats = {
   startTime: 0,
-  // numberOfFailed: 0,
-  // numberOfPassed: 0,
-  // numberOfPending: 0,
   currentTime: 0,
   raf: null
 }
@@ -34,16 +21,11 @@ export const useStatsStore = defineStore({
   state (): StatsStore {
     return {
       ...defaultStats,
-      runnablesStore: useRunnablesStore()
     }
   },
   actions: {
-    start({
-      startTime = defaultStats.startTime,}: Partial<StatsStore>) {
-      // this.numberOfFailed = numberOfFailed
-      // this.numberOfPassed = numberOfPassed
-      // this.numberOfPending = numberOfPending
-      this.startTime = new Date(startTime).getTime()
+    start() {
+      this.startTime = Date.now()
       this.currentTime = Date.now()
 
       const update = () => {
@@ -67,10 +49,13 @@ export const useStatsStore = defineStore({
 
       return store.currentTime - store.startTime
     },
-    stats() {
-      // return this.runnablesStore.testsArray.reduce((t, acc) => {
-      //   acc[t.state]++
-      // }, {})
+    byType() {
+      const store = useStore()
+      const types = _.groupBy(store.tests, 'state')
+      types.pending = types.pending || []
+      types.passed = types.passed || []
+      types.failed = types.failed || []
+      return types
     }
   }
 })

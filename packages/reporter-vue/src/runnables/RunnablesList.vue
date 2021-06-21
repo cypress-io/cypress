@@ -1,5 +1,5 @@
 <template>
-  <!-- Recursively calls into itself to generate all of the runnables -->
+<!-- Recursively calls into itself to generate all of the runnables -->
   <ul class="runnables">
     <li v-for="runnable in runnablesTree" :key="runnable.id"> 
       <Suite :suite="runnable" v-if="runnable.type === 'suite'">

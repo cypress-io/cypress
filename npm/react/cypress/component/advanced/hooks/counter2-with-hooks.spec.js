@@ -113,7 +113,7 @@ describe('0 describe', function () {
 
   describe('0.1 describe', () => {
     describe('0.0.1 describe', () => {
-      it('0.0.1 it', function () {
+      xit('0.0.1 it', function () {
     mount(<Counter2WithHooks />, { React, ReactDom })
     cy.contains('0')
     cy.document().should('not.have.property', 'title', 'You clicked 0 times')
