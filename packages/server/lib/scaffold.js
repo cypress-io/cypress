@@ -179,6 +179,8 @@ module.exports = {
 
     return getExampleSpecs()
     .then(({ shortPaths, index }) => {
+      console.log(index)
+
       return Promise.all(_.map(shortPaths, (file) => {
         return this._removeFile(file, folder, index)
       }))
