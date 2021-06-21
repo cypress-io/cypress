@@ -254,8 +254,12 @@ module.exports = {
   _removeFile (file, folder, index) {
     const dest = path.join(folder, file)
 
+    console.log(dest)
+
     return fileSizeIsSame(dest, index)
     .then((isSame) => {
+      console.log(isSame)
+
       if (isSame) {
         // catch all errors since the user may have already removed
         // the file or changed permissions, etc.
@@ -266,6 +270,8 @@ module.exports = {
 
   _removeFolder (folderPath, folder) {
     const dest = path.join(folder, folderPath)
+
+    console.log(dest)
 
     // catch all errors since the user may have already removed
     // the folder, changed permissions, added their own files to the folder, etc.
