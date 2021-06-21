@@ -13,7 +13,7 @@ const { default: pQueue } = require('p-queue')
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
 
-class File {
+class FileUtil {
   constructor (options = {}) {
     if (!options.path) {
       throw new Error('Must specify path to file when creating new FileUtil()')
@@ -222,7 +222,7 @@ class File {
   }
 }
 
-File.noopFile = {
+FileUtil.noopFile = {
   get () {
     return Promise.resolve({})
   },
@@ -235,4 +235,4 @@ File.noopFile = {
   },
 }
 
-module.exports = File
+module.exports = FileUtil

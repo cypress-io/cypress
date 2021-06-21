@@ -17,7 +17,9 @@ export const SpringboardApp = (props) => {
   const goNext = () => {}
 
   const [selectedTestingType, setSelectedTestingType] = useState<string>()
-  const selectTestingType = (testingType: TestingType): React.ChangeEventHandler<HTMLInputElement> => {
+  const selectTestingType = (
+    testingType: TestingType,
+  ): React.ChangeEventHandler<HTMLInputElement> => {
     return (e) => {
       setSelectedTestingType(testingType)
     }
@@ -32,7 +34,12 @@ export const SpringboardApp = (props) => {
         </div>
         <div className="flex flex-col justify-center h-120 p-2">
           {!currentStep ? (
-            <SelectWizard selectedTestingType={selectedTestingType} setTestingType={selectTestingType} testingTypes={testingTypes} showNewUserFlow />
+            <SelectWizard
+              selectedTestingType={selectedTestingType}
+              setTestingType={selectTestingType}
+              testingTypes={testingTypes}
+              showNewUserFlow
+            />
           ) : (
             currentStep.component
           )}
@@ -53,9 +60,7 @@ export const SpringboardApp = (props) => {
           disabled={!selectedTestingType}
           data-cy="previous"
           className={`bg-blue-500 text-white m-5 px-4 py-2 rounded ${
-            !selectedTestingType
-              ? 'opacity-50'
-              : ''
+            !selectedTestingType ? 'opacity-50' : ''
           }`}
           onClick={goNext}
         >

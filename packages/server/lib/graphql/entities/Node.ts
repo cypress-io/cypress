@@ -13,3 +13,5 @@ export abstract class Node {
 
   abstract get _id (): string
 }
+
+export { Node as RelayNode }

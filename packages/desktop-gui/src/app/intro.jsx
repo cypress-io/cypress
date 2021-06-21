@@ -1,8 +1,6 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import React, { Component } from 'react'
-import { action, observable } from 'mobx'
-import { observer } from 'mobx-react'
 
 import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
@@ -11,9 +9,10 @@ import viewStore from '../lib/view-store'
 
 import ProjectsList from '../projects/projects-list'
 
-@observer
-class Default extends Component {
-  @observable isDraggingOver
+class Intro extends Component {
+  state = {
+    dragging: false,
+  }
 
   componentDidMount () {
     // silly idiosyncrancies of the drag-n-drop API
@@ -28,7 +27,7 @@ class Default extends Component {
         <div className='intro-content'>
           <h1>To get started...</h1>
           <div
-            className={cs('project-drop', { 'is-dragging-over': this.isDraggingOver })}
+            className={cs('project-drop', { 'is-dragging-over': this.dragging })}
             onDragOver={this._dragover}
             onDragLeave={this._dragleave}
             onDrop={this._drop}
@@ -39,7 +38,7 @@ class Default extends Component {
             </span>
             <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
           </div>
-          <ProjectsList onSelect={this._projectSelected} />
+          <ProjectsList recentProjects={this.props.recentProjects} />
         </div>
       </div>
     )
@@ -80,10 +79,6 @@ class Default extends Component {
     })
   }
 
-  _projectSelected = (project) => {
-    projectsApi.addProject(project.path)
-  }
-
   _addProject (path) {
     projectsApi.addProject(path).then((project) => {
       viewStore.showProjectSpecs(project)
@@ -91,20 +86,20 @@ class Default extends Component {
   }
 
   _dragover = () => {
-    this._setDragging(true)
+    this.setState({ dragging: true })
 
     return false
   }
 
   _dragleave = () => {
-    this._setDragging(false)
+    this.setState({ dragging: false })
 
     return false
   }
 
   _drop = (e) => {
     e.preventDefault()
-    this._setDragging(false)
+    this.setState({ dragging: false })
 
     const file = _.get(e, 'dataTransfer.files[0]')
 
@@ -113,10 +108,6 @@ class Default extends Component {
     this._addProject(file.path)
 
     return false
-  }
-
-  @action _setDragging = (isDraggingOver) => {
-    this.isDraggingOver = isDraggingOver
   }
 
   _nope (e) {
@@ -130,4 +121,4 @@ class Default extends Component {
   }
 }
 
-export default Default
+export default Intro

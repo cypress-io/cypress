@@ -404,7 +404,6 @@ describe('lib/util/args', () => {
       }
 
       this.obj = this.setup(
-        '--get-key',
         '--env=foo=bar,baz=quux,bar=foo=quz',
         '--config',
         `requestTimeout=1234,blockHosts=${s(this.blockHosts)},hosts=${s(this.hosts)}`,

@@ -474,14 +474,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  getProjectToken (projectId, authToken) {
-    return this._projectToken('get', projectId, authToken)
-  },
-
-  updateProjectToken (projectId, authToken) {
-    return this._projectToken('put', projectId, authToken)
-  },
-
   getReleaseNotes (version) {
     return rp.get({
       url: onRoutes.releaseNotes(version),

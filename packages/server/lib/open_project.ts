@@ -1,19 +1,27 @@
+import { ProjectCt } from '@packages/server-ct'
+import { ProjectE2E } from './project-e2e'
+
 const _ = require('lodash')
 const la = require('lazy-ass')
-const debug = require('debug')('cypress:server:open_project')
+const debugLib = require('debug')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
-const { ProjectCt } = require('@packages/server-ct/src/project-ct')
-const { ProjectE2E } = require('./project-e2e')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
 const runEvents = require('./plugins/run_events')
 
+const debug = debugLib('cypress:server:open_project')
+
+interface CreateOpenProjectArgs {
+  testingType?: 'component' | 'e2e'
+  configFile?: string
+}
+
 const moduleFactory = () => {
-  let openProject = null
-  let relaunchBrowser = null
+  let openProject: ProjectE2E | ProjectCt | null = null
+  let relaunchBrowser: Function | null = null
 
   const reset = () => {
     openProject = null
@@ -324,12 +332,14 @@ const moduleFactory = () => {
       return this.closeOpenProjectAndBrowsers()
     },
 
-    create (path, args = {}, options = {}) {
+    create (path, args: CreateOpenProjectArgs = {}, options = {}) {
       debug('open_project create %s', path)
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = args.testingType === 'component' ? new ProjectCt(path) : new ProjectE2E(path)
+      const opening = args.testingType === 'component' ? new ProjectCt(path) : new ProjectE2E(path)
+
+      openProject = opening
 
       _.defaults(options, {
         onReloadBrowser: () => {
@@ -359,6 +369,8 @@ const moduleFactory = () => {
   }
 }
 
-module.exports = moduleFactory()
+const instance = moduleFactory()
 
-module.exports.Factory = moduleFactory
+instance.Factory = moduleFactory
+
+export = instance

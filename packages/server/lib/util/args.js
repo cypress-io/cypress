@@ -177,8 +177,6 @@ module.exports = {
       'exec-path': 'execPath',
       'exit-with-code': 'exitWithCode',
       'inspect-brk': 'inspectBrk',
-      'get-key': 'getKey',
-      'new-key': 'generateKey',
       'output-path': 'outputPath',
       'proxy-source': 'proxySource',
       'reporter-options': 'reporterOptions',

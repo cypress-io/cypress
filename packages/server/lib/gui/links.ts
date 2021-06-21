@@ -6,7 +6,7 @@ import { shell } from 'electron'
 
 interface OpenExternalOptions {
   url: string
-  params: { [key: string]: string }
+  params?: { [key: string]: string } | null
 }
 
 export const openExternal = (opts: OpenExternalOptions | string) => {

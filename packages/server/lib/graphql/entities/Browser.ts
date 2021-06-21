@@ -1,5 +1,6 @@
 import { nxs } from 'nexus-decorators'
 import { proxyEntity } from '../util/proxyEntity'
+import { RelayNode } from './Node'
 
 interface BrowserData {
   displayName: string
@@ -15,16 +16,22 @@ interface BrowserData {
   warning: string
 }
 
+export const BrowserState = nxs.enumType('browserState', ['opening', 'opened', 'closed'])
+
 @nxs.objectType()
-export class Browser {
+export class Browser extends RelayNode {
   constructor (readonly data: BrowserData) {
+    super()
+
     return proxyEntity(this)
   }
 
-  @nxs.mutationField({
-    type: 'Query',
-  })
-  static closeBrowser () {
-    //
+  get _id () {
+    return this.data.name
+  }
+
+  @nxs.field.type(() => BrowserState)
+  get state () {
+    return 'closed'
   }
 }

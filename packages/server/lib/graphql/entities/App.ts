@@ -1,7 +1,7 @@
-import { nonNull } from 'nexus'
 import { nxs } from 'nexus-decorators'
 import { DataContext } from '../util/DataContext'
 import { AppOptions } from './AppOptions'
+import { Experiment } from './Experiment'
 import { Project } from './Project'
 
 let i = 0
@@ -14,15 +14,6 @@ let i = 0
   },
 })
 export class App {
-  @nxs.queryField(() => {
-    return {
-      type: nonNull('App'),
-    }
-  })
-  static app () {
-    return new App()
-  }
-
   @nxs.field.string()
   field () {}
 
@@ -47,11 +38,9 @@ export class App {
     return new AppOptions(ctx.options)
   }
 
-  @nxs.mutationField({
-    type: 'Boolean',
-  })
-  static externalOpen () {
-    return true
+  @nxs.field.list.type(() => Experiment)
+  experiments () {
+    return []
   }
 
   // @computed get displayVersion () {

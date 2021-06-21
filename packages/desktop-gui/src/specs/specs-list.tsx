@@ -3,7 +3,6 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
@@ -12,6 +11,18 @@ import Notification from '../notifications/notification'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
+import { withApolloClient } from '../graphql/withApolloClient'
+import { gql } from '@apollo/client'
+
+gql`
+  fragment SpecsList on Project {
+    browserState
+    integrationFolder
+    sortedSpecsList {
+      id
+    }
+  }
+`
 
 /**
  * Returns a label text for a button.
@@ -54,20 +65,19 @@ const sortedSpecList = (specs) => {
 
 // Note: this component can be mounted and unmounted
 // if you need to persist the data through mounts, "save" it in the specsStore
-@observer
 class SpecsList extends Component {
+  filterRef = React.createRef()
+  newSpecRef = React.createRef<HTMLLIElement>()
+  // when the specs are running and the user changes the search filter
+  // we still want to show the previous button label to reflect what
+  // is currently running
+  runAllSavedLabel = null
+
   constructor (props) {
     super(props)
     this.state = {
       isFocused: false,
     }
-
-    this.filterRef = React.createRef()
-    this.newSpecRef = React.createRef()
-    // when the specs are running and the user changes the search filter
-    // we still want to show the previous button label to reflect what
-    // is currently running
-    this.runAllSavedLabel = null
 
     // @ts-ignore
     if (window.Cypress) {
@@ -460,4 +470,4 @@ class SpecsList extends Component {
   }
 }
 
-export default SpecsList
+export default withApolloClient(SpecsList)

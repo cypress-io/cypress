@@ -5,33 +5,43 @@
  */
 
 
+import type { App } from "./../entities/App"
 import type { AppOptions } from "./../entities/AppOptions"
 import type { Node } from "./../entities/Node"
-import type { File } from "./../entities/File"
-import type { Project } from "./../entities/Project"
-import type { App } from "./../entities/App"
 import type { Browser } from "./../entities/Browser"
 import type { Dashboard } from "./../entities/Dashboard"
 import type { Experiment } from "./../entities/Experiment"
+import type { File } from "./../entities/File"
 import type { Folder } from "./../entities/Folder"
 import type { Organization } from "./../entities/Organization"
+import type { Project } from "./../entities/Project"
 import type { ProjectConfig } from "./../entities/ProjectConfig"
 import type { Release } from "./../entities/Release"
 import type { User } from "./../entities/User"
 import type { Wizard, WizardDependency } from "./../entities/Wizard"
-import type { core, connectionPluginCore } from "nexus"
-
+import type { core } from "nexus"
+declare global {
+  interface NexusGenCustomInputMethods<TypeName extends string> {
+    /**
+     * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+     */
+    json<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSON";
+    /**
+     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+     */
+    dateTime<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "DateTime";
+  }
+}
 declare global {
   interface NexusGenCustomOutputMethods<TypeName extends string> {
     /**
-     * Adds a Relay-style connection to the type, with numerous options for configuration
-     *
-     * @see https://nexusjs.org/docs/plugins/connection
+     * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
-    connection<FieldName extends string>(
-      fieldName: FieldName,
-      config: connectionPluginCore.ConnectionFieldConfig<TypeName, FieldName>
-    ): void
+    json<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSON";
+    /**
+     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+     */
+    dateTime<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "DateTime";
   }
 }
 
@@ -46,6 +56,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   CurrentStep: "installDependencies" | "selectFramework"
   SpecType: "component" | "integration"
+  browserState: "closed" | "opened" | "opening"
 }
 
 export interface NexusGenScalars {
@@ -54,6 +65,8 @@ export interface NexusGenScalars {
   Float: number
   Boolean: boolean
   ID: string
+  DateTime: any
+  JSON: any
 }
 
 export interface NexusGenObjects {
@@ -89,6 +102,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 export interface NexusGenFieldTypes {
   App: { // field return type
     cypressVersion: string | null; // String
+    experiments: Array<NexusGenRootTypes['Experiment'] | null> | null; // [Experiment]
     field: string | null; // String
     name: string | null; // String
     options: NexusGenRootTypes['AppOptions'] | null; // AppOptions
@@ -101,20 +115,19 @@ export interface NexusGenFieldTypes {
     proxyBypassList: string | null; // String
     proxyServer: string | null; // String
     proxySource: string | null; // String
-    todo: string | null; // ID
   }
   Browser: { // field return type
-    todo: string | null; // ID
+    id: string | null; // ID
+    state: NexusGenEnums['browserState'] | null; // browserState
   }
   Dashboard: { // field return type
-    todo: string | null; // ID
+    todo: boolean | null; // Boolean
   }
   Experiment: { // field return type
-    todo: string | null; // ID
+    name: string | null; // String
   }
   File: { // field return type
     id: string | null; // ID
-    todo: string | null; // ID
   }
   Folder: { // field return type
     displayName: string | null; // String
@@ -128,7 +141,8 @@ export interface NexusGenFieldTypes {
     closeProject: NexusGenRootTypes['Query'] | null; // Query
     externalOpen: boolean | null; // Boolean
     logOut: NexusGenRootTypes['Query'] | null; // Query
-    removeProject: NexusGenRootTypes['Query'] | null; // Query
+    removeProject: NexusGenRootTypes['App'] | null; // App
+    selectProject: NexusGenRootTypes['Query'] | null; // Query
     setScaffoldPaths: NexusGenRootTypes['ProjectConfig'] | null; // ProjectConfig
     wizardSetComponentFramework: NexusGenRootTypes['Query'] | null; // Query
     wizardSetDismissedHelper: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -136,24 +150,31 @@ export interface NexusGenFieldTypes {
   }
   Organization: { // field return type
     name: string | null; // String
-    todo: string | null; // ID
   }
   Project: { // field return type
+    absolutePath: string; // String!
+    browserState: NexusGenEnums['browserState'] | null; // browserState
+    browsers: Array<NexusGenRootTypes['Browser'] | null> | null; // [Browser]
+    displayName: string | null; // String
+    displayPath: string | null; // String
+    id: string | null; // ID
+    integrationFolder: string | null; // String
     name: string | null; // String
     organization: NexusGenRootTypes['Organization'] | null; // Organization
+    relativePath: string; // String!
     sortedSpecsList: Array<NexusGenRootTypes['File'] | null> | null; // [File]
   }
   ProjectConfig: { // field return type
-    todo: string | null; // ID
+    todo: boolean | null; // Boolean
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
     currentProject: NexusGenRootTypes['Project'] | null; // Project
-    projects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
+    recentProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   Release: { // field return type
-    todo: string | null; // ID
+    todo: boolean | null; // Boolean
   }
   User: { // field return type
     displayName: string | null; // String
@@ -180,6 +201,7 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
     cypressVersion: 'String'
+    experiments: 'Experiment'
     field: 'String'
     name: 'String'
     options: 'AppOptions'
@@ -192,20 +214,19 @@ export interface NexusGenFieldTypeNames {
     proxyBypassList: 'String'
     proxyServer: 'String'
     proxySource: 'String'
-    todo: 'ID'
   }
   Browser: { // field return type name
-    todo: 'ID'
+    id: 'ID'
+    state: 'browserState'
   }
   Dashboard: { // field return type name
-    todo: 'ID'
+    todo: 'Boolean'
   }
   Experiment: { // field return type name
-    todo: 'ID'
+    name: 'String'
   }
   File: { // field return type name
     id: 'ID'
-    todo: 'ID'
   }
   Folder: { // field return type name
     displayName: 'String'
@@ -219,7 +240,8 @@ export interface NexusGenFieldTypeNames {
     closeProject: 'Query'
     externalOpen: 'Boolean'
     logOut: 'Query'
-    removeProject: 'Query'
+    removeProject: 'App'
+    selectProject: 'Query'
     setScaffoldPaths: 'ProjectConfig'
     wizardSetComponentFramework: 'Query'
     wizardSetDismissedHelper: 'Wizard'
@@ -227,24 +249,31 @@ export interface NexusGenFieldTypeNames {
   }
   Organization: { // field return type name
     name: 'String'
-    todo: 'ID'
   }
   Project: { // field return type name
+    absolutePath: 'String'
+    browserState: 'browserState'
+    browsers: 'Browser'
+    displayName: 'String'
+    displayPath: 'String'
+    id: 'ID'
+    integrationFolder: 'String'
     name: 'String'
     organization: 'Organization'
+    relativePath: 'String'
     sortedSpecsList: 'File'
   }
   ProjectConfig: { // field return type name
-    todo: 'ID'
+    todo: 'Boolean'
   }
   Query: { // field return type name
     app: 'App'
     currentProject: 'Project'
-    projects: 'Project'
+    recentProjects: 'Project'
     wizard: 'Wizard'
   }
   Release: { // field return type name
-    todo: 'ID'
+    todo: 'Boolean'
   }
   User: { // field return type name
     displayName: 'String'
@@ -270,6 +299,16 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    externalOpen: { // args
+      params: NexusGenScalars['JSON'] | null; // JSON
+      url: string; // String!
+    }
+    removeProject: { // args
+      id: string; // ID!
+    }
+    selectProject: { // args
+      id: string; // ID!
+    }
     wizardSetTestingType: { // args
       type?: string | null; // String
     }
@@ -277,11 +316,13 @@ export interface NexusGenArgTypes {
 }
 
 export interface NexusGenAbstractTypeMembers {
-  Node: "File"
+  Node: "Browser" | "File" | "Project"
 }
 
 export interface NexusGenTypeInterfaces {
+  Browser: "Node"
   File: "Node"
+  Project: "Node"
 }
 
 export type NexusGenObjectNames = keyof NexusGenObjects;
@@ -341,7 +382,6 @@ declare global {
   interface NexusGenPluginInputTypeConfig<TypeName extends string> {
   }
   interface NexusGenPluginFieldConfig<TypeName extends string, FieldName extends string> {
-    
   }
   interface NexusGenPluginInputFieldConfig<TypeName extends string, FieldName extends string> {
   }

@@ -1,3 +1,6 @@
+import { ApolloProvider } from '@apollo/client'
+import { apolloClient } from './graphql/apolloClient'
+
 import './main.scss'
 import { configure as configureMobx, toJS } from 'mobx'
 import React from 'react'
@@ -20,6 +23,10 @@ window.App = {
   ipc, // for stubbing in tests
 
   start () {
-    render(<App />, document.getElementById('app'))
+    render(
+      <ApolloProvider client={apolloClient}>
+        <App />
+      </ApolloProvider>, document.getElementById('app'),
+    )
   },
 }

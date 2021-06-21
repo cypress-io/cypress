@@ -2,8 +2,21 @@
   "plugins": [
     "@cypress/dev"
   ],
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "plugin:@cypress/dev/tests",
     "plugin:@cypress/dev/react"
-  ]
+  ],
+  "rules": {
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
+  }
 }

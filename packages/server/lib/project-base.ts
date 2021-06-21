@@ -34,6 +34,7 @@ import keys from './util/keys'
 import settings from './util/settings'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
+import type { ProjectConfig } from './graphql/entities/Project'
 
 interface CloseOptions {
   onClose: () => any
@@ -54,7 +55,7 @@ const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
-  protected projectRoot: string
+  readonly projectRoot: string
   protected watchers: Watchers
   protected options?: Record<string, any>
   protected spec: Cypress.Cypress['spec'] | null
@@ -476,10 +477,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (options = {}): Bluebird<Cfg> {
-    if (options == null) {
-      options = this.options
-    }
-
     if (this._cfg) {
       debug('project has config %o', this._cfg)
 
@@ -738,7 +735,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cache.getProjectRoots()
   }
 
-  static getPathsAndIds () {
+  static getPathsAndIds (): Bluebird<ProjectConfig[]> {
     return cache.getProjectRoots()
     // this assumes that the configFile for a cached project is 'cypress.json'
     // https://git.io/JeGyF

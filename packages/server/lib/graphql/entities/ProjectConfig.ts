@@ -4,10 +4,5 @@ import { nxs } from 'nexus-decorators'
   description: 'All configuration for a project',
 })
 export class ProjectConfig {
-  @nxs.mutationField(() => {
-    return {
-      type: 'ProjectConfig',
-    }
-  })
-  static setScaffoldPaths () {}
+
 }

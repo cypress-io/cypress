@@ -1,6 +1,4 @@
 import React, { Component } from 'react'
-import { observer } from 'mobx-react'
-import Loader from 'react-loader'
 import _ from 'lodash'
 
 import C from '../lib/constants'
@@ -14,38 +12,37 @@ import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
-import ErrorMessage from './error-message'
+// import ErrorMessage from './error-message'
 import WarningMessage from './warning-message'
+import { gql } from '@apollo/client'
+import type { ActiveProjectFragment } from '../generated/graphql'
 
-@observer
-class Project extends Component {
+gql`
+  fragment ActiveProject on Project {
+    displayName
+    displayPath
+    ...BrowserDropdown
+    ...SpecsList
+  }
+`
+
+class Project extends Component<{project: ActiveProjectFragment}> {
   componentDidMount () {
     const { project } = this.props
 
-    project.setLoading(true)
+    document.title = (appStore.isGlobalMode ? project.displayName : project.displayPath) ?? ''
 
-    document.title = appStore.isGlobalMode ? project.displayName : project.path
-
-    projectsApi.openProject(project)
+    // projectsApi.openProject(project)
   }
 
   componentWillUnmount () {
     document.title = 'Cypress'
 
-    projectsApi.closeProject(this.props.project)
+    // projectsApi.closeProject(this.props.project)
   }
 
   render () {
-    if (this.props.project.isLoading) {
-      return (
-        <div className='loader-wrap'>
-          <Loader color='#888' scale={0.5}/>
-        </div>
-      )
-    }
-
-    if (this.props.project.error) return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project}/>
-
+    // if (this.props.project.error) return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project}/>
     return (
       <>
         <ProjectNav project={this.props.project}/>
@@ -69,7 +66,7 @@ class Project extends Component {
       case C.PROJECT_RUNS:
         return <RunsList project={this.props.project} />
       case C.PROJECT_SETTINGS:
-        return <Settings project={this.props.project} app={this.props.app}/>
+        return <Settings project={this.props.project} />
       default:
         return <SpecsList project={this.props.project} />
     }

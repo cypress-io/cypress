@@ -1,12 +1,20 @@
 import React, { Component } from 'react'
-import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
 import { BrowserIcon, Dropdown } from '@packages/ui-components'
+import gql from 'graphql-tag'
 
 import MarkdownRenderer from '../lib/markdown-renderer'
 import projectsApi from '../projects/projects-api'
 
-@observer
+gql`
+fragment BrowserDropdown on Project {
+  browserState
+  browsers {
+    id
+  }
+}
+`
+
 export default class Browsers extends Component {
   render () {
     const project = this.props.project

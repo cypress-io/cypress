@@ -1,0 +1,20 @@
+overwrite: true
+schema: '../server/lib/graphql/server-schema.graphql'
+documents: 'src/**/*.{jsx,tsx}'
+generates:
+  src/generated/graphql.tsx:
+    config:
+      immutableTypes: true
+      useTypeImports: true
+      preResolveTypes: true
+      onlyOperationTypes: true
+      avoidOptionals: true
+      enumsAsTypes: true
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typed-document-node':
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+    - eslint --fix

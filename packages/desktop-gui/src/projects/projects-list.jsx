@@ -1,35 +1,66 @@
 import _ from 'lodash'
-import React, { Component } from 'react'
-import { observer } from 'mobx-react'
-import Loader from 'react-loader'
+import React from 'react'
+import gql from 'graphql-tag'
 
-import projectsApi from './projects-api'
 import projectsStore from './projects-store'
-import { Link, routes } from '../lib/routing'
+import { useMutation } from '@apollo/client'
+import { SelectProjectDocument, RemoveProjectDocument } from '../generated/graphql'
 
-const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
-  <li>
-    <Link className='project' to={routes.specs(project)} onClick={onSelect}>
-      <span className='project-name'>{project.displayName}</span>
-      <span className='project-path'>{project.displayPath}</span>
-    </Link>
-    <button onClick={(e) => {
-      e.stopPropagation()
-      onRemove()
-    }}>
-      <i className='fas fa-times' />
-    </button>
-  </li>
-))
-
-@observer
-class ProjectsList extends Component {
-  componentDidMount () {
-    projectsApi.loadProjects()
+gql`
+  fragment ProjectListItem on Project {
+    id
+    relativePath
+    displayName
+    displayPath
   }
+`
 
+gql`
+  mutation RemoveProject($projectId: ID!) {
+    removeProject(id: $projectId) {
+      recentProjects {
+        ...ProjectListItem
+      }
+    }
+  }
+`
+
+gql`
+  mutation SelectProject($projectId: ID!) {
+    selectProject(id: $projectId) {
+      currentProject {
+        id
+      }
+    }
+  }
+`
+
+const ProjectListItem = ({ project }) => {
+  const [selectProject] = useMutation(SelectProjectDocument, { variables: { projectId: project.id } })
+  const [removeProject] = useMutation(RemoveProjectDocument, { variables: { projectId: project.id } })
+
+  return (
+    <li>
+      <a className='project' href='#' onClick={(e) => {
+        e.stopPropagation()
+        selectProject()
+      }}>
+        <span className='project-name'>{project.displayName}</span>
+        <span className='project-path'>{project.displayPath}</span>
+      </a>
+      <button onClick={(e) => {
+        e.stopPropagation()
+        removeProject()
+      }}>
+        <i className='fas fa-times' />
+      </button>
+    </li>
+  )
+}
+
+class ProjectsList extends React.PureComponent {
   render () {
-    if (!projectsStore.isLoading && !projectsStore.projects.length) return null
+    if (!this.props.recentProjects.length) return null
 
     return (
       <div className='projects-list'>
@@ -57,17 +88,10 @@ class ProjectsList extends Component {
   }
 
   _content () {
-    if (projectsStore.isLoading) return <Loader color='#888' scale={0.5}/>
-
     return (
       <ul>
-        {_.map(projectsStore.projects, (project) => (
-          <ProjectListItem
-            key={project.path}
-            project={project}
-            onSelect={() => this.props.onSelect(project)}
-            onRemove={() => projectsApi.removeProject(project)}
-          />
+        {_.map(this.props.recentProjects, (project) => (
+          <ProjectListItem key={project.id} project={project} />
         ))}
       </ul>
     )

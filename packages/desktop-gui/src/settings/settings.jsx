@@ -1,8 +1,8 @@
 import cs from 'classnames'
 import React from 'react'
-import { observer } from 'mobx-react'
 import Collapse, { Panel } from 'rc-collapse'
 import { isEmpty } from 'lodash'
+import gql from 'graphql-tag'
 
 import Configuration from './configuration'
 import ProjectId from './project-id'
@@ -19,7 +19,16 @@ if (window.Cypress) {
   window.experimental = experimental
 }
 
-const Settings = observer(({ project, app }) => {
+gql`
+  fragment Settings on App {
+    cypressVersion
+    options {
+      proxyServer
+    }
+  }
+`
+
+const Settings = ({ project }) => {
   const { resolvedNodeVersion } = project
   const experiments = getExperiments(project)
   const hasExperiments = !isEmpty(experiments)
@@ -44,7 +53,7 @@ const Settings = observer(({ project, app }) => {
             <NodeVersion project={project} />
           </Panel>
           <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
-            <ProxySettings app={app} />
+            <ProxySettings />
           </Panel>
           <Panel header='File Opener Preference' key='file-preference' className='form-horizontal settings-file-preference'>
             <FilePreference />
@@ -58,6 +67,6 @@ const Settings = observer(({ project, app }) => {
       </div>
     </div>
   )
-})
+}
 
 export default Settings

@@ -25,3 +25,7 @@ export * from './Release'
 export * from './User'
 
 export * from './Wizard'
+
+export * from './Mutations'
+
+export * from './Query'

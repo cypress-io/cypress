@@ -6,14 +6,6 @@ export const WizardCurrentStep = nxs.enumType('CurrentStep', ['selectFramework',
   description: 'Groups all actions & data associated with the onboarding wizard',
 })
 export class Wizard {
-  @nxs.queryField({
-    type: 'Wizard',
-    description: 'Returns metadata associated with the onboarding wizard',
-  })
-  static wizard () {
-    return new Wizard()
-  }
-
   @nxs.mutationField({
     type: 'Query',
     args (t) {

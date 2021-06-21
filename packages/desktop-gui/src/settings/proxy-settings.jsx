@@ -4,6 +4,7 @@ import { trim } from 'lodash'
 import React from 'react'
 
 import ipc from '../lib/ipc'
+import appStore from '../lib/app-store'
 
 const trimQuotes = (input) =>
   trim(input, '"')
@@ -35,8 +36,8 @@ const renderLearnMore = () => {
   )
 }
 
-const ProxySettings = observer(({ app }) => {
-  if (!app.proxyServer) {
+const ProxySettings = observer(() => {
+  if (!appStore.proxyServer) {
     return (
       <div>
         {renderLearnMore()}
@@ -47,8 +48,8 @@ const ProxySettings = observer(({ app }) => {
     )
   }
 
-  const proxyBypassList = trimQuotes(app.proxyBypassList)
-  const proxySource = getProxySourceName(trimQuotes(app.proxySource))
+  const proxyBypassList = trimQuotes(appStore.proxyBypassList)
+  const proxySource = getProxySourceName(trimQuotes(appStore.proxySource))
 
   return (
     <div className="proxy-settings">
@@ -60,7 +61,7 @@ const ProxySettings = observer(({ app }) => {
             <th>Proxy Server</th>
             <td>
               <code>
-                {trimQuotes(app.proxyServer)}
+                {trimQuotes(appStore.proxyServer)}
               </code>
             </td>
           </tr>
