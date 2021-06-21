@@ -11,11 +11,11 @@ import { ProjectCt } from './project-ct'
 
 const debug = Debug('cypress:server:routes')
 
-export interface InitializeRoutes {
+export interface InitializeRoutes<Project> {
   app: Express
   specsStore: SpecsStore
   config: Record<string, any>
-  project: ProjectCt
+  project: Project
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
   onError: (...args: unknown[]) => any
@@ -28,7 +28,7 @@ export const createRoutes = ({
   nodeProxy,
   networkProxy,
   project,
-}: InitializeRoutes) => {
+}: InitializeRoutes<ProjectCt>) => {
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {

@@ -60,13 +60,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
   protected options?: Record<string, any>
-  protected spec: Cypress.Cypress['spec'] | null
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
 
   public browser: any
+  public spec: Cypress.Cypress['spec'] | null
 
   constructor (projectRoot: string) {
     super()

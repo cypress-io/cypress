@@ -1,20 +1,31 @@
-const path = require('path')
-const la = require('lazy-ass')
-const check = require('check-more-types')
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:routes')
+import path from 'path'
+import la from 'lazy-ass'
+import check from 'check-more-types'
+import _ from 'lodash'
+import Debug from 'debug'
 
-const AppData = require('./util/app_data')
-const CacheBuster = require('./util/cache_buster')
-const spec = require('./controllers/spec')
-const reporter = require('./controllers/reporter')
-const runner = require('./controllers/runner')
-const xhrs = require('./controllers/xhrs')
-const client = require('./controllers/client')
-const files = require('./controllers/files')
-const staticCtrl = require('./controllers/static')
+import { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
+import AppData from './util/app_data'
+import CacheBuster from './util/cache_buster'
+import spec from './controllers/spec'
+import reporter from './controllers/reporter'
+import runner from './controllers/runner'
+import xhrs from './controllers/xhrs'
+import client from './controllers/client'
+import files from './controllers/files'
+import staticCtrl from './controllers/static'
+import { ProjectE2E } from './project-e2e'
 
-module.exports = ({ app, config, getRemoteState, networkProxy, project, onError }) => {
+const debug = Debug('cypress:server:routes')
+
+export default ({
+  app,
+  config,
+  getRemoteState,
+  networkProxy,
+  project,
+  onError,
+}: InitializeRoutes<ProjectE2E> & { getRemoteState: () => any }) => {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
@@ -106,11 +117,18 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
   // the console and send 500 status
   // and report to raygun (in production)
   app.use((err, req, res) => {
+    // TODO: Figure out if types are wrong, or if this code is wrong
+    // and we just have no tests around it.
+
+    // @ts-ignore
     console.log(err.stack) // eslint-disable-line no-console
 
+    // @ts-ignore
     res.set('x-cypress-error', err.message)
+    // @ts-ignore
     res.set('x-cypress-stack', JSON.stringify(err.stack))
 
+    // @ts-ignore
     res.sendStatus(500)
   })
 }
