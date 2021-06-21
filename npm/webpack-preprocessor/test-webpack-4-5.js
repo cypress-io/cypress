@@ -2,19 +2,25 @@ const execa = require('execa')
 const pkg = require('./package.json')
 const fs = require('fs')
 
-const checkExit = ({ exitCode, step }) => {
-  if (typeof exitCode !== 'number') {
-    // eslint-disable-next-line no-console
-    console.error(`${step} finished with missing exit code from execa (received ${exitCode})`)
-    process.exit(1)
-  }
-
-  if (step === 'unit' && exitCode !== 0) {
-    process.exit(exitCode)
-  }
-}
-
 const main = async () => {
+  const originalPkg = JSON.stringify(pkg)
+
+  const resetPkg = () => {
+    fs.writeFileSync('package.json', JSON.stringify(originalPkg, null, 2))
+  }
+
+  const checkExit = ({ exitCode, step }) => {
+    if (typeof exitCode !== 'number') {
+      // eslint-disable-next-line no-console
+      console.error(`${step} finished with missing exit code from execa (received ${exitCode})`)
+    }
+
+    if (step === 'e2e' || (step === 'unit' && exitCode !== 0)) {
+      resetPkg()
+      process.exit(exitCode)
+    }
+  }
+
   pkg.dependencies['webpack'] = '^5.39.0'
   delete pkg.devDependencies['@types/webpack']
   delete pkg.devDependencies['webpack']
