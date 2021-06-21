@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import text from '../i18n'
-import {Tooltip} from '../header/Tooltip'
+import {Tooltip} from '../components/Tooltip'
 
 </script>
 

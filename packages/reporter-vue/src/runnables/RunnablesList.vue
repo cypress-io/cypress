@@ -1,8 +1,8 @@
 <template>
-<!-- Recursively calls into itself to generate all of the runnables -->
+  <!-- Recursively calls into itself to generate all of the runnables -->
   <ul class="runnables">
     <li v-for="runnable in runnablesTree" :key="runnable.id"> 
-      <Suite :suite="runnable" v-if="runnable.type === 'suite'">
+      <Suite :suite="runnable" v-if="runnable.type === 'suite'" :state="runnable.state">
         <RunnablesList :runnables="runnable.children" />
       </Suite>
       <Test v-if="runnable.type === 'test'" :test="runnable"  />
@@ -41,5 +41,4 @@ export default defineComponent({
 .runnables {
   padding: 0.25rem;
 }
-
 </style>

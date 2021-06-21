@@ -37,7 +37,7 @@
 import { useStatsStore, useReporterStore } from "../store";
 import RunnableStat from "./RunnableStat.vue";
 import RunnableDuration from './RunnableDuration.vue'
-import {HotkeyTooltip} from './Tooltip'
+import {HotkeyTooltip} from '../components/Tooltip'
 import ReporterHeaderLayout from './ReporterHeaderLayout.vue'
 import { computed, defineComponent } from 'vue'
 import text from '../i18n'

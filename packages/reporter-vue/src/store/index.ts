@@ -16,6 +16,7 @@ export const useStore = defineStore({
       bus: window.reporterBus,
       runnables: {},
       runnablesTree: {},
+      homelessLogs: {},
       originalValues: window.vueInitialState,
       // statsStore: useStatsStore()
     }
@@ -31,6 +32,20 @@ export const useStore = defineStore({
         this.setRunnablesFromRoot(rootRunnable)
       })
       
+      this.bus.on('reporter:log:add', (props) => {
+        if (props.testId) {
+          if (props.hookId) {
+            const hook = _.find(this.runnables[props.testId].hooks, (h => h.hookId === props.hookId))
+            hook.logs.push(props)
+          } else {
+            this.runnables[props.testId].logs.push(props)
+          }
+        } else {
+          // Debug only. Who ends up here?
+          this.homelessLogs[props.id] = props
+        }
+      })
+
       this.bus.on('reporter:start', () => {
         statsStore.start()
       })
@@ -46,15 +61,21 @@ export const useStore = defineStore({
       })
 
       this.bus.on('test:set:state', (props, cb) => {
-        this.tests[props.id] = props
+        this.runnables[props.id] = props
+        
+        syncNodeWithTree(test, this.runnablesTree)
       })
 
-      this.bus.on('test:before:run', (props) => {
-        this.tests[props.id].state = 'running'
+      this.bus.on('test:before:run:async', (props) => {
+        const test = this.runnables[props.id]
+        test.state = 'running'
+        syncNodeWithTree(test, this.runnablesTree)
       })
+
       this.bus.on('test:after:run', (props) => {
         const test = this.runnables[props.id]
 
+        debugger
         if (props.state === 'failed') {
           test.parentRunnables.forEach((id) => {
             this.runnables[id].state = 'failed'
@@ -62,7 +83,6 @@ export const useStore = defineStore({
           })
           
         }
-        
 
         test.state = props.state
         syncNodeWithTree(test, this.runnablesTree)
@@ -140,12 +160,15 @@ function createRunnable(type, props, hooks: Hook[], level: number, runnablesById
 function createTest(props): Test {
   const test = props
   test.hooks = [
-    ...props.hooks,
+    ...props.hooks.map(h => {
+      h.logs = []
+      return h
+    }),
     {
       hookId: props.id.toString(),
       hookName: 'test body',
       invocationDetails: props.invocationDetails,
-
+      logs: []
     }
   ]
 
@@ -155,6 +178,7 @@ function createTest(props): Test {
 function createSuite(props: Suite, level, runnablesById): Suite {
   return {
     ...props,
+    state: null,
     children: createRunnableChildren(props, ++level, runnablesById),
   }
 }

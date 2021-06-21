@@ -1,28 +1,58 @@
 <template>
-  <div :class="classNames">
-    {{ props.test.title }}
-    {{ props.test.state }}
-    Parent: {{ props.test.parentId }}
-    <!-- {{props.test.title}} -->
-  </div>
+  <!-- todo, use ref to trigger open -->
+  <BaseAccordion ref="accordion" :initially-open="false">
+    <template #header>
+      <div :class="classNames" v-show="test.state">
+      {{ test.title }}
+      State: {{ test.state }}
+      </div>
+    </template>
+    <slot>
+      <!-- <template></template> -->
+      <Hook v-for="hook in test.hooks" :key="hook.id" :hook="hook"></Hook>
+      <span v-show="test.state === 'failed'" v-for="log, idx in test.logs" :key="idx">{{ log }}</span>
+    </slot>
+  </BaseAccordion>
+  
 </template>
 
-<script setup lang="ts">
-import { defineProps, computed, ref } from 'vue'
+<script lang="ts">
+
+
+import { defineComponent, defineProps, computed, ref, watchEffect, } from 'vue'
+import BaseAccordion from '../../components/BaseAccordion.vue'
 import type { PropType } from 'vue'
 import type { Test } from '../types'
+import Hook from '../hooks/Hook.vue'
 
-const props = defineProps({
-  test: {
-    type: Object as PropType<Test>
+export default defineComponent({
+  props: ['test'],
+  components: {BaseAccordion, Hook},
+  setup(props) {
+    const accordion = ref(null)
+    const test = computed(() => props.test)
+    const state = computed(() => test.value.state)
+
+    watchEffect(() => {
+      if (state.value === 'failed') {
+        accordion.value.show = true
+      }
+    })
+
+    const classNames = computed(() => ([
+      'test',
+      test.value.state,
+      test.value.hasRetried ? 'retried' : ''
+    ]))
+    return {
+      state,
+      test,
+      classNames,
+      accordion
+    }
   }
 })
 
-const classNames = computed(() => ([
-  'test',
-  props.test.state,
-  props.test.hasRetried ? 'retried' : ''
-]))
 </script>
 
 <style scoped lang="scss">
