@@ -14,13 +14,11 @@ const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
 const getPathFromIntegrationFolder = (file) => {
-  return file.substring(file.indexOf('integration/') + 'integration/'.length)
-}
-
-const convertPathForOS = (filePath) => {
-  // converts posix paths for current OS
-  // on posix systems nothing changes, but it fixes the path for win32
-  return filePath.split(path.posix.sep).join(path.sep)
+  // always try with posix paths first and fallback to win if failed
+  // using path.sep will not work since sometimes posix paths are used
+  // in our scaffolding even when on windows
+  return file.substring(file.indexOf('integration/') + 'integration/'.length) ||
+    file.substring(file.indexOf('integration\\') + 'integration\\'.length)
 }
 
 const isDifferentNumberOfFiles = (files, exampleSpecs) => {
