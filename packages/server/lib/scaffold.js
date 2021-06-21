@@ -16,6 +16,10 @@ const getPathFromIntegrationFolder = (file) => {
   return file.substring(file.indexOf('integration/') + 'integration/'.length)
 }
 
+const convertPathForOS = (filePath) => {
+  return filePath.split(path.posix.sep).join(path.sep)
+}
+
 const isDifferentNumberOfFiles = (files, exampleSpecs) => {
   return files.length !== exampleSpecs.length
 }
@@ -40,7 +44,7 @@ const getExampleSpecs = (foldersOnly = false) => {
 }
 
 const getIndexedExample = (file, index) => {
-  return index[getPathFromIntegrationFolder(file)]
+  return convertPathForOS(index[getPathFromIntegrationFolder(file)])
 }
 
 const filesNamesAreDifferent = (files, index) => {
@@ -54,13 +58,12 @@ const getFileSize = (file) => {
 }
 
 const fileSizeIsSame = (file, index) => {
+  console.log(getIndexedExample(file, index))
+
   return Promise.join(
     getFileSize(file),
     getFileSize(getIndexedExample(file, index)),
   ).spread((fileSize, originalFileSize) => {
-    console.log(fileSize)
-    console.log(originalFileSize)
-
     return fileSize === originalFileSize
   }).catch((e) => {
     console.log(e)
