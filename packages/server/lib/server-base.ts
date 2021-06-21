@@ -97,7 +97,7 @@ export interface OpenServerOptions {
   onError: unknown
   onWarning: unknown
   shouldCorrelatePreRequests: () => boolean
-  createRoutes: (...args: any) => any
+  createRoutes: (...args: any[]) => any
 }
 
 export class ServerBase<TSocket extends SocketE2E | SocketCt> {
