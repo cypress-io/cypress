@@ -84,7 +84,7 @@ test_script:
 
   # make sure mocha runs
   - yarn test-mocha
-  - yarn workspace @packages/server test-unit 'scaffold_spec.js'
+  - yarn workspace @packages/server test-unit scaffold_spec.js
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
