@@ -17,6 +17,7 @@ const checkExit = ({ exitCode, step }) => {
 const main = async () => {
   pkg.dependencies['webpack'] = '^5.39.0'
   delete pkg.devDependencies['@types/webpack']
+  delete pkg.devDependencies['webpack']
   // eslint-disable-next-line no-console
   console.log('[@cypress/webpack-preprocessor]: updating package.json...')
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
