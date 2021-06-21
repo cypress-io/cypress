@@ -1395,6 +1395,31 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.wait('@upload')
       })
+
+      it('can stub a response with an ArrayBuffer', function () {
+        const stub = new Uint8Array(2)
+
+        stub[0] = 35
+        stub[1] = 2
+        const assertBody = (body: ArrayBuffer) => {
+          const uint8 = new Uint8Array(body)
+
+          stub.forEach((value, index) => {
+            expect(uint8[index]).to.eq(value)
+          })
+        }
+
+        cy.intercept('/binary*', {
+          body: stub.buffer,
+          headers: {
+            'content-type': 'application/octet-stream',
+          },
+          statusCode: 200,
+        }).as('get')
+        .visit('/fixtures/display-binary.html')
+        .wait('@get').its('response.body').should(assertBody)
+        .get('#result').should('have.text', stub.join(', '))
+      })
     })
   })
 
@@ -1426,6 +1451,27 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }).then(function () {
         $.post('/aaa', 'foo-bar-baz')
       })
+    })
+
+    it('can modify an ArrayBuffer request body', function () {
+      const modifiedUint8 = new Uint8Array(2)
+
+      modifiedUint8[0] = 35
+      modifiedUint8[1] = 2
+      const assertBody = (body: ArrayBuffer) => {
+        const uint8 = new Uint8Array(body)
+
+        modifiedUint8.forEach((value, index) => {
+          expect(uint8[index]).to.eq(value)
+        })
+      }
+
+      cy.intercept('/binary*', function (req) {
+        req.body = modifiedUint8.buffer
+      }).as('post')
+      .visit('/fixtures/dump-binary.html')
+      .wait('@post').its('response.body').should(assertBody)
+      .get('#result').should('have.text', modifiedUint8.join(', '))
     })
 
     it('can modify original request body and have it passed to next handler', function (done) {
@@ -2415,6 +2461,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           return p
         })
         .wait('@get').its('response.body').should('deep.eq', '{ "foo": "bar" }')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/16722
+      it('doesn\'t automatically parse response bodies if content is binary', function () {
+        const expectedBody = [120, 42, 7]
+        const assertBody = (body: ArrayBuffer) => {
+          const uint8 = new Uint8Array(body)
+
+          expectedBody.forEach((value, index) => {
+            expect(uint8[index]).to.eq(value)
+          })
+        }
+
+        cy.intercept('/binary*', (req) => {
+          req.on('response', (res) => {
+            expect(_.isArrayBuffer(res.body)).to.eq(true)
+            assertBody(res.body)
+          })
+        }).as('get')
+        .visit('/fixtures/display-binary.html')
+        .wait('@get').its('response.body').should(assertBody)
+        .get('#result').should('have.text', expectedBody.join(', '))
       })
 
       it('sets body to string if JSON is malformed', function () {
