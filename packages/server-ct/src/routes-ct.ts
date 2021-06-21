@@ -11,7 +11,7 @@ import { ProjectCt } from './project-ct'
 
 const debug = Debug('cypress:server:routes')
 
-interface InitializeRoutes {
+export interface InitializeRoutes {
   app: Express
   specsStore: SpecsStore
   config: Record<string, any>
