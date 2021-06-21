@@ -7,7 +7,7 @@ import {
   SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
-import { parseJsonBody } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
@@ -74,7 +74,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const { routeId } = subscription
   const route = getRoute(routeId)
 
-  parseJsonBody(req)
+  const bodyParsed = parseJsonBody(req)
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -239,8 +239,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     updateRequest(req)
 
-    if (_.isObject(req.body)) {
-      req.body = JSON.stringify(req.body)
+    if (bodyParsed) {
+      stringifyJsonBody(req)
     }
 
     resolve({

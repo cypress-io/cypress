@@ -2,7 +2,7 @@ import _ from 'lodash'
 
 import {
   StaticResponse,
-  BackendStaticResponse,
+  BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
 import $errUtils from '../../cypress/error_utils'
@@ -95,8 +95,8 @@ function getFixtureOpts (fixture: string): FixtureOpts {
   return { filePath, encoding }
 }
 
-export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
-  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
+export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {
+  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
 
   if (staticResponse.delayMs) {
     // support deprecated `delayMs` usage
@@ -108,7 +108,7 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
   }
 
   if (!_.isUndefined(staticResponse.body)) {
-    if (_.isString(staticResponse.body)) {
+    if (_.isString(staticResponse.body) || _.isArrayBuffer(staticResponse.body)) {
       backendStaticResponse.body = staticResponse.body
     } else {
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
