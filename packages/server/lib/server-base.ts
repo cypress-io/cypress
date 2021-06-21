@@ -100,7 +100,7 @@ export interface OpenServerOptions {
   createRoutes: (...args: any) => any
 }
 
-export class ServerBase<TSocket extends SocketE2E | SocketCt> {
+export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
   protected isListening: boolean
@@ -158,15 +158,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._httpsProxy, 'open')
   }
 
-  createServer (
+  abstract createServer (
     app: Express,
     config: Record<string, any>,
     project: ProjectE2E | ProjectCt,
     request: unknown,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]> {
-    throw Error('`createServer must be implemented by super class!`')
-  }
+  ): Bluebird<[number, WarningErr?]>
 
   open (config: Record<string, any> = {}, {
     project,
