@@ -894,34 +894,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return new ProjectBase(path).getConfig()
   }
 
-  static getSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.getProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_FETCH_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  static generateSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.updateProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_CREATE_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
   // Given a path to the project, finds all specs
   // returns list of specs with respect to the project root
   static findSpecs (projectRoot, specPattern) {
