@@ -12,15 +12,12 @@ const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const { Automation } = require(`${root}lib/automation`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
+const { createRoutes } = require(`${root}lib/routes`)
 
 const cyPort = 12345
 const otherPort = 55551
 const wsPort = 20000
 const wssPort = 8443
-
-function createRoutes (...args) {
-  return require(`${root}lib/routes`).apply(null, args)
-}
 
 describe('Web Sockets', () => {
   require('mocha-banner').register()
