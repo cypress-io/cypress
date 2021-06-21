@@ -2,6 +2,15 @@ const execa = require('execa')
 const pkg = require('./package.json')
 const fs = require('fs')
 
+/**
+ * This file installs Webpack 5 and runs the unit and e2e tests for the preprocessor.
+ * We read package.json, update the webpack version, then re-run yarn install.
+ * After it finishes, pass or fail,
+ * we revert the package.json back to the original state.
+ *
+ * The tests for the example projects (inside of examples) run with Webpack 4.
+ * This ensures we have some coverage for both versions.
+ */
 const main = async () => {
   const originalPkg = JSON.stringify(pkg, null, 2)
 
