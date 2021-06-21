@@ -15,6 +15,7 @@ import {
   sendStaticResponse,
   setDefaultHeaders,
   mergeDeletedHeaders,
+  mergeWithPreservedBuffers,
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
@@ -142,18 +143,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // resolve and propagate any changes to the URL
     request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
 
-    // if the body is binary, don't recursively merge it or it will get
-    // incorrectly converted from a Buffer into an array
-    // @see https://github.com/cypress-io/cypress/issues/15898
-    const serializableProps = _.without(SERIALIZABLE_REQ_PROPS, 'body')
-
-    _.merge(before, _.pick(after, serializableProps))
-
-    if (bodyIsBinary) {
-      before.body = after.body
-    } else {
-      _.merge(before, { body: after.body })
-    }
+    mergeWithPreservedBuffers(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
 
     mergeDeletedHeaders(before, after)
   }

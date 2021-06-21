@@ -1,3 +1,10 @@
+# [@cypress/vue-v3.0.0-beta.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-beta.1...@cypress/vue-v3.0.0-beta.2) (2021-06-17)
+
+
+### Bug Fixes
+
+* add latest channel to properly release npm packages ([#16994](https://github.com/cypress-io/cypress/issues/16994)) ([ac16efc](https://github.com/cypress-io/cypress/commit/ac16efca80f33e12153b0c2bd0fc3f04983ed305))
+
 # [@cypress/vue-v3.0.0-beta.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.3...@cypress/vue-v3.0.0-beta.1) (2021-05-31)
 
 
