@@ -1,10 +1,12 @@
 <template>
-  <div>
+  <div class="headers">
     <ReporterHeader/>
     <RunnableHeader>
       {{ store.spec.name }}
     </RunnableHeader>
-    <RunnablesList v-if="store.ready" :runnables="store.runnablesTree" />
+  </div>
+  <div>
+    <RunnablesList v-if="store.ready" :runnables="store.runnablesTree"/>
     <div v-else>Loading</div>
   </div>
 </template>
@@ -17,7 +19,6 @@ import ReporterHeader from './header/ReporterHeader.vue'
 import RunnableHeader from './runnables/RunnableHeader.vue'
 import RunnablesList from './runnables/RunnablesList.vue'
 import { useMagicKeys } from './composables/core'
-
 
 export default defineComponent({
   components: {
@@ -43,3 +44,20 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped lang="scss">
+.headers {
+  position: sticky;
+  top: 0;
+  overflow: auto;
+  background: white;
+}
+</style>
+
+<style>
+#vue-app {
+  overflow: auto;
+  height: 100%;
+  position: relative
+}
+</style>
