@@ -1681,6 +1681,8 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // https://github.com/cypress-io/cypress/issues/16327
     context('request url querystring', () => {
+      // cy.window() is used instead of $.get in the tests below.
+      // because $.get() appends query like _=12345 next to our query.
       it('parse query correctly', () => {
         cy.intercept({ url: '/users*' }, (req) => {
           expect(req.query.someKey).to.deep.equal('someValue')

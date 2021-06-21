@@ -130,7 +130,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       return result
-    } catch { // invalid url
+    } catch { // avoid when url is "".
       return {}
     }
   }
