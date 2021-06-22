@@ -166,6 +166,18 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
         return true
       },
+
+      defineProperty () {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.defineproperty_is_not_allowed')
+
+        return false
+      },
+
+      setPrototypeOf () {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.setprototypeof_is_not_allowed')
+
+        return false
+      },
     })
   }
 

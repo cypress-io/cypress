@@ -1001,6 +1001,8 @@ module.exports = {
           You passed: ${format(eventName)}`, 10)
       },
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
+      defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
+      setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {

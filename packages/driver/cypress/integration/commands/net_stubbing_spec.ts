@@ -1816,6 +1816,55 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             cy.wait('@getUrl')
           })
         })
+
+        context('throwing errors correctly', () => {
+          it('defineproperty', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`defineProperty()` is not allowed.')
+
+              done()
+            })
+
+            cy.intercept({ url: '/users*' }, (req) => {
+              Object.defineProperty(req.query, 'key', {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: 'static',
+              })
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            $.get({
+              url: '/users?someKey=someValue',
+              cache: true,
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('setPrototypeOf', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
+
+              done()
+            })
+
+            cy.intercept({ url: '/users*' }, (req) => {
+              Object.setPrototypeOf(req.query, null)
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            $.get({
+              url: '/users?someKey=someValue',
+              cache: true,
+            })
+
+            cy.wait('@getUrl')
+          })
+        })
       })
     })
 
