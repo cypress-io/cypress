@@ -25,7 +25,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const branchesToBuildBinary = ['develop', '7.0-release']
+  const branchesToBuildBinary = ['develop', 'windows-code-signing']
 
   return branchesToBuildBinary.includes(branch) || shouldForceBinaryBuild
 }
