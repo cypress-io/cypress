@@ -16,6 +16,7 @@ const {
   postInstanceTestsResponse,
 } = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
+const { clearCypressJsonCache } = require('../specUtils')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -28,6 +29,10 @@ let requests = null
 describe('e2e record', () => {
   beforeEach(() => {
     requests = getRequests()
+  })
+
+  afterEach(() => {
+    return clearCypressJsonCache()
   })
 
   context('passing', () => {
