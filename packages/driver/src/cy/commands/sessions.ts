@@ -577,11 +577,11 @@ export default function (Commands, Cypress, cy) {
       }
 
       // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
-      function validateSession (existingSession, onFail) {
+      function validateSession (existingSession, onFail, log = 'Validating Session') {
         navigateAboutBlank()
 
         Cypress.log({
-          name: 'Validating Session',
+          name: log,
           message: '',
           type: 'parent',
           state: 'passed',
@@ -656,6 +656,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       let hadValidationError = false
+      let hadExistingSession = true
       let onValidationError = (err) => {
         const log = Cypress.log({
           name: 'Session Invalidated',
@@ -701,6 +702,7 @@ export default function (Commands, Cypress, cy) {
         }
       }).then(() => {
         if (!existingSession.hydrated) {
+          hadExistingSession = false
           onValidationError = cy.fail
 
           return runSetupFn(existingSession)
@@ -710,7 +712,7 @@ export default function (Commands, Cypress, cy) {
       })
       .then(async () => {
         if (existingSession.validate) {
-          await validateSession(existingSession, onValidationError)
+          await validateSession(existingSession, onValidationError, hadExistingSession ? 'Validating Existing Session' : 'Validating Session')
         }
       })
       .then(async () => {

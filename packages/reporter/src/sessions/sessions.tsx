@@ -37,7 +37,7 @@ const Sessions = observer(({ model }: SessionsProps) => (
               headerClass='hook-header'
               headerExtras={<div className="clear-sessions"
                 onClick={() => events.emit('clear:session')}
-              ><span>Clear Sessions</span></div>}
+              ><span>Clear All Sessions</span></div>}
               contentClass='instrument-content'
             >
               <table>
@@ -60,7 +60,7 @@ const Sessions = observer(({ model }: SessionsProps) => (
   </div>
 ))
 
-function renderSessionTableContents (data:any) {
+function renderSessionTableContents (data: any) {
   if (!_.size(data)) {
     return (<tr>
       <td colSpan={3}><i>no session data</i></td>
