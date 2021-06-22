@@ -14,16 +14,7 @@ const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
 const getPathFromIntegrationFolder = (file) => {
-  // always try with posix paths first and fallback to win if failed
-  // using path.sep will not work since sometimes posix paths are used
-  // in our scaffolding even when on windows
-  const index = file.indexOf('integration/')
-
-  if (index > -1) {
-    return file.substring(index + 'integration/'.length)
-  }
-
-  return file.substring(file.indexOf('integration\\') + 'integration\\'.length)
+  return file.substring(file.indexOf('integration/') + 'integration/'.length)
 }
 
 const isDifferentNumberOfFiles = (files, exampleSpecs) => {
@@ -50,14 +41,10 @@ const getExampleSpecs = (foldersOnly = false) => {
 }
 
 const getIndexedExample = (file, index) => {
-  console.log('getting inndexed example', file)
-
   // convert to using posix sep if on win
   if (os.platform() === 'win32') {
     file = file.split(path.sep).join(path.posix.sep)
   }
-
-  console.log(getPathFromIntegrationFolder(file))
 
   return index[getPathFromIntegrationFolder(file)]
 }
@@ -73,17 +60,12 @@ const getFileSize = (file) => {
 }
 
 const fileSizeIsSame = (file, index) => {
-  console.log(file)
-  console.log(getIndexedExample(file, index))
-
   return Promise.join(
     getFileSize(file),
     getFileSize(getIndexedExample(file, index)),
   ).spread((fileSize, originalFileSize) => {
     return fileSize === originalFileSize
   }).catch((e) => {
-    console.log(e)
-
     // if the file does not exist, return false
     return false
   })
@@ -198,8 +180,6 @@ module.exports = {
 
     return getExampleSpecs()
     .then(({ shortPaths, index }) => {
-      console.log(index)
-
       return Promise.all(_.map(shortPaths, (file) => {
         return this._removeFile(file, folder, index)
       }))
@@ -282,8 +262,6 @@ module.exports = {
 
     return fileSizeIsSame(dest, index)
     .then((isSame) => {
-      console.log(isSame)
-
       if (isSame) {
         // catch all errors since the user may have already removed
         // the file or changed permissions, etc.
