@@ -161,10 +161,10 @@ describe('lib/project-e2e', () => {
       })
     })
 
-    it('sets cfg.isNewProject to false when state.showedOnBoardingModal is true', function () {
+    it('sets cfg.isNewProject to false when state.showedNewProjectBanner is true', function () {
       return savedState.create(this.todosPath)
       .then((state) => {
-        sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
+        sinon.stub(state, 'get').resolves({ showedNewProjectBanner: true })
 
         return this.project.getConfig({ foo: 'bar' })
         .then((cfg) => {
@@ -173,7 +173,7 @@ describe('lib/project-e2e', () => {
             isNewProject: false,
             baz: 'quux',
             state: {
-              showedOnBoardingModal: true,
+              showedNewProjectBanner: true,
             },
           })
 
@@ -814,7 +814,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('bubbles up Settings.read errors', function () {
+    it('bubbles up Settings.read EACCES error', function () {
       const err = new Error()
 
       err.code = 'EACCES'
@@ -826,6 +826,21 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         throw new Error('expected to fail, but did not')
       }).catch((err) => {
         expect(err.code).to.eq('EACCES')
+      })
+    })
+
+    it('bubbles up Settings.read EPERM error', function () {
+      const err = new Error()
+
+      err.code = 'EPERM'
+
+      sinon.stub(settings, 'read').rejects(err)
+
+      return this.project.getProjectId()
+      .then((id) => {
+        throw new Error('expected to fail, but did not')
+      }).catch((err) => {
+        expect(err.code).to.eq('EPERM')
       })
     })
   })

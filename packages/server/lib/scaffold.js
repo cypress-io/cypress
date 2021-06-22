@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
+const os = require('os')
 const cypressEx = require('@packages/example')
 const { fs } = require('./util/fs')
 const glob = require('./util/glob')
@@ -9,8 +10,8 @@ const debug = require('debug')('cypress:server:scaffold')
 const { isEmpty } = require('ramda')
 const { isDefault } = require('./util/config')
 
-const exampleFolderName = cypressEx.getFolderName()
 const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
+const getExampleFolderFullPaths = cypressEx.getPathToExampleFolders()
 
 const getPathFromIntegrationFolder = (file) => {
   return file.substring(file.indexOf('integration/') + 'integration/'.length)
@@ -20,8 +21,10 @@ const isDifferentNumberOfFiles = (files, exampleSpecs) => {
   return files.length !== exampleSpecs.length
 }
 
-const getExampleSpecs = () => {
-  return getExampleSpecsFullPaths
+const getExampleSpecs = (foldersOnly = false) => {
+  const paths = foldersOnly ? getExampleFolderFullPaths : getExampleSpecsFullPaths
+
+  return paths
   .then((fullPaths) => {
     // short paths relative to integration folder (i.e. examples/actions.spec.js)
     const shortPaths = _.map(fullPaths, (file) => {
@@ -38,6 +41,11 @@ const getExampleSpecs = () => {
 }
 
 const getIndexedExample = (file, index) => {
+  // convert to using posix sep if on win
+  if (os.platform() === 'win32') {
+    file = file.split(path.sep).join(path.posix.sep)
+  }
+
   return index[getPathFromIntegrationFolder(file)]
 }
 
@@ -49,6 +57,18 @@ const filesNamesAreDifferent = (files, index) => {
 
 const getFileSize = (file) => {
   return fs.statAsync(file).get('size')
+}
+
+const fileSizeIsSame = (file, index) => {
+  return Promise.join(
+    getFileSize(file),
+    getFileSize(getIndexedExample(file, index)),
+  ).spread((fileSize, originalFileSize) => {
+    return fileSize === originalFileSize
+  }).catch((e) => {
+    // if the file does not exist, return false
+    return false
+  })
 }
 
 const filesSizesAreSame = (files, index) => {
@@ -71,15 +91,22 @@ const componentTestingEnabled = (config) => {
   return componentTestingEnabled && !isDefault(config, 'componentFolder')
 }
 
-const isNewProject = (integrationFolder) => {
+const isNewProject = (config) => {
   // logic to determine if new project
-  // 1. component testing is not enabled
-  // 2. there are no files in 'integrationFolder'
-  // 3. there is the same number of files in 'integrationFolder'
-  // 4. the files are named the same as the example files
-  // 5. the bytes of the files match the example files
+  // 1. 'integrationFolder' is still the default
+  // 2. component testing is not enabled
+  // 3. there are no files in 'integrationFolder'
+  // 4. there is the same number of files in 'integrationFolder'
+  // 5. the files are named the same as the example files
+  // 6. the bytes of the files match the example files
+
+  const { integrationFolder } = config
 
   debug('determine if new project by globbing files in %o', { integrationFolder })
+
+  if (!isDefault(config, 'integrationFolder')) {
+    return Promise.resolve(false)
+  }
 
   // checks for file up to 3 levels deep
   return glob('{*,*/*,*/*/*}', { cwd: integrationFolder, realpath: true, nodir: true })
@@ -91,7 +118,7 @@ const isNewProject = (integrationFolder) => {
     debug('- empty?', isEmpty(files))
     if (isEmpty(files)) {
       return true
-    } // 1
+    }
 
     return getExampleSpecs()
     .then((exampleSpecs) => {
@@ -100,14 +127,14 @@ const isNewProject = (integrationFolder) => {
       debug('- different number of files?', numFilesDifferent)
       if (numFilesDifferent) {
         return false
-      } // 2
+      }
 
       const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
 
       debug('- different file names?', filesNamesDifferent)
       if (filesNamesDifferent) {
         return false
-      } // 3
+      }
 
       return filesSizesAreSame(files, exampleSpecs.index)
     })
@@ -120,10 +147,6 @@ const isNewProject = (integrationFolder) => {
 
 module.exports = {
   isNewProject,
-
-  integrationExampleName () {
-    return exampleFolderName
-  },
 
   integration (folder, config) {
     debug(`integration folder ${folder}`)
@@ -140,7 +163,31 @@ module.exports = {
       return getExampleSpecs()
       .then(({ fullPaths }) => {
         return Promise.all(_.map(fullPaths, (file) => {
-          return this._copy(file, path.join(folder, exampleFolderName), config)
+          return this._copy(file, folder, config, true)
+        }))
+      })
+    })
+  },
+
+  removeIntegration (folder, config) {
+    debug(`integration folder ${folder}`)
+
+    // skip if user has explicitly set integrationFolder
+    // since we wouldn't have scaffolded anything
+    if (!isDefault(config, 'integrationFolder')) {
+      return Promise.resolve()
+    }
+
+    return getExampleSpecs()
+    .then(({ shortPaths, index }) => {
+      return Promise.all(_.map(shortPaths, (file) => {
+        return this._removeFile(file, folder, index)
+      }))
+    }).then(() => {
+      // remove folders after we've removed all files
+      return getExampleSpecs(true).then(({ shortPaths }) => {
+        return Promise.all(_.map(shortPaths, (folderPath) => {
+          return this._removeFolder(folderPath, folder)
         }))
       })
     })
@@ -198,15 +245,37 @@ module.exports = {
     })
   },
 
-  _copy (file, folder, config) {
+  _copy (file, folder, config, integration = false) {
     // allow file to be relative or absolute
     const src = path.resolve(cwd('lib', 'scaffold'), file)
-    const dest = path.join(folder, path.basename(file))
+    const destFile = integration ? getPathFromIntegrationFolder(file) : path.basename(file)
+    const dest = path.join(folder, destFile)
 
     return this._assertInFileTree(dest, config)
     .then(() => {
       return fs.copyAsync(src, dest)
     })
+  },
+
+  _removeFile (file, folder, index) {
+    const dest = path.join(folder, file)
+
+    return fileSizeIsSame(dest, index)
+    .then((isSame) => {
+      if (isSame) {
+        // catch all errors since the user may have already removed
+        // the file or changed permissions, etc.
+        return fs.removeAsync(dest).catch(_.noop)
+      }
+    })
+  },
+
+  _removeFolder (folderPath, folder) {
+    const dest = path.join(folder, folderPath)
+
+    // catch all errors since the user may have already removed
+    // the folder, changed permissions, added their own files to the folder, etc.
+    return fs.rmdirAsync(dest).catch(_.noop)
   },
 
   verifyScaffolding (folder, fn) {

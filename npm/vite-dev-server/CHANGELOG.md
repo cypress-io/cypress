@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.0...@cypress/vite-dev-server-v2.0.1) (2021-06-18)
+
+
+### Bug Fixes
+
+* vite startDevServer needs to return close() ([#16950](https://github.com/cypress-io/cypress/issues/16950)) ([67b2b3b](https://github.com/cypress-io/cypress/commit/67b2b3b9be13437e56384e377c7d32c6e433e064))
+
 # [@cypress/vite-dev-server-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.7...@cypress/vite-dev-server-v2.0.0) (2021-05-31)
 
 

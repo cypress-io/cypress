@@ -603,6 +603,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
+  removeScaffoldedFiles () {
+    if (!this.cfg) {
+      throw new Error('Missing project config')
+    }
+
+    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
+  }
+
   // do not check files again and again - keep previous promise
   // to refresh it - just close and open the project again.
   determineIsNewProject (folder) {
@@ -634,12 +642,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         throw new Error('Missing integration folder')
       }
 
-      return this.determineIsNewProject(cfg.integrationFolder)
+      return this.determineIsNewProject(cfg)
       .then((untouchedScaffold) => {
-        const userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
+        const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
 
-        debugScaffold(`untouched scaffold ${untouchedScaffold} modal closed ${userHasSeenOnBoarding}`)
-        cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
+        debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
+        cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
       })
     }
 

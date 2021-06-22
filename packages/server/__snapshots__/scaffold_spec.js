@@ -3,7 +3,15 @@ exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = 
     "name": "tests",
     "children": [
       {
-        "name": "examples",
+        "name": "1-getting-started",
+        "children": [
+          {
+            "name": "todo.spec.js"
+          }
+        ]
+      },
+      {
+        "name": "2-advanced-examples",
         "children": [
           {
             "name": "actions.spec.js"
@@ -105,7 +113,15 @@ exports['lib/scaffold .fileTree leaves out integration tests if using component 
     "name": "tests",
     "children": [
       {
-        "name": "examples",
+        "name": "1-getting-started",
+        "children": [
+          {
+            "name": "todo.spec.js"
+          }
+        ]
+      },
+      {
+        "name": "2-advanced-examples",
         "children": [
           {
             "name": "actions.spec.js"
@@ -207,7 +223,15 @@ exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] =
     "name": "tests",
     "children": [
       {
-        "name": "examples",
+        "name": "1-getting-started",
+        "children": [
+          {
+            "name": "todo.spec.js"
+          }
+        ]
+      },
+      {
+        "name": "2-advanced-examples",
         "children": [
           {
             "name": "actions.spec.js"
@@ -301,7 +325,15 @@ exports['lib/scaffold .fileTree leaves out support if configured to false 1'] = 
     "name": "tests",
     "children": [
       {
-        "name": "examples",
+        "name": "1-getting-started",
+        "children": [
+          {
+            "name": "todo.spec.js"
+          }
+        ]
+      },
+      {
+        "name": "2-advanced-examples",
         "children": [
           {
             "name": "actions.spec.js"
@@ -445,7 +477,15 @@ exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = 
     "name": "tests",
     "children": [
       {
-        "name": "examples",
+        "name": "1-getting-started",
+        "children": [
+          {
+            "name": "todo.spec.js"
+          }
+        ]
+      },
+      {
+        "name": "2-advanced-examples",
         "children": [
           {
             "name": "actions.spec.js"
