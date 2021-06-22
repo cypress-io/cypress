@@ -20,7 +20,7 @@ describe('lib/settings', () => {
     })
 
     afterEach(() => {
-      return clearCypressJsonCache()
+      return fs.removeAsync('cypress.json').then(clearCypressJsonCache)
     })
 
     context('nested cypress object', () => {
