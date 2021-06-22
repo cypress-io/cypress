@@ -336,13 +336,18 @@ describe('multiple sessions in test - can switch without redefining', () => {
 function SuiteWithValidateFn (id, fn) {
   const setupFn = Cypress.sinon.stub().callsFake(() => {
     cy.log('setupFn')
+    .then(() => {
+      console.log('running session fn')
+    })
   })
   const validate = Cypress.sinon.stub().callsFake(() => {
     Cypress.log({
+      name: 'log',
       message: 'validate',
+      type: 'parent',
     })
 
-    cy.url().should('eq', 'about:blank')
+    expect(cy.state('window').location.href).eq('about:blank')
 
     return fn(validate.callCount)
   })
@@ -388,7 +393,7 @@ describe('options.validate reruns steps when rejecting', () => {
 })
 
 describe('options.validate reruns steps when resolving false in cypress command', () => {
-  SuiteWithValidateFn('validate_resolve_false_command', (callCount) => {
+  SuiteWithValidateFn('validate_resolve_false_command_1', (callCount) => {
     cy.request('https://127.0.0.2:44665/redirect').then((res) => {
       return callCount !== 2
     })
@@ -405,7 +410,7 @@ describe('options.validate reruns steps when resolving false in cypress chainer'
 })
 
 describe('options.validate reruns steps when failing cypress command', () => {
-  SuiteWithValidateFn('validate_resolve_false_command_2', (callCount) => {
+  SuiteWithValidateFn('validate_fail_command_1', (callCount) => {
     cy.wrap('validate wrap 1')
     cy.wrap('validate wrap 2').then(() => {
       return callCount !== 2
@@ -419,7 +424,7 @@ describe('options.validate reruns steps when failing cypress command', () => {
 })
 
 describe('options.validate reruns steps when failing cy.request', () => {
-  SuiteWithValidateFn('validate_resolve_false_command_2', (callCount) => {
+  SuiteWithValidateFn('validate_fail_command_2', (callCount) => {
     const status = callCount === 2 ? 500 : 200
 
     cy.request(`https://127.0.0.2:44665/status/${status}`)

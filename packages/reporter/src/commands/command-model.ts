@@ -23,6 +23,8 @@ export interface CommandProps extends InstrumentProps {
   hookId: string
   isStudio?: boolean
   showError?: boolean
+  group?: string
+  groupStart?: string
 }
 
 export default class Command extends Instrument {
@@ -40,6 +42,8 @@ export default class Command extends Instrument {
   @observable hookId: string
   @observable isStudio: boolean
   @observable showError?: boolean = false
+  @observable group?: string
+  @observable groupStart?: string
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -62,6 +66,8 @@ export default class Command extends Instrument {
 
     this.err.update(props.err)
     this.showError = props.showError
+    this.group = props.group
+    this.groupStart = props.groupStart
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements

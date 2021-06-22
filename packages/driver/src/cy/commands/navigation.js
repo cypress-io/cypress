@@ -332,10 +332,14 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     return new Promise((resolve) => {
-      return cy.once('window:load', () => {
+      return cy.once('window:load', (e) => {
         cy.state('onPageLoadErr', null)
 
-        options._log.set('message', '--page loaded--').snapshot().end()
+        if (e.window.location.href === 'about:blank') {
+          options._log.set('message', 'page cleared').end()
+        } else {
+          options._log.set('message', '--page loaded--').snapshot().end()
+        }
 
         return resolve()
       })

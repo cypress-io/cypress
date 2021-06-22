@@ -166,6 +166,9 @@ class Command extends Component<Props> {
           `command-state-${model.state}`,
           `command-type-${model.type}`,
           {
+            'command-group': model.group,
+            'command-groupStart': model.groupStart,
+            'command-has-showError': model.showError,
             'command-is-studio': model.isStudio,
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
@@ -225,7 +228,8 @@ class Command extends Component<Props> {
             <Progress model={model} />
 
             {model.showError && <Collapsible
-              header={'Cause'}
+              header={typeof model.showError === 'string' ? model.showError : 'Error'}
+              headerClass="command-error-header"
             >
               <TestError model={model} onPrintToConsole={this._onClick}/>
             </Collapsible>}

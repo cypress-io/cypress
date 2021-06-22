@@ -1,6 +1,6 @@
 .reporter {
   .commands-container {
-    background-color: #eef1f4;
+    // background-color: #eef1f4;
     font-family: $monospace;
     min-width: $reporter-contents-min-width;
     padding: 0;
@@ -11,6 +11,7 @@
   }
 
   .command {
+    background-color: #eef1f4;
     cursor: pointer;
     margin: 0;
   }
@@ -85,12 +86,53 @@
     }
   }
 
+
+  .command-groupStart {
+    // border-left:2px solid white;
+    // border-top:0px solid white;
+    // margin-right: 10px;
+    .command-method {
+      
+      font-weight: bold;
+      }
+      
+   
+  }
+  
+  .command-group {
+      // border-left:6px solid white;
+      margin-left: 10px;
+      
+  }
+  .command-has-showError,.command-name-Validating-Session,.command-name-Creating-New-Session {
+    // border-left:6px solid white;
+    
+    .command-method {
+      
+      font-weight: bold;
+      }
+      
+  }
+
   .command-wrapper {
     color: #777;
     min-height: 20px;
 
     &:hover {
       background-color: #E0E5E7;
+    }
+    .command-error-header {
+      margin-left: 10px;
+      color: #565554;
+      
+      .collapsible-header {
+        outline: none;
+        user-select: none;
+        padding: 5px 2px;
+      }
+      .collapsible-indicator {
+        color: #565554 !important;
+      }
     }
 
     .command-wrapper-text {

@@ -13,7 +13,7 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group groupStart message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -134,6 +134,24 @@ const defaults = function (state, config, obj) {
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
     }
 
+    // if (obj.name === 'assert') {
+    //   debugger
+    // }
+
+    if (obj.groupEnd) {
+      group = null
+
+      // return
+    }
+
+    if (group) {
+      obj.group = group
+    }
+
+    if (obj.groupStart) {
+      group = obj.groupStart
+    }
+
     _.defaults(obj, {
       timeout: config('defaultCommandTimeout'),
       event: false,
@@ -203,6 +221,8 @@ const defaults = function (state, config, obj) {
     },
   })
 }
+
+let group = null
 
 const Log = function (cy, state, config, obj) {
   obj = defaults(state, config, obj)
@@ -491,7 +511,6 @@ const Log = function (cy, state, config, obj) {
 const create = function (Cypress, cy, state, config) {
   counter = 0
   const logs = {}
-  let group = null
 
   // give us the ability to change the delay for firing
   // the change event, or default it to 4
@@ -541,22 +560,6 @@ const create = function (Cypress, cy, state, config) {
     }
 
     const log = Log(cy, state, config, options)
-
-    if (options.groupStart) {
-      group = true
-
-      return
-    }
-
-    if (options.groupEnd) {
-      group = null
-
-      return
-    }
-
-    if (group) {
-      if (options.type === 'parent') options.type = 'child'
-    }
 
     // add event emitter interface
     $Events.extend(log)
