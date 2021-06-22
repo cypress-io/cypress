@@ -13,6 +13,11 @@
     "dirt-simple-file-cache": "^0.4.0",
     "packherd": "^0.5.0"
   },
+  "devDependencies": {
+    "debug": "^4.3.1",
+    "esbuild": "^0.12.9",
+    "glob": "^7.1.7"
+  },
   "files": [
     "register.js",
     "hook-require.js"
