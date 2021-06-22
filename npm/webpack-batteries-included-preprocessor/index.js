@@ -97,6 +97,8 @@ const getDefaultWebpackOptions = () => {
               [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
               require.resolve('@babel/preset-react'),
             ],
+            configFile: false,
+            babelrc: false,
           },
         }],
       }, {

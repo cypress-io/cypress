@@ -25,7 +25,7 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
         includeWarnComment
           ? '  // TODO replace with valid webpack config path'
           : '',
-        `  webpackFileName: '${webpackConfigPath}'`,
+        `  webpackFilename: '${webpackConfigPath}'`,
         '})',
       ].join('\n'), { preserveComments: true }),
     }

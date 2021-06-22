@@ -1,3 +1,11 @@
+# [@cypress/schematic-v1.3.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.3.0...@cypress/schematic-v1.3.1) (2021-06-17)
+
+
+### Bug Fixes
+
+* ensure schematic is installed as devDependency ([#16965](https://github.com/cypress-io/cypress/issues/16965)) ([b49fcaf](https://github.com/cypress-io/cypress/commit/b49fcaf9cfc929313ed681248f6ca9c0a0bdf8c5))
+* **angular:** set rxjs versions > 6.6.0 as dependency ([#16676](https://github.com/cypress-io/cypress/issues/16676)) ([46de81e](https://github.com/cypress-io/cypress/commit/46de81e75fd18bc37cb884e9a751106fff4d08ad))
+
 # [@cypress/schematic-v1.3.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.2.0...@cypress/schematic-v1.3.0) (2021-05-26)
 
 

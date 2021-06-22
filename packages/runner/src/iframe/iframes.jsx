@@ -3,15 +3,16 @@ import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
+import {
+  SnapshotControls,
+  ScriptError,
+  IframeModel,
+  selectorPlaygroundModel,
+  AutIframe,
+  logger,
+  studioRecorder,
+} from '@packages/runner-shared'
 
-import AutIframe from './aut-iframe'
-import ScriptError from '../errors/script-error'
-import SnapshotControls from './snapshot-controls'
-
-import IframeModel from './iframe-model'
-import logger from '../lib/logger'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import studioRecorder from '../studio/studio-recorder'
 import util from '../lib/util'
 
 @observer
@@ -104,7 +105,6 @@ export default class Iframes extends Component {
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
-      removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
       detachDom: this.autIframe.detachDom,
@@ -124,7 +124,13 @@ export default class Iframes extends Component {
   }
 
   @action _setScriptError = (err) => {
-    this.props.state.scriptError = err
+    if (err && 'error' in err) {
+      this.props.state.scriptError = err.error
+    }
+
+    if (!err) {
+      this.props.state.scriptError = null
+    }
   }
 
   _run = (config) => {
