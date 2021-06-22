@@ -1,7 +1,7 @@
 <template>
   <!-- Recursively calls into itself to generate all of the runnables -->
   <ul class="runnables">
-    <li v-for="runnable in runnablesTree" :key="runnable.id"> 
+    <li v-for="runnable in runnablesTree" :key="runnable.id" class="runnable">
       <Suite :suite="runnable" v-if="runnable.type === 'suite'" :state="runnable.state">
         <RunnablesList :runnables="runnable.children" />
       </Suite>
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, watch } from "vue";
+import { defineComponent, computed, watch, ref, onMounted, unref } from "vue";
 import type { PropType } from 'vue'
 import type { Suite as SuiteType, Test as TestType } from './types'
 import Suite from './suites/RunnableSuite.vue'
@@ -39,6 +39,8 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .runnables {
-  padding: 0.25rem;
+  padding: 0.25rem 0;
 }
+
+.my-name {}
 </style>

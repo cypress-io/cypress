@@ -2,15 +2,18 @@
   <!-- todo, use ref to trigger open -->
   <BaseAccordion ref="accordion" :initially-open="false">
     <template #header>
+    <div class="test-header">
       <div :class="classNames" v-show="test.state">
       {{ test.title }}
       State: {{ test.state }}
       </div>
+      </div>
     </template>
     <slot>
-      <!-- <template></template> -->
+    <div class="test-header">
       <Hook v-for="hook in test.hooks" :key="hook.id" :hook="hook"></Hook>
       <span v-show="test.state === 'failed'" v-for="log, idx in test.logs" :key="idx">{{ log }}</span>
+      </div>
     </slot>
   </BaseAccordion>
   
@@ -38,6 +41,16 @@ export default defineComponent({
         accordion.value.show = true
       }
     })
+    
+    const color = computed(() => {
+      const colors = {
+        failed: 'red',
+        passed: 'green',
+        pending: 'gray',
+        running: 'blue',
+      }
+      return colors[test.value.state]
+    })
 
     const classNames = computed(() => ([
       'test',
@@ -45,6 +58,7 @@ export default defineComponent({
       test.value.hasRetried ? 'retried' : ''
     ]))
     return {
+      color,
       state,
       test,
       classNames,
@@ -56,18 +70,35 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
+
+
+.test-header {
+  position: relative;
+  // padding-left: 0.5rem;
+  padding-left: calc(0.5rem * v-bind(test.level));
+  &:before {
+    position: absolute;
+    content: " ";
+    width: 5px;
+    height: 100%;
+    left: 0;
+    background: v-bind(color);
+  }
+}
+
 .test {
-  &.pending {
-    background: gray;
-  }
-  &.running {
-    background: blue;
-  }
-  &.passed {
-    background: green;
-  }
-  &.failed {
-    background: red;
-  }
+  
+  // &.pending {
+  //   background: gray;
+  // }
+  // &.running {
+  //   background: blue;
+  // }
+  // &.passed {
+  //   background: green;
+  // }
+  // &.failed {
+  //   background: red;
+  // }
 }
 </style>

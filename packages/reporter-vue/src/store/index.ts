@@ -18,11 +18,12 @@ export const useStore = defineStore({
       runnablesTree: {},
       homelessLogs: {},
       originalValues: window.vueInitialState,
+      // runState: null
       // statsStore: useStatsStore()
     }
   },
   actions: {
-    init(bus, state = {}) {
+    init(bus, state = {}, run) {
       const statsStore = useStatsStore()
       
       this.originalValues = state
@@ -33,6 +34,7 @@ export const useStore = defineStore({
       })
       
       this.bus.on('reporter:log:add', (props) => {
+        // debugger
         if (props.testId) {
           if (props.hookId) {
             const hook = _.find(this.runnables[props.testId].hooks, (h => h.hookId === props.hookId))
@@ -47,10 +49,13 @@ export const useStore = defineStore({
       })
 
       this.bus.on('reporter:start', () => {
+        // this.runState = 'start'
+        run.value = 'start'
         statsStore.start()
       })
 
       this.bus.on('run:end', () => {
+        run.value = 'end'
         statsStore.stop()
       })
 
@@ -69,38 +74,20 @@ export const useStore = defineStore({
       this.bus.on('test:before:run:async', (props) => {
         const test = this.runnables[props.id]
         test.state = 'running'
-        syncNodeWithTree(test, this.runnablesTree)
       })
 
       this.bus.on('test:after:run', (props) => {
         const test = this.runnables[props.id]
-
-        debugger
-        if (props.state === 'failed') {
-          test.parentRunnables.forEach((id) => {
-            this.runnables[id].state = 'failed'
-            syncNodeWithTree(this.runnables[id], this.runnablesTree)
-          })
-          
-        }
-
         test.state = props.state
-        syncNodeWithTree(test, this.runnablesTree)
       })
 
       this.bus.on('paused', (nextCommandName: string) => {
-        // appState.pause(nextCommandName)
+      })
 
-        // this.statsStore.pause()
-      })
-  
-      this.bus.on('run:end', () => {
-        // this.end()
-        // this.statsStore.stop()
-      })
     },
     setRunnablesFromRoot(rootRunnable) {
       const runnablesById = {}
+      runnablesById[rootRunnable.id] = rootRunnable
       this.runnablesTree = createRunnableChildren(rootRunnable, 0, runnablesById)
       this.runnables = runnablesById
     },
@@ -117,7 +104,6 @@ export const useStore = defineStore({
   }
 })
 
-
 function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[], hooks: Hook[], level: number, runnablesById): (Suite | Test)[] {
   // @ts-ignore
 
@@ -128,14 +114,19 @@ function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[],
 }
 
 function createRunnableChildren(props: RootRunnable, level: number, runnablesById: Record<string, Test | Suite>) {
-
   const addParentRunnables = (runnable) => {
     const parentRunnables = runnable.parentRunnables || []
+    
+    // if (!props.root) {
+    //   parentRunnables.unshift(props.id)
+    // }
+
     parentRunnables.unshift(props.id)
+    
     return {
       ...runnable,
       parentRunnables,
-      parentId: props.id
+      parentId: props.root ? null : props.id
     }
   }
 
@@ -153,12 +144,13 @@ function createRunnable(type, props, hooks: Hook[], level: number, runnablesById
   if (type === 'suite') {
     return createSuite(props as Suite, level, runnablesById)
   } else {
-    return createTest(props as Test)
+    return createTest(props as Test, level)
   }
 }
 
-function createTest(props): Test {
+function createTest(props, level): Test {
   const test = props
+  test.level = level
   test.hooks = [
     ...props.hooks.map(h => {
       h.logs = []
@@ -178,6 +170,7 @@ function createTest(props): Test {
 function createSuite(props: Suite, level, runnablesById): Suite {
   return {
     ...props,
+    level,
     state: null,
     children: createRunnableChildren(props, ++level, runnablesById),
   }
@@ -185,10 +178,14 @@ function createSuite(props: Suite, level, runnablesById): Suite {
 
 
 function findNodeById(curr, id) {
-  if (curr.id == id) return curr
-  if (curr.children && curr.children.length > 0) {
-    for (let i = 0; i < curr.children.length; i++) {
-      const node = findNodeById(curr.children[i], id)
+  if (curr.id == id) {
+    return curr
+  }
+
+  let children = _.isArrayLike(curr) ? curr : curr.children
+  if (children && children.length > 0) {
+    for (let i = 0; i < children.length; i++) {
+      const node = findNodeById(children[i], id)
       if (node) return node
     }
   }

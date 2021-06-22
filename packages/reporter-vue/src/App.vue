@@ -5,7 +5,7 @@
       {{ store.spec.name }}
     </RunnableHeader>
   </div>
-  <div id="scroller" ref="scroller">
+  <div id="scroller" ref="scroller" v-if="true">
     <RunnablesList v-if="store.ready" :runnables="store.runnablesTree"/>
     <div v-else>Loading</div>
     <!-- <div id="anchor"/> -->
@@ -20,7 +20,8 @@ import  { useStore } from './store'
 import ReporterHeader from './header/ReporterHeader.vue'
 import RunnableHeader from './runnables/RunnableHeader.vue'
 import RunnablesList from './runnables/RunnablesList.vue'
-import { useMagicKeys } from './composables/core'
+import { whenever, useMagicKeys } from './composables/core'
+import { useScroller } from './scroller'
 
 export default defineComponent({
   components: {
@@ -33,20 +34,26 @@ export default defineComponent({
   setup(props) {
     window.reporterBus = props.reporterBus
     window.vueInitialState = props.state
+
     const store = useStore()
     const scroller = ref(null)
+    const run = ref('')        
+    store.init(props.reporterBus, props.state, run)
 
-    onMounted(() => {
-      // scroller.value
-      // debugger;
-    })
-    
+    // App Keybindings
     const { r } = useMagicKeys()
     watch(r, () => {
       store.restart()
     })
 
-    store.init(props.reporterBus, props.state)
+    // scrolling
+    const { pause }: any = useScroller(scroller)
+    watch(run, (runState) => {
+      if (runState === 'end') {
+        pause.value()
+      }
+    })
+
     return {
       store,
       scroller
