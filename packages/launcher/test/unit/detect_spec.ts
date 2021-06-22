@@ -39,15 +39,29 @@ describe('browser detection', () => {
   })
 
   context('#setMajorVersion', () => {
-    const foundBrowser = {
-      name: 'test browser',
-      version: '11.22.33',
-    }
+    it('major version is converted to number when string of numbers', () => {
+      const foundBrowser = {
+        name: 'test browser',
+        version: '11.22.33',
+      }
 
-    const res = setMajorVersion(foundBrowser)
+      const res = setMajorVersion(foundBrowser)
 
-    // @ts-ignore
-    expect(res.majorVersion, 'major version was converted to number').to.equal(11)
+      // @ts-ignore
+      expect(res.majorVersion).to.equal(11)
+    })
+
+    it('falls back to version when unconventional browser version', () => {
+      const foundBrowser = {
+        name: 'test browser',
+        version: 'VMware Fusion 12.1.0',
+      }
+
+      const res = setMajorVersion(foundBrowser)
+
+      // @ts-ignore
+      expect(res.majorVersion).to.equal(foundBrowser.version)
+    })
   })
 
   context('#detectByPath', () => {
