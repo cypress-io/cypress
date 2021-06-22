@@ -22,7 +22,8 @@ browserY
 isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
-showedOnBoardingModal
+showedNewProjectBanner
+firstOpenedCypress
 showedStudioModal
 preferredOpener
 ctReporterWidth

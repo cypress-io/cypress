@@ -115,7 +115,7 @@ index 0ef9f80..4cd787e 100644
      catch (e) {
          return false;
 diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
-index 4b7c234..15ed5b1 100644
+index 4b7c234..e444014 100644
 --- a/node_modules/socket.io-parser/dist/is-binary.js
 +++ b/node_modules/socket.io-parser/dist/is-binary.js
 @@ -1,6 +1,7 @@
@@ -126,9 +126,26 @@ index 4b7c234..15ed5b1 100644
  const withNativeArrayBuffer = typeof ArrayBuffer === "function";
  const isView = (obj) => {
      return typeof ArrayBuffer.isView === "function"
-@@ -22,16 +23,21 @@ const withNativeFile = typeof File === "function" ||
+@@ -15,23 +16,37 @@ const withNativeFile = typeof File === "function" ||
+     (typeof File !== "undefined" &&
+         toString.call(File) === "[object FileConstructor]");
+ /**
++ * Returns true if obj is an ArrayBuffer.
++ * This extra check is made because the "instanceof ArrayBuffer" check does not work
++ * across different execution contexts.
++ * @private
++ */
++function isArrayBuffer(obj) {
++    return typeof obj === 'object' && obj !== null && toString.call(obj) === '[object ArrayBuffer]';
++}
++/**
+  * Returns true if obj is a Buffer, an ArrayBuffer, a Blob or a File.
+  *
+  * @private
+  */
  function isBinary(obj) {
-     return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj))) ||
+-    return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj))) ||
++    return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isArrayBuffer(obj) || isView(obj))) ||
          (withNativeBlob && obj instanceof Blob) ||
 -        (withNativeFile && obj instanceof File));
 +        (withNativeFile && obj instanceof File)) ||
@@ -151,7 +168,7 @@ index 4b7c234..15ed5b1 100644
                  return true;
              }
          }
-@@ -43,10 +49,10 @@ function hasBinary(obj, toJSON) {
+@@ -43,10 +58,10 @@ function hasBinary(obj, toJSON) {
      if (obj.toJSON &&
          typeof obj.toJSON === "function" &&
          arguments.length === 1) {
