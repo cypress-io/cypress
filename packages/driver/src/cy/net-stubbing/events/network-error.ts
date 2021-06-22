@@ -36,7 +36,7 @@ export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cyp
   request.state = 'Errored'
   request.error = err
 
-  request.log.error(err)
+  request.log.snapshot('error').error(err)
 
   if (isAwaitingResponse) {
     // the user is implicitly expecting there to be a successful response from the server, so fail the test

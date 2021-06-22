@@ -377,7 +377,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
-    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest)
+    const onBrowserResponseReceived = (browserResponseReceived) => {
+      this.server.addBrowserResponseReceived(browserResponseReceived)
+    }
+
+    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest, onBrowserResponseReceived)
 
     this.server.startWebsockets(this.automation, cfg, {
       onReloadBrowser: options.onReloadBrowser,

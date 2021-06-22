@@ -263,6 +263,8 @@ interface RequestEvents {
  */
 export interface Interception {
   id: string
+  /* @internal */
+  browserRequestId?: string
   routeId: string
   /* @internal */
   log?: any

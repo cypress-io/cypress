@@ -240,6 +240,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
+  addBrowserResponseReceived (browserResponseReceived) {
+    this.socket.toDriver('browser:response:received', browserResponseReceived)
+  }
+
   _createHttpServer (app): DestroyableHttpServer {
     const svr = http.createServer(httpUtils.lenientOptions, app)
 

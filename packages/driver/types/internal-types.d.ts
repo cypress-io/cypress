@@ -5,6 +5,7 @@ declare namespace Cypress {
   interface Actions {
     (action: 'net:event', frame: any)
     (action: 'proxy:incoming:request', data: any)
+    (action: 'browser:response:received', data: any)
   }
 
   interface cy {
@@ -47,6 +48,7 @@ declare namespace Cypress {
     isStubbed?: boolean
     alias?: string
     aliasType?: 'route'
+    commandName?: string
     type?: 'parent'
     event?: boolean
     method?: string

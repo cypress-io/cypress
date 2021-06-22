@@ -71,7 +71,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     // there can already be an existing log item for this request.
     const proxyLog = Cypress.ProxyLogging.getInterceptLog(request)
 
-    return proxyLog ? proxyLog.set(logConfig) : Cypress.log(logConfig)
+    const log = proxyLog ? proxyLog.log.set(logConfig) : Cypress.log(logConfig)
+
+    log.snapshot('request')
+
+    return log
   }
 
   const { data: req, requestId, subscription } = frame

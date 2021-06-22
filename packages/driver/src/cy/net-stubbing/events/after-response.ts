@@ -17,7 +17,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
   request.state = 'Complete'
 
   request.log.fireChangeEvent()
-  request.log.end()
+  request.log.snapshot('response').end()
 
   // @ts-ignore
   userHandler && await userHandler(request.response!)

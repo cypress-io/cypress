@@ -6,7 +6,7 @@ import cdp from 'devtools-protocol'
 import { cors } from '@packages/network'
 import debugModule from 'debug'
 import { Automation } from '../automation'
-import { ResourceType, BrowserPreRequest } from '@packages/proxy'
+import { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -156,6 +156,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 export class CdpAutomation {
   constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
+    onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
@@ -164,6 +165,7 @@ export class CdpAutomation {
   }
 
   private onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
+    debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
@@ -175,11 +177,22 @@ export class CdpAutomation {
       requestId: params.requestId,
       method: params.request.method,
       url,
+      headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
     }
 
     this.automation.onBrowserPreRequest(browserPreRequest)
+  }
+
+  private onResponseReceived = (params: cdp.Network.ResponseReceivedEvent) => {
+    const browserResponseReceived: BrowserResponseReceived = {
+      requestId: params.requestId,
+      status: params.response.status,
+      headers: params.response.headers,
+    }
+
+    this.automation.onBrowserResponseReceived(browserResponseReceived)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {
