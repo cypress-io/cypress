@@ -1681,19 +1681,15 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
     // https://github.com/cypress-io/cypress/issues/16327
     context('request url querystring', () => {
-      // cy.window() is used instead of $.get in the tests below.
-      // because $.get() appends query like _=12345 next to our query.
       it('parse query correctly', () => {
         cy.intercept({ url: '/users*' }, (req) => {
           expect(req.query.someKey).to.deep.equal('someValue')
           expect(req.query).to.deep.equal({ someKey: 'someValue' })
         }).as('getUrl')
 
-        cy.window().then((win) => {
-          const xhr = new win.XMLHttpRequest()
-
-          xhr.open('GET', '/users?someKey=someValue')
-          xhr.send()
+        $.get({
+          url: '/users?someKey=someValue',
+          cache: true,
         })
 
         cy.wait('@getUrl')
@@ -1709,11 +1705,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(req.url).to.eq('http://localhost:3500/users?a=b')
           }).as('getUrl')
 
-          cy.window().then((win) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/users?someKey=someValue')
-            xhr.send()
+          $.get({
+            url: '/users?someKey=someValue',
+            cache: true,
           })
 
           cy.wait('@getUrl')
@@ -1727,11 +1721,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
           }).as('getUrl')
 
-          cy.window().then((win) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/users?a=b')
-            xhr.send()
+          $.get({
+            url: '/users?a=b',
+            cache: true,
           })
 
           cy.wait('@getUrl')
@@ -1749,11 +1741,9 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
           }).as('getUrl')
 
-          cy.window().then((win) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/users?someKey=someValue')
-            xhr.send()
+          $.get({
+            url: '/users?someKey=someValue',
+            cache: true,
           })
 
           cy.wait('@getUrl')
@@ -1771,31 +1761,60 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
             expect(req.url).to.eq('http://localhost:3500/users?a=b')
           }).as('getUrl')
 
-          cy.window().then((win) => {
-            const xhr = new win.XMLHttpRequest()
-
-            xhr.open('GET', '/users?someKey=someValue')
-            xhr.send()
+          $.get({
+            url: '/users?someKey=someValue',
+            cache: true,
           })
 
           cy.wait('@getUrl')
         })
 
-        it('by setting new url', () => {
-          cy.intercept({ url: '/users*' }, (req) => {
-            req.url = 'http://localhost:3500/users?a=b'
+        context('by setting new url', () => {
+          it('absolute path', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = 'http://localhost:3500/users?a=b'
 
-            expect(req.query).to.deep.eq({ a: 'b' })
-          }).as('getUrl')
+              expect(req.query).to.deep.eq({ a: 'b' })
+            }).as('getUrl')
 
-          cy.window().then((win) => {
-            const xhr = new win.XMLHttpRequest()
+            $.get({
+              url: '/users?someKey=someValue',
+              cache: true,
+            })
 
-            xhr.open('GET', '/users?someKey=someValue')
-            xhr.send()
+            cy.wait('@getUrl')
           })
 
-          cy.wait('@getUrl')
+          it('relative path', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = '/users?a=b'
+
+              expect(req.query).to.deep.eq({ a: 'b' })
+              expect(req.url).to.eq('http://localhost:3500/users?a=b')
+            }).as('getUrl')
+
+            $.get({
+              url: '/users?someKey=someValue',
+              cache: true,
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('empty string', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = ''
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            $.get({
+              url: '/users?someKey=someValue',
+              cache: true,
+            })
+
+            cy.wait('@getUrl')
+          })
         })
       })
     })

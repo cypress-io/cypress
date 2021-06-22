@@ -121,6 +121,12 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   const createQueryObject = () => {
     try {
+      if (/^(?:[a-z]+:)?\/\//i.test(req.url) === false) {
+        const { protocol, hostname, port } = window.location
+
+        req.url = `${protocol}//${hostname}${port ? `:${port}` : ''}${req.url}`
+      }
+
       const url = new URL(req.url)
       const urlSearchParams = new URLSearchParams(url.search)
       const result = {}
