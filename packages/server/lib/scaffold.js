@@ -51,6 +51,12 @@ const getExampleSpecs = (foldersOnly = false) => {
 
 const getIndexedExample = (file, index) => {
   console.log('getting inndexed example', file)
+
+  // convert to using posix sep if on win
+  if (os.platform() === 'win32') {
+    file = file.split(path.sep).join(path.posix.sep)
+  }
+
   console.log(getPathFromIntegrationFolder(file))
 
   return index[getPathFromIntegrationFolder(file)]
