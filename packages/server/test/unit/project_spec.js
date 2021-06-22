@@ -806,7 +806,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('bubbles up Settings.read errors', function () {
+    it('bubbles up Settings.read EACCES error', function () {
       const err = new Error()
 
       err.code = 'EACCES'
@@ -818,6 +818,21 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         throw new Error('expected to fail, but did not')
       }).catch((err) => {
         expect(err.code).to.eq('EACCES')
+      })
+    })
+
+    it('bubbles up Settings.read EPERM error', function () {
+      const err = new Error()
+
+      err.code = 'EPERM'
+
+      sinon.stub(settings, 'read').rejects(err)
+
+      return this.project.getProjectId()
+      .then((id) => {
+        throw new Error('expected to fail, but did not')
+      }).catch((err) => {
+        expect(err.code).to.eq('EPERM')
       })
     })
   })
