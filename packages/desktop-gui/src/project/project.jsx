@@ -10,7 +10,6 @@ import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 
 import Settings from '../settings/settings'
-import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
@@ -53,7 +52,6 @@ class Project extends Component {
           {this._renderWarnings()}
           {this._currentView()}
         </div>
-        <OnBoarding project={this.props.project}/>
       </>
     )
   }
