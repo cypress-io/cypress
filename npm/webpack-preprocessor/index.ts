@@ -251,10 +251,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       debug(`errored bundling ${outputPath}`, err.message)
 
-      bundles[filePath].deferreds.forEach((deferred) => {
-        deferred.reject(err)
-      })
+      const lastBundle = bundles[filePath].deferreds[bundles[filePath].deferreds.length - 1]
 
+      lastBundle.reject(err)
       bundles[filePath].deferreds.length = 0
     }
 
