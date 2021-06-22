@@ -83,7 +83,9 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-export class ServerBase<TSocket extends SocketE2E | SocketCt> {
+export type WarningErr = Record<string, any>
+
+export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
   protected isListening: boolean
@@ -117,28 +119,30 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   ensureProp = ensureProp
 
+  abstract openServer (...args: unknown[]): Bluebird<[number, WarningErr?]>
+
   get server () {
-    return this.ensureProp(this._server, 'open')
+    return this.ensureProp(this._server, 'openServer')
   }
 
   get socket () {
-    return this.ensureProp(this._socket, 'open')
+    return this.ensureProp(this._socket, 'openServer')
   }
 
   get nodeProxy () {
-    return this.ensureProp(this._nodeProxy, 'open')
+    return this.ensureProp(this._nodeProxy, 'openServer')
   }
 
   get networkProxy () {
-    return this.ensureProp(this._networkProxy, 'open')
+    return this.ensureProp(this._networkProxy, 'openServer')
   }
 
   get netStubbingState () {
-    return this.ensureProp(this._netStubbingState, 'open')
+    return this.ensureProp(this._netStubbingState, 'openServer')
   }
 
   get httpsProxy () {
-    return this.ensureProp(this._httpsProxy, 'open')
+    return this.ensureProp(this._httpsProxy, 'openServer')
   }
 
   createExpressApp (config) {

@@ -31,15 +31,17 @@ const renameSessionToken = function (obj) {
   }
 }
 
-module.exports = {
-  path: fileUtil.path,
+class CyAppCache {
+  get path () {
+    return fileUtil.path
+  }
 
   defaults () {
     return {
       USER: {},
       PROJECTS: [],
     }
-  },
+  }
 
   _applyRewriteRules (obj = {}) {
     return _.reduce([convertProjectsToArray, renameSessionToken], (memo, fn) => {
@@ -52,32 +54,31 @@ module.exports = {
       }
 
       return memo
-    }
-    , _.cloneDeep(obj))
-  },
+    }, _.cloneDeep(obj))
+  }
 
   read () {
     return fileUtil.get().then((contents) => {
       return _.defaults(contents, this.defaults())
     })
-  },
+  }
 
   write (obj = {}) {
     logger.info('writing to .cy cache', { cache: obj })
 
     return fileUtil.set(obj).return(obj)
-  },
+  }
 
   _getProjects (tx) {
     return tx.get('PROJECTS', [])
-  },
+  }
 
   _removeProjects (tx, projects, paths) {
     // normalize paths in array
     projects = _.without(projects, ...[].concat(paths))
 
     return tx.set({ PROJECTS: projects })
-  },
+  }
 
   getProjectRoots () {
     return fileUtil.transaction((tx) => {
@@ -97,7 +98,7 @@ module.exports = {
         })
       })
     })
-  },
+  }
 
   removeProject (path) {
     return fileUtil.transaction((tx) => {
@@ -105,7 +106,7 @@ module.exports = {
         return this._removeProjects(tx, projects, path)
       })
     })
-  },
+  }
 
   insertProject (path) {
     return fileUtil.transaction((tx) => {
@@ -125,35 +126,37 @@ module.exports = {
         return tx.set('PROJECTS', projects)
       })
     })
-  },
+  }
 
   getUser () {
     logger.info('getting user')
 
     return fileUtil.get('USER', {})
-  },
+  }
 
   setUser (user) {
     logger.info('setting user', { user })
 
     return fileUtil.set({ USER: user })
-  },
+  }
 
   removeUser () {
     return fileUtil.set({ USER: {} })
-  },
+  }
 
   remove () {
     return fileUtil.remove()
-  },
+  }
 
   // for testing purposes
 
-  __get: fileUtil.get.bind(fileUtil),
+  __get = fileUtil.get.bind(fileUtil)
 
   __removeSync () {
     fileUtil._cache = {}
 
     return fs.removeSync(this.path)
-  },
+  }
 }
+
+export = new CyAppCache()

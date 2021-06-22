@@ -9,6 +9,7 @@ export const AllViews = nxs.Nexus.enumType({
     'PROJECT_SETTINGS',
   ],
 })
+//
 
 @nxs.objectType()
 export class ViewManager {

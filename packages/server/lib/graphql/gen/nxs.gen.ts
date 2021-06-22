@@ -9,7 +9,6 @@ import type { App } from "./../entities/App"
 import type { AppOptions } from "./../entities/AppOptions"
 import type { Node } from "./../entities/Node"
 import type { Browser } from "./../entities/Browser"
-import type { Dashboard } from "./../entities/Dashboard"
 import type { Experiment } from "./../entities/Experiment"
 import type { File } from "./../entities/File"
 import type { Folder } from "./../entities/Folder"
@@ -17,7 +16,6 @@ import type { Organization } from "./../entities/Organization"
 import type { Project } from "./../entities/Project"
 import type { ProjectConfig } from "./../entities/ProjectConfig"
 import type { Release } from "./../entities/Release"
-import type { User } from "./../entities/User"
 import type { Wizard, WizardDependency } from "./../entities/Wizard"
 import type { core } from "nexus"
 declare global {
@@ -54,8 +52,9 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
-  CurrentStep: "installDependencies" | "selectFramework"
+  ProjectType: "component" | "e2e"
   SpecType: "component" | "integration"
+  WizardCurrentStep: "installDependencies" | "selectFramework"
   browserState: "closed" | "opened" | "opening"
 }
 
@@ -73,7 +72,6 @@ export interface NexusGenObjects {
   App: App;
   AppOptions: AppOptions;
   Browser: Browser;
-  Dashboard: Dashboard;
   Experiment: Experiment;
   File: File;
   Folder: Folder;
@@ -83,7 +81,6 @@ export interface NexusGenObjects {
   ProjectConfig: ProjectConfig;
   Query: {};
   Release: Release;
-  User: User;
   Wizard: Wizard;
   WizardDependency: WizardDependency;
 }
@@ -104,24 +101,28 @@ export interface NexusGenFieldTypes {
     cypressVersion: string | null; // String
     experiments: Array<NexusGenRootTypes['Experiment'] | null> | null; // [Experiment]
     field: string | null; // String
+    latestCypressVersion: string | null; // String
     name: string | null; // String
     options: NexusGenRootTypes['AppOptions'] | null; // AppOptions
     recentProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
+    updateAvailable: boolean | null; // Boolean
   }
   AppOptions: { // field return type
+    argv: Array<string | null> | null; // [String]
+    config: NexusGenScalars['JSON'] | null; // JSON
+    cwd: string | null; // String
     cypressEnv: string | null; // String
+    invokedFromCli: boolean | null; // Boolean
     os: string | null; // String
     projectRoot: string | null; // String
     proxyBypassList: string | null; // String
     proxyServer: string | null; // String
     proxySource: string | null; // String
+    testingType: string | null; // String
   }
   Browser: { // field return type
     id: string | null; // ID
     state: NexusGenEnums['browserState'] | null; // browserState
-  }
-  Dashboard: { // field return type
-    todo: boolean | null; // Boolean
   }
   Experiment: { // field return type
     name: string | null; // String
@@ -163,6 +164,7 @@ export interface NexusGenFieldTypes {
     organization: NexusGenRootTypes['Organization'] | null; // Organization
     relativePath: string; // String!
     sortedSpecsList: Array<NexusGenRootTypes['File'] | null> | null; // [File]
+    type: NexusGenEnums['ProjectType'] | null; // ProjectType
   }
   ProjectConfig: { // field return type
     todo: boolean | null; // Boolean
@@ -176,15 +178,10 @@ export interface NexusGenFieldTypes {
   Release: { // field return type
     todo: boolean | null; // Boolean
   }
-  User: { // field return type
-    displayName: string | null; // String
-    email: string | null; // String
-    name: string | null; // String
-  }
   Wizard: { // field return type
     canGoBackStep: boolean | null; // Boolean
     canGoNextStep: boolean | null; // Boolean
-    currentStep: NexusGenEnums['CurrentStep'] | null; // CurrentStep
+    currentStep: NexusGenEnums['WizardCurrentStep'] | null; // WizardCurrentStep
     dependenciesToInstall: Array<NexusGenRootTypes['WizardDependency'] | null> | null; // [WizardDependency]
     packageManager: string | null; // String
     showNewUserWelcome: boolean | null; // Boolean
@@ -203,24 +200,28 @@ export interface NexusGenFieldTypeNames {
     cypressVersion: 'String'
     experiments: 'Experiment'
     field: 'String'
+    latestCypressVersion: 'String'
     name: 'String'
     options: 'AppOptions'
     recentProjects: 'Project'
+    updateAvailable: 'Boolean'
   }
   AppOptions: { // field return type name
+    argv: 'String'
+    config: 'JSON'
+    cwd: 'String'
     cypressEnv: 'String'
+    invokedFromCli: 'Boolean'
     os: 'String'
     projectRoot: 'String'
     proxyBypassList: 'String'
     proxyServer: 'String'
     proxySource: 'String'
+    testingType: 'String'
   }
   Browser: { // field return type name
     id: 'ID'
     state: 'browserState'
-  }
-  Dashboard: { // field return type name
-    todo: 'Boolean'
   }
   Experiment: { // field return type name
     name: 'String'
@@ -262,6 +263,7 @@ export interface NexusGenFieldTypeNames {
     organization: 'Organization'
     relativePath: 'String'
     sortedSpecsList: 'File'
+    type: 'ProjectType'
   }
   ProjectConfig: { // field return type name
     todo: 'Boolean'
@@ -275,15 +277,10 @@ export interface NexusGenFieldTypeNames {
   Release: { // field return type name
     todo: 'Boolean'
   }
-  User: { // field return type name
-    displayName: 'String'
-    email: 'String'
-    name: 'String'
-  }
   Wizard: { // field return type name
     canGoBackStep: 'Boolean'
     canGoNextStep: 'Boolean'
-    currentStep: 'CurrentStep'
+    currentStep: 'WizardCurrentStep'
     dependenciesToInstall: 'WizardDependency'
     packageManager: 'String'
     showNewUserWelcome: 'Boolean'

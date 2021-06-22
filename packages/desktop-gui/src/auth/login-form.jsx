@@ -2,7 +2,6 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import authApi from './auth-api'
 import authStore from './auth-store'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
@@ -118,16 +117,17 @@ class LoginForm extends Component {
 
     this.setState({ isLoggingIn: true })
 
-    authApi.login(this.props.utm)
-    .then(() => {
-      this.props.onSuccess()
-    })
-    .catch((error) => {
-      this.setState({
-        isLoggingIn: false,
-        error,
-      })
-    })
+    // TODO: Login mutation
+    // authApi.login(this.props.utm)
+    // .then(() => {
+    //   this.props.onSuccess()
+    // })
+    // .catch((error) => {
+    //   this.setState({
+    //     isLoggingIn: false,
+    //     error,
+    //   })
+    // })
   }
 }
 

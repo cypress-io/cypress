@@ -87,6 +87,7 @@ module.exports = {
     menu.set({
       withDevTools: isDev(),
       onLogOutClicked () {
+        // TODO: GraphQL Mutation
         return bus.emit('menu:item:clicked', 'log:out')
       },
     })

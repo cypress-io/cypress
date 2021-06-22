@@ -1,4 +1,4 @@
 {
-  "schema": "./packages/server/lib/graphql/server-schema.graphql",
+  "schema": "./packages/server/lib/graphql/full-schema.graphql",
   "include": "./packages/{desktop-gui,springboard-react}/src/**/*.{jsx,tsx}"
 }

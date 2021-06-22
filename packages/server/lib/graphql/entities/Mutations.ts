@@ -3,8 +3,20 @@ import { openExternal } from '../../gui/links'
 import { DataContext } from '../util/DataContext'
 import { App } from './App'
 import openProject from '../../open_project'
+import { ProjectConfig } from './ProjectConfig'
 
 export class Mutations {
+  @nxs.mutationField({
+    type: 'Query',
+  })
+  static logOut (args, ctx: DataContext) {
+    if (ctx.authToken) {
+      ctx.cache.removeUser()
+    }
+
+    return {}
+  }
+
   @nxs.mutationField({
     type: 'Boolean',
     args (t) {
@@ -68,6 +80,7 @@ export class Mutations {
   static updaterRun () {}
 
   static windowOpen () {}
+  //
 
   static windowClose () {}
 
@@ -86,7 +99,7 @@ export class Mutations {
 
   @nxs.mutationField(() => {
     return {
-      type: 'ProjectConfig',
+      type: ProjectConfig,
     }
   })
   static setScaffoldPaths () {}

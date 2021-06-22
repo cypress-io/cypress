@@ -264,7 +264,7 @@ describe('lib/project-e2e', () => {
 
     // TODO: skip this for now
     it.skip('watches cypress.json', function () {
-      return this.server.open().bind(this).then(() => {
+      return this.server.openServer().bind(this).then(() => {
         expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.json')
       })
     })
@@ -273,7 +273,7 @@ describe('lib/project-e2e', () => {
     it.skip('passes watchers to Socket.startListening', function () {
       const options = {}
 
-      return this.server.open(options).then(() => {
+      return this.server.openServer(options).then(() => {
         const { startListening } = SocketE2E.prototype
 
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)

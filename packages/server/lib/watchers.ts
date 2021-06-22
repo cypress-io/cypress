@@ -1,26 +1,33 @@
-const _ = require('lodash')
-const chokidar = require('chokidar')
-const dependencyTree = require('dependency-tree')
+import _ from 'lodash'
+import chokidar from 'chokidar'
+import dependencyTree from 'dependency-tree'
+import { nxs } from 'nexus-decorators'
 
+@nxs.objectType({
+  description: 'All of the watchers associated with a given project',
+  definition (t) {
+    t.string('watchers', {
+      resolve: (obj) => Object.keys(obj.watchers),
+    })
+  },
+})
 class Watchers {
+  watchers: Record<string, any> = {}
+
   constructor () {
     if (!(this instanceof Watchers)) {
       return new Watchers
     }
-
-    this.watchers = {}
   }
 
   close () {
-    return (() => {
-      const result = []
+    const result: string[] = []
 
-      for (let filePath in this.watchers) {
-        result.push(this._remove(filePath))
-      }
+    for (let filePath in this.watchers) {
+      result.push(this._remove(filePath))
+    }
 
-      return result
-    })()
+    return result
   }
 
   watch (filePath, options = {}) {
@@ -71,16 +78,12 @@ class Watchers {
     this.watchers[filePath] = watcher
   }
 
-  _remove (filePath) {
-    let watcher
+  _remove (filePath: string) {
+    this.watchers[filePath]?.close()
 
-    if (!(watcher = this.watchers[filePath])) {
-      return
-    }
+    delete this.watchers[filePath]
 
-    watcher.close()
-
-    return delete this.watchers[filePath]
+    return filePath
   }
 }
 

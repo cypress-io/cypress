@@ -10,14 +10,20 @@ import settings from './util/settings'
 const debug = Debug('cypress:server:project')
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
+  isOpen = false
+
   get projectType () {
     return 'e2e'
   }
 
-  open (options: Record<string, unknown>) {
+  async openProject (options: Record<string, unknown>) {
+    if (this.isOpen) {
+      return
+    }
+
     this._server = new ServerE2E()
 
-    return super.open(options, {
+    return this._openProject(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then((modifiedCfg) => {
@@ -30,7 +36,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
           return updatedConfig
         })
         .then((cfg) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning)
+          return this.server.openServer(cfg, this, options.onError, options.onWarning)
           .then(([port, warning]) => {
             return {
               cfg,

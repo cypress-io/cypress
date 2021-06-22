@@ -14,6 +14,7 @@ const watcher = chokidar.watch('packages/server/lib/graphql/entities/**/*.{js,ts
  */
 let child
 
+let isClosing = false
 let isRestarting = false
 
 function runServer () {
@@ -26,17 +27,31 @@ function runServer () {
   })
 
   child.on('exit', (code) => {
-    if (!isRestarting) {
+    if (isClosing) {
       process.exit(code)
     }
   })
+
+  child.on('disconnect', () => {
+    child = null
+  })
 }
+
 async function restartServer () {
+  if (isRestarting) {
+    return
+  }
+
   const dfd = pDefer()
 
-  isRestarting = true
-  child.on('exit', dfd.resolve)
-  child.send('close')
+  if (child) {
+    child.on('exit', dfd.resolve)
+    isRestarting = true
+    child.send('close')
+  } else {
+    dfd.resolve()
+  }
+
   await dfd.promise
   isRestarting = false
   runServer()
@@ -48,6 +63,6 @@ watcher.on('change', restartServer)
 runServer()
 
 process.on('beforeExit', () => {
-  child.send('close')
-  watcher.close()
+  isClosing = true
+  child?.send('close')
 })

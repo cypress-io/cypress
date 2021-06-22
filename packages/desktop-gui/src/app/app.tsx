@@ -21,6 +21,7 @@ query AppQuery {
   recentProjects {
     ...ProjectListItem
   }
+  ...Layout
 }
 `
 
@@ -48,14 +49,14 @@ class App extends Component {
 
           if (result.data.currentProject) {
             return (
-              <Layout>
+              <Layout data={result.data}>
                 <Project project={result.data.currentProject} />
               </Layout>
             )
           }
 
           return (
-            <Layout>
+            <Layout data={result.data}>
               <Intro recentProjects={result.data.recentProjects} />
             </Layout>
           )

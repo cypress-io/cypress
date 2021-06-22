@@ -4,10 +4,8 @@ import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
-import la from 'lazy-ass'
 import _ from 'lodash'
 import path from 'path'
-import R from 'ramda'
 
 import commitInfo from '@cypress/commit-info'
 import pkg from '@packages/root'
@@ -32,7 +30,6 @@ import { escapeFilenameInUrl } from './util/escape_filename'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import settings from './util/settings'
-import specsUtil from './util/specs'
 import Watchers from './watchers'
 import type { ProjectConfig } from './graphql/entities/Project'
 
@@ -54,8 +51,11 @@ const backSlashesRe = /\\/g
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
-export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
-  readonly projectRoot: string
+/**
+ * A Project Base is a root class extended by the ProjectE2E and ProjectCT
+ * classes, which have specific implementations of the
+ */
+export abstract class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected watchers: Watchers
   protected options?: Record<string, any>
   protected spec: Cypress.Cypress['spec'] | null
@@ -66,7 +66,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   public browser: any
 
-  constructor (projectRoot: string) {
+  constructor (readonly projectRoot: string) {
     super()
 
     if (!projectRoot) {
@@ -118,7 +118,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.cfg.state
   }
 
-  open (options = {}, callbacks: OpenOptions) {
+  protected _openProject (options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
@@ -875,58 +875,5 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   static config (path) {
     return new ProjectBase(path).getConfig()
-  }
-
-  static getSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.getProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_FETCH_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  static generateSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.updateProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_CREATE_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  // Given a path to the project, finds all specs
-  // returns list of specs with respect to the project root
-  static findSpecs (projectRoot, specPattern) {
-    debug('finding specs for project %s', projectRoot)
-    la(check.unemptyString(projectRoot), 'missing project path', projectRoot)
-    la(check.maybe.unemptyString(specPattern), 'invalid spec pattern', specPattern)
-
-    // if we have a spec pattern
-    if (specPattern) {
-      // then normalize to create an absolute
-      // file path from projectRoot
-      // ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectRoot, specPattern)
-      debug('full spec pattern "%s"', specPattern)
-    }
-
-    return new ProjectBase(projectRoot)
-    .getConfig()
-    // TODO: handle wild card pattern or spec filename
-    .then((cfg) => {
-      return specsUtil.find(cfg, specPattern)
-    }).then(R.prop('integration'))
-    .then(R.map(R.prop('name')))
   }
 }

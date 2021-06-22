@@ -25,11 +25,13 @@ export type Scalars = {
   JSON: any
 };
 
-export type CurrentStep = 'installDependencies' | 'selectFramework';
+export type ProjectType = 'e2e' | 'component';
 
-export type SpecType = 'component' | 'integration';
+export type SpecType = 'integration' | 'component';
 
-export type BrowserState = 'closed' | 'opened' | 'opening';
+export type WizardCurrentStep = 'selectFramework' | 'installDependencies';
+
+export type BrowserState = 'opening' | 'opened' | 'closed';
 
 export type AppQueryQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -50,6 +52,33 @@ export type AppQueryQuery = {
       Maybe<{ readonly __typename?: 'Project' } & ProjectListItemFragment>
     >
   >
+} & LayoutFragment;
+
+export type LayoutFragment = { readonly __typename?: 'Query' } & NavFragment &
+  FooterFragment;
+
+export type NavFragment = {
+  readonly __typename?: 'Query'
+  readonly app: {
+    readonly __typename?: 'App'
+    readonly updateAvailable: Maybe<boolean>
+    readonly latestCypressVersion: Maybe<string>
+  }
+  readonly currentProject: Maybe<{
+    readonly __typename?: 'Project'
+    readonly id: Maybe<string>
+    readonly displayName: Maybe<string>
+  }>
+};
+
+export type FooterFragment = {
+  readonly __typename?: 'Query'
+  readonly app: {
+    readonly __typename?: 'App'
+    readonly cypressVersion: Maybe<string>
+    readonly updateAvailable: Maybe<boolean>
+    readonly latestCypressVersion: Maybe<string>
+  }
 };
 
 export type BrowserDropdownFragment = {
@@ -108,6 +137,32 @@ export type SelectProjectMutation = {
   }>
 };
 
+export type RunsListItemFragment = {
+  readonly __typename?: 'Remote_Run'
+  readonly id: Maybe<string>
+};
+
+export type RunsListFragment = {
+  readonly __typename?: 'Remote_Project'
+  readonly runs: Maybe<
+    ReadonlyArray<
+      Maybe<{ readonly __typename?: 'Remote_Run' } & RunsListItemFragment>
+    >
+  >
+};
+
+export type RunsListWrapperQueryQueryVariables = Exact<{
+  [key: string]: never
+}>;
+
+export type RunsListWrapperQueryQuery = {
+  readonly __typename?: 'Query'
+  readonly currentProject: Maybe<{
+    readonly __typename?: 'Project'
+    readonly id: Maybe<string>
+  }>
+};
+
 export type SettingsFragment = {
   readonly __typename?: 'App'
   readonly cypressVersion: Maybe<string>
@@ -127,6 +182,116 @@ export type SpecsListFragment = {
     >
   >
 };
+
+export const NavFragmentDoc = ({
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'Nav' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'Query' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'app' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'updateAvailable' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'latestCypressVersion' },
+                },
+              ],
+            },
+          },
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'currentProject' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'displayName' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown) as DocumentNode<NavFragment, unknown>
+
+export const FooterFragmentDoc = ({
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'Footer' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'Query' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'app' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'cypressVersion' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'updateAvailable' },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'latestCypressVersion' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown) as DocumentNode<FooterFragment, unknown>
+
+export const LayoutFragmentDoc = ({
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'Layout' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'Query' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          { kind: 'FragmentSpread', name: { kind: 'Name', value: 'Nav' } },
+          { kind: 'FragmentSpread', name: { kind: 'Name', value: 'Footer' } },
+        ],
+      },
+    },
+    ...NavFragmentDoc.definitions,
+    ...FooterFragmentDoc.definitions,
+  ],
+} as unknown) as DocumentNode<LayoutFragment, unknown>
 
 export const BrowserDropdownFragmentDoc = ({
   kind: 'Document',
@@ -243,6 +408,57 @@ export const ProjectListItemFragmentDoc = ({
   ],
 } as unknown) as DocumentNode<ProjectListItemFragment, unknown>
 
+export const RunsListItemFragmentDoc = ({
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RunsListItem' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'Remote_Run' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [{ kind: 'Field', name: { kind: 'Name', value: 'id' } }],
+      },
+    },
+  ],
+} as unknown) as DocumentNode<RunsListItemFragment, unknown>
+
+export const RunsListFragmentDoc = ({
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'FragmentDefinition',
+      name: { kind: 'Name', value: 'RunsList' },
+      typeCondition: {
+        kind: 'NamedType',
+        name: { kind: 'Name', value: 'Remote_Project' },
+      },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'runs' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                {
+                  kind: 'FragmentSpread',
+                  name: { kind: 'Name', value: 'RunsListItem' },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    ...RunsListItemFragmentDoc.definitions,
+  ],
+} as unknown) as DocumentNode<RunsListFragment, unknown>
+
 export const SettingsFragmentDoc = ({
   kind: 'Document',
   definitions: [
@@ -323,11 +539,13 @@ export const AppQueryDocument = ({
               ],
             },
           },
+          { kind: 'FragmentSpread', name: { kind: 'Name', value: 'Layout' } },
         ],
       },
     },
     ...ActiveProjectFragmentDoc.definitions,
     ...ProjectListItemFragmentDoc.definitions,
+    ...LayoutFragmentDoc.definitions,
   ],
 } as unknown) as DocumentNode<AppQueryQuery, AppQueryQueryVariables>
 
@@ -455,4 +673,33 @@ export const SelectProjectDocument = ({
 } as unknown) as DocumentNode<
   SelectProjectMutation,
   SelectProjectMutationVariables
+>
+
+export const RunsListWrapperQueryDocument = ({
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'RunsListWrapperQuery' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'currentProject' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown) as DocumentNode<
+  RunsListWrapperQueryQuery,
+  RunsListWrapperQueryQueryVariables
 >

@@ -1,6 +1,6 @@
 import { nxs, NxsMutationArgs } from 'nexus-decorators'
 
-export const WizardCurrentStep = nxs.enumType('CurrentStep', ['selectFramework', 'installDependencies'])
+export const WizardCurrentStep = nxs.enumType('WizardCurrentStep', ['selectFramework', 'installDependencies'])
 
 @nxs.objectType({
   description: 'Groups all actions & data associated with the onboarding wizard',

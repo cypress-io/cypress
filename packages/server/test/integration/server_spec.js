@@ -81,7 +81,7 @@ describe('Server', () => {
             // and open our cypress server
             (this.server = new ServerE2E()),
 
-            this.server.open(cfg)
+            this.server.openServer(cfg)
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },

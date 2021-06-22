@@ -95,7 +95,7 @@ xdescribe('lib/server', () => {
 
       _.extend(this.config, { port: 54321, morgan: false })
 
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         expect(this.server.createExpressApp).to.be.calledWithMatch({ morgan: false })
       })
@@ -109,7 +109,7 @@ xdescribe('lib/server', () => {
       sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(obj)
 
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
       })
@@ -123,7 +123,7 @@ xdescribe('lib/server', () => {
       sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(app)
 
-      return this.server.open(this.config, project, onError)
+      return this.server.openServer(this.config, project, onError)
       .then(() => {
         expect(this.server.createRoutes).to.be.called
         expect(this.server.createRoutes.lastCall.args[0].app).to.equal(app)
@@ -140,7 +140,7 @@ xdescribe('lib/server', () => {
       sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(obj)
 
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         expect(this.server.createServer).to.be.calledWith(obj, this.config)
       })
@@ -149,7 +149,7 @@ xdescribe('lib/server', () => {
     it('calls logger.setSettings with config', function () {
       sinon.spy(logger, 'setSettings')
 
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then((ret) => {
         expect(logger.setSettings).to.be.calledWith(this.config)
       })
@@ -262,7 +262,7 @@ xdescribe('lib/server', () => {
     })
 
     it('sets _socket and calls _socket#startListening', function () {
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         const arg2 = {}
 
@@ -275,7 +275,7 @@ xdescribe('lib/server', () => {
 
   context('#reset', () => {
     beforeEach(function () {
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         this.buffers = this.server._networkProxy.http
 
@@ -309,14 +309,14 @@ xdescribe('lib/server', () => {
     })
 
     it('calls close on this.server', function () {
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         return this.server.close()
       })
     })
 
     it('isListening=false', function () {
-      return this.server.open(this.config)
+      return this.server.openServer(this.config)
       .then(() => {
         return this.server.close()
       }).then(() => {

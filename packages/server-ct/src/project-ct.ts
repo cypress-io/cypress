@@ -36,16 +36,16 @@ export class ProjectCt extends ProjectBase<ServerCt> {
     this.server.socket.changeToUrl(targetUrl)
   }
 
-  open (options: Record<string, unknown>) {
+  openProject (options: Record<string, unknown>) {
     this._server = new ServerCt()
 
-    return super.open(options, {
+    return this._openProject(options, {
       onOpen: (cfg) => {
         const cfgForComponentTesting = this.addComponentTestingUniqueDefaults(cfg)
 
         return this._initPlugins(cfgForComponentTesting, options)
         .then(({ cfg, specsStore }) => {
-          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
+          return this.server.openServer(cfg, specsStore, this, options.onError, options.onWarning)
           .then(([port, warning]) => {
             return {
               cfg,

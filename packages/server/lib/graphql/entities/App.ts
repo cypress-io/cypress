@@ -43,6 +43,18 @@ export class App {
     return []
   }
 
+  @nxs.field.boolean()
+  updateAvailable () {
+    return false
+  }
+
+  @nxs.field.string()
+  latestCypressVersion () {
+    return '1.2.1'
+  }
+
+  apiServerIsListening () {}
+
   // @computed get displayVersion () {
   //   return this.isDev ? `${updateStore.version} (dev)` : updateStore.version
   // }

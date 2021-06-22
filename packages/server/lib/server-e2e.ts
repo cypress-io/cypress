@@ -13,14 +13,12 @@ import { createInitialWorkers } from '@packages/rewriter'
 import errors from './errors'
 import fileServer from './file_server'
 import logger from './logger'
-import { ServerBase } from './server-base'
+import { ServerBase, WarningErr } from './server-base'
 import { SocketE2E } from './socket-e2e'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
-
-type WarningErr = Record<string, any>
 
 const fullyQualifiedRe = /^https?:\/\//
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
@@ -53,7 +51,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
+  openServer (config: Record<string, any> = {}, project, onError, onWarning) {
     debug('server open')
 
     la(_.isPlainObject(config), 'expected plain config object', config)

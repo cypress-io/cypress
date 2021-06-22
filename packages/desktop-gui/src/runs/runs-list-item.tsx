@@ -15,6 +15,13 @@ import {
   stripLeadingCyDirs,
   stripSharedDirsFromDir2,
 } from '../lib/utils'
+import { gql } from '@apollo/client'
+
+gql`
+fragment RunsListItem on Remote_Run {
+  id
+}
+`
 
 const RunDuration = ({ run }) => {
   // Run was blocked due to exceeding limit

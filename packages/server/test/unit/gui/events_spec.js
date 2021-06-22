@@ -196,26 +196,6 @@ describe('lib/gui/events', () => {
         })
       })
     })
-
-    describe('get:current:user', () => {
-      it('calls user.get and returns user', function () {
-        sinon.stub(user, 'get').resolves({ foo: 'bar' })
-
-        return this.handleEvent('get:current:user').then((assert) => {
-          return assert.sendCalledWith({ foo: 'bar' })
-        })
-      })
-
-      it('catches errors', function () {
-        const err = new Error('foo')
-
-        sinon.stub(user, 'get').rejects(err)
-
-        return this.handleEvent('get:current:user').then((assert) => {
-          return assert.sendErrCalledWith(err)
-        })
-      })
-    })
   })
 
   context('external shell', () => {

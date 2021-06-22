@@ -4,12 +4,13 @@ import { observer, useLocalStore } from 'mobx-react'
 import React from 'react'
 
 import ipc from '../lib/ipc'
-import appStore from '../lib/app-store'
 import updateStore from '../update/update-store'
 import { getReleaseNotes, useUpdateChecker } from '../update/updates'
 
 import UpdateModal from '../update/update-modal'
 import UpdateNotice from '../update/update-notice'
+import { gql } from '@apollo/client'
+import { FooterFragment } from '../generated/graphql'
 
 const openChangelog = (e) => {
   e.target.blur()
@@ -24,7 +25,21 @@ const openChangelog = (e) => {
   })
 }
 
-const Footer = observer(() => {
+gql`
+fragment Footer on Query {
+  app {
+    cypressVersion
+    updateAvailable
+    latestCypressVersion
+  }
+}
+`
+
+interface FooterProps {
+  data: FooterFragment
+}
+
+const Footer: React.FC<FooterProps> = observer(({ data }) => {
   const state = useLocalStore(() => ({
     showingModal: false,
     showModal: action(() => {
@@ -40,7 +55,7 @@ const Footer = observer(() => {
   const showModal = (e) => {
     e.target.blur()
 
-    if (!updateStore.updateAvailable) return
+    if (!data.app.updateAvailable) return
 
     updateStore.setState(updateStore.SHOW_INSTRUCTIONS)
     state.showModal()
@@ -55,7 +70,7 @@ const Footer = observer(() => {
     <footer className={cs('footer', { 'update-available': updateStore.updateAvailable })}>
       <button className='version' onClick={showModal} disabled={!updateStore.updateAvailable}>
         <i className='update-indicator fas fa-arrow-alt-circle-up' />
-        Version {appStore.displayVersion}
+        Version {data.app.cypressVersion}
       </button>
       <button className='open-changelog' onClick={openChangelog}>Changelog</button>
       <UpdateModal show={state.showingModal} onClose={state.hideModal} />

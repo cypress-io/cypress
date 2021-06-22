@@ -8,12 +8,12 @@ import appData from '@packages/server/lib/util/app_data'
 import { createRoutes } from './routes-ct'
 import { SocketCt } from './socket-ct'
 
-type WarningErr = Record<string, any>
-
 const debug = Debug('cypress:server-ct:server')
 
+export type WarningErr = Record<string, any>
+
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config, specsStore, project, onError, onWarning) {
+  openServer (config, specsStore, project, onError, onWarning) {
     debug('server open')
 
     return Bluebird.try(() => {

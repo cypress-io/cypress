@@ -133,7 +133,7 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new ServerE2E(new Watchers())),
 
-            this.server.open(cfg, this.project)
+            this.server.openServer(cfg, this.project)
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },

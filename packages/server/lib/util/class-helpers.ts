@@ -1,8 +1,6 @@
 const propertyGetterNameRe = /\.get\s(.+?)\s/
 
-class AnyClass {}
-
-export function ensureProp<T> (this: AnyClass, prop: T | undefined, methodSetter): T {
+export function ensureProp<C extends {constructor: {name: string}}, T> (this: C, prop: T | undefined, methodSetter: keyof C): T {
   if (!prop) {
     const obj = {} as Error
 

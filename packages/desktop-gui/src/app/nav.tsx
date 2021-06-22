@@ -1,18 +1,35 @@
-import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dropdown } from '@packages/ui-components'
 
 import appStore from '../lib/app-store'
-import authApi from '../auth/auth-api'
 import authStore from '../auth/auth-store'
 import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
 import DocsMenu from './docs-menu'
+import { gql } from '@apollo/client'
+import { NavFragment } from '../generated/graphql'
 
-@observer
-export default class Nav extends Component {
+gql`
+fragment Nav on Query {
+  app {
+    updateAvailable
+    latestCypressVersion
+  }
+  currentProject {
+    id
+    displayName
+  }
+  # currentUser {
+  #   id
+  #   displayName
+  #   email
+  # }
+}
+`
+
+class Nav extends Component<{ data: NavFragment }> {
   render () {
     return (
       <nav className='main-nav navbar navbar-inverse'>
@@ -40,7 +57,7 @@ export default class Nav extends Component {
 
     // project mode
     if (!appStore.isGlobalMode) {
-      return <div>{project && project.displayName}</div>
+      return <div>{this.props.data.currentProject?.displayName}</div>
     }
 
     // global mode, on project page
@@ -71,7 +88,7 @@ export default class Nav extends Component {
       )
     }
 
-    if (!authStore.isAuthenticated) {
+    if (!this.props.data.currentUser) {
       return (
         <li>
           <a onClick={this._showLogin}>
@@ -101,9 +118,9 @@ export default class Nav extends Component {
             className='user-avatar'
             height='13'
             width='13'
-            src={`${gravatarUrl(authStore.user.email)}`}
+            src={`${gravatarUrl(this.props.data.currentUser?.email ?? '')}`}
           />
-          {' '}{authStore.user.displayName}
+          {' '}{this.props.data.currentUser?.displayName}
         </span>
       )
     }
@@ -118,7 +135,8 @@ export default class Nav extends Component {
 
   _select = (item) => {
     if (item.id === 'logout') {
-      authApi.logOut()
+      // TODO: Tim: Logout mutation
+      // authApi.logOut()
     }
   }
 
@@ -137,3 +155,5 @@ export default class Nav extends Component {
     })
   }
 }
+
+export default Nav

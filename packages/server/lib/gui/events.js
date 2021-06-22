@@ -128,11 +128,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'get:current:user':
-      return user.getSafely()
-      .then(send)
-      .catch(sendErr)
-
     case 'external:open':
       return openExternal(arg)
 
@@ -472,7 +467,7 @@ module.exports = {
           document: parse(params.text),
           operationName: params.name,
           variableValues: variables,
-          contextValue: new DataContext(options),
+          contextValue: DataContext.getInstance(options),
         })
 
         evt.sender.send('graphql:response', {

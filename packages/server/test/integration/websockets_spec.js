@@ -32,7 +32,7 @@ describe('Web Sockets', () => {
 
       this.server = new ServerE2E()
 
-      return this.server.open(this.cfg)
+      return this.server.openServer(this.cfg)
       .then(async () => {
         const automationStub = {
           use: () => { },

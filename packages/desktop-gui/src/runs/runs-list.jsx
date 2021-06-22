@@ -21,6 +21,15 @@ import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
 import DashboardBanner from './dashboard-banner'
 import WhatIsDashboard from './what-is-dashboard'
+import { gql } from '@apollo/client'
+
+gql`
+fragment RunsList on Remote_Project {
+  runs {
+    ...RunsListItem
+  }
+}
+`
 
 @observer
 class RunsList extends Component {
@@ -413,4 +422,14 @@ class RunsList extends Component {
   }
 }
 
-export default RunsList
+gql`
+query RunsListWrapperQuery {
+  currentProject {
+    id
+  }
+}
+`
+
+export default function RunsListWrapper () {
+  return <RunsList />
+}
