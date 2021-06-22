@@ -165,22 +165,7 @@ module.exports = {
 
     const requireAsync = (file) => {
       return Promise.try(() => {
-        const config = require(file)
-
-        // if it is not `cypress.js` just return it as-is.
-        if (!file.endsWith('cypress.js')) {
-          return config
-        }
-
-        // otherwise, if it is cypress.js, we grab the runner-specific settings.
-        if (this.isComponentTesting(options)) {
-          return config.component || {}
-        }
-
-        // additional, if config does *not* contain `e2e` but we are in `e2e` mode,
-        // it probably means the user is an e2e user who would like to use cypress.js
-        // instead of cypress.json. Just use the file as is.
-        return config.e2e || config
+        return require(file)
       })
     }
 

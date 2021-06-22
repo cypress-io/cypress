@@ -20,7 +20,9 @@ describe('lib/settings', () => {
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.json').then(clearCypressJsonCache)
+      return fs.removeAsync('cypress.json')
+      .then(() => fs.removeAsync('cypress.js'))
+      .then(clearCypressJsonCache)
     })
 
     context('nested cypress object', () => {
@@ -102,6 +104,75 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
+      it('promises cypress.js -> `component` key for component testing runner', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+            component: {
+              component_setting: 'peep'
+            }
+          }
+          `,
+        'cypress.js')
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'component' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            component_setting: 'peep',
+            component: {
+              component_setting: 'peep',
+            },
+          })
+        })
+      })
+
+      it('promises cypress.js -> `e2e` key for component testing runner', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+            e2e: {
+              e2e_setting: 'e2e_setting'
+            }
+          }
+          `,
+        'cypress.js')
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'e2e' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            e2e_setting: 'e2e_setting',
+            e2e: {
+              e2e_setting: 'e2e_setting',
+            },
+          })
+        })
+      })
+
+      it('promises cypress.js assumes e2e if no runner specific keys are configured', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+            e2e: {
+              e2e_setting: 'e2e_setting',
+            },
+          }
+          `,
+        'cypress.js')
+        .then(() => {
+          return settings.read(projectRoot, {})
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            e2e_setting: 'e2e_setting',
+            e2e: {
+              e2e_setting: 'e2e_setting',
+            },
+          })
+        })
+      })
+
       it('promises cypress.json', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
