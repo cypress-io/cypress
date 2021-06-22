@@ -1,8 +1,13 @@
 require('../../spec_helper')
+const { fs } = require(`../../../lib/util/fs`)
 const setting = require(`../../../lib/util/settings`)
 
 describe('lib/util/settings', () => {
   describe('pathToConfigFile', () => {
+    beforeEach(() => {
+      sinon.stub(fs, 'readdirSync').returns(['cypress.json'])
+    })
+
     it('supports relative path', () => {
       const path = setting.pathToConfigFile('/users/tony/cypress', {
         configFile: 'e2e/config.json',

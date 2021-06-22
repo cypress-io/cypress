@@ -3,13 +3,9 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
-const { supportedConfigFiles } = require('../specUtils')
+const { clearCypressJsonCache } = require('../specUtils')
 
 const projectRoot = process.cwd()
-
-const cleanupConfigFiles = () => {
-  return Promise.all(supportedConfigFiles.map((file) => fs.removeAsync(file)))
-}
 
 describe('lib/settings', () => {
   context('with no configFile option', () => {
@@ -24,7 +20,7 @@ describe('lib/settings', () => {
     })
 
     afterEach(() => {
-      return cleanupConfigFiles()
+      return clearCypressJsonCache()
     })
 
     context('nested cypress object', () => {
@@ -106,52 +102,6 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
-      it('promises cypress.js -> `component` key for component testing runner', function () {
-        return this.setup(`
-          module.exports = {
-            component: {
-              bo: 'peep'
-            }
-          }
-          `,
-        'cypress.js')
-        .then(() => {
-          return settings.read(projectRoot, {})
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ bo: 'peep' })
-        })
-      })
-
-      it('promises cypress.js -> `e2e` key for component testing runner', function () {
-        return this.setup(`
-          module.exports = {
-            e2e: {
-              e2e_setting: 'e2e_setting'
-            }
-          }
-          `,
-        'cypress.js')
-        .then(() => {
-          return settings.read(projectRoot, {})
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ e2e_setting: 'e2e_setting' })
-        })
-      })
-
-      it('promises cypress.js assumes e2e if no runner specific keys are configured', function () {
-        return this.setup(`
-          module.exports = {
-            bab: 'beb'
-          }
-          `,
-        'cypress.js')
-        .then(() => {
-          return settings.read(projectRoot, {})
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ bab: 'beb' })
-        })
-      })
-
       it('promises cypress.json', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
