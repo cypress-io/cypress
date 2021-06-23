@@ -167,8 +167,8 @@ class App extends Component {
   }
 
   _onReporterResize = (reporterWidth) => {
-    this.props.state.reporterWidth = reporterWidth - SPEC_LIST_WIDTH
-    this.props.state.absoluteReporterWidth = reporterWidth - SPEC_LIST_WIDTH
+    this.props.state.reporterWidth = reporterWidth - this.props.state.specListWidth
+    this.props.state.absoluteReporterWidth = reporterWidth - this.props.state.specListWidth
 
     const $header = $(findDOMNode(this.refs.header))
 
