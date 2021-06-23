@@ -1,12 +1,12 @@
 import * as React from 'react'
-import { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
+import type { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
 import { useTextField } from 'react-aria'
 import cs from 'classnames'
 
-import { ExtractFirstArg } from 'util/types'
-import { LineHeight, TextSize } from 'css'
+import type { ExtractFirstArg } from 'util/types'
+import type { LineHeight, TextSize } from 'css'
 import { styledTextSizeClassNames } from 'core/text/styledText'
-import { SizingProps } from 'core/shared'
+import type { SizingProps } from 'core/shared'
 
 import styles from './InputBase.module.scss'
 import { useCombinedRefs } from 'hooks/useCombinedRefs'

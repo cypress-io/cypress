@@ -1,5 +1,5 @@
-import { ChildProcess } from 'child_process'
-import * as Bluebird from 'bluebird'
+import type { ChildProcess } from 'child_process'
+import type * as Bluebird from 'bluebird'
 
 // TODO: Clean up this file
 

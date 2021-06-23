@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo } from 'react'
 import { usePress } from '@react-aria/interactions'
-import { PressEvent } from '@react-types/shared'
+import type { PressEvent } from '@react-types/shared'
 import cs from 'classnames'
 
 import { useMeasure } from 'hooks/useMeasure'

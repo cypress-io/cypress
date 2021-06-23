@@ -1,4 +1,4 @@
-import { FileBase, TreeFolder } from './types'
+import type { FileBase, TreeFolder } from './types'
 
 interface BuildingFile<T extends FileBase> {
   name: string

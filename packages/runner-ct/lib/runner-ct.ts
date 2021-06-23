@@ -2,8 +2,8 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import send from 'send'
-import { Cfg, ProjectCt } from '@packages/server-ct'
-import { SpecsStore } from '@packages/server/lib/specs-store'
+import type { Cfg, ProjectCt } from '@packages/server-ct'
+import type { SpecsStore } from '@packages/server/lib/specs-store'
 
 interface ServeOptions {
   config: Cfg

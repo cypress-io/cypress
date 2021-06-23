@@ -4,7 +4,7 @@ import { StyledText as TextComponent } from './StyledText'
 import { createStory, createStorybookConfig } from 'stories/util'
 
 import typography from 'css/derived/jsTypography.scss'
-import { TextSize } from 'css'
+import type { TextSize } from 'css'
 import { lorem } from 'util/lorem'
 
 export default createStorybookConfig({

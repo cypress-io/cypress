@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { buildTree } from './buildTree'
-import { FileBase, TreeFile, TreeFolder } from './types'
+import type { FileBase, TreeFile, TreeFolder } from './types'
 
 const getLeaves = (tree: TreeFolder<FileBase>): Array<TreeFile<FileBase>> => {
   const folders: Array<TreeFolder<FileBase>> = []

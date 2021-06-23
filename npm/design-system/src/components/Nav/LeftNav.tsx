@@ -7,7 +7,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 library.add(fas)
 
 import styles from './LeftNav.module.scss'
-import { LeftNavProps, NavButtonProps, NavLocation, NavItem } from './types'
+import type { LeftNavProps, NavButtonProps, NavLocation, NavItem } from './types'
 
 interface NavItemDefinedLocation extends NavItem {
   location: NavLocation

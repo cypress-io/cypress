@@ -13,7 +13,7 @@
  - element distance from top of container
 */
 
-import { TimeoutID } from './types'
+import type { TimeoutID } from './types'
 
 type UserScrollCallback = () => void
 

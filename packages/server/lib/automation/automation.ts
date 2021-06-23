@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
-import { BrowserPreRequest } from '@packages/proxy'
+import type { BrowserPreRequest } from '@packages/proxy'
 
 type NullableMiddlewareHook = (() => void) | null
 

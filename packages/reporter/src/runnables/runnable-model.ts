@@ -1,5 +1,5 @@
 import { observable } from 'mobx'
-import { HookProps } from '../hooks/hook-model'
+import type { HookProps } from '../hooks/hook-model'
 
 export interface RunnableProps {
   id: string

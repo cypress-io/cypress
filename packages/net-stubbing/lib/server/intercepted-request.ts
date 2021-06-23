@@ -1,18 +1,18 @@
 import _ from 'lodash'
-import { IncomingMessage } from 'http'
-import { Readable } from 'stream'
-import {
+import type { IncomingMessage } from 'http'
+import type { Readable } from 'stream'
+import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
 } from '@packages/proxy'
-import {
+import type {
   NetEvent,
   Subscription,
 } from '../types'
-import { BackendRoute, NetStubbingState } from './types'
+import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
-import CyServer from '@packages/server'
-import { BackendStaticResponse } from '../internal-types'
+import type CyServer from '@packages/server'
+import type { BackendStaticResponse } from '../internal-types'
 
 export class InterceptedRequest {
   id: string

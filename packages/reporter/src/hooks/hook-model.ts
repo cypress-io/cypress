@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
-import { FileDetails } from '@packages/ui-components'
+import type { FileDetails } from '@packages/ui-components'
 
-import { Alias } from '../instruments/instrument-model'
-import Err from '../errors/err-model'
-import CommandModel from '../commands/command-model'
+import type { Alias } from '../instruments/instrument-model'
+import type Err from '../errors/err-model'
+import type CommandModel from '../commands/command-model'
 
 export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 

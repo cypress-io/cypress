@@ -1,10 +1,9 @@
-import * as React from 'react'
-import { useRef, RefObject } from 'react'
+import React, { useRef, RefObject } from 'react'
 import cs from 'classnames'
 
 import { useButton } from '@react-aria/button'
-import { AriaButtonProps } from '@react-types/button'
-import { TextSizableComponent } from '../shared'
+import type { AriaButtonProps } from '@react-types/button'
+import type { TextSizableComponent } from '../shared'
 import { styledTextSizeClassNames } from 'core/text/styledText'
 
 import styles from './Button.module.scss'

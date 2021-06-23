@@ -1,6 +1,6 @@
 import { log } from './log'
 import * as cp from 'child_process'
-import { Browser, FoundBrowser } from './types'
+import type { Browser, FoundBrowser } from './types'
 
 /** list of the browsers we can detect and use by default */
 export const browsers: Browser[] = [

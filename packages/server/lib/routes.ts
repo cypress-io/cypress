@@ -4,7 +4,7 @@ import check from 'check-more-types'
 import _ from 'lodash'
 import Debug from 'debug'
 
-import { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
+import type { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
 import spec from './controllers/spec'

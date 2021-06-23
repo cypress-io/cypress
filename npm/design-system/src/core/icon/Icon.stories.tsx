@@ -10,7 +10,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import typography from 'css/derived/jsTypography.scss'
 import styles from './Icon.stories.module.scss'
-import { TextSize } from 'css'
+import type { TextSize } from 'css'
 import { Baseline } from '../../measure/baseline/Baseline'
 
 library.add(fas)

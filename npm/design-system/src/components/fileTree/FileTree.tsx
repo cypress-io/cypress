@@ -2,10 +2,10 @@ import React, { CSSProperties, useMemo } from 'react'
 
 import { VirtualizedTree } from 'components/virtualizedTree/VirtualizedTree'
 import { CollapsibleGroupHeader, IconInfo } from 'components/collapsibleGroup/CollapsibleGroupHeader'
-import { LeafProps, OnNodeKeyDown, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
+import type { LeafProps, OnNodeKeyDown, OnNodePress, ParentProps } from 'components/virtualizedTree/types'
 import { Placeholder } from 'core/text/placeholder'
 import { buildTree } from './buildTree'
-import { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
+import type { FileBase, FilePressEvent, FileTreeProps, TreeFile, TreeFolder } from './types'
 import { FileTreeFile, NameWithHighlighting } from './FileTreeFile'
 import { FileTreeSelectedContext } from './state'
 

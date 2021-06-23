@@ -40,7 +40,7 @@
     "types": ["mocha", "node"],                /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,  /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
     "esModuleInterop": true,
-
+    "importsNotUsedAsValues": "error",
     /* Source Map Options */
     // "sourceRoot": "./",                    /* Specify the location where debugger should locate TypeScript files instead of source locations. */
     // "mapRoot": "./",                       /* Specify the location where debugger should locate map files instead of generated locations. */

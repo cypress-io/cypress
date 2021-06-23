@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { ChangeEvent } from 'react'
 
-import { Editor } from './file-model'
+import type { Editor } from './file-model'
 import { Select, SelectItem } from '../select'
 
 interface Props {

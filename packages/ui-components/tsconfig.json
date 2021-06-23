@@ -49,9 +49,10 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true,,
+    "importsNotUsedAsValues": "error"
   },
   "exclude": [
-    "dist"
+    "dist",
   ]
 }

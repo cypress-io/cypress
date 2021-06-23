@@ -1,4 +1,4 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import type { IconProp } from '@fortawesome/fontawesome-svg-core'
 
 export type NavLocation = 'top' | 'bottom'
 

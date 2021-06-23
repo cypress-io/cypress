@@ -7,7 +7,7 @@ import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
-import {
+import type {
   Browser,
   DetectedBrowser,
   FoundBrowser,
