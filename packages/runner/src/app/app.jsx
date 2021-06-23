@@ -11,7 +11,9 @@ import {
   errorMessages,
   StudioModals,
   Header,
+  SpecList,
 } from '@packages/runner-shared'
+import styles from '@packages/runner-shared/src/styles.module.scss'
 
 import util from '../lib/util'
 
@@ -21,6 +23,7 @@ import Resizer from './resizer'
 @observer
 class App extends Component {
   @observable isReporterResizing = false
+  searchRef = React.createRef()
 
   render () {
     /**
@@ -35,6 +38,15 @@ class App extends Component {
         'is-reporter-resizing': this.isReporterResizing,
         'is-reporter-sized': this.props.state.reporterWidth != null,
       })}>
+        <div id='inline-spec-list'>
+          <SpecList
+            searchRef={this.searchRef}
+            specs={this.props.state.specs}
+            className={styles.specsList}
+            selectedFile={spec}
+            onFileClick={() => {}}
+          />
+        </div>
         <div
           ref='reporterWrap'
           className='reporter-wrap'

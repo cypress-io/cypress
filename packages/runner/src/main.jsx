@@ -18,7 +18,10 @@ const Runner = {
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
 
-      const state = new State(NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth)
+      const state = new State({
+        reporrterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
+        specs: config.specs,
+      })
 
       Runner.state = state
       Runner.configureMobx = configure

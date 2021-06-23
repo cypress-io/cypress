@@ -11,6 +11,7 @@ const _defaults = {
   height: 660,
 
   reporterWidth: null,
+  specs: [],
 
   url: '',
   highlightUrl: false,
@@ -39,6 +40,7 @@ export default class State {
 
   @observable width = _defaults.width
   @observable height = _defaults.height
+  @observable specs = _defaults.specs
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
@@ -54,8 +56,9 @@ export default class State {
 
   @observable.ref scriptError = null
 
-  constructor (reporterWidth = _defaults.reporterWidth) {
-    this.reporterWidth = reporterWidth
+  constructor ({ reporterWidth, specs }) {
+    this.reporterWidth = reporterWidth || _defaults.reporterWidth
+    this.specs = specs || _defaults.specs
   }
 
   @computed get scale () {
@@ -106,6 +109,10 @@ export default class State {
   @action updateDimensions (width, height) {
     this.width = width
     this.height = height
+  }
+
+  @action setSpecs (specs) {
+    this.specs = specs
   }
 
   @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
