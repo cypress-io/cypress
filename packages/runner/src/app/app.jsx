@@ -20,6 +20,13 @@ import util from '../lib/util'
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
 
+/**
+ * This is a feature flag. If true, all the integration specs
+ * will be rendered inline to the left of te command log, similar to the component testing runner.
+ */
+export const USE_INLINE_SPEC_LIST = false
+
+// If you change this, make sure to update it in app.scss, too.
 export const SPEC_LIST_WIDTH = 250
 
 const removeRelativeRegexp = /\.\.\//gi
@@ -44,27 +51,30 @@ class App extends Component {
         'is-reporter-sized': this.props.state.reporterWidth != null,
       })}>
         {Boolean(NO_COMMAND_LOG) || (
-          <div
-            className='spec-list-wrap'
-            style={{ width: this.props.state.specListWidth }}
-          >
-            <SpecList
-              searchRef={this.searchRef}
-              specs={this.props.state.specs}
-              className={cs(styles.specsList, 'spec-list')}
-              selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
-              onFileClick={this._runSpec}
-            />
-          </div>
-        )}
+          Boolean(USE_INLINE_SPEC_LIST) &&
+            <>
+              <div
+                className='spec-list-wrap'
+                style={{ width: this.props.state.specListWidth }}
+              >
+                <SpecList
+                  searchRef={this.searchRef}
+                  specs={this.props.state.specs}
+                  className={cs(styles.specsList, 'spec-list')}
+                  selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
+                  onFileClick={this._runSpec}
+                />
+              </div>
 
-        <Resizer
-          style={{ left: this.props.state.specListWidth }}
-          maxWidth={this.props.state.windowWidth - SPEC_LIST_WIDTH}
-          onResizeStart={this._onSpecListResizeStart}
-          onResize={this._onSpecListResize}
-          onResizeEnd={this._onSpecListResizeEnd}
-        />
+              <Resizer
+                style={{ left: this.props.state.specListWidth }}
+                maxWidth={this.props.state.windowWidth - SPEC_LIST_WIDTH}
+                onResizeStart={this._onSpecListResizeStart}
+                onResize={this._onSpecListResize}
+                onResizeEnd={this._onSpecListResizeEnd}
+              />
+            </>
+        )}
 
         <div
           ref='reporterWrap'
