@@ -1,7 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import { UIPlugin } from '../plugins/UIPlugin'
-import { automation, BaseStore } from '@packages/runner-shared'
+import { automation, BaseStore, RunMode } from '@packages/runner-shared'
 import {
   DEFAULT_REPORTER_WIDTH,
   LEFT_NAV_WIDTH,
@@ -11,8 +11,6 @@ import {
   HEADER_HEIGHT,
   DEFAULT_PLUGINS_HEIGHT,
 } from '../app/RunnerCt'
-
-export type RunMode = 'single' | 'multi'
 
 interface Defaults {
   messageTitle: string | null
@@ -111,9 +109,6 @@ export default class State extends BaseStore {
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
   @observable specRunId: string | null = null
-  /** @type {"single" | "multi"} */
-  @observable runMode: RunMode = 'single'
-  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   @observable readyToRunTests = false
   @observable activePlugin: string | null = null
@@ -288,15 +283,6 @@ export default class State extends BaseStore {
     if (foundSpec) {
       this.spec = foundSpec
     }
-  }
-
-  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
-    if (this.runMode === 'multi') {
-      this.runMode = 'single'
-      this.multiSpecs = []
-    }
-
-    this.setSpec(spec)
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {

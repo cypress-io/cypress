@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { observable } from 'mobx'
+import { observable, toJS } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
@@ -19,6 +19,8 @@ import util from '../lib/util'
 
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
+
+const removeRelativeRegexp = /\.\.\//gi
 
 @observer
 class App extends Component {
@@ -44,7 +46,7 @@ class App extends Component {
             specs={this.props.state.specs}
             className={styles.specsList}
             selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
-            onFileClick={() => {}}
+            onFileClick={this._runSpec}
           />
         </div>
         <div
@@ -90,6 +92,20 @@ class App extends Component {
   componentDidMount () {
     this._monitorWindowResize()
     this._handleScreenshots()
+  }
+
+  _runSpec = (path) => {
+    console.log(path)
+      // We request an absolute path from the dev server but the spec list displays relative paths
+      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+      const filePath = path.replace(removeRelativeRegexp, '')
+      const selectedSpec = this.props.state.specs.find((spec) => spec.absolute.includes(filePath))
+
+      if (!selectedSpec) {
+        throw Error(`Could not find spec matching ${path}.`)
+      }
+
+    this.props.state.setSingleSpec(selectedSpec)
   }
 
   _monitorWindowResize () {
