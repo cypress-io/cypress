@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { observable, toJS } from 'mobx'
+import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
@@ -95,15 +95,14 @@ class App extends Component {
   }
 
   _runSpec = (path) => {
-    console.log(path)
-      // We request an absolute path from the dev server but the spec list displays relative paths
-      // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
-      const filePath = path.replace(removeRelativeRegexp, '')
-      const selectedSpec = this.props.state.specs.find((spec) => spec.absolute.includes(filePath))
+    // We request an absolute path from the dev server but the spec list displays relative paths
+    // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+    const filePath = path.replace(removeRelativeRegexp, '')
+    const selectedSpec = this.props.state.specs.find((spec) => spec.absolute.includes(filePath))
 
-      if (!selectedSpec) {
-        throw Error(`Could not find spec matching ${path}.`)
-      }
+    if (!selectedSpec) {
+      throw Error(`Could not find spec matching ${path}.`)
+    }
 
     this.props.state.setSingleSpec(selectedSpec)
   }
