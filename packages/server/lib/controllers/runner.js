@@ -24,7 +24,7 @@ module.exports = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, project } = options
+    let { config, getRemoteState, project, specsStore } = options
 
     const { spec, browser } = project.getCurrentSpecAndBrowser()
 
@@ -34,6 +34,7 @@ module.exports = {
     config.platform = os.platform()
     config.arch = os.arch()
     config.spec = spec
+    config.specs = specsStore.specFiles
     config.browser = browser
 
     debug('serving runner index.html with config %o',

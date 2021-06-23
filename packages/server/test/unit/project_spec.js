@@ -3,6 +3,7 @@ require('../spec_helper')
 const mockedEnv = require('mocked-env')
 const path = require('path')
 const commitInfo = require('@cypress/commit-info')
+const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('../support/helpers/fixtures')
 const api = require(`${root}lib/api`)
@@ -32,6 +33,11 @@ describe('lib/project-e2e', () => {
     this.pristinePath = Fixtures.projectPath('pristine')
 
     sinon.stub(scaffold, 'isNewProject').resolves(false)
+    sinon.stub(chokidar, 'watch').returns({
+      on: () => {},
+      close: () => {},
+    })
+
     sinon.stub(runEvents, 'execute').resolves()
 
     return settings.read(this.todosPath).then((obj = {}) => {
@@ -718,7 +724,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls plugins.init when file changes', function () {
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
+      return this.project.watchPluginsFile(this.config, {
+        onError: () => {},
+      }).then(() => {
         this.project.watchers.watchTree.firstCall.args[1].onChange()
 
         expect(plugins.init).to.be.calledWith(this.config)
