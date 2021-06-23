@@ -49,9 +49,7 @@ export const getFs = () => {
 
 export const supportedConfigFiles = [
   'cypress.json',
-  'cypress.js',
-  'cypress.component.config.js',
-  'cypress.e2e.config.js',
+  'cypress.config.js',
 ]
 
 /**

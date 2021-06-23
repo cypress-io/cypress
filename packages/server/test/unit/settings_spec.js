@@ -21,7 +21,7 @@ describe('lib/settings', () => {
 
     afterEach(() => {
       return fs.removeAsync('cypress.json')
-      .then(() => fs.removeAsync('cypress.js'))
+      .then(() => fs.removeAsync('cypress.config.js'))
       .then(clearCypressJsonCache)
     })
 
@@ -104,7 +104,7 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
-      it('promises cypress.js -> `component` key for component testing runner', function () {
+      it('promises cypress.config.js -> `component` key for component testing runner', function () {
         return this.setup(`
           module.exports = {
             commmon_setting: true,
@@ -113,7 +113,7 @@ describe('lib/settings', () => {
             }
           }
           `,
-        'cypress.js')
+        'cypress.config.js')
         .then(() => {
           return settings.read(projectRoot, { testingType: 'component' })
         }).then((obj) => {
@@ -127,7 +127,7 @@ describe('lib/settings', () => {
         })
       })
 
-      it('promises cypress.js -> `e2e` key for component testing runner', function () {
+      it('promises cypress.config.js -> `e2e` key for component testing runner', function () {
         return this.setup(`
           module.exports = {
             commmon_setting: true,
@@ -136,7 +136,7 @@ describe('lib/settings', () => {
             }
           }
           `,
-        'cypress.js')
+        'cypress.config.js')
         .then(() => {
           return settings.read(projectRoot, { testingType: 'e2e' })
         }).then((obj) => {
@@ -150,7 +150,7 @@ describe('lib/settings', () => {
         })
       })
 
-      it('promises cypress.js assumes e2e if no runner specific keys are configured', function () {
+      it('promises cypress.config.js assumes e2e if no runner specific keys are configured', function () {
         return this.setup(`
           module.exports = {
             commmon_setting: true,
@@ -159,7 +159,7 @@ describe('lib/settings', () => {
             },
           }
           `,
-        'cypress.js')
+        'cypress.config.js')
         .then(() => {
           return settings.read(projectRoot, {})
         }).then((obj) => {

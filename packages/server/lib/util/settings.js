@@ -112,8 +112,8 @@ module.exports = {
       return 'cypress.json'
     }
 
-    if (ls.includes('cypress.js')) {
-      return 'cypress.js'
+    if (ls.includes('cypress.config.js')) {
+      return 'cypress.config.js'
     }
 
     // Default is to create a new `cypress.json` file if one does not exist.
