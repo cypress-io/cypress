@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import {
+import type {
   StaticResponse,
   BackendStaticResponseWithArrayBuffer,
   FixtureOpts,

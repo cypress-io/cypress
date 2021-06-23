@@ -1,10 +1,10 @@
 import { find } from 'lodash'
-import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
+import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 
-export function hasJsonContentType (headers: { [k: string]: string }) {
+export function hasJsonContentType (headers: CyHttpMessages.BaseMessage['headers']) {
   const contentType = find(headers, (v, k) => /^content-type$/i.test(k))
 
-  return contentType && /^application\/.*json/i.test(contentType)
+  return contentType && /^application\/.*json/i.test(String(contentType))
 }
 
 export function parseJsonBody (message: CyHttpMessages.BaseMessage): boolean {

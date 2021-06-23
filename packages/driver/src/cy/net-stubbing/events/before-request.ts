@@ -13,9 +13,9 @@ import {
   parseStaticResponseShorthand,
 } from '../static-response-utils'
 import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn, HandlerResult } from '.'
+import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import { NetEvent } from '@packages/net-stubbing/lib/types'
+import type { NetEvent } from '@packages/net-stubbing/lib/types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:net-stubbing:events:before-request')
