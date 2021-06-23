@@ -1,56 +1,27 @@
-# Reporter
+# Vue 3 + Typescript + Vite
 
-![Reporter](https://cloud.githubusercontent.com/assets/1157043/17947006/bffba412-6a18-11e6-86ee-af7e9c9d614e.png)
+This template should help get you started developing with Vue 3 and Typescript in Vite.
 
-The reporter shows the running results of the tests. It includes the following:
+## Recommended IDE Setup
 
-- A button to focus the list of test files
-- Stats for number of tests passed, failed, and pending
-- The total test run duration
-- Control for toggling auto-scrolling
-- Controls for various states (running, paused, stopped, etc.)
-- A command log, showing:
-  - suites
-  - tests
-  - hooks
-  - commands and assertions with detailed information
-  - any failures/errors
+[VSCode](https://code.visualstudio.com/) + [Vetur](https://marketplace.visualstudio.com/items?itemName=octref.vetur). Make sure to enable `vetur.experimental.templateInterpolationService` in settings!
 
-## Building
+### If Using `<script setup>`
 
-### For development
+[`<script setup>`](https://github.com/vuejs/rfcs/pull/227) is a feature that is currently in RFC stage. To get proper IDE support for the syntax, use [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) instead of Vetur (and disable Vetur).
 
-```bash
-yarn workspace @packages/reporter build
-```
+## Type Support For `.vue` Imports in TS
 
-### For production
+Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can use the following:
 
-```bash
-yarn workspace @packages/reporter build-prod
-```
+### If Using Volar
 
-## Developing
+Run `Volar: Switch TS Plugin on/off` from VSCode command palette.
 
-To see the reporter render, see [Developing the driver](../driver/README.md#Developing).
+### If Using Vetur
 
-### Watching
-
-- Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/reporter.js`
-- Compiles `*.scss` files to single `dist/reporter.css`
-
-```bash
-yarn workspace @packages/reporter watch
-```
-
-## Testing
-
-Run Cypress tests found in `cypress/integration`.
-
-```bash
-yarn workspace @packages/reporter cypress:open
-```
-
-You'll want to run `yarn workspace @packages/reporter watch` to iterate on the reporter under test while testing.
-
-You'll want to run `yarn workspace @packages/runner watch` to get changes to the main Cypress reporter while testing.
+1. Install and add `@vuedx/typescript-plugin-vue` to the [plugins section](https://www.typescriptlang.org/tsconfig#plugins) in `tsconfig.json`
+2. Delete `src/shims-vue.d.ts` as it is no longer needed to provide module info to Typescript
+3. Open `src/main.ts` in VSCode
+4. Open the VSCode command palette
+5. Search and run "Select TypeScript version" -> "Use workspace version"
