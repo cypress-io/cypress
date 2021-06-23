@@ -19,6 +19,7 @@
     "react-dom": "16.8.6"
   },
   "devDependencies": {
+    "@cypress/design-system": "0.0.0-development",
     "@packages/driver": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
