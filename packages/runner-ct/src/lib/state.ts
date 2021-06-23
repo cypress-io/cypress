@@ -1,8 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import { UIPlugin } from '../plugins/UIPlugin'
-import { nanoid } from 'nanoid'
-import { automation } from '@packages/runner-shared'
+import { automation, BaseStore } from '@packages/runner-shared'
 import {
   DEFAULT_REPORTER_WIDTH,
   LEFT_NAV_WIDTH,
@@ -64,7 +63,7 @@ const _defaults: Defaults = {
   callbackAfterUpdate: null,
 }
 
-export default class State {
+export default class State extends BaseStore {
   defaults = _defaults
 
   @observable isLoading = true
@@ -129,6 +128,7 @@ export default class State {
     specListWidth = DEFAULT_LIST_WIDTH,
     isSpecsListOpen = true,
   }, config: Cypress.RuntimeConfigOptions) {
+    super()
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
@@ -280,15 +280,6 @@ export default class State {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl
-  }
-
-  @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    this.spec = spec
-    this.specRunId = nanoid()
-  }
-
-  @action setSpecs (specs) {
-    this.specs = specs
   }
 
   @action updateSpecByUrl (specUrl) {

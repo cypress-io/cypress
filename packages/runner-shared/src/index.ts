@@ -35,3 +35,5 @@ export * from './header'
 export * from './container'
 
 export * from './spec-list'
+
+export * from './store'

@@ -1,5 +1,5 @@
 import { action, computed, observable } from 'mobx'
-import { automation } from '@packages/runner-shared'
+import { automation, BaseStore } from '@packages/runner-shared'
 
 const _defaults = {
   messageTitle: null,
@@ -18,7 +18,7 @@ const _defaults = {
   isLoadingUrl: false,
 }
 
-export default class State {
+export default class State extends BaseStore {
   defaults = _defaults
 
   @observable isLoading = true
@@ -40,7 +40,6 @@ export default class State {
 
   @observable width = _defaults.width
   @observable height = _defaults.height
-  @observable specs = _defaults.specs
 
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
@@ -57,6 +56,7 @@ export default class State {
   @observable.ref scriptError = null
 
   constructor ({ reporterWidth, specs }) {
+    super()
     this.reporterWidth = reporterWidth || _defaults.reporterWidth
     this.specs = specs || _defaults.specs
   }
@@ -109,10 +109,6 @@ export default class State {
   @action updateDimensions (width, height) {
     this.width = width
     this.height = height
-  }
-
-  @action setSpecs (specs) {
-    this.specs = specs
   }
 
   @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {

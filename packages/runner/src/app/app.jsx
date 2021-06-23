@@ -43,7 +43,7 @@ class App extends Component {
             searchRef={this.searchRef}
             specs={this.props.state.specs}
             className={styles.specsList}
-            selectedFile={spec}
+            selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
             onFileClick={() => {}}
           />
         </div>
