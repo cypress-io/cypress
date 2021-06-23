@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import Vue from '@vitejs/plugin-vue'
 import Layouts from 'vite-plugin-vue-layouts'
 import ViteIcons, { ViteIconsResolver } from 'vite-plugin-icons'
+import ViteFonts from 'vite-plugin-fonts'
 import ViteComponents from 'vite-plugin-components'
 import Markdown from 'vite-plugin-md'
 import WindiCSS from 'vite-plugin-windicss'
@@ -25,8 +26,16 @@ export default defineConfig({
     // https://github.com/JohnCampionJr/vite-plugin-vue-layouts
     Layouts(),
 
+    // https://github.com/stafyniaksacha/vite-plugin-fonts
+    ViteFonts({
+      google: {
+        families: ['Fira Code', 'Mulish', 'Source Code Pro']
+      }
+    }),
+
     // https://github.com/antfu/vite-plugin-icons
     ViteIcons(),
+    
     // https://github.com/antfu/vite-plugin-windicss
     WindiCSS({
       safelist: '*',

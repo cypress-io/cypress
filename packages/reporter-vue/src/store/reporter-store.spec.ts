@@ -1,7 +1,5 @@
 import { Runnables } from './reporter-store'
 import rootRunnable from '../../cypress/fixtures/runnables.json'
-import { mount } from '@cypress/vue'
-import { h, defineComponent } from 'vue'
 import { nanoid } from 'nanoid'
 import _ from 'lodash'
 
