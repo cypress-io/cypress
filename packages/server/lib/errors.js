@@ -965,6 +965,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${chalk.yellow(arg2)}
       `
+    case 'CT_NO_DEV_START_EVENT':
+      return stripIndent`\
+        To run component-testing, cypress needs the \`dev-server:start\` event. It is not implemented in your pluginsFile.
+
+        Add the implementation of a dev server to a \`on('dev-server:start')\` call in your pluginsFile.
+
+        https://on.cypress.io/component-testing
+        `
     default:
   }
 }
