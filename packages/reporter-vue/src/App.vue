@@ -1,27 +1,31 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />
+  <main class="max-w-800 w-80% p-8">
+    <header class="m-0-auto">
+    <img class="max-w-280px m-0-auto p-4" alt="Cypress Logo" src="./assets/cypress-logo.png" />
+    <h1 class="text-center text-2xl font-weight-light">Reporter Playground</h1>
+    <hr class="mt-4"/>
+  </header>
+  <article class="pt-4">
+  <h2 class="text-lg font-weight-light">Tools</h2>
+    <p><strong>Build: </strong>Rollup w/ Vite</p>
+    <p><strong>Framework: </strong>Vue 3</p>
+    <p><strong>CSS:</strong> WindiCSS</p>
+    <p><strong>Icons:</strong> Iconify</p>
+    <h2 class="text-lg font-weight-light">Testing</h2>
+
+    Tests are written with Cypress component testing and launched via <code>yarn cypress:open</code>.
+  </article>
+  </main>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
-
-export default defineComponent({
-  name: 'App',
-  components: {
-    HelloWorld
+<style scoped lang="scss">
+main {
+  p {
+    margin: 0.2rem 0;
   }
-})
-</script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  h2, h1 {
+    margin: 1.2rem 0 0.5rem;
+  }
 }
 </style>

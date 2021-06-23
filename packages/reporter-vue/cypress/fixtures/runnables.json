@@ -1,0 +1,79 @@
+{
+  "id": "r1",
+  "title": "",
+  "root": true,
+  "hooks": [],
+  "tests": [],
+  "suites": [
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "hooks": [],
+      "tests": [
+        {
+          "id": "r3",
+          "title": "test 1",
+          "state": "passed"
+        },
+        {
+          "id": "r4",
+          "title": "test 2",
+          "state": "failed"
+        }
+      ],
+      "suites": [
+        {
+          "id": "r5",
+          "title": "nested suite 1",
+          "root": false,
+          "hooks": [],
+          "tests": [
+            {
+              "id": "r6",
+              "title": "test 1",
+              "state": "pending"
+            },
+            {
+              "id": "r7",
+              "title": "test 2",
+              "state": "active",
+              "commands": [
+                {
+                  "hookId": "r7",
+                  "id": "c1",
+                  "instrument": "command",
+                  "message": "http://localhost:3000",
+                  "name": "visit",
+                  "state": "pending",
+                  "testId": "r7",
+                  "timeout": 4000,
+                  "type": "parent",
+                  "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r8",
+      "title": "suite 2",
+      "root": false,
+      "hooks": [],
+      "tests": [
+        {
+          "id": "r9",
+          "title": "test 3",
+          "state": "passed"
+        },
+        {
+          "id": "r10",
+          "title": "test 4",
+          "state": "passed"
+        }
+      ]
+    }
+  ]
+}

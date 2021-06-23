@@ -1,5 +1,5 @@
 {
-  "name": "@packages/reporter-vue",
+  "name": "@packages/reporter-vue-experimental",
   "version": "0.0.0-development",
   "private": true,
   "browser": "src/main.tsx",
@@ -17,8 +17,8 @@
     "pinia": "next",
     "v-tooltip": "4.0.0-alpha.1",
     "vue": "3.1.1",
-    "vue3-blocks-tree": "0.5.2",
-    "vue-virtual-tree": "3.1.1"
+    "vue-virtual-tree": "3.1.1",
+    "vue3-blocks-tree": "0.5.2"
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
