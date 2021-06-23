@@ -466,9 +466,10 @@ describe('lib/cypress', () => {
           return fs.statAsync(cfg.integrationFolder)
         }).then(() => {
           return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
           )
         })
       })
