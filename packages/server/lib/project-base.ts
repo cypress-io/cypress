@@ -668,11 +668,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       throw new Error('Missing project root')
     }
 
-    const newState = _.merge({}, this.cfg.state, stateChanges)
-
     return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
-    .then((state) => state.set(newState))
-    .then(() => {
+    .tap((state) => state.set(stateChanges))
+    .then((state) => {
+      const newState = state.get()
+
       this.cfg.state = newState
 
       return newState
