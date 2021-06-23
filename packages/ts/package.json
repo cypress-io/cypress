@@ -14,7 +14,7 @@
     "debug": "4.3.2"
   },
   "devDependencies": {
-    "ts-node": "5.0.1"
+    "ts-node": "^10.0.0"
   },
   "files": [
     "register.js"
