@@ -11,11 +11,3 @@ $cy-tooltip-class: 'cy-tooltip';
 
 @import '../../ui-components/src/dropdown';
 @import '../../reporter/src/main-runner';
-
-
-#inline-spec-list {
-  position: absolute;
-  z-index: 10;
-  width: 300px;
-  height: 100%;
-}

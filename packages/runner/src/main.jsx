@@ -3,7 +3,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 
-import App from './app/app'
+import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
 import { Container, eventManager } from '@packages/runner-shared'
@@ -19,8 +19,9 @@ const Runner = {
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
 
       const state = new State({
-        reporrterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
+        reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
         specs: config.specs,
+        specListWidth: NO_COMMAND_LOG ? 0 : SPEC_LIST_WIDTH,
       })
 
       Runner.state = state

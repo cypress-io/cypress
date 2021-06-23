@@ -36,7 +36,7 @@ export default class Iframes extends Component {
         )}
         style={{
           top: headerHeight,
-          left: this.props.state.absoluteReporterWidth,
+          left: this.props.state.absoluteReporterWidth + this.props.state.specListWidth,
         }}
       >
         <div

@@ -11,6 +11,7 @@ const _defaults = {
   height: 660,
 
   reporterWidth: null,
+  specListWidth: null,
   specs: [],
 
   url: '',
@@ -44,9 +45,12 @@ export default class State extends BaseStore {
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
+  @observable specListWidth = _defaults.specListWidth
+
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
   @observable headerHeight = 0
+  @observable absoluteSpecListWidth = 0
 
   @observable windowWidth = 0
   @observable windowHeight = 0
@@ -55,9 +59,10 @@ export default class State extends BaseStore {
 
   @observable.ref scriptError = null
 
-  constructor ({ reporterWidth, specs }) {
+  constructor ({ reporterWidth, specListWidth, specs }) {
     super()
     this.reporterWidth = reporterWidth || _defaults.reporterWidth
+    this.specListWidth = specListWidth || _defaults.specListWidth
     this.specs = specs || _defaults.specs
   }
 
@@ -70,7 +75,7 @@ export default class State extends BaseStore {
   }
 
   @computed get _containerWidth () {
-    return this.windowWidth - this.absoluteReporterWidth
+    return this.windowWidth - this.absoluteReporterWidth - this.specListWidth
   }
 
   @computed get _containerHeight () {
@@ -111,7 +116,12 @@ export default class State extends BaseStore {
     this.height = height
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+  @action updateWindowDimensions ({
+    windowWidth,
+    windowHeight,
+    reporterWidth,
+    headerHeight,
+  }) {
     if (windowWidth != null) this.windowWidth = windowWidth
 
     if (windowHeight != null) this.windowHeight = windowHeight

@@ -2,10 +2,14 @@
   cursor: col-resize;
 }
 
+// if you change this here,
+// make sure to update this in app.jsx too
+$spec-list-width: 250px;
+
 .reporter-wrap {
   min-width: $reporter-min-width;
   bottom: 0;
-  left: 0;
+  left: $spec-list-width;
   position: absolute;
   top: 0;
   width: 33%;
@@ -26,6 +30,18 @@
 
 .reporter .container {
   border-right: solid 1px #c7c7c7;
+}
+
+.spec-list-wrap {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: $spec-list-width;
+  height: 100%;
+}
+
+.spec-list {
+  width: 100%;
 }
 
 .runner {
@@ -53,11 +69,14 @@
 }
 
 .runner-resizer {
+  left: $spec-list-width;
   bottom: 0;
   cursor: col-resize;
   position: absolute;
   top: 0;
+  background: red;
   width: 5px;
+  z-index: 10;
 }
 
 .screenshot-helper-pixels {
