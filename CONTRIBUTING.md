@@ -167,7 +167,7 @@ Search [all issues](https://github.com/cypress-io/cypress/issues) for keywords f
 If an issue already exists you should:
 
 - Thank them for their contribution.
-- Explain that this issue if a duplicate of another issue, linking to the relevant issue (`#1234`).
+- Explain that this issue is a duplicate of another issue, linking to the relevant issue (`#1234`).
 - Add the `type: duplicate` label to the issue.
 - Close the issue.
 

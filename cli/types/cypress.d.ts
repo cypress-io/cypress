@@ -60,7 +60,7 @@ declare namespace Cypress {
      */
     displayName: string
     version: string
-    majorVersion: number
+    majorVersion: number | string
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -2763,8 +2763,6 @@ declare namespace Cypress {
     clientRoute: string
     configFile: string
     cypressEnv: string
-    integrationExampleName: string
-    integrationExamplePath: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
