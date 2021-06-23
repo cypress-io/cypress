@@ -100,7 +100,11 @@ export const eventManager = {
     })
 
     ws.on('component:specs:changed', (specs) => {
-      state.setSpecs(specs)
+      // TODO: Implement for E2E
+      // This is only used for CT, since E2E does not have an inline spec list yet.
+      if (state.setSpecs) {
+        state.setSpecs(specs)
+      }
     })
 
     ws.on('dev-server:hmr:error', (error) => {
