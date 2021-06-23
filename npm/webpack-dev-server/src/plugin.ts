@@ -1,5 +1,5 @@
 import webpack, { Compiler } from 'webpack'
-import { EventEmitter } from 'events'
+import type { EventEmitter } from 'events'
 import _ from 'lodash'
 import semver from 'semver'
 import fs, { PathLike } from 'fs'

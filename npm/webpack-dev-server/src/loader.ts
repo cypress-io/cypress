@@ -3,7 +3,7 @@
 
 import debugFn from 'debug'
 import * as path from 'path'
-import { CypressCTWebpackContext } from './plugin'
+import type { CypressCTWebpackContext } from './plugin'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 /**

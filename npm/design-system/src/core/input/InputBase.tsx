@@ -1,5 +1,4 @@
-import * as React from 'react'
-import type { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
+import React, { CSSProperties, InputHTMLAttributes, MutableRefObject, ReactNode, RefObject, TextareaHTMLAttributes, useMemo, useRef } from 'react'
 import { useTextField } from 'react-aria'
 import cs from 'classnames'
 

@@ -1,6 +1,6 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
-import * as webpack from 'webpack'
+import type * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import makeDefaultWebpackConfig from './webpack.config'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from './plugin'

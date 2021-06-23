@@ -1,6 +1,6 @@
 import { debug as debugFn } from 'debug'
-import { AddressInfo } from 'net'
-import { Server } from 'http'
+import type { AddressInfo } from 'net'
+import type { Server } from 'http'
 import { start as createDevServer, StartDevServer } from './startServer'
 
 const debug = debugFn('cypress:webpack-dev-server:webpack')
