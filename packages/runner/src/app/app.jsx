@@ -43,18 +43,20 @@ class App extends Component {
         'is-reporter-resizing': this.isReporterResizing,
         'is-reporter-sized': this.props.state.reporterWidth != null,
       })}>
-        <div
-          className='spec-list-wrap'
-          style={{ width: this.props.state.specListWidth }}
-        >
-          <SpecList
-            searchRef={this.searchRef}
-            specs={this.props.state.specs}
-            className={cs(styles.specsList, 'spec-list')}
-            selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
-            onFileClick={this._runSpec}
-          />
-        </div>
+        {Boolean(NO_COMMAND_LOG) || (
+          <div
+            className='spec-list-wrap'
+            style={{ width: this.props.state.specListWidth }}
+          >
+            <SpecList
+              searchRef={this.searchRef}
+              specs={this.props.state.specs}
+              className={cs(styles.specsList, 'spec-list')}
+              selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
+              onFileClick={this._runSpec}
+            />
+          </div>
+        )}
 
         <Resizer
           style={{ left: this.props.state.specListWidth }}
