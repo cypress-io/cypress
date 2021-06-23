@@ -418,7 +418,11 @@
         color: #3386d4;
         display: none;
         font-size: 16px;
-        padding: 3px 12px;
+        padding: 3px 10px;
+
+        i {
+          width: 15px;
+        }
 
         &:hover, &:focus {
           color: darken(#3386d4, 5%);
