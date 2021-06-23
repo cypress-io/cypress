@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-unit": "node test",
     "test-watch": "echo 'no watching of tests'"
