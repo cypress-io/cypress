@@ -4,8 +4,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
+    "build-prod": "tooling_build-typescript",
     "build-test": "yarn build-prod --noEmit",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@cypress/request-promise": "4.2.6",
+    "@scripts/tooling": "0.0.0-development",
     "@types/parse5-html-rewriting-stream": "5.1.1",
     "fs-extra": "9.0.0",
     "nock": "12.0.3",
