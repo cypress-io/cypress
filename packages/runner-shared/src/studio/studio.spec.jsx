@@ -109,6 +109,7 @@ describe('<Studio />', () => {
       expect(component.find(Tooltip).at(0)).to.have.prop('visible', false)
       expect(component.find(Tooltip).at(1)).to.have.prop('visible', false)
       expect(component.find(Tooltip).at(2)).to.have.prop('visible', false)
+      expect(component.find(Tooltip).at(3)).to.have.prop('visible', false)
     })
 
     it('emits studio:cancel when close button is clicked', () => {

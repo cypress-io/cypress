@@ -80,7 +80,7 @@ class Studio extends Component {
               onClick={this._copy}
               onMouseLeave={this._endCopySuccess}
             >
-              <i className={copySuccess ? 'fas fa-clipboard-check' : 'fas fa-clipboard'} />
+              <i className={copySuccess ? 'fas fa-check' : 'fas fa-copy'} />
             </button>
           </Tooltip>
           <Tooltip

@@ -397,7 +397,7 @@
         outline: none;
       }
 
-      &:active {
+      &:not(.studio-copy):active {
         box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
       }
     }
@@ -415,25 +415,23 @@
       margin-left: auto;
 
       .studio-copy {
-        border: 2px solid #3386d4;
         color: #3386d4;
         display: none;
-        font-size: 14px;
-        padding: 2.5px 16px;
+        font-size: 16px;
+        padding: 3px 12px;
 
         &:hover, &:focus {
-          background-color: rgba(0, 0, 0, 0.05)
+          color: darken(#3386d4, 5%);
         }
 
         &.studio-copy-success {
-          border-color: $pass;
           color: $pass;
         }
 
         &[disabled],
         &[disabled]:hover,
         &[disabled]:active {
-          background-color: #fff;
+          color: #3386d4;
           opacity: 0.5;
         }
       }
@@ -443,7 +441,7 @@
       background-color: #3386d4;
       color: #fff;
       display: none;
-      margin-left: 10px;
+      margin-left: 4px;
 
       &:hover {
         background-color: darken(#3386d4, 10%);

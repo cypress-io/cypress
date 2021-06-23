@@ -85,7 +85,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
             onClick={this._copy}
             onMouseLeave={this._endCopySuccess}
           >
-            <i className={copySuccess ? 'fas fa-clipboard-check' : 'fas fa-clipboard'} />
+            <i className={copySuccess ? 'fas fa-check' : 'fas fa-copy'} />
           </button>
         </Tooltip>
         <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
