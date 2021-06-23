@@ -1,0 +1,14 @@
+{
+  "name": "@scripts/tooling",
+  "version": "0.0.0-development",
+  "description": "Tools and scripts to facilitate Cypress CI, publish and release tasks.",
+  "private": true,
+  "devDependencies": {
+    "@packages/ts": "0.0.0-development"
+  },
+  "bin": {
+    "tooling_build-typescript": "./build-prod/typescript.js",
+    "tooling_clean-typescript": "./build-prod/clean-typescript.js"
+  },
+  "repository": "https://github.com/cypress-io/cypress.git"
+}
