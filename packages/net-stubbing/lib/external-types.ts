@@ -132,6 +132,10 @@ export namespace CyHttpMessages {
      */
     url: string
     /**
+     * URL query string as object.
+     */
+    query: Record<string, string|number>
+    /**
      * The HTTP version used in the request. Read only.
      */
     httpVersion: string
