@@ -1,8 +1,8 @@
 <template>
-  <ReporterHeaderLayout data-cy="reporter-header">
+  <ReporterHeaderLayout data-cy="reporter-header" class="hidden">
     <!-- Three stats (passed, failed, pending)-->
     <template #runnables>
-      <RunnableStat type="passed" :number="stats.byType && stats.byType.passed.length"/>
+      <RunnableStat type="passed" class="hidden" :number="stats.byType && stats.byType.passed.length"/>
       <RunnableStat type="failed" :number="stats.byType && stats.byType.failed.length"/>
       <RunnableStat type="pending" :number="stats.byType && stats.byType.pending.length"/>
     </template>
@@ -18,13 +18,16 @@
       <AutoScrollControl @click="autoScrollClicked"/> -->
 
       <HotkeyTooltip :content="playControl.text" :hotkey="playControl.hotkey">
-          <button @click="playControl.method">
+          <button @click="playControl.method" class="hidden">
+            <i-fa-repeat/>
+            <i-fa-pause/>
+            
             <i :class="`fas ${reporter.state === 'running' ? 'fa-pause' : 'fa-redo'}`"/>
           </button>
         </HotkeyTooltip>
 
         <HotkeyTooltip :content="autoScrollText" hotkey="A">
-          <button @click="reporter.toggleAutoScrolling" :aria-label="autoScrollText" :class="autoScrollingClass">
+          <button @click="reporter.toggleAutoScrolling" :aria-label="autoScrollText" :class="autoScrollingClass" class="btn">
             <span class="auto-scrolling-icon" />
             <i class="fas fa-arrows-alt-v"/>
           </button>
@@ -34,13 +37,14 @@
 </template>
 
 <script lang="ts">
-import { useStatsStore, useReporterStore } from "../store";
+// import { useStatsStore, useReporterStore } from "../store";
+import { useStatsStore, useReporterStore  } from '../store/reporter-store'
 import RunnableStat from "./RunnableStat.vue";
 import RunnableDuration from './RunnableDuration.vue'
 import {HotkeyTooltip} from '../components/Tooltip'
 import ReporterHeaderLayout from './ReporterHeaderLayout.vue'
 import { computed, defineComponent } from 'vue'
-import text from '../i18n'
+import text from '../i18n/reporter-text'
 
 export default defineComponent({
   components: {
@@ -90,7 +94,7 @@ export default defineComponent({
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
 .auto-scrolling {
   width: 10px;

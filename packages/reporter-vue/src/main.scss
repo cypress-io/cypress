@@ -1,0 +1,24 @@
+body {
+  @apply font-sans;
+}
+
+* {
+  @apply text-md tracking-tight leading-8 font-normal;
+}
+
+
+/**
+  It's possible to pass in different classes and a custom theme,
+  But it's quicker + terser to do this
+  */
+
+.resize-observer[data-v-b329ee4c]{position:absolute;top:0;left:0;z-index:-1;width:100%;height:100%;border:none;background-color:transparent;pointer-events:none;display:block;overflow:hidden;opacity:0}.resize-observer[data-v-b329ee4c] object{display:block;position:absolute;top:0;left:0;height:100%;width:100%;overflow:hidden;pointer-events:none;z-index:-1}.v-popper--theme-dropdown .v-popper__inner{background:#fff;color:#000;padding:24px;border-radius:6px;box-shadow:0 6px 30px rgba(0,0,0,.1)}.v-popper--theme-dropdown .v-popper__arrow{border-color:#fff}.v-popper{width:max-content}.v-popper--theme-tooltip .v-popper__inner{background:rgba(0,0,0,.8);color:#fff;border-radius:6px;padding:7px 12px 6px}.v-popper--theme-tooltip .v-popper__arrow{border-color:rgba(0,0,0,.8)}.v-popper__popper{z-index:10000}.v-popper__popper.v-popper__popper--hidden{visibility:hidden;opacity:0;transition:opacity .15s,visibility .15s}.v-popper__popper.v-popper__popper--shown{visibility:visible;opacity:1;transition:opacity .15s}.v-popper__popper.v-popper__popper--skip-transition,.v-popper__popper.v-popper__popper--skip-transition>.v-popper__wrapper{transition:none!important}.v-popper__inner{position:relative}.v-popper__arrow-container{width:10px;height:10px}.v-popper__arrow{border-style:solid;position:relative;width:0;height:0}.v-popper__popper[data-popper-placement^=top] .v-popper__arrow{border-width:5px 5px 0 5px;border-left-color:transparent!important;border-right-color:transparent!important;border-bottom-color:transparent!important}.v-popper__popper[data-popper-placement^=bottom] .v-popper__arrow-container{top:0}.v-popper__popper[data-popper-placement^=bottom] .v-popper__arrow{border-width:0 5px 5px 5px;border-left-color:transparent!important;border-right-color:transparent!important;border-top-color:transparent!important;top:-5px}.v-popper__popper[data-popper-placement^=right] .v-popper__arrow{border-width:5px 5px 5px 0;border-left-color:transparent!important;border-top-color:transparent!important;border-bottom-color:transparent!important;left:-5px}.v-popper__popper[data-popper-placement^=left] .v-popper__arrow-container{right:-5px}.v-popper__popper[data-popper-placement^=left] .v-popper__arrow{border-width:5px 0 5px 5px;border-top-color:transparent!important;border-right-color:transparent!important;border-bottom-color:transparent!important;right:-5px}
+
+.v-popper--theme-tooltip.v-popper--theme-tooltip .v-popper__inner {
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+.v-popper--theme-tooltip.v-popper--theme-tooltip .v-popper__arrow {
+  border-color: #ff0000;
+}

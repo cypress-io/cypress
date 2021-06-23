@@ -1,27 +1,29 @@
 <template>
   <span :class="`stat stat-${type}`" data-cy="stat">
   
+    <i-fa-solid-times v-if="type ==='failed'"/>
+    <i-fa-circle-o-notch v-if="type ==='pending'"/>
+    <i-fa-check v-if="type === 'passed'"/>
     <i :class="`fas ${icon} icon`" aria-hidden="true"></i>
     <span class="visually-hidden">{{type}}</span>
     <span>{{ numberFormatted }}</span>
   </span>
 </template>
 
-<script setup>
-import IconClarityAtomSolid from 'virtual:vite-icons/clarity/atom-solid'
-</script>
 <script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
-import type { StatType } from '../store/stats-store'
+import { defineComponent, computed } from "vue";
+import type { PropType} from 'vue'
+// import type { StatType } from '../store/stats-store'
 
-const noRunnerPlaceholder = '--'
-const icons: Record<StatType, string> = {
-  pending: 'fa-circle-notch',
-  passed: 'fa-check',
-  failed: 'fa-times'
-}
+// const noRunnerPlaceholder = '--'
+// const icons: Record<StatType, string> = {
+//   pending: 'fa-circle-notch',
+//   passed: 'fa-check',
+//   failed: 'fa-times'
+// }
 
 export default defineComponent({
+  // components: { IMdiRefresh },
   props: {
     type: String as PropType<StatType>,
     number:{ type: Number as PropType<null|number>, optional: true }
@@ -29,8 +31,9 @@ export default defineComponent({
   setup(props) {
     
     return {
-      icon: icons[props.type],
-      numberFormatted: computed(() => props.number > 0 ? props.number : noRunnerPlaceholder)
+      type: props.type
+      // icon: icons[props.type],
+      // numberFormatted: computed(() => props.number > 0 ? props.number : noRunnerPlaceholder)
     }
   }
 })

@@ -5,6 +5,7 @@
  */
 
 import _, { Dictionary } from 'lodash'
+import { EventEmitter } from 'events'
 import { useRafFn, Fn, Pausable } from '../composables/core/index'
 import { RunnableState } from '../types'
 import { computed, ref, Ref, ComputedRef, watch } from 'vue'
@@ -68,7 +69,7 @@ export function Runnables(rootRunnable: RawSuite): Runnables {
   }
 }
 
-export function useReporterStore(bus: EventEmitter, appState: any): ReporterStore {
+export function useReporterStore(bus = new EventEmitter(), appState: any): ReporterStore {
   if (stores.reporter) return stores.reporter
   let runnables: Runnables | Record<any, any> = {}
   const runState = ref('')
@@ -165,7 +166,7 @@ export class Suite implements Runnable {
   }  
 }
 
-function useStatsStore(): StatsStore {
+export function useStatsStore(): StatsStore {
   if (stores.stats) return stores.stats
 
   const startTime: Ref<number> = ref(0)

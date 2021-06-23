@@ -1,10 +1,14 @@
+import './main.scss'
 import App from './App.vue'
-
-
+import VTooltip from 'v-tooltip'
+import _ from 'lodash'
+export const plugins = [
+  VTooltip
+]
 // The setup function is called within the support file
 // When there are plugins, like a Store or Router, add them here so that
 // they're picked up by the tests and properly setup.
-async function setup(createApp = true) {
+export async function setup(createApp = true) {
 
   // Global CSS imports.
   import('virtual:windi.css')
@@ -17,11 +21,12 @@ async function setup(createApp = true) {
   // Cypress Component Test utils will set the app up on its own
   // Only need to do this when mounting this like an App
   if (createApp) {
-    
     const { createApp }  = await import('vue')
-    createApp(App).mount('#app')
+    const app = createApp(App)
+    _.forEach(plugins, plugin => app.use(plugin))
+    app.mount('#app')
   }
-  return App
+  return { root: App, plugins }
 }
 
 setup()
