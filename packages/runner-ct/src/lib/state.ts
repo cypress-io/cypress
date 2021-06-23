@@ -52,9 +52,6 @@ const _defaults: Defaults = {
   highlightUrl: false,
   isLoadingUrl: false,
 
-  // spec: null,
-  // specs: [],
-
   callbackAfterUpdate: null,
 }
 
@@ -103,8 +100,6 @@ export default class State extends BaseStore {
 
   @observable.ref scriptError: string | undefined
 
-  // @observable spec = _defaults.spec
-  // @observable specs = _defaults.specs
   @observable specRunId: string | null = null
 
   @observable readyToRunTests = false
