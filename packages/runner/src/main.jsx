@@ -1,4 +1,4 @@
-import { action, configure } from 'mobx'
+import { action, autorun, configure } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
@@ -25,6 +25,26 @@ const Runner = {
 
       Runner.state = state
       Runner.configureMobx = configure
+
+      const setSpecByUrlHash = () => {
+        const specPath = util.integrationSpecPath()
+
+        if (specPath) {
+          state.updateSpecByUrl(specPath)
+        }
+      }
+
+      setSpecByUrlHash()
+
+      autorun(() => {
+        const { spec } = state
+
+        if (spec) {
+          util.updateIntegrationSpecPath(spec.name)
+        }
+      })
+
+      window.addEventListener('hashchange', setSpecByUrlHash)
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 

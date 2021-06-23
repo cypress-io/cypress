@@ -28,4 +28,12 @@ export abstract class BaseStore {
   @action setSpecs (specs: Cypress.Cypress['spec'][]) {
     this.specs = specs
   }
+
+  @action updateSpecByUrl (specUrl: string) {
+    const foundSpec = this.specs.find((x) => x.name === decodeURI(specUrl))
+
+    if (foundSpec) {
+      this.spec = foundSpec
+    }
+  }
 }

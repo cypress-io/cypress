@@ -30,9 +30,6 @@ interface Defaults {
   highlightUrl: boolean
   isLoadingUrl: boolean
 
-  spec: Cypress.Cypress['spec'] | null
-  specs: Cypress.Cypress['spec'][]
-
   callbackAfterUpdate: ((...args: unknown[]) => void) | null
 }
 
@@ -55,8 +52,8 @@ const _defaults: Defaults = {
   highlightUrl: false,
   isLoadingUrl: false,
 
-  spec: null,
-  specs: [],
+  // spec: null,
+  // specs: [],
 
   callbackAfterUpdate: null,
 }
@@ -106,8 +103,8 @@ export default class State extends BaseStore {
 
   @observable.ref scriptError: string | undefined
 
-  @observable spec = _defaults.spec
-  @observable specs = _defaults.specs
+  // @observable spec = _defaults.spec
+  // @observable specs = _defaults.specs
   @observable specRunId: string | null = null
 
   @observable readyToRunTests = false
@@ -115,8 +112,8 @@ export default class State extends BaseStore {
   @observable plugins: UIPlugin[] = []
 
   constructor ({
-    spec = _defaults.spec,
-    specs = _defaults.specs,
+    spec,
+    specs = [],
     runMode = 'single' as RunMode,
     multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
