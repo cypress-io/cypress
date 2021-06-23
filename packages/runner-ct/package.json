@@ -5,7 +5,8 @@
   "browser": "src/index.js",
   "scripts": {
     "build": "webpack",
-    "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
+    "build-prod": "cross-env NODE_ENV=production yarn build && tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
@@ -23,6 +24,7 @@
     "@fortawesome/free-regular-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@packages/driver": "0.0.0-development",
+    "@scripts/tooling": "0.0.0-development",
     "@types/http-proxy": "1.17.4",
     "@types/node": "14.14.31",
     "@types/sockjs-client": "1.1.0",
@@ -52,13 +54,8 @@
     "react-devtools-inline": "^4.10.1",
     "react-dom": "16.8.6",
     "react-split-pane": "^0.1.92",
-    "sass-loader": "^10.0.3",
     "sockjs-client": "^1.5.0",
-    "strip-ansi": "6.0.0",
-    "ts-loader": "^8.0.5",
-    "ts-node": "8.3.0",
-    "watch": "^1.0.2",
-    "webpack": "4.44.2"
+    "strip-ansi": "6.0.0"
   },
   "peerDependencies": {
     "webpack": "^4.0.0 || ^5.0.0",

@@ -4,8 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
-    "clean": "node scripts/clean.js || true",
+    "build-prod": "tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "clean-js": "yarn clean",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
+    "@scripts/tooling": "0.0.0-development",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "cross-env": "6.0.3",

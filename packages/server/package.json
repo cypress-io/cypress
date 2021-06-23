@@ -4,7 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc",
+    "build-prod": "tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "codecov": "codecov",
     "dev": "node index.js",
@@ -143,6 +144,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
+    "@scripts/tooling": "0.0.0-development",
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
     "@types/http-proxy": "1.17.4",

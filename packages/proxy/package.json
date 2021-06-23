@@ -4,7 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
+    "build-prod": "tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
@@ -28,6 +29,7 @@
     "@cypress/request-promise": "4.2.6",
     "@cypress/sinon-chai": "2.9.1",
     "@packages/resolve-dist": "0.0.0-development",
+    "@scripts/tooling": "0.0.0-development",
     "@types/express": "4.17.2",
     "@types/supertest": "2.0.10",
     "express": "4.17.1",

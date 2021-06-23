@@ -5,7 +5,8 @@
   "main": "index.js",
   "browser": "lib/browser.ts",
   "scripts": {
-    "build-prod": "tsc",
+    "build-prod": "tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
@@ -19,6 +20,7 @@
     "socket.io-client": "4.0.1"
   },
   "devDependencies": {
+    "@scripts/tooling": "0.0.0-development",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",

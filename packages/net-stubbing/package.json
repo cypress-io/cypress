@@ -4,7 +4,8 @@
   "private": true,
   "main": "./lib/server",
   "scripts": {
-    "build-prod": "tsc --project .",
+    "build-prod": "tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
     "clean-deps": "rm -rf node_modules",
     "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
   },
@@ -18,6 +19,7 @@
     "throttle": "^1.0.3"
   },
   "devDependencies": {
+    "@scripts/tooling": "0.0.0-development",
     "@types/mocha": "7.0.2",
     "bin-up": "1.2.0",
     "chai": "4.2.0",
