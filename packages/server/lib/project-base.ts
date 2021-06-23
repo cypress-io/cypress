@@ -385,7 +385,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          this.server.sendSpecList(specs)
+          this.server.sendSpecList(specs, this.projectType)
 
           if (this.projectType === 'ct') {
           // ct uses the dev-server to build and bundle the speces.

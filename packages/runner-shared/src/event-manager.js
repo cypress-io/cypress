@@ -11,6 +11,7 @@ import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress, { $ } from '@packages/driver'
+import { USE_INLINE_SPEC_LIST } from '@packages/runner/src/app/app'
 
 const ws = client.connect({
   path: '/__socket.io',
@@ -99,12 +100,13 @@ export const eventManager = {
       rerun()
     })
 
-    ws.on('component:specs:changed', (specs) => {
-      // TODO: Implement for E2E
-      // This is only used for CT, since E2E does not have an inline spec list yet.
-      if (state.setSpecs) {
-        state.setSpecs(specs)
+    ws.on('specs:changed', ({ specs, projectType }) => {
+      // do not emit the event if e2e runner is not displaying an inline spec list.
+      if (projectType === 'e2e' && USE_INLINE_SPEC_LIST === false) {
+        return
       }
+
+      state.setSpecs(specs)
     })
 
     ws.on('dev-server:hmr:error', (error) => {
