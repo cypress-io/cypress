@@ -1,12 +1,9 @@
 <template>
   <BaseAccordion initially-open>
     <template #header>
-      <span v-if="state === 'not-started'"></span>
-      <template v-else>
         Suite Name: {{ suite.title }}
         <b>My state</b>: {{ state }}
       <hr/>
-      </template>
     </template>
     <slot></slot>
   </BaseAccordion>
@@ -41,7 +38,7 @@ export default {
       collectStateRecusively(props.suite, state)
       return state
     })
-    
+
     const state = computed(() => {
         if (sumOfStates.value.failed) return 'failed'
         if (sumOfStates.value.running) return 'running'

@@ -1,7 +1,8 @@
 <template>
   <!-- Recursively calls into itself to generate all of the runnables -->
   <ul class="runnables">
-    <li v-for="runnable in runnablesTree" :key="runnable.id" class="runnable">
+    <li v-for="runnable in runnables" :key="runnable.id" class="runnable">
+    {{ runnable.state }}
       <Suite :suite="runnable" v-if="runnable.type === 'suite'" :state="runnable.state">
         <RunnablesList :runnables="runnable.children" />
       </Suite>
@@ -29,8 +30,9 @@ export default defineComponent({
     }
   },
   setup(props) {
+    debugger;
     return {
-      runnablesTree: computed(() => props.runnables)
+      runnables: computed(() => props.runnables)
     }
   }
 })

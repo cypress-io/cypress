@@ -130,8 +130,14 @@ function createRunnableChildren(props: RootRunnable, level: number, runnablesByI
     }
   }
 
-  props.suites = props.suites.map(addParentRunnables)
-  props.tests = props.tests.map(addParentRunnables)
+  try {
+    props.suites = props.suites.map(addParentRunnables)
+    props.tests = props.tests.map(addParentRunnables)
+  } catch (err) {
+    props;
+    debugger;
+  }
+  
 
   return createRunnables('test', props.tests, props.hooks, level, runnablesById).concat(
     createRunnables('suite', props.suites, props.hooks, level, runnablesById),

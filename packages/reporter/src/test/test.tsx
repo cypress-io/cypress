@@ -86,7 +86,10 @@ class Test extends Component<TestProps> {
     const { appState, model, scroller } = this.props
     const { state, shouldRender } = model
 
-    if (appState.autoScrollingEnabled && (appState.isRunning || appState.studioActive) && shouldRender && state !== 'processing') {
+    if (appState.autoScrollingEnabled &&
+      (appState.isRunning || appState.studioActive) &&
+      shouldRender &&
+      state !== 'processing') {
       window.requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
         if (this.containerRef.current) {

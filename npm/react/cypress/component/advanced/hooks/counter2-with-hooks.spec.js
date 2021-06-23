@@ -6,6 +6,7 @@ import ReactDom from 'react-dom'
 import { mount } from '@cypress/react'
 import Counter2WithHooks from './counter2-with-hooks.jsx'
 
+it
 describe('another', () => {
   it('fails', () => {
     expect(true).to.eq(false)
@@ -57,24 +58,24 @@ it('renders', () => {
 describe('0 describe', function () {
   describe('deeper', () => {
     _.times(40, (n) => {
-      // if (Math.random() > 0.5) {
-      //   Math.random() > 0.75 ? describe.skip : describe('suite ' + n, () => {
-      //     it(`${n} might render`, function () {
-      //     expect(Math.random()).to.be.gt(0.5)
-      //     // expect(true).to.be(false)
-      //     // mount(<Counter2WithHooks />, { React, ReactDom })
-      //     // cy.contains('0')
-      //     // cy.document().should('have.property', 'title', 'You clicked 0 times')
+      if (Math.random() > 0.5) {
+        Math.random() > 0.75 ? describe.skip : describe('suite ' + n, () => {
+          it(`${n} might render`, function () {
+          expect(Math.random()).to.be.gt(0.5)
+          // expect(true).to.be(false)
+          // mount(<Counter2WithHooks />, { React, ReactDom })
+          // cy.contains('0')
+          // cy.document().should('have.property', 'title', 'You clicked 0 times')
 
-      //     // cy.log('Clicking changes document title')
-      //     // cy.get('#increment')
-      //     // .click()
-      //     // .click()
+          // cy.log('Clicking changes document title')
+          // cy.get('#increment')
+          // .click()
+          // .click()
 
-      //     // cy.document().should('have.property', 'title', 'You clicked 2 times')
-      //   })
+          // cy.document().should('have.property', 'title', 'You clicked 2 times')
+        })
 
-      // })
+      })
       it(`${n} might render`, function () {
         cy.get('body').should('exist')
         expect(Math.random()).to.be.gt(.90)

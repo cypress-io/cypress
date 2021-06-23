@@ -1,16 +1,16 @@
 import RunnablesList from './RunnablesList'
 import { mockRootRunnable } from './mock-runnables'
-import { useRunnablesStore } from '../store'
+import { useStore } from '../store'
 import { h } from 'vue'
 
 it('renders', () => {
   const wrapper = {
     setup() {
-      const runnablesStore = useRunnablesStore()
-      runnablesStore.rootRunnable = mockRootRunnable
-
-      debugger;
-      return () => h(RunnablesList)
+      const store = useStore()
+      store.setRunnablesFromRoot(require('@packages/reporter/cypress/fixtures/runnables'))
+      return () => h('div', [h(RunnablesList, {
+          runnables: store.runnablesTree
+        })])
     }
   }
   cy.mount(() => h(wrapper))
