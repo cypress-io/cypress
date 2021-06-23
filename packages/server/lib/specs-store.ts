@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
-import { findSpecsOfType } from '@packages/server/lib/util/specs'
+import { findSpecsOfType } from './util/specs'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
@@ -15,16 +15,25 @@ const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', '
 // TODO: shouldn't this be on the trailing edge, not leading?
 const debounce = (fn) => _.debounce(fn, 250, { leading: true })
 
+type RunnerType = 'ct' | 'e2e'
+
 export class SpecsStore {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
 
-  constructor (private cypressConfig) {
-
-  }
+  constructor (
+    private cypressConfig: Record<string, any>,
+    private runner: RunnerType,
+  ) {}
 
   get specDirectory () {
-    return this.cypressConfig.resolved.componentFolder.value
+    if (this.runner === 'e2e') {
+      return this.cypressConfig.resolved.integrationFolder.value
+    }
+
+    if (this.runner === 'ct') {
+      return this.cypressConfig.resolved.componentFolder.value
+    }
   }
 
   get testFiles () {
@@ -55,23 +64,21 @@ export class SpecsStore {
     return findSpecsOfType(searchOptions)
   }
 
-  watch (options?: SpecsWatcherOptions) {
+  watch (options: SpecsWatcherOptions) {
     this.watcher = chokidar.watch(this.cypressConfig.testFiles, this.watchOptions)
 
-    if (options?.onSpecsChanged) {
-      const onSpecsChanged = debounce(async () => {
-        const newSpecs = await this.getSpecFiles()
+    const onSpecsChanged = debounce(async () => {
+      const newSpecs = await this.getSpecFiles()
 
-        if (_.isEqual(newSpecs, this.specFiles)) return
+      if (_.isEqual(newSpecs, this.specFiles)) return
 
-        this.specFiles = newSpecs
+      this.specFiles = newSpecs
 
-        options.onSpecsChanged(newSpecs)
-      })
+      options.onSpecsChanged(newSpecs)
+    })
 
-      this.watcher.on('add', onSpecsChanged)
-      this.watcher.on('unlink', onSpecsChanged)
-    }
+    this.watcher.on('add', onSpecsChanged)
+    this.watcher.on('unlink', onSpecsChanged)
   }
 
   reset (): void {
