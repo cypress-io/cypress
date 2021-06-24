@@ -464,8 +464,8 @@ namespace CypressContainsTests {
   cy.contains('#app')
   cy.contains('my text to find')
   cy.contains('#app', 'my text to find')
-  cy.contains('#app', 'my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true})
-  cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true})
+  cy.contains('#app', 'my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
+  cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
 }
 
 // https://github.com/cypress-io/cypress/pull/5574
