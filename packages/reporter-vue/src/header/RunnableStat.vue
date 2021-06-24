@@ -1,5 +1,5 @@
 <template>
-  <span :class="`stat stat-${type} flex nowrap flex-column gap-1 w-60px`" data-cy="stat">
+  <span :class="`stat stat-${type} flex nowrap flex-column gap-4px`" data-cy="stat">
   
     <i-fa-solid-times v-if="type ==='failed'"/>
     <i-fa-circle-o-notch v-if="type ==='pending'"/>
@@ -41,9 +41,8 @@ export default defineComponent({
     font-size: 1.2rem;
     font-weight: 300;
     white-space: nowrap;
-    padding: 0 0.25rem;
+    padding: 0 8px;
     align-items: center;
-    justify-content: space-between;
   }
 
   .icon {

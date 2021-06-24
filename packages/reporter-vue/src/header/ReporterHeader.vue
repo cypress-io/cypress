@@ -1,28 +1,28 @@
 <template>
-  <ReporterHeaderLayout data-cy="reporter-header" class="hidden">
+  <ReporterHeaderLayout data-cy="reporter-header">
     <!-- Three stats (passed, failed, pending)-->
     <template #runnables>
-      <RunnableStat type="passed" class="hidden" :number="stats.byType && stats.byType.passed.length"/>
-      <RunnableStat type="failed" :number="stats.byType && stats.byType.failed.length"/>
-      <RunnableStat type="pending" :number="stats.byType && stats.byType.pending.length"/>
+      <RunnableStat type="passed" :number="runnables.testsByState.passed.length"/>
+      <RunnableStat type="failed" :number="runnables.testsByState.failed.length"/>
+      <RunnableStat type="pending" :number="runnables.testsByState.pending.length"/>
     </template>
 
     <!-- Timer -->
     <template #duration>
-      <RunnableDuration class="duration" :duration="stats.duration" />
+      <RunnableDuration class="duration" :duration="duration" />
     </template>
 
     <!-- Controls (auto-scrolling and play-pause) -->
     <template #controls>
       <HotkeyTooltip :content="playControl.text" :hotkey="playControl.hotkey">
           <button @click="playControl.method" class="hidden">
-            <i-fa-repeat v-if="reporter.state === 'running'"/>
+            <i-fa-repeat v-if="reporter.runState === 'running'"/>
             <i-fa-pause v-else />
           </button>
         </HotkeyTooltip>
 
         <HotkeyTooltip :content="autoScrollText" hotkey="A">
-          <button @click="reporter.toggleAutoScrolling" :aria-label="autoScrollText" class="inline-flex items-center justify-center w-100% h-100%">
+          <button @click="() => {}" :aria-label="autoScrollText" class="inline-flex items-center justify-center w-100% h-100%">
             <span class="auto-scrolling inline-block w-10px h-10px rounded-full" />
             <i-fa-arrows-v class="h-100% text-xs"/>
           </button>
@@ -70,10 +70,12 @@ export default defineComponent({
     const autoScrollText = computed(() => {
       return reporter.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
     })
+
     return {
       autoScrollText,
       playControl,
-      stats,
+      duration: computed(() => stats.duration),
+      runnables: computed(() => reporter.runnables),
       reporter,
 
       // TODO: Windicss tree-shaken stylesheets are stripping the bg-amber-500 etc colors. Add to allow-list.

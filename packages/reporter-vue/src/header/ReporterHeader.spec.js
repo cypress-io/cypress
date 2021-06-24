@@ -1,8 +1,7 @@
 import ReporterHeader from './ReporterHeader.vue'
-import { useStatsStore } from '../store/reporter-store'
-// import { mount } from '@cypress/vue'
+import { useStatsStore, useReporterStore } from '../store/reporter-store'
+import { rootRunnable } from '@packages/faker'
 import { h } from 'vue'
-import VTooltip from 'v-tooltip'
 
 const style = {
   resize: 'both',
@@ -16,22 +15,15 @@ it.only('renders', () => {
   const timeout = 1512
   const wrapper = {
     setup() {
-      // const store = useStatsStore()
-      // // const reporter = useReporterStore()
+      const store = useStatsStore()
+      const reporter = useReporterStore()
+      reporter.setRunnablesFromRoot(rootRunnable)
 
-      // cy.spy(reporter, 'rerun').as('rerun clicked')
-      // cy.spy(reporter, 'toggleAutoScrolling').as('toggle autoscrolling')
-      // cy.spy(reporter, 'stopRunning').as('stop tests clicked')
+      store.start()
 
-      // store.start({
-      //   ...defaultStats,
-      //   numberOfPassed: 2,
-      //   startTime: Date.now()
-      // })
-
-      // setTimeout(() => {
-      //   store.stop()
-      // }, timeout)
+      setTimeout(() => {
+        store.stop()
+      }, timeout)
     },
     
     render() {
