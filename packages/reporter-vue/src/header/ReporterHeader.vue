@@ -14,22 +14,17 @@
 
     <!-- Controls (auto-scrolling and play-pause) -->
     <template #controls>
-      <!-- <PlayControl @click="playControlClicked">
-      <AutoScrollControl @click="autoScrollClicked"/> -->
-
       <HotkeyTooltip :content="playControl.text" :hotkey="playControl.hotkey">
           <button @click="playControl.method" class="hidden">
-            <i-fa-repeat/>
-            <i-fa-pause/>
-            
-            <i :class="`fas ${reporter.state === 'running' ? 'fa-pause' : 'fa-redo'}`"/>
+            <i-fa-repeat v-if="reporter.state === 'running'"/>
+            <i-fa-pause v-else />
           </button>
         </HotkeyTooltip>
 
         <HotkeyTooltip :content="autoScrollText" hotkey="A">
-          <button @click="reporter.toggleAutoScrolling" :aria-label="autoScrollText" :class="autoScrollingClass" class="btn">
-            <span class="auto-scrolling-icon" />
-            <i class="fas fa-arrows-alt-v"/>
+          <button @click="reporter.toggleAutoScrolling" :aria-label="autoScrollText" class="inline-flex items-center justify-center w-100% h-100%">
+            <span class="auto-scrolling inline-block w-10px h-10px rounded-full" />
+            <i-fa-arrows-v class="h-100% text-xs"/>
           </button>
         </HotkeyTooltip>
     </template>
@@ -75,19 +70,14 @@ export default defineComponent({
     const autoScrollText = computed(() => {
       return reporter.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
     })
-
-    const autoScrollingClass = computed(() => {
-      return [
-        reporter.autoScrolling ? 'auto-scrolling-enabled' : 'auto-scrolling-disabled',
-        'auto-scrolling'
-      ]
-    })
     return {
       autoScrollText,
-      autoScrollingClass,
       playControl,
       stats,
-      reporter
+      reporter,
+
+      // TODO: Windicss tree-shaken stylesheets are stripping the bg-amber-500 etc colors. Add to allow-list.
+      autoScrollingColor: computed(() => reporter.autoScrolling ? 'orange' : 'gray'),
     }
   }
 })
@@ -95,19 +85,27 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+button {
+  background: none;
+  border-radius: none;
+}
 
 .auto-scrolling {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
-  display: inline-block;
+  background: v-bind(autoScrollingColor);
 }
 
-.auto-scrolling-enabled {
-  background: yellow;
-}
+// .auto-scrolling {
+//   width: 10px;
+//   height: 10px;
+//   border-radius: 100%;
+//   display: inline-block;
+// }
 
-.auto-scrolling-disabled {
-  background: gray;
-}
+// .auto-scrolling-enabled {
+//   background: yellow;
+// }
+
+// .auto-scrolling-disabled {
+//   background: gray;
+// }
 </style>

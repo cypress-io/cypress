@@ -1,5 +1,5 @@
 <template>
-  <span class="text-center font-sans text-gray-700">
+  <span class="text-center font-sans text-gray-600 tracking-tight">
   {{ durationFormatted }}
   </span>
 </template>

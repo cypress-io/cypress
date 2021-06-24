@@ -27,7 +27,6 @@ it.only('renders all states ', () => {
   const props = []
   const labels = []
   Object.entries(numbers).forEach(([label, number]) => {
-    // console.log(type)
     types.forEach((type) => {
       labels.push(`${type}, ${label}`)
       props.push({ number, type })
