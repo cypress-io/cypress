@@ -21,7 +21,7 @@ const format = (data) => {
 
 const formatConfigFile = (configFile) => {
   if (configFile === false) {
-    return '`cypress.json` (currently disabled by --config-file=false)'
+    return '`cypress.config.js` (currently disabled by --config-file=false)'
   }
 
   return `\`${format(configFile)}\``

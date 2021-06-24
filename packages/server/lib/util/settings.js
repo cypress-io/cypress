@@ -108,16 +108,16 @@ module.exports = {
       return options.configFile
     }
 
-    if (ls.includes('cypress.json')) {
-      return 'cypress.json'
-    }
-
     if (ls.includes('cypress.config.js')) {
       return 'cypress.config.js'
     }
 
+    if (ls.includes('cypress.json')) {
+      return 'cypress.json'
+    }
+
     // Default is to create a new `cypress.json` file if one does not exist.
-    return 'cypress.json'
+    return 'cypress.config.js'
   },
 
   id (projectRoot, options = {}) {
@@ -161,27 +161,27 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    const file = this.pathToConfigFile(projectRoot, options)
-
-    const requireAsync = (file) => {
+    const requireAsync = (fileRequired) => {
       return Promise.try(() => {
-        return require(file)
+        return require(fileRequired)
       })
     }
 
-    return requireAsync(file)
-    .catch({ code: 'MODULE_NOT_FOUND' }, () => {
-      return this._write(file, {})
-    })
-    .catch({ code: 'ENOENT' }, () => {
-      return this._write(file, {})
-    }).then((json = {}) => {
-      if (this.isComponentTesting(options) && 'component' in json) {
-        json = { ...json, ...json.component }
-      }
+    const file = this.pathToConfigFile(projectRoot, options)
 
-      if (!this.isComponentTesting(options) && 'e2e' in json) {
-        json = { ...json, ...json.e2e }
+    return requireAsync(file)
+    .catch({ code: 'MODULE_NOT_FOUND' }, { code: 'ENOENT' }, () => {
+      return this._write(file, `module.exports = {}`)
+    })
+    .then((json = {}) => {
+      const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
+
+      if ((testingType in json)) {
+        if (typeof json[testingType] === 'object') {
+          json = { ...json, ...json[testingType] }
+        } else if (typeof json[testingType] === 'function') {
+          json = json[testingType](() => {}, json) || json
+        }
       }
 
       const changed = this._applyRewriteRules(json)

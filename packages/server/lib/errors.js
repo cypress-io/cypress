@@ -918,7 +918,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can safely remove this option from your config.`
     case 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED':
       return stripIndent`\
-        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`cypress.json\`.
+        The ${chalk.yellow(`\`experimentalComponentTesting\``)} configuration option was removed in Cypress version \`7.0.0\`. Please remove this flag from \`${arg1}\`.
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 

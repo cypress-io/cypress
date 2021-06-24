@@ -201,8 +201,10 @@ module.exports = {
   },
 
   get (projectRoot, options = {}) {
+    const configFilename = settings.configFile(projectRoot, options)
+
     return Promise.all([
-      settings.read(projectRoot, options).then(validateFile('cypress.json')),
+      settings.read(projectRoot, options).then(validateFile(configFilename)),
       settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
     ])
     .spread((settings, envFile) => {
