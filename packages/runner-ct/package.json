@@ -16,6 +16,9 @@
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
   "dependencies": {
+    "debug": "^4.3.2",
+    "lodash": "^4.17.20",
+    "send": "^0.17.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -46,7 +49,6 @@
     "hotkeys-js": "3.8.2",
     "html-webpack-plugin": "^4.5.0",
     "koa": "^2.13.0",
-    "lodash": "^4.17.20",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
     "mocha": "^8.1.3",
