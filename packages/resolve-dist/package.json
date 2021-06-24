@@ -12,6 +12,9 @@
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch"
   },
+  "dependencies": {
+    "fs-extra": "8.1.0"
+  },
   "files": [
     "lib"
   ],
