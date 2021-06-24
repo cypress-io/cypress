@@ -8,7 +8,7 @@ const pkg = require('@packages/root')
 /**
  * @type {import('@packages/resolve-dist')}
  */
-const { getPathToDist, getPathToRunnerIndex } = require('@packages/resolve-dist')
+const { getPathToDist, getPathToIndex } = require('@packages/resolve-dist')
 
 const PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, '..', 'html', 'non_proxied_error.html')
 
@@ -50,7 +50,7 @@ module.exports = {
     // https://github.com/cypress-io/cypress/issues/4952
     const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
 
-    const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToRunnerIndex()
+    const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner')
 
     return res.render(runnerPath, {
       base64Config,
