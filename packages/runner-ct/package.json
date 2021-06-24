@@ -15,6 +15,9 @@
     "test": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
