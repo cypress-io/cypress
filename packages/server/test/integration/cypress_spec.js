@@ -45,8 +45,26 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
-const electronApp = require('../../lib/util/electron-app')
+const electronApp = require(`${root}lib/util/electron-app`)
 const savedState = require(`${root}lib/saved_state`)
+
+const supportedConfigFiles = [
+  'cypress.json',
+  'cypress.config.js',
+]
+
+/**
+ * Since we load the cypress.json, cypress.e2e.config.js or cypress.component.config.js
+ * via `require`, we need to clear the `require.cache` before/after some tests
+ * to ensure we are not using a cached configuration file.
+ */
+const clearCypressJsonCache = () => {
+  Object.keys(require.cache).forEach((key) => {
+    if (supportedConfigFiles.some((file) => key.includes(file))) {
+      delete require.cache[key]
+    }
+  })
+}
 
 const TYPICAL_BROWSERS = [
   {
@@ -176,6 +194,7 @@ describe('lib/cypress', () => {
     }
 
     Fixtures.remove()
+    clearCypressJsonCache()
   })
 
   context('test browsers', () => {
