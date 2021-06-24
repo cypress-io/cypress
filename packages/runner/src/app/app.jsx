@@ -67,7 +67,7 @@ class App extends Component {
               </div>
 
               <Resizer
-                style={{ left: this.props.state.specListWidth }}
+                style={{ left: this.props.state.specListWidth, zIndex: 10 }}
                 maxWidth={this.props.state.windowWidth - SPEC_LIST_WIDTH}
                 onResizeStart={this._onSpecListResizeStart}
                 onResize={this._onSpecListResize}
