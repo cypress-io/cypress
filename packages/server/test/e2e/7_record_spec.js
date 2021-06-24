@@ -16,7 +16,7 @@ const {
   postInstanceTestsResponse,
 } = require('../support/helpers/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
-const { clearCypressJsonCache } = require('../specUtils')
+const { clearCypressJsonCache } = require('../cache_helper')
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
