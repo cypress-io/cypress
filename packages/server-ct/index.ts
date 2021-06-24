@@ -11,8 +11,6 @@ export * from './src/server-ct'
 
 export * from './src/socket-ct'
 
-export * from './src/specs-store'
-
 const Updater = require('@packages/server/lib/updater')
 
 const registerCheckForUpdates = () => {

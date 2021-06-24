@@ -56,7 +56,7 @@ const stats = {
   timings: true,
 }
 
-function makeSassLoaders ({ modules, postcssPlugins }): RuleSetRule {
+function makeSassLoaders ({ modules: boolean, postcssPlugins }): RuleSetRule {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)

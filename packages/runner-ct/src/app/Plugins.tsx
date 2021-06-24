@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import State from '../lib/state'
 import { Hidden } from '../lib/Hidden'
-import { namedObserver } from '../lib/mobx'
+import { namedObserver } from '@packages/runner-shared'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
 
 import styles from './RunnerCt.module.scss'

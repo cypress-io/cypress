@@ -60,7 +60,7 @@ declare namespace Cypress {
      */
     displayName: string
     version: string
-    majorVersion: number
+    majorVersion: number | string
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -491,6 +491,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/keyboard-api
+     */
+     Keyboard: {
+      defaults(options: Partial<KeyboardDefaultsOptions>): void
+    }
+
+    /**
      * @see https://on.cypress.io/api/api-server
      */
     Server: {
@@ -841,7 +848,7 @@ declare namespace Cypress {
      *    // tries to find the given text for up to 1 second
      *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable & Shadow>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -859,7 +866,7 @@ declare namespace Cypress {
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
      */
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get the DOM element using CSS "selector" containing the text or regular expression.
      *
@@ -868,7 +875,7 @@ declare namespace Cypress {
      *    // yields <... class="foo">... apples ...</...>
      *    cy.contains('.foo', 'apples')
      */
-    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable & Shadow>): Chainable<JQuery<E>>
 
     /**
      * Double-click a DOM element.
@@ -2756,8 +2763,6 @@ declare namespace Cypress {
     clientRoute: string
     configFile: string
     cypressEnv: string
-    integrationExampleName: string
-    integrationExamplePath: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
@@ -2786,6 +2791,7 @@ declare namespace Cypress {
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
+    keystrokeDelay?: number
   }
 
   /**
@@ -2834,6 +2840,18 @@ declare namespace Cypress {
      * @default {}
      */
     env: object
+  }
+
+  /**
+   * Options for Cypress.Keyboard.defaults()
+   */
+  interface KeyboardDefaultsOptions {
+    /**
+    * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
+    *
+    * @default 10
+    */
+    keystrokeDelay: number
   }
 
   /**

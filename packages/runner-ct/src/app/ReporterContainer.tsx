@@ -19,10 +19,8 @@ import cs from 'classnames'
 import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
 
-import errorMessages from '../errors/error-messages'
-import EventManager from '../lib/event-manager'
+import { errorMessages, namedObserver, eventManager as EventManager } from '@packages/runner-shared'
 import State from '../lib/state'
-import { namedObserver } from '../lib/mobx'
 import { ReporterHeader } from './ReporterHeader'
 import { NoSpec } from './NoSpec'
 
@@ -31,7 +29,10 @@ import styles from './RunnerCt.module.scss'
 interface ReporterContainerProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: {
+    configFile: string
+    [key: string]: unknown
+  }
 }
 
 export const ReporterContainer = namedObserver('ReporterContainer',

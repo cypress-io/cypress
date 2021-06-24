@@ -33,8 +33,4 @@ export class SocketCt extends SocketBase {
       },
     })
   }
-
-  sendSpecList (specs) {
-    this.toRunner('component:specs:changed', specs)
-  }
 }

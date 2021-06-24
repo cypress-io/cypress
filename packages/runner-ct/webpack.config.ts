@@ -101,6 +101,43 @@ const commonConfig = getCommonConfig()
 //   return !['css', 's[ac]ss'].some((x) => x.match(x))
 // })
 
+babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
+  languages: ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+  plugins: ['line-numbers', 'line-highlight'],
+  theme: 'default',
+  css: false,
+}])
+
+const { pngRule, nonPngRules } = commonConfig!.module!.rules!.reduce<{
+  nonPngRules: webpack.RuleSetRule[]
+  pngRule: webpack.RuleSetRule | undefined
+}>((acc, rule) => {
+  if (rule?.test?.toString().includes('png')) {
+    return {
+      ...acc,
+      pngRule: rule,
+    }
+  }
+
+  return {
+    ...acc,
+    nonPngRules: [...acc.nonPngRules, rule],
+  }
+}, {
+  nonPngRules: [],
+  pngRule: undefined,
+})
+
+if (!pngRule || !pngRule.use) {
+  throw Error('Could not find png loader')
+}
+
+(pngRule.use as webpack.RuleSetLoader[])[0].options = {
+  name: '[name].[ext]',
+  outputPath: 'img',
+  publicPath: '/__cypress/runner/img/',
+}
+
 // @ts-ignore
 const config: webpack.Configuration = {
   ...commonConfig,

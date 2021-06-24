@@ -24,6 +24,7 @@ const files = require(`${root}../lib/gui/files`)
 const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
 const api = require(`${root}../lib/api`)
+const savedState = require(`${root}../lib/saved_state`)
 
 describe('lib/gui/events', () => {
   beforeEach(function () {
@@ -493,6 +494,52 @@ describe('lib/gui/events', () => {
           expect(open.opn).to.be.calledWith('path')
 
           return assert.sendCalledWith('okay')
+        })
+      })
+    })
+
+    describe('has:opened:cypress', function () {
+      beforeEach(function () {
+        this.state = {
+          set: sinon.stub().resolves(),
+          get: sinon.stub().resolves({}),
+        }
+
+        sinon.stub(savedState, 'create').resolves(this.state)
+      })
+
+      it('returns false when there is no existing saved state', function () {
+        return this.handleEvent('has:opened:cypress')
+        .then((assert) => {
+          assert.sendCalledWith(false)
+        })
+      })
+
+      it('returns true when there is any existing saved state', function () {
+        this.state.get.resolves({ shownOnboardingModal: true })
+
+        return this.handleEvent('has:opened:cypress')
+        .then((assert) => {
+          assert.sendCalledWith(true)
+        })
+      })
+
+      it('sets firstOpenedCypress when the user first opened Cypress if not already set', function () {
+        this.state.get.resolves({ shownOnboardingModal: true })
+        sinon.stub(Date, 'now').returns(12345)
+
+        return this.handleEvent('has:opened:cypress')
+        .then(() => {
+          expect(this.state.set).to.be.calledWith('firstOpenedCypress', 12345)
+        })
+      })
+
+      it('does not set firstOpenedCypress if already set', function () {
+        this.state.get.resolves({ firstOpenedCypress: 12345 })
+
+        return this.handleEvent('has:opened:cypress')
+        .then(() => {
+          expect(this.state.set).not.to.be.called
         })
       })
     })

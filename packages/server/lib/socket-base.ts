@@ -480,4 +480,8 @@ export class SocketBase {
   close () {
     return this.io.close()
   }
+
+  sendSpecList (specs) {
+    this.toRunner('component:specs:changed', specs)
+  }
 }

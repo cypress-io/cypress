@@ -1,16 +1,15 @@
 import Debug from 'debug'
 import browsers from './browsers'
-import config from './config'
-import plugins from './plugins'
 import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
 import { ServerE2E } from './server-e2e'
-import settings from './util/settings'
+import { SocketE2E } from './socket-e2e'
+import { createRoutes } from './routes'
 
 const debug = Debug('cypress:server:project')
 
 export class ProjectE2E extends ProjectBase<ServerE2E> {
-  get projectType () {
+  get projectType (): 'e2e' {
     return 'e2e'
   }
 
@@ -20,22 +19,24 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     return super.open(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
-        .then((modifiedCfg) => {
-          debug('plugin config yielded: %o', modifiedCfg)
-
-          const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
-
-          debug('updated config: %o', updatedConfig)
-
-          return updatedConfig
-        })
-        .then((cfg) => {
-          return this.server.open(cfg, this, options.onError, options.onWarning)
+        .then(({ cfg, specsStore, startSpecWatcher }) => {
+          return this.server.open(cfg, {
+            project: this,
+            onError: options.onError,
+            onWarning: options.onWarning,
+            shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+            projectType: 'e2e',
+            SocketCtor: SocketE2E,
+            createRoutes,
+            specsStore,
+          })
           .then(([port, warning]) => {
             return {
               cfg,
               port,
               warning,
+              specsStore,
+              startSpecWatcher,
             }
           })
         })
@@ -49,26 +50,16 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
     })
   }
 
+  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
+    debug('got plugins error', err.stack)
+
+    browsers.close()
+
+    options.onError(err)
+  }
+
   _initPlugins (cfg, options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    cfg = config.allowed(cfg)
-
-    return plugins.init(cfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
-      onError (err) {
-        debug('got plugins error', err.stack)
-
-        browsers.close()
-
-        options.onError(err)
-      },
-      onWarning: options.onWarning,
-    })
+    return super._initPlugins(cfg, options)
   }
 
   close () {
