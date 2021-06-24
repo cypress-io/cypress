@@ -491,6 +491,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/keyboard-api
+     */
+     Keyboard: {
+      defaults(options: Partial<KeyboardDefaultsOptions>): void
+    }
+
+    /**
      * @see https://on.cypress.io/api/api-server
      */
     Server: {
@@ -2756,8 +2763,6 @@ declare namespace Cypress {
     clientRoute: string
     configFile: string
     cypressEnv: string
-    integrationExampleName: string
-    integrationExamplePath: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
@@ -2786,6 +2791,7 @@ declare namespace Cypress {
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
+    keystrokeDelay?: number
   }
 
   /**
@@ -2834,6 +2840,18 @@ declare namespace Cypress {
      * @default {}
      */
     env: object
+  }
+
+  /**
+   * Options for Cypress.Keyboard.defaults()
+   */
+  interface KeyboardDefaultsOptions {
+    /**
+    * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
+    *
+    * @default 10
+    */
+    keystrokeDelay: number
   }
 
   /**

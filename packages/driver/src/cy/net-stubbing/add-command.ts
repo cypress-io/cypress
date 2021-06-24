@@ -14,6 +14,7 @@ import {
   NetEvent,
   StringMatcher,
   NumberMatcher,
+  BackendStaticResponseWithArrayBuffer,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,
@@ -212,7 +213,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
     }
 
-    const frame: NetEvent.ToServer.AddRoute = {
+    const frame: NetEvent.ToServer.AddRoute<BackendStaticResponseWithArrayBuffer> = {
       routeId,
       hasInterceptor,
       routeMatcher,

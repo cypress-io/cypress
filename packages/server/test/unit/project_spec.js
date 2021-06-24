@@ -3,6 +3,7 @@ require('../spec_helper')
 const mockedEnv = require('mocked-env')
 const path = require('path')
 const commitInfo = require('@cypress/commit-info')
+const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('../support/helpers/fixtures')
 const api = require(`${root}lib/api`)
@@ -32,6 +33,11 @@ describe('lib/project-e2e', () => {
     this.pristinePath = Fixtures.projectPath('pristine')
 
     sinon.stub(scaffold, 'isNewProject').resolves(false)
+    sinon.stub(chokidar, 'watch').returns({
+      on: () => {},
+      close: () => {},
+    })
+
     sinon.stub(runEvents, 'execute').resolves()
 
     return settings.read(this.todosPath).then((obj = {}) => {
@@ -155,10 +161,10 @@ describe('lib/project-e2e', () => {
       })
     })
 
-    it('sets cfg.isNewProject to false when state.showedOnBoardingModal is true', function () {
+    it('sets cfg.isNewProject to false when state.showedNewProjectBanner is true', function () {
       return savedState.create(this.todosPath)
       .then((state) => {
-        sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
+        sinon.stub(state, 'get').resolves({ showedNewProjectBanner: true })
 
         return this.project.getConfig({ foo: 'bar' })
         .then((cfg) => {
@@ -167,7 +173,7 @@ describe('lib/project-e2e', () => {
             isNewProject: false,
             baz: 'quux',
             state: {
-              showedOnBoardingModal: true,
+              showedNewProjectBanner: true,
             },
           })
 
@@ -718,7 +724,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls plugins.init when file changes', function () {
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
+      return this.project.watchPluginsFile(this.config, {
+        onError: () => {},
+      }).then(() => {
         this.project.watchers.watchTree.firstCall.args[1].onChange()
 
         expect(plugins.init).to.be.calledWith(this.config)
@@ -806,7 +814,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('bubbles up Settings.read errors', function () {
+    it('bubbles up Settings.read EACCES error', function () {
       const err = new Error()
 
       err.code = 'EACCES'
@@ -818,6 +826,21 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         throw new Error('expected to fail, but did not')
       }).catch((err) => {
         expect(err.code).to.eq('EACCES')
+      })
+    })
+
+    it('bubbles up Settings.read EPERM error', function () {
+      const err = new Error()
+
+      err.code = 'EPERM'
+
+      sinon.stub(settings, 'read').rejects(err)
+
+      return this.project.getProjectId()
+      .then((id) => {
+        throw new Error('expected to fail, but did not')
+      }).catch((err) => {
+        expect(err.code).to.eq('EPERM')
       })
     })
   })

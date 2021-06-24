@@ -128,8 +128,6 @@
   "execTimeout": 60000,
   "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
   "fixturesFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/fixtures",
-  "integrationExamplePath": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration/examples",
-  "integrationExampleName": "examples",
   "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
   "isHeadless": false,
   "isNewProject": false,
