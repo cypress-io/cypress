@@ -1,4 +1,4 @@
-import { MessagePort } from 'worker_threads'
+import type { MessagePort } from 'worker_threads'
 
 export type RewriteRequest = {
   /**

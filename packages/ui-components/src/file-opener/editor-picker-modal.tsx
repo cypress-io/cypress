@@ -10,7 +10,7 @@ import React from 'react'
 import VisuallyHidden from '@reach/visually-hidden'
 
 import EditorPicker from './editor-picker'
-import { Editor } from './file-model'
+import type { Editor } from './file-model'
 
 interface Props {
   chosenEditor: Editor

@@ -114,7 +114,7 @@
     "tough-cookie": "4.0.0",
     "trash": "5.2.0",
     "tree-kill": "1.2.2",
-    "ts-node": "8.5.4",
+    "ts-node": "^10.0.0",
     "underscore.string": "3.3.5",
     "url-parse": "1.5.1",
     "uuid": "8.3.2",

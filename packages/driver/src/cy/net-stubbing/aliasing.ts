@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import {
+import type {
   Interception,
 } from './types'
 

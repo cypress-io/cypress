@@ -5,7 +5,7 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import { mountAndSnapshot } from 'util/testing'
-import { NavItem } from './types'
+import type { NavItem } from './types'
 import { LeftNav } from './LeftNav'
 
 library.add(fas)

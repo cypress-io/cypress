@@ -1,4 +1,4 @@
-import {
+import type {
   CypressIncomingRequest,
   BrowserPreRequest,
 } from '@packages/proxy'

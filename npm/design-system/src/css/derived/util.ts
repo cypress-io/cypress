@@ -1,4 +1,4 @@
-import { TextSize } from './types'
+import type { TextSize } from './types'
 
 import jsTypography from './jsTypography.scss'
 

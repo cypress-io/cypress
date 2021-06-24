@@ -5,7 +5,7 @@ import { createStory, createStorybookConfig } from 'stories/util'
 import { PaddedBox as PaddedComponent } from './PaddedBox'
 import { lorem } from 'util/lorem'
 import { StoryHighlightWrapper } from 'util/storybook/storyHighlightWrapper/StoryHighlightWrapper'
-import { Spacing } from 'css'
+import type { Spacing } from 'css'
 
 import spacing from 'css/derived/jsSpacing.scss'
 

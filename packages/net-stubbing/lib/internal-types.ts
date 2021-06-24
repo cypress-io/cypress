@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import {
+import type {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
   Subscription,

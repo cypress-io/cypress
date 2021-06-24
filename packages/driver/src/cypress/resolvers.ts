@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import $Cypress from '../..'
+import type $Cypress from '../..'
 
 /**
  * Fix property reads and writes that could potentially help the AUT to break out of its iframe.

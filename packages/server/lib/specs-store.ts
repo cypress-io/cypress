@@ -1,4 +1,4 @@
-import Bluebird from 'bluebird'
+import type Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
 import { findSpecsOfType } from './util/specs'

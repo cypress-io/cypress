@@ -19,6 +19,7 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "noErrorTruncation": true,
+    "importsNotUsedAsValues": "error",
     "types": []
   },
   "exclude": [

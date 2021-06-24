@@ -1,7 +1,7 @@
 import type { PressEvent } from '@react-types/shared'
 import type { MutableRefObject, ReactNode } from 'react'
 
-import { LeafProps, ParentProps, SpecificTreeNode, VirtualizedTreeRef } from 'components/virtualizedTree/types'
+import type { LeafProps, ParentProps, SpecificTreeNode, VirtualizedTreeRef } from 'components/virtualizedTree/types'
 
 export interface FileTreeProps<T extends FileBase> {
   /**

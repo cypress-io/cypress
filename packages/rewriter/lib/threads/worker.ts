@@ -10,7 +10,7 @@ if (isMainThread) {
 
 import { rewriteJs, rewriteJsSourceMap } from '../js'
 import { rewriteHtmlJs } from '../html'
-import { RewriteRequest, RewriteResponse } from './types'
+import type { RewriteRequest, RewriteResponse } from './types'
 
 parentPort!.postMessage(true)
 

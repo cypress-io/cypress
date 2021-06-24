@@ -7,7 +7,7 @@ import { Button as ButtonComponent, LinkButton } from './Button'
 import { IconButton as IconButtonComponent } from './IconButton'
 
 import typography from 'css/derived/jsTypography.scss'
-import { TextSize } from 'css'
+import type { TextSize } from 'css'
 import { PaddedBox } from '../surface/paddedBox/PaddedBox'
 import { Icon } from '../icon/Icon'
 

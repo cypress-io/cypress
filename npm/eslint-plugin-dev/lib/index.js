@@ -269,6 +269,8 @@ module.exports = {
           rules: {
             'no-undef': 'off',
             'no-unused-vars': 'off',
+            'no-duplicate-imports': 'off',
+            '@typescript-eslint/no-duplicate-imports': ['error'],
             '@typescript-eslint/no-unused-vars': [
               'error',
               {

@@ -1,4 +1,7 @@
 const log = require('debug')('cypress:ts')
+/**
+ * @type {import('ts-node')}
+ */
 let tsNode
 
 // in development we should have TypeScript hook installed
@@ -15,13 +18,13 @@ try {
 
   // transpile TypeScript without checking types by default
   // set environment variable when you want to actually verify types
-  const fast = Boolean(process.env.TS_CHECK_TYPES) === false
+  const transpileOnly = Boolean(process.env.TS_CHECK_TYPES) === false
 
-  log('register TypeScript project %s fast? %s', project, fast)
+  log('register TypeScript project %s fast? %s', project, transpileOnly)
 
   tsNode.register({
     project,
-    fast,
+    transpileOnly,
   })
 
   // do we need to prevent any other TypeScript hooks?

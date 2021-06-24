@@ -5,7 +5,7 @@ import { createStory, createStorybookConfig } from 'stories/util'
 import { Elevation as ElevationComponent } from './Elevation'
 import { lorem } from 'util/lorem'
 import { StoryHighlightWrapper } from 'util/storybook/storyHighlightWrapper/StoryHighlightWrapper'
-import { SurfaceElevation } from 'css'
+import type { SurfaceElevation } from 'css'
 
 import surfaces from 'css/derived/jsSurfaces.scss'
 

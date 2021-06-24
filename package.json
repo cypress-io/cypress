@@ -191,7 +191,7 @@
     "term-to-html": "1.2.0",
     "terminal-banner": "1.1.0",
     "through": "2.3.8",
-    "ts-node": "8.3.0",
+    "ts-node": "^10.0.0",
     "typescript": "^4.2.3",
     "yarn-deduplicate": "3.1.0"
   },

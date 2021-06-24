@@ -1,5 +1,5 @@
 import find from 'lodash/find'
-import RewritingStream from 'parse5-html-rewriting-stream'
+import type RewritingStream from 'parse5-html-rewriting-stream'
 import * as js from './js'
 
 export function install (url: string, rewriter: RewritingStream, deferSourceMapRewrite?: js.DeferSourceMapRewriteFn) {

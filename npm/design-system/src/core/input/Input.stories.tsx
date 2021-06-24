@@ -7,7 +7,7 @@ import { Input as InputComponent } from './Input'
 import { IconInput as IconInputComponent } from './IconInput'
 
 import typography from 'css/derived/jsTypography.scss'
-import { TextSize } from 'css'
+import type { TextSize } from 'css'
 
 export default createStorybookConfig({
   title: 'Core/Input',

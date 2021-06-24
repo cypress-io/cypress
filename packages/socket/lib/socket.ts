@@ -1,5 +1,5 @@
 import fs from 'fs'
-import http from 'http'
+import type http from 'http'
 import server, { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
 import { client } from './browser'
 

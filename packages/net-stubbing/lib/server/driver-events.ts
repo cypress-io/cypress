@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import {
+import type {
   NetStubbingState,
   GetFixtureFn,
   BackendRoute,
@@ -17,8 +17,8 @@ import {
   setResponseFromFixture,
 } from './util'
 import { InterceptedRequest } from './intercepted-request'
-import CyServer from '@packages/server'
-import { BackendStaticResponse } from '../internal-types'
+import type CyServer from '@packages/server'
+import type { BackendStaticResponse } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 

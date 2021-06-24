@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import http from 'http'
+import type http from 'http'
 import * as network from '@packages/network'
 
 export interface DestroyableHttpServer extends http.Server {

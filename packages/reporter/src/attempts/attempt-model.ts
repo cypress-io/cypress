@@ -5,11 +5,12 @@ import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import type Test from '../test/test-model'
+import type { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
 import Hook, { HookName } from '../hooks/hook-model'
-import { FileDetails } from '@packages/ui-components'
-import { LogProps } from '../runnables/runnables-store'
-import Log from '../instruments/instrument-model'
+import type { FileDetails } from '@packages/ui-components'
+import type { LogProps } from '../runnables/runnables-store'
+import type Log from '../instruments/instrument-model'
 
 export default class Attempt {
   @observable agents: Agent[] = []

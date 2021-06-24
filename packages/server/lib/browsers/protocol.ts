@@ -4,7 +4,7 @@ import { connect } from '@packages/network'
 import Bluebird from 'bluebird'
 import la from 'lazy-ass'
 import Debug from 'debug'
-import { Socket } from 'net'
+import type { Socket } from 'net'
 import utils from './utils'
 const errors = require('../errors')
 const is = require('check-more-types')

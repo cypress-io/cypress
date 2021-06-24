@@ -9,7 +9,7 @@ import reactJs from '@iconify/icons-vscode-icons/file-type-reactjs'
 import reactTs from '@iconify/icons-vscode-icons/file-type-reactts'
 
 import { StyledText } from 'core/text/styledText'
-import { FileBase, TreeFile } from './types'
+import type { FileBase, TreeFile } from './types'
 
 import styles from './FileTree.module.scss'
 import { useSelectedId } from './state'

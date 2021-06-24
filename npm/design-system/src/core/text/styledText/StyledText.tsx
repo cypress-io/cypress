@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
 import cs from 'classnames'
 
-import { LineHeight, TextSize } from 'css'
-import { TextSizableComponent } from 'core/shared'
+import type { LineHeight, TextSize } from 'css'
+import type { TextSizableComponent } from 'core/shared'
 
 export type StyledTextProps = {
   style?: CSSProperties

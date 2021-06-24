@@ -1,8 +1,8 @@
-import {
+import type {
   RouteMatcherOptions,
   BackendStaticResponse,
 } from '../types'
-import {
+import type {
   InterceptedRequest,
 } from './intercepted-request'
 

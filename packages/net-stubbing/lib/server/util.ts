@@ -9,17 +9,17 @@ import {
   BackendStaticResponse,
 } from '../types'
 import { Readable, PassThrough } from 'stream'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn } from './types'
+import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
-import { CypressIncomingRequest } from '@packages/proxy'
-import { InterceptedRequest } from './intercepted-request'
+import type { CypressIncomingRequest } from '@packages/proxy'
+import type { InterceptedRequest } from './intercepted-request'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-import { CyHttpMessages } from '../external-types'
+import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')

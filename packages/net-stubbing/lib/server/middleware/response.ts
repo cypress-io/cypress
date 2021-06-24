@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import { concatStream, httpUtils } from '@packages/network'
 import Debug from 'debug'
-import { Readable } from 'stream'
+import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 
-import {
+import type {
   ResponseMiddleware,
 } from '@packages/proxy'
 import {

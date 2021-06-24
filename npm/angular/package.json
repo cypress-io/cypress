@@ -58,7 +58,7 @@
     "semantic-release": "17.4.2",
     "to-string-loader": "1.1.6",
     "ts-loader": "8.1.0",
-    "ts-node": "9.1.1",
+    "ts-node": "^10.0.0",
     "tslib": "2.2.0",
     "tslint": "5.20.1",
     "typescript": "4.2.4",

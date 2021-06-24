@@ -16,7 +16,6 @@
     "cypress/globals": true
   },
   "rules": {
-    "no-duplicate-imports": "off",
     "no-else-return": [
       "error",
       {

@@ -1,5 +1,5 @@
-import { Readable } from 'stream'
-import { Request, Response } from 'express'
+import type { Readable } from 'stream'
+import type { Request, Response } from 'express'
 
 /**
  * An incoming request to the Cypress web server.

@@ -1,10 +1,9 @@
 import webpack, { Compiler } from 'webpack'
-import { EventEmitter } from 'events'
+import type { EventEmitter } from 'events'
 import _ from 'lodash'
 import semver from 'semver'
 import fs, { PathLike } from 'fs'
 import path from 'path'
-// eslint-disable-next-line no-duplicate-imports
 import type { Compilation } from 'webpack'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void

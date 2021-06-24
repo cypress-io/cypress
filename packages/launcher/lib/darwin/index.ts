@@ -1,5 +1,5 @@
 import { findApp, FindAppParams } from './util'
-import { Browser, DetectedBrowser } from '../types'
+import type { Browser, DetectedBrowser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { merge } from 'ramda'

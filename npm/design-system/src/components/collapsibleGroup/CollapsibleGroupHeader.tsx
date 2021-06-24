@@ -1,8 +1,8 @@
 import React, { CSSProperties } from 'react'
 import cs from 'classnames'
-import { IconName } from '@fortawesome/fontawesome-common-types'
+import type { IconName } from '@fortawesome/fontawesome-common-types'
 
-import { TextSizableComponent } from 'core/shared'
+import type { TextSizableComponent } from 'core/shared'
 import { StyledText } from 'core/text/styledText'
 import { Icon, IconProps } from 'core/icon/Icon'
 

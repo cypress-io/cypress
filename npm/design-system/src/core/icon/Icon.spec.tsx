@@ -21,7 +21,11 @@ describe('<Icon />', () => {
   })
 
   it('Icon lines', () => {
-    const Icons = () => iconLines(['text-xs', 'text-s', 'text-ms', 'text-m', 'text-ml', 'text-l', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'])
+    const Icons = () => (
+      <>
+        {iconLines(['text-xs', 'text-s', 'text-ms', 'text-m', 'text-ml', 'text-l', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'])}
+      </>
+    )
 
     mountAndSnapshot(<Icons />)
   })

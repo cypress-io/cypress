@@ -1,4 +1,4 @@
-import webpack from 'webpack'
+import type webpack from 'webpack'
 import path from 'path'
 import sinon from 'sinon'
 import { expect } from 'chai'

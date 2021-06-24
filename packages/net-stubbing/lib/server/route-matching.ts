@@ -2,9 +2,9 @@ import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
 
-import { CypressIncomingRequest } from '@packages/proxy'
-import { BackendRoute } from './types'
-import { RouteMatcherOptions } from '../types'
+import type { CypressIncomingRequest } from '@packages/proxy'
+import type { BackendRoute } from './types'
+import type { RouteMatcherOptions } from '../types'
 import { getAllStringMatcherFields } from './util'
 
 /**

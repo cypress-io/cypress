@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 import Runnable, { RunnableProps } from './runnable-model'
-import TestModel, { TestProps, TestState } from '../test/test-model'
+import type TestModel from '../test/test-model'
+import type { TestProps, TestState } from '../test/test-model'
 
 export interface SuiteProps extends RunnableProps {
   suites: Array<SuiteProps>
