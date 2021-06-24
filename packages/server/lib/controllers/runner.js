@@ -61,11 +61,4 @@ module.exports = {
     return send(req, pathToFile)
     .pipe(res)
   },
-
-  handleSourceMappings (req, res) {
-    const pathToFile = runner.getPathToSourceMappings()
-
-    return send(req, pathToFile)
-    .pipe(res)
-  },
 }
