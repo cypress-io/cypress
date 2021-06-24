@@ -45,7 +45,8 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    it('bubbles focus event options', () => {
+    // https://github.com/cypress-io/cypress/issues/15294
+    it('proxies focus event options', () => {
       // The browser will try to read the preventScroll option if present
       const optionGetter = cy.stub()
       const fakeOptions = Object.defineProperty({}, 'preventScroll', {
