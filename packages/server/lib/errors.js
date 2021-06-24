@@ -967,9 +967,16 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       `
     case 'CT_NO_DEV_START_EVENT':
       return stripIndent`\
-        To run component-testing, cypress needs the \`dev-server:start\` event. It is not implemented in your pluginsFile.
+        To run component-testing, cypress needs the \`dev-server:start\` event. 
 
-        Add the implementation of a dev server to a \`on('dev-server:start')\` call in your pluginsFile.
+        Implement it by adding a \`on('dev-server:start', () => startDevServer())\` call in your pluginsFile.
+        ${arg1 ?
+        stripIndent`\
+        You can find the \'pluginsFile\' at the following path:
+
+        ${arg1}
+        ` : ''}
+        Learn how to set up component testing:
 
         https://on.cypress.io/component-testing
         `
