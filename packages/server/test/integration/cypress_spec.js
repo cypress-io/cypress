@@ -1794,6 +1794,10 @@ describe('lib/cypress', () => {
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
+      afterEach(function () {
+        delete require.cache[path.join(this.pristinePath, this.filename)]
+      })
+
       it('reads config from a custom config file', function () {
         fs.outputJSON(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
