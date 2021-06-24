@@ -27,17 +27,13 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
   let majorVersion = browser.majorVersion
 
   if (browser.version) {
-    majorVersion = browser.version.split('.')[0]
+    majorVersion = parseInt(browser.version.split('.')[0]) || browser.version
     log(
       'browser %s version %s major version %s',
       browser.name,
       browser.version,
       majorVersion,
     )
-
-    if (majorVersion) {
-      majorVersion = parseInt(majorVersion)
-    }
   }
 
   return extend({}, browser, { majorVersion })
