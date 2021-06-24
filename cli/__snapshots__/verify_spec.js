@@ -116,13 +116,9 @@ STRIPPED
 
 Error: Cypress failed to start.
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. https://on.cypress.io/required-dependencies
 
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error below for more details.
 
 ----------
 
@@ -138,13 +134,9 @@ Cypress Version: 1.2.3
 exports['fails with no stderr 1'] = `
 Error: Cypress failed to start.
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. https://on.cypress.io/required-dependencies
 
-The error below should indicate which dependency is missing.
-
-https://on.cypress.io/required-dependencies
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error below for more details.
 
 ----------
 
@@ -414,13 +406,9 @@ some weird indent
 
 ----------
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. [34mhttps://on.cypress.io/required-dependencies[39m
 
-The error above should indicate which dependency is missing.
-
-[34mhttps://on.cypress.io/required-dependencies[39m
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error above for more detail.
 
 ----------
 
