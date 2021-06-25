@@ -29,12 +29,8 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
     events,
   }
 
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      copySuccess: false,
-    }
+  state = {
+    copySuccess: false,
   }
 
   _cancel = (e: MouseEvent) => {

@@ -8,13 +8,9 @@ import { StudioInstructionsModal } from './studio-modals'
 
 @observer
 class Studio extends Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      modalOpen: false,
-      copySuccess: false,
-    }
+  state = {
+    modalOpen: false,
+    copySuccess: false,
   }
 
   render () {
