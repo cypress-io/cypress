@@ -64,6 +64,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   private _recordTests = null
 
   public browser: any
+  public projectType?: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
 
   constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
@@ -77,6 +78,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 
+    this.projectType = projectType
     this.projectRoot = path.resolve(projectRoot)
     this.watchers = new Watchers()
     this.spec = null
