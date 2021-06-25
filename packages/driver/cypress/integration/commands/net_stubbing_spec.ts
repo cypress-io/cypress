@@ -11,7 +11,8 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function () {
+// TODO: Network retries leak between tests, causing flake.
+describe('network stubbing', { retries: 2 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -1258,8 +1259,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    // TODO: flaky - unable to reproduce outside of CI
-    it('still works after a cy.visit', { retries: 2 }, function () {
+    it('still works after a cy.visit', function () {
       cy.intercept(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
         headers: {
@@ -1677,6 +1677,217 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     it('can intercept utf-8 request bodies without crashing', function () {
       cy.intercept('POST', 'http://localhost:5000/api/sample')
       cy.visit('/fixtures/utf8-post.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/16327
+    context('request url querystring', () => {
+      // In the code below, cy.window() is used instead of $.get.
+      // It's because XHR is not sent on Firefox and it's flaky on Chrome.
+      it('parse query correctly', () => {
+        cy.intercept({ url: '/users*' }, (req) => {
+          expect(req.query.someKey).to.deep.equal('someValue')
+          expect(req.query).to.deep.equal({ someKey: 'someValue' })
+        }).as('getUrl')
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users?someKey=someValue')
+          xhr.send()
+        })
+
+        cy.wait('@getUrl')
+      })
+
+      context('reconcile changes', () => {
+        it('by assigning a new query parameter obj', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+            }
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by setting new properties', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            expect(req.query.a).to.eq('b')
+            req.query.c = 'd'
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?a=b')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by doing both', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+            }
+
+            expect(req.query.a).to.eq('b')
+            req.query.c = 'd'
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by deleting query member', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+              c: 'd',
+            }
+
+            delete req.query.c
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        context('by setting new url', () => {
+          it('absolute path', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = 'http://localhost:3500/users?a=b'
+
+              expect(req.query).to.deep.eq({ a: 'b' })
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('relative path', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = '/users?a=b'
+
+              expect(req.query).to.deep.eq({ a: 'b' })
+              expect(req.url).to.eq('http://localhost:3500/users?a=b')
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('empty string', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = ''
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+        })
+
+        context('throwing errors correctly', () => {
+          it('defineproperty', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`defineProperty()` is not allowed.')
+
+              done()
+            })
+
+            cy.intercept({ url: '/users*' }, (req) => {
+              Object.defineProperty(req.query, 'key', {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: 'static',
+              })
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('setPrototypeOf', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
+
+              done()
+            })
+
+            cy.intercept({ url: '/users*' }, (req) => {
+              Object.setPrototypeOf(req.query, null)
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+        })
+      })
     })
 
     context('request events', function () {
