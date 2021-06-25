@@ -1449,8 +1449,8 @@ jobs:
             command: yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
-            name: Test Schematics
-            command: yarn test:schematics
+            name: Run unit tests
+            command: yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
