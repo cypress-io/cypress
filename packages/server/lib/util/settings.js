@@ -171,7 +171,7 @@ module.exports = {
 
     return requireAsync(file)
     .catch({ code: 'MODULE_NOT_FOUND' }, { code: 'ENOENT' }, () => {
-      return this._write(file, `module.exports = {}`)
+      return this._write(file, {})
     })
     .then((json = {}) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
