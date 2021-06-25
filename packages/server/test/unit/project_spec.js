@@ -97,22 +97,22 @@ describe('lib/project-e2e', () => {
 
     it('adds property', function () {
       return this.project.saveState()
-      .then(() => this.project.saveState({ foo: 42 }))
-      .then((state) => expect(state).to.deep.eq({ foo: 42 }))
+      .then(() => this.project.saveState({ appWidth: 42 }))
+      .then((state) => expect(state).to.deep.eq({ appWidth: 42 }))
     })
 
     it('adds second property', function () {
       return this.project.saveState()
-      .then(() => this.project.saveState({ foo: 42 }))
-      .then(() => this.project.saveState({ bar: true }))
-      .then((state) => expect(state).to.deep.eq({ foo: 42, bar: true }))
+      .then(() => this.project.saveState({ appWidth: 42 }))
+      .then(() => this.project.saveState({ appHeight: true }))
+      .then((state) => expect(state).to.deep.eq({ appWidth: 42, appHeight: true }))
     })
 
     it('modifes property', function () {
       return this.project.saveState()
-      .then(() => this.project.saveState({ foo: 42 }))
-      .then(() => this.project.saveState({ foo: 'modified' }))
-      .then((state) => expect(state).to.deep.eq({ foo: 'modified' }))
+      .then(() => this.project.saveState({ appWidth: 42 }))
+      .then(() => this.project.saveState({ appWidth: 'modified' }))
+      .then((state) => expect(state).to.deep.eq({ appWidth: 'modified' }))
     })
   })
 
