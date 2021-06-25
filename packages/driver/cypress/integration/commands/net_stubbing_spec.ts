@@ -11,7 +11,8 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function () {
+// TODO: Network retries leak between tests, causing flake.
+describe('network stubbing', { retries: 2 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -1258,8 +1259,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    // TODO: flaky - unable to reproduce outside of CI
-    it('still works after a cy.visit', { retries: 2 }, function () {
+    it('still works after a cy.visit', function () {
       cy.intercept(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
         headers: {

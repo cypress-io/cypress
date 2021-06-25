@@ -4,10 +4,8 @@ import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
-import la from 'lazy-ass'
 import _ from 'lodash'
 import path from 'path'
-import R from 'ramda'
 
 import commitInfo from '@cypress/commit-info'
 import pkg from '@packages/root'
@@ -1023,30 +1021,5 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   static config (path) {
     return new ProjectBase(path).getConfig()
-  }
-
-  // Given a path to the project, finds all specs
-  // returns list of specs with respect to the project root
-  static findSpecs (projectRoot, specPattern) {
-    debug('finding specs for project %s', projectRoot)
-    la(check.unemptyString(projectRoot), 'missing project path', projectRoot)
-    la(check.maybe.unemptyString(specPattern), 'invalid spec pattern', specPattern)
-
-    // if we have a spec pattern
-    if (specPattern) {
-      // then normalize to create an absolute
-      // file path from projectRoot
-      // ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectRoot, specPattern)
-      debug('full spec pattern "%s"', specPattern)
-    }
-
-    return new ProjectBase(projectRoot)
-    .getConfig()
-    // TODO: handle wild card pattern or spec filename
-    .then((cfg) => {
-      return specsUtil.find(cfg, specPattern)
-    }).then(R.prop('integration'))
-    .then(R.map(R.prop('name')))
   }
 }
