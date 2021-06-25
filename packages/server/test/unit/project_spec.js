@@ -486,7 +486,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#reset', () => {
     beforeEach(function () {
-      this.project = new ProjectBase(this.pristinePath)
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
       this.project._automation = { reset: sinon.stub() }
       this.project._server = { close () {}, reset: sinon.stub() }
     })
@@ -503,7 +503,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#getRuns', () => {
     beforeEach(function () {
-      this.project = new ProjectBase(this.todosPath)
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
       sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
       sinon.stub(api, 'getProjectRuns').resolves('runs')
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
@@ -883,7 +883,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#getSpecUrl', () => {
     beforeEach(function () {
-      this.project2 = new ProjectBase(this.idsPath)
+      this.project2 = new ProjectBase({ projectRoot: this.idsPath, projectType: 'e2e' })
 
       this.project._cfg = {
         browserUrl: 'http://localhost:8888/__/',
