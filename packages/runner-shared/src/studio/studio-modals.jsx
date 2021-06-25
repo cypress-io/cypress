@@ -7,6 +7,8 @@ import { eventManager } from '@packages/runner-shared'
 
 import { studioRecorder } from './studio-recorder'
 
+import './studio-modals.scss'
+
 @observer
 export class StudioInstructionsModal extends Component {
   render () {
