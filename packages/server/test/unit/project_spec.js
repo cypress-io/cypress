@@ -24,7 +24,7 @@ const settings = require(`${root}lib/util/settings`)
 const Watchers = require(`${root}lib/watchers`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 
-describe('lib/project-e2e', () => {
+describe('lib/project-base', () => {
   beforeEach(function () {
     Fixtures.scaffold()
 
