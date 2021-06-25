@@ -298,6 +298,8 @@ describe('lib/settings', () => {
       this.options = {
         configFile: 'my-test-config-file.json',
       }
+
+      return fs.ensureDirAsync(this.projectRoot)
     })
 
     afterEach(function () {

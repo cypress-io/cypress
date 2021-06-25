@@ -236,7 +236,7 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    return this.read(projectRoot)
+    return this.read(projectRoot, options)
     .then((settings) => {
       _.extend(settings, obj)
 
