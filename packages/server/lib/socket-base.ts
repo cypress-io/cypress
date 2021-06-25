@@ -1,483 +1,609 @@
+import './cwd'
 import Bluebird from 'bluebird'
+import compression from 'compression'
 import Debug from 'debug'
+import evilDns from 'evil-dns'
+import express, { Express } from 'express'
+import http from 'http'
+import httpProxy from 'http-proxy'
 import _ from 'lodash'
-import { onNetEvent } from '@packages/net-stubbing'
-import * as socketIo from '@packages/socket'
-import firefoxUtil from './browsers/firefox-util'
+import { AddressInfo } from 'net'
+import url from 'url'
+import la from 'lazy-ass'
+import httpsProxy from '@packages/https-proxy'
+import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { agent, cors, httpUtils, uri, clientCertificates } from '@packages/network'
+import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import { ProjectCt, SocketCt } from '@packages/server-ct'
 import errors from './errors'
-import exec from './exec'
-import files from './files'
-import fixture from './fixture'
-import task from './task'
+import logger from './logger'
+import Request from './request'
+import { SocketE2E } from './socket-e2e'
+import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
-import { getUserEditor, setUserEditor } from './util/editors'
-import { openFile } from './util/file-opener'
-import open from './util/open'
-import { DestroyableHttpServer } from './util/server_destroy'
+import origin from './util/origin'
+import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
+import { SocketAllowed } from './util/socket_allowed'
+import { createInitialWorkers } from '@packages/rewriter'
+import { ProjectE2E } from './project-e2e'
+import { SpecsStore } from './specs-store'
+import { InitializeRoutes } from '../../server-ct/src/routes-ct'
 
-type StartListeningCallbacks = {
-  onSocketConnection: (socket: any) => void
+const ALLOWED_PROXY_BYPASS_URLS = [
+  '/',
+  '/__cypress/runner/cypress_runner.css',
+  '/__cypress/runner/cypress_runner.js', // TODO: fix this
+  '/__cypress/static/favicon.ico',
+]
+const DEFAULT_DOMAIN_NAME = 'localhost'
+const fullyQualifiedRe = /^https?:\/\//
+
+const debug = Debug('cypress:server:server-base')
+
+const _isNonProxiedRequest = (req) => {
+  // proxied HTTP requests have a URL like: "http://example.com/foo"
+  // non-proxied HTTP requests have a URL like: "/foo"
+  return req.proxiedUrl.startsWith('/')
 }
 
-type RunnerEvent =
-  'reporter:restart:test:run'
-  | 'runnables:ready'
-  | 'run:start'
-  | 'test:before:run:async'
-  | 'reporter:log:add'
-  | 'reporter:log:state:changed'
-  | 'paused'
-  | 'test:after:hooks'
-  | 'run:end'
+const _forceProxyMiddleware = function (clientRoute) {
+  // normalize clientRoute to help with comparison
+  const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
-const runnerEvents: RunnerEvent[] = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-]
+  return function (req, res, next) {
+    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
-type ReporterEvent =
-  'runner:restart'
- | 'runner:abort'
- | 'runner:console:log'
- | 'runner:console:error'
- | 'runner:show:snapshot'
- | 'runner:hide:snapshot'
- | 'reporter:restarted'
+    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+      // this request is non-proxied and non-allowed, redirect to the runner error page
+      return res.redirect(clientRoute)
+    }
 
-const reporterEvents: ReporterEvent[] = [
-  // "go:to:file"
-  'runner:restart',
-  'runner:abort',
-  'runner:console:log',
-  'runner:console:error',
-  'runner:show:snapshot',
-  'runner:hide:snapshot',
-  'reporter:restarted',
-]
-
-const debug = Debug('cypress:server:socket-base')
-
-const retry = (fn: (res: any) => void) => {
-  return Bluebird.delay(25).then(fn)
+    return next()
+  }
 }
 
-export class SocketBase {
-  protected ended: boolean
-  protected _io?: socketIo.SocketIOServer
-  protected testsDir: string | null
+const setProxiedUrl = function (req) {
+  // proxiedUrl is the full URL with scheme, host, and port
+  // it will only be fully-qualified if the request was proxied.
 
-  constructor (config: Record<string, any>) {
-    this.ended = false
-    this.testsDir = null
+  // this function will set the URL of the request to be the path
+  // only, which can then be used to proxy the request.
+
+  // bail if we've already proxied the url
+  if (req.proxiedUrl) {
+    return
   }
 
-  protected ensureProp = ensureProp
+  // backup the original proxied url
+  // and slice out the host/origin
+  // and only leave the path which is
+  // how browsers would normally send
+  // use their url
+  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
 
-  get io () {
-    return this.ensureProp(this._io, 'startListening')
+  req.url = uri.getPath(req.url)
+}
+
+const notSSE = (req, res) => {
+  return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
+}
+
+export type WarningErr = Record<string, any>
+
+export interface OpenServerOptions {
+  project: ProjectE2E | ProjectCt
+  SocketCtor: typeof SocketE2E | typeof SocketCt
+  specsStore: SpecsStore
+  projectType: 'ct' | 'e2e'
+  onError: any
+  onWarning: any
+  shouldCorrelatePreRequests: () => boolean
+  createRoutes: (args: InitializeRoutes) => any
+}
+
+export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
+  private _middleware
+  protected request: Request
+  protected isListening: boolean
+  protected socketAllowed: SocketAllowed
+  protected _fileServer
+  protected _baseUrl: string | null
+  protected _server?: DestroyableHttpServer
+  protected _socket?: TSocket
+  protected _nodeProxy?: httpProxy
+  protected _networkProxy?: NetworkProxy
+  protected _netStubbingState?: NetStubbingState
+  protected _httpsProxy?: httpsProxy
+
+  protected _remoteAuth: unknown
+  protected _remoteProps: unknown
+  protected _remoteOrigin: unknown
+  protected _remoteStrategy: unknown
+  protected _remoteVisitingUrl: unknown
+  protected _remoteDomainName: unknown
+  protected _remoteFileServer: unknown
+
+  constructor () {
+    this.isListening = false
+    // @ts-ignore
+    this.request = Request()
+    this.socketAllowed = new SocketAllowed()
+    this._middleware = null
+    this._baseUrl = null
+    this._fileServer = null
   }
 
-  toReporter (event: string, data?: any) {
-    return this.io && this.io.to('reporter').emit(event, data)
+  ensureProp = ensureProp
+
+  get server () {
+    return this.ensureProp(this._server, 'open')
   }
 
-  toRunner (event: string, data?: any) {
-    return this.io && this.io.to('runner').emit(event, data)
+  get socket () {
+    return this.ensureProp(this._socket, 'open')
   }
 
-  isSocketConnected (socket) {
-    return socket && socket.connected
+  get nodeProxy () {
+    return this.ensureProp(this._nodeProxy, 'open')
   }
 
-  toDriver (event, ...data) {
-    return this.io && this.io.emit(event, ...data)
+  get networkProxy () {
+    return this.ensureProp(this._networkProxy, 'open')
   }
 
-  onAutomation (socket, message, data, id) {
-    // instead of throwing immediately here perhaps we need
-    // to make this more resilient by automatically retrying
-    // up to 1 second in the case where our automation room
-    // is empty. that would give padding for reconnections
-    // to automatically happen.
-    // for instance when socket.io detects a disconnect
-    // does it immediately remove the member from the room?
-    // YES it does per http://socket.io/docs/rooms-and-namespaces/#disconnection
-    if (this.isSocketConnected(socket)) {
-      return socket.emit('automation:request', id, message, data)
+  get netStubbingState () {
+    return this.ensureProp(this._netStubbingState, 'open')
+  }
+
+  get httpsProxy () {
+    return this.ensureProp(this._httpsProxy, 'open')
+  }
+
+  abstract createServer (
+    app: Express,
+    config: Record<string, any>,
+    project: ProjectE2E | ProjectCt,
+    request: unknown,
+    onWarning: unknown,
+  ): Bluebird<[number, WarningErr?]>
+
+  open (config: Record<string, any> = {}, {
+    project,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+    specsStore,
+    createRoutes,
+    projectType,
+    SocketCtor,
+  }: OpenServerOptions) {
+    debug('server open')
+
+    la(_.isPlainObject(config), 'expected plain config object', config)
+
+    return Bluebird.try(() => {
+      if (!config.baseUrl && projectType === 'ct') {
+        throw new Error('ServerCt#open called without config.baseUrl.')
+      }
+
+      const app = this.createExpressApp(config)
+
+      logger.setSettings(config)
+
+      // TODO: Can we just pass config.baseUrl regardless of project type?
+      this._nodeProxy = httpProxy.createProxyServer({
+        target: projectType === 'ct' ? config.baseUrl : undefined,
+      })
+
+      this._socket = new SocketCtor(config) as TSocket
+
+      clientCertificates.loadClientCertificateConfig(config)
+	  
+      const getRemoteState = () => {
+        return this._getRemoteState()
+      }
+
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+      if (config.experimentalSourceRewriting) {
+        createInitialWorkers()
+      }
+
+      this.createHosts(config.hosts)
+
+      createRoutes({
+        app,
+        config,
+        specsStore,
+        getRemoteState,
+        nodeProxy: this.nodeProxy,
+        networkProxy: this._networkProxy!,
+        onError,
+        project,
+      })
+
+      return this.createServer(app, config, project, this.request, onWarning)
+    })
+  }
+
+  createExpressApp (config) {
+    const { morgan, clientRoute } = config
+    const app = express()
+
+    // set the cypress config from the cypress.json file
+    app.set('view engine', 'html')
+
+    // since we use absolute paths, configure express-handlebars to not automatically find layouts
+    // https://github.com/cypress-io/cypress/issues/2891
+    app.engine('html', templateEngine.render)
+
+    // handle the proxied url in case
+    // we have not yet started our websocket server
+    app.use((req, res, next) => {
+      setProxiedUrl(req)
+
+      // useful for tests
+      if (this._middleware) {
+        this._middleware(req, res)
+      }
+
+      // always continue on
+
+      return next()
+    })
+
+    app.use(_forceProxyMiddleware(clientRoute))
+
+    app.use(require('cookie-parser')())
+    app.use(compression({ filter: notSSE }))
+    if (morgan) {
+      app.use(require('morgan')('dev'))
     }
 
-    throw new Error(`Could not process '${message}'. No automation clients connected.`)
+    // errorhandler
+    app.use(require('errorhandler')())
+
+    // remove the express powered-by header
+    app.disable('x-powered-by')
+
+    return app
   }
 
-  createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
-    return new socketIo.SocketIOServer(server, {
-      path,
-      cookie: {
-        name: cookie,
-      },
-      destroyUpgrade: false,
-      serveClient: false,
-      transports: ['websocket'],
-    })
+  getHttpServer () {
+    return this._server
   }
 
-  startListening (
-    server: DestroyableHttpServer,
-    automation,
-    config,
-    options,
-    callbacks: StartListeningCallbacks,
-  ) {
-    let existingState = null
+  portInUseErr (port: any) {
+    const e = errors.get('PORT_IN_USE_SHORT', port) as any
 
-    _.defaults(options, {
-      socketId: null,
-      onResetServerState () {},
-      onTestsReceivedAndMaybeRecord () {},
-      onMocha () {},
-      onConnect () {},
-      onRequest () {},
-      onResolveUrl () {},
-      onFocusTests () {},
-      onSpecChanged () {},
-      onChromiumRun () {},
-      onReloadBrowser () {},
-      checkForAppErrors () {},
-      onSavedStateChanged () {},
-      onTestFileChange () {},
-      onCaptureVideoFrames () {},
-    })
+    e.port = port
+    e.portInUse = true
 
-    let automationClient
+    return e
+  }
 
-    const { socketIoRoute, socketIoCookie } = config
-
-    this._io = this.createIo(server, socketIoRoute, socketIoCookie)
-
-    automation.use({
-      onPush: (message, data) => {
-        return this.io.emit('automation:push:message', message, data)
-      },
-    })
-
-    const onAutomationClientRequestCallback = (message, data, id) => {
-      return this.onAutomation(automationClient, message, data, id)
+  createNetworkProxy (config, getRemoteState, shouldCorrelatePreRequests) {
+    const getFileServerToken = () => {
+      return this._fileServer.token
     }
 
-    const automationRequest = (message: string, data: Record<string, unknown>) => {
-      return automation.request(message, data, onAutomationClientRequestCallback)
+    this._netStubbingState = netStubbingState()
+    // @ts-ignore
+    this._networkProxy = new NetworkProxy({
+      config,
+      shouldCorrelatePreRequests,
+      getRemoteState,
+      getFileServerToken,
+      socket: this.socket,
+      netStubbingState: this.netStubbingState,
+      request: this.request,
+    })
+  }
+
+  startWebsockets (automation, config, options: Record<string, unknown> = {}) {
+    options.onRequest = this._onRequest.bind(this)
+    options.netStubbingState = this.netStubbingState
+
+    options.onResetServerState = () => {
+      this.networkProxy.reset()
+      this.netStubbingState.reset()
     }
 
-    const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
+    const io = this.socket.startListening(this.server, automation, config, options)
 
-    this.io.on('connection', (socket: any) => {
-      debug('socket connected')
+    this._normalizeReqUrl(this.server)
 
-      // cache the headers so we can access
-      // them at any time
-      const headers = socket.request?.headers ?? {}
+    return io
+  }
 
-      socket.on('automation:client:connected', () => {
-        if (automationClient === socket) {
-          return
-        }
+  createHosts (hosts = {}) {
+    return _.each(hosts, (ip, host) => {
+      return evilDns.add(host, ip)
+    })
+  }
 
-        automationClient = socket
+  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  }
 
-        debug('automation:client connected')
+  _createHttpServer (app): DestroyableHttpServer {
+    const svr = http.createServer(httpUtils.lenientOptions, app)
 
-        // if our automation disconnects then we're
-        // in trouble and should probably bomb everything
-        automationClient.on('disconnect', () => {
-          // if we've stopped then don't do anything
-          if (this.ended) {
-            return
-          }
+    allowDestroy(svr)
 
-          // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
-          return Bluebird.delay(2000)
-          .then(() => {
-            // bail if we've swapped to a new automationClient
-            if (automationClient !== socket) {
-              return
-            }
+    // @ts-ignore
+    return svr
+  }
 
-            // give ourselves about 2000ms to reconnect
-            // and if we're connected its all good
-            if (automationClient.connected) {
-              return
-            }
+  _port () {
+    return (this.server.address() as AddressInfo).port
+  }
 
-            // TODO: if all of our clients have also disconnected
-            // then don't warn anything
-            errors.warning('AUTOMATION_SERVER_DISCONNECTED')
+  _listen (port, onError) {
+    return new Bluebird<number>((resolve) => {
+      const listener = () => {
+        const address = this.server.address() as AddressInfo
 
-            // TODO: no longer emit this, just close the browser and display message in reporter
-            return this.io.emit('automation:disconnected')
-          })
-        })
+        this.isListening = true
 
-        socket.on('automation:push:request', (
-          message: string,
-          data: Record<string, unknown>,
-          cb: (...args: unknown[]) => any,
-        ) => {
-          automation.push(message, data)
+        debug('Server listening on ', address)
 
-          // just immediately callback because there
-          // is not really an 'ack' here
-          if (cb) {
-            return cb()
-          }
-        })
+        this.server.removeListener('error', onError)
 
-        socket.on('automation:response', automation.response)
-      })
+        return resolve(address.port)
+      }
 
-      socket.on('automation:request', (message, data, cb) => {
-        debug('automation:request %s %o', message, data)
+      return this.server.listen(port || 0, '127.0.0.1', listener)
+    })
+  }
 
-        return automationRequest(message, data)
-        .then((resp) => {
-          return cb({ response: resp })
-        }).catch((err) => {
-          return cb({ error: errors.clone(err) })
-        })
-      })
+  _onRequest (headers, automationRequest, options) {
+    // @ts-ignore
+    return this.request.sendPromise(headers, automationRequest, options)
+  }
 
-      socket.on('reporter:connected', () => {
-        if (socket.inReporterRoom) {
-          return
-        }
+  _callRequestListeners (server, listeners, req, res) {
+    return listeners.map((listener) => {
+      return listener.call(server, req, res)
+    })
+  }
 
-        socket.inReporterRoom = true
+  _normalizeReqUrl (server) {
+    // because socket.io removes all of our request
+    // events, it forces the socket.io traffic to be
+    // handled first.
+    // however we need to basically do the same thing
+    // it does and after we call into socket.io go
+    // through and remove all request listeners
+    // and change the req.url by slicing out the host
+    // because the browser is in proxy mode
+    const listeners = server.listeners('request').slice(0)
 
-        return socket.join('reporter')
-      })
+    server.removeAllListeners('request')
 
-      // TODO: what to do about reporter disconnections?
+    server.on('request', (req, res) => {
+      setProxiedUrl(req)
 
-      socket.on('runner:connected', () => {
-        if (socket.inRunnerRoom) {
-          return
-        }
+      this._callRequestListeners(server, listeners, req, res)
+    })
+  }
 
-        socket.inRunnerRoom = true
+  _getRemoteState () {
+    // {
+    //   origin: "http://localhost:2020"
+    //   fileServer:
+    //   strategy: "file"
+    //   domainName: "localhost"
+    //   props: null
+    // }
 
-        return socket.join('runner')
-      })
+    // {
+    //   origin: "https://foo.google.com"
+    //   strategy: "http"
+    //   domainName: "google.com"
+    //   props: {
+    //     port: 443
+    //     tld: "com"
+    //     domain: "google"
+    //   }
+    // }
 
-      // TODO: what to do about runner disconnections?
-
-      socket.on('spec:changed', (spec) => {
-        return options.onSpecChanged(spec)
-      })
-
-      socket.on('app:connect', (socketId) => {
-        return options.onConnect(socketId, socket)
-      })
-
-      socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
-        return options.onTestsReceivedAndMaybeRecord(runnables, cb)
-      })
-
-      socket.on('mocha', (...args: unknown[]) => {
-        return options.onMocha.apply(options, args)
-      })
-
-      socket.on('open:finder', (p, cb = function () {}) => {
-        return open.opn(p)
-        .then(() => {
-          return cb()
-        })
-      })
-
-      socket.on('recorder:frame', (data) => {
-        return options.onCaptureVideoFrames(data)
-      })
-
-      socket.on('reload:browser', (url: string, browser: any) => {
-        return options.onReloadBrowser(url, browser)
-      })
-
-      socket.on('focus:tests', () => {
-        return options.onFocusTests()
-      })
-
-      socket.on('is:automation:client:connected', (
-        data: Record<string, any>,
-        cb: (...args: unknown[]) => void,
-      ) => {
-        const isConnected = () => {
-          return automationRequest('is:automation:client:connected', data)
-        }
-
-        const tryConnected = () => {
-          return Bluebird
-          .try(isConnected)
-          .catch(() => {
-            return retry(tryConnected)
-          })
-        }
-
-        // retry for up to data.timeout
-        // or 1 second
-        return Bluebird
-        .try(tryConnected)
-        .timeout(data.timeout != null ? data.timeout : 1000)
-        .then(() => {
-          return cb(true)
-        }).catch(Bluebird.TimeoutError, (_err) => {
-          return cb(false)
-        })
-      })
-
-      socket.on('backend:request', (eventName: string, ...args) => {
-        // cb is always the last argument
-        const cb = args.pop()
-
-        debug('backend:request %o', { eventName, args })
-
-        const backendRequest = () => {
-          switch (eventName) {
-            case 'preserve:run:state':
-              existingState = args[0]
-
-              return null
-            case 'resolve:url': {
-              const [url, resolveOpts] = args
-
-              return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
-            }
-            case 'http:request':
-              return options.onRequest(headers, automationRequest, args[0])
-            case 'reset:server:state':
-              return options.onResetServerState()
-            case 'log:memory:pressure':
-              return firefoxUtil.log()
-            case 'firefox:force:gc':
-              return firefoxUtil.collectGarbage()
-            case 'get:fixture':
-              return getFixture(args[0], args[1])
-            case 'read:file':
-              return files.readFile(config.projectRoot, args[0], args[1])
-            case 'write:file':
-              return files.writeFile(config.projectRoot, args[0], args[1], args[2])
-            case 'net':
-              return onNetEvent({
-                eventName: args[0],
-                frame: args[1],
-                state: options.netStubbingState,
-                socket: this,
-                getFixture,
-                args,
-              })
-            case 'exec':
-              return exec.run(config.projectRoot, args[0])
-            case 'task':
-              return task.run(config.pluginsFile, args[0])
-            default:
-              throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`,
-              )
-          }
-        }
-
-        return Bluebird.try(backendRequest)
-        .then((resp) => {
-          return cb({ response: resp })
-        }).catch((err) => {
-          return cb({ error: errors.clone(err) })
-        })
-      })
-
-      socket.on('get:existing:run:state', (cb) => {
-        const s = existingState
-
-        if (s) {
-          existingState = null
-
-          return cb(s)
-        }
-
-        return cb()
-      })
-
-      socket.on('save:app:state', (state, cb) => {
-        options.onSavedStateChanged(state)
-
-        // we only use the 'ack' here in tests
-        if (cb) {
-          return cb()
-        }
-      })
-
-      socket.on('external:open', (url: string) => {
-        debug('received external:open %o', { url })
-        // using this instead of require('electron').shell.openExternal
-        // because CT runner does not spawn an electron shell
-        // if we eventually decide to exclusively launch CT from
-        // the desktop-gui electron shell, we should update this to use
-        // electron.shell.openExternal.
-
-        // cross platform way to open a new tab in default browser, or a new browser window
-        // if one does not already exist for the user's default browser.
-        const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open')
-
-        return require('child_process').exec(`${start} ${url}`)
-      })
-
-      socket.on('get:user:editor', (cb) => {
-        getUserEditor(false)
-        .then(cb)
-      })
-
-      socket.on('set:user:editor', (editor) => {
-        setUserEditor(editor)
-      })
-
-      socket.on('open:file', (fileDetails) => {
-        openFile(fileDetails)
-      })
-
-      reporterEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toRunner(event, data)
-        })
-      })
-
-      runnerEvents.forEach((event) => {
-        socket.on(event, (data) => {
-          this.toReporter(event, data)
-        })
-      })
-
-      callbacks.onSocketConnection(socket)
+    const props = _.extend({}, {
+      auth: this._remoteAuth,
+      props: this._remoteProps,
+      origin: this._remoteOrigin,
+      strategy: this._remoteStrategy,
+      visiting: this._remoteVisitingUrl,
+      domainName: this._remoteDomainName,
+      fileServer: this._remoteFileServer,
     })
 
-    return this.io
+    debug('Getting remote state: %o', props)
+
+    return props
   }
 
-  end () {
-    this.ended = true
+  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
+    const l = (type, val) => {
+      return debug('Setting', type, val)
+    }
 
-    // TODO: we need an 'ack' from this end
-    // event from the other side
-    return this.io.emit('tests:finished')
+    this._remoteAuth = options.auth
+
+    l('remoteAuth', this._remoteAuth)
+
+    // if this isn't a fully qualified url
+    // or if this came to us as <root> in our tests
+    // then we know to go back to our default domain
+    // which is the localhost server
+    if ((fullyQualifiedUrl === '<root>') || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
+      this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`
+      this._remoteStrategy = 'file'
+      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
+      this._remoteDomainName = DEFAULT_DOMAIN_NAME
+      this._remoteProps = null
+
+      l('remoteOrigin', this._remoteOrigin)
+      l('remoteStrategy', this._remoteStrategy)
+      l('remoteHostAndPort', this._remoteProps)
+      l('remoteDocDomain', this._remoteDomainName)
+      l('remoteFileServer', this._remoteFileServer)
+    } else {
+      this._remoteOrigin = origin(fullyQualifiedUrl)
+
+      this._remoteStrategy = 'http'
+
+      this._remoteFileServer = null
+
+      // set an object with port, tld, and domain properties
+      // as the remoteHostAndPort
+      this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
+
+      // @ts-ignore
+      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
+
+      l('remoteOrigin', this._remoteOrigin)
+      l('remoteHostAndPort', this._remoteProps)
+      l('remoteDocDomain', this._remoteDomainName)
+    }
+
+    return this._getRemoteState()
   }
 
-  changeToUrl (url) {
-    return this.toRunner('change:to:url', url)
+  proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
+    // bail if this is our own namespaced socket.io request
+
+    if (req.url.startsWith(socketIoRoute)) {
+      if (!this.socketAllowed.isRequestAllowed(req)) {
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
+        socket.end()
+      }
+
+      // we can return here either way, if the socket is still valid socket.io will hook it up
+      return
+    }
+
+    const host = req.headers.host
+
+    if (host) {
+      // get the protocol using req.connection.encrypted
+      // get the port & hostname from host header
+      const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
+      const { hostname, protocol } = url.parse(fullUrl)
+      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
+
+      const onProxyErr = (err, req, res) => {
+        return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
+      }
+
+      return proxy.ws(req, socket, head, {
+        secure: false,
+        target: {
+          host: hostname,
+          port,
+          protocol,
+        },
+        agent,
+      }, onProxyErr)
+    }
+
+    // we can't do anything with this socket
+    // since we don't know how to proxy it!
+    if (socket.writable) {
+      return socket.end()
+    }
+  }
+
+  reset () {
+    this._networkProxy?.reset()
+
+    const baseUrl = this._baseUrl ?? '<root>'
+
+    return this._onDomainSet(baseUrl)
+  }
+
+  _close () {
+    // bail early we dont have a server or we're not
+    // currently listening
+    if (!this._server || !this.isListening) {
+      return Bluebird.resolve(true)
+    }
+
+    this.reset()
+
+    logger.unsetSettings()
+
+    evilDns.clear()
+
+    return this._server.destroyAsync()
+    .then(() => {
+      this.isListening = false
+    })
   }
 
   close () {
-    return this.io.close()
+    return Bluebird.all([
+      this._close(),
+      this._socket?.close(),
+      this._fileServer?.close(),
+      this._httpsProxy?.close(),
+    ])
+    .then((res) => {
+      this._middleware = null
+
+      return res
+    })
+  }
+
+  end () {
+    return this._socket && this._socket.end()
+  }
+
+  changeToUrl (url) {
+    return this._socket && this._socket.changeToUrl(url)
+  }
+
+  onRequest (fn) {
+    this._middleware = fn
+  }
+
+  onNextRequest (fn) {
+    return this.onRequest((...args) => {
+      fn.apply(this, args)
+
+      this._middleware = null
+    })
+  }
+
+  onUpgrade (req, socket, head, socketIoRoute) {
+    debug('Got UPGRADE request from %s', req.url)
+
+    return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
+  }
+
+  callListeners (req, res) {
+    const listeners = this.server.listeners('request').slice(0)
+
+    return this._callRequestListeners(this.server, listeners, req, res)
+  }
+
+  onSniUpgrade (req, socket, head) {
+    const upgrades = this.server.listeners('upgrade').slice(0)
+
+    return upgrades.map((upgrade) => {
+      return upgrade.call(this.server, req, socket, head)
+    })
+  }
+
+  onConnect (req, socket, head) {
+    debug('Got CONNECT request from %s', req.url)
+
+    socket.once('upstream-connected', this.socketAllowed.add)
+
+    return this.httpsProxy.connect(req, socket, head)
+  }
+
+  sendSpecList (specs) {
+    return this.socket.sendSpecList(specs)
   }
 }
