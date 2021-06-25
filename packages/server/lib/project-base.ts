@@ -92,14 +92,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   protected ensureProp = ensureProp
 
-  get projectType (): 'ct' | 'e2e' | 'base' {
-    if (this.constructor === ProjectBase) {
-      return 'base'
-    }
-
-    throw new Error('Project#projectType must be defined')
-  }
-
   setOnTestsReceived (fn) {
     this._recordTests = fn
   }
