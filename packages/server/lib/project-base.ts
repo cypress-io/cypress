@@ -66,7 +66,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public browser: any
   public spec: Cypress.Cypress['spec'] | null
 
-  constructor (projectRoot: string) {
+  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
     super()
 
     if (!projectRoot) {
@@ -1068,7 +1068,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   static id (path) {
-    return new ProjectBase(path).getProjectId()
+    return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getProjectId()
   }
 
   static ensureExists (path, options) {
@@ -1077,6 +1077,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   static config (path) {
-    return new ProjectBase(path).getConfig()
+    return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getConfig()
   }
 }

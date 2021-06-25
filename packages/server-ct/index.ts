@@ -5,8 +5,6 @@ import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
 
-export * from './src/project-ct'
-
 export * from './src/server-ct'
 
 export * from './src/socket-ct'

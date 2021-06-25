@@ -21,7 +21,7 @@ const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { SpecsStore } = require(`${root}/lib/specs-store`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
@@ -125,7 +125,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectE2E('/path/to/project-e2e')
+          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', projectType: 'e2e' })
 
           cfg.pluginsFile = false
 
