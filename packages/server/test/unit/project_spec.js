@@ -74,6 +74,20 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
   })
 
+  it('handles CT specific behaviors', function () {
+    sinon.stub(ServerE2E.prototype, 'open').resolves([])
+    sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
+
+    const projectCt = new ProjectBase({ projectRoot: '../foo/bar', projectType: 'ct' })
+
+    return projectCt.open({}).then((project) => {
+      expect(project._cfg.viewportHeight).to.eq(500)
+      expect(project._cfg.viewportWidth).to.eq(500)
+      expect(project._cfg.baseUrl).to.eq('http://localhost:9999')
+      expect(project.startCtDevServer).to.have.beenCalled
+    })
+  })
+
   context('#saveState', function () {
     beforeEach(function () {
       const integrationFolder = 'the/save/state/test'
