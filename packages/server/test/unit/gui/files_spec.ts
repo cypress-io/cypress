@@ -4,7 +4,6 @@ import { expect } from 'chai'
 import 'sinon-chai'
 
 import { showDialogAndCreateSpec } from '../../../lib/gui/files'
-//@ts-ignore
 import openProject from '../../../lib/open_project'
 import { ProjectBase } from '../../../lib/project-base'
 import * as dialog from '../../../lib/gui/dialog'
