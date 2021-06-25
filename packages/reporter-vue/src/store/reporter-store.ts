@@ -15,13 +15,14 @@ import { computed, ref, Ref, ComputedRef, watch, toRefs, reactive } from 'vue'
 type RunnableType = 'suite' | 'test'
 type RawSuite = any
 type RawTest = any
+export type TestsByState = ComputedRef<Dictionary<(Test | Suite)[]>>
 
 interface Runnables {
   nested: (Test | Suite)[],
   flat: Record<string, Test | Suite>,
   tests: Test[]
   suites: Suite[]
-  testsByState: ComputedRef<Dictionary<(Test | Suite)[]>>
+  testsByState: TestsByState,
   stats: ComputedRef<Dictionary<RunnableState>[]>
   getTest: (id: string) => Test | Suite
   getHook: (id: string) => any
@@ -96,7 +97,6 @@ export const useStatsStore = defineStore({
   }
 })
 
-
 // @ts-ignore
 export const useReporterStore = defineStore({
   id: 'reporter',
@@ -106,6 +106,7 @@ export const useReporterStore = defineStore({
       runState: '',
       runnables: null,
       autoScrolling: null,
+      statsStore: useStatsStore()
     }
   },
   actions: {
@@ -136,8 +137,7 @@ export const useReporterStore = defineStore({
       })
 
       this.bus.on('paused', () => {
-        this.runState = 'paused'
-        statsStore.pause()
+        this.pause()
       })
 
       this.bus.on('resume', () => {
@@ -146,9 +146,10 @@ export const useReporterStore = defineStore({
       })
 
       this.bus.on('reporter:restart:test:run', () => {
-        this.$reset()
-        statsStore.stop()
-        bus.emit('reporter:restarted')
+        this.runnables = null
+        this.runState = null
+        this.statsStore.pause()
+        this.bus.emit('reporter:restarted')
       })
 
       this.bus.on('reporter:log:add', (props) => {
@@ -156,8 +157,21 @@ export const useReporterStore = defineStore({
       })
     },
     setRunnablesFromRoot(rootRunnable) {
-      debugger;
       this.runnables = Runnables(rootRunnable)
+    },
+    restart() {
+      this.statsStore.stop()
+      this.bus.emit('runner:restart')
+    },
+    pause() {
+      this.runState = 'paused'
+      this.statsStore.pause()
+      this.bus.emit('runner:stop')
+    },
+    resume() {
+      this.runState = 'running'
+      this.statsStore.resume()
+      this.bus.emit('runner:resume')
     }
   }
 })

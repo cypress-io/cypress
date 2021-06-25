@@ -2,9 +2,9 @@
   <ReporterHeaderLayout data-cy="reporter-header">
     <!-- Three stats (passed, failed, pending)-->
     <template #runnables>
-      <RunnableStat type="passed" :number="runnables.testsByState.passed.length"/>
-      <RunnableStat type="failed" :number="runnables.testsByState.failed.length"/>
-      <RunnableStat type="pending" :number="runnables.testsByState.pending.length"/>
+      <RunnableStat type="passed" :number="numberPassed"/>
+      <RunnableStat type="failed" :number="numberFailed"/>
+      <RunnableStat type="pending" :number="numberPending"/>
     </template>
 
     <!-- Timer -->
@@ -14,10 +14,13 @@
 
     <!-- Controls (auto-scrolling and play-pause) -->
     <template #controls>
+
+      {{ runState }}
       <HotkeyTooltip :content="playControl.text" :hotkey="playControl.hotkey">
-          <button @click="playControl.method" class="hidden">
-            <i-fa-repeat v-if="reporter.runState === 'running'"/>
-            <i-fa-pause v-else />
+      {{ showPause }}
+          <button @click="runState === 'running' ? $emit('pause') : $emit('restart')" data-cy="play-pause-toggle">
+            <i-fa-pause v-if="showPause" />
+            <i-fa-repeat v-else />
           </button>
         </HotkeyTooltip>
 
@@ -32,15 +35,16 @@
 </template>
 
 <script lang="ts">
-// import { useStatsStore, useReporterStore } from "../store";
 import { useStatsStore, useReporterStore  } from '../store/reporter-store'
 import RunnableStat from "./RunnableStat.vue";
 import RunnableDuration from './RunnableDuration.vue'
 import {HotkeyTooltip} from '../components/Tooltip'
 import ReporterHeaderLayout from './ReporterHeaderLayout.vue'
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, PropType } from 'vue'
+import type { TestsByState } from '../store/reporter-store'
 import text from '../i18n/reporter-text'
 
+type ValidRunStates = 'running' | 'paused'
 export default defineComponent({
   components: {
     RunnableStat,
@@ -48,38 +52,52 @@ export default defineComponent({
     ReporterHeaderLayout,
     RunnableDuration
   },
-  setup() {
-    const reporter = useReporterStore()
+  props: {
+    runState: String as PropType<ValidRunStates>,
+    autoScrolling: Boolean,
+    stats: {
+      type: Object as PropType<TestsByState>
+    }
+  },
+  setup(props, { emit }) {
     const stats = useStatsStore()
-
     const playControl = computed(() => {
-      if (reporter.state === 'running') {
+      if (props.runState === 'running') {
         return {
           text: text.stopTests,
-          method: reporter.stopRunning,
+          method: () => {
+            emit('pause')
+          },
           hotkey: 'B'
         }
       }
       return {
         text: text.rerunTests,
-        method: reporter.restart,
+        method: () => emit('restart'),
         hotkey: 'R'
       }
     })
 
     const autoScrollText = computed(() => {
-      return reporter.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
+      return props.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
     })
 
     return {
-      autoScrollText,
+      // Header Stats
+      numberFailed: computed(() => props.stats.failed),
+      numberPassed: computed(() => props.stats.passed),
+      numberPending: computed(() => props.stats.pending),
+
+      // Play/Pause logic
+      showPause: computed(() => props.runState === 'running'),
       playControl,
+
+      // Timer
       duration: computed(() => stats.duration),
-      runnables: computed(() => reporter.runnables),
-      reporter,
 
       // TODO: Windicss tree-shaken stylesheets are stripping the bg-amber-500 etc colors. Add to allow-list.
-      autoScrollingColor: computed(() => reporter.autoScrolling ? 'orange' : 'gray'),
+      autoScrollText,
+      autoScrollingColor: computed(() => props.autoScrolling ? 'orange' : 'gray'),
     }
   }
 })
