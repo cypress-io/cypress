@@ -39,7 +39,7 @@ describe('lib/project-base', () => {
     })
 
     sinon.stub(runEvents, 'execute').resolves()
-    sinon.stub(fs, 'readdirSync').returns(['cypress.json'])
+    sinon.stub(fs, 'readdirSync').returns(['cypress.config.js'])
 
     return settings.read(this.todosPath).then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
