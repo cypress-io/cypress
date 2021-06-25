@@ -78,6 +78,10 @@ module.exports = {
   },
 
   _write (file, obj = {}) {
+    if (!/\.json$/.test(file)) {
+      return Promise.resolve(obj)
+    }
+
     return fs.outputJsonAsync(file, obj, { spaces: 2 })
     .return(obj)
     .catch((err) => {
@@ -171,7 +175,11 @@ module.exports = {
 
     return requireAsync(file)
     .catch({ code: 'MODULE_NOT_FOUND' }, { code: 'ENOENT' }, () => {
-      return this._write(file, {})
+      if (/\.json$/.test(file)) {
+        return this._write(file, {})
+      }
+
+      return fs.writeFile(file, 'module.exports = {}').then(() => ({}))
     })
     .then((json = {}) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
@@ -182,6 +190,10 @@ module.exports = {
         } else if (typeof json[testingType] === 'function') {
           json = json[testingType](() => {}, json) || json
         }
+      }
+
+      if (!/\.json$/.test(file)) {
+        return json
       }
 
       const changed = this._applyRewriteRules(json)
