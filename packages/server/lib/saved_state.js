@@ -74,7 +74,7 @@ const formStatePath = (projectRoot) => {
   })
 }
 
-const normalizeAndAllowSet = (_set, inTransaction, key, value) => {
+const normalizeAndAllowSet = (set, key, value) => {
   const valueObject = (() => {
     if (_.isString(key)) {
       const tmp = {}
@@ -96,7 +96,7 @@ const normalizeAndAllowSet = (_set, inTransaction, key, value) => {
     console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
   }
 
-  return _set(inTransaction, _.pick(valueObject, allowed))
+  return set(_.pick(valueObject, allowed))
 }
 
 const create = (projectRoot, isTextTerminal) => {
@@ -120,7 +120,7 @@ const create = (projectRoot, isTextTerminal) => {
       path: fullStatePath,
     })
 
-    stateFile._set = _.wrap(stateFile._set.bind(stateFile), normalizeAndAllowSet)
+    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
     stateFiles[fullStatePath] = stateFile
 

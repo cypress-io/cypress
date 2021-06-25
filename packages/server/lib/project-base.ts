@@ -668,10 +668,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
     .then((state) => {
-      return state.transaction((tx) => {
-        return tx.set(stateChanges).then(() => {
-          return tx.get()
-        })
+      return state.set(stateChanges).then(() => {
+        return state.get()
       })
     })
     .then((state) => {
