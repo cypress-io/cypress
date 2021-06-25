@@ -11,7 +11,7 @@ module.exports = (on) => {
     'assert:ws:fails': ({ proxyUrl, socketIoRoute }) => {
       const wsClient = socketIo.client(proxyUrl, {
         path: socketIoRoute,
-        transports: ['websocket'],
+        transports: ['polling'],
       })
 
       return new Promise((resolve, reject) => {
@@ -32,7 +32,7 @@ module.exports = (on) => {
       const wsClient = socketIo.client(proxyUrl, {
         agent,
         path: socketIoRoute,
-        transports: ['websocket'],
+        transports: ['polling'],
       })
 
       return new Promise((resolve, reject) => {

@@ -124,7 +124,7 @@ export class SocketBase {
       },
       destroyUpgrade: false,
       serveClient: false,
-      transports: ['websocket'],
+      transports: ['polling'],
     })
   }
 

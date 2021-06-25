@@ -14,7 +14,7 @@ import $Cypress, { $ } from '@packages/driver'
 
 const ws = client.connect({
   path: '/__socket.io',
-  transports: ['websocket'],
+  transports: ['polling'],
 })
 
 ws.on('connect', () => {
