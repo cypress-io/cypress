@@ -25,6 +25,6 @@ export default defineComponent({
 
 <style scoped>
 .header-wrapper {
-  cursor: pointer;
+  cursor: pointer
 }
 </style>
