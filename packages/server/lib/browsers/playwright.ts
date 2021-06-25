@@ -26,9 +26,6 @@ const playwrightDebugLogger = {
 
 // Generate browser specific configuration
 function getBrowserConfiguration (browser: Browser, options: any = {}): Record<string, any> {
-  console.log('!!! Weyert !!! proxyServer:', ps)
-  dbg('!!! Weyert !!! proxyServer:', ps)
-
   // If Firefox is the target browser, we should set the firefox specific user preferences
   if (browser.name === 'firefox') {
     return {
