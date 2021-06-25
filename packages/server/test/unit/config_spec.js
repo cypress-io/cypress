@@ -7,6 +7,7 @@ const debug = require('debug')('test')
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
+const { fs } = require(`${root}lib/util/fs`)
 const findSystemNode = require(`${root}lib/util/find_system_node`)
 const scaffold = require(`${root}lib/scaffold`)
 let settings = require(`${root}lib/util/settings`)
@@ -55,6 +56,7 @@ describe('lib/config', () => {
       this.projectRoot = '/_test-output/path/to/project'
 
       this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
+        sinon.stub(fs, 'readdirSync').withArgs(this.projectRoot).returns([])
         sinon.stub(settings, 'read').withArgs(this.projectRoot).resolves(cypressJson)
         sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
       }
@@ -142,10 +144,10 @@ describe('lib/config', () => {
         return this.expectValidationPasses()
       })
 
-      it('validates cypress.json', function () {
+      it('validates cypress.config.js', function () {
         this.setup({ reporter: 5 })
 
-        return this.expectValidationFails('cypress.json')
+        return this.expectValidationFails('cypress.config.js')
       })
 
       it('validates cypress.env.json', function () {
