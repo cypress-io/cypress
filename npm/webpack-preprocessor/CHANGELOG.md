@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.9.0...@cypress/webpack-preprocessor-v5.9.1) (2021-06-24)
+
+
+### Bug Fixes
+
+* **webpack-preprocessor:** hanging issues with webpack 5 ([#15611](https://github.com/cypress-io/cypress/issues/15611)) ([56bcbb6](https://github.com/cypress-io/cypress/commit/56bcbb61e61d823f80e80c46c943b01283da2942))
+
 # [@cypress/webpack-preprocessor-v5.9.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.8.0...@cypress/webpack-preprocessor-v5.9.0) (2021-05-26)
 
 

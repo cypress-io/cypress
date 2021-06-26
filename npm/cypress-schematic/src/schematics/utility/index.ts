@@ -4,22 +4,9 @@ import { get } from 'http'
 import { getPackageJsonDependency } from './dependencies'
 
 export interface NodePackage {
-    name: string
-    version: string
-  }
-
-export enum Paths {
-    AngularJson = './angular.json',
-  }
-
-export enum Configs {
-    JsonIndentLevel = 4,
-  }
-
-export interface CypressOptions {
-    project?: string
-    __version__: number
-  }
+  name: string
+  version: string
+}
 
 export function getAngularVersion (tree: Tree): number {
   const packageNode = getPackageJsonDependency(tree, '@angular/core')

@@ -250,9 +250,17 @@ export const eventManager = {
       studioRecorder.startSave()
     })
 
+    reporterBus.on('studio:copy:to:clipboard', (cb) => {
+      this._studioCopyToClipboard(cb)
+    })
+
     localBus.on('studio:start', () => {
       studioRecorder.closeInitModal()
       rerun()
+    })
+
+    localBus.on('studio:copy:to:clipboard', (cb) => {
+      this._studioCopyToClipboard(cb)
     })
 
     localBus.on('studio:save', (saveInfo) => {
@@ -592,6 +600,13 @@ export const eventManager = {
     }
 
     return displayProps
+  },
+
+  _studioCopyToClipboard (cb) {
+    ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
+      studioRecorder.copyToClipboard(commandsText)
+      .then(cb)
+    })
   },
 
   emit (event, ...args) {
