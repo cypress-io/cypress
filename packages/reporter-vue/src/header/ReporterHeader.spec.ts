@@ -1,7 +1,6 @@
 import ReporterHeader from './ReporterHeader.vue'
-import { h } from 'vue'
+import { h, defineComponent, ref } from 'vue'
 import { useStatsStore } from '../store/reporter-store'
-
 
 const props = {
   runState: 'running',
@@ -15,33 +14,32 @@ const props = {
 it('is renders the timer and can be played/paused', () => {
   const onRestartSpy = cy.spy().as('onRestart')
   const onPauseSpy = cy.spy().as('onPause')
-  const wrapper = h({
-    // The parent component will provide runState
-    data() {
-      return {
-        runState: 'running'
-      }
-    },
-    setup: () => ({ statsStore: useStatsStore() }),
-    render() {
-      const _this = this
-      return h(ReporterHeader, {
+
+  const Subject = defineComponent({
+    setup() {
+      const runState = ref('running')
+      const statsStore = useStatsStore() 
+
+      return () => h(ReporterHeader, {
         ...props,
-        runState: _this.runState, // pass runState in
+        runState: runState.value,
         onPause() {
+          console.log('onPause')
           onPauseSpy()
-          _this.runState = 'paused'
-          _this.statsStore.stop()
+          runState.value = 'paused'
+          statsStore.stop()
         },
         onRestart() {
           onRestartSpy()
-          _this.runState = 'running'
-          _this.statsStore.$reset()
-          _this.statsStore.start()
+          runState.value = 'running'
+          statsStore.$reset()
+          statsStore.start()
         }
       })
     }
   })
+
+  const wrapper = h(Subject)
 
   cy.mount(wrapper)
     .get('[data-cy=play-pause-toggle]').as('playPause')

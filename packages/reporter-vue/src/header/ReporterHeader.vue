@@ -31,63 +31,72 @@
   </ReporterHeaderLayout>
 </template>
 
-<script lang="ts" setup>
-import { useStatsStore } from '../store/reporter-store'
-import type { TestsByState } from '../store/reporter-store'
-
+<script lang="ts">
+import { useStatsStore, TestsByState } from '../store/reporter-store'
 import RunnableStat from "./RunnableStat.vue";
 import RunnableDuration from './RunnableDuration.vue'
 import {HotkeyTooltip} from '../components/Tooltip'
 import ReporterHeaderLayout from './ReporterHeaderLayout.vue'
-import { computed, PropType, defineProps, defineEmit } from 'vue'
+import { computed, PropType, defineComponent } from 'vue'
 
 import text from '../i18n/reporter-text'
 
 type ValidRunStates = 'running' | 'paused'
 
-const emit = defineEmit(['pause', 'restart'])
-const props = defineProps({
-  runState: String as PropType<ValidRunStates>,
-  autoScrolling: Boolean,
-  stats: {
-    type: Object as PropType<TestsByState>,
-    required: true
-  }
-})
+export default defineComponent({
+  components: {
+    ReporterHeaderLayout,
+    HotkeyTooltip,
+    RunnableDuration,
+    RunnableStat
+  },
+  props: {
+    runState: String as PropType<ValidRunStates>,
+    autoScrolling: Boolean,
+    stats: {
+      type: Object as PropType<TestsByState>,
+      required: true
+    }
+  },
+  emits: ['pause', 'restart'],
+  setup(props, {emit}) {
+    const statsStore = useStatsStore()
 
-const statsStore = useStatsStore()
-
-// Timer
-const duration = computed(() => statsStore.duration),
-
-// Play/Pause
-const showPause = computed(() => props.runState === 'running')
-const playControl = computed(() => {
-  if (props.runState === 'running') {
     return {
-      text: text.stopTests,
-      method: () => emit('pause'),
-      hotkey: 'B'
+      // Timer
+      duration: computed(() => statsStore.duration),
+
+      // Play/Pause
+      showPause: computed(() => props.runState === 'running'),
+      playControl: computed(() => {
+        if (props.runState === 'running') {
+          return {
+            text: text.stopTests,
+            method: () => emit('pause'),
+            hotkey: 'B'
+          }
+        }
+        return {
+          text: text.rerunTests,
+          method: () => emit('restart'),
+          hotkey: 'R'
+        }
+      }),
+
+      // Stats
+      numberFailed: computed(() => props.stats.failed),
+      numberPassed: computed(() => props.stats.passed),
+      numberPending: computed(() => props.stats.pending),
+
+      // Auto-scroll
+      autoScrollText: computed(() => {
+        return props.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
+      }),
+      autoScrollingColor: computed(() => props.autoScrolling ? 'orange' : 'gray')
+
     }
   }
-  return {
-    text: text.rerunTests,
-    method: () => emit('restart'),
-    hotkey: 'R'
-  }
 })
-
-// Stats
-const numberFailed = computed(() => props.stats.failed)
-const numberPassed = computed(() => props.stats.passed)
-const numberPending = computed(() => props.stats.pending)
-
-// Auto-scroll
-const autoScrollText = computed(() => {
-  return props.autoScrolling ? text.disableAutoScrolling : text.enableAutoScrolling
-})
-
-const autoScrollingColor = computed(() => props.autoScrolling ? 'orange' : 'gray')
 </script>
 
 <style lang="scss">

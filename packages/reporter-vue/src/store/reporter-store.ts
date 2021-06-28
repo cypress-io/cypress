@@ -71,9 +71,8 @@ export const useStatsStore = defineStore({
       startTime: 0,
       currentTime: 0,
       pauseable: {
-        pause() { },
-        resume(){}
-        
+        pause() {},
+        resume(){},
       }
     }
   },
@@ -224,10 +223,6 @@ function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[],
 function createRunnableChildren(props: RootRunnable, level: number, runnablesById: Record<string, Test | Suite>) {
   const addParentRunnables = (runnable) => {
     const parentRunnables = runnable.parentRunnables || []
-    
-    // if (!props.root) {
-    //   parentRunnables.unshift(props.id)
-    // }
 
     parentRunnables.unshift(props.id)
     
@@ -241,7 +236,6 @@ function createRunnableChildren(props: RootRunnable, level: number, runnablesByI
   props.suites = (props.suites || []).map(addParentRunnables)
   props.tests = (props.tests || []).map(addParentRunnables)
 
-  
   return createRunnables('test', props.tests, props.hooks, level, runnablesById).concat(
     createRunnables('suite', props.suites, props.hooks, level, runnablesById),
   )
