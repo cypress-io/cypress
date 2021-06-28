@@ -405,4 +405,29 @@ describe('src/cypress/runner', () => {
       cy.get('.reporter').should('not.exist')
     })
   })
+
+  describe('inline spec list', () => {
+    it('changes spec interactively using the spec list', () => {
+      runIsolatedCypress(() => {}, {
+        config: {
+          env: {
+            useInlineSpecList: true,
+          },
+        },
+        stubOnSpecWindow: false,
+      })
+
+      cy.get('[data-cy="specs-list"]').get('span').contains('foo.spec.js').click().then(() => {
+        cy.get('.runnable-title').contains('foo')
+        cy.get('.command-message-text').contains('expected foo to equal foo')
+        cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/foo.spec.js')
+      })
+
+      cy.get('[data-cy="specs-list"]').get('span').contains('bar.spec.js').click().then(() => {
+        cy.get('.runnable-title').contains('bar')
+        cy.get('.command-message-text').contains('expected bar to equal bar')
+        cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/bar.spec.js')
+      })
+    })
+  })
 })
