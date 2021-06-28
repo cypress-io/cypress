@@ -53,13 +53,21 @@ export const rootRunnable = {
       1, rootId, suite2, [test('failed', suite2, 2, 8)],
     ),
     suiteContents(
-      1, rootId, suite3, [test('pending', suite3, 2, 9)],
-      [suiteContents(
-        2, suite3, suite5, [test('passed', suite5, 3, 10)],
-      )],
+      1, rootId, suite3, [
+        test('pending', suite3, 2, 9),
+      ],
+      [
+        suiteContents(
+          2, suite3, suite5, [
+            test('passed', suite5, 3, 10),
+            test('passed', suite5, 3, 10),
+            test('passed', suite5, 3, 10),
+          ],
+        ),
+      ],
     ),
     suiteContents(
-      1, suite4, [test('pending', suite4, 2, 12), test('passed', suite4, 2, 11),
+      1, rootId, suite4, [test('pending', suite4, 2, 12), test('passed', suite4, 2, 11),
         test('passed', suite4, 2, 13),
         test('passed', suite4, 2, 14)],
     ),
