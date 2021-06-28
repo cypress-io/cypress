@@ -61,6 +61,11 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
         ZENHUB_API_TOKEN="..."
         ```
     - The `cypress-bot` GitHub app credentials are also needed. Ask another team member who has done a deploy for those.
+    - For purging the Cloudflare cache (part of the `move-binaries` step), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password. If you don't have access, ask a team member who has done a deploy.
+       ```text
+        CF_ZONEID="..."
+        CF_TOKEN="..."
+        ```
     - Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variables for different situations.
 
 ### Before Publishing a New Version

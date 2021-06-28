@@ -9,6 +9,8 @@ const { fs } = require('./util/fs')
 
 const stateFiles = {}
 
+// TODO: remove `showedOnBoardingModal` from this list - it is only included so that misleading `allowed` are not thrown
+// now that it has been removed from use
 const allowed = `
 appWidth
 appHeight
@@ -23,6 +25,8 @@ isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
 showedOnBoardingModal
+showedNewProjectBanner
+firstOpenedCypress
 showedStudioModal
 preferredOpener
 ctReporterWidth

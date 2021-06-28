@@ -131,6 +131,12 @@ export class SocketE2E extends SocketBase {
             }
           })
         })
+
+        socket.on('studio:get:commands:text', (commands, cb) => {
+          const commandsText = studio.getCommandsText(commands)
+
+          cb(commandsText)
+        })
       },
     })
   }

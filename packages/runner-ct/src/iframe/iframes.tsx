@@ -2,16 +2,18 @@ import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
 import { default as $Cypress } from '@packages/driver'
+import {
+  SnapshotControls,
+  ScriptError,
+  namedObserver,
+  IframeModel,
+  selectorPlaygroundModel,
+  AutIframe,
+  eventManager as EventManager,
+} from '@packages/runner-shared'
 
 import State from '../../src/lib/state'
-import AutIframe from './aut-iframe'
-import { ScriptError } from '../errors/script-error'
-import SnapshotControls from './snapshot-controls'
-import IframeModel from './iframe-model'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import styles from '../app/RunnerCt.module.scss'
-import eventManager from '../lib/event-manager'
-import { namedObserver } from '../lib/mobx'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
@@ -20,7 +22,7 @@ export function getSpecUrl ({ namespace, spec }, prefix = '') {
 
 interface IFramesProps {
   state: State
-  eventManager: typeof eventManager
+  eventManager: typeof EventManager
   config: Cypress.RuntimeConfigOptions
 }
 
@@ -168,7 +170,7 @@ export const Iframes = namedObserver('Iframes', ({
     state.callbackAfterUpdate?.()
   })
 
-  const { viewportHeight, viewportWidth, scriptError, scale, screenshotting } = state
+  const { height, width, scriptError, scale, screenshotting } = state
 
   return (
     <div
@@ -188,8 +190,8 @@ export const Iframes = namedObserver('Iframes', ({
           })
         }
         style={{
-          height: viewportHeight,
-          width: viewportWidth,
+          height,
+          width,
           transform: `scale(${screenshotting ? 1 : scale})`,
         }}
       />

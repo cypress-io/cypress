@@ -10,11 +10,13 @@ import { fs } from '../../../lib/util/fs'
 import {
   generateCypressCommand,
   addCommandsToBody,
+  convertCommandsToText,
   generateTest,
   appendCommandsToTest,
   createNewTestInSuite,
   createNewTestInFile,
-  createFile, countStudioUsage,
+  createFile,
+  countStudioUsage,
 } from '../../../lib/util/spec_writer'
 
 const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
@@ -102,6 +104,14 @@ describe('lib/util/spec_writer', () => {
       addCommandsToBody(program.body, exampleTestCommands)
 
       verifyOutput(program)
+    })
+  })
+
+  describe('#convertCommandsToText', () => {
+    it('converts studio commands to resulting text', () => {
+      const code = convertCommandsToText(exampleTestCommands)
+
+      snapshot(code)
     })
   })
 

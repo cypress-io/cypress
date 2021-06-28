@@ -606,4 +606,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   sendSpecList (specs) {
     return this.socket.sendSpecList(specs)
   }
+
+  sendSpecList (specs) {
+    this.toRunner('component:specs:changed', specs)
+  }
 }

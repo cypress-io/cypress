@@ -4,10 +4,8 @@ import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
-import la from 'lazy-ass'
 import _ from 'lodash'
 import path from 'path'
-import R from 'ramda'
 
 import commitInfo from '@cypress/commit-info'
 import pkg from '@packages/root'
@@ -32,8 +30,11 @@ import { escapeFilenameInUrl } from './util/escape_filename'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import settings from './util/settings'
+import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
+import devServer from './plugins/dev-server'
+import { SpecsStore } from './specs-store'
 
 interface CloseOptions {
   onClose: () => any
@@ -57,13 +58,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
   protected options?: Record<string, any>
-  protected spec: Cypress.Cypress['spec'] | null
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
 
   public browser: any
+  public spec: Cypress.Cypress['spec'] | null
 
   constructor (projectRoot: string) {
     super()
@@ -89,7 +90,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   protected ensureProp = ensureProp
 
-  get projectType () {
+  get projectType (): 'ct' | 'e2e' | 'base' {
     if (this.constructor === ProjectBase) {
       return 'base'
     }
@@ -155,7 +156,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .then(callbacks.onOpen)
-    .tap(({ cfg, port, warning }) => {
+    .tap(({ cfg, port }) => {
       // if we didnt have a cfg.port
       // then get the port once we
       // open the server
@@ -167,7 +168,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .tap(callbacks.onAfterOpen)
-    .then(({ cfg, port, warning }) => {
+    .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
       // store the cfg from
       // opening the server
       this._cfg = cfg
@@ -197,6 +198,16 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         this.saveState(stateToSave),
       )
       .then(() => {
+        // start watching specs
+        // whenever a spec file is added or removed, we notify the
+        // <SpecList>
+        // This is only used for CT right now, but it will be
+        // used for E2E eventually. Until then, do not watch
+        // the specs.
+        if (this.projectType === 'ct') {
+          startSpecWatcher()
+        }
+
         return Bluebird.join(
           this.checkSupportFile(cfg),
           this.watchPluginsFile(cfg, options),
@@ -281,6 +292,116 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
       })
     }
+  }
+
+  _onError (err: Error, options: Record<string, any>): void {
+    throw Error(`_onError must be implemented by the super class!`)
+  }
+
+  _initPlugins (cfg, options) {
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    const allowedCfg = config.allowed(cfg)
+
+    return plugins.init(allowedCfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      testingType: options.testingType,
+      onError: (err: Error) => this._onError(err, options),
+      onWarning: options.onWarning,
+    })
+    .then((modifiedCfg) => {
+      debug('plugin config yielded: %o', modifiedCfg)
+
+      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+      if (this.projectType === 'ct') {
+        updatedConfig.componentTesting = true
+
+        // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+        // But if we don't return it in the plugins function, it never gets set
+        // Since there is no chance that it will have any other value here, we set it to "component"
+        // This allows users to not return config in the `cypress/plugins/index.js` file
+        // https://github.com/cypress-io/cypress/issues/16860
+        updatedConfig.resolved.testingType = { value: 'component' }
+      }
+
+      debug('updated config: %o', updatedConfig)
+
+      return Bluebird.resolve(updatedConfig)
+    })
+    .then(async (modifiedConfig: any) => {
+      const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
+        if (this.projectType === 'ct') {
+          return spec.specType === 'component'
+        }
+
+        if (this.projectType === 'e2e') {
+          return spec.specType === 'integration'
+        }
+
+        throw Error(`Cannot return specType for projectType: ${this.projectType}`)
+      })
+
+      return this.initSpecStore({ specs, config: modifiedConfig })
+    })
+  }
+
+  async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
+    // CT uses a dev-server to build the bundle.
+    // We start the dev server here.
+    const devServerOptions = await devServer.start({ specs, config })
+
+    if (!devServerOptions) {
+      throw new Error([
+        'It looks like nothing was returned from on(\'dev-server:start\', {here}).',
+        'Make sure that the dev-server:start function returns an object.',
+        'For example: on("dev-server:start", () => startWebpackDevServer({ webpackConfig }))',
+      ].join('\n'))
+    }
+
+    return { port: devServerOptions.port }
+  }
+
+  async initSpecStore ({
+    specs,
+    config,
+  }: {
+    specs: Cypress.Cypress['spec'][]
+    config: any
+  }) {
+    const specsStore = new SpecsStore(config, this.projectType)
+
+    if (this.projectType === 'ct') {
+      const { port } = await this.startCtDevServer(specs, config)
+
+      config.baseUrl = `http://localhost:${port}`
+    }
+
+    const startSpecWatcher = () => {
+      return specsStore.watch({
+        onSpecsChanged: (specs) => {
+        // both e2e and CT watch the specs and send them to the
+        // client to be shown in the SpecList.
+          this.server.sendSpecList(specs)
+
+          if (this.projectType === 'ct') {
+          // ct uses the dev-server to build and bundle the speces.
+          // send new files to dev server
+            devServer.updateSpecs(specs)
+          }
+        },
+      })
+    }
+
+    return specsStore.storeSpecFiles()
+    .return({
+      specsStore,
+      cfg: config,
+      startSpecWatcher,
+    })
   }
 
   watchPluginsFile (cfg, options) {
@@ -480,6 +601,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
+  removeScaffoldedFiles () {
+    if (!this.cfg) {
+      throw new Error('Missing project config')
+    }
+
+    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
+  }
+
   // do not check files again and again - keep previous promise
   // to refresh it - just close and open the project again.
   determineIsNewProject (folder) {
@@ -511,12 +640,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         throw new Error('Missing integration folder')
       }
 
-      return this.determineIsNewProject(cfg.integrationFolder)
+      return this.determineIsNewProject(cfg)
       .then((untouchedScaffold) => {
-        const userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
+        const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
 
-        debugScaffold(`untouched scaffold ${untouchedScaffold} modal closed ${userHasSeenOnBoarding}`)
-        cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
+        debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
+        cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
       })
     }
 
@@ -892,58 +1021,5 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   static config (path) {
     return new ProjectBase(path).getConfig()
-  }
-
-  static getSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.getProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_FETCH_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  static generateSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.updateProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_CREATE_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  // Given a path to the project, finds all specs
-  // returns list of specs with respect to the project root
-  static findSpecs (projectRoot, specPattern) {
-    debug('finding specs for project %s', projectRoot)
-    la(check.unemptyString(projectRoot), 'missing project path', projectRoot)
-    la(check.maybe.unemptyString(specPattern), 'invalid spec pattern', specPattern)
-
-    // if we have a spec pattern
-    if (specPattern) {
-      // then normalize to create an absolute
-      // file path from projectRoot
-      // ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectRoot, specPattern)
-      debug('full spec pattern "%s"', specPattern)
-    }
-
-    return new ProjectBase(projectRoot)
-    .getConfig()
-    // TODO: handle wild card pattern or spec filename
-    .then((cfg) => {
-      return specsUtil.find(cfg, specPattern)
-    }).then(R.prop('integration'))
-    .then(R.map(R.prop('name')))
   }
 }

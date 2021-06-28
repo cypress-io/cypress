@@ -281,146 +281,6 @@ describe('lib/cypress', () => {
     })
   })
 
-  context('--get-key', () => {
-    it('writes out key and exits on success', function () {
-      return Promise.all([
-        user.set({ name: 'brian', authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'getProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .resolves('new-key-123')
-
-        return cypress.start(['--get-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        expect(console.log).to.be.calledWith('new-key-123')
-        this.expectExitWith(0)
-      })
-    })
-
-    it('logs error and exits when user isn\'t logged in', function () {
-      return user.set({})
-      .then(() => {
-        return cypress.start(['--get-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('NOT_LOGGED_IN')
-      })
-    })
-
-    it('logs error and exits when project does not have an id', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--get-key', `--project=${this.pristinePath}`])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
-      })
-    })
-
-    it('logs error and exits when project could not be found at the path', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--get-key', '--project=path/to/no/project'])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
-      })
-    })
-
-    it('logs error and exits when project token cannot be fetched', function () {
-      return Promise.all([
-        user.set({ authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'getProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .rejects(new Error())
-
-        return cypress.start(['--get-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('CANNOT_FETCH_PROJECT_TOKEN')
-      })
-    })
-  })
-
-  context('--new-key', () => {
-    it('writes out key and exits on success', function () {
-      return Promise.all([
-        user.set({ name: 'brian', authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'updateProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .resolves('new-key-123')
-
-        return cypress.start(['--new-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        expect(console.log).to.be.calledWith('new-key-123')
-        this.expectExitWith(0)
-      })
-    })
-
-    it('logs error and exits when user isn\'t logged in', function () {
-      return user.set({})
-      .then(() => {
-        return cypress.start(['--new-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('NOT_LOGGED_IN')
-      })
-    })
-
-    it('logs error and exits when project does not have an id', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--new-key', `--project=${this.pristinePath}`])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
-      })
-    })
-
-    it('logs error and exits when project could not be found at the path', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--new-key', '--project=path/to/no/project'])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
-      })
-    })
-
-    it('logs error and exits when project token cannot be fetched', function () {
-      return Promise.all([
-        user.set({ authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'updateProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .rejects(new Error())
-
-        return cypress.start(['--new-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('CANNOT_CREATE_PROJECT_TOKEN')
-      })
-    })
-  })
-
   context('--run-project', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
@@ -606,9 +466,10 @@ describe('lib/cypress', () => {
           return fs.statAsync(cfg.integrationFolder)
         }).then(() => {
           return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
           )
         })
       })
