@@ -86,6 +86,10 @@ const init = (config, options) => {
       stdio: 'inherit',
     }
 
+    if (typeof config[config.testingType] === 'function') {
+      childArguments.push('--functionName', config.testingType)
+    }
+
     if (config.resolvedNodePath) {
       debug('launching using custom node version %o', _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
       childOptions.execPath = config.resolvedNodePath

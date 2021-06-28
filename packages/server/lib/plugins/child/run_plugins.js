@@ -140,7 +140,11 @@ const execute = (ipc, event, ids, args = []) => {
 
 let tsRegistered = false
 
-const runPlugins = (ipc, pluginsFile, projectRoot) => {
+function getPluginsFunction (pluginsFile, functionName) {
+  return functionName ? require(pluginsFile)[functionName] : require(pluginsFile)
+}
+
+const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
   debug('pluginsFile:', pluginsFile)
   debug('project root:', projectRoot)
   if (!projectRoot) {
@@ -172,7 +176,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
 
   try {
     debug('require pluginsFile')
-    plugins = require(pluginsFile)
+    plugins = getPluginsFunction(pluginsFile, functionName)
 
     // Handle export default () => {}
     if (plugins && typeof plugins.default === 'function') {
