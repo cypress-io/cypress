@@ -418,15 +418,30 @@ describe('src/cypress/runner', () => {
       })
 
       cy.get('[data-cy="specs-list"]').get('span').contains('foo.spec.js').click()
-      cy.get('[data-cy="runnable-foo"]').contains('foo')
+      // spec should be selected
+      cy.get('[data-cy="selected-spec"]').contains('foo.spec.js')
       cy.get('.command-message-text').contains('expected foo to equal foo')
       cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/foo.spec.js')
 
       // change to a different spec, bar.spec.js, and verify it was correctly executed.
-      cy.get('[data-cy="specs-list"]').get('span').contains('bar.spec.js').click()
-      cy.get('[data-cy="runnable-bar"]').contains('bar')
+      cy.get('[data-cy="specs-list"]').get('span').contains('bar.spec.js').as('bar.spec.js')
+      cy.get('@bar.spec.js').click()
+      // spec should be selected
+      cy.get('[data-cy="selected-spec"]').contains('bar.spec.js')
       cy.get('.command-message-text').contains('expected bar to equal bar')
       cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/bar.spec.js')
+
+      // runnable title is "bar (random_id=1127)"
+      // clicking the spec again should *not* re-run it
+      // verify by asserting the random number has not changed
+      cy.get('.runnable-title').contains('bar').then(($el) => {
+        // get the random number from "bar (random_id=1127)"
+        /* eslint-disable-next-line no-unused-vars */
+        const [_, randomId] = $el[0].textContent.match(/random_id=(.+?)\)/)
+
+        cy.get('@bar.spec.js').click()
+        cy.get('.runnable-title').contains('bar').should('have.text', `bar (random_id=${randomId})`)
+      })
     })
   })
 })
