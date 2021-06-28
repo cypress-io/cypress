@@ -1,0 +1,26 @@
+name: "✨ Feature"
+description: Suggest a feature or enhancement to improve Cypress.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        👋 Use the template below to request a feature. 
+
+        Have a question? Start a new discussion 👉 https://github.com/cypress-io/cypress/discussions
+
+        Please be patient and we will respond as soon as we can. 🙏 
+  - type: textarea
+    id: feature
+    attributes:
+      label: What would you like?
+      description: A clear description of the feature or enhancement wanted in Cypress 
+      placeholder: What would you like?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why is this needed?
+      description: Remember, we are not familiar with the application you are testing, so please provide a clear description of why this would be useful to your project. 
+      placeholder: Why is this needed?

@@ -1,4 +1,4 @@
-name: "\U0001F41E Bug report"
+name: "🐛 Bug report"
 description: Report a bug found while using Cypress.
 body:
   - type: markdown
