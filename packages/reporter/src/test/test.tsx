@@ -120,7 +120,7 @@ class Test extends Component<TestProps> {
 
     return (<>
       <i aria-hidden='true' className='runnable-state fas' />
-      <span className='runnable-title'>
+      <span className='runnable-title test.tsx' data-cy={`runnable-${model.title}`}>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
       </span>

@@ -417,17 +417,16 @@ describe('src/cypress/runner', () => {
         stubOnSpecWindow: false,
       })
 
-      cy.get('[data-cy="specs-list"]').get('span').contains('foo.spec.js').click().then(() => {
-        cy.get('.runnable-title').contains('foo')
-        cy.get('.command-message-text').contains('expected foo to equal foo')
-        cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/foo.spec.js')
-      })
+      cy.get('[data-cy="specs-list"]').get('span').contains('foo.spec.js').click()
+      cy.get('[data-cy="runnable-foo"]').contains('foo')
+      cy.get('.command-message-text').contains('expected foo to equal foo')
+      cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/foo.spec.js')
 
-      cy.get('[data-cy="specs-list"]').get('span').contains('bar.spec.js').click().then(() => {
-        cy.get('.runnable-title').contains('bar')
-        cy.get('.command-message-text').contains('expected bar to equal bar')
-        cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/bar.spec.js')
-      })
+      // change to a different spec, bar.spec.js, and verify it was correctly executed.
+      cy.get('[data-cy="specs-list"]').get('span').contains('bar.spec.js').click()
+      cy.get('[data-cy="runnable-bar"]').contains('bar')
+      cy.get('.command-message-text').contains('expected bar to equal bar')
+      cy.get('[data-cy="selected-spec"]').should('have.attr', 'title', 'cypress/integration/inline-spec-list/bar.spec.js')
     })
   })
 })
