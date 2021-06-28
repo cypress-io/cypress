@@ -1,34 +1,28 @@
+// @ts-nocheck
 /**
  * Reporter store structure
  1. Command Log
  2. Stats + Timing
  */
 
+import { defineStore } from 'pinia'
 import _, { Dictionary } from 'lodash'
 import { EventEmitter } from 'events'
 import { useRafFn, Fn, Pausable } from '../composables/core/index'
 import { RunnableState } from '../types'
-import { computed, ref, Ref, ComputedRef, watch } from 'vue'
-
-const stores: Record<string, any> = { stats: null }
+import { computed, ref, Ref, ComputedRef, watch, toRefs, reactive } from 'vue'
 
 type RunnableType = 'suite' | 'test'
 type RawSuite = any
 type RawTest = any
-
-interface StatsStore {
-  start: () => Pausable,
-  pause: Pausable["pause"],
-  resume: Pausable["resume"],
-  stop: Pausable["pause"]
-}
+export type TestsByState = ComputedRef<Dictionary<(Test | Suite)[]>>
 
 interface Runnables {
   nested: (Test | Suite)[],
   flat: Record<string, Test | Suite>,
   tests: Test[]
   suites: Suite[]
-  testsByState: ComputedRef<Dictionary<(Test | Suite)[]>>
+  testsByState: TestsByState,
   stats: ComputedRef<Dictionary<RunnableState>[]>
   getTest: (id: string) => Test | Suite
   getHook: (id: string) => any
@@ -52,7 +46,7 @@ export function Runnables(rootRunnable: RawSuite): Runnables {
   return {
     nested,
     flat,
-    tests: test,
+    tests: computed(() => test),
     suites: suite, // TS error, why?
     testsByState,
     getTest,
@@ -69,67 +63,118 @@ export function Runnables(rootRunnable: RawSuite): Runnables {
   }
 }
 
-export function useReporterStore(bus = new EventEmitter(), appState: any): ReporterStore {
-  if (stores.reporter) return stores.reporter
-  let runnables: Runnables | Record<any, any> = {}
-  const runState = ref('')
-  const statsStore = useStatsStore()
+// @ts-ignore
+export const useStatsStore = defineStore({
+  id: 'stats',
+  state() {
+    return {
+      startTime: 0,
+      currentTime: 0,
+      pauseable: {
+        pause() {},
+        resume(){},
+      }
+    }
+  },
+  actions: {
+    start() {
+      this.startTime = Date.now()
+      this.currentTime = Date.now()
 
-  function init() {
-    runnables = {}
-    runState.value = 'ready'
-    statsStore.stop()
+      this.pauseable = useRafFn(() => {
+          this.currentTime = Date.now()
+      })
+    }
+  },
+  getters: {
+    pause: state => state.pauseable.pause,
+    resume: state => state.pauseable.resume,
+    stop: (state) => () => {
+      state.pauseable.pause()
+    },
+    duration: state => state.currentTime - state.startTime
   }
+})
 
-  bus.on('reporter:start', () => {
-    runState.value ='running'
-    statsStore.start()
-  })
+// @ts-ignore
+export const useReporterStore = defineStore({
+  id: 'reporter',
+  state() {
+    return {
+      bus: new EventEmitter(),
+      runState: '',
+      runnables: null,
+      autoScrolling: null,
+      statsStore: useStatsStore()
+    }
+  },
+  actions: {
+    init(bus = new EventEmitter(), appState?: any) {
+      const statsStore = useStatsStore()
+      this.bus = bus
 
-  bus.on('runnables:ready', (rootRunnable) => {
-    runnables = Runnables(rootRunnable)
-  })
+      this.bus.on('reporter:start', () => {
+        this.runState ='running'
+        statsStore.start()
+      })
 
-  bus.on('test:after:run', (props: Test) => {
-    runnables.getTest(props.id).state = props.state
-  })
+      this.bus.on('runnables:ready', (rootRunnable) => {
+        this.runnables = Runnables(rootRunnable)
+      })
 
-  bus.on('test:before:run:async', (props) => {
-    runnables.getTest(props.id).state = 'running'
-  })
+      this.bus.on('test:after:run', (props: Test) => {
+        this.runnables.getTest(props.id).state = props.state
+      })
 
-  bus.on('run:end', () => {
-    runState.value = 'finished'
-    statsStore.stop()
-  })
+      this.bus.on('test:before:run:async', (props) => {
+        this.runnables.getTest(props.id).state = 'running'
+      })
 
-  bus.on('paused', () => {
-    runState.value = 'paused'
-    statsStore.pause()
-  })
+      this.bus.on('run:end', () => {
+        this.runState = 'finished'
+        statsStore.stop()
+      })
 
-  bus.on('resume', () => {
-    runState.value = 'running'
-    statsStore.resume()
-  })
+      this.bus.on('paused', () => {
+        this.pause()
+      })
 
-  bus.on('reporter:restart:test:run', () => {
-    init()
-    statsStore.stop()
-    bus.emit('reporter:restarted')
-  })
+      this.bus.on('resume', () => {
+        this.runState = 'running'
+        statsStore.resume()
+      })
 
-  bus.on('reporter:log:add', (props) => {
-    runnables.addLog(props)
-  })
+      this.bus.on('reporter:restart:test:run', () => {
+        this.runnables = null
+        this.runState = null
+        this.statsStore.pause()
+        this.bus.emit('reporter:restarted')
+      })
 
-  return {
-    spec: computed(() => appState.spec),
-    bus,
-    runnables,
-    runState
+      this.bus.on('reporter:log:add', (props) => {
+        this.runnables.addLog(props)
+      })
+    },
+    setRunnablesFromRoot(rootRunnable) {
+      this.runnables = Runnables(rootRunnable)
+    },
+    restart() {
+      this.statsStore.stop()
+      this.bus.emit('runner:restart')
+    },
+    pause() {
+      this.runState = 'paused'
+      this.statsStore.pause()
+      this.bus.emit('runner:stop')
+    },
+    resume() {
+      this.runState = 'running'
+      this.statsStore.resume()
+      this.bus.emit('runner:resume')
+    }
   }
-}
+})
+
 
 interface Runnable {
   readonly id: string,
@@ -166,90 +211,6 @@ export class Suite implements Runnable {
   }  
 }
 
-export function useStatsStore(): StatsStore {
-  if (stores.stats) return stores.stats
-
-  const startTime: Ref<number> = ref(0)
-  const currentTime: Ref<number> = ref(0)
-  let pause = () => { }
-  let resume = () => { }
-
-  const start = () => {
-    startTime.value = Date.now()
-    currentTime.value = Date.now()
-
-    const pausable = useRafFn(() => {
-      currentTime.value = Date.now()
-    })
-    pause = pausable.pause
-    resume = pausable.resume
-    return pausable
-  }
-
-  return stores.stats = {
-    start,
-    pause,
-    resume,
-    stop: () => {
-      startTime.value = 0
-      currentTime.value = 0
-    },
-  }
-}
-
-
-
-//       this.bus = bus
-//       this.bus.on('runnables:ready', (rootRunnable) => {
-//         this.setRunnablesFromRoot(rootRunnable)
-//       })
-      
-
-//       this.bus.on('reporter:restart:test:run', () => {
-//         this.$reset()
-//         statsStore.$reset()
-//         this.bus.emit('reporter:restarted')
-//       })
-
-//       this.bus.on('test:set:state', (props, cb) => {
-//         this.runnables[props.id] = props
-        
-//         syncNodeWithTree(test, this.runnablesTree)
-//       })
-
-//       this.bus.on('test:before:run:async', (props) => {
-//         const test = this.runnables[props.id]
-//         test.state = 'running'
-//       })
-
-//       this.bus.on('test:after:run', (props) => {
-//         const test = this.runnables[props.id]
-//         test.state = props.state
-//       })
-
-//       this.bus.on('paused', (nextCommandName: string) => {
-//       })
-
-//     },
-//     setRunnablesFromRoot(rootRunnable) {
-//       const runnablesById = {}
-//       runnablesById[rootRunnable.id] = rootRunnable
-//       this.runnablesTree = createRunnableChildren(rootRunnable, 0, runnablesById)
-//       this.runnables = runnablesById
-//     },
-//     restart() {
-//       this.bus.emit('runner:restart')
-//     }
-//   },
-//   getters: {
-//     spec: state => state.originalValues.spec || {},
-//     ready: state => state.runnables !== null,
-//     specName: state => state.spec.name,
-//     tests: state => _.filter(state.runnables, r => r.type === 'test'),
-//     suites: state => _.filter(state.runnables, r => r.type === 'suite'),
-//   }
-// })
-
 function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[], hooks: Hook[], level: number, runnablesById): (Suite | Test)[] {
   // @ts-ignore
 
@@ -262,10 +223,6 @@ function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[],
 function createRunnableChildren(props: RootRunnable, level: number, runnablesById: Record<string, Test | Suite>) {
   const addParentRunnables = (runnable) => {
     const parentRunnables = runnable.parentRunnables || []
-    
-    // if (!props.root) {
-    //   parentRunnables.unshift(props.id)
-    // }
 
     parentRunnables.unshift(props.id)
     

@@ -1,4 +1,5 @@
 import RunnableDuration from './RunnableDuration.vue'
+import RunnableStat from './RunnableStat.vue'
 import { h } from 'vue'
 import { mount } from '@cypress/vue'
 

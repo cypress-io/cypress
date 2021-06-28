@@ -15,10 +15,10 @@
   <i-mdi-tools class="text-xl inline"></i-mdi-tools>
   Tools
   </h2>
-    <p><strong>Build: </strong>Rollup w/ Vite</p>
-    <p><strong>Framework: </strong>Vue 3</p>
-    <p><strong>CSS:</strong> WindiCSS</p>
-    <p><strong>Icons:</strong> Iconify, currently with the <a href="https://iconify.design/icon-sets/clarity/">Clarity set</a></p>
+    <p><strong>Build: </strong>Rollup w/ <a href="https://vitejs.dev/">Vite</a></p>
+    <p><strong>Framework: </strong><a href="https://v3.vuejs.org/guide/introduction.html#getting-started">Vue 3</a></p>
+    <p><strong>CSS:</strong> <a href="https://windicss.org/">WindiCSS,</a> with a live <a href="https://windicss.org/play.html">Playground</a></p>
+    <p><strong>Icons:</strong> Iconify, currently with the <a href="https://iconify.design/icon-sets/mdi/">Material</a> or <a href="https://iconify.design/icon-sets/fa-solid/">Font Awesome 5</a> set</p>
     
     <h2 class="text-lg font-weight-light hover:text-green-600">
     <i-mdi-flask class="text-xl inline"></i-mdi-flask>
@@ -29,12 +29,6 @@
   </article>
   </main>
 </template>
-
-<script setup lang="ts">
-import IMdiFlask from 'virtual:vite-icons/mdi/flask'
-import IMdiTools from 'virtual:vite-icons/mdi/tools'
-
-</script>
 
 <style scoped lang="scss">
 main {

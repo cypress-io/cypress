@@ -4,6 +4,7 @@ import VTooltip from 'v-tooltip'
 import 'virtual:windi.css'
 import 'virtual:windi-devtools'
 import DebugRenderer from './DebugRenderer.vue'
+import { createPinia } from 'pinia'
 
 const tooltipOptions = {
   themes: {
@@ -36,7 +37,7 @@ Cypress.Commands.add('mount', (component, options = {}) => {
 
   return mount(component, {
     global: {
-      plugins: [[VTooltip, tooltipOptions]],
+      plugins: [createPinia(), [VTooltip, tooltipOptions]],
       ...global,
     },
     ...options,

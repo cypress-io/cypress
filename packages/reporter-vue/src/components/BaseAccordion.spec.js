@@ -1,4 +1,4 @@
-import BaseAccordion from './BaseAccordion'
+import BaseAccordion from './BaseAccordion.vue'
 import { h } from 'vue'
 
 it('renders', () => {
