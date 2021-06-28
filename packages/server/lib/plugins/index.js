@@ -81,13 +81,20 @@ const init = (config, options) => {
 
     const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
+    const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'inherit',
     }
 
-    if (typeof config[config.testingType] === 'function') {
-      childArguments.push('--functionName', config.testingType)
+    const testingType = config.testingType || 'e2e'
+
+    if (typeof config[testingType] === 'function') {
+      childArguments.push(
+        '--functionName', testingType,
+        '--file', options.configFile,
+      )
+    } else {
+      childArguments.push('--file', pluginsFile)
     }
 
     if (config.resolvedNodePath) {

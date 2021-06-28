@@ -187,8 +187,6 @@ module.exports = {
       if ((testingType in json)) {
         if (typeof json[testingType] === 'object') {
           json = { ...json, ...json[testingType] }
-        } else if (typeof json[testingType] === 'function') {
-          json = json[testingType](() => {}, json) || json
         }
       }
 
