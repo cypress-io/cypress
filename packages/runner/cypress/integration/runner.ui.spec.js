@@ -411,7 +411,7 @@ describe('src/cypress/runner', () => {
       runIsolatedCypress(() => {}, {
         config: {
           env: {
-            useInlineSpecList: true,
+            CypressInternal_UseInlineSpecList: true,
           },
         },
         stubOnSpecWindow: false,
