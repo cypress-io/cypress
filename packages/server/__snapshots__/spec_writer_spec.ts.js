@@ -440,3 +440,10 @@ exports['lib/util/spec_writer #createFile creates a new file with templated comm
 // https://on.cypress.io/writing-first-test
 
 `
+
+exports['lib/util/spec_writer #convertCommandsToText converts studio commands to resulting text 1'] = `
+/* ==== Generated with Cypress Studio ==== */
+cy.get('.input').type('typed text');
+cy.get('.btn').click();
+/* ==== End Cypress Studio ==== */
+`
