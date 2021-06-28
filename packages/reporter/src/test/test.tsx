@@ -2,6 +2,7 @@ import { observer } from 'mobx-react'
 import React, { Component, createRef, RefObject, MouseEvent } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
+import cs from 'classnames'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
@@ -18,10 +19,18 @@ interface StudioControlsProps {
   model: TestModel
 }
 
+interface StudioControlsState {
+  copySuccess: boolean
+}
+
 @observer
-class StudioControls extends Component<StudioControlsProps> {
+class StudioControls extends Component<StudioControlsProps, StudioControlsState> {
   static defaultProps = {
     events,
+  }
+
+  state = {
+    copySuccess: false,
   }
 
   _cancel = (e: MouseEvent) => {
@@ -36,12 +45,45 @@ class StudioControls extends Component<StudioControlsProps> {
     this.props.events.emit('studio:save')
   }
 
+  _copy = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:copy:to:clipboard', () => {
+      this.setState({ copySuccess: true })
+    })
+  }
+
+  _endCopySuccess = () => {
+    if (this.state.copySuccess) {
+      this.setState({ copySuccess: false })
+    }
+  }
+
   render () {
     const { studioIsNotEmpty } = this.props.model
+    const { copySuccess } = this.state
 
     return (
       <div className='studio-controls'>
         <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <Tooltip
+          title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
+          className='cy-tooltip'
+          wrapperClassName='studio-copy-wrapper'
+          visible={!studioIsNotEmpty ? false : null}
+          updateCue={copySuccess}
+        >
+          <button
+            className={cs('studio-copy', {
+              'studio-copy-success': copySuccess,
+            })}
+            disabled={!studioIsNotEmpty}
+            onClick={this._copy}
+            onMouseLeave={this._endCopySuccess}
+          >
+            <i className={copySuccess ? 'fas fa-check' : 'far fa-copy'} />
+          </button>
+        </Tooltip>
         <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
       </div>
     )
