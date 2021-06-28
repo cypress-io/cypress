@@ -185,6 +185,14 @@ const isOneOf = (...values) => {
   }
 }
 
+const isOverrideFunction = (key, config) => {
+  if (typeof config === 'function') {
+    return true
+  }
+
+  return isValidConfig(key, config)
+}
+
 module.exports = {
   isValidBrowser,
 
@@ -195,6 +203,8 @@ module.exports = {
   isValidRetriesConfig,
 
   isValidConfig,
+
+  isOverrideFunction,
 
   isPlainObject,
 

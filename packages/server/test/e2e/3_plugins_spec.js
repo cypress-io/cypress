@@ -49,6 +49,17 @@ describe('e2e plugins', function () {
     })
   })
 
+  it('can config plugins directly in the cypress.config.js', function () {
+    return e2e.exec(this, {
+      spec: 'app_spec.js',
+      env: 'foo=foo,bar=bar',
+      config: { pageLoadTimeout: 10000 },
+      project: Fixtures.projectPath('plugin-config-js'),
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+    })
+  })
+
   it('passes version correctly', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('plugin-config-version'),
