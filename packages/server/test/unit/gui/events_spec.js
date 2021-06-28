@@ -8,8 +8,7 @@ const debug = require('debug')('test')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const cache = require(`${root}../lib/cache`)
 const logger = require(`${root}../lib/logger`)
-const { ProjectE2E } = require(`${root}../lib/project-e2e`)
-const { ProjectBase } = require(`${root}../lib/project-base`)
+const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
@@ -484,8 +483,8 @@ describe('lib/gui/events', () => {
 
       it('works even after project is opened (issue #227)', function () {
         sinon.stub(open, 'opn').resolves('okay')
-        sinon.stub(ProjectE2E.prototype, 'open').resolves()
-        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
+        sinon.stub(ProjectBase.prototype, 'open').resolves()
+        sinon.stub(ProjectBase.prototype, 'getConfig').resolves({ some: 'config' })
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
@@ -652,10 +651,10 @@ describe('lib/gui/events', () => {
         sinon.stub(browsers, 'getAllBrowsersWith')
         browsers.getAllBrowsersWith.resolves([])
         browsers.getAllBrowsersWith.withArgs('/usr/bin/baz-browser').resolves([{ foo: 'bar' }])
-        this.open = sinon.stub(ProjectE2E.prototype, 'open').resolves()
-        sinon.stub(ProjectE2E.prototype, 'close').resolves()
+        this.open = sinon.stub(ProjectBase.prototype, 'open').resolves()
+        sinon.stub(ProjectBase.prototype, 'close').resolves()
 
-        return sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
+        return sinon.stub(ProjectBase.prototype, 'getConfig').resolves({ some: 'config' })
       })
 
       afterEach(() => {
@@ -798,7 +797,7 @@ describe('lib/gui/events', () => {
 
     describe('close:project', () => {
       beforeEach(() => {
-        return sinon.stub(ProjectE2E.prototype, 'close').withArgs({ sync: true }).resolves()
+        return sinon.stub(ProjectBase.prototype, 'close').withArgs({ sync: true }).resolves()
       })
 
       it('is noop and returns null when no project is open', function () {
@@ -810,8 +809,8 @@ describe('lib/gui/events', () => {
       })
 
       it('closes down open project and returns null', function () {
-        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({})
-        sinon.stub(ProjectE2E.prototype, 'open').resolves()
+        sinon.stub(ProjectBase.prototype, 'getConfig').resolves({})
+        sinon.stub(ProjectBase.prototype, 'open').resolves()
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {

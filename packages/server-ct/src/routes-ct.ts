@@ -7,8 +7,7 @@ import { handle, serve, serveChunk } from '@packages/runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import staticPkg from '@packages/static'
-import { ProjectCt } from './project-ct'
-import { ProjectE2E } from '../../server/lib/project-e2e'
+import { ProjectBase } from '../../server/lib/project-base'
 
 const debug = Debug('cypress:server:routes')
 
@@ -16,7 +15,7 @@ export interface InitializeRoutes {
   app: Express
   specsStore: SpecsStore
   config: Record<string, any>
-  project: ProjectCt | ProjectE2E
+  project: ProjectBase<any>
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
   getRemoteState: () => any
@@ -83,7 +82,7 @@ export const createRoutes = ({
 
     serve(req, res, {
       config,
-      project: project as ProjectCt,
+      project,
       specsStore,
     })
   })
