@@ -1,6 +1,5 @@
 import { action, computed, observable } from 'mobx'
 import { automation, BaseStore } from '@packages/runner-shared'
-import { USE_INLINE_SPEC_LIST } from '../app/app'
 
 const _defaults = {
   messageTitle: null,
@@ -57,13 +56,15 @@ export default class State extends BaseStore {
   @observable windowHeight = 0
 
   @observable automation = automation.CONNECTING
+  @observable useInlineSpecList = false
 
   @observable.ref scriptError = null
 
-  constructor ({ reporterWidth, specListWidth, specs }) {
+  constructor ({ reporterWidth, specListWidth, specs, useInlineSpecList }) {
     super()
     this.reporterWidth = reporterWidth || _defaults.reporterWidth
-    this.specListWidth = USE_INLINE_SPEC_LIST ? specListWidth : 0
+    this.specListWidth = useInlineSpecList ? specListWidth : 0
+    this.useInlineSpecList = useInlineSpecList || false
     this.specs = specs || _defaults.specs
   }
 

@@ -3,7 +3,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 
-import App, { SPEC_LIST_WIDTH, USE_INLINE_SPEC_LIST } from './app/app'
+import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
 import State from './lib/state'
 import { Container, eventManager } from '@packages/runner-shared'
@@ -17,11 +17,13 @@ const Runner = {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
+      const useInlineSpecList = (config.env || {}).useInlineSpecList
 
       const state = new State({
         reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
         specs: config.specs,
-        specListWidth: NO_COMMAND_LOG ? 0 : USE_INLINE_SPEC_LIST ? SPEC_LIST_WIDTH : 0,
+        useInlineSpecList,
+        specListWidth: NO_COMMAND_LOG ? 0 : useInlineSpecList ? SPEC_LIST_WIDTH : 0,
       })
 
       Runner.state = state

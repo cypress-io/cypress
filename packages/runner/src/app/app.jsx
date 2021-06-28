@@ -24,8 +24,6 @@ import Resizer from './resizer'
  * This is a feature flag. If true, all the integration specs
  * will be rendered inline to the left of te command log, similar to the component testing runner.
  */
-export const USE_INLINE_SPEC_LIST = false
-
 // If you change this, make sure to update it in app.scss, too.
 export const SPEC_LIST_WIDTH = 250
 
@@ -51,7 +49,7 @@ class App extends Component {
         'is-reporter-sized': this.props.state.reporterWidth != null,
       })}>
         {Boolean(NO_COMMAND_LOG) || (
-          Boolean(USE_INLINE_SPEC_LIST) &&
+          Boolean(this.props.state.useInlineSpecList) &&
             <>
               <div
                 className='spec-list-wrap'
