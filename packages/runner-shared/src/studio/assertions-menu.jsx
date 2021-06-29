@@ -13,7 +13,7 @@ const renderAssertionsMenu = (container, props) => {
   render(<AssertionsMenu {...props} />, container)
 }
 
-export default {
+export const studioAssertionsMenu = {
   render: renderAssertionsMenu,
   unmount: unmountComponentAtNode,
 }
