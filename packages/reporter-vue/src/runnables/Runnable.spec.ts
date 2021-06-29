@@ -1,7 +1,7 @@
 import { h } from 'vue'
-import RunnableSuites from './RunnableSuite.vue'
+import Runnable from './Runnable.vue'
 import faker from 'faker'
-import { Suite } from '../store/reporter-store'
+import { Suite, Test } from '../store/reporter-store'
 import _ from 'lodash'
 
 const makeSuite = (tests) => new Suite({
@@ -13,34 +13,56 @@ const makeSuite = (tests) => new Suite({
   children: tests || []
 })
 
+const makeTest = state => new Test({
+  id: faker.datatype.uuid(),
+  title: faker.git.commitMessage(),
+  level: 0,
+  state
+})
+
 // @ts-ignore
 const mountWithProps = (props = {}) => {
-  return cy.mount(RunnableSuites, {
+  return cy.mount(Runnable, {
     slots: {
       title() {
-        return h('span', props.suite.title)
+        return h('span', props.runnable.title)
       },
       default() {
         return h('span', 'inner content')
       }
     },
     props: {
-      suite: makeSuite([]),
+      runnable: makeSuite([]),
       ...props
     }
   })
 }
+
 describe('Runnable Suite suite states', () => {
   it('renders a failing suite', () => {
-    mountWithProps({ suite: makeSuite([{ state: 'failing' }]) })
+    mountWithProps({ runnable: makeSuite([{ state: 'failed' }]) })
   })
 
   it('renders a passing suite', () => {
-    mountWithProps({ suite: makeSuite([{ state: 'passed' }]) })
+    mountWithProps({ runnable: makeSuite([{ state: 'passed' }]) })
   })
 
   it('renders a pending suite', () => {
-    mountWithProps({ suite: makeSuite([{ state: 'pending' }]) })
+    mountWithProps({ runnable: makeSuite([{ state: 'pending' }]) })
+  })
+})
+
+describe('Runnable Test test states', () => {
+  it('renders a failing test', () => {
+    mountWithProps({ runnable: makeTest('failed') })
+  })
+
+  it('renders a passing test', () => {
+    mountWithProps({ runnable: makeTest('passed') })
+  })
+
+  it('renders a pending test', () => {
+    mountWithProps({ runnable: makeTest('pending') })
   })
 })
 

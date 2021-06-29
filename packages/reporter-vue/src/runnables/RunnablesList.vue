@@ -1,27 +1,27 @@
 <template>
   <ul :class="`${root && 'root-suite'} block font-sm text-gray-800`">
     <li v-for="runnable in runnables" :key="runnable.id">
-      <div v-if="runnable.type === 'suite'" class="suite-wrapper">
-        <RunnableSuite :suite="runnable">
+      <div>
+        <Runnable :runnable="runnable">
           <template #title>
-            <div class="test bg-orange-50 hover:bg-orange-200"><strong>Suite:</strong> {{ runnable.title }}</div>
+            <!-- <div class="test bg-orange-50 hover:bg-orange-200"><strong>Suite:</strong> {{ runnable.title }}</div> -->
           </template>
           <RunnablesList :runnables="runnable.children"></RunnablesList>
-        </RunnableSuite>
+        </Runnable>
       </div>
-      <RunnableTest v-else class="test-wrapper" :test="runnable" style="height: 100%;">
+      <!-- <RunnableTest v-else class="test-wrapper" :test="runnable" style="height: 100%;">
         <template #title>
           {{ runnable.state }}<strong>Test:</strong> {{ runnable.title }}
         </template>
-      </RunnableTest>
+      </RunnableTest> -->
     </li>
   </ul>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import RunnableSuite from './RunnableSuite.vue'
-import RunnableTest from './RunnableTest.vue';
+import Runnable from './Runnable.vue'
+// import RunnableTest from './RunnableTest.vue';
 
 export default defineComponent({
     name: "runnables-list",
@@ -36,7 +36,7 @@ export default defineComponent({
             })
         };
     },
-    components: { RunnableSuite, RunnableTest }
+    components: { Runnable }
 })
 </script>
 
