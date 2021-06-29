@@ -1,4 +1,3 @@
-import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
@@ -123,9 +122,13 @@ export class StudioInitModal extends Component {
 
 @observer
 export class StudioSaveModal extends Component {
-  @observable name = ''
+  state = {
+    name: '',
+  }
 
   render () {
+    const { name } = this.state
+
     return (
       <Dialog
         className='studio-modal studio-save-modal'
@@ -143,10 +146,10 @@ export class StudioSaveModal extends Component {
             <form onSubmit={this._save}>
               <div className='text'>
                 <label className='text-strong' htmlFor='testName'>Test Name</label>
-                <input id='testName' type='text' value={this.name} required={true} onChange={this._onInputChange} />
+                <input id='testName' type='text' value={name} required={true} onChange={this._onInputChange} />
               </div>
               <div className='center'>
-                <button className='btn-main' type='submit' disabled={!this.name}>
+                <button className='btn-main' type='submit' disabled={!name}>
                   Save Test
                 </button>
               </div>
@@ -163,17 +166,18 @@ export class StudioSaveModal extends Component {
     )
   }
 
-  @action
   _onInputChange = (e) => {
-    this.name = e.target.value
+    this.setState({ name: e.target.value })
   }
 
   _save = (e) => {
     e.preventDefault()
 
-    if (!this.name) return
+    const { name } = this.state
 
-    studioRecorder.save(this.name)
+    if (!name) return
+
+    studioRecorder.save(name)
   }
 }
 
