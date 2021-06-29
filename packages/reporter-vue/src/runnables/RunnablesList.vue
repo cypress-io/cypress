@@ -1,6 +1,6 @@
 <template>
-  <ul :class="`runnables ${root && 'root-suite'}`" style="height: 100%;">
-    <li v-for="runnable in runnables" :key="runnable.id" style="height: 100%;">
+  <ul :class="`${root && 'root-suite'} block font-sm text-gray-800`">
+    <li v-for="runnable in runnables" :key="runnable.id">
       <div v-if="runnable.type === 'suite'" class="suite-wrapper">
         <RunnableSuite :suite="runnable">
           <template #title>
@@ -42,12 +42,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .root-suite {
-  display: block;
+  @apply text-size-13px text-warm-gray-800;
   position: relative;
   overflow: hidden;
 }
 
-.suite-wrapper,.test-wrapper {
-  
-}
 </style>

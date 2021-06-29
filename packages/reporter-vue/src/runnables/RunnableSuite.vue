@@ -2,13 +2,12 @@
   <div :class="`runnable-suite-root ${state}-state`">
     <BaseAccordion v-model="open">
       <template #header>
-      
         <div data-cy="title" class="suite-title">
-          <i-mdi-triangle :class="`${open ? 'rotate-180' : 'rotate-90'} transform text-size-6px inline mx-2`" /><strong>Suite:</strong> {{ suite.title }}
+          <i-fa-caret-right :class="`${open && 'rotate-90'} transform text-size-8px inline mx-1 text-warm-gray-400 mb-2px`" />{{ suite.title }}
         </div>
       </template>
       <!-- Inner content of the suite -->
-      <div data-cy="content"><slot name="default"/></div>
+      <div data-cy="content" class="pl-2"><slot name="default"/></div>
     </BaseAccordion>
   </div>
 </template>
@@ -37,19 +36,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-// .foo {
-//   @apply bg-amber-500;
-// }
 .runnable-suite-root {
-  @apply hover:cursor-pointer;
-  padding-left: calc(18px * v-bind(level + 1));
+  @apply hover:cursor-pointer text-size-13px text-warm-gray-600;
+  padding-left: calc(6px * v-bind(level + 1));
   &:before {
     @apply w-4px h-[calc(100%)] block absolute content:"" left-0; 
   }
 }
 
+.suite-title {
+  @apply hover:bg-warm-gray-50;
+}
+
 .passed-state {
-  // @apply before:bg-green-600;
   &:before {
     background: #11c08e;
   }
