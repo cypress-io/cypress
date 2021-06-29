@@ -86,7 +86,7 @@ const init = (config, options) => {
       stdio: 'inherit',
     }
 
-    const testingType = config.testingType || 'e2e'
+    const testingType = options.testingType || 'e2e'
 
     if (typeof config[testingType] === 'function') {
       childArguments.push(

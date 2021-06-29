@@ -174,7 +174,7 @@ module.exports = {
     const file = this.pathToConfigFile(projectRoot, options)
 
     return requireAsync(file)
-    .catch({ code: 'MODULE_NOT_FOUND' }, { code: 'ENOENT' }, () => {
+    .catch({ code: 'ENOENT' }, (e) => {
       if (/\.json$/.test(file)) {
         return this._write(file, {})
       }

@@ -245,7 +245,7 @@ module.exports = {
 
     config.rawJson = _.cloneDeep(config)
 
-    _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
+    _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers', 'testingType'))
     debug('merged config with options, got %o', config)
 
     _
@@ -574,7 +574,7 @@ module.exports = {
   //     - throw an error, because it should be there if the user
   //       explicitly set it
   setPluginsFile: Promise.method((obj) => {
-    if (!obj.pluginsFile) {
+    if (!obj.pluginsFile || typeof obj[obj.testingType] === 'function') {
       return obj
     }
 
