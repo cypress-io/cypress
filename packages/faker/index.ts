@@ -49,7 +49,7 @@ export const rootRunnable = {
   ],
   suites: [
     suiteContents(
-      1, rootId, suite7, [test('running', suite7, 2, 24), test('not-started', suite7, 2, 24)],
+      1, rootId, suite7, [test('processing', suite7, 2, 24), test('not-started', suite7, 2, 24)],
     ),
     suiteContents(
       1, rootId, suite1, [test('passed', suite1, 2, 7)],
