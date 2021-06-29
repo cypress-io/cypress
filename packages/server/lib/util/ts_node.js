@@ -1,7 +1,7 @@
 const debug = require('debug')('cypress:server:ts-node')
 const path = require('path')
 const tsnode = require('ts-node')
-const resolve = require('../../util/resolve')
+const resolve = require('./resolve')
 
 const getTsNodeOptions = (tsPath, pluginsFile) => {
   return {

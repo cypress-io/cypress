@@ -1,6 +1,7 @@
 const { startDevServer } = require('@cypress/webpack-dev-server')
+const webpackConfig = require('./webpack.config')
 
-module.exports = {
+export default {
   viewportWidth: 500,
   viewportHeight: 500,
   video: false,
@@ -12,8 +13,6 @@ module.exports = {
     if (config.testingType !== 'component') {
       throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
     }
-
-    const webpackConfig = require('./webpack.config')
 
     if (!webpackConfig.resolve) {
       webpackConfig.resolve = {}
@@ -29,4 +28,4 @@ module.exports = {
 
     return config
   },
-}
+} as any

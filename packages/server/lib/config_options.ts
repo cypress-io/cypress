@@ -48,7 +48,7 @@ export const options = [
     isFolder: true,
   }, {
     name: 'configFile',
-    defaultValue: 'cypress.config.js',
+    defaultValue: null,
     validation: v.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option

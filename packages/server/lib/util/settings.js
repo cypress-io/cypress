@@ -3,14 +3,16 @@ const Promise = require('bluebird')
 const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
-const { fs } = require('../util/fs')
+const { fs } = require('./fs')
+const tsNodeUtil = require('./ts_node')
+
+let tsRegistered = false
 
 // TODO:
 // think about adding another PSemaphore
 // here since we can read + write the
 // settings at the same time something else
 // is potentially reading it
-
 const flattenCypress = (obj) => {
   return obj.cypress ? obj.cypress : undefined
 }
@@ -112,6 +114,10 @@ module.exports = {
       return options.configFile
     }
 
+    if (ls.includes('cypress.config.ts')) {
+      return 'cypress.config.ts'
+    }
+
     if (ls.includes('cypress.config.js')) {
       return 'cypress.config.js'
     }
@@ -120,7 +126,7 @@ module.exports = {
       return 'cypress.json'
     }
 
-    // Default is to create a new `cypress.json` file if one does not exist.
+    // Default is to create a new `cypress.config.js` file if one does not exist.
     return 'cypress.config.js'
   },
 
@@ -165,9 +171,18 @@ module.exports = {
       return Promise.resolve({})
     }
 
+    if (!tsRegistered) {
+      tsNodeUtil.register(projectRoot, options.configFile)
+
+      // ensure typescript is only registered once
+      tsRegistered = true
+    }
+
     const requireAsync = (fileRequired) => {
       return Promise.try(() => {
-        return require(fileRequired)
+        const exp = require(fileRequired)
+
+        return exp.default || exp
       })
     }
 

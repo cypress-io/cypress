@@ -1044,7 +1044,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // don't cache a project if a non-default configFile is set
     // https://git.io/JeGyF
 
-    if (!['cypress.config.js', 'cypress.json'].includes(settings.configFile(path, options))) {
+    if (!['cypress.config.ts', 'cypress.config.js', 'cypress.json'].includes(settings.configFile(path, options))) {
       return Bluebird.resolve({ path })
     }
 

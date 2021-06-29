@@ -2,6 +2,7 @@ const path = require('path')
 
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
+const { fs } = require(`${root}lib/util/fs`)
 
 const e2eProject = Fixtures.projectPath('e2e')
 
@@ -57,6 +58,22 @@ describe('e2e plugins', function () {
       project: Fixtures.projectPath('plugin-config-js'),
       sanitizeScreenshotDimensions: true,
       snapshot: true,
+    })
+  })
+
+  it('does not create a new pluginsFile if cypress.config.js is properly configured', function () {
+    const jsProjectPath = Fixtures.projectPath('plugin-config-js')
+
+    return e2e.exec(this, {
+      spec: 'app_spec.js',
+      env: 'foo=foo,bar=bar',
+      config: { pageLoadTimeout: 10000 },
+      project: jsProjectPath,
+      sanitizeScreenshotDimensions: true,
+    }).then(() => {
+      return fs.exists(path.join(jsProjectPath, 'cypress/plugins/index.js'))
+    }).then((newPluginsFileExists) => {
+      expect(newPluginsFileExists).to.be.false
     })
   })
 
