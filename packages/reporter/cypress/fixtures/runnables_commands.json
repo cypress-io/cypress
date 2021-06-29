@@ -113,7 +113,8 @@
           "event": true,
           "testId": "r3",
           "timeout": 4000,
-          "type": "parent"
+          "type": "parent",
+          "alias": "dup0"
         },
         {
           "hookId": "r3",
@@ -126,7 +127,8 @@
           "event": true,
           "testId": "r3",
           "timeout": 4000,
-          "type": "parent"
+          "type": "parent",
+          "alias": "dup1"
         },
         {
           "hookId": "r3",

@@ -26,6 +26,17 @@ export interface FileDetails {
   line: number
 }
 
+const printSettings: recast.Options = {
+  quote: 'single',
+  wrapColumn: 360,
+}
+
+const generateCommentText = (comment) => ` ==== ${comment} ==== `
+
+const createdComment = generateCommentText('Test Created with Cypress Studio')
+const extendedStartComment = generateCommentText('Generated with Cypress Studio')
+const extendedEndComment = generateCommentText('End Cypress Studio')
+
 export const generateCypressCommand = (cmd: Command) => {
   const { selector, name, message } = cmd
 
@@ -92,7 +103,7 @@ export const generateTest = (name: string, body: n.BlockStatement) => {
   )
 
   // adding the comment like this also adds a newline before the comment
-  stmt.comments = [b.block(' === Test Created with Cypress Studio === ', true, false)]
+  stmt.comments = [b.block(createdComment, true, false)]
 
   return stmt
 }
@@ -109,15 +120,25 @@ export const addCommentToBody = (body: Array<{}>, comment: string) => {
 }
 
 export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
-  addCommentToBody(body, ' ==== Generated with Cypress Studio ==== ')
+  addCommentToBody(body, extendedStartComment)
 
   commands.forEach((command) => {
     body.push(generateCypressCommand(command))
   })
 
-  addCommentToBody(body, ' ==== End Cypress Studio ==== ')
+  addCommentToBody(body, extendedEndComment)
 
   return body
+}
+
+export const convertCommandsToText = (commands: Command[]) => {
+  const program = b.program([])
+
+  addCommandsToBody(program.body, commands)
+
+  const { code } = recast.print(program, printSettings)
+
+  return code
 }
 
 export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
@@ -246,10 +267,7 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
 
     visit(ast, astRules)
 
-    const { code } = recast.print(ast, {
-      quote: 'single',
-      wrapColumn: 360,
-    })
+    const { code } = recast.print(ast, printSettings)
 
     return fs.writeFile(path, code)
   })
@@ -257,4 +275,24 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
 
 export const createFile = (path: string) => {
   return fs.writeFile(path, newFileTemplate(path))
+}
+
+export const countStudioUsage = (path: string) => {
+  return fs.readFile(path)
+  .then((specBuffer) => {
+    const specContents = specBuffer.toString()
+    const createdRegex = new RegExp(createdComment, 'g')
+    const extendedRegex = new RegExp(extendedStartComment, 'g')
+
+    // TODO: remove when Studio goes GA
+    // earlier versions of studio used this comment to mark a created test
+    // which was later changed to be consistent with other Studio comments
+    const oldCreatedRegex = / === Test Created with Cypress Studio === /g
+    const oldStudioCreated = (specContents.match(oldCreatedRegex) || []).length
+
+    return {
+      studioCreated: (specContents.match(createdRegex) || []).length + oldStudioCreated,
+      studioExtended: (specContents.match(extendedRegex) || []).length,
+    }
+  })
 }

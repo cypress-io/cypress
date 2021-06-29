@@ -7,7 +7,7 @@ import {
   SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
-import { parseJsonBody } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
@@ -24,11 +24,28 @@ type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
 const validEvents = ['before:response', 'response', 'after:response']
 
+const getDisplayUrl = (url: string) => {
+  if (url.startsWith(window.location.origin)) {
+    return url.slice(window.location.origin.length)
+  }
+
+  return url
+}
+
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
   function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
+    const message = _.compact([
+      request.request.method,
+      request.response && request.response.statusCode,
+      getDisplayUrl(request.request.url),
+      request.state,
+    ]).join(' ')
+
+    const displayName = route.handler ? (_.isFunction(route.handler) ? 'req fn' : 'req stub') : 'req'
+
     return Cypress.log({
       name: 'xhr',
-      displayName: 'req',
+      displayName,
       alias: route.alias,
       aliasType: 'route',
       type: 'parent',
@@ -47,7 +64,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       renderProps: () => {
         return {
           indicator: request.state === 'Complete' ? 'successful' : 'pending',
-          message: `${request.request.url} ${request.state}`,
+          message,
         }
       },
     })
@@ -57,7 +74,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const { routeId } = subscription
   const route = getRoute(routeId)
 
-  parseJsonBody(req)
+  const bodyParsed = parseJsonBody(req)
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -102,8 +119,90 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   let resolved = false
   let handlerCompleted = false
 
+  const createQueryObject = () => {
+    try {
+      if (/^(?:[a-z]+:)?\/\//i.test(req.url) === false) {
+        const { protocol, hostname, port } = window.location
+
+        req.url = `${protocol}//${hostname}${port ? `:${port}` : ''}${req.url}`
+      }
+
+      const url = new URL(req.url)
+      const urlSearchParams = new URLSearchParams(url.search)
+      const result = {}
+
+      for (let pair of urlSearchParams.entries()) {
+        result[pair[0]] = pair[1]
+      }
+
+      return result
+    } catch { // avoid when url is "".
+      return {}
+    }
+  }
+
+  const updateUrlParams = (paramsObj) => {
+    const url = new URL(req.url)
+    const urlSearchParams = new URLSearchParams(paramsObj)
+
+    url.search = urlSearchParams.toString()
+    req.url = url.toString()
+  }
+
+  const createQueryProxy = (obj) => {
+    return new Proxy(obj, {
+      set (target, key, value) {
+        target[key] = value
+
+        updateUrlParams(target)
+
+        return true
+      },
+
+      deleteProperty (target, key) {
+        delete target[key]
+
+        updateUrlParams(target)
+
+        return true
+      },
+
+      defineProperty () {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.defineproperty_is_not_allowed')
+
+        return false
+      },
+
+      setPrototypeOf () {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.setprototypeof_is_not_allowed')
+
+        return false
+      },
+    })
+  }
+
+  let queryObj = createQueryObject()
+  let queryProxy = createQueryProxy(queryObj)
+
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
+    get query () {
+      return queryProxy
+    },
+    set query (userQuery) {
+      updateUrlParams(userQuery)
+      queryProxy = createQueryProxy(userQuery)
+    },
+    get url () {
+      return req.url
+    },
+    set url (userUrl) {
+      req.url = userUrl
+
+      // reset query variables
+      queryObj = createQueryObject()
+      queryProxy = createQueryProxy(queryObj)
+    },
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
@@ -222,8 +321,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     updateRequest(req)
 
-    if (_.isObject(req.body)) {
-      req.body = JSON.stringify(req.body)
+    if (bodyParsed) {
+      stringifyJsonBody(req)
     }
 
     resolve({

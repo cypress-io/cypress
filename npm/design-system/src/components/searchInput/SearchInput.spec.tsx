@@ -3,6 +3,7 @@ import { mount } from '@cypress/react'
 
 import { SearchInput } from './SearchInput'
 import { useCallback, useState } from 'react'
+import { mountAndSnapshot } from 'util/testing'
 
 describe('SearchInput', () => {
   const StatefulWrapper: React.FC<{onInput?: (input: string) => void}> = ({ onInput }) => {
@@ -18,7 +19,7 @@ describe('SearchInput', () => {
   }
 
   it('should render', () => {
-    mount(<SearchInput placeholder="foo" value="" aria-label="Search" onInput={() => {}} />)
+    mountAndSnapshot(<SearchInput placeholder="foo" value="" aria-label="Search" onInput={() => {}} />)
     cy.get('input').should('exist')
   })
 
@@ -47,6 +48,8 @@ describe('SearchInput', () => {
       cy.get('input').type('some input')
 
       cy.get('[aria-label="Clear search"]').should('exist')
+
+      cy.percySnapshot()
     })
 
     it('should clear input on click', () => {

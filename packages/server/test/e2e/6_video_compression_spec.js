@@ -38,6 +38,8 @@ describe('e2e video compression', () => {
     false,
   ].forEach((headed) => {
     e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
+      // videos are corrupted in firefox due to known issues
+      browser: '!firefox',
       spec: 'video_compression_spec.js',
       snapshot: false,
       headed,

@@ -10,8 +10,8 @@ export class SocketCt extends SocketBase {
   constructor (config: Record<string, any>) {
     super(config)
 
-    devServer.emitter.on('dev-server:compile:error', (error) => {
-      this.toRunner('dev-server:hmr:error', error === null ? null : { error })
+    devServer.emitter.on('dev-server:compile:error', (error: string | undefined) => {
+      this.toRunner('dev-server:hmr:error', error)
     })
 
     // should we use this option at all for component testing 😕?
@@ -32,9 +32,5 @@ export class SocketCt extends SocketBase {
         debug('do onSocketConnection')
       },
     })
-  }
-
-  sendSpecList (specs) {
-    this.toRunner('component:specs:changed', specs)
   }
 }

@@ -8,7 +8,6 @@ const fs = require('../lib/fs')
 const {
   version,
   description,
-  author,
   homepage,
   license,
   bugs,
@@ -31,7 +30,6 @@ function preparePackageForNpmRelease (json) {
   _.extend(json, {
     version,
     description,
-    author,
     homepage,
     license,
     bugs,

@@ -1,27 +1,27 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
+import { Message, namedObserver, eventManager as EventManager, Header } from '@packages/runner-shared'
 
-import Header from '../header/header'
-import Iframes from '../iframe/iframes'
-import { debounce } from '../lib/debounce'
-import { Message } from '../message/message'
+import { Iframes } from '../iframe/iframes'
+import { animationFrameDebounce } from '../lib/debounce'
 import { KeyboardHelper } from './KeyboardHelper'
 import { NoSpec } from './NoSpec'
 import { Plugins } from './Plugins'
 import { ReporterContainer } from './ReporterContainer'
 import { PLUGIN_BAR_HEIGHT } from './RunnerCt'
 import State from '../lib/state'
-import EventManager from '../lib/event-manager'
 import { hideIfScreenshotting, hideReporterIfNecessary } from '../lib/hideGuard'
 
 import styles from './RunnerCt.module.scss'
-import { namedObserver } from '../lib/mobx'
 
 interface SpecContentProps {
   state: State
   eventManager: typeof EventManager
-  config: Cypress.RuntimeConfigOptions
+  config: {
+    configFile: string
+    [key: string]: unknown
+  }
 }
 
 interface SpecContentWrapperProps {
@@ -50,7 +50,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
             ? props.state.pluginsHeight
           // show the small not resize-able panel with buttons or nothing
             : props.state.isAnyPluginToShow ? PLUGIN_BAR_HEIGHT : 0)}
-        onChange={debounce(updatePluginsHeight)}
+        onChange={animationFrameDebounce(updatePluginsHeight)}
       >
         <div className={cs(
           'runner',
@@ -62,7 +62,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
           },
         )}
         >
-          <Header {...props} />
+          <Header {...props} runner='ct' />
           {props.state.spec
             ? <Iframes {...props} />
             : (
@@ -70,7 +70,19 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
                 <KeyboardHelper />
               </NoSpec>
             )}
-          <Message state={props.state} />
+          <Message
+            state={{
+              messageTitle: props.state.messageTitle,
+              messageControls: props.state.messageControls,
+              messageDescription: props.state.messageDescription,
+              messageType: props.state.messageType,
+              messageStyles: {
+                state: props.state.messageStyles.state,
+                styles: props.state.messageStyles.styles,
+                messageType: props.state.messageType,
+              },
+            }}
+          />
         </div>
         <Plugins
           key="plugins"
@@ -95,7 +107,7 @@ const SpecContentWrapper = namedObserver('SpecContentWrapper', (props: React.Pro
         maxSize={hideReporterIfNecessary(props.state, () => 600)}
         defaultSize={hideReporterIfNecessary(props.state, () => props.state.reporterWidth)}
         className='primary'
-        onChange={debounce(updateReporterWidth)}
+        onChange={animationFrameDebounce(updateReporterWidth)}
       >
         {props.children}
       </SplitPane>

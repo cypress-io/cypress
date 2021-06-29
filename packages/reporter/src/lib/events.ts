@@ -152,6 +152,8 @@ const events: Events = {
     }))
 
     localBus.on('next', action('next', () => {
+      appState.resume()
+      statsStore.resume()
       runner.emit('runner:next')
     }))
 
@@ -237,6 +239,10 @@ const events: Events = {
 
     localBus.on('studio:save', () => {
       runner.emit('studio:save')
+    })
+
+    localBus.on('studio:copy:to:clipboard', (cb) => {
+      runner.emit('studio:copy:to:clipboard', cb)
     })
   },
 

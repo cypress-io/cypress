@@ -13,6 +13,8 @@ export type FixtureOpts = {
 
 export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
 
+export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
+
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
   'body', // doesn't exist on the OG message, but will be attached by the backend
@@ -31,7 +33,7 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
   'throttleKbps',
 )
 
-export const PLAIN_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['https', 'port', 'middleware']
+export const PLAIN_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['https', 'port', 'middleware', 'times']
 
 export const DICT_STRING_MATCHER_FIELDS: (keyof RouteMatcherOptionsGeneric<any>)[] = ['headers', 'query']
 
@@ -68,9 +70,9 @@ export declare namespace NetEvent {
   }
 
   export namespace ToServer {
-    export interface AddRoute {
+    export interface AddRoute<StaticResponse> {
       routeMatcher: AnnotatedRouteMatcherOptions
-      staticResponse?: BackendStaticResponse
+      staticResponse?: StaticResponse
       hasInterceptor: boolean
       routeId: string
     }

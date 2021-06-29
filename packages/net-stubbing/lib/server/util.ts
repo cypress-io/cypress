@@ -104,6 +104,28 @@ export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMes
     }
   }
 
+  // https://github.com/cypress-io/cypress/issues/15050
+  // Check if res.headers has a custom header.
+  // If so, set access-control-expose-headers to '*'.
+  const hasCustomHeader = Object.keys(res.headers).some((header) => {
+    // The list of header items that can be accessed from cors request
+    // without access-control-expose-headers
+    // @see https://stackoverflow.com/a/37931084/1038927
+    return ![
+      'cache-control',
+      'content-language',
+      'content-type',
+      'expires',
+      'last-modified',
+      'pragma',
+    ].includes(header.toLowerCase())
+  })
+
+  // We should not override the user's access-control-expose-headers setting.
+  if (hasCustomHeader && !res.headers['access-control-expose-headers']) {
+    setDefaultHeader('access-control-expose-headers', _.constant('*'))
+  }
+
   setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(req.headers, 'origin') || '*')
   setDefaultHeader('access-control-allow-credentials', _.constant('true'))
 }
@@ -210,6 +232,19 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
   }
 }
 
+export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
+  // lodash merge converts Buffer into Array (by design)
+  // https://github.com/lodash/lodash/issues/2964
+  // @see https://github.com/cypress-io/cypress/issues/15898
+  _.mergeWith(before, after, (_a, b) => {
+    if (b instanceof Buffer) {
+      return b
+    }
+
+    return undefined
+  })
+}
+
 type BodyEncoding = 'utf8' | 'binary' | null
 
 export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncoding {
@@ -219,7 +254,8 @@ export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncod
 
   // a simple heuristic for detecting UTF8 encoded requests
   if (req.headers && req.headers['content-type']) {
-    const contentType = req.headers['content-type'].toLowerCase()
+    const contentTypeHeader = req.headers['content-type'] as string
+    const contentType = contentTypeHeader.toLowerCase()
 
     if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
       return 'utf8'

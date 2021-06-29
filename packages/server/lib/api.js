@@ -366,6 +366,7 @@ module.exports = {
           'video',
           'screenshots',
           'reporterStats',
+          'metadata',
         ]),
       })
       .catch(RequestErrors.StatusCodeError, formatResponseBody)
@@ -455,30 +456,6 @@ module.exports = {
     })
     .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
-  },
-
-  _projectToken (method, projectId, authToken) {
-    return rp({
-      method,
-      url: apiRoutes.projectToken(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '2',
-      },
-    })
-    .get('apiToken')
-    .catch(tagError)
-  },
-
-  getProjectToken (projectId, authToken) {
-    return this._projectToken('get', projectId, authToken)
-  },
-
-  updateProjectToken (projectId, authToken) {
-    return this._projectToken('put', projectId, authToken)
   },
 
   getReleaseNotes (version) {

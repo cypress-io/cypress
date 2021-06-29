@@ -464,8 +464,8 @@ namespace CypressContainsTests {
   cy.contains('#app')
   cy.contains('my text to find')
   cy.contains('#app', 'my text to find')
-  cy.contains('#app', 'my text to find', {log: false, timeout: 100})
-  cy.contains('my text to find', {log: false, timeout: 100})
+  cy.contains('#app', 'my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
+  cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
 }
 
 // https://github.com/cypress-io/cypress/pull/5574
@@ -592,17 +592,19 @@ namespace CypressTestConfigOverridesTests {
     browser: [{name: 'firefox'}, {name: 'chrome'}]
   }, () => {})
   it('test', {
-    browser: 'firefox'
+    browser: 'firefox',
+    keystrokeDelay: 0
   }, () => {})
   it('test', {
-    browser: {foo: 'bar'} // $ExpectError
+    browser: {foo: 'bar'}, // $ExpectError
   }, () => {})
-
   it('test', {
-    retries: null
+    retries: null,
+    keystrokeDelay: 0
   }, () => { })
   it('test', {
-    retries: 3
+    retries: 3,
+    keystrokeDelay: false, // $ExpectError
   }, () => { })
   it('test', {
     retries: {
@@ -631,14 +633,16 @@ namespace CypressTestConfigOverridesTests {
   // set config on a per-suite basis
   describe('suite', {
     browser: {family: 'firefox'},
-    baseUrl: 'www.example.com'
+    baseUrl: 'www.example.com',
+    keystrokeDelay: 0
   }, () => {})
 
   context('suite', {}, () => {})
 
   describe('suite', {
     browser: {family: 'firefox'},
-    baseUrl: 'www.example.com'
+    baseUrl: 'www.example.com',
+    keystrokeDelay: false // $ExpectError
     foo: 'foo' // $ExpectError
   }, () => {})
 
@@ -670,5 +674,20 @@ namespace CypressTaskTests {
   cy.task('foo') // $ExpectType Chainable<unknown>
   cy.task('foo').then((val) => {
     val // $ExpectType unknown
+  })
+}
+
+namespace CypressKeyboardTests {
+  Cypress.Keyboard.defaults({
+    keystrokeDelay: 0
+  })
+  Cypress.Keyboard.defaults({
+    keystrokeDelay: 500
+  })
+  Cypress.Keyboard.defaults({
+    keystrokeDelay: false // $ExpectError
+  })
+  Cypress.Keyboard.defaults({
+    delay: 500 // $ExpectError
   })
 }

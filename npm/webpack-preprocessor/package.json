@@ -5,15 +5,13 @@
   "private": false,
   "main": "dist",
   "scripts": {
-    "ban": "ban",
     "build": "shx rm -rf dist && tsc",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
-    "license": "license-checker --production --onlyunknown --csv",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
-    "test": "yarn test-unit && yarn test-e2e",
+    "test": "node ./test-webpack-4-5.js",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
@@ -31,14 +29,13 @@
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.8.3",
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
-    "@types/webpack": "4.41.12",
+    "@types/webpack": "^4.41.12",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-loader": "^8.0.2",
-    "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
     "chalk": "3.0.0",
-    "chokidar-cli": "1.2.0",
+    "chokidar-cli": "2.1.0",
     "cypress": "0.0.0-development",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
@@ -49,10 +46,8 @@
     "fast-glob": "3.1.1",
     "find-webpack": "1.5.0",
     "fs-extra": "8.1.0",
-    "license-checker": "13.0.3",
     "mocha": "^7.1.0",
     "mockery": "2.1.0",
-    "prettier-eslint-cli": "4.4.0",
     "proxyquire": "2.1.3",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -62,15 +57,14 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "start-server-and-test": "1.10.11",
     "ts-node": "8.10.1",
-    "webpack": "^4.18.1"
+    "webpack": "^4.41.12"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.2",
-    "webpack": "^4.18.1"
+    "webpack": "^4 || ^5"
   },
   "files": [
     "dist"
@@ -82,7 +76,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme",
-  "author": "Chris Breiding <chris@cypress.io>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",
