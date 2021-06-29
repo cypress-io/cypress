@@ -13,7 +13,13 @@ describe('studio ui', () => {
     .then(() => {
       cy.get('.reporter').find('.test').first().find('.runnable-controls-studio').click()
 
-      cy.get('.studio-modal').should('be.visible')
+      cy.get('.studio-init-modal').should('be.visible')
+
+      // assert image is visible for percy snapshot
+      cy.get('.studio-init-modal').find('.gif').find('img').should('be.visible')
+      .then(($img) => {
+        cy.wrap($img[0].naturalWidth).should('be.greaterThan', 0)
+      })
 
       cy.percySnapshot()
     })
