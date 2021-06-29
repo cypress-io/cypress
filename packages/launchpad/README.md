@@ -1,6 +1,6 @@
-# Springboard
+# Launchpad
 
-Springboard is next-gen react application that is rendered by Electron. This acts as the visual user interface you see when running: `cypress open`.
+Launchpad is next-gen react application that is rendered by Electron. This acts as the visual user interface you see when running: `cypress open`.
 
 It replaces the original electron app, `desktop-gui`.
 
@@ -15,21 +15,21 @@ It replaces the original electron app, `desktop-gui`.
 
 ```bash
 ## from repo root
-yarn workspace @packages/springboard build
+yarn workspace @packages/launchpad build
 ```
 
 ## Developing
 
 ```bash
 ## from repo root
-yarn workspace @packages/springboard dev
+yarn workspace @packages/launchpad dev
 ```
 
 You probably want to start webpack in watch mode, too:
 
 ```bash
 ## from repo root
-yarn workspace @packages/springboard watch
+yarn workspace @packages/launchpad watch
 ```
 
 ## Testing
@@ -42,12 +42,12 @@ E2E tests:
 
 ```bash
 ## from repo root
-yarn workspace @packages/springboard cypress:open
+yarn workspace @packages/launchpad cypress:open
 ```
 
 Component Tests:
 
 ```bash
 ## from repo root
-yarn workspace @packages/springboard cypress:open:ct
+yarn workspace @packages/launchpad cypress:open:ct
 ```
