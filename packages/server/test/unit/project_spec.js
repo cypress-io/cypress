@@ -55,7 +55,7 @@ describe('lib/project-base', () => {
   })
 
   afterEach(function () {
-    // Fixtures.remove()
+    Fixtures.remove()
 
     if (this.project) {
       this.project.close()
