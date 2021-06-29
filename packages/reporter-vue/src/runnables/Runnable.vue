@@ -2,8 +2,8 @@
   <div :class="`runnable-root ${state}-state`">
     <BaseAccordion v-model="open">
       <template #header>
-        <div data-cy="title" :class="`runnable-title-wrapper ${runnable.type}-title hover:bg-warm-gray-50`">
-          <div class="transform runnable-title">
+        <div data-cy="title" :class="`runnable-title-wrapper hover:bg-warm-gray-50`">
+          <div :class="`transform runnable-title ${runnable.type}-title`">
           <i-fa-caret-right v-if="type === 'suite'" :class="`${open && 'rotate-90'} transform text-warm-gray-400`" />
           <template v-else>
             <i-fa-solid-times v-if="state ==='failed'"/>
@@ -68,6 +68,10 @@ $pending: #a7c8e6;
 .runnable-title {
   padding: 0.4rem;
   transform: translateX(calc(18px * v-bind(level)));
+}
+
+.suite-title {
+  @apply text-size-13px text-warm-gray-900;
 }
 
 .passed-state {
