@@ -12,6 +12,11 @@ import runEvents from './plugins/run_events'
 
 const debug = Debug('cypress:server:open_project')
 
+interface Specs {
+  component: Cypress.Cypress['spec'][]
+  integration: Cypress.Cypress['spec'][]
+}
+
 class OpenProject {
   openProject: ProjectBase<any> | undefined
   relaunchBrowser: (() => void) | undefined
@@ -223,14 +228,14 @@ class OpenProject {
   }
 
   getSpecChanges (options: any = {}) {
-    let currentSpecs: Cypress.Cypress['spec'][]
+    let currentSpecs: Specs
 
     _.defaults(options, {
       onChange: () => { },
       onError: () => { },
     })
 
-    const sendIfChanged = (specs: Cypress.Cypress['spec'][] = []) => {
+    const sendIfChanged = (specs: Specs = { component: [], integration: [] }) => {
       // dont do anything if the specs haven't changed
       if (_.isEqual(specs, currentSpecs)) {
         return
@@ -241,7 +246,7 @@ class OpenProject {
       return options.onChange(specs)
     }
 
-    const get = (): Bluebird<Cypress.Cypress['spec'][]> => {
+    const get = (): Bluebird<Specs> => {
       return this.openProject!.getConfig()
       .then((cfg) => {
         createSpecsWatcher(cfg)
