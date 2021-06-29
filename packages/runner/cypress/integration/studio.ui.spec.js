@@ -19,9 +19,10 @@ describe('studio ui', () => {
       cy.get('.studio-init-modal').find('.gif').find('img').should('be.visible')
       .then(($img) => {
         cy.wrap($img[0].naturalWidth).should('be.greaterThan', 0)
+        .then(() => {
+          cy.percySnapshot()
+        })
       })
-
-      cy.percySnapshot()
     })
   })
 
