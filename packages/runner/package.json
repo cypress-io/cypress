@@ -20,6 +20,7 @@
     "fs-extra": "8.1.0"
   },
   "devDependencies": {
+    "@cypress/design-system": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fontsource/mulish": "4.3.0",

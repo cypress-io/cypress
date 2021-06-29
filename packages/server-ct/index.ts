@@ -6,8 +6,6 @@ import human from 'human-interval'
 import _ from 'lodash'
 import Debug from 'debug'
 
-export * from './src/project-ct'
-
 export * from './src/server-ct'
 
 export * from './src/socket-ct'

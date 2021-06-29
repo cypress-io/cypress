@@ -1,13 +1,14 @@
 import Debug from 'debug'
 import _ from 'lodash'
 import send from 'send'
-import { Cfg, ProjectCt } from './project-ct'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
+import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
+import { ServerCt } from '../../server-ct'
 
 interface ServeOptions {
   config: Cfg
-  project: ProjectCt
+  project: ProjectBase<ServerCt>
   specsStore: SpecsStore
 }
 

@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const cypressEx = require('@packages/example')
 const snapshot = require('snap-shot-it')
 const config = require(`${root}lib/config`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const scaffold = require(`${root}lib/scaffold`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
@@ -26,7 +26,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when integrationFolder is empty', function () {
-      const pristine = new ProjectE2E(this.pristinePath)
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
 
       return pristine.getConfig()
       .then((cfg) => {
@@ -37,7 +37,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is false when integrationFolder has been changed', function () {
-      const pristine = new ProjectE2E(this.pristinePath)
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
 
       return pristine.getConfig({ integrationFolder: 'foo' })
       .then((cfg) => {
@@ -51,7 +51,7 @@ describe('lib/scaffold', () => {
       const id = () => {
         const idsPath = Fixtures.projectPath('ids')
 
-        this.ids = new ProjectE2E(idsPath)
+        this.ids = new ProjectBase({ projectRoot: idsPath, projectType: 'e2e' })
 
         return this.ids.getConfig()
         .then((cfg) => {
@@ -66,7 +66,7 @@ describe('lib/scaffold', () => {
       const todo = () => {
         const todosPath = Fixtures.projectPath('todos')
 
-        this.todos = new ProjectE2E(todosPath)
+        this.todos = new ProjectBase({ projectRoot: todosPath, projectType: 'e2e' })
 
         return this.todos.getConfig()
         .then((cfg) => {
@@ -82,7 +82,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when files, name + bytes match to scaffold', function () {
-      const pristine = new ProjectE2E(this.pristinePath)
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
 
       return pristine.getConfig()
       .then((cfg) => {
@@ -95,7 +95,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is false when bytes dont match scaffold', function () {
-      const pristine = new ProjectE2E(this.pristinePath)
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
 
       return pristine.getConfig()
       .then((cfg) => {

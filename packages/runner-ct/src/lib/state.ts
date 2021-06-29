@@ -1,8 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import { UIPlugin } from '../plugins/UIPlugin'
-import { nanoid } from 'nanoid'
-import { automation } from '@packages/runner-shared'
+import { automation, BaseStore, RunMode } from '@packages/runner-shared'
 import {
   DEFAULT_REPORTER_WIDTH,
   LEFT_NAV_WIDTH,
@@ -12,8 +11,6 @@ import {
   HEADER_HEIGHT,
   DEFAULT_PLUGINS_HEIGHT,
 } from '../app/RunnerCt'
-
-export type RunMode = 'single' | 'multi'
 
 interface Defaults {
   messageTitle: string | null
@@ -32,9 +29,6 @@ interface Defaults {
   url: string
   highlightUrl: boolean
   isLoadingUrl: boolean
-
-  spec: Cypress.Cypress['spec'] | null
-  specs: Cypress.Cypress['spec'][]
 
   callbackAfterUpdate: ((...args: unknown[]) => void) | null
 }
@@ -58,13 +52,10 @@ const _defaults: Defaults = {
   highlightUrl: false,
   isLoadingUrl: false,
 
-  spec: null,
-  specs: [],
-
   callbackAfterUpdate: null,
 }
 
-export default class State {
+export default class State extends BaseStore {
   defaults = _defaults
 
   @observable isLoading = true
@@ -109,26 +100,22 @@ export default class State {
 
   @observable.ref scriptError: string | undefined
 
-  @observable spec = _defaults.spec
-  @observable specs = _defaults.specs
   @observable specRunId: string | null = null
-  /** @type {"single" | "multi"} */
-  @observable runMode: RunMode = 'single'
-  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   @observable readyToRunTests = false
   @observable activePlugin: string | null = null
   @observable plugins: UIPlugin[] = []
 
   constructor ({
-    spec = _defaults.spec,
-    specs = _defaults.specs,
+    spec,
+    specs = [],
     runMode = 'single' as RunMode,
     multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
     isSpecsListOpen = true,
   }, config: Cypress.RuntimeConfigOptions) {
+    super()
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
@@ -282,30 +269,12 @@ export default class State {
     this.isLoadingUrl = _defaults.isLoadingUrl
   }
 
-  @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    this.spec = spec
-    this.specRunId = nanoid()
-  }
-
-  @action setSpecs (specs) {
-    this.specs = specs
-  }
-
   @action updateSpecByUrl (specUrl) {
     const foundSpec = _.find(this.specs, { name: decodeURI(specUrl) })
 
     if (foundSpec) {
       this.spec = foundSpec
     }
-  }
-
-  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
-    if (this.runMode === 'multi') {
-      this.runMode = 'single'
-      this.multiSpecs = []
-    }
-
-    this.setSpec(spec)
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
