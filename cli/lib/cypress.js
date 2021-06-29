@@ -68,6 +68,10 @@ const cypressModuleApi = {
       return cli.parseRunCommand(args)
     },
   },
+
+  defineConfig (config) {
+    return config
+  },
 }
 
 module.exports = cypressModuleApi

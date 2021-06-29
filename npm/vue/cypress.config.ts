@@ -1,7 +1,8 @@
-const { startDevServer } = require('@cypress/webpack-dev-server')
-const webpackConfig = require('./webpack.config')
+import { defineConfig } from 'cypress'
+import { startDevServer } from '@cypress/webpack-dev-server'
+import webpackConfig from './webpack.config'
 
-export default {
+export default defineConfig({
   viewportWidth: 500,
   viewportHeight: 500,
   video: false,
@@ -28,4 +29,4 @@ export default {
 
     return config
   },
-} as any
+} as Cypress.ConfigOptions)

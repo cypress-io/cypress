@@ -2682,14 +2682,16 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: ResolvedConfigOptions
+    component: ResolvedConfigOptions | TestingTypeFunctions
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: ResolvedConfigOptions
+    e2e: ResolvedConfigOptions | TestingTypeFunctions
   }
+
+  type TestingTypeFunctions = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
 
   /**
    * Options appended to config object on runtime.

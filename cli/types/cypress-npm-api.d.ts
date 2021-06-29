@@ -377,6 +377,8 @@ declare module 'cypress' {
      * Cypress does
      */
     cli: CypressCommandLine.CypressCliParser
+
+    defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   }
 
   // export Cypress NPM module interface
