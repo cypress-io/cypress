@@ -1452,6 +1452,10 @@ jobs:
             name: Run unit tests
             command: yarn test
             working_directory: npm/cypress-schematic
+        - run:
+            name: Run Cypress
+            command: yarn test:e2e:sandbox
+            working_directory: npm/cypress-schematic
         - store-npm-logs
 
   npm-release:
