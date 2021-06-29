@@ -3,17 +3,9 @@
     <li v-for="runnable in runnables" :key="runnable.id">
       <div>
         <Runnable :runnable="runnable">
-          <template #title>
-            <!-- <div class="test bg-orange-50 hover:bg-orange-200"><strong>Suite:</strong> {{ runnable.title }}</div> -->
-          </template>
-          <RunnablesList :runnables="runnable.children"></RunnablesList>
+          <RunnablesList :runnables="runnable.children"/>
         </Runnable>
       </div>
-      <!-- <RunnableTest v-else class="test-wrapper" :test="runnable" style="height: 100%;">
-        <template #title>
-          {{ runnable.state }}<strong>Test:</strong> {{ runnable.title }}
-        </template>
-      </RunnableTest> -->
     </li>
   </ul>
 </template>
@@ -21,7 +13,6 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import Runnable from './Runnable.vue'
-// import RunnableTest from './RunnableTest.vue';
 
 export default defineComponent({
     name: "runnables-list",

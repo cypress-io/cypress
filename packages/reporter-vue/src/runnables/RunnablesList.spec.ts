@@ -7,7 +7,6 @@ it('renders the runnables list', () => {
   // randomness makes this (currently) untestable
   const runnables = Runnables(rootRunnable)
 
-  // @ts-ignore
   cy.mount(RunnablesList, {
     props: {
       runnables: runnables.nested,

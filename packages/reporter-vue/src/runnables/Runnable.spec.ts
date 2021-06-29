@@ -20,7 +20,6 @@ const makeTest = state => new Test({
   state
 })
 
-// @ts-ignore
 const mountWithProps = (props = {}) => {
   return cy.mount(Runnable, {
     slots: {
@@ -51,8 +50,8 @@ describe('Runnable Suite suite states', () => {
     mountWithProps({ runnable: makeSuite([{ state: 'pending' }]) })
   })
 
-  it('renders a running suite', () => {
-    mountWithProps({ runnable: makeSuite([{ state: 'running' }]) })
+  it('renders a processing suite', () => {
+    mountWithProps({ runnable: makeSuite([{ state: 'processing' }]) })
   })
 
   it('renders a not running suite', () => {
@@ -73,8 +72,8 @@ describe('Runnable Test test states', () => {
     mountWithProps({ runnable: makeTest('pending') })
   })
 
-  it('renders a running test', () => {
-    mountWithProps({ runnable: makeTest('running') })
+  it('renders a processing test', () => {
+    mountWithProps({ runnable: makeTest('processing') })
   })
 
   it('renders a not running test', () => {
