@@ -11,6 +11,9 @@ export default defineConfig({
         mono: '"Fira Code", "Source Code Pro", Monaco, "Andale Mono", monospace',
         serif: 'Times New Roman',
       },
+      animation: {
+        'spin-slow': 'spin 1.5s linear infinite',
+      },
       screens: {
         'sm': '640px',
         'md': '768px',

@@ -33,6 +33,8 @@ const suite2 = newId(3)
 const suite3 = newId(4)
 const suite4 = newId(5)
 const suite5 = newId(6)
+const suite6 = newId(7)
+const suite7 = newId(8)
 
 export const rootRunnable = {
   root: true,
@@ -47,21 +49,40 @@ export const rootRunnable = {
   ],
   suites: [
     suiteContents(
+      1, rootId, suite7, [test('processing', suite7, 2, 24), test('not-started', suite7, 2, 24)],
+    ),
+    suiteContents(
       1, rootId, suite1, [test('passed', suite1, 2, 7)],
     ),
     suiteContents(
       1, rootId, suite2, [test('failed', suite2, 2, 8)],
     ),
     suiteContents(
-      1, rootId, suite3, [test('pending', suite3, 2, 9)],
-      [suiteContents(
-        2, suite3, suite5, [test('passed', suite5, 3, 10)],
-      )],
+      1, rootId, suite3, [
+        test('pending', suite3, 2, 9),
+      ],
+      [
+        suiteContents(
+          2, suite3, suite5, [
+            test('passed', suite5, 3, 10),
+            test('passed', suite5, 3, 10),
+            test('passed', suite5, 3, 10),
+          ],
+        ),
+      ],
     ),
     suiteContents(
-      1, suite4, [test('pending', suite4, 2, 12), test('passed', suite4, 2, 11),
+      1, rootId, suite4, [test('pending', suite4, 2, 12), test('passed', suite4, 2, 11),
         test('passed', suite4, 2, 13),
         test('passed', suite4, 2, 14)],
     ),
+    suiteContents(
+      1, rootId, suite6, [
+        test('pending', suite5, 3, 21),
+        test('pending', suite5, 3, 22),
+        test('pending', suite5, 3, 23),
+      ],
+    ),
   ],
+
 }
