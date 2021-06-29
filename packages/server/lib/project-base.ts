@@ -249,9 +249,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         // This is only used for CT right now, but it will be
         // used for E2E eventually. Until then, do not watch
         // the specs.
-        if (this.projectType === 'ct') {
-          startSpecWatcher()
-        }
+        startSpecWatcher()
 
         return Bluebird.join(
           this.checkSupportFile(cfg),
@@ -436,7 +434,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          this.server.sendSpecList(specs)
+          this.server.sendSpecList(specs, this.projectType)
 
           if (this.projectType === 'ct') {
           // ct uses the dev-server to build and bundle the speces.

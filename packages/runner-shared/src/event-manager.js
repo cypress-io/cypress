@@ -99,12 +99,13 @@ export const eventManager = {
       rerun()
     })
 
-    ws.on('component:specs:changed', (specs) => {
-      // TODO: Implement for E2E
-      // This is only used for CT, since E2E does not have an inline spec list yet.
-      if (state.setSpecs) {
-        state.setSpecs(specs)
+    ws.on('specs:changed', ({ specs, projectType }) => {
+      // do not emit the event if e2e runner is not displaying an inline spec list.
+      if (projectType === 'e2e' && state.useInlineSpecList === false) {
+        return
       }
+
+      state.setSpecs(specs)
     })
 
     ws.on('dev-server:hmr:error', (error) => {

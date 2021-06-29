@@ -14,10 +14,12 @@
     "lodash": "4.17.21",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
+    "nanoid": "3.1.20",
     "react": "16.8.6",
     "react-dom": "16.8.6"
   },
   "devDependencies": {
+    "@cypress/design-system": "0.0.0-development",
     "@packages/driver": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
