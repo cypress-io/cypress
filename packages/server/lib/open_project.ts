@@ -152,7 +152,7 @@ class OpenProject {
             preprocessor.removeFile(spec.absolute, cfg)
           }
 
-          afterSpec()
+          (afterSpec() as Bluebird<any>)
           .catch((err: Error) => {
             this.openProject?.options?.onError(err)
           })
@@ -173,6 +173,8 @@ class OpenProject {
             if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
               return runEvents.execute('before:spec', cfg, spec)
             }
+
+            return
           })
           .then(() => {
             return browsers.open(browser, options, automation)
@@ -215,6 +217,7 @@ class OpenProject {
       // assumes all specs are integration specs
       return {
         integration: specs,
+        component: [],
       }
     })
   }
@@ -238,7 +241,7 @@ class OpenProject {
       return options.onChange(specs)
     }
 
-    const get = () => {
+    const get = (): Bluebird<Cypress.Cypress['spec'][]> => {
       return this.openProject!.getConfig()
       .then((cfg) => {
         createSpecsWatcher(cfg)
