@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import retargetEvents from 'react-shadow-dom-retarget-events'
 
 import { $ } from '@packages/driver'
 import { selectorPlaygroundHighlight } from './selector-playground/highlight'
@@ -226,7 +227,7 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
 }
 
 function manageStudioAssertionsMenu ({ event, $body, display, possibleAssertions, addAssertion }) {
-  const { $container, $reactContainer } = getOrCreateHelperDom({
+  const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
     $body,
     className: '__cypress-studio-assertions-menu',
     css: studioAssertionsMenuCSS,
@@ -255,6 +256,8 @@ function manageStudioAssertionsMenu ({ event, $body, display, possibleAssertions
     possibleAssertions,
     addAssertion,
   })
+
+  retargetEvents(shadowRoot)
 }
 
 function createLayer ($el, attr, color, container, dimensions) {

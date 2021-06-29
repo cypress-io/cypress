@@ -383,6 +383,11 @@ export class StudioRecorder {
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
+    // do not record interactions within our own assertions menu
+    if ($el.hasClass('__cypress-studio-assertions-menu')) {
+      return false
+    }
+
     // only want to record keystrokes within input elements
     if ((event.type === 'keydown' || event.type === 'keyup') && tagName !== 'INPUT') {
       return false
