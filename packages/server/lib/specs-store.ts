@@ -15,7 +15,7 @@ const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', '
 // TODO: shouldn't this be on the trailing edge, not leading?
 const debounce = (fn) => _.debounce(fn, 250, { leading: true })
 
-type RunnerType = 'ct' | 'e2e'
+export type RunnerType = 'ct' | 'e2e'
 
 export class SpecsStore {
   watcher: FSWatcher | null = null
