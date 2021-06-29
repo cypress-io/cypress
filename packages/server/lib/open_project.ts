@@ -17,7 +17,7 @@ interface Specs {
   integration: Cypress.Cypress['spec'][]
 }
 
-class OpenProject {
+export class OpenProject {
   openProject: ProjectBase<any> | undefined
   relaunchBrowser: (() => void) | undefined
   specsWatcher: any = null

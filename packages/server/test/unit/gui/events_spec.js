@@ -13,7 +13,7 @@ const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
-const { openProject } = require(`${root}../lib/open_project`)
+const { openProject, OpenProject } = require(`${root}../lib/open_project`)
 const open = require(`${root}../lib/util/open`)
 const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
@@ -24,6 +24,13 @@ const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
 const api = require(`${root}../lib/api`)
 const savedState = require(`${root}../lib/saved_state`)
+
+function busSpy () {
+  return {
+    removeAllListeners: sinon.stub(),
+    on: sinon.stub(),
+  }
+}
 
 describe('lib/gui/events', () => {
   beforeEach(function () {
@@ -49,12 +56,12 @@ describe('lib/gui/events', () => {
     sinon.stub(electron.ipcMain, 'on')
     sinon.stub(electron.ipcMain, 'removeAllListeners')
 
-    this.handleEvent = (type, arg) => {
+    this.handleEvent = (type, arg, customBus) => {
       const id = `${type}-${Math.random()}`
 
       return Promise
       .try(() => {
-        return events.handleEvent(this.options, this.bus, this.event, id, type, arg)
+        return events.handleEvent(this.options, customBus ?? this.bus, this.event, id, type, arg)
       }).return({
         sendCalledWith: (data) => {
           expect(this.send).to.be.calledWith('response', { id, data })
@@ -669,9 +676,10 @@ describe('lib/gui/events', () => {
       })
 
       it('catches errors', function () {
+        this.create = sinon.stub(OpenProject.prototype, 'create').resolves()
         const err = new Error('foo')
 
-        this.open.rejects(err)
+        this.create.rejects(err)
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then((assert) => {
@@ -679,58 +687,12 @@ describe('lib/gui/events', () => {
         })
       })
 
-      it('sends \'focus:tests\' onFocusTests', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:focus:tests')
-        }).then((assert) => {
-          this.open.lastCall.args[0].onFocusTests()
+      ;['focus:tests', 'config:changed', 'spec:changed', 'project:warning', 'project:error'].forEach((msg) => {
+        it(`sends ${msg}`, function () {
+          const bus = busSpy()
 
-          return assert.sendCalledWith(undefined)
-        })
-      })
-
-      it('sends \'config:changed\' onSettingsChanged', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:config:changed')
-        }).then((assert) => {
-          this.open.lastCall.args[0].onSettingsChanged()
-
-          return assert.sendCalledWith(undefined)
-        })
-      })
-
-      it('sends \'spec:changed\' onSpecChanged', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:spec:changed')
-        }).then((assert) => {
-          this.open.lastCall.args[0].onSpecChanged('/path/to/spec.coffee')
-
-          return assert.sendCalledWith('/path/to/spec.coffee')
-        })
-      })
-
-      it('sends \'project:warning\' onWarning', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:project:warning')
-        }).then((assert) => {
-          this.open.lastCall.args[0].onWarning({ name: 'foo', message: 'foo' })
-
-          return assert.sendCalledWith({ name: 'foo', message: 'foo' })
-        })
-      })
-
-      it('sends \'project:error\' onError', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
-        .then(() => {
-          return this.handleEvent('on:project:error')
-        }).then((assert) => {
-          this.open.lastCall.args[0].onError({ name: 'foo', message: 'foo' })
-
-          return assert.sendCalledWith({ name: 'foo', message: 'foo' })
+          this.handleEvent(`on:${msg}`, undefined, bus)
+          expect(bus.on).to.have.been.calledWith(msg)
         })
       })
 
@@ -1077,6 +1039,10 @@ describe('lib/gui/events', () => {
 
     describe('launch:browser', () => {
       it('launches browser via openProject', function () {
+        openProject.openProject = {
+          open: sinon.stub().resolves(),
+        }
+
         sinon.stub(openProject, 'launch').callsFake((browser, spec, opts) => {
           debug('spec was %o', spec)
           expect(browser, 'browser').to.eq('foo')
