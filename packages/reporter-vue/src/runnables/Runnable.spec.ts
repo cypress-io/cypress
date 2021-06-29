@@ -50,6 +50,14 @@ describe('Runnable Suite suite states', () => {
   it('renders a pending suite', () => {
     mountWithProps({ runnable: makeSuite([{ state: 'pending' }]) })
   })
+
+  it('renders a running suite', () => {
+    mountWithProps({ runnable: makeSuite([{ state: 'running' }]) })
+  })
+
+  it('renders a not running suite', () => {
+    mountWithProps({ runnable: makeSuite([{ state: 'not-started' }]) })
+  })
 })
 
 describe('Runnable Test test states', () => {
@@ -63,6 +71,14 @@ describe('Runnable Test test states', () => {
 
   it('renders a pending test', () => {
     mountWithProps({ runnable: makeTest('pending') })
+  })
+
+  it('renders a running test', () => {
+    mountWithProps({ runnable: makeTest('running') })
+  })
+
+  it('renders a not running test', () => {
+    mountWithProps({ runnable: makeTest('not-started') })
   })
 })
 
