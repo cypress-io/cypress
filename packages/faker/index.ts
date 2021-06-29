@@ -33,6 +33,7 @@ const suite2 = newId(3)
 const suite3 = newId(4)
 const suite4 = newId(5)
 const suite5 = newId(6)
+const suite6 = newId(7)
 
 export const rootRunnable = {
   root: true,
@@ -71,5 +72,13 @@ export const rootRunnable = {
         test('passed', suite4, 2, 13),
         test('passed', suite4, 2, 14)],
     ),
+    suiteContents(
+      1, rootId, suite6, [
+        test('pending', suite5, 3, 21),
+        test('pending', suite5, 3, 22),
+        test('pending', suite5, 3, 23),
+      ],
+    ),
   ],
+
 }

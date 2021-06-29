@@ -179,15 +179,19 @@ export const useReporterStore = defineStore({
 interface Runnable {
   readonly id: string,
   state: ComputedRef<RunnableState>
+  level: number
 }
 
-class Test implements Runnable {
+export interface Test {}
+export class Test implements Runnable {
   readonly type: RunnableType = 'test'
   readonly id: string
   state: ComputedRef<RunnableState>
   constructor(test: RawTest) {
     this.id = test.id
-    this.state = computed(() => test.status)
+    this.state = computed(() => test.state || 'not-started')
+    this.level = test.level
+    this.title = test.title
   }
 }
 
@@ -202,12 +206,23 @@ export class Suite implements Runnable {
   
   constructor(suite: RawSuite) {
     this.id = suite.id
-    this.tests = suite.tests // nested
-    this.suites = suite.suites // nested
-    this.children = ref([])
+    this.tests = suite.tests || []// nested
+    this.suites = suite.suites || [] // nested
+    this.children = ref(suite.children || [])
+
     this.state = computed(() => {
-      return 'failed'
+      const countByStatus = _.groupBy(this.children.value, 'state')
+      if (countByStatus.failed) return 'failed'
+      if (countByStatus.running) return 'running'
+      if (countByStatus['not-started']) return 'not-started'
+      if (countByStatus.pending && !countByStatus.passed) return 'pending'
+      return 'passed'
     })
+
+    this.title = suite.title
+    this.tests = ref(suite.tests || [])
+    this.suites = ref(suite.suites || [])
+    this.level = suite.level
   }  
 }
 
@@ -267,16 +282,16 @@ function createTest(props, level): Test {
     }
   ]
 
-  return test
+  return new Test(test)
 }
 
 function createSuite(props: Suite, level, runnablesById): Suite {
-  return {
+  return new Suite({
     ...props,
     level,
     state: null,
     children: createRunnableChildren(props, ++level, runnablesById),
-  }
+  })
 }
 
 
