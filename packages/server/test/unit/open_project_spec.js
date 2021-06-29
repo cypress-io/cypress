@@ -5,7 +5,7 @@ const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { openProject } = require(`${root}lib/open_project`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const runEvents = require(`${root}lib/plugins/run_events`)
+const { runEvents } = require(`${root}lib/plugins/run_events`)
 
 describe('lib/open_project', () => {
   beforeEach(function () {
@@ -103,7 +103,7 @@ describe('lib/open_project', () => {
         this.config.isTextTerminal = false
 
         return openProject.launch(this.browser, this.spec).then(() => {
-          expect(runEvents.execute).to.be.calledWith('before:spec', this.config, this.spec)
+          expect(runEvents.execute).to.be.calledWith('before:spec', this.spec)
         })
       })
 
@@ -135,7 +135,7 @@ describe('lib/open_project', () => {
         })
         .delay(100) // needs a tick or two for the event to fire
         .then(() => {
-          expect(runEvents.execute).to.be.calledWith('after:spec', this.config, this.spec)
+          expect(runEvents.execute).to.be.calledWith('after:spec', this.spec)
         })
       })
 

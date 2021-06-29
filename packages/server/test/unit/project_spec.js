@@ -17,7 +17,7 @@ const { Automation } = require(`${root}lib/automation`)
 const savedState = require(`${root}lib/saved_state`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const plugins = require(`${root}lib/plugins`)
-const runEvents = require(`${root}lib/plugins/run_events`)
+const { runEvents } = require(`${root}lib/plugins/run_events`)
 const system = require(`${root}lib/util/system`)
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
@@ -344,7 +344,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       return this.project.open({})
       .then(() => {
-        expect(runEvents.execute).to.be.calledWith('before:run', this.config, {
+        expect(runEvents.execute).to.be.calledWith('before:run', {
           config: this.config,
           cypressVersion: pkg.version,
           system: sysInfo,
@@ -459,7 +459,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       return this.project.close()
       .then(() => {
-        expect(runEvents.execute).to.be.calledWith('after:run', this.config)
+        expect(runEvents.execute).to.be.calledWith('after:run')
       })
     })
 

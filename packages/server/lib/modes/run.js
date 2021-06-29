@@ -18,7 +18,7 @@ const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
 const videoCapture = require('../video_capture')
 const { fs } = require('../util/fs')
-const runEvents = require('../plugins/run_events')
+const { runEvents } = require('../plugins/run_events')
 const env = require('../util/env')
 const trash = require('../util/trash')
 const random = require('../util/random')
@@ -1153,7 +1153,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, testingType } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, testingType } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1203,7 +1203,7 @@ module.exports = {
         .catch(warnVideoRecordingFailed)
       }
 
-      await runEvents.execute('after:spec', config, spec, results)
+      await runEvents.execute('after:spec', spec, results)
 
       const videoExists = videoName ? await fs.pathExists(videoName) : false
 
@@ -1345,7 +1345,7 @@ module.exports = {
       tag,
     }
 
-    return runEvents.execute('before:run', config, beforeRunDetails)
+    return runEvents.execute('before:run', beforeRunDetails)
     .then(() => {
       return iterateThroughSpecs({
         specs,
@@ -1411,7 +1411,7 @@ module.exports = {
               openProject.closeBrowser()
       })
       .then(() => {
-        return runEvents.execute('after:run', config, moduleAPIResults)
+        return runEvents.execute('after:run', moduleAPIResults)
       })
       .then(() => {
         return writeOutput(outputPath, moduleAPIResults)
@@ -1438,7 +1438,7 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', config, spec)
+    return runEvents.execute('before:spec', spec)
     .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and

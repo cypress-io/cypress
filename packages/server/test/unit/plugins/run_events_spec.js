@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const errors = require(`${root}../lib/errors`)
 const plugins = require(`${root}../lib/plugins`)
-const runEvents = require(`${root}../lib/plugins/run_events`)
+const { runEvents } = require(`${root}../lib/plugins/run_events`)
 
 describe('lib/plugins/run_events', () => {
   context('#execute', () => {
@@ -23,7 +23,7 @@ describe('lib/plugins/run_events', () => {
       plugins.has.returns(true)
       plugins.execute.resolves('the result')
 
-      return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
+      return runEvents.execute('before:spec', 'arg1', 'arg2')
       .then(() => {
         expect(plugins.execute).to.be.calledWith('before:spec', 'arg1', 'arg2')
       })
@@ -33,7 +33,7 @@ describe('lib/plugins/run_events', () => {
       plugins.has.returns(true)
       plugins.execute.resolves('the result')
 
-      return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
+      return runEvents.execute('before:spec', 'arg1', 'arg2')
       .then((result) => {
         expect(result).to.equal('the result')
       })
@@ -43,7 +43,7 @@ describe('lib/plugins/run_events', () => {
       plugins.has.returns(true)
       plugins.execute.rejects({ stack: 'The event threw an error' })
 
-      return runEvents.execute('before:spec', {}, 'arg1', 'arg2')
+      return runEvents.execute('before:spec', 'arg1', 'arg2')
       .then(() => {
         expect(errors.throw).to.be.calledWith('PLUGINS_RUN_EVENT_ERROR', 'before:spec', 'The event threw an error')
       })

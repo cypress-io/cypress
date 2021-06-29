@@ -21,7 +21,7 @@ import cwd from './cwd'
 import errors from './errors'
 import logger from './logger'
 import Reporter from './reporter'
-import runEvents from './plugins/run_events'
+import { runEvents } from './plugins/run_events'
 import savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
@@ -265,7 +265,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             system: _.pick(sys, 'osName', 'osVersion'),
           }
 
-          return runEvents.execute('before:run', cfg, beforeRunDetails)
+          return runEvents.execute('before:run', beforeRunDetails)
         })
       })
     })

@@ -8,7 +8,7 @@ import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
-import runEvents from './plugins/run_events'
+import { runEvents } from './plugins/run_events'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -64,10 +64,13 @@ class OpenProject {
     return this.openProject
   }
 
-  async changeUrlToSpec (spec: Cypress.Cypress['spec']) {
-    const newSpecUrl = await this.openProject?.getSpecUrl(spec.absolute, spec.specType)
+  changeUrlToSpec (spec: Cypress.Cypress['spec']) {
+    if (!this.openProject) {
+      throw Error('Cannot call OpenProject#changeUrlToSpec without first calling OpenProject#create')
+    }
 
-    return this.openProject?.changeToUrl(newSpecUrl)
+    return this.openProject.getSpecUrl(spec.absolute, spec.specType)
+    .then((newSpecUrl) => this.openProject!.changeToUrl(newSpecUrl))
   }
 
   launch (browser: Cypress.Browser, spec: Cypress.Cypress['spec'], options: any = {}) {
@@ -147,7 +150,7 @@ class OpenProject {
         const afterSpec = () => {
           if (!this.openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Bluebird.resolve()
 
-          return runEvents.execute('after:spec', cfg, spec)
+          return runEvents.execute('after:spec', spec)
         }
 
         const { onBrowserClose } = options
@@ -176,7 +179,7 @@ class OpenProject {
 
           return Bluebird.try(() => {
             if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-              return runEvents.execute('before:spec', cfg, spec)
+              return runEvents.execute('before:spec', spec)
             }
 
             return
