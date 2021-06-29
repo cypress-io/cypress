@@ -22,6 +22,7 @@ class OpenProject {
   relaunchBrowser: (() => void) | undefined
   specsWatcher: any = null
   componentSpecsWatcher: any = null
+  options: Record<string, any> = {}
 
   reset () {
     this.openProject = undefined
@@ -368,15 +369,14 @@ class OpenProject {
       options.configFile = args.configFile
     }
 
-    options = _.extend({}, args.config, options, { args })
+    debug('created project %s', path)
+    debug('with options %o', options)
 
-    // open the project and return
+    this.options = _.extend({}, args.config, options, { args })
+
+    // return the project and return
     // the config for the project instance
-    debug('opening project %s', path)
-    debug('and options %o', options)
-
-    return this.openProject?.open({ ...options, testingType: args.testingType })
-    .return(this)
+    return this.openProject.getConfig(this.options)
   }
 
   // for testing purposes

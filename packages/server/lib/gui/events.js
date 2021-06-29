@@ -154,21 +154,24 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         specFilter: arg.specFilter,
       })
 
-      return openProject.launch(arg.browser, fullSpec, {
-        projectRoot: options.projectRoot,
-        onBrowserOpen () {
-          return send({ browserOpened: true })
-        },
-        onBrowserClose () {
-          return send({ browserClosed: true })
-        },
-      })
-      .catch((err) => {
-        if (err.title == null) {
-          err.title = 'Error launching browser'
-        }
+      return openProject.openProject.open(openProject.options)
+      .then(() => {
+        return openProject.launch(arg.browser, fullSpec, {
+          projectRoot: options.projectRoot,
+          onBrowserOpen () {
+            return send({ browserOpened: true })
+          },
+          onBrowserClose () {
+            return send({ browserClosed: true })
+          },
+        })
+        .catch((err) => {
+          if (err.title == null) {
+            err.title = 'Error launching browser'
+          }
 
-        return sendErr(err)
+          return sendErr(err)
+        })
       })
 
     case 'begin:auth':
@@ -321,7 +324,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           onError,
           onWarning,
         })
-      }).call('getConfig')
+      })
       .then(send)
       .catch(sendErr)
 
