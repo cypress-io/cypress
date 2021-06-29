@@ -2,7 +2,6 @@
   "name": "@packages/runner-ct",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
   "browser": "src/index.js",
   "scripts": {
     "build": "webpack",
@@ -15,12 +14,7 @@
     "test": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "watch": "webpack --watch --progress --config webpack.config.ts"
   },
-  "dependencies": {
-    "debug": "^4.3.2",
-    "lodash": "^4.17.20",
-    "send": "^0.17.1",
-    "tslib": "^2.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
@@ -71,7 +65,6 @@
   },
   "files": [
     "dist",
-    "src",
-    "lib"
+    "src"
   ]
 }
