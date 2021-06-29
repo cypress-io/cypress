@@ -8,4 +8,7 @@
     "index.ts",
     "./../ts/index.d.ts"
   ],
+  "compilerOptions": {
+    "importHelpers": true
+  }
 }

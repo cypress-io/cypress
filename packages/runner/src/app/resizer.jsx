@@ -29,7 +29,7 @@ class Resizer extends Component {
 
   @action _resize = (e) => {
     const minWidth = 0
-    const maxWidth = this.props.state.windowWidth
+    const maxWidth = this.props.maxWidth
 
     if (this._isDragging) {
       e.preventDefault()

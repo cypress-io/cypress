@@ -18,6 +18,7 @@
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
     "@packages/network": "0.0.0-development",
+    "@packages/resolve-dist": "0.0.0-development",
     "@packages/runner": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
@@ -78,7 +79,6 @@
     "zone.js": "0.9.0"
   },
   "files": [
-    "lib",
     "patches"
   ],
   "workspaces": {

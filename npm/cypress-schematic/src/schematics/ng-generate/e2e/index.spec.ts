@@ -2,18 +2,17 @@ import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/te
 import { join, resolve } from 'path'
 import { expect } from 'chai'
 
-describe('@cypress/schematic: ng-add', () => {
+describe('@cypress/schematic:e2e ng-generate', () => {
   const schematicRunner = new SchematicTestRunner(
     'schematics',
-    join(__dirname, './../collection.json'),
+    join(__dirname, '../../collection.json'),
   )
-
   let appTree: UnitTestTree
 
   const workspaceOptions = {
     name: 'workspace',
     newProjectRoot: 'projects',
-    version: '6.0.0',
+    version: '12.0.0',
   }
 
   const appOptions = {
@@ -30,10 +29,10 @@ describe('@cypress/schematic: ng-add', () => {
   })
 
   it('should create cypress files', async () => {
-    const files = ['cypress/integration/spec.ts', 'cypress/plugins/index.js', 'cypress/support/commands.ts', 'cypress/support/index.ts', 'cypress/tsconfig.json', 'cypress.json']
+    const files = ['cypress/integration/foo.spec.ts']
     const homePath = '/projects/sandbox/'
 
-    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
+    return schematicRunner.runSchematicAsync('e2e', { name: 'foo' }, appTree).toPromise().then((tree) => {
       files.forEach((f) => {
         const pathToFile = resolve(homePath, f)
 
