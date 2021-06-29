@@ -1,8 +1,8 @@
 <template>
-  <div class="header-wrapper" @click="show = !show">
+  <div class="header-wrapper" @click="$emit('update:modelValue', !modelValue)">
     <slot name="header"></slot>
   </div>
-  <slot name="default" v-if="show"></slot>
+  <slot name="default" v-if="modelValue"></slot>
 </template>
 
 <script lang="ts">
@@ -10,15 +10,10 @@ import { ref, defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    initiallyOpen: {
-    default: false,
-    type: Boolean
-  },
-  },
-  setup(props) {
-    return {
-      show: ref(props.initiallyOpen)
-    }
+    modelValue: {
+      default: false,
+      type: Boolean
+    },
   }
 })
 </script>
