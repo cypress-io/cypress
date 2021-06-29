@@ -17,11 +17,12 @@ describe('studio ui', () => {
 
       // assert image is visible for percy snapshot
       cy.get('.studio-init-modal').find('.gif').find('img').should('be.visible')
-      .then(($img) => {
-        cy.wrap($img[0].naturalWidth).should('be.greaterThan', 0)
-        .then(() => {
-          cy.percySnapshot()
-        })
+      .and(($img) => {
+        expect($img[0].naturalWidth).to.be.greaterThan(0)
+        expect($img[0].naturalHeight).to.be.greaterThan(0)
+      })
+      .then(() => {
+        cy.percySnapshot()
       })
     })
   })
