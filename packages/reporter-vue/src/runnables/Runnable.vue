@@ -9,7 +9,8 @@
             <i-fa-solid-times v-if="state ==='failed'"/>
             <i-fa-circle-o-notch v-if="state ==='pending'"/>
             <i-fa-check v-if="state === 'passed'"/>
-            <i-mdi-square-outline v-if="state === 'not-running'"/>
+            <i-mdi-square-outline v-if="state === 'not-started'"/>
+            <i-fa-refresh v-if="state === 'running'" class="animate-spin-slow"/>
           </template>
           {{ runnable.title }}
           </div>
@@ -17,7 +18,7 @@
         </div>
       </template>
       <!-- Inner content of the suite -->
-      <div data-cy="content"><slot name="default" /></div>
+      <div data-cy="content" class="ml-0.4rem"><slot name="default" /></div>
     </BaseAccordion>
   </div>
 </template>
@@ -63,7 +64,7 @@ $pending: #a7c8e6;
 .runnable-title-wrapper {
   @apply inline-flex justify-start items-center gap-4px leading-loose select-none w-[calc(100%)];
   svg {
-    @apply text-size-8px inline mx-1 mb-2px;
+    @apply w-10px h-10px inline mx-1 mb-2px;
   }
 }
 
@@ -108,7 +109,7 @@ $pending: #a7c8e6;
   }
 }
 
-.not-running-state,.running-state {
+.not-started-state, .running-state {
   &:before {
     background: white;
   }
