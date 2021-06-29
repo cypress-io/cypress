@@ -15,6 +15,9 @@
   "dependencies": {
     "fs-extra": "8.1.0"
   },
+  "devDependencies": {
+    "@packages/ts": "0.0.0-development"
+  },
   "files": [
     "lib"
   ],
