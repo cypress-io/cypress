@@ -141,7 +141,10 @@ const execute = (ipc, event, ids, args = []) => {
 let tsRegistered = false
 
 function getPluginsFunction (pluginsFile, functionName) {
-  return functionName ? require(pluginsFile)[functionName] : require(pluginsFile)
+  const exp = require(pluginsFile)
+  const resolvedExport = exp.default || exp
+
+  return functionName ? resolvedExport[functionName] : resolvedExport
 }
 
 const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
@@ -176,13 +179,10 @@ const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
   }
 
   try {
-    debug('require pluginsFile')
+    debug('require pluginsFile "%s", functionName "%s"', pluginsFile, functionName)
     plugins = getPluginsFunction(pluginsFile, functionName)
 
-    // Handle export default () => {}
-    if (plugins && typeof plugins.default === 'function') {
-      plugins = plugins.default
-    }
+    debug('plugins %o', plugins)
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)

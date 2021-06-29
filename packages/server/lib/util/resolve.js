@@ -1,6 +1,6 @@
 const resolve = require('resolve')
 const env = require('./env')
-const debug = require('debug')('cypress:server:plugins')
+const debug = require('debug')('cypress:server:util:resolve')
 
 module.exports = {
   /**

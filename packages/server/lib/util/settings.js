@@ -171,13 +171,6 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    if (!tsRegistered) {
-      tsNodeUtil.register(projectRoot, options.configFile)
-
-      // ensure typescript is only registered once
-      tsRegistered = true
-    }
-
     const requireAsync = (fileRequired) => {
       return Promise.try(() => {
         const exp = require(fileRequired)
@@ -187,6 +180,13 @@ module.exports = {
     }
 
     const file = this.pathToConfigFile(projectRoot, options)
+
+    if (!tsRegistered) {
+      tsNodeUtil.register(projectRoot, file)
+
+      // ensure typescript is only registered once
+      tsRegistered = true
+    }
 
     return requireAsync(file)
     .catch({ code: 'ENOENT' }, (e) => {

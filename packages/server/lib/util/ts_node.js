@@ -18,13 +18,15 @@ const getTsNodeOptions = (tsPath, pluginsFile) => {
 
 const register = (projectRoot, pluginsFile) => {
   try {
+    debug('projectRoot path: %s', projectRoot)
     const tsPath = resolve.typescript(projectRoot)
 
     if (!tsPath) return
 
+    debug('typescript path: %s', tsPath)
+
     const tsOptions = getTsNodeOptions(tsPath, pluginsFile)
 
-    debug('typescript path: %s', tsPath)
     debug('registering project TS with options %o', tsOptions)
 
     require('tsconfig-paths/register')
