@@ -1,7 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 const saveErrorMessage = (message) => {
   return `\
@@ -259,6 +259,29 @@ export class StudioRecorder {
     })
 
     this._clearPreviousMouseEvent()
+  }
+
+  copyToClipboard = (commandsText) => {
+    // clipboard API is not supported without secure context
+    if (window.isSecureContext && navigator.clipboard) {
+      return navigator.clipboard.writeText(commandsText)
+    }
+
+    // fallback to creating invisible textarea
+    // create the textarea in our document rather than this._body
+    // as to not interfere with the app in the aut
+    const textArea = document.createElement('textarea')
+
+    textArea.value = commandsText
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = 0
+
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    textArea.remove()
+
+    return Promise.resolve()
   }
 
   _trustEvent = (event) => {

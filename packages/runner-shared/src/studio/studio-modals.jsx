@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 import { studioRecorder } from './studio-recorder'
 
