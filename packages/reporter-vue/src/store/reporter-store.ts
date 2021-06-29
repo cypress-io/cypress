@@ -127,7 +127,7 @@ export const useReporterStore = defineStore({
       })
 
       this.bus.on('test:before:run:async', (props) => {
-        this.runnables.getTest(props.id).state = 'running'
+        this.runnables.getTest(props.id).state = 'processing'
       })
 
       this.bus.on('run:end', () => {
@@ -213,7 +213,7 @@ export class Suite implements Runnable {
     this.state = computed(() => {
       const countByStatus = _.groupBy(this.children.value, 'state')
       if (countByStatus.failed) return 'failed'
-      if (countByStatus.running) return 'running'
+      if (countByStatus.processing) return 'processing'
       if (countByStatus['not-started']) return 'not-started'
       if (countByStatus.pending && !countByStatus.passed) return 'pending'
       return 'passed'

@@ -10,11 +10,10 @@
             <i-fa-circle-o-notch v-if="state ==='pending'"/>
             <i-fa-check v-if="state === 'passed'"/>
             <i-mdi-square-outline v-if="state === 'not-started'"/>
-            <i-fa-refresh v-if="state === 'running'" class="animate-spin-slow"/>
+            <i-fa-refresh v-if="state === 'processing'" class="animate-spin-slow"/>
           </template>
           {{ runnable.title }}
           </div>
-          <!-- <slot name="title" /> -->
         </div>
       </template>
       <!-- Inner content of the suite -->
@@ -53,9 +52,7 @@ $failed: #e94f5f;
 $pending: #a7c8e6;
 
 .runnable-root {
-  @apply hover:cursor-pointer text-size-13px text-warm-gray-600;
-  // padding-left: calc(18px * v-bind(level));
-  width: 100%;
+  @apply hover:cursor-pointer text-size-13px text-warm-gray-600 w-[calc(100%)];
   &:before {
     @apply w-4px h-[calc(100%)] block absolute content:"" left-0; 
   }
@@ -109,7 +106,7 @@ $pending: #a7c8e6;
   }
 }
 
-.not-started-state, .running-state {
+.not-started-state, .processing-state {
   &:before {
     background: white;
   }
