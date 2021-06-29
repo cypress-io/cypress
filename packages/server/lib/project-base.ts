@@ -41,10 +41,6 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 
-interface OpenOptions {
-  onOpen: (cfg: any) => Bluebird<any>
-}
-
 export type Cfg = Record<string, any>
 
 const localCwd = cwd()
@@ -57,12 +53,12 @@ const debugScaffold = Debug('cypress:server:scaffold')
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
-  protected options?: Record<string, any>
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
 
+  public options?: Record<string, any>
   public browser: any
   public projectType?: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
@@ -161,7 +157,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cfg
   }
 
-  open (options = {}, callbacks: OpenOptions) {
+  open (options = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 

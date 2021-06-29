@@ -3,7 +3,7 @@ require('../spec_helper')
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const openProject = require(`${root}lib/open_project`)
+const { openProject } = require(`${root}lib/open_project`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const runEvents = require(`${root}lib/plugins/run_events`)
 

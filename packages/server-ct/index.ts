@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import browsers from '@packages/server/lib/browsers'
-import openProject from '@packages/server/lib/open_project'
+import { openProject } from '@packages/server/lib/open_project'
 import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
@@ -39,7 +39,7 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
   // add chrome as a default browser if none has been specified
   return browsers.ensureAndGetByNameOrPath(args.browser)
   .then((browser: Cypress.Browser) => {
-    const spec = {
+    const spec: Cypress.Cypress['spec'] = {
       name: 'All Specs',
       absolute: '__all',
       relative: '__all',

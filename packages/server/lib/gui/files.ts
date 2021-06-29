@@ -1,4 +1,4 @@
-import openProject from '../open_project'
+import { openProject } from '../open_project'
 import { createFile } from '../util/spec_writer'
 import { showSaveDialog } from './dialog'
 

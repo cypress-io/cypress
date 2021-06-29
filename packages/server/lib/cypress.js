@@ -114,7 +114,9 @@ module.exports = {
   openProject (options) {
     // this code actually starts a project
     // and is spawned from nodemon
-    return require('./open_project').open(options.project, options)
+    const { openProject } = require('./open_project')
+
+    return openProject.open(options.project, options)
   },
 
   start (argv = []) {

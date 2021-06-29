@@ -4,13 +4,15 @@ import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import { BrowserPreRequest } from '@packages/proxy'
 
-type NullableMiddlewareHook = (() => void) | null
+type NullableMiddlewareHook<T = (() => void)> = T | null
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
+type OnBeforeRequest = (message: string, data: any) => void
+
 interface IMiddleware {
   onPush: NullableMiddlewareHook
-  onBeforeRequest: NullableMiddlewareHook
+  onBeforeRequest: NullableMiddlewareHook<OnBeforeRequest>
   onRequest: ((msg: string, data: unknown) => void) | null
   onResponse: NullableMiddlewareHook
   onAfterResponse: NullableMiddlewareHook
