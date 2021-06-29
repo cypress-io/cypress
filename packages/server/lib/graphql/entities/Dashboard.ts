@@ -1,0 +1,8 @@
+import { nxs } from 'nexus-decorators'
+
+@nxs.objectType()
+export class Dashboard {
+
+  //
+
+}

@@ -1,0 +1,70 @@
+{
+  "id": "r1",
+  "title": "",
+  "root": true,
+  "hooks": [],
+  "tests": [
+    {
+      "id": "r3",
+      "title": "test 1",
+      "state": "passed",
+      "agents": [
+        {
+          "id": 1,
+          "functionName": "get",
+          "type": "spy",
+          "alias": "getAlias",
+          "instrument": "agent",
+          "callCount": 1
+        },
+        {
+          "id": 2,
+          "functionName": "fetch",
+          "type": "stub",
+          "alias": ["fetchAlias", "gonnaHappenAlias"],
+          "instrument": "agent",
+          "callCount": 3
+        },
+        {
+          "id": 3,
+          "functionName": "go",
+          "type": "stub",
+          "instrument": "agent",
+          "callCount": 0
+        }
+      ],
+      "commands": [
+        {
+          "hookId": "r3",
+          "id": "c1",
+          "instrument": "command",
+          "message": "http://localhost:3000",
+          "name": "visit",
+          "state": "passed",
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c2",
+          "instrument": "command",
+          "message": "div",
+          "name": "get",
+          "state": "passed",
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        }
+      ],
+      "invocationDetails": {
+        "absoluteFile": "/absolute/path/to/foo_spec.js",
+        "column": 8,
+        "line": 34,
+        "originalFile": "path/to/foo_spec.js",
+        "relativeFile": "path/to/foo_spec.js"
+      }
+    }
+  ],
+  "suites": []
+}

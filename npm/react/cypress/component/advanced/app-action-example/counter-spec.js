@@ -33,4 +33,24 @@ describe('Counter with access', () => {
     // the UI should update to reflect the new count
     cy.contains('count: 101').should('be.visible')
   })
+
+  describe('another block', () => {
+    before(() => {
+
+    })
+
+    after(() => {
+
+    })
+
+    it('has functionality', () => {
+
+    })
+  })
+})
+
+describe('root level block', () => {
+  it('renders', () => {
+    
+  })
 })

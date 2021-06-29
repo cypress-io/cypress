@@ -91,6 +91,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     } = this.props
 
     return (
+      // <div></div>
       <div className={cs(className, 'reporter', {
         multiSpecs: runMode === 'multi',
         'experimental-studio-enabled': experimentalStudioEnabled,
@@ -178,7 +179,8 @@ if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
     // @ts-ignore
-    render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
+    // render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
+    render(<div></div>)
   }
 }
 

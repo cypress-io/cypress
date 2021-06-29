@@ -1,0 +1,15 @@
+{
+  "name": "@packages/faker",
+  "version": "0.0.0-development",
+  "description": "Generate fake data for use within mocks",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "echo dev"
+  },
+  "devDependencies": {
+    "faker": "5.5.3"
+  },
+  "license": "ISC",
+  "author": "",
+  "keywords": []
+}

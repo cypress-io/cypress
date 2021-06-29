@@ -1,0 +1,38 @@
+{
+  "name": "@vueuse/core",
+  "version": "5.0.3",
+  "description": "Collection of essential Vue Composition Utilities",
+  "keywords": [
+    "vue",
+    "vue-use",
+    "utils"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vueuse/vueuse.git"
+  },
+  "funding": "https://github.com/sponsors/antfu",
+  "author": "Anthony Fu<https://github.com/antfu>",
+  "exports": {
+    ".": {
+      "import": "./index.esm.js",
+      "require": "./index.cjs.js"
+    },
+    "./*": "./*"
+  },
+  "main": "./index.cjs.js",
+  "types": "./index.d.ts",
+  "module": "./index.esm.js",
+  "unpkg": "./index.iife.min.js",
+  "jsdelivr": "./index.iife.min.js",
+  "sideEffects": false,
+  "bugs": {
+    "url": "https://github.com/vueuse/vueuse/issues"
+  },
+  "homepage": "https://github.com/vueuse/vueuse#readme",
+  "dependencies": {
+    "../../shared": "5.0.3",
+    "vue": "*"
+  }
+}

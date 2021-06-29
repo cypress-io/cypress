@@ -56,6 +56,8 @@
     "react": "16.8.6",
     "react-devtools-inline": "^4.10.1",
     "react-dom": "16.8.6",
+    "vue": "3.1.1",
+    "pinia": "next",
     "react-split-pane": "^0.1.92",
     "sass-loader": "^10.0.3",
     "sockjs-client": "^1.5.0",

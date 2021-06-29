@@ -1,4 +1,20 @@
-import * as React from 'react'
+// import React, { useEffect, useLayoutEffect } from 'react'
+
+// import { start } from '@packages/reporter-vue/src/main'
+
+// // eval('de' + 'bugger')
+// export const ReporterContainer = React.memo((props) => {
+//   useEffect(() => {
+//     // eval('debugger')
+//     start({
+//       reporterBus: props.eventManager.reporterBus,
+//       state: props.state,
+//     })
+//   })
+
+//   return (<div id="vue-app"></div>)
+// })
+import React from 'react'
 import cs from 'classnames'
 import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'

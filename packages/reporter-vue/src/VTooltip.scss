@@ -1,0 +1,14 @@
+/**
+  It's possible to pass in different classes and a custom theme,
+  But it's quicker + terser to do this
+  */
+@import '~v-tooltip/dist/v-tooltip.css';
+
+.v-popper--theme-tooltip.v-popper--theme-tooltip .v-popper__inner {
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+.v-popper--theme-tooltip.v-popper--theme-tooltip .v-popper__arrow {
+  border-color: #ff0000;
+}
