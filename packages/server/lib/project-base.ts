@@ -63,6 +63,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _automation?: Automation
   private _recordTests = null
 
+  public modifiedConfig: Cfg
   public browser: any
   public projectType?: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
@@ -122,16 +123,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
+  async onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
     this._server = this.projectType === 'e2e'
       ? new ServerE2E()
       : new ServerCt()
 
-    return this._initPlugins(cfg, options)
-    .then(({ cfg, specsStore, startSpecWatcher }) => {
+    await this._initPlugins(cfg, options)
+
+    return this.initializeSpecs()
+    .then(({ specsStore, startSpecWatcher }) => {
       const updatedCfg = this.projectType === 'e2e'
-        ? cfg
-        : this.injectCtSpecificConfig(cfg)
+        ? this.modifiedConfig
+        : this.injectCtSpecificConfig(this.modifiedConfig)
 
       return this.server.open(updatedCfg, {
         project: this,
@@ -366,6 +369,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
+      this.modifiedConfig = updatedConfig
+
       if (this.projectType === 'ct') {
         updatedConfig.componentTesting = true
 
@@ -377,25 +382,26 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         updatedConfig.resolved.testingType = { value: 'component' }
       }
 
-      debug('updated config: %o', updatedConfig)
+      debug('updated config: %o', this.modifiedConfig)
 
-      return Bluebird.resolve(updatedConfig)
+      return Bluebird.resolve(this.modifiedConfig)
     })
-    .then(async (modifiedConfig: any) => {
-      const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
-        if (this.projectType === 'ct') {
-          return spec.specType === 'component'
-        }
+  }
 
-        if (this.projectType === 'e2e') {
-          return spec.specType === 'integration'
-        }
+  async initializeSpecs () {
+    const specs = (await specsUtil.find(this.modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
+      if (this.projectType === 'ct') {
+        return spec.specType === 'component'
+      }
 
-        throw Error(`Cannot return specType for projectType: ${this.projectType}`)
-      })
+      if (this.projectType === 'e2e') {
+        return spec.specType === 'integration'
+      }
 
-      return this.initSpecStore({ specs, config: modifiedConfig })
+      throw Error(`Cannot return specType for projectType: ${this.projectType}`)
     })
+
+    return this.initSpecStore({ specs })
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
@@ -416,17 +422,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   async initSpecStore ({
     specs,
-    config,
   }: {
     specs: Cypress.Cypress['spec'][]
-    config: any
   }) {
-    const specsStore = new SpecsStore(config, this.projectType)
+    const specsStore = new SpecsStore(this.modifiedConfig, this.projectType)
 
     if (this.projectType === 'ct') {
-      const { port } = await this.startCtDevServer(specs, config)
+      const { port } = await this.startCtDevServer(specs, this.modifiedConfig)
 
-      config.baseUrl = `http://localhost:${port}`
+      this.modifiedConfig.baseUrl = `http://localhost:${port}`
     }
 
     const startSpecWatcher = () => {
@@ -448,7 +452,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return specsStore.storeSpecFiles()
     .return({
       specsStore,
-      cfg: config,
       startSpecWatcher,
     })
   }
