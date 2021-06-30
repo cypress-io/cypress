@@ -1,24 +1,26 @@
-const path = require('path')
-const la = require('lazy-ass')
-const check = require('check-more-types')
-const R = require('ramda')
-const os = require('os')
+import path from 'path'
+import os from 'os'
 
 // canonical platform names
-const platforms = {
+export const platforms = {
   darwin: 'darwin',
   linux: 'linux',
   windows: 'win32',
+} as const
+
+export const PLATFORM = os.platform() as any
+
+if (!Object.values(platforms).includes(PLATFORM)) {
+  throw new Error(`Invalid build platform  ${PLATFORM}`)
 }
 
-const isValidPlatform = check.oneOf(R.values(platforms))
+export type PlatformName = {[K in keyof typeof platforms]: typeof platforms[K]}[keyof typeof platforms]
 
-const checkPlatform = (platform) => {
-  return la(isValidPlatform(platform),
-    'invalid build platform', platform, 'valid choices', R.values(platforms))
+export const buildRootDir = () => {
+  return path.join(TMP_BUILD_DIR, 'build')
 }
 
-const buildRootDir = () => {
+export const buildLinkDir = () => {
   return path.resolve('build')
 }
 
@@ -27,11 +29,10 @@ const buildRootDir = () => {
 // build/
 //   <platform>/ = linux or darwin
 //     ... platform-specific files
-const buildDir = function (platform, ...args) {
-  checkPlatform(platform)
+export const buildDir = function (...args: string[]) {
   const root = buildRootDir()
 
-  switch (platform) {
+  switch (PLATFORM) {
     case 'darwin':
       // the new electron-builder for some reason adds its own platform
       // subfolder and it is NOT "darwin" but "mac"
@@ -50,23 +51,21 @@ const buildDir = function (platform, ...args) {
   }
 }
 
-// returns a path into the /dist directory
-const distDir = function (platform, ...args) {
-  checkPlatform(platform)
+export const TMP_BUILD_DIR = path.join(os.tmpdir(), 'cypress-build', PLATFORM)
 
-  return path.resolve('dist', platform, ...args)
+// returns a path into the /dist directory
+export const distDir = function (...args: string[]) {
+  return path.resolve(TMP_BUILD_DIR, 'dist', ...args)
 }
 
 // returns folder to zip before uploading
-const zipDir = function (platform) {
-  checkPlatform(platform)
-  switch (platform) {
+export const zipDir = function () {
+  switch (PLATFORM) {
     case 'darwin':
-      return buildDir(platform, 'Cypress.app')
+      return buildDir('Cypress.app')
     case 'linux':
-      return buildDir(platform)
     case 'win32':
-      return buildDir(platform)
+      return buildDir()
     default:
       throw new Error('unexpected platform')
   }
@@ -74,42 +73,28 @@ const zipDir = function (platform) {
 
 // returns a path into the /build/*/app directory
 // specific to each platform
-const buildAppDir = function (platform, ...args) {
-  checkPlatform(platform)
-  switch (platform) {
+export const buildAppDir = function (...args: string[]) {
+  switch (PLATFORM) {
     case 'darwin':
-      return buildDir(platform, 'Cypress.app', 'Contents', 'resources', 'app', ...args)
+      return buildDir('Cypress.app', 'Contents', 'resources', 'app', ...args)
     case 'linux':
-      return buildDir(platform, 'resources', 'app', ...args)
     case 'win32':
-      return buildDir(platform, 'resources', 'app', ...args)
+      return buildDir('resources', 'app', ...args)
     default:
       throw new Error('unexpected platform')
   }
 }
 
-const buildAppExecutable = function (platform) {
-  checkPlatform(platform)
-  switch (platform) {
+export const buildAppExecutable = function () {
+  switch (PLATFORM) {
     case 'darwin':
-      return buildDir(platform, 'Cypress.app', 'Contents', 'MacOS', 'Cypress')
+      return buildDir('Cypress.app', 'Contents', 'MacOS', 'Cypress')
     case 'linux':
-      return buildDir(platform, 'Cypress')
     case 'win32':
-      return buildDir(platform, 'Cypress')
+      return buildDir('Cypress')
     default:
       throw new Error('unexpected platform')
   }
 }
 
-module.exports = {
-  isValidPlatform,
-  buildRootDir,
-  buildDir,
-  distDir,
-  zipDir,
-  buildAppDir,
-  buildAppExecutable,
-  cacheDir: path.join(process.cwd(), 'cache'),
-  platforms,
-}
+export const cacheDir = path.join(process.cwd(), 'cache')
