@@ -3,6 +3,9 @@
     <li v-for="runnable in runnables" :key="runnable.id">
       <div>
         <Runnable :runnable="runnable">
+          <div v-for="hook in runnable.hooks">
+            
+          </div>
           <RunnablesList :runnables="runnable.children"/>
         </Runnable>
       </div>

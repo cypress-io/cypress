@@ -27,6 +27,22 @@ export function suiteContents (level, parentId, id, tests, suites) {
   }
 }
 
+export function addCommand (logData = {}) {
+  return {
+    event: false,
+    hookId: 'r3',
+    id: newId(),
+    instrument: 'command',
+    renderProps: {},
+    state: 'passed',
+    testId: newId(),
+    testCurrentRetry: 0,
+    type: 'parent',
+    url: 'http://example.com',
+    ...logData,
+  }
+}
+
 const rootId = newId(1)
 const suite1 = newId(2)
 const suite2 = newId(3)

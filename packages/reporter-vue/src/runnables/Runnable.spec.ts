@@ -1,10 +1,10 @@
 import { h } from 'vue'
 import Runnable from './Runnable.vue'
 import faker from 'faker'
-import { Suite, Test } from '../store/reporter-store'
+import { SuiteModel, TestModel } from '../store/reporter-store'
 import _ from 'lodash'
 
-const makeSuite = (tests) => new Suite({
+const makeSuite = (tests) => new SuiteModel({
   suites: [],
   id: faker.datatype.uuid(),
   title: faker.git.commitMessage(),
@@ -13,7 +13,7 @@ const makeSuite = (tests) => new Suite({
   children: tests || []
 })
 
-const makeTest = state => new Test({
+const makeTest = state => new TestModel({
   id: faker.datatype.uuid(),
   title: faker.git.commitMessage(),
   level: 0,
@@ -42,7 +42,7 @@ describe('Runnable Suite suite states', () => {
     mountWithProps({ runnable: makeSuite([{ state: 'failed' }]) })
   })
 
-  it('renders a passing suite', () => {
+  it.only('renders a passing suite', () => {
     mountWithProps({ runnable: makeSuite([{ state: 'passed' }]) })
   })
 
