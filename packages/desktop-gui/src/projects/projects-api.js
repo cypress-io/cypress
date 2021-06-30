@@ -192,6 +192,7 @@ const openProject = (project) => {
 
   return ipc.openProject(project.path)
   .then((config = {}) => {
+    console.log('CONFIG IS', config)
     updateConfig(config)
     const projectIdAndPath = { id: config.projectId, path: project.path }
 

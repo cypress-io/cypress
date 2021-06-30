@@ -62,6 +62,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public browser: any
   public projectType?: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
+  // as modified via plugins
+  public modifiedConfig: Record<string, any> = {}
+  public specsStore: any
+  public startSpecWatcher: any
 
   constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
     super()
@@ -118,37 +122,37 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
+  onOpen (options: OpenServerOptions) {
     this._server = this.projectType === 'e2e'
       ? new ServerE2E()
       : new ServerCt()
 
-    return this._initPlugins(cfg, options)
-    .then(({ cfg, specsStore, startSpecWatcher }) => {
-      const updatedCfg = this.projectType === 'e2e'
-        ? cfg
-        : this.injectCtSpecificConfig(cfg)
+    // return this._initPlugins(cfg, options)
+    // .then(({ cfg, specsStore, startSpecWatcher }) => {
+    const updatedCfg = this.projectType === 'e2e'
+      ? this.modifiedConfig
+      : this.injectCtSpecificConfig(this.modifiedConfig)
 
-      return this.server.open(updatedCfg, {
-        project: this,
-        onError: options.onError,
-        onWarning: options.onWarning,
-        shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-        projectType: this.projectType,
-        SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
-        createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
-        specsStore,
-      })
-      .then(([port, warning]) => {
-        return {
-          cfg: updatedCfg,
-          port,
-          warning,
-          specsStore,
-          startSpecWatcher,
-        }
-      })
+    return this.server.open(updatedCfg, {
+      project: this,
+      onError: options.onError,
+      onWarning: options.onWarning,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      projectType: this.projectType,
+      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      specsStore: this.specsStore,
     })
+    .then(([port, warning]) => {
+      return {
+        cfg: updatedCfg,
+        port,
+        warning,
+        specsStore: this.specsStore,
+        startSpecWatcher: this.startSpecWatcher,
+      }
+    })
+    // })
   }
 
   onAfterOpen ({ cfg }) {
@@ -194,8 +198,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
     })
-    .then((cfg) => {
-      return this.onOpen(cfg, options)
+    .then(() => {
+      return this.onOpen(options)
     })
     .tap(({ cfg, port }) => {
       // if we didnt have a cfg.port
@@ -209,7 +213,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }
     })
     .tap(this.onAfterOpen)
-    .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
+    .then(({ cfg, port, warning  }) => {
       // store the cfg from
       // opening the server
       this._cfg = cfg
@@ -245,7 +249,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         // This is only used for CT right now, but it will be
         // used for E2E eventually. Until then, do not watch
         // the specs.
-        startSpecWatcher()
+        // startSpecWatcher()
 
         return Bluebird.join(
           this.checkSupportFile(cfg),
@@ -361,6 +365,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       debug('plugin config yielded: %o', modifiedCfg)
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+      console.log('updatedConfig', updatedConfig)
 
       if (this.projectType === 'ct') {
         updatedConfig.componentTesting = true
@@ -378,6 +383,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return Bluebird.resolve(updatedConfig)
     })
     .then(async (modifiedConfig: any) => {
+      console.log('in here!', modifiedConfig)
       const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
         if (this.projectType === 'ct') {
           return spec.specType === 'component'
@@ -391,6 +397,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
 
       return this.initSpecStore({ specs, config: modifiedConfig })
+      .then((val) => {
+        console.log('VALS  ARE', val)
+        return val
+      })
     })
   }
 
@@ -441,12 +451,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
-    return specsStore.storeSpecFiles()
-    .return({
+    specsStore.storeSpecFiles()
+
+    return {
       specsStore,
       cfg: config,
       startSpecWatcher,
-    })
+    }
   }
 
   watchPluginsFile (cfg, options) {

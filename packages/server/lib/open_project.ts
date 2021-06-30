@@ -388,7 +388,10 @@ export class OpenProject {
     .then((cfg) => {
       return this.openProject!._initPlugins(cfg, this.options)
     })
-    .then(({ cfg }) => {
+    .then((val) => {
+      const { cfg, specsStore, startSpecWatcher } = val
+      this.openProject!.specsStore = specsStore
+      this.openProject!.startSpecWatcher = startSpecWatcher
       return cfg
     })
   }

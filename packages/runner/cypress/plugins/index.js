@@ -6,7 +6,7 @@ const { getSnapshot, saveSnapshot } = require('./snapshot/snapshotPlugin')
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on) => {
-  throw Error('uh oh')
+  // throw Error('uh oh')
   on('task', {
     getSnapshot,
     saveSnapshot,
