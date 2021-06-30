@@ -53,7 +53,8 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
     debug('create project')
 
     return openProject.create(projectRoot, args, options)
-    .then((project) => {
+    .then(() => openProject.open())
+    .then(() => {
       debug('launch project')
 
       return openProject.launch(browser, spec, {

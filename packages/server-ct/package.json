@@ -24,6 +24,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@cypress/sinon-chai": "2.9.1",
     "@packages/resolve-dist": "0.0.0-development",
     "chai": "^4.2.0",
     "expect": "^26.6.2",

@@ -2,8 +2,11 @@ const Updater = require('@packages/server/lib/updater')
 import { openProject } from '@packages/server/lib/open_project'
 import browsers from '@packages/server/lib/browsers'
 import sinon from 'sinon'
-import { expect } from 'chai'
+import Chai, { expect } from 'chai'
+import SinonChai from '@cypress/sinon-chai'
 import * as Index from '../../index'
+
+Chai.use(SinonChai)
 
 describe('index.spec', () => {
   let backupEnv
@@ -15,6 +18,7 @@ describe('index.spec', () => {
     stub_setInterval = sinon.spy(global, 'setInterval')
     sinon.stub(Updater, 'check').resolves()
     sinon.stub(openProject, 'create').resolves()
+    sinon.stub(openProject, 'open').resolves()
     sinon.stub(openProject, 'launch').resolves()
     sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves()
   })
@@ -24,6 +28,8 @@ describe('index.spec', () => {
       process.env = backupEnv
       backupEnv = null
     }
+
+    sinon.restore()
   })
 
   it('registers update check', async () => {
@@ -38,5 +44,13 @@ describe('index.spec', () => {
       testingType: 'ct',
       initialLaunch: true,
     })
+  })
+
+  it('calls openProject#open', async () => {
+    await Index.start('/path/to/project', {
+      browser: 'chrome',
+    })
+
+    expect(openProject.open).to.have.been.called
   })
 })
