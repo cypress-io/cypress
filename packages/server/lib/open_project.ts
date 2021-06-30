@@ -380,7 +380,7 @@ export class OpenProject {
     debug('created project %s', path)
     debug('with options %o', options)
 
-    this.options = _.extend({}, args.config, options, { args })
+    this.options = _.extend({}, args.config, options, { args }, { testingType: args.testingType })
 
     // return the project and return
     // the config for the project instance
