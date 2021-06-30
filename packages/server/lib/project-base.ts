@@ -158,6 +158,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   open (options = {}) {
+    if (this._server) {
+      // we have already opened the project - do not "open" again
+      return Bluebird.resolve()
+    }
+
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
