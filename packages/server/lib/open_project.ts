@@ -65,6 +65,14 @@ export class OpenProject {
     return this.openProject
   }
 
+  open () {
+    if (!this.openProject) {
+      throw Error('Cannot call OpenProject#open without first calling OpenProject#create')
+    }
+
+    return this.openProject.open(this.options)
+  }
+
   changeUrlToSpec (spec: Cypress.Cypress['spec']) {
     if (!this.openProject) {
       throw Error('Cannot call OpenProject#changeUrlToSpec without first calling OpenProject#create')
