@@ -1784,7 +1784,9 @@ describe('lib/cypress', () => {
 
         return Events.handleEvent(options, bus, event, 123, 'open:project', this.todosPath)
       }).then(() => {
-        expect(event.sender.send.withArgs('response').firstCall.args[1].data).to.eql(warning)
+        return openProject.open()
+      }).then(() => {
+        expect(event.sender.send.withArgs('response').secondCall.args[1].data).to.eql(warning)
       })
     })
 
