@@ -19,15 +19,11 @@
       <!-- Inner content of the suite -->
       <template v-if="runnable.type === 'test'">
         <div data-cy="content" class="content-wrapper transform">
-          <Hook v-for="hook in runnable.hooks"
+          <Hook v-for="(hook, idx) in runnable.hooks"
           :key="hook.hookId"
-          :byKind="hooksByKind"
+          :idx="idx"
+          :count="hooksByKind[hook.hookName].length"
           :hook="hook">
-            <!-- <template #title="{ shouldRender }">
-              <span v-if="shouldRender">
-                {{ hook.hookName }} {{ hookCounts > 0 && `(${hookCounts[hook.hookName]})` }}
-              </span>
-            </template> -->
           </Hook>
         </div>
       </template>
