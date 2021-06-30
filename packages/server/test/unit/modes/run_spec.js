@@ -661,6 +661,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'waitForBrowserToConnect')
       sinon.stub(videoCapture, 'start').resolves()
       sinon.stub(openProject, 'launch').resolves()
+      sinon.stub(openProject, 'open').resolves()
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
       sinon.spy(errors, 'warning')
       sinon.stub(config, 'get').resolves({
@@ -730,6 +731,7 @@ describe('lib/modes/run', () => {
       sinon.stub(ProjectBase, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
+      sinon.stub(openProject, 'open').resolves(openProject)
       sinon.stub(system, 'info').resolves({ osName: 'osFoo', osVersion: 'fooVersion' })
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves({
         name: 'fooBrowser',
