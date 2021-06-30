@@ -158,11 +158,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   // maybe by tapping into the Cypress reset
   // stuff, or handling this in the runner itself?
   // Cypress sessions will clear cookies on its own before each test
-  if (!Cypress.config.experimentalSessionSupport) {
-    Cypress.on('test:before:run:async', () => {
+  Cypress.on('test:before:run:async', () => {
+    if (!Cypress.config.experimentalSessionSupport) {
       return getAndClear()
-    })
-  }
+    }
+  })
 
   return Commands.addAll({
     getCookie (name, options = {}) {

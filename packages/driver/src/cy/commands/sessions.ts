@@ -440,22 +440,24 @@ export default function (Commands, Cypress, cy) {
 
     registerSessionHooks () {
       Cypress.on('test:before:run:async', () => {
-        currentTestRegisteredSessions.clear()
+        if (Cypress.config('experimentalSessionSupport')) {
+          currentTestRegisteredSessions.clear()
 
-        return navigateAboutBlank(false)
-        .then(() => sessions.clearCurrentSessionData())
-        .then(() => {
-          return Cypress.backend('reset:renderedHTMLOrigins')
-        })
+          return navigateAboutBlank(false)
+          .then(() => sessions.clearCurrentSessionData())
+          .then(() => {
+            return Cypress.backend('reset:renderedHTMLOrigins')
+          })
+        }
+
+        return
       })
     },
 
   }
 
   Cypress.on('run:start', () => {
-    if (Cypress.config('experimentalSessionSupport')) {
-      sessions.registerSessionHooks()
-    }
+    sessions.registerSessionHooks()
   })
 
   Commands.addAll({
