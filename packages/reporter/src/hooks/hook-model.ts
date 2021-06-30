@@ -43,7 +43,7 @@ export default class Hook implements HookProps {
     let consecutiveDuplicateAliases: Array<Alias> = []
     const aliases: Array<Alias> = this.commands.map((command) => {
       if (command.alias) {
-        if (command.hasDuplicates) {
+        if (command.hasChildren) {
           consecutiveDuplicateAliases.push(command.alias)
         }
 
@@ -87,13 +87,24 @@ export default class Hook implements HookProps {
       command.number = 1
     }
 
+    if (command.group) {
+      const groupCommand = _.find(this.commands, { id: command.group }) as CommandModel
+
+      if (groupCommand && groupCommand.addChild) {
+        groupCommand.addChild(command)
+
+        return
+      }
+    }
+
     const lastCommand = _.last(this.commands)
 
     if (lastCommand &&
       lastCommand.isMatchingEvent &&
       lastCommand.isMatchingEvent(command) &&
-      lastCommand.addDuplicate) {
-      lastCommand.addDuplicate(command)
+      lastCommand.addChild
+    ) {
+      lastCommand.addChild(command)
     } else {
       this.commands.push(command)
     }

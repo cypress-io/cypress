@@ -1492,6 +1492,8 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
         })
       }
 
+      cy.state('duringUserTestExecution', false)
+
       // our runnable is about to run, so let cy know. this enables
       // us to always have a correct runnable set even when we are
       // running lifecycle events
@@ -1535,6 +1537,11 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
 
         // call the original method with our
         // custom onNext function
+
+        // this tells us we are now running test execution code
+        // since all test:before:run:async listeners have completed
+        cy.state('duringUserTestExecution', true)
+
         return runnableRun.call(runnable, onNext)
       })
     },

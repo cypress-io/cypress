@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
 Cypress.config('isInteractive', true)
+Cypress.config('experimentalSessionSupport', true)
 
 const expectCurrentSessionData = (obj) => {
   cy.then(() => {
@@ -13,9 +14,34 @@ const expectCurrentSessionData = (obj) => {
 }
 
 before(() => {
+  if (top.doNotClearSessions) {
+    top.doNotClearSessions = false
+
+    return
+  }
+
   // TODO: look into why returning this promise here throws a Cypress warning in console
   // about mixed promises and commands
   cy.wrap(Cypress.session.clearAllSavedSessions())
+})
+
+describe('persist saved sessions between spec reruns', () => {
+  it('sets session', (done) => {
+    cy.session('persist_session', () => {
+      cy.setCookie('cookieName', 'cookieValue')
+    })
+    .then(() => {
+      if (!top.didRerun) {
+        top.didRerun = true
+        top.doNotClearSessions = true
+        top._rerun()
+      }
+    })
+    .then(() => {
+      top.didRerun = false
+      done()
+    })
+  })
 })
 
 const sessionUser = (name = 'user0') => {
@@ -199,9 +225,12 @@ describe('clears session data beforeEach test even with no session', () => {
   })
 })
 
-describe('navigates to about:blank between tests', () => {
+describe('navigates to about:blank between tests and shows warning about session lifecycle', () => {
   cy.state('foo', true)
   it('t1', () => {
+    // only warns after initial blank page
+    // unfortunately this fails when run alongside other tests
+    // cy.contains('experimentalSessionSupport').should('not.exist')
     cy.contains('default blank page')
 
     cy.visit('https://localhost:4466/cross_origin_iframe/foo')
@@ -209,6 +238,7 @@ describe('navigates to about:blank between tests', () => {
   })
 
   it('t2', () => {
+    cy.contains('Because you have experimentalSessionSupport')
     cy.contains('default blank page')
   })
 })
@@ -232,7 +262,7 @@ describe('navigates to special about:blank after session', () => {
   })
 
   it('t2', () => {
-    cy.contains('session')
+    cy.contains('experimentalSessionSupport')
     cy.contains('blank page')
   })
 })
@@ -336,9 +366,6 @@ describe('multiple sessions in test - can switch without redefining', () => {
 function SuiteWithValidateFn (id, fn) {
   const setupFn = Cypress.sinon.stub().callsFake(() => {
     cy.log('setupFn')
-    .then(() => {
-      console.log('running session fn')
-    })
   })
   const validate = Cypress.sinon.stub().callsFake(() => {
     Cypress.log({

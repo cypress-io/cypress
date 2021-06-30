@@ -72,7 +72,10 @@ const toSerializedJSON = function (attrs) {
 }
 
 const getDisplayProps = (attrs) => {
-  return _.pick(attrs, DISPLAY_PROPS)
+  return {
+    ..._.pick(attrs, DISPLAY_PROPS),
+    hasSnapshot: !!attrs.snapshots,
+  }
 }
 
 const getConsoleProps = (attrs) => {
@@ -134,24 +137,6 @@ const defaults = function (state, config, obj) {
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
     }
 
-    // if (obj.name === 'assert') {
-    //   debugger
-    // }
-
-    if (obj.groupEnd) {
-      group = null
-
-      // return
-    }
-
-    if (group) {
-      obj.group = group
-    }
-
-    if (obj.groupStart) {
-      group = obj.groupStart
-    }
-
     _.defaults(obj, {
       timeout: config('defaultCommandTimeout'),
       event: false,
@@ -197,7 +182,7 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
-  return _.defaults(obj, {
+  _.defaults(obj, {
     id: (counter += 1),
     state: 'pending',
     instrument: 'command',
@@ -220,6 +205,20 @@ const defaults = function (state, config, obj) {
       return {}
     },
   })
+
+  if (obj.groupEnd) {
+    group = null
+  }
+
+  if (group) {
+    obj.group = group
+  }
+
+  if (obj.groupStart) {
+    group = obj.id
+  }
+
+  return obj
 }
 
 let group = null

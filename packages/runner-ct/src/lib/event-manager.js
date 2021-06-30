@@ -230,6 +230,8 @@ const eventManager = {
       window.Cypress = Cypress
     }
 
+    Cypress.rerun = this._reRun()
+
     this._addCypressListeners(Cypress)
 
     ws.emit('watch:test:file', config.spec)

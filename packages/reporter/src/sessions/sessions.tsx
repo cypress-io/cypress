@@ -22,56 +22,31 @@ const Sessions = observer(({ model }: SessionsProps) => (
     })}
   >
 
-    {_.map(model, (sess) => {
-      return (<div key={sess.name} className='instruments-container sessions-container'>
-        <ul className='hooks-container'>
-          <li className='hook-item'>
-            <Collapsible
-              header={<>
-                  Session <i style={{ textTransform: 'none' }}>({sess.name})</i>
-                &nbsp;
-                {sess.state === 'pending' && <i className="fa fa-spinner fa-spin" />}
-
-              </>
-              }
-              headerClass='hook-header'
-              headerExtras={<div className="clear-sessions"
+    <div className='instruments-container sessions-container'>
+      <ul className='hooks-container'>
+        <li className='hook-item'>
+          <Collapsible
+            header={<>
+                  Sessions <i style={{ textTransform: 'none' }}>({_.size(model)})</i>
+            </>
+            }
+            headerClass='hook-header'
+            headerExtras={
+              <div className="clear-sessions"
                 onClick={() => events.emit('clear:session')}
-              ><span>Clear All Sessions</span></div>}
-              contentClass='instrument-content'
-            >
-              <table>
-                <thead>
-                  <tr>
-                    <th>Domain</th>
-                    <th># Cookies</th>
-                    <th># LocalStorage keys</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {renderSessionTableContents(sess.data)}
-                </tbody>
-              </table>
-            </Collapsible>
-          </li>
-        </ul>
-      </div>)
-    })}
+              ><span><i className="fas fa-ban" />Clear All Sessions</span></div>}
+            contentClass='instrument-content'
+          >
+            <div>
+              {_.map(model, (sess) => {
+                return (<div key={sess.name}>{sess.name}</div>)
+              })}
+            </div>
+          </Collapsible>
+        </li>
+      </ul>
+    </div>
   </div>
 ))
-
-function renderSessionTableContents (data: any) {
-  if (!_.size(data)) {
-    return (<tr>
-      <td colSpan={3}><i>no session data</i></td>
-    </tr>)
-  }
-
-  return _.map(data, (val, domain) => (<tr key={domain}>
-    <td>{domain}</td>
-    <td>{val.cookies || '-'}</td>
-    <td>{val.localStorage || '-'}</td>
-  </tr>))
-}
 
 export default Sessions

@@ -252,6 +252,12 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     return
   }
 
+  // this prevents a log occurring when we navigate to about:blank inbetween tests
+  // e.g. for new sessions lifecycle
+  if (!state('duringUserTestExecution')) {
+    return
+  }
+
   const options = {}
 
   _.defaults(options, {
@@ -333,10 +339,13 @@ const stabilityChanged = (Cypress, state, config, stable) => {
 
     return new Promise((resolve) => {
       return cy.once('window:load', (e) => {
+        // this prevents a log occurring when we navigate to about:blank inbetween tests
+        if (!state('duringUserTestExecution')) return
+
         cy.state('onPageLoadErr', null)
 
         if (e.window.location.href === 'about:blank') {
-          options._log.set('message', 'page cleared').end()
+          options._log.set('message', 'page cleared').snapshot().end()
         } else {
           options._log.set('message', '--page loaded--').snapshot().end()
         }

@@ -105,6 +105,125 @@ export const initial = () => {
   `
 }
 
+export const sessionLifecycle = () => {
+  return `
+    <style>
+      body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        color: #111;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.4;
+        padding: 20px;
+        width: 100%;
+        height: 100%;
+      }
+
+      pre {
+        text-align: left;
+        display: flex;
+      }
+
+      pre code {
+        margin: 0 auto;
+      }
+
+      .container {
+        background-color: #f3f3f3;
+        border-radius: 6px;
+        border: 2px dashed #ddd;
+        padding: 30px 15px;
+        text-align: center;
+        height: 100%;
+      }
+
+      svg {
+        display: inline-block;
+        stroke-width: 0;
+        stroke: currentColor;
+        fill: currentColor;
+        margin: 20px 0 10px;
+        width: 62px;
+      }
+
+      p {
+        font-size: 21px;
+        font-weight: 200;
+        line-height: 1.4;
+      }
+
+      kbd {
+        background-color: #6b6b6b;
+        border-radius: 3px;
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+        color: #fff;
+        display: inline-block;
+        font-size: 85%;
+        padding: 2px 4px;
+      }
+
+      a {
+        color: #FFF;
+        text-decoration: none;
+      }
+
+      a:hover,
+      a:focus,
+      a:active {
+        text-decoration: underline;
+      }
+
+      ul {
+        text-align: left;
+        margin: 0 auto 10px;
+        display: inline-block;
+        padding: 20px 20px 20px 40px;
+      }
+
+      li {
+        list-style: decimal;
+        list-style-position: outside;
+        margin: 4px 0;
+      }
+
+      .warn {
+        color: #0000007a;
+        background-color: #ffa5007a;
+        border-left: 4px solid #ffa500;
+        font-size: 15px;
+        padding: 10px 6px;
+        max-width: 600px;
+        margin: 0 auto 6px;
+        display: inline-block;
+        text-align: left;
+      }
+    </style>
+
+    <div class='container'>
+      ${svg_cy}
+      <br/>
+      <p class="warn">Because you have <code><b>experimentalSessionSupport</b></code> enabled, Cypress navigates your app to the default blank page before each test.</p>
+      <p>This is the default blank page.</p>
+      <p>To test your web application:</p>
+      <ul>
+        <li>Start your app's server</li>
+        <li>
+          <kbd>
+            <a href='https://on.cypress.io/visit' target='_blank'>cy.visit()</a>
+          </kbd>
+          your app
+        </li>
+        <li>Begin writing tests</li>
+      </ul>
+    </div>
+  `
+}
+
 export const session = () => {
   return `
     <style>

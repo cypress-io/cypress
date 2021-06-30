@@ -32,6 +32,10 @@ export default class AutIframe {
     this._showContents(blankContents.session())
   }
 
+  showSessionLifecycleBlankContents () {
+    this._showContents(blankContents.sessionLifecycle())
+  }
+
   showVisitFailure = (props) => {
     this._showContents(visitFailure(props))
   }
@@ -69,10 +73,15 @@ export default class AutIframe {
       this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
-        if (type === 'session') {
-          this.showSessionBlankContents()
-        } else {
-          this.showInitialBlankContents()
+        switch (type) {
+          case 'session':
+            this.showSessionBlankContents()
+            break
+          case 'session-lifecycle':
+            this.showSessionLifecycleBlankContents()
+            break
+          default:
+            this.showInitialBlankContents()
         }
 
         resolve()

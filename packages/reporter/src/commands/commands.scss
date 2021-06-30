@@ -1,6 +1,5 @@
 .reporter {
   .commands-container {
-    // background-color: #eef1f4;
     font-family: $monospace;
     min-width: $reporter-contents-min-width;
     padding: 0;
@@ -11,8 +10,7 @@
   }
 
   .command {
-    background-color: #eef1f4;
-    cursor: pointer;
+    cursor:default;
     margin: 0;
   }
 
@@ -43,7 +41,7 @@
       background-color: #eef1f4;
     }
 
-    .command-type-parent {
+    .command-type-parent > span > .command-wrapper {
       &:hover {
         border-top: 1px solid #e3e3e3;
       }
@@ -59,11 +57,11 @@
 
     .command-method,
     .command-message {
-      color: #9a9aaa !important;
+      color: #9a9aaa;
     }
   }
 
-  .command-type-parent {
+  .command-type-parent > span > .command-wrapper {
     border-top: 1px solid #e3e3e3;
 
     &:hover {
@@ -86,53 +84,13 @@
     }
   }
 
-
-  .command-groupStart {
-    // border-left:2px solid white;
-    // border-top:0px solid white;
-    // margin-right: 10px;
-    .command-method {
-      
-      font-weight: bold;
-      }
-      
-   
-  }
-  
-  .command-group {
-      // border-left:6px solid white;
-      margin-left: 10px;
-      
-  }
-  .command-has-showError,.command-name-Validating-Session,.command-name-Validating-Existing-Session,.command-name-Creating-New-Session {
-    // border-left:6px solid white;
-    
-    .command-method {
-      
-      font-weight: bold;
-      }
-      
-  }
-
   .command-wrapper {
+    background-color: #eef1f4;
     color: #777;
     min-height: 20px;
 
     &:hover {
       background-color: #E0E5E7;
-    }
-    .command-error-header {
-      margin-left: 10px;
-      color: #565554;
-      
-      .collapsible-header {
-        outline: none;
-        user-select: none;
-        padding: 5px 2px;
-      }
-      .collapsible-indicator {
-        color: #565554 !important;
-      }
     }
 
     .command-wrapper-text {
@@ -168,7 +126,7 @@
         }
       }
 
-      // ensures alias & number of duplicates don't break if reporter
+      // ensures alias & number of children commands don't break if reporter
       // width is narrow
       .alias-container {
         white-space: nowrap;
@@ -178,7 +136,7 @@
         }
       }
 
-      .num-duplicates,
+      .num-children,
       .command-alias-count {
         border-radius: 5px;
         color: #777;
@@ -188,7 +146,7 @@
         margin-left: 0;
       }
 
-      .num-duplicates.has-alias {
+      .num-children.has-alias {
         border-radius: 10px;
         line-height: 2;
         padding: 3px 5px 3px 5px;
@@ -199,7 +157,7 @@
         padding: 5px 6px 3px 4px;
       }
 
-      .num-duplicates,
+      .num-children,
       .command-alias-count {
         background-color: darken(#ffdf9c, 8%) !important;
       }
@@ -208,6 +166,9 @@
     .command-progress {
       height: 2px;
     }
+  }
+  .command-child-container {
+    margin-left: 10px;
   }
 
   .command-number {
@@ -223,7 +184,7 @@
     }
   }
 
-  .command-state-pending .command-number {
+  .command-state-pending > span > .command-wrapper .command-number {
     i {
       line-height: 18px;
       display: inline-block;
@@ -327,42 +288,80 @@
     text-overflow: ellipsis;
   }
 
-  .command-wrapper .fa-circle {
-    display: none;
-  }
-
-  .command-name-xhr,
-  .command-name-request {
-    .command-status {
-      font-weight: 700;
-      color: #565554;
-      margin-right: 3px;
-    }
-
-    .command-body {
-      color: #565554;
-    }
-
-    &.command-with-indicator .fa-circle {
-      display: inline-block;
-    }
-
-    .fa-circle.successful {
-      color: $pending;
-    }
-
-    .fa-circle.aborted {
-      color: $fail;
-    }
-
-    .fa-circle.bad {
-      color: #F0AD4E;
-    }
-
-    .fa-circle.pending {
-      color: #AAA;
+  .command-wrapper {
+    .fa-circle {
+      display: none;
     }
   }
+
+  .command-has-showError {
+    > span > .command-wrapper {
+      background-color: $warn-background;
+      border-left: 2px solid hsl(42, 56%, 53%);
+
+      &:hover {
+        background-color:$warn-header-background;
+      }
+
+      .command-wrapper-text .command-method {
+        color: $warn-text;
+      }
+
+      .command-error-header {
+        color: $warn-text;
+        font-style: normal;
+        margin-left: 25px;
+        
+        &:hover {
+          color: darken($color: $warn-text, $amount: 10%);
+
+          .collapsible-indicator {
+            color: #999;
+          }
+        }
+
+        .collapsible-header {
+          outline: none;
+          padding: 3px 0;
+        }
+      }
+    }
+  }
+
+  .command-with-indicator {
+    > span > .command-wrapper {
+      .command-status {
+        font-weight: 700;
+        color: #565554;
+        margin-right: 3px;
+      }
+
+      .command-body {
+        color: #565554;
+      }
+
+      .fa-circle {
+        padding: 4px;
+        display: inline-block;
+      }
+    
+      .fa-circle.successful {
+        color: $pending;
+      }
+    
+      .fa-circle.aborted {
+        color: $fail;
+      }
+    
+      .fa-circle.bad {
+        color: #F0AD4E;
+      }
+    
+      .fa-circle.pending {
+        color: #AAA;
+      }
+    }
+  } 
 
   .command-name-assert {
     .command-method {
@@ -500,20 +499,26 @@
     display: inline-block;
   }
 
+  .command-error {
+    font-style: normal;
+  }
+ 
+
   .command-has-num-elements .num-elements,
-  .num-duplicates {
+  .num-children {
     display: none;
   }
 
   .command-has-num-elements.no-elements .num-elements,
   .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-duplicates .num-duplicates {
+  .command-has-children .num-children {
     display: inline;
   }
 
-  .command-is-duplicate .num-duplicates,
-  .command-name-assert.command-has-num-elements .num-elements {
-    display: none;
+  .command-has-children > span > .command-wrapper:hover {
+    .command-expander {
+      color: #999;
+    }
   }
 
   .command-pin {
@@ -544,34 +549,16 @@
       @extend .#{$fa-css-prefix}-caret-right;
     }
 
-    &:hover {
-      color: #999;
-    }
   }
 
-  .command-has-duplicates,
-  .command-has-duplicates:hover {
-    .command-number {
+
+  .command-has-children > span > .command-wrapper {
+    .command-expander {
       display: block;
     }
-
-    .command-number {
-      display: none;
-    }
-  }
-
-  .command-has-duplicates .command-expander {
-    display: block;
-  }
-
-  .command-is-duplicate {
-    &:first-child {
-      border-top: solid 1px #e3e3e3;
-    }
-
-    .command-expander {
-      visibility: hidden;
-    }
+   .command-progress {
+     visibility: hidden;
+   }
   }
 
   .command-is-open {
@@ -581,7 +568,7 @@
       }
     }
 
-    .num-duplicates {
+    .num-children {
       display: none;
     }
 
@@ -590,8 +577,12 @@
     }
   }
 
-  .command-is-pinned,
-  .command:not(.command-is-studio):hover {
+  .command-has-snapshot > span > .command-wrapper {
+    cursor: pointer;
+  }
+
+  .command-is-pinned > span > .command-wrapper,
+  .command-has-snapshot > span > .command-wrapper:hover {
     .command-number {
       display: none;
     }
@@ -601,24 +592,20 @@
     }
   }
 
-  .command-has-duplicates:hover .duplicates .command-pin,
-  .command-has-duplicates:hover > span > .command-wrapper .command-pin {
-    display: none;
-  }
-
-  .command-has-duplicates.command-is-pinned > span > .command-wrapper,
-  .command-is-duplicate.command-is-pinned > span > .command-wrapper,
-  .command-is-duplicate > span > .command-wrapper:hover {
-    .command-expander {
-      display: none;
-    }
-
-    .command-pin {
-      display: block;
+  .command {
+    &.command-is-studio,&.command-has-children {
+      > span > .command-wrapper:hover {
+        .command-pin {
+          display: none;
+        }
+        .command-number {
+          display: block;
+        }
+      }
     }
   }
 
-  .command-state-pending > span .command-wrapper:hover {
+  .command-state-pending > span > .command-wrapper:hover {
     .command-number {
       display: block;
     }

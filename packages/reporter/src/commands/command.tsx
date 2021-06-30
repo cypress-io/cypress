@@ -15,8 +15,8 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import CommandModel from './command-model'
-import TestError from '../errors/test-error'
 import Collapsible from '../collapsible/collapsible'
+import TestError from '../errors/test-error'
 
 const md = new Markdown()
 
@@ -145,7 +145,7 @@ interface Props {
 
 @observer
 class Command extends Component<Props> {
-  @observable isOpen = false
+  @observable isOpen: boolean|null = null
   private _showTimeout?: TimeoutID
 
   static defaultProps = {
@@ -163,11 +163,9 @@ class Command extends Component<Props> {
         className={cs(
           'command',
           `command-name-${model.name ? nameClassName(model.name) : ''}`,
-          `command-state-${model.state}`,
+          `command-state-${(_.last(model.children) || model).state}`,
           `command-type-${model.type}`,
           {
-            'command-group': model.group,
-            'command-groupStart': model.groupStart,
             'command-has-showError': model.showError,
             'command-is-studio': model.isStudio,
             'command-is-event': !!model.event,
@@ -177,31 +175,34 @@ class Command extends Component<Props> {
             'command-with-indicator': !!model.renderProps.indicator,
             'command-scaled': message && message.length > 100,
             'no-elements': !model.numElements,
+            'command-has-snapshot': model.hasSnapshot,
             'multiple-elements': model.numElements > 1,
-            'command-has-duplicates': model.hasDuplicates,
-            'command-is-duplicate': model.isDuplicate,
-            'command-is-open': this.isOpen,
+            'command-has-children': model.hasChildren,
+            'command-is-child': model.isChild,
+            'command-is-open': this._isOpen(),
           },
         )}
-        onMouseOver={() => this._snapshot(true)}
-        onMouseOut={() => this._snapshot(false)}
+
       >
         <FlashOnClick
           message='Printed output to your console'
           onClick={this._onClick}
           shouldShowMessage={this._shouldShowClickMessage}
         >
-          <div className='command-wrapper'>
+          <div className='command-wrapper'
+            onMouseOver={() => this._snapshot(true)}
+            onMouseOut={() => this._snapshot(false)}
+          >
             <div className='command-wrapper-text'>
+              <span className='command-expander' onClick={this._toggleOpen}>
+                <i className='fas' />
+              </span>
               <span className='command-number'>
                 <i className='fas fa-spinner fa-spin' />
                 <span>{model.number || ''}</span>
               </span>
               <span className='command-pin'>
                 <i className='fas fa-thumbtack' />
-              </span>
-              <span className='command-expander' onClick={this._toggleOpen}>
-                <i className='fas' />
               </span>
               <span className='command-method'>
                 <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
@@ -219,38 +220,51 @@ class Command extends Component<Props> {
                 </Tooltip>
                 <span className='alias-container'>
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                  <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
-                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
+                  <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
+                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numChildren}</span>
                   </Tooltip>
                 </span>
               </span>
             </div>
             <Progress model={model} />
-
             {model.showError && <Collapsible
               header={typeof model.showError === 'string' ? model.showError : 'Error'}
               headerClass="command-error-header"
+              contentClass="command-error"
             >
               <TestError model={model} onPrintToConsole={this._onClick}/>
+
             </Collapsible>}
           </div>
         </FlashOnClick>
-        {this._duplicates()}
+        {this._children()}
       </li>
     )
   }
 
-  _duplicates () {
+  _isOpen () {
+    const { model } = this.props
+
+    return this.isOpen ||
+    (this.isOpen === null
+      && (
+        (_.some(model.children, (v) => v.isLongRunning) && _.last(model.children)?.state === 'pending') ||
+        _.last(model.children)?.state === 'failed'
+      )
+    )
+  }
+
+  _children () {
     const { appState, events, model, runnablesStore } = this.props
 
-    if (!this.isOpen || !model.hasDuplicates) return null
+    if (!this._isOpen()) return
 
     return (
-      <ul className='duplicates'>
-        {_.map(model.duplicates, (duplicate) => (
+      <ul className='command-child-container'>
+        {_.map(model.children, (child) => (
           <Command
-            key={duplicate.id}
-            model={duplicate}
+            key={child.id}
+            model={child}
             appState={appState}
             events={events}
             runnablesStore={runnablesStore}
@@ -276,6 +290,12 @@ class Command extends Component<Props> {
   }
 
   @action _onClick = () => {
+    if (this.props.model.hasChildren) {
+      this.isOpen = !this._isOpen()
+
+      return
+    }
+
     if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model

@@ -86,7 +86,6 @@ export default class Test extends Runnable {
       || this.isLongRunning
       || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
       || this.store.hasSingleTest)
-      || true
     }
 
     return this._isOpen
