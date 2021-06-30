@@ -5,7 +5,10 @@ const { fs } = require('../util/fs')
 const path = require('path')
 const debug = require('debug')('cypress:server:runner')
 const pkg = require('@packages/root')
-const runner = require('@packages/runner/lib/resolve-dist')
+/**
+ * @type {import('@packages/resolve-dist')}
+ */
+const { getPathToDist, getPathToIndex } = require('@packages/resolve-dist')
 
 const PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, '..', 'html', 'non_proxied_error.html')
 
@@ -24,7 +27,7 @@ module.exports = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, project } = options
+    let { config, getRemoteState, project, specsStore } = options
 
     const { spec, browser } = project.getCurrentSpecAndBrowser()
 
@@ -34,6 +37,7 @@ module.exports = {
     config.platform = os.platform()
     config.arch = os.arch()
     config.spec = spec
+    config.specs = specsStore.specFiles
     config.browser = browser
 
     debug('serving runner index.html with config %o',
@@ -46,7 +50,7 @@ module.exports = {
     // https://github.com/cypress-io/cypress/issues/4952
     const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
 
-    const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || runner.getPathToIndex()
+    const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner')
 
     return res.render(runnerPath, {
       base64Config,
@@ -55,14 +59,7 @@ module.exports = {
   },
 
   handle (req, res) {
-    const pathToFile = runner.getPathToDist(req.params[0])
-
-    return send(req, pathToFile)
-    .pipe(res)
-  },
-
-  handleSourceMappings (req, res) {
-    const pathToFile = runner.getPathToSourceMappings()
+    const pathToFile = getPathToDist('runner', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)

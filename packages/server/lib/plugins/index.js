@@ -114,6 +114,12 @@ const init = (config, options) => {
       testingType: options.testingType,
     })
 
+    // alphabetize config by keys
+    let orderedConfig = {}
+
+    Object.keys(config).sort().forEach((key) => orderedConfig[key] = config[key])
+    config = orderedConfig
+
     ipc.send('load', config)
 
     ipc.on('loaded', (newCfg, registrations) => {

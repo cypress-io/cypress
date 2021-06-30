@@ -14,6 +14,7 @@ import {
 import {
   getBodyStream,
   mergeDeletedHeaders,
+  mergeWithPreservedBuffers,
 } from '../util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
@@ -65,7 +66,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
   }
 
   const mergeChanges = (before: CyHttpMessages.IncomingResponse, after: CyHttpMessages.IncomingResponse) => {
-    _.merge(before, _.pick(after, SERIALIZABLE_RES_PROPS))
+    mergeWithPreservedBuffers(before, _.pick(after, SERIALIZABLE_RES_PROPS))
 
     mergeDeletedHeaders(before, after)
   }

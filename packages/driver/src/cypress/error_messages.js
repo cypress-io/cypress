@@ -668,6 +668,24 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/{{cmd}}',
     },
   },
+
+  keyboard: {
+    invalid_arg: {
+      message: `${cmd('Cypress.Keyboard.defaults')} must be called with an object. You passed: \`{{arg}}\``,
+      docsUrl: 'https://on.cypress.io/keyboard-api',
+    },
+    invalid_delay ({ cmd: command, option, delay, docsPath }) {
+      return {
+        message: `${cmd(command)} \`${option}\` option must be 0 (zero) or a positive number. You passed: \`${delay}\``,
+        docsUrl: `https://on.cypress.io/${docsPath}`,
+      }
+    },
+    invalid_per_test_delay: {
+      message: `The test configuration \`keystrokeDelay\` option must be 0 (zero) or a positive number. You passed: \`{{delay}}\``,
+      docsUrl: 'https://on.cypress.io/test-configuration',
+    },
+  },
+
   location: {
     invalid_key: {
       message: 'Location object does not have key: `{{key}}`',
@@ -917,7 +935,7 @@ module.exports = {
     reached_redirection_limit ({ href, limit }) {
       return stripIndent`\
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
-        
+
         If so, increase \`redirectionLimit\` value in configuration.`
     },
   },
@@ -931,23 +949,29 @@ module.exports = {
         You passed: ${format(staticResponse)}`, 8)
     },
     intercept: {
+      extra_arguments: ({ argsLength, overload }) => {
+        return cyStripIndent(`\
+          The ${cmd('intercept', overload.join(', '))} signature accepts a maximum of ${overload.length} arguments, but ${argsLength} arguments were passed.
+
+          Please refer to the docs for all accepted signatures for ${cmd('intercept')}.`, 10)
+      },
       invalid_handler: ({ handler }) => {
-        return stripIndent`\
+        return cyStripIndent(`\
           ${cmd('intercept')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
-          You passed: ${format(handler)}`
+          You passed: ${format(handler)}`, 10)
       },
       invalid_middleware_handler: ({ handler }) => {
-        return stripIndent`\
+        return cyStripIndent(`\
           ${cmd('intercept')}'s \`handler\` argument must be an HttpController function when \`middleware\` is set to \`true\`.
 
-          You passed: ${format(handler)}`
+          You passed: ${format(handler)}`, 10)
       },
       invalid_route_matcher: ({ message, matcher }) => {
-        return stripIndent`\
+        return cyStripIndent(`\
           An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
-          You passed: ${format(matcher)}`
+          You passed: ${format(matcher)}`, 10)
       },
       no_duplicate_url: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, \`url\` can only be specified as the first parameter.`,
       handler_required: `When invoking ${cmd('intercept')} with a \`RouteMatcher\` as the second parameter, a handler (function or \`StaticResponse\`) must be specified as the third parameter. If you intended to stub out a response body by passing an object as the 2nd parameter, pass an object with a \`body\` property containing the desired response body instead.`,
@@ -971,12 +995,14 @@ module.exports = {
       unknown_event: ({ validEvents, eventName }) => {
         return cyStripIndent(`\
           An invalid event name was passed as the first parameter to \`req.on()\`.
-          
+
           Valid event names are: ${format(validEvents)}
-          
+
           You passed: ${format(eventName)}`, 10)
       },
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
+      defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
+      setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {
@@ -1933,7 +1959,7 @@ module.exports = {
         ${cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 
         To visit a local file, you can pass in the relative path to the file from the \`projectRoot\` (Note: if the configuration value \`baseUrl\` is set, the supplied path will be resolved from the \`baseUrl\` instead of \`projectRoot\`)`,
-      docsUrl: ['https://docs.cypress.io/api/commands/visit.html', '/https://docs.cypress.io/api/cypress-api/config.html'],
+      docsUrl: 'https://on.cypress.io/visit',
     },
   },
 

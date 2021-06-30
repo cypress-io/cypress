@@ -1883,19 +1883,19 @@ describe('lib/config', () => {
   })
 
   context('.setScaffoldPaths', () => {
-    it('sets integrationExamplePath + integrationExampleName + scaffoldedFiles', () => {
+    it('sets scaffoldedFiles', () => {
       const obj = {
         integrationFolder: '/_test-output/path/to/project/cypress/integration',
       }
 
-      sinon.stub(scaffold, 'fileTree').resolves([])
+      const scaffoldedFiles = ['/_test-output/path/to/project/cypress/integration/example.spec.js']
+
+      sinon.stub(scaffold, 'fileTree').resolves(scaffoldedFiles)
 
       return config.setScaffoldPaths(obj).then((result) => {
         expect(result).to.deep.eq({
           integrationFolder: '/_test-output/path/to/project/cypress/integration',
-          integrationExamplePath: '/_test-output/path/to/project/cypress/integration/examples',
-          integrationExampleName: 'examples',
-          scaffoldedFiles: [],
+          scaffoldedFiles,
         })
       })
     })

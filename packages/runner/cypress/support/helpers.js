@@ -105,6 +105,7 @@ function createCypress (defaultOptions = {}) {
       state: {},
       config: { video: false },
       onBeforeRun () {},
+      stubOnSpecWindow: true,
       visitUrl: 'http://localhost:3500/fixtures/dom.html',
       visitSuccess: true,
     })
@@ -219,26 +220,28 @@ function createCypress (defaultOptions = {}) {
         .callsFake(() => {
           autCypress = win.Cypress
 
-          cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
-            autCypress.onSpecWindow.restore()
+          if (opts.stubOnSpecWindow) {
+            cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
+              autCypress.onSpecWindow.restore()
 
-            opts.onBeforeRun({ specWindow, win, autCypress })
+              opts.onBeforeRun({ specWindow, win, autCypress })
 
-            const testsInOwnFile = _.isString(mochaTestsOrFile)
-            const relativeFile = testsInOwnFile ? mochaTestsOrFile : 'cypress/fixtures/empty_spec.js'
+              const testsInOwnFile = _.isString(mochaTestsOrFile)
+              const relativeFile = testsInOwnFile ? mochaTestsOrFile : 'cypress/fixtures/empty_spec.js'
 
-            autCypress.onSpecWindow(specWindow, [
-              {
-                absolute: relativeFile,
-                relative: relativeFile,
-                relativeUrl: `/__cypress/tests?p=${relativeFile}`,
-              },
-            ])
+              autCypress.onSpecWindow(specWindow, [
+                {
+                  absolute: relativeFile,
+                  relative: relativeFile,
+                  relativeUrl: `/__cypress/tests?p=${relativeFile}`,
+                },
+              ])
 
-            if (testsInOwnFile) return
+              if (testsInOwnFile) return
 
-            generateMochaTestsForWin(specWindow, mochaTestsOrFile)
-          })
+              generateMochaTestsForWin(specWindow, mochaTestsOrFile)
+            })
+          }
 
           cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).log(false).callsFake(runIsolatedCypress)
         })

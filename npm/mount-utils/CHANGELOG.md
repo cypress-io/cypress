@@ -1,3 +1,10 @@
+# [@cypress/mount-utils-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v1.0.1...@cypress/mount-utils-v1.0.2) (2021-04-30)
+
+
+### Bug Fixes
+
+* avoid unmounting React components twice ([#16280](https://github.com/cypress-io/cypress/issues/16280)) ([bd629d3](https://github.com/cypress-io/cypress/commit/bd629d307eca9165b2c6f44ff87164a9e07a3eb5))
+
 # [@cypress/mount-utils-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v1.0.0...@cypress/mount-utils-v1.0.1) (2021-04-26)
 
 

@@ -1,18 +1,19 @@
 {
   "name": "cypress",
-  "version": "7.2.0",
+  "version": "7.6.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
     "binary-build": "node ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
+    "binary-ensure": "node ./scripts/binary.js ensure",
     "binary-purge": "node ./scripts/binary.js purge-version",
     "binary-release": "node ./scripts/binary.js release",
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
-    "build": "lerna run build --stream",
-    "build-prod": "lerna run build-prod --stream",
+    "build": "lerna run build --stream --ignore create-cypress-tests && lerna run build --stream --scope create-cypress-tests",
+    "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && lerna run build-prod --stream --scope create-cypress-tests",
     "bump": "node ./scripts/binary.js bump",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
@@ -45,7 +46,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts,unwritten.spec.ts",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,runner-shared,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
@@ -156,9 +157,9 @@
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
     "lerna": "3.20.2",
-    "lint-staged": "9.4.1",
-    "listr": "0.14.3",
-    "lodash": "4.17.19",
+    "lint-staged": "11.0.0",
+    "listr2": "3.8.3",
+    "lodash": "4.17.21",
     "make-empty-github-commit": "1.2.0",
     "minimist": "1.2.5",
     "mocha": "3.5.3",
@@ -205,7 +206,6 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress",
-  "author": "Brian Mann",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
   },
@@ -234,19 +234,12 @@
       "**/@ffmpeg-installer",
       "**/@ffmpeg-installer/**",
       "**/webpack-preprocessor/babel-loader",
-      "**/webpack-batteries-included-preprocessor/ts-loader",
-      "**/cypress-circleci-reporter"
+      "**/webpack-batteries-included-preprocessor/ts-loader"
     ]
   },
   "lint-staged": {
-    "*.coffee": [
-      "yarn stop-only --folder",
-      "git add"
-    ],
-    "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix",
-      "git add"
-    ]
+    "*.coffee": "yarn stop-only --folder",
+    "*.{js,jsx,ts,tsx,json,eslintrc}": "eslint --fix"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
@@ -254,7 +247,7 @@
     "**/@types/react": "16.9.50",
     "**/jquery": "3.1.1",
     "**/pretty-format": "26.4.0",
-    "**/socket.io-parser": "4.0.2",
+    "**/socket.io-parser": "4.0.4",
     "vue-template-compiler": "2.6.12"
   }
 }

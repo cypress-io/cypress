@@ -13,6 +13,7 @@ let zlib = require('zlib')
 const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const pkg = require('@packages/root')
@@ -20,7 +21,8 @@ const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const { SpecsStore } = require(`${root}/lib/specs-store`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
@@ -29,7 +31,11 @@ const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
-const runner = require(`${root}../runner/lib/resolve-dist`)
+/**
+ * @type {import('@packages/resolve-dist')}
+ */
+const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
+const { createRoutes } = require(`${root}lib/routes`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -122,7 +128,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectE2E('/path/to/project-e2e')
+          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', projectType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -133,7 +139,13 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new ServerE2E(new Watchers())),
 
-            this.server.open(cfg, this.project)
+            this.server.open(cfg, {
+              SocketCtor: SocketE2E,
+              project: this.project,
+              specsStore: new SpecsStore({}, 'e2e'),
+              createRoutes,
+              projectType: 'e2e',
+            })
             .spread(async (port) => {
               const automationStub = {
                 use: () => { },
@@ -2500,7 +2512,7 @@ describe('Routes', () => {
           'Content-Type': 'text/html',
         })
 
-        const injection = await runner.getInjectionContents()
+        const injection = await getRunnerInjectionContents()
         const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html').replace('{{injection}}', injection))
         const res = await this.rp({
           url: 'http://www.google.com/bar',
@@ -2521,7 +2533,7 @@ describe('Routes', () => {
           'Content-Type': 'text/html',
         })
 
-        const injection = await runner.getInjectionContents()
+        const injection = await getRunnerInjectionContents()
         const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html').replace('{{injection}}', injection))
 
         const res = await this.rp({
@@ -2785,7 +2797,7 @@ describe('Routes', () => {
       it('injects into https server', async function () {
         await this.setup('https://localhost:8443')
 
-        const injection = await runner.getInjectionContents()
+        const injection = await getRunnerInjectionContents()
         const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
         const res = await this.rp({
           url: 'https://localhost:8443/',
@@ -2853,7 +2865,7 @@ describe('Routes', () => {
         await this.setup('https://www.foobar.com:8443')
         evilDns.add('*.foobar.com', '127.0.0.1')
 
-        const injection = await runner.getInjectionContents()
+        const injection = await getRunnerInjectionContents()
         const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
         const res = await this.rp({
           url: 'https://www.foobar.com:8443/index.html',
@@ -2871,7 +2883,7 @@ describe('Routes', () => {
         await this.setup('https://www.foobar.com:8443')
         evilDns.add('*.foobar.com', '127.0.0.1')
 
-        const injection = await runner.getInjectionContents()
+        const injection = await getRunnerInjectionContents()
         const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
         const res = await this.rp({
           url: 'https://docs.foobar.com:8443/index.html',

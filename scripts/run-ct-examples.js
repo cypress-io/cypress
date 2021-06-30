@@ -13,6 +13,8 @@ const PROJECTS_FOR_CI = fs.readFileSync(filePath, { encoding: 'utf8' })
 .split('\n')
 .filter((a) => !/^\#/.test(a))
 
+const reporterConfig = path.resolve(process.cwd(), '../../mocha-reporter-config.json')
+
 const testResultsDestination = path.resolve(process.cwd(), 'test_results')
 
 const runTests = async (dir) => {
@@ -28,9 +30,9 @@ const runTests = async (dir) => {
     await execa('yarn', [
       'test',
       '--reporter',
-      'cypress-circleci-reporter',
+      'mocha-multi-reporters',
       '--reporter-options',
-      `resultsDir=${testResultsDestination}`,
+      `configFile=${reporterConfig},resultsDir=${testResultsDestination}`,
     ], { stdout: 'inherit' })
   } catch (e) {
     if (e.stdout) {

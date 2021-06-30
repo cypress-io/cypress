@@ -244,7 +244,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   }
 
   const contentWindowListeners = function (contentWindow) {
-    return $Listeners.bindTo(contentWindow, {
+    $Listeners.bindTo(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event)

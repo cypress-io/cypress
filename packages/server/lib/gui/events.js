@@ -25,6 +25,7 @@ const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
+const savedState = require('../saved_state')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -392,9 +393,41 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return sendErr(err)
       })
 
-    case 'onboarding:closed':
+    case 'new:project:banner:closed':
       return openProject.getProject()
-      .saveState({ showedOnBoardingModal: true })
+      .saveState({ showedNewProjectBanner: true })
+      .then(sendNull)
+
+    case 'has:opened:cypress':
+      return savedState.create()
+      .then(async (state) => {
+        const currentState = await state.get()
+
+        // we check if there is any state at all so users existing before
+        // we added firstOpenedCypress are not marked as new
+        const hasOpenedCypress = !!Object.keys(currentState).length
+
+        if (!currentState.firstOpenedCypress) {
+          await state.set('firstOpenedCypress', Date.now())
+        }
+
+        return hasOpenedCypress
+      })
+      .then(send)
+
+    case 'remove:scaffolded:files':
+      return openProject.getProject()
+      .removeScaffoldedFiles()
+      .then(sendNull)
+
+    case 'set:prompt:shown':
+      return openProject.getProject()
+      .saveState({
+        promptsShown: {
+          ...openProject.getProject().state.promptsShown,
+          [arg]: Date.now(),
+        },
+      })
       .then(sendNull)
 
     case 'ping:api:server':

@@ -13,6 +13,7 @@ const debugStats = require('debug')('cypress:webpack:stats')
 type FilePath = string
 interface BundleObject {
   promise: Promise<FilePath>
+  deferreds: Array<{ resolve: (filePath: string) => void, reject: (error: Error) => void, promise: Promise<string> }>
   initial: boolean
 }
 
@@ -59,6 +60,11 @@ const cleanModuleNotFoundError = (err: Error) => {
   const message = err.message
 
   if (!message.includes('Module not found')) return err
+
+  // Webpack 5 error messages are much less verbose. No need to clean.
+  if ('NormalModule' in webpack) {
+    return err
+  }
 
   const startIndex = message.lastIndexOf('resolve ')
   const endIndex = message.lastIndexOf(`doesn't exist`) + `doesn't exist`.length
@@ -226,16 +232,14 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const compiler = webpack(webpackOptions)
 
-    // we keep a reference to the latest bundle in this scope
-    // it's a deferred object that will be resolved or rejected in
-    // the `handle` function below and its promise is what is ultimately
-    // returned from this function
-    let latestBundle = createDeferred<string>()
+    let firstBundle = createDeferred<string>()
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
     bundles[filePath] = {
-      promise: latestBundle.promise,
+      promise: firstBundle.promise,
+      // we will resolve all reject everything in this array when a compile completes in the `handle` function
+      deferreds: [firstBundle],
       initial: true,
     }
 
@@ -247,7 +251,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       debug(`errored bundling ${outputPath}`, err.message)
 
-      latestBundle.reject(err)
+      const lastBundle = bundles[filePath].deferreds[bundles[filePath].deferreds.length - 1]
+
+      lastBundle.reject(err)
+      bundles[filePath].deferreds.length = 0
     }
 
     // this function is called when bundling is finished, once at the start
@@ -294,7 +301,15 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // Seems to be a race condition where changing file before next tick
       // does not cause build to rerun
       Promise.delay(0).then(() => {
-        latestBundle.resolve(outputPath)
+        if (!bundles[filePath]) {
+          return
+        }
+
+        bundles[filePath].deferreds.forEach((deferred) => {
+          deferred.resolve(outputPath)
+        })
+
+        bundles[filePath].deferreds.length = 0
       })
     }
 
@@ -303,11 +318,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const onCompile = () => {
       debug('compile', filePath)
-      // we overwrite the latest bundle, so that a new call to this function
-      // returns a promise that resolves when the bundling is finished
-      latestBundle = createDeferred<string>()
-      bundles[filePath].promise = latestBundle.promise
+      const nextBundle = createDeferred<string>()
 
+      bundles[filePath].promise = nextBundle.promise
+      bundles[filePath].deferreds.push(nextBundle)
       bundles[filePath].promise.finally(() => {
         debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
         // when the bundling is finished, emit 'rerun' to let Cypress
@@ -330,14 +344,13 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     // when we should watch, we hook into the 'compile' hook so we know when
     // to rerun the tests
     if (file.shouldWatch) {
-      debug('watching')
-
       if (compiler.hooks) {
         // TODO compile.tap takes "string | Tap"
         // so seems we just need to pass plugin.name
         // @ts-ignore
         compiler.hooks.compile.tap(plugin, onCompile)
-      } else {
+      } else if ('plugin' in compiler) {
+        // @ts-ignore
         compiler.plugin('compile', onCompile)
       }
     }
@@ -352,7 +365,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       if (file.shouldWatch) {
         // in this case the bundler is webpack.Compiler.Watching
-        (bundler as webpack.Compiler.Watching).close(cb)
+        if (bundler && 'close' in bundler) {
+          bundler.close(cb)
+        }
       }
     })
 
@@ -380,8 +395,18 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
-  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
+// for testing purposes, but do not add this to the typescript interface
+// @ts-ignore
+preprocessor.__bundles = () => {
+  return bundles
+}
+
+// @ts-ignore - webpack.StatsError is unique to webpack 5
+// TODO: Remove this when we update to webpack 5.
+function cleanseError (err: string | webpack.StatsError) {
+  let msg = typeof err === 'string' ? err : err.message
+
+  return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 export = preprocessor
