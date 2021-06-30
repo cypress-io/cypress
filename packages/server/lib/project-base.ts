@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
@@ -40,10 +38,7 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
-
-interface OpenOptions {
-  onOpen: (cfg: any) => Bluebird<any>
-}
+import { OpenServerOptions } from './server-base'
 
 export type Cfg = Record<string, any>
 
@@ -61,14 +56,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
-  private _recordTests = null
+  private generatedProjectIdTimestamp?: any
+  private _recordTests?: (runnables: any, cb: any) => any
 
-  public modifiedConfig: Cfg
+  public modifiedConfig: Cfg = {}
   public browser: any
-  public projectType?: 'e2e' | 'ct'
+  public projectType: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
 
-  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
+  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' }) {
     super()
 
     if (!projectRoot) {
@@ -124,9 +120,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
-    this._server = this.projectType === 'e2e'
+    this._server = (this.projectType === 'e2e'
       ? new ServerE2E()
-      : new ServerCt()
+      : new ServerCt()) as TServer
 
     await this._initPlugins(cfg, options)
 
@@ -163,7 +159,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cfg
   }
 
-  open (options = {}, callbacks: OpenOptions) {
+  open (options: any = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
@@ -231,7 +227,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       // save the last time they opened the project
       // along with the first time they opened it
       const now = Date.now()
-      const stateToSave = {
+      const stateToSave: any = {
         lastOpened: now,
       }
 
@@ -300,6 +296,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       if (this._server) {
         return this._server.reset()
       }
+
+      return
     })
   }
 
@@ -309,7 +307,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
+    const closePreprocessor = (this.projectType === 'e2e' && preprocessor.close) ?? undefined
 
     return Bluebird.join(
       this.server?.close(),
@@ -339,6 +337,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
       })
     }
+
+    return Bluebird.resolve()
   }
 
   _onError<Options extends Record<string, any>> (err: Error, options: Options) {
@@ -517,7 +517,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
   }
 
-  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
+  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, any> = {}) {
     this.watchSettings(options.onSettingsChanged, options)
 
     const { projectRoot } = cfg
@@ -578,9 +578,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
 
         if (this._recordTests) {
-          await this._recordTests(runnables, cb)
+          await this._recordTests?.(runnables, cb)
 
-          this._recordTests = null
+          this._recordTests = undefined
 
           return
         }
@@ -607,6 +607,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             this.emit('end', stats)
           })
         }
+
+        return
       },
     })
   }
@@ -669,7 +671,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (options = {}): Bluebird<Cfg> {
+  getConfig (options: any = {}): Bluebird<Cfg> {
     if (options == null) {
       options = this.options
     }
@@ -816,7 +818,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const scaffolds = []
 
-    const push = scaffolds.push.bind(scaffolds)
+    const push = scaffolds.push.bind(scaffolds) as (...args: any[]) => number
 
     // TODO: we are currently always scaffolding support
     // even when headlessly - this is due to a major breaking
@@ -995,7 +997,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         debug(`got ${projects.length} projects`)
         const projectsIndex = _.keyBy(projects, 'id')
 
-        return Bluebird.all(_.map(clientProjects, (clientProject) => {
+        return Bluebird.all(_.map(clientProjects, (clientProject: any) => {
           debug('looking at', clientProject.path)
           // not a CI project, just mark as valid and return
           if (!clientProject.id) {
