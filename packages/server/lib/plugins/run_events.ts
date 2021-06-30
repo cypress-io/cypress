@@ -1,10 +1,12 @@
-const Promise = require('bluebird')
+import Bluebird from 'bluebird'
 
-const errors = require('../errors')
-const plugins = require('../plugins')
+import errors from '../errors'
+import plugins from '../plugins'
 
-module.exports = {
-  execute: Promise.method((eventName, config = {}, ...args) => {
+type Execute = (eventName: string, ...args: unknown[]) => Bluebird<Execute>
+
+export const runEvents = {
+  execute: Bluebird.method<Execute>((eventName: string, ...args: unknown[]) => {
     if (!plugins.has(eventName)) return
 
     return plugins.execute(eventName, ...args)
