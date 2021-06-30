@@ -139,6 +139,7 @@
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
+    "@packages/resolve-dist": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/static": "0.0.0-development",

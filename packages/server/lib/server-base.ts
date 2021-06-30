@@ -25,7 +25,7 @@ import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import { SpecsStore } from './specs-store'
+import { RunnerType, SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
 import { ProjectBase } from './project-base'
 
@@ -601,7 +601,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.httpsProxy.connect(req, socket, head)
   }
 
-  sendSpecList (specs) {
-    return this.socket.sendSpecList(specs)
+  sendSpecList (specs: Cypress.Cypress['spec'][], projectType: RunnerType) {
+    return this.socket.sendSpecList(specs, projectType)
   }
 }

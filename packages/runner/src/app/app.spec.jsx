@@ -11,7 +11,9 @@ const Reporter = reporter.Reporter = () => <div />
 
 import App from './app'
 
-const createProps = () => ({
+const reporterWidth = 500
+
+const createProps = ({ state } = {}) => ({
   config: {
     browsers: [],
     integrationFolder: '',
@@ -19,6 +21,7 @@ const createProps = () => ({
     projectName: '',
     viewportHeight: 800,
     viewportWidth: 500,
+    reporterWidth,
     state: {},
     spec: {
       name: 'foo.js',
@@ -34,7 +37,7 @@ const createProps = () => ({
       on: sinon.spy(),
     },
   },
-  state: new State(),
+  state: state || (new State({ reporterWidth })),
 })
 
 const shallowRender = (component) => {
@@ -134,7 +137,7 @@ describe('<App />', () => {
     const props = createProps()
     const component = shallowRender(<App {...props} />)
 
-    expect(component.find('Resizer')).to.have.prop('state', props.state)
+    expect(component.find('Resizer')).to.have.prop('maxWidth')
   })
 
   describe('resizing reporter', () => {
@@ -145,7 +148,10 @@ describe('<App />', () => {
     })
 
     it('renders without is-reporter-sized class when there is no explicitly-set reporter width', () => {
-      const component = shallowRender(<App {...createProps()} />)
+      const props = createProps({
+        state: new State({ reporterWidth: 0 }),
+      })
+      const component = shallowRender(<App {...props} />)
 
       expect(component).not.to.have.className('is-reporter-sized')
     })

@@ -1,9 +1,12 @@
 const send = require('send')
-const staticPkg = require('@packages/static')
+/**
+ * @type {import('@packages/resolve-dist')}
+ */
+const { getPathToDist } = require('@packages/resolve-dist')
 
 module.exports = {
   handle (req, res) {
-    const pathToFile = staticPkg.getPathToDist(req.params[0])
+    const pathToFile = getPathToDist('static', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
