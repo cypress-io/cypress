@@ -384,7 +384,13 @@ export class OpenProject {
 
     // return the project and return
     // the config for the project instance
-    return this.openProject.getConfig(this.options)
+    return this.getConfig()
+    .then((cfg) => {
+      return this.openProject!._initPlugins(cfg, this.options)
+    })
+    .then(({ cfg }) => {
+      return cfg
+    })
   }
 
   // for testing purposes
