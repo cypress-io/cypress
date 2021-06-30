@@ -249,7 +249,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         // This is only used for CT right now, but it will be
         // used for E2E eventually. Until then, do not watch
         // the specs.
-        // startSpecWatcher()
+        this.startSpecWatcher()
 
         return Bluebird.join(
           this.checkSupportFile(cfg),
@@ -365,7 +365,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       debug('plugin config yielded: %o', modifiedCfg)
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
-      console.log('updatedConfig', updatedConfig)
 
       if (this.projectType === 'ct') {
         updatedConfig.componentTesting = true
@@ -383,7 +382,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return Bluebird.resolve(updatedConfig)
     })
     .then(async (modifiedConfig: any) => {
-      console.log('in here!', modifiedConfig)
       const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
         if (this.projectType === 'ct') {
           return spec.specType === 'component'
@@ -398,7 +396,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
       return this.initSpecStore({ specs, config: modifiedConfig })
       .then((val) => {
-        console.log('VALS  ARE', val)
         return val
       })
     })
@@ -451,7 +448,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
-    specsStore.storeSpecFiles()
+    specsStore.setSpecFiles(specs)
 
     return {
       specsStore,

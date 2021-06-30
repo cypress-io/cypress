@@ -48,11 +48,8 @@ export class SpecsStore {
     }
   }
 
-  storeSpecFiles (): Bluebird<void> {
-    return this.getSpecFiles()
-    .then((specFiles) => {
-      this.specFiles = specFiles
-    })
+  setSpecFiles (specFiles: Cypress.Cypress['spec'][]) {
+    this.specFiles = specFiles
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {
@@ -60,6 +57,7 @@ export class SpecsStore {
 
     searchOptions.searchFolder = this.specDirectory
     searchOptions.testFiles = this.testFiles
+    console.log('options', searchOptions)
 
     return findSpecsOfType(searchOptions)
   }

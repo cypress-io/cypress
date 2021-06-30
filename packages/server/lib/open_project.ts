@@ -384,12 +384,12 @@ export class OpenProject {
 
     // return the project and return
     // the config for the project instance
-    return this.getConfig()
+    return this.openProject.getConfig(this.options)
     .then((cfg) => {
       return this.openProject!._initPlugins(cfg, this.options)
     })
-    .then((val) => {
-      const { cfg, specsStore, startSpecWatcher } = val
+    .then(({ cfg, specsStore, startSpecWatcher }) => {
+      this.openProject!.modifiedConfig = cfg
       this.openProject!.specsStore = specsStore
       this.openProject!.startSpecWatcher = startSpecWatcher
       return cfg
