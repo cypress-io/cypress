@@ -338,7 +338,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
-    return Bluebird.resolve()
+    return
   }
 
   _onError<Options extends Record<string, any>> (err: Error, options: Options) {

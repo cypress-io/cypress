@@ -62,7 +62,7 @@ describe('lib/project-base', () => {
   })
 
   it('requires a projectRoot', function () {
-    const fn = () => new ProjectBase()
+    const fn = () => new ProjectBase({})
 
     expect(fn).to.throw('Instantiating lib/project requires a projectRoot!')
   })
