@@ -130,31 +130,30 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     await this._initPlugins(cfg, options)
 
-    return this.initializeSpecs()
-    .then(({ specsStore, startSpecWatcher }) => {
-      const updatedCfg = this.projectType === 'e2e'
-        ? this.modifiedConfig
-        : this.injectCtSpecificConfig(this.modifiedConfig)
+    const { specsStore, startSpecWatcher } = await this.initializeSpecs()
 
-      return this.server.open(updatedCfg, {
-        project: this,
-        onError: options.onError,
-        onWarning: options.onWarning,
-        shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-        projectType: this.projectType,
-        SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
-        createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+    this.modifiedConfig = this.projectType === 'e2e'
+      ? this.modifiedConfig
+      : this.injectCtSpecificConfig(this.modifiedConfig)
+
+    return this.server.open(this.modifiedConfig, {
+      project: this,
+      onError: options.onError,
+      onWarning: options.onWarning,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      projectType: this.projectType,
+      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      specsStore,
+    })
+    .then(([port, warning]) => {
+      return {
+        cfg: this.modifiedConfig,
+        port,
+        warning,
         specsStore,
-      })
-      .then(([port, warning]) => {
-        return {
-          cfg: updatedCfg,
-          port,
-          warning,
-          specsStore,
-          startSpecWatcher,
-        }
-      })
+        startSpecWatcher,
+      }
     })
   }
 
