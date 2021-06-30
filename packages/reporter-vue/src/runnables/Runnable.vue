@@ -1,9 +1,9 @@
 <template>
-  <div :class="`runnable-root ${state}-state`">
+  <div :class="`runnable-root ${state}`">
     <BaseAccordion v-model="open">
       <template #header>
         <div data-cy="title" :class="`runnable-title-wrapper hover:bg-warm-gray-50`">
-          <div :class="`transform runnable-title ${runnable.type}-title`">
+          <div :class="`transform runnable-title ${runnable.type}-title ${runnable.type} ${state}`">
           <i-fa-caret-right v-if="type === 'suite'" :class="`${open && 'rotate-90'} transform text-warm-gray-400`" />
           <template v-else>
             <i-fa-solid-times v-if="state ==='failed'"/>
@@ -12,12 +12,28 @@
             <i-mdi-square-outline v-if="state === 'not-started'"/>
             <i-fa-refresh v-if="state === 'processing'" class="animate-spin-slow"/>
           </template>
-          {{ runnable.title }}
+          {{ runnable.id }} {{ runnable.title }}
           </div>
         </div>
       </template>
       <!-- Inner content of the suite -->
-      <div data-cy="content" class="ml-0.4rem"><slot name="default" /></div>
+      <template v-if="runnable.type === 'test'">
+        <div data-cy="content" class="content-wrapper transform">
+          <Hook v-for="hook in runnable.hooks"
+          :key="hook.hookId"
+          :byKind="hooksByKind"
+          :hook="hook">
+            <!-- <template #title="{ shouldRender }">
+              <span v-if="shouldRender">
+                {{ hook.hookName }} {{ hookCounts > 0 && `(${hookCounts[hook.hookName]})` }}
+              </span>
+            </template> -->
+          </Hook>
+        </div>
+      </template>
+      <template v-else>
+        <slot name="default"/>
+      </template>
     </BaseAccordion>
   </div>
 </template>
@@ -25,13 +41,14 @@
 <script lang="ts" >
 import { defineComponent, computed, PropType, ref } from 'vue'
 import BaseAccordion from '../components/BaseAccordion.vue'
-import { Test, Suite } from '../store/reporter-store';
+import { TestModel, SuiteModel } from '../store/reporter-store';
+import Hook from '../hooks/Hook.vue'
 
 export default defineComponent({
-  components: { BaseAccordion },
+  components: { BaseAccordion, Hook },
   props: {
     runnable: {
-      type: Object as PropType<Test | Suite>,
+      type: Object as PropType<TestModel | SuiteModel>,
       required: true
     },
   },
@@ -40,7 +57,8 @@ export default defineComponent({
       open: ref(true),
       state: computed(() => props.runnable.state),
       level: computed(() => props.runnable.level),
-      type: computed(() => props.runnable.type)
+      type: computed(() => props.runnable.type),
+      hooksByKind: computed(() => props.runnable.hooksByKind)
     }
   }
 })
@@ -50,11 +68,12 @@ export default defineComponent({
 $passed: #11c08e;
 $failed: #e94f5f;
 $pending: #a7c8e6;
+$indentSize: 18px;
 
 .runnable-root {
-  @apply hover:cursor-pointer text-size-13px text-warm-gray-600 w-[calc(100%)];
+  @apply hover:cursor-pointer text-size-13px text-warm-gray-600 w-[calc(100%)] relative;
   &:before {
-    @apply w-4px h-[calc(100%)] block absolute content:"" left-0; 
+    @apply w-4px h-[calc(100%)] block absolute content:"" left-0;
   }
 }
 
@@ -67,52 +86,41 @@ $pending: #a7c8e6;
 
 .runnable-title {
   padding: 0.4rem;
-  transform: translateX(calc(18px * v-bind(level)));
+  transform: translateX(calc(#{$indentSize} * v-bind(level)));
 }
 
 .suite-title {
   @apply text-size-13px text-warm-gray-900;
 }
 
-.passed-state {
-  .test-title {
-    svg {
-      color: $passed;
-    }
-  }
+.content-wrapper {
+  @apply ml-0.4rem;
+  transform: translateX(calc(#{$indentSize} * v-bind(level + 1))); 
+}
 
-  &:before {
-    background: $passed;
+$states: (passed: $passed, failed: $failed, pending: $pending);
+@each $state, $color in $states {
+  .#{$state} {
+    &.test {
+      svg {
+        color: $color;
+      }
+    }
+    &:before {
+      background: $color;
+    }
   }
 }
 
-.failed-state {
-  .test-title {
-    svg {
-      color: $failed;
-    }
-  }
-  
-  &:before {
-    background: $failed;
-  }
+.pending.test-title {
+  color: $pending;
 }
 
-.pending-state {
-  .test-title {
-    svg {
-      color: $pending;
-    }
-  }
-  
-  &:before {
-    background: $pending;
-  }
-}
 
 .not-started-state, .processing-state {
   &:before {
     background: white;
   }
 }
+
 </style>
