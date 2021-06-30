@@ -1706,6 +1706,8 @@ describe('lib/cypress', () => {
 
         return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
       }).then(() => {
+        return openProject.open()
+      }).then(() => {
         expect(getConfig).to.be.calledWithMatch({
           port: 2121,
           pageLoadTimeout: 1000,
@@ -1809,6 +1811,8 @@ describe('lib/cypress', () => {
 
           return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
         }).then(() => {
+          return openProject.open()
+        }).then(() => {
           expect(this.open).to.be.called
 
           const cfg = this.open.getCall(0).args[0]
@@ -1830,6 +1834,8 @@ describe('lib/cypress', () => {
           debug('first call arguments %o', Events.start.firstCall.args)
 
           return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+        }).then(() => {
+          return openProject.open()
         }).then(() => {
           expect(this.open, 'open was called').to.be.called
 
