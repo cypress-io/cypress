@@ -12,16 +12,16 @@
     "test-unit": "yarn run-mocha \"test/unit/**/*.spec.ts\""
   },
   "dependencies": {
-    "bluebird": "3.5.3",
-    "charset": "1.0.1",
-    "common-tags": "1.8.0",
-    "debug": "4.3.2",
-    "grapheme-splitter": "1.0.4",
-    "iconv-lite": "0.6.2",
-    "lodash": "4.17.19",
-    "pumpify": "1.5.1",
-    "through": "2.3.8",
-    "utf8-stream": "0.0.0"
+    "bluebird": "^3.5.3",
+    "charset": "^1.0.1",
+    "common-tags": "^1.8.0",
+    "debug": "^4.3.2",
+    "grapheme-splitter": "^1.0.4",
+    "iconv-lite": "^0.6.2",
+    "lodash": "^4.17.19",
+    "pumpify": "^1.5.1",
+    "through": "^2.3.8",
+    "utf8-stream": "^0.0.0"
   },
   "devDependencies": {
     "@cypress/request": "2.88.5",

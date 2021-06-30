@@ -13,11 +13,11 @@
     "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
-    "@cypress/parse-domain": "2.4.0",
-    "bluebird": "3.5.3",
-    "concat-stream": "1.6.2",
-    "debug": "4.3.2",
-    "lodash": "4.17.21",
+    "@cypress/parse-domain": "^2.4.0",
+    "bluebird": "^3.5.3",
+    "concat-stream": "^1.6.2",
+    "debug": "^4.3.2",
+    "lodash": "^4.17.21",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
