@@ -73,10 +73,6 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('sdfsdfdsf', function () {
-      $('sd')
-    })
-
     it('removes window:load listeners', () => {
       const listeners = cy.listeners('window:load')
 

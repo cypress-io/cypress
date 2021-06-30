@@ -1,3 +1,17 @@
+# [@cypress/schematic-v1.4.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.0...@cypress/schematic-v1.4.1) (2021-06-29)
+
+
+### Bug Fixes
+
+* plugin file in angular schematics ([#17141](https://github.com/cypress-io/cypress/issues/17141)) ([7b4d694](https://github.com/cypress-io/cypress/commit/7b4d69430368e87108310aa5e592786a32104561))
+
+# [@cypress/schematic-v1.4.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.3.1...@cypress/schematic-v1.4.0) (2021-06-25)
+
+
+### Features
+
+* add ng generate to @cypress/schematic to generate e2e spec files ([#16962](https://github.com/cypress-io/cypress/issues/16962)) ([96a9db4](https://github.com/cypress-io/cypress/commit/96a9db4204f50a7605a5e51d51584d27aa9df164))
+
 # [@cypress/schematic-v1.3.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.3.0...@cypress/schematic-v1.3.1) (2021-06-17)
 
 
