@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import 'windi.css'
+import 'virtual:windi.css'
 import App from './App.vue'
 import { store } from './store'
 

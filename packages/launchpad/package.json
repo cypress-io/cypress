@@ -4,7 +4,7 @@
   "private": true,
   "main": "lib/gui.js",
   "scripts": {
-    "build": "webpack",
+    "build": "vite build",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
@@ -14,7 +14,7 @@
     "dev": "LAUNCHPAD=1 yarn start-test 5050 cypress:open",
     "postinstall": "echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
-    "watch": "yarn build --watch --progress"
+    "watch": "yarn build --watch"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -23,14 +23,14 @@
   },
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
-    "@packages/web-config": "0.0.0-development",
+    "@vitejs/plugin-vue": "1.2.4",
+    "@vitejs/plugin-vue-jsx": "1.1.6",
     "cross-env": "6.0.3",
-    "ts-loader": "^8.0.5",
+    "vite": "2.3.8",
+    "vite-plugin-windicss": "1.1.1",
     "vue-loader": "16.2.0",
-    "webpack": "4.44.2",
-    "webpack-cli": "3.3.2",
-    "windicss": "3.0.12",
-    "windicss-webpack-plugin": "0.6.1"
+    "vue-tsc": "^0.0.24",
+    "windicss": "3.0.12"
   },
   "files": [
     "dist",
