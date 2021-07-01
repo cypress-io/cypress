@@ -132,10 +132,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       ? this.modifiedConfig
       : this.injectCtSpecificConfig(this.modifiedConfig)
 
-    return this.server.open(this.modifiedConfig, {
+    return this.server.open({
       project: this,
       onError: options.onError,
       onWarning: options.onWarning,
+      getConfig: () => this.modifiedConfig,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       projectType: this.projectType,
       SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
@@ -193,7 +194,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     .then((cfg) => {
       return this.onOpen(cfg, options)
     })
-    .tap(({ cfg, port }) => {
+    .then(({ cfg, port, ...rest }) => {
       // if we didnt have a cfg.port
       // then get the port once we
       // open the server
@@ -204,14 +205,24 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       const urls = config.setUrls(cfg)
 
       // and set all the urls again
-      _.extend(cfg, urls, { proxyServer: urls.proxyUrl })
+      // _.extend(cfg, urls, { proxyServer: urls.proxyUrl })
+      this.modifiedConfig = {
+        ...cfg,
+        ...urls,
+        proxyServer: urls.proxyUrl,
+      }
+
+      return Bluebird.resolve({
+        ...rest,
+        port,
+      })
     })
-    .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
+    .then(({ port, warning, startSpecWatcher, specsStore }) => {
       // store the cfg from
       // opening the server
-      this._cfg = cfg
+      this._cfg = this.modifiedConfig
 
-      debug('project config: %o', _.omit(cfg, 'resolved'))
+      debug('project config: %o', _.omit(this.modifiedConfig, 'resolved'))
 
       if (warning) {
         options.onWarning(warning)
@@ -226,13 +237,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         lastOpened: now,
       }
 
-      if (!cfg.state || !cfg.state.firstOpened) {
+      if (!this.modifiedConfig.state || !this.modifiedConfig.state.firstOpened) {
         stateToSave.firstOpened = now
       }
 
       return Bluebird.join(
-        this.watchSettingsAndStartWebsockets(options, cfg),
-        this.scaffold(cfg),
+        this.watchSettingsAndStartWebsockets(options, this.modifiedConfig),
+        this.scaffold(this.modifiedConfig),
         this.saveState(stateToSave),
       )
       .then(() => {
@@ -245,22 +256,22 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         startSpecWatcher()
 
         return Bluebird.join(
-          this.checkSupportFile(cfg),
-          this.watchPluginsFile(cfg, options),
+          this.checkSupportFile(this.modifiedConfig),
+          this.watchPluginsFile(this.modifiedConfig, options),
         )
       })
       .then(() => {
-        if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+        if (this.modifiedConfig.isTextTerminal || !this.modifiedConfig.experimentalInteractiveRunEvents) return
 
         return system.info()
         .then((sys) => {
           const beforeRunDetails = {
-            config: cfg,
+            config: this.modifiedConfig,
             cypressVersion: pkg.version,
             system: _.pick(sys, 'osName', 'osVersion'),
           }
 
-          return runEvents.execute('before:run', cfg, beforeRunDetails)
+          return runEvents.execute('before:run', this.modifiedConfig, beforeRunDetails)
         })
       })
     })

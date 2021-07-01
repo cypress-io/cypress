@@ -14,7 +14,7 @@ const debug = Debug('cypress:server:routes')
 export interface InitializeRoutes {
   app: Express
   specsStore: SpecsStore
-  config: Record<string, any>
+  getConfig: () => Record<string, any>
   project: ProjectBase<any>
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
@@ -24,12 +24,14 @@ export interface InitializeRoutes {
 
 export const createRoutes = ({
   app,
-  config,
+  getConfig,
   specsStore,
   nodeProxy,
   networkProxy,
   project,
 }: InitializeRoutes) => {
+  const clientRoute = getConfig().clientRoute
+
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
@@ -45,7 +47,7 @@ export const createRoutes = ({
     // to properly intercept and serve assets from the correct src root
     // TODO: define a contract for dev-server plugins to configure this behavior
     req.headers.__cypress_spec_path = req.params[0]
-    req.url = `${config.devServerPublicPathRoute}/index.html`
+    req.url = `${getConfig().devServerPublicPathRoute}/index.html`
 
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
@@ -61,7 +63,7 @@ export const createRoutes = ({
 
   // user app code + spec code
   // default mounted to /__cypress/src/*
-  app.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+  app.get(`${getConfig().devServerPublicPathRoute}*`, (req, res) => {
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
@@ -74,30 +76,30 @@ export const createRoutes = ({
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {
-    xhrs.handle(req, res, config, next)
+    xhrs.handle(req, res, getConfig(), next)
   })
 
-  app.get(config.clientRoute, (req, res) => {
+  app.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     serve(req, res, {
-      config,
+      config: getConfig(),
       project,
       specsStore,
     })
   })
 
   // enables runner-ct to make a dynamic import
-  app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
+  app.get(`${clientRoute}ctChunk-*`, (req, res) => {
     debug('Serving Cypress front-end chunk by requested URL:', req.url)
 
-    serveChunk(req, res, { config })
+    serveChunk(req, res, { config: getConfig() })
   })
 
-  app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
+  app.get(`${clientRoute}vendors~ctChunk-*`, (req, res) => {
     debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
 
-    serveChunk(req, res, { config })
+    serveChunk(req, res, { config: getConfig() })
   })
 
   app.all('*', (req, res) => {

@@ -97,6 +97,7 @@ export interface OpenServerOptions {
   projectType: 'ct' | 'e2e'
   onError: any
   onWarning: any
+  getConfig: () => Record<string, any>
   shouldCorrelatePreRequests: () => boolean
   createRoutes: (args: InitializeRoutes) => any
 }
@@ -167,7 +168,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
 
-  open (config: Record<string, any> = {}, {
+  open ({
+    getConfig,
     project,
     onError,
     onWarning,
@@ -178,6 +180,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     SocketCtor,
   }: OpenServerOptions) {
     debug('server open')
+    const config = getConfig()
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
@@ -211,7 +214,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       createRoutes({
         app,
-        config,
+        getConfig,
         specsStore,
         getRemoteState,
         nodeProxy: this.nodeProxy,

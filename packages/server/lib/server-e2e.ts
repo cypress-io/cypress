@@ -49,8 +49,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, options: OpenServerOptions) {
-    return super.open(config, { ...options, projectType: 'e2e' })
+  open (options: OpenServerOptions) {
+    return super.open({ ...options, projectType: 'e2e' })
   }
 
   createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {

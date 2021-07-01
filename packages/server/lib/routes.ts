@@ -19,20 +19,22 @@ const debug = Debug('cypress:server:routes')
 
 export const createRoutes = ({
   app,
-  config,
+  getConfig,
   specsStore,
   getRemoteState,
   networkProxy,
   project,
   onError,
 }: InitializeRoutes) => {
+  const { projectRoot, clientRoute } = getConfig()
+
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
 
-    spec.handle(test, req, res, config, next, onError)
+    spec.handle(test, req, res, getConfig(), next, onError)
   })
 
   app.get('/__cypress/socket.io.js', (req, res) => {
@@ -53,7 +55,7 @@ export const createRoutes = ({
 
   // routing for /files JSON endpoint
   app.get('/__cypress/files', (req, res) => {
-    files.handleFiles(req, res, config)
+    files.handleFiles(req, res, getConfig())
   })
 
   // routing for the dynamic iframe html
@@ -69,11 +71,11 @@ export const createRoutes = ({
       extraOptions,
     })
 
-    files.handleIframe(req, res, config, getRemoteState, extraOptions)
+    files.handleIframe(req, res, getConfig(), getRemoteState, extraOptions)
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {
-    xhrs.handle(req, res, config, next)
+    xhrs.handle(req, res, getConfig(), next)
   })
 
   app.get('/__cypress/source-maps/:id.map', (req, res) => {
@@ -82,27 +84,27 @@ export const createRoutes = ({
 
   // special fallback - serve local files from the project's root folder
   app.get('/__root/*', (req, res) => {
-    const file = path.join(config.projectRoot, req.params[0])
+    const file = path.join(projectRoot, req.params[0])
 
     res.sendFile(file, { etag: false })
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
   app.get('/__cypress/bundled/*', (req, res) => {
-    const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
+    const file = AppData.getBundledFilePath(projectRoot, path.join('src', req.params[0]))
 
     debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
 
     res.sendFile(file, { etag: false })
   })
 
-  la(check.unemptyString(config.clientRoute), 'missing client route in config', config)
+  la(check.unemptyString(clientRoute), 'missing client route in config', getConfig())
 
-  app.get(config.clientRoute, (req, res) => {
+  app.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runner.serve(req, res, {
-      config,
+      config: getConfig(),
       project,
       getRemoteState,
       specsStore,
