@@ -18,6 +18,7 @@ export interface Command {
   selector?: string
   name: string
   message?: string | string[]
+  isAssertion?: boolean
 }
 
 export interface FileDetails {
@@ -38,14 +39,16 @@ const extendedStartComment = generateCommentText('Generated with Cypress Studio'
 const extendedEndComment = generateCommentText('End Cypress Studio')
 
 export const generateCypressCommand = (cmd: Command) => {
-  const { selector, name, message } = cmd
+  const { selector, name, message, isAssertion } = cmd
 
-  let messageExpression: n.ArrayExpression | n.StringLiteral | null = null
+  let messageExpression: n.ArrayExpression[] | n.StringLiteral[] | null = null
 
-  if (Array.isArray(message)) {
-    messageExpression = b.arrayExpression(message.map((e) => b.stringLiteral(e)))
+  if (isAssertion && Array.isArray(message)) {
+    messageExpression = message.map((msg) => b.stringLiteral(msg))
+  } else if (Array.isArray(message)) {
+    messageExpression = [b.arrayExpression(message.map((e) => b.stringLiteral(e)))]
   } else if (message) {
-    messageExpression = b.stringLiteral(message)
+    messageExpression = [b.stringLiteral(message)]
   }
 
   let stmt
@@ -64,7 +67,7 @@ export const generateCypressCommand = (cmd: Command) => {
           ),
           b.identifier(name),
         ),
-        messageExpression ? [messageExpression] : [],
+        messageExpression || [],
       ),
     )
   } else {
@@ -75,7 +78,7 @@ export const generateCypressCommand = (cmd: Command) => {
           b.identifier(name),
           false,
         ),
-        messageExpression ? [messageExpression] : [],
+        messageExpression || [],
       ),
     )
   }

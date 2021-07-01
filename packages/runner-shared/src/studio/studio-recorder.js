@@ -594,13 +594,17 @@ export class StudioRecorder {
 
     const $el = $(event.target)
 
-    dom.manageStudioAssertionsMenu({
+    dom.openStudioAssertionsMenu({
       event,
       $body: $(this._body),
       display: true,
       possibleAssertions: this._generatePossibleAssertions($el),
       addAssertion: this._addAssertion,
     })
+  }
+
+  _closeAssertionsMenu = () => {
+    dom.closeStudioAssertionsMenu($(this._body))
   }
 
   _generatePossibleAssertions = ($el) => {
@@ -626,7 +630,7 @@ export class StudioRecorder {
       if (name === 'class') {
         possibleAssertions.push({
           name: 'have.class',
-          value: value.split(' '),
+          value: value.split(' ').map((value) => ({ value })),
         })
 
         return
@@ -646,8 +650,15 @@ export class StudioRecorder {
     return possibleAssertions
   }
 
-  _addAssertion = (assertion) => {
-    return
+  @action _addAssertion = ($el, ...args) => {
+    this._addLog({
+      isAssertion: true,
+      selector: this.Cypress.SelectorPlayground.getSelector($el),
+      name: 'should',
+      message: args,
+    })
+
+    this._closeAssertionsMenu()
   }
 }
 

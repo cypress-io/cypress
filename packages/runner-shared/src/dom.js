@@ -226,19 +226,16 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
   })
 }
 
-function manageStudioAssertionsMenu ({ event, $body, display, possibleAssertions, addAssertion }) {
-  const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
+function getStudioAssertionsMenuDom ($body) {
+  return getOrCreateHelperDom({
     $body,
     className: '__cypress-studio-assertions-menu',
     css: studioAssertionsMenuCSS,
   })
+}
 
-  if (!display) {
-    studioAssertionsMenu.unmount($reactContainer[0])
-    $container.remove()
-
-    return
-  }
+function openStudioAssertionsMenu ({ event, $body, possibleAssertions, addAssertion }) {
+  const { shadowRoot, $reactContainer } = getStudioAssertionsMenuDom($body)
 
   const $el = $(event.target)
 
@@ -253,11 +250,19 @@ function manageStudioAssertionsMenu ({ event, $body, display, possibleAssertions
 
   studioAssertionsMenu.render($reactContainer[0], {
     style,
+    $el,
     possibleAssertions,
     addAssertion,
   })
 
   retargetEvents(shadowRoot)
+}
+
+function closeStudioAssertionsMenu ($body) {
+  const { $container, $reactContainer } = getStudioAssertionsMenuDom($body)
+
+  studioAssertionsMenu.unmount($reactContainer[0])
+  $container.remove()
 }
 
 function createLayer ($el, attr, color, container, dimensions) {
@@ -490,7 +495,8 @@ export const dom = {
   addElementBoxModelLayers,
   addHitBoxLayer,
   addOrUpdateSelectorPlaygroundHighlight,
-  manageStudioAssertionsMenu,
+  openStudioAssertionsMenu,
+  closeStudioAssertionsMenu,
   addCssAnimationDisabler,
   removeCssAnimationDisabler,
   getElementsForSelector,
