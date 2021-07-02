@@ -702,7 +702,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   // forces saving of project's state by first merging with argument
-  saveState (stateChanges = {}) {
+  async saveState (stateChanges = {}) {
     if (!this.cfg) {
       throw new Error('Missing project config')
     }
@@ -711,14 +711,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       throw new Error('Missing project root')
     }
 
-    return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
-    .tap((state) => state.set(stateChanges))
-    .then((state) => state.get())
-    .then((state) => {
-      this.cfg.state = state
+    let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
 
-      return state
-    })
+    state.set(stateChanges)
+    state = await state.get()
+    this.cfg.state = state
+
+    return state
   }
 
   async _setSavedState (cfg) {
