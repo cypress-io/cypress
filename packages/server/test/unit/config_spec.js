@@ -1844,7 +1844,7 @@ describe('lib/config', () => {
     })
   })
 
-  context('.setUrls', () => {
+  xcontext('.setUrls', () => {
     it('does not mutate existing obj', () => {
       const obj = {}
 

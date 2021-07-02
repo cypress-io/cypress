@@ -291,7 +291,7 @@ module.exports = {
     config = this.setResolvedConfigValues(config, defaultValues, resolved)
 
     if (config.port) {
-      config = this.setUrls(config)
+      config = { ...config, ...this.setUrls(config) }
     }
 
     config = this.setAbsolutePaths(config, defaultValues)
@@ -652,24 +652,22 @@ module.exports = {
   },
 
   setUrls (obj) {
-    obj = _.clone(obj)
+    if (!obj.port) {
+      throw Error('Port is needed to set the correct proxyUrl.')
+    }
 
     // TODO: rename this to be proxyServer
     const proxyUrl = `http://localhost:${obj.port}`
 
-    const rootUrl = obj.baseUrl ?
-      origin(obj.baseUrl)
-      :
-      proxyUrl
+    const rootUrl = obj.baseUrl ? origin(obj.baseUrl) : proxyUrl
 
-    _.extend(obj, {
+    return {
       proxyUrl,
+      proxyServer: proxyUrl,
       browserUrl: rootUrl + obj.clientRoute,
       reporterUrl: rootUrl + obj.reporterRoute,
       xhrUrl: obj.namespace + obj.xhrRoute,
-    })
-
-    return obj
+    }
   },
 
   parseEnv (cfg, envCLI, resolved = {}) {
