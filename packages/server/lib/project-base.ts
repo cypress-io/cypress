@@ -289,7 +289,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  close () {
+  async close () {
     debug('closing project instance %s', this.projectRoot)
 
     this.spec = null
@@ -298,21 +298,19 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // @ts-ignore
     const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
 
-    return Bluebird.join(
+    await Promise.all([
       this.server?.close(),
       this.watchers?.close(),
       closePreprocessor?.(),
-    )
-    .then(() => {
-      process.chdir(localCwd)
+    ])
 
-      return this.getConfig()
-    })
-    .then((config) => {
-      if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
+    process.chdir(localCwd)
 
-      return runEvents.execute('after:run', config)
-    })
+    const config = await this.getConfig()
+
+    if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
+
+    return runEvents.execute('after:run', config)
   }
 
   checkSupportFile (cfg) {
