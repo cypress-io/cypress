@@ -122,37 +122,35 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
+  async onOpen (_cfg: Record<string, any> | undefined, options: OpenServerOptions) {
     this._server = this.projectType === 'e2e'
       ? new ServerE2E()
       : new ServerCt()
 
-    return this._initPlugins(cfg, options)
-    .then(({ cfg, specsStore, startSpecWatcher }) => {
-      const updatedCfg = this.projectType === 'e2e'
-        ? cfg
-        : this.injectCtSpecificConfig(cfg)
+    const { cfg, specsStore, startSpecWatcher } = await this._initPlugins(_cfg, options)
 
-      return this.server.open(updatedCfg, {
-        project: this,
-        onError: options.onError,
-        onWarning: options.onWarning,
-        shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-        projectType: this.projectType,
-        SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
-        createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
-        specsStore,
-      })
-      .then(([port, warning]) => {
-        return {
-          cfg: updatedCfg,
-          port,
-          warning,
-          specsStore,
-          startSpecWatcher,
-        }
-      })
+    const updatedCfg = this.projectType === 'e2e'
+      ? cfg
+      : this.injectCtSpecificConfig(cfg)
+
+    const [port, warning] = await this.server.open(updatedCfg, {
+      project: this,
+      onError: options.onError,
+      onWarning: options.onWarning,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      projectType: this.projectType,
+      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      specsStore,
     })
+
+    return {
+      cfg: updatedCfg,
+      port,
+      warning,
+      specsStore,
+      startSpecWatcher,
+    }
   }
 
   onAfterOpen ({ cfg }) {
