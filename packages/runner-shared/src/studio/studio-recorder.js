@@ -518,7 +518,7 @@ export class StudioRecorder {
     ]
   }
 
-  _addLog = (log) => {
+  @action _addLog = (log) => {
     log.id = this._getId()
 
     this.logs.push(log)
@@ -589,6 +589,45 @@ export class StudioRecorder {
     return false
   }
 
+  @action _addAssertion = ($el, ...args) => {
+    const id = this._getId()
+    const selector = this.Cypress.SelectorPlayground.getSelector($el)
+
+    const log = {
+      id,
+      selector,
+      name: 'should',
+      message: args,
+      isAssertion: true,
+    }
+
+    this.logs.push(log)
+
+    const reporterLog = {
+      id,
+      selector,
+      name: 'assert',
+      message: this._generateAssertionMessage($el, args),
+    }
+
+    this._generateBothLogs(reporterLog).forEach((commandLog) => {
+      eventManager.emit('reporter:log:add', commandLog)
+    })
+  }
+
+  _generateAssertionMessage = ($el, args) => {
+    const elementString = $driverUtils.stringifyActual($el)
+    const assertionString = args[0].replace('.', ' ')
+
+    const message = `expect **${elementString}** to ${assertionString} **${args[1]}**`
+
+    if (args[2]) {
+      return `${message} with the value **${args[2]}**`
+    }
+
+    return message
+  }
+
   _openAssertionsMenu = (event) => {
     event.preventDefault()
 
@@ -654,17 +693,6 @@ export class StudioRecorder {
     })
 
     return possibleAssertions
-  }
-
-  @action _addAssertion = ($el, ...args) => {
-    this._addLog({
-      isAssertion: true,
-      selector: this.Cypress.SelectorPlayground.getSelector($el),
-      name: 'should',
-      message: args,
-    })
-
-    this._closeAssertionsMenu()
   }
 }
 
