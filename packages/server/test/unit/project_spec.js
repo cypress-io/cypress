@@ -492,12 +492,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('resets server + automation', function () {
-      return this.project.reset()
-      .then(() => {
-        expect(this.project._automation.reset).to.be.calledOnce
+      this.project.reset()
+      expect(this.project._automation.reset).to.be.calledOnce
 
-        expect(this.project.server.reset).to.be.calledOnce
-      })
+      expect(this.project.server.reset).to.be.calledOnce
     })
   })
 

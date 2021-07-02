@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
@@ -38,10 +37,6 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
-
-interface OpenOptions {
-  onOpen: (cfg: any) => Bluebird<any>
-}
 
 export type Cfg = Record<string, any>
 
@@ -154,7 +149,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  async open (options = {}, callbacks: OpenOptions) {
+  async open (options = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
@@ -261,14 +256,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return runEvents.execute('before:run', cfg2, beforeRunDetails)
   }
 
-  getRuns () {
-    return Bluebird.all([
+  async getRuns () {
+    const [projectId, authToken] = await Promise.all([
       this.getProjectId(),
       user.ensureAuthToken(),
     ])
-    .spread((projectId, authToken) => {
-      return api.getProjectRuns(projectId, authToken)
-    })
+
+    return api.getProjectRuns(projectId, authToken)
   }
 
   reset () {
@@ -277,16 +271,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    // @ts-ignore
-    return Bluebird.try(() => {
-      if (this._automation) {
-        this._automation.reset()
-      }
+    if (this._automation) {
+      this._automation.reset()
+    }
 
-      if (this._server) {
-        return this._server.reset()
-      }
-    })
+    if (this._server) {
+      return this._server.reset()
+    }
+
+    return
   }
 
   async close () {
@@ -442,7 +435,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   async watchPluginsFile (cfg, options) {
     debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
     if (!cfg.pluginsFile || options.isTextTerminal) {
-      return Bluebird.resolve()
+      return Promise.resolve()
     }
 
     const found = await fs.pathExists(cfg.pluginsFile)
@@ -575,7 +568,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         cb()
       },
 
-      onMocha: (event, runnable) => {
+      onMocha: async (event, runnable) => {
         debug('onMocha', event)
         // bail if we dont have a
         // reporter instance
@@ -586,13 +579,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         reporter.emit(event, runnable)
 
         if (event === 'end') {
-          return Bluebird.all([
+          const [stats = {}] = await Promise.all([
             (reporter != null ? reporter.end() : undefined),
             this.server.end(),
           ])
-          .spread((stats = {}) => {
-            this.emit('end', stats)
-          })
+
+          this.emit('end', stats)
         }
 
         return
@@ -832,7 +824,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       debug('will not scaffold integration or fixtures folder')
     }
 
-    return Bluebird.all(scaffolds)
+    return Promise.all(scaffolds)
   }
 
   writeProjectId (id) {
@@ -914,16 +906,17 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cache.getProjectRoots()
   }
 
-  static getPathsAndIds () {
-    return cache.getProjectRoots()
+  static async getPathsAndIds () {
+    const projectRoots: string[] = await cache.getProjectRoots()
+
     // this assumes that the configFile for a cached project is 'cypress.json'
     // https://git.io/JeGyF
-    .map((projectRoot) => {
-      return Bluebird.props({
+    return Promise.all(projectRoots.map(async (projectRoot) => {
+      return {
         path: projectRoot,
-        id: settings.id(projectRoot),
-      })
-    })
+        id: await settings.id(projectRoot),
+      }
+    }))
   }
 
   static async getDashboardProjects () {
