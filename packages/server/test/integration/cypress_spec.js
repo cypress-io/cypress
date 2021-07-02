@@ -1110,7 +1110,7 @@ describe('lib/cypress', () => {
       })
 
       // TODO: handle PORT_IN_USE short integration test
-      it('logs error and exits when port is in use', function () {
+      xit('logs error and exits when port is in use', function () {
         let server = http.createServer()
 
         server = Promise.promisifyAll(server)
