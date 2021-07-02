@@ -61,7 +61,6 @@ const moduleFactory = () => {
     },
 
     launch (browser, spec, options = {}) {
-      console.log('this.openProject', this.openProject)
       debug('resetting project state, preparing to launch browser %s for spec %o options %o',
         browser.name, spec, options)
 

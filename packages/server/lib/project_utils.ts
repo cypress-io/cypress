@@ -63,5 +63,5 @@ export const getPrefixedPathToSpec =  ({
  */
 export const ensureExists = async (projectRoot: string, configFile: string): Promise<boolean> => {
   // is there a configFile? is the root writable?
-  return settings.exists(path, { configFile })
+  return settings.exists(projectRoot, { configFile })
 }

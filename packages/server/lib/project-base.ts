@@ -1,5 +1,3 @@
-// // @ts-nocheck
-
 import { RunnerType } from "./specs-store"
 import config from './config'
 import { Automation } from './automation'
@@ -8,6 +6,7 @@ import { getPrefixedPathToSpec, normalizeSpecUrl } from "./project_utils"
 import { ServerE2E } from "./server-e2e"
 import { ServerCt, SocketCt } from "../../server-ct"
 import { SocketE2E } from "./socket-e2e"
+import EE from 'events'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import plugins from './plugins'
@@ -1106,7 +1105,7 @@ export interface Opts {
   [key: string]: any
 }
 
-export class ProjectBase {
+export class ProjectBase extends EE {
   projectType: RunnerType
   projectRoot: string
   /**
@@ -1153,6 +1152,8 @@ export class ProjectBase {
   private _watchers?: Watchers
 
   constructor({ projectType, projectRoot, options }: { projectType: RunnerType, projectRoot: string, options: Opts }) {
+    super()
+
     this._watchers = new Watchers()
     this.projectType = projectType
     this.projectRoot = projectRoot
@@ -1211,7 +1212,8 @@ export class ProjectBase {
 
     this.server.startWebsockets(this.automation, this.config, {
       onConnect: (id: string) => {
-        throw Error(`CONNECTED!! ${id}`)
+        debug('socket:connected')
+        this.emit('socket:connected', id)
       }
     })
   }
@@ -1292,7 +1294,7 @@ export class ProjectBase {
 
   get automation () {
     if (!this._automation) {
-      throw Error ('Must initialize _automation before calling ProjecBase#open')
+      throw Error ('Must initialize _automation before calling ProjectBase#open')
     }
 
     return this._automation

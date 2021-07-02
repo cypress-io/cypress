@@ -112,7 +112,6 @@ module.exports = {
   },
 
   exists (projectRoot, options = {}) {
-    console.log({projectRoot, options})
     const file = this.pathToConfigFile(projectRoot, options)
 
     // first check if cypress.json exists

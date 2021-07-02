@@ -620,20 +620,26 @@ const createAndOpenProject = async function (socketId, options) {
   const { projectRoot, projectId } = options
 
   // resolves undefined if everything is okay, otherwise throws an error.
-  console.log(options)
   await ensureExists(projectRoot, options.configFile)
 
   // open this project without
   // adding it to the global cache
-  return openProjectCreate(projectRoot, socketId, options)
-  .call('getProject')
-  .then((project) => {
-    return Promise.props({
-      project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
-  })
+  const openProject = await openProjectCreate(projectRoot, socketId, options)
+  return {
+    projectId: null, // TODO, does this really need to be async??
+    project: openProject,
+    config: openProject.getConfig()
+  }
+
+// project, projectId, config
+  // .call('getProject')
+  // .then((project) => {
+  //   return Promise.props({
+  //     project,
+  //     config: project.getConfig(),
+  //     projectId: getProjectId(project, projectId),
+  //   })
+  // })
 }
 
 const removeOldProfiles = (browser) => {
@@ -973,8 +979,14 @@ module.exports = {
 
       return project.onWarning
     }
-
-    return openProject.launch(browser, spec, browserOpts)
+  
+    return openProject.close()
+    .then(() => {
+      return openProject.openProject.open(openProject.options)
+    })
+    .then(() => {
+      return openProject.launch(browser, spec, browserOpts)
+    })
   },
 
   navigateToNextSpec (spec) {

@@ -156,11 +156,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
       return openProject.close()
       .then(() => {
-        const p = openProject.openProject.open(openProject.options)
-        console.log('project is', openProject.openProject)
-        return p
-      }).then(() => {
-        console.log('now it is',openProject.openProject)
+        return openProject.openProject.open(openProject.options)
+      })
+      .then(() => {
         return openProject.launch(arg.browser, fullSpec, {
           projectRoot: options.projectRoot,
           onBrowserOpen () {
