@@ -34,7 +34,7 @@ import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
-import { SpecsStore } from './specs-store'
+import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 
@@ -54,14 +54,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
-  private _recordTests = null
+  private _recordTests?: any = null
 
   public browser: any
-  public projectType?: 'e2e' | 'ct'
+  public projectType?: RunnerType
   public spec: Cypress.Cypress['spec'] | null
+  private generatedProjectIdTimestamp: any
 
-  // @ts-ignore
-  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
+  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' }) {
     super()
 
     if (!projectRoot) {
@@ -117,10 +117,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async onOpen (_cfg: Record<string, any> | undefined, options) {
-    // @ts-ignore
     this._server = this.projectType === 'e2e'
-      ? new ServerE2E()
-      : new ServerCt()
+      ? new ServerE2E() as TServer
+      : new ServerCt() as TServer
 
     const { cfg, specsStore, startSpecWatcher } = await this._initPlugins(_cfg, options)
 
@@ -133,8 +132,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onError: options.onError,
       onWarning: options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      // @ts-ignore
-      projectType: this.projectType,
+      projectType: this.projectType as 'ct' | 'e2e',
       SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
       createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
       specsStore,
@@ -149,7 +147,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  async open (options = {}) {
+  async open (options: any = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
@@ -207,11 +205,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('project config: %o', _.omit(cfg2, 'resolved'))
 
     if (warning) {
-      // @ts-ignore
       options.onWarning(warning)
     }
 
-    // @ts-ignore
     options.onSavedStateChanged = (state) => this.saveState(state)
 
     // save the last time they opened the project
@@ -288,8 +284,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    // @ts-ignore
-    const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
+    const closePreprocessor = (this.projectType === 'e2e' && preprocessor.close) ?? undefined
 
     await Promise.all([
       this.server?.close(),
@@ -398,8 +393,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     specs: Cypress.Cypress['spec'][]
     config: any
   }) {
-    // @ts-ignore
-    const specsStore = new SpecsStore(config, this.projectType)
+    const specsStore = new SpecsStore(config, this.projectType as RunnerType)
 
     if (this.projectType === 'ct') {
       const { port } = await this.startCtDevServer(specs, config)
@@ -412,8 +406,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          // @ts-ignore
-          this.server.sendSpecList(specs, this.projectType)
+          this.server.sendSpecList(specs, this.projectType as RunnerType)
 
           if (this.projectType === 'ct') {
           // ct uses the dev-server to build and bundle the speces.
@@ -475,9 +468,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onChange: () => {
         // dont fire change events if we generated
         // a project id less than 1 second ago
-      // @ts-ignore
         if (this.generatedProjectIdTimestamp &&
-        // @ts-ignore
           ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
           return
         }
@@ -495,7 +486,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
   }
 
-  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
+  watchSettingsAndStartWebsockets (options: Record<string, any> = {}, cfg: Record<string, any> = {}) {
     this.watchSettings(options.onSettingsChanged, options)
 
     const { projectRoot } = cfg
@@ -527,7 +518,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
-    // @ts-ignore
     this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest)
 
     this.server.startWebsockets(this.automation, cfg, {
@@ -557,8 +547,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
 
         if (this._recordTests) {
-          // @ts-ignore
-          await this._recordTests(runnables, cb)
+          await this._recordTests?.(runnables, cb)
 
           this._recordTests = null
 
@@ -649,9 +638,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  async getConfig (options = {}): Promise<Cfg> {
+  async getConfig (options: any = {}): Promise<Cfg> {
     if (options == null) {
-      // @ts-ignore
       options = this.options
     }
 
@@ -793,7 +781,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const scaffolds = []
 
-    const push = scaffolds.push.bind(scaffolds)
+    const push = scaffolds.push.bind(scaffolds) as any
 
     // TODO: we are currently always scaffolding support
     // even when headlessly - this is due to a major breaking
@@ -803,7 +791,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     //
     // ensure support dir is created
     // and example support file if dir doesnt exist
-    // @ts-ignore
     push(scaffold.support(cfg.supportFolder, cfg))
 
     // if we're in headed mode add these other scaffolding tasks
@@ -816,9 +803,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     if (scaffoldExamples) {
       debug('will scaffold integration and fixtures folder')
-      // @ts-ignore
       push(scaffold.integration(cfg.integrationFolder, cfg))
-      // @ts-ignore
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')
@@ -832,7 +817,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     logger.info('Writing Project ID', _.clone(attrs))
 
-    // @ts-ignore
     this.generatedProjectIdTimestamp = new Date()
 
     return settings
