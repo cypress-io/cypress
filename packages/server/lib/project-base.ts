@@ -153,13 +153,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  onAfterOpen ({ cfg }) {
-    cfg.proxyServer = cfg.proxyUrl
-
-    return cfg
-  }
-
-  open (options = {}, callbacks: OpenOptions) {
+  async open (options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
@@ -174,102 +168,93 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('project options %o', options)
     this.options = options
 
-    return this.getConfig(options)
-    .tap((cfg) => {
-      process.chdir(this.projectRoot)
+    const cfg1 = await this.getConfig(options)
+    process.chdir(this.projectRoot)
 
-      // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
-      if (cfg.chromeWebSecurity === false) {
-        _.chain(cfg.browsers)
-        .filter((browser) => browser.family !== 'chromium')
-        .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
-        .value()
-      }
+    // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
+    if (cfg1.chromeWebSecurity === false) {
+      _.chain(cfg.browsers)
+      .filter((browser) => browser.family !== 'chromium')
+      .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
+      .value()
+    }
 
-      // TODO: we currently always scaffold the plugins file
-      // even when headlessly or else it will cause an error when
-      // we try to load it and it's not there. We must do this here
-      // else initialing the plugins will instantly fail.
-      if (cfg.pluginsFile) {
-        debug('scaffolding with plugins file %s', cfg.pluginsFile)
+    // TODO: we currently always scaffold the plugins file
+    // even when headlessly or else it will cause an error when
+    // we try to load it and it's not there. We must do this here
+    // else initialing the plugins will instantly fail.
+    if (cfg1.pluginsFile) {
+      debug('scaffolding with plugins file %s', cfg1.pluginsFile)
 
-        return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
-      }
-    })
-    .then((cfg) => {
-      return this.onOpen(cfg, options)
-    })
-    .tap(({ cfg, port }) => {
-      // if we didnt have a cfg.port
-      // then get the port once we
-      // open the server
-      if (!cfg.port) {
-        cfg.port = port
+      return scaffold.plugins(path.dirname(cfg1.pluginsFile), cfg1)
+    }
 
-        // and set all the urls again
-        _.extend(cfg, config.setUrls(cfg))
-      }
-    })
-    .tap(this.onAfterOpen)
-    .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
+    const { cfg: cfg2, port, warning, startSpecWatcher, specsStore  } = this.onOpen(cfg1, options)
+
+    // if we didnt have a cfg.port
+    // then get the port once we
+    // open the server
+    if (!cfg2.port) {
+      cfg2.port = port
+
+      // and set all the urls again
+      _.extend(cfg2, config.setUrls(cfg2))
+    }
+
+    cfg2.proxyServer = cfg2.proxyUrl
+
       // store the cfg from
       // opening the server
-      this._cfg = cfg
+    this._cfg = cfg2
 
-      debug('project config: %o', _.omit(cfg, 'resolved'))
+    debug('project config: %o', _.omit(cfg2, 'resolved'))
 
-      if (warning) {
-        options.onWarning(warning)
-      }
+    if (warning) {
+      options.onWarning(warning)
+    }
 
-      options.onSavedStateChanged = (state) => this.saveState(state)
+    options.onSavedStateChanged = (state) => this.saveState(state)
 
-      // save the last time they opened the project
-      // along with the first time they opened it
-      const now = Date.now()
-      const stateToSave = {
-        lastOpened: now,
-      }
+    // save the last time they opened the project
+    // along with the first time they opened it
+    const now = Date.now()
+    const stateToSave = {
+      lastOpened: now,
+    }
 
-      if (!cfg.state || !cfg.state.firstOpened) {
-        stateToSave.firstOpened = now
-      }
+    if (!cfg.state || !cfg.state.firstOpened) {
+      stateToSave.firstOpened = now
+    }
 
-      return Bluebird.join(
-        this.watchSettingsAndStartWebsockets(options, cfg),
-        this.scaffold(cfg),
-        this.saveState(stateToSave),
-      )
-      .then(() => {
-        // start watching specs
-        // whenever a spec file is added or removed, we notify the
-        // <SpecList>
-        // This is only used for CT right now, but it will be
-        // used for E2E eventually. Until then, do not watch
-        // the specs.
-        startSpecWatcher()
+    await Promise.all([
+      this.watchSettingsAndStartWebsockets(options, cfg2),
+      this.scaffold(cfg2),
+      this.saveState(stateToSave),
+    ])
 
-        return Bluebird.join(
-          this.checkSupportFile(cfg),
-          this.watchPluginsFile(cfg, options),
-        )
-      })
-      .then(() => {
-        if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+    // start watching specs
+    // whenever a spec file is added or removed, we notify the
+    // <SpecList>
+    // This is only used for CT right now, but it will be
+    // used for E2E eventually. Until then, do not watch
+    // the specs.
+    startSpecWatcher()
 
-        return system.info()
-        .then((sys) => {
-          const beforeRunDetails = {
-            config: cfg,
-            cypressVersion: pkg.version,
-            system: _.pick(sys, 'osName', 'osVersion'),
-          }
+    await Promise.all([
+      this.checkSupportFile(cfg2),
+      this.watchPluginsFile(cfg2, options),
+    ])
 
-          return runEvents.execute('before:run', cfg, beforeRunDetails)
-        })
-      })
-    })
-    .return(this)
+    if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+
+    const sys = await system.info()
+    const beforeRunDetails = {
+      config: cfg2,
+      cypressVersion: pkg.version,
+      system: _.pick(sys, 'osName', 'osVersion'),
+    }
+
+    return runEvents.execute('before:run', cfg2, beforeRunDetails)
   }
 
   getRuns () {

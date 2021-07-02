@@ -323,7 +323,7 @@ const moduleFactory = () => {
       return this.closeOpenProjectAndBrowsers()
     },
 
-    create (path, args = {}, options = {}) {
+    async create (path, args = {}, options = {}) {
       debug('open_project create %s', path)
       debug('and options %o', options)
 
@@ -352,8 +352,8 @@ const moduleFactory = () => {
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      return openProject.open({ ...options, testingType: args.testingType })
-      .return(this)
+      await openProject.open({ ...options, testingType: args.testingType })
+      return openProject
     },
 
     // for testing purposes
