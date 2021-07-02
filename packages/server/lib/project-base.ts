@@ -163,13 +163,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('project options %o', options)
     this.options = options
 
-    const cfg1 = await this.getConfig(options)
+    let cfg = await this.getConfig(options)
 
     process.chdir(this.projectRoot)
 
     // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
-    if (cfg1.chromeWebSecurity === false) {
-      _.chain(cfg1.browsers)
+    if (cfg.chromeWebSecurity === false) {
+      _.chain(cfg.browsers)
       .filter((browser) => browser.family !== 'chromium')
       .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
       .value()
@@ -179,31 +179,34 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // even when headlessly or else it will cause an error when
     // we try to load it and it's not there. We must do this here
     // else initialing the plugins will instantly fail.
-    if (cfg1.pluginsFile) {
-      debug('scaffolding with plugins file %s', cfg1.pluginsFile)
+    if (cfg.pluginsFile) {
+      debug('scaffolding with plugins file %s', cfg.pluginsFile)
 
-      await scaffold.plugins(path.dirname(cfg1.pluginsFile), cfg1)
+      await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
     }
 
-    const { cfg: cfg2, port, warning, startSpecWatcher } = await this.onOpen(cfg1, options)
+    const res = await this.onOpen(cfg, options)
+    const { port, warning, startSpecWatcher } = res
+
+    cfg = res.cfg
 
     // if we didnt have a cfg.port
     // then get the port once we
     // open the server
-    if (!cfg2.port) {
-      cfg2.port = port
+    if (!cfg.port) {
+      cfg.port = port
 
       // and set all the urls again
-      _.extend(cfg2, config.setUrls(cfg2))
+      _.extend(cfg, config.setUrls(cfg))
     }
 
-    cfg2.proxyServer = cfg2.proxyUrl
+    cfg.proxyServer = cfg.proxyUrl
 
     // store the cfg from
     // opening the server
-    this._cfg = cfg2
+    this._cfg = cfg
 
-    debug('project config: %o', _.omit(cfg2, 'resolved'))
+    debug('project config: %o', _.omit(cfg, 'resolved'))
 
     if (warning) {
       options.onWarning(warning)
@@ -218,13 +221,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       lastOpened: now,
     } as any
 
-    if (!cfg2.state || !cfg2.state.firstOpened) {
+    if (!cfg.state || !cfg.state.firstOpened) {
       stateToSave.firstOpened = now
     }
 
     await Promise.all([
-      this.watchSettingsAndStartWebsockets(options, cfg2),
-      this.scaffold(cfg2),
+      this.watchSettingsAndStartWebsockets(options, cfg),
+      this.scaffold(cfg),
       this.saveState(stateToSave),
     ])
 
@@ -237,20 +240,20 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     startSpecWatcher()
 
     await Promise.all([
-      this.checkSupportFile(cfg2),
-      this.watchPluginsFile(cfg2, options),
+      this.checkSupportFile(cfg),
+      this.watchPluginsFile(cfg, options),
     ])
 
-    if (cfg2.isTextTerminal || !cfg2.experimentalInteractiveRunEvents) return
+    if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
 
     const sys = await system.info()
     const beforeRunDetails = {
-      config: cfg2,
+      config: cfg,
       cypressVersion: pkg.version,
       system: _.pick(sys, 'osName', 'osVersion'),
     }
 
-    return runEvents.execute('before:run', cfg2, beforeRunDetails)
+    return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
   async getRuns () {
