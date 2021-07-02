@@ -239,17 +239,7 @@ function openStudioAssertionsMenu ({ event, $body, props }) {
 
   const $el = $(event.target)
 
-  const style = {
-    position: 'absolute',
-    margin: 0,
-    padding: 0,
-    top: event.pageY,
-    left: event.pageX,
-    zIndex: getZIndex($el),
-  }
-
   studioAssertionsMenu.render($reactContainer[0], {
-    style,
     $el,
     ...props,
   })

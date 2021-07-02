@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
+import { usePopper } from 'react-popper'
 import { stringify } from '@packages/driver/src/dom/elements'
 
-const AssertionsMenu = ({ style, $el, possibleAssertions, addAssertion, closeMenu }) => {
+const AssertionsMenu = ({ $el, possibleAssertions, addAssertion, closeMenu }) => {
+  const [popperElement, setPopperElement] = useState(null)
+
+  const { styles, attributes } = usePopper($el[0], popperElement)
+
   const _addAssertion = (...args) => {
     addAssertion($el, ...args)
   }
@@ -14,7 +19,7 @@ const AssertionsMenu = ({ style, $el, possibleAssertions, addAssertion, closeMen
   }
 
   return (
-    <div className='assertions-menu' style={style}>
+    <div ref={setPopperElement} className='assertions-menu' style={styles.popper} {...attributes.popper}>
       <a className='close' onClick={_close}>&times;</a>
       <div className='title'>
         Add Assertion

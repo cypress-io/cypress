@@ -6,7 +6,7 @@
 .assertions-menu {
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.25);
-  border-radius: .25rem;
+  border-radius: 0.5rem;
   font-family: 'Helvetica Neue', 'Arial', sans-serif;
 
   .close {
@@ -23,7 +23,6 @@
     font-size: 16px;
     text-align: center;
     margin: 0.75rem 0.5rem 0.25rem;
-    width: 100%;
   }
 
   .element {

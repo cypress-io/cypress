@@ -27,6 +27,7 @@
     "nanoid": "3.1.20",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "react-popper": "2.2.5",
     "react-shadow-dom-retarget-events": "1.0.11",
     "sinon": "7.5.0",
     "sinon-chai": "3.3.0"
