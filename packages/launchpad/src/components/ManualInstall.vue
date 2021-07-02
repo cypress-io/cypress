@@ -7,13 +7,8 @@ import { defineComponent, onMounted } from "vue";
 import { useStore } from "../../src/store";
 
 export default defineComponent({
-  setup(_, { emit }) {
+  setup(_) {
     const store = useStore()
-    onMounted(() => {
-      store.onAlt(() => {
-        emit("back")
-      })
-    })
     return;
   },
 });

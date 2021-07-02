@@ -3,7 +3,7 @@ import { SupportedFrameworkNext } from '../statics/frameworks'
 import InstallDependencies from './InstallDependencies.vue'
 
 describe('<InstallDependencies />', () => {
-  it('playground', () => {
+  beforeEach(() => {
     cy.mount(() => (
       <InstallDependencies />
     )).then(() => {
@@ -13,5 +13,22 @@ describe('<InstallDependencies />', () => {
         complete: true,
       })
     })
+  })
+
+  it('playground', () => {
+    cy.contains('@cypress/react').should('exist')
+    cy.contains('@cypress/webpack-dev-server').should('exist')
+  })
+
+  it('should infinitely toggle manual', () => {
+    cy.contains('@cypress/react').should('exist')
+    cy.contains('manually').click()
+    cy.contains('@cypress/react').should('not.exist')
+    cy.contains('Install manually').click()
+    cy.contains('@cypress/react').should('exist')
+    cy.contains('manually').click()
+    cy.contains('@cypress/react').should('not.exist')
+    cy.contains('Install manually').click()
+    cy.contains('@cypress/react').should('exist')
   })
 })

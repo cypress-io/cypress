@@ -32,7 +32,7 @@ export default defineComponent({
       });
 
       store.onAlt(() => {
-        manualInstall.value = true;
+        manualInstall.value = !manualInstall.value;
       });
 
       store.onBack(() => {

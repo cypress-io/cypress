@@ -24,6 +24,10 @@ export default defineComponent({
                 title: 'Configuration file',
                 description: 'Cypress reads the settings from this file each time the test runner is initialized. We can create the file for you, or you can copy and paste the code below if you wish.',
             })
+
+            store.onBack(() => {
+                store.flagDependenciesInstalled(false)
+            })
         })
         return { nextButtonName }
     }
