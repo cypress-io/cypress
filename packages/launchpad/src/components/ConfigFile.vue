@@ -11,7 +11,7 @@
                 <span v-if="language === lang.id" class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-400 rounded-t" />
             </button>
         </nav>
-        <div class="relative">
+        <div v-if="tsInstalled" class="relative">
             <PrismJs :key="language" :language="language" >{{ code }}</PrismJs>
             <CopyButton v-if="manualInstall" :text="code"/>
         </div>
@@ -19,9 +19,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue"
+import { computed, defineComponent, onBeforeMount, onMounted, ref } from "vue"
 import 'prismjs'
-import 'prismjs/components/prism-typescript'
 import '@packages/reporter/src/errors/prism.scss'
 import PrismJs from "vue-prism-component"
 import { useStore } from "../store";
@@ -38,10 +37,12 @@ export default defineComponent({
     setup() {
         const store = useStore();
         const manualInstall = ref(false);
+        const tsInstalled = ref(false);
         const language = ref<'js'|'ts'>('ts')
         const nextButtonName = computed(() =>
             manualInstall.value ? "I've added this file" : "Create File"
         );
+
         onMounted(() => {
             store.setMeta({
                 title: 'Cypress.config',
@@ -59,11 +60,15 @@ export default defineComponent({
             store.onAlt(() => {
                 manualInstall.value = !manualInstall.value
             })
+
+            import('prismjs/components/prism-typescript').then(() => {
+                tsInstalled.value = true
+            })
         })
 
         const code = computed(() => getCode(language.value));
 
-        return { manualInstall, nextButtonName, code, language, languages }
+        return { manualInstall, nextButtonName, code, language, languages, tsInstalled }
     }
 })
 </script>

@@ -4,7 +4,7 @@ export const getCode = (lang: 'js'|'ts') => {
   const component = useStore().getState().component
 
   if (!component) {
-    return 'nocode'
+    return ''
   }
 
   const framework = component.framework
