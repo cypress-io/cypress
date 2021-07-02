@@ -11,7 +11,10 @@
                 <span v-if="language === lang.id" class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-400 rounded-t" />
             </button>
         </nav>
-        <PrismJs :key="language" :language="language" >{{ code[language] }}</PrismJs>
+        <div class="relative">
+            <PrismJs :key="language" :language="language" >{{ code[language] }}</PrismJs>
+            <CopyButton v-if="manualInstall" :text="code[language]"/>
+        </div>
     </WizardLayout>
 </template>
 
@@ -23,11 +26,13 @@ import '@packages/reporter/src/errors/prism.scss'
 import PrismJs from "vue-prism-component"
 import { useStore } from "../store";
 import WizardLayout from "./WizardLayout.vue"
+import CopyButton from "./CopyButton.vue"
 
 export default defineComponent({
     components: {
         WizardLayout,
         PrismJs,
+        CopyButton,
     },
     setup() {
         const store = useStore();
@@ -91,7 +96,7 @@ export default {
             }, 
         ]
 
-        return { nextButtonName, code, language, languages }
+        return { manualInstall, nextButtonName, code, language, languages }
     }
 })
 </script>
