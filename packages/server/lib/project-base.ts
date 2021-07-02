@@ -127,7 +127,7 @@ export class ProjectBase extends EE {
     this._config = {
       ...this.config, 
       ...urls,
-      proxyServer: urls.proxyUrl,
+      // proxyServer: urls.proxyUrl,
       port
     }
 
@@ -310,7 +310,7 @@ export class ProjectBase extends EE {
     
     // await this.initializePlugins(this.options.testingType)
     
-    console.log('Creating server...')
+    debug('Creating server...')
     const [port, warning] = await this._server.open(this.config, {
       project: this,
       onError: this.options?.onError ?? noop,
@@ -322,7 +322,8 @@ export class ProjectBase extends EE {
       specsStore: {} as any,
     })
 
-    console.log(`Created server on ${port}.`)
+    debug(`Created server on ${port}.`)
+    
     return {
       port,
       warning
@@ -365,7 +366,6 @@ export class ProjectBase extends EE {
 
     this._config = {
       ...defaultConfig,
-      ...config.setUrls(defaultConfig),
       state,
     }
   }
@@ -530,7 +530,6 @@ export class ProjectBase extends EE {
         debug('plugins file changed')
 
         try {
-          console.log('ERROR handler:', onError)
         // re-init plugins after a change
           const updatedConfig = await this.initializePlugins(
             this.projectType === 'ct' ? 'component' : 'e2e' as TestingType)
