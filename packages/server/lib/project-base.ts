@@ -347,55 +347,51 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     options.onError(err)
   }
 
-  _initPlugins (cfg, options) {
+  async _initPlugins (cfg, options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
     const allowedCfg = config.allowed(cfg)
 
-    return plugins.init(allowedCfg, {
+    const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
     })
-    .then((modifiedCfg) => {
-      debug('plugin config yielded: %o', modifiedCfg)
 
-      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+    debug('plugin config yielded: %o', modifiedCfg)
 
+    const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+    if (this.projectType === 'ct') {
+      updatedConfig.componentTesting = true
+
+      // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+      // But if we don't return it in the plugins function, it never gets set
+      // Since there is no chance that it will have any other value here, we set it to "component"
+      // This allows users to not return config in the `cypress/plugins/index.js` file
+      // https://github.com/cypress-io/cypress/issues/16860
+      updatedConfig.resolved.testingType = { value: 'component' }
+    }
+
+    debug('updated config: %o', updatedConfig)
+
+    const specs = (await specsUtil.find(updatedConfig)).filter((spec: Cypress.Cypress['spec']) => {
       if (this.projectType === 'ct') {
-        updatedConfig.componentTesting = true
-
-        // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-        // But if we don't return it in the plugins function, it never gets set
-        // Since there is no chance that it will have any other value here, we set it to "component"
-        // This allows users to not return config in the `cypress/plugins/index.js` file
-        // https://github.com/cypress-io/cypress/issues/16860
-        updatedConfig.resolved.testingType = { value: 'component' }
+        return spec.specType === 'component'
       }
 
-      debug('updated config: %o', updatedConfig)
+      if (this.projectType === 'e2e') {
+        return spec.specType === 'integration'
+      }
 
-      return Bluebird.resolve(updatedConfig)
+      throw Error(`Cannot return specType for projectType: ${this.projectType}`)
     })
-    .then(async (modifiedConfig: any) => {
-      const specs = (await specsUtil.find(modifiedConfig)).filter((spec: Cypress.Cypress['spec']) => {
-        if (this.projectType === 'ct') {
-          return spec.specType === 'component'
-        }
 
-        if (this.projectType === 'e2e') {
-          return spec.specType === 'integration'
-        }
-
-        throw Error(`Cannot return specType for projectType: ${this.projectType}`)
-      })
-
-      return this.initSpecStore({ specs, config: modifiedConfig })
-    })
+    return this.initSpecStore({ specs, config: updatedConfig })
   }
 
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
