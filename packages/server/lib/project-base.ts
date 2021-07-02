@@ -1,4 +1,4 @@
-import { RunnerType } from "./specs-store"
+import { RunnerType, SpecsStore } from "./specs-store"
 import config from './config'
 import { Automation } from './automation'
 import { ServerBase } from "./server-base"
@@ -18,6 +18,9 @@ import cwd from './cwd'
 import runEvents from './plugins/run_events'
 import { fs } from './util/fs'
 import Debug from 'debug'
+import { RootRunnable} from '@packages/reporter'
+import Reporter from './reporter'
+import errors from './errors'
 
 // import Bluebird from 'bluebird'
 // import check from 'check-more-types'
@@ -29,7 +32,6 @@ import Debug from 'debug'
 // import commitInfo from '@cypress/commit-info'
 // import browsers from './browsers'
 // import pkg from '@packages/root'
-// import { RunnablesStore } from '@packages/reporter'
 // import { ServerCt, SocketCt } from '@packages/server-ct'
 // import { SocketE2E } from './socket-e2e'
 // import api from './api'
@@ -1093,7 +1095,15 @@ const debug = Debug('cypress:server:project')
 
 const localCwd = cwd()
 
-export type Cfg = Record<string, any>
+export interface Cfg {
+  reporter: 'dot' | 'spec' | string
+
+  report: boolean
+
+  // many other keys also exist.
+  // if you find one that isn't listed here, please add it.
+  [key: string]: any
+}
 
 export type TestingType = 'e2e' | 'component'
 
@@ -1151,6 +1161,8 @@ export class ProjectBase extends EE {
    */
   private _watchers?: Watchers
 
+  private _reporter?: typeof Reporter
+
   constructor({ projectType, projectRoot, options }: { projectType: RunnerType, projectRoot: string, options: Opts }) {
     super()
 
@@ -1205,6 +1217,40 @@ export class ProjectBase extends EE {
     return this._watchers
   }
 
+  get reporter () {
+    if (!this._reporter) {
+      throw Error('Call initializeReporter first!')
+    }
+    return this._reporter
+  }
+
+  initializeReporter () {
+    if (!this.config.report) {
+      return
+    }
+
+    // if we've passed down reporter
+    // then record these via mocha reporter
+    try {
+      Reporter.loadReporter(this.config.reporter, this.projectRoot)
+    } catch (err) {
+      const paths = Reporter.getSearchPathsForReporter(this.config.reporter, this.projectRoot)
+
+      // only include the message if this is the standard MODULE_NOT_FOUND
+      // else include the whole stack
+      const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
+
+      errors.throw('INVALID_REPORTER_NAME', {
+        paths,
+        error: errorMsg,
+        name: this.config.reporter,
+      })
+    }
+
+    this._reporter = Reporter.create(
+      this.config.reporter, this.config.reporterOptions, this.projectRoot)
+  }
+
   async startWebsockets () {
     if (!this.server) {
       throw Error('You need a server before starting web sockets!')
@@ -1214,7 +1260,68 @@ export class ProjectBase extends EE {
       onConnect: (id: string) => {
         debug('socket:connected')
         this.emit('socket:connected', id)
-      }
+      },
+
+      onTestsReceivedAndMaybeRecord: async (runnables: RootRunnable, executeRunnable: () => any) => {
+        debug('received runnables %o', runnables)
+        this.initializeReporter()
+
+        this.reporter.setRunnables(runnables)
+
+        // if (this._recordTests) {
+        //   await this._recordTests(runnables, cb)
+
+        //   this._recordTests = null
+
+        //   return
+        // }
+
+        console.log('Executing runnable')
+        executeRunnable()
+      },
+
+      onReloadBrowser: () => {
+        throw Error('TODO onReloadBrowser')
+        // options.onReloadBrowser,
+      },
+
+      onFocusTests: () => {
+        throw Error('TODO onFocusTests')
+        // options.onFocusTests,
+      },
+
+      onSpecChanged: () => {
+        this.options.onSpecChanged?.()
+      },
+
+      onSavedStateChanged: () => {
+        throw Error('TODO onSavedStateChanged')
+      }, // options.onSavedStateChanged,
+
+      onCaptureVideoFrames: (data) => {
+        // TODO: move this to browser automation middleware
+        this.emit('capture:video:frames', data)
+      },
+
+      onMocha: async (event: string, runnable: any) => {
+        debug('onMocha', event)
+        // bail if we dont have a
+        // reporter instance
+        if (!this.reporter) {
+          return
+        }
+
+        this.reporter.emit(event, runnable)
+
+        if (event === 'end') {
+          const [stats, _] = await Promise.all([
+            this.reporter.end(),
+            this.server?.end()
+          ])
+
+          this.emit('end', stats || {})
+        }
+      },
     })
   }
 
