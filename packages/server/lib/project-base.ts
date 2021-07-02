@@ -122,36 +122,44 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
+  async openServer (updatedCfg, options) {
+    const { port, warning } = await this.server.open(updatedCfg, {
+      project: this,
+      onError: options.onError,
+      onWarning: options.onWarning,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      projectType: this.projectType,
+      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      // specsStore,
+    })
+
+    return {
+      port,
+      warning
+    }
+  }
+
   onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
     this._server = this.projectType === 'e2e'
       ? new ServerE2E()
       : new ServerCt()
 
     return this._initPlugins(cfg, options)
-    .then(({ cfg, specsStore, startSpecWatcher }) => {
+    .then(async ({ cfg, specsStore, startSpecWatcher }) => {
       const updatedCfg = this.projectType === 'e2e'
         ? cfg
         : this.injectCtSpecificConfig(cfg)
 
-      return this.server.open(updatedCfg, {
-        project: this,
-        onError: options.onError,
-        onWarning: options.onWarning,
-        shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-        projectType: this.projectType,
-        SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
-        createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      const { port, warning } = await this.openServer(updatedCfg, options)
+
+      return {
+        cfg: updatedCfg,
+        port,
+        warning,
         specsStore,
-      })
-      .then(([port, warning]) => {
-        return {
-          cfg: updatedCfg,
-          port,
-          warning,
-          specsStore,
-          startSpecWatcher,
-        }
-      })
+        startSpecWatcher,
+      }
     })
   }
 
@@ -347,20 +355,26 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     options.onError(err)
   }
 
-  _initPlugins (cfg, options) {
+  async initializePlugins (cfg, options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
     const allowedCfg = config.allowed(cfg)
 
-    return plugins.init(allowedCfg, {
+    const updatedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
     })
+
+    return updatedCfg
+  }
+
+  _initPlugins (cfg, options) {
+    return this.initializePlugins(cfg, options)
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
 
