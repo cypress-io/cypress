@@ -889,28 +889,25 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  getRecordKeys () {
-    return Bluebird.all([
+  async getRecordKeys () {
+    const [projectId, authToken] = await Promise.all([
       this.getProjectId(),
       user.ensureAuthToken(),
     ])
-    .spread((projectId, authToken) => {
-      return api.getProjectRecordKeys(projectId, authToken)
-    })
+
+    return api.getProjectRecordKeys(projectId, authToken)
   }
 
-  requestAccess (projectId) {
-    return user.ensureAuthToken()
-    .then((authToken) => {
-      return api.requestAccess(projectId, authToken)
-    })
+  async requestAccess (projectId) {
+    const authToken = await user.ensureAuthToken()
+
+    return api.requestAccess(projectId, authToken)
   }
 
-  static getOrgs () {
-    return user.ensureAuthToken()
-    .then((authToken) => {
-      return api.getOrgs(authToken)
-    })
+  static async getOrgs () {
+    const authToken = await user.ensureAuthToken()
+
+    return api.getOrgs(authToken)
   }
 
   static paths () {
@@ -929,13 +926,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  static getDashboardProjects () {
-    return user.ensureAuthToken()
-    .then((authToken) => {
-      debug('got auth token: %o', { authToken: keys.hide(authToken) })
+  static async getDashboardProjects () {
+    const authToken = await user.ensureAuthToken()
 
-      return api.getProjects(authToken)
-    })
+    debug('got auth token: %o', { authToken: keys.hide(authToken) })
+
+    return api.getProjects(authToken)
   }
 
   static _mergeDetails (clientProject, project) {
@@ -946,15 +942,16 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return _.extend({}, clientProject, { state })
   }
 
-  static _getProject (clientProject, authToken) {
+  static async _getProject (clientProject, authToken) {
     debug('get project from api', clientProject.id, clientProject.path)
 
-    return api.getProject(clientProject.id, authToken)
-    .then((project) => {
+    try {
+      const project = await api.getProject(clientProject.id, authToken)
+
       debug('got project from api')
 
       return ProjectBase._mergeDetails(clientProject, project)
-    }).catch((err) => {
+    } catch (err) {
       debug('failed to get project from api', err.statusCode)
       switch (err.statusCode) {
         case 404:
@@ -966,84 +963,85 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         default:
           throw err
       }
-    })
+    }
   }
 
-  static getProjectStatuses (clientProjects: any = []) {
+  static async getProjectStatuses (clientProjects: any = []) {
     debug(`get project statuses for ${clientProjects.length} projects`)
 
-    return user.ensureAuthToken()
-    .then((authToken) => {
-      debug('got auth token: %o', { authToken: keys.hide(authToken) })
+    const authToken = await user.ensureAuthToken()
 
-      return api.getProjects(authToken).then((projects = []) => {
-        debug(`got ${projects.length} projects`)
-        const projectsIndex = _.keyBy(projects, 'id')
+    debug('got auth token: %o', { authToken: keys.hide(authToken) })
 
-        return Bluebird.all(_.map(clientProjects, (clientProject) => {
-          debug('looking at', clientProject.path)
-          // not a CI project, just mark as valid and return
-          if (!clientProject.id) {
-            debug('no project id')
+    const projects = (await api.getProjects(authToken) || [])
 
-            return ProjectBase._mergeState(clientProject, 'VALID')
-          }
+    debug(`got ${projects.length} projects`)
+    const projectsIndex = _.keyBy(projects, 'id')
 
-          const project = projectsIndex[clientProject.id]
+    return Promise.all(_.map(clientProjects, (clientProject) => {
+      debug('looking at', clientProject.path)
+      // not a CI project, just mark as valid and return
+      if (!clientProject.id) {
+        debug('no project id')
 
-          if (project) {
-            debug('found matching:', project)
+        return ProjectBase._mergeState(clientProject, 'VALID')
+      }
 
-            // merge in details for matching project
-            return ProjectBase._mergeDetails(clientProject, project)
-          }
+      const project = projectsIndex[clientProject.id]
 
-          debug('did not find matching:', project)
+      if (project) {
+        debug('found matching:', project)
 
-          // project has id, but no matching project found
-          // check if it doesn't exist or if user isn't authorized
-          return ProjectBase._getProject(clientProject, authToken)
-        }))
-      })
-    })
+        // merge in details for matching project
+        return ProjectBase._mergeDetails(clientProject, project)
+      }
+
+      debug('did not find matching:', project)
+
+      // project has id, but no matching project found
+      // check if it doesn't exist or if user isn't authorized
+      return ProjectBase._getProject(clientProject, authToken)
+    }))
   }
 
-  static getProjectStatus (clientProject) {
+  static async getProjectStatus (clientProject) {
     debug('get project status for client id %s at path %s', clientProject.id, clientProject.path)
 
     if (!clientProject.id) {
       debug('no project id')
 
-      return Bluebird.resolve(ProjectBase._mergeState(clientProject, 'VALID'))
+      return Promise.resolve(ProjectBase._mergeState(clientProject, 'VALID'))
     }
 
-    return user.ensureAuthToken().then((authToken) => {
-      debug('got auth token: %o', { authToken: keys.hide(authToken) })
+    const authToken = await user.ensureAuthToken()
 
-      return ProjectBase._getProject(clientProject, authToken)
-    })
+    debug('got auth token: %o', { authToken: keys.hide(authToken) })
+
+    return ProjectBase._getProject(clientProject, authToken)
   }
 
   static remove (path) {
     return cache.removeProject(path)
   }
 
-  static add (path, options) {
+  static async add (path, options) {
     // don't cache a project if a non-default configFile is set
     // https://git.io/JeGyF
     if (settings.configFile(options) !== 'cypress.json') {
-      return Bluebird.resolve({ path })
+      return Promise.resolve({ path })
     }
 
-    return cache.insertProject(path)
-    .then(() => {
-      return this.id(path)
-    }).then((id) => {
-      return { id, path }
-    })
-    .catch(() => {
+    try {
+      await cache.insertProject(path)
+      const id = await ProjectBase.id(path)
+
+      return {
+        id,
+        path,
+      }
+    } catch (e) {
       return { path }
-    })
+    }
   }
 
   static id (path) {
