@@ -18,16 +18,20 @@ import { computed, defineComponent } from "vue";
 import { getPackages } from "../statics/packages";
 import { useStore } from "../store";
 
-export default defineComponent({
-  setup() {
-    const store = useStore();
+export function listPackages(){
+  const store = useStore();
     const framework = computed(() => store.getState().component?.framework);
     const bundler = computed(() => store.getState().component?.bundler);
     const listOfNecessaryPackages = computed(() => framework.value && bundler.value ? getPackages(
       framework.value,
       bundler.value
     ) : []);
-    return { listOfNecessaryPackages };
+    return listOfNecessaryPackages
+}
+
+export default defineComponent({
+  setup() {
+    return { listOfNecessaryPackages: listPackages() };
   },
 });
 </script>

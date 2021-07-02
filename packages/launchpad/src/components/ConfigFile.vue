@@ -80,15 +80,15 @@ export default {
     }
 }`}
 
-        const languages:Array<{id:"js"|"ts", name:string}> = [
+        const languages:Array<{id: "js"|"ts", name: string}> = [
+            {
+                id: 'ts',
+                name: 'TypeScript'
+            },
             {
                 id:'js',
                 name: 'JavaScript'
             }, 
-            {
-                id: 'ts',
-                name: 'TypeScript'
-            }
         ]
 
         return { nextButtonName, code, language, languages }
