@@ -1077,7 +1077,7 @@ module.exports = {
       return this.currentSetScreenshotMetadata(data)
     }
 
-    const wait = () => {
+    const wait = async () => {
       debug('waiting for socket to connect and browser to launch...')
 
       if (!shouldLaunchBrowser) {
@@ -1085,9 +1085,6 @@ module.exports = {
         // we tell it that we are ready
         // to receive the next spec
         return this.navigateToNextSpec(options.spec)
-        .tap(() => {
-          debug('navigated to next spec')
-        })
       }
 
       return Promise.join(
