@@ -726,34 +726,33 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cfg
   }
 
-  getSpecUrl (absoluteSpecPath, specType) {
+  async getSpecUrl (absoluteSpecPath, specType) {
     debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
-    return this.getConfig()
-    .then((cfg) => {
-      // if we don't have a absoluteSpecPath or its __all
-      if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
-        const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+    const cfg = await this.getConfig()
 
-        debug('returning url to run all specs: %s', url)
+    // if we don't have a absoluteSpecPath or its __all
+    if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+      const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
 
-        return url
-      }
-
-      // TODO:
-      // to handle both unit + integration tests we need
-      // to figure out (based on the config) where this absoluteSpecPath
-      // lives. does it live in the integrationFolder or
-      // the unit folder?
-      // once we determine that we can then prefix it correctly
-      // with either integration or unit
-      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
-      const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
-
-      debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+      debug('returning url to run all specs: %s', url)
 
       return url
-    })
+    }
+
+    // TODO:
+    // to handle both unit + integration tests we need
+    // to figure out (based on the config) where this absoluteSpecPath
+    // lives. does it live in the integrationFolder or
+    // the unit folder?
+    // once we determine that we can then prefix it correctly
+    // with either integration or unit
+    const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
+    const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
+
+    debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+
+    return url
   }
 
   getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
@@ -849,27 +848,23 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     .return(id)
   }
 
-  getProjectId () {
-    return this.verifyExistence()
-    .then(() => {
-      return settings.read(this.projectRoot, this.options)
-    })
-    .then((readSettings) => {
-      if (readSettings && readSettings.projectId) {
-        return readSettings.projectId
-      }
+  async getProjectId () {
+    await this.verifyExistence()
+    const readSettings = await settings.read(this.projectRoot, this.options)
 
-      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
-    })
+    if (readSettings && readSettings.projectId) {
+      return readSettings.projectId
+    }
+
+    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
   }
 
-  verifyExistence () {
-    return fs
-    .statAsync(this.projectRoot)
-    .return(this)
-    .catch(() => {
+  async verifyExistence () {
+    try {
+      await fs.statAsync(this.projectRoot)
+    } catch (err) {
       errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
-    })
+    }
   }
 
   createCiProject (projectDetails) {
