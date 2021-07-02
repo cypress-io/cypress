@@ -20,7 +20,6 @@ const moduleFactory = () => {
   }
 
   const tryToCall = (method) => {
-    console.log(`Try to call ${method}`)
     return (...args) => {
       if (openProject) {
         return openProject[method](...args)
@@ -34,22 +33,6 @@ const moduleFactory = () => {
     specsWatcher: null,
 
     componentSpecsWatcher: null,
-
-    // reset: tryToCall('reset'),
-
-    // getConfig: tryToCall('getConfig'),
-
-    // createCiProject: tryToCall('createCiProject'),
-
-    // writeProjectId: tryToCall('writeProjectId'),
-
-    // getRecordKeys: tryToCall('getRecordKeys'),
-
-    // getRuns: tryToCall('getRuns'),
-
-    // requestAccess: tryToCall('requestAccess'),
-
-    // emit: tryToCall('emit'),
 
     getProject () {
       return openProject
@@ -374,8 +357,6 @@ const moduleFactory = () => {
       this.openProject = openProject
 
       return openProject
-      // return openProject.open({ ...options, testingType: args.testingType })
-      // .return(this)
     },
 
     // for testing purposes

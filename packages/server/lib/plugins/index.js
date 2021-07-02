@@ -178,10 +178,8 @@ const init = (config, options) => {
       // this can sometimes trigger before the promise is fulfilled and
       // sometimes after, so we need to handle each case differently
       if (fulfilled) {
-        console.log('HERE!!!!')
         options.onError(err)
       } else {
-        console.log('HERE....')
         reject(err)
       }
     }

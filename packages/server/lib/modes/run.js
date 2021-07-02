@@ -635,16 +635,6 @@ const createAndOpenProject = async function (socketId, options) {
     project: openProject,
     config: openProject.getConfig(),
   }
-
-// project, projectId, config
-  // .call('getProject')
-  // .then((project) => {
-  //   return Promise.props({
-  //     project,
-  //     config: project.getConfig(),
-  //     projectId: getProjectId(project, projectId),
-  //   })
-  // })
 }
 
 const removeOldProfiles = (browser) => {
@@ -1557,7 +1547,6 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
-          console.log(projectId, options)
           recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
