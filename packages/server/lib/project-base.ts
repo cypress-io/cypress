@@ -155,12 +155,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  onAfterOpen ({ cfg }) {
-    cfg.proxyServer = cfg.proxyUrl
-
-    return cfg
-  }
-
   open (options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
@@ -212,7 +206,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         _.extend(cfg, config.setUrls(cfg))
       }
     })
-    .tap(this.onAfterOpen)
     .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
       // store the cfg from
       // opening the server
