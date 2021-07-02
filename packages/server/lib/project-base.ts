@@ -626,15 +626,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  setBrowsers (browsers = []) {
+  async setBrowsers (browsers = []) {
     debug('getting config before setting browsers %o', browsers)
 
-    return this.getConfig()
-    .then((cfg) => {
-      debug('setting config browsers to %o', browsers)
+    const cfg = await this.getConfig()
 
-      cfg.browsers = browsers
-    })
+    debug('setting config browsers to %o', browsers)
+
+    cfg.browsers = browsers
   }
 
   getAutomation () {
