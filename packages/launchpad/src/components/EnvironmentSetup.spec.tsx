@@ -1,4 +1,4 @@
-import EnvironmentSetup from './2-EnvironmentSetup.vue'
+import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {
   it('playground', { viewportWidth: 800 }, () => {

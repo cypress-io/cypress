@@ -15,8 +15,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useStore } from "../store";
-import TestingType from "./1-TestingType.vue";
-import EnvironmentSetup from "./2-EnvironmentSetup.vue";
+import TestingType from "./TestingType.vue";
+import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./3-InstallDependencies.vue";
 
 export default defineComponent({

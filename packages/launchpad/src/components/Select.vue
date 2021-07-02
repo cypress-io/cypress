@@ -98,7 +98,7 @@ interface Option {
 }
 
 export default defineComponent({
-  emits: ["select"],
+  emits: {select: Object},
   props: {
     name: {
       type: String,
