@@ -597,9 +597,11 @@ export class StudioRecorder {
     dom.openStudioAssertionsMenu({
       event,
       $body: $(this._body),
-      display: true,
-      possibleAssertions: this._generatePossibleAssertions($el),
-      addAssertion: this._addAssertion,
+      props: {
+        possibleAssertions: this._generatePossibleAssertions($el),
+        addAssertion: this._addAssertion,
+        closeMenu: this._closeAssertionsMenu,
+      },
     })
   }
 
@@ -614,23 +616,27 @@ export class StudioRecorder {
 
     if (!tagNamesWithoutText.includes(tagName)) {
       possibleAssertions.push({
-        name: 'have.text',
-        value: $el.text(),
+        type: 'have.text',
+        options: [{
+          value: $el.text(),
+        }],
       })
     }
 
     if (tagNamesWithValue.includes(tagName)) {
       possibleAssertions.push({
-        name: 'have.value',
-        value: $el.val(),
+        type: 'have.value',
+        options: [{
+          value: $el.val(),
+        }],
       })
     }
 
     const attributes = $.map($el[0].attributes, ({ name, value }) => {
       if (name === 'class') {
         possibleAssertions.push({
-          name: 'have.class',
-          value: value.split(' ').map((value) => ({ value })),
+          type: 'have.class',
+          options: value.split(' ').map((value) => ({ value })),
         })
 
         return
@@ -643,8 +649,8 @@ export class StudioRecorder {
     })
 
     possibleAssertions.push({
-      name: 'have.attr',
-      value: attributes,
+      type: 'have.attr',
+      options: attributes,
     })
 
     return possibleAssertions

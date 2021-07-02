@@ -234,7 +234,7 @@ function getStudioAssertionsMenuDom ($body) {
   })
 }
 
-function openStudioAssertionsMenu ({ event, $body, possibleAssertions, addAssertion }) {
+function openStudioAssertionsMenu ({ event, $body, props }) {
   const { shadowRoot, $reactContainer } = getStudioAssertionsMenuDom($body)
 
   const $el = $(event.target)
@@ -251,8 +251,7 @@ function openStudioAssertionsMenu ({ event, $body, possibleAssertions, addAssert
   studioAssertionsMenu.render($reactContainer[0], {
     style,
     $el,
-    possibleAssertions,
-    addAssertion,
+    ...props,
   })
 
   retargetEvents(shadowRoot)

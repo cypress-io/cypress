@@ -3,15 +3,45 @@
 * in the user's app html
 */
 
-@import '../variables';
-
 .assertions-menu {
   background: #fff;
-  font-family: $font-sans;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: .25rem;
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+
+  .close {
+    position: absolute;
+    top: 0;
+    right: 5px;
+
+    &:hover, &:focus, &:active {
+      cursor: pointer;
+    }
+  }
 
   .title {
-    font-size: 18px;
+    font-size: 16px;
     text-align: center;
-    padding: 8px;
+    margin: 0.75rem 0.5rem 0.25rem;
+    width: 100%;
+  }
+
+  .element {
+    font-size: 14px;
+    margin: 0 0.25rem 0.5rem;
+  }
+
+  .assertions-list {
+    .assertion {
+      padding: 0.4rem 0.5rem;
+
+      &:hover {
+        background-color: #e9ecef;
+      }
+
+      .assertion-options {
+        display: none;
+      }
+    }
   }
 }
