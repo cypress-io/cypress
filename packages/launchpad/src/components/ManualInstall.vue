@@ -10,7 +10,7 @@ export default defineComponent({
   setup(_, { emit }) {
     const store = useStore()
     onMounted(() => {
-      store.setAltFunction(() => {
+      store.onAlt(() => {
         emit("back")
       })
     })

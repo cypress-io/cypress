@@ -19,7 +19,7 @@ describe('<Wizard />', () => {
     cy.get('h1').should('contain', 'Install Dev Dependencies')
     cy.contains('@cypress/vue').should('be.visible')
     cy.contains('@cypress/vite-dev-server').should('be.visible')
-    cy.contains('Install these').click()
+    cy.contains('Install manually').click()
     cy.contains('installed').click()
 
     cy.get('h1').should('contain', 'Configuration file')

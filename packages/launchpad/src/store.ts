@@ -71,15 +71,15 @@ export class Store {
     }
   }
 
-  setNextFunction (newNext: () => void) {
+  onNext (newNext: () => void) {
     this.state.nextAction = newNext
   }
 
-  setBackFunction (newBack: () => void) {
+  onBack (newBack: () => void) {
     this.state.backAction = newBack
   }
 
-  setAltFunction (newAlt: () => void) {
+  onAlt (newAlt: () => void) {
     this.state.alternativeAction = newAlt
   }
 

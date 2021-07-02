@@ -13,19 +13,21 @@
     <Button @click="nextFunction()">{{ next }}</Button>
     <Button @click="backFunction()" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
-    <Button v-if="altFunction && alt" @click="altFunction?.()" variant="link">{{
-      alt
-    }}</Button>
+    <div v-if="altFunction && alt" @click="handleAlt" class="flex items-center px-3">
+      <label class="text-indigo-600 px-3">{{ alt }}</label>
+      <Switch :value="altValue" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, ref } from "vue";
 import { useStore } from "../store";
 import Button from "./Button.vue";
+import Switch from "./Switch.vue";
 
 export default defineComponent({
-  components: { Button },
+  components: { Button, Switch },
   props: {
     next: {
       type: String,
@@ -41,12 +43,19 @@ export default defineComponent({
     },
   },
   setup() {
+    const altValue = ref(false)
     const store = useStore();
     const state = computed(() => store.getState());
     const nextFunction = computed(() => state.value.nextAction);
     const backFunction = computed(() => state.value.backAction);
     const altFunction = computed(() => state.value.alternativeAction);
-    return { nextFunction, backFunction, altFunction };
+
+    const handleAlt = () => {
+      altValue.value = !altValue.value;
+      altFunction.value?.();
+    }
+
+    return { nextFunction, backFunction, altFunction, altValue, handleAlt };
   },
 });
 </script>

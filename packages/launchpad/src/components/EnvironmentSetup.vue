@@ -56,11 +56,11 @@ export default defineComponent({
           "Confirm the front-end framework and bundler used in your project.",
       });
 
-      store.setBackFunction(() => {
+      store.onBack(() => {
         store.setTestingType(undefined);
       });
-
-      store.setNextFunction(() => {
+      
+      store.onNext(() => {
         if (!selectedFramework.value || !selectedBundler.value) {
           return;
         }

@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, Ref, ref } from "vue";
+import { computed, defineComponent, PropType, ref } from "vue";
 
 const logos = import.meta.globEager("../assets/logos/*.svg");
 interface Option {

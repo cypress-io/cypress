@@ -9,7 +9,7 @@ describe('<ButtonBar />', () => {
     cy.mount(() => <ButtonBar next="Next Step" back="Back" />).then(() => {
       const nextFunction = cy.spy()
 
-      Cypress.store.setNextFunction(nextFunction)
+      Cypress.store.onNext(nextFunction)
       cy.contains('Next Step')
       .click()
       .then(() => {
@@ -22,11 +22,24 @@ describe('<ButtonBar />', () => {
     cy.mount(() => <ButtonBar next="Next Step" back="Back" />).then(() => {
       const backFunction = cy.spy()
 
-      Cypress.store.setBackFunction(backFunction)
+      Cypress.store.onBack(backFunction)
       cy.contains('Back')
       .click()
       .then(() => {
         expect(backFunction).to.have.been.calledOnce
+      })
+    })
+  })
+
+  it('should show a switch on the right when alt is mentionned and onAlt is set', () => {
+    cy.mount(() => <ButtonBar next="Next Step" back="Back" alt="Install manually" />).then(() => {
+      const altFunction = cy.spy()
+
+      Cypress.store.onAlt(altFunction)
+      cy.contains('Install manually')
+      .click()
+      .then(() => {
+        expect(altFunction).to.have.been.calledOnce
       })
     })
   })
