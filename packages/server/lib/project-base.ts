@@ -598,6 +598,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             this.emit('end', stats)
           })
         }
+
+        return
       },
     })
   }
@@ -660,7 +662,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (options = {}): Bluebird<Cfg> {
+  async getConfig (options = {}): Promise<Cfg> {
     if (options == null) {
       // @ts-ignore
       options = this.options
@@ -669,10 +671,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     if (this._cfg) {
       debug('project has config %o', this._cfg)
 
-      return Bluebird.resolve(this._cfg)
+      return Promise.resolve(this._cfg)
     }
 
-    const setNewProject = (cfg) => {
+    const setNewProject = async (cfg) => {
       if (cfg.isTextTerminal) {
         return
       }
@@ -683,20 +685,20 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         throw new Error('Missing integration folder')
       }
 
-      return this.determineIsNewProject(cfg)
-      .then((untouchedScaffold) => {
-        const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
+      const untouchedScaffold = await this.determineIsNewProject(cfg)
+      const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
 
-        debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
-        cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
-      })
+      debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
+      cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
     }
 
-    return config.get(this.projectRoot, options)
-    .then((cfg) => {
-      return this._setSavedState(cfg)
-    })
-    .tap(setNewProject)
+    const theCfg = await config.get(this.projectRoot, options)
+
+    await setNewProject(theCfg)
+
+    const cfgWithSaved = await this._setSavedState(theCfg)
+
+    return cfgWithSaved
   }
 
   // forces saving of project's state by first merging with argument
@@ -719,16 +721,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  _setSavedState (cfg) {
+  async _setSavedState (cfg) {
     debug('get saved state')
 
-    return savedState.create(this.projectRoot, cfg.isTextTerminal)
-    .then((state) => state.get())
-    .then((state) => {
-      cfg.state = state
+    let state = await savedState.create(this.projectRoot, cfg.isTextTerminal)
 
-      return cfg
-    })
+    state = await state.get()
+    cfg.state = state
+
+    return cfg
   }
 
   getSpecUrl (absoluteSpecPath, specType) {
