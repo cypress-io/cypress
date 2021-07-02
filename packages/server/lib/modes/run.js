@@ -12,7 +12,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const { ProjectBase } = require('../project-base')
+const { ensureExists } = require('../project_utils')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')
@@ -616,16 +616,16 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   })
 }
 
-const createAndOpenProject = function (socketId, options) {
+const createAndOpenProject = async function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return ProjectBase
-  .ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
+  // resolves undefined if everything is okay, otherwise throws an error.
+  console.log(options)
+  await ensureExists(projectRoot, options.configFile)
+
+  // open this project without
+  // adding it to the global cache
+  return openProjectCreate(projectRoot, socketId, options)
   .call('getProject')
   .then((project) => {
     return Promise.props({

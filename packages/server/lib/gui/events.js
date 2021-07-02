@@ -154,21 +154,29 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         specFilter: arg.specFilter,
       })
 
-      return openProject.launch(arg.browser, fullSpec, {
-        projectRoot: options.projectRoot,
-        onBrowserOpen () {
-          return send({ browserOpened: true })
-        },
-        onBrowserClose () {
-          return send({ browserClosed: true })
-        },
-      })
-      .catch((err) => {
-        if (err.title == null) {
-          err.title = 'Error launching browser'
-        }
+      return openProject.close()
+      .then(() => {
+        const p = openProject.openProject.open(openProject.options)
+        console.log('project is', openProject.openProject)
+        return p
+      }).then(() => {
+        console.log('now it is',openProject.openProject)
+        return openProject.launch(arg.browser, fullSpec, {
+          projectRoot: options.projectRoot,
+          onBrowserOpen () {
+            return send({ browserOpened: true })
+          },
+          onBrowserClose () {
+            return send({ browserClosed: true })
+          },
+        })
+        .catch((err) => {
+          if (err.title == null) {
+            err.title = 'Error launching browser'
+          }
 
-        return sendErr(err)
+          return sendErr(err)
+        })
       })
 
     case 'begin:auth':
@@ -305,7 +313,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then((browsers = []) => {
         debug('setting found %s on the config', pluralize('browser', browsers.length, true))
         options.config = _.assign(options.config, { browsers })
-      }).then(() => {
+      }).then(async () => {
         chromePolicyCheck.run((err) => {
           return options.config.browsers.forEach((browser) => {
             if (browser.family === 'chromium') {
@@ -314,16 +322,20 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           })
         })
 
-        return openProject.create(arg, options, {
-          onFocusTests,
-          onSpecChanged,
-          onSettingsChanged,
-          onError,
-          onWarning,
-        })
-      }).call('getConfig')
-      .then(send)
-      .catch(sendErr)
+        try {
+          const project = await openProject.create(arg, options, {
+            onFocusTests,
+            onSpecChanged,
+            onSettingsChanged,
+            onError,
+            onWarning,
+          })
+
+          return send(project.getConfig())
+        } catch (err) {
+          sendErr(err)
+        }
+      })
 
     case 'close:project':
       return openProject.close()

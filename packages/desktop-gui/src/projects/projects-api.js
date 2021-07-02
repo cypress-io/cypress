@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
+import Promise, { promisify } from 'bluebird'
 
 import ipc from '../lib/ipc'
 import localData from '../lib/local-data'
@@ -210,6 +210,7 @@ const reopenProject = (project) => {
   project.clearError()
   project.dismissWarning()
 
+// TOOD: this crashes when you click "try again"
   return closeProject(project)
   .then(() => {
     return openProject(project)

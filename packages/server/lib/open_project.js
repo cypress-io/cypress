@@ -20,6 +20,7 @@ const moduleFactory = () => {
   }
 
   const tryToCall = (method) => {
+    console.log(`Try to call ${method}`)
     return (...args) => {
       if (openProject) {
         return openProject[method](...args)
@@ -34,21 +35,21 @@ const moduleFactory = () => {
 
     componentSpecsWatcher: null,
 
-    reset: tryToCall('reset'),
+    // reset: tryToCall('reset'),
 
-    getConfig: tryToCall('getConfig'),
+    // getConfig: tryToCall('getConfig'),
 
-    createCiProject: tryToCall('createCiProject'),
+    // createCiProject: tryToCall('createCiProject'),
 
-    writeProjectId: tryToCall('writeProjectId'),
+    // writeProjectId: tryToCall('writeProjectId'),
 
-    getRecordKeys: tryToCall('getRecordKeys'),
+    // getRecordKeys: tryToCall('getRecordKeys'),
 
-    getRuns: tryToCall('getRuns'),
+    // getRuns: tryToCall('getRuns'),
 
-    requestAccess: tryToCall('requestAccess'),
+    // requestAccess: tryToCall('requestAccess'),
 
-    emit: tryToCall('emit'),
+    // emit: tryToCall('emit'),
 
     getProject () {
       return openProject
@@ -60,6 +61,7 @@ const moduleFactory = () => {
     },
 
     launch (browser, spec, options = {}) {
+      console.log('this.openProject', this.openProject)
       debug('resetting project state, preparing to launch browser %s for spec %o options %o',
         browser.name, spec, options)
 
@@ -67,107 +69,105 @@ const moduleFactory = () => {
 
       // reset to reset server and socket state because
       // of potential domain changes, request buffers, etc
-      return this.reset()
-      .then(() => openProject.getSpecUrl(spec.absolute, spec.specType))
-      .then((url) => {
-        debug('open project url %s', url)
+      // this.openProject.reset()
 
-        return openProject.getConfig()
-        .then((cfg) => {
-          _.defaults(options, {
-            browsers: cfg.browsers,
-            userAgent: cfg.userAgent,
-            proxyUrl: cfg.proxyUrl,
-            proxyServer: cfg.proxyServer,
-            socketIoRoute: cfg.socketIoRoute,
-            chromeWebSecurity: cfg.chromeWebSecurity,
-            isTextTerminal: cfg.isTextTerminal,
-            downloadsFolder: cfg.downloadsFolder,
-          })
+      const url = this.openProject.getSpecUrl(spec.absolute, spec.specType)
+      debug('open project url %s', url)
 
-          // if we don't have the isHeaded property
-          // then we're in interactive mode and we
-          // can assume its a headed browser
-          // TODO: we should clean this up
-          if (!_.has(browser, 'isHeaded')) {
-            browser.isHeaded = true
-            browser.isHeadless = false
-          }
+      const cfg = this.openProject.getConfig()
 
-          // set the current browser object on options
-          // so we can pass it down
-          options.browser = browser
-          options.url = url
-
-          openProject.setCurrentSpecAndBrowser(spec, browser)
-
-          const automation = openProject.getAutomation()
-
-          // use automation middleware if its
-          // been defined here
-          let am = options.automationMiddleware
-
-          if (am) {
-            automation.use(am)
-          }
-
-          if (!am || !am.onBeforeRequest) {
-            automation.use({
-              onBeforeRequest (message, data) {
-                if (message === 'take:screenshot') {
-                  data.specName = spec.name
-
-                  return data
-                }
-              },
-            })
-          }
-
-          const afterSpec = () => {
-            if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
-
-            return runEvents.execute('after:spec', cfg, spec)
-          }
-
-          const { onBrowserClose } = options
-
-          options.onBrowserClose = () => {
-            if (spec && spec.absolute) {
-              preprocessor.removeFile(spec.absolute, cfg)
-            }
-
-            afterSpec(cfg, spec)
-            .catch((err) => {
-              openProject.options.onError(err)
-            })
-
-            if (onBrowserClose) {
-              return onBrowserClose()
-            }
-          }
-
-          options.onError = openProject.options.onError
-
-          relaunchBrowser = () => {
-            debug(
-              'launching browser: %o, spec: %s',
-              browser,
-              spec.relative,
-            )
-
-            return Promise.try(() => {
-              if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-                return runEvents.execute('before:spec', cfg, spec)
-              }
-            })
-            .then(() => {
-              return browsers.open(browser, options, automation)
-            })
-          }
-
-          return relaunchBrowser()
-        })
+      _.defaults(options, {
+        browsers: cfg.browsers,
+        userAgent: cfg.userAgent,
+        proxyUrl: cfg.proxyUrl,
+        proxyServer: cfg.proxyServer,
+        socketIoRoute: cfg.socketIoRoute,
+        chromeWebSecurity: cfg.chromeWebSecurity,
+        isTextTerminal: cfg.isTextTerminal,
+        downloadsFolder: cfg.downloadsFolder,
       })
+
+      // if we don't have the isHeaded property
+      // then we're in interactive mode and we
+      // can assume its a headed browser
+      // TODO: we should clean this up
+      if (!_.has(browser, 'isHeaded')) {
+        browser.isHeaded = true
+        browser.isHeadless = false
+      }
+
+      // set the current browser object on options
+      // so we can pass it down
+      options.browser = browser
+      options.url = url
+
+      this.openProject.setCurrentSpecAndBrowser({ spec, browser })
+
+      const automation = this.openProject.automation
+
+      // use automation middleware if its
+      // been defined here
+      let am = options.automationMiddleware
+
+      if (am) {
+        automation.use(am)
+      }
+
+      if (!am || !am.onBeforeRequest) {
+        automation.use({
+          onBeforeRequest (message, data) {
+            if (message === 'take:screenshot') {
+              data.specName = spec.name
+
+              return data
+            }
+          },
+        })
+      }
+
+      const afterSpec = () => {
+        if (!this.openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
+
+        return runEvents.execute('after:spec', cfg, spec)
+      }
+
+      const { onBrowserClose } = options
+
+      options.onBrowserClose = () => {
+        if (spec && spec.absolute) {
+          preprocessor.removeFile(spec.absolute, cfg)
+        }
+
+        afterSpec(cfg, spec)
+        .catch((err) => {
+          this.openProject.options.onError(err)
+        })
+
+        if (onBrowserClose) {
+          return onBrowserClose()
+        }
+      }
+
+      options.onError = this.openProject.options.onError
+
+      relaunchBrowser = () => {
+        debug(
+          'launching browser: %o, spec: %s',
+          browser,
+          spec.relative,
+        )
+
+        return Promise.try(() => {
+          if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
+            return runEvents.execute('before:spec', cfg, spec)
+          }
+        })
+        .then(() => {
+          return browsers.open(browser, options, automation)
+        })
+      }
+
+      return relaunchBrowser()
     },
 
     getSpecs (cfg) {
@@ -252,7 +252,10 @@ const moduleFactory = () => {
             ignoreInitial: true,
           })
 
-          this.specsWatcher.on('add', checkForSpecUpdates)
+          this.specsWatcher.on('add', (...args) => {
+            console.log("A")
+            return checkForSpecUpdates(...args)
+          })
 
           this.specsWatcher.on('unlink', checkForSpecUpdates)
         }
@@ -266,19 +269,20 @@ const moduleFactory = () => {
             ignoreInitial: true,
           })
 
-          this.componentSpecsWatcher.on('add', checkForSpecUpdates)
+          this.componentSpecsWatcher.on('add', (...args) => {
+            console.log("B")
+            return checkForSpecUpdates(...args)
+          })
 
           this.componentSpecsWatcher.on('unlink', checkForSpecUpdates)
         }
       }
 
       const get = () => {
-        return openProject.getConfig()
-        .then((cfg) => {
-          createSpecsWatcher(cfg)
-
-          return this.getSpecs(cfg)
-        })
+        const cfg = openProject.getConfig()
+        // HERE!!
+        createSpecsWatcher(cfg)
+        return this.getSpecs(cfg)
       }
 
       // immediately check the first time around
@@ -306,7 +310,7 @@ const moduleFactory = () => {
     closeOpenProjectAndBrowsers () {
       return this.closeBrowser()
       .then(() => {
-        return openProject && openProject.close()
+        return this.openProject.close()
       })
       .then(() => {
         reset()
@@ -323,15 +327,9 @@ const moduleFactory = () => {
       return this.closeOpenProjectAndBrowsers()
     },
 
-    create (path, args = {}, options = {}) {
+    async create (path, args = {}, options = {}) {
       debug('open_project create %s', path)
       debug('and options %o', options)
-
-      // store the currently open project
-      openProject = new Project.ProjectBase({
-        projectType: args.testingType === 'component' ? 'ct' : 'e2e',
-        projectRoot: path,
-      })
 
       _.defaults(options, {
         onReloadBrowser: () => {
@@ -352,8 +350,33 @@ const moduleFactory = () => {
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      return openProject.open({ ...options, testingType: args.testingType })
-      .return(this)
+      // store the currently open project
+      openProject = new Project.ProjectBase({
+        projectType: args.testingType === 'component' ? 'ct' : 'e2e',
+        projectRoot: path,
+        options
+      })
+
+      await openProject.initializeConfig()
+
+      debug('initialize plugins watcher')
+      await openProject.initializeWatchers()
+
+      // watch the plugins file for any changes; if it changes,
+      // we call initializePlugins again 
+      await openProject.watchPluginsFile({
+        pluginsFile: openProject.config.pluginsFile,
+        isTextTerminal: openProject.config.isTextTerminal,
+        onError: openProject.options.onError
+      })
+
+      await openProject.initializePlugins(args.testingType)
+
+      this.openProject = openProject
+
+      return openProject
+      // return openProject.open({ ...options, testingType: args.testingType })
+      // .return(this)
     },
 
     // for testing purposes
@@ -364,3 +387,4 @@ const moduleFactory = () => {
 module.exports = moduleFactory()
 
 module.exports.Factory = moduleFactory
+

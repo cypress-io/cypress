@@ -91,7 +91,7 @@ const notSSE = (req, res) => {
 export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
-  project: ProjectBase<any>
+  project: ProjectBase
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
   projectType: 'ct' | 'e2e'
@@ -162,7 +162,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   abstract createServer (
     app: Express,
     config: Record<string, any>,
-    project: ProjectBase<any>,
+    project: ProjectBase,
     request: unknown,
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
@@ -540,6 +540,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
+    console.log('Closing SERVER!!')
     return Bluebird.all([
       this._close(),
       this._socket?.close(),

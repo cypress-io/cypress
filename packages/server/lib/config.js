@@ -657,19 +657,14 @@ module.exports = {
     // TODO: rename this to be proxyServer
     const proxyUrl = `http://localhost:${obj.port}`
 
-    const rootUrl = obj.baseUrl ?
-      origin(obj.baseUrl)
-      :
-      proxyUrl
+    const rootUrl = obj.baseUrl ? origin(obj.baseUrl) : proxyUrl
 
-    _.extend(obj, {
+    return {
       proxyUrl,
       browserUrl: rootUrl + obj.clientRoute,
       reporterUrl: rootUrl + obj.reporterRoute,
       xhrUrl: obj.namespace + obj.xhrRoute,
-    })
-
-    return obj
+    }
   },
 
   parseEnv (cfg, envCLI, resolved = {}) {
