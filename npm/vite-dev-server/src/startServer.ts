@@ -24,7 +24,7 @@ export interface StartDevServer {
    * to override some options, you can do so using this.
    * @optional
    */
-  viteConfig?: UserConfig
+  viteConfig?: Omit<UserConfig, 'base'>
 }
 
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
@@ -32,7 +32,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const requiredOptions: InlineConfig = {
     base: '/__cypress/src/',
-    root: projectRoot,
+    root: viteConfig.root ?? projectRoot,
   }
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
