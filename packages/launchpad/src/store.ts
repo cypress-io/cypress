@@ -10,6 +10,7 @@ type ComponentSetup = {
 };
 
 interface State {
+  projectTitle: string
   title: string
   description: string
   testingType?: TestingType
@@ -18,16 +19,19 @@ interface State {
   nextAction: () => void
   backAction: () => void
   alternativeAction?: () => void
+  dependenciesInstalled: boolean
 }
 
 function createInitialState (): State {
   return {
-    title: 'Welcome to Cypress',
+    projectTitle: 'design-system',
+    title: 'LaunchPad',
     description:
-      'Before we get started with testing your project, please confirm which method of testing you would like to use for the initial tests that you’ll be writing.',
+      'Scaffold Cypress Tests',
     firstOpen: true,
     nextAction () {},
     backAction () {},
+    dependenciesInstalled: false,
   }
 }
 
@@ -77,6 +81,10 @@ export class Store {
 
   setAltFunction (newAlt: () => void) {
     this.state.alternativeAction = newAlt
+  }
+
+  flagDependenciesInstalled (flag = true) {
+    this.state.dependenciesInstalled = flag
   }
 }
 

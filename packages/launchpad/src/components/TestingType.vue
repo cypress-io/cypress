@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onMounted } from "vue";
 import { TestingType } from "../statics/testingTypes";
 import { useStore } from "../store";
 
@@ -21,9 +21,16 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
+    onMounted(() => {
+      store.setMeta({
+        title: 'Welcome to Cypress',
+        description: 'Before we get started with testing your project, please confirm which method of testing you would like to use for the initial tests that you’ll be writing.',
+      })
+    })
+
     const selectTestingType = (testingType: TestingType) => {
       store.setTestingType(testingType);
-    };
+    };    
 
     const testingTypes: Array<{
       name: string;

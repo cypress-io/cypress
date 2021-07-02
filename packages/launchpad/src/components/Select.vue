@@ -43,7 +43,7 @@
           {{ selectedOptionObject.description }}
         </span>
       </template>
-      <span>
+      <span v-else class="text-gray-400">
         {{ placeholder }}
       </span>
       <span class="flex-grow"></span>
@@ -80,7 +80,6 @@
         <span v-if="opt.description" class="text-gray-400 ml-2">
           {{ opt.description }}
         </span>
-        
       </li>
     </ul>
   </div>

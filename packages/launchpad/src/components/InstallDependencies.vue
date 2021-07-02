@@ -12,8 +12,6 @@ import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
 
-function installIt() {}
-
 export default defineComponent({
   components: {
     WizardLayout,
@@ -47,7 +45,11 @@ export default defineComponent({
       });
 
       store.setNextFunction(() => {
-        installIt();
+        if(manualInstall.value){
+          store.flagDependenciesInstalled()
+        }else{
+          
+        }
       });
     });
     return { manualInstall, nextButtonName, altButtonName };

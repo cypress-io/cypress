@@ -6,6 +6,7 @@
         @select="setFEFramework"
         :options="frameworks"
         :value="selectedFrameworkId"
+        placeholder="Pick a framework"
       />
       <Select
         name="Bundler"
@@ -13,6 +14,7 @@
         :options="bundlers"
         :value="selectedBundlerId"
         :disabled="disabledBundlerSelect"
+        placeholder="Pick a bundler"
       />
     </div>
   </WizardLayout>

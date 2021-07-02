@@ -5,7 +5,6 @@
       grid grid-cols-launchpad grid-rows-launchpad
       bg-white
       relative
-      text-center
     "
   >
     <div
@@ -48,7 +47,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
+import { useStore } from "../store";
 
 import SideBarItem from "./SideBarItem.vue"
 
@@ -57,7 +57,8 @@ export default defineComponent({
     SideBarItem
   },
   setup() {
-    const projectTitle = "Project title";
+    const store = useStore()
+    const projectTitle = computed(() => store.getState().projectTitle);
 
     const sideMenuDefinition = [
       {icon:'clarity:dashboard-line'}, 
