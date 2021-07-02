@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50 h-9 flex items-center px-5 gap-2 border-b border-gray-200">
+  <div class="bg-gray-50 h-9 flex items-center px-5 gap-2 border-b border-gray-200 rounded-t-md">
     <div v-for="i in [0,1,2]" class="rounded-md h-3 w-3 border border-1-gray-600"/>
   </div>
   <div class="relative">
