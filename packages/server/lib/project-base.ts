@@ -313,16 +313,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return runEvents.execute('after:run', config)
   }
 
-  checkSupportFile (cfg) {
+  async checkSupportFile (cfg) {
     const supportFile = cfg.supportFile
 
     if (supportFile) {
-      return fs.pathExists(supportFile)
-      .then((found) => {
-        if (!found) {
-          errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(cfg))
-        }
-      })
+      const found = await fs.pathExists(supportFile)
+
+      if (!found) {
+        errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(cfg))
+      }
     }
 
     return
