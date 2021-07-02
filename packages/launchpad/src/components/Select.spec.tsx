@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { Framework } from '../statics/frameworks'
+import { Framework } from '../utils/frameworks'
 import Select from './Select.vue'
 
 const manyOptions = [

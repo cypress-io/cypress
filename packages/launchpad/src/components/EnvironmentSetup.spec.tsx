@@ -1,6 +1,6 @@
 import { ref } from 'vue'
-import { SupportedBundlerWebpack } from '../statics/bundler'
-import { SupportedFrameworkNext } from '../statics/frameworks'
+import { SupportedBundlerWebpack } from '../utils/bundler'
+import { SupportedFrameworkNext } from '../utils/frameworks'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {

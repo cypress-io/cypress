@@ -1,7 +1,7 @@
 import { reactive, readonly, inject, App } from 'vue'
-import { Bundler } from './statics/bundler'
-import { Framework } from './statics/frameworks'
-import { TestingType } from './statics/testingTypes'
+import { Bundler } from './utils/bundler'
+import { Framework } from './utils/frameworks'
+import { TestingType } from './utils/testingTypes'
 
 type ComponentSetup = {
   framework: Framework

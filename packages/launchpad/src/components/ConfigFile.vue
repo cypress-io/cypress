@@ -12,8 +12,8 @@
             </button>
         </nav>
         <div class="relative">
-            <PrismJs :key="language" :language="language" >{{ code[language] }}</PrismJs>
-            <CopyButton v-if="manualInstall" :text="code[language]"/>
+            <PrismJs :key="language" :language="language" >{{ code }}</PrismJs>
+            <CopyButton v-if="manualInstall" :text="code"/>
         </div>
     </WizardLayout>
 </template>
@@ -27,6 +27,7 @@ import PrismJs from "vue-prism-component"
 import { useStore } from "../store";
 import WizardLayout from "./WizardLayout.vue"
 import CopyButton from "./CopyButton.vue"
+import { getCode, languages } from "../utils/configFile"
 
 export default defineComponent({
     components: {
@@ -60,41 +61,7 @@ export default defineComponent({
             })
         })
 
-        const code = {
-            js:
-            `// Component testing, Javascript, Vanilla JS, Webpack
-module.exports = {
-    component(on, config) {
-        const { startDevServer } = require('@cypress/webpack-dev-server')
-        const webpackConfig = require('./webpack.config')
-        on('dev-server:start', (options) => {
-            return startDevServer({ options, webpackConfig })
-        })
-        return config
-    }
-}`,
-            ts: `// Component testing, Javascript, Vanilla JS, Webpack
-export default {
-    component(on, config) {
-        const { startDevServer } = require('@cypress/webpack-dev-server')
-        const webpackConfig = require('./webpack.config')
-        on('dev-server:start', (options) => {
-            return startDevServer({ options, webpackConfig })
-        })
-        return config
-    }
-}`}
-
-        const languages:Array<{id: "js"|"ts", name: string}> = [
-            {
-                id: 'ts',
-                name: 'TypeScript'
-            },
-            {
-                id:'js',
-                name: 'JavaScript'
-            }, 
-        ]
+        const code = computed(() => getCode(language.value));
 
         return { manualInstall, nextButtonName, code, language, languages }
     }

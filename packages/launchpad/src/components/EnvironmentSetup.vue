@@ -26,8 +26,8 @@ import WizardLayout from "./WizardLayout.vue";
 import Select from "./Select.vue";
 
 import { useStore } from "../store";
-import { Framework, supportedFrameworks } from "../statics/frameworks";
-import { Bundler, supportedBundlers } from "../statics/bundler";
+import { Framework, supportedFrameworks } from "../utils/frameworks";
+import { Bundler, supportedBundlers } from "../utils/bundler";
 
 export default defineComponent({
   components: { WizardLayout, Select },

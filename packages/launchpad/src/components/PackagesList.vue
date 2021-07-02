@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from "vue";
-import { getPackages } from "../statics/packages";
+import { getPackages } from "../utils/packages";
 import { useStore } from "../store";
 
 export function listPackages(){

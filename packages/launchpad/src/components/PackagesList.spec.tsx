@@ -1,5 +1,5 @@
-import { SupportedBundlerWebpack } from '../statics/bundler'
-import { SupportedFrameworkNext } from '../statics/frameworks'
+import { SupportedBundlerWebpack } from '../utils/bundler'
+import { SupportedFrameworkNext } from '../utils/frameworks'
 import PackagesList from './PackagesList.vue'
 
 describe('<PackagesList />', () => {

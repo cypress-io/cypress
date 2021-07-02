@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from "vue";
-import { TestingType } from "../statics/testingTypes";
+import { TestingType } from "../utils/testingTypes";
 import { useStore } from "../store";
 
 const logos = import.meta.globEager("../assets/testingTypes/*.svg");
