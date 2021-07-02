@@ -36,10 +36,32 @@
 
       &:hover {
         background-color: #e9ecef;
+
+        .assertion-options {
+          display: block;
+        }
       }
 
       .assertion-options {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.25);
+        border-radius: 0.5rem;
         display: none;
+        left: 100%;
+        position: absolute;
+
+        .assertion-option {
+          cursor: pointer;
+          padding: 0.4rem 0.5rem;
+
+          &:hover {
+            background-color: #e9ecef;
+          }
+          
+          .assertion-option-value {
+            font-weight: 600;
+          }
+        }
       }
     }
   }

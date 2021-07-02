@@ -8,8 +8,14 @@ const AssertionsMenu = ({ $el, possibleAssertions, addAssertion, closeMenu }) =>
 
   const { styles, attributes } = usePopper($el[0], popperElement)
 
-  const _addAssertion = (...args) => {
-    addAssertion($el, ...args)
+  const _addAssertion = ({ type, name, value }) => {
+    if (name) {
+      addAssertion($el, type, name, value)
+
+      return
+    }
+
+    addAssertion($el, type, value)
   }
 
   const _close = (event) => {
@@ -34,7 +40,11 @@ const AssertionsMenu = ({ $el, possibleAssertions, addAssertion, closeMenu }) =>
               {type}
               <div className='assertion-options'>
                 {options.map(({ name, value }) => (
-                  <div key={`${name}${value}`} className='assertion-option'>
+                  <div
+                    key={`${name}${value}`}
+                    className='assertion-option'
+                    onClick={() => _addAssertion({ type, name, value })}
+                  >
                     {name && (
                       <span className='assertion-option-name'>
                         {name}
