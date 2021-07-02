@@ -1,4 +1,4 @@
-import { RunnerType, SpecsStore } from "./specs-store"
+import { RunnerType } from "./specs-store"
 import config from './config'
 import { Automation } from './automation'
 import { ServerBase } from "./server-base"
@@ -111,10 +111,6 @@ const debug = Debug('cypress:server:project')
 //   }
 
 //   protected ensureProp = ensureProp
-
-//   setOnTestsReceived (fn) {
-//     this._recordTests = fn
-//   }
 
 //   get server () {
 //     return this.EnsureProp(this._server, 'open')
@@ -1115,6 +1111,8 @@ export interface Opts {
   [key: string]: any
 }
 
+type RecordTests = (runnables: any, cb: () => void) => Promise<void>
+
 export class ProjectBase extends EE {
   projectType: RunnerType
   projectRoot: string
@@ -1162,6 +1160,11 @@ export class ProjectBase extends EE {
   private _watchers?: Watchers
 
   private _reporter?: typeof Reporter
+
+  /**
+   * callback to record tests if the user provides a projectId
+   */
+  private _recordTests?: RecordTests
 
   constructor({ projectType, projectRoot, options }: { projectType: RunnerType, projectRoot: string, options: Opts }) {
     super()
@@ -1268,15 +1271,14 @@ export class ProjectBase extends EE {
 
         this.reporter.setRunnables(runnables)
 
-        // if (this._recordTests) {
-        //   await this._recordTests(runnables, cb)
+        if (this._recordTests) {
+          await this._recordTests(runnables, executeRunnable)
 
-        //   this._recordTests = null
+          this._recordTests = undefined
 
-        //   return
-        // }
+          return
+        }
 
-        console.log('Executing runnable')
         executeRunnable()
       },
 
@@ -1474,6 +1476,10 @@ export class ProjectBase extends EE {
       spec: this.spec,
       browser: this.browser,
     }
+  }
+
+  setOnTestsReceived (fn: RecordTests) {
+    this._recordTests = fn
   }
 
 
