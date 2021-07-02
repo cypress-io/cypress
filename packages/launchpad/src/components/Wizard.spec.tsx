@@ -1,7 +1,7 @@
 import Wizard from './Wizard.vue'
 
 describe('<Wizard />', () => {
-  it('playground', () => {
+  it('should run the full flow', () => {
     cy.mount(() => (
       <Wizard />
     ))
@@ -22,6 +22,6 @@ describe('<Wizard />', () => {
     cy.contains('Install manually').click()
     cy.contains('installed').click()
 
-    cy.get('h1').should('contain', 'Configuration file')
+    cy.get('h1').should('contain', 'Cypress.config')
   })
 })

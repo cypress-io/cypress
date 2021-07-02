@@ -74,10 +74,8 @@ export default defineComponent({
       const initialComponent = store.getState().component;
 
       if (initialComponent) {
-        selectedFramework.value = initialComponent.framework;
-        selectedFrameworkId.value = initialComponent.framework.id;
-        selectedBundler.value = initialComponent.bundler;
-        selectedBundlerId.value = initialComponent.bundler.id;
+        setFEFramework(initialComponent.framework);
+        setFEBundler(initialComponent.bundler);
       }
     });
 

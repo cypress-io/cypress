@@ -1,3 +1,6 @@
+import { ref } from 'vue'
+import { SupportedBundlerWebpack } from '../statics/bundler'
+import { SupportedFrameworkNext } from '../statics/frameworks'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {
@@ -45,5 +48,27 @@ describe('<EnvironmentSetup />', () => {
 
     cy.contains('Webpack').click({ force: true })
     cy.contains('ViteJs').should('not.exist')
+  })
+
+  it('should not allow to change bundler if set by framework through the state', () => {
+    const display = ref(false)
+
+    cy.mount(() => (
+      <div class="m-10">
+        <button onClick={() => {
+          display.value = true
+        }}>Show the component</button>
+        {display.value ? <EnvironmentSetup /> : undefined}
+      </div>
+    )).then(() => {
+      Cypress.store.setComponentSetup({
+        bundler: SupportedBundlerWebpack,
+        framework: SupportedFrameworkNext,
+        complete: false,
+      })
+
+      cy.contains('Show').click()
+      cy.contains('Webpack').should('be.disabled')
+    })
   })
 })
