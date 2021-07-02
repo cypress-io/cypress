@@ -34,7 +34,7 @@ const moduleFactory = () => {
 
     componentSpecsWatcher: null,
 
-    reset: tryToCall('reset'),
+    reset: () => openProject?.reset(),
 
     getConfig: tryToCall('getConfig'),
 
@@ -67,8 +67,9 @@ const moduleFactory = () => {
 
       // reset to reset server and socket state because
       // of potential domain changes, request buffers, etc
-      return this.reset()
-      .then(() => openProject.getSpecUrl(spec.absolute, spec.specType))
+      this.reset()
+
+      return openProject.getSpecUrl(spec.absolute, spec.specType)
       .then((url) => {
         debug('open project url %s', url)
 

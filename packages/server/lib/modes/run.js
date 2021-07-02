@@ -1092,10 +1092,7 @@ module.exports = {
         .tap(() => {
           debug('socket connected', { socketId })
         }),
-        this.launchBrowser(options)
-        .tap(() => {
-          debug('browser launched')
-        }),
+        this.launchBrowser(options),
       )
       .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
