@@ -1,6 +1,10 @@
-import { escapeFilenameInUrl } from './util/escape_filename'
 import path from 'path'
+import { escapeFilenameInUrl } from './util/escape_filename'
+import { fs } from './util/fs'
+import { BigIntStats, Stats } from 'fs-extra'
 import settings from './util/settings'
+import errors from './errors'
+import { TestingType } from './project-base'
 
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const backSlashesRe = /\\/g
@@ -16,19 +20,19 @@ export const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
   .replace(multipleForwardSlashesRe, replacer)
 }
 
-export const getPrefixedPathToSpec =  ({
-  integrationFolder, 
-  componentFolder, 
-  projectRoot, 
-  pathToSpec, 
-  type 
-} : {
-  integrationFolder: string, 
-  componentFolder: string, 
-  projectRoot: string, 
-  pathToSpec: string, 
-  type: string 
-})  => {
+export const getPrefixedPathToSpec = ({
+  integrationFolder,
+  componentFolder,
+  projectRoot,
+  pathToSpec,
+  type,
+}: {
+  integrationFolder: string
+  componentFolder: string
+  projectRoot: string
+  pathToSpec: string
+  type: string
+}) => {
   type ??= 'integration'
 
   // for now hard code the 'type' as integration
@@ -43,7 +47,6 @@ export const getPrefixedPathToSpec =  ({
   // becomes /integration/foo.js
 
   const folderToUse = type === 'integration' ? integrationFolder : componentFolder
-  console.log(type, folderToUse, projectRoot, pathToSpec)
 
   // To avoid having invalid urls from containing backslashes,
   // we normalize specUrls to posix by replacing backslash by slash
@@ -61,7 +64,37 @@ export const getPrefixedPathToSpec =  ({
  * see if a config file exists for a given project
  * and it is it writable.
  */
-export const ensureExists = async (projectRoot: string, configFile: string): Promise<boolean> => {
+export const ensureExists = async (projectRoot: string, configFile: string | boolean): Promise<boolean> => {
   // is there a configFile? is the root writable?
   return settings.exists(projectRoot, { configFile })
+}
+
+export const __getProjectId = async ({
+  configFile,
+  projectRoot,
+  testingType,
+}: {
+  projectRoot: string
+  configFile: string | boolean
+  testingType: TestingType
+}) => {
+  await verifyExistence(projectRoot)
+
+  const theSettings = await settings.read(projectRoot, { configFile, projectRoot, testingType })
+
+  if (theSettings?.projectId) {
+    return theSettings.projectId
+  }
+
+  errors.throw('NO_PROJECT_ID', settings.configFile({ configFile }), projectRoot)
+}
+
+export const verifyExistence = async (projectRoot: string): Promise<Stats | BigIntStats> => {
+  try {
+    const stats = await fs.statAsync(projectRoot)
+
+    return stats
+  } catch (e) {
+    return errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', projectRoot)
+  }
 }

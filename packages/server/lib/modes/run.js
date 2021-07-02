@@ -12,7 +12,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const { ensureExists } = require('../project_utils')
+const { ensureExists, __getProjectId } = require('../project_utils')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')
@@ -463,22 +463,26 @@ const iterateThroughSpecs = function (options = {}) {
   return serial()
 }
 
-const getProjectId = Promise.method((project, id) => {
-  if (id == null) {
-    id = env.get('CYPRESS_PROJECT_ID')
-  }
-
-  // if we have an ID just use it
+const getProjectId = async (project, id) => {
   if (id) {
     return id
   }
 
-  return project.getProjectId()
-  .catch(() => {
-    // no id no problem
-    return null
-  })
-})
+  if (env.get('CYPRESS_PROJECT_ID')) {
+    return env.get('CYPRESS_PROJECT_ID')
+  }
+
+  try {
+    return __getProjectId({
+      projectRoot: project.projectRoot,
+      testingType: project.projectType === 'e2e' ? 'e2e' : 'component',
+      configFile: project.getConfig().configFile,
+    })
+  } catch (e) {
+    // no id, no problem
+    return
+  }
+}
 
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame, onError) => {
   la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
@@ -625,10 +629,11 @@ const createAndOpenProject = async function (socketId, options) {
   // open this project without
   // adding it to the global cache
   const openProject = await openProjectCreate(projectRoot, socketId, options)
+
   return {
-    projectId: null, // TODO, does this really need to be async??
+    projectId: projectId || await getProjectId(openProject, projectId),
     project: openProject,
-    config: openProject.getConfig()
+    config: openProject.getConfig(),
   }
 
 // project, projectId, config
@@ -979,7 +984,7 @@ module.exports = {
 
       return project.onWarning
     }
-  
+
     return openProject.close()
     .then(() => {
       return openProject.openProject.open(openProject.options)
@@ -1552,6 +1557,7 @@ module.exports = {
         recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
+          console.log(projectId, options)
           recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
           recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
