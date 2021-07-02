@@ -189,7 +189,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return scaffold.plugins(path.dirname(cfg1.pluginsFile), cfg1)
     }
 
-    const { cfg: cfg2, port, warning, startSpecWatcher, specsStore  } = this.onOpen(cfg1, options)
+    const { cfg: cfg2, port, warning, startSpecWatcher, specsStore } = this.onOpen(cfg1, options)
 
     // if we didnt have a cfg.port
     // then get the port once we
