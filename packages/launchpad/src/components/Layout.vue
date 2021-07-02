@@ -36,8 +36,10 @@
     >
       {{ projectTitle }}
     </div>
-    <div class="bg-gray-900 text-gray-500 flex flex-col items-center">
+    <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch">
       <SideBarItem v-for="i in sideMenuDefinition" :icon="i.icon" :active="!!i.active"/>
+      <div class="flex-grow" />
+      <img src="../assets/cypress_s.png" class="m-5 w-7" />
     </div>
     <div>
       <slot />
