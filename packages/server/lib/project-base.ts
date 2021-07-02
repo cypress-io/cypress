@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
@@ -67,6 +65,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public projectType?: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
 
+  // @ts-ignore
   constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
     super()
 
@@ -122,7 +121,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  async onOpen (_cfg: Record<string, any> | undefined, options: OpenServerOptions) {
+  async onOpen (_cfg: Record<string, any> | undefined, options) {
+    // @ts-ignore
     this._server = this.projectType === 'e2e'
       ? new ServerE2E()
       : new ServerCt()
@@ -138,6 +138,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onError: options.onError,
       onWarning: options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      // @ts-ignore
       projectType: this.projectType,
       SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
       createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
@@ -169,11 +170,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.options = options
 
     const cfg1 = await this.getConfig(options)
+
     process.chdir(this.projectRoot)
 
     // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
     if (cfg1.chromeWebSecurity === false) {
-      _.chain(cfg.browsers)
+      _.chain(cfg1.browsers)
       .filter((browser) => browser.family !== 'chromium')
       .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
       .value()
@@ -186,10 +188,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     if (cfg1.pluginsFile) {
       debug('scaffolding with plugins file %s', cfg1.pluginsFile)
 
-      return scaffold.plugins(path.dirname(cfg1.pluginsFile), cfg1)
+      await scaffold.plugins(path.dirname(cfg1.pluginsFile), cfg1)
     }
 
-    const { cfg: cfg2, port, warning, startSpecWatcher, specsStore } = this.onOpen(cfg1, options)
+    const { cfg: cfg2, port, warning, startSpecWatcher } = await this.onOpen(cfg1, options)
 
     // if we didnt have a cfg.port
     // then get the port once we
@@ -203,16 +205,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     cfg2.proxyServer = cfg2.proxyUrl
 
-      // store the cfg from
-      // opening the server
+    // store the cfg from
+    // opening the server
     this._cfg = cfg2
 
     debug('project config: %o', _.omit(cfg2, 'resolved'))
 
     if (warning) {
+      // @ts-ignore
       options.onWarning(warning)
     }
 
+    // @ts-ignore
     options.onSavedStateChanged = (state) => this.saveState(state)
 
     // save the last time they opened the project
@@ -220,9 +224,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const now = Date.now()
     const stateToSave = {
       lastOpened: now,
-    }
+    } as any
 
-    if (!cfg.state || !cfg.state.firstOpened) {
+    if (!cfg2.state || !cfg2.state.firstOpened) {
       stateToSave.firstOpened = now
     }
 
@@ -245,7 +249,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.watchPluginsFile(cfg2, options),
     ])
 
-    if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+    if (cfg2.isTextTerminal || !cfg2.experimentalInteractiveRunEvents) return
 
     const sys = await system.info()
     const beforeRunDetails = {
@@ -273,6 +277,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
+    // @ts-ignore
     return Bluebird.try(() => {
       if (this._automation) {
         this._automation.reset()
@@ -290,6 +295,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
+    // @ts-ignore
     const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
 
     return Bluebird.join(
@@ -320,6 +326,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
       })
     }
+
+    return
   }
 
   _onError<Options extends Record<string, any>> (err: Error, options: Options) {
@@ -400,6 +408,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     specs: Cypress.Cypress['spec'][]
     config: any
   }) {
+    // @ts-ignore
     const specsStore = new SpecsStore(config, this.projectType)
 
     if (this.projectType === 'ct') {
@@ -413,6 +422,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
+          // @ts-ignore
           this.server.sendSpecList(specs, this.projectType)
 
           if (this.projectType === 'ct') {
@@ -476,7 +486,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onChange: () => {
         // dont fire change events if we generated
         // a project id less than 1 second ago
+      // @ts-ignore
         if (this.generatedProjectIdTimestamp &&
+        // @ts-ignore
           ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
           return
         }
@@ -526,6 +538,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
+    // @ts-ignore
     this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest)
 
     this.server.startWebsockets(this.automation, cfg, {
@@ -555,6 +568,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         }
 
         if (this._recordTests) {
+          // @ts-ignore
           await this._recordTests(runnables, cb)
 
           this._recordTests = null
@@ -648,6 +662,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // window width and height, DevTools open or not, etc.
   getConfig (options = {}): Bluebird<Cfg> {
     if (options == null) {
+      // @ts-ignore
       options = this.options
     }
 
@@ -802,6 +817,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     //
     // ensure support dir is created
     // and example support file if dir doesnt exist
+    // @ts-ignore
     push(scaffold.support(cfg.supportFolder, cfg))
 
     // if we're in headed mode add these other scaffolding tasks
@@ -814,7 +830,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     if (scaffoldExamples) {
       debug('will scaffold integration and fixtures folder')
+      // @ts-ignore
       push(scaffold.integration(cfg.integrationFolder, cfg))
+      // @ts-ignore
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
     } else {
       debug('will not scaffold integration or fixtures folder')
@@ -828,6 +846,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     logger.info('Writing Project ID', _.clone(attrs))
 
+    // @ts-ignore
     this.generatedProjectIdTimestamp = new Date()
 
     return settings
@@ -960,7 +979,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  static getProjectStatuses (clientProjects = []) {
+  static getProjectStatuses (clientProjects: any = []) {
     debug(`get project statuses for ${clientProjects.length} projects`)
 
     return user.ensureAuthToken()

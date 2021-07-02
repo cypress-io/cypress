@@ -353,7 +353,8 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       await openProject.open({ ...options, testingType: args.testingType })
-      return openProject
+
+      return this
     },
 
     // for testing purposes
