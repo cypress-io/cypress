@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-xl mx-auto border-1 border-gray-200 rounded m-10">
+  <div class="max-w-2xl mx-auto border-1 border-gray-200 rounded m-10">
     <slot />
     <ButtonBar :next="next" :back="back" :alt="alt" />
   </div>

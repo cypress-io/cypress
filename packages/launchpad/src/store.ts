@@ -10,6 +10,7 @@ type ComponentSetup = {
 };
 
 interface State {
+  complete: boolean
   projectTitle: string
   title: string
   description: string
@@ -32,6 +33,7 @@ function createInitialState (): State {
     nextAction () {},
     backAction () {},
     dependenciesInstalled: false,
+    complete: false,
   }
 }
 
@@ -85,6 +87,10 @@ export class Store {
 
   flagDependenciesInstalled (flag = true) {
     this.state.dependenciesInstalled = flag
+  }
+
+  finishSetup () {
+    this.state.complete = true
   }
 }
 

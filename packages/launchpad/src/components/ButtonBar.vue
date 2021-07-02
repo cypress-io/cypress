@@ -14,7 +14,7 @@
     <Button @click="backFunction()" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
     <div v-if="altFunction && alt"  class="flex items-center px-3">
-      <label @click="handleAlt" class="text-indigo-600 px-3">{{ alt }}</label>
+      <label @click="handleAlt" class="text-gray-500 px-3">{{ alt }}</label>
       <Switch :value="altValue" @update="handleAlt" />
     </div>
   </div>

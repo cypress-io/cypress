@@ -1,35 +1,103 @@
 <template>
-    <WizardLayout :next="nextButtonName">
-        File Config ts js
+    <WizardLayout :next="nextButtonName" alt="Create file manually">
+        <nav class="text-left text-gray-500 px-5 bg-gray-50 flex gap-2 border-b-1 border-gray-200">
+            <button
+                v-for="lang in languages" 
+                :key="lang.id"
+                @click="language = lang.id" 
+                class="p-4 w-28 relative focus:outline-transparent" 
+                :class="language === lang.id ? 'text-indigo-800 font-semibold' : ''">
+                {{ lang.name }}
+                <span v-if="language === lang.id" class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-400 rounded-t" />
+            </button>
+        </nav>
+        <PrismJs :key="language" :language="language" >{{ code[language] }}</PrismJs>
     </WizardLayout>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue"
+import 'prismjs'
+import 'prismjs/components/prism-typescript'
+import '@packages/reporter/src/errors/prism.scss'
+import PrismJs from "vue-prism-component"
 import { useStore } from "../store";
 import WizardLayout from "./WizardLayout.vue"
 
 export default defineComponent({
     components: {
-        WizardLayout
+        WizardLayout,
+        PrismJs,
     },
     setup() {
         const store = useStore();
         const manualInstall = ref(false);
+        const language = ref<'js'|'ts'>('ts')
         const nextButtonName = computed(() =>
             manualInstall.value ? "I've added this file" : "Create File"
         );
         onMounted(() => {
             store.setMeta({
-                title: 'Configuration file',
-                description: 'Cypress reads the settings from this file each time the test runner is initialized. We can create the file for you, or you can copy and paste the code below if you wish.',
+                title: 'Cypress.config',
+                description: 'Cypress will now create the following config file in the local directory for this project.',
+            })
+
+            store.onNext(() => {
+                store.finishSetup()
             })
 
             store.onBack(() => {
                 store.flagDependenciesInstalled(false)
             })
+
+            store.onAlt(() => {
+                manualInstall.value = !manualInstall.value
+            })
         })
-        return { nextButtonName }
+
+        const code = {
+            js:
+            `// Component testing, Javascript, Vanilla JS, Webpack
+module.exports = {
+    component(on, config) {
+        const { startDevServer } = require('@cypress/webpack-dev-server')
+        const webpackConfig = require('./webpack.config')
+        on('dev-server:start', (options) => {
+            return startDevServer({ options, webpackConfig })
+        })
+        return config
+    }
+}`,
+            ts: `// Component testing, Javascript, Vanilla JS, Webpack
+export default {
+    component(on, config) {
+        const { startDevServer } = require('@cypress/webpack-dev-server')
+        const webpackConfig = require('./webpack.config')
+        on('dev-server:start', (options) => {
+            return startDevServer({ options, webpackConfig })
+        })
+        return config
+    }
+}`}
+
+        const languages:Array<{id:"js"|"ts", name:string}> = [
+            {
+                id:'js',
+                name: 'JavaScript'
+            }, 
+            {
+                id: 'ts',
+                name: 'TypeScript'
+            }
+        ]
+
+        return { nextButtonName, code, language, languages }
     }
 })
 </script>
+
+<style>
+body pre[class*='language-']{
+    margin:0;
+}
+</style>
