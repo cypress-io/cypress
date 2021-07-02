@@ -95,6 +95,28 @@ describe('lib/util/spec_writer', () => {
 
       verifyOutput(command)
     })
+
+    it('can generate a command for an assertion with two parameters', () => {
+      const command = generateCypressCommand({
+        selector: '.div',
+        name: 'should',
+        message: ['have.text', 'action succeeded'],
+        isAssertion: true,
+      })
+
+      verifyOutput(command)
+    })
+
+    it('can generate a command for an assertion with three parameters', () => {
+      const command = generateCypressCommand({
+        selector: '.div',
+        name: 'should',
+        message: ['have.attr', 'aria-label', 'search'],
+        isAssertion: true,
+      })
+
+      verifyOutput(command)
+    })
   })
 
   describe('#addCommandsToBody', () => {

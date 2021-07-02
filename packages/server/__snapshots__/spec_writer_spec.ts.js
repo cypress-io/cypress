@@ -14,6 +14,14 @@ exports['lib/util/spec_writer #generateCypressComand can generate a command with
 cy.visit("the://url");
 `
 
+exports['lib/util/spec_writer #generateCypressComand can generate a command for an assertion with two parameters 1'] = `
+cy.get(".div").should("have.text", "action succeeded");
+`
+
+exports['lib/util/spec_writer #generateCypressComand can generate a command for an assertion with three parameters 1'] = `
+cy.get(".div").should("have.attr", "aria-label", "search");
+`
+
 exports['lib/util/spec_writer #addCommandsToBody adds commands with comments 1'] = `
 /* ==== Generated with Cypress Studio ==== */
 cy.get(".input").type("typed text");

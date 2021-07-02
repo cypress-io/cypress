@@ -44,9 +44,9 @@ export const generateCypressCommand = (cmd: Command) => {
   let messageExpression: n.ArrayExpression[] | n.StringLiteral[] | null = null
 
   if (isAssertion && Array.isArray(message)) {
-    messageExpression = message.map((msg) => b.stringLiteral(msg))
+    messageExpression = message.map(b.stringLiteral)
   } else if (Array.isArray(message)) {
-    messageExpression = [b.arrayExpression(message.map((e) => b.stringLiteral(e)))]
+    messageExpression = [b.arrayExpression(message.map(b.stringLiteral))]
   } else if (message) {
     messageExpression = [b.stringLiteral(message)]
   }
