@@ -439,34 +439,33 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  watchPluginsFile (cfg, options) {
+  async watchPluginsFile (cfg, options) {
     debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
     if (!cfg.pluginsFile || options.isTextTerminal) {
       return Bluebird.resolve()
     }
 
-    return fs.pathExists(cfg.pluginsFile)
-    .then((found) => {
-      debug(`plugins file found? ${found}`)
-      // ignore if not found. plugins#init will throw the right error
-      if (!found) {
-        return
-      }
+    const found = await fs.pathExists(cfg.pluginsFile)
 
-      debug('watch plugins file')
+    debug(`plugins file found? ${found}`)
+    // ignore if not found. plugins#init will throw the right error
+    if (!found) {
+      return
+    }
 
-      return this.watchers.watchTree(cfg.pluginsFile, {
-        onChange: () => {
-          // TODO: completely re-open project instead?
-          debug('plugins file changed')
+    debug('watch plugins file')
 
-          // re-init plugins after a change
-          this._initPlugins(cfg, options)
-          .catch((err) => {
-            options.onError(err)
-          })
-        },
-      })
+    return this.watchers.watchTree(cfg.pluginsFile, {
+      onChange: () => {
+        // TODO: completely re-open project instead?
+        debug('plugins file changed')
+
+        // re-init plugins after a change
+        this._initPlugins(cfg, options)
+        .catch((err) => {
+          options.onError(err)
+        })
+      },
     })
   }
 
