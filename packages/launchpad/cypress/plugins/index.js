@@ -1,20 +1,33 @@
-const express = require('express')
-const { startDevServer } = require('@cypress/webpack-dev-server')
-const webpackPreprocessor = require('@cypress/webpack-preprocessor')
-const webpackConfig = require('../../webpack.config').default
+const { startDevServer } = require('@cypress/vite-dev-server')
 
-express().use(express.static('dist')).listen(5555)
+/// <reference types="cypress" />
+// ***********************************************************
+// This example plugins/index.js can be used to load plugins
+//
+// You can change the location of this file or turn off loading
+// the plugins file with the 'pluginsFile' configuration option.
+//
+// You can read more here:
+// https://on.cypress.io/plugins-guide
+// ***********************************************************
+// This function is called when a project is opened or re-opened (e.g. due to
+// the project's config changing)
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
+// eslint-disable-next-line no-unused-vars
 module.exports = (on, config) => {
+  // `on` is used to hook into various events Cypress emits
+  // `config` is the resolved Cypress config
+
   if (config.testingType === 'component') {
-    on('dev-server:start', (options) => {
-      return startDevServer({ options, webpackConfig })
+    on('dev-server:start', async (options) => {
+      return startDevServer({
+        options,
+      })
     })
-  } else {
-    on('file:preprocessor', webpackPreprocessor({
-      webpackOptions: webpackConfig,
-    }))
   }
 
-  return config
+  return config // IMPORTANT to return a config
 }

@@ -3,10 +3,6 @@
   "viewportWidth": 800,
   "viewportHeight": 850,
   "fixturesFolder": false,
-  "env": {
-    "webpackFilename": "webpack.config.ts",
-    "coverage": false
-  },
   "retries": {
     "runMode": 2,
     "openMode": 0
@@ -18,7 +14,6 @@
     "configFile": "../../mocha-reporter-config.json"
   },
   "component": {
-    "componentFolder": "cypress/component",
-    "testFiles": "**/*.spec.*"
+    "componentFolder": "src/component"
   }
 }
