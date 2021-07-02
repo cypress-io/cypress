@@ -24,6 +24,7 @@
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
     "@iconify/json": "1.1.368",
+    "@iconify/vue": "3.0.0-beta.1",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
     "cross-env": "6.0.3",

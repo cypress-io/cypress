@@ -25,7 +25,6 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 import { mount } from '@cypress/vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { VClickOutside } from '../../src/plugins/ClickOutside'
 import { createStore, Store } from '../../src/store'
 
@@ -38,9 +37,6 @@ Cypress.Commands.add(
 
     options = options || {}
     options.global = options.global || {}
-
-    options.global.components = options.global.components || {}
-    options.global.components['FaIcon'] = FontAwesomeIcon
 
     options.global.directives = options.global.directives || {}
     options.global.directives['click-outside'] = VClickOutside

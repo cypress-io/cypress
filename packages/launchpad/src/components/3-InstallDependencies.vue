@@ -1,7 +1,7 @@
 <template>
   <WizardLayout :next="nextButtonName" :alt="altButtonName">
     <PackagesList v-if="!manualInstall" />
-    <ManualInstall v-else />
+    <ManualInstall v-else @back="manualInstall = false"/>
   </WizardLayout>
 </template>
 

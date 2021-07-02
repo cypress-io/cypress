@@ -3137,6 +3137,11 @@
   resolved "https://registry.yarnpkg.com/@iconify/types/-/types-1.0.6.tgz#87a0409d9ce58a04e6c76f89637d69c81bc0d942"
   integrity sha512-eG74WPaqjBGnZ3Xy36X4LRDA/ZlhCK6T0zbsAAIYObY2Qija/379iXx+e2wWwEIXS46B62nGaUcuI0MpUnTSrg==
 
+"@iconify/vue@3.0.0-beta.1":
+  version "3.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@iconify/vue/-/vue-3.0.0-beta.1.tgz#2cd2a775510cdb9f22c9eda94d4c2080d03fee2d"
+  integrity sha512-8FJRUj3y47FVBbRNeaf0R0MWlwmPiDRCR//BcvOKSVjOjNar/qLysn3Ns0cyQZJGOwxpsWkRpW3WrfX4JywlAg==
+
 "@internationalized/message@3.0.0-alpha.0":
   version "3.0.0-alpha.0"
   resolved "https://registry.yarnpkg.com/@internationalized/message/-/message-3.0.0-alpha.0.tgz#83015e2057d2b6b5034a3e23983b1e051f9d9e36"

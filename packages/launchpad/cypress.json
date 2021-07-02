@@ -14,6 +14,6 @@
     "configFile": "../../mocha-reporter-config.json"
   },
   "component": {
-    "componentFolder": "src/component"
+    "componentFolder": "src/components"
   }
 }

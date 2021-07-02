@@ -23,10 +23,10 @@ export default defineComponent({
     const store = useStore();
     const framework = computed(() => store.getState().component?.framework);
     const bundler = computed(() => store.getState().component?.bundler);
-    const listOfNecessaryPackages = getPackages(
-      framework.value!,
-      bundler.value!
-    );
+    const listOfNecessaryPackages = computed(() => framework.value && bundler.value ? getPackages(
+      framework.value,
+      bundler.value
+    ) : []);
     return { listOfNecessaryPackages };
   },
 });

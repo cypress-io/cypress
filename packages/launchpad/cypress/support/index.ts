@@ -17,6 +17,5 @@
 
 import 'virtual:windi.css'
 import '../../src/main.scss'
-import '../../src/plugins/FontAwesome'
 
 import './commands'

@@ -37,9 +37,7 @@
       {{ projectTitle }}
     </div>
     <div class="bg-gray-900 text-gray-500 flex flex-col items-center">
-      <i-clarity-dashboard-line class="mt-3 p-3 h-13 w-13" />
-      <i-clarity-terminal-line class="mt-3 p-3 h-13 w-13"/>
-      <i-clarity-settings-line class="mt-3 p-3 h-13 w-13"/>
+      <SideBarItem v-for="i in sideMenuDefinition" :icon="i.icon" :active="!!i.active"/>
     </div>
     <div>
       <slot />
@@ -50,11 +48,22 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
+import SideBarItem from "./SideBarItem.vue"
+
 export default defineComponent({
+  components: {
+    SideBarItem
+  },
   setup() {
     const projectTitle = "Project title";
 
-    return { projectTitle };
+    const sideMenuDefinition = [
+      {icon:'clarity:dashboard-line'}, 
+      {icon:'clarity-terminal-line'}, 
+      {icon:'clarity-settings-line', active:true}
+    ]
+
+    return { projectTitle, sideMenuDefinition};
   },
 });
 </script>
