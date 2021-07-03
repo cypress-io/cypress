@@ -25,8 +25,8 @@ const packages: Record<string, { description: string }> = {
 }
 
 export function getPackages (framework: Framework, bundler: Bundler) {
-  const libraryPackage = `@cypress/${framework.library}`
-  const bundlerPackage = `@cypress/${bundler.id}-dev-server`
+  const libraryPackage = framework.library.package
+  const bundlerPackage = bundler.package
 
   return [
     {

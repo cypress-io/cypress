@@ -17,13 +17,13 @@ export const getCode = (lang: 'js'|'ts') => {
   const exportStatement = lang === 'js' ? 'module.exports = {' : 'export default {'
 
   const importStatements = lang === 'js' ? '' : [
-    `import { startdevServer } from \'@cypress/${bundler.id}-dev-server\'`,
+    `import { startdevServer } from \'${bundler.package}\'`,
     `import webpackConfig from './webpack.config'`,
     '',
   ].join('\n')
 
   const requireStatements = lang === 'ts' ? '' : [
-    `const { startDevServer } = require('@cypress/${bundler.id}-dev-server')`,
+    `const { startDevServer } = require('${bundler.package}')`,
     `const webpackConfig = require('./webpack.config')`,
     '',
   ].join('\n  ')

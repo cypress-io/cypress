@@ -1,6 +1,22 @@
 import { BundlerId } from './bundler'
 
-type Library = 'vue' | 'react';
+type Library = {
+  id: string
+  name: string
+  package: string
+};
+
+export const SupportedLibraryVue = {
+  id: 'vue',
+  name: 'VueJs',
+  package: '@cypress/vue',
+}
+
+export const SupportedLibraryReact = {
+  id: 'react',
+  name: 'ReactJs',
+  package: '@cypress/react',
+}
 
 export type Framework = {
   id: string
@@ -14,7 +30,7 @@ export const SupportedFrameworkNext: Framework = {
   id: 'nextjs',
   name: 'NextJs',
   bundler: 'webpack',
-  library: 'react',
+  library: SupportedLibraryReact,
   logo: 'nextjs',
 }
 
@@ -22,7 +38,7 @@ export const SupportedFrameworkNuxt: Framework = {
   id: 'nuxt',
   name: 'NuxtJs',
   bundler: 'webpack',
-  library: 'vue',
+  library: SupportedLibraryVue,
   logo: 'nuxt',
 }
 
@@ -30,7 +46,7 @@ export const SupportedFrameworkVueCLI: Framework = {
   id: 'vuecli',
   name: 'Vue CLI',
   bundler: 'webpack',
-  library: 'vue',
+  library: SupportedLibraryVue,
   logo: 'vue',
 }
 
@@ -38,21 +54,21 @@ export const SupportedFrameworkCreateReactApp: Framework = {
   id: 'cra',
   name: 'Create React App',
   bundler: 'webpack',
-  library: 'react',
+  library: SupportedLibraryReact,
   logo: 'react',
 }
 
 export const SupportedFrameworkVue: Framework = {
   id: 'vue',
   name: 'VueJs',
-  library: 'vue',
+  library: SupportedLibraryVue,
   logo: 'vue',
 }
 
 export const SupportedFrameworkReact: Framework = {
   id: 'react',
   name: 'ReactJs',
-  library: 'react',
+  library: SupportedLibraryReact,
   logo: 'react',
 }
 
