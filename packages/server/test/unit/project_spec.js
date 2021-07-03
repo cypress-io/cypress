@@ -631,7 +631,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('watches cypress.json and cypress.env.json', function () {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged () {} })
+      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged () {} }, {})
       expect(this.watch).to.be.calledTwice
       expect(this.watch).to.be.calledWith('/path/to/cypress.json')
 
@@ -639,7 +639,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('sets onChange event when {changeEvents: true}', function (done) {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: () => done() })
+      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: () => done() }, {})
 
       // get the object passed to watchers.watch
       const obj = this.watch.getCall(0).args[1]
@@ -650,7 +650,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('does not call watch when {changeEvents: false}', function () {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: undefined })
+      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: undefined }, {})
 
       expect(this.watch).not.to.be.called
     })
@@ -662,7 +662,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const stub = sinon.stub()
 
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: stub })
+      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: stub }, {})
 
       // get the object passed to watchers.watch
       const obj = this.watch.getCall(0).args[1]

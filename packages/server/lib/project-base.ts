@@ -6,7 +6,6 @@ import path from 'path'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { RunnablesStore } from '@packages/reporter'
 import { ServerCt, SocketCt } from '@packages/server-ct'
 import { SocketE2E } from './socket-e2e'
 import api from './api'
@@ -34,7 +33,14 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 
-export type Cfg = Record<string, any>
+export interface Cfg {
+  reporter: 'spec' | 'dot' | string
+  report: boolean
+  projectRoot: string
+  reporterOptions: Record<string, any>
+
+  [key: string]: any
+}
 
 type Options = Record<string, any>
 
@@ -500,33 +506,46 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
   }
 
-  watchSettingsAndStartWebsockets (options: Record<string, any> = {}, cfg: Record<string, any> = {}) {
-    this.watchSettings(options.onSettingsChanged, options)
+  initializeReporter ({
+    report,
+    reporter,
+    projectRoot,
+    reporterOptions,
+  }: Pick<Cfg, 'report' | 'reporter' | 'projectRoot' | 'reporterOptions'>) {
+    if (!report) {
+      return
+    }
 
-    const { projectRoot } = cfg
-    let { reporter } = cfg as { reporter: RunnablesStore }
+    try {
+      Reporter.loadReporter(reporter, projectRoot)
+    } catch (err) {
+      const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
+
+      // only include the message if this is the standard MODULE_NOT_FOUND
+      // else include the whole stack
+      const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
+
+      errors.throw('INVALID_REPORTER_NAME', {
+        paths,
+        error: errorMsg,
+        name: reporter,
+      })
+    }
+
+    return Reporter.create(reporter, reporterOptions, projectRoot)
+  }
+
+  watchSettingsAndStartWebsockets (options: Record<string, any> = {}, cfg: Cfg) {
+    this.watchSettings(options.onSettingsChanged, options)
 
     // if we've passed down reporter
     // then record these via mocha reporter
-    if (cfg.report) {
-      try {
-        Reporter.loadReporter(reporter, projectRoot)
-      } catch (err) {
-        const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
-
-        // only include the message if this is the standard MODULE_NOT_FOUND
-        // else include the whole stack
-        const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
-
-        errors.throw('INVALID_REPORTER_NAME', {
-          paths,
-          error: errorMsg,
-          name: reporter,
-        })
-      }
-
-      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
-    }
+    const reporterInstance = this.initializeReporter({
+      report: cfg.report,
+      reporter: cfg.reporter,
+      reporterOptions: cfg.reporterOptions,
+      projectRoot: this.projectRoot,
+    })
 
     const onBrowserPreRequest = (browserPreRequest) => {
       this.server.addBrowserPreRequest(browserPreRequest)
@@ -556,8 +575,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onTestsReceivedAndMaybeRecord: async (runnables, cb) => {
         debug('received runnables %o', runnables)
 
-        if (reporter != null) {
-          reporter.setRunnables(runnables)
+        if (reporterInstance != null) {
+          reporterInstance.setRunnables(runnables)
         }
 
         if (this._recordTests) {
@@ -575,15 +594,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         debug('onMocha', event)
         // bail if we dont have a
         // reporter instance
-        if (!reporter) {
+        if (!reporterInstance) {
           return
         }
 
-        reporter.emit(event, runnable)
+        reporterInstance.emit(event, runnable)
 
         if (event === 'end') {
           const [stats = {}] = await Promise.all([
-            (reporter != null ? reporter.end() : undefined),
+            (reporterInstance != null ? reporterInstance.end() : undefined),
             this.server.end(),
           ])
 
