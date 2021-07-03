@@ -31,13 +31,16 @@ import preprocessor from './plugins/preprocessor'
 import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
+import { checkSupportFile } from './project_utils'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // or places in this file modify existing types, adding additional keys dynamically.
 // Instead, this is an interface of values that have been manually validated to exist
 // and used when creating a project.
 // TODO: Figure out how to type this better.
-type ReceivedCypressOptions = Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'socketIoCookie'> & Pick<Cypress.ResolvedConfigOptions, 'screenshotsFolder'>
+type ReceivedCypressOptions =
+  Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'socketIoCookie' | 'configFile'>
+  & Pick<Cypress.ResolvedConfigOptions, 'screenshotsFolder' | 'supportFile'>
 
 export interface Cfg extends ReceivedCypressOptions {
   reporter: 'spec' | 'dot' | string
@@ -69,6 +72,8 @@ const localCwd = cwd()
 
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
+
+type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected watchers: Watchers
@@ -290,7 +295,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     startSpecWatcher()
 
     await Promise.all([
-      this.checkSupportFile(cfg),
+      checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
       this.watchPluginsFile(cfg, this.options),
     ])
 
@@ -353,20 +358,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
     return runEvents.execute('after:run', config)
-  }
-
-  async checkSupportFile (cfg) {
-    const supportFile = cfg.supportFile
-
-    if (supportFile) {
-      const found = await fs.pathExists(supportFile)
-
-      if (!found) {
-        errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(cfg))
-      }
-    }
-
-    return
   }
 
   _onError<Options extends Record<string, any>> (err: Error, options: Options) {
@@ -580,19 +571,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  startWebsockets ({
-    onReloadBrowser,
-    onFocusTests,
-    onSpecChanged,
-  }: Options, {
-    socketIoCookie,
-    namespace,
-    screenshotsFolder,
-    report,
-    reporter,
-    reporterOptions,
-    projectRoot,
-  }: Cfg) {
+  // type StartWebsocketOptions = {}
+
+  startWebsockets (options: Options, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
@@ -609,9 +590,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest)
 
     this.server.startWebsockets(this.automation, this.cfg, {
-      onReloadBrowser,
-      onFocusTests,
-      onSpecChanged,
+      onReloadBrowser: options.onReloadBrowser,
+      onFocusTests: options.onFocusTests,
+      onSpecChanged: options.onSpecChanged,
       onSavedStateChanged: (state: any) => this.saveState(state),
 
       onCaptureVideoFrames: (data: any) => {
@@ -706,20 +687,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  removeScaffoldedFiles () {
-    if (!this.cfg) {
-      throw new Error('Missing project config')
-    }
-
-    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
-  }
-
-  // do not check files again and again - keep previous promise
-  // to refresh it - just close and open the project again.
-  determineIsNewProject (folder) {
-    return scaffold.isNewProject(folder)
-  }
-
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
@@ -761,6 +728,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cfgWithSaved
   }
 
+  // Saved state
+
   // forces saving of project's state by first merging with argument
   async saveState (stateChanges = {}) {
     if (!this.cfg) {
@@ -789,6 +758,21 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     cfg.state = state
 
     return cfg
+  }
+
+  // Scaffolding
+  removeScaffoldedFiles () {
+    if (!this.cfg) {
+      throw new Error('Missing project config')
+    }
+
+    return scaffold.removeIntegration(this.cfg.integrationFolder, this.cfg)
+  }
+
+  // do not check files again and again - keep previous promise
+  // to refresh it - just close and open the project again.
+  determineIsNewProject (folder) {
+    return scaffold.isNewProject(folder)
   }
 
   scaffold (cfg: Cfg) {
@@ -826,6 +810,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     return Promise.all(scaffolds)
   }
+
+  // These methods are not related to start server/sockets/runners
 
   async getProjectId () {
     await this.verifyExistence()
