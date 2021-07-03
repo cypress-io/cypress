@@ -1,14 +1,14 @@
 <template>
     <WizardLayout :next="nextButtonName" alt="Create file manually">
-        <nav class="text-left text-gray-500 px-5 bg-gray-50 flex gap-2 border-b-1 border-gray-200">
+        <nav class="rounded-t text-left text-gray-500 px-5 bg-gray-50 flex gap-2 border-b-1 border-gray-200">
             <button
                 v-for="lang in languages" 
                 :key="lang.id"
                 @click="language = lang.id" 
                 class="p-4 w-28 relative focus:outline-transparent" 
-                :class="language === lang.id ? 'text-indigo-800 font-semibold' : ''">
+                :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''">
                 {{ lang.name }}
-                <span v-if="language === lang.id" class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-400 rounded-t" />
+                <span v-if="language === lang.id" class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-500 rounded-t" />
             </button>
         </nav>
         <div v-if="tsInstalled" class="relative">
@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, onMounted, ref } from "vue"
+import { computed, defineComponent, onMounted, ref } from "vue"
 import 'prismjs'
 import '@packages/reporter/src/errors/prism.scss'
 import PrismJs from "vue-prism-component"
