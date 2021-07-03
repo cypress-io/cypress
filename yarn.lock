@@ -39162,7 +39162,7 @@ vue-loader@^15.9.2:
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
-vue-prism-component@^2.0.0:
+vue-prism-component@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/vue-prism-component/-/vue-prism-component-2.0.0.tgz#eec89c5fe1ea3d8b55b8721d823b29d8b73b2b6d"
   integrity sha512-1ofrL+GCZOv4HqtX5W3EgkhSAgadSeuD8FDTXbwhLy8kS+28RCR8t2S5VTeM9U/peAaXLBpSgRt3J25ao8KTeg==

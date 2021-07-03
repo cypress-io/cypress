@@ -1,22 +1,9 @@
 import { BundlerId } from './bundler'
-
-type Library = {
-  id: string
-  name: string
-  package: string
-};
-
-export const SupportedLibraryVue = {
-  id: 'vue',
-  name: 'VueJs',
-  package: '@cypress/vue',
-}
-
-export const SupportedLibraryReact = {
-  id: 'react',
-  name: 'ReactJs',
-  package: '@cypress/react',
-}
+import LogoNext from '../assets/logos/nextjs.svg'
+import LogoNuxt from '../assets/logos/nuxt.svg'
+import LogoVue from '../assets/logos/vue.svg'
+import LogoReact from '../assets/logos/react.svg'
+import { Library, SupportedLibraryReact, SupportedLibraryVue } from './libraries'
 
 export type Framework = {
   id: string
@@ -31,7 +18,7 @@ export const SupportedFrameworkNext: Framework = {
   name: 'NextJs',
   bundler: 'webpack',
   library: SupportedLibraryReact,
-  logo: 'nextjs',
+  logo: LogoNext,
 }
 
 export const SupportedFrameworkNuxt: Framework = {
@@ -39,7 +26,7 @@ export const SupportedFrameworkNuxt: Framework = {
   name: 'NuxtJs',
   bundler: 'webpack',
   library: SupportedLibraryVue,
-  logo: 'nuxt',
+  logo: LogoNuxt,
 }
 
 export const SupportedFrameworkVueCLI: Framework = {
@@ -47,7 +34,7 @@ export const SupportedFrameworkVueCLI: Framework = {
   name: 'Vue CLI',
   bundler: 'webpack',
   library: SupportedLibraryVue,
-  logo: 'vue',
+  logo: LogoVue,
 }
 
 export const SupportedFrameworkCreateReactApp: Framework = {
@@ -55,21 +42,21 @@ export const SupportedFrameworkCreateReactApp: Framework = {
   name: 'Create React App',
   bundler: 'webpack',
   library: SupportedLibraryReact,
-  logo: 'react',
+  logo: LogoReact,
 }
 
 export const SupportedFrameworkVue: Framework = {
   id: 'vue',
   name: 'VueJs',
   library: SupportedLibraryVue,
-  logo: 'vue',
+  logo: LogoVue,
 }
 
 export const SupportedFrameworkReact: Framework = {
   id: 'react',
   name: 'ReactJs',
   library: SupportedLibraryReact,
-  logo: 'react',
+  logo: LogoReact,
 }
 
 export const supportedFrameworks = [

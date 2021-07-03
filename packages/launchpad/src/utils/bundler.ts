@@ -1,3 +1,6 @@
+import LogoWebpack from '../assets/logos/webpack.svg'
+import LogoVite from '../assets/logos/vite.svg'
+
 export type BundlerId = 'webpack' | 'vite';
 
 export type Bundler = {
@@ -10,14 +13,14 @@ export type Bundler = {
 export const SupportedBundlerWebpack: Bundler = {
   id: 'webpack',
   name: 'Webpack',
-  logo: 'webpack',
+  logo: LogoWebpack,
   package: '@cypress/webpack-dev-server',
 }
 
 export const SupportedBundlerVite: Bundler = {
   id: 'vite',
   name: 'ViteJs',
-  logo: 'vite',
+  logo: LogoVite,
   package: '@cypress/vite-dev-server',
 }
 

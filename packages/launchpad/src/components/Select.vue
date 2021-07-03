@@ -28,9 +28,7 @@
     >
       <template v-if="selectedOptionObject">
         <img
-          :src="
-            logos[`../assets/logos/${selectedOptionObject.logo}.svg`]?.default
-          "
+          :src="selectedOptionObject.logo"
           class="w-5 h-5 mr-3"
         />
         <span>
@@ -71,7 +69,7 @@
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
       >
         <img
-          :src="logos[`../assets/logos/${opt.logo}.svg`]?.default"
+          :src="opt.logo"
           class="w-5 h-5 mr-3"
         />
         <span>
@@ -88,7 +86,6 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from "vue";
 
-const logos = import.meta.globEager("../assets/logos/*.svg");
 interface Option {
   name: string;
   description?: string;
@@ -136,7 +133,6 @@ export default defineComponent({
     );
 
     return {
-      logos,
       isOpen,
       selectedOptionObject,
       selectOption,
