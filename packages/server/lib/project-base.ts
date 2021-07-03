@@ -31,7 +31,6 @@ import preprocessor from './plugins/preprocessor'
 import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
-import { getPrefixedPathToSpec, normalizeSpecUrl } from './project_utils'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // or places in this file modify existing types, adding additional keys dynamically.
@@ -72,7 +71,6 @@ const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
-  protected projectRoot: string
   protected watchers: Watchers
   protected options: Options
   protected _cfg?: Cfg
@@ -84,6 +82,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
+  projectRoot: string
 
   constructor ({
     projectRoot,
@@ -790,41 +789,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     cfg.state = state
 
     return cfg
-  }
-
-  async getSpecUrl (absoluteSpecPath: string, specType: 'integration' | 'component' = 'integration') {
-    debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
-
-    const cfg = await this.getConfig()
-
-    // if we don't have a absoluteSpecPath or its __all
-    if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
-      const url = normalizeSpecUrl(cfg.browserUrl, '/__all')
-
-      debug('returning url to run all specs: %s', url)
-
-      return url
-    }
-
-    // TODO:
-    // to handle both unit + integration tests we need
-    // to figure out (based on the config) where this absoluteSpecPath
-    // lives. does it live in the integrationFolder or
-    // the unit folder?
-    // once we determine that we can then prefix it correctly
-    // with either integration or unit
-    const prefixedPath = getPrefixedPathToSpec({
-      integrationFolder: cfg.integrationFolder,
-      componentFolder: cfg.componentFolder,
-      projectRoot: this.projectRoot,
-      pathToSpec: absoluteSpecPath,
-      type: specType,
-    })
-    const url = normalizeSpecUrl(cfg.browserUrl, prefixedPath)
-
-    debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
-
-    return url
   }
 
   scaffold (cfg: Cfg) {

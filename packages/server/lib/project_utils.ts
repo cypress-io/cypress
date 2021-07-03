@@ -8,8 +8,8 @@ const debug = Debug('cypress:server:project_utils')
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const backSlashesRe = /\\/g
 
-export const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
-  const replacer = (match) => match.replace('//', '/')
+const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
+  const replacer = (match: string) => match.replace('//', '/')
 
   return [
     browserUrl,
@@ -19,7 +19,7 @@ export const normalizeSpecUrl = (browserUrl: string, specUrl: string) => {
   .replace(multipleForwardSlashesRe, replacer)
 }
 
-export const getPrefixedPathToSpec = ({
+const getPrefixedPathToSpec = ({
   integrationFolder,
   componentFolder,
   projectRoot,
@@ -57,6 +57,55 @@ export const getPrefixedPathToSpec = ({
   )).replace(backSlashesRe, '/')}`
 
   debug('prefixed path for spec %o', { pathToSpec, type, url })
+
+  return url
+}
+
+export const getSpecUrl = ({
+  absoluteSpecPath,
+  specType,
+  browserUrl,
+  integrationFolder,
+  componentFolder,
+  projectRoot,
+}: {
+  absoluteSpecPath?: string
+  browserUrl: string
+  integrationFolder: string
+  componentFolder: string
+  projectRoot: string
+  specType: 'integration' | 'component'
+}) => {
+  specType ??= 'integration'
+
+  debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+
+  // if we don't have a absoluteSpecPath or its __all
+  if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+    const url = normalizeSpecUrl(browserUrl, '/__all')
+
+    debug('returning url to run all specs: %s', url)
+
+    return url
+  }
+
+  // TODO:
+  // to handle both unit + integration tests we need
+  // to figure out (based on the config) where this absoluteSpecPath
+  // lives. does it live in the integrationFolder or
+  // the unit folder?
+  // once we determine that we can then prefix it correctly
+  // with either integration or unit
+  const prefixedPath = getPrefixedPathToSpec({
+    integrationFolder,
+    componentFolder,
+    projectRoot,
+    pathToSpec: absoluteSpecPath,
+    type: specType,
+  })
+  const url = normalizeSpecUrl(browserUrl, prefixedPath)
+
+  debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
 
   return url
 }
