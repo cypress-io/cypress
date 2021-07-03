@@ -4,7 +4,7 @@
   <div class="mx-10">
     <TestingType v-if="!app.steps.testingType" />
 
-    <template v-else-if="config.testingType === 'component'">
+    <template v-else-if="app.testingType === 'component'">
       <EnvironmentSetup v-if="!app.steps.setup" />
       <InstallDependencies v-else-if="!app.steps.dependencies" />
       <ConfigFile v-else-if="!app.steps.configFile" />
@@ -15,7 +15,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useStoreApp } from "../store/app";
-import { useStoreConfig } from "../store/config";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
@@ -32,9 +31,8 @@ export default defineComponent({
 },
   setup() {
     const storeApp = useStoreApp();
-    const storeConfig = useStoreConfig();
 
-    return { app: storeApp.getState(), config: storeConfig.getState() };
+    return { app: storeApp.getState() };
   },
 });
 </script>

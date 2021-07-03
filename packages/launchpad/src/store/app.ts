@@ -7,6 +7,7 @@ interface State {
   nextAction: () => void
   backAction: () => void
   alternativeAction?: () => void
+  testingType?: 'component' | 'e2e'
   steps: {
       testingType?: boolean
       setup?: boolean
@@ -46,6 +47,10 @@ export class StoreApp {
   setMeta (meta: { title: string, description: string }) {
     this.state.title = meta.title
     this.state.description = meta.description
+  }
+
+  setTestingType (testingType?: 'component' | 'e2e') {
+    this.state.testingType = testingType
   }
 
   flagTestingType (flag = true) {

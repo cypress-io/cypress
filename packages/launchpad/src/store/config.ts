@@ -42,6 +42,7 @@ export class StoreConfig {
 
   setTestingType (testingType?: TestingType) {
     this.state.testingType = testingType
+    this.storeApp.setTestingType(testingType)
     this.storeApp.flagTestingType()
   }
 
