@@ -55,7 +55,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   private _recordTests?: any = null
 
   public browser: any
-  public projectType?: RunnerType
+  public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
 
@@ -114,11 +114,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  async onOpen (_cfg: Record<string, any> | undefined, options) {
-    this._server = this.projectType === 'e2e'
+  createServer (projectType: RunnerType) {
+    return projectType === 'e2e'
       ? new ServerE2E() as TServer
       : new ServerCt() as TServer
+  }
 
+  async onOpen (_cfg: Record<string, any> | undefined, options, server: TServer) {
     const cfgModdedByPlugins = await this._initPlugins(_cfg, options)
     const { cfg, specsStore, startSpecWatcher } = await this.initializeSpecStore(cfgModdedByPlugins)
 
@@ -126,7 +128,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       ? cfg
       : this.injectCtSpecificConfig(cfg)
 
-    const [port, warning] = await this.server.open(updatedCfg, {
+    const [port, warning] = await server.open(updatedCfg, {
       project: this,
       onError: options.onError,
       onWarning: options.onWarning,
@@ -150,13 +152,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
 
-    _.defaults(options, {
+    options = {
       report: false,
       onFocusTests () {},
       onError () {},
       onWarning () {},
       onSettingsChanged: false,
-    })
+      ...options,
+    }
 
     debug('project options %o', options)
     this.options = options
@@ -183,7 +186,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
     }
 
-    const res = await this.onOpen(cfg, options)
+    this._server = this.createServer(this.projectType)
+    const res = await this.onOpen(cfg, options, this._server)
     const { port, warning, startSpecWatcher } = res
 
     cfg = res.cfg
