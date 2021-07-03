@@ -1,27 +1,30 @@
 <template>
   <div class="text-center">
-    <h1 class="text-3xl mt-12">{{ store.title }}</h1>
+    <h1 class="text-3xl mt-12">{{ app.title }}</h1>
     <p class="text-gray-400 my-2 w-180 mx-auto">
-      {{ store.description }}
+      {{ app.description }}
     </p>
     <div class="max-w-4xl mx-auto">
-      <TestingType v-if="!store.testingType" />
+      <TestingType v-if="!app.steps.testingType" />
 
-      <template v-else-if="store.testingType === 'component'">
-        <EnvironmentSetup v-if="!store.component?.complete" />
-        <InstallDependencies v-else-if="!store.dependenciesInstalled" />
-        <ConfigFile v-else />
+      <template v-else-if="config.testingType === 'component'">
+        <EnvironmentSetup v-if="!app.steps.setup" />
+        <InstallDependencies v-else-if="!app.steps.dependencies" />
+        <ConfigFile v-else-if="!app.steps.configFile" />
+        <OpenBrowser v-else />
       </template>
     </div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useStore } from "../store";
+import { useStoreApp } from "../store/app";
+import { useStoreConfig } from "../store/config";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
+import OpenBrowser from "./OpenBrowser.vue";
 
 export default defineComponent({
   components: {
@@ -29,11 +32,13 @@ export default defineComponent({
     EnvironmentSetup,
     InstallDependencies,
     ConfigFile,
-  },
+    OpenBrowser,
+},
   setup() {
-    const store = useStore();
+    const storeApp = useStoreApp();
+    const storeConfig = useStoreConfig();
 
-    return { store: store.getState() };
+    return { app: storeApp.getState(), config: storeConfig.getState() };
   },
 });
 </script>

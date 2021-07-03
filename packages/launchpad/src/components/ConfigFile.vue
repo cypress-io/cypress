@@ -46,10 +46,10 @@ import { computed, defineComponent, onMounted, ref } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
 import PrismJs from "vue-prism-component";
-import { useStore } from "../store";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { getCode, languages } from "../utils/configFile";
+import { useStoreApp } from "../store/app";
 
 export default defineComponent({
   components: {
@@ -58,7 +58,7 @@ export default defineComponent({
     CopyButton,
   },
   setup() {
-    const store = useStore();
+    const store = useStoreApp();
     const manualInstall = ref(false);
     const tsInstalled = ref(false);
     const language = ref<"js" | "ts">("ts");

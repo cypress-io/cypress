@@ -1,5 +1,5 @@
-import LogoWebpack from '../assets/logos/webpack.svg'
-import LogoVite from '../assets/logos/vite.svg'
+import LogoWebpack from '../images/logos/webpack.svg'
+import LogoVite from '../images/logos/vite.svg'
 
 export type BundlerId = 'webpack' | 'vite';
 

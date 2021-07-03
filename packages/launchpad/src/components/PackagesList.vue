@@ -15,11 +15,12 @@
 
 <script lang="ts">
 import { computed, defineComponent } from "vue";
+import { useStoreConfig } from "../store/config";
 import { getPackages } from "../utils/packages";
-import { useStore } from "../store";
+
 
 export function listPackages() {
-  const store = useStore();
+  const store = useStoreConfig();
   const framework = computed(() => store.getState().component?.framework);
   const bundler = computed(() => store.getState().component?.bundler);
   const listOfNecessaryPackages = computed(() =>

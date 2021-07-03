@@ -7,10 +7,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, ref } from "vue";
-import { useStore } from "../store";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
+import { useStoreApp } from "../store/app";
 
 export default defineComponent({
   components: {
@@ -19,7 +19,7 @@ export default defineComponent({
     ManualInstall,
   },
   setup() {
-    const store = useStore();
+    const store = useStoreApp();
     const manualInstall = ref(false);
     const nextButtonName = computed(() =>
       manualInstall.value ? "I've installed them" : "Install"
@@ -36,7 +36,7 @@ export default defineComponent({
       });
 
       store.onBack(() => {
-        store.resetComponentSetup();
+        store.flagComponentSetup(false);
       });
 
       store.onNext(() => {

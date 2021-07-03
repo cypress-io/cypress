@@ -42,7 +42,7 @@
         :active="!!i.active"
       />
       <div class="flex-grow" />
-      <img src="../assets/cypress_s.png" class="m-5 w-7" />
+      <img src="../images/cypress_s.png" class="m-5 w-7" />
     </div>
     <div>
       <slot />
@@ -52,8 +52,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from "vue";
-import { useStore } from "../store";
-
+import { useStoreApp } from "../store/app";
 import SideBarItem from "./SideBarItem.vue";
 
 export default defineComponent({
@@ -61,7 +60,7 @@ export default defineComponent({
     SideBarItem,
   },
   setup() {
-    const store = useStore();
+    const store = useStoreApp();
     const projectTitle = computed(() => store.getState().projectTitle);
 
     const sideMenuDefinition = [

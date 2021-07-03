@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from "vue";
-import { useStore } from "../store";
+import { useStoreApp } from "../store/app";
 import Button from "./Button.vue";
 import Switch from "./Switch.vue";
 
@@ -44,7 +44,7 @@ export default defineComponent({
   },
   setup() {
     const altValue = ref(false);
-    const store = useStore();
+    const store = useStoreApp();
     const state = computed(() => store.getState());
     const nextFunction = computed(() => state.value.nextAction);
     const backFunction = computed(() => state.value.backAction);

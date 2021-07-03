@@ -26,13 +26,13 @@
 
 <script lang="ts">
 import { computed, defineComponent } from "vue";
-import { useStore } from "../store";
+import { useStoreApp } from "../store/app";
 import { listPackages } from "./PackagesList.vue";
 import CopyButton from "./CopyButton.vue";
 
 export default defineComponent({
   setup() {
-    const store = useStore();
+    const store = useStoreApp();
     const listOfNecessaryPackages = listPackages();
     const dependenciesCode = computed(
       () =>

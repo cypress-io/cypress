@@ -28,6 +28,8 @@ import Select from "./Select.vue";
 import { useStore } from "../store";
 import { Framework, supportedFrameworks } from "../utils/frameworks";
 import { Bundler, supportedBundlers } from "../utils/bundler";
+import { useStoreApp } from "../store/app";
+import { useStoreConfig } from "../store/config";
 
 export default defineComponent({
   components: { WizardLayout, Select },
@@ -42,7 +44,8 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
+    const storeApp = useStoreApp();
+    const storeConfig = useStoreConfig()
 
     const selectedFramework = ref<Framework | undefined>(undefined);
     const selectedFrameworkId = ref(props.detectedFramework);
@@ -50,28 +53,27 @@ export default defineComponent({
     const selectedBundlerId = ref(props.detectedBundler);
 
     onMounted(() => {
-      store.setMeta({
+      storeApp.setMeta({
         title: "Project Setup",
         description:
           "Confirm the front-end framework and bundler used in your project.",
       });
 
-      store.onBack(() => {
-        store.setTestingType(undefined);
+      storeApp.onBack(() => {
+        storeApp.flagTestingType(false);
       });
 
-      store.onNext(() => {
+      storeApp.onNext(() => {
         if (!selectedFramework.value || !selectedBundler.value) {
           return;
         }
-        store.setComponentSetup({
+        storeConfig.setComponentSetup({
           framework: selectedFramework.value,
-          bundler: selectedBundler.value,
-          complete: true,
+          bundler: selectedBundler.value
         });
       });
 
-      const initialComponent = store.getState().component;
+      const initialComponent = storeConfig.getState().component;
 
       if (initialComponent) {
         setFEFramework(initialComponent.framework);

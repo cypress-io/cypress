@@ -1,7 +1,7 @@
-import { useStore } from '../store'
+import { useStoreConfig } from '../store/config'
 
 export const getCode = (lang: 'js' | 'ts') => {
-  const component = useStore().getState().component
+  const component = useStoreConfig().getState().component
 
   if (!component) {
     return ''
