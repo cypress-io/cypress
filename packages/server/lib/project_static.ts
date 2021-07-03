@@ -1,12 +1,14 @@
 import Debug from 'debug'
+import commitInfo from '@cypress/commit-info'
+import _ from 'lodash'
 
+import logger from './logger'
 import api from './api'
 import cache from './cache'
 import user from './user'
 import keys from './util/keys'
 import settings from './util/settings'
 import { ProjectBase } from './project-base'
-import _ from 'lodash'
 
 const debug = Debug('cypress:server:project_static')
 
@@ -152,10 +154,47 @@ export async function add (path, options) {
 }
 
 export function getId (path) {
-  return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getProjectId()
+  return new ProjectBase({ projectRoot: path, projectType: 'e2e', options: {} }).getProjectId()
 }
 
 export function ensureExists (path, options) {
   // is there a configFile? is the root writable?
   return settings.exists(path, options)
+}
+
+async function writeProjectId (id: string, projectRoot: string) {
+  const attrs = { projectId: id }
+
+  logger.info('Writing Project ID', _.clone(attrs))
+
+  // TODO: We need to set this
+  // this.generatedProjectIdTimestamp = new Date()
+
+  await settings.write(projectRoot, attrs)
+
+  return id
+}
+
+interface ProjectDetails {
+  projectName: string
+  orgId: string | null
+  public: boolean
+}
+
+export async function createCiProject (projectDetails: ProjectDetails, projectRoot: string) {
+  debug('create CI project with projectDetails %o projectRoot %s', projectDetails, projectRoot)
+
+  const authToken = await user.ensureAuthToken()
+  const remoteOrigin = await commitInfo.getRemoteOrigin(projectRoot)
+
+  debug('found remote origin at projectRoot %o', {
+    remoteOrigin,
+    projectRoot,
+  })
+
+  const newProject = await api.createProject(projectDetails, remoteOrigin, authToken)
+
+  await writeProjectId(newProject.id, projectRoot)
+
+  return newProject
 }

@@ -332,7 +332,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'setup:dashboard:project':
-      return openProject.createCiProject(arg)
+      return ProjectStatic.createCiProject(arg, options.projectRoot)
       .then(send)
       .catch(sendErr)
 

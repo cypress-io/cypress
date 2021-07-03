@@ -4,7 +4,6 @@ import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
 
-import commitInfo from '@cypress/commit-info'
 import browsers from './browsers'
 import pkg from '@packages/root'
 import { RunnablesStore } from '@packages/reporter'
@@ -15,7 +14,6 @@ import { Automation } from './automation'
 import config from './config'
 import cwd from './cwd'
 import errors from './errors'
-import logger from './logger'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
 import savedState from './saved_state'
@@ -828,18 +826,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Promise.all(scaffolds)
   }
 
-  writeProjectId (id) {
-    const attrs = { projectId: id }
-
-    logger.info('Writing Project ID', _.clone(attrs))
-
-    this.generatedProjectIdTimestamp = new Date()
-
-    return settings
-    .write(this.projectRoot, attrs)
-    .return(id)
-  }
-
   async getProjectId () {
     await this.verifyExistence()
     const readSettings = await settings.read(this.projectRoot, this.options)
@@ -857,28 +843,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     } catch (err) {
       errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     }
-  }
-
-  createCiProject (projectDetails) {
-    debug('create CI project with projectDetails %o', projectDetails)
-
-    return user.ensureAuthToken()
-    .then((authToken) => {
-      const remoteOrigin = commitInfo.getRemoteOrigin(this.projectRoot)
-
-      debug('found remote origin at projectRoot %o', {
-        remoteOrigin,
-        projectRoot: this.projectRoot,
-      })
-
-      return remoteOrigin
-      .then((remoteOrigin) => {
-        return api.createProject(projectDetails, remoteOrigin, authToken)
-      })
-    }).then((newProject) => {
-      return this.writeProjectId(newProject.id)
-      .return(newProject)
-    })
   }
 
   async getRecordKeys () {
