@@ -162,7 +162,7 @@ export function ensureExists (path, options) {
   return settings.exists(path, options)
 }
 
-async function writeProjectId (id: string, projectRoot: string) {
+export async function writeProjectId (id: string, projectRoot: string) {
   const attrs = { projectId: id }
 
   logger.info('Writing Project ID', _.clone(attrs))
