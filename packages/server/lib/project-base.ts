@@ -12,7 +12,6 @@ import { ServerCt, SocketCt } from '@packages/server-ct'
 import { SocketE2E } from './socket-e2e'
 import api from './api'
 import { Automation } from './automation'
-import cache from './cache'
 import config from './config'
 import cwd from './cwd'
 import errors from './errors'
@@ -27,7 +26,6 @@ import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { escapeFilenameInUrl } from './util/escape_filename'
 import { fs } from './util/fs'
-import keys from './util/keys'
 import settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
@@ -61,7 +59,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
 
-  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' }) {
+  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: RunnerType }) {
     super()
 
     if (!projectRoot) {
@@ -885,159 +883,5 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const authToken = await user.ensureAuthToken()
 
     return api.requestAccess(projectId, authToken)
-  }
-
-  static async getOrgs () {
-    const authToken = await user.ensureAuthToken()
-
-    return api.getOrgs(authToken)
-  }
-
-  static paths () {
-    return cache.getProjectRoots()
-  }
-
-  static async getPathsAndIds () {
-    const projectRoots: string[] = await cache.getProjectRoots()
-
-    // this assumes that the configFile for a cached project is 'cypress.json'
-    // https://git.io/JeGyF
-    return Promise.all(projectRoots.map(async (projectRoot) => {
-      return {
-        path: projectRoot,
-        id: await settings.id(projectRoot),
-      }
-    }))
-  }
-
-  static async getDashboardProjects () {
-    const authToken = await user.ensureAuthToken()
-
-    debug('got auth token: %o', { authToken: keys.hide(authToken) })
-
-    return api.getProjects(authToken)
-  }
-
-  static _mergeDetails (clientProject, project) {
-    return _.extend({}, clientProject, project, { state: 'VALID' })
-  }
-
-  static _mergeState (clientProject, state) {
-    return _.extend({}, clientProject, { state })
-  }
-
-  static async _getProject (clientProject, authToken) {
-    debug('get project from api', clientProject.id, clientProject.path)
-
-    try {
-      const project = await api.getProject(clientProject.id, authToken)
-
-      debug('got project from api')
-
-      return ProjectBase._mergeDetails(clientProject, project)
-    } catch (err) {
-      debug('failed to get project from api', err.statusCode)
-      switch (err.statusCode) {
-        case 404:
-          // project doesn't exist
-          return ProjectBase._mergeState(clientProject, 'INVALID')
-        case 403:
-          // project exists, but user isn't authorized for it
-          return ProjectBase._mergeState(clientProject, 'UNAUTHORIZED')
-        default:
-          throw err
-      }
-    }
-  }
-
-  static async getProjectStatuses (clientProjects: any = []) {
-    debug(`get project statuses for ${clientProjects.length} projects`)
-
-    const authToken = await user.ensureAuthToken()
-
-    debug('got auth token: %o', { authToken: keys.hide(authToken) })
-
-    const projects = (await api.getProjects(authToken) || [])
-
-    debug(`got ${projects.length} projects`)
-    const projectsIndex = _.keyBy(projects, 'id')
-
-    return Promise.all(_.map(clientProjects, (clientProject) => {
-      debug('looking at', clientProject.path)
-      // not a CI project, just mark as valid and return
-      if (!clientProject.id) {
-        debug('no project id')
-
-        return ProjectBase._mergeState(clientProject, 'VALID')
-      }
-
-      const project = projectsIndex[clientProject.id]
-
-      if (project) {
-        debug('found matching:', project)
-
-        // merge in details for matching project
-        return ProjectBase._mergeDetails(clientProject, project)
-      }
-
-      debug('did not find matching:', project)
-
-      // project has id, but no matching project found
-      // check if it doesn't exist or if user isn't authorized
-      return ProjectBase._getProject(clientProject, authToken)
-    }))
-  }
-
-  static async getProjectStatus (clientProject) {
-    debug('get project status for client id %s at path %s', clientProject.id, clientProject.path)
-
-    if (!clientProject.id) {
-      debug('no project id')
-
-      return Promise.resolve(ProjectBase._mergeState(clientProject, 'VALID'))
-    }
-
-    const authToken = await user.ensureAuthToken()
-
-    debug('got auth token: %o', { authToken: keys.hide(authToken) })
-
-    return ProjectBase._getProject(clientProject, authToken)
-  }
-
-  static remove (path) {
-    return cache.removeProject(path)
-  }
-
-  static async add (path, options) {
-    // don't cache a project if a non-default configFile is set
-    // https://git.io/JeGyF
-    if (settings.configFile(options) !== 'cypress.json') {
-      return Promise.resolve({ path })
-    }
-
-    try {
-      await cache.insertProject(path)
-      const id = await ProjectBase.id(path)
-
-      return {
-        id,
-        path,
-      }
-    } catch (e) {
-      return { path }
-    }
-  }
-
-  static id (path) {
-    return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getProjectId()
-  }
-
-  static ensureExists (path, options) {
-    // is there a configFile? is the root writable?
-    return settings.exists(path, options)
-  }
-
-  static config (path) {
-    return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getConfig()
   }
 }
