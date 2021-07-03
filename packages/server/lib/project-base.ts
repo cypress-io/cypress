@@ -21,7 +21,6 @@ import { ServerE2E } from './server-e2e'
 import system from './util/system'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
-import { escapeFilenameInUrl } from './util/escape_filename'
 import { fs } from './util/fs'
 import settings from './util/settings'
 import plugins from './plugins'
@@ -32,6 +31,7 @@ import preprocessor from './plugins/preprocessor'
 import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
+import { getPrefixedPathToSpec, normalizeSpecUrl } from './project_utils'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // or places in this file modify existing types, adding additional keys dynamically.
@@ -67,8 +67,6 @@ interface Options {
 }
 
 const localCwd = cwd()
-const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
-const backSlashesRe = /\\/g
 
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
@@ -794,14 +792,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return cfg
   }
 
-  async getSpecUrl (absoluteSpecPath, specType) {
+  async getSpecUrl (absoluteSpecPath: string, specType: 'integration' | 'component' = 'integration') {
     debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
     const cfg = await this.getConfig()
 
     // if we don't have a absoluteSpecPath or its __all
     if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
-      const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+      const url = normalizeSpecUrl(cfg.browserUrl, '/__all')
 
       debug('returning url to run all specs: %s', url)
 
@@ -815,53 +813,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // the unit folder?
     // once we determine that we can then prefix it correctly
     // with either integration or unit
-    const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
-    const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
+    const prefixedPath = getPrefixedPathToSpec({
+      integrationFolder: cfg.integrationFolder,
+      componentFolder: cfg.componentFolder,
+      projectRoot: this.projectRoot,
+      pathToSpec: absoluteSpecPath,
+      type: specType,
+    })
+    const url = normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
     debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
 
     return url
-  }
-
-  getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
-    const { integrationFolder, componentFolder, projectRoot } = cfg
-
-    // for now hard code the 'type' as integration
-    // but in the future accept something different here
-
-    // strip out the integration folder and prepend with "/"
-    // example:
-    //
-    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration
-    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.js
-    //
-    // becomes /integration/foo.js
-
-    const folderToUse = type === 'integration' ? integrationFolder : componentFolder
-
-    // To avoid having invalid urls from containing backslashes,
-    // we normalize specUrls to posix by replacing backslash by slash
-    // Indeed, path.realtive will return something different on windows
-    // than on posix systems which can lead to problems
-    const url = `/${path.join(type, path.relative(
-      folderToUse,
-      path.resolve(projectRoot, pathToSpec),
-    )).replace(backSlashesRe, '/')}`
-
-    debug('prefixed path for spec %o', { pathToSpec, type, url })
-
-    return url
-  }
-
-  normalizeSpecUrl (browserUrl, specUrl) {
-    const replacer = (match) => match.replace('//', '/')
-
-    return [
-      browserUrl,
-      '#/tests',
-      escapeFilenameInUrl(specUrl),
-    ].join('/')
-    .replace(multipleForwardSlashesRe, replacer)
   }
 
   scaffold (cfg: Cfg) {
