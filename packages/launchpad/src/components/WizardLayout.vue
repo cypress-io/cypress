@@ -1,7 +1,7 @@
 <template>
   <div
     class="
-      max-w-2xl
+      max-w-3xl
       min-h-80
       mx-auto
       border-1 border-gray-200

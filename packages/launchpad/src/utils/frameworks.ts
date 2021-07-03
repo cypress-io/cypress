@@ -1,9 +1,14 @@
 import { BundlerId } from './bundler'
+import { Library, SupportedLibraryReact, SupportedLibraryVue } from './libraries'
+
 import LogoNext from '../assets/logos/nextjs.svg'
 import LogoNuxt from '../assets/logos/nuxt.svg'
 import LogoVue from '../assets/logos/vue.svg'
 import LogoReact from '../assets/logos/react.svg'
-import { Library, SupportedLibraryReact, SupportedLibraryVue } from './libraries'
+import ConfigNextTs from '../samples/next/ts.ts?raw'
+import ConfigNextJs from '../samples/next/js.js?raw'
+import ConfigNuxtTs from '../samples/nuxt/ts.ts?raw'
+import ConfigNuxtJs from '../samples/nuxt/js.js?raw'
 
 export type Framework = {
   id: string
@@ -11,6 +16,10 @@ export type Framework = {
   bundler?: BundlerId
   library: Library
   logo: string
+  configFile?: {
+    ts: string
+    js: string
+  }
 };
 
 export const SupportedFrameworkNext: Framework = {
@@ -19,6 +28,10 @@ export const SupportedFrameworkNext: Framework = {
   bundler: 'webpack',
   library: SupportedLibraryReact,
   logo: LogoNext,
+  configFile: {
+    ts: ConfigNextTs,
+    js: ConfigNextJs,
+  },
 }
 
 export const SupportedFrameworkNuxt: Framework = {
@@ -27,6 +40,10 @@ export const SupportedFrameworkNuxt: Framework = {
   bundler: 'webpack',
   library: SupportedLibraryVue,
   logo: LogoNuxt,
+  configFile: {
+    ts: ConfigNuxtTs,
+    js: ConfigNuxtJs,
+  },
 }
 
 export const SupportedFrameworkVueCLI: Framework = {

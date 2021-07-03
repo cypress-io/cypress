@@ -106,6 +106,6 @@ export default defineComponent({
 
 <style>
 body pre[class*="language-"] {
-  margin: 0;
+  margin: 0 5px;
 }
 </style>

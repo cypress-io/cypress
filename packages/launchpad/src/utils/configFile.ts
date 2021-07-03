@@ -14,6 +14,12 @@ export const getCode = (lang: 'js' | 'ts') => {
 
   const comments = `Component testing, ${language?.name}, ${framework.name}, ${bundler.name}`
 
+  if (framework.configFile) {
+    return `// ${comments}
+    
+${framework.configFile[lang]}`
+  }
+
   const exportStatement =
     lang === 'js' ? 'module.exports = {' : 'export default {'
 
