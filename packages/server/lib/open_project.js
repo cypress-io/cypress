@@ -327,16 +327,6 @@ const moduleFactory = () => {
     async create (path, args = {}, options = {}) {
       debug('open_project create %s', path)
 
-      // store the currently open project
-      openProject = new Project.ProjectBase({
-        projectType: args.testingType === 'component' ? 'ct' : 'e2e',
-        projectRoot: path,
-        options: {
-          ...options,
-          testingType: args.testingType,
-        },
-      })
-
       _.defaults(options, {
         onReloadBrowser: () => {
           if (relaunchBrowser) {
@@ -355,6 +345,16 @@ const moduleFactory = () => {
       // the config for the project instance
       debug('opening project %s', path)
       debug('and options %o', options)
+
+      // store the currently open project
+      openProject = new Project.ProjectBase({
+        projectType: args.testingType === 'component' ? 'ct' : 'e2e',
+        projectRoot: path,
+        options: {
+          ...options,
+          testingType: args.testingType,
+        },
+      })
 
       await openProject.open()
 
