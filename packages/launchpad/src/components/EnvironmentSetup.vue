@@ -25,7 +25,6 @@ import { computed, defineComponent, onMounted, ref } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import Select from "./Select.vue";
 
-import { useStore } from "../store";
 import { Framework, supportedFrameworks } from "../utils/frameworks";
 import { Bundler, supportedBundlers } from "../utils/bundler";
 import { useStoreApp } from "../store/app";
@@ -56,7 +55,7 @@ export default defineComponent({
       storeApp.setMeta({
         title: "Project Setup",
         description:
-          "Confirm the front-end framework and bundler used in your project.",
+          "Confirm the front-end framework and bundler fused in your project.",
       });
 
       storeApp.onBack(() => {

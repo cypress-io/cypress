@@ -44,7 +44,7 @@
       <div class="flex-grow" />
       <img src="../images/cypress_s.png" class="m-5 w-7" />
     </div>
-    <div>
+    <div class="flex items-stretch flex-col">
       <slot />
     </div>
   </div>

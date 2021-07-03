@@ -1,6 +1,8 @@
 <template>
     <img src="../images/success.svg" class="mx-auto my-10"/>
-    <Button>Open Chrome</Button>
+    <div class="text-center">
+        <Button>Open Chrome</Button>
+    </div>
 </template>
 
 <script lang="ts">
@@ -14,7 +16,7 @@ export default defineComponent({
         onMounted(() => {
             storeApp.setMeta({
                 title: "Setup Finished",
-                description: "The cypress/cypress.js file was successfully added to your project.Let’s open your browser and start testing some components!"
+                description: "<em>cypress.config.js</em> file was successfully added to your project.Let’s open your browser and start testing some components!"
             });
         });
     },

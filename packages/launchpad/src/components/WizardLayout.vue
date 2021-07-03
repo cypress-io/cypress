@@ -1,6 +1,6 @@
 <template>
   <div
-    class="
+    class="      
       max-w-3xl
       min-h-80
       mx-auto

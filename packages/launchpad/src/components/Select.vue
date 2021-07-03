@@ -10,19 +10,19 @@
         flex
         justify-between
         items-center
-        border-1 border-gray-200
+        border-1
         px-2
         py-1
         rounded
         w-full
         focus:border-indigo-600 focus:outline-transparent
       "
+      :class="disabledClass + ' ' + (isOpen ? 'border-indigo-600' : 'border-gray-200')"
       @click="
         if (!disabled) {
           isOpen = !isOpen;
         }
       "
-      :class="disabledClass"
       :disabled="disabled"
       v-click-outside="() => (isOpen = false)"
     >

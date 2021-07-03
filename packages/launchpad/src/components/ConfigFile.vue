@@ -66,12 +66,19 @@ export default defineComponent({
       manualInstall.value ? "I've added this file" : "Create File"
     );
 
+    const originalText = {
+      title: "Cypress.config",
+      description:
+        "Cypress will now create the following config file in the local directory for this project.",
+    }
+    const manualText = {
+      title: "Cypress.config",
+      description:
+        "Create a <em>cypress.config.js</em> file with the code below to store your project configuration.",
+    }
+
     onMounted(() => {
-      store.setMeta({
-        title: "Cypress.config",
-        description:
-          "Cypress will now create the following config file in the local directory for this project.",
-      });
+      store.setMeta(originalText);
 
       store.onNext(() => {
         store.finishSetup();
@@ -83,6 +90,7 @@ export default defineComponent({
 
       store.onAlt(() => {
         manualInstall.value = !manualInstall.value;
+        store.setMeta(manualInstall.value ? manualText : originalText);
       });
 
       import("prismjs/components/prism-typescript").then(() => {

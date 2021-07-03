@@ -1,17 +1,19 @@
 <template>
-  <button
-    :key="type.id"
-    v-for="type in testingTypes"
-    class="h-100 w-2/5 border border-gray-200 m-5 p-9 rounded"
-    @click="selectTestingType(type.id)"
-  >
-    <img
-      :src="type.icon"
-      class="w-32 h-32 mb-10 mt-5 mx-auto"
-    />
-    <p class="text-indigo-700">{{ type.name }}</p>
-    <p class="text-gray-400 text-sm">{{ type.description }}</p>
-  </button>
+  <div class="max-w-4xl mx-auto text-center">
+    <button
+      :key="type.id"
+      v-for="type in testingTypes"
+      class="block h-45 border border-gray-200 m-5 p-2 rounded md:h-100 md:w-2/5 md:p-9 md:inline-block"
+      @click="selectTestingType(type.id)"
+    >
+      <img
+        :src="type.icon"
+        class="float-left m-5 md:mx-auto md:mb-10 md:float-none"
+      />
+      <p class="text-indigo-700 text-left mt-3 md:text-center">{{ type.name }}</p>
+      <p class="text-gray-400 text-sm text-left md:text-center" v-html="type.description" />
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -28,8 +30,7 @@ export default defineComponent({
     onMounted(() => {
       storeApp.setMeta({
         title: "Welcome to Cypress",
-        description:
-          "Before we get started with testing your project, please confirm which method of testing you would like to use for the initial tests that you’ll be writing.",
+        description: "Choose which method of testing you would like to set up first.",
       });
     });
 

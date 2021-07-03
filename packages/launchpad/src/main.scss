@@ -10,4 +10,9 @@
 
 body {
   font-family: system;
+  @apply font-light
+}
+
+em {
+  @apply text-purple-400 not-italic
 }

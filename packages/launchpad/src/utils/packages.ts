@@ -4,11 +4,11 @@ import { Framework } from './frameworks'
 const packages: Record<string, { description: string }> = {
   '@cypress/vue': {
     description:
-      'Allows Cypress to mount each Vue component using `cy.mount()`',
+      'Allows Cypress to mount each Vue component using <em>cy.mount()</em>',
   },
   '@cypress/react': {
     description:
-      'Allows Cypress to mount each React component using `cy.mount()`',
+      'Allows Cypress to mount each React component using <em>cy.mount()</em>',
   },
   '@cypress/webpack-dev-server': {
     description:

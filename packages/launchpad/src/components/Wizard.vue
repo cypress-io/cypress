@@ -1,19 +1,15 @@
 <template>
-  <div class="text-center">
-    <h1 class="text-3xl mt-12">{{ app.title }}</h1>
-    <p class="text-gray-400 my-2 w-180 mx-auto">
-      {{ app.description }}
-    </p>
-    <div class="max-w-4xl mx-auto">
-      <TestingType v-if="!app.steps.testingType" />
+  <h1 class="text-3xl mt-12 text-center">{{ app.title }}</h1>
+  <p class="text-center text-gray-400 my-2 mx-10" v-html="app.description" />
+  <div class="mx-10">
+    <TestingType v-if="!app.steps.testingType" />
 
-      <template v-else-if="config.testingType === 'component'">
-        <EnvironmentSetup v-if="!app.steps.setup" />
-        <InstallDependencies v-else-if="!app.steps.dependencies" />
-        <ConfigFile v-else-if="!app.steps.configFile" />
-        <OpenBrowser v-else />
-      </template>
-    </div>
+    <template v-else-if="config.testingType === 'component'">
+      <EnvironmentSetup v-if="!app.steps.setup" />
+      <InstallDependencies v-else-if="!app.steps.dependencies" />
+      <ConfigFile v-else-if="!app.steps.configFile" />
+      <OpenBrowser v-else />
+    </template>
   </div>
 </template>
 <script lang="ts">
