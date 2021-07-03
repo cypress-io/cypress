@@ -6,6 +6,7 @@ const commitInfo = require('@cypress/commit-info')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('../support/helpers/fixtures')
+const { sinon } = require('../spec_helper')
 const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
 const cache = require(`${root}lib/cache`)
@@ -224,7 +225,8 @@ describe('lib/project-base', () => {
 
   context('#open', () => {
     beforeEach(function () {
-      sinon.stub(this.project, 'watchSettingsAndStartWebsockets').resolves()
+      sinon.stub(this.project, 'watchSettings')
+      sinon.stub(this.project, 'startWebsockets')
       sinon.stub(this.project, 'checkSupportFile').resolves()
       sinon.stub(this.project, 'scaffold').resolves()
       sinon.stub(this.project, 'getConfig').resolves(this.config)
@@ -235,47 +237,68 @@ describe('lib/project-base', () => {
       sinon.stub(plugins, 'init').resolves()
     })
 
-    it('calls #watchSettingsAndStartWebsockets with options + config', function () {
-      const opts = { changeEvents: false, onAutomationRequest () {} }
+    it('calls #watchSettings with options + config', function () {
+      return this.project.open().then(() => {
+        expect(this.project.watchSettings).to.be.calledWith({
+          configFile: undefined,
+          onSettingsChanged: false,
+          projectRoot: this.todosPath,
+        })
+      })
+    })
 
-      this.project.__setOptions(opts)
-      this.project.cfg = {}
+    it('calls #startWebsockets with options + config', function () {
+      const onFocusTests = sinon.stub()
 
-      return this.project.open(opts).then(() => {
-        expect(this.project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, this.project.cfg)
+      this.project.__setOptions({
+        onFocusTests,
+      })
+
+      return this.project.open().then(() => {
+        expect(this.project.startWebsockets).to.be.calledWith({
+          onReloadBrowser: undefined,
+          onFocusTests,
+          onSpecChanged: undefined,
+        }, {
+          socketIoCookie: '__socket.io',
+          namespace: '__cypress',
+          screenshotsFolder: '/foo/bar/cypress/screenshots',
+          report: undefined,
+          reporter: 'spec',
+          reporterOptions: null,
+          projectRoot: this.todosPath,
+        })
       })
     })
 
     it('calls #scaffold with server config promise', function () {
-      return this.project.open({}).then(() => {
+      return this.project.open().then(() => {
         expect(this.project.scaffold).to.be.calledWith(this.config)
       })
     })
 
     it('calls #checkSupportFile with server config when scaffolding is finished', function () {
-      return this.project.open({}).then(() => {
+      return this.project.open().then(() => {
         expect(this.project.checkSupportFile).to.be.calledWith(this.config)
       })
     })
 
     it('calls #getConfig options', function () {
-      const opts = {}
+      this.project.__setOptions({})
 
-      this.project.__setOptions(opts)
-
-      return this.project.open(opts).then(() => {
-        expect(this.project.getConfig).to.be.calledWith(opts)
+      return this.project.open().then(() => {
+        expect(this.project.getConfig).to.be.calledWith({})
       })
     })
 
     it('initializes the plugins', function () {
-      return this.project.open({}).then(() => {
+      return this.project.open().then(() => {
         expect(plugins.init).to.be.called
       })
     })
 
     it('calls support.plugins with pluginsFile directory', function () {
-      return this.project.open({}).then(() => {
+      return this.project.open().then(() => {
         expect(scaffold.plugins).to.be.calledWith(path.dirname(this.config.pluginsFile))
       })
     })
@@ -325,7 +348,7 @@ describe('lib/project-base', () => {
         chromeWebSecurity: false,
       })
 
-      return this.project.open({})
+      return this.project.open()
       .then(() => this.project.getConfig())
       .then((config) => {
         expect(config.chromeWebSecurity).eq(false)
@@ -359,7 +382,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = false
 
-      return this.project.open({})
+      return this.project.open()
       .then(() => {
         expect(runEvents.execute).to.be.calledWith('before:run', this.config, {
           config: this.config,
@@ -374,7 +397,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.config.experimentalInteractiveRunEvents = true
       this.config.isTextTerminal = true
 
-      return this.project.open({})
+      return this.project.open()
       .then(() => {
         expect(system.info).not.to.be.called
         expect(runEvents.execute).not.to.be.calledWith('before:run')
@@ -386,7 +409,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.config.experimentalInteractiveRunEvents = false
       this.config.isTextTerminal = false
 
-      return this.project.open({})
+      return this.project.open()
       .then(() => {
         expect(system.info).not.to.be.called
         expect(runEvents.execute).not.to.be.calledWith('before:run')
@@ -400,7 +423,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('sets firstOpened and lastOpened on first open', function () {
-        return this.project.open({})
+        return this.project.open()
         .then(() => this.project.getConfig())
         .then((config) => {
           expect(config.state).to.eql({ firstOpened: this._time, lastOpened: this._time })
@@ -408,11 +431,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('only sets lastOpened on subsequent opens', function () {
-        return this.project.open({})
+        return this.project.open()
         .then(() => {
           this._dateStub.returns(this._time + 100000)
         })
-        .then(() => this.project.open({}))
+        .then(() => this.project.open())
         .then(() => this.project.getConfig())
         .then((config) => {
           expect(config.state).to.eql({ firstOpened: this._time, lastOpened: this._time + 100000 })
@@ -422,11 +445,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('updates config.state when saved state changes', function () {
         sinon.spy(this.project, 'saveState')
 
-        const options = {}
+        const options = { onSavedStateChanged: (...args) => this.project.saveState(...args) }
 
         this.project.__setOptions(options)
 
-        return this.project.open(options)
+        return this.project.open()
         .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
         .then(() => this.project.getConfig())
         .then((config) => {
@@ -631,7 +654,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('watches cypress.json and cypress.env.json', function () {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged () {} }, {})
+      this.project.watchSettings({ onSettingsChanged () {} }, {})
       expect(this.watch).to.be.calledTwice
       expect(this.watch).to.be.calledWith('/path/to/cypress.json')
 
@@ -639,7 +662,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('sets onChange event when {changeEvents: true}', function (done) {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: () => done() }, {})
+      this.project.watchSettings({ onSettingsChanged: () => done() }, {})
 
       // get the object passed to watchers.watch
       const obj = this.watch.getCall(0).args[1]
@@ -650,7 +673,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('does not call watch when {changeEvents: false}', function () {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: undefined }, {})
+      this.project.watchSettings({ onSettingsChanged: undefined }, {})
 
       expect(this.watch).not.to.be.called
     })
@@ -662,7 +685,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const stub = sinon.stub()
 
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: stub }, {})
+      this.project.watchSettings({ onSettingsChanged: stub }, {})
 
       // get the object passed to watchers.watch
       const obj = this.watch.getCall(0).args[1]
@@ -782,18 +805,20 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#watchSettingsAndStartWebsockets', () => {
+  context('#startWebsockets', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
       this.project.watchers = {}
       this.project._server = { close () {}, startWebsockets: sinon.stub() }
+      sinon.stub(ProjectBase.prototype, 'open').resolves()
       sinon.stub(this.project, 'watchSettings')
     })
 
-    it('calls server.startWebsockets with automation + config', function () {
+    it('calls server.startWebsockets with automation + config', async function () {
       const c = {}
 
-      this.project.watchSettingsAndStartWebsockets({}, c)
+      this.project.__setConfig(c)
+      this.project.startWebsockets({}, c)
 
       const args = this.project.server.startWebsockets.lastCall.args
 
@@ -806,7 +831,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.server.startWebsockets.yieldsTo('onReloadBrowser')
 
-      this.project.watchSettingsAndStartWebsockets({ onReloadBrowser: fn }, {})
+      this.project.startWebsockets({ onReloadBrowser: fn }, {})
 
       expect(fn).to.be.calledOnce
     })

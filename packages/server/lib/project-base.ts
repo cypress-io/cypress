@@ -33,7 +33,14 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 
-export interface Cfg {
+// Cannot just use RuntimeConfigOptions as is because some types are not complete.
+// or places in this file modify existing types, adding additional keys dynamically.
+// Instead, this is an interface of values that have been manually validated to exist
+// and used when creating a project.
+// TODO: Figure out how to type this better.
+type ReceivedCypressOptions = Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'socketIoCookie'> & Pick<Cypress.ResolvedConfigOptions, 'screenshotsFolder'>
+
+export interface Cfg extends ReceivedCypressOptions {
   reporter: 'spec' | 'dot' | string
   report: boolean
   projectRoot: string
@@ -42,8 +49,19 @@ export interface Cfg {
   [key: string]: any
 }
 
+type WebSocketOptionsCallback = (...args: any[]) => any
+
 interface Options {
   configFile?: string | boolean
+
+  // Callback to reload the Desktop GUI when cypress.json is changed.
+  onSettingsChanged?: false | (() => void)
+
+  // Optional callbacks used for triggering events via the web socket
+  onReloadBrowser?: WebSocketOptionsCallback
+  onFocusTests?: WebSocketOptionsCallback
+  onSpecChanged?: WebSocketOptionsCallback
+  onSavedStateChanged?: WebSocketOptionsCallback
 
   [key: string]: any
 }
@@ -124,7 +142,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   get cfg () {
-    return this.ensureProp(this._cfg, 'open')
+    return this._cfg!
+    // return this.ensureProp(this._cfg, 'open')
   }
 
   get state () {
@@ -229,8 +248,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.options.onWarning(warning)
     }
 
-    this.options.onSavedStateChanged = (state) => this.saveState(state)
-
     // save the last time they opened the project
     // along with the first time they opened it
     const now = Date.now()
@@ -242,8 +259,27 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       stateToSave.firstOpened = now
     }
 
+    this.watchSettings({
+      onSettingsChanged: this.options.onSettingsChanged,
+      projectRoot: this.projectRoot,
+      configFile: this.options.configFile,
+    })
+
+    this.startWebsockets({
+      onReloadBrowser: this.options.onReloadBrowser,
+      onFocusTests: this.options.onFocusTests,
+      onSpecChanged: this.options.onSpecChanged,
+    }, {
+      socketIoCookie: cfg.socketIoCookie,
+      namespace: cfg.namespace,
+      screenshotsFolder: cfg.screenshotsFolder,
+      report: cfg.report,
+      reporter: cfg.reporter,
+      reporterOptions: cfg.reporterOptions,
+      projectRoot: this.projectRoot,
+    })
+
     await Promise.all([
-      this.watchSettingsAndStartWebsockets(this.options, cfg),
       this.scaffold(cfg),
       this.saveState(stateToSave),
     ])
@@ -486,7 +522,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }: {
     projectRoot: string
     configFile?: string | boolean
-    onSettingsChanged?: () => void
+    onSettingsChanged?: false | (() => void)
   }) {
     // bail if we havent been told to
     // watch anything (like in run mode)
@@ -547,51 +583,54 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  watchSettingsAndStartWebsockets (options: Options, cfg: Cfg) {
-    this.watchSettings({
-      onSettingsChanged: options.onSettingsChanged,
-      projectRoot: this.projectRoot,
-      configFile: options.configFile,
-    })
-
-    // if we've passed down reporter
-    // then record these via mocha reporter
+  startWebsockets ({
+    onReloadBrowser,
+    onFocusTests,
+    onSpecChanged,
+  }: Options, {
+    socketIoCookie,
+    namespace,
+    screenshotsFolder,
+    report,
+    reporter,
+    reporterOptions,
+    projectRoot,
+  }: Cfg) {
+  // if we've passed down reporter
+  // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
-      report: cfg.report,
-      reporter: cfg.reporter,
-      reporterOptions: cfg.reporterOptions,
-      projectRoot: this.projectRoot,
+      report,
+      reporter,
+      reporterOptions,
+      projectRoot,
     })
 
     const onBrowserPreRequest = (browserPreRequest) => {
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
-    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder, onBrowserPreRequest)
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest)
 
-    this.server.startWebsockets(this.automation, cfg, {
-      onReloadBrowser: options.onReloadBrowser,
+    this.server.startWebsockets(this.automation, this.cfg, {
+      onReloadBrowser,
+      onFocusTests,
+      onSpecChanged,
+      onSavedStateChanged: (state: any) => this.saveState(state),
 
-      onFocusTests: options.onFocusTests,
-
-      onSpecChanged: options.onSpecChanged,
-
-      onSavedStateChanged: options.onSavedStateChanged,
-
-      onCaptureVideoFrames: (data) => {
+      onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware
         this.emit('capture:video:frames', data)
       },
 
-      onConnect: (id) => {
+      onConnect: (id: string) => {
         debug('socket:connected')
         this.emit('socket:connected', id)
       },
 
-      onTestsReceivedAndMaybeRecord: async (runnables, cb) => {
+      onTestsReceivedAndMaybeRecord: async (runnables: unknown[], cb: () => void) => {
         debug('received runnables %o', runnables)
 
-        if (reporterInstance != null) {
+        if (reporterInstance) {
           reporterInstance.setRunnables(runnables)
         }
 
@@ -900,5 +939,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // pass all your options when you create a new instance!
   __setOptions (options: Options) {
     this.options = options
+  }
+
+  __setConfig (cfg: Cfg) {
+    this._cfg = cfg
   }
 }
