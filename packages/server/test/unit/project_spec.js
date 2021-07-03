@@ -236,6 +236,7 @@ describe('lib/project-base', () => {
     it('calls #watchSettingsAndStartWebsockets with options + config', function () {
       const opts = { changeEvents: false, onAutomationRequest () {} }
 
+      this.project.__setOptions(opts)
       this.project.cfg = {}
 
       return this.project.open(opts).then(() => {
@@ -257,6 +258,8 @@ describe('lib/project-base', () => {
 
     it('calls #getConfig options', function () {
       const opts = {}
+
+      this.project.__setOptions(opts)
 
       return this.project.open(opts).then(() => {
         expect(this.project.getConfig).to.be.calledWith(opts)
@@ -282,7 +285,9 @@ describe('lib/project-base', () => {
         message: 'plugin error message',
       }
 
-      return this.project.open({ onError }).then(() => {
+      this.project.__setOptions({ onError })
+
+      return this.project.open().then(() => {
         const pluginsOnError = plugins.init.lastCall.args[1].onError
 
         expect(pluginsOnError).to.be.a('function')
@@ -416,6 +421,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         sinon.spy(this.project, 'saveState')
 
         const options = {}
+
+        this.project.__setOptions(options)
 
         return this.project.open(options)
         .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
@@ -684,8 +691,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       }
     })
 
-    it('does nothing when {supportFile: false}', function () {
-      const ret = this.project.checkSupportFile({ supportFile: false })
+    it('does nothing when {supportFile: false}', async function () {
+      const ret = await this.project.checkSupportFile({ supportFile: false })
 
       expect(ret).to.be.undefined
     })

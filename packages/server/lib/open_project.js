@@ -326,12 +326,15 @@ const moduleFactory = () => {
 
     async create (path, args = {}, options = {}) {
       debug('open_project create %s', path)
-      debug('and options %o', options)
 
       // store the currently open project
       openProject = new Project.ProjectBase({
         projectType: args.testingType === 'component' ? 'ct' : 'e2e',
         projectRoot: path,
+        options: {
+          ...options,
+          testingType: args.testingType,
+        },
       })
 
       _.defaults(options, {
@@ -353,7 +356,7 @@ const moduleFactory = () => {
       debug('opening project %s', path)
       debug('and options %o', options)
 
-      await openProject.open({ ...options, testingType: args.testingType })
+      await openProject.open()
 
       return this
     },

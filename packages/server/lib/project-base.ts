@@ -38,6 +38,8 @@ import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-c
 
 export type Cfg = Record<string, any>
 
+type Options = Record<string, any>
+
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const backSlashesRe = /\\/g
@@ -48,7 +50,7 @@ const debugScaffold = Debug('cypress:server:scaffold')
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
-  protected options?: Record<string, any>
+  protected options: Options
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -59,7 +61,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
 
-  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: RunnerType }) {
+  constructor ({
+    projectRoot,
+    projectType,
+    options,
+  }: {
+    projectRoot: string
+    projectType: RunnerType
+    options: Options
+  }) {
     super()
 
     if (!projectRoot) {
@@ -80,6 +90,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       projectType: this.projectType,
       projectRoot: this.projectRoot,
     })
+
+    this.options = {
+      report: false,
+      onFocusTests () {},
+      onError () {},
+      onWarning () {},
+      onSettingsChanged: false,
+      ...options,
+    }
   }
 
   protected ensureProp = ensureProp
@@ -148,23 +167,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  async open (options: any = {}) {
+  async open () {
     debug('opening project instance %s', this.projectRoot)
-    debug('project open options %o', options)
+    debug('project open options %o', this.options)
 
-    options = {
-      report: false,
-      onFocusTests () {},
-      onError () {},
-      onWarning () {},
-      onSettingsChanged: false,
-      ...options,
-    }
-
-    debug('project options %o', options)
-    this.options = options
-
-    let cfg = await this.getConfig(options)
+    let cfg = await this.getConfig(this.options)
 
     process.chdir(this.projectRoot)
 
@@ -187,7 +194,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     this._server = this.createServer(this.projectType)
-    const res = await this.onOpen(cfg, options, this._server)
+    const res = await this.onOpen(cfg, this.options, this._server)
     const { port, warning, startSpecWatcher } = res
 
     cfg = res.cfg
@@ -211,10 +218,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('project config: %o', _.omit(cfg, 'resolved'))
 
     if (warning) {
-      options.onWarning(warning)
+      this.options.onWarning(warning)
     }
 
-    options.onSavedStateChanged = (state) => this.saveState(state)
+    this.options.onSavedStateChanged = (state) => this.saveState(state)
 
     // save the last time they opened the project
     // along with the first time they opened it
@@ -228,7 +235,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     await Promise.all([
-      this.watchSettingsAndStartWebsockets(options, cfg),
+      this.watchSettingsAndStartWebsockets(this.options, cfg),
       this.scaffold(cfg),
       this.saveState(stateToSave),
     ])
@@ -243,7 +250,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     await Promise.all([
       this.checkSupportFile(cfg),
-      this.watchPluginsFile(cfg, options),
+      this.watchPluginsFile(cfg, this.options),
     ])
 
     if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
@@ -887,5 +894,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const authToken = await user.ensureAuthToken()
 
     return api.requestAccess(projectId, authToken)
+  }
+
+  // For testing
+  // Do not use this method outside of testing
+  // pass all your options when you create a new instance!
+  __setOptions (options: Options) {
+    this.options = options
   }
 }
