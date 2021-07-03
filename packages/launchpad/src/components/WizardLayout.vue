@@ -1,6 +1,8 @@
 <template>
-  <div class="max-w-2xl mx-auto border-1 border-gray-200 rounded m-10">
-    <slot />
+  <div class="max-w-2xl min-h-80 mx-auto border-1 border-gray-200 rounded m-10 flex flex-col">
+    <div class="flex-grow">
+      <slot />
+    </div>
     <ButtonBar :next="next" :back="back" :alt="alt" />
   </div>
 </template>
