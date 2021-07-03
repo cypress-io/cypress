@@ -9,9 +9,13 @@ describe('<ConfigFile />', () => {
 
     cy.mount(() => (
       <div class="m-10">
-        <button data-cy="show" onClick={() => {
-          display.value = true
-        }} class="hidden"></button>
+        <button
+          data-cy="show"
+          onClick={() => {
+            display.value = true
+          }}
+          class="hidden"
+        ></button>
         {display.value ? <ConfigFile /> : undefined}
       </div>
     )).then(() => {

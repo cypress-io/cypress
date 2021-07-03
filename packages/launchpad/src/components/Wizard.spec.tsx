@@ -2,9 +2,7 @@ import Wizard from './Wizard.vue'
 
 describe('<Wizard />', () => {
   it('should run the full flow', () => {
-    cy.mount(() => (
-      <Wizard />
-    ))
+    cy.mount(() => <Wizard />)
 
     cy.get('h1').should('contain', 'Welcome to Cypress')
     cy.contains('Component Testing').click()

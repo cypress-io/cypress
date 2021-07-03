@@ -19,7 +19,7 @@
         text-lg
       "
     >
-      <i-clarity-menu-line class="p-3 h-13 w-13"/>
+      <i-clarity-menu-line class="p-3 h-13 w-13" />
     </div>
     <div
       class="
@@ -36,7 +36,11 @@
       {{ projectTitle }}
     </div>
     <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch">
-      <SideBarItem v-for="i in sideMenuDefinition" :icon="i.icon" :active="!!i.active"/>
+      <SideBarItem
+        v-for="i in sideMenuDefinition"
+        :icon="i.icon"
+        :active="!!i.active"
+      />
       <div class="flex-grow" />
       <img src="../assets/cypress_s.png" class="m-5 w-7" />
     </div>
@@ -50,23 +54,23 @@
 import { computed, defineComponent } from "vue";
 import { useStore } from "../store";
 
-import SideBarItem from "./SideBarItem.vue"
+import SideBarItem from "./SideBarItem.vue";
 
 export default defineComponent({
   components: {
-    SideBarItem
+    SideBarItem,
   },
   setup() {
-    const store = useStore()
+    const store = useStore();
     const projectTitle = computed(() => store.getState().projectTitle);
 
     const sideMenuDefinition = [
-      {icon:'clarity:dashboard-line'}, 
-      {icon:'clarity-terminal-line'}, 
-      {icon:'clarity-settings-line', active:true}
-    ]
+      { icon: "clarity:dashboard-line" },
+      { icon: "clarity-terminal-line" },
+      { icon: "clarity-settings-line", active: true },
+    ];
 
-    return { projectTitle, sideMenuDefinition};
+    return { projectTitle, sideMenuDefinition };
   },
 });
 </script>

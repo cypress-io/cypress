@@ -1,7 +1,7 @@
 <template>
   <WizardLayout :next="nextButtonName" alt="Install manually">
     <PackagesList v-if="!manualInstall" />
-    <ManualInstall v-else @back="manualInstall = false"/>
+    <ManualInstall v-else @back="manualInstall = false" />
   </WizardLayout>
 </template>
 
@@ -40,10 +40,9 @@ export default defineComponent({
       });
 
       store.onNext(() => {
-        if(manualInstall.value){
-          store.flagDependenciesInstalled()
-        }else{
-
+        if (manualInstall.value) {
+          store.flagDependenciesInstalled();
+        } else {
         }
       });
     });

@@ -32,7 +32,9 @@ describe('<ButtonBar />', () => {
   })
 
   it('should show a switch on the right when alt is mentionned and onAlt is set', () => {
-    cy.mount(() => <ButtonBar next="Next Step" back="Back" alt="Install manually" />).then(() => {
+    cy.mount(() => (
+      <ButtonBar next="Next Step" back="Back" alt="Install manually" />
+    )).then(() => {
       const altFunction = cy.spy()
 
       Cypress.store.onAlt(altFunction)

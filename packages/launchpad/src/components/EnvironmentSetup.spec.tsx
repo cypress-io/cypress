@@ -19,8 +19,12 @@ describe('<EnvironmentSetup />', () => {
     ))
 
     cy.contains('NuxtJs').should('exist')
-    cy.contains('Next Step').click().then(() => {
-      expect(Cypress.store.getState().component?.bundler.id).to.equal('webpack')
+    cy.contains('Next Step')
+    .click()
+    .then(() => {
+      expect(Cypress.store.getState().component?.bundler.id).to.equal(
+        'webpack',
+      )
     })
   })
 
@@ -36,7 +40,9 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('Webpack').click()
     cy.contains('ViteJs').click()
     cy.contains('ViteJs').should('exist')
-    cy.contains('Next Step').click().then(() => {
+    cy.contains('Next Step')
+    .click()
+    .then(() => {
       expect(Cypress.store.getState().component?.bundler.id).to.equal('vite')
     })
   })
@@ -53,8 +59,12 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('ViteJs').should('exist')
     cy.contains('VueJs').click()
     cy.contains('Nuxt').click()
-    cy.contains('Next Step').click().then(() => {
-      expect(Cypress.store.getState().component?.bundler.id).to.equal('webpack')
+    cy.contains('Next Step')
+    .click()
+    .then(() => {
+      expect(Cypress.store.getState().component?.bundler.id).to.equal(
+        'webpack',
+      )
     })
   })
 })

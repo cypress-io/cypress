@@ -6,16 +6,19 @@ describe('<Switch />', () => {
     const valueRef = ref(false)
 
     cy.mount(() => (
-      <div class="p-6" >
+      <div class="p-6">
         <Switch
           // @ts-ignore
           value={valueRef.value}
           // @ts-ignore
-          onUpdate={(newVal) => valueRef.value = newVal} />
+          onUpdate={(newVal) => (valueRef.value = newVal)}
+        />
       </div>
     ))
 
-    cy.get('button').click().then(() => {
+    cy.get('button')
+    .click()
+    .then(() => {
       expect(valueRef.value).to.be.true
     })
   })

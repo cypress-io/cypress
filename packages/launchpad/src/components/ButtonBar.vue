@@ -13,7 +13,7 @@
     <Button @click="nextFunction()">{{ next }}</Button>
     <Button @click="backFunction()" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
-    <div v-if="altFunction && alt"  class="flex items-center px-3">
+    <div v-if="altFunction && alt" class="flex items-center px-3">
       <label @click="handleAlt" class="text-gray-500 px-3">{{ alt }}</label>
       <Switch :value="altValue" @update="handleAlt" />
     </div>
@@ -43,7 +43,7 @@ export default defineComponent({
     },
   },
   setup() {
-    const altValue = ref(false)
+    const altValue = ref(false);
     const store = useStore();
     const state = computed(() => store.getState());
     const nextFunction = computed(() => state.value.nextAction);
@@ -53,7 +53,7 @@ export default defineComponent({
     const handleAlt = () => {
       altValue.value = !altValue.value;
       altFunction.value?.();
-    }
+    };
 
     return { nextFunction, backFunction, altFunction, altValue, handleAlt };
   },

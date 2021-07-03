@@ -29,7 +29,7 @@ export default defineComponent({
     EnvironmentSetup,
     InstallDependencies,
     ConfigFile,
-},
+  },
   setup() {
     const store = useStore();
 

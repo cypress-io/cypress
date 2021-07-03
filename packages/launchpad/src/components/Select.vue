@@ -47,7 +47,7 @@
         {{ placeholder }}
       </span>
       <span class="flex-grow"></span>
-      <i-fa-angle-down/>
+      <i-fa-angle-down />
     </button>
     <ul
       v-if="isOpen"
@@ -97,7 +97,7 @@ interface Option {
 }
 
 export default defineComponent({
-  emits: {select: Object},
+  emits: { select: Object },
   props: {
     name: {
       type: String,

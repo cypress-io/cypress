@@ -27,8 +27,7 @@ function createInitialState (): State {
   return {
     projectTitle: 'design-system',
     title: 'LaunchPad',
-    description:
-      'Scaffold Cypress Tests',
+    description: 'Scaffold Cypress Tests',
     firstOpen: true,
     nextAction () {},
     backAction () {},

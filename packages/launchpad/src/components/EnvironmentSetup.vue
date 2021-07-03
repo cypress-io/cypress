@@ -59,7 +59,7 @@ export default defineComponent({
       store.onBack(() => {
         store.setTestingType(undefined);
       });
-      
+
       store.onNext(() => {
         if (!selectedFramework.value || !selectedBundler.value) {
           return;
