@@ -42,7 +42,11 @@ export interface Cfg {
   [key: string]: any
 }
 
-type Options = Record<string, any>
+interface Options {
+  configFile?: string | boolean
+
+  [key: string]: any
+}
 
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
@@ -475,7 +479,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  watchSettings (onSettingsChanged, options) {
+  watchSettings ({
+    onSettingsChanged,
+    configFile,
+    projectRoot,
+  }: {
+    projectRoot: string
+    configFile?: string | boolean
+    onSettingsChanged?: () => void
+  }) {
     // bail if we havent been told to
     // watch anything (like in run mode)
     if (!onSettingsChanged) {
@@ -495,15 +507,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
         // call our callback function
         // when settings change!
-        onSettingsChanged.call(this)
+        onSettingsChanged()
       },
     }
 
-    if (options.configFile !== false) {
-      this.watchers.watch(settings.pathToConfigFile(this.projectRoot, options), obj)
+    if (configFile !== false) {
+      this.watchers.watch(settings.pathToConfigFile(projectRoot, { configFile }), obj)
     }
 
-    return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
+    return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
   }
 
   initializeReporter ({
@@ -535,8 +547,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  watchSettingsAndStartWebsockets (options: Record<string, any> = {}, cfg: Cfg) {
-    this.watchSettings(options.onSettingsChanged, options)
+  watchSettingsAndStartWebsockets (options: Options, cfg: Cfg) {
+    this.watchSettings({
+      onSettingsChanged: options.onSettingsChanged,
+      projectRoot: this.projectRoot,
+      configFile: options.configFile,
+    })
 
     // if we've passed down reporter
     // then record these via mocha reporter
