@@ -371,6 +371,7 @@ const moduleFactory = () => {
         },
       })
 
+      await openProject.initializeConfig()
       await openProject.open()
 
       return this

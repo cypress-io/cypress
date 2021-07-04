@@ -39,8 +39,8 @@ import { checkSupportFile } from './project_utils'
 // and used when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'socketIoCookie' | 'configFile'>
-  & Pick<Cypress.ResolvedConfigOptions, 'screenshotsFolder' | 'supportFile'>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'integrationFolder'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   reporter: 'spec' | 'dot' | string
@@ -687,41 +687,45 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
+  async initializeConfig (): Promise<Cfg> {
+    const theCfg: Cfg = await config.get(this.projectRoot, this.options)
+
+    if (theCfg.isTextTerminal) {
+      this._cfg = theCfg
+
+      return this._cfg
+    }
+
+    // decide if new project by asking scaffold
+    // and looking at previously saved user state
+    if (!theCfg.integrationFolder) {
+      throw new Error('Missing integration folder')
+    }
+
+    const untouchedScaffold = await this.determineIsNewProject(theCfg)
+    const userHasSeenBanner = _.get(theCfg, 'state.showedNewProjectBanner', false)
+
+    debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
+    theCfg.isNewProject = untouchedScaffold && !userHasSeenBanner
+
+    const cfgWithSaved = await this._setSavedState(theCfg)
+
+    this._cfg = cfgWithSaved
+
+    return this._cfg
+  }
+
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   async getConfig (): Promise<Cfg> {
-    if (this._cfg) {
-      debug('project has config %o', this._cfg)
-
-      return Promise.resolve(this._cfg)
+    if (!this._cfg) {
+      throw Error('Must call #initializeConfig before accessing config.')
     }
 
-    const setNewProject = async (cfg) => {
-      if (cfg.isTextTerminal) {
-        return
-      }
+    debug('project has config %o', this._cfg)
 
-      // decide if new project by asking scaffold
-      // and looking at previously saved user state
-      if (!cfg.integrationFolder) {
-        throw new Error('Missing integration folder')
-      }
-
-      const untouchedScaffold = await this.determineIsNewProject(cfg)
-      const userHasSeenBanner = _.get(cfg, 'state.showedNewProjectBanner', false)
-
-      debugScaffold(`untouched scaffold ${untouchedScaffold} banner closed ${userHasSeenBanner}`)
-      cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
-    }
-
-    const theCfg = await config.get(this.projectRoot, this.options)
-
-    await setNewProject(theCfg)
-
-    const cfgWithSaved = await this._setSavedState(theCfg)
-
-    return cfgWithSaved
+    return Promise.resolve(this._cfg)
   }
 
   // Saved state
@@ -745,7 +749,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return state
   }
 
-  async _setSavedState (cfg) {
+  async _setSavedState (cfg: Cfg) {
     debug('get saved state')
 
     let state = await savedState.create(this.projectRoot, cfg.isTextTerminal)

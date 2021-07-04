@@ -87,11 +87,13 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
   })
 
-  it('handles CT specific behaviors', function () {
+  it('handles CT specific behaviors', async function () {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
     const projectCt = new ProjectBase({ projectRoot: '../foo/bar', projectType: 'ct' })
+
+    await projectCt.initializeConfig()
 
     return projectCt.open({}).then((project) => {
       expect(projectCt._cfg.viewportHeight).to.eq(500)
@@ -143,7 +145,7 @@ describe('lib/project-base', () => {
     })
   })
 
-  context('#getConfig', () => {
+  context('#initializeConfig', () => {
     const integrationFolder = 'foo/bar/baz'
 
     beforeEach(function () {
@@ -159,9 +161,9 @@ describe('lib/project-base', () => {
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
-        return this.project.getConfig()
-        .then((cfg) => {
-          expect(cfg).to.deep.eq({
+        return this.project.initializeConfig()
+        .then(async (cfg) => {
+          expect(await this.project.getConfig()).to.deep.eq({
             integrationFolder,
             isNewProject: false,
             baz: 'quux',
@@ -175,18 +177,15 @@ describe('lib/project-base', () => {
       })
     })
 
-    it('resolves if cfg is already set', function () {
+    it('resolves if cfg is already set', async function () {
       this.project._cfg = {
         integrationFolder,
         foo: 'bar',
       }
 
-      return this.project.getConfig()
-      .then((cfg) => {
-        expect(cfg).to.deep.eq({
-          integrationFolder,
-          foo: 'bar',
-        })
+      expect(await this.project.getConfig()).to.deep.eq({
+        integrationFolder,
+        foo: 'bar',
       })
     })
 
@@ -197,7 +196,7 @@ describe('lib/project-base', () => {
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedNewProjectBanner: true })
 
-        return this.project.getConfig()
+        return this.project.initializeConfig()
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -220,7 +219,7 @@ describe('lib/project-base', () => {
 
       sinon.stub(this.project, '_setSavedState').resolves(cfg)
 
-      return this.project.getConfig()
+      return this.project.initializeConfig()
       .then((cfg) => {
         expect(cfg).not.to.have.property('isNewProject')
       })
