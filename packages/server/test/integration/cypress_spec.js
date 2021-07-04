@@ -1677,7 +1677,6 @@ describe('lib/cypress', () => {
     })
 
     it('passes filtered options to Project#open and sets cli config', function () {
-      const getConfig = sinon.spy(ProjectBase.prototype, 'getConfig')
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
@@ -1707,12 +1706,12 @@ describe('lib/cypress', () => {
 
         return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
       }).then(() => {
-        expect(getConfig).to.be.calledWithMatch({
-          port: 2121,
-          pageLoadTimeout: 1000,
-          report: false,
-          env: { baz: 'baz' },
-        })
+        const projectOptions = openProject.getProject().options
+
+        expect(projectOptions.port).to.eq(2121)
+        expect(projectOptions.pageLoadTimeout).to.eq(1000)
+        expect(projectOptions.report).to.eq(false)
+        expect(projectOptions.env).to.eql({ baz: 'baz' })
 
         expect(open).to.be.called
 
