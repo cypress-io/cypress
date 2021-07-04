@@ -5,10 +5,9 @@ import InstallDependencies from './InstallDependencies.vue'
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
     cy.mount(() => <InstallDependencies />).then(() => {
-      Cypress.store.setComponentSetup({
+      Cypress.storeConfig.setComponentSetup({
         bundler: SupportedBundlerWebpack,
         framework: SupportedFrameworkNext,
-        complete: true,
       })
     })
   })

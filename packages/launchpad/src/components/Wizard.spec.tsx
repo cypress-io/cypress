@@ -22,4 +22,12 @@ describe('<Wizard />', () => {
 
     cy.get('h1').should('contain', 'Cypress.config')
   })
+
+  it('should not moot when setting component directly in the store', () => {
+    cy.mount(() => <Wizard />)
+    cy.get('h1').should('contain', 'Welcome to Cypress').then(() => {
+      Cypress.storeApp.flagComponent()
+      cy.get('h1').should('contain', 'Project Setup')
+    })
+  })
 })

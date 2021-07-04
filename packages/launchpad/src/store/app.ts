@@ -7,12 +7,13 @@ interface State {
   nextAction: () => void
   backAction: () => void
   alternativeAction?: () => void
-  testingType?: 'component' | 'e2e'
   steps: {
-      testingType?: boolean
+      component?: boolean
       setup?: boolean
       dependencies?: boolean
       configFile?: boolean
+
+      e2e?: boolean
   }
 }
 
@@ -49,12 +50,8 @@ export class StoreApp {
     this.state.description = meta.description
   }
 
-  setTestingType (testingType?: 'component' | 'e2e') {
-    this.state.testingType = testingType
-  }
-
-  flagTestingType (flag = true) {
-    this.state.steps.testingType = flag
+  flagComponent (flag = true) {
+    this.state.steps.component = flag
   }
 
   flagComponentSetup (flag = true) {

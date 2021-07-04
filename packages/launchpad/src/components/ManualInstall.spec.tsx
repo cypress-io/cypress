@@ -9,10 +9,9 @@ describe('<ManualInstall />', () => {
         <ManualInstall />
       </div>
     )).then(() => {
-      Cypress.store.setComponentSetup({
+      Cypress.storeConfig.setComponentSetup({
         bundler: SupportedBundlerWebpack,
         framework: SupportedFrameworkNext,
-        complete: true,
       })
     })
   })

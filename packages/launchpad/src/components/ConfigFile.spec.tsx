@@ -19,10 +19,9 @@ describe('<ConfigFile />', () => {
         {display.value ? <ConfigFile /> : undefined}
       </div>
     )).then(() => {
-      Cypress.store.setComponentSetup({
+      Cypress.storeConfig.setComponentSetup({
         bundler: SupportedBundlerWebpack,
         framework: SupportedFrameworkNext,
-        complete: false,
       })
 
       cy.get('[data-cy="show"]').click({ force: true })

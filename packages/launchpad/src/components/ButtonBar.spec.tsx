@@ -9,7 +9,7 @@ describe('<ButtonBar />', () => {
     cy.mount(() => <ButtonBar next="Next Step" back="Back" />).then(() => {
       const nextFunction = cy.spy()
 
-      Cypress.store.onNext(nextFunction)
+      Cypress.storeApp.onNext(nextFunction)
       cy.contains('Next Step')
       .click()
       .then(() => {
@@ -22,7 +22,7 @@ describe('<ButtonBar />', () => {
     cy.mount(() => <ButtonBar next="Next Step" back="Back" />).then(() => {
       const backFunction = cy.spy()
 
-      Cypress.store.onBack(backFunction)
+      Cypress.storeApp.onBack(backFunction)
       cy.contains('Back')
       .click()
       .then(() => {
@@ -37,7 +37,7 @@ describe('<ButtonBar />', () => {
     )).then(() => {
       const altFunction = cy.spy()
 
-      Cypress.store.onAlt(altFunction)
+      Cypress.storeApp.onAlt(altFunction)
       cy.contains('Install manually')
       .click()
       .then(() => {

@@ -59,7 +59,7 @@ export default defineComponent({
       });
 
       storeApp.onBack(() => {
-        storeApp.flagTestingType(false);
+        storeApp.flagComponent(false);
       });
 
       storeApp.onNext(() => {

@@ -5,10 +5,9 @@ import PackagesList from './PackagesList.vue'
 describe('<PackagesList />', () => {
   it('playground', () => {
     cy.mount(() => <PackagesList />).then(() => {
-      Cypress.store.setComponentSetup({
+      Cypress.storeConfig.setComponentSetup({
         bundler: SupportedBundlerWebpack,
         framework: SupportedFrameworkNext,
-        complete: true,
       })
     })
   })

@@ -1,19 +1,23 @@
 <template>
-  <h1 class="text-3xl mt-12 text-center">{{ app.title }}</h1>
-  <p class="text-center text-gray-400 my-2 mx-10" v-html="app.description" />
+  <h1 class="text-3xl mt-12 text-center">{{ title }}</h1>
+  <p class="text-center text-gray-400 my-2 mx-10" v-html="description" />
   <div class="mx-10">
-    <TestingType v-if="!app.steps.testingType" />
+    <TestingType v-if="!steps.component && !steps.e2e" />
 
-    <template v-else-if="app.testingType === 'component'">
-      <EnvironmentSetup v-if="!app.steps.setup" />
-      <InstallDependencies v-else-if="!app.steps.dependencies" />
-      <ConfigFile v-else-if="!app.steps.configFile" />
+    <template v-else-if="steps.component">
+      <EnvironmentSetup v-if="!steps.setup" />
+      <InstallDependencies v-else-if="!steps.dependencies" />
+      <ConfigFile v-else-if="!steps.configFile" />
       <OpenBrowser v-else />
+    </template>
+
+    <template v-else-if="steps.e2e">
+      <div>Here be dragons</div>
     </template>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
 import { useStoreApp } from "../store/app";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
@@ -32,7 +36,11 @@ export default defineComponent({
   setup() {
     const storeApp = useStoreApp();
 
-    return { app: storeApp.getState() };
+    const title = computed(() => storeApp.getState().title)
+    const description = computed(() => storeApp.getState().description)
+    const steps = computed(() => storeApp.getState().steps)
+
+    return { steps, title, description };
   },
 });
 </script>

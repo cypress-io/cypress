@@ -22,7 +22,7 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('Next Step')
     .click()
     .then(() => {
-      expect(Cypress.store.getState().component?.bundler.id).to.equal(
+      expect(Cypress.storeConfig.getState().component?.bundler.id).to.equal(
         'webpack',
       )
     })
@@ -43,7 +43,7 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('Next Step')
     .click()
     .then(() => {
-      expect(Cypress.store.getState().component?.bundler.id).to.equal('vite')
+      expect(Cypress.storeConfig.getState().component?.bundler.id).to.equal('vite')
     })
   })
 
@@ -62,7 +62,7 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('Next Step')
     .click()
     .then(() => {
-      expect(Cypress.store.getState().component?.bundler.id).to.equal(
+      expect(Cypress.storeConfig.getState().component?.bundler.id).to.equal(
         'webpack',
       )
     })

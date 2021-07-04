@@ -3,6 +3,7 @@
   "viewportWidth": 800,
   "viewportHeight": 850,
   "fixturesFolder": false,
+  "video": false,
   "retries": {
     "runMode": 2,
     "openMode": 0

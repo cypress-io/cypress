@@ -28,8 +28,19 @@ export class StoreConfig {
   private storeApp: StoreApp
 
   install (app: App) {
+    if (!this.storeApp) {
+      this.storeApp = storeApp
+    }
+
     app.provide(storeKey, this)
-    this.storeApp = storeApp
+  }
+
+  /**
+   * This function is mainly used in testing
+   * @param storeAppLocal
+   */
+  setStoreApp (storeAppLocal: StoreApp) {
+    this.storeApp = storeAppLocal
   }
 
   constructor (initialState: StateConfig) {
@@ -42,8 +53,9 @@ export class StoreConfig {
 
   setTestingType (testingType?: TestingType) {
     this.state.testingType = testingType
-    this.storeApp.setTestingType(testingType)
-    this.storeApp.flagTestingType()
+    if (testingType === 'component') {
+      this.storeApp.flagComponent()
+    }
   }
 
   setComponentSetup (options: ComponentSetup) {
@@ -53,7 +65,7 @@ export class StoreConfig {
 }
 
 // useful for testing
-export function createStore (stateOverrides: Partial<StateConfig> = {}) {
+export function createStoreConfig (stateOverrides: Partial<StateConfig> = {}) {
   return new StoreConfig({
     ...createInitialState(),
     ...stateOverrides,
