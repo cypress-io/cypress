@@ -1,5 +1,5 @@
 import Chai from 'chai'
-import { getSpecUrl } from '../../lib/project_utils'
+import { getSpecUrl, checkSupportFile } from '../../lib/project_utils'
 import Fixtures from '../support/helpers/fixtures'
 import path from 'path'
 
@@ -93,6 +93,28 @@ describe('lib/project_utils', () => {
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')
+    })
+  })
+
+  describe('checkSupportFile', () => {
+    it('does nothing when {supportFile: false}', async () => {
+      const ret = await checkSupportFile({
+        configFile: 'cypress.json',
+        supportFile: false,
+      })
+
+      expect(ret).to.be.undefined
+    })
+
+    it('throws when support file does not exist', async () => {
+      try {
+        await checkSupportFile({
+          configFile: 'cypress.json',
+          supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/index.js',
+        })
+      } catch (e) {
+        expect(e.message).to.include('The support file is missing or invalid.')
+      }
     })
   })
 })

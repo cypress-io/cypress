@@ -26,9 +26,9 @@ const {
   createCiProject,
   writeProjectId,
 } = require(`${root}lib/project_static`)
+const ProjectUtils = require(`${root}lib/project_utils`)
 const { Automation } = require(`${root}lib/automation`)
 const savedState = require(`${root}lib/saved_state`)
-const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const plugins = require(`${root}lib/plugins`)
 const runEvents = require(`${root}lib/plugins/run_events`)
 const system = require(`${root}lib/util/system`)
@@ -227,7 +227,7 @@ describe('lib/project-base', () => {
     beforeEach(function () {
       sinon.stub(this.project, 'watchSettings')
       sinon.stub(this.project, 'startWebsockets')
-      sinon.stub(this.project, 'checkSupportFile').resolves()
+      this.checkSupportFileStub = sinon.stub(ProjectUtils, 'checkSupportFile').resolves()
       sinon.stub(this.project, 'scaffold').resolves()
       sinon.stub(this.project, 'getConfig').resolves(this.config)
       sinon.stub(ServerE2E.prototype, 'open').resolves([])
@@ -277,9 +277,12 @@ describe('lib/project-base', () => {
       })
     })
 
-    it('calls #checkSupportFile with server config when scaffolding is finished', function () {
+    it('calls checkSupportFile with server config when scaffolding is finished', function () {
       return this.project.open().then(() => {
-        expect(this.project.checkSupportFile).to.be.calledWith(this.config)
+        expect(this.checkSupportFileStub).to.be.calledWith({
+          configFile: 'cypress.json',
+          supportFile: '/foo/bar/cypress/support/index.js',
+        })
       })
     })
 
@@ -700,35 +703,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       obj.onChange()
 
       expect(stub).to.be.calledOnce
-    })
-  })
-
-  context('#checkSupportFile', () => {
-    beforeEach(function () {
-      sinon.stub(fs, 'pathExists').resolves(true)
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
-      this.project.server = { onTestFileChange: sinon.spy() }
-      sinon.stub(preprocessor, 'getFile').resolves()
-
-      this.config = {
-        projectRoot: '/path/to/root/',
-        supportFile: '/path/to/root/foo/bar.js',
-      }
-    })
-
-    it('does nothing when {supportFile: false}', async function () {
-      const ret = await this.project.checkSupportFile({ supportFile: false })
-
-      expect(ret).to.be.undefined
-    })
-
-    it('throws when support file does not exist', function () {
-      fs.pathExists.resolves(false)
-
-      return this.project.checkSupportFile(this.config)
-      .catch((e) => {
-        expect(e.message).to.include('The support file is missing or invalid.')
-      })
     })
   })
 
