@@ -200,7 +200,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = await this.getConfig(this.options)
+    let cfg = await this.getConfig()
 
     process.chdir(this.projectRoot)
 
@@ -690,11 +690,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  async getConfig (options: any = {}): Promise<Cfg> {
-    if (options == null) {
-      options = this.options
-    }
-
+  async getConfig (): Promise<Cfg> {
     if (this._cfg) {
       debug('project has config %o', this._cfg)
 
@@ -719,7 +715,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       cfg.isNewProject = untouchedScaffold && !userHasSeenBanner
     }
 
-    const theCfg = await config.get(this.projectRoot, options)
+    const theCfg = await config.get(this.projectRoot, this.options)
 
     await setNewProject(theCfg)
 

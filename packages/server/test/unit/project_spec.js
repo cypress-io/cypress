@@ -153,11 +153,13 @@ describe('lib/project-base', () => {
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
+      this.project.__setOptions({ foo: 'bar' })
+
       return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
-        return this.project.getConfig({ foo: 'bar' })
+        return this.project.getConfig()
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -189,11 +191,13 @@ describe('lib/project-base', () => {
     })
 
     it('sets cfg.isNewProject to false when state.showedNewProjectBanner is true', function () {
+      this.project.__setOptions({ foo: 'bar' })
+
       return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedNewProjectBanner: true })
 
-        return this.project.getConfig({ foo: 'bar' })
+        return this.project.getConfig()
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -216,7 +220,7 @@ describe('lib/project-base', () => {
 
       sinon.stub(this.project, '_setSavedState').resolves(cfg)
 
-      return this.project.getConfig({ foo: 'bar' })
+      return this.project.getConfig()
       .then((cfg) => {
         expect(cfg).not.to.have.property('isNewProject')
       })
@@ -283,14 +287,6 @@ describe('lib/project-base', () => {
           configFile: 'cypress.json',
           supportFile: '/foo/bar/cypress/support/index.js',
         })
-      })
-    })
-
-    it('calls #getConfig options', function () {
-      this.project.__setOptions({})
-
-      return this.project.open().then(() => {
-        expect(this.project.getConfig).to.be.calledWith({})
       })
     })
 
