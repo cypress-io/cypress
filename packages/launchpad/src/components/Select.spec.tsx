@@ -1,17 +1,19 @@
 import { ref } from 'vue'
 import { Framework } from '../utils/frameworks'
 import Select from './Select.vue'
+import LogoVue from '../images/logos/vue.svg'
+import LogoReact from '../images/logos/react.svg'
 
 const manyOptions = [
   {
     name: 'VueJs',
-    logo: 'vue',
+    logo: LogoVue,
     id: 'vue',
   },
   {
     name: 'ReactJs',
     description: '(detected)',
-    logo: 'react',
+    logo: LogoReact,
     id: 'react',
   },
 ]
