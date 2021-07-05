@@ -2,7 +2,7 @@ import { reactive, readonly, inject, App } from 'vue'
 import { Bundler } from '../utils/bundler'
 import { Framework } from '../utils/frameworks'
 import { TestingType } from '../utils/testingTypes'
-import { StoreApp, storeApp } from './app'
+import { StoreApp } from './app'
 
 type ComponentSetup = {
   framework: Framework
@@ -24,27 +24,16 @@ function createInitialState (): StateConfig {
 const storeKey = Symbol('storeConfig')
 
 export class StoreConfig {
-  private state: StateConfig;
-  private storeApp: StoreApp
+  private readonly state: StateConfig;
+  private readonly storeApp: StoreApp
 
   install (app: App) {
-    if (!this.storeApp) {
-      this.storeApp = storeApp
-    }
-
     app.provide(storeKey, this)
   }
 
-  /**
-   * This function is mainly used in testing
-   * @param storeAppLocal
-   */
-  setStoreApp (storeAppLocal: StoreApp) {
-    this.storeApp = storeAppLocal
-  }
-
-  constructor (initialState: StateConfig) {
+  constructor (storeApp: StoreApp, initialState: StateConfig) {
     this.state = reactive(initialState)
+    this.storeApp = storeApp
   }
 
   getState () {
@@ -65,14 +54,12 @@ export class StoreConfig {
 }
 
 // useful for testing
-export function createStoreConfig (stateOverrides: Partial<StateConfig> = {}) {
-  return new StoreConfig({
+export function createStoreConfig (storeApp: StoreApp, stateOverrides: Partial<StateConfig> = {}) {
+  return new StoreConfig(storeApp, {
     ...createInitialState(),
     ...stateOverrides,
   })
 }
-
-export const storeConfig = new StoreConfig(createInitialState())
 
 export const useStoreConfig = (): StoreConfig => {
   const _store = inject<StoreConfig>(storeKey)

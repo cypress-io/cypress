@@ -7,9 +7,7 @@ Cypress.Commands.add(
   'mount',
   (comp: Parameters<typeof mount>[0], options: Parameters<typeof mount>[1]) => {
     const storeApp = createStoreApp()
-    const storeConfig = createStoreConfig()
-
-    storeConfig.setStoreApp(storeApp)
+    const storeConfig = createStoreConfig(storeApp)
 
     Cypress.storeApp = storeApp
     Cypress.storeConfig = storeConfig
@@ -37,7 +35,13 @@ declare global {
       mount: typeof mount
     }
     interface Cypress {
+      /**
+       * The sroreApp used in the mount command
+       */
       storeApp: StoreApp
+      /**
+       * The sroreConfig used in the mount command
+       */
       storeConfig: StoreConfig
     }
   }

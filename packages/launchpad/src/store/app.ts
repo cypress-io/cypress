@@ -31,7 +31,7 @@ function createInitialState (): State {
 const storeKey = Symbol('storeApp')
 
 export class StoreApp {
-  private state: State;
+  private readonly state: State;
 
   install (app: App) {
     app.provide(storeKey, this)
@@ -86,8 +86,6 @@ export function createStoreApp (stateOverrides: Partial<State> = {}) {
     ...stateOverrides,
   })
 }
-
-export const storeApp = new StoreApp(createInitialState())
 
 export const useStoreApp = (): StoreApp => {
   const _store = inject<StoreApp>(storeKey)
