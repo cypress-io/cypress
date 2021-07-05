@@ -175,32 +175,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       : new ServerCt() as TServer
   }
 
-  async onOpen (_cfg: Record<string, any> | undefined, options, server: TServer) {
-    const cfgModdedByPlugins = await this.initializePlugins(_cfg, options)
-    const { specsStore, startSpecWatcher, ctDevServerPort } = await this.initializeSpecStore(cfgModdedByPlugins)
-
-    cfgModdedByPlugins.baseUrl = `http://localhost:${ctDevServerPort}`
-
-    const [port, warning] = await server.open(cfgModdedByPlugins, {
-      project: this,
-      onError: options.onError,
-      onWarning: options.onWarning,
-      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      projectType: this.projectType as 'ct' | 'e2e',
-      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
-      specsStore,
-    })
-
-    return {
-      cfg: cfgModdedByPlugins,
-      port,
-      warning,
-      specsStore,
-      startSpecWatcher,
-    }
-  }
-
   async open () {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
@@ -220,10 +194,29 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     this._server = this.createServer(this.projectType)
-    const res = await this.onOpen(cfg, this.options, this._server)
-    const { port, warning, startSpecWatcher } = res
 
-    cfg = res.cfg
+    cfg = await this.initializePlugins(cfg, this.options)
+
+    const {
+      specsStore,
+      startSpecWatcher,
+      ctDevServerPort,
+    } = await this.initializeSpecStore(cfg)
+
+    if (this.projectType === 'ct') {
+      cfg.baseUrl = `http://localhost:${ctDevServerPort}`
+    }
+
+    const [port, warning] = await this._server.open(cfg, {
+      project: this,
+      onError: this.options.onError,
+      onWarning: this.options.onWarning,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      projectType: this.projectType as 'ct' | 'e2e',
+      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      specsStore,
+    })
 
     // if we didnt have a cfg.port
     // then get the port once we
