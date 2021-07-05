@@ -40,7 +40,7 @@ import { checkSupportFile } from './project_utils'
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
   Partial<Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'integrationFolder'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'integrationFolder' | 'baseUrl'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   reporter: 'spec' | 'dot' | string
@@ -177,9 +177,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   async onOpen (_cfg: Record<string, any> | undefined, options, server: TServer) {
     const cfgModdedByPlugins = await this.initializePlugins(_cfg, options)
-    const { cfg, specsStore, startSpecWatcher } = await this.initializeSpecStore(cfgModdedByPlugins)
+    const { specsStore, startSpecWatcher, ctDevServerPort } = await this.initializeSpecStore(cfgModdedByPlugins)
 
-    const [port, warning] = await server.open(cfg, {
+    cfgModdedByPlugins.baseUrl = `http://localhost:${ctDevServerPort}`
+
+    const [port, warning] = await server.open(cfgModdedByPlugins, {
       project: this,
       onError: options.onError,
       onWarning: options.onWarning,
@@ -191,7 +193,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
 
     return {
-      cfg,
+      cfg: cfgModdedByPlugins,
       port,
       warning,
       specsStore,
@@ -363,7 +365,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     options.onError(err)
   }
 
-  async initializeSpecStore (updatedConfig: Cfg) {
+  async initializeSpecStore (updatedConfig: Cfg): Promise<{
+    specsStore: SpecsStore
+    ctDevServerPort: number | undefined
+    startSpecWatcher: () => void
+  }> {
     const allSpecs = await specsUtil.find(updatedConfig)
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
       if (this.projectType === 'ct') {
@@ -425,12 +431,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }) {
     const specsStore = new SpecsStore(config, this.projectType as RunnerType)
 
-    if (this.projectType === 'ct') {
-      const { port } = await this.startCtDevServer(specs, config)
-
-      config.baseUrl = `http://localhost:${port}`
-    }
-
     const startSpecWatcher = () => {
       return specsStore.watch({
         onSpecsChanged: (specs) => {
@@ -447,10 +447,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
+    let ctDevServerPort: number | undefined
+
+    if (this.projectType === 'ct') {
+      const { port } = await this.startCtDevServer(specs, config)
+
+      ctDevServerPort = port
+    }
+
     return specsStore.storeSpecFiles()
     .return({
       specsStore,
-      cfg: config,
+      ctDevServerPort,
       startSpecWatcher,
     })
   }
