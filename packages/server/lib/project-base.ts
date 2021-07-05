@@ -152,10 +152,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   injectCtSpecificConfig (cfg) {
+    cfg.resolved.testingType = { value: 'component' }
+
+    // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
+    // But if we don't return it in the plugins function, it never gets set
+    // Since there is no chance that it will have any other value here, we set it to "component"
+    // This allows users to not return config in the `cypress/plugins/index.js` file
+    // https://github.com/cypress-io/cypress/issues/16860
     const rawJson = cfg.rawJson as Cfg
 
     return {
       ...cfg,
+      componentTesting: true,
       viewportHeight: rawJson.viewportHeight ?? 500,
       viewportWidth: rawJson.viewportWidth ?? 500,
     }
@@ -168,14 +176,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async onOpen (_cfg: Record<string, any> | undefined, options, server: TServer) {
-    const cfgModdedByPlugins = await this._initPlugins(_cfg, options)
+    const cfgModdedByPlugins = await this.initializePlugins(_cfg, options)
     const { cfg, specsStore, startSpecWatcher } = await this.initializeSpecStore(cfgModdedByPlugins)
 
-    const updatedCfg = this.projectType === 'e2e'
-      ? cfg
-      : this.injectCtSpecificConfig(cfg)
-
-    const [port, warning] = await server.open(updatedCfg, {
+    const [port, warning] = await server.open(cfg, {
       project: this,
       onError: options.onError,
       onWarning: options.onWarning,
@@ -187,7 +191,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
 
     return {
-      cfg: updatedCfg,
+      cfg,
       port,
       warning,
       specsStore,
@@ -360,19 +364,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeSpecStore (updatedConfig: Cfg) {
-    if (this.projectType === 'ct') {
-      updatedConfig.componentTesting = true
-
-      // This value is normally set up in the `packages/server/lib/plugins/index.js#110`
-      // But if we don't return it in the plugins function, it never gets set
-      // Since there is no chance that it will have any other value here, we set it to "component"
-      // This allows users to not return config in the `cypress/plugins/index.js` file
-      // https://github.com/cypress-io/cypress/issues/16860
-      updatedConfig.resolved.testingType = { value: 'component' }
-    }
-
-    debug('updated config: %o', updatedConfig)
-
     const allSpecs = await specsUtil.find(updatedConfig)
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
       if (this.projectType === 'ct') {
@@ -389,7 +380,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.initSpecStore({ specs, config: updatedConfig })
   }
 
-  async _initPlugins (cfg, options) {
+  async initializePlugins (cfg, options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
@@ -486,7 +477,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         debug('plugins file changed')
 
         // re-init plugins after a change
-        this._initPlugins(cfg, options)
+        this.initializePlugins(cfg, options)
         .catch((err) => {
           options.onError(err)
         })
@@ -679,7 +670,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    const theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     theCfg.browsers = theCfg.browsers.map((browser) => {
       if (browser.family === 'chromium') {
@@ -691,6 +682,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         warning: errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
       }
     })
+
+    theCfg = this.projectType === 'e2e'
+      ? theCfg
+      : this.injectCtSpecificConfig(theCfg)
 
     if (theCfg.isTextTerminal) {
       this._cfg = theCfg
