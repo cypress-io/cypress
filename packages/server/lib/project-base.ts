@@ -4,15 +4,15 @@ import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
-import la from 'lazy-ass'
 import _ from 'lodash'
 import path from 'path'
-import R from 'ramda'
 
 import commitInfo from '@cypress/commit-info'
+import browsers from './browsers'
 import pkg from '@packages/root'
 import { RunnablesStore } from '@packages/reporter'
-import { ServerCt } from '@packages/server-ct'
+import { ServerCt, SocketCt } from '@packages/server-ct'
+import { SocketE2E } from './socket-e2e'
 import api from './api'
 import { Automation } from './automation'
 import cache from './cache'
@@ -36,15 +36,13 @@ import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
+import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-
-interface CloseOptions {
-  onClose: () => any
-}
+import { createRoutes as createE2ERoutes } from './routes'
+import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 
 interface OpenOptions {
   onOpen: (cfg: any) => Bluebird<any>
-  onAfterOpen: (cfg: any) => Bluebird<any>
 }
 
 export type Cfg = Record<string, any>
@@ -66,9 +64,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   private _recordTests = null
 
   public browser: any
+  public projectType?: 'e2e' | 'ct'
   public spec: Cypress.Cypress['spec'] | null
 
-  constructor (projectRoot: string) {
+  constructor ({ projectRoot, projectType }: { projectRoot: string, projectType: 'ct' | 'e2e' } = {}) {
     super()
 
     if (!projectRoot) {
@@ -79,6 +78,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 
+    this.projectType = projectType
     this.projectRoot = path.resolve(projectRoot)
     this.watchers = new Watchers()
     this.spec = null
@@ -91,14 +91,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   protected ensureProp = ensureProp
-
-  get projectType (): 'ct' | 'e2e' | 'base' {
-    if (this.constructor === ProjectBase) {
-      return 'base'
-    }
-
-    throw new Error('Project#projectType must be defined')
-  }
 
   setOnTestsReceived (fn) {
     this._recordTests = fn
@@ -118,6 +110,55 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   get state () {
     return this.cfg.state
+  }
+
+  injectCtSpecificConfig (cfg) {
+    const rawJson = cfg.rawJson as Cfg
+
+    return {
+      ...cfg,
+      viewportHeight: rawJson.viewportHeight ?? 500,
+      viewportWidth: rawJson.viewportWidth ?? 500,
+    }
+  }
+
+  onOpen (cfg: Record<string, any> | undefined, options: OpenServerOptions) {
+    this._server = this.projectType === 'e2e'
+      ? new ServerE2E()
+      : new ServerCt()
+
+    return this._initPlugins(cfg, options)
+    .then(({ cfg, specsStore, startSpecWatcher }) => {
+      const updatedCfg = this.projectType === 'e2e'
+        ? cfg
+        : this.injectCtSpecificConfig(cfg)
+
+      return this.server.open(updatedCfg, {
+        project: this,
+        onError: options.onError,
+        onWarning: options.onWarning,
+        shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+        projectType: this.projectType,
+        SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
+        createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+        specsStore,
+      })
+      .then(([port, warning]) => {
+        return {
+          cfg: updatedCfg,
+          port,
+          warning,
+          specsStore,
+          startSpecWatcher,
+        }
+      })
+    })
+  }
+
+  onAfterOpen ({ cfg }) {
+    cfg.proxyServer = cfg.proxyUrl
+
+    return cfg
   }
 
   open (options = {}, callbacks: OpenOptions) {
@@ -157,7 +198,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
     })
-    .then(callbacks.onOpen)
+    .then((cfg) => {
+      return this.onOpen(cfg, options)
+    })
     .tap(({ cfg, port }) => {
       // if we didnt have a cfg.port
       // then get the port once we
@@ -169,7 +212,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         _.extend(cfg, config.setUrls(cfg))
       }
     })
-    .tap(callbacks.onAfterOpen)
+    .tap(this.onAfterOpen)
     .then(({ cfg, port, warning, startSpecWatcher, specsStore }) => {
       // store the cfg from
       // opening the server
@@ -206,9 +249,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         // This is only used for CT right now, but it will be
         // used for E2E eventually. Until then, do not watch
         // the specs.
-        if (this.projectType === 'ct') {
-          startSpecWatcher()
-        }
+        startSpecWatcher()
 
         return Bluebird.join(
           this.checkSupportFile(cfg),
@@ -260,16 +301,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
   }
 
-  close (options?: CloseOptions) {
+  close () {
     debug('closing project instance %s', this.projectRoot)
 
     this.spec = null
     this.browser = null
 
+    const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
+
     return Bluebird.join(
       this.server?.close(),
       this.watchers?.close(),
-      options?.onClose(),
+      closePreprocessor?.(),
     )
     .then(() => {
       process.chdir(localCwd)
@@ -296,8 +339,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  _onError (err: Error, options: Record<string, any>): void {
-    throw Error(`_onError must be implemented by the super class!`)
+  _onError<Options extends Record<string, any>> (err: Error, options: Options) {
+    debug('got plugins error', err.stack)
+
+    browsers.close()
+
+    options.onError(err)
   }
 
   _initPlugins (cfg, options) {
@@ -387,7 +434,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          this.server.sendSpecList(specs)
+          this.server.sendSpecList(specs, this.projectType)
 
           if (this.projectType === 'ct') {
           // ct uses the dev-server to build and bundle the speces.
@@ -668,14 +715,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       throw new Error('Missing project root')
     }
 
-    const newState = _.merge({}, this.cfg.state, stateChanges)
-
     return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
-    .then((state) => state.set(newState))
-    .then(() => {
-      this.cfg.state = newState
+    .tap((state) => state.set(stateChanges))
+    .then((state) => state.get())
+    .then((state) => {
+      this.cfg.state = state
 
-      return newState
+      return state
     })
   }
 
@@ -1013,7 +1059,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   static id (path) {
-    return new ProjectBase(path).getProjectId()
+    return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getProjectId()
   }
 
   static ensureExists (path, options) {
@@ -1022,59 +1068,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   static config (path) {
-    return new ProjectBase(path).getConfig()
-  }
-
-  static getSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.getProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_FETCH_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  static generateSecretKeyByPath (path) {
-    // get project id
-    return ProjectBase.id(path)
-    .then((id) => {
-      return user.ensureAuthToken()
-      .then((authToken) => {
-        return api.updateProjectToken(id, authToken)
-        .catch(() => {
-          errors.throw('CANNOT_CREATE_PROJECT_TOKEN')
-        })
-      })
-    })
-  }
-
-  // Given a path to the project, finds all specs
-  // returns list of specs with respect to the project root
-  static findSpecs (projectRoot, specPattern) {
-    debug('finding specs for project %s', projectRoot)
-    la(check.unemptyString(projectRoot), 'missing project path', projectRoot)
-    la(check.maybe.unemptyString(specPattern), 'invalid spec pattern', specPattern)
-
-    // if we have a spec pattern
-    if (specPattern) {
-      // then normalize to create an absolute
-      // file path from projectRoot
-      // ie: **/* turns into /Users/bmann/dev/project/**/*
-      specPattern = path.resolve(projectRoot, specPattern)
-      debug('full spec pattern "%s"', specPattern)
-    }
-
-    return new ProjectBase(projectRoot)
-    .getConfig()
-    // TODO: handle wild card pattern or spec filename
-    .then((cfg) => {
-      return specsUtil.find(cfg, specPattern)
-    }).then(R.prop('integration'))
-    .then(R.map(R.prop('name')))
+    return new ProjectBase({ projectRoot: path, projectType: 'e2e' }).getConfig()
   }
 }

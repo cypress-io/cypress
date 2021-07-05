@@ -14,7 +14,7 @@ import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { ProjectCt, SocketCt } from '@packages/server-ct'
+import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
@@ -25,9 +25,9 @@ import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import { ProjectE2E } from './project-e2e'
-import { SpecsStore } from './specs-store'
+import { RunnerType, SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
+import { ProjectBase } from './project-base'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -91,7 +91,7 @@ const notSSE = (req, res) => {
 export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
-  project: ProjectE2E | ProjectCt
+  project: ProjectBase<any>
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
   projectType: 'ct' | 'e2e'
@@ -162,7 +162,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   abstract createServer (
     app: Express,
     config: Record<string, any>,
-    project: ProjectE2E | ProjectCt,
+    project: ProjectBase<any>,
     request: unknown,
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
@@ -601,7 +601,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.httpsProxy.connect(req, socket, head)
   }
 
-  sendSpecList (specs) {
-    return this.socket.sendSpecList(specs)
+  sendSpecList (specs: Cypress.Cypress['spec'][], projectType: RunnerType) {
+    return this.socket.sendSpecList(specs, projectType)
   }
 }
