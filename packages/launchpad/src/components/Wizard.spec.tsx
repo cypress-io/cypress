@@ -21,13 +21,11 @@ describe('<Wizard />', () => {
     cy.contains('installed').click()
 
     cy.get('h1').should('contain', 'Cypress.config')
-  })
+    cy.contains('button', 'JavaScript').click()
+    cy.contains('Create file manually').click()
+    cy.contains('button', 'Copy').should('be.visible')
+    cy.contains('I\'ve added this file').click()
 
-  it('should not moot when setting component directly in the store', () => {
-    cy.mount(() => <Wizard />)
-    cy.get('h1').should('contain', 'Welcome to Cypress').then(() => {
-      Cypress.storeApp.flagComponent()
-      cy.get('h1').should('contain', 'Project Setup')
-    })
+    cy.get('h1').should('contain', 'Setup Finished')
   })
 })
