@@ -22,7 +22,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace: string, cookieNamespace: string, screenshotsFolder: string, public onBrowserPreRequest: OnBrowserPreRequest) {
+  constructor (cyNamespace: string, cookieNamespace: string, screenshotsFolder: string | false, public onBrowserPreRequest: OnBrowserPreRequest) {
     this.requests = {}
 
     // set the middleware

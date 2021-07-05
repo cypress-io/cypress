@@ -37,9 +37,15 @@ describe('lib/scaffold', () => {
     })
 
     it('is false when integrationFolder has been changed', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({
+        projectRoot: this.pristinePath,
+        projectType: 'e2e',
+        options: {
+          integrationFolder: 'foo',
+        },
+      })
 
-      return pristine.getConfig({ integrationFolder: 'foo' })
+      return pristine.getConfig()
       .then((cfg) => {
         return pristine.determineIsNewProject(cfg)
       }).then((ret) => {

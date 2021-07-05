@@ -12,7 +12,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const { ProjectBase } = require('../project-base')
+const { ensureExists } = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')
@@ -619,8 +619,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
 const createAndOpenProject = function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return ProjectBase
-  .ensureExists(projectRoot, options)
+  return ensureExists(projectRoot, options)
   .then(() => {
     // open this project without
     // adding it to the global cache
@@ -1077,7 +1076,7 @@ module.exports = {
       return this.currentSetScreenshotMetadata(data)
     }
 
-    const wait = () => {
+    const wait = async () => {
       debug('waiting for socket to connect and browser to launch...')
 
       if (!shouldLaunchBrowser) {
@@ -1085,9 +1084,6 @@ module.exports = {
         // we tell it that we are ready
         // to receive the next spec
         return this.navigateToNextSpec(options.spec)
-        .tap(() => {
-          debug('navigated to next spec')
-        })
       }
 
       return Promise.join(
@@ -1095,10 +1091,7 @@ module.exports = {
         .tap(() => {
           debug('socket connected', { socketId })
         }),
-        this.launchBrowser(options)
-        .tap(() => {
-          debug('browser launched')
-        }),
+        this.launchBrowser(options),
       )
       .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
