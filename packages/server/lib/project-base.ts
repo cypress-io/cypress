@@ -145,7 +145,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   get cfg () {
     return this._cfg!
-    // return this.ensureProp(this._cfg, 'open')
   }
 
   get state () {
@@ -203,14 +202,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     let cfg = await this.getConfig()
 
     process.chdir(this.projectRoot)
-
-    // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
-    if (cfg.chromeWebSecurity === false) {
-      _.chain(cfg.browsers)
-      .filter((browser) => browser.family !== 'chromium')
-      .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
-      .value()
-    }
 
     // TODO: we currently always scaffold the plugins file
     // even when headlessly or else it will cause an error when
@@ -689,6 +680,17 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   async initializeConfig (): Promise<Cfg> {
     const theCfg: Cfg = await config.get(this.projectRoot, this.options)
+
+    theCfg.browsers = theCfg.browsers.map((browser) => {
+      if (browser.family === 'chromium') {
+        return browser
+      }
+
+      return {
+        ...browser,
+        warning: errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
+      }
+    })
 
     if (theCfg.isTextTerminal) {
       this._cfg = theCfg

@@ -149,30 +149,25 @@ describe('lib/project-base', () => {
     const integrationFolder = 'foo/bar/baz'
 
     beforeEach(function () {
-      this.project._cfg = undefined
-
-      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder })
+      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder, browsers: [] })
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
       this.project.__setOptions({ foo: 'bar' })
 
       return savedState.create(this.todosPath)
-      .then((state) => {
+      .then(async (state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
-        return this.project.initializeConfig()
-        .then(async (cfg) => {
-          expect(await this.project.getConfig()).to.deep.eq({
-            integrationFolder,
-            isNewProject: false,
-            baz: 'quux',
-            state: {
-              reporterWidth: 225,
-            },
-          })
-
-          this.project._cfg = cfg
+        await this.project.initializeConfig()
+        expect(await this.project.getConfig()).to.deep.eq({
+          integrationFolder,
+          browsers: [],
+          isNewProject: false,
+          baz: 'quux',
+          state: {
+            reporterWidth: 225,
+          },
         })
       })
     })
@@ -200,6 +195,7 @@ describe('lib/project-base', () => {
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
+            browsers: [],
             isNewProject: false,
             baz: 'quux',
             state: {
@@ -213,7 +209,7 @@ describe('lib/project-base', () => {
     })
 
     it('does not set cfg.isNewProject when cfg.isTextTerminal', function () {
-      const cfg = { isTextTerminal: true }
+      const cfg = { isTextTerminal: true, browsers: [] }
 
       config.get.resolves(cfg)
 
@@ -224,6 +220,43 @@ describe('lib/project-base', () => {
         expect(cfg).not.to.have.property('isNewProject')
       })
     })
+
+    it('attaches warning to non-chrome browsers when chromeWebSecurity:false', async function () {
+      const cfg = Object.assign({}, {
+        integrationFolder,
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: false,
+      })
+
+      config.get.restore()
+      sinon.stub(config, 'get').returns(cfg)
+
+      await this.project.initializeConfig()
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(config.chromeWebSecurity).eq(false)
+        expect(config.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+            warning: `\
+Your project has set the configuration option: \`chromeWebSecurity: false\`
+
+This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
+`,
+          },
+        ])
+
+        expect(config).ok
+      })
+    })
+  })
+
+  context('#initializeConfig', function () {
   })
 
   context('#open', () => {
@@ -337,36 +370,6 @@ describe('lib/project-base', () => {
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
 
         expect(startListening.getCall(0).args[1]).to.eq(options)
-      })
-    })
-
-    it('attaches warning to non-chrome browsers when chromeWebSecurity:false', function () {
-      Object.assign(this.config, {
-        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
-        chromeWebSecurity: false,
-      })
-
-      return this.project.open()
-      .then(() => this.project.getConfig())
-      .then((config) => {
-        expect(config.chromeWebSecurity).eq(false)
-        expect(config.browsers).deep.eq([
-          {
-            family: 'chromium',
-            name: 'Canary',
-          },
-          {
-            family: 'some-other-family',
-            name: 'some-other-name',
-            warning: `\
-Your project has set the configuration option: \`chromeWebSecurity: false\`
-
-This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
-`,
-          },
-        ])
-
-        expect(config).ok
       })
     })
 
