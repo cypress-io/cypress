@@ -1218,6 +1218,7 @@ jobs:
       - store-npm-logs
 
   run-launchpad-ct-tests:
+    <<: *defaults
     steps:
       - restore_cached_workspace
       - run:
