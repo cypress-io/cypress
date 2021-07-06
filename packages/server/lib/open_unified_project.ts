@@ -3,7 +3,7 @@ import { ProjectBase } from './project-base'
 import { getSpecUrl } from './project_utils'
 
 const factory = () => {
-  let __openProject: ProjectBase<any>
+  let __openProject: ProjectBase<any> | undefined
 
   const getProject = () => {
     if (!__openProject) {
@@ -103,6 +103,15 @@ const factory = () => {
   }
 
   const killActiveRunner = async () => {
+    await browsers.close()
+
+    const project = getProject()
+
+    // close server, web sockets, proxy, etc.
+    await project.server.close()
+
+    // clear
+    __openProject = undefined
   }
 
   return {

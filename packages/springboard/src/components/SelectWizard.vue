@@ -20,8 +20,8 @@
   <button @click="initProject">1. Initialize Project {{ progress.initProject }}</button>
   <button @click="initPlugins">2. Initialize Plugins {{ progress.initPlugins }}</button>
   <button @click="initServer">3. Initialize Server {{ progress.initServer }}</button>
-
   <button @click="initRunner">4. Launch Runner</button>
+  <button @click="killActiveRunner">(X) Kill runner</button>
 </template>
 
 <script lang="ts">
@@ -50,6 +50,13 @@ export default defineComponent({
     const initPlugins = () => {
       progress.initPlugins = 'LOADING...'
       ipcBus.send('on:initialize:plugins', {})
+    }
+
+    const killActiveRunner = () => {
+      ipcBus.send('on:kill:runner', {})
+      progress.initProject = ''
+      progress.initPlugins = ''
+      progress.initServer = ''
     }
 
     const initServer = () => {
@@ -98,6 +105,7 @@ export default defineComponent({
       initPlugins,
       initServer,
       initRunner,
+      killActiveRunner,
       progress,
       testingTypes: markRaw(testingTypes),
       selectTestingType,

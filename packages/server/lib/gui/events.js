@@ -290,6 +290,10 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return openUnifiedProject.initializeRunner()
       .then(send)
 
+    case 'on:kill:runner':
+      return openUnifiedProject.killActiveRunner()
+      .then(send)
+
     case 'open:project':
       debug('open:project')
 

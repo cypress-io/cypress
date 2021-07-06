@@ -49,7 +49,10 @@ export const CollapsibleGroup: React.FC<CollapsibleGroupProps> = ({
         expanded={isExpanded}
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => {
-          onToggle?.(!isExpanded)
+          // onToggle?.(!isExpanded)
+          if (onToggle) {
+            onToggle(!isExpanded)
+          }
 
           setIsExpanded((expanded) => !expanded)
         }}
