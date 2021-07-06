@@ -5,6 +5,7 @@ const errors = require('../errors')
 const log = require('../log')
 const { fs } = require('./fs')
 const requireAsync = require('./require_async').default
+const debug = require('debug')('cypress:server:settings')
 
 // TODO:
 // think about adding another PSemaphore
@@ -172,8 +173,10 @@ module.exports = {
     const file = this.pathToConfigFile(projectRoot, options)
 
     return requireAsync(file,
-      { projectRoot: options.projectRoot,
+      {
+        projectRoot,
         loadErrorCode: 'CONFIG_FILE_ERROR',
+        functionNames: ['e2e', 'component'],
       })
     .catch({ code: 'ENOENT' }, (e) => {
       if (/\.json$/.test(file)) {
@@ -182,25 +185,37 @@ module.exports = {
 
       return fs.writeFile(file, 'module.exports = {}').then(() => ({}))
     })
-    .then((json = {}) => {
+    .then(({ result: configObject, functionNames }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
 
-      if ((testingType in json)) {
-        if (typeof json[testingType] === 'object') {
-          json = { ...json, ...json[testingType] }
+      debug('resolved configObject', configObject)
+
+      if ((testingType in configObject)) {
+        if (typeof configObject[testingType] === 'object') {
+          configObject = { ...configObject, ...configObject[testingType] }
         }
       }
 
       if (!/\.json$/.test(file)) {
-        return json
+        // Tell the system we detected plugin functions
+        // for e2e or component that we cannot get this way.
+        // They will never be executed but will match the
+        // expected type instead of being not there.
+        functionNames.forEach((name) => {
+          configObject[name] = function () {
+            throw Error('This function whould always be executed within the plugins context')
+          }
+        })
+
+        return configObject
       }
 
-      const changed = this._applyRewriteRules(json)
+      const changed = this._applyRewriteRules(configObject)
 
       // if our object is unchanged
       // then just return it
-      if (_.isEqual(json, changed)) {
-        return json
+      if (_.isEqual(configObject, changed)) {
+        return configObject
       }
 
       // else write the new reduced obj
