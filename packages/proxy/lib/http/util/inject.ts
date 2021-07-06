@@ -1,5 +1,5 @@
 import { oneLine } from 'common-tags'
-import runner from '@packages/runner/lib/resolve-dist'
+import { getRunnerInjectionContents, getRunnerMultidomainInjectionContents } from '@packages/resolve-dist'
 
 export function partial (domain) {
   return oneLine`
@@ -10,7 +10,7 @@ export function partial (domain) {
 }
 
 export function full (domain) {
-  return runner.getInjectionContents().then((contents) => {
+  return getRunnerInjectionContents().then((contents) => {
     return oneLine`
       <script type='text/javascript'>
         document.domain = '${domain}';
@@ -22,7 +22,7 @@ export function full (domain) {
 }
 
 export function fullMultidomain (domain) {
-  return runner.getMultidomainInjectionContents().then((contents) => {
+  return getRunnerMultidomainInjectionContents().then((contents) => {
     return oneLine`
       <script type='text/javascript'>
         document.domain = '127.0.0.1';

@@ -89,6 +89,11 @@ commands:
           at: ~/
       - unpack-dependencies
 
+  restore_cached_binary:
+    steps:
+      - attach_workspace:
+          at: ~/
+
   prepare-modules-cache:
     parameters:
       dont-move:
@@ -462,7 +467,7 @@ commands:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
     steps:
-      - restore_cached_workspace
+      - restore_cached_binary
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
@@ -1449,8 +1454,8 @@ jobs:
             command: yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
-            name: Test Schematics
-            command: yarn test:schematics
+            name: Run unit tests
+            command: yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
