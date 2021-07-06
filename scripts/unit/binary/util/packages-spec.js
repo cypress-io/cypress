@@ -48,8 +48,9 @@ describe('packages', () => {
     .resolves(['./packages/coffee'])
 
     globbyStub
-    .withArgs(['lib', 'src/main.js'])
+    .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
+      'package.json',
       'lib/foo.js',
       'src/main.js',
     ])

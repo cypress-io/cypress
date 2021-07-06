@@ -15,18 +15,17 @@ exports['packages can copy files from package.json 1'] = {
   "tmp": {
     "packages": {
       "coffee": {
-        "lib": {
-          "foo.js": "{}"
-        },
+        "package.json": "{\"main\":\"src/main.js\", \"name\": \"foo\", \"files\": [\"lib\"]}",
         "src": {
           "main.js": "console.log()"
         },
-        "package.json": "{\n  \"main\": \"src/main.js\",\n  \"name\": \"foo\",\n  \"files\": [\n    \"lib\"\n  ]\n}\n"
+        "lib": {
+          "foo.js": "{}"
+        }
       }
     }
   }
 }
-
 
 exports['transformRequires can find and replace symlink requires 1'] = {
   "[cwd]": {
