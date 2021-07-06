@@ -19,6 +19,7 @@ const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const openProject = require('../open_project')
+const { openUnifiedProject } = require('../open_unified_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -63,7 +64,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   }
 
   const send = (data) => {
-    return sendResponse({ id, data })
+    return sendResponse({ id, data, type })
   }
 
   const sendNull = () => {
@@ -272,6 +273,22 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return send(arg)
       })
       .catch(sendErr)
+
+    case 'on:initialize:project':
+      return openUnifiedProject.create(arg)
+      .then(send)
+
+    case 'on:initialize:plugins':
+      return openUnifiedProject.initializePlugins()
+      .then(send)
+
+    case 'on:initialize:server':
+      return openUnifiedProject.initializeServer()
+      .then(send)
+
+    case 'on:initialize:runner':
+      return openUnifiedProject.initializeRunner()
+      .then(send)
 
     case 'open:project':
       debug('open:project')

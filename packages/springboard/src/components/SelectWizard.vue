@@ -16,14 +16,21 @@
       @click="selectTestingType(testingType)"
     />
   </div>
+
+  <button @click="initProject">1. Initialize Project {{ progress.initProject }}</button>
+  <button @click="initPlugins">2. Initialize Plugins {{ progress.initPlugins }}</button>
+  <button @click="initServer">3. Initialize Server {{ progress.initServer }}</button>
+
+  <button @click="initRunner">4. Launch Runner</button>
 </template>
 
 <script lang="ts">
-import { defineComponent, markRaw, computed } from "vue";
+import { defineComponent, markRaw, computed, reactive } from "vue";
 import { useStore } from "../store";
 import { TestingType, testingTypes } from "../types/shared";
 import RunnerButton from "./RunnerButton.vue";
 import NewUserWelcome from "./NewUserWelcome.vue";
+import { ipcBus } from '../ipc'
 
 export default defineComponent({
   components: {
@@ -34,6 +41,50 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
+    const progress = reactive({
+      initProject: '',
+      initPlugins: '',
+      initServer: '',
+    })
+
+    const initPlugins = () => {
+      progress.initPlugins = 'LOADING...'
+      ipcBus.send('on:initialize:plugins', {})
+    }
+
+    const initServer = () => {
+      progress.initServer = 'LOADING...'
+      ipcBus.send('on:initialize:server', {})
+    }
+
+    const initRunner = () => {
+      ipcBus.send('on:initialize:runner', {})
+    }
+
+    ipcBus.on('on:initialize:project', () => {
+      progress.initProject = 'OK'
+    })
+
+    ipcBus.on('on:initialize:plugins', () => {
+      progress.initPlugins = 'OK'
+    })
+
+    ipcBus.on('on:initialize:server', () => {
+      progress.initServer = 'OK'
+    })
+
+    const initProject = () => {
+      ipcBus.on('get:options', ({ data }, ...rest: any[]) => {
+        progress.initProject = 'LOADING...'
+        ipcBus.send('on:initialize:project', {
+          ...data,
+          testingType: store.getState().testingType 
+        })
+      })
+
+      ipcBus.send('get:options', {})
+    }
+
     const selectTestingType = (testingType: TestingType) => {
       store.setTestingType(testingType);
     };
@@ -43,6 +94,11 @@ export default defineComponent({
     };
 
     return {
+      initProject,
+      initPlugins,
+      initServer,
+      initRunner,
+      progress,
       testingTypes: markRaw(testingTypes),
       selectTestingType,
       showNewUserFlow: computed(

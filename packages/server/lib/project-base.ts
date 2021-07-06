@@ -32,6 +32,7 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
+import { Browser } from '../../launcher'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // or places in this file modify existing types, adding additional keys dynamically.
@@ -39,7 +40,7 @@ import { checkSupportFile } from './project_utils'
 // and used when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'browsers'>>
   & Partial<Pick<Cypress.ResolvedConfigOptions, 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'integrationFolder' | 'baseUrl'>>
 
 export interface Cfg extends ReceivedCypressOptions {
@@ -77,7 +78,6 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected watchers: Watchers
-  protected options: Options
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -88,6 +88,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
   projectRoot: string
+  options: Options
 
   constructor ({
     projectRoot,
@@ -195,7 +196,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     this._server = this.createServer(this.projectType)
 
-    cfg = await this.initializePlugins(cfg, this.options)
+    cfg = this.cfg // await this.initializePlugins(cfg, this.options)
 
     const {
       specsStore,
@@ -379,7 +380,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.initSpecStore({ specs, config: updatedConfig })
   }
 
-  async initializePlugins (cfg, options) {
+  async initializePlugins (cfg: Cfg, options: Options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
@@ -670,8 +671,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  async initializeConfig (): Promise<Cfg> {
+  async initializeConfig ({ browsers } : { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+    if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      theCfg.browsers = browsers
+    }
 
     theCfg.browsers = theCfg.browsers.map((browser) => {
       if (browser.family === 'chromium') {

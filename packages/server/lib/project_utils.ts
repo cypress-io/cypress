@@ -74,8 +74,8 @@ export const getSpecUrl = ({
 }: {
   absoluteSpecPath?: string
   browserUrl: string
-  integrationFolder: string
-  componentFolder: string
+  integrationFolder?: string
+  componentFolder?: string
   projectRoot: string
   specType: 'integration' | 'component'
 }) => {

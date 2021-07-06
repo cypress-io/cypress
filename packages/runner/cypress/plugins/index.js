@@ -5,9 +5,12 @@ const { getSnapshot, saveSnapshot } = require('./snapshot/snapshotPlugin')
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = (on) => {
+module.exports = (on, config) => {
   on('task', {
     getSnapshot,
     saveSnapshot,
   })
+
+  config.downloadsFolder = "cypress/my_downloads"
+  return config
 }
