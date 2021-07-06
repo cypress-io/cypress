@@ -378,6 +378,9 @@ declare module 'cypress' {
      */
     cli: CypressCommandLine.CypressCliParser
 
+    /**
+     * Type helper to make writing `cypress.config.ts` easier
+     */
     defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
   }
 

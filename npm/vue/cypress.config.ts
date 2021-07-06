@@ -29,4 +29,4 @@ export default defineConfig({
 
     return config
   },
-} as Cypress.ConfigOptions)
+})
