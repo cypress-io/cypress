@@ -4,9 +4,7 @@ const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
 const { fs } = require('./fs')
-const tsNodeUtil = require('./ts_node')
-
-let tsRegistered = false
+const requireAsync = require('./require_async').default
 
 // TODO:
 // think about adding another PSemaphore
@@ -171,24 +169,12 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    const requireAsync = (fileRequired) => {
-      return Promise.try(() => {
-        const exp = require(fileRequired)
-
-        return exp.default || exp
-      })
-    }
-
     const file = this.pathToConfigFile(projectRoot, options)
 
-    if (!tsRegistered) {
-      tsNodeUtil.register(projectRoot, file)
-
-      // ensure typescript is only registered once
-      tsRegistered = true
-    }
-
-    return requireAsync(file)
+    return requireAsync(file,
+      { projectRoot: options.projectRoot,
+        loadErrorCode: 'CONFIG_FILE_ERROR',
+      })
     .catch({ code: 'ENOENT' }, (e) => {
       if (/\.json$/.test(file)) {
         return this._write(file, {})

@@ -559,6 +559,17 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
 
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
+    case 'CONFIG_FILE_ERROR':
+      msg = stripIndent`\
+            The config file loading errored.
+    
+            You might have renamed the extension of your config file. If that's the case, restart the test runner.`.trim()
+
+      if (arg2) {
+        return { msg, details: arg2 }
+      }
+
+      return msg
     case 'PLUGINS_FILE_ERROR':
       msg = stripIndent`\
         The plugins file is missing or invalid.
