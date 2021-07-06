@@ -1655,15 +1655,9 @@ module.exports = {
   },
 
   async run (options) {
-    let app = null
+    if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+      const app = require('electron').app
 
-    try {
-      app = require('electron').app
-    } catch {
-      debug('running as a node process, not an electron process')
-    }
-
-    if (app) {
       // electron >= 5.0.0 will exit the app if all browserwindows are closed,
       // this is obviously undesirable in run mode
       // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695

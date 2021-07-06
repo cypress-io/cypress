@@ -1,6 +1,6 @@
 const debug = require('debug')('cypress:server:ipc')
 
-try {
+if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
   const {
     contextBridge,
     ipcRenderer,
@@ -10,6 +10,4 @@ try {
     on: (...args) => ipcRenderer.on(...args),
     send: (...args) => ipcRenderer.send(...args),
   })
-} catch {
-  debug('running as a node process, not an electron process')
 }
