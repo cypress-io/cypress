@@ -2679,16 +2679,45 @@ declare namespace Cypress {
     includeShadowDom: boolean
 
     /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: false | string
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
+     * Path to the support folder.
+     */
+    supportFolder: string
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    testFiles: string | string[]
+    /**
+     * The user agent the browser sends in all request headers.
+     */
+    userAgent: null | string
+    /**
+     * Polyfills `window.fetch` to enable Network spying and stubbing
+     */
+    experimentalFetchPolyfill: boolean
+
+    /**
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: ResolvedConfigOptions | TestingTypeFunctions
+    component: ConfigOptions | TestingTypeFunctions
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: ResolvedConfigOptions | TestingTypeFunctions
+    e2e: ConfigOptions | TestingTypeFunctions
   }
 
   type TestingTypeFunctions = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
@@ -2704,10 +2733,6 @@ declare namespace Cypress {
      */
     arch: string
     /**
-     * The list of hosts to be blocked
-     */
-    blockHosts: null | string | string[]
-    /**
      * The browser Cypress is running on.
      */
     browser: Browser
@@ -2715,10 +2740,6 @@ declare namespace Cypress {
      * Available browsers found on your system.
      */
     browsers: Browser[]
-    /**
-     * Path to folder containing component test files.
-     */
-    componentFolder: string
     /**
      * Hosts mappings to IP addresses.
      */
@@ -2738,22 +2759,6 @@ declare namespace Cypress {
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
-    /**
-     * A unique ID for the project used for recording
-     */
-    projectId: null | string
-    /**
-     * Path to the support folder.
-     */
-    supportFolder: string
-    /**
-     * Glob pattern to determine what test files to load.
-     */
-    testFiles: string
-    /**
-     * The user agent the browser sends in all request headers.
-     */
-    userAgent: null | string
     /**
      * The Cypress version being used.
      */
