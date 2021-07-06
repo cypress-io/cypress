@@ -61,7 +61,6 @@
     "webpack-cli": "3.3.2"
   },
   "files": [
-    "dist",
-    "lib"
+    "dist"
   ]
 }

@@ -3,11 +3,11 @@ import { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
 import { NetworkProxy } from '@packages/proxy'
-import { handle, serve, serveChunk } from '@packages/runner-ct'
+import { handle, serve, serveChunk } from './runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
-import staticPkg from '@packages/static'
 import { ProjectBase } from '../../server/lib/project-base'
+import { getPathToDist } from '@packages/resolve-dist'
 
 const debug = Debug('cypress:server:routes')
 
@@ -33,7 +33,7 @@ export const createRoutes = ({
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
-    const pathToFile = staticPkg.getPathToDist(req.params[0])
+    const pathToFile = getPathToDist('static', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
