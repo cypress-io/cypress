@@ -112,7 +112,16 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
       backendStaticResponse.body = staticResponse.body
     } else {
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
-      _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+
+      // There are various json-related MIME types. We cannot simply set it as `application/json`.
+      // @see https://www.iana.org/assignments/media-types/media-types.xhtml
+      if (
+        !(backendStaticResponse.headers &&
+        backendStaticResponse.headers['content-type'] &&
+        backendStaticResponse.headers['content-type'].includes('json'))
+      ) {
+        _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+      }
     }
   }
 
