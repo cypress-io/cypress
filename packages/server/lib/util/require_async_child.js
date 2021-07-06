@@ -49,18 +49,33 @@ function run (ipc, requiredFile, projectRoot) {
     return false
   })
 
-  try {
-    const exp = require(requiredFile)
+  ipc.on('load', (functionNames) => {
+    try {
+      const exp = require(requiredFile)
 
-    const result = exp.default || exp
+      const result = exp.default || exp
 
-    ipc.send('loaded', result)
+      const functionsNamesOut = []
 
-    debug('config %o', result)
-  } catch (err) {
-    debug('failed to load requiredFile:\n%s', err.stack)
-    ipc.send('load:error', loadErrorCode, requiredFile, err.stack)
+      // Since functions cannot be transmitted through ipc
+      // register if they are indeed function to inform parent process
+      // that something is missing from the transmitted object
+      functionNames.forEach((name) => {
+        debug('check if %s is a function (%s)', name, typeof result[name])
+        if (typeof result[name] === 'function') {
+          debug('%s is a function', name)
+          functionsNamesOut.push(name)
+        }
+      })
 
-    return
-  }
+      ipc.send('loaded', { result, functionNames: functionsNamesOut })
+
+      debug('config %o', result)
+    } catch (err) {
+      debug('failed to load requiredFile:\n%s', err.stack)
+      ipc.send('load:error', loadErrorCode, requiredFile, err.stack)
+
+      return
+    }
+  })
 }

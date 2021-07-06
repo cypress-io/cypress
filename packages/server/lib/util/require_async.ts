@@ -13,6 +13,10 @@ let configProcess: cp.ChildProcess
 interface RequireAsyncOptions{
     projectRoot: string
     loadErrorCode: string
+    /**
+     * members of the object returned that are functions and will need to be wrapped
+     */
+    functionNames: string[]
 }
 
 interface ChildOptions{
@@ -43,9 +47,11 @@ export default async function requireAsync (filePath: string, options: RequireAs
   const ipc = util.wrapIpc(configProcess)
 
   return new Promise((resolve, reject) => {
-    ipc.on('loaded', (newCfg) => {
-      debug('resolving with config %o', newCfg)
-      resolve(newCfg)
+    ipc.send('load', options.functionNames)
+    ipc.on('loaded', ({ result, functionNames }) => {
+      debug('resolving with result %o', result)
+      debug('resolving with functions %o', functionNames)
+      resolve({ result, functionNames })
     })
 
     ipc.on('load:error', (type, ...args) => {
