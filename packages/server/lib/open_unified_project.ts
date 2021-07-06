@@ -9,11 +9,13 @@ const factory = () => {
     if (!__openProject) {
       throw Error('Must call #create before accessing the current project!')
     }
+
     return __openProject
   }
 
   const getBrowsers = async () => {
     const all = await browsers.getAllBrowsersWith()
+
     return all
   }
 
@@ -22,7 +24,7 @@ const factory = () => {
     // temp hack to test opening different runners
     // if CT, open use packages/runner-ct as project root
     // if E2E, open use packages/runner as project root
-    const projectRoot = testingType === 'ct' 
+    const projectRoot = testingType === 'ct'
       ? args.projectRoot.replace('springboard', 'runner-ct')
       : args.projectRoot.replace('springboard', 'runner')
 
@@ -35,6 +37,7 @@ const factory = () => {
     })
 
     const browsers = await getBrowsers()
+
     await project.initializeConfig({ browsers })
 
     __openProject = project
@@ -44,13 +47,15 @@ const factory = () => {
     const project = getProject()
     const updatedConfig = await project.initializePlugins(
       await project.getConfig(),
-      project.options
+      project.options,
     )
+
     project.__setConfig(updatedConfig)
   }
 
   const initializeServer = async () => {
     const project = getProject()
+
     await project.open()
   }
 
@@ -78,11 +83,10 @@ const factory = () => {
     })
 
     // hard-code chrome for testing
-    const chrome = project.cfg.browsers!.find(x => x.name === 'chrome')!
-    console.log('chrome!', chrome)
+    const chrome = project.cfg.browsers!.find((x) => x.name === 'chrome')!
 
     // set spec/browser
-    project.setCurrentSpecAndBrowser(spec, chrome)    
+    project.setCurrentSpecAndBrowser(spec, chrome)
 
     const config = await project.getConfig()
     // required options for launching
@@ -107,7 +111,11 @@ const factory = () => {
 
     const project = getProject()
 
+    // reset? TODO: is this necessary?
+    project.reset()
+
     // close server, web sockets, proxy, etc.
+    await project.close()
     await project.server.close()
 
     // clear
@@ -120,7 +128,7 @@ const factory = () => {
     initializeServer,
     initializeRunner,
     killActiveRunner,
-    getProject
+    getProject,
   }
 }
 

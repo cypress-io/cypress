@@ -32,7 +32,6 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import { Browser } from '../../launcher'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // or places in this file modify existing types, adding additional keys dynamically.
@@ -334,12 +333,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    const closePreprocessor = (this.projectType === 'e2e' && preprocessor.close) ?? undefined
+    const closePreprocessor = this.projectType === 'e2e' && preprocessor && preprocessor.close
+      ? preprocessor.close
+      : () => {}
 
     await Promise.all([
       this.server?.close(),
       this.watchers?.close(),
-      closePreprocessor?.(),
+      closePreprocessor(),
     ])
 
     process.chdir(localCwd)
@@ -671,8 +672,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  async initializeConfig ({ browsers } : { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
+  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       theCfg.browsers = browsers
     }
