@@ -13,13 +13,13 @@
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
-    "debug": "4.3.2",
-    "execa": "4.0.0",
-    "fs-extra": "8.1.0",
-    "lodash": "4.17.21",
-    "plist": "3.0.1",
-    "ramda": "0.27.1"
+    "bluebird": "^3.5.3",
+    "debug": "^4.3.2",
+    "execa": "^4.0.0",
+    "fs-extra": "^8.1.0",
+    "lodash": "^4.17.21",
+    "plist": "^3.0.1",
+    "ramda": "^0.27.1"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
