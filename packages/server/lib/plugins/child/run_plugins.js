@@ -149,7 +149,7 @@ function getPluginsFunction (pluginsFile, functionName) {
 
 const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
   debug('pluginsFile:', pluginsFile)
-  debug('functionName:', pluginsFile)
+  debug('functionName:', functionName)
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
