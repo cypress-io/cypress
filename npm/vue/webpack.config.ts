@@ -5,7 +5,7 @@ import { VueLoaderPlugin } from 'vue-loader'
 import * as path from 'path'
 import { Configuration } from 'webpack'
 
-const pkg = require('package.json')
+const pkg = require('./package.json')
 
 export default {
   mode: 'development',
