@@ -613,16 +613,22 @@ export class StudioRecorder {
     this._generateBothLogs(reporterLog).forEach((commandLog) => {
       eventManager.emit('reporter:log:add', commandLog)
     })
+
+    this._closeAssertionsMenu()
   }
 
   _generateAssertionMessage = ($el, args) => {
     const elementString = $driverUtils.stringifyActual($el)
-    const assertionString = args[0].replace('.', ' ')
+    const assertionString = args[0].replace(/\./g, ' ')
 
-    const message = `expect **${elementString}** to ${assertionString} **${args[1]}**`
+    let message = `expect **${elementString}** to ${assertionString}`
+
+    if (args[1]) {
+      message = `${message} **${args[1]}**`
+    }
 
     if (args[2]) {
-      return `${message} with the value **${args[2]}**`
+      message = `${message} with the value **${args[2]}**`
     }
 
     return message
@@ -654,21 +660,29 @@ export class StudioRecorder {
     const possibleAssertions = []
 
     if (!tagNamesWithoutText.includes(tagName)) {
-      possibleAssertions.push({
-        type: 'have.text',
-        options: [{
-          value: $el.text(),
-        }],
-      })
+      const text = $el.text()
+
+      if (text) {
+        possibleAssertions.push({
+          type: 'have.text',
+          options: [{
+            value: text,
+          }],
+        })
+      }
     }
 
     if (tagNamesWithValue.includes(tagName)) {
-      possibleAssertions.push({
-        type: 'have.value',
-        options: [{
-          value: $el.val(),
-        }],
-      })
+      const val = $el.val()
+
+      if (val !== undefined && val !== '') {
+        possibleAssertions.push({
+          type: 'have.value',
+          options: [{
+            value: val,
+          }],
+        })
+      }
     }
 
     const attributes = $.map($el[0].attributes, ({ name, value }) => {
@@ -681,16 +695,51 @@ export class StudioRecorder {
         return
       }
 
-      return {
-        name,
-        value,
+      if (name === 'id') {
+        possibleAssertions.push({
+          type: 'have.id',
+          options: [{
+            value,
+          }],
+        })
+
+        return
+      }
+
+      if (value !== undefined && value !== '') {
+        return {
+          name,
+          value,
+        }
       }
     })
 
+    if (attributes.length > 0) {
+      possibleAssertions.push({
+        type: 'have.attr',
+        options: attributes,
+      })
+    }
+
     possibleAssertions.push({
-      type: 'have.attr',
-      options: attributes,
+      type: 'be.visible',
     })
+
+    const isDisabled = $el.prop('disabled')
+
+    if (isDisabled !== undefined) {
+      possibleAssertions.push({
+        type: isDisabled ? 'be.disabled' : 'be.enabled',
+      })
+    }
+
+    const isChecked = $el.prop('checked')
+
+    if (isChecked !== undefined) {
+      possibleAssertions.push({
+        type: isChecked ? 'be.checked' : 'not.be.checked',
+      })
+    }
 
     return possibleAssertions
   }
