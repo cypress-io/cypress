@@ -1,5 +1,4 @@
 import { mount } from '@cypress/vue'
-import { VClickOutside } from '../../src/plugins/ClickOutside'
 import { createStoreApp, StoreApp } from '../../src/store/app'
 import { createStoreConfig, StoreConfig } from '../../src/store/config'
 
@@ -14,9 +13,6 @@ Cypress.Commands.add(
 
     options = options || {}
     options.global = options.global || {}
-
-    options.global.directives = options.global.directives || {}
-    options.global.directives['click-outside'] = VClickOutside
 
     options.global.plugins = options.global.plugins || []
     options.global.plugins.push(storeApp)
