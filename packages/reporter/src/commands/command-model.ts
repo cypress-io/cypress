@@ -25,6 +25,7 @@ export interface CommandProps extends InstrumentProps {
   isStudio?: boolean
   group?: string
   hasSnapshot?: boolean
+  hasConsoleProps?: boolean
 
 }
 
@@ -45,6 +46,7 @@ export default class Command extends Instrument {
   @observable showError?: boolean = false
   @observable group?: string
   @observable hasSnapshot?: boolean
+  @observable hasConsoleProps?: boolean
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -78,6 +80,7 @@ export default class Command extends Instrument {
     this.showError = props.showError
     this.group = props.group
     this.hasSnapshot = props.hasSnapshot
+    this.hasConsoleProps = props.hasConsoleProps
 
     this._checkLongRunning()
   }
@@ -92,6 +95,7 @@ export default class Command extends Instrument {
     this.visible = props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
+    this.hasConsoleProps = props.hasConsoleProps
     this.showError = props.showError
     this.group = props.group
 

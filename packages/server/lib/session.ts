@@ -2,7 +2,7 @@ import { CyCookie } from './browsers/cdp_automation'
 
 interface SessionData {
   cookies: CyCookie[]
-  name: string
+  id: string
   localStorage: object
   sessionStorage: object
 }
@@ -11,15 +11,15 @@ const state = {
 }
 
 export function saveSession (data: SessionData) {
-  if (!data.name) throw new Error('session data had no name')
+  if (!data.id) throw new Error('session data had no id')
 
-  state.sessions[data.name] = data
+  state.sessions[data.id] = data
 }
 
-export function getSession (name: string): SessionData {
-  const session = state.sessions[name]
+export function getSession (id: string): SessionData {
+  const session = state.sessions[id]
 
-  if (!session) throw new Error(`session with name "${name}" not found`)
+  if (!session) throw new Error(`session with id "${id}" not found`)
 
   return session
 }

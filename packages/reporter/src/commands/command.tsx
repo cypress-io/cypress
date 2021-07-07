@@ -185,6 +185,7 @@ class Command extends Component<Props> {
             'command-scaled': message && message.length > 100,
             'no-elements': !model.numElements,
             'command-has-snapshot': model.hasSnapshot,
+            'command-has-console-props': model.hasConsoleProps,
             'multiple-elements': model.numElements > 1,
             'command-has-children': model.hasChildren,
             'command-is-child': model.isChild,
@@ -230,9 +231,21 @@ class Command extends Component<Props> {
                 <span className='alias-container'>
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
                   <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
-                    <span className={cs('num-duplicates', { 'has-alias': model.alias, 'has-duplicates': model.numChildren > 1 })}>{model.numChildren}</span>
+                    <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
                   </Tooltip>
                 </span>
+                {model.hasConsoleProps && model.numChildren > 1 &&
+                  <FlashOnClick
+                    message='Printed output to your console'
+                    onClick={this._onPrintToConsole}
+                    shouldShowMessage={() => true}
+                  >
+                    <div className='command-parent-print-btn'>
+                 print to console
+                    </div>
+                  </FlashOnClick>
+
+                }
               </span>
             </div>
             <Progress model={model} />
@@ -289,7 +302,11 @@ class Command extends Component<Props> {
   }
 
   _shouldShowClickMessage = () => {
-    return !this.props.appState.isRunning && this._isPinned()
+    if (this.props.model.hasChildren) {
+      return false
+    }
+
+    return !this.props.appState.isRunning && !!this.props.model.hasConsoleProps
   }
 
   @action _toggleOpen = (e: MouseEvent) => {
@@ -305,6 +322,22 @@ class Command extends Component<Props> {
       return
     }
 
+    if (this.props.appState.isRunning || this.props.appState.studioActive) return
+
+    const { id } = this.props.model
+
+    if (this._isPinned()) {
+      this.props.appState.pinnedSnapshotId = null
+      this.props.events.emit('unpin:snapshot', id)
+      this._snapshot(true)
+    } else {
+      this.props.appState.pinnedSnapshotId = id as number
+      this.props.events.emit('pin:snapshot', id)
+      this.props.events.emit('show:command', this.props.model.id)
+    }
+  }
+  @action _onPrintToConsole = (e) => {
+    e.stopPropagation()
     if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model

@@ -7,7 +7,7 @@ import stringifyStable from 'json-stable-stringify'
 const currentTestRegisteredSessions = new Map()
 const getSessionDetails = (sessState) => {
   return {
-    name: sessState.name,
+    id: sessState.id,
     data: _.merge(
       _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v.length })),
       ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: Object.keys(v.value).length } })),
@@ -22,7 +22,7 @@ const getSessionDetailsForTable = (sessState) => {
 
 const getConsoleProps = (sessState) => {
   const ret = {
-    name: sessState.name,
+    id: sessState.id,
     table: _.compact(_.flatMap(getSessionDetailsForTable(sessState), (val, domain) => {
       return [() => {
         return {
@@ -57,10 +57,10 @@ export default function (Commands, Cypress, cy) {
 
     cy.state('activeSessions', newSessions)
   }
-  const getActiveSession = (name) => {
+  const getActiveSession = (id) => {
     const currentSessions = cy.state('activeSessions') || {}
 
-    return currentSessions[name]
+    return currentSessions[id]
   }
   const clearActiveSessions = () => {
     const curSessions = cy.state('activeSessions') || {}
@@ -194,15 +194,15 @@ export default function (Commands, Cypress, cy) {
 
     defineSession (options = {} as any) {
       const sess_state = {
-        name: options.name,
+        id: options.id,
         cookies: null,
         localStorage: null,
-        setupFn: options.setupFn,
+        setup: options.setup,
         hydrated: false,
         validate: options.validate,
       }
 
-      setActiveSession({ [sess_state.name]: sess_state })
+      setActiveSession({ [sess_state.id]: sess_state })
 
       return sess_state
     },
@@ -274,8 +274,8 @@ export default function (Commands, Cypress, cy) {
       return ses
     },
 
-    getSession (name) {
-      return Cypress.backend('get:session', name)
+    getSession (id) {
+      return Cypress.backend('get:session', id)
     },
 
     /**
@@ -461,17 +461,17 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (name, setupFn?: Function, options: {
+    session (id, setup?: Function, options: {
       validate?: Function
     } = {}) {
       throwIfNoSessionSupport()
 
-      if (!name || !_.isString(name) && !_.isObject(name)) {
+      if (!id || !_.isString(id) && !_.isObject(id)) {
         throw new Error('cy.session requires a string or object as the first argument')
       }
 
       // stringfy determinitically if we were given an object
-      name = typeof name === 'string' ? name : stringifyStable(name)
+      id = typeof id === 'string' ? id : stringifyStable(id)
 
       if (options) {
         if (!_.isObject(options)) {
@@ -497,38 +497,38 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let existingSession = getActiveSession(name)
+      let existingSession = getActiveSession(id)
 
-      if (!setupFn) {
-        if (!existingSession || !currentTestRegisteredSessions.has(name)) {
-          $errUtils.throwErrByPath('sessions.session.not_found', { args: { name } })
+      if (!setup) {
+        if (!existingSession || !currentTestRegisteredSessions.has(id)) {
+          $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
         }
       } else {
-        const isUniqSessionDefinition = !existingSession || existingSession.setupFn.toString().trim() !== setupFn.toString().trim()
+        const isUniqSessionDefinition = !existingSession || existingSession.setup.toString().trim() !== setup.toString().trim()
 
         if (isUniqSessionDefinition) {
-          if (currentTestRegisteredSessions.has(name)) {
-            throw $errUtils.errByPath('sessions.session.duplicateName', { name: existingSession.name })
+          if (currentTestRegisteredSessions.has(id)) {
+            throw $errUtils.errByPath('sessions.session.duplicateId', { id: existingSession.id })
           }
 
           existingSession = sessions.defineSession({
-            name,
-            setupFn,
+            id,
+            setup,
             validate: options.validate,
           })
 
-          currentTestRegisteredSessions.set(name, true)
+          currentTestRegisteredSessions.set(id, true)
         }
       }
 
       const _log = Cypress.log({
         name: 'session',
         sessionInfo: getSessionDetails(existingSession),
-        message: `${existingSession.name > 50 ? `${existingSession.name.substr(0, 47)}...` : existingSession.name}`,
+        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
       })
 
-      async function runSetupFn (existingSession) {
+      async function runsetup (existingSession) {
         Cypress.log({
           name: 'Creating New Session',
           state: 'passed',
@@ -542,7 +542,7 @@ export default function (Commands, Cypress, cy) {
             renderProps: () => {
               return {
                 indicator: 'successful',
-                message: ``,
+                message: `(new) ${_log.get().message}`,
               }
             },
           })
@@ -551,14 +551,14 @@ export default function (Commands, Cypress, cy) {
         await navigateAboutBlank()
 
         cy.then(() => sessions.clearCurrentSessionData())
-        .then(() => existingSession.setupFn())
+        .then(() => existingSession.setup())
 
         return cy.then(() => sessions.getCurrentSessionData())
         .then((data) => {
           _.extend(existingSession, data)
           existingSession.hydrated = true
 
-          setActiveSession({ [existingSession.name]: existingSession })
+          setActiveSession({ [existingSession.id]: existingSession })
 
           _log.set({
             consoleProps: () => getConsoleProps(existingSession),
@@ -568,7 +568,7 @@ export default function (Commands, Cypress, cy) {
           // eslint-disable-next-line no-console
 
           // eslint-disable-next-line no-console
-          return Cypress.backend('save:session', { ...existingSession, setupFn: existingSession.setupFn.toString() }).catch(console.error)
+          return Cypress.backend('save:session', { ...existingSession, setup: existingSession.setup.toString() }).catch(console.error)
         })
       }
 
@@ -671,14 +671,14 @@ export default function (Commands, Cypress, cy) {
           renderProps: () => {
             return {
               indicator: 'bad',
-              message: '',
+              message: `(invalidated) ${_log.get().message}`,
             }
           },
         })
 
         hadValidationError = true
 
-        return runSetupFn(existingSession)
+        return runsetup(existingSession)
         .then(() => {
           cy.then(() => {
             return validateSession(existingSession, throwValidationError)
@@ -701,10 +701,10 @@ export default function (Commands, Cypress, cy) {
       return cy.then(async () => {
         if (existingSession.hydrated) return
 
-        const serverStoredSession = await sessions.getSession(existingSession.name).catch(_.noop)
+        const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
 
-        // we have a saved session on the server AND setupFn matches
-        if (serverStoredSession && serverStoredSession.setupFn === existingSession.setupFn.toString()) {
+        // we have a saved session on the server AND setup matches
+        if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
           _.extend(existingSession, serverStoredSession)
           existingSession.hydrated = true
         }
@@ -712,7 +712,7 @@ export default function (Commands, Cypress, cy) {
         if (!existingSession.hydrated) {
           onValidationError = throwValidationError
 
-          return runSetupFn(existingSession)
+          return runsetup(existingSession)
         }
 
         Cypress.log({
@@ -727,7 +727,7 @@ export default function (Commands, Cypress, cy) {
           renderProps: () => {
             return {
               indicator: 'pending',
-              message: '',
+              message: `(cached) ${_log.get().message}`,
             }
           },
         })

@@ -158,6 +158,7 @@ describe('args', () => {
   it('uses sorted stringify and rejects duplicate registrations', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).contain('previously used name')
+      expect(err.message).contain('{"key":"val"')
       done()
     })
 
@@ -238,7 +239,7 @@ describe('navigates to about:blank between tests and shows warning about session
   })
 
   it('t2', () => {
-    cy.contains('Because you have experimentalSessionSupport')
+    cy.contains('Because experimentalSessionSupport')
     cy.contains('default blank page')
   })
 })
@@ -364,8 +365,8 @@ describe('multiple sessions in test - can switch without redefining', () => {
 })
 
 function SuiteWithValidateFn (id, fn) {
-  const setupFn = Cypress.sinon.stub().callsFake(() => {
-    cy.log('setupFn')
+  const setup = Cypress.sinon.stub().callsFake(() => {
+    cy.log('setup')
   })
   const validate = Cypress.sinon.stub().callsFake(() => {
     Cypress.log({
@@ -380,7 +381,7 @@ function SuiteWithValidateFn (id, fn) {
   })
 
   beforeEach(() => {
-    cy.session(id, setupFn, {
+    cy.session(id, setup, {
       validate,
     })
   })
@@ -388,13 +389,13 @@ function SuiteWithValidateFn (id, fn) {
   it('t1', () => {
     cy.url().should('eq', 'about:blank')
 
-    expect(setupFn).calledOnce
+    expect(setup).calledOnce
     expect(validate).calledOnce
   })
 
   it('t2', () => {
     cy.url().should('eq', 'about:blank')
-    expect(setupFn).calledTwice
+    expect(setup).calledTwice
     expect(validate).calledThrice
   })
 }
@@ -469,7 +470,7 @@ describe('options.validate failing test', () => {
     })
 
     cy.session('user_validate_fails_after_setup_1', () => {
-      cy.log('setupFn')
+      cy.log('setup')
     }, {
       validate () {
         cy.wrap('foo', { timeout: 30 }).should('eq', 'bar')
@@ -487,7 +488,7 @@ describe('options.validate failing test', () => {
     })
 
     cy.session('user_validate_fails_after_setup_2', () => {
-      cy.log('setupFn')
+      cy.log('setup')
     }, {
       validate () {
         throw new Error('validate error')
@@ -504,7 +505,7 @@ describe('options.validate failing test', () => {
     })
 
     cy.session('user_validate_fails_after_setup_3', () => {
-      cy.log('setupFn')
+      cy.log('setup')
     }, {
       validate () {
         return Promise.reject(new Error('validate error'))
@@ -521,7 +522,7 @@ describe('options.validate failing test', () => {
     })
 
     cy.session('user_validate_fails_after_setup_4', () => {
-      cy.log('setupFn')
+      cy.log('setup')
     }, {
       validate () {
         return false
@@ -538,7 +539,7 @@ describe('options.validate failing test', () => {
     })
 
     cy.session('user_validate_fails_after_setup_5', () => {
-      cy.log('setupFn')
+      cy.log('setup')
     }, {
       validate () {
         return Promise.resolve(false)
@@ -559,7 +560,7 @@ describe('options.validate failing test', () => {
     })
 
     cy.session('user_validate_fails_after_setup', () => {
-      cy.log('setupFn')
+      cy.log('setup')
     }, {
       validate () {
         return cy.wrap(false)
@@ -639,7 +640,7 @@ describe('consoleProps', () => {
 
     expect(renderedConsoleProps).deep.eq({
       Command: 'session',
-      name: 'session_consoleProps',
+      id: 'session_consoleProps',
       table: [
         {
           'name': '🍪 Cookies - localhost (1)',

@@ -202,12 +202,16 @@ export const sessionLifecycle = () => {
         display: inline-block;
         text-align: left;
       }
+
+      .em {
+        font-style: italic;
+      }
     </style>
 
     <div class='container'>
       ${svg_cy}
       <br/>
-      <p class="warn">Because you have <code><b>experimentalSessionSupport</b></code> enabled, Cypress navigates your app to the default blank page before each test.</p>
+      <p class="warn">Because <code><b>experimentalSessionSupport</b></code> is enabled, Cypress navigates to the default blank page <span class="em">before each test</span> to ensure test reliability.</p>
       <p>This is the default blank page.</p>
       <p>To test your web application:</p>
       <ul>

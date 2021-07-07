@@ -555,11 +555,6 @@ declare namespace Cypress {
     value: object
   }
 
-  interface SessionData {
-    cookies: Cookie[]
-    localStorage: LocalStorageData[]
-  }
-
   type sessionExcludeFilterCookies = {
     domain?: string|RegExp
     name?: string| RegExp
@@ -571,10 +566,6 @@ declare namespace Cypress {
 
   interface SessionOptions {
     validate?: () => false|void
-    exclude?: {
-      cookies?: sessionExcludeFilterCookies[] | sessionExcludeFilterCookies
-      localStorage?: sessionExcludeFilterLocalStorage[] | sessionExcludeFilterLocalStorage
-    }
   }
  
 
@@ -980,7 +971,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/session
      */
-    session(name: string, setupFn?: Function, options?: SessionOptions): Chainable<SessionData>
+    session(id: string, setup?: Function, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.

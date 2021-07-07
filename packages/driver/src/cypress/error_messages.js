@@ -1446,19 +1446,19 @@ module.exports = {
         message: `${cmd('session')} requires a {{name}}.`,
         docsUrl: 'https://on.cypress.io/session',
       },
-      duplicateName: {
+      duplicateId: {
         message: stripIndent`
-        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{name}}**.
+        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
         message: stripIndent`
         No session is defined with the name
-          **{{name}}**
-        In order to use ${cmd('session')}, provide a \`setupFn\` as the second argument:
+          **{{id}}**
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
 
-        \`cy.session(name, setupFn)\`
+        \`cy.session(id, setup)\`
         `,
         docsUrl: 'https://on.cypress.io/session',
       },

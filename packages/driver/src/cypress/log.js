@@ -75,6 +75,7 @@ const getDisplayProps = (attrs) => {
   return {
     ..._.pick(attrs, DISPLAY_PROPS),
     hasSnapshot: !!attrs.snapshots,
+    hasConsoleProps: !!attrs.consoleProps,
   }
 }
 

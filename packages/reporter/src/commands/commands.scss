@@ -154,7 +154,7 @@
         padding: 3px 5px 3px 5px;
       }
 
-      .num-duplicates.has-alias.has-duplicates {
+      .num-children.has-alias.has-children {
         border-radius: 0 10px 10px 0;
         padding: 4px 5px 2px 3px;
       }
@@ -518,13 +518,43 @@
 
   .command-has-num-elements.no-elements .num-elements,
   .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-children .num-children {
+  .command-has-children .num-children.has-alias {
     display: inline;
   }
 
   .command-has-children > span > .command-wrapper:hover {
     .command-expander {
       color: #999;
+    }
+  }
+
+  .command-has-children.command-has-console-props > span > .command-wrapper:hover {
+    .command-parent-print-btn {
+      opacity: 1;
+      pointer-events: unset;
+      
+      &:hover {
+        box-shadow: 0 0 3px #33333370;
+        background-color: #333333;
+
+      }
+    }
+  }
+
+ 
+
+  .command-has-children.command-has-console-props > span > .command-wrapper {
+    position: relative;
+    .command-parent-print-btn {
+      opacity: 0;
+      position: absolute;
+      top:0;
+      right:0;
+      pointer-events: none;
+      transition: all 50ms;
+      background-color: #333333a0;
+      padding: 2px 4px;
+      color: white
     }
   }
 
@@ -575,9 +605,7 @@
       }
     }
 
-    .num-children {
-      display: none;
-    }
+  
 
     .command-alias {
       border-radius: 10px !important;
@@ -585,6 +613,9 @@
   }
 
   .command-has-snapshot > span > .command-wrapper {
+    cursor: pointer;
+  }
+  .command-has-console-props > span > .command-wrapper {
     cursor: pointer;
   }
 
