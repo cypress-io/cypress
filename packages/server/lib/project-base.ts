@@ -38,10 +38,11 @@ import { checkSupportFile } from './project_utils'
 // and are required when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'clientRoute' | 'devServerPublicPathRoute' | 'supportFolder' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'projectRoot' | 'proxyUrl' | 'browsers'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'supportFolder' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
   & Partial<Pick<Cypress.ResolvedConfigOptions, 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
 
 export interface Cfg extends ReceivedCypressOptions {
+  projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   state?: {
     firstOpened?: number

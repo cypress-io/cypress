@@ -27,7 +27,7 @@ import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import { RunnerType, SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
-import { ProjectBase } from './project-base'
+import { Cfg, ProjectBase } from './project-base'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -161,7 +161,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   abstract createServer (
     app: Express,
-    config: Record<string, any>,
+    config: Cfg,
     project: ProjectBase<any>,
     request: unknown,
     onWarning: unknown,
