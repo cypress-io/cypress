@@ -2129,6 +2129,29 @@ describe('network stubbing', { retries: 2 }, function () {
           .get('@3.all').should('have.length', 2)
           .get('@4.all').should('have.length', 3)
         })
+
+        context('stopPropagation: true', () => {
+          it('works with continue', () => {
+            cy.intercept({
+              method: 'POST',
+              times: 1,
+              url: '/post-only',
+            },
+            (req) => {
+              req.continue((res) => {
+                res.body = 'stubbed data'
+              })
+            }).as('interceptor')
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
+        })
       })
     })
 
