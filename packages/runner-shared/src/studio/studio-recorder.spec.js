@@ -325,6 +325,39 @@ describe('StudioRecorder', () => {
     })
   })
 
+  context('#copyToClipboard', () => {
+    const textToBeCopied = 'cy.get(\'.btn\').click()'
+
+    afterEach(() => {
+      delete window.isSecureContext
+      delete navigator.clipboard
+      delete document.execCommand
+    })
+
+    it('uses clipboard api when available', () => {
+      const writeText = sinon.stub().resolves()
+
+      window.isSecureContext = true
+      navigator.clipboard = {
+        writeText,
+      }
+
+      return instance.copyToClipboard(textToBeCopied).then(() => {
+        expect(writeText).to.be.calledWith(textToBeCopied)
+      })
+    })
+
+    it('falls back to execCommand when clipboard api not available', () => {
+      const execCommand = sinon.stub()
+
+      document.execCommand = execCommand
+
+      instance.copyToClipboard(textToBeCopied).then(() => {
+        expect(execCommand).to.be.calledWith('copy')
+      })
+    })
+  })
+
   // https://github.com/cypress-io/cypress/issues/14658
   context('#recordMouseEvent', () => {
     beforeEach(() => {

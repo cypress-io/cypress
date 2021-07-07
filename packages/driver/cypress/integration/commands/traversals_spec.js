@@ -41,10 +41,6 @@ describe('src/cy/commands/traversals', () => {
 
       describe('errors', {
         defaultCommandTimeout: 100,
-        retries: {
-          openMode: 0,
-          runMode: 2,
-        },
       }, () => {
         it('throws when options.length isnt a number', (done) => {
           cy.on('fail', (err) => {

@@ -4,6 +4,21 @@ const { createCypress } = helpers
 const { runIsolatedCypress } = createCypress({ config: { experimentalStudio: true } })
 
 describe('studio ui', () => {
+  it('displays modal when launching studio for the first time', () => {
+    runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
+      state: {
+        showedStudioModal: false,
+      },
+    })
+    .then(() => {
+      cy.get('.reporter').find('.test').first().find('.runnable-controls-studio').click()
+
+      cy.get('.studio-init-modal').should('be.visible')
+
+      cy.percySnapshot()
+    })
+  })
+
   it('launches studio ui when extending test', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {

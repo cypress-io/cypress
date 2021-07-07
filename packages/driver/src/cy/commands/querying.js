@@ -465,6 +465,12 @@ module.exports = (Commands, Cypress, cy, state) => {
         filter = ''
       }
 
+      // https://github.com/cypress-io/cypress/issues/1119
+      if (text === 0) {
+        // text can be 0 but should not be falsy
+        text = '0'
+      }
+
       if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
         $errUtils.throwErrByPath('contains.regex_conflict')
       }
