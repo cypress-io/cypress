@@ -49,22 +49,35 @@ const formStatePath = (projectRoot) => {
 
     debug('missing project path, looking for project here')
 
-    const cypressConfigJsPath = cwd('cypress.config.js')
+    const cypressConfigTsPath = cwd('cypress.config.ts')
 
-    return fs.pathExistsAsync(cypressConfigJsPath)
-    .then((found) => {
-      if (found) {
-        debug('found cypress file %s', cypressConfigJsPath)
+    return fs.pathExistsAsync(cypressConfigTsPath)
+    .then((foundTs) => {
+      if (foundTs) {
+        debug('found cypress file %s', cypressConfigTsPath)
         projectRoot = cwd()
       } else {
-        const cypressJsonPath = cwd('cypress.json')
+        const cypressConfigJsPath = cwd('cypress.config.js')
 
         // if not found with js, try with json
-        return fs.pathExistsAsync(cypressJsonPath)
-        .then((foundJson) => {
-          if (foundJson) {
-            debug('found cypress file %s', cypressJsonPath)
+        return fs.pathExistsAsync(cypressConfigJsPath)
+        .then((foundJs) => {
+          if (foundJs) {
+            debug('found cypress file %s', cypressConfigJsPath)
             projectRoot = cwd()
+          } else {
+            const cypressJsonPath = cwd('cypress.json')
+
+            // if not found with js, try with json
+            return fs.pathExistsAsync(cypressJsonPath)
+            .then((foundJson) => {
+              if (foundJson) {
+                debug('found cypress file %s', cypressJsonPath)
+                projectRoot = cwd()
+              }
+
+              return projectRoot
+            })
           }
 
           return projectRoot
