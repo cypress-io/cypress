@@ -1,9 +1,22 @@
 import * as React from 'react'
+
 import { mount } from './mount'
+
+type MountHookResult<T> = {
+  readonly current: T | null | undefined
+  readonly error: Error | null
+}
+
+type ResultContainer<T> = {
+  result: MountHookResult<T>
+  addResolver: (resolver: () => void) => void
+  setValue: (val: T) => void
+  setError: (err: Error) => void
+}
 
 // mounting hooks inside a test component mostly copied from
 // https://github.com/testing-library/react-hooks-testing-library/blob/master/src/pure.js
-function resultContainer<T> () {
+function resultContainer<T> (): ResultContainer<T> {
   let value: T | undefined | null = null
   let error: Error | null = null
   const resolvers: any[] = []
@@ -29,7 +42,7 @@ function resultContainer<T> () {
 
   return {
     result,
-    addResolver: (resolver: any) => {
+    addResolver: (resolver: (() => void)) => {
       resolvers.push(resolver)
     },
     setValue: (val: T) => updateResult(val),
@@ -54,28 +67,25 @@ function TestHook ({ callback, onError, children }: TestHookProps) {
     }
   }
 
-  // TODO decide what the test hook component should show
-  // maybe nothing, or maybe useful information about the hook?
-  // maybe its current properties?
-  // return <div>TestHook</div>
   return null
 }
 
 /**
  * Mounts a React hook function in a test component for testing.
  *
- * @see https://github.com/bahmutov/@cypress/react#advanced-examples
  */
-export const mountHook = (hookFn: (...args: any[]) => any) => {
-  const { result, setValue, setError } = resultContainer()
+export const mountHook = <T>(hookFn: (...args: any[]) => T) => {
+  const { result, setValue, setError } = resultContainer<T>()
 
-  return mount(
-    React.createElement(TestHook, {
-      callback: hookFn,
-      onError: setError,
-      children: setValue,
-    }),
-  ).then(() => {
+  const componentTest: React.ReactElement = React.createElement(TestHook, {
+    callback: hookFn,
+    onError: setError,
+    children: setValue,
+  })
+
+  return mount(componentTest).then(() => {
     cy.wrap(result)
+
+    return result
   })
 }
