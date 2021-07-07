@@ -973,10 +973,14 @@ module.exports = {
       return project.onWarning
     }
 
+    debug('browser launched')
+
     return openProject.launch(browser, spec, browserOpts)
   },
 
   navigateToNextSpec (spec) {
+    debug('navigating to next spec')
+
     return openProject.changeUrlToSpec(spec)
   },
 

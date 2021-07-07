@@ -553,8 +553,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  // type StartWebsocketOptions = {}
-
   startWebsockets (options: Options, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
