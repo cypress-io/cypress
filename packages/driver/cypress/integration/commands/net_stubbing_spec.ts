@@ -11,7 +11,8 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function () {
+// TODO: Network retries leak between tests, causing flake.
+describe('network stubbing', { retries: 2 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -1258,8 +1259,7 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       })
     })
 
-    // TODO: flaky - unable to reproduce outside of CI
-    it('still works after a cy.visit', { retries: 2 }, function () {
+    it('still works after a cy.visit', function () {
       cy.intercept(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
         headers: {
@@ -1395,6 +1395,31 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
 
         cy.wait('@upload')
       })
+
+      it('can stub a response with an ArrayBuffer', function () {
+        const stub = new Uint8Array(2)
+
+        stub[0] = 35
+        stub[1] = 2
+        const assertBody = (body: ArrayBuffer) => {
+          const uint8 = new Uint8Array(body)
+
+          stub.forEach((value, index) => {
+            expect(uint8[index]).to.eq(value)
+          })
+        }
+
+        cy.intercept('/binary*', {
+          body: stub.buffer,
+          headers: {
+            'content-type': 'application/octet-stream',
+          },
+          statusCode: 200,
+        }).as('get')
+        .visit('/fixtures/display-binary.html')
+        .wait('@get').its('response.body').should(assertBody)
+        .get('#result').should('have.text', stub.join(', '))
+      })
     })
   })
 
@@ -1426,6 +1451,27 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
       }).then(function () {
         $.post('/aaa', 'foo-bar-baz')
       })
+    })
+
+    it('can modify an ArrayBuffer request body', function () {
+      const modifiedUint8 = new Uint8Array(2)
+
+      modifiedUint8[0] = 35
+      modifiedUint8[1] = 2
+      const assertBody = (body: ArrayBuffer) => {
+        const uint8 = new Uint8Array(body)
+
+        modifiedUint8.forEach((value, index) => {
+          expect(uint8[index]).to.eq(value)
+        })
+      }
+
+      cy.intercept('/binary*', function (req) {
+        req.body = modifiedUint8.buffer
+      }).as('post')
+      .visit('/fixtures/dump-binary.html')
+      .wait('@post').its('response.body').should(assertBody)
+      .get('#result').should('have.text', modifiedUint8.join(', '))
     })
 
     it('can modify original request body and have it passed to next handler', function (done) {
@@ -1631,6 +1677,217 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
     it('can intercept utf-8 request bodies without crashing', function () {
       cy.intercept('POST', 'http://localhost:5000/api/sample')
       cy.visit('/fixtures/utf8-post.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/16327
+    context('request url querystring', () => {
+      // In the code below, cy.window() is used instead of $.get.
+      // It's because XHR is not sent on Firefox and it's flaky on Chrome.
+      it('parse query correctly', () => {
+        cy.intercept({ url: '/users*' }, (req) => {
+          expect(req.query.someKey).to.deep.equal('someValue')
+          expect(req.query).to.deep.equal({ someKey: 'someValue' })
+        }).as('getUrl')
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('GET', '/users?someKey=someValue')
+          xhr.send()
+        })
+
+        cy.wait('@getUrl')
+      })
+
+      context('reconcile changes', () => {
+        it('by assigning a new query parameter obj', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+            }
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by setting new properties', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            expect(req.query.a).to.eq('b')
+            req.query.c = 'd'
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?a=b')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by doing both', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+            }
+
+            expect(req.query.a).to.eq('b')
+            req.query.c = 'd'
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b&c=d')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        it('by deleting query member', () => {
+          cy.intercept({ url: '/users*' }, (req) => {
+            req.query = {
+              a: 'b',
+              c: 'd',
+            }
+
+            delete req.query.c
+
+            expect(req.url).to.eq('http://localhost:3500/users?a=b')
+          }).as('getUrl')
+
+          cy.window().then((win) => {
+            const xhr = new win.XMLHttpRequest()
+
+            xhr.open('GET', '/users?someKey=someValue')
+            xhr.send()
+          })
+
+          cy.wait('@getUrl')
+        })
+
+        context('by setting new url', () => {
+          it('absolute path', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = 'http://localhost:3500/users?a=b'
+
+              expect(req.query).to.deep.eq({ a: 'b' })
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('relative path', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = '/users?a=b'
+
+              expect(req.query).to.deep.eq({ a: 'b' })
+              expect(req.url).to.eq('http://localhost:3500/users?a=b')
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('empty string', () => {
+            cy.intercept({ url: '/users*' }, (req) => {
+              req.url = ''
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+        })
+
+        context('throwing errors correctly', () => {
+          it('defineproperty', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`defineProperty()` is not allowed.')
+
+              done()
+            })
+
+            cy.intercept({ url: '/users*' }, (req) => {
+              Object.defineProperty(req.query, 'key', {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: 'static',
+              })
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+
+          it('setPrototypeOf', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
+
+              done()
+            })
+
+            cy.intercept({ url: '/users*' }, (req) => {
+              Object.setPrototypeOf(req.query, null)
+
+              expect(req.query).to.deep.eq({})
+            }).as('getUrl')
+
+            cy.window().then((win) => {
+              const xhr = new win.XMLHttpRequest()
+
+              xhr.open('GET', '/users?someKey=someValue')
+              xhr.send()
+            })
+
+            cy.wait('@getUrl')
+          })
+        })
+      })
     })
 
     context('request events', function () {
@@ -1871,6 +2128,29 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           .get('@2.all').should('have.length', 2)
           .get('@3.all').should('have.length', 2)
           .get('@4.all').should('have.length', 3)
+        })
+
+        context('stopPropagation: true', () => {
+          it('works with continue', () => {
+            cy.intercept({
+              method: 'POST',
+              times: 1,
+              url: '/post-only',
+            },
+            (req) => {
+              req.continue((res) => {
+                res.body = 'stubbed data'
+              })
+            }).as('interceptor')
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
         })
       })
     })
@@ -2415,6 +2695,28 @@ describe('network stubbing', { retries: { runMode: 2, openMode: 0 } }, function 
           return p
         })
         .wait('@get').its('response.body').should('deep.eq', '{ "foo": "bar" }')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/16722
+      it('doesn\'t automatically parse response bodies if content is binary', function () {
+        const expectedBody = [120, 42, 7]
+        const assertBody = (body: ArrayBuffer) => {
+          const uint8 = new Uint8Array(body)
+
+          expectedBody.forEach((value, index) => {
+            expect(uint8[index]).to.eq(value)
+          })
+        }
+
+        cy.intercept('/binary*', (req) => {
+          req.on('response', (res) => {
+            expect(_.isArrayBuffer(res.body)).to.eq(true)
+            assertBody(res.body)
+          })
+        }).as('get')
+        .visit('/fixtures/display-binary.html')
+        .wait('@get').its('response.body').should(assertBody)
+        .get('#result').should('have.text', expectedBody.join(', '))
       })
 
       it('sets body to string if JSON is malformed', function () {

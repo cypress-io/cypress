@@ -8,8 +8,7 @@ const debug = require('debug')('test')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const cache = require(`${root}../lib/cache`)
 const logger = require(`${root}../lib/logger`)
-const { ProjectE2E } = require(`${root}../lib/project-e2e`)
-const { ProjectBase } = require(`${root}../lib/project-base`)
+const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
@@ -24,6 +23,7 @@ const files = require(`${root}../lib/gui/files`)
 const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
 const api = require(`${root}../lib/api`)
+const savedState = require(`${root}../lib/saved_state`)
 
 describe('lib/gui/events', () => {
   beforeEach(function () {
@@ -483,8 +483,8 @@ describe('lib/gui/events', () => {
 
       it('works even after project is opened (issue #227)', function () {
         sinon.stub(open, 'opn').resolves('okay')
-        sinon.stub(ProjectE2E.prototype, 'open').resolves()
-        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
+        sinon.stub(ProjectBase.prototype, 'open').resolves()
+        sinon.stub(ProjectBase.prototype, 'getConfig').resolves({ some: 'config' })
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
@@ -493,6 +493,52 @@ describe('lib/gui/events', () => {
           expect(open.opn).to.be.calledWith('path')
 
           return assert.sendCalledWith('okay')
+        })
+      })
+    })
+
+    describe('has:opened:cypress', function () {
+      beforeEach(function () {
+        this.state = {
+          set: sinon.stub().resolves(),
+          get: sinon.stub().resolves({}),
+        }
+
+        sinon.stub(savedState, 'create').resolves(this.state)
+      })
+
+      it('returns false when there is no existing saved state', function () {
+        return this.handleEvent('has:opened:cypress')
+        .then((assert) => {
+          assert.sendCalledWith(false)
+        })
+      })
+
+      it('returns true when there is any existing saved state', function () {
+        this.state.get.resolves({ shownOnboardingModal: true })
+
+        return this.handleEvent('has:opened:cypress')
+        .then((assert) => {
+          assert.sendCalledWith(true)
+        })
+      })
+
+      it('sets firstOpenedCypress when the user first opened Cypress if not already set', function () {
+        this.state.get.resolves({ shownOnboardingModal: true })
+        sinon.stub(Date, 'now').returns(12345)
+
+        return this.handleEvent('has:opened:cypress')
+        .then(() => {
+          expect(this.state.set).to.be.calledWith('firstOpenedCypress', 12345)
+        })
+      })
+
+      it('does not set firstOpenedCypress if already set', function () {
+        this.state.get.resolves({ firstOpenedCypress: 12345 })
+
+        return this.handleEvent('has:opened:cypress')
+        .then(() => {
+          expect(this.state.set).not.to.be.called
         })
       })
     })
@@ -605,10 +651,10 @@ describe('lib/gui/events', () => {
         sinon.stub(browsers, 'getAllBrowsersWith')
         browsers.getAllBrowsersWith.resolves([])
         browsers.getAllBrowsersWith.withArgs('/usr/bin/baz-browser').resolves([{ foo: 'bar' }])
-        this.open = sinon.stub(ProjectE2E.prototype, 'open').resolves()
-        sinon.stub(ProjectE2E.prototype, 'close').resolves()
+        this.open = sinon.stub(ProjectBase.prototype, 'open').resolves()
+        sinon.stub(ProjectBase.prototype, 'close').resolves()
 
-        return sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
+        return sinon.stub(ProjectBase.prototype, 'getConfig').resolves({ some: 'config' })
       })
 
       afterEach(() => {
@@ -751,7 +797,7 @@ describe('lib/gui/events', () => {
 
     describe('close:project', () => {
       beforeEach(() => {
-        return sinon.stub(ProjectE2E.prototype, 'close').withArgs({ sync: true }).resolves()
+        return sinon.stub(ProjectBase.prototype, 'close').withArgs({ sync: true }).resolves()
       })
 
       it('is noop and returns null when no project is open', function () {
@@ -763,8 +809,8 @@ describe('lib/gui/events', () => {
       })
 
       it('closes down open project and returns null', function () {
-        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({})
-        sinon.stub(ProjectE2E.prototype, 'open').resolves()
+        sinon.stub(ProjectBase.prototype, 'getConfig').resolves({})
+        sinon.stub(ProjectBase.prototype, 'open').resolves()
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {

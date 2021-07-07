@@ -99,7 +99,12 @@ export const eventManager = {
       rerun()
     })
 
-    ws.on('component:specs:changed', (specs) => {
+    ws.on('specs:changed', ({ specs, projectType }) => {
+      // do not emit the event if e2e runner is not displaying an inline spec list.
+      if (projectType === 'e2e' && state.useInlineSpecList === false) {
+        return
+      }
+
       state.setSpecs(specs)
     })
 
@@ -246,9 +251,17 @@ export const eventManager = {
       studioRecorder.startSave()
     })
 
+    reporterBus.on('studio:copy:to:clipboard', (cb) => {
+      this._studioCopyToClipboard(cb)
+    })
+
     localBus.on('studio:start', () => {
       studioRecorder.closeInitModal()
       rerun()
+    })
+
+    localBus.on('studio:copy:to:clipboard', (cb) => {
+      this._studioCopyToClipboard(cb)
     })
 
     localBus.on('studio:save', (saveInfo) => {
@@ -588,6 +601,13 @@ export const eventManager = {
     }
 
     return displayProps
+  },
+
+  _studioCopyToClipboard (cb) {
+    ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
+      studioRecorder.copyToClipboard(commandsText)
+      .then(cb)
+    })
   },
 
   emit (event, ...args) {

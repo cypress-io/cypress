@@ -7,7 +7,7 @@ module.exports = (on, config) => {
   if (config.testingType === "component") {
     injectDevServer(on, config, {
       // TODO replace with valid webpack config path
-      webpackFileName: './webpack.config.js'
+      webpackFilename: './webpack.config.js'
     });
   }
 
@@ -23,7 +23,7 @@ const something = require("something");
 module.exports = (on, config) => {
   if (config.testingType === "component") {
     injectDevServer(on, config, {
-      webpackFileName: 'config/webpack.config.js'
+      webpackFilename: 'config/webpack.config.js'
     });
   }
 

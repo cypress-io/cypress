@@ -14,6 +14,7 @@ import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile } from './util/file-opener'
 import open from './util/open'
 import { DestroyableHttpServer } from './util/server_destroy'
+import { RunnerType } from './specs-store'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -479,5 +480,9 @@ export class SocketBase {
 
   close () {
     return this.io.close()
+  }
+
+  sendSpecList (specs, projectType: RunnerType) {
+    this.toRunner('specs:changed', { specs, projectType })
   }
 }
