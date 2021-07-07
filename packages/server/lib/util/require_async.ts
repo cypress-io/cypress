@@ -51,11 +51,13 @@ export default async function requireAsync (filePath: string, options: RequireAs
     ipc.on('loaded', ({ result, functionNames }) => {
       debug('resolving with result %o', result)
       debug('resolving with functions %o', functionNames)
+      configProcess.kill()
       resolve({ result, functionNames })
     })
 
     ipc.on('load:error', (type, ...args) => {
       debug('load:error %s, rejecting', type)
+      configProcess.kill()
 
       reject(errors.get(type, ...args))
     })
