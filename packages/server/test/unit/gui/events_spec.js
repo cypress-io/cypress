@@ -659,6 +659,7 @@ describe('lib/gui/events', () => {
         sinon.stub(browsers, 'getAllBrowsersWith')
         browsers.getAllBrowsersWith.resolves([])
         browsers.getAllBrowsersWith.withArgs('/usr/bin/baz-browser').resolves([{ foo: 'bar' }])
+        this.initializeConfig = sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
         this.open = sinon.stub(ProjectBase.prototype, 'open').resolves()
         sinon.stub(ProjectBase.prototype, 'close').resolves()
 
@@ -672,11 +673,13 @@ describe('lib/gui/events', () => {
       it('open project + returns config', function () {
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then((assert) => {
-          return assert.sendCalledWith({ some: 'config' })
+          expect(this.send.firstCall.args[0]).to.eq('response') // [1].id).to.match(/setup:dashboard:project-/)
+          expect(this.send.firstCall.args[1].id).to.match(/open:project-/)
+          expect(this.send.firstCall.args[1].data).to.eql({ some: 'config' })
         })
       })
 
-      xit('catches errors', function () {
+      it('catches errors', function () {
         const err = new Error('foo')
 
         this.open.rejects(err)
@@ -922,17 +925,16 @@ describe('lib/gui/events', () => {
 
     describe('setup:dashboard:project', () => {
       it('returns result of openProject.createCiProject', function () {
-        sinon.stub(openProject, 'createCiProject').resolves('response')
-
         return this.handleEvent('setup:dashboard:project').then((assert) => {
-          return assert.sendCalledWith('response')
+          expect(this.send.firstCall.args[0]).to.eq('response')
+          expect(this.send.firstCall.args[1].id).to.match(/setup:dashboard:project-/)
         })
       })
 
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(openProject, 'createCiProject').rejects(err)
+        sinon.stub(ProjectStatic, 'createCiProject').rejects(err)
 
         return this.handleEvent('setup:dashboard:project').then((assert) => {
           return assert.sendErrCalledWith(err)
