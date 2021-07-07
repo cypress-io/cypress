@@ -10,7 +10,7 @@
       />
       <Select
         name="Bundler"
-        v-if="!hiddenBundlerSelect"
+        :disabled="disabledBundlerSelect"
         @select="setFEBundler"
         :options="bundlers"
         :value="selectedBundlerId"
@@ -81,7 +81,7 @@ export default defineComponent({
     });
 
     const fwBundlerId = computed(() => selectedFramework?.value?.bundler);
-    const hiddenBundlerSelect = ref(false);
+    const disabledBundlerSelect = ref(false);
 
     const setFEBundler = (bundler: Bundler) => {
       selectedBundler.value = bundler;
@@ -101,7 +101,7 @@ export default defineComponent({
     const setFEFramework = (framework: Framework) => {
       selectedFrameworkId.value = framework.id;
       selectedFramework.value = framework;
-      hiddenBundlerSelect.value = !!fwBundlerId.value;
+      disabledBundlerSelect.value = !!fwBundlerId.value;
       if (fwBundlerId.value) {
         const foundBundler = supportedBundlers.find(
           (bund) => bund.id === fwBundlerId.value
@@ -129,7 +129,7 @@ export default defineComponent({
       selectedFrameworkId,
       bundlers,
       selectedBundlerId,
-      hiddenBundlerSelect,
+      disabledBundlerSelect,
     };
   },
 });

@@ -17,7 +17,9 @@
         w-full
         focus:border-indigo-600 focus:outline-transparent
       "
-      :class="disabledClass + ' ' + (isOpen ? 'border-indigo-600' : 'border-gray-200')"
+      :class="disabledClass 
+        + (isOpen ? ' border-indigo-600' : ' border-gray-200') 
+        + (disabled ? ' bg-gray-300 text-gray-600' : '')"
       @click="
         if (!disabled) {
           isOpen = !isOpen;
