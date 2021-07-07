@@ -1,15 +1,20 @@
 <template>
-  <button
-    class="bg-gray-50 px-3 py-1 rounded absolute top-2 right-2 text-indigo-600"
-    @click="copyToClipboard"
-  >
-    Copy
-  </button>
+  <div class="absolute top-2 right-2">
+    <transition name="fade">
+      <span class="mx-3" v-show="showCopied">Copied</span>
+    </transition>
+    <button
+      class="bg-gray-50 px-3 py-1 rounded text-indigo-600"
+      @click="copyToClipboard"
+    >
+      Copy
+    </button>
+  </div>
   <textarea class="absolute -top-96" ref="textElement">{{ text }}</textarea>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, nextTick, ref } from "vue";
 
 export default defineComponent({
   props: {
@@ -19,12 +24,26 @@ export default defineComponent({
     },
   },
   setup() {
+    const showCopied = ref(false)
     const textElement = ref<HTMLTextAreaElement | null>(null);
-    const copyToClipboard = () => {
+    const copyToClipboard = async () => {
       textElement.value?.select();
       document.execCommand("copy");
+      showCopied.value = true
+      await nextTick()
+      showCopied.value = false
     };
-    return { copyToClipboard, textElement };
+    return { copyToClipboard, textElement, showCopied };
   },
 });
 </script>
+
+<style>
+.fade-leave-active {
+  transition: opacity 1s ease;
+}
+
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
