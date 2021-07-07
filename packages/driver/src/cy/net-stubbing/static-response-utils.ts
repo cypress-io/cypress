@@ -10,6 +10,16 @@ import $errUtils from '../../cypress/error_utils'
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']
 
+function caseInsensitiveHas (obj, lowercaseProperty) {
+  for (let key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      return true
+    }
+  }
+
+  return false
+}
+
 export function validateStaticResponse (cmd: string, staticResponse: StaticResponse): void {
   const err = (message) => {
     $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { cmd, message, staticResponse } })
@@ -115,11 +125,7 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
 
       // There are various json-related MIME types. We cannot simply set it as `application/json`.
       // @see https://www.iana.org/assignments/media-types/media-types.xhtml
-      if (
-        !(backendStaticResponse.headers &&
-        backendStaticResponse.headers['content-type'] &&
-        backendStaticResponse.headers['content-type'].includes('json'))
-      ) {
+      if (backendStaticResponse.headers && !caseInsensitiveHas(backendStaticResponse.headers, 'content-type')) {
         _.set(backendStaticResponse, 'headers.content-type', 'application/json')
       }
     }
