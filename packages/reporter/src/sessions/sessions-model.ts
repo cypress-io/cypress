@@ -5,7 +5,7 @@ export interface SessionProps extends InstrumentProps {
   name: string
   testId: string
   testCurrentRetry: number
-  sessionInfo: {name: string, data: Record<string, {cookies: number, localStorage: number}>}
+  sessionInfo: {id: string, data: Record<string, {cookies: number, localStorage: number}>}
 }
 
 export default class Session extends Instrument {
@@ -14,9 +14,9 @@ export default class Session extends Instrument {
 
   constructor (props: SessionProps) {
     super(props)
-    const { name, data } = props.sessionInfo
+    const { id, data } = props.sessionInfo
 
-    this.name = name
+    this.name = id
     this.data = { ...data }
   }
 }
