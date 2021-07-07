@@ -1,6 +1,6 @@
 # Launchpad
 
-Launchpad is next-gen react application that is rendered by Electron. This acts as the visual user interface you see when running: `cypress open`.
+Launchpad is next-gen Vue application that is rendered by Electron. This acts as the visual user interface you see when running: `cypress open`.
 
 It replaces the original electron app, `desktop-gui`.
 
