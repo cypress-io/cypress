@@ -27,6 +27,7 @@ describe('lib/open_project', () => {
 
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
+    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
     sinon.stub(ProjectBase.prototype, 'open').resolves()
     sinon.stub(ProjectBase.prototype, 'reset').resolves()
     sinon.stub(ProjectBase.prototype, 'getConfig').resolves(this.config)
