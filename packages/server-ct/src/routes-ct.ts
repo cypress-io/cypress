@@ -77,7 +77,7 @@ export const createRoutes = ({
     xhrs.handle(req, res, config, next)
   })
 
-  app.get(config.clientRoute, (req, res) => {
+  app.get(`${config.clientRoute}`, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     serve(req, res, {
