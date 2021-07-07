@@ -104,6 +104,7 @@ describe('InputComponent', () => {
 | [Assets](src/app/assets-image)                       | `assets` folder accessible by Cypress                                                        |
 | [Async](src/app/timeout)                             | Async test with `cy.tick`                                                                    |
 | [Routing](src/app/routing)                           | Test routing link                                                                            |
+| [Network](src/app/network) | Test with http calls
 
 ## Code coverage
 
