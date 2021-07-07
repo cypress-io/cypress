@@ -21,7 +21,7 @@ export class StudioInstructionsModal extends Component {
           <h1 className='title'>
             <i className='fas fa-magic icon' />
             {' '}
-Studio
+            Studio
             <span className='beta'>BETA</span>
           </h1>
           <div className='content center'>
@@ -52,7 +52,7 @@ Studio
               {' '}
               <a href='https://on.cypress.io/studio-beta' target='_blank' rel="noreferrer">feedback</a>
               {' '}
-will be highly influential to our team.
+              will be highly influential to our team.
             </div>
           </div>
           <div className='controls'>
@@ -84,7 +84,7 @@ export class StudioInitModal extends Component {
           <h1 className='title'>
             <i className='fas fa-magic icon' />
             {' '}
-Studio
+            Studio
             <span className='beta'>BETA</span>
           </h1>
           <div className='gif'>
@@ -133,7 +133,7 @@ export class StudioSaveModal extends Component {
           <h1 className='title'>
             <i className='fas fa-magic icon' />
             {' '}
-Save New Test
+            Save New Test
           </h1>
           <div className='content'>
             <form onSubmit={this._save}>
