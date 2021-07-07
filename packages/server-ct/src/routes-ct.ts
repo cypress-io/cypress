@@ -6,7 +6,7 @@ import { NetworkProxy } from '@packages/proxy'
 import { handle, serve, serveChunk } from './runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
-import { ProjectBase } from '../../server/lib/project-base'
+import { Cfg, ProjectBase } from '../../server/lib/project-base'
 import { getPathToDist } from '@packages/resolve-dist'
 
 const debug = Debug('cypress:server:routes')
@@ -14,7 +14,7 @@ const debug = Debug('cypress:server:routes')
 export interface InitializeRoutes {
   app: Express
   specsStore: SpecsStore
-  config: Record<string, any>
+  config: Cfg
   project: ProjectBase<any>
   nodeProxy: httpProxy
   networkProxy: NetworkProxy

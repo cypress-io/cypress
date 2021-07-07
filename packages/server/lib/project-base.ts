@@ -34,21 +34,19 @@ import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-c
 import { checkSupportFile } from './project_utils'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
-// or places in this file modify existing types, adding additional keys dynamically.
 // Instead, this is an interface of values that have been manually validated to exist
-// and used when creating a project.
+// and are required when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'integrationFolder' | 'baseUrl'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'supportFolder' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'projectRoot' | 'proxyUrl' | 'browsers'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
 
 export interface Cfg extends ReceivedCypressOptions {
-  reporter: 'spec' | 'dot' | string
-  report: boolean
-  projectRoot: string
-  reporterOptions: Record<string, any>
-
-  [key: string]: any
+  proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  state?: {
+    firstOpened?: number
+    lastOpened?: number
+  }
 }
 
 type WebSocketOptionsCallback = (...args: any[]) => any
@@ -673,16 +671,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   async initializeConfig (): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
-    theCfg.browsers = theCfg.browsers.map((browser) => {
-      if (browser.family === 'chromium') {
-        return browser
-      }
+    if (theCfg.browsers) {
+      theCfg.browsers = theCfg.browsers?.map((browser) => {
+        if (browser.family === 'chromium') {
+          return browser
+        }
 
-      return {
-        ...browser,
-        warning: errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
-      }
-    })
+        return {
+          ...browser,
+          warning: errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name),
+        }
+      })
+    }
 
     theCfg = this.projectType === 'e2e'
       ? theCfg
