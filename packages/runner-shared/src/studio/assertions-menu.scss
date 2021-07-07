@@ -3,6 +3,12 @@
 * in the user's app html
 */
 
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
 .assertions-menu {
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.25);
@@ -23,11 +29,6 @@
     font-size: 16px;
     text-align: center;
     margin: 0.75rem 0.5rem 0.25rem;
-  }
-
-  .element {
-    font-size: 14px;
-    margin: 0 0.25rem 0.5rem;
   }
 
   .assertions-list {

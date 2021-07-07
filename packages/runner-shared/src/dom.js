@@ -178,24 +178,10 @@ function getOrCreateHelperDom ({ $body, className, css }) {
   return { $container, shadowRoot, $reactContainer }
 }
 
-function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
-  const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
-    $body,
-    className: '__cypress-selector-playground',
-    css: selectorPlaygroundCSS,
-  })
-
-  if (!$el) {
-    selectorPlaygroundHighlight.unmount($reactContainer[0])
-    $reactContainer.off('click')
-    $container.remove()
-
-    return
-  }
-
+function getSelectorHighlightStyles ($el) {
   const borderSize = 2
 
-  const styles = $el.map((__, el) => {
+  return $el.map((__, el) => {
     const $el = $(el)
     const offset = $el.offset()
 
@@ -211,6 +197,24 @@ function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showToo
       zIndex: getZIndex($el),
     }
   }).get()
+}
+
+function addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }) {
+  const { $container, shadowRoot, $reactContainer } = getOrCreateHelperDom({
+    $body,
+    className: '__cypress-selector-playground',
+    css: selectorPlaygroundCSS,
+  })
+
+  if (!$el) {
+    selectorPlaygroundHighlight.unmount($reactContainer[0])
+    $reactContainer.off('click')
+    $container.remove()
+
+    return
+  }
+
+  const styles = getSelectorHighlightStyles($el)
 
   if ($el.length === 1) {
     $reactContainer
@@ -234,13 +238,14 @@ function getStudioAssertionsMenuDom ($body) {
   })
 }
 
-function openStudioAssertionsMenu ({ event, $body, props }) {
+function openStudioAssertionsMenu ({ $el, $body, props }) {
   const { shadowRoot, $reactContainer } = getStudioAssertionsMenuDom($body)
 
-  const $el = $(event.target)
+  const selectorHighlightStyles = getSelectorHighlightStyles($el)[0]
 
   studioAssertionsMenu.render($reactContainer[0], {
     $el,
+    selectorHighlightStyles,
     ...props,
   })
 

@@ -640,7 +640,7 @@ export class StudioRecorder {
     const $el = $(event.target)
 
     dom.openStudioAssertionsMenu({
-      event,
+      $el,
       $body: $(this._body),
       props: {
         possibleAssertions: this._generatePossibleAssertions($el),
