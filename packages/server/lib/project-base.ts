@@ -62,6 +62,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
+  private isOpen: boolean = false
 
   public browser: any
   public projectType?: 'e2e' | 'ct'
@@ -267,6 +268,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             system: _.pick(sys, 'osName', 'osVersion'),
           }
 
+          this.isOpen = true
+
           return runEvents.execute('before:run', cfg, beforeRunDetails)
         })
       })
@@ -310,7 +313,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
 
     return Bluebird.join(
-      this.server?.close(),
+      this.isOpen ? this.server?.close() : Promise.resolve(),
       this.watchers?.close(),
       closePreprocessor?.(),
     )
