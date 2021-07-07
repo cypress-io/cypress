@@ -59,8 +59,8 @@ type TestHookProps = {
 function TestHook ({ callback, onError, children }: TestHookProps) {
   try {
     children(callback())
-  } catch (err) {
-    if (err.then) {
+  } catch (err: any) {
+    if ('then' in err) {
       throw err
     } else {
       onError(err)
@@ -83,9 +83,5 @@ export const mountHook = <T>(hookFn: (...args: any[]) => T) => {
     children: setValue,
   })
 
-  return mount(componentTest).then(() => {
-    cy.wrap(result)
-
-    return result
-  })
+  return mount(componentTest).then(() => result)
 }
