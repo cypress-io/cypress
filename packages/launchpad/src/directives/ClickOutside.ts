@@ -3,7 +3,7 @@ import { DirectiveBinding } from 'vue'
 /**
  * Runs the binding when clicking outside of the targetted component
  */
-export const VClickOutside = {
+export const ClickOutside = {
   beforeMount (el: any, binding: DirectiveBinding<any>) {
     // Define ourClickEventHandler
     const ourClickEventHandler = (event: MouseEvent) => {

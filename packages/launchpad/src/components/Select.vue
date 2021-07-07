@@ -85,7 +85,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from "vue";
-import { VClickOutside } from '../directives/ClickOutside'
+import { ClickOutside } from '../directives/ClickOutside'
 
 interface Option {
   name: string;
@@ -96,7 +96,7 @@ interface Option {
 
 export default defineComponent({
   emits: { select: Object },
-  directives: { VClickOutside },
+  directives: { ClickOutside },
   props: {
     name: {
       type: String,
