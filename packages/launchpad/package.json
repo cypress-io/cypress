@@ -8,6 +8,7 @@
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn cypress:run:ct",
+    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
     "dev": "LAUNCHPAD=1 yarn start-test 5050 cypress:open",
@@ -38,8 +39,6 @@
   },
   "files": [
     "dist",
-    "lib",
-    "!lib/**/*_spec.jsx",
-    "assets"
+    "lib"
   ]
 }
