@@ -1,8 +1,8 @@
-export type Library = {
+export interface Library {
     id: string
     name: string
     package: string
-};
+}
 
 export const SupportedLibraryVue = {
   id: 'vue',

@@ -8,12 +8,12 @@ interface State {
   backAction: () => void
   alternativeAction?: () => void
   steps: {
-      component?: boolean
-      setup?: boolean
-      dependencies?: boolean
-      configFile?: boolean
+      component: boolean
+      setup: boolean
+      dependencies: boolean
+      configFile: boolean
 
-      e2e?: boolean
+      e2e: boolean
   }
 }
 
@@ -22,9 +22,20 @@ function createInitialState (): State {
     projectTitle: 'design-system',
     title: 'LaunchPad',
     description: 'Scaffold Cypress Tests',
-    nextAction () {},
-    backAction () {},
-    steps: {},
+    nextAction () {
+      throw Error('Must assign an action before calling nextAction')
+    },
+    backAction () {
+      throw Error('Must assign an action before calling backAction')
+    },
+    steps: {
+      component: false,
+      setup: false,
+      dependencies: false,
+      configFile: false,
+
+      e2e: false,
+    },
   }
 }
 

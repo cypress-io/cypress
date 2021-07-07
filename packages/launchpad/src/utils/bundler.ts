@@ -3,12 +3,12 @@ import LogoVite from '../images/logos/vite.svg'
 
 export type BundlerId = 'webpack' | 'vite';
 
-export type Bundler = {
+export interface Bundler {
   id: BundlerId
   name: string
   logo: string
   package: string
-};
+}
 
 export const SupportedBundlerWebpack: Bundler = {
   id: 'webpack',

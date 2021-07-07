@@ -4,10 +4,10 @@ import { Framework } from '../utils/frameworks'
 import { TestingType } from '../utils/testingTypes'
 import { StoreApp } from './app'
 
-type ComponentSetup = {
+interface ComponentSetup {
   framework: Framework
   bundler: Bundler
-};
+}
 
 interface StateConfig {
   firstOpen: boolean

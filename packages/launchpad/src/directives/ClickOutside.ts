@@ -1,5 +1,8 @@
-import { App, DirectiveBinding } from 'vue'
+import { DirectiveBinding } from 'vue'
 
+/**
+ * Runs the binding when clicking outside of the targetted component
+ */
 export const VClickOutside = {
   beforeMount (el: any, binding: DirectiveBinding<any>) {
     // Define ourClickEventHandler
@@ -21,8 +24,4 @@ export const VClickOutside = {
     // Remove Event Listener
     document.removeEventListener('click', el.__vueClickEventHandler__)
   },
-}
-
-export default (app: App) => {
-  app.directive('click-outside', VClickOutside)
 }
