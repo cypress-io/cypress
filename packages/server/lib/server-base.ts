@@ -167,7 +167,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
 
-  open (config: Record<string, any> = {}, {
+  open (config: Cfg, {
     project,
     onError,
     onWarning,
@@ -192,7 +192,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       // TODO: Can we just pass config.baseUrl regardless of project type?
       this._nodeProxy = httpProxy.createProxyServer({
-        target: projectType === 'ct' ? config.baseUrl : undefined,
+        target: config.baseUrl && projectType === 'ct' ? config.baseUrl : undefined,
       })
 
       this._socket = new SocketCtor(config) as TSocket
