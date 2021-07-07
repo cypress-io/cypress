@@ -12,7 +12,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const { ensureExists } = require('../project_static')
+const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')
@@ -619,7 +619,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
 const createAndOpenProject = function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return ensureExists(projectRoot, options)
+  return ProjectStatic.ensureExists(projectRoot, options)
   .then(() => {
     // open this project without
     // adding it to the global cache
