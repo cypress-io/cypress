@@ -1080,14 +1080,14 @@ module.exports = {
       return this.currentSetScreenshotMetadata(data)
     }
 
-    const wait = async () => {
+    const wait = () => {
       debug('waiting for socket to connect and browser to launch...')
 
       if (!shouldLaunchBrowser) {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return this.navigateToNextSpec(options.spec)
+        return Promise.resolve(this.navigateToNextSpec(options.spec))
       }
 
       return Promise.join(
