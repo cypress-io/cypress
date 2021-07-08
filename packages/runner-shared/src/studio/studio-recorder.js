@@ -383,11 +383,6 @@ export class StudioRecorder {
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
-    // do not record interactions within our own assertions menu
-    if ($el.hasClass('__cypress-studio-assertions-menu')) {
-      return false
-    }
-
     // only want to record keystrokes within input elements
     if ((event.type === 'keydown' || event.type === 'keyup') && tagName !== 'INPUT') {
       return false
@@ -422,6 +417,12 @@ export class StudioRecorder {
     if (this.isFailed || !this._trustEvent(event)) return
 
     const $el = $(event.target)
+
+    if (this._isAssertionsMenu($el)) {
+      return
+    }
+
+    this._closeAssertionsMenu()
 
     if (!this._shouldRecordEvent(event, $el)) {
       return
@@ -634,10 +635,20 @@ export class StudioRecorder {
     return message
   }
 
+  _isAssertionsMenu = ($el) => {
+    return $el.hasClass('__cypress-studio-assertions-menu')
+  }
+
   _openAssertionsMenu = (event) => {
     event.preventDefault()
 
     const $el = $(event.target)
+
+    if (this._isAssertionsMenu($el)) {
+      return
+    }
+
+    this._closeAssertionsMenu()
 
     dom.openStudioAssertionsMenu({
       $el,

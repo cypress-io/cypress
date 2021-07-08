@@ -14,6 +14,7 @@
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 0.5rem;
   font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  width: 150px;
 
   .close {
     position: absolute;
@@ -28,21 +29,23 @@
   .title {
     font-size: 16px;
     text-align: center;
-    margin: 0.75rem 0.5rem 0.25rem;
+    margin: 0.75rem 0.5rem 0.5rem;
   }
 
   .assertions-list {
-    .assertion {
+    .assertion-type {
       cursor: default;
-      padding: 0.4rem 0.5rem;
+      font-size: 15px;
+      padding: 0.4rem 0.6rem;
       position: relative;
+
+      &:last-of-type {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+      }
 
       &:hover {
         background-color: #e9ecef;
-
-        .assertion-options {
-          display: block;
-        }
       }
 
       &.single-assertion {
@@ -54,10 +57,8 @@
         background: #fff;
         border: 1px solid rgba(0, 0, 0, 0.25);
         border-radius: 0.5rem;
-        display: none;
-        left: 100%;
-        top: -2px;
-        position: absolute;
+        font-size: 14px;
+        overflow: hidden;
 
         .assertion-option {
           cursor: pointer;
