@@ -29,8 +29,6 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   if (request) {
     request.state = 'ResponseReceived'
 
-    request.log.fireChangeEvent()
-
     if (!userHandler) {
       // this is notification-only, update the request with the response attributes and end
       request.response = res
@@ -43,7 +41,6 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
     if (request) {
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
-      request.log.fireChangeEvent()
     }
   }
 

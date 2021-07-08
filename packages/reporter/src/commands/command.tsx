@@ -121,6 +121,70 @@ const Message = observer(({ model }: MessageProps) => (
   </span>
 ))
 
+interface InterceptionsProps {
+  model: CommandModel
+}
+
+const pluralTypes = {
+  spy: 'spies',
+  stub: 'stubs',
+  function: 'functions',
+}
+
+const Interceptions = observer(({ model }: InterceptionsProps) => {
+  if (!model.renderProps.interceptions || !model.renderProps.interceptions.length) {
+    return null
+  }
+
+  const renderCount = (command: string) => {
+    const interceptions = model.renderProps.interceptions!.filter((v) => v.command === command)
+
+    if (!interceptions.length) return
+
+    const counts = _.countBy(interceptions, 'type')
+
+    let title = 'Matched '
+    let first = true
+
+    for (const type in counts) {
+      if (!first) {
+        title += ', '
+      }
+
+      const count = counts[type]
+
+      title += `${count } `
+
+      if (first) {
+        title += `cy.${command}() `
+      }
+
+      title += count > 1 ? pluralTypes[type] : type
+
+      const aliased = interceptions.filter((v) => v.alias && v.type === type)
+
+      if (aliased.length) {
+        title += ` (aliased as ${aliased.map(({ alias }) => `@${alias}`).join(', ')})`
+      }
+
+      first = false
+    }
+
+    return (<Tooltip key='a' placement='top' title={title} className='cy-tooltip'>
+      <span className={cs('command-interceptions', { 'show-count': interceptions.length > 1 })}>
+        cy.{command}()
+      </span>
+    </Tooltip>)
+  }
+
+  return (
+    <>
+      {renderCount('intercept')}
+      {renderCount('route')}
+    </>
+  )
+})
+
 interface ProgressProps {
   model: CommandModel
 }
@@ -223,6 +287,7 @@ class Command extends Component<Props> {
                 </Tooltip>
                 <span className='alias-container'>
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this.isOpen} />
+                  <Interceptions model={model}/>
                   <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
                     <span className={cs('num-duplicates', { 'has-alias': model.alias, 'has-duplicates': model.numDuplicates > 1 })}>{model.numDuplicates}</span>
                   </Tooltip>

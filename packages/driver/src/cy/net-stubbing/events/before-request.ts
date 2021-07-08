@@ -1,7 +1,6 @@
 import _ from 'lodash'
 
 import {
-  Route,
   Interception,
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
@@ -24,60 +23,7 @@ type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
 const validEvents = ['before:response', 'response', 'after:response']
 
-const getDisplayUrl = (url: string) => {
-  if (url.startsWith(window.location.origin)) {
-    return url.slice(window.location.origin.length)
-  }
-
-  return url
-}
-
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
-  function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
-    const message = _.compact([
-      request.request.method,
-      request.response && request.response.statusCode,
-      getDisplayUrl(request.request.url),
-      request.state,
-    ]).join(' ')
-    const displayName = route.handler ? (_.isFunction(route.handler) ? 'intercept fn' : 'intercept stub') : 'intercept'
-    const logConfig: Partial<Cypress.LogConfig> = {
-      name: 'xhr',
-      displayName,
-      alias: route.alias,
-      aliasType: 'route',
-      type: 'parent',
-      event: true,
-      method: request.request.method,
-      timeout: undefined,
-      consoleProps: () => {
-        return {
-          Alias: route.alias,
-          Method: request.request.method,
-          URL: request.request.url,
-          Matched: route.options,
-          Handler: route.handler,
-        }
-      },
-      renderProps: () => {
-        return {
-          indicator: request.state === 'Complete' ? 'successful' : 'pending',
-          message,
-        }
-      },
-    }
-
-    // because `before:request` happens after the proxy layer has emitted `proxy:incoming:request`,
-    // there can already be an existing log item for this request.
-    const proxyLog = Cypress.ProxyLogging.getInterceptLog(request)
-
-    const log = proxyLog ? proxyLog.log.set(logConfig) : Cypress.log(logConfig)
-
-    log.snapshot('request')
-
-    return log
-  }
-
   const { data: req, requestId, subscription } = frame
   const { routeId } = subscription
   const route = getRoute(routeId)
@@ -102,17 +48,18 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
   }
 
-  const getCanonicalRequest = (): Interception => {
-    const existingRequest = getRequest(routeId, requestId)
+  const getCanonicalInterception = (): Interception => {
+    const existingInterception = getRequest(routeId, requestId)
 
-    if (existingRequest) {
-      existingRequest.request = req
+    if (existingInterception) {
+      existingInterception.request = req
 
-      return existingRequest
+      return existingInterception
     }
 
     return {
       id: requestId,
+      browserRequestId: frame.browserRequestId,
       routeId,
       request: req,
       state: 'Received',
@@ -122,7 +69,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     }
   }
 
-  const request: Interception = getCanonicalRequest()
+  const request: Interception = getCanonicalInterception()
 
   let resolved = false
   let handlerCompleted = false
@@ -216,7 +163,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     destroy () {
       userReq.reply({
         forceNetworkError: true,
-      }) // TODO: this misnomer is a holdover from XHR, should be numRequests
+      })
     },
   }
 
@@ -227,7 +174,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       request.request = _.cloneDeep(req)
 
       request.state = 'Intercepted'
-      request.log && request.log.fireChangeEvent()
     }
   }
 
@@ -263,9 +209,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  if (!request.log) {
-    request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
-  }
+  Cypress.ProxyLogging.logInterception(request, route)
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

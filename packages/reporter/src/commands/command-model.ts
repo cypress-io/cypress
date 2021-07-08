@@ -9,6 +9,11 @@ const LONG_RUNNING_THRESHOLD = 1000
 interface RenderProps {
   message?: string
   indicator?: string
+  interceptions?: Array<{
+    command: 'intercept' | 'route'
+    alias?: string
+    type: 'function' | 'stub' | 'spy'
+  }>
 }
 
 export interface CommandProps extends InstrumentProps {

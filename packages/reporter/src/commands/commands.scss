@@ -98,7 +98,8 @@
       flex-wrap: wrap;
       padding: 2px 5px 0;
 
-      .command-alias {
+      .command-alias,
+      .command-interceptions {
         border-radius: 10px;
         color: #777888;
         padding: 0 5px;
@@ -167,6 +168,10 @@
       .num-duplicates,
       .command-alias-count {
         background-color: darken(#ffdf9c, 8%) !important;
+      }
+
+      .command-interceptions {
+        background-color: lighten(#f0a5d7, 13%);
       }
     }
 
