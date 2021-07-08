@@ -1,14 +1,14 @@
 <template>
   <CommandRow :size="size" class="command-row" :class="{ [command.state]: true, selected, 'event': command.event, scaled }" @select="selected = $event">
     <template #position="{ hovering }">
-      <div class="position">
+      <div class="command-position">
         <i-mdi-pin v-if="hovering || selected"></i-mdi-pin>
         <i-fa-spinner v-else-if="command.state === 'pending'" class="w-14px h-14px animate-spin"/>
         <span v-else-if="!command.event === true">{{ idx + 1 }}</span>
       </div>
     </template>
     <template #name="{}">
-      <span class="command-name">{{ commandName }}</span>
+      <span class="command-name font-semibold">{{ commandName }}</span>
     </template>
     <template #message="{}">
       <span class="command-message">
@@ -76,30 +76,70 @@ export default defineComponent({
 </style>
 
 <style lang="scss" scoped>
-.failed {
-  @apply bg-red-100 text-red-600;
+
+.failed, .failed:hover {
+  @apply bg-red-200;
+
+  .command-name, .command-message, .command-position {
+    @apply text-red-600;
+  }
+
+  &.selected {
+    .command-position {
+      @apply text-violet-600;
+    }
+  }
 }
 
 .pending, .pending:hover {
-  @apply bg-blue-100 text-blue-600;
+  @apply bg-blue-200;
+  .command-name, .command-message, .command-position {
+    @apply text-blue-600;
+  }
 }
 
-.selected {
-  &, &:hover, > * {
-    @apply text-violet-600 bg-violet-100;
+.selected, .selected:hover {
+  @apply bg-violet-200;
+
+  .command-name, .command-message, .command-position {
+    @apply text-violet-600;
   }
+  // &, &:hover, > * {
+  //   @apply text-violet-600 bg-violet-100;
+  // }
 
   // Always show some failure color, even when selected
   &.failed {
+    .command-position {
+      @apply text-violet-600;
+    }
     .command-name, .command-message {
         @apply text-red-600;
     }
   }
 }
 
+.command-position {
+  @apply text-cool-gray-400;
+}
+.command-message {
+  @apply text-cool-gray-600;
+}
+
+.command-name {
+  @apply text-cool-gray-700;
+}
+
 .command-row.event {
   .command-message, .command-name {
     @apply text-cool-gray-400 italic;
+  }
+}
+
+.command-row {
+  @apply bg-opacity-60;
+  &:hover {
+    @apply bg-opacity-100;
   }
 }
 
