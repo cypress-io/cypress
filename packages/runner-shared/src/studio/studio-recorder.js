@@ -697,6 +697,8 @@ export class StudioRecorder {
     }
 
     const attributes = $.map($el[0].attributes, ({ name, value }) => {
+      if (name === 'value') return
+
       if (name === 'class') {
         possibleAssertions.push({
           type: 'have.class',
