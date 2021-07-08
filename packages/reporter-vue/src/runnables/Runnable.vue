@@ -16,6 +16,7 @@
           </div>
         </div>
       </template>
+
       <!-- Inner content of the suite -->
       <template v-if="runnable.type === 'test'">
         <div data-cy="content" class="content-wrapper transform">

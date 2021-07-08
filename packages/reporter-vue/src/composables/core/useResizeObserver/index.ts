@@ -49,7 +49,7 @@ export function useResizeObserver(
   callback: ResizeObserverCallback,
   options: ResizeObserverOptions = {},
 ) {
-  debugger;
+
   const { window = defaultWindow, ...observerOptions } = options
   let observer: ResizeObserver | undefined
   const isSupported = window && 'ResizeObserver' in window

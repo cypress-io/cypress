@@ -46,7 +46,9 @@ export function Runnables(rootRunnable: RawSuite): Runnables {
   const tests = test
 
   const testsByState = computed(() => _.groupBy(tests, 'state'))
-  const getHook = (hook) => _.find(flat[hook.testId].hooks, h => h.hookId === hook.id)
+  const getHook = (hook) => {
+    return _.find(flat[hook.testId].hooks, h => h.hookId === hook.hookId)
+  }
   const getTest = id => flat[id]
   return {
     nested,
@@ -203,7 +205,7 @@ export class TestModel implements RunnableModel {
   readonly id: string
   state: ComputedRef<RunnableState>
   commands: CommandModel[] = []
-  hooks = []
+  hooks: HookModel[] = []
   constructor(test: RawTest) {
     this.id = test.id
     this.state = computed(() => test.state || 'not-started')
@@ -216,21 +218,6 @@ export class TestModel implements RunnableModel {
 
     this.hooks = createHooks(test.hooks, test)
     this.hooksByKind = _.groupBy(this.hooks, 'hookName')
-
-    // before hooks
-    // body
-    // after hooks
-    // for hook in hooks
-
-    // before all by id
-    // before each by id
-    // test body
-    // after each by id
-    // after all
-
-
-    // this.hooks
-      // _.map(test.hooks, (h) => new HookModel(h, test))
   }
 }
 
@@ -248,7 +235,7 @@ class HookModel {
   }
 }
 
-interface CommandModel { }
+interface CommandModel {}
 class CommandModel {
   public hookId: string
   public testId: string
@@ -326,7 +313,9 @@ function createRunnableChildren(props: RootRunnable, level: number, runnablesByI
 
 function createRunnable(type, props, hooks: HookModel[], level: number, runnablesById) {
   runnablesById[props.id] = props
-  props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
+
+  props.hooks = _.unionBy(hooks, props.hooks, 'hookId')
+  
   if (type === 'suite') {
     return createSuite(props as SuiteModel, level, runnablesById)
   } else {
@@ -338,19 +327,17 @@ function createTest(props, level): TestModel {
   const test = props
   test.level = level
   test.hooks = [
-    ...props.hooks.map(h => {
-      h.logs = []
-      return h
-    }),
-    {
+    ...props.hooks.map(h => new HookModel(h, test)),
+    new HookModel({
       hookId: props.id.toString(),
       hookName: 'test body',
       invocationDetails: props.invocationDetails,
       logs: []
-    }
+    }, test)
   ]
 
-  return new TestModel(test)
+  const testModel = new TestModel(test)
+  return testModel
 }
 
 function createSuite(props: SuiteModel, level, runnablesById): SuiteModel {
