@@ -36,7 +36,7 @@
     .assertion-type {
       cursor: default;
       font-size: 15px;
-      padding: 0.4rem 0.6rem;
+      padding: 0.4rem 0.4rem 0.4rem 0.6rem;
       position: relative;
 
       &:last-of-type {
@@ -53,12 +53,23 @@
         font-weight: 600;
       }
 
+      .assertion-type-text {
+        align-items: center;
+        display: flex;
+
+        .dropdown-arrow {
+          margin-left: auto;
+        }
+      }
+
       .assertion-options {
         background: #fff;
         border: 1px solid rgba(0, 0, 0, 0.25);
         border-radius: 0.5rem;
         font-size: 14px;
+        max-width: 150px;
         overflow: hidden;
+        overflow-wrap: break-word;
 
         .assertion-option {
           cursor: pointer;
