@@ -39,17 +39,11 @@ const moduleFactory = () => {
 
     getConfig: tryToCall('getConfig'),
 
-    createCiProject: tryToCall('createCiProject'),
-
-    writeProjectId: tryToCall('writeProjectId'),
-
     getRecordKeys: tryToCall('getRecordKeys'),
 
     getRuns: tryToCall('getRuns'),
 
     requestAccess: tryToCall('requestAccess'),
-
-    emit: tryToCall('emit'),
 
     getProject () {
       return openProject

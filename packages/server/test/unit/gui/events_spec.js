@@ -924,7 +924,7 @@ describe('lib/gui/events', () => {
     })
 
     describe('setup:dashboard:project', () => {
-      it('returns result of openProject.createCiProject', function () {
+      it('returns result of ProjectStatic.createCiProject', function () {
         return this.handleEvent('setup:dashboard:project').then((assert) => {
           expect(this.send.firstCall.args[0]).to.eq('response')
           expect(this.send.firstCall.args[1].id).to.match(/setup:dashboard:project-/)
