@@ -306,7 +306,7 @@ module.exports = function (Commands, Cypress, cy, state) {
       })
     }
 
-    const traverseObjectAtPath = (acc, pathsArray, index = 0) => {
+    const traverseObjectAtPath = (acc, pathsArray, updatedSubject, index = 0) => {
       // traverse at this depth
       const prop = pathsArray[index]
       const previousProp = pathsArray[index - 1]
@@ -324,7 +324,7 @@ module.exports = function (Commands, Cypress, cy, state) {
           traversalErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
         }
 
-        return acc
+        return { prop: acc, updatedSubject }
       }
 
       // if we have no more properties to traverse
@@ -335,7 +335,7 @@ module.exports = function (Commands, Cypress, cy, state) {
         }
 
         // finally return the reduced traversed accumulator here
-        return acc
+        return { prop: acc, updatedSubject }
       }
 
       // attempt to lookup this property on the acc
@@ -347,11 +347,11 @@ module.exports = function (Commands, Cypress, cy, state) {
       if (!(prop in primitiveToObject(acc))) {
         traversalErr = propertyNotOnSubjectErr(prop)
 
-        return undefined
+        return { prop: undefined, updatedSubject }
       }
 
       // if we succeeded then continue to traverse
-      return traverseObjectAtPath(acc[prop], pathsArray, index + 1)
+      return traverseObjectAtPath(acc[prop], pathsArray, acc, index + 1)
     }
 
     const getSettledValue = (value, subject, propAtLastPath) => {
@@ -395,11 +395,13 @@ module.exports = function (Commands, Cypress, cy, state) {
 
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
-      const actualSubject = remoteSubject || subject
+      let actualSubject = remoteSubject || subject
 
       let paths = _.isString(str) ? str.split('.') : [str]
 
-      const prop = traverseObjectAtPath(actualSubject, paths)
+      const { prop, updatedSubject } = traverseObjectAtPath(actualSubject, paths, actualSubject)
+
+      actualSubject = updatedSubject
 
       const value = getSettledValue(prop, actualSubject, _.last(paths))
 
