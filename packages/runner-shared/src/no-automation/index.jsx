@@ -50,11 +50,14 @@ const browserPicker = (browsers, onLaunchBrowser) => {
 
 export const NoAutomation = ({ browsers, onLaunchBrowser }) => (
   <div className='runner automation-failure'>
-    <div className='automation-message'>
+    <div className="automation-message">
       <p>Whoops, we can't run your tests.</p>
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
+      <div>
+        <p className="muted">Either the browser was launched by Cypress and your organization has a ProxyMode group policy set or you visited the Cypress HTTP proxy port outside of a Cypress browser.</p>
+      </div>
       <div className='helper-line'>
-        <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank' rel='noreferrer'>
+        <a className='helper-docs-link' href='https://on.cypress.io/error-messages#Whoops-we-can-t-run-your-tests' target='_blank' rel='noreferrer'>
           <i className='fas fa-question-circle'></i>
           {' Why am I seeing this message?'}
         </a>
