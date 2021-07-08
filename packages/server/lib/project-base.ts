@@ -268,6 +268,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             system: _.pick(sys, 'osName', 'osVersion'),
           }
 
+          // flag the project as open
+          // this is useful if we want to close project
+          // that was never open in the first place
+          // since it allows us to skip a few lines
+          // @see close() function
           this.isOpen = true
 
           return runEvents.execute('before:run', cfg, beforeRunDetails)
@@ -366,6 +371,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
+
+      if (modifiedCfg) {
+        modifiedCfg.configFile = path.relative(this.projectRoot, modifiedCfg.configFile)
+      }
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 

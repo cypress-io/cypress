@@ -29,4 +29,9 @@ export default defineConfig({
 
     return config
   },
+  e2e (_, config) {
+    config.includeShadowDom = true
+
+    return config
+  },
 })

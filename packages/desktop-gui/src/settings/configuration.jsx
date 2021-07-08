@@ -85,7 +85,7 @@ ObjectLabel.defaultProps = {
   data: 'undefined',
 }
 
-const computeFromValue = (obj, name, path) => {
+const computeFromValue = (obj, hasE2EFunction, name, path) => {
   const normalizedPath = path.replace('$.', '').replace(name, `['${name}']`)
   let value = _.get(obj, normalizedPath)
 
@@ -99,11 +99,15 @@ const computeFromValue = (obj, name, path) => {
     return undefined
   }
 
+  if (value.from === 'plugin' && hasE2EFunction) {
+    return 'function'
+  }
+
   return value.from ? value.from : undefined
 }
 
-const ConfigDisplay = ({ data: obj }) => {
-  const getFromValue = _.partial(computeFromValue, obj)
+const ConfigDisplay = ({ data: obj, hasE2EFunction }) => {
+  const getFromValue = _.partial(computeFromValue, obj, hasE2EFunction)
   const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
     if (depth === 0) {
       return null
@@ -123,6 +127,8 @@ const ConfigDisplay = ({ data: obj }) => {
   }
 
   const data = normalizeWithoutMeta(obj)
+
+  if (!data) return <div/>
 
   data.env = normalizeWithoutMeta(obj.env)
 
@@ -175,12 +181,21 @@ const Configuration = observer(({ project }) => (
           <td>set from CLI arguments</td>
         </tr>
         <tr className='config-keys'>
-          <td><span className='plugin'>{project.hasE2EFunction ? 'e2e function' : 'plugin'}</span></td>
-          <td>set from {project.hasE2EFunction ? 'e2e function' : 'plugin file'}</td>
+          {project.hasE2EFunction ?
+            <>
+              <td><span className='function'>function</span></td>
+              <td>set in the <code>e2e</code> function if the {configFileFormatted(project.configFile)} file</td>
+            </>
+            :
+            <>
+              <td><span className='plugin'>plugin</span></td>
+              <td>set from plugin file</td>
+            </>
+          }
         </tr>
       </tbody>
     </table>
-    <ConfigDisplay data={project.resolvedConfig} />
+    <ConfigDisplay data={project.resolvedConfig} hasE2EFunction={project.hasE2EFunction} />
   </div>
 ))
 
