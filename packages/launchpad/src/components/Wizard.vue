@@ -1,7 +1,7 @@
 <template>
   <h1 class="text-3xl mt-12 text-center">{{ title }}</h1>
   <p class="text-center text-gray-400 my-2 mx-10" v-html="description" />
-  <div class="mx-10">
+  <div class="mx-5">
     <TestingType v-if="!steps.component && !steps.e2e" />
 
     <template v-else-if="steps.component">

@@ -2,7 +2,7 @@
   <div
     class="      
       max-w-3xl
-      min-h-80
+      min-h-70
       mx-auto
       border-1 border-gray-200
       rounded
