@@ -1,11 +1,12 @@
-import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 import { studioRecorder } from './studio-recorder'
+
+import './studio-modals.scss'
 
 @observer
 export class StudioInstructionsModal extends Component {
@@ -21,7 +22,8 @@ export class StudioInstructionsModal extends Component {
           <h1 className='title'>
             <i className='fas fa-magic icon' />
             {' '}
-Studio
+            Studio
+            {' '}
             <span className='beta'>BETA</span>
           </h1>
           <div className='content center'>
@@ -52,7 +54,7 @@ Studio
               {' '}
               <a href='https://on.cypress.io/studio-beta' target='_blank' rel="noreferrer">feedback</a>
               {' '}
-will be highly influential to our team.
+              will be highly influential to our team.
             </div>
           </div>
           <div className='controls'>
@@ -75,7 +77,7 @@ export class StudioInitModal extends Component {
   render () {
     return (
       <Dialog
-        className='studio-modal'
+        className='studio-modal studio-init-modal'
         aria-label='Start Studio'
         isOpen={studioRecorder.initModalIsOpen}
         onDismiss={this._close}
@@ -84,7 +86,8 @@ export class StudioInitModal extends Component {
           <h1 className='title'>
             <i className='fas fa-magic icon' />
             {' '}
-Studio
+            Studio
+            {' '}
             <span className='beta'>BETA</span>
           </h1>
           <div className='gif'>
@@ -119,9 +122,13 @@ Studio
 
 @observer
 export class StudioSaveModal extends Component {
-  @observable name = ''
+  state = {
+    name: '',
+  }
 
   render () {
+    const { name } = this.state
+
     return (
       <Dialog
         className='studio-modal studio-save-modal'
@@ -133,16 +140,16 @@ export class StudioSaveModal extends Component {
           <h1 className='title'>
             <i className='fas fa-magic icon' />
             {' '}
-Save New Test
+            Save New Test
           </h1>
           <div className='content'>
             <form onSubmit={this._save}>
               <div className='text'>
                 <label className='text-strong' htmlFor='testName'>Test Name</label>
-                <input id='testName' type='text' value={this.name} required={true} onChange={this._onInputChange} />
+                <input id='testName' type='text' value={name} required={true} onChange={this._onInputChange} />
               </div>
               <div className='center'>
-                <button className='btn-main' type='submit' disabled={!this.name}>
+                <button className='btn-main' type='submit' disabled={!name}>
                   Save Test
                 </button>
               </div>
@@ -159,25 +166,24 @@ Save New Test
     )
   }
 
-  @action
   _onInputChange = (e) => {
-    this.name = e.target.value
+    this.setState({ name: e.target.value })
   }
 
   _save = (e) => {
     e.preventDefault()
 
-    if (!this.name) return
+    const { name } = this.state
 
-    studioRecorder.save(this.name)
+    if (!name) return
+
+    studioRecorder.save(name)
   }
 }
 
-const StudioModals = () => (
+export const StudioModals = () => (
   <>
     <StudioInitModal />
     <StudioSaveModal />
   </>
 )
-
-export { StudioModals }
