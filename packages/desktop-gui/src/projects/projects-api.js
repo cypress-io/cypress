@@ -156,7 +156,7 @@ const openProject = (project) => {
     })
   }
 
-  const updateConfig = (config) => {
+  const updateConfig = (config, functions) => {
     project.update({
       id: config.projectId,
       name: config.projectName,
@@ -167,6 +167,7 @@ const openProject = (project) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
+    project.setE2EFunction(functions.indexOf('e2e') !== -1)
     project.prompts.setPromptStates(config)
   }
 
@@ -191,7 +192,7 @@ const openProject = (project) => {
   })
 
   return ipc.openProject(project.path)
-  .then((config = {}) => {
+  .then(({ config = {}, functions }) => {
     // In this context we know we are in e2e.
     // The configuration in e2e has already been merged with the main.
     // It is not useful to display those 2 fields explicitely.
@@ -200,8 +201,11 @@ const openProject = (project) => {
     // These two parameter could be functions and we
     // cannot send/receive functions using ipc
     delete config.e2e
+    delete config.resolved.e2e
     delete config.component
-    updateConfig(config)
+    delete config.resolved.component
+
+    updateConfig(config, functions)
     const projectIdAndPath = { id: config.projectId, path: project.path }
 
     specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
