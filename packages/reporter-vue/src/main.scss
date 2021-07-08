@@ -1,3 +1,8 @@
+* > strong {
+  @apply text-cool-gray-800;
+  font-weight: bold !important;
+}
+
 body {
   @apply font-sans;
 }

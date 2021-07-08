@@ -27,7 +27,6 @@ export function useElementSize(
     target,
     ([entry]) => {
 
-      debugger;
       width.value = entry.contentRect.width
       height.value = entry.contentRect.height
     },
