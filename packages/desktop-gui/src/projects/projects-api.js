@@ -192,6 +192,15 @@ const openProject = (project) => {
 
   return ipc.openProject(project.path)
   .then((config = {}) => {
+    // In this context we know we are in e2e.
+    // The configuration in e2e has already been merged with the main.
+    // It is not useful to display those 2 fields explicitely.
+    //
+    // NOTE: Even if we wanted to, we cannot display them.
+    // These two parameter could be functions and we
+    // cannot send/receive functions using ipc
+    delete config.e2e
+    delete config.component
     updateConfig(config)
     const projectIdAndPath = { id: config.projectId, path: project.path }
 
