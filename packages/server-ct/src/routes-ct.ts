@@ -73,11 +73,17 @@ export const createRoutes = ({
     })
   })
 
+  const clientRoute = config.clientRoute
+
+  if (!clientRoute) {
+    throw Error(`clientRoute is required. Received ${clientRoute}`)
+  }
+
   app.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
 
-  app.get(`${config.clientRoute}`, (req, res) => {
+  app.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     serve(req, res, {
@@ -88,13 +94,13 @@ export const createRoutes = ({
   })
 
   // enables runner-ct to make a dynamic import
-  app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
+  app.get(`${clientRoute}ctChunk-*`, (req, res) => {
     debug('Serving Cypress front-end chunk by requested URL:', req.url)
 
     serveChunk(req, res, { config })
   })
 
-  app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
+  app.get(`${clientRoute}vendors~ctChunk-*`, (req, res) => {
     debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
 
     serveChunk(req, res, { config })
