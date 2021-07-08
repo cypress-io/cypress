@@ -39,6 +39,20 @@ const verifyCommandLog = (index, { selector, name, message }) => {
   }
 }
 
+const getAssertionsMenu = () => {
+  return getFrame().find('.__cypress-studio-assertions-menu').should('exist').shadow()
+}
+
+const getAssertionOption = (type, value) => {
+  const menuItem = getAssertionsMenu().contains(type).parents('.assertion-type')
+
+  if (value) {
+    return menuItem.trigger('mouseover').find('.assertion-options').contains(value)
+  }
+
+  return menuItem
+}
+
 describe('studio record', () => {
   context('click', () => {
     it('records click event', () => {
@@ -303,6 +317,235 @@ describe('studio record', () => {
           selector: '#multiple',
           name: 'select',
           message: '[0, 2]',
+        })
+      })
+    })
+  })
+
+  context('assertions', () => {
+    it('displays dismissable assertions menu with highlight on right click', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+
+        getAssertionsMenu().find('.highlight').should('exist')
+        getAssertionsMenu().find('.assertions-menu').should('exist')
+
+        cy.percySnapshot()
+
+        getAssertionsMenu().find('.close').click()
+
+        getFrame().find('.__cypress-studio-assertions-menu').should('not.exist')
+      })
+    })
+
+    it('displays assertion options on hover', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+
+        getAssertionsMenu().find('.assertions-menu').should('exist')
+
+        getAssertionOption('have.attr', 'type: button')
+
+        cy.percySnapshot()
+      })
+    })
+
+    it('displays all possible assertions', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+
+        getAssertionsMenu().find('.assertions-menu').should('exist')
+
+        getAssertionOption('have.text', 'assertions button')
+        getAssertionOption('have.value', 'submit1')
+        getAssertionOption('have.id', 'assertions-1')
+        getAssertionOption('have.class', 'container')
+        getAssertionOption('have.class', 'container-wide')
+        getAssertionOption('have.attr', 'type: button')
+        getAssertionOption('have.attr', 'data-channel: a1')
+        getAssertionOption('have.attr', 'data-target: none')
+        getAssertionOption('be.visible').trigger('hover').find('.assertion-options').should('not.exist')
+        getAssertionOption('be.enabled').trigger('hover').find('.assertion-options').should('not.exist')
+      })
+    })
+
+    it('dismisses menu when recording another event', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+
+        getAssertionsMenu().find('.assertions-menu').should('exist')
+
+        getFrame().find('.btn').click()
+
+        getFrame().find('.__cypress-studio-assertions-menu').should('not.exist')
+
+        verifyCommandLog(1, {
+          selector: '.btn',
+          name: 'click',
+        })
+      })
+    })
+
+    it('dismisses existing menu and opens another when right clicking on a different element', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+
+        getAssertionOption('have.text', 'assertions button')
+
+        getFrame().find('.btn').rightclick()
+
+        getAssertionOption('have.text', 'button')
+      })
+    })
+
+    it('adds assertions to command log and dismisses menu', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+
+        getAssertionOption('have.text', 'assertions button').click()
+
+        getFrame().find('.__cypress-studio-assertions-menu').should('not.exist')
+
+        verifyCommandLog(1, {
+          selector: '#assertions-1',
+          name: 'assert',
+          message: 'expect <button#assertions-1.container.container-wide> to have text assertions button',
+        })
+      })
+    })
+
+    it('adds assertions of each type (1, 2, 3, params)', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#assertions-1').rightclick()
+        getAssertionOption('be.visible').click()
+
+        getFrame().find('#assertions-1').rightclick()
+        getAssertionOption('have.value', 'submit1').click()
+
+        getFrame().find('#assertions-1').rightclick()
+        getAssertionOption('have.attr', 'type').click()
+
+        verifyCommandLog(1, {
+          selector: '#assertions-1',
+          name: 'assert',
+          message: 'expect <button#assertions-1.container.container-wide> to be visible',
+        })
+
+        verifyCommandLog(2, {
+          selector: '#assertions-1',
+          name: 'assert',
+          message: 'expect <button#assertions-1.container.container-wide> to have value submit1',
+        })
+
+        verifyCommandLog(3, {
+          selector: '#assertions-1',
+          name: 'assert',
+          message: 'expect <button#assertions-1.container.container-wide> to have attr type with the value button',
+        })
+      })
+    })
+
+    it('can add assertions alongside commands in a changing environment', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('.assertion-submit').click()
+
+        getFrame().contains('action success!').rightclick()
+        getAssertionOption('be.visible').click()
+
+        verifyCommandLog(1, {
+          selector: '.assertion-submit',
+          name: 'click',
+        })
+
+        verifyCommandLog(2, {
+          selector: '#success-message',
+          name: 'assert',
+          message: 'expect <span#success-message> to be visible',
+        })
+      })
+    })
+
+    it('can add assertions on changing elements', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#input-radio').rightclick()
+        getAssertionOption('not.be.checked').click()
+
+        getFrame().find('#input-radio').click()
+
+        getFrame().find('#input-radio').rightclick()
+        getAssertionOption('be.checked').click()
+
+        getFrame().find('#input-checkbox').rightclick()
+        getAssertionOption('not.be.checked').click()
+
+        getFrame().find('#input-checkbox').check()
+
+        getFrame().find('#input-checkbox').rightclick()
+        getAssertionOption('be.checked').click()
+
+        getFrame().find('#input-text').type('words')
+
+        getFrame().find('#input-text').rightclick()
+        getAssertionOption('have.value', 'words').click()
+
+        verifyCommandLog(1, {
+          selector: '#input-radio',
+          name: 'assert',
+          message: 'expect <input#input-radio> to not be checked',
+        })
+
+        verifyCommandLog(2, {
+          selector: '#input-radio',
+          name: 'check',
+        })
+
+        verifyCommandLog(3, {
+          selector: '#input-radio',
+          name: 'assert',
+          message: 'expect <input#input-radio> to be checked',
+        })
+
+        verifyCommandLog(4, {
+          selector: '#input-checkbox',
+          name: 'assert',
+          message: 'expect <input#input-checkbox> to not be checked',
+        })
+
+        verifyCommandLog(5, {
+          selector: '#input-checkbox',
+          name: 'check',
+        })
+
+        verifyCommandLog(6, {
+          selector: '#input-checkbox',
+          name: 'assert',
+          message: 'expect <input#input-checkbox> to be checked',
+        })
+
+        verifyCommandLog(7, {
+          selector: '#input-text',
+          name: 'clear',
+        })
+
+        verifyCommandLog(8, {
+          selector: '#input-text',
+          name: 'type',
+          message: 'words',
+        })
+
+        verifyCommandLog(9, {
+          selector: '#input-text',
+          name: 'assert',
+          message: 'expect <input#input-text> to have value words',
         })
       })
     })

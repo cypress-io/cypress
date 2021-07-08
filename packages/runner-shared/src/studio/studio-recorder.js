@@ -34,6 +34,7 @@ const internalMouseEvents = [
 ]
 
 const tagNamesWithoutText = [
+  'SELECT',
   'INPUT',
   'TEXTAREA',
 ]
