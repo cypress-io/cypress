@@ -92,8 +92,9 @@ export default class Hook implements HookProps {
 
       if (groupCommand && groupCommand.addChild) {
         groupCommand.addChild(command)
-
-        return
+      } else {
+        // if we cant find a command to attach to, treat this like an ordinary log
+        command.group = undefined
       }
     }
 

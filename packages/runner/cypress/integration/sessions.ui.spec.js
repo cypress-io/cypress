@@ -5,16 +5,14 @@ const { runIsolatedCypress } = helpers.createCypress({ config: { experimentalSes
 describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeight: 660 }, () => {
   it('empty session with no data', () => {
     runIsolatedCypress(() => {
-      const blankSession = cy.defineSession('blankSession', () => {})
-
       it('t1', () => {
-        cy.session(blankSession)
+        cy.session('blank_session', () => {})
         assert(true)
       })
     })
 
     cy.get('.sessions-container').click()
-    .should('contain', 'no session data')
+    .should('contain', 'blank_session')
 
     cy.percySnapshot()
   })

@@ -11,7 +11,7 @@ const $errUtils = require('./error_utils')
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
-const parentOrChildRe = /parent|child/
+const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group groupStart message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
@@ -207,22 +207,22 @@ const defaults = function (state, config, obj) {
     },
   })
 
-  if (obj.groupEnd) {
-    group = null
+  const logGroup = _.last(state('logGroup'))
+
+  if (logGroup) {
+    obj.group = logGroup
   }
 
-  if (group) {
-    obj.group = group
+  if (obj.groupEnd) {
+    state('logGroup', _.slice(state('logGroup'), 0, -1))
   }
 
   if (obj.groupStart) {
-    group = obj.id
+    state('logGroup', (state('logGroup') || []).concat(obj.id))
   }
 
   return obj
 }
-
-let group = null
 
 const Log = function (cy, state, config, obj) {
   obj = defaults(state, config, obj)
@@ -466,7 +466,11 @@ const Log = function (cy, state, config, obj) {
       // unless its already been 'ended'
       // or has been specifically told not to auto resolve
       if (this._shouldAutoEnd()) {
-        return this.snapshot().end()
+        if (this.get('snapshot') !== false) {
+          this.snapshot()
+        }
+
+        return this.end()
       }
     },
 

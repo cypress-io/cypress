@@ -15,7 +15,6 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import CommandModel from './command-model'
-import Collapsible from '../collapsible/collapsible'
 import TestError from '../errors/test-error'
 
 const md = new Markdown()
@@ -150,6 +149,7 @@ interface Props {
   appState: AppState
   events: Events
   runnablesStore: RunnablesStore
+  groupId?: number
 }
 
 @observer
@@ -167,15 +167,22 @@ class Command extends Component<Props> {
     const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
 
+    if (model.group && this.props.groupId !== model.group) {
+      return null
+    }
+
+    if (model.showError) {
+      return <TestError model={model} onPrintToConsole={this._onClick}/>
+    }
+
     return (
       <li
         className={cs(
           'command',
           `command-name-${model.name ? nameClassName(model.name) : ''}`,
-          `command-state-${(_.last(model.children) || model).state}`,
+          `command-state-${model.state}`,
           `command-type-${model.type}`,
           {
-            'command-has-showError': model.showError,
             'command-is-studio': model.isStudio,
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
@@ -204,7 +211,7 @@ class Command extends Component<Props> {
             onMouseOut={() => this._snapshot(false)}
           >
             <div className='command-wrapper-text'>
-              <span className='command-expander' onClick={this._toggleOpen}>
+              <span className='command-expander' >
                 <i className='fas' />
               </span>
               <span className='command-number'>
@@ -215,7 +222,7 @@ class Command extends Component<Props> {
                 <i className='fas fa-thumbtack' />
               </span>
               <span className='command-method'>
-                <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
+                <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
               </span>
               <span className='command-message'>
                 {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
@@ -234,29 +241,11 @@ class Command extends Component<Props> {
                     <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
                   </Tooltip>
                 </span>
-                {model.hasConsoleProps && model.numChildren > 1 &&
-                  <FlashOnClick
-                    message='Printed output to your console'
-                    onClick={this._onPrintToConsole}
-                    shouldShowMessage={() => true}
-                  >
-                    <div className='command-parent-print-btn'>
-                 print to console
-                    </div>
-                  </FlashOnClick>
 
-                }
               </span>
             </div>
             <Progress model={model} />
-            {model.showError && <Collapsible
-              header={typeof model.showError === 'string' ? model.showError : 'Error'}
-              headerClass="command-error-header"
-              contentClass="command-error"
-            >
-              <TestError model={model} onPrintToConsole={this._onClick}/>
 
-            </Collapsible>}
           </div>
         </FlashOnClick>
         {this._children()}
@@ -267,13 +256,7 @@ class Command extends Component<Props> {
   _isOpen () {
     const { model } = this.props
 
-    return this.isOpen ||
-    (this.isOpen === null
-      && (
-        (_.some(model.children, (v) => v.isLongRunning) && _.last(model.children)?.state === 'pending') ||
-        _.last(model.children)?.state === 'failed'
-      )
-    )
+    return !!model.isOpen
   }
 
   _children () {
@@ -291,6 +274,7 @@ class Command extends Component<Props> {
             events={events}
             runnablesStore={runnablesStore}
             aliasesWithDuplicates={null}
+            groupId={model.id}
           />
         ))}
       </ul>
@@ -309,15 +293,9 @@ class Command extends Component<Props> {
     return !this.props.appState.isRunning && !!this.props.model.hasConsoleProps
   }
 
-  @action _toggleOpen = (e: MouseEvent) => {
-    e.stopPropagation()
-
-    this.isOpen = !this.isOpen
-  }
-
   @action _onClick = () => {
     if (this.props.model.hasChildren) {
-      this.isOpen = !this._isOpen()
+      this.props.model.toggleOpen()
 
       return
     }

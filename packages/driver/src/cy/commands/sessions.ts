@@ -523,18 +523,25 @@ export default function (Commands, Cypress, cy) {
 
       const _log = Cypress.log({
         name: 'session',
-        sessionInfo: getSessionDetails(existingSession),
         message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
         groupStart: true,
+        snapshot: false,
+      })
+
+      const dataLog = Cypress.log({
+        name: 'session',
+        sessionInfo: getSessionDetails(existingSession),
+        message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
       })
 
       async function runsetup (existingSession) {
-        Cypress.log({
+        const creatingLog = Cypress.log({
           name: 'Creating New Session',
           state: 'passed',
           event: true,
-          type: 'parent',
+          type: 'system',
           message: ``,
+          groupStart: true,
         })
 
         if (!hadValidationError) {
@@ -555,12 +562,19 @@ export default function (Commands, Cypress, cy) {
 
         return cy.then(() => sessions.getCurrentSessionData())
         .then((data) => {
+          creatingLog.set({
+            name: 'Created New Session',
+
+          })
+
+          Cypress.log({ groupEnd: true, emitOnly: true })
+
           _.extend(existingSession, data)
           existingSession.hydrated = true
 
           setActiveSession({ [existingSession.id]: existingSession })
 
-          _log.set({
+          dataLog.set({
             consoleProps: () => getConsoleProps(existingSession),
           })
 
@@ -573,17 +587,22 @@ export default function (Commands, Cypress, cy) {
       }
 
       // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
-      function validateSession (existingSession, onFail) {
+      function validateSession (existingSession, _onFail) {
         navigateAboutBlank()
 
-        Cypress.log({
+        const validatingLog = Cypress.log({
           name: 'Validating Session',
           message: '',
           snapshot: false,
-          type: 'parent',
+          type: 'system',
           state: 'passed',
           event: true,
+          groupStart: true,
         })
+
+        const onFail = (err) => {
+          _onFail(err, validatingLog)
+        }
 
         let _commandToResume: any = null
 
@@ -594,7 +613,6 @@ export default function (Commands, Cypress, cy) {
         try {
           returnVal = existingSession.validate()
         } catch (e) {
-          (e)
           onFail(e)
 
           return
@@ -606,9 +624,10 @@ export default function (Commands, Cypress, cy) {
             if (val === false) {
               throw new Error('Your `cy.session` **validate** callback resolved false')
             }
+
+            Cypress.log({ groupEnd: true, emitOnly: true })
           })
           .catch((err) => {
-            (err)
             onFail(err)
           })
         }
@@ -639,9 +658,9 @@ export default function (Commands, Cypress, cy) {
             if (val === false) {
               return onFail((new Error('Your `cy.session` **validate** callback resolved false')))
             }
-
-            return
           }
+
+          Cypress.log({ groupEnd: true, emitOnly: true })
         })
 
         _commandToResume = _catchCommand
@@ -650,22 +669,28 @@ export default function (Commands, Cypress, cy) {
       }
 
       let hadValidationError = false
-      let onValidationError: Function = (err) => {
-        const log = Cypress.log({
+      let onValidationError: Function = (err, log) => {
+        log.set({
           name: 'Invalidated Session',
           message: '',
-          type: 'parent',
+          type: 'system',
           event: true,
+          state: 'warning',
+        })
+
+        const errorLog = Cypress.log({
           showError: true,
+          type: 'system',
+          event: true,
+          name: '',
+          message: '',
         })
 
-        log.error(err)
-        log.set({
-          state: 'passed',
+        errorLog.error(err)
+        errorLog.set({
+          state: 'warn',
 
         })
-
-        log.snapshot().end()
 
         _log.set({
           renderProps: () => {
@@ -675,6 +700,8 @@ export default function (Commands, Cypress, cy) {
             }
           },
         })
+
+        Cypress.log({ groupEnd: true, emitOnly: true })
 
         hadValidationError = true
 
@@ -719,7 +746,7 @@ export default function (Commands, Cypress, cy) {
           name: 'Restored Saved Session',
           event: true,
           state: 'passed',
-          type: 'parent',
+          type: 'system',
           message: ``,
         })
 
@@ -742,7 +769,7 @@ export default function (Commands, Cypress, cy) {
       .then(async () => {
         if (!hadValidationError) {
           await navigateAboutBlank()
-          Cypress.log({ groupEnd: true, name: '', message: '', emitOnly: true })
+          Cypress.log({ groupEnd: true, emitOnly: true })
         }
       })
     },

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
 import Err from '../errors/err-model'
@@ -23,7 +24,7 @@ export interface CommandProps extends InstrumentProps {
   hookId: string
   showError?: boolean
   isStudio?: boolean
-  group?: string
+  group?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
 
@@ -44,9 +45,10 @@ export default class Command extends Instrument {
   @observable hookId: string
   @observable isStudio: boolean
   @observable showError?: boolean = false
-  @observable group?: string
+  @observable group?: number
   @observable hasSnapshot?: boolean
   @observable hasConsoleProps?: boolean
+  @observable _isOpen: boolean|null = null
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -58,6 +60,22 @@ export default class Command extends Instrument {
   @computed get numChildren () {
     // and one to include self so it's the total number of same events
     return this.children.length + 1
+  }
+
+  @computed get isOpen () {
+    if (!this.hasChildren) return null
+
+    return this._isOpen || (this._isOpen === null
+      && (
+        _.last(this.children)?.isOpen ||
+        (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
+        _.some(this.children, (v) => v.state === 'failed')
+      )
+    )
+  }
+
+  @action toggleOpen () {
+    this._isOpen = !this._isOpen
   }
 
   @computed get hasChildren () {

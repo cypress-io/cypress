@@ -180,7 +180,7 @@ export default class Attempt {
   _addSession (props: SessionProps) {
     const session = new Session(props)
 
-    this.sessions[props.sessionInfo.name] = session
+    this.sessions[props.sessionInfo.id] = session
   }
 
   _addRoute (props: RouteProps) {

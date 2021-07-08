@@ -52,7 +52,15 @@
     }
   }
 
-  .command-is-event {
+  .command-type-system.command-is-event > span > .command-wrapper{
+    font-style: unset;
+    .command-method,
+    .command-message {
+      color: #525252;
+      font-weight: 700;
+    }
+  }
+  .command-is-event > span > .command-wrapper {
     font-style: italic;
 
     .command-method,
@@ -301,8 +309,8 @@
     }
   }
 
-  .command-has-showError {
-    > span > .command-wrapper {
+  .command-state-warn > span > .command-wrapper {
+    font-style: unset;
       background-color: $warn-background;
       border-left: 2px solid hsl(42, 56%, 53%);
 
@@ -313,26 +321,13 @@
       .command-wrapper-text .command-method {
         color: $warn-text;
       }
+  }
 
-      .command-error-header {
-        color: $warn-text;
-        font-style: normal;
-        margin-left: 25px;
-        
-        &:hover {
-          color: darken($color: $warn-text, $amount: 10%);
-
-          .collapsible-indicator {
-            color: #999;
-          }
-        }
-
-        .collapsible-header {
-          outline: none;
-          padding: 3px 0;
-        }
-      }
-    }
+  .command .runnable-err-wrapper {
+    padding:0;
+    border:0;
+    margin: 0;
+    margin-bottom: 5px;
   }
 
   .command-with-indicator {
@@ -598,7 +593,7 @@
    }
   }
 
-  .command-is-open {
+  .command-is-open > span > .command-wrapper {
     .command-expander {
       i {
         @extend .#{$fa-css-prefix}-caret-down;
@@ -619,6 +614,13 @@
     cursor: pointer;
   }
 
+  .command-has-children > span > .command-wrapper {
+    .command-number {
+      display: none;
+    }
+
+  }
+
   .command-is-pinned > span > .command-wrapper,
   .command-has-snapshot > span > .command-wrapper:hover {
     .command-number {
@@ -631,8 +633,7 @@
   }
 
   .command {
-    &.command-is-studio,&.command-has-children {
-      > span > .command-wrapper:hover {
+    &.command-is-studio > span > .command-wrapper:hover {
         .command-pin {
           display: none;
         }
@@ -640,7 +641,6 @@
           display: block;
         }
       }
-    }
   }
 
   .command-state-pending > span > .command-wrapper:hover {

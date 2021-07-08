@@ -384,6 +384,8 @@ function SuiteWithValidateFn (id, fn) {
     cy.session(id, setup, {
       validate,
     })
+
+    cy.log('outside session')
   })
 
   it('t1', () => {
@@ -420,8 +422,20 @@ describe('options.validate reruns steps when rejecting', () => {
   })
 })
 
+describe('options.validate reruns steps when rejecting', () => {
+  SuiteWithValidateFn('validate_reject', (callCount) => {
+    if (callCount === 2) {
+      throw new Error('validate error')
+    }
+  })
+})
+
 describe('options.validate reruns steps when resolving false in cypress command', () => {
   SuiteWithValidateFn('validate_resolve_false_command_1', (callCount) => {
+    if (callCount === 2) {
+      // cy.wait(10000)
+    }
+
     cy.request('https://127.0.0.2:44665/redirect').then((res) => {
       return callCount !== 2
     })
