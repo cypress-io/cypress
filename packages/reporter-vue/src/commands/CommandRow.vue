@@ -1,9 +1,8 @@
 <template>
   <div class="command-row" :class="{ [size]: true, ...$attrs.class }"
   @click="onSelect"
-  @mouse-enter="hovering = true"
-  @mouse-leave="hovering = false"
-  >
+  @mouseenter="hovering = true"
+  @mouseleave="hovering = false">
     <div class="position"><slot name="position" v-bind="{ selected, hovering }"></slot></div>
     <div class="command-name"><slot name="name" v-bind="{ selected, hovering }"></slot></div>
     <div class="command-message"><slot name="message" v-bind="{ selected, hovering }"></slot></div>
