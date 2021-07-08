@@ -207,6 +207,8 @@ module.exports = {
           }
         })
 
+        configObject.configFile = path.relative(projectRoot, file)
+
         return configObject
       }
 
