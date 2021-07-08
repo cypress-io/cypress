@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.4.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.1...@cypress/schematic-v1.4.2) (2021-06-29)
+
+
+### Bug Fixes
+
+* plugin file referenced by cypress config in angular schematics ([#17143](https://github.com/cypress-io/cypress/issues/17143)) ([5c2efc7](https://github.com/cypress-io/cypress/commit/5c2efc750779b75792b579b3196c8cb8af1f72f9))
+
 # [@cypress/schematic-v1.4.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.0...@cypress/schematic-v1.4.1) (2021-06-29)
 
 

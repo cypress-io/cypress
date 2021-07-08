@@ -8,6 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
+        - tgriesser/fix/mac-build
 
 defaults: &defaults
   parallelism: 1
