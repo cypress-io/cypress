@@ -607,13 +607,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onError: args.onError,
   }
 
-  return openProject
-  .create(projectRoot, args, options)
-  .catch({ portInUse: true }, (err) => {
-    // TODO: this needs to move to call exitEarly
-    // so we record the failure in CI
-    return errors.throw('PORT_IN_USE_LONG', err.port)
-  })
+  return openProject.create(projectRoot, args, options)
 }
 
 const createAndOpenProject = function (socketId, options) {

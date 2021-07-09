@@ -1111,7 +1111,8 @@ describe('lib/cypress', () => {
       })
 
       // TODO: handle PORT_IN_USE short integration test
-      xit('logs error and exits when port is in use', function () {
+      it('logs error and exits when port is in use', async function () {
+        sinon.stub(ProjectBase.prototype, 'getAutomation').returns({ use: () => {} })
         let server = http.createServer()
 
         server = Promise.promisifyAll(server)
@@ -1120,7 +1121,7 @@ describe('lib/cypress', () => {
         .then(() => {
           return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         }).then(() => {
-          this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
+          this.expectExitWithErr('PORT_IN_USE_SHORT', '5544')
         })
       })
     })

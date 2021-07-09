@@ -10,6 +10,7 @@ const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
 const runEvents = require('./plugins/run_events')
 const { getSpecUrl } = require('./project_utils')
+const errors = require('./errors')
 
 const moduleFactory = () => {
   let openProject = null
@@ -365,8 +366,17 @@ const moduleFactory = () => {
         },
       })
 
-      await openProject.initializeConfig()
-      await openProject.open()
+      try {
+        await openProject.initializeConfig()
+        await openProject.open()
+      } catch (err) {
+        if (err.isCypressErr && err.portInUse) {
+          errors.throw(err.type, err.port)
+        } else {
+          // rethrow and handle elsewhere
+          throw (err)
+        }
+      }
 
       return this
     },
