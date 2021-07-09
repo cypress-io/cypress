@@ -1,6 +1,5 @@
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
-const { app } = require('electron')
 const la = require('lazy-ass')
 const pkg = require('@packages/root')
 const path = require('path')
@@ -1506,6 +1505,10 @@ module.exports = {
   ready (options = {}) {
     debug('run mode ready with options %o', options)
 
+    if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
+      debug('running electron as a node process without xvfb')
+    }
+
     _.defaults(options, {
       isTextTerminal: true,
       browser: 'electron',
@@ -1652,14 +1655,18 @@ module.exports = {
   },
 
   async run (options) {
-    // electron >= 5.0.0 will exit the app if all browserwindows are closed,
-    // this is obviously undesirable in run mode
-    // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
-    app.on('window-all-closed', () => {
-      debug('all BrowserWindows closed, not exiting')
-    })
+    if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+      const app = require('electron').app
 
-    await app.whenReady()
+      // electron >= 5.0.0 will exit the app if all browserwindows are closed,
+      // this is obviously undesirable in run mode
+      // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
+      app.on('window-all-closed', () => {
+        debug('all BrowserWindows closed, not exiting')
+      })
+
+      await app.whenReady()
+    }
 
     return this.ready(options)
   },
