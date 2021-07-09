@@ -688,7 +688,7 @@ export default function (Commands, Cypress, cy) {
       let hadValidationError = false
       let onValidationError: Function = (err, log) => {
         log.set({
-          name: 'Validate Session: invalidated',
+          name: 'Validate Session: invalid',
           message: '',
           type: 'system',
           event: true,
