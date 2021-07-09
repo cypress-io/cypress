@@ -93,7 +93,6 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     return (
       <div className={cs(className, 'reporter', {
         multiSpecs: runMode === 'multi',
-        inactive: !appState.isRunning,
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
       })}>
