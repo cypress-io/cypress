@@ -151,14 +151,13 @@ Issues may be opened about wanting changes to our [documentation](https://github
 - If you have permission to 'Transfer the issue', do so. If not, explain that they can open an issue in our other repository and link to the repository.
 - Close the issue (if not already transferred).
 
-#### Our Dashboard Service
+#### Our Dashboard
 
-Issues may be opened about wanting features in our Dashboard Service. In this case you should:
+Issues may be opened about wanting features in our Dashboard. In this case you should:
 
 - Thank them for expressing interest in a new feature.
-- Refer them to the Dashboard ProductBoard: "You can express interest and see progress for this feature on our Roadmap from our Dashboard's product board here: https://portal.productboard.com/cypress-io/1-cypress-dashboard All related work for the Dashboard features is handled in that ProductBoard and will be handled by the Dashboard team directly when you comment there."
-- Close the issue
-- Close the issue to comments
+- Tag the issue as 'external: dashboard'.
+- Inform the Dashboard team of the newly opened feature.
 
 ### Is this already an open issue?
 
