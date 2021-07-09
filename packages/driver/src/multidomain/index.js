@@ -3,7 +3,7 @@ import $Cy from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 
-export const initialize = (autWindow) => {
+const onBeforeAppWindowLoad = (autWindow) => {
   const specWindow = {
     Error,
   }
@@ -50,11 +50,12 @@ export const initialize = (autWindow) => {
     }
   }, false)
 
-  top.postMessage('cross:domain:driver:ready', '*')
-
+  autWindow.Cypress = Cypress
   autWindow.cy = cy
 
-  return {
-    cy,
-  }
+  top.postMessage('cross:domain:window:before:load', '*')
 }
+
+window.__onBeforeAppWindowLoad = onBeforeAppWindowLoad
+
+top.postMessage('cross:domain:bridge:ready', '*')
