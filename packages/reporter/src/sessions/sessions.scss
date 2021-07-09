@@ -1,4 +1,9 @@
-.sessions-container {
+.sessions-container.instruments-container {
+
+  .instrument-content {
+    padding: 0
+  }
+
     .clear-sessions {
       text-transform: none;
       color: #6a6b6c;
@@ -8,6 +13,19 @@
       cursor: pointer;
       &:hover, &:focus {
           color: rgb(48, 48, 48);
+      }
+    }
+
+    .session-item {
+      padding: 3px 10px;
+
+      background-color: #eef1f4;
+      color: #777;
+      min-height: 20px;
+  
+      &:hover {
+        cursor: pointer;
+        background-color: #E0E5E7;
       }
     }
 }

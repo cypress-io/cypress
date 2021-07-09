@@ -314,22 +314,6 @@ class Command extends Component<Props> {
       this.props.events.emit('show:command', this.props.model.id)
     }
   }
-  @action _onPrintToConsole = (e) => {
-    e.stopPropagation()
-    if (this.props.appState.isRunning || this.props.appState.studioActive) return
-
-    const { id } = this.props.model
-
-    if (this._isPinned()) {
-      this.props.appState.pinnedSnapshotId = null
-      this.props.events.emit('unpin:snapshot', id)
-      this._snapshot(true)
-    } else {
-      this.props.appState.pinnedSnapshotId = id as number
-      this.props.events.emit('pin:snapshot', id)
-      this.props.events.emit('show:command', this.props.model.id)
-    }
-  }
 
   // snapshot rules
   //

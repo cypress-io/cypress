@@ -5,7 +5,10 @@ export interface SessionProps extends InstrumentProps {
   name: string
   testId: string
   testCurrentRetry: number
-  sessionInfo: {id: string, data: Record<string, {cookies: number, localStorage: number}>}
+  sessionInfo: {
+    id: string
+    data: Record<string, {cookies: number, localStorage: number}>
+  }
 }
 
 export default class Session extends Instrument {

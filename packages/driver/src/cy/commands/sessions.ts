@@ -759,6 +759,10 @@ export default function (Commands, Cypress, cy) {
           },
         })
 
+        dataLog.set({
+          consoleProps: () => getConsoleProps(existingSession),
+        })
+
         return sessions.setSessionData(existingSession)
       })
       .then(async () => {
