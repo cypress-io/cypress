@@ -4,36 +4,39 @@ body:
   - type: markdown
     attributes:
       value: |
-        👋 Use the template below to report a bug. Fill in as much info as possible. 
-
-        Have a question? Start a new discussion 👉 https://github.com/cypress-io/cypress/discussions
-
-        As an open source project with a small maintainer team, it may take some time for your issue to be addressed. Please be patient and we will respond as soon as we can.
+        Have a question? 👉 [Start a new discussion](https://github.com/cypress-io/cypress/discussions) or [ask in chat](https://on.cypress.io/discord).
   - type: textarea
     id: current-behavior
     attributes:
       label: Current behavior
-      description: A description including screenshots, stack traces, DEBUG logs, etc. 👉 https://on.cypress.io/troubleshooting
-      placeholder: Current behavior
+      description: A description including screenshots, stack traces, DEBUG logs, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
+      placeholder: Currently...
     validations:
       required: true
   - type: textarea
     id: desired-behavior
     attributes:
       label: Desired behavior
-      description: Remember, we are not familiar with the application you're testing, so please provide a clear description of what should happen.
-      placeholder: Desired behavior
+      description: Remember, we're not familiar with the app you're testing, so please provide a clear description of what should happen.
+      placeholder: In this situation, Cypress should...
   - type: textarea
     id: reproduction
     attributes:
       label: Test code to reproduce
-      description: You could also provide a repo that we can clone and run. You can fork 👉 https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then link to your fork.
-      placeholder: Test code to reproduce
-  - type: textarea
-    id: versions
+      description: Provide a failing test or repo we can run. You can fork [this repo](https://github.com/cypress-io/cypress-test-tiny), set up a failing test, then link to your fork.
+      placeholder: Here is my failing test code and the app code to run the tests on...
+    validations:
+      required: true
+  - type: input
+    id: version
     attributes:
-      label: Versions
-      description: |
-        Cypress version, last known working Cypress version (if applicable), Browser and version, Operating System, CI Provider, etc
-
-        If possible, please update Cypress to latest version and check if the bug is still present.
+      label: Cypress Version
+      description: Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
+      placeholder: ex. 7.6.0
+    validations:
+      required: true
+  - type: textarea
+    id: othter
+    attributes:
+      label: Other
+      placeholder: Any other details?
