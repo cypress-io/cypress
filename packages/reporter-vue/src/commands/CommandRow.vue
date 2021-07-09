@@ -108,7 +108,7 @@ export default defineComponent({
 }
 
 .command-row {
-  @apply p-2px bg-cool-gray-100 font-mono cursor-pointer hover:bg-cool-gray-200;
+  @apply p-2px bg-warm-gray-100 font-mono cursor-pointer hover:bg-warm-gray-200;
 }
 
 .command-meta {

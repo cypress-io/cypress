@@ -22,7 +22,7 @@
     <template #meta="{}">
       <span class="command-meta">
         <i-fa-eye-slash v-if="command.visible === false"/>
-        <span class="bg-cool-gray-400 px-4px py-4px rounded-md  text-size-10.2px text-white" v-if="command.numElements >= 0">
+        <span class="bg-warm-gray-400 px-4px py-4px rounded-md  text-size-10.2px text-white" v-if="command.numElements >= 0">
           {{ command.numElements }}
         </span>
       </span>
@@ -120,19 +120,19 @@ export default defineComponent({
 }
 
 .command-position {
-  @apply text-cool-gray-400;
+  @apply text-warm-gray-400;
 }
 .command-message {
-  @apply text-cool-gray-600;
+  @apply text-warm-gray-600;
 }
 
 .command-name {
-  @apply text-cool-gray-700;
+  @apply text-warm-gray-700;
 }
 
 .command-row.event {
   .command-message, .command-name {
-    @apply text-cool-gray-400 italic;
+    @apply text-warm-gray-400 italic;
   }
 }
 
@@ -144,7 +144,7 @@ export default defineComponent({
 }
 
 .command-meta {
-  @apply text-cool-gray-400 flex col-auto justify-center items-center h-[calc(100%)] gap-4px w-[calc(100%)];
+  @apply text-warm-gray-400 flex col-auto justify-center items-center h-[calc(100%)] gap-4px w-[calc(100%)];
 }
 
 .indicator {
