@@ -191,7 +191,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       logger.setSettings(config)
 
       this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl ?? undefined,
+        target: config.baseUrl && projectType === 'ct' ? config.baseUrl : undefined,
       })
 
       this._socket = new SocketCtor(config) as TSocket
