@@ -11803,6 +11803,16 @@ babel-preset-stage-3@^6.24.1:
     babel-plugin-transform-exponentiation-operator "^6.24.1"
     babel-plugin-transform-object-rest-spread "^6.22.0"
 
+babel-preset-typescript-vue3@2.0.14:
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/babel-preset-typescript-vue3/-/babel-preset-typescript-vue3-2.0.14.tgz#d60dd7a53d8e1fb60ff755aaaaa5f05c2f871f0f"
+  integrity sha512-aChegBF7AUMkIyR7aDeAa/boeeLPxfx2lObr4/H7VXXB3PR6KHtsriRFs/vzELCm1rvButQJAFpBRexJqUYTSA==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.0.0"
+    "@babel/plugin-transform-typescript" "^7.3.2"
+    "@babel/preset-typescript" "^7.3.3"
+    "@vue/compiler-sfc" "^3.0.5"
+
 babel-preset-typescript-vue@^1.0.3:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/babel-preset-typescript-vue/-/babel-preset-typescript-vue-1.1.1.tgz#6a617dcb0ee26f911735d5f2bbe530286b2c7c02"

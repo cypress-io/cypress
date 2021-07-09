@@ -6,10 +6,7 @@ import {
   namedObserver,
   eventManager as EventManager,
   Header,
-  useVue,
-  // VueApp
 } from '@packages/runner-shared'
-import SpecPatternGuide from '@packages/runner-shared/src/components/SpecPatternGuide.vue'
 
 import { Iframes } from '../iframe/iframes'
 import { animationFrameDebounce } from '../lib/debounce'
@@ -41,10 +38,6 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
   function updatePluginsHeight (height: number) {
     props.state.updatePluginsHeight(height)
   }
-
-  const specGlobRef = React.useRef<HTMLDivElement>(null)
-
-  useVue(specGlobRef, SpecPatternGuide)
 
   return (
     <SpecContentWrapper state={props.state} onSplitPaneChange={props.state.updateReporterWidth}>
@@ -79,7 +72,6 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
             ? <Iframes {...props} />
             : (
               <NoSpec>
-                {/* {props.state.specs.length > 0 && <VueApp mountRef={specGlobRef} /> } */}
                 <KeyboardHelper />
               </NoSpec>
             )}

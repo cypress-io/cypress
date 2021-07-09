@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
+import globby from 'globby'
 import _ from 'lodash'
 import { onNetEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
@@ -73,10 +74,12 @@ export class SocketBase {
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   protected testsDir: string | null
+  protected config: any
 
   constructor (config: Record<string, any>) {
     this.ended = false
     this.testsDir = null
+    this.config = config
   }
 
   protected ensureProp = ensureProp
@@ -338,6 +341,12 @@ export class SocketBase {
         }).catch(Bluebird.TimeoutError, (_err) => {
           return cb(false)
         })
+      })
+
+      socket.on('get:project:files', async (glob: string, cb: (files: string[]) => void) => {
+        const files = await globby(glob, { cwd: this.config.projectRoot, gitignore: true })
+
+        cb(files)
       })
 
       socket.on('backend:request', (eventName: string, ...args) => {
