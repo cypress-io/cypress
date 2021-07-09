@@ -65,12 +65,9 @@ export default class Command extends Instrument {
   @computed get isOpen () {
     if (!this.hasChildren) return null
 
-    if (this.group && this.type === 'system' && this.hasChildren) {
-      return true
-    }
-
     return this._isOpen || (this._isOpen === null
       && (
+        (this.group && this.type === 'system' && this.hasChildren) ||
         _.last(this.children)?.isOpen ||
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
         _.some(this.children, (v) => v.state === 'failed')
@@ -79,7 +76,7 @@ export default class Command extends Instrument {
   }
 
   @action toggleOpen () {
-    this._isOpen = !this._isOpen
+    this._isOpen = !this.isOpen
   }
 
   @computed get hasChildren () {

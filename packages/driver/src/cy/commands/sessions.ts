@@ -470,6 +470,9 @@ export default function (Commands, Cypress, cy) {
         throw new Error('cy.session requires a string or object as the first argument')
       }
 
+      // backup session command so we can set it as codeFrame location for errors later on
+      const sessionCommand = cy.state('current')
+
       // stringfy determinitically if we were given an object
       id = typeof id === 'string' ? id : stringifyStable(id)
 
@@ -535,8 +538,8 @@ export default function (Commands, Cypress, cy) {
       })
 
       async function runsetup (existingSession) {
-        const creatingLog = Cypress.log({
-          name: 'Creating New Session',
+        Cypress.log({
+          name: 'Create New Session',
           state: 'passed',
           event: true,
           type: 'system',
@@ -562,11 +565,6 @@ export default function (Commands, Cypress, cy) {
 
         return cy.then(() => sessions.getCurrentSessionData())
         .then((data) => {
-          creatingLog.set({
-            name: 'Created New Session',
-
-          })
-
           Cypress.log({ groupEnd: true, emitOnly: true })
 
           _.extend(existingSession, data)
@@ -591,7 +589,7 @@ export default function (Commands, Cypress, cy) {
         navigateAboutBlank()
 
         const validatingLog = Cypress.log({
-          name: 'Validating Session',
+          name: 'Validate Session',
           message: '',
           snapshot: false,
           type: 'system',
@@ -622,7 +620,9 @@ export default function (Commands, Cypress, cy) {
           return returnVal
           .then((val) => {
             if (val === false) {
-              throw new Error('Your `cy.session` **validate** callback resolved false')
+              // set current command to cy.session for more accurate codeFrame
+              cy.state('current', sessionCommand)
+              throw $errUtils.errByPath('sessions.callback_returned_false', { reason: 'resolved false' })
             }
 
             Cypress.log({ groupEnd: true, emitOnly: true })
@@ -662,7 +662,11 @@ export default function (Commands, Cypress, cy) {
           if (_didThrow) return onFail((_didThrow))
 
           if (returnVal === false) {
-            return onFail((new Error('Your `cy.session` **validate** callback returned false.')))
+            // set current command to cy.session for more accurate codeframe
+            cy.state('current', sessionCommand)
+
+            return onFail($errUtils.errByPath('sessions.callback_returned_false', { reason: 'returned false' }))
+            // return onFail((new Error('Your `cy.session` **validate** callback returned false.')))
           }
 
           if (returnVal === undefined || Cypress.isCy(returnVal)) {
@@ -684,7 +688,7 @@ export default function (Commands, Cypress, cy) {
       let hadValidationError = false
       let onValidationError: Function = (err, log) => {
         log.set({
-          name: 'Invalidated Session',
+          name: 'Validate Session: invalidated',
           message: '',
           type: 'system',
           event: true,
@@ -756,7 +760,7 @@ export default function (Commands, Cypress, cy) {
         }
 
         Cypress.log({
-          name: 'Restored Saved Session',
+          name: 'Restore Saved Session',
           event: true,
           state: 'passed',
           type: 'system',
@@ -767,7 +771,7 @@ export default function (Commands, Cypress, cy) {
           renderProps: () => {
             return {
               indicator: 'pending',
-              message: `(cached) ${_log.get().message}`,
+              message: `(saved) ${_log.get().message}`,
             }
           },
         })

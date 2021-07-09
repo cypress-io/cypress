@@ -1443,6 +1443,9 @@ _.extend(module.exports, {
   },
 
   sessions: {
+    callback_returned_false: {
+      message: 'Your `cy.session` **validate** callback {{reason}}',
+    },
     session: {
       missing_argument: {
         message: `${cmd('session')} requires a {{name}}.`,

@@ -345,7 +345,8 @@ const stabilityChanged = (Cypress, state, config, stable) => {
         cy.state('onPageLoadErr', null)
 
         if (e.window.location.href === 'about:blank') {
-          options._log.set({ message: '', name: 'clearing page' }).snapshot().end()
+          // we treat this as a system log since navigating to about:blank must have been caused by Cypress
+          options._log.set({ message: '', name: 'Cleared Page', type: 'system' }).snapshot().end()
         } else {
           options._log.set('message', '--page loaded--').snapshot().end()
         }

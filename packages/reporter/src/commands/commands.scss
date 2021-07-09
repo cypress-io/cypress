@@ -53,6 +53,7 @@
   }
 
   .command-type-system.command-is-event > span > .command-wrapper{
+    user-select: none;
     font-style: unset;
     .command-method,
     .command-message {
