@@ -184,7 +184,7 @@ const Configuration = observer(({ project }) => (
           {project.hasE2EFunction ?
             <>
               <td><span className='function'>function</span></td>
-              <td>set in the <code>e2e</code> function if the {configFileFormatted(project.configFile)} file</td>
+              <td>set in the <code>e2e</code> function if the {configFileFormatted(project.configFile)}</td>
             </>
             :
             <>
