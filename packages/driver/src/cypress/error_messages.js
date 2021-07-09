@@ -1,3 +1,5 @@
+module.exports = {}
+
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
@@ -101,7 +103,7 @@ const cyStripIndent = (str, indentSize) => {
   }).join('\n')
 }
 
-module.exports = {
+_.extend(module.exports, {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',
   },
@@ -2016,4 +2018,4 @@ module.exports = {
     missing: '`XMLHttpRequest#xhr` is missing.',
     network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
   },
-}
+})

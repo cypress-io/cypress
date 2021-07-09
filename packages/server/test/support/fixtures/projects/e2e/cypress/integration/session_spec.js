@@ -375,7 +375,7 @@ function SuiteWithValidateFn (id, fn) {
       type: 'parent',
     })
 
-    expect(cy.state('window').location.href).eq('about:blank')
+    // expect(cy.state('window').location.href).eq('about:blank')
 
     return fn(validate.callCount)
   })
@@ -479,6 +479,7 @@ describe('options.validate failing test', () => {
       expect(err.message).contain('foo')
       expect(err.message).contain('session validate hook')
       expect(err.message).not.contain('not from Cypress')
+      expect(err.codeFrame).exist
 
       done()
     })
@@ -494,9 +495,9 @@ describe('options.validate failing test', () => {
 
   it('test fails when options.validate after setup throws', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).contain('validate error')
       expect(err.message).contain('session validate hook')
       expect(err.message).not.contain('not from Cypress')
+      expect(err.codeFrame).exist
 
       done()
     })
@@ -515,6 +516,8 @@ describe('options.validate failing test', () => {
       expect(err.message).contain('validate error')
       expect(err.message).contain('session validate hook')
       expect(err.message).not.contain('not from Cypress')
+      expect(err.codeFrame).exist
+
       done()
     })
 
@@ -532,6 +535,8 @@ describe('options.validate failing test', () => {
       expect(err.message).contain('returned false')
       expect(err.message).contain('session validate hook')
       expect(err.message).not.contain('not from Cypress')
+      expect(err.codeFrame).exist
+
       done()
     })
 
@@ -549,6 +554,8 @@ describe('options.validate failing test', () => {
       expect(err.message).contain('callback resolved false')
       expect(err.message).contain('session validate hook')
       expect(err.message).not.contain('not from Cypress')
+      expect(err.codeFrame).exist
+
       done()
     })
 

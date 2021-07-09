@@ -22,8 +22,8 @@ export interface CommandProps extends InstrumentProps {
   visible?: boolean
   wallClockStartedAt?: string
   hookId: string
-  showError?: boolean
   isStudio?: boolean
+  showError?: boolean
   group?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
@@ -64,6 +64,10 @@ export default class Command extends Instrument {
 
   @computed get isOpen () {
     if (!this.hasChildren) return null
+
+    if (this.group && this.type === 'system' && this.hasChildren) {
+      return true
+    }
 
     return this._isOpen || (this._isOpen === null
       && (

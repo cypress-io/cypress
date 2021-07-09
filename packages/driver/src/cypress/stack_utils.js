@@ -1,11 +1,11 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
-
 const _ = require('lodash')
 const path = require('path')
 const errorStackParser = require('error-stack-parser')
 const { codeFrameColumns } = require('@babel/code-frame')
 
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 const $sourceMapUtils = require('./source_map_utils')
 const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
 
@@ -15,7 +15,11 @@ const customProtocolRegex = /^[^:\/]+:\/+/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
-const hasCrossFrameStacks = (specWindow) => {
+export {
+  replacedStack,
+}
+
+export const hasCrossFrameStacks = (specWindow) => {
   // get rid of the top lines since they naturally have different line:column
   const normalize = (stack) => {
     return stack.replace(/^.*\n/, '')
@@ -27,7 +31,7 @@ const hasCrossFrameStacks = (specWindow) => {
   return topStack === specStack
 }
 
-const stackWithContentAppended = (err, stack) => {
+export const stackWithContentAppended = (err, stack) => {
   const appendToStack = err.appendToStack
 
   if (!appendToStack || !appendToStack.content) return stack
@@ -49,7 +53,7 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
+export const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
     const withAboveMarkerRemoved = _.dropWhile(lines, (line) => {
@@ -60,13 +64,13 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
   })
 }
 
-const stackWithReplacementMarkerLineRemoved = (stack) => {
+export const stackWithReplacementMarkerLineRemoved = (stack) => {
   return stackWithLinesRemoved(stack, (lines) => {
     return _.reject(lines, (line) => _.includes(line, STACK_REPLACEMENT_MARKER))
   })
 }
 
-const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
+export const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
   const stack = _.trim(err.stack, '\n') // trim newlines from end
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
@@ -91,7 +95,7 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
   }
 }
 
-const getInvocationDetails = (specWindow, config) => {
+export const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -114,11 +118,48 @@ const getInvocationDetails = (specWindow, config) => {
   }
 }
 
+export const getUserInvocationStack = (err, state) => {
+  const current = state('current')
+
+  const currentAssertionCommand = current?.get('currentAssertionCommand')
+  const withInvocationStack = currentAssertionCommand || current
+  // user assertion errors (expect().to, etc) get their invocation stack
+  // attached to the error thrown from chai
+  // command errors and command assertion errors (default assertion or cy.should)
+  // have the invocation stack attached to the current command
+  // prefer err.userInvocation stack if it's been set
+  let userInvocationStack = $errUtils.getUserInvocationStackFromError(err) || state('currentAssertionUserInvocationStack')
+
+  // if there is no user invocation stack from an assertion or it is the default
+  // assertion, meaning it came from a command (e.g. cy.get), prefer the
+  // command's user invocation stack so the code frame points to the command.
+  // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+  // points to the `cy.should`, but the error came from inside the callback,
+  // so we need to prefer that.
+  if (
+    !userInvocationStack
+    || err.isDefaultAssertionErr
+    || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+  ) {
+    userInvocationStack = withInvocationStack?.get('userInvocationStack')
+  }
+
+  if (!userInvocationStack) return
+
+  if (
+    $errUtils.isCypressErr(err)
+    || $errUtils.isAssertionErr(err)
+    || $errUtils.isChaiValidationErr(err)
+  ) {
+    return userInvocationStack
+  }
+}
+
 const getLanguageFromExtension = (filePath) => {
   return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
 }
 
-const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absoluteFile }) => {
+export const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absoluteFile }) => {
   if (!sourceCode) return
 
   const frame = codeFrameColumns(sourceCode, { start: { line, column } })
@@ -136,7 +177,7 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   }
 }
 
-const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
+export const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
   if (!userInvocationStack) {
     const newErr = new ErrorConstructor('userInvocationStack')
 
@@ -161,7 +202,7 @@ const getCodeFrameStackLine = (err, stackIndex) => {
   return err.parsedStack[stackIndex]
 }
 
-const getCodeFrame = (err, stackIndex) => {
+export const getCodeFrame = (err, stackIndex) => {
   if (err.codeFrame) return err.codeFrame
 
   const stackLine = getCodeFrameStackLine(err, stackIndex)
@@ -293,7 +334,7 @@ const getSourceDetailsForLine = (projectRoot, line) => {
   }
 }
 
-const getSourceDetailsForFirstLine = (stack, projectRoot) => {
+export const getSourceDetailsForFirstLine = (stack, projectRoot) => {
   const line = getStackLines(stack)[0]
 
   if (!line) return
@@ -313,7 +354,7 @@ const reconstructStack = (parsedStack) => {
   }).join('\n')
 }
 
-const getSourceStack = (stack, projectRoot) => {
+export const getSourceStack = (stack, projectRoot) => {
   if (!_.isString(stack)) return {}
 
   const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
@@ -340,7 +381,7 @@ const normalizeStackIndentation = (stack) => {
   return unsplitStack(messageLines, normalizedStackLines)
 }
 
-const normalizedStack = (err) => {
+export const normalizedStack = (err) => {
   // Firefox errors do not include the name/message in the stack, whereas
   // Chromium-based errors do, so we normalize them so that the stack
   // always includes the name/message
@@ -362,7 +403,7 @@ const normalizedStack = (err) => {
   return normalizeStackIndentation(errStack)
 }
 
-const normalizedUserInvocationStack = (userInvocationStack) => {
+export const normalizedUserInvocationStack = (userInvocationStack) => {
   // Firefox user invocation stack includes a line at the top that looks like
   // addCommand/cy[name]@cypress:///../driver/src/cypress/cy.js:936:77 or
   // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
@@ -378,22 +419,4 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   }).join('\n')
 
   return normalizeStackIndentation(winnowedStackLines)
-}
-
-module.exports = {
-  getCodeFrame,
-  getSourceStack,
-  getStackLines,
-  getSourceDetailsForFirstLine,
-  hasCrossFrameStacks,
-  normalizedStack,
-  normalizedUserInvocationStack,
-  replacedStack,
-  stackWithContentAppended,
-  stackWithLinesDroppedFromMarker,
-  stackWithoutMessage,
-  stackWithReplacementMarkerLineRemoved,
-  stackWithUserInvocationStackSpliced,
-  captureUserInvocationStack,
-  getInvocationDetails,
 }

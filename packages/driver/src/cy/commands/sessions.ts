@@ -3,7 +3,7 @@ import $ from 'jquery'
 import $Location from '../../cypress/location'
 import $errUtils from '../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
-
+import * as $stackUtils from '../../cypress/stack_utils'
 const currentTestRegisteredSessions = new Map()
 const getSessionDetails = (sessState) => {
   return {
@@ -634,6 +634,19 @@ export default function (Commands, Cypress, cy) {
 
         cy.state('onCommandFailed', (err, queue, next) => {
           const index = _.findIndex(queue.commands, (v: any) => _commandToResume && v.attributes.chainerId === _commandToResume.chainerId)
+
+          // attach codeframe and cleanse the stack trace since we may not hit the cy.fail callback
+          if (typeof err === 'string') {
+            err = new Error(err)
+          }
+
+          err.stack = $stackUtils.normalizedStack(err)
+
+          err = $errUtils.enhanceStack({
+            err,
+            userInvocationStack: $stackUtils.getUserInvocationStack(err, Cypress.state),
+            projectRoot: Cypress.config('projectRoot'),
+          })
 
           cy.state('index', index)
 
