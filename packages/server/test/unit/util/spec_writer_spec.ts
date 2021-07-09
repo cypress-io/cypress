@@ -31,6 +31,11 @@ const exampleTestCommands = [
   }, {
     selector: '.btn',
     name: 'click',
+  }, {
+    selector: '.btn',
+    name: 'should',
+    message: ['have.type', 'submit'],
+    isAssertion: true,
   },
 ]
 
@@ -96,6 +101,17 @@ describe('lib/util/spec_writer', () => {
       verifyOutput(command)
     })
 
+    it('can generate a command for an assertion with one parameter', () => {
+      const command = generateCypressCommand({
+        selector: '.div',
+        name: 'should',
+        message: ['be.visible'],
+        isAssertion: true,
+      })
+
+      verifyOutput(command)
+    })
+
     it('can generate a command for an assertion with two parameters', () => {
       const command = generateCypressCommand({
         selector: '.div',
@@ -111,7 +127,7 @@ describe('lib/util/spec_writer', () => {
       const command = generateCypressCommand({
         selector: '.div',
         name: 'should',
-        message: ['have.attr', 'aria-label', 'search'],
+        message: ['have.attr', 'data-content', 'search'],
         isAssertion: true,
       })
 
