@@ -3,9 +3,6 @@
     <li v-for="runnable in runnables" :key="runnable.id">
       <div>
         <Runnable :runnable="runnable">
-          <div v-for="hook in runnable.hooks">
-            
-          </div>
           <RunnablesList :runnables="runnable.children"/>
         </Runnable>
       </div>
@@ -16,6 +13,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import Runnable from './Runnable.vue'
+import Hook from '../hooks/Hook.vue'
 
 export default defineComponent({
     name: "runnables-list",
@@ -30,13 +28,14 @@ export default defineComponent({
             })
         };
     },
-    components: { Runnable }
+    components: { Runnable, Hook }
 })
 </script>
 
 <style lang="scss" scoped>
 .root-suite {
   @apply text-size-13px text-warm-gray-800;
+  width: calc(100% - 2rem);
   position: relative;
   overflow: hidden;
 }

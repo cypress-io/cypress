@@ -277,4 +277,7 @@ it('renders a test body', () => {
       })
     )
   })
+    .get('.hook-header')
+    .click()
+    .click()
 })

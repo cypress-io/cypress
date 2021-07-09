@@ -1,6 +1,6 @@
 <template>
   <span v-if="message" class="message" :class="{ scaled }"><p>{{ message }}</p></span>
-  <Markdown v-else-if="markdown" :source="markdown" :class="{ scaled }" class="message text-cool-gray-400 italic markdown" />
+  <Markdown v-else-if="markdown" :source="markdown" :class="{ scaled }" class="message text-warm-gray-400 italic markdown" />
 </template>
 
 <script lang="ts">
@@ -38,15 +38,15 @@ export default defineComponent({
 }
 
 .event {
-  @apply text-cool-gray-400 italic;
+  @apply text-warm-gray-400 italic;
   strong {
-    @apply text-cool-gray-800;
+    @apply text-warm-gray-800;
   }
 }
 
 .markdown {
   strong {
-    @apply text-cool-gray-800;
+    @apply text-warm-gray-800;
   }
 }
 </style>
