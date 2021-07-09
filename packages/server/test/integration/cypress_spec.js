@@ -32,8 +32,7 @@ const cache = require(`${root}lib/cache`)
 const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
-const { ProjectBase } = require(`${root}lib/project-base`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
@@ -368,7 +367,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase(this.noScaffolding)).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, projectType: 'e2e' })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -1677,7 +1676,7 @@ describe('lib/cypress', () => {
     })
 
     it('passes filtered options to Project#open and sets cli config', function () {
-      const getConfig = sinon.spy(ProjectE2E.prototype, 'getConfig')
+      const getConfig = sinon.spy(ProjectBase.prototype, 'getConfig')
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
