@@ -113,12 +113,26 @@
 
 .project-content .alert-warning,
 .global-error {
-    margin-bottom: 0;
+  margin-bottom: 0;
 
-    button {
-      font-size: 1em;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
+  button {
+    font-size: 1em;
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
+}
+
+.info-box {
+  border-left: 4px solid #2a98b9;
+  background-color: #f2fafd;
+  padding: 10px 14px;
+  position: relative;
+
+  &.info-box-dismissible .close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+  }
+}

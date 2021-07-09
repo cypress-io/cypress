@@ -264,20 +264,6 @@ describe('Login', function () {
         })
       })
     })
-
-    describe('terms and privacy message', () => {
-      it('opens links to terms and privacy on click', function () {
-        cy.contains('a', 'Terms of Use')
-        .click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/terms-of-use')
-        })
-
-        cy.contains('a', 'Privacy Policy')
-        .click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/privacy-policy')
-        })
-      })
-    })
   })
 
   describe('when not connected to api server', function () {

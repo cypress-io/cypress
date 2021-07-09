@@ -3,6 +3,7 @@ import { action, computed, observable, toJS } from 'mobx'
 
 import Browser from '../lib/browser-model'
 import Warning from './warning-model'
+import Prompts from '../prompts/prompts-model'
 
 const cacheProps = [
   'id',
@@ -22,11 +23,11 @@ const validProps = cacheProps.concat([
   'isNew',
   'configFile',
   'browsers',
-  'onBoardingModalOpen',
+  'newProjectBannerOpen',
+  'newUserBannerOpen',
   'browserState',
   'resolvedConfig',
   'parentTestsFolderDisplay',
-  'integrationExampleName',
   'scaffoldedFiles',
   'resolvedNodePath',
   'resolvedNodeVersion',
@@ -54,7 +55,8 @@ export default class Project {
   @observable isLoading = false
   @observable isNew = false
   @observable browsers = []
-  @observable onBoardingModalOpen = false
+  @observable newProjectBannerOpen = false
+  @observable newUserBannerOpen = false
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
@@ -62,12 +64,12 @@ export default class Project {
   @observable _warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
-  @observable integrationExampleName
   @observable scaffoldedFiles = []
   @observable resolvedNodePath
   @observable resolvedNodeVersion
   // should never change after first set
   @observable path
+  @observable prompts = new Prompts()
   // not observable
   dismissedWarnings = {}
 
@@ -145,12 +147,9 @@ export default class Project {
     this.isLoading = isLoading
   }
 
-  @action openModal () {
-    this.onBoardingModalOpen = true
-  }
-
-  @action closeModal () {
-    this.onBoardingModalOpen = false
+  @action closeBanners () {
+    this.newProjectBannerOpen = false
+    this.newUserBannerOpen = false
   }
 
   @action browserOpening () {
@@ -204,11 +203,10 @@ export default class Project {
 
   @action setOnBoardingConfig (config) {
     this.isNew = config.isNewProject
+    this.newProjectBannerOpen = config.isNewProject
     this.integrationFolder = config.integrationFolder
     this.parentTestsFolderDisplay = config.parentTestsFolderDisplay
     this.fileServerFolder = config.fileServerFolder
-    this.integrationExampleName = config.integrationExampleName
-    this.integrationExamplePath = config.integrationExamplePath
     this.scaffoldedFiles = config.scaffoldedFiles
   }
 

@@ -38,6 +38,10 @@ const getBrowserPath = (browser) => {
   )
 }
 
+const getMajorVersion = (version) => {
+  return parseFloat(version.split('.')[0]) || version
+}
+
 const defaultLaunchOptions: {
   preferences: {[key: string]: any}
   extensions: string[]
@@ -193,6 +197,8 @@ export = {
 
   getBrowserPath,
 
+  getMajorVersion,
+
   getProfileDir,
 
   getExtensionDir,
@@ -244,7 +250,7 @@ export = {
       const version = process.versions.chrome || ''
 
       if (version) {
-        majorVersion = parseFloat(version.split('.')[0])
+        majorVersion = getMajorVersion(version)
       }
 
       const electronBrowser: FoundBrowser = {

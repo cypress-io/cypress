@@ -160,7 +160,7 @@ declare namespace CypressCommandLine {
      * Specify the type of tests to execute.
      * @default "e2e"
      */
-    testingType: 'e2e' | 'component'
+    testingType: Cypress.TestingType
   }
 
   // small utility types to better express meaning of other types

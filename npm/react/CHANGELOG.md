@@ -1,3 +1,25 @@
+# [@cypress/react-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.0...@cypress/react-v5.9.1) (2021-06-04)
+
+
+### Bug Fixes
+
+* **cypress/react:** add default webpack config path ([#16813](https://github.com/cypress-io/cypress/issues/16813)) ([0348170](https://github.com/cypress-io/cypress/commit/03481703c997088a3e7ef5ed3b55d9fee01821a0))
+* **npm/react:** webpack config sample bug ([#16737](https://github.com/cypress-io/cypress/issues/16737)) ([98fe58c](https://github.com/cypress-io/cypress/commit/98fe58cce3dd42fc6ca4616a9ed3c9da7b33794c))
+
+# [@cypress/react-v5.9.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.1...@cypress/react-v5.9.0) (2021-05-31)
+
+
+### Features
+
+* react-scripts. allow parametrise webpack config path ([#16644](https://github.com/cypress-io/cypress/issues/16644)) ([c618d30](https://github.com/cypress-io/cypress/commit/c618d30f3df99394df5c0b81ea3817caf0a7eaf4))
+
+# [@cypress/react-v5.8.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.0...@cypress/react-v5.8.1) (2021-05-26)
+
+
+### Bug Fixes
+
+* Prevent mount .wrap command appearing in log ([#16585](https://github.com/cypress-io/cypress/issues/16585)) ([fca9b9a](https://github.com/cypress-io/cypress/commit/fca9b9aeb052db668d054f589d7894fc4f9c6d5a))
+
 # [@cypress/react-v5.8.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.7.0...@cypress/react-v5.8.0) (2021-05-21)
 
 

@@ -79,7 +79,7 @@ export namespace CyHttpMessages {
     /**
      * The headers of the HTTP message.
      */
-    headers: { [key: string]: string }
+    headers: { [key: string]: string | string[] }
   }
 
   export type IncomingResponse = BaseMessage & {
@@ -131,6 +131,10 @@ export namespace CyHttpMessages {
      * Request URL.
      */
     url: string
+    /**
+     * URL query string as object.
+     */
+    query: Record<string, string|number>
     /**
      * The HTTP version used in the request. Read only.
      */
@@ -383,7 +387,7 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string, string | object | boolean | null> & {
+export type StaticResponse = GenericStaticResponse<string, string | object | boolean | ArrayBuffer | null> & {
   /**
    * Milliseconds to delay before the response is sent.
    * @deprecated Use `delay` instead of `delayMs`.

@@ -1,5 +1,6 @@
 const serverCt = require('@packages/server-ct')
 const { getBrowsers } = require('../browsers/utils')
+const errors = require('../errors')
 
 const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox']
 
@@ -22,7 +23,14 @@ const run = async (options) => {
 
   options.browser = options.browser || returnDefaultBrowser(browsersForCtInteractive, installedBrowsers)
 
-  return serverCt.start(options.projectRoot, options)
+  return serverCt.start(options.projectRoot, options).catch((e) => {
+    // Usually this kind of error management is doen inside cypress.js start
+    // But here we bypassed this since we don't use the window of the gui
+    // Handle errors here to avoid multiple errors appearing.
+    return errors.logException(e).then(() => {
+      process.exit(1)
+    })
+  })
 }
 
 module.exports = {

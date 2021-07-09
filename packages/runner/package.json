@@ -20,8 +20,11 @@
     "fs-extra": "8.1.0"
   },
   "devDependencies": {
+    "@cypress/design-system": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
+    "@fontsource/mulish": "4.3.0",
+    "@fontsource/open-sans": "4.3.0",
     "@fortawesome/fontawesome-free": "5.12.1",
     "@packages/driver": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
@@ -58,7 +61,6 @@
     "webpack-cli": "3.3.2"
   },
   "files": [
-    "dist",
-    "lib"
+    "dist"
   ]
 }

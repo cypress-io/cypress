@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const cypressEx = require('@packages/example')
 const snapshot = require('snap-shot-it')
 const config = require(`${root}lib/config`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const scaffold = require(`${root}lib/scaffold`)
 const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
@@ -20,46 +20,59 @@ describe('lib/scaffold', () => {
     return Fixtures.remove()
   })
 
-  context('.integrationExampleName', () => {
-    it('returns examples', () => {
-      expect(scaffold.integrationExampleName()).to.eq('examples')
-    })
-  })
-
-  // TODO: fix it later
-  context.skip('.isNewProject', () => {
+  context('.isNewProject', () => {
     beforeEach(function () {
-      const todosPath = Fixtures.projectPath('todos')
+      this.pristinePath = Fixtures.projectPath('pristine')
+    })
 
-      return config.get(todosPath)
+    it('is true when integrationFolder is empty', function () {
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+
+      return pristine.getConfig()
       .then((cfg) => {
-        this.cfg = cfg;
-        ({ integrationFolder: this.integrationFolder } = this.cfg)
+        return pristine.determineIsNewProject(cfg)
+      }).then((ret) => {
+        expect(ret).to.be.true
+      })
+    })
+
+    it('is false when integrationFolder has been changed', function () {
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+
+      return pristine.getConfig({ integrationFolder: 'foo' })
+      .then((cfg) => {
+        return pristine.determineIsNewProject(cfg)
+      }).then((ret) => {
+        expect(ret).to.be.false
       })
     })
 
     it('is false when files.length isnt 1', function () {
       const id = () => {
-        this.ids = new ProjectE2E(this.idsPath)
+        const idsPath = Fixtures.projectPath('ids')
+
+        this.ids = new ProjectBase({ projectRoot: idsPath, projectType: 'e2e' })
 
         return this.ids.getConfig()
         .then((cfg) => {
           return this.ids.scaffold(cfg).return(cfg)
         }).then((cfg) => {
-          return this.ids.determineIsNewProject(cfg.integrationFolder)
+          return this.ids.determineIsNewProject(cfg)
         }).then((ret) => {
           expect(ret).to.be.false
         })
       }
 
       const todo = () => {
-        this.todos = new ProjectE2E(this.todosPath)
+        const todosPath = Fixtures.projectPath('todos')
+
+        this.todos = new ProjectBase({ projectRoot: todosPath, projectType: 'e2e' })
 
         return this.todos.getConfig()
         .then((cfg) => {
           return this.todos.scaffold(cfg).return(cfg)
         }).then((cfg) => {
-          return this.todos.determineIsNewProject(cfg.integrationFolder)
+          return this.todos.determineIsNewProject(cfg)
         }).then((ret) => {
           expect(ret).to.be.false
         })
@@ -69,29 +82,26 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when files, name + bytes match to scaffold', function () {
-      // TODO this test really can move to scaffold
-      const pristine = new ProjectE2E(this.pristinePath)
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
 
       return pristine.getConfig()
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg.integrationFolder)
+        return pristine.determineIsNewProject(cfg)
       }).then((ret) => {
         expect(ret).to.be.true
       })
     })
 
     it('is false when bytes dont match scaffold', function () {
-      // TODO this test really can move to scaffold
-      const pristine = new ProjectE2E(this.pristinePath)
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
 
       return pristine.getConfig()
       .then((cfg) => {
         return pristine.scaffold(cfg).return(cfg)
       }).then((cfg) => {
-        const example = scaffold.integrationExampleName()
-        const file = path.join(cfg.integrationFolder, example)
+        const file = path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
         // different in file size
@@ -102,7 +112,7 @@ describe('lib/scaffold', () => {
           return fs.writeFileAsync(file, str).return(cfg)
         })
       }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg.integrationFolder)
+        return pristine.determineIsNewProject(cfg)
       }).then((ret) => {
         expect(ret).to.be.false
       })
@@ -126,10 +136,10 @@ describe('lib/scaffold', () => {
       )
       .spread((exampleSpecs) => {
         return Promise.join(
-          fs.statAsync(`${this.integrationFolder}/examples/actions.spec.js`).get('size'),
+          fs.statAsync(`${this.integrationFolder}/1-getting-started/todo.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[0]).get('size'),
-          fs.statAsync(`${this.integrationFolder}/examples/location.spec.js`).get('size'),
-          fs.statAsync(exampleSpecs[8]).get('size'),
+          fs.statAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`).get('size'),
+          fs.statAsync(exampleSpecs[9]).get('size'),
         ).spread((size1, size2, size3, size4) => {
           expect(size1).to.eq(size2)
 
@@ -188,6 +198,117 @@ describe('lib/scaffold', () => {
         throw new Error('Should throw the right error')
       }).catch((err = {}) => {
         expect(err.stack).to.contain('not in the scaffolded file tree')
+      })
+    })
+  })
+
+  context('.removeIntegration', () => {
+    beforeEach(function () {
+      const pristinePath = Fixtures.projectPath('pristine')
+
+      return config.get(pristinePath).then((cfg) => {
+        this.cfg = cfg;
+        ({ integrationFolder: this.integrationFolder } = this.cfg)
+      })
+    })
+
+    it('removes all scaffolded files and folders', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.equal(0)
+      })
+    })
+
+    it('removes all scaffolded files and folders after the user has deleted files', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+
+        return Promise.join(
+          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/actions.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/assertions.spec.js`),
+          fs.unlinkAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`),
+        )
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.equal(0)
+      })
+    })
+
+    it('does not remove files created by user', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+
+        return Promise.join(
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/custom1.spec.js`, 'foo'),
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/custom2.spec.js`, 'bar'),
+        )
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files).to.have.same.members([
+          '2-advanced-examples',
+          '2-advanced-examples/custom1.spec.js',
+          '2-advanced-examples/custom2.spec.js',
+        ])
+      })
+    })
+
+    it('does not remove files modified by user', function () {
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files.length).to.be.greaterThan(0)
+
+        return Promise.join(
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/actions.spec.js`, 'foo'),
+          fs.writeFileAsync(`${this.integrationFolder}/2-advanced-examples/location.spec.js`, 'bar'),
+        )
+      })
+      .then(() => {
+        return scaffold.removeIntegration(this.integrationFolder, this.cfg)
+      })
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      })
+      .then((files) => {
+        expect(files).to.have.same.members([
+          '2-advanced-examples',
+          '2-advanced-examples/actions.spec.js',
+          '2-advanced-examples/location.spec.js',
+        ])
       })
     })
   })

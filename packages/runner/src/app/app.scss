@@ -28,6 +28,22 @@
   border-right: solid 1px #c7c7c7;
 }
 
+// if you change this here,
+// make sure to update this in app.jsx too
+$spec-list-width: 250px;
+
+.spec-list-wrap {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: $spec-list-width;
+  height: 100%;
+}
+
+.spec-list {
+  width: 100%;
+}
+
 .runner {
   & {
     bottom: 0;

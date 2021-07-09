@@ -20,9 +20,11 @@
     "http-proxy": "1.18.1",
     "human-interval": "1.0.0",
     "lodash": "4.17.20",
-    "send": "0.17.1"
+    "send": "0.17.1",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@packages/resolve-dist": "0.0.0-development",
     "chai": "^4.2.0",
     "expect": "^26.6.2",
     "mocha": "^8.1.3"

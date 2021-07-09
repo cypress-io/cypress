@@ -26,6 +26,11 @@ export interface FileDetails {
   line: number
 }
 
+const printSettings: recast.Options = {
+  quote: 'single',
+  wrapColumn: 360,
+}
+
 const generateCommentText = (comment) => ` ==== ${comment} ==== `
 
 const createdComment = generateCommentText('Test Created with Cypress Studio')
@@ -124,6 +129,16 @@ export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
   addCommentToBody(body, extendedEndComment)
 
   return body
+}
+
+export const convertCommandsToText = (commands: Command[]) => {
+  const program = b.program([])
+
+  addCommandsToBody(program.body, commands)
+
+  const { code } = recast.print(program, printSettings)
+
+  return code
 }
 
 export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
@@ -252,10 +267,7 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
 
     visit(ast, astRules)
 
-    const { code } = recast.print(ast, {
-      quote: 'single',
-      wrapColumn: 360,
-    })
+    const { code } = recast.print(ast, printSettings)
 
     return fs.writeFile(path, code)
   })

@@ -4,6 +4,44 @@ import Fixtures from '../support/helpers/fixtures'
 describe('e2e headless', function () {
   e2e.setup()
 
+  describe('ELECTRON_RUN_AS_NODE', () => {
+    const baseSpec = {
+      spec: 'headless_spec.js',
+      config: {
+        env: {
+          'CI': process.env.CI,
+          'EXPECT_HEADLESS': '1',
+        },
+      },
+      headed: false,
+      processEnv: {
+        // Ensure that electron is spawned as a node process.
+        ELECTRON_RUN_AS_NODE: 1,
+        // Ensure that the current xserver is not passed to the test.
+        DISPLAY: '',
+        // Debug cypress:server:run to look for a message that electron/xvfb were not spawned.
+        DEBUG: 'cypress:server:run',
+      },
+    }
+
+    e2e.it('pass for browsers that do not need xvfb', {
+      ...baseSpec,
+      browser: ['chrome', 'chrome-beta', 'firefox'],
+      expectedExitCode: 0,
+      onRun (exec) {
+        return exec().then(({ stderr }) => {
+          expect(stderr).to.include('running electron as a node process without xvfb')
+        })
+      },
+    })
+
+    e2e.it('fails for browsers that do need xvfb', {
+      ...baseSpec,
+      expectedExitCode: 1,
+      browser: ['electron'],
+    })
+  })
+
   // cypress run --headless
   e2e.it('tests in headless mode pass', {
     spec: 'headless_spec.js',
@@ -12,6 +50,7 @@ describe('e2e headless', function () {
         'CI': process.env.CI,
         'EXPECT_HEADLESS': '1',
       },
+      video: false,
     },
     headed: false,
     snapshot: true,

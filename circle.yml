@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - optimize-ci-resource-classes
+        - tgriesser/fix/mac-build
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +42,6 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - optimize-ci-resource-classes
   requires:
     - create-build-artifacts
 
@@ -50,7 +49,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome89-ff77
+      - image: cypress/browsers:node14.16.0-chrome90-ff88
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -59,7 +58,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome89-ff77
+      - image: cypress/browsers:node14.16.0-chrome90-ff88
         user: node
     environment:
       PLATFORM: linux
@@ -90,6 +89,11 @@ commands:
       - attach_workspace:
           at: ~/
       - unpack-dependencies
+
+  restore_cached_binary:
+    steps:
+      - attach_workspace:
+          at: ~/
 
   prepare-modules-cache:
     parameters:
@@ -464,7 +468,7 @@ commands:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
     steps:
-      - restore_cached_workspace
+      - restore_cached_binary
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
@@ -977,14 +981,14 @@ jobs:
       - run: yarn test-mocha
       # test binary build code
       - run: yarn test-scripts
-      # check for compile errors with the releaserc scripts
-      - run: yarn test-npm-package-release-script
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
+      # check for compile errors with the releaserc scripts
+      - run: yarn test-npm-package-release-script
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -1114,6 +1118,7 @@ jobs:
 
   runner-integration-tests-firefox:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1327,7 +1332,7 @@ jobs:
   npm-vue:
     <<: *defaults
     resource_class: medium
-    parallelism: 4
+    parallelism: 3
     steps:
       - restore_cached_workspace
       - run:
@@ -1450,8 +1455,8 @@ jobs:
             command: yarn launch:test
             working_directory: npm/cypress-schematic
         - run:
-            name: Test Schematics
-            command: yarn test:schematics
+            name: Run unit tests
+            command: yarn test
             working_directory: npm/cypress-schematic
         - store-npm-logs
 
@@ -1475,7 +1480,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "optimize-ci-resource-classes" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2110,7 +2115,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - build
     - test-kitchensink:
@@ -2122,7 +2126,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - build
     - create-build-artifacts:
@@ -2172,7 +2175,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2180,7 +2182,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2189,7 +2190,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
 
@@ -2214,7 +2214,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - create-build-artifacts
 
@@ -2286,7 +2285,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - darwin-create-build-artifacts
 
@@ -2298,7 +2296,6 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - optimize-ci-resource-classes
         requires:
           - darwin-create-build-artifacts
 
