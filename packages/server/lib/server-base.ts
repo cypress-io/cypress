@@ -190,7 +190,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       logger.setSettings(config)
 
-      // TODO: Can we just pass config.baseUrl regardless of project type?
       this._nodeProxy = httpProxy.createProxyServer({
         target: config.baseUrl ?? undefined,
       })
