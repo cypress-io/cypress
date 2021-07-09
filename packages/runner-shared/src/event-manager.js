@@ -113,6 +113,12 @@ export const eventManager = {
       localBus.emit('script:error', error)
     })
 
+    ws.on('dev-server:compile:success', ({ specFile }) => {
+      if (!specFile || specFile === state.spec.absolute) {
+        rerun()
+      }
+    })
+
     _.each(socketRerunEvents, (event) => {
       ws.on(event, rerun)
     })

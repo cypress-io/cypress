@@ -90,7 +90,7 @@ export const makeCypressPlugin = (
         for (const mod of moduleImporters.values()) {
           if (specsPathsSet.has(mod.file)) {
             debug('handleHotUpdate - compile success')
-            devServerEvents.emit('dev-server:compile:success')
+            devServerEvents.emit('dev-server:compile:success', { specFile: mod.file })
 
             return []
           }
