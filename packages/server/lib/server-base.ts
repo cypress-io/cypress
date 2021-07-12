@@ -12,7 +12,7 @@ import url from 'url'
 import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, cors, httpUtils, uri } from '@packages/network'
+import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
@@ -196,6 +196,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
 
       this._socket = new SocketCtor(config) as TSocket
+
+      clientCertificates.loadClientCertificateConfig(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()
