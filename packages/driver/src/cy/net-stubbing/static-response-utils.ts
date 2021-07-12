@@ -6,7 +6,6 @@ import {
   FixtureOpts,
 } from '@packages/net-stubbing/lib/types'
 import {
-  caseInsensitiveGet,
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
 import $errUtils from '../../cypress/error_utils'
@@ -120,9 +119,9 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
       // There are various json-related MIME types. We cannot simply set it as `application/json`.
       // @see https://www.iana.org/assignments/media-types/media-types.xhtml
       if (
-        !(backendStaticResponse.headers &&
-          caseInsensitiveHas(backendStaticResponse.headers, 'content-type') &&
-          caseInsensitiveGet(backendStaticResponse.headers, 'content-type').includes('json'))
+        !backendStaticResponse.headers ||
+        (backendStaticResponse.headers &&
+          !caseInsensitiveHas(backendStaticResponse.headers, 'content-type'))
       ) {
         _.set(backendStaticResponse, 'headers.content-type', 'application/json')
       }
