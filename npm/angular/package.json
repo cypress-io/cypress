@@ -1,6 +1,7 @@
 {
   "name": "@cypress/angular",
   "version": "0.0.0-development",
+  "description": "Test Angular components using Cypress",
   "private": true,
   "main": "dist/index.js",
   "scripts": {
@@ -84,5 +85,12 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://on.cypress.io/component-testing"
+  "homepage": "https://on.cypress.io/component-testing",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
+  "contributors": [
+    {
+      "name": "Jean-Michel Leclercq",
+      "social": "@LeJeanbono"
+    }
+  ]
 }
