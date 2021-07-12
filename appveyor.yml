@@ -3,6 +3,7 @@ branches:
     - master
     - develop
     - windows-code-signing
+    - tgriesser/build/root-yarn-install
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
