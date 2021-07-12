@@ -725,7 +725,7 @@ export default function (Commands, Cypress, cy) {
           renderProps: () => {
             return {
               indicator: 'bad',
-              message: `(invalid) ${_log.get().message}`,
+              message: `(recreated) ${_log.get().message}`,
             }
           },
         })
@@ -749,7 +749,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       const throwValidationError = (err) => {
-        err.message += '\n\nThis error occurred in a session validate hook after initializing the session.'
+        err.message += '\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.'
 
         cy.fail(err)
       }
