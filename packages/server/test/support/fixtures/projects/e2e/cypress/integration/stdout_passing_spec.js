@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 describe('stdout_passing_spec', () => {
   context('file', () => {
     it('visits file', () => {
@@ -8,7 +7,7 @@ describe('stdout_passing_spec', () => {
 
   context('google', () => {
     it('visits google', () => {
-      cy.visit('https://www.google.com')
+      cy.visit('https://www.google.com:1777')
     })
 
     it('google2', () => {})
@@ -18,7 +17,7 @@ describe('stdout_passing_spec', () => {
     it('apple1', () => {})
 
     it('visits apple', () => {
-      cy.visit('https://www.apple.com')
+      cy.visit('https://www.apple.com:1777')
     })
   })
 
@@ -26,14 +25,8 @@ describe('stdout_passing_spec', () => {
     it('cypress1', () => {})
 
     it('visits cypress', () => {
-      cy.on('uncaught:exception', () => {
-        // cypress.io currently throws an uncaught exception
-        // TODO: remove this
-        return false
-      })
-
-      cy.visit('https://www.cypress.io')
-      cy.visit('https://docs.cypress.io')
+      cy.visit('https://www.cypress.io:1777')
+      cy.visit('https://docs.cypress.io:1777')
     })
 
     it('cypress3', () => {})
