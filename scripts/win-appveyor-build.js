@@ -66,10 +66,14 @@ shell.exec(`yarn binary-build --platform windows --version ${version}`)
 
 // make sure we are not including dev dependencies accidentally
 // TODO how to get the server package folder?
-const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
+const serverPackageFolder = path.join(os.tmpdir(), 'cypress-build', os.platform(), 'dist')
 
 shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
 shell.exec('yarn list --prod --depth 0 || true')
+shell.exec('yarn list --prod --depth 0 || true', {
+  cwd: serverPackageFolder,
+})
+
 const result = shell.exec('yarn list --dev --depth 0 || true', {
   cwd: serverPackageFolder,
 })
