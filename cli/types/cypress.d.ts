@@ -2685,16 +2685,45 @@ declare namespace Cypress {
     includeShadowDom: boolean
 
     /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: false | string
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
+     * Path to the support folder.
+     */
+    supportFolder: string
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    testFiles: string | string[]
+    /**
+     * The user agent the browser sends in all request headers.
+     */
+    userAgent: null | string
+    /**
+     * Polyfills `window.fetch` to enable Network spying and stubbing
+     */
+    experimentalFetchPolyfill: boolean
+
+    /**
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: ResolvedConfigOptions
+    component: Omit<ResolvedConfigOptions, 'e2e' | 'component'>
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: ResolvedConfigOptions
+    e2e: Omit<ResolvedConfigOptions, 'e2e' | 'component'>
   }
 
   /**
@@ -2708,10 +2737,6 @@ declare namespace Cypress {
      */
     arch: string
     /**
-     * The list of hosts to be blocked
-     */
-    blockHosts: null | string | string[]
-    /**
      * The browser Cypress is running on.
      */
     browser: Browser
@@ -2719,10 +2744,6 @@ declare namespace Cypress {
      * Available browsers found on your system.
      */
     browsers: Browser[]
-    /**
-     * Path to folder containing component test files.
-     */
-    componentFolder: string
     /**
      * Hosts mappings to IP addresses.
      */
@@ -2742,22 +2763,6 @@ declare namespace Cypress {
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
-    /**
-     * A unique ID for the project used for recording
-     */
-    projectId: null | string
-    /**
-     * Path to the support folder.
-     */
-    supportFolder: string
-    /**
-     * Glob pattern to determine what test files to load.
-     */
-    testFiles: string
-    /**
-     * The user agent the browser sends in all request headers.
-     */
-    userAgent: null | string
     /**
      * The Cypress version being used.
      */
@@ -2803,7 +2808,8 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type ConfigOptions = Partial<ResolvedConfigOptions>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, 'e2e' | 'component'>>
+  type ConfigOptions = CoreConfigOptions & {e2e?: CoreConfigOptions, component?: CoreConfigOptions }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
