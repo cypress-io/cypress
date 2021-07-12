@@ -14,12 +14,12 @@
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
-    "debug": "4.3.2",
-    "fs-extra": "8.1.0",
-    "lodash": "4.17.21",
-    "node-forge": "0.10.0",
-    "semaphore": "1.1.0"
+    "bluebird": "^3.5.3",
+    "debug": "^4.3.2",
+    "fs-extra": "^8.1.0",
+    "lodash": "^4.17.21",
+    "node-forge": "^0.10.0",
+    "semaphore": "^1.1.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",

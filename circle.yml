@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - tgriesser/fix/mac-build
+        - tgriesser/build/root-yarn-install
 
 defaults: &defaults
   parallelism: 1
