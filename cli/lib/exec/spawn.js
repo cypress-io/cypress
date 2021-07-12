@@ -73,15 +73,15 @@ module.exports = {
 
     debug('needs to start own Xvfb?', needsXvfb)
 
-    // 1. Start arguments with "--" so Electron knows these are OUR
-    // arguments and does not try to sanitize them. Otherwise on Windows
-    // an url in one of the arguments crashes it :(
-    // https://github.com/cypress-io/cypress/issues/5466
-
-    // 2. Always push cwd into the args
+    // Always push cwd into the args
     // which additionally acts as a signal to the
     // binary that it was invoked through the NPM module
-    args = ['--'].concat(args, '--cwd', process.cwd())
+    args = args || []
+    if (typeof args === 'string') {
+      args = [args]
+    }
+
+    args = [...args, '--cwd', process.cwd()]
 
     _.defaults(options, {
       dev: false,
@@ -97,26 +97,24 @@ module.exports = {
           electronLogging: false,
         })
 
+        const { onStderrData, electronLogging } = overrides
+        const envOverrides = util.getEnvOverrides(options)
+        const electronArgs = []
+        const node11WindowsFix = isPlatform('win32')
+
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
           executable = 'node'
-          args.unshift(
+          electronArgs.unshift(
             path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
           )
 
           debug('in dev mode the args became %o', args)
         }
 
-        const { onStderrData, electronLogging } = overrides
-        const envOverrides = util.getEnvOverrides(options)
-        const electronArgs = _.clone(args)
-        const node11WindowsFix = isPlatform('win32')
-
         if (!options.dev && verify.needsSandbox()) {
-          // this is one of the Electron's command line switches
-          // thus it needs to be before "--" separator
-          electronArgs.unshift('--no-sandbox')
+          electronArgs.push('--no-sandbox')
         }
 
         // strip dev out of child process options
@@ -141,10 +139,22 @@ module.exports = {
           stdioOptions.env.DISPLAY = process.env.DISPLAY
         }
 
-        debug('spawning Cypress with executable: %s', executable)
-        debug('spawn args %o %o', electronArgs, _.omit(stdioOptions, 'env'))
+        if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
+          // Since we are running electron as node, we need to add an entry point file.
+          const serverEntryPoint = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
 
-        const child = cp.spawn(executable, electronArgs, stdioOptions)
+          args = [serverEntryPoint, ...args]
+        } else {
+          // Start arguments with "--" so Electron knows these are OUR
+          // arguments and does not try to sanitize them. Otherwise on Windows
+          // an url in one of the arguments crashes it :(
+          // https://github.com/cypress-io/cypress/issues/5466
+          args = [...electronArgs, '--', ...args]
+        }
+
+        debug('spawning Cypress with executable: %s', executable)
+        debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
+        const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event) {
           return function (code, signal) {
