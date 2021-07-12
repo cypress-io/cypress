@@ -26,6 +26,12 @@ describe('stdout_passing_spec', () => {
     it('cypress1', () => {})
 
     it('visits cypress', () => {
+      cy.on('uncaught:exception', () => {
+        // cypress.io currently throws an uncaught exception
+        // TODO: remove this
+        return false
+      })
+
       cy.visit('https://www.cypress.io')
       cy.visit('https://docs.cypress.io')
     })
