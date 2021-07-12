@@ -2,7 +2,6 @@
   "name": "@packages/launchpad",
   "version": "0.0.0-development",
   "private": true,
-  "main": "lib/gui.js",
   "scripts": {
     "build": "vite build",
     "build-prod": "cross-env NODE_ENV=production yarn build",
@@ -16,23 +15,21 @@
     "start": "http-server -p 5050 dist",
     "watch": "yarn build --watch"
   },
-  "dependencies": {
-    "bluebird": "3.5.3",
-    "classnames": "2.3.1",
-    "vue": "3.0.11"
-  },
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
+    "bluebird": "3.5.3",
+    "classnames": "2.3.1",
     "cross-env": "6.0.3",
     "prismjs": "1.24.0",
     "vite": "2.4.1",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-windicss": "1.2.4",
+    "vue": "3.0.11",
     "vue-prism-component": "2.0.0",
     "vue-tsc": "0.0.24",
     "windicss": "3.1.4"
