@@ -1,30 +1,21 @@
 import Debug from 'debug'
 import _ from 'lodash'
-import path from 'path'
 import send from 'send'
-import { Cfg, ProjectCt } from '@packages/server-ct'
 import { SpecsStore } from '@packages/server/lib/specs-store'
+import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
+import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
+import { ServerCt } from '../../server-ct'
 
 interface ServeOptions {
   config: Cfg
-  project: ProjectCt
+  project: ProjectBase<ServerCt>
   specsStore: SpecsStore
 }
 
 const debug = Debug('cypress:server:runner-ct')
 
-function dist (...args) {
-  const paths = [__dirname, '..', 'dist'].concat(args)
-
-  return path.join(...paths)
-}
-
-export const getPathToDist = (...args) => {
-  return dist(...args)
-}
-
 export const handle = (req, res) => {
-  const pathToFile = getPathToDist(req.params[0])
+  const pathToFile = getPathToDist('runner-ct', req.params[0])
 
   return send(req, pathToFile)
   .pipe(res)
@@ -48,7 +39,7 @@ export const serve = (req, res, options: ServeOptions) => {
   // https://github.com/cypress-io/cypress/issues/4952
   const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
 
-  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToDist('index.html')
+  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')
 
   return res.render(runnerPath, {
     base64Config,
@@ -58,7 +49,7 @@ export const serve = (req, res, options: ServeOptions) => {
 
 export const serveChunk = (req, res, options) => {
   let { config } = options
-  let pathToFile = getPathToDist(req.originalUrl.replace(config.clientRoute, ''))
+  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(config.clientRoute, ''))
 
   return send(req, pathToFile).pipe(res)
 }

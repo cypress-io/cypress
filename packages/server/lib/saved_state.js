@@ -24,7 +24,7 @@ browserY
 isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
-showedOnBoardingModal
+specListWidth
 showedNewProjectBanner
 firstOpenedCypress
 showedStudioModal

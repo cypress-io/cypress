@@ -18,6 +18,7 @@ fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
 
 const DEFAULT_PATHS = 'package.json'.split(' ')
+const rootYarnLock = fs.readFileSync(path.join(__dirname, '../../../yarn.lock'), 'utf8')
 
 const pathToPackageJson = function (packageFolder) {
   la(check.unemptyString(packageFolder), 'expected package path', packageFolder)
@@ -181,14 +182,6 @@ const replaceLocalNpmVersions = function (basePath) {
   return updatePackageJson('./packages/*/package.json')
 }
 
-const forceNpmInstall = function (packagePath, packageToInstall) {
-  console.log('Force installing %s', packageToInstall)
-  console.log('in %s', packagePath)
-  la(check.unemptyString(packageToInstall), 'missing package to install')
-
-  return yarn(['install', '--force', packageToInstall], packagePath)
-}
-
 const removeDevDependencies = function (packageFolder) {
   const packagePath = pathToPackageJson(packageFolder)
 
@@ -252,6 +245,9 @@ const npmInstallAll = function (pathToPackages) {
   return retryGlobbing(pathToPackages)
   .tap(printFolders)
   .mapSeries((packageFolder) => {
+    // Copying the yarn.lock from the root for deterministic builds
+    fs.writeFileSync(path.join(packageFolder, 'yarn.lock'), rootYarnLock)
+
     return removeDevDependencies(packageFolder)
     .then(() => {
       return retryNpmInstall(packageFolder)
@@ -272,12 +268,5 @@ module.exports = {
 
   runAllCleanJs,
 
-  forceNpmInstall,
-
   replaceLocalNpmVersions,
-}
-
-if (!module.parent) {
-  console.log('demo force install')
-  forceNpmInstall('packages/server', '@ffmpeg-installer/win32-x64')
 }

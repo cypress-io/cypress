@@ -180,7 +180,7 @@ export class InterceptedRequest {
           await handleSubscription(subscription)
 
           if (stopPropagationNow) {
-            break outerLoop
+            break
           }
         }
 
@@ -198,6 +198,10 @@ export class InterceptedRequest {
 
             return data
           }
+        }
+
+        if (stopPropagationNow) {
+          break outerLoop
         }
       }
     }
