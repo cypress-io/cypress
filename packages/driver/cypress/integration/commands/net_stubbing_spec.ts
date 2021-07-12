@@ -835,6 +835,15 @@ describe('network stubbing', { retries: 2 }, function () {
 
           cy.intercept({ hostname: 'http://website.web' })
         })
+
+        // https://github.com/cypress-io/cypress/issues/17015
+        it('string hostname can be "localhost"', () => {
+          cy.intercept({ hostname: 'localhost' })
+        })
+
+        it('string hostname can be unicode', () => {
+          cy.intercept({ hostname: 'はじめよう.みんな' })
+        })
       })
 
       context('with invalid handler', function () {
