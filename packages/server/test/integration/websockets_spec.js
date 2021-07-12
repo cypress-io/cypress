@@ -9,8 +9,11 @@ const socketIo = require(`${root}../socket`)
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
+const { SpecsStore } = require(`${root}/lib/specs-store`)
 const { Automation } = require(`${root}lib/automation`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
+const { createRoutes } = require(`${root}lib/routes`)
 
 const cyPort = 12345
 const otherPort = 55551
@@ -32,7 +35,12 @@ describe('Web Sockets', () => {
 
       this.server = new ServerE2E()
 
-      return this.server.open(this.cfg)
+      return this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        specsStore: new SpecsStore({}, 'e2e'),
+        projectType: 'e2e',
+      })
       .then(async () => {
         const automationStub = {
           use: () => { },

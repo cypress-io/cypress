@@ -12,7 +12,7 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import { parseJsonBody } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
 
@@ -21,7 +21,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const { routeId } = subscription
   const request = getRequest(routeId, frame.requestId)
 
-  parseJsonBody(res)
+  const bodyParsed = parseJsonBody(res)
 
   let responseSent = false
   let resolved = false
@@ -75,7 +75,14 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
         // arguments to res.send() are merged with the existing response
         const _staticResponse = _.defaults({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS))
 
-        _.defaults(_staticResponse.headers, res.headers)
+        _staticResponse.headers = _.defaults({}, _staticResponse.headers, res.headers)
+
+        // https://github.com/cypress-io/cypress/issues/17084
+        // When a user didn't provide content-type,
+        // we remove the content-type provided by the server
+        if (!staticResponse.headers || !staticResponse.headers['content-type']) {
+          delete _staticResponse.headers['content-type']
+        }
 
         sendStaticResponse(requestId, _staticResponse)
 
@@ -104,8 +111,8 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
     finishResponseStage(res)
 
-    if (_.isObject(res.body)) {
-      res.body = JSON.stringify(res.body)
+    if (bodyParsed) {
+      stringifyJsonBody(res)
     }
 
     resolve({
