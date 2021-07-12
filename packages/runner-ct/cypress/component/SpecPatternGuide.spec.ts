@@ -3,7 +3,12 @@ import SpecPatternGuide from '@packages/runner-shared/src/components/SpecPattern
 
 describe('SpecPatternGuide', () => {
   it('filters using globby via web socket', () => {
-    mount(SpecPatternGuide)
+    mount(SpecPatternGuide, {
+      props: {
+        runnerType: 'e2e',
+        configFile: 'cypress.config.js',
+      },
+    })
 
     // cypress/fixtures/foo.spec.ts
     cy.get('input').clear().type('**/*fixtures/*.spec.ts')
