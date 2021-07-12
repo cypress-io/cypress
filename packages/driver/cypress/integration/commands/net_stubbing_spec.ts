@@ -840,6 +840,10 @@ describe('network stubbing', { retries: 2 }, function () {
         it('string hostname can be "localhost"', () => {
           cy.intercept({ hostname: 'localhost' })
         })
+
+        it('string hostname can be unicode', () => {
+          cy.intercept({ hostname: 'はじめよう.みんな' })
+        })
       })
 
       context('with invalid handler', function () {
