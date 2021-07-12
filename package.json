@@ -140,6 +140,7 @@
     "glob": "7.1.6",
     "globby": "10.0.1",
     "got": "11.5.1",
+    "graphql": "^15.5.1",
     "gulp": "4.0.2",
     "gulp-awspublish": "4.0.0",
     "gulp-debug": "4.0.0",

@@ -1,0 +1,19 @@
+overwrite: true
+schema: './graphql-schema.graphql'
+documents: 'src/**/*.vue'
+generates:
+  src/generated/graphql.tsx:
+    config:
+      immutableTypes: true
+      useTypeImports: true
+      preResolveTypes: true
+      onlyOperationTypes: true
+      avoidOptionals: true
+      enumsAsTypes: true
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typed-document-node'
+hooks:
+  afterOneFileWrite:
+    - eslint --fix
