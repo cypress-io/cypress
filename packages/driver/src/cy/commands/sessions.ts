@@ -598,6 +598,18 @@ export default function (Commands, Cypress, cy) {
           groupStart: true,
         })
 
+        const onSuccess = () => {
+          validatingLog.set({
+            name: 'Validate Session: valid',
+            message: '',
+            type: 'system',
+            event: true,
+            state: 'warning',
+          })
+
+          Cypress.log({ groupEnd: true, emitOnly: true })
+        }
+
         const onFail = (err) => {
           _onFail(err, validatingLog)
         }
@@ -625,7 +637,7 @@ export default function (Commands, Cypress, cy) {
               throw $errUtils.errByPath('sessions.callback_returned_false', { reason: 'resolved false' })
             }
 
-            Cypress.log({ groupEnd: true, emitOnly: true })
+            onSuccess()
           })
           .catch((err) => {
             onFail(err)
@@ -677,7 +689,7 @@ export default function (Commands, Cypress, cy) {
             }
           }
 
-          Cypress.log({ groupEnd: true, emitOnly: true })
+          onSuccess()
         })
 
         _commandToResume = _catchCommand
@@ -713,7 +725,7 @@ export default function (Commands, Cypress, cy) {
           renderProps: () => {
             return {
               indicator: 'bad',
-              message: `(invalidated) ${_log.get().message}`,
+              message: `(invalid) ${_log.get().message}`,
             }
           },
         })
