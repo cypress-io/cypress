@@ -1,7 +1,7 @@
 const debug = require('debug')('cypress:server:ts-node')
 const path = require('path')
 const tsnode = require('ts-node')
-const resolve = require('../../util/resolve')
+const resolve = require('./resolve')
 
 const getTsNodeOptions = (tsPath, pluginsFile) => {
   return {
@@ -18,13 +18,16 @@ const getTsNodeOptions = (tsPath, pluginsFile) => {
 
 const register = (projectRoot, pluginsFile) => {
   try {
+    debug('projectRoot path: %s', projectRoot)
+    debug('pluginsFile: %s', pluginsFile)
     const tsPath = resolve.typescript(projectRoot)
 
     if (!tsPath) return
 
+    debug('typescript path: %s', tsPath)
+
     const tsOptions = getTsNodeOptions(tsPath, pluginsFile)
 
-    debug('typescript path: %s', tsPath)
     debug('registering project TS with options %o', tsOptions)
 
     require('tsconfig-paths/register')

@@ -3,14 +3,15 @@ const Promise = require('bluebird')
 const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
-const { fs } = require('../util/fs')
+const { fs } = require('./fs')
+const requireAsync = require('./require_async').default
+const debug = require('debug')('cypress:server:settings')
 
 // TODO:
 // think about adding another PSemaphore
 // here since we can read + write the
 // settings at the same time something else
 // is potentially reading it
-
 const flattenCypress = (obj) => {
   return obj.cypress ? obj.cypress : undefined
 }
@@ -78,6 +79,10 @@ module.exports = {
   },
 
   _write (file, obj = {}) {
+    if (!/\.json$/.test(file)) {
+      return Promise.resolve(obj)
+    }
+
     return fs.outputJsonAsync(file, obj, { spaces: 2 })
     .return(obj)
     .catch((err) => {
@@ -97,8 +102,31 @@ module.exports = {
     return options.testingType === 'component'
   },
 
-  configFile (options = {}) {
-    return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  configFile (projectRoot, options = {}) {
+    const ls = fs.readdirSync(projectRoot)
+
+    if (options.configFile === false) {
+      return false
+    }
+
+    if (options.configFile) {
+      return options.configFile
+    }
+
+    if (ls.includes('cypress.config.ts')) {
+      return 'cypress.config.ts'
+    }
+
+    if (ls.includes('cypress.config.js')) {
+      return 'cypress.config.js'
+    }
+
+    if (ls.includes('cypress.json')) {
+      return 'cypress.json'
+    }
+
+    // Default is to create a new `cypress.config.js` file if one does not exist.
+    return 'cypress.config.js'
   },
 
   id (projectRoot, options = {}) {
@@ -124,8 +152,8 @@ module.exports = {
       // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
-      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
-    }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
+      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
+    }).catch({ code: 'EACCES' }, () => {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {
@@ -144,24 +172,52 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
-    .catch({ code: 'ENOENT' }, () => {
-      return this._write(file, {})
-    }).then((json = {}) => {
-      if (this.isComponentTesting(options) && 'component' in json) {
-        json = { ...json, ...json.component }
+    return requireAsync(file,
+      {
+        projectRoot,
+        loadErrorCode: 'CONFIG_FILE_ERROR',
+        functionNames: ['e2e', 'component'],
+      })
+    .catch({ code: 'ENOENT' }, (e) => {
+      if (/\.json$/.test(file)) {
+        return this._write(file, {})
       }
 
-      if (!this.isComponentTesting(options) && 'e2e' in json) {
-        json = { ...json, ...json.e2e }
+      return fs.writeFile(file, 'module.exports = {}').then(() => ({}))
+    })
+    .then(({ result: configObject, functionNames }) => {
+      const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
+
+      debug('resolved configObject', configObject)
+
+      if ((testingType in configObject)) {
+        if (typeof configObject[testingType] === 'object') {
+          configObject = { ...configObject, ...configObject[testingType] }
+        }
       }
 
-      const changed = this._applyRewriteRules(json)
+      if (!/\.json$/.test(file)) {
+        // Tell the system we detected plugin functions
+        // for e2e or component that we cannot get this way.
+        // They will never be executed but will match the
+        // expected type instead of being not there.
+        functionNames.forEach((name) => {
+          configObject[name] = function () {
+            throw Error('This function whould always be executed within the plugins context')
+          }
+        })
+
+        configObject.configFile = path.relative(projectRoot, file)
+
+        return configObject
+      }
+
+      const changed = this._applyRewriteRules(configObject)
 
       // if our object is unchanged
       // then just return it
-      if (_.isEqual(json, changed)) {
-        return json
+      if (_.isEqual(configObject, changed)) {
+        return configObject
       }
 
       // else write the new reduced obj
@@ -196,7 +252,7 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    return this.read(projectRoot)
+    return this.read(projectRoot, options)
     .then((settings) => {
       _.extend(settings, obj)
 
@@ -211,7 +267,7 @@ module.exports = {
   },
 
   pathToConfigFile (projectRoot, options = {}) {
-    const configFile = this.configFile(options)
+    const configFile = this.configFile(projectRoot, options)
 
     return configFile && this._pathToFile(projectRoot, configFile)
   },

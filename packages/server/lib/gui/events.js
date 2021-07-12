@@ -321,7 +321,16 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           onError,
           onWarning,
         })
-      }).call('getConfig')
+      }).then((project) => {
+        return project.getConfig()
+      })
+      .then((cfg) => {
+        const functions = ['e2e', 'component'].filter((func) => {
+          return typeof cfg[func] === 'function'
+        })
+
+        return { config: cfg, functions }
+      })
       .then(send)
       .catch(sendErr)
 

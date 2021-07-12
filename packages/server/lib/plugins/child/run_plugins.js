@@ -7,11 +7,11 @@ const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
 const resolve = require('../../util/resolve')
+const tsNodeUtil = require('../../util/ts_node')
 const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const tsNodeUtil = require('./ts_node')
 
 let registeredEventsById = {}
 let registeredEventsByName = {}
@@ -140,8 +140,16 @@ const execute = (ipc, event, ids, args = []) => {
 
 let tsRegistered = false
 
-const runPlugins = (ipc, pluginsFile, projectRoot) => {
+function getPluginsFunction (pluginsFile, functionName) {
+  const exp = require(pluginsFile)
+  const resolvedExport = exp.default || exp
+
+  return functionName ? resolvedExport[functionName] : resolvedExport
+}
+
+const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
   debug('pluginsFile:', pluginsFile)
+  debug('functionName:', functionName)
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
@@ -171,13 +179,10 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   }
 
   try {
-    debug('require pluginsFile')
-    plugins = require(pluginsFile)
+    debug('require pluginsFile "%s", functionName "%s"', pluginsFile, functionName)
+    plugins = getPluginsFunction(pluginsFile, functionName)
 
-    // Handle export default () => {}
-    if (plugins && typeof plugins.default === 'function') {
-      plugins = plugins.default
-    }
+    debug('plugins %o', plugins)
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)

@@ -3,19 +3,26 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
+const { clearCypressJsonCache } = require('../cache_helper')
 
 const projectRoot = process.cwd()
 
 describe('lib/settings', () => {
   context('with no configFile option', () => {
     beforeEach(function () {
-      this.setup = (obj = {}) => {
-        return fs.writeJsonAsync('cypress.json', obj)
+      this.setup = (obj = {}, file = 'cypress.json') => {
+        if (file === 'cypress.json') {
+          return fs.writeJsonAsync(file, obj)
+        }
+
+        return fs.outputFileAsync(file, obj)
       }
     })
 
     afterEach(() => {
       return fs.removeAsync('cypress.json')
+      .then(() => fs.removeAsync('cypress.config.js'))
+      .then(clearCypressJsonCache)
     })
 
     context('nested cypress object', () => {
@@ -97,6 +104,75 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
+      it('promises cypress.config.js -> `component` key for component testing runner', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+            component: {
+              component_setting: 'peep'
+            }
+          }
+          `,
+        'cypress.config.js')
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'component' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            component_setting: 'peep',
+            component: {
+              component_setting: 'peep',
+            },
+          })
+        })
+      })
+
+      it('promises cypress.config.js -> `e2e` key for component testing runner', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+            e2e: {
+              e2e_setting: 'e2e_setting'
+            }
+          }
+          `,
+        'cypress.config.js')
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'e2e' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            e2e_setting: 'e2e_setting',
+            e2e: {
+              e2e_setting: 'e2e_setting',
+            },
+          })
+        })
+      })
+
+      it('promises cypress.config.js assumes e2e if no runner specific keys are configured', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+            e2e: {
+              e2e_setting: 'e2e_setting',
+            },
+          }
+          `,
+        'cypress.config.js')
+        .then(() => {
+          return settings.read(projectRoot, {})
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            e2e_setting: 'e2e_setting',
+            e2e: {
+              e2e_setting: 'e2e_setting',
+            },
+          })
+        })
+      })
+
       it('promises cypress.json', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
@@ -222,6 +298,8 @@ describe('lib/settings', () => {
       this.options = {
         configFile: 'my-test-config-file.json',
       }
+
+      return fs.ensureDirAsync(this.projectRoot)
     })
 
     afterEach(function () {

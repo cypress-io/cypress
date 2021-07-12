@@ -1,11 +1,13 @@
 // A basic webpack configuration
 // The default for running tests in this project
 // https://vue-loader.vuejs.org/guide/#manual-setup
-const { VueLoaderPlugin } = require('vue-loader')
-const path = require('path')
-const pkg = require('package.json')
+import { VueLoaderPlugin } from 'vue-loader'
+import * as path from 'path'
+import { Configuration } from 'webpack'
 
-module.exports = {
+const pkg = require('./package.json')
+
+export default {
   mode: 'development',
   output: {
     path: path.join(__dirname, 'dist'),
@@ -49,4 +51,4 @@ module.exports = {
     // make sure to include the plugin for the magic
     new VueLoaderPlugin(),
   ],
-}
+} as Configuration

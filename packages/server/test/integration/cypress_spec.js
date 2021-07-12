@@ -1,4 +1,5 @@
 require('../spec_helper')
+const { clearCypressJsonCache } = require('../cache_helper')
 
 const R = require('ramda')
 const _ = require('lodash')
@@ -45,7 +46,7 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
-const electronApp = require('../../lib/util/electron-app')
+const electronApp = require(`${root}lib/util/electron-app`)
 const savedState = require(`${root}lib/saved_state`)
 
 const TYPICAL_BROWSERS = [
@@ -176,6 +177,7 @@ describe('lib/cypress', () => {
     }
 
     Fixtures.remove()
+    clearCypressJsonCache()
   })
 
   context('test browsers', () => {
@@ -1792,14 +1794,15 @@ describe('lib/cypress', () => {
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
+      afterEach(function () {
+        delete require.cache[path.join(this.pristinePath, this.filename)]
+      })
+
       it('reads config from a custom config file', function () {
-        sinon.stub(fs, 'readJsonAsync')
-        fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
+        fs.outputJSON(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
           port: 2020,
         })
-
-        fs.readJsonAsync.callThrough()
 
         return cypress.start([
           `--config-file=${this.filename}`,

@@ -81,9 +81,20 @@ const init = (config, options) => {
 
     const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
+    const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'inherit',
+    }
+
+    const testingType = options.testingType || 'e2e'
+
+    if (typeof config[testingType] === 'function') {
+      childArguments.push(
+        '--functionName', testingType,
+        '--file', options.configFile,
+      )
+    } else {
+      childArguments.push('--file', pluginsFile)
     }
 
     if (config.resolvedNodePath) {
@@ -123,8 +134,6 @@ const init = (config, options) => {
     ipc.send('load', config)
 
     ipc.on('loaded', (newCfg, registrations) => {
-      _.omit(config, 'projectRoot', 'configFile')
-
       _.each(registrations, (registration) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
 

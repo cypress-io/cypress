@@ -39,8 +39,8 @@ export const options = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
-    validation: v.isValidConfig,
+    defaultValue: null,
+    validation: v.functionOverrides,
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
@@ -48,7 +48,7 @@ export const options = [
     isFolder: true,
   }, {
     name: 'configFile',
-    defaultValue: 'cypress.json',
+    defaultValue: null,
     validation: v.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
@@ -69,8 +69,8 @@ export const options = [
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
-    validation: v.isValidConfig,
+    defaultValue: null,
+    validation: v.functionOverrides,
   }, {
     name: 'env',
     validation: v.isPlainObject,

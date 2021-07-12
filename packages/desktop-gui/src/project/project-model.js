@@ -42,6 +42,7 @@ export default class Project {
   // persisted with api
   @observable id
   @observable name
+  @observable configFile
   @observable public
   @observable lastBuildStatus
   @observable lastBuildCreatedAt
@@ -59,6 +60,7 @@ export default class Project {
   @observable newUserBannerOpen = false
   @observable browserState = 'closed'
   @observable resolvedConfig
+  @observable hasE2EFunction
   @observable error
   /** @type {{[key: string] : {warning:Error & {dismissed: boolean}}}} */
   @observable _warnings = {}
@@ -212,6 +214,10 @@ export default class Project {
 
   @action setResolvedConfig (resolved) {
     this.resolvedConfig = resolved
+  }
+
+  @action setE2EFunction (hasE2EFunction) {
+    this.hasE2EFunction = hasE2EFunction
   }
 
   @action setError (err = {}) {

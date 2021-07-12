@@ -100,7 +100,7 @@
     }
   }
 
-  .envFile, .env, .config, .cli, .plugin, .default {
+  .envFile, .env, .config, .cli, .plugin, .function, .default {
     font-family: $font-mono;
     padding: 2px;
   }
@@ -125,7 +125,7 @@
     color: #A21313;
   }
 
-  .plugin {
+  .plugin, .function {
     background-color: #f0e7fc;
     color: #134aa2;
   }

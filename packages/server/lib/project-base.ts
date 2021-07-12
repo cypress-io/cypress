@@ -62,6 +62,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests = null
+  private isOpen: boolean = false
 
   public browser: any
   public projectType?: 'e2e' | 'ct'
@@ -267,6 +268,13 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
             system: _.pick(sys, 'osName', 'osVersion'),
           }
 
+          // flag the project as open
+          // this is useful if we want to close project
+          // that was never open in the first place
+          // since it allows us to skip a few lines
+          // @see close() function
+          this.isOpen = true
+
           return runEvents.execute('before:run', cfg, beforeRunDetails)
         })
       })
@@ -310,7 +318,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const closePreprocessor = this.projectType === 'e2e' && preprocessor.close ?? undefined
 
     return Bluebird.join(
-      this.server?.close(),
+      this.isOpen ? this.server?.close() : Promise.resolve(),
       this.watchers?.close(),
       closePreprocessor?.(),
     )
@@ -333,7 +341,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return fs.pathExists(supportFile)
       .then((found) => {
         if (!found) {
-          errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(cfg))
+          errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(this.projectRoot, cfg))
         }
       })
     }
@@ -363,6 +371,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     })
     .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
+
+      if (modifiedCfg) {
+        modifiedCfg.configFile = path.relative(this.projectRoot, modifiedCfg.configFile)
+      }
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
@@ -866,7 +878,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         return readSettings.projectId
       }
 
-      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+      errors.throw('NO_PROJECT_ID', settings.configFile(this.projectRoot, this.options), this.projectRoot)
     })
   }
 
@@ -1043,7 +1055,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   static add (path, options) {
     // don't cache a project if a non-default configFile is set
     // https://git.io/JeGyF
-    if (settings.configFile(options) !== 'cypress.json') {
+
+    if (!['cypress.config.ts', 'cypress.config.js', 'cypress.json'].includes(settings.configFile(path, options))) {
       return Bluebird.resolve({ path })
     }
 

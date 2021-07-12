@@ -510,3 +510,155 @@ exports['e2e plugins does not report more screenshots than exist if user overwri
 
 
 `
+
+exports['e2e-plugins fails when there is an async error inside an event handler 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.js                                                                     (1 of 1)
+
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js\`)
+
+ Error: Async error from plugins file
+      [stack trace lines]
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.js                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  app_spec.js                              XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+
+
+`
+
+exports['e2e-plugins can modify config from plugins 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.js                                                                     (1 of 1)
+
+
+  ✓ overrides config
+  ✓ overrides env
+
+  2 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.js                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 20 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  app_spec.js                              XX:XX        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+
+
+`
+
+exports['e2e-plugins catches invalid viewportWidth returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+
+`
+
+exports['e2e-plugins catches invalid browsers list returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
+
+Expected at least one browser
+
+`
+
+exports['e2e-plugins catches invalid browser returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
+
+Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
+
+`
+
+exports['e2e-plugins can filter browsers from config 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: 'chrome' was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+- chrome
+- chromium
+- edge
+- electron
+- firefox
+
+You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+Available browsers found on your system are:
+- electron
+
+`
