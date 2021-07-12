@@ -3,11 +3,12 @@ import httpsProxy from '@packages/https-proxy'
 import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import { SocketCt } from './socket-ct'
+import { Cfg } from '../../server/lib/project-base'
 
 type WarningErr = Record<string, any>
 
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config: Record<string, any> = {}, options: OpenServerOptions) {
+  open (config: Cfg, options: OpenServerOptions) {
     return super.open(config, { ...options, projectType: 'ct' })
   }
 
