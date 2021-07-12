@@ -1054,15 +1054,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // temporary hack so that other tests expecting cross-origin
           // failures still fail as expected
           if (state('anticipateMultidomain')) {
-            Cypress.once('cross:domain:window:load', () => {
-              Cypress.once('cross:domain:driver:ready', () => {
-                stability.isStable(true, 'load')
-              })
-
-              Cypress.action('cy:switch:domain', '127.0.0.1:3501')
-            })
-
-            return
+            return stability.isStable(true, 'load')
           }
 
           let e = err
