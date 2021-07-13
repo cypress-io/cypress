@@ -226,7 +226,7 @@ describe('lib/util/spec_writer', () => {
       it('can add commands to an existing test defined with it only', () => {
         const saveDetails = {
           absoluteFile: '',
-          runnableTitle: 'test with it.only',
+          runnableTitle: 'test with it only',
           commands: exampleTestCommands,
         }
 
@@ -366,7 +366,7 @@ describe('lib/util/spec_writer', () => {
       it('can create a new test in a suite defined with describe only', () => {
         const saveDetails = {
           absoluteFile: '',
-          runnableTitle: 'inner suite with describe.only',
+          runnableTitle: 'inner suite with describe only',
           commands: exampleTestCommands,
           testName: 'test added to describe only',
         }
