@@ -21,7 +21,7 @@ export interface Command {
 }
 
 export interface FileDetails {
-  absoluteFile: string
+  absoluteFile?: string
   column: number
   line: number
 }
@@ -253,7 +253,7 @@ const createTest = ({ body }: n.Program | n.BlockStatement, commands: Command[],
 
 const updateRunnableExpression = async ({ fileDetails, absoluteFile, runnableTitle }: SaveDetails, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Promise<Boolean> => {
   // if we have file details we first try to find the runnable using line and column number
-  if (fileDetails) {
+  if (fileDetails && fileDetails.absoluteFile) {
     const fileDetailsAst = await getAst(fileDetails.absoluteFile)
     let fileDetailsSuccess = false
 
