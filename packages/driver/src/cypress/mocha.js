@@ -105,6 +105,10 @@ const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
+    if (specWindow.Cypress && specWindow.Cypress.getMochaHookInvocationDetails) {
+      return specWindow.Cypress.getMochaHookInvocationDetails(stack)
+    }
+
     // note: specWindow.Cypress can be undefined or null
     // if the user quickly reloads the tests multiple times
 

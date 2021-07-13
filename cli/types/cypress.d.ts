@@ -548,6 +548,24 @@ declare namespace Cypress {
      * @private
      */
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
+
+    /**
+     * Load  files
+     * @private
+     */
+    getMochaHookInvocationDetails?(string: string): {
+      stack: string,
+      details: {
+        absoluteFile: string, 
+        relativeFile?: string, 
+        originalFile?: string, 
+        fileUrl?: string, 
+        function?: string, 
+        whitespace?: string,
+        line: number, 
+        column: number, 
+      }
+    }
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
