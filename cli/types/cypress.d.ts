@@ -2763,6 +2763,7 @@ declare namespace Cypress {
     clientRoute: string
     configFile: string
     cypressEnv: string
+    devServerPublicPathRoute: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
