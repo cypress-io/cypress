@@ -884,6 +884,137 @@ describe('lib/config', () => {
           return this.expectValidationFails('a positive number or null or an object')
         })
       })
+
+      function pemCertificate () {
+        return {
+          clientCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  cert: 'certs/cert.crt',
+                  key: 'certs/cert.key',
+                  passphrase: 'certs/cert.key.pass',
+                },
+              ],
+            },
+          ],
+        }
+      }
+
+      function pfxCertificate () {
+        return {
+          clientCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  pfx: 'certs/cert.pfx',
+                  passphrase: 'certs/cerpfx.pass',
+                },
+              ],
+            },
+          ],
+        }
+      }
+
+      context('clientCertificates', () => {
+        it('accepts valid PEM config', function () {
+          this.setup(pemCertificate())
+
+          return this.expectValidationPasses()
+        })
+
+        it('accepts valid PFX config', function () {
+          this.setup(pfxCertificate())
+
+          return this.expectValidationPasses()
+        })
+
+        it('detects invalid config with no url', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].url = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].url` to be a URL matcher')
+        })
+
+        it('detects invalid config with no certs', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs` to be an array of certs')
+        })
+
+        it('detects invalid config with no cert', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` must have either PEM or PFX defined')
+        })
+
+        it('detects invalid config with PEM and PFX certs', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].pfx = 'a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` has both PEM and PFX defined')
+        })
+
+        it('detects invalid PEM config with no key', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a key filepath')
+        })
+
+        it('detects PEM cert absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].cert` to be a relative filepath')
+        })
+
+        it('detects PEM key absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a relative filepath')
+        })
+
+        it('detects PFX absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = undefined
+          cfg.clientCertificates[0].certs[0].pfx = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].pfx` to be a relative filepath')
+        })
+
+        it('detects CA absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].ca[0] = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].ca[0]` to be a relative filepath')
+        })
+      })
     })
   })
 
@@ -1321,6 +1452,7 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
             component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
@@ -1407,6 +1539,7 @@ describe('lib/config', () => {
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
             component: { from: 'default', value: {} },
+            clientCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
@@ -1573,7 +1706,7 @@ describe('lib/config', () => {
 
   context('_.defaultsDeep', () => {
     it('merges arrays', () => {
-    // sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      // sanity checks to confirm how Lodash merges arrays in defaultsDeep
       const diffs = {
         list: [1],
       }

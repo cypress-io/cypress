@@ -835,6 +835,15 @@ describe('network stubbing', { retries: 2 }, function () {
 
           cy.intercept({ hostname: 'http://website.web' })
         })
+
+        // https://github.com/cypress-io/cypress/issues/17015
+        it('string hostname can be "localhost"', () => {
+          cy.intercept({ hostname: 'localhost' })
+        })
+
+        it('string hostname can be unicode', () => {
+          cy.intercept({ hostname: 'はじめよう.みんな' })
+        })
       })
 
       context('with invalid handler', function () {
@@ -2129,6 +2138,29 @@ describe('network stubbing', { retries: 2 }, function () {
           .get('@3.all').should('have.length', 2)
           .get('@4.all').should('have.length', 3)
         })
+
+        context('stopPropagation: true', () => {
+          it('works with continue', () => {
+            cy.intercept({
+              method: 'POST',
+              times: 1,
+              url: '/post-only',
+            },
+            (req) => {
+              req.continue((res) => {
+                res.body = 'stubbed data'
+              })
+            }).as('interceptor')
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
+        })
       })
     })
 
@@ -2627,6 +2659,30 @@ describe('network stubbing', { retries: 2 }, function () {
       })
       .should('not.include', 'content-type')
       .wait('@get')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17084
+    it('does not overwrite the json-related content-type header', () => {
+      cy.intercept('/json-content-type', (req) => {
+        req.on('response', (res) => {
+          res.send({
+            statusCode: 500,
+            headers: {
+              'content-type': 'application/problem+json',
+              'access-control-allow-origin': '*',
+            },
+            body: {
+              status: 500,
+              title: 'Internal Server Error',
+            },
+          })
+        })
+      })
+
+      fetch('/json-content-type')
+      .then((res) => {
+        expect(res.headers.get('content-type')).to.eq('application/problem+json')
+      })
     })
 
     context('body parsing', function () {

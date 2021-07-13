@@ -105,7 +105,7 @@ class App extends Component {
           {this.props.children}
         </div>
         <Resizer
-          style={{ left: this.props.state.reporterWidth + this.props.state.specListWidth }}
+          style={{ left: this.props.state.absoluteReporterWidth + this.props.state.specListWidth }}
           maxWidth={this.props.state.windowWidth}
           onResizeStart={this._onReporterResizeStart}
           onResize={this._onReporterResize}

@@ -280,6 +280,9 @@ function createCypress (defaultOptions = {}) {
         .withArgs('automation:request')
         .yieldsAsync({ response: {} })
 
+        .withArgs('studio:init')
+        .yieldsAsync(_.defaultTo(opts.state.showedStudioModal, true))
+
         const c = _.extend({}, Cypress.config(), {
           isTextTerminal: false,
           spec: {
