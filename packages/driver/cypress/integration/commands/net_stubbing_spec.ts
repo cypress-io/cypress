@@ -835,6 +835,15 @@ describe('network stubbing', { retries: 2 }, function () {
 
           cy.intercept({ hostname: 'http://website.web' })
         })
+
+        // https://github.com/cypress-io/cypress/issues/17015
+        it('string hostname can be "localhost"', () => {
+          cy.intercept({ hostname: 'localhost' })
+        })
+
+        it('string hostname can be unicode', () => {
+          cy.intercept({ hostname: 'はじめよう.みんな' })
+        })
       })
 
       context('with invalid handler', function () {
@@ -2650,6 +2659,30 @@ describe('network stubbing', { retries: 2 }, function () {
       })
       .should('not.include', 'content-type')
       .wait('@get')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17084
+    it('does not overwrite the json-related content-type header', () => {
+      cy.intercept('/json-content-type', (req) => {
+        req.on('response', (res) => {
+          res.send({
+            statusCode: 500,
+            headers: {
+              'content-type': 'application/problem+json',
+              'access-control-allow-origin': '*',
+            },
+            body: {
+              status: 500,
+              title: 'Internal Server Error',
+            },
+          })
+        })
+      })
+
+      fetch('/json-content-type')
+      .then((res) => {
+        expect(res.headers.get('content-type')).to.eq('application/problem+json')
+      })
     })
 
     context('body parsing', function () {
