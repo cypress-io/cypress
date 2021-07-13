@@ -30,4 +30,18 @@ describe('top level suite', () => {
   describe('suite with config', { responseTimeout: 60000 }, () => {
 
   })
+
+  describe('suite with same title', () => {
+    it('test with same title', () => {
+      cy.get('.btn').click()
+    })
+
+    it('test with same title', () => {
+      cy.get('.btn').click()
+    })
+  })
+
+  describe('suite with same title', () => {
+
+  })
 })
