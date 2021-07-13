@@ -476,18 +476,6 @@ class $Cypress {
       case 'cy:scrolled':
         return this.emit('scrolled', ...args)
 
-      case 'app:cross:domain:window:load':
-        return this.emit('cross:domain:window:load', args[0])
-
-      case 'cy:switch:domain':
-        return this.emit('switch:domain', args[0])
-
-      case 'runner:cross:domain:driver:ready':
-        return this.emit('cross:domain:driver:ready')
-
-      case 'cy:cross:domain:message':
-        return this.emit('cross:domain:message', ...args)
-
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
 
@@ -534,6 +522,18 @@ class $Cypress {
 
       case 'spec:script:error':
         return this.emit('script:error', ...args)
+
+      // multidomain messages
+      // TODO: consider moving these elsewhere if they grow too
+      // large in number
+      case 'cy:expect:domain':
+        return this.emit('expect:domain', args[0])
+
+      case 'runner:cross:domain:bridge:ready':
+        return this.emit('cross:domain:bridge:ready')
+
+      case 'cy:cross:domain:message':
+        return this.emit('cross:domain:message', ...args)
 
       default:
         return

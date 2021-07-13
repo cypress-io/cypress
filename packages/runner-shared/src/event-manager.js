@@ -25,7 +25,7 @@ const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:for
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed switch:domain'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed expect:domain'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
@@ -303,15 +303,15 @@ export const eventManager = {
 
     top.addEventListener('message', (event) => {
       switch (event.data) {
-        case 'app:cross:domain:window:load':
-          return Cypress.action('app:cross:domain:window:load')
-        case 'cross:domain:driver:ready':
+        case 'cross:domain:window:before:load':
           this.crossDomainDriverWindow = event.source
 
-          return Cypress.action('runner:cross:domain:driver:ready')
+          return
+        case 'cross:domain:bridge:ready':
+          return Cypress.action('runner:cross:domain:bridge:ready')
         default:
           // eslint-disable-next-line no-console
-          console.log('Unknown postMessage:', event.data)
+          console.log('Unexpected postMessage:', event.data)
       }
     }, false)
   },

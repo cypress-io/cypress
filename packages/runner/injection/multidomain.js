@@ -33,8 +33,9 @@
 
 //  timers.wrap()
 
-// TODO: change this to be window:before:load once coordination with
-// driver is fleshed out better
-window.addEventListener('load', () => {
-  window.top.postMessage('app:cross:domain:window:load', '*')
-})
+// TODO: don't hard-code the index. need it to be predictable or need
+// to search for the right one somehow. will need to be fixed when we
+// test out visiting a 3rd domain
+const cyBridgeFrame = window.parent.frames[2]
+
+cyBridgeFrame.__onBeforeAppWindowLoad(window)
