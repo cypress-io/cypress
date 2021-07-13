@@ -7,6 +7,8 @@ const saveErrorMessage = (message) => {
   return `\
 ${message}\n\n\
 Cypress was unable to save these commands to your spec file. \
+You can use the copy button below to copy the commands to your clipboard. \
+\n
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
