@@ -11,9 +11,10 @@
     "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
     "dev": "LAUNCHPAD=1 yarn start-test 5050 cypress:open",
-    "postinstall": "patch-typed-document-node && echo '@packages/launchpad needs: yarn build'",
+    "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
-    "watch": "yarn build --watch"
+    "watch": "yarn build --watch",
+    "codegen": "graphql-codegen --config graphql-codegen.yml || echo 'todo'"
   },
   "devDependencies": {
     "@apollo/client": "^3.3.21",
@@ -23,12 +24,11 @@
     "@graphql-codegen/typescript": "^1.22.4",
     "@graphql-codegen/typescript-operations": "^1.18.3",
     "@graphql-typed-document-node/core": "^3.1.0",
-    "@graphql-typed-document-node/patch-cli": "^3.0.8",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
-    "@vue/apollo-composable": "^4.0.0-alpha.13",
+    "@vue/apollo-composable": "4.0.0-alpha.12",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
     "cross-env": "6.0.3",

@@ -30,6 +30,7 @@
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "cypress:verify": "cypress verify --dev",
     "dev": "node ./scripts/start.js",
+    "dev:watch": "node ./scripts/watch.js",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",

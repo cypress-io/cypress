@@ -24,6 +24,16 @@ import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
+import { gql } from '@apollo/client'
+import { WizardDocument } from '../generated/graphql'
+import { useQuery } from "@vue/apollo-composable";
+gql`
+query Wizard {
+  app {
+    isFirstOpen
+  }
+}
+`
 
 export default defineComponent({
   components: {
@@ -32,13 +42,16 @@ export default defineComponent({
     InstallDependencies,
     ConfigFile,
     OpenBrowser,
-},
+  },
   setup() {
     const storeApp = useStoreApp();
 
     const title = computed(() => storeApp.getState().title)
     const description = computed(() => storeApp.getState().description)
     const steps = computed(() => storeApp.getState().steps)
+
+    // Don't really understand how this should be used
+    const query = useQuery(WizardDocument, {})
 
     return { steps, title, description };
   },

@@ -1,0 +1,97 @@
+diff --git a/node_modules/@vue/apollo-composable/dist/useQuery.js b/node_modules/@vue/apollo-composable/dist/useQuery.js
+index 0d4ce68..f5c9b11 100644
+--- a/node_modules/@vue/apollo-composable/dist/useQuery.js
++++ b/node_modules/@vue/apollo-composable/dist/useQuery.js
+@@ -9,9 +9,7 @@ var __assign = (this && this.__assign) || function () {
+     };
+     return __assign.apply(this, arguments);
+ };
+-import { ref, isRef, computed, watch, 
+-// @ts-expect-error
+-onServerPrefetch, getCurrentInstance, onBeforeUnmount, nextTick, } from 'vue-demi';
++import { ref, isRef, computed, watch, getCurrentInstance, onBeforeUnmount, nextTick, } from 'vue-demi';
+ import { throttle, debounce } from 'throttle-debounce';
+ import { useApolloClient } from './useApolloClient';
+ import { paramToRef } from './util/paramToRef';
+@@ -51,22 +49,22 @@ export function useQueryImpl(document, variables, options, lazy) {
+     // SSR
+     var firstResolve;
+     var firstReject;
+-    onServerPrefetch === null || onServerPrefetch === void 0 ? void 0 : onServerPrefetch(function () {
+-        if (!isEnabled.value || (isServer && currentOptions.value.prefetch === false))
+-            return;
+-        return new Promise(function (resolve, reject) {
+-            firstResolve = function () {
+-                resolve();
+-                firstResolve = undefined;
+-                firstReject = undefined;
+-            };
+-            firstReject = function (error) {
+-                reject(error);
+-                firstResolve = undefined;
+-                firstReject = undefined;
+-            };
+-        }).then(stop).catch(stop);
+-    });
++    // onServerPrefetch === null || onServerPrefetch === void 0 ? void 0 : onServerPrefetch(function () {
++    //     if (!isEnabled.value || (isServer && currentOptions.value.prefetch === false))
++    //         return;
++    //     return new Promise(function (resolve, reject) {
++    //         firstResolve = function () {
++    //             resolve();
++    //             firstResolve = undefined;
++    //             firstReject = undefined;
++    //         };
++    //         firstReject = function (error) {
++    //             reject(error);
++    //             firstResolve = undefined;
++    //             firstReject = undefined;
++    //         };
++    //     }).then(stop).catch(stop);
++    // });
+     // Apollo Client
+     var resolveClient = useApolloClient().resolveClient;
+     // Query
+diff --git a/node_modules/@vue/apollo-composable/dist/vue-apollo-composable.js b/node_modules/@vue/apollo-composable/dist/vue-apollo-composable.js
+index 3fd3f3a..4912ea7 100644
+--- a/node_modules/@vue/apollo-composable/dist/vue-apollo-composable.js
++++ b/node_modules/@vue/apollo-composable/dist/vue-apollo-composable.js
+@@ -303,22 +303,22 @@ define("useQuery", ["require", "exports", "vue-demi", "throttle-debounce", "useA
+         // SSR
+         var firstResolve;
+         var firstReject;
+-        vue_demi_5.onServerPrefetch === null || vue_demi_5.onServerPrefetch === void 0 ? void 0 : vue_demi_5.onServerPrefetch(function () {
+-            if (!isEnabled.value || (isServer && currentOptions.value.prefetch === false))
+-                return;
+-            return new Promise(function (resolve, reject) {
+-                firstResolve = function () {
+-                    resolve();
+-                    firstResolve = undefined;
+-                    firstReject = undefined;
+-                };
+-                firstReject = function (error) {
+-                    reject(error);
+-                    firstResolve = undefined;
+-                    firstReject = undefined;
+-                };
+-            }).then(stop).catch(stop);
+-        });
++        // vue_demi_5.onServerPrefetch === null || vue_demi_5.onServerPrefetch === void 0 ? void 0 : vue_demi_5.onServerPrefetch(function () {
++        //     if (!isEnabled.value || (isServer && currentOptions.value.prefetch === false))
++        //         return;
++        //     return new Promise(function (resolve, reject) {
++        //         firstResolve = function () {
++        //             resolve();
++        //             firstResolve = undefined;
++        //             firstReject = undefined;
++        //         };
++        //         firstReject = function (error) {
++        //             reject(error);
++        //             firstResolve = undefined;
++        //             firstReject = undefined;
++        //         };
++        //     }).then(stop).catch(stop);
++        // });
+         // Apollo Client
+         var resolveClient = useApolloClient_1.useApolloClient().resolveClient;
+         // Query

@@ -7,6 +7,9 @@ import ViteIcons, { ViteIconsResolver } from 'vite-plugin-icons'
 
 export default defineConfig({
   base: './',
+  build: {
+    minify: false,
+  },
   plugins: [
     vue(),
     vueJsx(),
