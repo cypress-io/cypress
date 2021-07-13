@@ -4,12 +4,12 @@
   "description": "Launches Vite Dev Server for Component Testing",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc",
+    "build": "tsc --project tsconfig.build.json",
+    "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "test": "yarn cy:run",
-    "watch": "tsc -w"
+    "watch": "yarn build --watch"
   },
   "dependencies": {
     "debug": "^4.3.2",
@@ -19,6 +19,8 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
     "@testing-library/cypress": "7.0.4",
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2",
     "@vitejs/plugin-vue": "1.2.0",
     "@vue/compiler-sfc": "3.0.9",
     "cypress": "0.0.0-development",

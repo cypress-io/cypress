@@ -565,7 +565,7 @@ declare namespace Cypress {
         line: number, 
         column: number, 
       }
-    }
+    } | {}
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
