@@ -16,8 +16,9 @@
     </template>
   </div>
 </template>
+
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, watch, watchEffect } from "vue";
 import { useStoreApp } from "../store/app";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
@@ -27,6 +28,7 @@ import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@apollo/client'
 import { WizardDocument } from '../generated/graphql'
 import { useQuery } from "@vue/apollo-composable";
+
 gql`
 query Wizard {
   app {
@@ -50,8 +52,11 @@ export default defineComponent({
     const description = computed(() => storeApp.getState().description)
     const steps = computed(() => storeApp.getState().steps)
 
-    // Don't really understand how this should be used
-    const query = useQuery(WizardDocument, {})
+    const { result } = useQuery(WizardDocument, {})
+
+    // Beware that result may not contain your data at all time! It will initially be undefined until the query successfully completes. 
+    // So it's a good idea to add a conditional before rendering the data:
+    const isFirstOpened = computed(() => result.value.data?.app?.isFirstOpen ?? false)
 
     return { steps, title, description };
   },
