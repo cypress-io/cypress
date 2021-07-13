@@ -45,6 +45,8 @@ export class StudioRecorder {
   @observable _hasStarted = false
 
   fileDetails = null
+  absoluteFile = null
+  runnableTitle = null
   _currentId = 1
   _previousMouseEvent = null
 
@@ -144,6 +146,14 @@ export class StudioRecorder {
     this.fileDetails = fileDetails
   }
 
+  setAbsoluteFile = (absoluteFile) => {
+    this.absoluteFile = absoluteFile
+  }
+
+  setRunnableTitle = (runnableTitle) => {
+    this.runnableTitle = runnableTitle
+  }
+
   _clearPreviousMouseEvent = () => {
     this._previousMouseEvent = null
   }
@@ -202,8 +212,11 @@ export class StudioRecorder {
 
     eventManager.emit('studio:save', {
       fileDetails: this.fileDetails,
+      absoluteFile: this.absoluteFile,
+      runnableTitle: this.runnableTitle,
       commands: this.logs,
       isSuite: !!this.suiteId,
+      isRoot: this.suiteId === 'r1',
       testName,
     })
   }

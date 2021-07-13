@@ -405,9 +405,11 @@ export const eventManager = {
         reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
-            studioTestId: studioRecorder.testId,
-            studioSuiteId: studioRecorder.suiteId,
-            studioUrl: studioRecorder.url,
+            studio: {
+              testId: studioRecorder.testId,
+              suiteId: studioRecorder.suiteId,
+              url: studioRecorder.url,
+            },
           })
         })
       })
@@ -482,13 +484,23 @@ export const eventManager = {
       localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (test) => {
+    Cypress.on('test:before:run:async', (attr, test) => {
       if (studioRecorder.suiteId) {
         studioRecorder.setTestId(test.id)
       }
 
-      if (studioRecorder.hasRunnableId && test.invocationDetails) {
-        studioRecorder.setFileDetails(test.invocationDetails)
+      if (studioRecorder.hasRunnableId) {
+        if (test.invocationDetails) {
+          studioRecorder.setFileDetails(test.invocationDetails)
+        }
+
+        if (studioRecorder.suiteId) {
+          if (test.parent && test.parent.id !== 'r1') {
+            studioRecorder.setRunnableTitle(test.parent.title)
+          }
+        } else {
+          studioRecorder.setRunnableTitle(test.title)
+        }
       }
     })
 
@@ -555,35 +567,30 @@ export const eventManager = {
   },
 
   _restoreStudioFromState (state) {
-    if (state.studioTestId) {
-      studioRecorder.setTestId(state.studioTestId)
-    }
+    const { studio } = state
 
-    if (state.studioSuiteId) {
-      studioRecorder.setSuiteId(state.studioSuiteId)
-    }
+    if (studio) {
+      if (studio.testId) {
+        studioRecorder.setTestId(studio.testId)
+      }
 
-    if (state.studioUrl) {
-      studioRecorder.setUrl(state.studioUrl)
+      if (studio.suiteId) {
+        studioRecorder.setSuiteId(studio.suiteId)
+      }
+
+      if (studio.url) {
+        studioRecorder.setUrl(studio.url)
+      }
     }
   },
 
   _initializeStudio (config) {
     if (studioRecorder.hasRunnableId) {
+      studioRecorder.setAbsoluteFile(config.spec.absolute)
       studioRecorder.startLoading()
 
       if (studioRecorder.suiteId) {
         Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
-
-        // root runnable always has id of r1
-        // and does not have invocationDetails so we must set manually from config
-        if (studioRecorder.suiteId === 'r1') {
-          studioRecorder.setFileDetails({
-            absoluteFile: config.spec.absolute,
-            line: null,
-            column: null,
-          })
-        }
       } else if (studioRecorder.testId) {
         Cypress.runner.setOnlyTestId(studioRecorder.testId)
       }

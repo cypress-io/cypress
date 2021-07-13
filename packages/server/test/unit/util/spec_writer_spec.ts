@@ -129,86 +129,147 @@ describe('lib/util/spec_writer', () => {
 
   describe('#appendCommandsToTest', () => {
     it('can add commands to an existing test defined with it', () => {
-      appendCommandsToTest({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 3,
+          column: 5,
+        },
         absoluteFile: '',
-        line: 3,
-        column: 5,
-      }, exampleTestCommands)
+        runnableTitle: '',
+        commands: exampleTestCommands,
+      }
+
+      return appendCommandsToTest(saveDetails)
     })
 
     it('can add commands to an existing test defined with specify', () => {
-      appendCommandsToTest({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 7,
+          column: 5,
+        },
         absoluteFile: '',
-        line: 7,
-        column: 5,
-      }, exampleTestCommands)
+        runnableTitle: '',
+        commands: exampleTestCommands,
+      }
+
+      return appendCommandsToTest(saveDetails)
     })
 
     it('can add commands to an existing test defined with it only', () => {
-      appendCommandsToTest({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 12,
+          column: 8,
+        },
         absoluteFile: '',
-        line: 12,
-        column: 8,
-      }, exampleTestCommands)
+        runnableTitle: '',
+        commands: exampleTestCommands,
+      }
+
+      return appendCommandsToTest(saveDetails)
     })
 
     it('can add commands to an existing test with config', () => {
-      appendCommandsToTest({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 16,
+          column: 8,
+        },
         absoluteFile: '',
-        line: 16,
-        column: 8,
-      }, exampleTestCommands)
+        runnableTitle: '',
+        commands: exampleTestCommands,
+      }
+
+      return appendCommandsToTest(saveDetails)
     })
   })
 
   describe('#createNewTestInSuite', () => {
     it('can create a new test in a suite defined with describe', () => {
-      createNewTestInSuite({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 2,
+          column: 3,
+        },
         absoluteFile: '',
-        line: 2,
-        column: 3,
-      }, exampleTestCommands, 'test added to describe')
+        runnableTitle: '',
+        commands: exampleTestCommands,
+        testName: 'test added to describe',
+      }
+
+      return createNewTestInSuite(saveDetails)
     })
 
     it('can create a new test in a suite defined with context', () => {
-      createNewTestInSuite({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 21,
+          column: 3,
+        },
         absoluteFile: '',
-        line: 21,
-        column: 3,
-      }, exampleTestCommands, 'test added to context')
+        runnableTitle: '',
+        commands: exampleTestCommands,
+        testName: 'test added to context',
+      }
+
+      return createNewTestInSuite(saveDetails)
     })
 
     it('can create a new test in a suite defined with describe only', () => {
-      createNewTestInSuite({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 26,
+          column: 12,
+        },
         absoluteFile: '',
-        line: 26,
-        column: 12,
-      }, exampleTestCommands, 'test added to describe only')
+        runnableTitle: '',
+        commands: exampleTestCommands,
+        testName: 'test added to describe only',
+      }
+
+      return createNewTestInSuite(saveDetails)
     })
 
     it('can create a new test in a suite with config', () => {
-      createNewTestInSuite({
+      const saveDetails = {
+        fileDetails: {
+          absoluteFile: '',
+          line: 30,
+          column: 12,
+        },
         absoluteFile: '',
-        line: 30,
-        column: 12,
-      }, exampleTestCommands, 'test added to describe with config')
+        runnableTitle: '',
+        commands: exampleTestCommands,
+        testName: 'test added to describe with config',
+      }
+
+      return createNewTestInSuite(saveDetails)
     })
   })
 
   describe('#createNewTestInFile', () => {
     it('can create a new test in the root of a file', () => {
-      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to file')
+      return createNewTestInFile('', exampleTestCommands, 'test added to file')
     })
 
     it('preserves comments in a completely empty spec', () => {
       readFile.resolves(emptyCommentsSpec)
-      createNewTestInFile({ absoluteFile: '' }, exampleTestCommands, 'test added to empty file')
+
+      return createNewTestInFile('', exampleTestCommands, 'test added to empty file')
     })
   })
 
   describe('#createFile', () => {
     it('creates a new file with templated comments', () => {
-      createFile('/path/to/project/cypress/integration/my_new_spec.js')
+      return createFile('/path/to/project/cypress/integration/my_new_spec.js')
     })
   })
 
