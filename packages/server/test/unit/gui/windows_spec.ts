@@ -54,14 +54,16 @@ describe('lib/gui/windows', () => {
           width: 600,
           type: 'INDEX',
           show: true,
-          url: getPathToDesktopIndex(),
+          url: getPathToDesktopIndex('desktop-gui'),
         })
 
         expect(options.webPreferences).to.include({
           preload: path.resolve('lib', 'ipc', 'ipc.js'),
         })
 
-        expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex())
+        expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex(
+          'desktop-gui',
+        ))
       })
     })
   })

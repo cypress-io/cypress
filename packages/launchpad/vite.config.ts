@@ -7,6 +7,13 @@ import ViteIcons, { ViteIconsResolver } from 'vite-plugin-icons'
 
 export default defineConfig({
   base: './',
+  build: {
+    minify: false,
+  },
+  optimizeDeps: {
+    include: ['@apollo/client/core'],
+    exclude: ['@apollo/client'],
+  },
   plugins: [
     vue(),
     vueJsx(),

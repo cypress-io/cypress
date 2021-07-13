@@ -16,14 +16,26 @@
     </template>
   </div>
 </template>
+
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, watch } from "vue";
 import { useStoreApp } from "../store/app";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
+import { gql } from '@apollo/client'
+import { WizardDocument } from '../generated/graphql'
+import { useQuery } from "@vue/apollo-composable";
+
+gql`
+query Wizard {
+  app {
+    isFirstOpen
+  }
+}
+`
 
 export default defineComponent({
   components: {
@@ -32,7 +44,7 @@ export default defineComponent({
     InstallDependencies,
     ConfigFile,
     OpenBrowser,
-},
+  },
   setup() {
     const storeApp = useStoreApp();
 
@@ -40,7 +52,17 @@ export default defineComponent({
     const description = computed(() => storeApp.getState().description)
     const steps = computed(() => storeApp.getState().steps)
 
-    return { steps, title, description };
+    const { onResult, result, loading } = useQuery(WizardDocument, {})
+
+    onResult((result) => {
+      console.log(result)
+    })
+
+    watch(result, value => {
+      console.log(value)
+    })
+
+    return { steps, title, description, loading, result };
   },
 });
 </script>

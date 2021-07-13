@@ -18,6 +18,6 @@ export const getPathToIndex = (pkg: 'runner' | 'runner-ct') => {
   return getPathToDist(pkg, 'index.html')
 }
 
-export const getPathToDesktopIndex = () => {
-  return `file://${path.join(__dirname, '..', '..', 'desktop-gui', 'dist', 'index.html')}`
+export const getPathToDesktopIndex = (pkg: 'desktop-gui' | 'launchpad') => {
+  return `file://${path.join(__dirname, '..', '..', pkg, 'dist', 'index.html')}`
 }

@@ -135,7 +135,7 @@ module.exports = {
         argv.push('--enable-logging')
       }
 
-      return cp.spawn(execPath, argv, { stdio: 'inherit' })
+      const spawned = cp.spawn(execPath, argv, { stdio: 'inherit' })
       .on('close', (code, signal) => {
         debug('electron closing %o', { code, signal })
 
@@ -154,6 +154,18 @@ module.exports = {
 
         return process.exit(code)
       })
+
+      if (process.argv.includes('--devWatch')) {
+        spawned.on('exit', () => {
+          process.exit(0)
+        })
+
+        process.on('exit', () => {
+          spawned.kill(9)
+        })
+      }
+
+      return spawned
     }).catch((err) => {
       // eslint-disable-next-line no-console
       console.debug(err.stack)

@@ -53,6 +53,10 @@ packages/server/test/support/fixtures/server/libs
 # from runner-ct
 /packages/runner-ct/cypress/screenshots
 
+# graphql, auto-generated
+/packages/server/lib/graphql/gen/nxs.gen.ts
+/packages/launchpad/src/generated
+
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template
 /npm/create-cypress-tests/src/test-output
