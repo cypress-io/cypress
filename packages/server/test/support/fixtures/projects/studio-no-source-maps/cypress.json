@@ -1,1 +1,3 @@
-../studio/cypress.json
+{
+  "experimentalStudio": true
+}

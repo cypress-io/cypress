@@ -496,7 +496,7 @@ export const externalTest = () => {
 `
 
 exports['studio-no-source-maps extend.spec.js'] = `
-import { openStudio, saveStudio, verifyCommandLog } from '../support'
+import { openStudio, saveStudio, verifyCommandLog } from '../../../studio/cypress/support'
 
 const isTextTerminal = Cypress.config('isTextTerminal')
 
@@ -510,65 +510,24 @@ describe('extends test', () => {
       Cypress.emit('run:end')
     })
 
-    cy.get('.link', { log: false }).click({ log: false })
-    cy.get('.input-text', { log: false }).type('testing', { log: false })
-    cy.get('.input-radio', { log: false }).click({ log: false })
-    cy.get('.input-checkbox', { log: false }).click({ log: false })
-    cy.get('.input-checkbox', { log: false }).click({ log: false })
-    cy.get('.select', { log: false }).select('1', { log: false })
-    cy.get('.multiple', { log: false }).select(['0', '2'], { log: false })
+    cy.get('.btn', { log: false }).click({ log: false })
 
     verifyCommandLog(1, {
-      selector: '.link',
+      selector: '.btn',
       name: 'click',
     })
 
-    verifyCommandLog(2, {
-      selector: '.input-text',
-      name: 'clear',
-    })
-
-    verifyCommandLog(3, {
-      selector: '.input-text',
-      name: 'type',
-      message: 'testing',
-    })
-
-    verifyCommandLog(4, {
-      selector: '.input-radio',
-      name: 'check',
-    })
-
-    verifyCommandLog(5, {
-      selector: '.input-checkbox',
-      name: 'check',
-    })
-
-    verifyCommandLog(6, {
-      selector: '.input-checkbox',
-      name: 'uncheck',
-    })
-
-    verifyCommandLog(7, {
-      selector: '.select',
-      name: 'select',
-      message: '1',
-    })
-
-    verifyCommandLog(8, {
-      selector: '.multiple',
-      name: 'select',
-      message: '[0, 2]',
-    })
-
     saveStudio()
+    /* ==== Generated with Cypress Studio ==== */
+    cy.get('.btn').click();
+    /* ==== End Cypress Studio ==== */
   })
 })
 
 `
 
 exports['studio-no-source-maps new.spec.js'] = `
-import { openStudio, saveStudio, verifyCommandLog, verifyVisit } from '../support'
+import { openStudio, saveStudio, verifyCommandLog, verifyVisit } from '../../../studio/cypress/support'
 
 const isTextTerminal = Cypress.config('isTextTerminal')
 
@@ -584,7 +543,7 @@ describe('creates new test', () => {
       cy.wrap(Cypress.$(window.top.document.body), { log: false })
       .find('.runner', { log: false })
       .find('.input-active', { log: false })
-      .type('new.html', { log: false }).then(() => {
+      .type('index.html', { log: false }).then(() => {
         // we have to send a jquery click here since Cypress throws an error
         // as the click triggers a cy.visit() in the runner
         Cypress.$(window.top.document.body).find('.btn-submit').click()
@@ -592,7 +551,7 @@ describe('creates new test', () => {
 
       cy.get('.btn', { log: false }).click({ log: false })
 
-      verifyVisit('new.html')
+      verifyVisit('index.html')
 
       verifyCommandLog(2, {
         selector: '.btn',
@@ -601,6 +560,14 @@ describe('creates new test', () => {
 
       saveStudio('My New Test')
     })
+
+    /* ==== Test Created with Cypress Studio ==== */
+    it('My New Test', function() {
+      /* ==== Generated with Cypress Studio ==== */
+      cy.visit('index.html');
+      cy.get('.btn').click();
+      /* ==== End Cypress Studio ==== */
+    });
   })
 })
 
