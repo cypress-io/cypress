@@ -105,6 +105,10 @@
         padding: 0 5px;
         display: inline-block;
 
+        &.show-count {
+          padding-right: 2px;
+        }
+
         &.route {
           background-color: $yellow-medium;
         }
@@ -119,13 +123,7 @@
         }
 
         &.show-count {
-          padding-right: 2px;
           border-radius: 10px 0 0 10px;
-          max-width: 200px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          vertical-align: top;
         }
       }
 
@@ -151,13 +149,8 @@
 
       .num-duplicates.has-alias {
         border-radius: 10px;
-        line-height: 1;
+        line-height: 2;
         padding: 3px 5px 3px 5px;
-      }
-
-      .num-duplicates.has-alias.has-duplicates {
-        border-radius: 0 10px 10px 0;
-        padding: 4px 5px 2px 3px;
       }
 
       .command-alias-count {

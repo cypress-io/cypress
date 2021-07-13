@@ -78,31 +78,22 @@ const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesRef
 ))
 
 interface AliasesProps {
-  isOpen: boolean
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
 }
 
-const Aliases = observer(({ model, aliasesWithDuplicates, isOpen }: AliasesProps) => {
+const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
   if (!model.alias) return null
 
   return (
     <span>
-      {_.map(([] as Array<Alias>).concat(model.alias), (alias) => {
-        const aliases = [alias]
-
-        if (!isOpen && model.hasDuplicates) {
-          aliases.push(..._.compact(model.duplicates.map((dupe) => dupe.alias)))
-        }
-
-        return (
-          <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`} className='cy-tooltip'>
-            <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': shouldShowCount(aliasesWithDuplicates, alias, model) })}>
-              {aliases.join(', ')}
-            </span>
-          </Tooltip>
-        )
-      })}
+      {_.map(([] as Array<Alias>).concat(model.alias), (alias) => (
+        <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`} className='cy-tooltip'>
+          <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': shouldShowCount(aliasesWithDuplicates, alias, model) })}>
+            {alias}
+          </span>
+        </Tooltip>
+      ))}
     </span>
   )
 })
@@ -131,6 +122,7 @@ const pluralTypes = {
   function: 'functions',
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Interceptions = observer(({ model }: InterceptionsProps) => {
   if (!model.renderProps.interceptions || !model.renderProps.interceptions.length) {
     return null
@@ -286,10 +278,9 @@ class Command extends Component<Props> {
                   <span className='num-elements'>{model.numElements}</span>
                 </Tooltip>
                 <span className='alias-container'>
-                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this.isOpen} />
-                  <Interceptions model={model}/>
+                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
                   <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
-                    <span className={cs('num-duplicates', { 'has-alias': model.alias, 'has-duplicates': model.numDuplicates > 1 })}>{model.numDuplicates}</span>
+                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
                   </Tooltip>
                 </span>
               </span>
