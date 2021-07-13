@@ -12,6 +12,7 @@ Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.js
 - lib/project-base.ts
+- lib/project_static.ts
 - lib/modes/run.js
 - lib/modes/run-e2e.js
 - lib/modes/index.js

@@ -105,7 +105,7 @@ export const createRoutes = ({
 
   la(check.unemptyString(config.clientRoute), 'missing client route in config', config)
 
-  app.get(config.clientRoute, (req, res) => {
+  app.get(`${config.clientRoute}`, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runner.serve(req, res, {
