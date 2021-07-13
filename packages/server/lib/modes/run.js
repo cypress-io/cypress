@@ -1,6 +1,5 @@
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
-const { app } = require('electron')
 const la = require('lazy-ass')
 const pkg = require('@packages/root')
 const path = require('path')
@@ -12,7 +11,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const { ProjectBase } = require('../project-base')
+const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')
@@ -607,20 +606,13 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onError: args.onError,
   }
 
-  return openProject
-  .create(projectRoot, args, options)
-  .catch({ portInUse: true }, (err) => {
-    // TODO: this needs to move to call exitEarly
-    // so we record the failure in CI
-    return errors.throw('PORT_IN_USE_LONG', err.port)
-  })
+  return openProject.create(projectRoot, args, options)
 }
 
 const createAndOpenProject = function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return ProjectBase
-  .ensureExists(projectRoot, options)
+  return ProjectStatic.ensureExists(projectRoot, options)
   .then(() => {
     // open this project without
     // adding it to the global cache
@@ -974,10 +966,14 @@ module.exports = {
       return project.onWarning
     }
 
+    debug('browser launched')
+
     return openProject.launch(browser, spec, browserOpts)
   },
 
   navigateToNextSpec (spec) {
+    debug('navigating to next spec')
+
     return openProject.changeUrlToSpec(spec)
   },
 
@@ -1084,10 +1080,7 @@ module.exports = {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return this.navigateToNextSpec(options.spec)
-        .tap(() => {
-          debug('navigated to next spec')
-        })
+        return Promise.resolve(this.navigateToNextSpec(options.spec))
       }
 
       return Promise.join(
@@ -1095,10 +1088,7 @@ module.exports = {
         .tap(() => {
           debug('socket connected', { socketId })
         }),
-        this.launchBrowser(options)
-        .tap(() => {
-          debug('browser launched')
-        }),
+        this.launchBrowser(options),
       )
       .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
@@ -1506,6 +1496,10 @@ module.exports = {
   ready (options = {}) {
     debug('run mode ready with options %o', options)
 
+    if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
+      debug('running electron as a node process without xvfb')
+    }
+
     _.defaults(options, {
       isTextTerminal: true,
       browser: 'electron',
@@ -1652,14 +1646,18 @@ module.exports = {
   },
 
   async run (options) {
-    // electron >= 5.0.0 will exit the app if all browserwindows are closed,
-    // this is obviously undesirable in run mode
-    // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
-    app.on('window-all-closed', () => {
-      debug('all BrowserWindows closed, not exiting')
-    })
+    if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+      const app = require('electron').app
 
-    await app.whenReady()
+      // electron >= 5.0.0 will exit the app if all browserwindows are closed,
+      // this is obviously undesirable in run mode
+      // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
+      app.on('window-all-closed', () => {
+        debug('all BrowserWindows closed, not exiting')
+      })
+
+      await app.whenReady()
+    }
 
     return this.ready(options)
   },
