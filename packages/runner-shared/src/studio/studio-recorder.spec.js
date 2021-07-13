@@ -10,6 +10,8 @@ const createEvent = (props) => {
   return {
     isTrusted: true,
     type: 'click',
+    preventDefault: sinon.stub(),
+    stopPropagation: sinon.stub(),
     ...props,
   }
 }
@@ -535,6 +537,18 @@ describe('StudioRecorder', () => {
       expect(instance.logs).to.be.empty
     })
 
+    it('does not prevent the action from reaching other event listeners', () => {
+      const $el = $('<div />')
+
+      const preventDefault = sinon.stub()
+      const stopPropagation = sinon.stub()
+
+      instance._recordEvent(createEvent({ target: $el, preventDefault, stopPropagation }))
+
+      expect(preventDefault).not.to.be.called
+      expect(stopPropagation).not.to.be.called
+    })
+
     it('does not record events if the test has failed', () => {
       instance.testFailed()
 
@@ -1039,20 +1053,22 @@ describe('StudioRecorder', () => {
   })
 
   context('#openAssertionsMenu', () => {
-    it('prevents the default right click event action', () => {
+    it('prevents the default right click event and propagation', () => {
       const $el = $('<div />')
 
       const preventDefault = sinon.stub()
+      const stopPropagation = sinon.stub()
 
-      instance._openAssertionsMenu(createEvent({ target: $el, preventDefault }))
+      instance._openAssertionsMenu(createEvent({ target: $el, preventDefault, stopPropagation }))
 
       expect(preventDefault).to.be.called
+      expect(stopPropagation).to.be.called
     })
 
     it('closes existing assertions menu', () => {
       const $el = $('<div />')
 
-      instance._openAssertionsMenu(createEvent({ target: $el, preventDefault: sinon.stub() }))
+      instance._openAssertionsMenu(createEvent({ target: $el }))
 
       expect(dom.closeStudioAssertionsMenu).to.be.called
     })
@@ -1060,7 +1076,7 @@ describe('StudioRecorder', () => {
     it('opens the assertions menu', () => {
       const $el = $('<div />')
 
-      instance._openAssertionsMenu(createEvent({ target: $el, preventDefault: sinon.stub() }))
+      instance._openAssertionsMenu(createEvent({ target: $el }))
 
       expect(dom.openStudioAssertionsMenu).to.be.called
     })
@@ -1068,7 +1084,7 @@ describe('StudioRecorder', () => {
     it('does not close existing assertions menu or open another one if right click within menu', () => {
       const $el = $('<div class="__cypress-studio-assertions-menu" />')
 
-      instance._openAssertionsMenu(createEvent({ target: $el, preventDefault: sinon.stub() }))
+      instance._openAssertionsMenu(createEvent({ target: $el }))
 
       expect(dom.closeStudioAssertionsMenu).not.to.be.called
       expect(dom.openStudioAssertionsMenu).not.to.be.called

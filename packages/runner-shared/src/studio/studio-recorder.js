@@ -258,7 +258,9 @@ export class StudioRecorder {
       })
     })
 
-    this._body.addEventListener('contextmenu', this._openAssertionsMenu)
+    this._body.addEventListener('contextmenu', this._openAssertionsMenu, {
+      capture: true,
+    })
 
     this._clearPreviousMouseEvent()
   }
@@ -278,7 +280,9 @@ export class StudioRecorder {
       })
     })
 
-    this._body.removeEventListener('contextmenu', this._openAssertionsMenu)
+    this._body.removeEventListener('contextmenu', this._openAssertionsMenu, {
+      capture: true,
+    })
 
     this._clearPreviousMouseEvent()
   }
@@ -642,6 +646,7 @@ export class StudioRecorder {
 
   _openAssertionsMenu = (event) => {
     event.preventDefault()
+    event.stopPropagation()
 
     const $el = $(event.target)
 
