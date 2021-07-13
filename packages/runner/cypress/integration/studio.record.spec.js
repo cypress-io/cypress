@@ -346,7 +346,7 @@ describe('studio record', () => {
 
         getAssertionsMenu().find('.assertions-menu').should('exist')
 
-        getAssertionOption('have.attr', 'type: button')
+        getAssertionOption('have attr', 'type: button')
 
         cy.percySnapshot()
       })
@@ -359,16 +359,16 @@ describe('studio record', () => {
 
         getAssertionsMenu().find('.assertions-menu').should('exist')
 
-        getAssertionOption('have.text', 'assertions button')
-        getAssertionOption('have.value', 'submit1')
-        getAssertionOption('have.id', 'assertions-1')
-        getAssertionOption('have.class', 'container')
-        getAssertionOption('have.class', 'container-wide')
-        getAssertionOption('have.attr', 'type: button')
-        getAssertionOption('have.attr', 'data-channel: a1')
-        getAssertionOption('have.attr', 'data-target: none')
-        getAssertionOption('be.visible').trigger('hover').find('.assertion-options').should('not.exist')
-        getAssertionOption('be.enabled').trigger('hover').find('.assertion-options').should('not.exist')
+        getAssertionOption('have text', 'assertions button')
+        getAssertionOption('have value', 'submit1')
+        getAssertionOption('have id', 'assertions-1')
+        getAssertionOption('have class', 'container')
+        getAssertionOption('have class', 'container-wide')
+        getAssertionOption('have attr', 'type: button')
+        getAssertionOption('have attr', 'data-channel: a1')
+        getAssertionOption('have attr', 'data-target: none')
+        getAssertionOption('be visible').trigger('hover').find('.assertion-options').should('not.exist')
+        getAssertionOption('be enabled').trigger('hover').find('.assertion-options').should('not.exist')
       })
     })
 
@@ -395,11 +395,11 @@ describe('studio record', () => {
       .then(() => {
         getFrame().find('#assertions-1').rightclick()
 
-        getAssertionOption('have.text', 'assertions button')
+        getAssertionOption('have text', 'assertions button')
 
         getFrame().find('.btn').rightclick()
 
-        getAssertionOption('have.text', 'button')
+        getAssertionOption('have text', 'button')
       })
     })
 
@@ -408,7 +408,7 @@ describe('studio record', () => {
       .then(() => {
         getFrame().find('#assertions-1').rightclick()
 
-        getAssertionOption('have.text', 'assertions button').click()
+        getAssertionOption('have text', 'assertions button').click()
 
         getFrame().find('.__cypress-studio-assertions-menu').should('not.exist')
 
@@ -424,13 +424,13 @@ describe('studio record', () => {
       runCypressStudio()
       .then(() => {
         getFrame().find('#assertions-1').rightclick()
-        getAssertionOption('be.visible').click()
+        getAssertionOption('be visible').click()
 
         getFrame().find('#assertions-1').rightclick()
-        getAssertionOption('have.value', 'submit1').click()
+        getAssertionOption('have value', 'submit1').click()
 
         getFrame().find('#assertions-1').rightclick()
-        getAssertionOption('have.attr', 'type').click()
+        getAssertionOption('have attr', 'type').click()
 
         verifyCommandLog(1, {
           selector: '#assertions-1',
@@ -458,7 +458,7 @@ describe('studio record', () => {
         getFrame().find('.assertion-submit').click()
 
         getFrame().contains('action success!').rightclick()
-        getAssertionOption('be.visible').click()
+        getAssertionOption('be visible').click()
 
         verifyCommandLog(1, {
           selector: '.assertion-submit',
@@ -477,25 +477,25 @@ describe('studio record', () => {
       runCypressStudio()
       .then(() => {
         getFrame().find('#input-radio').rightclick()
-        getAssertionOption('not.be.checked').click()
+        getAssertionOption('not be checked').click()
 
         getFrame().find('#input-radio').click()
 
         getFrame().find('#input-radio').rightclick()
-        getAssertionOption('be.checked').click()
+        getAssertionOption('be checked').click()
 
         getFrame().find('#input-checkbox').rightclick()
-        getAssertionOption('not.be.checked').click()
+        getAssertionOption('not be checked').click()
 
         getFrame().find('#input-checkbox').check()
 
         getFrame().find('#input-checkbox').rightclick()
-        getAssertionOption('be.checked').click()
+        getAssertionOption('be checked').click()
 
         getFrame().find('#input-text').type('words')
 
         getFrame().find('#input-text').rightclick()
-        getAssertionOption('have.value', 'words').click()
+        getAssertionOption('have value', 'words').click()
 
         verifyCommandLog(1, {
           selector: '#input-radio',

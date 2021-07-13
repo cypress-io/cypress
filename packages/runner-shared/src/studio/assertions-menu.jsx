@@ -39,7 +39,7 @@ const AssertionType = ({ addAssertion, type, options }) => {
     >
       <div className='assertion-type-text'>
         <span>
-          {type}
+          {type.replace(/\./g, ' ')}
         </span>
         {hasOptions && (
           <span className='dropdown-arrow'>
@@ -100,6 +100,15 @@ const AssertionsMenu = ({ $el, possibleAssertions, addAssertion, closeMenu, sele
         <a className='close' onClick={_close}>&times;</a>
         <div className='title'>
           Add Assertion
+        </div>
+        <div className='subtitle'>
+          expect
+          {' '}
+          <code>
+            {`<${$el.prop('tagName').toLowerCase()}>`}
+          </code>
+          {' '}
+          to
         </div>
         <div className='assertions-list'>
           {possibleAssertions.map((assertion) => (

@@ -3,6 +3,13 @@
 * in the user's app html
 */
 
+@mixin menu-style {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 3px 8px 1px rgba(0, 0, 0, 0.12);
+  border-radius: 0.5rem;
+}
+
 .highlight {
   background: rgba(159, 196, 231, 0.6);
   border: solid 2px #9FC4E7;
@@ -10,9 +17,8 @@
 }
 
 .assertions-menu {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  border-radius: 0.5rem;
+  @include menu-style;
+
   font-family: 'Helvetica Neue', 'Arial', sans-serif;
   width: 150px;
 
@@ -29,14 +35,27 @@
   .title {
     font-size: 16px;
     text-align: center;
-    margin: 0.75rem 0.5rem 0.5rem;
+    margin-bottom: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .subtitle {
+    color: #07b282;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 0.4rem;
+
+    code {
+      color: #069069;
+      font-weight: 600;
+    }
   }
 
   .assertions-list {
     .assertion-type {
       cursor: default;
       font-size: 15px;
-      padding: 0.4rem 0.4rem 0.4rem 0.6rem;
+      padding: 0.4rem 0.7rem;
       position: relative;
 
       &:last-of-type {
@@ -63,9 +82,8 @@
       }
 
       .assertion-options {
-        background: #fff;
-        border: 1px solid rgba(0, 0, 0, 0.25);
-        border-radius: 0.5rem;
+        @include menu-style;
+
         font-size: 14px;
         max-width: 150px;
         overflow: hidden;
@@ -73,7 +91,7 @@
 
         .assertion-option {
           cursor: pointer;
-          padding: 0.4rem 0.5rem;
+          padding: 0.4rem 0.6rem;
 
           &:hover {
             background-color: #e9ecef;
