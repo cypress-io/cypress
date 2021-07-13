@@ -50,6 +50,7 @@ const DocsMenu = observer(() => {
         utm_medium: 'Nav',
         utm_campaign: 'Docs',
       },
+      machineId: true,
     })
   }
 
@@ -88,6 +89,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'First Test',
           },
+          machineId: true,
         },
       }, {
         text: 'Testing your app',
@@ -97,6 +99,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'Testing Your App',
           },
+          machineId: true,
         },
       }],
     }, {
@@ -109,6 +112,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'Best Practices',
           },
+          machineId: true,
         },
       }, {
         text: 'Configuration',
@@ -118,6 +122,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'Configuration',
           },
+          machineId: true,
         },
       }, {
         text: 'API',
@@ -127,6 +132,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'API',
           },
+          machineId: true,
         },
       }],
     }, {
@@ -140,6 +146,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'Set Up CI',
           },
+          machineId: true,
         }),
       }, {
         text: 'Run tests faster',
@@ -149,6 +156,7 @@ const DocsMenu = observer(() => {
             utm_medium,
             utm_content: 'Parallelization',
           },
+          machineId: true,
         }),
       }],
     }]

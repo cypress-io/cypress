@@ -59,6 +59,7 @@ class CIPrompt1 extends Component {
             utm_campaign: 'Circle',
             utm_content: this.utm_content,
           },
+          machineId: true,
         },
       },
       {
@@ -71,6 +72,7 @@ class CIPrompt1 extends Component {
             utm_campaign: 'GitHub',
             utm_content: this.utm_content,
           },
+          machineId: true,
         },
       },
       {
@@ -83,6 +85,7 @@ class CIPrompt1 extends Component {
             utm_campaign: 'Bitbucket',
             utm_content: this.utm_content,
           },
+          machineId: true,
         },
       },
       {
@@ -95,6 +98,7 @@ class CIPrompt1 extends Component {
             utm_campaign: 'GitLab',
             utm_content: this.utm_content,
           },
+          machineId: true,
         },
       },
       {
@@ -107,6 +111,7 @@ class CIPrompt1 extends Component {
             utm_campaign: 'AWS',
             utm_content: this.utm_content,
           },
+          machineId: true,
         },
       },
     ]
@@ -129,6 +134,7 @@ class CIPrompt1 extends Component {
         utm_campaign: 'Other',
         utm_content: this.utm_content,
       },
+      machineId: true,
     })
   }
 
@@ -140,6 +146,7 @@ class CIPrompt1 extends Component {
         utm_campaign: 'Learn More',
         utm_content: this.utm_content,
       },
+      machineId: true,
     })
   }
 
