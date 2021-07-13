@@ -54,7 +54,7 @@ class SelectorPlayground extends Component {
           </Tooltip>
           <div
             className='wrap'
-            onMouseEnter={this._setHighlight(true)}
+            onMouseOver={this._setHighlight(true)}
           >
             {this._methodSelector()}
             <span>(</span>
