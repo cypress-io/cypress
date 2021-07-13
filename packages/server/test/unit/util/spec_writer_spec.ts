@@ -132,7 +132,7 @@ describe('lib/util/spec_writer', () => {
       it('can add commands to an existing test defined with it', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 3,
             column: 5,
           },
@@ -149,7 +149,7 @@ describe('lib/util/spec_writer', () => {
       it('can add commands to an existing test defined with specify', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 7,
             column: 5,
           },
@@ -166,7 +166,7 @@ describe('lib/util/spec_writer', () => {
       it('can add commands to an existing test defined with it only', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 12,
             column: 8,
           },
@@ -183,7 +183,7 @@ describe('lib/util/spec_writer', () => {
       it('can add commands to an existing test with config', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 16,
             column: 8,
           },
@@ -266,7 +266,7 @@ describe('lib/util/spec_writer', () => {
       it('can create a new test in a suite defined with describe', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 2,
             column: 3,
           },
@@ -284,7 +284,7 @@ describe('lib/util/spec_writer', () => {
       it('can create a new test in a suite defined with context', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 21,
             column: 3,
           },
@@ -302,7 +302,7 @@ describe('lib/util/spec_writer', () => {
       it('can create a new test in a suite defined with describe only', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 26,
             column: 12,
           },
@@ -320,7 +320,7 @@ describe('lib/util/spec_writer', () => {
       it('can create a new test in a suite with config', () => {
         const saveDetails = {
           fileDetails: {
-            absoluteFile: '',
+            absoluteFile: '/path/to/file',
             line: 30,
             column: 12,
           },
