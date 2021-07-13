@@ -74,7 +74,9 @@ const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
+export type Server = ServerE2E | ServerCt
+
+export class ProjectBase<TServer extends Server> extends EE {
   protected watchers: Watchers
   protected options: Options
   protected _cfg?: Cfg
@@ -667,8 +669,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  async initializeConfig (): Promise<Cfg> {
+  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+
+    if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      theCfg.browsers = browsers
+    }
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {
@@ -715,14 +721,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  async getConfig (): Promise<Cfg> {
+  getConfig (): Cfg {
     if (!this._cfg) {
       throw Error('Must call #initializeConfig before accessing config.')
     }
 
     debug('project has config %o', this._cfg)
 
-    return Promise.resolve(this._cfg)
+    return this._cfg
   }
 
   // Saved state
