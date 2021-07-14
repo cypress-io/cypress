@@ -178,7 +178,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = await this.getConfig()
+    let cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 
@@ -342,7 +342,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     process.chdir(localCwd)
 
-    const config = await this.getConfig()
+    const config = this.getConfig()
 
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
@@ -656,7 +656,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   async setBrowsers (browsers = []) {
     debug('getting config before setting browsers %o', browsers)
 
-    const cfg = await this.getConfig()
+    const cfg = this.getConfig()
 
     debug('setting config browsers to %o', browsers)
 
@@ -715,14 +715,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  async getConfig (): Promise<Cfg> {
+  getConfig (): Cfg {
     if (!this._cfg) {
       throw Error('Must call #initializeConfig before accessing config.')
     }
 
     debug('project has config %o', this._cfg)
 
-    return Promise.resolve(this._cfg)
+    return this._cfg
   }
 
   // Saved state
