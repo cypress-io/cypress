@@ -20,6 +20,7 @@ const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const openProject = require('../open_project')
+const { projects } = require('../projects')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -486,6 +487,13 @@ module.exports = {
   start (options, bus) {
     // curry left options
     ipc.on('request', _.partial(this.handleEvent, options, bus))
+
+    if (options.projectRoot) {
+      projects.addProject({
+        projectRoot: options.projectRoot,
+        testingType: options.testingType,
+      }, { isCurrentProject: true })
+    }
 
     ipc.on('graphql', async (evt, { id, params, variables }) => {
       try {

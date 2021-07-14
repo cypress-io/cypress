@@ -1,57 +1,102 @@
-import { objectType, extendType, stringArg, nonNull } from 'nexus'
+import { objectType, extendType, stringArg, nonNull, nullable, enumType } from 'nexus'
+import { ProjectBase } from '../../project-base'
 import { projects, TestingType } from '../../projects'
+
+const PluginsState = enumType({
+  name: 'PluginsState',
+  members: ['uninitialized', 'initializing', 'initialized', 'error'],
+})
+
+const InitPluginsStatus = objectType({
+  name: 'InitPluginsStatus',
+  definition (t) {
+    t.field('state', {
+      type: PluginsState,
+    }),
+    t.nullable.string('message')
+  },
+})
 
 export const Project = objectType({
   name: 'Project',
   definition (t) {
-    t.int('id')
     t.string('projectRoot')
-  }
+    t.boolean('isOpen')
+    t.field('plugins', {
+      type: InitPluginsStatus,
+    })
+  },
 })
 
-export const Query = extendType({
+function formatProject (project: ProjectBase<any>) {
+  return {
+    projectRoot: project.projectRoot,
+    isOpen: project.isOpen,
+    plugins: project.pluginsStatus,
+  }
+}
+
+export const Projects = extendType({
   type: 'Query',
   definition (t) {
     t.nonNull.list.field('projects', {
-      type: Project,
+      type: 'Project',
       resolve (_root, args, ctx) {
-        return [{ id: 1, projectRoot: 'root' }]
-      }
+        return Object.values(projects.projects).map(formatProject)
+      },
     })
-  }
+  },
 })
 
-const CreateProject = objectType({
-  name: 'CreateProject',
+export const OpenProject = extendType({
+  type: 'Query',
   definition (t) {
-    t.string('testingType')
-    t.string('projectRoot')
-  }
+    t.nullable.field('openProject', {
+      type: nullable('Project'),
+      resolve (_root, args, ctx) {
+        try {
+          return formatProject(projects.openProject)
+        } catch (e) {
+          return null
+        }
+      },
+    })
+  },
 })
 
-export const Mutation = extendType({
+export const InitializePlugins = extendType({
   type: 'Mutation',
   definition (t) {
-    // HOLY CRAP THIS IS VERBOSE IS THIS THE MOST CONCISE WAY TO DO IT??
+    t.nonNull.field('initializePlugins', {
+      type: InitPluginsStatus,
+      async resolve (_root, args, ctx) {
+        await projects.initializePlugins()
+
+        return projects.openProject.pluginsStatus
+      },
+    })
+  },
+})
+
+export const AddProject = extendType({
+  type: 'Mutation',
+  definition (t) {
     t.nonNull.field('addProject', {
-      type: CreateProject,
+      type: nullable('Boolean'),
       args: {
         projectRoot: nonNull(stringArg()),
         testingType: nonNull(stringArg()),
       },
-      resolve (_root, args, ctx) {
-        projects.addProject(args.projectRoot, {
+      async resolve (_root, args, ctx) {
+        await projects.addProject({
           projectRoot: args.projectRoot,
-          // CAN I TYPE THIS USING A CUSTOM SCALAR??
-          testingType: args.testingType as TestingType
+          testingType: args.testingType as TestingType,
+        }, {
+          isCurrentProject: true,
         })
 
-        return {
-          id: 1,
-          projectRoot: 'ok',
-          testingType: 'asdf'
-        } 
-      }
+        return true
+      },
     })
-  }
+  },
 })

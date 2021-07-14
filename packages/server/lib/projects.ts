@@ -1,53 +1,79 @@
-import { getBrowsers } from './browsers'
+import browsers from './browsers'
 import { ProjectBase, Server } from './project-base'
-
-interface OpenProject {
-  isOpen: boolean
-  project: ProjectBase<Server>
-}
 
 export type TestingType = 'e2e' | 'component'
 
 interface Args {
-  testingType: TestingType
   projectRoot: string
+  testingType: TestingType
 }
 
 class Projects {
   private currentProject?: string
-  projects: Record<string, OpenProject> = {}
+  // key is projectRoot
+  projects: Record<string, ProjectBase<Server>> = {}
 
-  async addProject (projectRoot: string, { testingType }: Args) {
+  async addProject ({ testingType, projectRoot }: Args, { isCurrentProject }: { isCurrentProject: boolean }) {
     const type = testingType === 'component' ? 'ct' : 'e2e'
 
-    const project = new ProjectBase({
+    const projectBase = new ProjectBase({
       projectType: type,
       projectRoot,
       options: {
+        projectRoot,
         testingType: type,
       },
     })
 
-    const browsers = await getBrowsers()
+    const allBrowsers = await browsers.getAllBrowsersWith()
 
-    await project.initializeConfig({ browsers })
+    await projectBase.initializeConfig({ browsers: allBrowsers })
 
-    this.projects[projectRoot] = {
-      project,
-      isOpen: true
+    this.projects[projectRoot] = projectBase
+
+    if (isCurrentProject) {
+      this.currentProject = projectRoot
     }
+
+    return this.projects[projectRoot]
   }
 
   setTestingType (testingType: TestingType) {
     this.openProject.projectType = testingType === 'component' ? 'ct' : 'e2e'
-  } 
+  }
+
+  async initializePlugins () {
+    const project = this.openProject
+
+    if (project.pluginsStatus.state === 'initialized') {
+      // Do we need to initialize *again*?
+      // Consider a `reinitialize` argument to facilitate this.
+      return
+    }
+
+    try {
+      project.pluginsStatus = { state: 'initializing' }
+      const updatedConfig = await project.initializePlugins(
+        project.getConfig(),
+        project.options,
+      )
+
+      project.__setConfig(updatedConfig)
+      project.pluginsStatus = { state: 'initialized' }
+    } catch (e) {
+      project.pluginsStatus = {
+        state: 'error',
+        message: e.details,
+      }
+    }
+  }
 
   get openProject () {
     if (!this.currentProject) {
       throw Error('No project open')
     }
 
-    return this.projects[this.currentProject].project
+    return this.projects[this.currentProject]
   }
 }
 

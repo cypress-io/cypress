@@ -76,9 +76,16 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export type Server = ServerE2E | ServerCt
 
+export type PluginsState = 'uninitialized' | 'initializing' | 'initialized' | 'error'
+
+interface PluginsStatus {
+  state: PluginsState
+  message?: string
+}
+
 export class ProjectBase<TServer extends Server> extends EE {
   protected watchers: Watchers
-  protected options: Options
+  public options: Options
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -87,6 +94,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   public browser: any
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
+  public isOpen: boolean = false
+  public pluginsStatus: PluginsStatus = {
+    state: 'uninitialized',
+  }
   private generatedProjectIdTimestamp: any
   projectRoot: string
 
@@ -299,6 +310,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       system: _.pick(sys, 'osName', 'osVersion'),
     }
 
+    this.isOpen = true
+
     return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
@@ -343,6 +356,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     ])
 
     process.chdir(localCwd)
+    this.isOpen = false
 
     const config = await this.getConfig()
 
