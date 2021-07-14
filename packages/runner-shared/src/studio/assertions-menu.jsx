@@ -97,9 +97,13 @@ const AssertionsMenu = ({ $el, possibleAssertions, addAssertion, closeMenu, sele
     <>
       <div ref={setReferenceElement} className='highlight' style={selectorHighlightStyles} />
       <div ref={setPopperElement} className='assertions-menu' style={styles.popper} {...attributes.popper}>
-        <a className='close' onClick={_close}>&times;</a>
-        <div className='title'>
-          Add Assertion
+        <div className='header'>
+          <div className='title'>
+            <span>Add Assertion</span>
+          </div>
+          <div className='close-wrapper'>
+            <a className='close' onClick={_close}>&times;</a>
+          </div>
         </div>
         <div className='subtitle'>
           expect
