@@ -11,7 +11,9 @@ const runCypressStudio = (visitUrl = 'http://localhost:3500/fixtures/studio.html
       },
     },
     state: {
-      studioTestId: 'r3',
+      studio: {
+        testId: 'r3',
+      },
     },
     visitUrl,
   })

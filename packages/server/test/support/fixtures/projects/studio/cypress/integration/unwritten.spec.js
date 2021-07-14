@@ -9,7 +9,7 @@ describe('top level suite', () => {
     })
 
     // eslint-disable-next-line mocha/no-exclusive-tests
-    it.only('test with it.only', () => {
+    it.only('test with it only', () => {
       cy.get('.btn').click()
     })
 
@@ -23,11 +23,25 @@ describe('top level suite', () => {
   })
 
   // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('inner suite with describe.only', () => {
+  describe.only('inner suite with describe only', () => {
 
   })
 
   describe('suite with config', { responseTimeout: 60000 }, () => {
+
+  })
+
+  describe('suite with same title', () => {
+    it('test with same title', () => {
+      cy.get('.btn').click()
+    })
+
+    it('test with same title', () => {
+      cy.get('.btn').click()
+    })
+  })
+
+  describe('suite with same title', () => {
 
   })
 })

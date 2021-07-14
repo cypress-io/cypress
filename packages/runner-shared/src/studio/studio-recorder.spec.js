@@ -262,9 +262,13 @@ describe('StudioRecorder', () => {
         line: 10,
         column: 4,
       }
+      const absoluteFile = '/path/to/spec.js'
+      const runnableTitle = 'my test'
       const logs = ['log 1', 'log 2']
 
       instance.setFileDetails(fileDetails)
+      instance.setAbsoluteFile(absoluteFile)
+      instance.setRunnableTitle(runnableTitle)
       instance.logs = logs
       instance.testId = 'r2'
 
@@ -272,8 +276,11 @@ describe('StudioRecorder', () => {
 
       expect(eventManager.emit).to.be.calledWith('studio:save', {
         fileDetails,
+        absoluteFile,
+        runnableTitle,
         commands: logs,
         isSuite: false,
+        isRoot: false,
         testName: null,
       })
     })
@@ -284,18 +291,46 @@ describe('StudioRecorder', () => {
         line: 10,
         column: 4,
       }
+      const absoluteFile = '/path/to/spec.js'
+      const runnableTitle = 'my suite'
       const logs = ['log 1', 'log 2']
 
       instance.setFileDetails(fileDetails)
+      instance.setAbsoluteFile(absoluteFile)
+      instance.setRunnableTitle(runnableTitle)
+      instance.logs = logs
+      instance.suiteId = 'r2'
+
+      instance.save('new test name')
+
+      expect(eventManager.emit).to.be.calledWith('studio:save', {
+        fileDetails,
+        absoluteFile,
+        runnableTitle,
+        commands: logs,
+        isSuite: true,
+        isRoot: false,
+        testName: 'new test name',
+      })
+    })
+
+    it('emits studio:save with relevant suite information for root suite', () => {
+      const absoluteFile = '/path/to/spec.js'
+      const logs = ['log 1', 'log 2']
+
+      instance.setAbsoluteFile(absoluteFile)
       instance.logs = logs
       instance.suiteId = 'r1'
 
       instance.save('new test name')
 
       expect(eventManager.emit).to.be.calledWith('studio:save', {
-        fileDetails,
+        fileDetails: null,
+        absoluteFile,
+        runnableTitle: null,
         commands: logs,
         isSuite: true,
+        isRoot: true,
         testName: 'new test name',
       })
     })

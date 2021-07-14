@@ -7,6 +7,8 @@ const saveErrorMessage = (message) => {
   return `\
 ${message}\n\n\
 Cypress was unable to save these commands to your spec file. \
+You can use the copy button below to copy the commands to your clipboard. \
+\n
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
@@ -45,6 +47,8 @@ export class StudioRecorder {
   @observable _hasStarted = false
 
   fileDetails = null
+  absoluteFile = null
+  runnableTitle = null
   _currentId = 1
   _previousMouseEvent = null
 
@@ -144,6 +148,14 @@ export class StudioRecorder {
     this.fileDetails = fileDetails
   }
 
+  setAbsoluteFile = (absoluteFile) => {
+    this.absoluteFile = absoluteFile
+  }
+
+  setRunnableTitle = (runnableTitle) => {
+    this.runnableTitle = runnableTitle
+  }
+
   _clearPreviousMouseEvent = () => {
     this._previousMouseEvent = null
   }
@@ -202,8 +214,11 @@ export class StudioRecorder {
 
     eventManager.emit('studio:save', {
       fileDetails: this.fileDetails,
+      absoluteFile: this.absoluteFile,
+      runnableTitle: this.runnableTitle,
       commands: this.logs,
       isSuite: !!this.suiteId,
+      isRoot: this.suiteId === 'r1',
       testName,
     })
   }
