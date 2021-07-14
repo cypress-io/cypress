@@ -32,6 +32,7 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
+import { NexusGenObjects } from './graphql/gen/nxs.gen'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -74,9 +75,13 @@ const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
+export type Server = ServerE2E | ServerCt
+
+export type PluginsState = 'uninitialized' | 'initializing' | 'initialized' | 'error'
+
+export class ProjectBase<TServer extends Server> extends EE {
   protected watchers: Watchers
-  protected options: Options
+  public options: Options
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -85,6 +90,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public browser: any
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
+  public isOpen: boolean = false
+  public pluginsStatus: NexusGenObjects['InitPluginsStatus'] = {
+    state: 'uninitialized',
+  }
   private generatedProjectIdTimestamp: any
   projectRoot: string
 
@@ -297,6 +306,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       system: _.pick(sys, 'osName', 'osVersion'),
     }
 
+    this.isOpen = true
+
     return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
@@ -341,6 +352,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     ])
 
     process.chdir(localCwd)
+    this.isOpen = false
 
     const config = await this.getConfig()
 
@@ -667,8 +679,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  async initializeConfig (): Promise<Cfg> {
+  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+
+    if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      theCfg.browsers = browsers
+    }
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {
@@ -715,14 +731,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  async getConfig (): Promise<Cfg> {
+  getConfig (): Cfg {
     if (!this._cfg) {
       throw Error('Must call #initializeConfig before accessing config.')
     }
 
     debug('project has config %o', this._cfg)
 
-    return Promise.resolve(this._cfg)
+    return this._cfg
   }
 
   // Saved state
