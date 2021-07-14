@@ -33,7 +33,7 @@ describe('gui/files', () => {
       this.err = new Error('foo')
 
       sinon.stub(ProjectBase.prototype, 'open').resolves()
-      sinon.stub(ProjectBase.prototype, 'getConfig').resolves(this.config)
+      sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
 
       this.showSaveDialog = sinon.stub(dialog, 'showSaveDialog').resolves(this.selectedPath)
       this.createFile = sinon.stub(specWriter, 'createFile').resolves({})

@@ -30,8 +30,7 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         return pristine.determineIsNewProject(cfg)
       }).then((ret) => {
         expect(ret).to.be.true
@@ -49,8 +48,7 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         return pristine.determineIsNewProject(cfg)
       }).then((ret) => {
         expect(ret).to.be.false
@@ -65,8 +63,7 @@ describe('lib/scaffold', () => {
 
         return this.ids.initializeConfig()
         .then(() => {
-          return this.ids.getConfig()
-        }).then((cfg) => {
+          const cfg = this.ids.getConfig()
           return this.ids.scaffold(cfg).return(cfg)
         }).then((cfg) => {
           return this.ids.determineIsNewProject(cfg)
@@ -82,12 +79,10 @@ describe('lib/scaffold', () => {
 
         return this.todos.initializeConfig()
         .then(() => {
-          return this.todos.getConfig()
-        }).then((cfg) => {
+          const cfg = this.todos.getConfig()
           return this.todos.scaffold(cfg)
         }).then(() => {
-          return this.todos.getConfig()
-        }).then((cfg) => {
+          const cfg = this.todos.getConfig()
           return this.todos.determineIsNewProject(cfg)
         }).then((ret) => {
           expect(ret).to.be.false
@@ -102,12 +97,10 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         return pristine.scaffold(cfg)
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         return pristine.determineIsNewProject(cfg)
       }).then((ret) => {
         expect(ret).to.be.true
@@ -119,12 +112,10 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         return pristine.scaffold(cfg)
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         const file = path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
@@ -136,8 +127,7 @@ describe('lib/scaffold', () => {
           return fs.writeFileAsync(file, str)
         })
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
         return pristine.determineIsNewProject(cfg)
       }).then((ret) => {
         expect(ret).to.be.false
