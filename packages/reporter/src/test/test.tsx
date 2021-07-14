@@ -160,7 +160,9 @@ class Test extends Component<TestProps> {
   _header () {
     const { model } = this.props
 
-    return (<>
+    return (<div onMouseEnter={() => {
+      this.props.events.emit('show:snapshot', model.id)
+    }}>
       <i aria-hidden='true' className='runnable-state fas' />
       <span className='runnable-title'>
         <span>{model.title}</span>
@@ -176,7 +178,7 @@ class Test extends Component<TestProps> {
           </a>
         </Tooltip>
       </span>
-    </>)
+    </div>)
   }
 
   _contents () {
