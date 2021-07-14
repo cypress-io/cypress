@@ -20,7 +20,7 @@ body:
       description: Remember, we're not familiar with the app you're testing, so please provide a clear description of why this would be useful to your project. 
       placeholder: I want this because...
   - type: textarea
-    id: othter
+    id: other
     attributes:
       label: Other
       placeholder: Any other details?
