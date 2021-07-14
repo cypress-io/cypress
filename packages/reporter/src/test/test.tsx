@@ -126,9 +126,9 @@ class Test extends Component<TestProps> {
 
   _scrollIntoView () {
     const { appState, model, scroller } = this.props
-    const { state, shouldRender } = model
+    const { state } = model
 
-    if (appState.autoScrollingEnabled && (appState.isRunning || appState.studioActive) && shouldRender && state !== 'processing') {
+    if (appState.autoScrollingEnabled && (appState.isRunning || appState.studioActive) && state !== 'processing') {
       window.requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
         if (this.containerRef.current) {
@@ -140,8 +140,6 @@ class Test extends Component<TestProps> {
 
   render () {
     const { model } = this.props
-
-    if (!model.shouldRender) return null
 
     return (
       <Collapsible
