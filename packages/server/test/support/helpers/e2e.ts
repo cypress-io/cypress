@@ -763,11 +763,7 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
-      console.log(`options`, options)
       const cmd = options.command || 'node'
-
-      console.log(`cmd`, cmd)
-      console.log(`args`, args.join(' '))
       const sp = cp.spawn(cmd, args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
