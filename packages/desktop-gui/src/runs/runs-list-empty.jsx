@@ -50,7 +50,7 @@ class RunsListEmpty extends Component {
     ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs`)
   }
 
-  render () {
+  _control = () => {
     const recordCommand = `cypress run --record --key ${this.state.recordKey || '<record-key>'}`
 
     return (
@@ -101,6 +101,18 @@ class RunsListEmpty extends Component {
         </div>
       </div>
     )
+  }
+
+  _new = () => {
+
+  }
+
+  render () {
+    if (this.props.project.getTestGroup(2)) {
+      return this._new()
+    }
+
+    return this._control()
   }
 }
 
