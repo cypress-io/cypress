@@ -164,7 +164,7 @@ export class StudioRecorder {
     return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
   }
 
-  @action restoreFromState = (state) => {
+  @action initialize = (config, state) => {
     const { studio } = state
 
     if (studio) {
@@ -180,9 +180,7 @@ export class StudioRecorder {
         this.setUrl(studio.url)
       }
     }
-  }
 
-  @action initialize = (config) => {
     if (this.hasRunnableId) {
       this.setAbsoluteFile(config.spec.absolute)
       this.startLoading()

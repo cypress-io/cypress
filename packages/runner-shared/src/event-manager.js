@@ -343,8 +343,7 @@ export const eventManager = {
             return
           }
 
-          studioRecorder.restoreFromState(state)
-          studioRecorder.initialize(config)
+          studioRecorder.initialize(config, state)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
