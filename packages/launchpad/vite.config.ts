@@ -10,6 +10,10 @@ export default defineConfig({
   build: {
     minify: false,
   },
+  optimizeDeps: {
+    include: ['@apollo/client/core'],
+    exclude: ['@apollo/client'],
+  },
   plugins: [
     vue(),
     vueJsx(),

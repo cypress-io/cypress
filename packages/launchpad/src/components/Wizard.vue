@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch, watchEffect } from "vue";
+import { computed, defineComponent, watch } from "vue";
 import { useStoreApp } from "../store/app";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
@@ -52,13 +52,17 @@ export default defineComponent({
     const description = computed(() => storeApp.getState().description)
     const steps = computed(() => storeApp.getState().steps)
 
-    const { result } = useQuery(WizardDocument, {})
+    const { onResult, result, loading } = useQuery(WizardDocument, {})
 
-    // Beware that result may not contain your data at all time! It will initially be undefined until the query successfully completes. 
-    // So it's a good idea to add a conditional before rendering the data:
-    const isFirstOpened = computed(() => result.value.data?.app?.isFirstOpen ?? false)
+    onResult((result) => {
+      console.log(result)
+    })
 
-    return { steps, title, description };
+    watch(result, value => {
+      console.log(value)
+    })
+
+    return { steps, title, description, loading, result };
   },
 });
 </script>

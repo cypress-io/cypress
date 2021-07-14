@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "prebuild": "yarn codegen",
     "build": "vite build",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
@@ -14,7 +15,7 @@
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
     "watch": "yarn build --watch",
-    "codegen": "graphql-codegen --config graphql-codegen.yml || echo 'todo'"
+    "codegen": "graphql-codegen --config graphql-codegen.yml"
   },
   "devDependencies": {
     "@apollo/client": "^3.3.21",
