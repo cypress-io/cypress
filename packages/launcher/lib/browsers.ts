@@ -6,6 +6,7 @@ import { Browser, FoundBrowser } from './types'
 export const browsers: Browser[] = [
   {
     name: 'chrome',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome',
@@ -14,6 +15,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'chromium',
+    launchEngine: 'cypress',
     family: 'chromium',
     // technically Chromium is always in development
     channel: 'stable',
@@ -23,6 +25,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'chrome',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'beta',
     displayName: 'Chrome Beta',
@@ -31,6 +34,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'chrome',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'canary',
     displayName: 'Canary',
@@ -39,6 +43,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'firefox',
+    launchEngine: 'cypress',
     family: 'firefox',
     channel: 'stable',
     displayName: 'Firefox',
@@ -48,6 +53,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'firefox',
+    launchEngine: 'cypress',
     family: 'firefox',
     channel: 'dev',
     displayName: 'Firefox Developer Edition',
@@ -58,6 +64,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'firefox',
+    launchEngine: 'cypress',
     family: 'firefox',
     channel: 'nightly',
     displayName: 'Firefox Nightly',
@@ -68,6 +75,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'edge',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'stable',
     displayName: 'Edge',
@@ -76,6 +84,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'edge',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'canary',
     displayName: 'Edge Canary',
@@ -84,6 +93,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'edge',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'beta',
     displayName: 'Edge Beta',
@@ -92,6 +102,7 @@ export const browsers: Browser[] = [
   },
   {
     name: 'edge',
+    launchEngine: 'cypress',
     family: 'chromium',
     channel: 'dev',
     displayName: 'Edge Dev',

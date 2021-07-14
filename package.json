@@ -71,6 +71,9 @@
       "pre-commit": "lint-staged"
     }
   },
+  "dependencies": {
+    "playwright": "1.12.2"
+  },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",
     "@cypress/commit-message-install": "3.1.3",

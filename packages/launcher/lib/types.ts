@@ -9,7 +9,9 @@ type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
 
 type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-type BrowserFamily = 'chromium' | 'firefox'
+type BrowserFamily = 'chromium' | 'firefox' | 'webkit' | 'playwright'
+
+type BrowserLaunchEngine = 'cypress' | 'playwright'
 
 export type PlatformName = 'darwin' | 'linux' | 'win32'
 
@@ -21,6 +23,8 @@ export type Browser = {
    * Short browser name.
    */
   name: BrowserName
+  /** The underlying launch engine for this browser */
+  launchEngine: BrowserLaunchEngine
   /**
    * The underlying engine for this browser.
    */

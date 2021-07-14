@@ -29,7 +29,7 @@ const downloadMimeTypes = Object.keys(mimeDb).filter((mimeType) => {
   return mimeDb[mimeType].extensions?.length
 }).join(',')
 
-const defaultPreferences = {
+export const defaultPreferences = {
   /**
    * Taken from https://github.com/puppeteer/puppeteer/blob/8b49dc62a62282543ead43541316e23d3450ff3c/lib/Launcher.js#L520
    * with minor modifications
