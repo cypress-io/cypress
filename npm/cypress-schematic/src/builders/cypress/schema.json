@@ -62,6 +62,14 @@
       "description": "Whether or not Cypress should record the results of the tests",
       "default": false
     },
+    "reporter": {
+      "type": "string",
+      "description": "Specify a Mocha reporter"
+    },
+    "reporter-options": {
+      "type": "string",
+      "description": "Specify reporter options"
+    },
     "spec": {
       "type": "string",
       "description": "A comma delimited glob string that is provided to the Cypress runner to specify which spec files to run. i.e. '**examples/**,**actions.spec**"

@@ -8,6 +8,11 @@ import { strings, normalize, virtualFs, workspaces } from '@angular-devkit/core'
 
 import { Schema } from './schema'
 
+const updateNotifier = require('update-notifier')
+const pkg = require('./package.json')
+
+updateNotifier({ pkg }).notify()
+
 function createSpec (tree: Tree): workspaces.WorkspaceHost {
   return {
     async readFile (path: string): Promise<string> {
