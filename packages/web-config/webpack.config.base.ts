@@ -133,7 +133,7 @@ export const getCommonConfig = () => {
                 // packages/server/lib/browsers/chrome.ts
                 [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }],
                 require.resolve('@babel/preset-react'),
-                [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
+                [require.resolve('babel-preset-typescript-vue3'), { allowNamespaces: true }],
               ],
               babelrc: false,
             },

@@ -610,6 +610,10 @@ export const eventManager = {
     })
   },
 
+  _getProjectFiles (pattern, cb) {
+    ws.emit('get:project:files', pattern, cb)
+  },
+
   emit (event, ...args) {
     localBus.emit(event, ...args)
   },

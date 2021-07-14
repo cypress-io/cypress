@@ -18,6 +18,7 @@
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "9.7.4",
     "babel-loader": "8.1.0",
+    "babel-preset-typescript-vue3": "2.0.14",
     "browser-resolve": "1.11.3",
     "chai": "4.2.0",
     "chalk": "2.4.2",

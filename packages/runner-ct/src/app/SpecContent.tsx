@@ -1,7 +1,12 @@
 import cs from 'classnames'
 import * as React from 'react'
 import SplitPane from 'react-split-pane'
-import { Message, namedObserver, eventManager as EventManager, Header } from '@packages/runner-shared'
+import {
+  Message,
+  namedObserver,
+  eventManager as EventManager,
+  Header,
+} from '@packages/runner-shared'
 
 import { Iframes } from '../iframe/iframes'
 import { animationFrameDebounce } from '../lib/debounce'

@@ -1,1 +1,3 @@
 cypress/videos/*
+dist/
+node_modules

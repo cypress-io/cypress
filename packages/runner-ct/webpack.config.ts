@@ -4,6 +4,7 @@ import _ from 'lodash'
 import path from 'path'
 import webpack from 'webpack'
 import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { VueLoaderPlugin } from 'vue-loader'
 
 const commonConfig = getCommonConfig()
 
@@ -57,6 +58,10 @@ const config: webpack.Configuration = {
   module: {
     rules: [
       ...nonPngRules,
+      {
+        test: /\.vue$/,
+        use: ['vue-loader'],
+      },
       pngRule,
     ],
   },
@@ -74,6 +79,7 @@ const config: webpack.Configuration = {
 config.plugins = [
   // @ts-ignore
   ...config.plugins,
+  new VueLoaderPlugin(),
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './static/index.html'),
     inject: false,
