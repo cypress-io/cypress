@@ -164,6 +164,37 @@ export class StudioRecorder {
     return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
   }
 
+  @action restoreFromState = (state) => {
+    const { studio } = state
+
+    if (studio) {
+      if (studio.testId) {
+        this.setTestId(studio.testId)
+      }
+
+      if (studio.suiteId) {
+        this.setSuiteId(studio.suiteId)
+      }
+
+      if (studio.url) {
+        this.setUrl(studio.url)
+      }
+    }
+  }
+
+  @action initialize = (config) => {
+    if (this.hasRunnableId) {
+      this.setAbsoluteFile(config.spec.absolute)
+      this.startLoading()
+
+      if (this.suiteId) {
+        this.Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
+      } else if (this.testId) {
+        this.Cypress.runner.setOnlyTestId(studioRecorder.testId)
+      }
+    }
+  }
+
   @action start = (body) => {
     this.isActive = true
     this.isLoading = false

@@ -343,9 +343,8 @@ export const eventManager = {
             return
           }
 
-          this._restoreStudioFromState(state)
-
-          this._initializeStudio(config)
+          studioRecorder.restoreFromState(state)
+          studioRecorder.initialize(config)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -564,37 +563,6 @@ export const eventManager = {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
-  },
-
-  _restoreStudioFromState (state) {
-    const { studio } = state
-
-    if (studio) {
-      if (studio.testId) {
-        studioRecorder.setTestId(studio.testId)
-      }
-
-      if (studio.suiteId) {
-        studioRecorder.setSuiteId(studio.suiteId)
-      }
-
-      if (studio.url) {
-        studioRecorder.setUrl(studio.url)
-      }
-    }
-  },
-
-  _initializeStudio (config) {
-    if (studioRecorder.hasRunnableId) {
-      studioRecorder.setAbsoluteFile(config.spec.absolute)
-      studioRecorder.startLoading()
-
-      if (studioRecorder.suiteId) {
-        Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
-      } else if (studioRecorder.testId) {
-        Cypress.runner.setOnlyTestId(studioRecorder.testId)
-      }
-    }
   },
 
   _interceptStudio (displayProps) {
