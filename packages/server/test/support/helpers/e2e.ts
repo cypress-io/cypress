@@ -685,7 +685,7 @@ const e2e = {
       Fixtures.installStubPackage(options.project, options.stubPackage)
     }
 
-    args = ['index.js'].concat(args)
+    args = options.args || ['index.js'].concat(args)
 
     let stdout = ''
     let stderr = ''
@@ -763,7 +763,12 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
-      const sp = cp.spawn('node', args, {
+      console.log(`options`, options)
+      const cmd = options.command || 'node'
+
+      console.log(`cmd`, cmd)
+      console.log(`args`, args.join(' '))
+      const sp = cp.spawn(cmd, args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
         .extend({
@@ -792,6 +797,7 @@ const e2e = {
         })
         .extend(options.processEnv)
         .value(),
+        ...options.spawnOpts,
       })
 
       const ColorOutput = function () {

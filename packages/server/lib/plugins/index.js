@@ -84,6 +84,10 @@ const init = (config, options) => {
     const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+      },
     }
 
     if (config.resolvedNodePath) {
