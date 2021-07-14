@@ -32,6 +32,7 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
+import { NexusGenObjects } from './graphql/gen/nxs.gen'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -78,11 +79,6 @@ export type Server = ServerE2E | ServerCt
 
 export type PluginsState = 'uninitialized' | 'initializing' | 'initialized' | 'error'
 
-interface PluginsStatus {
-  state: PluginsState
-  message?: string
-}
-
 export class ProjectBase<TServer extends Server> extends EE {
   protected watchers: Watchers
   public options: Options
@@ -95,7 +91,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
-  public pluginsStatus: PluginsStatus = {
+  public pluginsStatus: NexusGenObjects['InitPluginsStatus'] = {
     state: 'uninitialized',
   }
   private generatedProjectIdTimestamp: any
