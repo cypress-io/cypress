@@ -26,7 +26,7 @@
 // hmm, how to load it better?
 /// <reference path="./cypress-npm-api.d.ts" />
 
-/// <reference path="./net-stubbing.ts" />
+/// <reference path="./net-stubbing.d.ts" />
 /// <reference path="./cypress.d.ts" />
 /// <reference path="./cypress-global-vars.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />

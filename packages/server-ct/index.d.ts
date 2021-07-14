@@ -7,7 +7,7 @@
 
 /// <reference path="../../cli/types/cypress-npm-api.d.ts" />
 
-/// <reference path="../../cli/types/net-stubbing.ts" />
+/// <reference path="../../cli/types/net-stubbing.d.ts" />
 /// <reference path="../../cli/types/cypress.d.ts" />
 /// <reference path="../../cli/types/cypress-global-vars.d.ts" />
 /// <reference path="../../cli/types/cypress-type-helpers.d.ts" />
