@@ -77,8 +77,6 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export type Server = ServerE2E | ServerCt
 
-export type PluginsState = 'uninitialized' | 'initializing' | 'initialized' | 'error'
-
 export class ProjectBase<TServer extends Server> extends EE {
   protected watchers: Watchers
   public options: Options
