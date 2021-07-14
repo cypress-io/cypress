@@ -1,23 +1,48 @@
-// FIXME: Skip this for now since it's flaky
-it.skip('verifies initial implementation of sibling iframe and switchToDomain', (done) => {
-  top.addEventListener('message', (event) => {
-    if (event.data && event.data.textFromParagraph !== undefined) {
-      expect(event.data.host).to.equal('127.0.0.1:3501')
-      expect(event.data.textFromParagraph).to.equal('From a secondary domain with window.Cypress')
-      done()
-    }
-  }, false)
+// FIXME: Skip these for now since they're flaky
+describe.skip('multidomain', () => {
+  const expectTextMessage = (text, done) => {
+    const onMessage = (event) => {
+      if (event.data && event.data.queriedText !== undefined) {
+        expect(event.data.host).to.equal('127.0.0.1:3501')
+        expect(event.data.queriedText).to.equal(text)
 
-  cy.viewport(900, 300)
-  cy.visit('/fixtures/multidomain.html')
-  // @ts-ignore
-  cy.anticipateMultidomain()
-  cy.get('a').click()
-  // @ts-ignore
-  cy.switchToDomain('127.0.0.1:3501', () => {
+        top.removeEventListener('message', onMessage)
+
+        done()
+      }
+    }
+
+    top.addEventListener('message', onMessage, false)
+  }
+
+  beforeEach(() => {
+    cy.visit('/fixtures/multidomain.html')
     // @ts-ignore
-    cy.now('get', 'p').then(($el) => {
-      top.postMessage({ host: location.host, textFromParagraph: $el.text() }, '*')
+    cy.anticipateMultidomain()
+    cy.get('a').click()
+  })
+
+  it('runs synchronous commands in secondary domain', (done) => {
+    expectTextMessage('From a secondary domain', done)
+
+    // @ts-ignore
+    cy.switchToDomain('127.0.0.1:3501', () => {
+      // @ts-ignore
+      cy.now('get', '[data-cy="dom-check"]').then(($el) => {
+        top.postMessage({ host: location.host, queriedText: $el.text() }, '*')
+      })
+    })
+  })
+
+  it('sets up window.Cypress in secondary domain', (done) => {
+    expectTextMessage('Has window.Cypress', done)
+
+    // @ts-ignore
+    cy.switchToDomain('127.0.0.1:3501', () => {
+      // @ts-ignore
+      cy.now('get', '[data-cy="cypress-check"]').then(($el) => {
+        top.postMessage({ host: location.host, queriedText: $el.text() }, '*')
+      })
     })
   })
 })
