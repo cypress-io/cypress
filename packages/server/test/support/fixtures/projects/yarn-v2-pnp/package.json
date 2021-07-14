@@ -1,0 +1,18 @@
+{
+  "name": "yarn-v2-pnp",
+  "version": "1.0.0",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-typescript": "^7.14.5",
+    "@cypress/webpack-preprocessor": "^5.9.1",
+    "babel-loader": "^8.0.6",
+    "pnp-webpack-plugin": "^1.6.4",
+    "typescript": "^4.2.4",
+    "webpack": "^4"
+  },
+  "license": "MIT"
+}

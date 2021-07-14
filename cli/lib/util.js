@@ -280,7 +280,18 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
+    .extend(util.getOriginalNodeOptions(options))
     .value()
+  },
+
+  getOriginalNodeOptions (options) {
+    if (process.env.NODE_OPTIONS) {
+      return {
+        ORIGINAL_NODE_OPTIONS: process.env.NODE_OPTIONS,
+      }
+    }
+
+    return {}
   },
 
   getForceTty () {
