@@ -100,9 +100,9 @@ describe('lib/modes/run', () => {
     it('sets width and height', () => {
       const props = runMode.getElectronProps()
 
-      expect(props.width).to.eq(1920)
+      expect(props.width).to.eq(1280)
 
-      expect(props.height).to.eq(1080)
+      expect(props.height).to.eq(720)
     })
 
     it('sets show to boolean', () => {
