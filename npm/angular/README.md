@@ -22,6 +22,20 @@ require('core-js/es7/reflect');
 require('@cypress/angular/support');
 ```
 
+### Webpack config
+
+Create a new file `webpack.config.ts` in `cypress/plugins` folder.
+You can find the file content here :
+
+- [Webpack v4.x](cypress/plugins/webpack4.config.ts)
+- [Webpack v5.x or Angular v12](cypress/plugins/webpack.config.ts)
+
+### Cypress >= v7
+
+```shell
+npm install -D @cypress/webpack-dev-server
+```
+
 Enable component testing in `cypress.json`.
 
 ```json
@@ -50,7 +64,33 @@ module.exports = (on, config) => {
 };
 ```
 
-The `webpack.config.ts` file is [here](cypress/plugins/webpack.config.ts).
+### Cypress < v7
+
+Enable experimental component testing mode in `cypress.json` and point at the spec files. Usually they are alongside your application files in `src` folder.
+
+```json
+{
+  "experimentalComponentTesting": true,
+  "componentFolder": "src",
+  "testFiles": "**/*cy-spec.*"
+}
+```
+
+Configure `cypress/plugins/index.js` to transpile Angular code.
+
+```javascript
+const wp = require('@cypress/webpack-preprocessor');
+import * as webpackOptions from './webpack.config';
+module.exports = (on, config) => {
+  const options = {
+    webpackOptions,
+  };
+  on('file:preprocessor', wp(options));
+  return config;
+};
+```
+
+Run `npx cypress open`
 
 ## Use
 
