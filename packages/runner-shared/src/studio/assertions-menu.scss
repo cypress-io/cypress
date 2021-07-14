@@ -1,0 +1,107 @@
+/**
+* This is a standalone file that gets included with the assertions menu
+* in the user's app html
+*/
+
+@mixin menu-style {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 3px 8px 1px rgba(0, 0, 0, 0.12);
+  border-radius: 0.5rem;
+}
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.assertions-menu {
+  @include menu-style;
+
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  width: 150px;
+
+  .close {
+    position: absolute;
+    top: 0;
+    right: 5px;
+
+    &:hover, &:focus, &:active {
+      cursor: pointer;
+    }
+  }
+
+  .title {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 0.4rem;
+    margin-top: 0.75rem;
+  }
+
+  .subtitle {
+    color: #07b282;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 0.4rem;
+
+    code {
+      color: #069069;
+      font-weight: 600;
+    }
+  }
+
+  .assertions-list {
+    .assertion-type {
+      cursor: default;
+      font-size: 15px;
+      padding: 0.4rem 0.7rem;
+      position: relative;
+
+      &:last-of-type {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+      }
+
+      &:hover {
+        background-color: #e9ecef;
+      }
+
+      &.single-assertion {
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .assertion-type-text {
+        align-items: center;
+        display: flex;
+
+        .dropdown-arrow {
+          margin-left: auto;
+        }
+      }
+
+      .assertion-options {
+        @include menu-style;
+
+        font-size: 14px;
+        max-width: 150px;
+        overflow: hidden;
+        overflow-wrap: break-word;
+
+        .assertion-option {
+          cursor: pointer;
+          padding: 0.4rem 0.6rem;
+
+          &:hover {
+            background-color: #e9ecef;
+          }
+          
+          .assertion-option-value {
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+}

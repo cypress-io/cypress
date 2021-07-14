@@ -38,7 +38,7 @@ const StudioNoCommands = () => (
         <div className='command-wrapper-text'>
           <span className='command-message'>
             <span className='command-message-text'>
-              Interact with your site to add test commands.
+              Interact with your site to add test commands. Right click to add assertions.
             </span>
           </span>
           <span className='command-controls'>

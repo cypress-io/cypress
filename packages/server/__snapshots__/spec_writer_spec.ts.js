@@ -14,10 +14,23 @@ exports['lib/util/spec_writer #generateCypressComand can generate a command with
 cy.visit("the://url");
 `
 
+exports['lib/util/spec_writer #generateCypressComand can generate a command for an assertion with one parameter 1'] = `
+cy.get(".div").should("be.visible");
+`
+
+exports['lib/util/spec_writer #generateCypressComand can generate a command for an assertion with two parameters 1'] = `
+cy.get(".div").should("have.text", "action succeeded");
+`
+
+exports['lib/util/spec_writer #generateCypressComand can generate a command for an assertion with three parameters 1'] = `
+cy.get(".div").should("have.attr", "data-content", "search");
+`
+
 exports['lib/util/spec_writer #addCommandsToBody adds commands with comments 1'] = `
 /* ==== Generated with Cypress Studio ==== */
 cy.get(".input").type("typed text");
 cy.get(".btn").click();
+cy.get(".btn").should("have.type", "submit");
 /* ==== End Cypress Studio ==== */
 `
 
@@ -27,6 +40,7 @@ it("my new test", function() {
     /* ==== Generated with Cypress Studio ==== */
     cy.get(".input").type("typed text");
     cy.get(".btn").click();
+    cy.get(".btn").should("have.type", "submit");
     /* ==== End Cypress Studio ==== */
 });
 `
@@ -39,6 +53,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     })
 
@@ -84,6 +99,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     })
 
@@ -138,6 +154,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     });
   })
@@ -185,6 +202,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     });
   })
@@ -218,6 +236,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     })
 
@@ -274,6 +293,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     });
   })
@@ -306,6 +326,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     })
   })
@@ -362,6 +383,7 @@ describe('top level suite', () => {
       /* ==== Generated with Cypress Studio ==== */
       cy.get('.input').type('typed text');
       cy.get('.btn').click();
+      cy.get('.btn').should('have.type', 'submit');
       /* ==== End Cypress Studio ==== */
     });
   })
@@ -409,6 +431,7 @@ it('test added to file', function() {
   /* ==== Generated with Cypress Studio ==== */
   cy.get('.input').type('typed text');
   cy.get('.btn').click();
+  cy.get('.btn').should('have.type', 'submit');
   /* ==== End Cypress Studio ==== */
 });
 
@@ -426,6 +449,7 @@ it('test added to empty file', function() {
  /* ==== Generated with Cypress Studio ==== */
  cy.get('.input').type('typed text');
  cy.get('.btn').click();
+ cy.get('.btn').should('have.type', 'submit');
  /* ==== End Cypress Studio ==== */
 });
 
@@ -445,5 +469,6 @@ exports['lib/util/spec_writer #convertCommandsToText converts studio commands to
 /* ==== Generated with Cypress Studio ==== */
 cy.get('.input').type('typed text');
 cy.get('.btn').click();
+cy.get('.btn').should('have.type', 'submit');
 /* ==== End Cypress Studio ==== */
 `
