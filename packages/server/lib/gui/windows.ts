@@ -5,6 +5,7 @@ import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import cwd from '../cwd'
 import savedState from '../saved_state'
+import * as cyDesktopLaunchpad from '@packages/launchpad'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = Debug('cypress:server:windows')
@@ -21,7 +22,12 @@ let recentlyCreatedWindow = false
 const getUrl = function (type) {
   switch (type) {
     case 'INDEX':
+      if (process.env.LAUNCHPAD) {
+        return cyDesktopLaunchpad.getPathToIndex()
+      }
+
       return getPathToDesktopIndex()
+
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
   }

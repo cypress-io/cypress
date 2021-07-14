@@ -1,0 +1,20 @@
+{
+  "baseUrl": "http://localhost:5555",
+  "viewportWidth": 800,
+  "viewportHeight": 850,
+  "fixturesFolder": false,
+  "video": false,
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
+  },
+  "nodeVersion": "system",
+  "testFiles": "**/*.spec.{ts,tsx}",
+  "reporter": "../../node_modules/cypress-multi-reporters/index.js",
+  "reporterOptions": {
+    "configFile": "../../mocha-reporter-config.json"
+  },
+  "component": {
+    "componentFolder": "src/components"
+  }
+}
