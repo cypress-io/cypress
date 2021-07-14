@@ -3,7 +3,8 @@
 
 declare namespace Cypress {
   interface Actions {
-    (action: 'net:event', frame: any)
+    (action: 'net:event', frame: any): void
+    (action: 'before:reset'): void
   }
 
   interface cy {
