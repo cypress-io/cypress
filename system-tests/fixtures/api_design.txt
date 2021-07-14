@@ -1,0 +1,57 @@
+Cypress API
+
+// Environment Variables
+Cypress.env()
+
+// Custom Commands
+Cypress.addParentCommand()
+  Cypress.addParentCommand is now deprecated and will be removed in the next major release. You can safely rewrite this as Cypress.Commands.addParent()
+Cypress.addChildCommand()
+Cypress.addDualCommand()
+
+Cypress.Commands.addParent()
+Cypress.Commands.addChild()
+Cypress.Commands.addDual()
+
+// Cookies
+Cypress.Cookies.set()
+Cypress.Cookies.get()
+Cypress.Cookies.remove()
+Cypress.Cookies.preserve()
+Cypress.Cookies.preserveOnce()
+
+Cypress.setCookie
+Cypress.getCookie
+Cypress.removeCookie
+Cypress.preserveCookie
+
+Cypress.logCommand
+Cypress.logRoute
+Cypress.logSpy
+
+// Logging
+Cypress.Log.command()
+Cypress.Log.route()
+Cypress.Log.spy()
+
+// Server
+Cypress.Server.defaults()
+
+// Request
+Cypress.Request.defaults()
+
+
+cy = new Cypress.Cy
+
+// Pro's Top Level
+- consistent
+- easy to use
+- can only publish what i want public
+- easy to debug in dev tools (traversing)
+- enables me to refactor internal organization w/o breaking API's
+
+// Con's Top Level
+- no organization
+- long method names
+- mish-mash of concerns
+- overlapping method names

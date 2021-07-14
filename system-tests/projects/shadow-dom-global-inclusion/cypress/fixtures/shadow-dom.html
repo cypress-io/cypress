@@ -1,0 +1,16 @@
+<html>
+<body>
+  <div class="outside-shadow-dom">
+    <div class="outside-shadow-dom">
+      <div class="shadow-host"></div>
+    </div>
+  </div>
+
+  <script>
+    document
+    .querySelector('.shadow-host')
+    .attachShadow({ mode: 'open' })
+    .innerHTML = '<div class="in-shadow-dom">In the Shadow DOM</div>'
+  </script>
+</body>
+</html>

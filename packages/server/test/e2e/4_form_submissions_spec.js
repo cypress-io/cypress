@@ -14,7 +14,7 @@ describe('e2e form submissions', () => {
 })
 
 const e2ePath = Fixtures.projectPath('e2e')
-const pathToLargeImage = Fixtures.path('server/imgs/earth.jpg')
+const pathToLargeImage = Fixtures.path('server/large-img/earth.jpg')
 
 const getFormHtml = (formAttrs, textValue = '') => {
   return `\

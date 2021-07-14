@@ -32,12 +32,12 @@
       "command": "yarn cypress:open"
     },
     {
-      "name": "packages/server test-e2e",
+      "name": "system-tests test",
       "focus": true,
       "onlySingle": true,
       "execute": false,
-      "cwd": "[cwd]/packages/server",
-      "command": "yarn test-e2e [fileBasename]"
+      "cwd": "[cwd]/system-tests",
+      "command": "yarn test [fileBasename]"
     },
     {
       "name": "packages/server test-watch",
