@@ -74,6 +74,18 @@ module.exports = (on, config) => {
   })
 
   on('task', {
+    'console:log' (msg) {
+      console.log(msg)
+
+      return null
+    },
+
+    'console:error' (msg) {
+      console.error(msg)
+
+      return null
+    },
+
     'returns:undefined' () {},
 
     'errors' (message) {
