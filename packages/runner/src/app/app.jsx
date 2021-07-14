@@ -11,16 +11,29 @@ import {
   errorMessages,
   StudioModals,
   Header,
+  SpecList,
 } from '@packages/runner-shared'
+import styles from '@packages/runner-shared/src/styles.module.scss'
 
 import util from '../lib/util'
 
 import Iframes from '../iframe/iframes'
 import Resizer from './resizer'
 
+/**
+ * This is a feature flag. If true, all the integration specs
+ * will be rendered inline to the left of te command log, similar to the component testing runner.
+ */
+// If you change this, make sure to update it in app.scss, too.
+export const SPEC_LIST_WIDTH = 250
+
+const removeRelativeRegexp = /\.\.\//gi
+
 @observer
 class App extends Component {
   @observable isReporterResizing = false
+  @observable isSpecListResizing = false
+  searchRef = React.createRef()
 
   render () {
     /**
@@ -35,10 +48,39 @@ class App extends Component {
         'is-reporter-resizing': this.isReporterResizing,
         'is-reporter-sized': this.props.state.reporterWidth != null,
       })}>
+        {Boolean(NO_COMMAND_LOG) || (
+          Boolean(this.props.state.useInlineSpecList) &&
+            <>
+              <div
+                className='spec-list-wrap'
+                style={{ width: this.props.state.specListWidth }}
+              >
+                <SpecList
+                  searchRef={this.searchRef}
+                  specs={this.props.state.specs}
+                  className={cs(styles.specsList, 'spec-list')}
+                  selectedFile={this.props.state.spec ? this.props.state.spec.relative : undefined}
+                  onFileClick={this._runSpec}
+                />
+              </div>
+
+              <Resizer
+                style={{ left: this.props.state.specListWidth, zIndex: 10 }}
+                maxWidth={this.props.state.windowWidth - SPEC_LIST_WIDTH}
+                onResizeStart={this._onSpecListResizeStart}
+                onResize={this._onSpecListResize}
+                onResizeEnd={this._onSpecListResizeEnd}
+              />
+            </>
+        )}
+
         <div
           ref='reporterWrap'
           className='reporter-wrap'
-          style={{ width: this.props.state.reporterWidth }}
+          style={{
+            width: this.props.state.reporterWidth,
+            left: this.props.state.specListWidth,
+          }}
         >
           {Boolean(NO_COMMAND_LOG) || <Reporter
             runner={this.props.eventManager.reporterBus}
@@ -52,7 +94,10 @@ class App extends Component {
         <div
           ref='container'
           className='runner container'
-          style={{ left: this.props.state.absoluteReporterWidth }}
+          style={{
+            left: this.props.state.absoluteReporterWidth +
+            this.props.state.specListWidth,
+          }}
         >
           <Header ref='header' runner='e2e' {...this.props} />
           <Iframes ref='iframes' {...this.props} />
@@ -60,8 +105,8 @@ class App extends Component {
           {this.props.children}
         </div>
         <Resizer
-          style={{ left: this.props.state.absoluteReporterWidth }}
-          state={this.props.state}
+          style={{ left: this.props.state.absoluteReporterWidth + this.props.state.specListWidth }}
+          maxWidth={this.props.state.windowWidth}
           onResizeStart={this._onReporterResizeStart}
           onResize={this._onReporterResize}
           onResizeEnd={this._onReporterResizeEnd}
@@ -78,6 +123,19 @@ class App extends Component {
   componentDidMount () {
     this._monitorWindowResize()
     this._handleScreenshots()
+  }
+
+  _runSpec = (path) => {
+    // We request an absolute path from the dev server but the spec list displays relative paths
+    // For this reason to match the spec we remove leading relative paths. Eg ../../foo.js -> foo.js.
+    const filePath = path.replace(removeRelativeRegexp, '')
+    const selectedSpec = this.props.state.specs.find((spec) => spec.absolute.includes(filePath))
+
+    if (!selectedSpec) {
+      throw Error(`Could not find spec matching ${path}.`)
+    }
+
+    this.props.state.setSingleSpec(selectedSpec)
   }
 
   _monitorWindowResize () {
@@ -99,13 +157,28 @@ class App extends Component {
     $(win).on('resize', this._onWindowResize).trigger('resize')
   }
 
+  _onSpecListResizeStart = () => {
+    this.isSpecListResizing = true
+  }
+
   _onReporterResizeStart = () => {
     this.isReporterResizing = true
   }
 
+  _onSpecListResize = (specListWidth) => {
+    this.props.state.specListWidth = specListWidth
+    this.props.state.absoluteSpecListWidth = specListWidth
+
+    const $header = $(findDOMNode(this.refs.header))
+
+    this.props.state.updateWindowDimensions({
+      headerHeight: $header.outerHeight(),
+    })
+  }
+
   _onReporterResize = (reporterWidth) => {
-    this.props.state.reporterWidth = reporterWidth
-    this.props.state.absoluteReporterWidth = reporterWidth
+    this.props.state.reporterWidth = reporterWidth - this.props.state.specListWidth
+    this.props.state.absoluteReporterWidth = reporterWidth - this.props.state.specListWidth
 
     const $header = $(findDOMNode(this.refs.header))
 
@@ -118,6 +191,13 @@ class App extends Component {
     this.isReporterResizing = false
     this.props.eventManager.saveState({
       reporterWidth: this.props.state.reporterWidth,
+    })
+  }
+
+  _onSpecListResizeEnd = () => {
+    this.isSpecListResizing = false
+    this.props.eventManager.saveState({
+      specListWidth: this.props.state.specListWidth,
     })
   }
 

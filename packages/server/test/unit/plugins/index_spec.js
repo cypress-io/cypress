@@ -92,7 +92,7 @@ describe('lib/plugins/index', () => {
       return plugins.init(config, getOptions())
       .then(() => {
         const options = {
-          stdio: 'inherit',
+          stdio: 'pipe',
           execPath: systemNode,
         }
 
@@ -111,7 +111,7 @@ describe('lib/plugins/index', () => {
       return plugins.init(config, getOptions())
       .then(() => {
         const options = {
-          stdio: 'inherit',
+          stdio: 'pipe',
         }
 
         expect(_.omit(cp.fork.lastCall.args[2], 'env')).to.eql(options)

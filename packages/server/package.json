@@ -115,7 +115,7 @@
     "trash": "5.2.0",
     "tree-kill": "1.2.2",
     "ts-node": "8.5.4",
-    "tslib": "^2.3.0",
+    "tslib": "2.3.0",
     "underscore.string": "3.3.5",
     "url-parse": "1.5.1",
     "uuid": "8.3.2",
@@ -139,6 +139,7 @@
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
+    "@packages/resolve-dist": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/static": "0.0.0-development",
@@ -204,6 +205,7 @@
     ]
   },
   "optionalDependencies": {
+    "fsevents": "^2",
     "registry-js": "1.15.0"
   }
 }
