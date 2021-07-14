@@ -103,6 +103,11 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalSessionSupport',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: v.isString,

@@ -56,6 +56,7 @@ export type ServerCtx = Readonly<{
   shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
@@ -188,6 +189,7 @@ export class Http {
   preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
+  renderedHTMLOrigins: {[key: string]: boolean} = {}
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -229,6 +231,7 @@ export class Http {
           ...opts,
         })
       },
+      getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -253,6 +256,10 @@ export class Http {
     })
   }
 
+  getRenderedHTMLOrigins = () => {
+    return this.renderedHTMLOrigins
+  }
+
   async handleSourceMapRequest (req: Request, res: Response) {
     try {
       const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
@@ -268,6 +275,8 @@ export class Http {
   }
 
   reset () {
+    // TODO: when to reset marked origins?
+    // this.renderedHTMLOrigins = {}
     this.buffers.reset()
     this.preRequests = new PreRequests()
   }

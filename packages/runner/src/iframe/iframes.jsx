@@ -75,6 +75,7 @@ export default class Iframes extends Component {
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
     this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
+    this.props.eventManager.on('visit:blank', this.autIframe.visitBlank)
 
     this.props.eventManager.on('run:end', this.autIframe.startStudio)
     this.props.eventManager.on('page:loading', (isLoading) => {
@@ -152,7 +153,7 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
-    this.autIframe.showBlankContents()
+    this.autIframe.showInitialBlankContents()
 
     const $specIframe = $('<iframe />', {
       id: `Your Spec: '${specSrc}'`,

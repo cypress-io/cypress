@@ -550,6 +550,27 @@ declare namespace Cypress {
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
+  interface LocalStorageData {
+    origin: string
+    value: object
+  }
+
+  type sessionExcludeFilterCookies = {
+    domain?: string|RegExp
+    name?: string| RegExp
+  } | string | RegExp
+  type sessionExcludeFilterLocalStorage = {
+    origin?: string|RegExp
+    key?: string| RegExp
+  } | string | RegExp
+
+  interface SessionOptions {
+    validate?: () => false|void
+  }
+ 
+
+
+
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
@@ -944,6 +965,13 @@ declare namespace Cypress {
      * @see https://on.cypress.io/debug
      */
     debug(options?: Partial<Loggable>): Chainable<Subject>
+
+    /**
+     * Apply a Session's cookie/localStorage data to the current test
+     *
+     * @see https://on.cypress.io/session
+     */
+    session(id: string, setup?: Function, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.

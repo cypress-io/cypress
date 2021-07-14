@@ -10,9 +10,11 @@ import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import Log from '../instruments/instrument-model'
+import Session, { SessionProps } from '../sessions/sessions-model'
 
 export default class Attempt {
   @observable agents: Agent[] = []
+  @observable sessions: Record<string, Session> = {}
   @observable commands: Command[] = []
   @observable err = new Err({})
   @observable hooks: Hook[] = []
@@ -175,6 +177,12 @@ export default class Attempt {
     return agent
   }
 
+  _addSession (props: SessionProps) {
+    const session = new Session(props)
+
+    this.sessions[props.sessionInfo.id] = session
+  }
+
   _addRoute (props: RouteProps) {
     const route = new Route(props)
 
@@ -194,6 +202,8 @@ export default class Attempt {
     const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
 
     const hook = this.hooks[hookIndex]
+
+    if (!hook) return
 
     hook.addCommand(command)
 

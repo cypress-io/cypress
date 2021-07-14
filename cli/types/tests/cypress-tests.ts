@@ -677,6 +677,55 @@ namespace CypressTaskTests {
   })
 }
 
+namespace CypressSessionsTests {
+  cy.session('user')
+  cy.session('user', ()=>{})
+  cy.session('user', ()=>{}, {})
+  cy.session('user', ()=>{}, {
+    exclude: {},
+    validate: ()=>{}
+  })
+
+  cy.session() // $ExpectError
+  cy.session({}) // $ExpectError
+  cy.session('user', ()=>{}, {
+    exclude: {
+      foo: {} // $ExpectError
+    },
+  })
+  cy.session('user', ()=>{}, {
+    exclude: {
+      cookies: {foo:true} // $ExpectError
+    },
+  })
+  cy.session('user', ()=>{}, {
+    validate: {foo:true} // $ExpectError
+  })
+}
+
+namespace CypressCookieTests {
+  cy.getCookie('foo') // $ExpectType Chainable<Cookie | null>
+
+  cy.setCookie('foo', 'val', { // $ExpectType Chainable<Cookie>
+    log: false,
+    domain: 'example.com',
+    expiry: 123,
+    secure: true,
+    sameSite: 'no_restriction',
+    foo: true, // $ExpectError
+  })
+
+  const cookie: Cypress.Cookie = {} as unknown as Cypress.Cookie
+
+  cookie.domain
+  cookie.expiry
+  cookie.httpOnly
+  cookie.name
+  cookie.path
+  cookie.sameSite
+  cookie.secure
+  cookie.value
+  cookie.foo // $ExpectError
 namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0

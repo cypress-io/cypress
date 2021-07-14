@@ -18,6 +18,8 @@ import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
+import * as session from './session'
+
 import { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
@@ -302,10 +304,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
+      session.clearSessions()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)

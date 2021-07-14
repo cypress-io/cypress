@@ -31,6 +31,7 @@ const builtInCommands = [
   require('../cy/commands/navigation'),
   require('../cy/commands/querying'),
   require('../cy/commands/request'),
+  require('../cy/commands/sessions'),
   require('../cy/commands/screenshot'),
   require('../cy/commands/task'),
   require('../cy/commands/traversals'),
@@ -192,6 +193,8 @@ const create = (Cypress, cy, state, config) => {
 
   // perf loop
   for (let cmd of builtInCommands) {
+    // support "export default" syntax
+    cmd = cmd.default || cmd
     cmd(Commands, Cypress, cy, state, config)
   }
 

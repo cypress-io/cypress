@@ -402,6 +402,30 @@ describe('Routes', () => {
     })
   })
 
+  context('GET /__cypress/automation', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('sends getLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/getLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/parent\.postMessage.*localStorage/)
+      })
+    })
+
+    it('sends setLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/setLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/localStorage\.setItem/)
+      })
+    })
+  })
+
   context('GET /__cypress/files', () => {
     beforeEach(() => {
       Fixtures.scaffold('todos')

@@ -38,7 +38,7 @@ export default class Err {
   @observable message = ''
   @observable stack = ''
   @observable sourceMappedStack = ''
-  @observable.ref parsedStack: ParsedStackLine[] = []
+  @observable.ref parsedStack: ParsedStackLine[] | null = null
   @observable docsUrl = '' as string | string[]
   @observable templateType = ''
   // @ts-ignore

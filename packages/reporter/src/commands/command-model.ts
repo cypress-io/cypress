@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
 import Err from '../errors/err-model'
@@ -22,6 +23,11 @@ export interface CommandProps extends InstrumentProps {
   wallClockStartedAt?: string
   hookId: string
   isStudio?: boolean
+  showError?: boolean
+  group?: number
+  hasSnapshot?: boolean
+  hasConsoleProps?: boolean
+
 }
 
 export default class Command extends Instrument {
@@ -34,10 +40,15 @@ export default class Command extends Instrument {
   @observable timeout?: number
   @observable visible?: boolean = true
   @observable wallClockStartedAt?: string
-  @observable duplicates: Array<Command> = []
-  @observable isDuplicate = false
+  @observable children: Array<Command> = []
+  @observable isChild = false
   @observable hookId: string
   @observable isStudio: boolean
+  @observable showError?: boolean = false
+  @observable group?: number
+  @observable hasSnapshot?: boolean
+  @observable hasConsoleProps?: boolean
+  @observable _isOpen: boolean|null = null
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -46,13 +57,30 @@ export default class Command extends Instrument {
     return this.renderProps.message || this.message
   }
 
-  @computed get numDuplicates () {
+  @computed get numChildren () {
     // and one to include self so it's the total number of same events
-    return this.duplicates.length + 1
+    return this.children.length + 1
   }
 
-  @computed get hasDuplicates () {
-    return this.numDuplicates > 1
+  @computed get isOpen () {
+    if (!this.hasChildren) return null
+
+    return this._isOpen || (this._isOpen === null
+      && (
+        (this.group && this.type === 'system' && this.hasChildren) ||
+        _.last(this.children)?.isOpen ||
+        (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
+        _.some(this.children, (v) => v.state === 'failed')
+      )
+    )
+  }
+
+  @action toggleOpen () {
+    this._isOpen = !this.isOpen
+  }
+
+  @computed get hasChildren () {
+    return this.numChildren > 1
   }
 
   constructor (props: CommandProps) {
@@ -68,6 +96,10 @@ export default class Command extends Instrument {
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
+    this.showError = props.showError
+    this.group = props.group
+    this.hasSnapshot = props.hasSnapshot
+    this.hasConsoleProps = props.hasConsoleProps
 
     this._checkLongRunning()
   }
@@ -81,6 +113,10 @@ export default class Command extends Instrument {
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
     this.timeout = props.timeout
+    this.hasSnapshot = props.hasSnapshot
+    this.hasConsoleProps = props.hasConsoleProps
+    this.showError = props.showError
+    this.group = props.group
 
     this._checkLongRunning()
   }
@@ -89,9 +125,9 @@ export default class Command extends Instrument {
     return command.event && this.matches(command)
   }
 
-  addDuplicate (command: Command) {
-    command.isDuplicate = true
-    this.duplicates.push(command)
+  addChild (command: Command) {
+    command.isChild = true
+    this.children.push(command)
   }
 
   matches (command: Command) {

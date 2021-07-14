@@ -1463,6 +1463,7 @@ describe('lib/config', () => {
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
@@ -1547,6 +1548,7 @@ describe('lib/config', () => {
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             env: {
               foo: {

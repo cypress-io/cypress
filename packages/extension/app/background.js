@@ -4,7 +4,7 @@ const once = require('lodash/once')
 const Promise = require('bluebird')
 const browser = require('webextension-polyfill')
 const client = require('./client')
-const { getCookieUrl } = require('../lib/util')
+const util = require('../lib/util')
 
 const COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
 const GET_ALL_PROPS = COOKIE_PROPS.concat(['session', 'storeId'])
@@ -76,6 +76,8 @@ const connect = function (host, path, extraOpts) {
         return invoke('getCookie', id, data)
       case 'set:cookie':
         return invoke('setCookie', id, data)
+      case 'set:cookies':
+        return invoke('setCookies', id, data)
       case 'clear:cookies':
         return invoke('clearCookies', id, data)
       case 'clear:cookie':
@@ -101,34 +103,52 @@ const connect = function (host, path, extraOpts) {
   return ws
 }
 
-const automation = {
-  connect,
+const setOneCookie = (props) => {
+  // only get the url if its not already set
+  if (props.url == null) {
+    props.url = util.getCookieUrl(props)
+  }
 
-  getUrl: getCookieUrl,
+  if (props.hostOnly) {
+    delete props.domain
+  }
 
-  clear (filter = {}) {
-    const clear = (cookie) => {
-      const url = this.getUrl(cookie)
-      const props = { url, name: cookie.name }
+  if (props.domain === 'localhost') {
+    delete props.domain
+  }
 
-      const throwError = function (err) {
-        throw (err != null ? err : new Error(`Removing cookie failed for: ${JSON.stringify(props)}`))
-      }
+  props = pick(props, SET_PROPS)
 
-      return Promise.try(() => {
-        return browser.cookies.remove(props)
-      }).then((details) => {
-        if (details) {
-          return cookie
-        }
+  return Promise.try(() => {
+    return browser.cookies.set(props)
+  })
+}
 
-        return throwError()
-      }).catch(throwError)
+const clearOneCookie = (cookie = {}) => {
+  const url = util.getCookieUrl(cookie)
+  const props = { url, name: cookie.name }
+
+  const throwError = function (err) {
+    throw (err != null ? err : new Error(`Removing cookie failed for: ${JSON.stringify(props)}`))
+  }
+
+  return Promise.try(() => {
+    if (!cookie.name) {
+      throw new Error(`Removing cookie failed for: ${JSON.stringify(cookie)}. Cookie did not include a name`)
     }
 
-    return this.getAll(filter)
-    .map(clear)
-  },
+    return browser.cookies.remove(props)
+  }).then((details) => {
+    return cookie
+  }).catch(throwError)
+}
+
+const clearAllCookies = (cookies) => {
+  return Promise.mapSeries(cookies, clearOneCookie)
+}
+
+const automation = {
+  connect,
 
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
@@ -150,38 +170,24 @@ const automation = {
   },
 
   setCookie (props = {}, fn) {
-    // only get the url if its not already set
-    if (props.url == null) {
-      props.url = this.getUrl(props)
-    }
+    return setOneCookie(props)
+    .then(fn)
+  },
 
-    if (props.hostOnly) {
-      delete props.domain
-    }
-
-    if (props.domain === 'localhost') {
-      delete props.domain
-    }
-
-    props = pick(props, SET_PROPS)
-
-    return Promise.try(() => {
-      return browser.cookies.set(props)
-      // the cookie callback could be null such as the
-      // case when expirationDate is before now
-    }).then((details) => {
-      return fn(details || null)
-    })
+  setCookies (propsArr = [], fn) {
+    return Promise.mapSeries(propsArr, setOneCookie)
+    .then(fn)
   },
 
   clearCookie (filter, fn) {
-    return this.clear(filter)
+    return this.getAll(filter)
+    .then(clearAllCookies)
     .then(firstOrNull)
     .then(fn)
   },
 
-  clearCookies (filter, fn) {
-    return this.clear(filter)
+  clearCookies (cookies, fn) {
+    return clearAllCookies(cookies)
     .then(fn)
   },
 

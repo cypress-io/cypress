@@ -21,11 +21,11 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 })
 
-const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
-const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
+const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc session:add'.split(' ')
+const driverToLocalAndReporterEvents = 'runnables:ready run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:event script:error'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
@@ -64,6 +64,8 @@ export const eventManager = {
 
       return this._reRun(state)
     }
+
+    top._rerun = rerun
 
     ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
@@ -206,6 +208,12 @@ export const eventManager = {
 
     reporterBus.on('save:state', (state) => {
       this.saveState(state)
+    })
+
+    reporterBus.on('clear:session', () => {
+      Cypress.backend('clear:session').then(() => {
+        rerun()
+      })
     })
 
     reporterBus.on('external:open', (url) => {

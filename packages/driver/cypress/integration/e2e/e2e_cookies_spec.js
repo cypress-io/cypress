@@ -1,3 +1,15 @@
+const { _ } = Cypress
+
+const cleanse = (cookies) => {
+  return _.cloneDeepWith(cookies, (v, key) => {
+    if (key === 'expiry') {
+      return 100
+    }
+  })
+}
+
+const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { sameSite: 'no_restriction' } : {}
+
 describe('e2e cookies spec', () => {
   it('simple cookie', () => {
     cy.setCookie('foo', 'bar')
@@ -81,6 +93,28 @@ describe('e2e cookies spec', () => {
 
         done()
       })
+    })
+
+    // a hostOnly cookie is set in the browser by omitting the 'domain' property
+    // so for cross-domain cookies users need to add hostOnly: true as well as 'domain'
+    // TODO: un-skip when we rework cookie API to support setting hostOnly thirdparty cookies.
+    it.skip('can set hostOnly cookies', () => {
+      cy.setCookie('one', 'bar', { hostOnly: true, domain: 'example.com' })
+      cy.setCookie('one', 'bar', { hostOnly: true })
+
+      cy.getCookies({ domain: 'example.com' })
+      .then(cleanse)
+      .should('deep.eq', [{
+        name: 'one',
+        value: 'bar',
+        path: '/',
+        domain: 'example.com',
+        secure: false,
+        httpOnly: false,
+        hostOnly: true,
+        expiry: 100,
+        ...firefoxDefaultSameSite,
+      }])
     })
   })
 })

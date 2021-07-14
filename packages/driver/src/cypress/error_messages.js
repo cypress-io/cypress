@@ -1,3 +1,5 @@
+module.exports = {}
+
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
@@ -101,7 +103,7 @@ const cyStripIndent = (str, indentSize) => {
   }).join('\n')
 }
 
-module.exports = {
+_.extend(module.exports, {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',
   },
@@ -1440,6 +1442,38 @@ module.exports = {
     whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
+  sessions: {
+    callback_returned_false: {
+      message: 'Your `cy.session` **validate** callback {{reason}}',
+    },
+    session: {
+      missing_argument: {
+        message: `${cmd('session')} requires a {{name}}.`,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      duplicateId: {
+        message: stripIndent`
+        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      not_found: {
+        message: stripIndent`
+        No session is defined with the name
+          **{{id}}**
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\`
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      invalid_argument: {
+        message: `${cmd('session')} must be passed a string or the return value from \`cy.session\`. You passed:\n\n\`{{value}}\``,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+    },
+  },
+
   setCookie: {
     invalid_arguments: {
       message: `${cmd('setCookie')} must be passed two string arguments for \`name\` and \`value\`.`,
@@ -1987,4 +2021,4 @@ module.exports = {
     missing: '`XMLHttpRequest#xhr` is missing.',
     network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
   },
-}
+})

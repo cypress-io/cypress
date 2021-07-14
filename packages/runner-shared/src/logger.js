@@ -102,7 +102,7 @@ export const logger = {
     if (_.isArray(table)) {
       console.table(table)
     } else {
-      console.groupCollapsed(table.name)
+      console.group(table.name)
       console.table(table.data, table.columns)
       console.groupEnd()
     }

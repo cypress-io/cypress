@@ -236,7 +236,7 @@ class CypressError extends Error {
   }
 }
 
-const getUserInvocationStack = (err) => {
+const getUserInvocationStackFromError = (err) => {
   return err.userInvocationStack
 }
 
@@ -503,7 +503,7 @@ module.exports = {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
-  getUserInvocationStack,
+  getUserInvocationStackFromError,
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,

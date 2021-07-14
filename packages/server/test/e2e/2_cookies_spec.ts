@@ -2,6 +2,9 @@ import dayjs from 'dayjs'
 import parser from 'cookie-parser'
 import e2e from '../support/helpers/e2e'
 import humanInterval from 'human-interval'
+import cors from 'cors'
+
+const it = e2e.it
 
 const onServer = function (app) {
   app.use(parser())
@@ -192,7 +195,7 @@ describe('e2e cookies', () => {
 
     // once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
     // we can remove this extra test case
-    e2e.it('with forced SameSite strictness', {
+    it('with forced SameSite strictness', {
       config: {
         baseUrl,
         env: {
@@ -245,7 +248,7 @@ describe('e2e cookies', () => {
           https,
         ],
       ) => {
-        e2e.it(`passes with baseurl: ${baseUrl}`, {
+        it(`passes with baseurl: ${baseUrl}`, {
           config: {
             baseUrl,
             env: {
@@ -268,7 +271,7 @@ describe('e2e cookies', () => {
         })
       })
 
-      e2e.it('passes with no baseurl', {
+      it('passes with no baseurl', {
         config: {
           env: {
             httpUrl,
@@ -280,5 +283,77 @@ describe('e2e cookies', () => {
         snapshot: true,
       })
     })
+  })
+})
+
+describe('cross-origin cookies, set:cookies', () => {
+  const onServer = (app) => {
+    app.use(parser())
+    app.use(cors({
+      origin: (origin, cb) => {
+        cb(null, true)
+      },
+      credentials: true,
+    }))
+
+    app.get('/cookie/:name', (req, res) => {
+      const name = req.params.name
+
+      if (!name) {
+        throw new Error('cookie options requires name')
+      }
+
+      const cookieStr = Object.keys(req.query)[0]
+
+      console.log(cookieStr)
+      const reqCookie = JSON.parse(cookieStr)
+
+      console.log({ reqCookie })
+      const { value, ...cookie } = reqCookie
+
+      res.cookie(name, value || 'value', {
+        secure: true,
+        sameSite: 'None',
+        ...cookie,
+      })
+
+      res.send(`<h1>${name}</h1>`)
+    })
+
+    app.get('*', (req, res) => {
+      res.json(req.cookies)
+    })
+  }
+
+  e2e.setup({
+    servers: [{
+      onServer,
+      port: httpPort,
+    }, {
+      onServer,
+      port: httpsPort,
+      https: true,
+    }],
+    settings: {
+      hosts: {
+        '*.foo.com': '127.0.0.1',
+        '*.bar.net': '127.0.0.1',
+        '*.cypress.test': '127.0.0.1',
+      },
+    },
+
+  })
+
+  // https://github.com/cypress-io/cypress/issues/6375
+  it('set:cookies', {
+    config: {
+      video: false,
+      baseUrl: `http://127.0.0.3:${httpPort}`,
+      env: {
+        HTTP: httpPort,
+        HTTPS: httpsPort,
+      },
+    },
+    spec: 'multi_cookies_spec.js',
   })
 })
