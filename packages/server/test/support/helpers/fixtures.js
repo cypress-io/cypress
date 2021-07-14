@@ -24,8 +24,15 @@ const copyContents = (fromFile, toFile) => {
 module.exports = {
   // copies all of the project fixtures
   // to the tmpDir .projects in the root
-  scaffold () {
+  scaffoldAll () {
     return fs.copySync(projects, tmpDir)
+  },
+
+  async scaffoldProject (projectTmpDir) {
+    const srcDir = path.join(projects, path.basename(projectTmpDir))
+
+    await fs.mkdirp(projectTmpDir)
+    await fs.copy(srcDir, projectTmpDir)
   },
 
   scaffoldWatch () {
