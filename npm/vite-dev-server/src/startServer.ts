@@ -24,7 +24,7 @@ export interface StartDevServer {
    * to override some options, you can do so using this.
    * @optional
    */
-  viteConfig?: UserConfig
+  viteConfig?: Omit<UserConfig, 'base' | 'root'>
 }
 
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
