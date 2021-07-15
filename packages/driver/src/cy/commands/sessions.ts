@@ -812,9 +812,9 @@ export default function (Commands, Cypress, cy) {
 }
 
 function navigateAboutBlank (session = true) {
-  if (cy.state('window').location.href === 'about:blank') {
-    return Promise.resolve()
-  }
+  // if (cy.state('window').location.href === 'about:blank') {
+  //   return Promise.resolve()
+  // }
 
   Cypress.action('cy:url:changed', '')
 
