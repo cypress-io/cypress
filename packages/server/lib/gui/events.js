@@ -16,7 +16,8 @@ const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
-const { ProjectBase } = require('../project-base')
+const ProjectStatic = require('../project_static')
+
 const openProject = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
@@ -236,37 +237,37 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return send(null)
 
     case 'get:orgs':
-      return ProjectBase.getOrgs()
+      return ProjectStatic.getOrgs()
       .then(send)
       .catch(sendErr)
 
     case 'get:projects':
-      return ProjectBase.getPathsAndIds()
+      return ProjectStatic.getPathsAndIds()
       .then(send)
       .catch(sendErr)
 
     case 'get:project:statuses':
-      return ProjectBase.getProjectStatuses(arg)
+      return ProjectStatic.getProjectStatuses(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:project:status':
-      return ProjectBase.getProjectStatus(arg)
+      return ProjectStatic.getProjectStatus(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:dashboard:projects':
-      return ProjectBase.getDashboardProjects()
+      return ProjectStatic.getDashboardProjects()
       .then(send)
       .catch(sendErr)
 
     case 'add:project':
-      return ProjectBase.add(arg, options)
+      return ProjectStatic.add(arg, options)
       .then(send)
       .catch(sendErr)
 
     case 'remove:project':
-      return ProjectBase.remove(arg)
+      return ProjectStatic.remove(arg)
       .then(() => {
         return send(arg)
       })
@@ -331,12 +332,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'setup:dashboard:project':
-      return openProject.createCiProject(arg)
+      return ProjectStatic.createCiProject(arg, options.projectRoot)
       .then(send)
       .catch(sendErr)
 
     case 'set:project:id':
-      return openProject.writeProjectId(arg)
+      return ProjectStatic.writeProjectId(arg, options.projectRoot)
       .then(send)
       .catch(sendErr)
 

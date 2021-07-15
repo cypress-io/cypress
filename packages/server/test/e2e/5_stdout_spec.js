@@ -1,7 +1,24 @@
 const e2e = require('../support/helpers/e2e').default
 
 describe('e2e stdout', () => {
-  e2e.setup()
+  e2e.setup({
+    servers: [{
+      port: 1777,
+      https: true,
+      onServer: (app) => {
+        app.get('/', (req, res) => {
+          res.set('content-type', 'text/html').end('it worked')
+        })
+      },
+    }],
+    settings: {
+      hosts: {
+        'www.google.com': '127.0.0.1',
+        'www.apple.com': '127.0.0.1',
+        '*.cypress.io': '127.0.0.1',
+      },
+    },
+  })
 
   it('displays errors from failures', function () {
     return e2e.exec(this, {
