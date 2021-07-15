@@ -3,6 +3,7 @@ import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
+import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
@@ -78,6 +79,9 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 export type Server = ServerE2E | ServerCt
 
 export class ProjectBase<TServer extends Server> extends EE {
+  // id is sha256 of projectRoot
+  public id: string
+
   protected watchers: Watchers
   public options: Options
   protected _cfg?: Cfg
@@ -119,6 +123,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.watchers = new Watchers()
     this.spec = null
     this.browser = null
+    this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
 
     debug('Project created %o', {
       projectType: this.projectType,

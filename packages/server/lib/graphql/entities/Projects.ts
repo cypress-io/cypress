@@ -1,102 +1,57 @@
-import { objectType, extendType, stringArg, nonNull, nullable, enumType } from 'nexus'
-import { ProjectBase } from '../../project-base'
-import { projects, TestingType } from '../../projects'
+import { inputObjectType, nonNull, mutationField, queryField } from 'nexus'
+import { projects } from '../../projects'
+import { Project } from './types'
+import { formatProject } from '../utils'
 
-const PluginsState = enumType({
-  name: 'PluginsState',
-  members: ['uninitialized', 'initializing', 'initialized', 'error'],
-})
-
-const InitPluginsStatus = objectType({
-  name: 'InitPluginsStatus',
+const AddProjectInput = inputObjectType({
+  name: 'AddProjectInput',
   definition (t) {
-    t.field('state', {
-      type: PluginsState,
-    }),
-    t.nullable.string('message')
+    t.nonNull.string('projectRoot')
+    t.nonNull.string('testingType')
+    t.nonNull.boolean('isCurrent')
   },
 })
 
-export const Project = objectType({
-  name: 'Project',
-  definition (t) {
-    t.string('projectRoot')
-    t.boolean('isOpen')
-    t.field('plugins', {
-      type: InitPluginsStatus,
-    })
-  },
+export const allProjects = queryField((t) => {
+  t.nonNull.list.field('projects', {
+    type: Project,
+    resolve (_root, args, ctx) {
+      return Object.values(projects.projects).map(formatProject)
+    },
+  })
 })
 
-function formatProject (project: ProjectBase<any>) {
-  return {
-    projectRoot: project.projectRoot,
-    isOpen: project.isOpen,
-    plugins: project.pluginsStatus,
-  }
-}
-
-export const Projects = extendType({
-  type: 'Query',
-  definition (t) {
-    t.nonNull.list.field('projects', {
-      type: 'Project',
-      resolve (_root, args, ctx) {
-        return Object.values(projects.projects).map(formatProject)
-      },
-    })
-  },
+export const openProject = queryField((t) => {
+  t.field('openProject', {
+    type: Project,
+    resolve (_root, args, ctx) {
+      return projects.openProject ? formatProject(projects.openProject) : null
+    },
+  })
 })
 
-export const OpenProject = extendType({
-  type: 'Query',
-  definition (t) {
-    t.nullable.field('openProject', {
-      type: nullable('Project'),
-      resolve (_root, args, ctx) {
-        try {
-          return formatProject(projects.openProject)
-        } catch (e) {
-          return null
-        }
-      },
-    })
-  },
+export const InitializePlugins = mutationField((t) => {
+  t.nonNull.field('initializePlugins', {
+    type: Project,
+    async resolve (_root, args, ctx) {
+      // TODO: should we await here, or return a pending state to the client?
+      await projects.initializePlugins()
+
+      return formatProject(projects.openProject!)
+    },
+  })
 })
 
-export const InitializePlugins = extendType({
-  type: 'Mutation',
-  definition (t) {
-    t.nonNull.field('initializePlugins', {
-      type: InitPluginsStatus,
-      async resolve (_root, args, ctx) {
-        await projects.initializePlugins()
+export const addProject = mutationField((t) => {
+  t.nonNull.field('addProject', {
+    type: Project,
+    args: {
+      input: nonNull(AddProjectInput),
+    },
+    async resolve (_root, args, ctx) {
+      const addedProject = await projects.addProject(args.input)
 
-        return projects.openProject.pluginsStatus
-      },
-    })
-  },
-})
-
-export const AddProject = extendType({
-  type: 'Mutation',
-  definition (t) {
-    t.nonNull.field('addProject', {
-      type: nullable('Boolean'),
-      args: {
-        projectRoot: nonNull(stringArg()),
-        testingType: nonNull(stringArg()),
-      },
-      async resolve (_root, args, ctx) {
-        await projects.addProject({
-          projectRoot: args.projectRoot,
-          testingType: args.testingType as TestingType,
-        }, {
-          isCurrentProject: true,
-        })
-
-        return true
-      },
-    })
-  },
+      return formatProject(addedProject)
+    },
+  })
 })

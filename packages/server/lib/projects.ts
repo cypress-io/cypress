@@ -1,19 +1,24 @@
 import browsers from './browsers'
 import { ProjectBase, Server } from './project-base'
+import { NexusGenInputs } from './graphql/gen/nxs.gen'
 
 export type TestingType = 'e2e' | 'component'
 
-interface Args {
-  projectRoot: string
-  testingType: TestingType
-}
-
 class Projects {
-  private currentProject?: string
-  // key is projectRoot
-  projects: Record<string, ProjectBase<Server>> = {}
+  currentProjectId?: string
+  projects: ProjectBase<Server>[] = []
 
-  async addProject ({ testingType, projectRoot }: Args, { isCurrentProject }: { isCurrentProject: boolean }) {
+  async addProject ({
+    projectRoot,
+    testingType,
+    isCurrent,
+  }: NexusGenInputs['AddProjectInput']): Promise<ProjectBase<Server>> {
+    const exists = this.projects.find((x) => x.projectRoot === projectRoot)
+
+    if (exists) {
+      return exists
+    }
+
     const type = testingType === 'component' ? 'ct' : 'e2e'
 
     const projectBase = new ProjectBase({
@@ -27,41 +32,49 @@ class Projects {
 
     const allBrowsers = await browsers.getAllBrowsersWith()
 
+    this.currentProjectId = projectBase.id
+
     await projectBase.initializeConfig({ browsers: allBrowsers })
 
-    this.projects[projectRoot] = projectBase
-
-    if (isCurrentProject) {
-      this.currentProject = projectRoot
+    if (isCurrent) {
+      this.currentProjectId = projectBase.id
     }
 
-    return this.projects[projectRoot]
+    this.projects.push(projectBase)
+
+    return projectBase
   }
 
   setTestingType (testingType: TestingType) {
+    if (!this.openProject) {
+      return
+    }
+
     this.openProject.projectType = testingType === 'component' ? 'ct' : 'e2e'
   }
 
   async initializePlugins () {
-    const project = this.openProject
+    if (!this.openProject) {
+      return
+    }
 
-    if (project.pluginsStatus.state === 'initialized') {
+    if (this.openProject.pluginsStatus.state === 'initialized') {
       // Do we need to initialize *again*?
       // Consider a `reinitialize` argument to facilitate this.
       return
     }
 
     try {
-      project.pluginsStatus = { state: 'initializing' }
-      const updatedConfig = await project.initializePlugins(
-        project.getConfig(),
-        project.options,
+      this.openProject.pluginsStatus = { state: 'initializing' }
+      const updatedConfig = await this.openProject.initializePlugins(
+        this.openProject.getConfig(),
+        this.openProject.options,
       )
 
-      project.__setConfig(updatedConfig)
-      project.pluginsStatus = { state: 'initialized' }
+      this.openProject.__setConfig(updatedConfig)
+      this.openProject.pluginsStatus = { state: 'initialized' }
     } catch (e) {
-      project.pluginsStatus = {
+      this.openProject.pluginsStatus = {
         state: 'error',
         message: e.details,
       }
@@ -69,11 +82,9 @@ class Projects {
   }
 
   get openProject () {
-    if (!this.currentProject) {
-      throw Error('No project open')
-    }
-
-    return this.projects[this.currentProject]
+    return this.currentProjectId
+      ? this.projects.find((p) => p.id === this.currentProjectId)!
+      : undefined
   }
 }
 
