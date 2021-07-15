@@ -1561,7 +1561,7 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
-        // return only what is return to the specPattern
+          // return only what is return to the specPattern
           if (specPattern) {
             specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
@@ -1574,6 +1574,10 @@ module.exports = {
               // else we looked in the integration folder
               errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
             }
+          }
+
+          if (browser.unsupportedVersion && browser.warning) {
+            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {

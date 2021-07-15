@@ -119,12 +119,16 @@ export default class Project {
     return _.filter(this.browsers, { isChosen: false })
   }
 
+  @computed get supportedBrowsers () {
+    return _.filter(this.browsers, (browser) => !browser.unsupportedVersion)
+  }
+
   @computed get chosenBrowser () {
     return _.find(this.browsers, { isChosen: true })
   }
 
   @computed get defaultBrowser () {
-    return this.browsers[0]
+    return this.supportedBrowsers[0]
   }
 
   @computed get warnings () {
@@ -173,7 +177,7 @@ export default class Project {
       // use a custom browser if one is supplied. or, if they already have
       // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.
-      const customBrowser = _.find(this.browsers, { custom: true })
+      const customBrowser = _.find(this.availableBrowsers, { custom: true })
 
       if (customBrowser) {
         return this.setChosenBrowser(customBrowser, { save: false })
@@ -260,7 +264,7 @@ export default class Project {
       filter.name = ls
     }
 
-    const browser = _.find(this.browsers, filter) || this.defaultBrowser
+    const browser = _.find(this.availableBrowsers, filter) || this.defaultBrowser
 
     this.setChosenBrowser(browser)
   }

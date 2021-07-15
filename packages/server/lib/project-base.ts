@@ -184,7 +184,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       if (cfg.chromeWebSecurity === false) {
         _.chain(cfg.browsers)
         .filter((browser) => browser.family !== 'chromium')
-        .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
+        .each((browser) => browser.warning = browsers.warning || errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
         .value()
       }
 

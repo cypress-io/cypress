@@ -16,26 +16,26 @@ import {
 } from './types'
 import * as windowsHelper from './windows'
 
-type HasVersion = {
-  version?: string
-  majorVersion?: string | number
+type HasVersion = Partial<FoundBrowser> & {
+  version: string
   name: string
 }
 
 export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
-  let majorVersion = browser.majorVersion
+  const majorVersion = parseInt(browser.version.split('.')[0]) || browser.version
 
-  if (browser.version) {
-    majorVersion = parseInt(browser.version.split('.')[0]) || browser.version
-    log(
-      'browser %s version %s major version %s',
-      browser.name,
-      browser.version,
-      majorVersion,
-    )
-  }
+  const unsupportedVersion = browser.minSupportedVersion && majorVersion < browser.minSupportedVersion
+  const warning = unsupportedVersion ? `Cypress does not support running ${browser.displayName} version ${majorVersion} - it is too old. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.` : undefined
 
-  return extend({}, browser, { majorVersion })
+  log(
+    'browser %s version %s major version %s',
+    browser.name,
+    browser.version,
+    majorVersion,
+    unsupportedVersion,
+  )
+
+  return extend({}, browser, { majorVersion, unsupportedVersion, warning })
 }
 
 type PlatformHelper = {
@@ -102,6 +102,8 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
     'custom',
     'warning',
     'info',
+    'minSupportedVersion',
+    'unsupportedVersion',
   ])
 
   const logBrowser = (props: any) => {
@@ -196,6 +198,7 @@ export const detectByPath = (
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
+      minSupportedVersion: browser.minSupportedVersion,
       custom: true,
       path,
       version,
