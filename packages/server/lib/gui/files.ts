@@ -13,7 +13,7 @@ export const showDialogAndCreateSpec = async () => {
       path,
     }
   }
-  
+
   // only create file if they selected a file
   if (path) {
     createFile(path)
@@ -23,6 +23,7 @@ export const showDialogAndCreateSpec = async () => {
   // we reload here so we can update ui immediately instead of
   // waiting for file watching to send updated spec list
   const specs = await openProject.getSpecs(cfg)
+
   return {
     specs,
     path,

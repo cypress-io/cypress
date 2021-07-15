@@ -85,6 +85,7 @@ const moduleFactory = () => {
       debug('open project url %s', url)
 
       const cfg = openProject.getConfig()
+
       _.defaults(options, {
         browsers: cfg.browsers,
         userAgent: cfg.userAgent,
@@ -283,6 +284,7 @@ const moduleFactory = () => {
 
       const get = () => {
         const cfg = openProject.getConfig()
+
         createSpecsWatcher(cfg)
 
         return this.getSpecs(cfg)

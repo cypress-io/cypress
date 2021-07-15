@@ -234,6 +234,7 @@ describe('lib/project-base', () => {
       await this.project.initializeConfig()
       .then(() => {
         const cfg = this.project.getConfig()
+
         expect(cfg.chromeWebSecurity).eq(false)
         expect(cfg.browsers).deep.eq([
           {
@@ -425,8 +426,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       it('sets firstOpened and lastOpened on first open', function () {
         return this.project.open()
-        .then((config) => {
+        .then(() => {
           const cfg = this.project.getConfig()
+
           expect(cfg.state).to.eql({ firstOpened: this._time, lastOpened: this._time })
         })
       })
@@ -439,6 +441,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         .then(() => this.project.open())
         .then(() => {
           const cfg = this.project.getConfig()
+
           expect(cfg.state).to.eql({ firstOpened: this._time, lastOpened: this._time + 100000 })
         })
       })
@@ -454,6 +457,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
         .then(() => {
           const cfg = this.project.getConfig()
+
           expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
 
           expect(cfg.state).to.eql({
