@@ -42,8 +42,12 @@ const filterSpecs = (filter, files) => {
     return files
   }
 
+  const nonUnicodeLetters = /[^\p{L}]/gu
   const filteredFiles = _.filter(files, (spec) => {
-    return spec.name.toLowerCase().includes(filter.toLowerCase())
+    return spec.name
+    .toLowerCase()
+    .replace(nonUnicodeLetters, '')
+    .includes(filter.toLowerCase().replace(nonUnicodeLetters, ''))
   })
 
   return filteredFiles

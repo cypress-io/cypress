@@ -488,6 +488,22 @@ describe('Specs List', function () {
           .should('have.length', 2)
         })
 
+        it('ignores non-letter characters', function () {
+          cy.get('.filter').clear().type('appspec')
+
+          cy.get('.specs-list .file')
+          .should('have.length', 1)
+          .and('contain', 'app_spec.coffee')
+        })
+
+        it('treats non-Latin characters as letters', function () {
+          cy.get('.filter').clear().type('日本語')
+
+          cy.get('.specs-list .file')
+          .should('have.length', 1)
+          .and('contain', '日本語_spec.coffee')
+        })
+
         it('clears the filter on clear button click', function () {
           cy.get('.clear-filter').click()
           cy.get('.filter')
