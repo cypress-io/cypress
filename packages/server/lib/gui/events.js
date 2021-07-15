@@ -492,7 +492,8 @@ module.exports = {
       projects.addProject({
         projectRoot: options.projectRoot,
         testingType: options.testingType,
-      }, { isCurrentProject: true })
+        isCurrent: true,
+      })
     }
 
     ipc.on('graphql', async (evt, { id, params, variables }) => {

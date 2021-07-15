@@ -734,14 +734,14 @@ export class ProjectBase<TServer extends Server> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (): Cfg {
+  async getConfig (): Promise<Cfg> {
     if (!this._cfg) {
       throw Error('Must call #initializeConfig before accessing config.')
     }
 
     debug('project has config %o', this._cfg)
 
-    return this._cfg
+    return Promise.resolve(this._cfg)
   }
 
   // Saved state

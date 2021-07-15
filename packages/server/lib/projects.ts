@@ -67,7 +67,7 @@ class Projects {
     try {
       this.openProject.pluginsStatus = { state: 'initializing' }
       const updatedConfig = await this.openProject.initializePlugins(
-        this.openProject.getConfig(),
+        await this.openProject.getConfig(),
         this.openProject.options,
       )
 
