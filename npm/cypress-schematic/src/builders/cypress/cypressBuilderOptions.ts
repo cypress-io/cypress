@@ -14,7 +14,7 @@ export interface CypressBuilderOptions extends JsonObject {
   projectPath: string
   record: boolean
   reporter: string
-  'reporter-options': string
+  reporterOptions: JsonObject
   spec: string
   tsConfig: string
   watch: boolean
