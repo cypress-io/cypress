@@ -25,7 +25,6 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
   const majorVersion = parseInt(browser.version.split('.')[0]) || browser.version
 
   const unsupportedVersion = browser.minSupportedVersion && majorVersion < browser.minSupportedVersion
-  const warning = unsupportedVersion ? `Cypress does not support running ${browser.displayName} version ${majorVersion} - it is too old. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.` : undefined
 
   log(
     'browser %s version %s major version %s',
@@ -35,7 +34,14 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
     unsupportedVersion,
   )
 
-  return extend({}, browser, { majorVersion, unsupportedVersion, warning })
+  const foundBrowser = extend({}, browser, { majorVersion })
+
+  if (unsupportedVersion) {
+    foundBrowser.unsupportedVersion = true
+    foundBrowser.warning = `Cypress does not support running ${browser.displayName} version ${majorVersion} - it is too old. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.`
+  }
+
+  return foundBrowser
 }
 
 type PlatformHelper = {
@@ -198,7 +204,6 @@ export const detectByPath = (
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
-      minSupportedVersion: browser.minSupportedVersion,
       custom: true,
       path,
       version,
