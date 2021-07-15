@@ -329,13 +329,16 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', 8)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 5)
+          cy.get('.file').should('have.length', 6)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 5)
+          cy.get('.file').should('have.length', 6)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 5)
+          cy.get('.file').should('have.length', 6)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get('.file').should('have.length', 6)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 5)
@@ -344,10 +347,7 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', 4)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 3)
-
-          cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 1)
+          cy.get('.file').should('have.length', 2)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 0)
