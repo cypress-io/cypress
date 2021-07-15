@@ -177,7 +177,7 @@ export default class Project {
       // use a custom browser if one is supplied. or, if they already have
       // a browser chosen that's been saved in localStorage, then select that
       // otherwise just do the default.
-      const customBrowser = _.find(this.availableBrowsers, { custom: true })
+      const customBrowser = _.find(this.supportedBrowsers, { custom: true })
 
       if (customBrowser) {
         return this.setChosenBrowser(customBrowser, { save: false })
@@ -264,7 +264,7 @@ export default class Project {
       filter.name = ls
     }
 
-    const browser = _.find(this.availableBrowsers, filter) || this.defaultBrowser
+    const browser = _.find(this.supportedBrowsers, filter) || this.defaultBrowser
 
     this.setChosenBrowser(browser)
   }
