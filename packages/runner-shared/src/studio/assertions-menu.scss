@@ -26,7 +26,7 @@ $border-radius: 4px;
 
   .header {
     align-items: center;
-    background: #3386d4;
+    background: #07b282;
     border-top-left-radius: $border-radius;
     border-top-right-radius: $border-radius;
     color: #fff;
@@ -56,14 +56,13 @@ $border-radius: 4px;
 
   .subtitle {
     border-bottom: 1px solid #c4c4c4;
-    color: darken(#08c18d, 3%);
+    color: #6b6b6b;
     font-size: 13px;
     font-style: italic;
     font-weight: 400;
     padding: 0.5rem 0.7rem;
 
     code {
-      color: darken(#08c18d, 10%);
       font-weight: 600;
     }
   }
