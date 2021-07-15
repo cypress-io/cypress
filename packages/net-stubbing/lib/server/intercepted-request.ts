@@ -194,7 +194,7 @@ export class InterceptedRequest {
           }
 
           if (immediateStaticResponse) {
-            sendStaticResponse(this, immediateStaticResponse)
+            await sendStaticResponse(this, immediateStaticResponse)
 
             return data
           }
