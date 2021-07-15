@@ -155,7 +155,7 @@ You may want to specify a custom reporter. Cypress works with any reporters buil
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
-    "reporter": "junit", // name of reporter or file path to custom reporter
+    "reporter": "junit",
     "reporterOptions": {
       "mochaFile": "results/my-test-output.xml",
       "toConsole": true
