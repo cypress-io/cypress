@@ -29,6 +29,11 @@
       "name": "日本語_spec.coffee",
       "absolute": "/user/project/cypress/integration/日本語_spec.coffee",
       "relative": "cypress/integration/日本語_spec.coffee"
+    },
+    {
+      "name": "123_spec.coffee",
+      "absolute": "/user/project/cypress/integration/123_spec.coffee",
+      "relative": "cypress/integration/123_spec.coffee"
     }
   ],
   "component": [

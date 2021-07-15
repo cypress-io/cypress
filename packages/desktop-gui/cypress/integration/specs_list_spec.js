@@ -216,7 +216,7 @@ describe('Specs List', function () {
       })
 
       context('run all specs', function () {
-        const runAllIntegrationSpecsLabel = 'Run 6 integration specs'
+        const runAllIntegrationSpecsLabel = 'Run 7 integration specs'
 
         it('displays run all specs button', () => {
           cy.contains('.all-tests', runAllIntegrationSpecsLabel)
@@ -288,7 +288,7 @@ describe('Specs List', function () {
           .find('li').first().should('contain', 'accounts')
 
           cy.get('.list-as-table.integration')
-          .find('li').last().should('contain', '日本語_spec')
+          .find('li').last().should('contain', '123_spec')
         })
       })
 
@@ -323,19 +323,22 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', this.numSpecs)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 8)
+          cy.get('.file').should('have.length', 9)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 8)
+          cy.get('.file').should('have.length', 9)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
+
+          cy.get(lastExpandedFolderSelector).click()
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 6)
@@ -344,10 +347,7 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', 5)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 4)
-
-          cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 2)
+          cy.get('.file').should('have.length', 3)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 0)
@@ -458,7 +458,7 @@ describe('Specs List', function () {
       })
 
       describe('typing the filter', function () {
-        const runAllIntegrationSpecsLabel = 'Run 6 integration specs'
+        const runAllIntegrationSpecsLabel = 'Run 7 integration specs'
 
         beforeEach(function () {
           this.ipc.getSpecs.yields(null, this.specs)
@@ -494,6 +494,14 @@ describe('Specs List', function () {
           cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', 'app_spec.coffee')
+        })
+
+        it('ignores non-number characters', function () {
+          cy.get('.filter').clear().type('123spec')
+
+          cy.get('.specs-list .file')
+          .should('have.length', 1)
+          .and('contain', '123_spec.coffee')
         })
 
         it('treats non-Latin characters as letters', function () {
@@ -577,7 +585,7 @@ describe('Specs List', function () {
 
           // but once the project stops running tests, the button gets updated
           cy.get('.close-browser').click()
-          cy.contains('.all-tests', 'Run 6 integration specs')
+          cy.contains('.all-tests', 'Run 7 integration specs')
           .should('not.have.class', 'active')
         })
       })
@@ -749,7 +757,7 @@ describe('Specs List', function () {
       it('shows separate run specs buttons', function () {
         cy.get('.all-tests').should('have.length', 2)
         cy.contains('.folder-name', 'integration tests')
-        .contains('.all-tests', 'Run 6 integration specs')
+        .contains('.all-tests', 'Run 7 integration specs')
 
         cy.contains('.folder-name', 'component tests')
         .contains('.all-tests', 'Run 8 component specs')
@@ -786,7 +794,7 @@ describe('Specs List', function () {
 
         cy.log('**clearing the search**')
         cy.get('.filter').clear()
-        cy.contains('.all-tests', 'Run 6 integration specs')
+        cy.contains('.all-tests', 'Run 7 integration specs')
         cy.contains('.all-tests', 'Run 8 component specs')
       })
     })

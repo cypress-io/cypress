@@ -42,12 +42,12 @@ const filterSpecs = (filter, files) => {
     return files
   }
 
-  const nonUnicodeLetters = /[^\p{L}]/gu
+  const notUnicodeLettersOrNumbers = /[^\p{L}\p{N}]/gu
   const filteredFiles = _.filter(files, (spec) => {
     return spec.name
     .toLowerCase()
-    .replace(nonUnicodeLetters, '')
-    .includes(filter.toLowerCase().replace(nonUnicodeLetters, ''))
+    .replace(notUnicodeLettersOrNumbers, '')
+    .includes(filter.toLowerCase().replace(notUnicodeLettersOrNumbers, ''))
   })
 
   return filteredFiles
