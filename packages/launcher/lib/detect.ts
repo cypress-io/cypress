@@ -200,18 +200,16 @@ export const detectByPath = (
   const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
     const version = helper.getVersionNumber(versionStr, browser)
 
-    let parsedBrowser = {
+    let parsedBrowser = extend({}, browser, {
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
       custom: true,
       path,
       version,
-    }
+    })
 
-    parsedBrowser = setMajorVersion(parsedBrowser)
-
-    return extend({}, browser, parsedBrowser)
+    return setMajorVersion(parsedBrowser)
   }
 
   const pathData = helper.getPathData(path)

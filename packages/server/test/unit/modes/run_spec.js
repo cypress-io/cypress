@@ -699,6 +699,15 @@ describe('lib/modes/run', () => {
       .to.be.rejectedWith(/invalid browser family in/)
     })
 
+    it('throws an error if unsupportedVersion', () => {
+      const browser = { displayName: 'SomeBrowser', warning: 'blah blah', unsupportedVersion: true }
+
+      sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
+
+      return expect(runMode.run())
+      .to.be.rejectedWith('blah blah')
+    })
+
     it('shows no warnings for chrome browser', () => {
       return runMode.run({ browser: 'chrome' })
       .then(() => {
