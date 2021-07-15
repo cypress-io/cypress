@@ -83,6 +83,14 @@ export class StudioRecorder {
     }
   }
 
+  @computed get state () {
+    return {
+      testId: this.testId,
+      suiteId: this.suiteId,
+      url: this.url,
+    }
+  }
+
   get Cypress () {
     return eventManager.getCypress()
   }
@@ -186,9 +194,29 @@ export class StudioRecorder {
       this.startLoading()
 
       if (this.suiteId) {
-        this.Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
+        this.Cypress.runner.setOnlySuiteId(this.suiteId)
       } else if (this.testId) {
-        this.Cypress.runner.setOnlyTestId(studioRecorder.testId)
+        this.Cypress.runner.setOnlyTestId(this.testId)
+      }
+    }
+  }
+
+  @action interceptTest = (test) => {
+    if (this.suiteId) {
+      this.setTestId(test.id)
+    }
+
+    if (this.hasRunnableId) {
+      if (test.invocationDetails) {
+        this.setFileDetails(test.invocationDetails)
+      }
+
+      if (this.suiteId) {
+        if (test.parent && test.parent.id !== 'r1') {
+          this.setRunnableTitle(test.parent.title)
+        }
+      } else {
+        this.setRunnableTitle(test.title)
       }
     }
   }

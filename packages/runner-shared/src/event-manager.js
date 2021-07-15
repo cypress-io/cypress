@@ -403,11 +403,7 @@ export const eventManager = {
         reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
-            studio: {
-              testId: studioRecorder.testId,
-              suiteId: studioRecorder.suiteId,
-              url: studioRecorder.url,
-            },
+            studio: studioRecorder.state,
           })
         })
       })
@@ -482,24 +478,8 @@ export const eventManager = {
       localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (attr, test) => {
-      if (studioRecorder.suiteId) {
-        studioRecorder.setTestId(test.id)
-      }
-
-      if (studioRecorder.hasRunnableId) {
-        if (test.invocationDetails) {
-          studioRecorder.setFileDetails(test.invocationDetails)
-        }
-
-        if (studioRecorder.suiteId) {
-          if (test.parent && test.parent.id !== 'r1') {
-            studioRecorder.setRunnableTitle(test.parent.title)
-          }
-        } else {
-          studioRecorder.setRunnableTitle(test.title)
-        }
-      }
+    Cypress.on('test:before:run:async', (_attr, test) => {
+      studioRecorder.interceptTest(test)
     })
 
     Cypress.on('test:after:run', (test) => {
