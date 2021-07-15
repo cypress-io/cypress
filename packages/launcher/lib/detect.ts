@@ -38,7 +38,7 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
 
   if (unsupportedVersion) {
     foundBrowser.unsupportedVersion = true
-    foundBrowser.warning = `Cypress does not support running ${browser.displayName} version ${majorVersion} - it is too old. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.`
+    foundBrowser.warning = `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${browser.minSupportedVersion}.`
   }
 
   return foundBrowser
