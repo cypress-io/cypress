@@ -830,7 +830,7 @@ describe('src/cy/commands/request', () => {
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.config.js`. Neither of those values were present.')
+          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` option. Neither of those values were present.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
           done()
@@ -851,27 +851,7 @@ describe('src/cy/commands/request', () => {
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.config.js` (currently disabled by --config-file=false). Neither of those values were present.')
-
-          done()
-        })
-
-        cy.request('/foo/bar')
-      })
-
-      it('throws when url is not FQDN, notes that configFile is non-default', {
-        baseUrl: '',
-        configFile: 'foo.json',
-      }, function (done) {
-        cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `foo.json`. Neither of those values were present.')
+          expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` option. (currently disabled by --config-file=false). Neither of those values were present.')
 
           done()
         })
