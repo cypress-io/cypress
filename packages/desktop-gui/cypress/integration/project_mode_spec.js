@@ -14,7 +14,7 @@ describe('Project Mode', function () {
       cy.stub(this.ipc, 'onFocusTests')
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'updaterCheck').resolves(false)
-      cy.stub(this.ipc, 'openProject').resolves(this.config)
+      cy.stub(this.ipc, 'openProject').resolves({ config: this.config })
       cy.stub(this.ipc, 'getSpecs')
 
       this.getCurrentUser = this.util.deferred()

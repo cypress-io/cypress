@@ -28,7 +28,7 @@ describe('Global Mode', function () {
       cy.stub(this.ipc, 'updaterCheck').resolves(false)
       cy.stub(this.ipc, 'logOut').resolves({})
       cy.stub(this.ipc, 'addProject').resolves(this.projects[0])
-      cy.stub(this.ipc, 'openProject').resolves(this.config)
+      cy.stub(this.ipc, 'openProject').resolves({ config: this.config })
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'offOpenProject')
       cy.stub(this.ipc, 'offGetSpecs')

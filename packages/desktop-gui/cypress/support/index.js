@@ -9,6 +9,13 @@ require('cypress-real-events/support')
 const BluebirdPromise = require('bluebird')
 
 beforeEach(function () {
+  this.config = {
+    testFiles: '**/*.spec.js',
+    resolved: {
+      testFiles: '**/*.spec.js',
+    },
+  }
+
   this.util = {
     deferred (Promise = BluebirdPromise) {
       const deferred = {}

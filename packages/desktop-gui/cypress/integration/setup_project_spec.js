@@ -108,7 +108,7 @@ describe('Connect to Dashboard', function () {
       cy.stub(this.ipc, 'updaterCheck').resolves(false)
       cy.stub(this.ipc, 'closeBrowser').resolves(null)
       this.config.projectId = null
-      cy.stub(this.ipc, 'openProject').resolves(this.config)
+      cy.stub(this.ipc, 'openProject').resolves({ config: this.config })
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'getRuns').resolves([])
       cy.stub(this.ipc, 'getRecordKeys').resolves(this.keys)

@@ -15,7 +15,7 @@ describe('Login', function () {
       cy.stub(this.ipc, 'updaterCheck').resolves(false)
       cy.stub(this.ipc, 'getProjects').resolves([])
       cy.stub(this.ipc, 'getProjectStatuses').resolves([])
-      cy.stub(this.ipc, 'openProject').resolves(this.config)
+      cy.stub(this.ipc, 'openProject').resolves({ config: this.config })
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'logOut').resolves()
