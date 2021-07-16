@@ -276,7 +276,7 @@ export default class Project {
   }
 
   getConfigValue (key) {
-    if (!this.resolvedConfig) return
+    if (!this.resolvedConfig || !this.resolvedConfig[key]) return
 
     return toJS(this.resolvedConfig[key]).value
   }
