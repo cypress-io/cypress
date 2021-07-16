@@ -12,7 +12,17 @@ const create = function (state) {
     return state('jQuery') || state('window').$
   }
 
+  const $$ = function (selector, context) {
+    if (context == null) {
+      context = state('document')
+    }
+
+    return $dom.query(selector, context)
+  }
+
   return {
+    $$,
+
     getRemotejQueryInstance (subject) {
       // we make assumptions that you cannot have
       // an array of mixed types, so we only look at

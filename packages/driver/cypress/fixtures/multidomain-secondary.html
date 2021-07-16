@@ -3,11 +3,12 @@
 <head>
 </head>
 <body>
-  <p></p>
+  <p data-cy="dom-check">From a secondary domain</p>
+  <p data-cy="cypress-check"></p>
 
   <script>
     if (window.Cypress) {
-      document.querySelector('p').innerText = 'From a secondary domain with window.Cypress'
+      document.querySelector('[data-cy="cypress-check"]').innerText = 'Has window.Cypress'
     }
   </script>
 </body>

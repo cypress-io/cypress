@@ -2,6 +2,10 @@ import $Cypress from '../cypress'
 import $Cy from '../cypress/cy'
 import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
+import $Focused from '../cy/focused'
+import $jQuery from '../cy/jquery'
+import $Snapshots from '../cy/snapshots'
+import { create as createOverrides } from '../cy/overrides'
 
 const onBeforeAppWindowLoad = (autWindow) => {
   const specWindow = {
@@ -40,7 +44,14 @@ const onBeforeAppWindowLoad = (autWindow) => {
     timeout () {},
   })
 
-  $Commands.create(Cypress, cy, Cypress.state, Cypress.config)
+  const { state, config } = Cypress
+  const jquery = $jQuery.create(state)
+  const focused = $Focused.create(state)
+  const snapshots = $Snapshots.create(jquery.$$, state)
+
+  const overrides = createOverrides(state, config, focused, snapshots)
+
+  $Commands.create(Cypress, cy, state, config)
 
   window.addEventListener('message', (event) => {
     if (event.data && event.data.message === 'run:in:domain') {
@@ -52,6 +63,8 @@ const onBeforeAppWindowLoad = (autWindow) => {
 
   autWindow.Cypress = Cypress
   autWindow.cy = cy
+
+  overrides.wrapNativeMethods(autWindow)
 
   top.postMessage('cross:domain:window:before:load', '*')
 }

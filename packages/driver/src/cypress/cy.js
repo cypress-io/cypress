@@ -25,13 +25,11 @@ const $Timers = require('../cy/timers')
 const $Timeouts = require('../cy/timeouts')
 const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
-const $selection = require('../dom/selection')
+const $Overrides = require('../cy/overrides')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
 const $TestConfigOverrides = require('../cy/testConfigOverrides')
-
-const { registerFetch } = require('unfetch')
 
 const noArgsAreAFunction = (args) => {
   return !_.some(args, _.isFunction)
@@ -194,14 +192,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     })
   }
 
-  const $$ = function (selector, context) {
-    if (context == null) {
-      context = state('document')
-    }
-
-    return $dom.query(selector, context)
-  }
-
   const queue = $CommandQueue.create()
 
   $VideoRecorder.create(Cypress)
@@ -224,8 +214,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const ensures = $Ensures.create(state, expect)
 
-  const snapshots = $Snapshots.create($$, state)
+  const snapshots = $Snapshots.create(jquery.$$, state)
   const testConfigOverrides = $TestConfigOverrides.create()
+  const overrides = $Overrides.create(state, config, focused, snapshots)
 
   const isCy = (val) => {
     return (val === cy) || $utils.isInstanceOf(val, $Chainer)
@@ -298,64 +289,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return ret
       },
     })
-  }
-
-  const wrapNativeMethods = function (contentWindow) {
-    try {
-      // return null to trick contentWindow into thinking
-      // its not been iframed if modifyObstructiveCode is true
-      if (config('modifyObstructiveCode')) {
-        Object.defineProperty(contentWindow, 'frameElement', {
-          get () {
-            return null
-          },
-        })
-      }
-
-      contentWindow.HTMLElement.prototype.focus = function (focusOption) {
-        return focused.interceptFocus(this, contentWindow, focusOption)
-      }
-
-      contentWindow.HTMLElement.prototype.blur = function () {
-        return focused.interceptBlur(this)
-      }
-
-      contentWindow.SVGElement.prototype.focus = function (focusOption) {
-        return focused.interceptFocus(this, contentWindow, focusOption)
-      }
-
-      contentWindow.SVGElement.prototype.blur = function () {
-        return focused.interceptBlur(this)
-      }
-
-      contentWindow.HTMLInputElement.prototype.select = function () {
-        return $selection.interceptSelect.call(this)
-      }
-
-      contentWindow.document.hasFocus = function () {
-        return focused.documentHasFocus.call(this)
-      }
-
-      const cssModificationSpy = function (original, ...args) {
-        snapshots.onCssModified(this.href)
-
-        return original.apply(this, args)
-      }
-
-      const { insertRule } = contentWindow.CSSStyleSheet.prototype
-      const { deleteRule } = contentWindow.CSSStyleSheet.prototype
-
-      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
-      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-
-      if (config('experimentalFetchPolyfill')) {
-        // drop "fetch" polyfill that replaces it with XMLHttpRequest
-        // from the app iframe that we wrap for network stubbing
-        contentWindow.fetch = registerFetch(contentWindow)
-        // flag the polyfill to test this experimental feature easier
-        state('fetchPolyfilled', true)
-      }
-    } catch (error) {} // eslint-disable-line no-empty
   }
 
   const enqueue = function (obj) {
@@ -917,7 +850,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     id: _.uniqueId('cy'),
 
     // synchrounous querying
-    $$,
+    $$: jquery.$$,
 
     state,
 
@@ -1308,7 +1241,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       contentWindowListeners(contentWindow)
 
-      wrapNativeMethods(contentWindow)
+      overrides.wrapNativeMethods(contentWindow)
 
       snapshots.onBeforeWindowLoad()
     },
