@@ -231,6 +231,17 @@ class $Cypress {
       }))
     })
     .then(() => {
+      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
+        window.addEventListener('blur', () => {
+          this.backend('firefox:window:focus')
+        })
+
+        if (!document.hasFocus()) {
+          return this.backend('firefox:window:focus')
+        }
+      }
+    })
+    .then(() => {
       this.cy.initialize(this.$autIframe)
 
       this.onSpecReady()
