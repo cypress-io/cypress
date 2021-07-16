@@ -40,7 +40,7 @@ describe('Project Nav', function () {
 
   context('project nav', function () {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     it('displays projects nav', function () {
@@ -99,7 +99,7 @@ describe('Project Nav', function () {
   context('browsers dropdown', function () {
     describe('browsers available', function () {
       beforeEach(function () {
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       context('normal browser list behavior', function () {
@@ -324,7 +324,7 @@ describe('Project Nav', function () {
           channel: 'canary',
         }))
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
 
         cy.get('.browsers-list .dropdown-chosen')
         .should('contain', 'Canary').and('not.contain', 'Edge')
@@ -335,7 +335,7 @@ describe('Project Nav', function () {
       it('displays chosen browser with old string-style id in localStorage', function () {
         localStorage.setItem('chosenBrowser', 'chrome')
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
 
         cy.get('.browsers-list .dropdown-chosen')
         .should('contain', 'Chrome')
@@ -344,7 +344,7 @@ describe('Project Nav', function () {
       it('displays default browser with null localStorage', function () {
         localStorage.removeItem('chosenBrowser')
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
 
         cy.get('.browsers-list .dropdown-chosen')
         .should('contain', this.config.browsers[0].displayName)
@@ -355,7 +355,7 @@ describe('Project Nav', function () {
       beforeEach(function () {
         localStorage.setItem('chosenBrowser', 'netscape-navigator')
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('defaults to first browser', () => {
@@ -375,7 +375,7 @@ describe('Project Nav', function () {
           majorVersion: '50',
         }]
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('displays no dropdown btn', () => {
@@ -400,7 +400,7 @@ describe('Project Nav', function () {
           },
         ]
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('shows warning icon with linkified tooltip', function () {
@@ -419,7 +419,7 @@ describe('Project Nav', function () {
       beforeEach(function () {
         this.config.browsers[this.config.browsers.length - 1].custom = true
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('displays generic icon', () => {
@@ -454,7 +454,7 @@ describe('Project Nav', function () {
           info: this.info,
         }]
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('shows info icon with linkified tooltip', function () {
@@ -470,7 +470,7 @@ describe('Project Nav', function () {
 
   context('issue #869 - nav responsiveness', function () {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     it('main nav does not block project nav when long project name pushes it to multiple lines', () => {
