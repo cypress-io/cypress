@@ -3,6 +3,7 @@ const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
 const configOptions = require('../config_options')
+const path = require('path')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -130,9 +131,9 @@ const isValidFirefoxGcInterval = (key, value) => {
   }
 
   if (isIntervalValue(value)
-      || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
-          && isIntervalValue(value.runMode)
-          && isIntervalValue(value.openMode))) {
+    || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
+      && isIntervalValue(value.runMode)
+      && isIntervalValue(value.openMode))) {
     return true
   }
 
@@ -193,7 +194,99 @@ const isOverrideFunction = (key, config) => {
   return isValidConfig(key, config)
 }
 
+/**
+ * Validates whether the supplied set of cert information is valid
+ * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
+ */
+const isValidClientCertificatesSet = (key, certsForUrls) => {
+  debug('clientCerts: %o', certsForUrls)
+
+  if (!Array.isArray(certsForUrls)) {
+    return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
+  }
+
+  let urls = []
+
+  for (let i = 0; i < certsForUrls.length; i++) {
+    debug(`Processing clientCertificates: ${i}`)
+    let certsForUrl = certsForUrls[i]
+
+    if (!certsForUrl.url) {
+      return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'a URL matcher')
+    }
+
+    if (certsForUrl.url !== '*') {
+      try {
+        let parsed = new URL(certsForUrl.url)
+
+        if (parsed.protocol !== 'https:') {
+          return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'an https protocol')
+        }
+      } catch (e) {
+        return errMsg(`clientCertificates[${i}].url`, certsForUrl.url, 'a valid URL')
+      }
+    }
+
+    if (urls.includes(certsForUrl.url)) {
+      return `clientCertificates has duplicate client certificate URL: ${certsForUrl.url}`
+    }
+
+    urls.push(certsForUrl.url)
+
+    if (certsForUrl.ca && !Array.isArray(certsForUrl.ca)) {
+      return errMsg(`clientCertificates[${i}].ca`, certsForUrl.ca, 'an array of CA filepaths')
+    }
+
+    if (!Array.isArray(certsForUrl.certs)) {
+      return errMsg(`clientCertificates[${i}].certs`, certsForUrl.certs, 'an array of certs')
+    }
+
+    for (let j = 0; j < certsForUrl.certs.length; j++) {
+      let certInfo = certsForUrl.certs[j]
+
+      // Only one of PEM or PFX cert allowed
+      if (certInfo.cert && certInfo.pfx) {
+        return `\`clientCertificates[${i}].certs[${j}]\` has both PEM and PFX defined`
+      }
+
+      if (!certInfo.cert && !certInfo.pfx) {
+        return `\`clientCertificates[${i}].certs[${j}]\` must have either PEM or PFX defined`
+      }
+
+      if (certInfo.pfx) {
+        if (path.isAbsolute(certInfo.pfx)) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].pfx`, certInfo.pfx, 'a relative filepath')
+        }
+      }
+
+      if (certInfo.cert) {
+        if (path.isAbsolute(certInfo.cert)) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].cert`, certInfo.cert, 'a relative filepath')
+        }
+
+        if (!certInfo.key) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].key`, certInfo.key, 'a key filepath')
+        }
+
+        if (path.isAbsolute(certInfo.key)) {
+          return errMsg(`clientCertificates[${i}].certs[${j}].key`, certInfo.key, 'a relative filepath')
+        }
+      }
+    }
+
+    for (let k = 0; k < certsForUrl.ca.length; k++) {
+      if (path.isAbsolute(certsForUrl.ca[k])) {
+        return errMsg(`clientCertificates[${k}].ca[${k}]`, certsForUrl.ca[k], 'a relative filepath')
+      }
+    }
+  }
+
+  return true
+}
+
 module.exports = {
+  isValidClientCertificatesSet,
+
   isValidBrowser,
 
   isValidBrowserList,

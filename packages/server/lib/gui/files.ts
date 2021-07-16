@@ -12,13 +12,15 @@ export const showDialogAndCreateSpec = () => {
       }
     })
   })
-  .tap(({ path }) => {
+  .then((opt) => {
+    const { path } = opt
+
     // only create file if they selected a file
     if (path) {
       return createFile(path)
     }
 
-    return
+    return opt
   })
   .then(({ cfg, path }) => {
     if (!path) {

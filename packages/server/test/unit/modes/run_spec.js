@@ -9,7 +9,6 @@ const pkg = require('@packages/root')
 const { fs } = require(`${root}../lib/util/fs`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
-const config = require(`${root}../lib/config`)
 const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const browsers = require(`${root}../lib/browsers`)
 const Reporter = require(`${root}../lib/reporter`)
@@ -21,6 +20,7 @@ const random = require(`${root}../lib/util/random`)
 const system = require(`${root}../lib/util/system`)
 const specsUtil = require(`${root}../lib/util/specs`)
 const { experimental } = require(`${root}../lib/experiments`)
+const ProjectStatic = require(`${root}../lib/project_static`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
@@ -646,9 +646,21 @@ describe('lib/modes/run', () => {
 
   context('.run browser vs video recording', () => {
     beforeEach(function () {
+      const config = {
+        proxyUrl: 'http://localhost:12345',
+        video: true,
+        videosFolder: 'videos',
+        integrationFolder: '/path/to/integrationFolder',
+        resolved: {
+          integrationFolder: {
+            integrationFolder: { value: '/path/to/integrationFolder', from: 'config' },
+          },
+        },
+      }
+
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
-      sinon.stub(ProjectBase, 'ensureExists').resolves()
+      sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
@@ -660,19 +672,9 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'waitForBrowserToConnect')
       sinon.stub(videoCapture, 'start').resolves()
       sinon.stub(openProject, 'launch').resolves()
+      this.projectInstance.__setConfig(config)
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
       sinon.spy(errors, 'warning')
-      sinon.stub(config, 'get').resolves({
-        proxyUrl: 'http://localhost:12345',
-        video: true,
-        videosFolder: 'videos',
-        integrationFolder: '/path/to/integrationFolder',
-        resolved: {
-          integrationFolder: {
-            integrationFolder: { value: '/path/to/integrationFolder', from: 'config' },
-          },
-        },
-      })
 
       sinon.stub(specsUtil, 'find').resolves([
         {
@@ -726,7 +728,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
-      sinon.stub(ProjectBase, 'ensureExists').resolves()
+      sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(system, 'info').resolves({ osName: 'osFoo', osVersion: 'fooVersion' })

@@ -37,6 +37,10 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
+    name: 'clientCertificates',
+    defaultValue: [],
+    validation: v.isValidClientCertificatesSet,
+  }, {
     name: 'component',
     // runner-ct overrides
     defaultValue: null,
