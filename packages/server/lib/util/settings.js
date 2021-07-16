@@ -222,6 +222,15 @@ module.exports = {
 
       // else write the new reduced obj
       return this._write(file, changed)
+      .then(function (config) {
+        // when json configfile is written, update the value of the configfile
+        // with the value found.
+        // NOTE: it does not have to be cypress.json.
+        // it could be ./e2e/custom-config.json
+        config.configFile = path.relative(projectRoot, file)
+
+        return config
+      })
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err
