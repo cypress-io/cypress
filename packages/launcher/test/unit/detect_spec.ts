@@ -1,5 +1,5 @@
 require('../spec_helper')
-import { firefoxGcWarning, detect, detectByPath, setMajorVersion } from '../../lib/detect'
+import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
@@ -166,21 +166,6 @@ describe('browser detection', () => {
 
       expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
       .and.contain('Firefox newer than or equal to 86')
-    })
-
-    // @see https://github.com/cypress-io/cypress/issues/8241
-    it('adds warnings to Firefox versions less than 80', async () => {
-      execa.withArgs('/good-firefox', ['--version'])
-      .resolves({ stdout: 'Mozilla Firefox 80.0' })
-
-      execa.withArgs('/bad-firefox', ['--version'])
-      .resolves({ stdout: 'Mozilla Firefox 79.1' })
-
-      // TODO: remove this warning/auto-GC, since Cy no longer supports FF < 86
-      // expect(await detectByPath('/good-firefox')).to.not.have.property('warning')
-      expect(await detectByPath('/bad-firefox')).to.include({
-        warning: firefoxGcWarning,
-      })
     })
   })
 })

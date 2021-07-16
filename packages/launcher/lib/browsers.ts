@@ -5,7 +5,7 @@ import { Browser, FoundBrowser } from './types'
 // Chrome started exposing CDP 1.3 in 64
 const MIN_CHROME_VERSION = 64
 // Firefox started exposing CDP in 86
-const MIN_FIREFOX_VERSION = 86
+const MIN_FIREFOX_VERSION = 99
 // Edge switched to Blink in 79
 const MIN_EDGE_VERSION = 79
 

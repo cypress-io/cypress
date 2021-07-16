@@ -87,15 +87,6 @@ describe('<App />', () => {
     expect(component.find(Reporter)).to.have.prop('autoScrollingEnabled', true)
   })
 
-  it('renders the <Reporter /> with the firefoxGcInterval flag', () => {
-    const props = createProps()
-
-    props.config.firefoxGcInterval = 111
-    const component = shallowRender(<App {...props} />)
-
-    expect(component.find(Reporter)).to.have.prop('firefoxGcInterval', 111)
-  })
-
   it('renders the runner container with `left` set as the width of the reporter', () => {
     const props = createProps()
 
