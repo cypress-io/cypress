@@ -41,7 +41,7 @@ describe('Specs List', function () {
     beforeEach(function () {
       this.ipc.getSpecs.yields(null, [])
 
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     it('displays empty message', () => {
@@ -80,7 +80,7 @@ describe('Specs List', function () {
     beforeEach(function () {
       this.ipc.getSpecs.yields(null, this.componentSpecs)
 
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     it('shows both types of specs', () => {
@@ -103,7 +103,7 @@ describe('Specs List', function () {
     beforeEach(function () {
       this.config.isNewProject = true
 
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     context('banner', function () {
@@ -145,7 +145,7 @@ describe('Specs List', function () {
 
   describe('first time user in existing project', function () {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
       this.ipc.hasOpenedCypress.resolves(false)
     })
 
@@ -179,7 +179,7 @@ describe('Specs List', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specsWindows)
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       context('displays list of specs', function () {
@@ -212,7 +212,7 @@ describe('Specs List', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specs)
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       context('run all specs', function () {
@@ -360,7 +360,7 @@ describe('Specs List', function () {
         beforeEach(function () {
           this.ipc.getSpecs.yields(null, this.specs)
 
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
         })
 
         it('collapsing root spec will keep root itself expanded', function () {
@@ -439,7 +439,7 @@ describe('Specs List', function () {
             unit: [],
           })
 
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
         })
 
         it('hides expand/collapse buttons when there are no folders', function () {
@@ -451,7 +451,7 @@ describe('Specs List', function () {
     context('filtering specs', function () {
       it('scrolls the specs and not the filter', function () {
         this.ipc.getSpecs.yields(null, this.specs)
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
 
         cy.contains('last_list_spec').scrollIntoView()
         cy.get('.filter').should('be.visible')
@@ -462,7 +462,7 @@ describe('Specs List', function () {
 
         beforeEach(function () {
           this.ipc.getSpecs.yields(null, this.specs)
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
 
           cy.contains('.all-tests', runAllIntegrationSpecsLabel)
           cy.get('.filter').type('new')
@@ -576,7 +576,7 @@ describe('Specs List', function () {
         })
 
         it('applies it for the appropriate project', function () {
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
 
           cy.get('.filter').should('have.value', 'app')
           cy.contains('.all-tests', 'Run 1 integration spec')
@@ -584,7 +584,7 @@ describe('Specs List', function () {
 
         it('does not apply it for a different project', function () {
           this.config.projectId = 'different'
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
 
           cy.get('.filter').should('have.value', '')
         })
@@ -597,7 +597,7 @@ describe('Specs List', function () {
         })
 
         it('saves the filter to local storage', function () {
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
 
           cy.get('.filter').type('my-filter')
           cy.window().then((win) => {
@@ -610,7 +610,7 @@ describe('Specs List', function () {
         it('applies the saved filter when returning to the project', function () {
           cy.window().then(function (win) {
             win.localStorage[`specsFilter-<no-id>-/foo/bar`] = JSON.stringify('my-filter')
-            this.openProject.resolve(this.config)
+            this.openProject.resolve({ config: this.config })
           })
 
           cy.get('.filter').should('have.value', 'my-filter')
@@ -621,7 +621,7 @@ describe('Specs List', function () {
     context('click on spec', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specs)
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
 
         cy.contains('.file .file-name-wrapper', 'app_spec.coffee').as('firstSpec')
       })
@@ -668,7 +668,7 @@ describe('Specs List', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specs)
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       context('choose shallow spec', function () {
@@ -704,7 +704,7 @@ describe('Specs List', function () {
     context('switching specs', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specs)
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
 
         cy.get('.file').contains('a', 'app_spec.coffee').as('firstSpec')
         .click()
@@ -727,7 +727,7 @@ describe('Specs List', function () {
     context('with component tests', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specs)
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('shows separate run specs buttons', function () {
@@ -778,7 +778,7 @@ describe('Specs List', function () {
     context('returning to specs tab', function () {
       beforeEach(function () {
         this.ipc.getSpecs.yields(null, this.specs)
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       // https://github.com/cypress-io/cypress/issues/9151
@@ -805,7 +805,7 @@ describe('Specs List', function () {
     beforeEach(function () {
       this.ipc.getSpecs.yields(null, this.specs)
 
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     it('updates spec list selected on specChanged', function () {
@@ -832,7 +832,7 @@ describe('Specs List', function () {
     beforeEach(function () {
       this.ipc.getSpecs.yields(null, this.specs)
 
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
 
       cy.get('.file').contains('a', 'app_spec.coffee').parent().as('spec')
       cy.get('@spec').contains('Open in IDE').as('button')
@@ -986,7 +986,7 @@ describe('Specs List', function () {
 
   describe('new spec file', function () {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
     })
 
     it('launches system save dialog', function () {

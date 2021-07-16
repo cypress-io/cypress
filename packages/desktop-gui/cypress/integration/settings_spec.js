@@ -52,7 +52,7 @@ describe('Settings', () => {
 
   describe('general functionality', () => {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -99,7 +99,7 @@ describe('Settings', () => {
   describe('configuration panel', () => {
     describe('displays config', () => {
       beforeEach(function () {
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -359,7 +359,7 @@ describe('Settings', () => {
 
   describe('project id panel', () => {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -393,7 +393,7 @@ describe('Settings', () => {
   describe('record key panel', () => {
     context('when project is set up and you have access', () => {
       beforeEach(function () {
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -523,7 +523,7 @@ describe('Settings', () => {
       })
 
       it('does not show ci Keys section when project is invalid', function () {
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
         this.projectStatuses[0].state = 'INVALID'
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
@@ -535,7 +535,7 @@ describe('Settings', () => {
 
     context('when you are not a user of this projects org', () => {
       beforeEach(function () {
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('does not show record key', function () {
@@ -590,7 +590,7 @@ describe('Settings', () => {
 
   describe('proxy settings panel', () => {
     beforeEach(function () {
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
       this.config.resolved.baseUrl.value = 'http://localhost:7777'
 
       this.projectStatuses[0].id = this.config.projectId
@@ -654,7 +654,7 @@ describe('Settings', () => {
 
     describe('no experimental features turned on', () => {
       beforeEach(function () {
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -674,7 +674,7 @@ describe('Settings', () => {
           value: true,
         }
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -708,7 +708,7 @@ describe('Settings', () => {
             value: true,
           }
 
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
           this.projectStatuses[0].id = this.config.projectId
           this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -736,7 +736,7 @@ describe('Settings', () => {
             from: 'default',
           }
 
-          this.openProject.resolve(this.config)
+          this.openProject.resolve({ config: this.config })
           this.projectStatuses[0].id = this.config.projectId
           this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -770,7 +770,7 @@ describe('Settings', () => {
       cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
       cy.stub(this.ipc, 'setUserEditor').resolves()
 
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -847,7 +847,7 @@ describe('Settings', () => {
 
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
-      this.openProject.resolve(this.config)
+      this.openProject.resolve({ config: this.config })
       this.goToSettings()
       openConfiguration()
 
