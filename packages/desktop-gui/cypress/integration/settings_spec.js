@@ -225,7 +225,7 @@ describe('Settings', () => {
         this.ipc.onConfigChanged.yield()
 
         cy.contains('.line', 'env:null').then(() => {
-          this.ipc.openProject.resolves(this.config)
+          this.ipc.openProject.resolves({ config: this.config })
           this.ipc.onConfigChanged.yield()
 
           cy.contains('.line', 'env:fileServerFolder')
@@ -233,7 +233,7 @@ describe('Settings', () => {
             this.ipc.openProject.resolves(setConfigEnv(this.config, null))
             this.ipc.onConfigChanged.yield()
             cy.contains('.line', 'env:null').then(() => {
-              this.ipc.openProject.resolves(this.config)
+              this.ipc.openProject.resolves({ config: this.config })
               this.ipc.onConfigChanged.yield()
 
               cy.contains('.line', 'env:fileServerFolder')
@@ -306,7 +306,7 @@ describe('Settings', () => {
         newConfig.clientUrl = 'http://localhost:8888'
         newConfig.clientUrlDisplay = 'http://localhost:8888'
         newConfig.browsers = this.browsers
-        this.openProject.resolve(newConfig)
+        this.openProject.resolve({ config: newConfig })
 
         this.goToSettings()
 
@@ -317,7 +317,7 @@ describe('Settings', () => {
         const newConfig = this.util.deepClone(this.config)
 
         newConfig.resolved.baseUrl.value = 'http://localhost:7777'
-        this.ipc.openProject.onCall(1).resolves(newConfig)
+        this.ipc.openProject.onCall(1).resolves({ config: newConfig })
         this.ipc.onConfigChanged.yield()
 
         cy.contains('http://localhost:7777')
@@ -326,9 +326,9 @@ describe('Settings', () => {
 
     context('when configFile is false', () => {
       beforeEach(function () {
-        this.openProject.resolve(Cypress._.assign({
+        this.openProject.resolve({ config: Cypress._.assign({
           configFile: false,
-        }, this.config))
+        }, this.config) })
 
         this.goToSettings()
 
@@ -342,9 +342,9 @@ describe('Settings', () => {
 
     context('when configFile is set', function () {
       beforeEach(function () {
-        this.openProject.resolve(Cypress._.assign({
+        this.openProject.resolve({ config: Cypress._.assign({
           configFile: 'special-cypress.json',
-        }, this.config))
+        }, this.config) })
 
         this.goToSettings()
 
@@ -555,7 +555,7 @@ describe('Settings', () => {
 
     beforeEach(function () {
       this.navigateWithConfig = function (config) {
-        this.openProject.resolve(_.defaults(config, this.config))
+        this.openProject.resolve({ config: _.defaults(config, this.config) })
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
@@ -877,8 +877,8 @@ describe('Settings', () => {
 
 // --
 function setConfigEnv (config, v) {
-  return flow([
+  return { config: flow([
     merge(config),
     set('resolved.env', v),
-  ])({})
+  ])({}) }
 }
