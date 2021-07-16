@@ -14,6 +14,7 @@ interface RenderProps {
     alias?: string
     type: 'function' | 'stub' | 'spy'
   }>
+  status?: string
 }
 
 export interface CommandProps extends InstrumentProps {

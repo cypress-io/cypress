@@ -98,8 +98,55 @@
       flex-wrap: wrap;
       padding: 2px 5px 0;
 
-      .command-alias,
-      .command-interceptions {
+      .badge {
+        $left: $yellow-dark;
+        $middle: $yellow-medium;
+        $right: lighten($left, 10%);
+        $borderRadius: 10px;
+        $padding: $borderRadius/2;
+
+        display: inline-block;
+        font-style: normal;
+        font-size: .9em;
+        background-color: $middle;
+        border-radius: $borderRadius;
+
+        >span {
+          display: inline-block;
+          padding-left: 2.5px;
+          padding-right: 2.5px;
+
+          &:first-child {
+            padding-left: 5px;
+          }
+
+          &:last-child {
+            padding-right: 5px;
+          }
+        }
+
+        >.left {
+          border-radius: $borderRadius 0 0 $borderRadius;
+          background-color: $left;
+          color: #333;
+
+          &:only-child {
+            border-radius: inherit;
+          }
+        }
+
+        >.right {
+          border-radius: 0 $borderRadius $borderRadius 0;
+          background-color: $right;
+          color: #333;
+
+          &:only-child {
+            border-radius: inherit;
+          }
+        }
+      }
+
+      .command-alias {
         border-radius: 10px;
         color: #777888;
         padding: 0 5px;
@@ -138,7 +185,8 @@
       }
 
       .num-duplicates,
-      .command-alias-count {
+      .command-alias-count,
+      .command-interception-count {
         border-radius: 5px;
         color: #777;
         font-size: 90%;
@@ -153,7 +201,13 @@
         padding: 3px 5px 3px 5px;
       }
 
-      .command-alias-count {
+      .num-duplicates.has-alias.has-duplicates {
+        border-radius: 0 10px 10px 0;
+        padding: 4px 5px 2px 3px;
+      }
+
+      .command-alias-count,
+      .command-interception-count {
         border-radius: 0 10px 10px 0;
         padding: 5px 6px 3px 4px;
       }
@@ -161,10 +215,6 @@
       .num-duplicates,
       .command-alias-count {
         background-color: darken(#ffdf9c, 8%) !important;
-      }
-
-      .command-interceptions {
-        background-color: lighten(#f0a5d7, 13%);
       }
     }
 
@@ -437,7 +487,8 @@
       display: none;
     }
 
-    .command-alias {
+    .command-alias,
+    .badge {
       font-family: $open-sans;
       font-size: 10px;
       line-height: 1.75;

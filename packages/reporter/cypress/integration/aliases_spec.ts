@@ -30,6 +30,97 @@ describe('aliases', () => {
     })
   })
 
+  context('proxy logging', () => {
+    context('badges', () => {
+      it('shows only status if no alias or dupe', () => {
+        addCommand(runner, {
+          aliasType: 'route',
+          renderProps: {
+            status: 'some status',
+            interceptions: [{
+              type: 'spy',
+              command: 'intercept',
+            }],
+          },
+        })
+
+        cy.contains('.command-number', '1').parent().find('.badge')
+        .should('have.text', 'some status')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', 'Matched 1 cy.intercept() spy')
+        .percySnapshot()
+      })
+
+      it('shows status and count if dupe', () => {
+        addCommand(runner, {
+          aliasType: 'route',
+          renderProps: {
+            status: 'some status',
+            interceptions: [{
+              type: 'spy',
+              command: 'intercept',
+            }, {
+              type: 'spy',
+              command: 'route',
+            }],
+          },
+        })
+
+        cy.contains('.command-number', '1').parent().find('.badge')
+        .should('have.text', 'some status2')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', 'Matched 1 cy.intercept() spy and 1 cy.route() spy')
+        .percySnapshot()
+      })
+
+      it('shows status and alias and count if dupe', () => {
+        addCommand(runner, {
+          aliasType: 'route',
+          alias: 'myAlias',
+          renderProps: {
+            status: 'some status',
+            interceptions: [{
+              type: 'spy',
+              command: 'intercept',
+              alias: 'firstAlias',
+            }, {
+              type: 'spy',
+              command: 'intercept',
+              alias: 'myAlias',
+            }],
+          },
+        })
+
+        cy.contains('.command-number', '1').parent().find('.badge')
+        .should('have.text', 'some statusmyAlias2')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', 'Matched 2 cy.intercept() spies (aliased as @firstAlias, @myAlias)')
+        .percySnapshot()
+      })
+
+      it('shows status and alias', () => {
+        addCommand(runner, {
+          aliasType: 'route',
+          alias: 'myAlias',
+          renderProps: {
+            status: 'some status',
+            interceptions: [{
+              type: 'spy',
+              command: 'intercept',
+              alias: 'myAlias',
+            }],
+          },
+        })
+
+        cy.contains('.command-number', '1').parent().find('.badge')
+        .should('have.text', 'some statusmyAlias')
+        .trigger('mouseover')
+        .get('.cy-tooltip').should('have.text', 'Matched 1 cy.intercept() spy (aliased as @myAlias)')
+        .percySnapshot()
+      })
+    })
+  })
+
   context('route aliases', () => {
     describe('without duplicates', () => {
       beforeEach(() => {
