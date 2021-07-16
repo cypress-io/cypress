@@ -21,7 +21,7 @@ const format = (data) => {
 
 const formatConfigFile = (configFile) => {
   if (configFile === false) {
-    return '`cypress.config.js` (currently disabled by --config-file=false)'
+    return '`cypress.json` (currently disabled by --config-file=false)'
   }
 
   return `\`${format(configFile)}\``
@@ -1221,7 +1221,7 @@ module.exports = {
     },
     url_invalid ({ configFile }) {
       return {
-        message: `${cmd('request')} must be provided a fully qualified \`url\` - one that begins with \`http\`. By default ${cmd('request')} will use either the current window's origin or the \`baseUrl\` option. Neither of those values were present.`,
+        message: `${cmd('request')} must be provided a fully qualified \`url\` - one that begins with \`http\`. By default ${cmd('request')} will use either the current window's origin or the \`baseUrl\` in ${formatConfigFile(configFile)}. Neither of those values were present.`,
         docsUrl: 'https://on.cypress.io/request',
       }
     },

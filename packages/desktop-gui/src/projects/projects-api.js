@@ -192,7 +192,7 @@ const openProject = (project) => {
   })
 
   return ipc.openProject(project.path)
-  .then(({ config, functions = [] }) => {
+  .then(({ config = {}, functions = [] } = {}) => {
     // In this context we know we are in e2e.
     // The configuration in e2e has already been merged with the main.
     // It is not useful to display component/e2e fields explicitely.
