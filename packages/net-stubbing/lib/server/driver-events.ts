@@ -73,7 +73,7 @@ async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtu
 
   await setResponseFromFixture(getFixture, options.staticResponse)
 
-  _sendStaticResponse(request, options.staticResponse)
+  await _sendStaticResponse(request, options.staticResponse)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
