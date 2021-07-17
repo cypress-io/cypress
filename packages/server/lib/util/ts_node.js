@@ -7,7 +7,7 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
   return {
     compiler: tsPath, // use the user's installed typescript
     compilerOptions: {
-      module: 'es2018',
+      module: 'CommonJS',
     },
     // resolves tsconfig.json starting from the plugins directory
     // instead of the cwd (the project root)
