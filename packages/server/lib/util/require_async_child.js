@@ -27,6 +27,7 @@ function run (ipc, requiredFile, projectRoot) {
   }
 
   if (!tsRegistered) {
+    debug('register typescript for required file')
     tsNodeUtil.register(projectRoot, requiredFile)
 
     // ensure typescript is only registered once
