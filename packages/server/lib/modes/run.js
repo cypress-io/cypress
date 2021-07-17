@@ -462,7 +462,7 @@ const iterateThroughSpecs = function (options = {}) {
   return serial()
 }
 
-const getProjectId = Promise.method((project, id) => {
+const getProjectId = Promise.method(async (project, id) => {
   if (id == null) {
     id = env.get('CYPRESS_PROJECT_ID')
   }
@@ -472,10 +472,12 @@ const getProjectId = Promise.method((project, id) => {
     return id
   }
 
-  return project.getProjectId()
-  .catch(() => {
-    // no id no problem
-    return null
+  return project.getConfig().then((conf) => {
+    return project.getProjectId(conf)
+    .catch(() => {
+      // no id no problem
+      return null
+    })
   })
 })
 

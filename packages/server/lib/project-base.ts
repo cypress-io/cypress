@@ -39,7 +39,7 @@ import { checkSupportFile } from './project_utils'
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
   Partial<Pick<Cypress.RuntimeConfigOptions, 'projectName' | 'report' | 'hosts' |'clientRoute' |'devServerPublicPathRoute' | 'namespace' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'projectId'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -819,15 +819,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
   // These methods are not related to start server/sockets/runners
 
-  async getProjectId () {
+  async getProjectId (config?: Cfg): Promise<string> {
     await this.verifyExistence()
-    const readSettings = await settings.read(this.projectRoot, this.options)
+    const readSettings = config || await settings.read(this.projectRoot, this.options)
 
     if (readSettings && readSettings.projectId) {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.projectRoot, this.options), this.projectRoot)
+    return errors.throw('NO_PROJECT_ID', settings.configFile(this.projectRoot, this.options), this.projectRoot)
   }
 
   async verifyExistence () {
