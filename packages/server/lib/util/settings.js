@@ -183,7 +183,12 @@ module.exports = {
         return this._write(file, {})
       }
 
-      return fs.writeFile(file, 'module.exports = {}').then(() => ({}))
+      return fs.writeFile(file, `import { defineConfig } from 'cypress'
+
+export default defineConfig({
+
+})
+`).then(() => ({}))
     })
     .then(({ result: configObject, functionNames }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
