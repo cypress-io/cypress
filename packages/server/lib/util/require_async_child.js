@@ -51,6 +51,7 @@ function run (ipc, requiredFile, projectRoot) {
 
   ipc.on('load', (functionNames) => {
     try {
+      debug('try loading', requiredFile)
       const exp = require(requiredFile)
 
       const result = exp.default || exp

@@ -43,11 +43,11 @@ export default async function requireAsync (filePath: string, options: RequireAs
 
   const childArguments = ['--projectRoot', options.projectRoot, '--file', filePath, '--loadErrorCode', options.loadErrorCode]
 
+  debug('fork child process', path.join(__dirname, 'require_async_child.js'), childArguments, childOptions)
   configProcess = cp.fork(path.join(__dirname, 'require_async_child.js'), childArguments, childOptions)
   const ipc = util.wrapIpc(configProcess)
 
   return new Promise((resolve, reject) => {
-    ipc.send('load', options.functionNames)
     ipc.on('loaded', ({ result, functionNames }) => {
       debug('resolving with result %o', result)
       debug('resolving with functions %o', functionNames)
@@ -61,5 +61,8 @@ export default async function requireAsync (filePath: string, options: RequireAs
 
       reject(errors.get(type, ...args))
     })
+
+    debug('trigger the load of the file')
+    ipc.send('load', options.functionNames)
   })
 }
