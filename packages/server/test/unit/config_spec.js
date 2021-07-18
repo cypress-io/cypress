@@ -245,9 +245,9 @@ describe('lib/config', () => {
           return this.expectValidationPasses()
         })
 
-        it('fails if not a plain object', function () {
+        it('fails if not a plain object or a function', function () {
           this.setup({ component: false })
-          this.expectValidationFails('to be a plain object')
+          this.expectValidationFails('to be a plain object or a function')
 
           return this.expectValidationFails('the value was: `false`')
         })
@@ -1455,11 +1455,11 @@ describe('lib/config', () => {
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
             clientCertificates: { value: [], from: 'default' },
-            component: { from: 'default', value: {} },
+            component: { from: 'default', value: null },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
-            e2e: { from: 'default', value: {} },
+            e2e: { from: 'default', value: null },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
@@ -1539,12 +1539,12 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            component: { from: 'default', value: {} },
+            component: { from: 'default', value: null },
             clientCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
-            e2e: { from: 'default', value: {} },
+            e2e: { from: 'default', value: null },
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },

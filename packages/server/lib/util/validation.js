@@ -186,12 +186,16 @@ const isOneOf = (...values) => {
   }
 }
 
-const isOverrideFunction = (key, config) => {
-  if (typeof config === 'function') {
+const isOverrideFunction = (key, value) => {
+  if (typeof config !== 'function' && !_.isPlainObject(value) && value !== null) {
+    return errMsg(key, value, `a plain object or a function`)
+  }
+
+  if (value === null || typeof value === 'function') {
     return true
   }
 
-  return isValidConfig(key, config)
+  return isValidConfig(key, value)
 }
 
 /**
