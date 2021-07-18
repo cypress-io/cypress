@@ -278,6 +278,76 @@
           "type": "boolean",
           "default": false,
           "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
+        },
+        "clientCertificates": {
+          "description": "Defines client certificates to use when sending requests to the specified URLs",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "description": "Requests for URLs matching this minimatch pattern will use the supplied client certificate",
+                "type": "string"
+              },
+              "ca": {
+                "description": "Path(s) to CA file(s) to validate certs against, relative to project root",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "certs": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "description": "PEM file specific properties",
+                      "type": "object",
+                      "properties": {
+                        "cert": {
+                          "description": "Path to the certificate, relative to project root",
+                          "type": "string"
+                        },
+                        "key": {
+                          "description": "Path to the private key, relative to project root",
+                          "type": "string"
+                        },
+                        "passphrase": {
+                          "description": "(Optional) File path to a UTF-8 text file containing the passphrase for the key, relative to project root",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "cert",
+                        "key"
+                      ]
+                    },
+                    {
+                      "description": "PFX file specific properties",
+                      "type": "object",
+                      "properties": {
+                        "pfx": {
+                          "description": "Path to the certificate container, relative to project root",
+                          "type": "string"
+                        },
+                        "passphrase": {
+                          "description": "(Optional) File path to a UTF-8 text file containing the passphrase for the container, relative to project root",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "pfx"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "url",
+              "certs"
+            ]
+          }
         }
       }
     }

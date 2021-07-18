@@ -3431,7 +3431,7 @@
 
 "@jest/types@^26.3.0", "@jest/types@^26.6.2":
   version "26.6.2"
-  resolved "https://registry.npmjs.org/@jest/types/-/types-26.6.2.tgz#bef5a532030e1d88a2f5a6d933f84e97226ed48e"
+  resolved "https://registry.yarnpkg.com/@jest/types/-/types-26.6.2.tgz#bef5a532030e1d88a2f5a6d933f84e97226ed48e"
   integrity sha512-fC6QCp7Sc5sX6g8Tvbmj4XUTbyrik0akgRy03yjXbQaBWWNWGE7SGtJk98m0N8nzegD/7SggrUlivxo5ax4KWQ==
   dependencies:
     "@types/istanbul-lib-coverage" "^2.0.0"
@@ -7614,7 +7614,7 @@
 
 "@types/cheerio@*", "@types/cheerio@0.22.21":
   version "0.22.21"
-  resolved "https://registry.npmjs.org/@types/cheerio/-/cheerio-0.22.21.tgz#5e37887de309ba11b2e19a6e14cad7874b31a8a3"
+  resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.21.tgz#5e37887de309ba11b2e19a6e14cad7874b31a8a3"
   integrity sha512-aGI3DfswwqgKPiEOTaiHV2ZPC9KEhprpgEbJnv0fZl3SGX0cGgEva1126dGrMC6AJM6v/aihlUgJn9M5DbDZ/Q==
   dependencies:
     "@types/node" "*"
@@ -7709,7 +7709,7 @@
 
 "@types/enzyme@*", "@types/enzyme@3.10.5":
   version "3.10.5"
-  resolved "https://registry.npmjs.org/@types/enzyme/-/enzyme-3.10.5.tgz#fe7eeba3550369eed20e7fb565bfb74eec44f1f0"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.5.tgz#fe7eeba3550369eed20e7fb565bfb74eec44f1f0"
   integrity sha512-R+phe509UuUYy9Tk0YlSbipRpfVtIzb/9BHn5pTEtjJTF5LXvUjrIQcZvNyANNEyFrd2YGs196PniNT1fgvOQA==
   dependencies:
     "@types/cheerio" "*"
@@ -22879,10 +22879,10 @@ is-utf8@^0.2.0, is-utf8@^0.2.1:
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
   integrity sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=
 
-is-valid-domain@0.0.19:
-  version "0.0.19"
-  resolved "https://registry.npmjs.org/is-valid-domain/-/is-valid-domain-0.0.19.tgz#50ce5ff3ab1cbe85bcb5b155b0fba61f4b9ea668"
-  integrity sha512-NxuZbJABXdGlFNEVphG9bT0YOQE0B75Bv+emGsEjmRnAs9aMUVbdKUafj//yTxApThjqQqRKBd9MJDlnqx8Pmg==
+is-valid-domain@0.0.20:
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/is-valid-domain/-/is-valid-domain-0.0.20.tgz#8bb1317f2a5c0d00ca86d11eee6798587c43b5ac"
+  integrity sha512-Yd9oD7sgCycVvH8CHy5U4fLXibPwxVw2+diudYbT8ZfAiQDtW1H9WvPRR4+rtN9qOll+r+KAfO4SjO28OPpitA==
   dependencies:
     punycode "^1.4.1"
 
@@ -22895,6 +22895,11 @@ is-valid-glob@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-valid-glob/-/is-valid-glob-1.0.0.tgz#29bf3eff701be2d4d315dbacc39bc39fe8f601aa"
   integrity sha1-Kb8+/3Ab4tTTFdusw5vDn+j2Aao=
+
+is-valid-hostname@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-valid-hostname/-/is-valid-hostname-1.0.1.tgz#4001a549e908bcc6a6d5347d8781779d8fedd9ce"
+  integrity sha512-GuMwWwBVh+TiH/DzzcITaCJ3aMijgCwE+/Sa4Zh13PyslxaTX0xmWxnwkNOoXcCTCd3z/Dw8Pe5Brsgp+bULtA==
 
 is-what@^3.12.0:
   version "3.14.1"
@@ -35057,7 +35062,7 @@ socket.io-client@4.0.1:
 
 socket.io-parser@4.0.4, socket.io-parser@~3.3.0, socket.io-parser@~3.4.0, socket.io-parser@~4.0.3, socket.io-parser@~4.0.4:
   version "4.0.4"
-  resolved "https://registry.npmjs.org/socket.io-parser/-/socket.io-parser-4.0.4.tgz#9ea21b0d61508d18196ef04a2c6b9ab630f4c2b0"
+  resolved "https://registry.yarnpkg.com/socket.io-parser/-/socket.io-parser-4.0.4.tgz#9ea21b0d61508d18196ef04a2c6b9ab630f4c2b0"
   integrity sha512-t+b0SS+IxG7Rxzda2EVvyBZbvFPBCjJoyHuE0P//7OAsN23GItzDRdWa6ALxZI/8R5ygK7jAR6t028/z+7295g==
   dependencies:
     "@types/component-emitter" "^1.2.10"
