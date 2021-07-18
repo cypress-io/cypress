@@ -662,3 +662,63 @@ Available browsers found on your system are:
 - electron
 
 `
+
+exports['e2e plugins can config plugins directly in the cypress.config.js 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.js                                                                     (1 of 1)
+
+
+  ✓ overrides config
+  ✓ overrides env
+
+  2 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.js                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 20 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  app_spec.js                              XX:XX        2        2        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+
+
+`
