@@ -402,7 +402,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // desktop-gui receives the proper config file, even if it is one of the defaults
     // we can't know in advance which one json, js or ts file will be present
     // but we need it to be forwarded to the gui for display and help
-    finalConfig.configFile = path.relative(this.projectRoot, finalConfig.configFile ?? configFile)
+    if (configFile !== false) {
+      finalConfig.configFile = path.relative(this.projectRoot, finalConfig.configFile ?? configFile)
+    }
 
     return finalConfig
   }
