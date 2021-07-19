@@ -980,6 +980,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/component-testing
         `
+    case 'UNSUPPORTED_BROWSER_VERSION':
+      return arg1
     default:
   }
 }
