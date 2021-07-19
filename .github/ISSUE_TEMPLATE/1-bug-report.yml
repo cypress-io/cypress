@@ -36,7 +36,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: othter
+    id: other
     attributes:
       label: Other
       placeholder: Any other details?
