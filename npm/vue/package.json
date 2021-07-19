@@ -44,7 +44,7 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "tailwindcss": "1.1.4",
     "typescript": "3.9.6",
-    "vue": "3.0.11",
+    "vue": "3.1.1",
     "vue-i18n": "9.0.0-rc.6",
     "vue-loader": "16.1.2",
     "vue-router": "^4.0.0",
