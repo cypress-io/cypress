@@ -302,6 +302,9 @@ export const eventManager = {
     })
 
     top.addEventListener('message', (event) => {
+      // currently used for tests, can be removed later
+      if (event.data && event.data.actual) return
+
       switch (event.data) {
         case 'cross:domain:window:before:load':
           this.crossDomainDriverWindow = event.source

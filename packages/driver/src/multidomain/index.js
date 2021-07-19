@@ -4,6 +4,7 @@ import $Commands from '../cypress/commands'
 import $Log from '../cypress/log'
 import $Focused from '../cy/focused'
 import $jQuery from '../cy/jquery'
+import $Listeners from '../cy/listeners'
 import $Snapshots from '../cy/snapshots'
 import { create as createOverrides } from '../cy/overrides'
 
@@ -65,6 +66,50 @@ const onBeforeAppWindowLoad = (autWindow) => {
   autWindow.cy = cy
 
   overrides.wrapNativeMethods(autWindow)
+  // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
+  $Listeners.bindTo(autWindow, {
+    // TODO: implement this once there's a better way to forward
+    // messages to the top frame
+    onError () {},
+    onSubmit (e) {
+      return Cypress.action('app:form:submitted', e)
+    },
+    onBeforeUnload (e) {
+      // TODO: implement these commented out bits
+      // stability.isStable(false, 'beforeunload')
+
+      // Cookies.setInitial()
+
+      // timers.reset()
+
+      Cypress.action('app:window:before:unload', e)
+
+      // return undefined so our beforeunload handler
+      // doesn't trigger a confirmation dialog
+      return undefined
+    },
+    onUnload (e) {
+      return Cypress.action('app:window:unload', e)
+    },
+    // TODO: this currently only works on hashchange, but needs work
+    // for other navigation events
+    onNavigation (...args) {
+      return Cypress.action('app:navigation:changed', ...args)
+    },
+    onAlert (str) {
+      return Cypress.action('app:window:alert', str)
+    },
+    onConfirm (str) {
+      const results = Cypress.action('app:window:confirm', str)
+
+      // return false if ANY results are false
+      const ret = !results.some((result) => result === false)
+
+      Cypress.action('app:window:confirmed', str, ret)
+
+      return ret
+    },
+  })
 
   top.postMessage('cross:domain:window:before:load', '*')
 }
