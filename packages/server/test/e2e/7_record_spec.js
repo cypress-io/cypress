@@ -41,6 +41,11 @@ describe('e2e record', () => {
         snapshot: true,
         outputPath,
         expectedExitCode: 3,
+        config: {
+          env: {
+            'TEST_STDIO': '1',
+          },
+        },
       })
 
       console.log(stdout)
@@ -181,6 +186,8 @@ describe('e2e record', () => {
       expect(thirdInstanceStdout.body.stdout).to.include('record_pass_spec.js')
       expect(thirdInstanceStdout.body.stdout).not.to.include('record_error_spec.js')
       expect(thirdInstanceStdout.body.stdout).not.to.include('record_fail_spec.js')
+      expect(thirdInstanceStdout.body.stdout).to.include('plugin stdout')
+      expect(thirdInstanceStdout.body.stdout).to.not.include('plugin stderr')
 
       const fourthInstance = requests[16]
 
