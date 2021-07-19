@@ -62,6 +62,21 @@ describe('browser detection', () => {
       // @ts-ignore
       expect(res.majorVersion).to.equal(foundBrowser.version)
     })
+
+    it('creates warning when version is unsupported', () => {
+      const foundBrowser = {
+        displayName: 'TestBro',
+        name: 'test browser',
+        version: '9000.1',
+        minSupportedVersion: 9001,
+      }
+
+      const res = setMajorVersion(foundBrowser)
+
+      // @ts-ignore
+      expect(res.warning).to.contain('does not support running TestBro version 9000')
+      .and.contain('TestBro newer than or equal to 9001')
+    })
   })
 
   context('#detectByPath', () => {
@@ -143,6 +158,16 @@ describe('browser detection', () => {
       })
     })
 
+    it('creates warning when version is unsupported', async () => {
+      execa.withArgs('/good-firefox', ['--version'])
+      .resolves({ stdout: 'Mozilla Firefox 85.0' })
+
+      const foundBrowser = await detectByPath('/good-firefox')
+
+      expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
+      .and.contain('Firefox newer than or equal to 86')
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/8241
     it('adds warnings to Firefox versions less than 80', async () => {
       execa.withArgs('/good-firefox', ['--version'])
@@ -151,7 +176,8 @@ describe('browser detection', () => {
       execa.withArgs('/bad-firefox', ['--version'])
       .resolves({ stdout: 'Mozilla Firefox 79.1' })
 
-      expect(await detectByPath('/good-firefox')).to.not.have.property('warning')
+      // TODO: remove this warning/auto-GC, since Cy no longer supports FF < 86
+      // expect(await detectByPath('/good-firefox')).to.not.have.property('warning')
       expect(await detectByPath('/bad-firefox')).to.include({
         warning: firefoxGcWarning,
       })

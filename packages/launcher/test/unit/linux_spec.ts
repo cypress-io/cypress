@@ -49,7 +49,7 @@ describe('linux browser detection', () => {
   // https://github.com/cypress-io/cypress/pull/7039
   it('sets profilePath on snapcraft chromium', () => {
     execa.withArgs('chromium', ['--version'])
-    .resolves({ stdout: 'Chromium 1.2.3 snap' })
+    .resolves({ stdout: 'Chromium 64.2.3 snap' })
 
     sinon.stub(os, 'platform').returns('linux')
     sinon.stub(os, 'homedir').returns('/home/foo')
@@ -60,10 +60,11 @@ describe('linux browser detection', () => {
         name: 'chromium',
         family: 'chromium',
         displayName: 'Chromium',
-        majorVersion: 1,
+        majorVersion: 64,
+        minSupportedVersion: 64,
         path: 'chromium',
         profilePath: '/home/foo/snap/chromium/current',
-        version: '1.2.3',
+        version: '64.2.3',
       })
     }
 
