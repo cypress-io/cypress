@@ -133,19 +133,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   .then(pickBrowserProps)
   .then(tap(logBrowser))
   .then((browser) => setMajorVersion(browser))
-  .then(maybeSetFirefoxWarning)
   .catch(failed)
-}
-
-export const firefoxGcWarning = 'This version of Firefox has a bug that causes excessive memory consumption and will cause your tests to run slowly. It is recommended to upgrade to Firefox 80 or newer. [Learn more.](https://docs.cypress.io/guides/references/configuration.html#firefoxGcInterval)'
-
-// @see https://github.com/cypress-io/cypress/issues/8241
-const maybeSetFirefoxWarning = (browser: FoundBrowser) => {
-  if (browser.family === 'firefox' && Number(browser.majorVersion) < 80) {
-    browser.warning = firefoxGcWarning
-  }
-
-  return browser
 }
 
 /** returns list of detected browsers */
@@ -232,7 +220,6 @@ export const detectByPath = (
 
     return setCustomBrowserData(browser, pathData.path, version)
   })
-  .then(maybeSetFirefoxWarning)
   .catch((err: NotDetectedAtPathError) => {
     if (err.notDetectedAtPath) {
       throw err

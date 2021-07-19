@@ -941,6 +941,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalRunEvents\` configuration option was removed in Cypress version \`6.7.0\`. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
+    case 'FIREFOX_GC_INTERVAL_REMOVED':
+      return stripIndent`\
+        The \`firefoxGcInterval\` configuration option was removed in Cypress version \`8.0.0\`. It was introduced to work around a bug in Firefox 79 and below.
+
+        Since Cypress no longer supports Firefox 85 and below in Cypress 8, this option was removed.
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.

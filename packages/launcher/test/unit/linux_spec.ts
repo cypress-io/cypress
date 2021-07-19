@@ -4,8 +4,7 @@ import _ from 'lodash'
 import * as linuxHelper from '../../lib/linux'
 import 'chai-as-promised'
 import { log } from '../log'
-import { detect, firefoxGcWarning } from '../../lib/detect'
-import { browsers } from '../../lib/browsers'
+import { detect } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
@@ -92,18 +91,6 @@ describe('linux browser detection', () => {
 
     // @ts-ignore
     return linuxHelper.detect(goal).then(checkBrowser)
-  })
-
-  // @see https://github.com/cypress-io/cypress/issues/8241
-  it('adds warnings to Firefox versions less than 80', async () => {
-    const goalFirefox = _.find(browsers, { binary: 'firefox' })
-
-    sinon.stub(os, 'platform').withArgs().returns('linux')
-    execa.withArgs('firefox', ['--version']).resolves({ stdout: 'Mozilla Firefox 79.1' })
-
-    expect((await detect([goalFirefox]))[0]).to.include({
-      warning: firefoxGcWarning,
-    })
   })
 
   // despite using detect(), this test is in linux/spec instead of detect_spec because it is
