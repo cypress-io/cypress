@@ -121,25 +121,6 @@ const isValidRetriesConfig = (key, value) => {
   return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
 }
 
-const isValidFirefoxGcInterval = (key, value) => {
-  const isIntervalValue = (val) => {
-    if (isNumber(val)) {
-      return val >= 0
-    }
-
-    return val == null
-  }
-
-  if (isIntervalValue(value)
-    || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
-      && isIntervalValue(value.runMode)
-      && isIntervalValue(value.openMode))) {
-    return true
-  }
-
-  return errMsg(key, value, 'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values')
-}
-
 const isPlainObject = (key, value) => {
   if (value == null || _.isPlainObject(value)) {
     return true
@@ -282,8 +263,6 @@ module.exports = {
   isValidBrowser,
 
   isValidBrowserList,
-
-  isValidFirefoxGcInterval,
 
   isValidRetriesConfig,
 
