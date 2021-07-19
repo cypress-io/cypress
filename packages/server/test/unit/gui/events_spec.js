@@ -88,7 +88,7 @@ describe('lib/gui/events', () => {
       electron.ipcMain.on.yields('arg1', 'arg2')
       const handleEvent = sinon.stub(events, 'handleEvent')
 
-      events.start({ foo: 'bar' }, {})
+      events.start({ foo: 'bar' }, {}, { startGraphQL: false })
 
       expect(handleEvent).to.be.calledWith({ foo: 'bar' }, {}, 'arg1', 'arg2')
     })

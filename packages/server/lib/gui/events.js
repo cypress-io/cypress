@@ -28,7 +28,8 @@ const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
-const { graphqlSchema } = require('../graphql/server')
+const { graphqlSchema } = require('../graphql/schema')
+const { startGraphQLServer } = require('../graphql/server')
 const { ExecContext } = require('../graphql/ExecContext')
 
 const nullifyUnserializableValues = (obj) => {
@@ -483,9 +484,16 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
-  start (options, bus) {
+  start (options, bus, { startGraphQL } = { startGraphQL: true }) {
     // curry left options
     ipc.on('request', _.partial(this.handleEvent, options, bus))
+
+    // support not starting server for testing purposes.
+    if (!startGraphQL) {
+      return
+    }
+
+    startGraphQLServer()
 
     ipc.on('graphql', async (evt, { id, params, variables }) => {
       try {
