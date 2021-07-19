@@ -43,7 +43,7 @@
     "npm-release": "node scripts/npm-release.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
-    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts,unwritten.spec.ts",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude e2e.ts,cypress-tests.ts",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,runner-shared,socket}'\"",
@@ -196,7 +196,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=14.17.0",
+    "node": ">=14.16.0",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
@@ -234,7 +234,9 @@
       "**/@ffmpeg-installer",
       "**/@ffmpeg-installer/**",
       "**/webpack-preprocessor/babel-loader",
-      "**/webpack-batteries-included-preprocessor/ts-loader"
+      "**/webpack-batteries-included-preprocessor/ts-loader",
+      "**/@vue/runtime-dom",
+      "**/vue"
     ]
   },
   "lint-staged": {
