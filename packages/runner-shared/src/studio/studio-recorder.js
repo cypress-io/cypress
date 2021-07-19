@@ -703,7 +703,7 @@ export class StudioRecorder {
     }
 
     const attributes = $.map($el[0].attributes, ({ name, value }) => {
-      if (name === 'value') return
+      if (name === 'value' || name === 'disabled') return
 
       if (name === 'class') {
         possibleAssertions.push({
