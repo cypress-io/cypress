@@ -5,7 +5,11 @@ import { ExecContext } from '../ExecContext'
   description: 'Namespace for information related to the app',
 })
 export class App {
-  constructor (private ctx: ExecContext) {}
+  ctx: ExecContext
+
+  constructor (ctx: ExecContext) {
+    this.ctx = ctx
+  }
 
   @nxs.queryField(() => {
     return { type: App }
