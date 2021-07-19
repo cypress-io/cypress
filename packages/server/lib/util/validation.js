@@ -187,11 +187,11 @@ const isOneOf = (...values) => {
 }
 
 const isOverrideFunction = (key, value) => {
-  if (typeof config !== 'function' && !_.isPlainObject(value) && value !== null) {
+  if (typeof config !== 'function' && !_.isPlainObject(value) && value !== null && value !== undefined) {
     return errMsg(key, value, `a plain object or a function`)
   }
 
-  if (value === null || typeof value === 'function') {
+  if (value === undefined || value === null || typeof value === 'function') {
     return true
   }
 
