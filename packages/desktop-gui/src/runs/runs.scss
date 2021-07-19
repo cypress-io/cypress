@@ -49,6 +49,18 @@
     }
   }
 
+  .step {
+    display: flex;
+    font-weight: 400;
+    font-size: 14px;
+    margin: 15px 0 10px;
+    line-height: 18px;
+
+    .help-text {
+      margin-left: auto;
+    }
+  }
+
   .alert {
     border-radius: 3px;
     border: 1px solid #eee;
@@ -74,7 +86,8 @@
     margin-top: 25px;
     margin-bottom: 25px;
   }
-  h4, .center {
+
+  .center {
     text-align: center;
   }
 
@@ -84,6 +97,37 @@
     background-color: #252831;
     border-radius: 3px;
     color: #eee;
+  }
+
+  .subtitle {
+    color: #666;
+    font-size: 12px;
+    text-align: left;
+  }
+
+  .panel-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+
+    .panel {
+      border: 1px solid rgba(0, 0, 0, .05);
+      border-radius: 4px;
+      box-shadow: 1px 3px 4px rgba(0, 0, 0, .15);
+      display: flex;
+      padding: 12px;
+
+      p {
+        margin-bottom: 5px;
+        text-align: left;
+      }
+
+      .panel-icon {
+        color: $brand-primary;
+        font-size: 18px;
+        padding-right: 12px;
+      }
+    }
   }
 }
 
