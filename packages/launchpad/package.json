@@ -17,6 +17,11 @@
     "watch": "yarn build --watch",
     "codegen": "graphql-codegen --config graphql-codegen.yml"
   },
+  "dependencies": {
+    "bluebird": "3.5.3",
+    "classnames": "2.3.1",
+    "vue": "3.1.1"
+  },
   "devDependencies": {
     "@apollo/client": "^3.3.21",
     "@cypress/vue": "0.0.0-development",
