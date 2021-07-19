@@ -16,7 +16,7 @@ export const showDialogAndCreateSpec = async () => {
 
   // only create file if they selected a file
   if (path) {
-    createFile(path)
+    await createFile(path)
   }
 
   // reload specs now that we've added a new file
