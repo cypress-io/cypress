@@ -227,6 +227,19 @@ class $Cypress {
       }))
     })
     .then(() => {
+      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+      // this is critical for headless mode since otherwise the browser never gains focus
+      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
+        window.addEventListener('blur', () => {
+          this.backend('firefox:window:focus')
+        })
+
+        if (!document.hasFocus()) {
+          return this.backend('firefox:window:focus')
+        }
+      }
+    })
+    .then(() => {
       this.cy.initialize(this.$autIframe)
 
       this.onSpecReady()

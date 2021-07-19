@@ -3431,7 +3431,7 @@
 
 "@jest/types@^26.3.0", "@jest/types@^26.6.2":
   version "26.6.2"
-  resolved "https://registry.npmjs.org/@jest/types/-/types-26.6.2.tgz#bef5a532030e1d88a2f5a6d933f84e97226ed48e"
+  resolved "https://registry.yarnpkg.com/@jest/types/-/types-26.6.2.tgz#bef5a532030e1d88a2f5a6d933f84e97226ed48e"
   integrity sha512-fC6QCp7Sc5sX6g8Tvbmj4XUTbyrik0akgRy03yjXbQaBWWNWGE7SGtJk98m0N8nzegD/7SggrUlivxo5ax4KWQ==
   dependencies:
     "@types/istanbul-lib-coverage" "^2.0.0"
@@ -7614,7 +7614,7 @@
 
 "@types/cheerio@*", "@types/cheerio@0.22.21":
   version "0.22.21"
-  resolved "https://registry.npmjs.org/@types/cheerio/-/cheerio-0.22.21.tgz#5e37887de309ba11b2e19a6e14cad7874b31a8a3"
+  resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.21.tgz#5e37887de309ba11b2e19a6e14cad7874b31a8a3"
   integrity sha512-aGI3DfswwqgKPiEOTaiHV2ZPC9KEhprpgEbJnv0fZl3SGX0cGgEva1126dGrMC6AJM6v/aihlUgJn9M5DbDZ/Q==
   dependencies:
     "@types/node" "*"
@@ -7709,7 +7709,7 @@
 
 "@types/enzyme@*", "@types/enzyme@3.10.5":
   version "3.10.5"
-  resolved "https://registry.npmjs.org/@types/enzyme/-/enzyme-3.10.5.tgz#fe7eeba3550369eed20e7fb565bfb74eec44f1f0"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.5.tgz#fe7eeba3550369eed20e7fb565bfb74eec44f1f0"
   integrity sha512-R+phe509UuUYy9Tk0YlSbipRpfVtIzb/9BHn5pTEtjJTF5LXvUjrIQcZvNyANNEyFrd2YGs196PniNT1fgvOQA==
   dependencies:
     "@types/cheerio" "*"
@@ -31042,7 +31042,7 @@ pretty-error@^2.0.2, pretty-error@^2.1.1:
 
 pretty-format@26.4.0, pretty-format@^24.9.0, pretty-format@^26.6.2:
   version "26.4.0"
-  resolved "https://registry.npmjs.org/pretty-format/-/pretty-format-26.4.0.tgz#c08073f531429e9e5024049446f42ecc9f933a3b"
+  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-26.4.0.tgz#c08073f531429e9e5024049446f42ecc9f933a3b"
   integrity sha512-mEEwwpCseqrUtuMbrJG4b824877pM5xald3AkilJ47Po2YLr97/siejYQHqj2oDQBeJNbu+Q0qUuekJ8F0NAPg==
   dependencies:
     "@jest/types" "^26.3.0"
@@ -35057,7 +35057,7 @@ socket.io-client@4.0.1:
 
 socket.io-parser@4.0.4, socket.io-parser@~3.3.0, socket.io-parser@~3.4.0, socket.io-parser@~4.0.3, socket.io-parser@~4.0.4:
   version "4.0.4"
-  resolved "https://registry.npmjs.org/socket.io-parser/-/socket.io-parser-4.0.4.tgz#9ea21b0d61508d18196ef04a2c6b9ab630f4c2b0"
+  resolved "https://registry.yarnpkg.com/socket.io-parser/-/socket.io-parser-4.0.4.tgz#9ea21b0d61508d18196ef04a2c6b9ab630f4c2b0"
   integrity sha512-t+b0SS+IxG7Rxzda2EVvyBZbvFPBCjJoyHuE0P//7OAsN23GItzDRdWa6ALxZI/8R5ygK7jAR6t028/z+7295g==
   dependencies:
     "@types/component-emitter" "^1.2.10"
