@@ -1218,19 +1218,6 @@ jobs:
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
-  run-launchpad-ct-tests:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn cypress:run:ct
-          working_directory: packages/launchpad
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
   reporter-integration-tests:
     <<: *defaults
     resource_class: medium
@@ -2039,9 +2026,6 @@ linux-workflow: &linux-workflow
     - desktop-gui-component-tests:
         requires:
           - build
-    - run-launchpad-ct-tests:
-        requires:
-          - build
     - reporter-integration-tests:
         requires:
           - build
@@ -2105,7 +2089,6 @@ linux-workflow: &linux-workflow
           - reporter-integration-tests
           - Linux lint
           - desktop-gui-component-tests
-          - run-launchpad-ct-tests
           - desktop-gui-integration-tests-2x
           - runner-ct-integration-tests-chrome
           - runner-integration-tests-firefox

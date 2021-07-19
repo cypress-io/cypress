@@ -236,9 +236,7 @@
       "**/@ffmpeg-installer",
       "**/@ffmpeg-installer/**",
       "**/webpack-preprocessor/babel-loader",
-      "**/webpack-batteries-included-preprocessor/ts-loader",
-      "**/@vue/runtime-dom",
-      "**/vue"
+      "**/webpack-batteries-included-preprocessor/ts-loader"
     ]
   },
   "lint-staged": {
