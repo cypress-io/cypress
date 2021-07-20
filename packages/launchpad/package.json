@@ -22,14 +22,15 @@
     "@graphql-codegen/typed-document-node": "^1.18.9",
     "@graphql-codegen/typescript": "^1.22.4",
     "@graphql-codegen/typescript-operations": "^1.18.3",
+    "@graphql-typed-document-node/core": "^3.1.0",
+    "@vue/compiler-sfc": "3.1.0",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
-    "vue": "3.1.1"
+    "vue": "3.1.0"
   },
   "devDependencies": {
     "@apollo/client": "^3.3.21",
     "@cypress/vue": "0.0.0-development",
-    "@graphql-typed-document-node/core": "^3.1.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@vitejs/plugin-vue": "1.2.4",
