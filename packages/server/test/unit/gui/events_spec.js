@@ -88,7 +88,7 @@ describe('lib/gui/events', () => {
       electron.ipcMain.on.yields('arg1', 'arg2')
       const handleEvent = sinon.stub(events, 'handleEvent')
 
-      events.start({ foo: 'bar' }, {})
+      events.start({ foo: 'bar' }, {}, { startGraphQL: false })
 
       expect(handleEvent).to.be.calledWith({ foo: 'bar' }, {}, 'arg1', 'arg2')
     })
@@ -815,7 +815,7 @@ describe('lib/gui/events', () => {
         expect(openProject.getProject()).to.be.null
 
         return this.handleEvent('close:project').then((assert) => {
-          return assert.sendCalledWith(null)
+          return assert.sendCalledWith([null, null])
         })
       })
 
@@ -833,7 +833,7 @@ describe('lib/gui/events', () => {
           // it should store the opened project
           expect(openProject.getProject()).to.be.null
 
-          return assert.sendCalledWith(null)
+          return assert.sendCalledWith([null, null])
         })
       })
     })

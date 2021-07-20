@@ -5,6 +5,7 @@
   "private": false,
   "main": "./src",
   "scripts": {
+    "add:angular-cli": "node ./add-angular-cli-dev.js",
     "build": "tsc -p tsconfig.json",
     "build:test": "tsc -p tsconfig.spec.json",
     "build:all": "tsc -p tsconfig.json && tsc -p tsconfig.spec.json",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@angular-devkit/schematics-cli": "^12.0.0",
+    "@angular/cli": "11.2.12",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
