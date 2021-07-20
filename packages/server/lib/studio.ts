@@ -1,17 +1,9 @@
 import savedState from './saved_state'
-import { Command, FileDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite, convertCommandsToText } from './util/spec_writer'
+import { Command, SaveDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite, convertCommandsToText } from './util/spec_writer'
 
-interface FileDetailsOptionalPosition {
-  absoluteFile: string
-  line?: number
-  column?: number
-}
-
-interface SaveInfo {
-  fileDetails: FileDetailsOptionalPosition
-  commands: Command[]
+interface SaveInfo extends SaveDetails {
   isSuite: boolean
-  testName?: string
+  isRoot: boolean
 }
 
 class StudioSaveError extends Error {
@@ -37,18 +29,18 @@ export const getStudioModalShown = () => {
 }
 
 export const save = (saveInfo: SaveInfo) => {
-  const { fileDetails, commands, isSuite, testName } = saveInfo
+  const { isSuite, isRoot, absoluteFile, commands, testName } = saveInfo
 
   const saveToFile = () => {
-    if (!fileDetails.line || !fileDetails.column) {
-      return createNewTestInFile(fileDetails, commands, testName || 'New Test')
+    if (isRoot) {
+      return createNewTestInFile(absoluteFile, commands, testName || 'New Test')
     }
 
     if (isSuite) {
-      return createNewTestInSuite(fileDetails as FileDetails, commands, testName || 'New Test')
+      return createNewTestInSuite(saveInfo)
     }
 
-    return appendCommandsToTest(fileDetails as FileDetails, commands)
+    return appendCommandsToTest(saveInfo)
   }
 
   return saveToFile()
