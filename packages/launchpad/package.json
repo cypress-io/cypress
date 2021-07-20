@@ -15,7 +15,7 @@
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
     "watch": "yarn build --watch",
-    "codegen": "yarn graphql-codegen --config graphql-codegen.yml"
+    "codegen": "graphql-codegen --config graphql-codegen.yml"
   },
   "dependencies": {
     "@graphql-codegen/cli": "^1.21.6",
