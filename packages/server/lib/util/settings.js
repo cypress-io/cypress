@@ -149,7 +149,7 @@ module.exports = {
       // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
-      // cypress.json does not exist, we missing project
+      // cypress.config.js does not exist, we missing project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
@@ -178,7 +178,9 @@ module.exports = {
         loadErrorCode: 'CONFIG_FILE_ERROR',
         functionNames: ['e2e', 'component'],
       })
-    .catch({ code: 'ENOENT' }, (e) => {
+    .catch((e) => e.type === 'MODULE_NOT_FOUND' || e.code === 'ENOENT', (err) => {
+      debug('file not found', file, err)
+
       if (/\.json$/.test(file)) {
         return this._write(file, {})
       }
@@ -190,7 +192,7 @@ export default defineConfig({
 })
 `).then(() => ({}))
     })
-    .then(({ result: configObject, functionNames }) => {
+    .then(({ result: configObject = {}, functionNames = [] }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
 
       debug('resolved configObject', configObject)
@@ -237,6 +239,7 @@ export default defineConfig({
         return config
       })
     }).catch((err) => {
+      debug('an error occured when reading config', err)
       if (errors.isCypressErr(err)) {
         throw err
       }

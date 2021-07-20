@@ -74,7 +74,13 @@ function run (ipc, requiredFile, projectRoot) {
 
       debug('config %o', result)
     } catch (err) {
-      debug('failed to load requiredFile:\n%s', err.stack)
+      debug('failed to load requiredFile:\n%s', err.code, err.stack)
+      if (err.code === 'ENOENT' || err.code === 'MODULE_NOT_FOUND') {
+        ipc.send('load:error', err.code, requiredFile, err.stack)
+
+        return
+      }
+
       ipc.send('load:error', loadErrorCode, requiredFile, err.stack)
 
       return
