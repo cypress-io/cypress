@@ -333,8 +333,6 @@ describe('studio record', () => {
         getAssertionsMenu().find('.highlight').should('exist')
         getAssertionsMenu().find('.assertions-menu').should('exist')
 
-        cy.percySnapshot()
-
         getAssertionsMenu().find('.close').click()
 
         getFrame().find('.__cypress-studio-assertions-menu').should('not.exist')
@@ -349,8 +347,6 @@ describe('studio record', () => {
         getAssertionsMenu().find('.assertions-menu').should('exist')
 
         getAssertionOption('have attr', 'type: button')
-
-        cy.percySnapshot()
       })
     })
 
@@ -371,6 +367,15 @@ describe('studio record', () => {
         getAssertionOption('have attr', 'data-target: none')
         getAssertionOption('be visible').trigger('hover').find('.assertion-options').should('not.exist')
         getAssertionOption('be enabled').trigger('hover').find('.assertion-options').should('not.exist')
+      })
+    })
+
+    it('truncates assertion options that are too long', () => {
+      runCypressStudio()
+      .then(() => {
+        getFrame().find('#long-attr').rightclick()
+
+        getAssertionOption('have attr', 'style: color: red; border: 1px solid blue; border-radius: 100px; z-index: 1; backgro...')
       })
     })
 
