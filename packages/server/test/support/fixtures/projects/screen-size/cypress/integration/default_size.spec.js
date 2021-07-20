@@ -1,6 +1,6 @@
 describe('windowSize', () => {
   it('spawns with correct default size', () => {
-    // assert the browser was spawned at 1920x1080 and is full size
+    // assert the browser was spawned at 1280x720 and is full size
     // normally e2e tests spawn at fixed size, but this spec should be spawned without passing any width/height arguments in plugins file.
     // TODO: look into fixing screen/available height and width
     expect({
@@ -11,12 +11,12 @@ describe('windowSize', () => {
       // availWidth: top.screen.availWidth,
       // availHeight: top.screen.availHeight,
     }).deep.eq({
-      innerWidth: 1920,
-      innerHeight: 1080,
-      // screenWidth: 1920,
-      // screenHeight: 1080,
-      // availWidth: 1920,
-      // availHeight: 1080,
+      innerWidth: 1280,
+      innerHeight: 720,
+      // screenWidth: 1280,
+      // screenHeight: 720,
+      // availWidth: 1280,
+      // availHeight: 720,
     })
   })
 })

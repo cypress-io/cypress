@@ -2,6 +2,14 @@ const { $ } = Cypress
 
 let isActuallyInteractive
 
+isActuallyInteractive = Cypress.config('isInteractive')
+if (!isActuallyInteractive) {
+  // we want to only enable retries in runMode
+  // and because we set `isInteractive` above
+  // we have to set retries here
+  Cypress.config('retries', 2)
+}
+
 beforeEach(() => {
   isActuallyInteractive = Cypress.config('isInteractive')
 
@@ -14,11 +22,6 @@ beforeEach(() => {
     // necessary or else snapshots will not be taken
     // and we can't test them
     Cypress.config('numTestsKeptInMemory', 1)
-
-    // we want to only enable retries in runMode
-    // and because we set `isInteractive` above
-    // we have to set retries here
-    Cypress.config('retries', 2)
   }
 
   // remove all event listeners
