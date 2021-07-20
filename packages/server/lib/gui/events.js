@@ -485,7 +485,7 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
-  async start (options, bus, { startGraphQL } = { startGraphQL: true }) {
+  start (options, bus, { startGraphQL } = { startGraphQL: true }) {
     // curry left options
     ipc.on('request', _.partial(this.handleEvent, options, bus))
 
