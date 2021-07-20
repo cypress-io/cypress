@@ -142,7 +142,7 @@ let tsRegistered = false
 
 function getPluginsFunction (pluginsFile, functionName) {
   const exp = require(pluginsFile)
-  const resolvedExport = exp.default || exp
+  const resolvedExport = exp && exp.default ? exp.default : exp
 
   return functionName ? resolvedExport[functionName] : resolvedExport
 }
