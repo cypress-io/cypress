@@ -15,6 +15,7 @@ import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
+import { Cfg } from './project-base'
 
 type WarningErr = Record<string, any>
 
@@ -49,7 +50,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, options: OpenServerOptions) {
+  open (config: Cfg, options: OpenServerOptions) {
     return super.open(config, { ...options, projectType: 'e2e' })
   }
 

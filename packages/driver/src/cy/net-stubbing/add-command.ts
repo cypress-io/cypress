@@ -28,6 +28,7 @@ import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 import isValidDomain from 'is-valid-domain'
+import isValidHostname from 'is-valid-hostname'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
@@ -131,7 +132,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  if (_.isString(routeMatcher.hostname) && !isValidDomain(routeMatcher.hostname, { allowUnicode: true })) {
+  if (_.isString(routeMatcher.hostname) && !(isValidHostname(routeMatcher.hostname) || isValidDomain(routeMatcher.hostname, { allowUnicode: true }))) {
     return err('`hostname` must be a valid host name or domain name.')
   }
 

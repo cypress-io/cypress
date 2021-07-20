@@ -835,6 +835,15 @@ describe('network stubbing', { retries: 2 }, function () {
 
           cy.intercept({ hostname: 'http://website.web' })
         })
+
+        // https://github.com/cypress-io/cypress/issues/17015
+        it('string hostname can be "localhost"', () => {
+          cy.intercept({ hostname: 'localhost' })
+        })
+
+        it('string hostname can be unicode', () => {
+          cy.intercept({ hostname: 'はじめよう.みんな' })
+        })
       })
 
       context('with invalid handler', function () {
@@ -1673,6 +1682,30 @@ describe('network stubbing', { retries: 2 }, function () {
       .then(() => testDelay()).wait('@get')
     })
 
+    // https://github.com/cypress-io/cypress/issues/15188
+    it('delay works correctly with 204 No Content', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('No response ever occurred')
+
+        done()
+      })
+
+      cy.intercept('POST', '/post-only', {
+        statusCode: 204, // delay is not respected
+        delay: 5000,
+      }).as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/post-only", {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create', { timeout: 500 })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/15901
     it('can intercept utf-8 request bodies without crashing', function () {
       cy.intercept('POST', 'http://localhost:5000/api/sample')
@@ -2128,6 +2161,29 @@ describe('network stubbing', { retries: 2 }, function () {
           .get('@2.all').should('have.length', 2)
           .get('@3.all').should('have.length', 2)
           .get('@4.all').should('have.length', 3)
+        })
+
+        context('stopPropagation: true', () => {
+          it('works with continue', () => {
+            cy.intercept({
+              method: 'POST',
+              times: 1,
+              url: '/post-only',
+            },
+            (req) => {
+              req.continue((res) => {
+                res.body = 'stubbed data'
+              })
+            }).as('interceptor')
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
         })
       })
     })

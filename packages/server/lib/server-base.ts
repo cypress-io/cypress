@@ -12,7 +12,7 @@ import url from 'url'
 import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, cors, httpUtils, uri } from '@packages/network'
+import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
@@ -27,7 +27,7 @@ import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import { RunnerType, SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
-import { ProjectBase } from './project-base'
+import { Cfg, ProjectBase } from './project-base'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -161,13 +161,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   abstract createServer (
     app: Express,
-    config: Record<string, any>,
+    config: Cfg,
     project: ProjectBase<any>,
     request: unknown,
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
 
-  open (config: Record<string, any> = {}, {
+  open (config: Cfg, {
     project,
     onError,
     onWarning,
@@ -190,12 +190,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       logger.setSettings(config)
 
-      // TODO: Can we just pass config.baseUrl regardless of project type?
       this._nodeProxy = httpProxy.createProxyServer({
-        target: projectType === 'ct' ? config.baseUrl : undefined,
+        target: config.baseUrl && projectType === 'ct' ? config.baseUrl : undefined,
       })
 
       this._socket = new SocketCtor(config) as TSocket
+
+      clientCertificates.loadClientCertificateConfig(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()
@@ -314,7 +315,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts = {}) {
+  createHosts (hosts: string[] | null = []) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })

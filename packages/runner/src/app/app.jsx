@@ -87,7 +87,6 @@ class App extends Component {
             spec={spec}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
-            firefoxGcInterval={this.props.config.firefoxGcInterval}
             experimentalStudioEnabled={this.props.config.experimentalStudio}
           />}
         </div>
