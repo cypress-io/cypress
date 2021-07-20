@@ -486,6 +486,9 @@ describe('extends test', () => {
     })
 
     saveStudio()
+    /* ==== Generated with Cypress Studio ==== */
+    cy.get('.btn').click();
+    /* ==== End Cypress Studio ==== */
   })
 })
 
@@ -591,6 +594,14 @@ describe('creates new test', () => {
 
       saveStudio('My New Test')
     })
+
+    /* ==== Test Created with Cypress Studio ==== */
+    it('My New Test', function() {
+      /* ==== Generated with Cypress Studio ==== */
+      cy.visit('index.html');
+      cy.get('.btn').click();
+      /* ==== End Cypress Studio ==== */
+    });
   })
 })
 
