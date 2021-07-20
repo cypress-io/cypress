@@ -10,6 +10,7 @@ const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
 const runEvents = require('./plugins/run_events')
 const { getSpecUrl } = require('./project_utils')
+const { closeGraphQLServer } = require('./graphql/server')
 const errors = require('./errors')
 
 const moduleFactory = () => {
@@ -331,7 +332,10 @@ const moduleFactory = () => {
 
       this.stopSpecsWatcher()
 
-      return this.closeOpenProjectAndBrowsers()
+      return Promise.all([
+        this.closeOpenProjectAndBrowsers(),
+        closeGraphQLServer(),
+      ])
     },
 
     async create (path, args = {}, options = {}) {
