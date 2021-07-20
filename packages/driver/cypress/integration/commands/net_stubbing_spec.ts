@@ -2703,7 +2703,7 @@ describe('network stubbing', { retries: 2 }, function () {
         })
       })
 
-      fetch('/json-content-type')
+      return fetch('/json-content-type')
       .then((res) => {
         expect(res.headers.get('content-type')).to.eq('application/problem+json')
       })
