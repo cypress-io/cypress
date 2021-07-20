@@ -1,4 +1,4 @@
-import '../../spec_helper'
+import { sinon } from '../../spec_helper'
 
 import { expect } from 'chai'
 import 'sinon-chai'
@@ -7,6 +7,7 @@ import { showDialogAndCreateSpec } from '../../../lib/gui/files'
 import openProject from '../../../lib/open_project'
 import { ProjectBase } from '../../../lib/project-base'
 import * as dialog from '../../../lib/gui/dialog'
+import { fs } from '../../../lib/util/fs'
 import * as specWriter from '../../../lib/util/spec_writer'
 
 describe('gui/files', () => {
@@ -30,13 +31,15 @@ describe('gui/files', () => {
         ],
       }
 
+      sinon.stub(fs, 'readdirSync').returns(['cypress.json'])
+
       this.err = new Error('foo')
 
       sinon.stub(ProjectBase.prototype, 'open').resolves()
       sinon.stub(ProjectBase.prototype, 'getConfig').resolves(this.config)
 
       this.showSaveDialog = sinon.stub(dialog, 'showSaveDialog').resolves(this.selectedPath)
-      this.createFile = sinon.stub(specWriter, 'createFile').resolves({})
+      this.createFile = sinon.stub(specWriter, 'createFile').resolves({ path: this.selectedPath })
       this.getSpecs = sinon.stub(openProject, 'getSpecs').resolves(this.specs)
 
       return openProject.create('/_test-output/path/to/project-e2e')
