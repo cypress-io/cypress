@@ -257,6 +257,15 @@ describe('then', () => {
       $p // $ExpectType JQuery<HTMLParagraphElement>
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/16669
+  it('any as default', () => {
+    cy.get('body')
+    .then(() => ({} as any))
+    .then(v => {
+      v // $ExpectType any
+    })
+  })
 })
 
 cy.wait(['@foo', '@bar'])
