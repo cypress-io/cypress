@@ -1,7 +1,9 @@
 import Chai from 'chai'
+import path from 'path'
+const { sinon } = require('../spec_helper')
 import { getSpecUrl, checkSupportFile } from '../../lib/project_utils'
 import Fixtures from '../support/helpers/fixtures'
-import path from 'path'
+import settings from '../../lib/util/settings'
 
 const todosPath = Fixtures.projectPath('todos')
 
@@ -97,6 +99,10 @@ describe('lib/project_utils', () => {
   })
 
   describe('checkSupportFile', () => {
+    beforeEach(() => {
+      sinon.stub(settings, 'configFile').returns({})
+    })
+
     it('does nothing when {supportFile: false}', async () => {
       const ret = await checkSupportFile({
         configFile: 'cypress.json',
