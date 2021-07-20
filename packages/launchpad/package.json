@@ -15,7 +15,7 @@
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
     "watch": "yarn build --watch",
-    "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
+    "codegen": "graphql-codegen"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -52,7 +52,33 @@
   },
   "files": [
     "dist",
-    "lib",
-    "graphql-codegen.yml"
-  ]
+    "lib"
+  ],
+  "codegen": {
+    "overwrite": true,
+    "schema": "../server/schema.graphql",
+    "documents": "src/**/*.vue",
+    "generates": {
+      "src/generated/graphql.tsx": {
+        "config": {
+          "immutableTypes": true,
+          "useTypeImports": true,
+          "preResolveTypes": true,
+          "onlyOperationTypes": true,
+          "avoidOptionals": true,
+          "enumsAsTypes": true
+        },
+        "plugins": [
+          "typescript",
+          "typescript-operations",
+          "typed-document-node"
+        ]
+      }
+    },
+    "hooks": {
+      "afterOneFileWrite": [
+        "eslint --fix"
+      ]
+    }
+  }
 }
