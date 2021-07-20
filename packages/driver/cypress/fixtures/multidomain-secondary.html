@@ -5,11 +5,24 @@
 <body>
   <p data-cy="dom-check">From a secondary domain</p>
   <p data-cy="cypress-check"></p>
+  <form>
+    <button type="submit">Submit</button>
+  </form>
+  <button data-cy="alert">Alert</button>
+  <button data-cy="confirm">Confirm</button>
 
   <script>
     if (window.Cypress) {
       document.querySelector('[data-cy="cypress-check"]').innerText = 'Has window.Cypress'
     }
+
+    document.querySelector('[data-cy="alert"]').addEventListener('click', () => {
+      window.alert('the alert text')
+    })
+
+    document.querySelector('[data-cy="confirm"]').addEventListener('click', () => {
+      window.confirm('the confirm text')
+    })
   </script>
 </body>
 </html>
