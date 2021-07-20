@@ -8,7 +8,7 @@ branches:
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use matching version of Node.js
-  nodejs_version: "14.17.0"
+  nodejs_version: "14.16.0"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables

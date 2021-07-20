@@ -1,7 +1,7 @@
 const helpers = require('../support/helpers')
 
 const { shouldHaveTestResults, getRunState, cleanseRunStateMap } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true, firefoxGcInterval: null } })
+const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true } })
 const { sinon } = Cypress
 const match = Cypress.sinon.match
 
