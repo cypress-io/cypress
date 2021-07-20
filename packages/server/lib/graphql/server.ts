@@ -12,18 +12,18 @@ const debug = Debug('cypress:server:graphql')
 let app: ReturnType<typeof express>
 let server: Server
 
-export async function closeGraphQLServer () {
-  if (!server) {
-    return
+export function closeGraphQLServer () {
+  if (!server || !server.listening) {
+    return Promise.resolve(null)
   }
 
-  return new Promise<void>((res, rej) => {
+  return new Promise<void | null>((res, rej) => {
     server.close((err) => {
       if (err) {
         rej(err)
       }
 
-      res()
+      res(null)
     })
   })
 }
