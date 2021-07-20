@@ -1448,7 +1448,7 @@ jobs:
             command: yarn workspace @cypress/schematic build:all
         - run:
             name: Install @angular/cli
-            command: yarn policies set-version 1.19.0 && yarn add --dev @angular/cli
+            command: yarn add --dev @angular/cli
             working_directory: npm/cypress-schematic
         - run:
             name: Launch
