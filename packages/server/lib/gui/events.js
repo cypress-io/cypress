@@ -2,6 +2,7 @@
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
+const { execute, parse } = require('graphql')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
@@ -27,6 +28,9 @@ const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
+const { graphqlSchema } = require('../graphql/schema')
+const { startGraphQLServer } = require('../graphql/server')
+const { ExecContext } = require('../graphql/ExecContext')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -480,9 +484,44 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
-  start (options, bus) {
+  start (options, bus, { startGraphQL } = { startGraphQL: true }) {
     // curry left options
-    return ipc.on('request', _.partial(this.handleEvent, options, bus))
-  },
+    ipc.on('request', _.partial(this.handleEvent, options, bus))
 
+    // support not starting server for testing purposes.
+    if (!startGraphQL) {
+      return
+    }
+
+    startGraphQLServer()
+
+    ipc.on('graphql', async (evt, { id, params, variables }) => {
+      try {
+        const result = await execute({
+          schema: graphqlSchema,
+          document: parse(params.text),
+          operationName: params.name,
+          variableValues: variables,
+          contextValue: new ExecContext(options),
+        })
+
+        evt.sender.send('graphql:response', {
+          id,
+          result,
+        })
+      } catch (e) {
+        evt.sender.send('graphql:response', {
+          id,
+          result: {
+            data: null,
+            errors: [{
+              name: e.name,
+              message: e.message,
+              stack: e.stack,
+            }],
+          },
+        })
+      }
+    })
+  },
 }

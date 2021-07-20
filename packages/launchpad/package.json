@@ -2,8 +2,8 @@
   "name": "@packages/launchpad",
   "version": "0.0.0-development",
   "private": true,
-  "main": "lib/gui.js",
   "scripts": {
+    "prebuild": "yarn codegen",
     "build": "vite build",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
@@ -12,9 +12,10 @@
     "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
     "dev": "LAUNCHPAD=1 yarn start-test 5050 cypress:open",
-    "postinstall": "echo '@packages/launchpad needs: yarn build'",
+    "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
-    "watch": "yarn build --watch"
+    "watch": "yarn build --watch",
+    "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -22,23 +23,36 @@
     "vue": "3.1.1"
   },
   "devDependencies": {
+    "@apollo/client": "^3.3.21",
     "@cypress/vue": "0.0.0-development",
+    "@graphql-codegen/cli": "^1.21.6",
+    "@graphql-codegen/typed-document-node": "^1.18.9",
+    "@graphql-codegen/typescript": "^1.22.4",
+    "@graphql-codegen/typescript-operations": "^1.18.3",
+    "@graphql-typed-document-node/core": "^3.1.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
+    "@vue/apollo-composable": "4.0.0-alpha.12",
+    "bluebird": "3.5.3",
+    "classnames": "2.3.1",
     "cross-env": "6.0.3",
+    "graphql": "^15.5.1",
+    "graphql-tag": "^2.12.5",
     "prismjs": "1.24.0",
     "vite": "2.4.1",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-windicss": "1.2.4",
+    "vue": "3.1.0",
     "vue-prism-component": "2.0.0",
     "vue-tsc": "0.0.24",
     "windicss": "3.1.4"
   },
   "files": [
     "dist",
-    "lib"
+    "graphql-codegen.yml",
+    "src"
   ]
 }
