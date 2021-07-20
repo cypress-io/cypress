@@ -13,17 +13,25 @@ const AssertionType = ({ addAssertion, type, options }) => {
     placement: 'right-start',
   })
 
-  const _open = (e) => {
+  function _open () {
     setOpen(true)
   }
 
-  const _close = (e) => {
+  function _close (e) {
     // don't close menu if mouse out to sub menu
     if (popperElement && popperElement.contains(e.relatedTarget)) {
       return
     }
 
     setOpen(false)
+  }
+
+  function _truncate (str) {
+    if (str && str.length > 80) {
+      return `${str.substr(0, 77)}...`
+    }
+
+    return str
   }
 
   const hasOptions = options && !!options.length
@@ -59,13 +67,13 @@ const AssertionType = ({ addAssertion, type, options }) => {
             >
               {name && (
                 <span className='assertion-option-name'>
-                  {name}
+                  {_truncate(name)}
                   :
                   {' '}
                 </span>
               )}
               <span className='assertion-option-value'>
-                {value}
+                {_truncate(value)}
               </span>
             </div>
           ))}
@@ -79,7 +87,14 @@ const AssertionsMenu = ({ $el, possibleAssertions, addAssertion, closeMenu, sele
   const [referenceElement, setReferenceElement] = useState(null)
   const [popperElement, setPopperElement] = useState(null)
 
-  const { styles, attributes } = usePopper(referenceElement, popperElement)
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    modifiers: [{
+      name: 'preventOverflow',
+      options: {
+        altAxis: true,
+      },
+    }],
+  })
 
   function _addAssertion (...args) {
     args = _.compact(args)

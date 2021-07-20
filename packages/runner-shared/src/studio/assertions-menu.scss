@@ -22,6 +22,7 @@ $border-radius: 4px;
   @include menu-style;
 
   font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  z-index: 2147483647;
   width: 175px;
 
   .header {
