@@ -47,6 +47,7 @@ describe('lib/modes/run', () => {
     it('is null when no projectId', () => {
       const project = {
         getProjectId: sinon.stub().rejects(new Error),
+        getConfig: () => Promise.resolve({}),
       }
 
       return runMode.getProjectId(project)
