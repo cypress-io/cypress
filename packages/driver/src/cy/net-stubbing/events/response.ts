@@ -79,9 +79,12 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
         // https://github.com/cypress-io/cypress/issues/17084
         // When a user didn't provide content-type,
+        // and they provided body as an object,
         // we remove the content-type provided by the server
         if (!staticResponse.headers || !staticResponse.headers['content-type']) {
-          delete _staticResponse.headers['content-type']
+          if (typeof _staticResponse.body === 'object') {
+            delete _staticResponse.headers['content-type']
+          }
         }
 
         sendStaticResponse(requestId, _staticResponse)
