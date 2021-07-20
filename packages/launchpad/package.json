@@ -18,6 +18,10 @@
     "codegen": "yarn graphql-codegen --config graphql-codegen.yml"
   },
   "dependencies": {
+    "@graphql-codegen/cli": "^1.21.6",
+    "@graphql-codegen/typed-document-node": "^1.18.9",
+    "@graphql-codegen/typescript": "^1.22.4",
+    "@graphql-codegen/typescript-operations": "^1.18.3",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
     "vue": "3.1.1"
@@ -25,10 +29,6 @@
   "devDependencies": {
     "@apollo/client": "^3.3.21",
     "@cypress/vue": "0.0.0-development",
-    "@graphql-codegen/cli": "^1.21.6",
-    "@graphql-codegen/typed-document-node": "^1.18.9",
-    "@graphql-codegen/typescript": "^1.22.4",
-    "@graphql-codegen/typescript-operations": "^1.18.3",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
