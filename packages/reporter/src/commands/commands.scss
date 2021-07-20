@@ -99,9 +99,9 @@
       padding: 2px 5px 0;
 
       .badge {
-        $left: $yellow-dark;
-        $middle: $yellow-medium;
-        $right: lighten($left, 10%);
+        $left: #ffd273;
+        $middle: #ffdf9c;
+        $right: $left;
         $borderRadius: 10px;
         $padding: $borderRadius/2;
 
@@ -128,7 +128,6 @@
         >.left {
           border-radius: $borderRadius 0 0 $borderRadius;
           background-color: $left;
-          color: #333;
 
           &:only-child {
             border-radius: inherit;
@@ -138,7 +137,6 @@
         >.right {
           border-radius: 0 $borderRadius $borderRadius 0;
           background-color: $right;
-          color: #333;
 
           &:only-child {
             border-radius: inherit;

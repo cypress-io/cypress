@@ -27,6 +27,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const { data: req, requestId, subscription } = frame
   const { routeId } = subscription
   const route = getRoute(routeId)
+  const reqClone = _.cloneDeep(req)
 
   parseJsonBody(req)
 
@@ -197,6 +198,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       req.body = JSON.stringify(req.body)
     }
 
+    if (!_.isEqual(req, reqClone)) {
+      request.log.setFlag('reqModified')
+    }
+
     resolve({
       changedData: req,
       stopPropagation,
@@ -209,7 +214,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  Cypress.ProxyLogging.logInterception(request, route)
+  request.log = Cypress.ProxyLogging.logInterception(request, route)
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

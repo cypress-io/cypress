@@ -88,7 +88,7 @@ const pluralTypes = {
 }
 
 const Interceptions = observer(({ model }: InterceptionsProps) => {
-  if (!model.renderProps.interceptions) return null
+  if (!model.renderProps.interceptions || !model.renderProps.interceptions.length) return null
 
   let title = `Matched ${ ['intercept', 'route'].map((command) => {
     let titlePart = ''
@@ -115,7 +115,7 @@ const Interceptions = observer(({ model }: InterceptionsProps) => {
       const aliased = interceptions.filter((v) => v.alias && v.type === type)
 
       if (aliased.length) {
-        const unaliasedCount = interceptions.length - aliased.length
+        const unaliasedCount = count - aliased.length
 
         titlePart += ` (aliased as ${aliased.map(({ alias }) => `@${alias}`).join(', ')}`
 
@@ -132,10 +132,10 @@ const Interceptions = observer(({ model }: InterceptionsProps) => {
 
   const count = model.renderProps.interceptions.length
 
-  const displayAlias = _.isArray(model.alias) ? _.last(model.alias) : (model.alias || undefined)
+  const displayAlias = _.isArray(model.alias) ? _.last(model.alias as Array<any>) : (model.alias || undefined)
 
   return (
-    <Tooltip key='a' placement='top' title={title} className='cy-tooltip'>
+    <Tooltip placement='top' title={title} className='cy-tooltip'>
       <span className='badge'>
         {model.renderProps.status ? <span className='left'>{model.renderProps.status}</span> : null}
         {displayAlias ? <span className='middle'>{displayAlias}</span> : null}

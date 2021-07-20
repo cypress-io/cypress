@@ -41,8 +41,6 @@ const unavailableErr = () => {
   return $errUtils.throwErrByPath('server.unavailable')
 }
 
-const getDisplayName = (route) => _.isNil(route?.response) ? 'xhr' : 'xhr stub'
-
 const stripOrigin = (url) => {
   const location = $Location.create(url)
 
@@ -112,7 +110,7 @@ const startXhrServer = (cy, state, config) => {
       const log = logs[xhr.id] = Cypress.log({
         message: '',
         name: 'xhr',
-        displayName: getDisplayName(route),
+        displayName: 'xhr',
         alias,
         aliasType: 'route',
         type: 'parent',
@@ -172,11 +170,19 @@ const startXhrServer = (cy, state, config) => {
           return {
             indicator,
             message: `${xhr.method} ${status} ${stripOrigin(xhr.url)}`,
+            interceptions: route ? [
+              {
+                command: 'route',
+                type: route?.response ? 'stub' : 'spy',
+                alias,
+              },
+            ] : [],
+            status: route?.response ? 'stubbed' : 'spied',
           }
         },
       })
 
-      Cypress.ProxyLogging.addXhrLog({ xhr, log })
+      Cypress.ProxyLogging.addXhrLog({ xhr, route, log })
 
       return log.snapshot('request')
     },

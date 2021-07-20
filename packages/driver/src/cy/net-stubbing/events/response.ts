@@ -20,6 +20,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const { data: res, requestId, subscription } = frame
   const { routeId } = subscription
   const request = getRequest(routeId, frame.requestId)
+  const resClone = _.cloneDeep(res)
 
   parseJsonBody(res)
 
@@ -39,6 +40,10 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
   const finishResponseStage = (res) => {
     if (request) {
+      if (!_.isEqual(resClone, res)) {
+        request.log.setFlag('resModified')
+      }
+
       request.response = _.cloneDeep(res)
       request.state = 'ResponseIntercepted'
     }
