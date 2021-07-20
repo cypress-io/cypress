@@ -57,10 +57,10 @@ describe('lib/plugins/index', () => {
 
         const args = cp.fork.lastCall.args[1]
 
-        expect(args[0]).to.equal('--file')
-        expect(args[1]).to.include('plugins/child/default_plugins_file.js')
-        expect(args[2]).to.equal('--projectRoot')
-        expect(args[3]).to.equal('/path/to/project/root')
+        expect(args[0]).to.equal('--projectRoot')
+        expect(args[1]).to.equal('/path/to/project/root')
+        expect(args[2]).to.equal('--file')
+        expect(args[3]).to.include('plugins/child/default_plugins_file.js')
       })
     })
 
@@ -73,7 +73,7 @@ describe('lib/plugins/index', () => {
         expect(cp.fork).to.be.called
         expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
 
-        expect(cp.fork.lastCall.args[1]).to.eql(['--file', 'cypress-plugin', '--projectRoot', '/path/to/project/root'])
+        expect(cp.fork.lastCall.args[1]).to.eql(['--projectRoot', '/path/to/project/root', '--file', 'cypress-plugin'])
       })
     })
 
