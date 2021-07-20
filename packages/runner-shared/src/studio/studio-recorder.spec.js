@@ -16,6 +16,9 @@ const createEvent = (props) => {
 describe('StudioRecorder', () => {
   const cyVisitStub = sinon.stub()
   const getSelectorStub = sinon.stub().returns('.selector')
+  const setOnlyTestIdStub = sinon.stub()
+  const setOnlySuiteIdStub = sinon.stub()
+
   let instance
 
   beforeEach(() => {
@@ -33,6 +36,10 @@ describe('StudioRecorder', () => {
       },
       SelectorPlayground: {
         getSelector: getSelectorStub,
+      },
+      runner: {
+        setOnlyTestId: setOnlyTestIdStub,
+        setOnlySuiteId: setOnlySuiteIdStub,
       },
       env: () => null,
     })
@@ -61,6 +68,7 @@ describe('StudioRecorder', () => {
 
       expect(instance.testId).to.equal('r2')
       expect(instance.hasRunnableId).to.be.true
+      expect(instance.state.testId).to.equal('r2')
     })
 
     it('does not clear suite id', () => {
@@ -77,6 +85,7 @@ describe('StudioRecorder', () => {
 
       expect(instance.suiteId).to.equal('r1')
       expect(instance.hasRunnableId).to.be.true
+      expect(instance.state.suiteId).to.equal('r1')
     })
 
     it('clears test id', () => {
@@ -84,6 +93,141 @@ describe('StudioRecorder', () => {
       instance.setSuiteId('r1')
 
       expect(instance.testId).to.be.null
+    })
+  })
+
+  context('#initialize', () => {
+    const config = {
+      spec: {
+        absolute: '/path/to/spec.js',
+      },
+    }
+
+    it('restores state, grabs config info, and initializes driver when extending test', () => {
+      const state = {
+        studio: {
+          testId: 'r2',
+          suiteId: null,
+          url: null,
+        },
+      }
+
+      instance.initialize(config, state)
+
+      expect(instance.testId).to.equal('r2')
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlyTestIdStub).to.be.calledWith('r2')
+    })
+
+    it('restores state, grabs config info, and initializes driver when adding to suite', () => {
+      const state = {
+        studio: {
+          testId: null,
+          suiteId: 'r1',
+          url: 'https://example.com',
+        },
+      }
+
+      instance.initialize(config, state)
+
+      expect(instance.suiteId).to.equal('r1')
+      expect(instance.url).to.equal('https://example.com')
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlySuiteIdStub).to.be.calledWith('r1')
+    })
+
+    it('grabs config info and initializes driver when state already exists while extending test', () => {
+      instance.setTestId('r2')
+
+      instance.initialize(config, {})
+
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlyTestIdStub).to.be.calledWith('r2')
+    })
+
+    it('grabs config info and initializes driver when state already exists while adding to suite', () => {
+      instance.setSuiteId('r1')
+
+      instance.initialize(config, {})
+
+      expect(instance.absoluteFile).to.equal('/path/to/spec.js')
+      expect(instance.isLoading).to.be.true
+      expect(setOnlySuiteIdStub).to.be.calledWith('r1')
+    })
+  })
+
+  context('#interceptTest', () => {
+    it('grabs test data when extending test', () => {
+      const invocationDetails = {
+        absoluteFile: '/path/to/spec',
+        line: 20,
+        column: 5,
+      }
+
+      const test = {
+        id: 'r2',
+        title: 'my test',
+        invocationDetails,
+      }
+
+      instance.setTestId('r2')
+
+      instance.interceptTest(test)
+
+      expect(instance.fileDetails).to.equal(invocationDetails)
+      expect(instance.runnableTitle).to.equal('my test')
+    })
+
+    it('grabs test and suite data when adding to suite', () => {
+      const invocationDetails = {
+        absoluteFile: '/path/to/spec',
+        line: 20,
+        column: 5,
+      }
+
+      const suite = {
+        id: 'r2',
+        title: 'my suite',
+      }
+
+      const test = {
+        id: 'r3',
+        title: 'my test',
+        invocationDetails,
+        parent: suite,
+      }
+
+      instance.setSuiteId('r2')
+
+      instance.interceptTest(test)
+
+      expect(instance.testId).to.equal('r3')
+      expect(instance.fileDetails).to.equal(invocationDetails)
+      expect(instance.runnableTitle).to.equal('my suite')
+    })
+
+    it('does not grab parent title when adding to root', () => {
+      const root = {
+        id: 'r1',
+        title: '',
+      }
+
+      const test = {
+        id: 'r2',
+        title: 'my test',
+        parent: root,
+      }
+
+      instance.setSuiteId('r1')
+
+      instance.interceptTest(test)
+
+      expect(instance.testId).to.equal('r2')
+      expect(instance.fileDetails).to.be.null
+      expect(instance.runnableTitle).to.be.null
     })
   })
 
@@ -262,9 +406,13 @@ describe('StudioRecorder', () => {
         line: 10,
         column: 4,
       }
+      const absoluteFile = '/path/to/spec.js'
+      const runnableTitle = 'my test'
       const logs = ['log 1', 'log 2']
 
       instance.setFileDetails(fileDetails)
+      instance.setAbsoluteFile(absoluteFile)
+      instance.setRunnableTitle(runnableTitle)
       instance.logs = logs
       instance.testId = 'r2'
 
@@ -272,8 +420,11 @@ describe('StudioRecorder', () => {
 
       expect(eventManager.emit).to.be.calledWith('studio:save', {
         fileDetails,
+        absoluteFile,
+        runnableTitle,
         commands: logs,
         isSuite: false,
+        isRoot: false,
         testName: null,
       })
     })
@@ -284,18 +435,46 @@ describe('StudioRecorder', () => {
         line: 10,
         column: 4,
       }
+      const absoluteFile = '/path/to/spec.js'
+      const runnableTitle = 'my suite'
       const logs = ['log 1', 'log 2']
 
       instance.setFileDetails(fileDetails)
+      instance.setAbsoluteFile(absoluteFile)
+      instance.setRunnableTitle(runnableTitle)
+      instance.logs = logs
+      instance.suiteId = 'r2'
+
+      instance.save('new test name')
+
+      expect(eventManager.emit).to.be.calledWith('studio:save', {
+        fileDetails,
+        absoluteFile,
+        runnableTitle,
+        commands: logs,
+        isSuite: true,
+        isRoot: false,
+        testName: 'new test name',
+      })
+    })
+
+    it('emits studio:save with relevant suite information for root suite', () => {
+      const absoluteFile = '/path/to/spec.js'
+      const logs = ['log 1', 'log 2']
+
+      instance.setAbsoluteFile(absoluteFile)
       instance.logs = logs
       instance.suiteId = 'r1'
 
       instance.save('new test name')
 
       expect(eventManager.emit).to.be.calledWith('studio:save', {
-        fileDetails,
+        fileDetails: null,
+        absoluteFile,
+        runnableTitle: null,
         commands: logs,
         isSuite: true,
+        isRoot: true,
         testName: 'new test name',
       })
     })
@@ -313,6 +492,7 @@ describe('StudioRecorder', () => {
       instance.visitUrl('example.com')
 
       expect(instance.url).to.equal('example.com')
+      expect(instance.state.url).to.equal('example.com')
       expect(cyVisitStub).to.be.calledWith('example.com')
     })
 

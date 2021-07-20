@@ -14,7 +14,6 @@ const $Commands = require('./cypress/commands')
 const $Cookies = require('./cypress/cookies')
 const $Cy = require('./cypress/cy')
 const $Events = require('./cypress/events')
-const $FirefoxForcedGc = require('./util/firefox_forced_gc')
 const $Keyboard = require('./cy/keyboard')
 const $SetterGetter = require('./cypress/setter_getter')
 const $Log = require('./cypress/log')
@@ -137,7 +136,6 @@ class $Cypress {
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
-    this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 
@@ -213,8 +211,6 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    $FirefoxForcedGc.install(this)
-
     $scriptUtils.runScripts(specWindow, scripts)
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
@@ -229,6 +225,19 @@ class $Cypress {
           this._onInitialize = resolve
         }
       }))
+    })
+    .then(() => {
+      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+      // this is critical for headless mode since otherwise the browser never gains focus
+      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
+        window.addEventListener('blur', () => {
+          this.backend('firefox:window:focus')
+        })
+
+        if (!document.hasFocus()) {
+          return this.backend('firefox:window:focus')
+        }
+      }
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)

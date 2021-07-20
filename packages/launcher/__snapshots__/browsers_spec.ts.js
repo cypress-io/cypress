@@ -9,7 +9,8 @@ exports['browsers returns the expected list of browsers 1'] = [
       "google-chrome",
       "chrome",
       "google-chrome-stable"
-    ]
+    ],
+    "minSupportedVersion": 64
   },
   {
     "name": "chromium",
@@ -20,7 +21,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "binary": [
       "chromium-browser",
       "chromium"
-    ]
+    ],
+    "minSupportedVersion": 64
   },
   {
     "name": "chrome",
@@ -28,7 +30,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "beta",
     "displayName": "Chrome Beta",
     "versionRegex": {},
-    "binary": "google-chrome-beta"
+    "binary": "google-chrome-beta",
+    "minSupportedVersion": 64
   },
   {
     "name": "chrome",
@@ -36,7 +39,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "canary",
     "displayName": "Canary",
     "versionRegex": {},
-    "binary": "google-chrome-canary"
+    "binary": "google-chrome-canary",
+    "minSupportedVersion": 64
   },
   {
     "name": "firefox",
@@ -44,7 +48,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "stable",
     "displayName": "Firefox",
     "versionRegex": {},
-    "binary": "firefox"
+    "binary": "firefox",
+    "minSupportedVersion": 86
   },
   {
     "name": "firefox",
@@ -55,7 +60,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "binary": [
       "firefox-developer-edition",
       "firefox"
-    ]
+    ],
+    "minSupportedVersion": 86
   },
   {
     "name": "firefox",
@@ -66,7 +72,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "binary": [
       "firefox-nightly",
       "firefox-trunk"
-    ]
+    ],
+    "minSupportedVersion": 86
   },
   {
     "name": "edge",
@@ -77,7 +84,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "binary": [
       "edge",
       "microsoft-edge"
-    ]
+    ],
+    "minSupportedVersion": 79
   },
   {
     "name": "edge",
@@ -85,7 +93,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "binary": "edge-canary"
+    "binary": "edge-canary",
+    "minSupportedVersion": 79
   },
   {
     "name": "edge",
@@ -93,7 +102,8 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "binary": "edge-beta"
+    "binary": "edge-beta",
+    "minSupportedVersion": 79
   },
   {
     "name": "edge",
@@ -104,6 +114,7 @@ exports['browsers returns the expected list of browsers 1'] = [
     "binary": [
       "edge-dev",
       "microsoft-edge-dev"
-    ]
+    ],
+    "minSupportedVersion": 79
   }
 ]

@@ -12,6 +12,7 @@ export default class Browser {
   @observable info
   @observable custom
   @observable warning
+  @observable unsupportedVersion
   @observable isChosen = false
 
   constructor (browser) {
@@ -26,5 +27,6 @@ export default class Browser {
     this.info = browser.info
     this.custom = browser.custom
     this.warning = browser.warning
+    this.unsupportedVersion = browser.unsupportedVersion
   }
 }
