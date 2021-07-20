@@ -11,7 +11,6 @@ import EQ from 'css-element-queries/src/ElementQueries'
 import { RunnablesErrorModel } from './runnables/runnable-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
-import ForcedGcWarning from './lib/forced-gc-warning'
 import runnablesStore, { RunnablesStore } from './runnables/runnables-store'
 import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
@@ -84,7 +83,6 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       runnablesStore,
       scroller,
       error,
-      events,
       statsStore,
       experimentalStudioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
@@ -115,11 +113,6 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
             spec={spec}
           />
         ))}
-
-        <ForcedGcWarning
-          appState={appState}
-          events={events}
-        />
       </div>
     )
   }
