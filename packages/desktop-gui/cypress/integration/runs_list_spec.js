@@ -853,7 +853,7 @@ describe('Runs List', function () {
       })
 
       it('displays empty message', () => {
-        cy.contains('to record your first')
+        cy.contains('How to record your first run')
       })
 
       it('opens project id guide on clicking "Why?"', () => {

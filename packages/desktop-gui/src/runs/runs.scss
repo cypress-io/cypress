@@ -7,6 +7,17 @@
   }
 }
 
+.cy-tooltip {
+  &.tooltip-text-left {
+    text-align: left;
+  }
+
+  .tooltip-code {
+    color: #fff;
+    background-color: #252831;
+  }
+}
+
 .empty-no-api-server {
   em {
     color: #333;
@@ -21,6 +32,10 @@
 
 .first-run-instructions {
   padding: 40px 130px;
+
+  &.new-first-run-instructions {
+    padding: 40px 100px;
+  }
 
   a {
     cursor: pointer;
@@ -53,7 +68,7 @@
     display: flex;
     font-weight: 400;
     font-size: 14px;
-    margin: 15px 0 10px;
+    margin: 20px 0 10px;
     line-height: 18px;
 
     .help-text {
@@ -101,7 +116,7 @@
 
   .subtitle {
     color: #666;
-    font-size: 12px;
+    font-size: 13px;
     text-align: left;
   }
 
@@ -113,13 +128,18 @@
     .panel {
       border: 1px solid rgba(0, 0, 0, .05);
       border-radius: 4px;
-      box-shadow: 1px 3px 4px rgba(0, 0, 0, .15);
+      box-shadow: 1px 3px 4px rgba(0, 0, 0, .1);
       display: flex;
+      font-size: 13px;
       padding: 12px;
 
       p {
-        margin-bottom: 5px;
+        margin-bottom: 0;
         text-align: left;
+
+        &.panel-content {
+          margin-bottom: 8px;
+        }
       }
 
       .panel-icon {

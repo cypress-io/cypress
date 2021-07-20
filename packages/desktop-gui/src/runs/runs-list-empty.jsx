@@ -130,7 +130,7 @@ class RunsListEmpty extends Component {
   _new = () => {
     return (
       <div>
-        <div className='first-run-instructions'>
+        <div className='first-run-instructions new-first-run-instructions'>
           <h4>
             How to record your first run
           </h4>
@@ -144,7 +144,7 @@ class RunsListEmpty extends Component {
             </span>
             <span className='help-text'>
               <Tooltip
-                className='cy-tooltip'
+                className='tooltip-text-left cy-tooltip'
                 title={<span>This helps Cypress uniquely identify your project. If altered or deleted, analytics and load balancing will not function properly. <a onClick={this._openProjectIdGuide}>Learn More</a></span>}
               >
                 <a><i className='fas fa-question-circle' /></a>
@@ -157,8 +157,8 @@ class RunsListEmpty extends Component {
             </span>
             <span className='help-text'>
               <Tooltip
-                className='cy-tooltip'
-                title={<span>Close this application and run this command with <code>npx</code> or <code>yarn</code> in your terminal. <a onClick={this._openRunGuide}>Learn More</a></span>}
+                className='tooltip-text-left cy-tooltip'
+                title={<span>Close this application and run this command with <code className='tooltip-code'>npx</code> or <code className='tooltip-code'>yarn</code> in your terminal. <a onClick={this._openRunGuide}>Learn More</a></span>}
               >
                 <a><i className='fas fa-question-circle' /></a>
               </Tooltip>
@@ -183,7 +183,7 @@ class RunsListEmpty extends Component {
                 <i className='fas fa-sync' />
               </div>
               <div>
-                <p>
+                <p className='panel-content'>
                   <strong>Run in CI</strong>
                   <br />
                   Cypress was designed to be run in your CI, enabling parallel test runs and rich test analytics.
@@ -198,7 +198,7 @@ class RunsListEmpty extends Component {
                 <i className='fas fa-info-circle' />
               </div>
               <div>
-                <p>
+                <p className='panel-content'>
                   <strong>Sample Project</strong>
                   <br />
                   Want to see what a recorded run looks like? See an example project.
