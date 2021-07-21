@@ -4,7 +4,7 @@ import send from 'send'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
 import { Cfg } from '@packages/server/lib/project-base'
-import { Browser } from '@packages/launcher'
+import { Browser } from '@packages/server/lib/browsers/types'
 
 interface ServeOptions {
   config: Cfg
