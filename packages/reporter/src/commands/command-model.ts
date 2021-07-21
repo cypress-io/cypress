@@ -116,7 +116,6 @@ export default class Command extends Instrument {
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
     this.showError = props.showError
-    this.group = props.group
 
     this._checkLongRunning()
   }
@@ -125,8 +124,14 @@ export default class Command extends Instrument {
     return command.event && this.matches(command)
   }
 
+  @action
+  setGroup (id) {
+    this.group = id
+  }
+
   addChild (command: Command) {
     command.isChild = true
+    command.setGroup(this.id)
     this.children.push(command)
   }
 

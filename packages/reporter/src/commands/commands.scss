@@ -508,13 +508,14 @@
  
 
   .command-has-num-elements .num-elements,
-  .num-children {
+  .num-children,
+  .command-has-children.command-is-open > span > .command-wrapper .num-children.has-alias.has-children  {
     display: none;
   }
 
   .command-has-num-elements.no-elements .num-elements,
   .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-children .num-children.has-alias {
+  .command-has-children .num-children.has-alias.has-children {
     display: inline;
   }
 
