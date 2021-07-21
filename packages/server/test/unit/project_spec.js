@@ -160,7 +160,7 @@ describe('lib/project-base', () => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
         await this.project.initializeConfig()
-        expect(await this.project.getConfig()).to.deep.eq({
+        expect(this.project.getConfig()).to.deep.eq({
           integrationFolder,
           browsers: [],
           isNewProject: false,
@@ -178,7 +178,7 @@ describe('lib/project-base', () => {
         foo: 'bar',
       }
 
-      expect(await this.project.getConfig()).to.deep.eq({
+      expect(this.project.getConfig()).to.deep.eq({
         integrationFolder,
         foo: 'bar',
       })
@@ -232,10 +232,11 @@ describe('lib/project-base', () => {
       sinon.stub(config, 'get').returns(cfg)
 
       await this.project.initializeConfig()
-      .then(() => this.project.getConfig())
-      .then((config) => {
-        expect(config.chromeWebSecurity).eq(false)
-        expect(config.browsers).deep.eq([
+      .then(() => {
+        const cfg = this.project.getConfig()
+
+        expect(cfg.chromeWebSecurity).eq(false)
+        expect(cfg.browsers).deep.eq([
           {
             family: 'chromium',
             name: 'Canary',
@@ -251,7 +252,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           },
         ])
 
-        expect(config).ok
+        expect(cfg).ok
       })
     })
   })
@@ -265,7 +266,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(this.project, 'startWebsockets')
       this.checkSupportFileStub = sinon.stub(ProjectUtils, 'checkSupportFile').resolves()
       sinon.stub(this.project, 'scaffold').resolves()
-      sinon.stub(this.project, 'getConfig').resolves(this.config)
+      sinon.stub(this.project, 'getConfig').returns(this.config)
       sinon.stub(ServerE2E.prototype, 'open').resolves([])
       sinon.stub(ServerE2E.prototype, 'reset')
       sinon.stub(config, 'updateWithPluginValues').returns(this.config)
@@ -425,9 +426,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       it('sets firstOpened and lastOpened on first open', function () {
         return this.project.open()
-        .then(() => this.project.getConfig())
-        .then((config) => {
-          expect(config.state).to.eql({ firstOpened: this._time, lastOpened: this._time })
+        .then(() => {
+          const cfg = this.project.getConfig()
+
+          expect(cfg.state).to.eql({ firstOpened: this._time, lastOpened: this._time })
         })
       })
 
@@ -437,9 +439,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           this._dateStub.returns(this._time + 100000)
         })
         .then(() => this.project.open())
-        .then(() => this.project.getConfig())
-        .then((config) => {
-          expect(config.state).to.eql({ firstOpened: this._time, lastOpened: this._time + 100000 })
+        .then(() => {
+          const cfg = this.project.getConfig()
+
+          expect(cfg.state).to.eql({ firstOpened: this._time, lastOpened: this._time + 100000 })
         })
       })
 
@@ -452,11 +455,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         return this.project.open()
         .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
-        .then(() => this.project.getConfig())
-        .then((config) => {
+        .then(() => {
+          const cfg = this.project.getConfig()
+
           expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
 
-          expect(config.state).to.eql({
+          expect(cfg.state).to.eql({
             autoScrollingEnabled: false,
             firstOpened: this._time,
             lastOpened: this._time,
@@ -472,7 +476,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project._server = { close () {} }
 
-      sinon.stub(this.project, 'getConfig').resolves(this.config)
+      sinon.stub(this.project, 'getConfig').returns(this.config)
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 

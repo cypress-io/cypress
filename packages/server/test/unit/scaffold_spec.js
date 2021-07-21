@@ -30,9 +30,7 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.true
       })
@@ -49,9 +47,7 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.false
       })
@@ -65,9 +61,7 @@ describe('lib/scaffold', () => {
 
         return this.ids.initializeConfig()
         .then(() => {
-          return this.ids.getConfig()
-        }).then((cfg) => {
-          return this.ids.scaffold(cfg).return(cfg)
+          return this.ids.scaffold(this.ids.getConfig()).return(this.getConfig())
         }).then((cfg) => {
           return this.ids.determineIsNewProject(cfg)
         }).then((ret) => {
@@ -82,13 +76,9 @@ describe('lib/scaffold', () => {
 
         return this.todos.initializeConfig()
         .then(() => {
-          return this.todos.getConfig()
-        }).then((cfg) => {
-          return this.todos.scaffold(cfg)
+          return this.todos.scaffold(this.todos.getConfig())
         }).then(() => {
-          return this.todos.getConfig()
-        }).then((cfg) => {
-          return this.todos.determineIsNewProject(cfg)
+          return this.todos.determineIsNewProject(this.todos.getConfig())
         }).then((ret) => {
           expect(ret).to.be.false
         })
@@ -102,13 +92,9 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.scaffold(cfg)
+        return pristine.scaffold(pristine.getConfig())
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.true
       })
@@ -119,13 +105,11 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
+
         return pristine.scaffold(cfg)
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        const file = path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')
+        const file = path.join(pristine.getConfig().integrationFolder, '1-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
         // different in file size
@@ -136,9 +120,7 @@ describe('lib/scaffold', () => {
           return fs.writeFileAsync(file, str)
         })
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.false
       })
