@@ -8,7 +8,7 @@ import xhrs from '@packages/server/lib/controllers/xhrs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { Cfg } from '@packages/server/lib/project-base'
 import { getPathToDist } from '@packages/resolve-dist'
-import { Browser } from '@packages/launcher'
+import { Browser } from '@packages/server/lib/browsers/types'
 
 const debug = Debug('cypress:server:routes')
 
