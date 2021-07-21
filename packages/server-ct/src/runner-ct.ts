@@ -4,11 +4,10 @@ import send from 'send'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
 import { Cfg } from '@packages/server/lib/project-base'
-import { Browser } from '../../launcher'
+import { Browser } from '@packages/launcher'
 
 interface ServeOptions {
   config: Cfg
-  // project: ProjectBase<ServerCt>
   getCurrentBrowser: () => Browser
   specsStore: SpecsStore
 }

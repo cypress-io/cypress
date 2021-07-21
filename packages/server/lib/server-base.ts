@@ -28,7 +28,7 @@ import { createInitialWorkers } from '@packages/rewriter'
 import { RunnerType, SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
 import { Cfg } from './project-base'
-import { Browser } from '../../launcher'
+import { Browser } from '@packages/launcher'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
