@@ -458,9 +458,17 @@ describe('Specs List', function () {
       })
 
       describe('typing the filter', function () {
-        const runAllIntegrationSpecsLabel = 'Run 7 integration specs'
+        const runAllIntegrationSpecsLabel = 'Run 8 integration specs'
 
         beforeEach(function () {
+          this.specs.integration.push({
+            name: 'a-b_c/d~e(f)g.spec.js',
+            absolute: '/user/project/cypress/integration/a-b_c/d~e(f)g.spec.js',
+            relative: 'cypress/integration/a-b_c/d~e(f)g.spec.js',
+          })
+
+          this.numSpecs = 16
+
           this.ipc.getSpecs.yields(null, this.specs)
           this.openProject.resolve(this.config)
 
@@ -502,6 +510,14 @@ describe('Specs List', function () {
           cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', '123_spec.coffee')
+        })
+
+        it('ignores commonly used path characters', function () {
+          cy.get('.filter').clear().type('abcdefg')
+
+          cy.get('.specs-list .file')
+          .should('have.length', 1)
+          .and('contain', 'd~e(f)g.spec.js')
         })
 
         it('treats non-Latin characters as letters', function () {
@@ -585,7 +601,7 @@ describe('Specs List', function () {
 
           // but once the project stops running tests, the button gets updated
           cy.get('.close-browser').click()
-          cy.contains('.all-tests', 'Run 7 integration specs')
+          cy.contains('.all-tests', runAllIntegrationSpecsLabel)
           .should('not.have.class', 'active')
         })
       })
