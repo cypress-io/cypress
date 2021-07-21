@@ -4,9 +4,9 @@ const stackUtils = require('./util/stack_utils')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidently upgrading this one
 // TODO: look into upgrading this to version in driver
-const Mocha = require('mocha-7.0.1')
-const mochaReporters = require('mocha-7.0.1/lib/reporters')
-const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
+const Mocha = require('mocha-7.2.0')
+const mochaReporters = require('mocha-7.2.0/lib/reporters')
+const mochaCreateStatsCollector = require('mocha-7.2.0/lib/stats-collector')
 const mochaColor = mochaReporters.Base.color
 
 const debug = require('debug')('cypress:server:reporter')
@@ -15,7 +15,7 @@ const { overrideRequire } = require('./override_require')
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
-const customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
+const customReporterMochaPath = path.dirname(require.resolve('mocha-7.2.0'))
 
 overrideRequire((depPath, _load) => {
   if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {
