@@ -472,12 +472,12 @@ const getProjectId = Promise.method(async (project, id) => {
     return id
   }
 
-  return project.getConfig().then((conf) => {
-    return project.getProjectId(conf)
-    .catch(() => {
-      // no id no problem
-      return null
-    })
+  const conf = project.getConfig()
+
+  return project.getProjectId(conf)
+  .catch(() => {
+    // no id no problem
+    return null
   })
 })
 
