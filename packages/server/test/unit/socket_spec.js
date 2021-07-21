@@ -85,7 +85,7 @@ describe('lib/socket', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/4346
-    /* it('can emit a circular object without crashing', function (done) {
+    it('can emit a circular object without crashing', function (done) {
       const foo = {
         bar: {},
       }
@@ -101,7 +101,7 @@ describe('lib/socket', () => {
 
         return done()
       })
-    }) */
+    })
 
     context('on(automation:request)', () => {
       describe('#onAutomation', () => {
