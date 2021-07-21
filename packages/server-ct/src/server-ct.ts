@@ -3,7 +3,7 @@ import httpsProxy from '@packages/https-proxy'
 import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import { SocketCt } from './socket-ct'
-import { Cfg } from '../../server/lib/project-base'
+import { Cfg } from '@packages/server/lib/project-base'
 
 type WarningErr = Record<string, any>
 

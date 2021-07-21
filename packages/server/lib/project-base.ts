@@ -207,8 +207,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     const [port, warning] = await this._server.open(cfg, {
-      browser: this.browser,
-      spec: this.spec,
+      getCurrentBrowser: () => this.browser,
+      getSpec: () => this.spec,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,

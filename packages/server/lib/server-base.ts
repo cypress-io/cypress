@@ -92,14 +92,13 @@ const notSSE = (req, res) => {
 export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
-  // project: ProjectBase<any>
-  browser: Browser
-  spec: Cypress.Cypress['spec'] | null
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
   projectType: 'ct' | 'e2e'
   onError: any
   onWarning: any
+  getCurrentBrowser: () => Browser
+  getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
   createRoutes: (args: InitializeRoutes) => any
 }
@@ -169,8 +168,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   ): Bluebird<[number, WarningErr?]>
 
   open (config: Cfg, {
-    spec,
-    browser,
+    getSpec,
+    getCurrentBrowser,
     onError,
     onWarning,
     shouldCorrelatePreRequests,
@@ -220,8 +219,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         nodeProxy: this.nodeProxy,
         networkProxy: this._networkProxy!,
         onError,
-        spec,
-        browser,
+        getSpec,
+        getCurrentBrowser,
       })
 
       return this.createServer(app, config, onWarning)

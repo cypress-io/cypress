@@ -22,8 +22,8 @@ export const createRoutes = ({
   specsStore,
   getRemoteState,
   networkProxy,
-  spec,
-  browser,
+  getSpec,
+  getCurrentBrowser,
   onError,
 }: InitializeRoutes) => {
   // routing for the actual specs which are processed automatically
@@ -59,12 +59,12 @@ export const createRoutes = ({
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
     const extraOptions = {
-      specFilter: spec?.specFilter,
+      specFilter: getSpec()?.specFilter,
       specType: 'integration',
     }
 
     debug('handling iframe for project spec %o', {
-      spec,
+      spec: getSpec(),
       extraOptions,
     })
 
@@ -102,8 +102,8 @@ export const createRoutes = ({
 
     runner.serve(req, res, {
       config,
-      spec,
-      browser,
+      getSpec,
+      getCurrentBrowser,
       getRemoteState,
       specsStore,
     })

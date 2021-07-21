@@ -9,7 +9,7 @@ import { Browser } from '../../launcher'
 interface ServeOptions {
   config: Cfg
   // project: ProjectBase<ServerCt>
-  browser: Browser
+  getCurrentBrowser: () => Browser
   specsStore: SpecsStore
 }
 
@@ -25,7 +25,7 @@ export const handle = (req, res) => {
 export const serve = (req, res, options: ServeOptions) => {
   const config = {
     ...options.config,
-    browser: options.browser,
+    browser: options.getCurrentBrowser(),
     specs: options.specsStore.specFiles,
   } as Cfg
 
