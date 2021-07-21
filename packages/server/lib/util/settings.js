@@ -219,9 +219,9 @@ module.exports = {
 
       const code = /\.ts$/.test(file) ? tsCode : jsCode
 
-      return fs.writeFile(file, code).then(() => ({}))
+      return fs.writeFile(file, code).then(() => ({ configObject: {}, functionNames: [] }))
     })
-    .then(({ result: configObject = {}, functionNames = [] }) => {
+    .then(({ result: configObject, functionNames }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
 
       debug('resolved configObject', configObject)
