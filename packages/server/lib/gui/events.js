@@ -20,6 +20,7 @@ const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const openProject = require('../open_project')
+const { projects } = require('../projects')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -494,6 +495,14 @@ module.exports = {
     }
 
     startGraphQLServer()
+
+    if (options.projectRoot) {
+      projects.addProject({
+        projectRoot: options.projectRoot,
+        testingType: options.testingType,
+        isCurrent: true,
+      })
+    }
 
     ipc.on('graphql', async (evt, { id, params, variables }) => {
       try {

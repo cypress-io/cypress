@@ -52,6 +52,7 @@
   },
   "files": [
     "dist",
+    "lib",
     "graphql-codegen.yml",
     "src"
   ]

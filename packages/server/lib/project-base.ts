@@ -3,6 +3,7 @@ import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
+import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
@@ -32,6 +33,7 @@ import { RunnerType, SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
+import { NexusGenObjects } from './graphql/gen/nxs.gen'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -74,9 +76,14 @@ const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
 
-export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
+export type Server = ServerE2E | ServerCt
+
+export class ProjectBase<TServer extends Server> extends EE {
+  // id is sha256 of projectRoot
+  public id: string
+
   protected watchers: Watchers
-  protected options: Options
+  public options: Options
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -85,6 +92,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public browser: any
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
+  public isOpen: boolean = false
+  public pluginsStatus: NexusGenObjects['InitPluginsStatus'] = {
+    state: 'uninitialized',
+  }
   private generatedProjectIdTimestamp: any
   projectRoot: string
 
@@ -112,6 +123,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.watchers = new Watchers()
     this.spec = null
     this.browser = null
+    this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
 
     debug('Project created %o', {
       projectType: this.projectType,
@@ -297,6 +309,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       system: _.pick(sys, 'osName', 'osVersion'),
     }
 
+    this.isOpen = true
+
     return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
@@ -341,6 +355,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     ])
 
     process.chdir(localCwd)
+    this.isOpen = false
 
     const config = await this.getConfig()
 
@@ -667,8 +682,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  async initializeConfig (): Promise<Cfg> {
+  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
+
+    if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      theCfg.browsers = browsers
+    }
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {
