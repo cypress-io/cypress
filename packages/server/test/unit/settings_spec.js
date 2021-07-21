@@ -31,7 +31,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', foo: 'bar' })
 
           return fs.readJsonAsync('cypress.json')
         }).then((obj) => {
@@ -123,6 +123,7 @@ describe('lib/settings', () => {
             component: {
               component_setting: 'peep',
             },
+            configFile: 'cypress.config.js',
           })
         })
       })
@@ -146,6 +147,7 @@ describe('lib/settings', () => {
             e2e: {
               e2e_setting: 'e2e_setting',
             },
+            configFile: 'cypress.config.js',
           })
         })
       })
@@ -169,6 +171,7 @@ describe('lib/settings', () => {
             e2e: {
               e2e_setting: 'e2e_setting',
             },
+            configFile: 'cypress.config.js',
           })
         })
       })
@@ -205,7 +208,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ defaultCommandTimeout: 30000, foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', defaultCommandTimeout: 30000, foo: 'bar' })
         })
       })
 
@@ -214,7 +217,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ supportFile: 'foo', foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', supportFile: 'foo', foo: 'bar' })
         })
       })
 
@@ -223,7 +226,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', pageLoadTimeout: 30000, foo: 'bar' })
         })
       })
 
@@ -232,7 +235,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', pageLoadTimeout: 30000, foo: 'bar' })
         })
       })
     })

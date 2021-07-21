@@ -12,6 +12,7 @@ const debug = require('debug')('cypress:server:settings')
 // here since we can read + write the
 // settings at the same time something else
 // is potentially reading it
+
 const flattenCypress = (obj) => {
   return obj.cypress ? obj.cypress : undefined
 }
@@ -149,7 +150,7 @@ module.exports = {
       // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
-      // cypress.config.js does not exist, we missing project
+      // cypress.config.js does not exist, completely new project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
@@ -179,11 +180,15 @@ module.exports = {
         functionNames: ['e2e', 'component'],
       })
     .catch((e) => e.type === 'MODULE_NOT_FOUND' || e.code === 'ENOENT', (err) => {
-      debug('file not found', file, err)
+      debug('file not found', file)
 
       if (/\.json$/.test(file)) {
+        debug('seeding a json config file')
+
         return this._write(file, {})
       }
+
+      debug('seeding a js/ts config file')
 
       return fs.writeFile(file, `import { defineConfig } from 'cypress'
 
@@ -195,7 +200,7 @@ export default defineConfig({
     .then(({ result: configObject = {}, functionNames = [] }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
 
-      debug('resolved configObject', configObject)
+      debug('resolved that configObject', configObject)
 
       if ((testingType in configObject)) {
         if (typeof configObject[testingType] === 'object') {
