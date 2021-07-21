@@ -7,6 +7,20 @@ const { fs } = require('./fs')
 const requireAsync = require('./require_async').default
 const debug = require('debug')('cypress:server:settings')
 
+const jsCode = `const { defineConfig } = require('cypress')
+
+module.export = defineConfig({
+
+})
+`
+
+const tsCode = `import { defineConfig } from 'cypress'
+
+export default defineConfig({
+
+})
+`
+
 // TODO:
 // think about adding another PSemaphore
 // here since we can read + write the
@@ -140,8 +154,17 @@ module.exports = {
     })
   },
 
+  /**
+   * Ensures the project at this root has a config file
+   * that is readable and writable by the node process
+   * @param {string} projectRoot root of the project
+   * @param {object} options
+   * @returns
+   */
   exists (projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
+
+    debug('find out if "%s" exists', file)
 
     // first check if cypress.json exists
     return maybeVerifyConfigFile(file)
@@ -150,15 +173,19 @@ module.exports = {
       // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
+      debug('no module error')
       // cypress.config.js does not exist, completely new project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
     }).catch({ code: 'EACCES' }, () => {
+      debug('no access error')
+
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
+        debug('throwing error')
         throw err
       }
 
@@ -190,17 +217,14 @@ module.exports = {
 
       debug('seeding a js/ts config file')
 
-      return fs.writeFile(file, `import { defineConfig } from 'cypress'
+      const code = /\.ts$/.test(file) ? tsCode : jsCode
 
-export default defineConfig({
-
-})
-`).then(() => ({}))
+      return fs.writeFile(file, code).then(() => ({}))
     })
     .then(({ result: configObject = {}, functionNames = [] }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
 
-      debug('resolved that configObject', configObject)
+      debug('resolved configObject', configObject)
 
       if ((testingType in configObject)) {
         if (typeof configObject[testingType] === 'object') {
@@ -273,6 +297,8 @@ export default defineConfig({
     if (options.configFile === false) {
       return Promise.resolve({})
     }
+
+    debug('write a file')
 
     return this.read(projectRoot, options)
     .then((settings) => {
