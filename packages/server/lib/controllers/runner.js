@@ -27,9 +27,7 @@ module.exports = {
       return _serveNonProxiedError(res)
     }
 
-    let { config, getRemoteState, project, specsStore } = options
-
-    const { spec, browser } = project.getCurrentSpecAndBrowser()
+    let { config, getRemoteState, spec, browser, specsStore } = options
 
     config = _.clone(config)
     config.remote = getRemoteState()

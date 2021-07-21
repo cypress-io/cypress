@@ -12,7 +12,7 @@ export class ServerCt extends ServerBase<SocketCt> {
     return super.open(config, { ...options, projectType: 'ct' })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, baseUrl, socketIoRoute } = config
 
