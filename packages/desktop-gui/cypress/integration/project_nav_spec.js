@@ -204,6 +204,20 @@ describe('Project Nav', function () {
           })
         })
 
+        it('has unsupportedVersions styled and unselectable', function () {
+          cy.get('.browsers-list .dropdown-chosen').click()
+
+          cy.get('.browsers-list').find('.dropdown-menu')
+          .find('li').should('have.length', this.config.browsers.length - 1)
+          .contains('span', 'Firefox 69')
+          .should('have.class', 'unsupported-version')
+          .click()
+
+          cy.get('.browsers-list .dropdown-menu').should('be.visible')
+
+          cy.get('.browsers-list .dropdown-chosen').contains('Chromium')
+        })
+
         it('saves chosen browser in local storage', () => {
           expect(localStorage.getItem('chosenBrowser')).to.eq(JSON.stringify({ name: 'chromium', channel: 'stable' }))
         })
@@ -255,7 +269,7 @@ describe('Project Nav', function () {
           const browserArg = this.ipc.launchBrowser.getCall(0).args[0].browser
 
           expect(browserArg).to.have.keys([
-            'family', 'name', 'path', 'profilePath', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
+            'family', 'name', 'path', 'profilePath', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel', 'unsupportedVersion',
           ])
 
           expect(browserArg.path).to.include('/')
@@ -356,6 +370,22 @@ describe('Project Nav', function () {
         localStorage.setItem('chosenBrowser', 'netscape-navigator')
 
         this.openProject.resolve({ config: this.config })
+      })
+
+      it('defaults to first browser', () => {
+        cy.get('.browsers-list .dropdown-chosen')
+        .should('contain', 'Chrome')
+      })
+    })
+
+    describe('when browser saved in local storage has an unsupported version', function () {
+      beforeEach(function () {
+        localStorage.setItem('chosenBrowser', JSON.stringify({ name: 'firefox', channel: 'stable' }))
+
+        // sanity check: saved browser should be found in the config
+        expect(this.config.browsers.find((b) => b.name === 'firefox' && b.channel === 'stable' && b.unsupportedVersion)).to.exist
+
+        this.openProject.resolve(this.config)
       })
 
       it('defaults to first browser', () => {

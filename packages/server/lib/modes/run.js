@@ -545,8 +545,8 @@ const getChromeProps = (writeVideoFrame) => {
 const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
   return _
   .chain({
-    width: 1920,
-    height: 1080,
+    width: 1280,
+    height: 720,
     show: isHeaded,
     onCrashed () {
       const err = errors.get('RENDERER_CRASHED')
@@ -1261,11 +1261,6 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
-    _.defaults(options, {
-      // only non-Electron browsers run headed by default
-      headed: options.browser.name !== 'electron',
-    })
-
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
 
     const isHeadless = !headed
@@ -1554,7 +1549,7 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
-        // return only what is return to the specPattern
+          // return only what is return to the specPattern
           if (specPattern) {
             specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
@@ -1567,6 +1562,10 @@ module.exports = {
               // else we looked in the integration folder
               errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
             }
+          }
+
+          if (browser.unsupportedVersion && browser.warning) {
+            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
           }
 
           if (browser.family === 'chromium') {

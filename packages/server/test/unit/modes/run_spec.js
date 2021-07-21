@@ -101,9 +101,9 @@ describe('lib/modes/run', () => {
     it('sets width and height', () => {
       const props = runMode.getElectronProps()
 
-      expect(props.width).to.eq(1920)
+      expect(props.width).to.eq(1280)
 
-      expect(props.height).to.eq(1080)
+      expect(props.height).to.eq(720)
     })
 
     it('sets show to boolean', () => {
@@ -700,6 +700,15 @@ describe('lib/modes/run', () => {
 
       return expect(runMode.run({ browser: 'opera' }))
       .to.be.rejectedWith(/invalid browser family in/)
+    })
+
+    it('throws an error if unsupportedVersion', () => {
+      const browser = { displayName: 'SomeBrowser', warning: 'blah blah', unsupportedVersion: true }
+
+      sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
+
+      return expect(runMode.run())
+      .to.be.rejectedWith('blah blah')
     })
 
     it('shows no warnings for chrome browser', () => {

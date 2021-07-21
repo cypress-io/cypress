@@ -108,13 +108,6 @@ export const options = [
     validation: v.isString,
     isFolder: true,
   }, {
-    name: 'firefoxGcInterval',
-    defaultValue: {
-      runMode: 1,
-      openMode: null,
-    },
-    validation: v.isValidFirefoxGcInterval,
-  }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
     validation: v.isStringOrFalse,
@@ -330,6 +323,10 @@ export const breakingOptions = [
   }, {
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'firefoxGcInterval',
+    errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
   },
 ]

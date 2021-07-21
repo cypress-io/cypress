@@ -1050,8 +1050,8 @@ describe('lib/cypress', () => {
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
             const launchedChrome = R.merge(chrome, {
-              isHeadless: false,
-              isHeaded: true,
+              isHeadless: true,
+              isHeaded: false,
             })
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)

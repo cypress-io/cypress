@@ -21,7 +21,7 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 })
 
-const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
+const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
@@ -343,9 +343,7 @@ export const eventManager = {
             return
           }
 
-          this._restoreStudioFromState(state)
-
-          this._initializeStudio(config)
+          studioRecorder.initialize(config, state)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -405,9 +403,7 @@ export const eventManager = {
         reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
-            studioTestId: studioRecorder.testId,
-            studioSuiteId: studioRecorder.suiteId,
-            studioUrl: studioRecorder.url,
+            studio: studioRecorder.state,
           })
         })
       })
@@ -482,14 +478,8 @@ export const eventManager = {
       localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (test) => {
-      if (studioRecorder.suiteId) {
-        studioRecorder.setTestId(test.id)
-      }
-
-      if (studioRecorder.hasRunnableId && test.invocationDetails) {
-        studioRecorder.setFileDetails(test.invocationDetails)
-      }
+    Cypress.on('test:before:run:async', (_attr, test) => {
+      studioRecorder.interceptTest(test)
     })
 
     Cypress.on('test:after:run', (test) => {
@@ -507,7 +497,6 @@ export const eventManager = {
     })
 
     reporterBus.emit('reporter:start', {
-      firefoxGcInterval: Cypress.getFirefoxGcInterval(),
       startTime: Cypress.runner.getStartTime(),
       numPassed: state.passed,
       numFailed: state.failed,
@@ -552,42 +541,6 @@ export const eventManager = {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
-  },
-
-  _restoreStudioFromState (state) {
-    if (state.studioTestId) {
-      studioRecorder.setTestId(state.studioTestId)
-    }
-
-    if (state.studioSuiteId) {
-      studioRecorder.setSuiteId(state.studioSuiteId)
-    }
-
-    if (state.studioUrl) {
-      studioRecorder.setUrl(state.studioUrl)
-    }
-  },
-
-  _initializeStudio (config) {
-    if (studioRecorder.hasRunnableId) {
-      studioRecorder.startLoading()
-
-      if (studioRecorder.suiteId) {
-        Cypress.runner.setOnlySuiteId(studioRecorder.suiteId)
-
-        // root runnable always has id of r1
-        // and does not have invocationDetails so we must set manually from config
-        if (studioRecorder.suiteId === 'r1') {
-          studioRecorder.setFileDetails({
-            absoluteFile: config.spec.absolute,
-            line: null,
-            column: null,
-          })
-        }
-      } else if (studioRecorder.testId) {
-        Cypress.runner.setOnlyTestId(studioRecorder.testId)
-      }
-    }
   },
 
   _interceptStudio (displayProps) {

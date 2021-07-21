@@ -5,49 +5,39 @@ import { showSaveDialog } from './dialog'
 
 const debug = Debug('cypress:server:gui:files')
 
-export const showDialogAndCreateSpec = () => {
-  return openProject.getConfig()
-  .then((cfg) => {
-    debug('got config')
+export const showDialogAndCreateSpec = async () => {
+  const cfg = openProject.getConfig()
 
-    return showSaveDialog(cfg.integrationFolder).then((path) => {
-      return {
-        cfg,
-        path,
-      }
-    })
-  })
-  .then((opt) => {
-    const { path } = opt
+  const path = await showSaveDialog(cfg.integrationFolder)
 
-    debug('got opt', opt)
-
-    // only create file if they selected a file
-    if (path) {
-      return createFile(path)
+  if (!path) {
+    return {
+      specs: null,
+      path,
     }
+  }
 
-    return opt
-  })
-  .then(({ cfg, path }) => {
-    debug('file potentially created', path)
-    if (!path) {
-      return {
-        specs: null,
-        path,
-      }
+  // only create file if they selected a file
+  if (path) {
+    await createFile(path)
+  }
+
+  debug('file potentially created', path)
+
+  if (!path) {
+    return {
+      specs: null,
+      path,
     }
+  }
 
-    // reload specs now that we've added a new file
-    // we reload here so we can update ui immediately instead of
-    // waiting for file watching to send updated spec list
-    return openProject.getSpecs(cfg).then((specs) => {
-      debug('found specs', specs)
+  // reload specs now that we've added a new file
+  // we reload here so we can update ui immediately instead of
+  // waiting for file watching to send updated spec list
+  const specs = await openProject.getSpecs(cfg)
 
-      return {
-        specs,
-        path,
-      }
-    })
-  })
+  return {
+    specs,
+    path,
+  }
 }
