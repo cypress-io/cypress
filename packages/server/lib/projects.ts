@@ -1,3 +1,4 @@
+import path from 'path'
 import browsers from './browsers'
 import { ProjectBase, Server } from './project-base'
 import { NexusGenInputs } from './graphql/gen/nxs.gen'
@@ -13,7 +14,9 @@ class Projects {
     testingType,
     isCurrent,
   }: NexusGenInputs['AddProjectInput']): Promise<ProjectBase<Server>> {
-    const exists = this.projects.find((x) => x.projectRoot === projectRoot)
+    const absoluteProjectRoot = path.resolve(projectRoot)
+
+    const exists = this.projects.find((x) => x.projectRoot === absoluteProjectRoot)
 
     if (exists) {
       return exists
@@ -23,7 +26,7 @@ class Projects {
 
     const projectBase = new ProjectBase({
       projectType: type,
-      projectRoot,
+      projectRoot: absoluteProjectRoot,
       options: {
         projectRoot,
         testingType: type,
@@ -67,7 +70,7 @@ class Projects {
     try {
       this.openProject.pluginsStatus = { state: 'initializing' }
       const updatedConfig = await this.openProject.initializePlugins(
-        await this.openProject.getConfig(),
+        this.openProject.getConfig(),
         this.openProject.options,
       )
 
@@ -79,6 +82,17 @@ class Projects {
         message: e.details,
       }
     }
+  }
+
+  async initializeServer () {
+    if (!this.openProject) {
+      return
+    }
+
+    const config = this.openProject.getConfig()
+    process.chdir(this.openProject.projectRoot)
+    const server = this.openProject.createServer(this.openProject.projectType)
+    this.openProject._server = server
   }
 
   get openProject () {

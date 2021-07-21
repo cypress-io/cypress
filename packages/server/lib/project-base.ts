@@ -85,10 +85,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   protected watchers: Watchers
   public options: Options
   protected _cfg?: Cfg
-  protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
 
+  public _server?: TServer
   public browser: any
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
