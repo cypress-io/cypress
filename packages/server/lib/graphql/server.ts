@@ -40,6 +40,11 @@ export function startGraphQLServer () {
   }))
 
   server = app.listen(52159, () => {
+    if (process.env.NODE_ENV === 'development') {
+      /* eslint-disable-next-line no-console */
+      console.log('GraphQL server is running at http://localhost:52159/graphql')
+    }
+
     debug(`GraphQL Server at http://localhost:${(server.address() as AddressInfo).port}/graphql`)
   })
 

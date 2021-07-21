@@ -11,7 +11,7 @@
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "dev": "LAUNCHPAD=1 yarn start-test 5050 cypress:open",
+    "dev": "NODE_ENV=development LAUNCHPAD=1 yarn start-test 5050 cypress:open",
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
     "watch": "yarn build --watch",
