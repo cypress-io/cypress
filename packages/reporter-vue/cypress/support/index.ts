@@ -1,5 +1,4 @@
 import '../../src/main.scss'
-import $ from 'jquery'
 import { mount } from '@cypress/vue'
 import VTooltip from 'v-tooltip'
 import 'virtual:windi.css'
@@ -21,7 +20,7 @@ const tooltipOptions = {
 }
 
 beforeEach(() => {
-  $('#__cy_root').css({ position: 'relative' })
+  Cypress.$('#__cy_root').css({ position: 'relative' })
 })
 
 Cypress.Commands.add('debugMount', (content) => {

@@ -11,14 +11,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType, ref } from 'vue'
+import { defineComponent, PropType, ref } from 'vue'
+import { CommandModel } from '../store/reporter-store'
 
 export default defineComponent({
   props: {
-    command: {},
-    idx: {},
+    command: {
+      type: Object as PropType<CommandModel>
+    },
+    idx: {
+      type: Number
+    },
     size: {
-      values: ['sm', 'md', 'lg'],
+      type: String as PropType<'sm' | 'md' | 'lg'>,
       default: 'lg'
     },
   },
@@ -28,7 +33,7 @@ export default defineComponent({
     return {
       selected,
       hovering,
-      onSelect(e) {
+      onSelect() {
         emit('select', !selected.value)
         selected.value = !selected.value
       } 
@@ -108,7 +113,7 @@ export default defineComponent({
 }
 
 .command-row {
-  @apply p-2px bg-warm-gray-100 font-mono cursor-pointer hover:bg-warm-gray-200;
+  @apply p-2px bg-cool-gray-100 font-mono cursor-pointer hover:bg-cool-gray-200;
 }
 
 .command-meta {

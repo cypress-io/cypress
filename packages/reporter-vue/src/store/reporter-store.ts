@@ -20,6 +20,9 @@ type RunnableType = 'suite' | 'test'
 type RawSuite = any
 type RawTest = any
 export type TestsByState = ComputedRef<Dictionary<(TestModel | SuiteModel)[]>>
+export type InstrumentType = 'agent' | 'command' | 'route'
+export type CommandType = 'parent' | 'child'
+export type IndicatorTypes = 'bad' | 'successful'
 
 interface Runnables {
   nested: (TestModel | SuiteModel)[],
@@ -183,7 +186,7 @@ export const useReporterStore = defineStore({
   }
 })
 
-interface RunnableModel {
+export interface RunnableModel {
   readonly id: string,
   state: ComputedRef<RunnableState>
   level: number
@@ -199,13 +202,14 @@ function createHooks(hooks, test) {
     filter(h => h.commands.length > 0)
   )(hooks)
 }
-export interface TestModel {}
+
 export class TestModel implements RunnableModel {
   readonly type: RunnableType = 'test'
   readonly id: string
-  state: ComputedRef<RunnableState>
-  commands: CommandModel[] = []
-  hooks: HookModel[] = []
+  public state: ComputedRef<RunnableState>
+  public commands: CommandModel[] = []
+  public hooks: HookModel[] = []
+  public level: number
   constructor(test: RawTest) {
     this.id = test.id
     this.state = computed(() => test.state || 'not-started')
@@ -221,9 +225,7 @@ export class TestModel implements RunnableModel {
   }
 }
 
-
-interface HookModel {}
-class HookModel {
+export class HookModel {
   public hookId: string
   public hookName: HookName
   public commands: CommandModel[] = []
@@ -235,28 +237,60 @@ class HookModel {
   }
 }
 
-interface CommandModel {}
-class CommandModel {
-  public hookId: string
+// TODO: Classdocs
+export class CommandModel {
+  public hookId: string // A command belongs to a hook (Test Body is a hook)
   public testId: string
+
+  // Unique ids, they're generated procedurally by the test runner
   public id: string
-  public instrument: string
+
+  // If the command is a route, command, or agent
+  public instrument: InstrumentType
+
+  // The message is the longer text used to display info about the command
+  // Message can also come from `renderProps.message` if it uses markdown
   public message: string
+
+  // The name is the short text used to display info about the command
+  // e.g. `get` or `click`
   public name: string
+
+  // Alias to `name`
+  public displayName: string
+
+  // Each command has a state, which is either 'pending' or 'done'
   public state: RunnableState
+
+  // Either the default timeout or a specific timeout passed in to the command
   public timeout: number
-  public type: string = 'parent'
+
+  // If the command is a child or parent. Children are rendered as nested.
+  // e.g. cy.get('.selector').click() <- Here, the `click` command is a child of `get`
+  public type: CommandType = 'parent'
+
+  // If the command has found elements
+  public visible: boolean
+
+  // Custom data passed in to the command, via the Runner
+  public renderProps: { message: string, indicator: IndicatorTypes }
+
+  // The number of elements found by the command, if it's a get command
+  public numElements: number
+
+  // If there command is an event (e.g. xhr commands)
+  public event: boolean
 }
 
-export interface SuiteModel {}
 export class SuiteModel implements RunnableModel {
   readonly type: RunnableType = 'suite'
   readonly id: string
   public children: Ref<(TestModel | SuiteModel)[]> = ref([])
   public state: ComputedRef<RunnableState>
-  private tests: Test[] = []
-  private suites: Suite[] = []
-  hooks: HookModel[] = []
+  public tests: Test[] = []
+  public suites: Suite[] = []
+  public hooks: HookModel[] = []
+  public level: number
   
   constructor(suite: RawSuite) {
     this.id = suite.id
@@ -331,6 +365,7 @@ function createTest(props, level): TestModel {
     new HookModel({
       hookId: props.id.toString(),
       hookName: 'test body',
+      testId: test.testId,
       invocationDetails: props.invocationDetails,
       logs: []
     }, test)
