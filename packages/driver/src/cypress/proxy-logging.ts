@@ -197,7 +197,7 @@ export class ProxyLogging {
   /**
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
-  logInterception (interception: Interception, route: Route): ProxyRequest {
+  logInterception (interception: Interception, route: Route): ProxyRequest | undefined {
     const unloggedPreRequest = take(this.unloggedPreRequests, ({ requestId }) => requestId === interception.browserRequestId)
 
     if (unloggedPreRequest) {
@@ -207,7 +207,9 @@ export class ProxyLogging {
 
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
-    if (!proxyRequest) throw new Error('??')
+    if (!proxyRequest) {
+      throw new Error(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url}`)
+    }
 
     proxyRequest.interceptions.push(interception)
     proxyRequest.displayInterceptions.push({

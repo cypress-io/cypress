@@ -3,12 +3,23 @@ import './setup'
 describe('cy.intercept', () => {
   const { $ } = Cypress
 
+  const emitProxyLog = () => Cypress.emit('proxy:incoming:request', {
+    requestId: 1,
+    method: 'GET',
+    url: '',
+    headers: {},
+    resourceType: 'other',
+    originalResourceType: 'other',
+  })
+
   it('assertion failure in req callback', () => {
     cy.intercept('/json-content-type', () => {
       expect('a').to.eq('b')
     })
     .then(() => {
+      emitProxyLog()
       Cypress.emit('net:event', 'before:request', {
+        browserRequestId: 1,
         eventId: '1',
         subscription: {
           // @ts-ignore
@@ -30,7 +41,9 @@ describe('cy.intercept', () => {
       })
     })
     .then(() => {
+      emitProxyLog()
       Cypress.emit('net:event', 'before:request', {
+        browserRequestId: 1,
         eventId: '1',
         requestId: '1',
         subscription: {
@@ -68,7 +81,9 @@ describe('cy.intercept', () => {
       })
     })
     .then(() => {
+      emitProxyLog()
       Cypress.emit('net:event', 'before:request', {
+        browserRequestId: 1,
         eventId: '1',
         requestId: '1',
         subscription: {
