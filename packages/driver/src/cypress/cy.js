@@ -378,7 +378,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     // it onto the end of the queu
     const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length
 
-    queue.splice(index, obj)
+    queue.insert(index, obj)
 
     return Cypress.action('cy:command:enqueued', obj)
   }
