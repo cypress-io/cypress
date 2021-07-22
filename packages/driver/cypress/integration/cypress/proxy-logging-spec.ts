@@ -1,4 +1,6 @@
 describe('Proxy Logging', () => {
+  const { _ } = Cypress
+
   const url = '/testFlag'
   const alias = 'aliasName'
 
@@ -66,8 +68,11 @@ describe('Proxy Logging', () => {
           'URL': 'http://localhost:3500/some-url',
         })
 
+        // case depends on browser
+        const refererKey = _.keys(log.consoleProps['Request Headers']).find((k) => k.toLowerCase() === 'referer')
+
         expect(log.consoleProps['Request Headers']).to.include({
-          'Referer': window.location.href,
+          [refererKey]: window.location.href,
         })
 
         expect(log.consoleProps).to.not.have.property('Response Headers')
