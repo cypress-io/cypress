@@ -99,6 +99,18 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
         consoleProps['Error'] = req.error
       }
 
+      if (req.stack) {
+        consoleProps['groups'] = () => {
+          return [
+            {
+              name: 'Initiator',
+              items: [req.stack],
+              label: false,
+            },
+          ]
+        }
+      }
+
       return consoleProps
     },
     renderProps: () => {
@@ -140,6 +152,7 @@ class ProxyRequest {
   responseReceived?: BrowserResponseReceived
   error?: Error
   xhr?: Cypress.WaitXHR
+  stack?: string
   interceptions: Array<Interception> = []
   displayInterceptions: Array<{ command: 'intercept' | 'route', alias?: string, type: 'stub' | 'spy' | 'function' }> = []
   flags: {
@@ -164,6 +177,7 @@ type UnmatchedXhrLog = {
   xhr: Cypress.WaitXHR
   route?: any
   log: Cypress.Log
+  stack?: string
 }
 
 export class ProxyLogging {
@@ -267,10 +281,11 @@ export class ProxyLogging {
       const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
 
       if (unmatchedXhrLog) {
-        const { log, xhr, route } = unmatchedXhrLog
+        const { log, xhr, route, stack } = unmatchedXhrLog
         const proxyRequest = new ProxyRequest(preRequest, {
           xhr,
           log,
+          stack,
           displayInterceptions: route ? [{
             command: 'route',
             alias: route?.alias,

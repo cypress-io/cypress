@@ -184,7 +184,7 @@ const startXhrServer = (cy, state, config) => {
         },
       })
 
-      Cypress.ProxyLogging.addXhrLog({ xhr, route, log })
+      Cypress.ProxyLogging.addXhrLog({ xhr, route, log, stack })
 
       return log.snapshot('request')
     },
@@ -194,7 +194,7 @@ const startXhrServer = (cy, state, config) => {
 
       const log = logs[xhr.id]
 
-      if (log) {
+      if (log && !log.get('snapshots').find((v) => v.name === 'response')) {
         return log.snapshot('response').end()
       }
     },

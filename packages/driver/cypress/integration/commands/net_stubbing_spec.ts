@@ -3184,7 +3184,7 @@ describe('network stubbing', { retries: 2 }, function () {
         $.get('/fixtures/app.json')
       }).wait('@getFoo').then(function (res) {
         const log = cy.queue.logs({
-          displayName: 'req',
+          displayName: 'xhr',
         })[0]
 
         expect(log.get('alias')).to.eq('getFoo')

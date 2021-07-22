@@ -2353,8 +2353,8 @@ describe('src/cy/commands/xhr', () => {
         })
       })
 
-      it('says Stubbed: No when request isnt forced 404', function () {
-        expect(this.lastLog.invoke('consoleProps').Status).to.eq('spied')
+      it('no status when request isnt forced 404', function () {
+        expect(this.lastLog.invoke('consoleProps').Status).to.be.undefined
       })
 
       it('logs request + response headers', () => {
@@ -2374,7 +2374,7 @@ describe('src/cy/commands/xhr', () => {
             expect(consoleProps).to.include({
               Method: 'GET',
               URL: 'http://localhost:3500/fixtures/app.json',
-              Status: 'spied',
+              Status: undefined,
               'Response Status Code': 304,
               XHR: xhr.xhr,
             })
