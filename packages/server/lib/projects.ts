@@ -2,6 +2,10 @@ import path from 'path'
 import browsers from './browsers'
 import { ProjectBase, Server } from './project-base'
 import { NexusGenInputs } from './graphql/gen/nxs.gen'
+import { SocketE2E } from './socket-e2e'
+import { SocketCt } from '../../server-ct'
+import { createRoutes as createE2ERoutes } from './routes'
+import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 
 export type TestingType = 'e2e' | 'component'
 
@@ -89,10 +93,27 @@ class Projects {
       return
     }
 
-    const config = this.openProject.getConfig()
     process.chdir(this.openProject.projectRoot)
     const server = this.openProject.createServer(this.openProject.projectType)
+
     this.openProject._server = server
+
+    const all = await browsers.get()
+
+    const config = this.openProject.getConfig()
+
+    server.open(config, {
+      getSpec: () => null,
+      getCurrentBrowser: () => all[0],
+      onError: () => {},
+      onWarning: () => {},
+      shouldCorrelatePreRequests: () => true,
+      projectType: this.openProject.projectType,
+      SocketCtor: this.openProject.projectType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.openProject.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      // @ts-ignore
+      specsStore: null,
+    })
   }
 
   get openProject () {

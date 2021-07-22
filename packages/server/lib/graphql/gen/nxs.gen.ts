@@ -47,6 +47,9 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  BrowserChannel: "beta" | "canary" | "dev" | "nightly" | "stable"
+  BrowserFamily: "chromium" | "firefox"
+  BrowserName: "chrome" | "chromium" | "edge" | "electron" | "firefox"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
 }
 
@@ -62,6 +65,16 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   App: App;
+  Browser: { // root type
+    channel: NexusGenEnums['BrowserChannel']; // BrowserChannel!
+    displayName: string; // String!
+    family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
+    majorVersion?: number | null; // Int
+    minSupportedVersion?: number | null; // Int
+    name: NexusGenEnums['BrowserName']; // BrowserName!
+    path: string; // String!
+    version: string; // String!
+  }
   InitPluginsStatus: { // root type
     message?: string | null; // String
     state: NexusGenEnums['PluginsState']; // PluginsState!
@@ -91,6 +104,16 @@ export interface NexusGenFieldTypes {
   App: { // field return type
     isFirstOpen: boolean; // Boolean!
   }
+  Browser: { // field return type
+    channel: NexusGenEnums['BrowserChannel']; // BrowserChannel!
+    displayName: string; // String!
+    family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
+    majorVersion: number | null; // Int
+    minSupportedVersion: number | null; // Int
+    name: NexusGenEnums['BrowserName']; // BrowserName!
+    path: string; // String!
+    version: string; // String!
+  }
   InitPluginsStatus: { // field return type
     message: string | null; // String
     state: NexusGenEnums['PluginsState']; // PluginsState!
@@ -107,6 +130,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App'] | null; // App
+    browsers: Array<NexusGenRootTypes['Browser'] | null>; // [Browser]!
     openProject: NexusGenRootTypes['Project'] | null; // Project
     projects: Array<NexusGenRootTypes['Project'] | null>; // [Project]!
   }
@@ -118,6 +142,16 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
     isFirstOpen: 'Boolean'
+  }
+  Browser: { // field return type name
+    channel: 'BrowserChannel'
+    displayName: 'String'
+    family: 'BrowserFamily'
+    majorVersion: 'Int'
+    minSupportedVersion: 'Int'
+    name: 'BrowserName'
+    path: 'String'
+    version: 'String'
   }
   InitPluginsStatus: { // field return type name
     message: 'String'
@@ -135,6 +169,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    browsers: 'Browser'
     openProject: 'Project'
     projects: 'Project'
   }
