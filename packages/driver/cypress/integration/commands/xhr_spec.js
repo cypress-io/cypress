@@ -817,12 +817,14 @@ describe('src/cy/commands/xhr', () => {
 
             expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
               name: 'xhr',
-              displayName: 'xhr stub',
+              displayName: 'xhr',
               event: true,
               alias: 'getFoo',
               aliasType: 'route',
               state: 'pending',
             })
+
+            expect(lastLog.get('renderProps')()).to.include({ status: 'stubbed' })
 
             const snapshots = lastLog.get('snapshots')
 
@@ -846,12 +848,14 @@ describe('src/cy/commands/xhr', () => {
 
             expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
               name: 'xhr',
-              displayName: 'xhr stub',
+              displayName: 'xhr',
               event: true,
               alias: 'getFoo',
               aliasType: 'route',
               state: 'pending',
             })
+
+            expect(lastLog.get('renderProps')()).to.include({ status: 'stubbed' })
 
             const snapshots = lastLog.get('snapshots')
 
@@ -971,7 +975,7 @@ describe('src/cy/commands/xhr', () => {
         it('logs obj', function () {
           const obj = {
             name: 'xhr',
-            displayName: 'xhr stub',
+            displayName: 'xhr',
             event: true,
             message: '',
             type: 'parent',
@@ -2350,15 +2354,15 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('says Stubbed: No when request isnt forced 404', function () {
-        expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('No')
+        expect(this.lastLog.invoke('consoleProps').Status).to.eq('spied')
       })
 
       it('logs request + response headers', () => {
         cy.then(function () {
-          const consoleProps = this.lastLog.invoke('consoleProps')
-
-          expect(consoleProps.Request.headers).to.be.an('object')
-          expect(consoleProps.Response.headers).to.be.an('object')
+          cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
+            expect(consoleProps['Request Headers']).to.be.an('object')
+            expect(consoleProps['Response Headers']).to.be.an('object')
+          })
         })
       })
 
@@ -2366,26 +2370,27 @@ describe('src/cy/commands/xhr', () => {
         cy.then(function () {
           const { xhr } = cy.state('responses')[0]
 
-          const consoleProps = _.pick(this.lastLog.invoke('consoleProps'), 'Method', 'Status', 'URL', 'XHR')
-
-          expect(consoleProps).to.deep.eq({
-            Method: 'GET',
-            URL: 'http://localhost:3500/fixtures/app.json',
-            Status: '200 (OK)',
-            XHR: xhr.xhr,
+          cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
+            expect(consoleProps).to.include({
+              Method: 'GET',
+              URL: 'http://localhost:3500/fixtures/app.json',
+              Status: 'spied',
+              'Response Status Code': 304,
+              XHR: xhr.xhr,
+            })
           })
         })
       })
 
       it('logs response', () => {
         cy.then(function () {
-          const consoleProps = this.lastLog.invoke('consoleProps')
-
-          expect(consoleProps.Response.body).to.deep.eq({
-            some: 'json',
-            foo: {
-              bar: 'baz',
-            },
+          cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
+            expect(consoleProps['Response Body']).to.deep.eq({
+              some: 'json',
+              foo: {
+                bar: 'baz',
+              },
+            })
           })
         })
       })
@@ -2561,11 +2566,11 @@ describe('src/cy/commands/xhr', () => {
 
         cy.wrap(null).should(() => {
           expect(log.get('state')).to.eq('failed')
-          expect(log.invoke('renderProps')).to.deep.eq({
-            message: 'GET (aborted) /timeout?ms=999',
-            indicator: 'aborted',
+          expect(log.invoke('renderProps')).to.include({
+            message: 'GET /timeout?ms=999',
           })
 
+          expect(log.get('error')).to.be.an('Error')
           expect(xhr.aborted).to.be.true
         })
       })

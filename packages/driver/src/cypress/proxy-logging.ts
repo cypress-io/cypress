@@ -40,6 +40,25 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
 }
 
 function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
+  function getStatus (): string | undefined {
+    const { spied, stubbed, reqModified, resModified } = req.flags
+
+    if (stubbed) return 'stubbed'
+
+    if (reqModified || resModified) {
+      return [
+        reqModified && 'req',
+        reqModified && resModified && '+',
+        resModified && 'res',
+        'modified',
+      ].filter((v) => v).join(' ')
+    }
+
+    if (spied) return 'spied'
+
+    return
+  }
+
   return {
     ...getDynamicRequestLogConfig(req),
     displayName: req.preRequest.resourceType,
@@ -54,6 +73,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
       const consoleProps = {
         Method: req.preRequest.method,
         URL: req.preRequest.url,
+        Status: getStatus(),
         'Resource Type': req.preRequest.resourceType,
         'Request Headers': req.preRequest.headers,
       }
@@ -65,12 +85,13 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
         })
       }
 
-      if (req.interceptions.length) {
-        consoleProps['Matched `cy.intercept()`s'] = req.interceptions
+      if (req.xhr) {
+        consoleProps['Response Body'] = req.xhr.responseBody
+        consoleProps['XHR'] = req.xhr.xhr
       }
 
-      if (req.xhr) {
-        consoleProps['Matched XMLHttpRequest'] = req.xhr
+      if (req.interceptions.length) {
+        consoleProps['Matched `cy.intercept()`s'] = req.interceptions
       }
 
       return consoleProps
@@ -86,25 +107,6 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
         }
 
         return 'bad'
-      }
-
-      function getStatus (): string | undefined {
-        const { spied, stubbed, reqModified, resModified } = req.flags
-
-        if (stubbed) return 'stubbed'
-
-        if (reqModified || resModified) {
-          return [
-            reqModified && 'req',
-            reqModified && resModified && '+',
-            resModified && 'res',
-            'modified',
-          ].filter((v) => v).join(' ')
-        }
-
-        if (spied) return 'spied'
-
-        return
       }
 
       const message = _.compact([
@@ -249,11 +251,13 @@ export class ProxyLogging {
           displayInterceptions: route ? [{
             command: 'route',
             alias: route?.alias,
-            type: route?.response ? 'stub' : 'spy',
+            type: _.isNil(route?.response) ? 'spy' : 'stub',
           }] : [],
         })
 
-        proxyRequest.setFlag(route?.response ? 'stubbed' : 'spied')
+        if (route) {
+          proxyRequest.setFlag(_.isNil(route.response) ? 'spied' : 'stubbed')
+        }
 
         log.set(getRequestLogConfig(proxyRequest))
 

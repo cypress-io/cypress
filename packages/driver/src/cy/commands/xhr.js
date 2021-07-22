@@ -107,6 +107,8 @@ const startXhrServer = (cy, state, config) => {
         rl.set('numResponses', numResponses + 1)
       }
 
+      const isStubbed = route && !_.isNil(route.response)
+
       const log = logs[xhr.id] = Cypress.log({
         message: '',
         name: 'xhr',
@@ -124,7 +126,7 @@ const startXhrServer = (cy, state, config) => {
             'Matched URL': route?.url,
             Status: xhr.statusMessage,
             Duration: xhr.duration,
-            Stubbed: _.isNil(route?.response) ? 'No' : 'Yes',
+            Stubbed: isStubbed ? 'Yes' : 'No',
             Request: xhr.request,
             Response: xhr.response,
             XHR: xhr._getXhr(),
@@ -173,11 +175,11 @@ const startXhrServer = (cy, state, config) => {
             interceptions: route ? [
               {
                 command: 'route',
-                type: route?.response ? 'stub' : 'spy',
+                type: isStubbed ? 'stub' : 'spy',
                 alias,
               },
             ] : [],
-            status: route ? (route?.response ? 'stubbed' : 'spied') : undefined,
+            status: route ? (isStubbed ? 'stubbed' : 'spied') : undefined,
           }
         },
       })
