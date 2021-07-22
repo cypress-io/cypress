@@ -337,7 +337,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     await Promise.all([
       this.server?.close(),
       this.watchers?.close(),
-      closePreprocessor?.(),
+      typeof closePreprocessor === 'function' ? closePreprocessor() : Promise.resolve(),
     ])
 
     process.chdir(localCwd)
