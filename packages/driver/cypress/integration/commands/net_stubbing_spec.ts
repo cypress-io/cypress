@@ -2702,10 +2702,11 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         })
       })
-
-      return fetch('/json-content-type')
-      .then((res) => {
-        expect(res.headers.get('content-type')).to.eq('application/problem+json')
+      .then(() => {
+        return fetch('/json-content-type')
+        .then((res) => {
+          expect(res.headers.get('content-type')).to.eq('application/problem+json')
+        })
       })
     })
 
