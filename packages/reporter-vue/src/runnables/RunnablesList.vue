@@ -3,6 +3,7 @@
     <li v-for="runnable in runnables" :key="runnable.id">
       <div>
         <Runnable :runnable="runnable">
+          <div v-for="hook in runnable.hooks"></div>
           <RunnablesList :runnables="runnable.children"/>
         </Runnable>
       </div>
@@ -11,13 +12,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, PropType } from 'vue'
+import { SuiteModel } from '../store/reporter-store';
 import Runnable from './Runnable.vue'
-import Hook from '../hooks/Hook.vue'
 
 export default defineComponent({
     name: "runnables-list",
-    props: ["runnables", "root"],
+    props: {
+      runnables: {
+        type: Array as PropType<SuiteModel[]>
+      },
+      root: {
+        type: Boolean,
+      }
+    },
     setup(props) {
         return {
             level: computed(() => {
@@ -28,14 +36,13 @@ export default defineComponent({
             })
         };
     },
-    components: { Runnable, Hook }
+    components: { Runnable }
 })
 </script>
 
 <style lang="scss" scoped>
 .root-suite {
   @apply text-size-13px text-warm-gray-800;
-  width: calc(100% - 2rem);
   position: relative;
   overflow: hidden;
 }

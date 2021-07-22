@@ -1,9 +1,9 @@
 <template>
-  <div :class="`runnable-root runnable-${state} `">
+  <div :class="`runnable-root ${state}`">
     <BaseAccordion v-model="open">
       <template #header>
-        <div data-cy="title" :class="`runnable-title-wrapper hover:bg-warm-gray-50 `">
-          <div :class="`transform runnable-title ${runnable.type}-title ${runnable.type} runnable-${state}`">
+        <div data-cy="title" :class="`runnable-title-wrapper hover:bg-warm-gray-50`">
+          <div :class="`transform runnable-title ${runnable.type}-title ${runnable.type} ${state}`">
           <i-fa-caret-right v-if="type === 'suite'" :class="`${open && 'rotate-90'} transform text-warm-gray-400`" />
           <template v-else>
             <i-fa-solid-times v-if="state ==='failed'"/>
@@ -12,20 +12,19 @@
             <i-mdi-square-outline v-if="state === 'not-started'"/>
             <i-fa-refresh v-if="state === 'processing'" class="animate-spin-slow"/>
           </template>
-          {{ runnable.title }}
+          {{ runnable.id }} {{ runnable.title }}
           </div>
         </div>
       </template>
 
       <!-- Inner content of the suite -->
       <template v-if="runnable.type === 'test'">
-        <div data-cy="content" class="content-wrapper grid gap-6px transform">
-          <Hook v-for="hook, idx in runnable.hooks"
+        <div data-cy="content" class="content-wrapper transform">
+          <Hook v-for="(hook, idx) in runnable.hooks"
           :key="hook.hookId"
           :idx="idx"
           :count="hooksByKind[hook.hookName].length"
-          :hook="hook"
-          >
+          :hook="hook">
           </Hook>
         </div>
       </template>
@@ -56,13 +55,18 @@ export default defineComponent({
       state: computed(() => props.runnable.state),
       level: computed(() => props.runnable.level),
       type: computed(() => props.runnable.type),
-      hooksByKind: computed(() => props.runnable.hooksByKind)
+      hooksByKind: computed(() => {
+        if (props.runnable.type === 'test') {
+          // @ts-ignore // TODO: How do I coerce these types?
+          return props.runnable.hooksByKind
+        }
+      })
     }
   }
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $passed: #11c08e;
 $failed: #e94f5f;
 $pending: #a7c8e6;
@@ -77,8 +81,6 @@ $indentSize: 18px;
 
 .runnable-title-wrapper {
   @apply inline-flex justify-start items-center gap-4px leading-loose select-none w-[calc(100%)];
-  width: calc(100% + (2 * 12px));
-  // calc(100% + (2 * 12px))
   svg {
     @apply w-10px h-10px inline mx-1 mb-2px;
   }
@@ -95,13 +97,12 @@ $indentSize: 18px;
 
 .content-wrapper {
   @apply ml-0.4rem;
-  width: calc(100% - (v-bind(level) * #{$indentSize}));
   transform: translateX(calc(#{$indentSize} * v-bind(level + 1))); 
 }
 
 $states: (passed: $passed, failed: $failed, pending: $pending);
 @each $state, $color in $states {
-  .runnable-#{$state} {
+  .#{$state} {
     &.test {
       svg {
         color: $color;

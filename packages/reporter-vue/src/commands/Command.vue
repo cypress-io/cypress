@@ -22,7 +22,7 @@
     <template #meta="{}">
       <span class="command-meta">
         <i-fa-eye-slash v-if="command.visible === false"/>
-        <span class="bg-warm-gray-400 px-4px py-4px rounded-md  text-size-10.2px text-white" v-if="command.numElements >= 0">
+        <span class="bg-cool-gray-400 px-4px py-4px rounded-md  text-size-10.2px text-white" v-if="command.numElements >= 0">
           {{ command.numElements }}
         </span>
       </span>
@@ -33,18 +33,23 @@
 <script lang="ts">
 import { defineComponent, computed, PropType, ref } from 'vue'
 import Markdown from 'vue3-markdown-it'
+import { CommandModel } from '../store/reporter-store'
 import CommandRow from './CommandRow.vue' 
-import CommandMessage from './CommandMessage.vue'
 export default defineComponent({
   props: {
-    command: {},
-    idx: {},
+    command: {
+      type: Object as PropType<CommandModel>,
+      required: true
+    },
+    idx: {
+      type: Number
+    },
     size: {
-      values: ['sm', 'md', 'lg'],
+      type: String as PropType<'sm' | 'md' | 'lg'>,
       default: 'lg'
     }
   },
-  components: { CommandMessage, Markdown, CommandRow },
+  components: { Markdown, CommandRow },
   setup(props) {
     const showMarkdown = computed(() => props.command.renderProps && props.command.renderProps.message)
     const commandMessage = computed(() => showMarkdown.value ? props.command.renderProps.message : props.command.message)
@@ -120,19 +125,19 @@ export default defineComponent({
 }
 
 .command-position {
-  @apply text-warm-gray-400;
+  @apply text-cool-gray-400;
 }
 .command-message {
-  @apply text-warm-gray-600;
+  @apply text-cool-gray-600;
 }
 
 .command-name {
-  @apply text-warm-gray-700;
+  @apply text-cool-gray-700;
 }
 
 .command-row.event {
   .command-message, .command-name {
-    @apply text-warm-gray-400 italic;
+    @apply text-cool-gray-400 italic;
   }
 }
 
@@ -144,7 +149,7 @@ export default defineComponent({
 }
 
 .command-meta {
-  @apply text-warm-gray-400 flex col-auto justify-center items-center h-[calc(100%)] gap-4px w-[calc(100%)];
+  @apply text-cool-gray-400 flex col-auto justify-center items-center h-[calc(100%)] gap-4px w-[calc(100%)];
 }
 
 .indicator {

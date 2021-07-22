@@ -14,7 +14,7 @@ export default defineComponent({
       default: false,
       type: Boolean
     },
-  }
+  },
 })
 </script>
 

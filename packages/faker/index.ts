@@ -1,14 +1,14 @@
 // @ts-nocheck
 import faker from 'faker'
 
-const newId = (seed) => faker.datatype.uuid(seed).slice(30)
+const newId = () => faker.datatype.uuid().slice(30)
 
-export function test (state = 'passed', parentId, level, seed) {
+export function test (state = 'passed', parentId, level) {
   return {
-    title: faker.git.commitMessage(seed),
+    title: faker.git.commitMessage(),
     type: 'test',
     level,
-    id: newId(seed),
+    id: newId(),
     parentId,
     state,
   }
@@ -52,6 +52,9 @@ const suite5 = newId(6)
 const suite6 = newId(7)
 const suite7 = newId(8)
 
+
+
+
 export const rootRunnable = {
   root: true,
   id: rootId,
@@ -89,14 +92,14 @@ export const rootRunnable = {
     ),
     suiteContents(
       1, rootId, suite4, [test('pending', suite4, 2, 12), test('passed', suite4, 2, 11),
-        test('passed', suite4, 2, 13),
-        test('passed', suite4, 2, 14)],
+        test('passed', suite4, 2),
+        test('passed', suite4, 2)],
     ),
     suiteContents(
       1, rootId, suite6, [
-        test('pending', suite5, 3, 21),
-        test('pending', suite5, 3, 22),
-        test('pending', suite5, 3, 23),
+        test('pending', suite5, 3),
+        test('pending', suite5, 3),
+        test('pending', suite5, 3),
       ],
     ),
   ],
