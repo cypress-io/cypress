@@ -1340,7 +1340,7 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run component tests
-          command: yarn test-ci:ct
+          command: yarn test:ci:ct
           working_directory: npm/vue
       - run:
           name: Run e2e tests
