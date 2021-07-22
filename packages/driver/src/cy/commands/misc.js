@@ -24,7 +24,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       if (state('current').get('injected')) {
         const restoreCmdIndex = state('index') + 1
 
-        cy.queue.splice(restoreCmdIndex, 0, {
+        cy.queue.insert(restoreCmdIndex, {
           args: [state('subject')],
           name: 'log-restore',
           fn: (subject) => subject,

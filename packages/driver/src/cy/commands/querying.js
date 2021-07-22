@@ -635,7 +635,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       // commands inside within() callback and commands chained to it.
       const restoreCmdIndex = state('index') + 1
 
-      cy.queue.splice(restoreCmdIndex, 0, {
+      cy.queue.insert(restoreCmdIndex, {
         args: [subject],
         name: 'within-restore',
         fn: (subject) => subject,
