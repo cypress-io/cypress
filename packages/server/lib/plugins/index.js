@@ -84,6 +84,10 @@ const init = (config, options) => {
     const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'pipe',
+      env: {
+        ...process.env,
+        NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
+      },
     }
 
     const testingType = options.testingType || 'e2e'

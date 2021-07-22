@@ -1,4 +1,3 @@
-const resolve = require('resolve')
 const env = require('./env')
 const debug = require('debug')('cypress:server:util:resolve')
 
@@ -15,13 +14,9 @@ module.exports = {
     }
 
     try {
-      const options = {
-        basedir: projectRoot,
-      }
+      debug('resolving typescript with projectRoot %o', projectRoot)
 
-      debug('resolving typescript with options %o', options)
-
-      const resolved = resolve.sync('typescript', options)
+      const resolved = require.resolve('typescript', { paths: [projectRoot] })
 
       debug('resolved typescript %s', resolved)
 
