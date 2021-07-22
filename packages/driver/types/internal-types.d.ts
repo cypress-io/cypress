@@ -4,7 +4,7 @@
 declare namespace Cypress {
   interface Actions {
     (action: 'net:event', frame: any)
-    (action: 'proxy:data', data: any)
+    (action: 'request:event', data: any)
   }
 
   interface cy {

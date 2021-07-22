@@ -25,7 +25,7 @@ const LogError: ErrorMiddleware = function () {
 
 const SendToDriver: ErrorMiddleware = function () {
   if (this.req.browserPreRequest) {
-    this.socket.toDriver('proxy:data', 'request:error', {
+    this.socket.toDriver('request:event', 'request:error', {
       requestId: this.req.browserPreRequest.requestId,
       error: errors.clone(this.error),
     })

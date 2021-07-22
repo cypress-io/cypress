@@ -3,7 +3,7 @@ import './setup'
 describe('cy.intercept', () => {
   const { $ } = Cypress
 
-  const emitProxyLog = () => Cypress.emit('proxy:data', 'incoming:request', {
+  const emitProxyLog = () => Cypress.emit('request:event', 'incoming:request', {
     requestId: 1,
     method: 'GET',
     url: '',

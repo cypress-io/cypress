@@ -172,7 +172,7 @@ export class ProxyLogging {
   proxyRequests: Array<ProxyRequest> = []
 
   constructor (private Cypress: Cypress.Cypress) {
-    Cypress.on('proxy:data', (eventName, data) => {
+    Cypress.on('request:event', (eventName, data) => {
       switch (eventName) {
         case 'incoming:request':
           return this.logIncomingRequest(data)
@@ -181,7 +181,7 @@ export class ProxyLogging {
         case 'request:error':
           return this.updateRequestWithError(data)
         default:
-          throw new Error(`unrecognized proxy:data event ${eventName}`)
+          throw new Error(`unrecognized request:event event ${eventName}`)
       }
     })
 
