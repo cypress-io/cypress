@@ -1,15 +1,15 @@
 import { objectType, enumType } from 'nexus'
 
-const PluginsState = enumType({
-  name: 'PluginsState',
+const InitState = enumType({
+  name: 'InitState',
   members: ['uninitialized', 'initializing', 'initialized', 'error'],
 })
 
-const InitPluginsStatus = objectType({
-  name: 'InitPluginsStatus',
+const InitStatus = objectType({
+  name: 'InitStatus',
   definition (t) {
     t.nonNull.field('state', {
-      type: PluginsState,
+      type: InitState,
     }),
     t.string('message')
   },
@@ -22,7 +22,11 @@ export const Project = objectType({
     t.nonNull.boolean('isOpen')
     t.nonNull.boolean('isCurrent')
     t.field('plugins', {
-      type: InitPluginsStatus,
+      type: InitStatus,
+    })
+
+    t.field('server', {
+      type: InitStatus,
     })
   },
 })

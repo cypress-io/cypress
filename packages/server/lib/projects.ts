@@ -88,37 +88,81 @@ class Projects {
     }
   }
 
+  async launchRunner () {
+    if (!this.openProject) {
+      throw Error('Must set currentProjectId before calling launchRunner!')
+    }
+
+    const options = {}
+
+    return browsers.open(chrome, options, this.openProject.getAutomation())
+  }
+
   async initializeServer () {
     if (!this.openProject) {
-      return
+      throw Error('Must set currentProjectId before calling initializeServer!')
+    }
+
+    // already listening
+    if (this.openProject._server?.listening) {
+      return this.openProject
     }
 
     process.chdir(this.openProject.projectRoot)
+
+    this.openProject.serverStatus = {
+      state: 'initializing',
+      message: null,
+    }
+
     const server = this.openProject.createServer(this.openProject.projectType)
 
     this.openProject._server = server
 
-    const all = await browsers.get()
+    try {
+      server.open(this.openProject.getConfig(), {
+        getSpec: () => null,
+        getCurrentBrowser: () => {
+          return {
+            name: 'chrome',
+            family: 'chromium',
+            channel: 'stable',
+            version: '91.0.4472.164',
+            displayName: 'chrome',
+            path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+            minSupportedVersion: 64,
+            isHeaded: true,
+            isHeadless: false,
+            majorVersion: 91 as never,
+          }
+        },
+        onError: () => {},
+        onWarning: () => {},
+        shouldCorrelatePreRequests: () => true,
+        projectType: this.openProject.projectType,
+        SocketCtor: this.openProject.projectType === 'e2e' ? SocketE2E : SocketCt,
+        createRoutes: this.openProject.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+        // @ts-ignore
+        specsStore: null,
+      })
 
-    const config = this.openProject.getConfig()
+      this.openProject.serverStatus = {
+        state: 'initialized',
+        message: null,
+      }
+    } catch (e) {
+      this.openProject.serverStatus = {
+        state: 'error',
+        message: null,
+      }
+    }
 
-    server.open(config, {
-      getSpec: () => null,
-      getCurrentBrowser: () => all[0],
-      onError: () => {},
-      onWarning: () => {},
-      shouldCorrelatePreRequests: () => true,
-      projectType: this.openProject.projectType,
-      SocketCtor: this.openProject.projectType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.openProject.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
-      // @ts-ignore
-      specsStore: null,
-    })
+    return
   }
 
   get openProject () {
     return this.currentProjectId
-      ? this.projects.find((p) => p.id === this.currentProjectId)!
+      ? this.projects.find((p) => p.id === this.currentProjectId)
       : undefined
   }
 }

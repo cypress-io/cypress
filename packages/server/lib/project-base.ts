@@ -93,7 +93,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   public projectType: RunnerType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
-  public pluginsStatus: NexusGenObjects['InitPluginsStatus'] = {
+  public pluginsStatus: NexusGenObjects['InitStatus'] = {
+    state: 'uninitialized',
+  }
+  public serverStatus: NexusGenObjects['InitStatus'] = {
     state: 'uninitialized',
   }
   private generatedProjectIdTimestamp: any

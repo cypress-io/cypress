@@ -141,6 +141,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._server, 'open')
   }
 
+  get listening () {
+    return this.server.listening
+  }
+
   get socket () {
     return this.ensureProp(this._socket, 'open')
   }

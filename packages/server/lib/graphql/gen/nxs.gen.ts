@@ -50,7 +50,7 @@ export interface NexusGenEnums {
   BrowserChannel: "beta" | "canary" | "dev" | "nightly" | "stable"
   BrowserFamily: "chromium" | "firefox"
   BrowserName: "chrome" | "chromium" | "edge" | "electron" | "firefox"
-  PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
+  InitState: "error" | "initialized" | "initializing" | "uninitialized"
 }
 
 export interface NexusGenScalars {
@@ -75,16 +75,17 @@ export interface NexusGenObjects {
     path: string; // String!
     version: string; // String!
   }
-  InitPluginsStatus: { // root type
+  InitStatus: { // root type
     message?: string | null; // String
-    state: NexusGenEnums['PluginsState']; // PluginsState!
+    state: NexusGenEnums['InitState']; // InitState!
   }
   Mutation: {};
   Project: { // root type
     isCurrent: boolean; // Boolean!
     isOpen: boolean; // Boolean!
-    plugins?: NexusGenRootTypes['InitPluginsStatus'] | null; // InitPluginsStatus
+    plugins?: NexusGenRootTypes['InitStatus'] | null; // InitStatus
     projectRoot: string; // String!
+    server?: NexusGenRootTypes['InitStatus'] | null; // InitStatus
   }
   Query: {};
   Wizard: Wizard;
@@ -114,19 +115,22 @@ export interface NexusGenFieldTypes {
     path: string; // String!
     version: string; // String!
   }
-  InitPluginsStatus: { // field return type
+  InitStatus: { // field return type
     message: string | null; // String
-    state: NexusGenEnums['PluginsState']; // PluginsState!
+    state: NexusGenEnums['InitState']; // InitState!
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
     initializePlugins: NexusGenRootTypes['Project']; // Project!
+    initializeServer: NexusGenRootTypes['Project']; // Project!
+    launchRunner: NexusGenRootTypes['Project']; // Project!
   }
   Project: { // field return type
     isCurrent: boolean; // Boolean!
     isOpen: boolean; // Boolean!
-    plugins: NexusGenRootTypes['InitPluginsStatus'] | null; // InitPluginsStatus
+    plugins: NexusGenRootTypes['InitStatus'] | null; // InitStatus
     projectRoot: string; // String!
+    server: NexusGenRootTypes['InitStatus'] | null; // InitStatus
   }
   Query: { // field return type
     app: NexusGenRootTypes['App'] | null; // App
@@ -153,19 +157,22 @@ export interface NexusGenFieldTypeNames {
     path: 'String'
     version: 'String'
   }
-  InitPluginsStatus: { // field return type name
+  InitStatus: { // field return type name
     message: 'String'
-    state: 'PluginsState'
+    state: 'InitState'
   }
   Mutation: { // field return type name
     addProject: 'Project'
     initializePlugins: 'Project'
+    initializeServer: 'Project'
+    launchRunner: 'Project'
   }
   Project: { // field return type name
     isCurrent: 'Boolean'
     isOpen: 'Boolean'
-    plugins: 'InitPluginsStatus'
+    plugins: 'InitStatus'
     projectRoot: 'String'
+    server: 'InitStatus'
   }
   Query: { // field return type name
     app: 'App'

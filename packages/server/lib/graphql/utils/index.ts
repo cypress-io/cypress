@@ -8,5 +8,6 @@ export function formatProject (project: ProjectBase<any>): NexusGenFieldTypes['P
     isOpen: project.isOpen,
     plugins: project.pluginsStatus,
     isCurrent: project.id === projects.currentProjectId,
+    server: project.serverStatus,
   }
 }

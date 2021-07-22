@@ -42,7 +42,31 @@ export const InitializePlugins = mutationField((t) => {
   })
 })
 
-export const addProject = mutationField((t) => {
+export const InitializeServer = mutationField((t) => {
+  t.nonNull.field('initializeServer', {
+    type: Project,
+    async resolve (_root, args, ctx) {
+      // TODO: should we await here, or return a pending state to the client?
+      await projects.initializeServer()
+
+      return formatProject(projects.openProject!)
+    },
+  })
+})
+
+export const LaunchRunner = mutationField((t) => {
+  t.nonNull.field('launchRunner', {
+    type: Project,
+    async resolve (_root, args, ctx) {
+      // TODO: should we await here, or return a pending state to the client?
+      await projects.launchRunner()
+
+      return formatProject(projects.openProject!)
+    },
+  })
+})
+
+export const AddProject = mutationField((t) => {
   t.nonNull.field('addProject', {
     type: Project,
     args: {

@@ -51,9 +51,16 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-type InitPluginsStatus {
+enum InitState {
+  error
+  initialized
+  initializing
+  uninitialized
+}
+
+type InitStatus {
   message: String
-  state: PluginsState!
+  state: InitState!
 }
 
 """
@@ -64,20 +71,16 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 type Mutation {
   addProject(input: AddProjectInput!): Project!
   initializePlugins: Project!
-}
-
-enum PluginsState {
-  error
-  initialized
-  initializing
-  uninitialized
+  initializeServer: Project!
+  launchRunner: Project!
 }
 
 type Project {
   isCurrent: Boolean!
   isOpen: Boolean!
-  plugins: InitPluginsStatus
+  plugins: InitStatus
   projectRoot: String!
+  server: InitStatus
 }
 
 type Query {
