@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 
+const $Command = require('../../cypress/command')
 const $dom = require('../../dom')
 const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
@@ -635,11 +636,11 @@ module.exports = (Commands, Cypress, cy, state) => {
       // commands inside within() callback and commands chained to it.
       const restoreCmdIndex = state('index') + 1
 
-      cy.queue.insert(restoreCmdIndex, {
+      cy.queue.insert(restoreCmdIndex, $Command.create({
         args: [subject],
         name: 'within-restore',
         fn: (subject) => subject,
-      })
+      }))
 
       state('index', restoreCmdIndex)
 

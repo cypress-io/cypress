@@ -27,6 +27,7 @@ const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
 const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
+const $Command = require('./command')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
 const $TestConfigOverrides = require('../cy/testConfigOverrides')
@@ -378,7 +379,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     // it onto the end of the queu
     const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length
 
-    queue.insert(index, obj)
+    queue.insert(index, $Command.create(obj))
 
     return Cypress.action('cy:command:enqueued', obj)
   }
