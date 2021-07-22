@@ -32,8 +32,8 @@ const cache = require(`${root}lib/cache`)
 const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
-const { ProjectBase } = require(`${root}lib/project-base`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const { getId } = require(`${root}lib/project_static`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
@@ -281,146 +281,6 @@ describe('lib/cypress', () => {
     })
   })
 
-  context('--get-key', () => {
-    it('writes out key and exits on success', function () {
-      return Promise.all([
-        user.set({ name: 'brian', authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'getProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .resolves('new-key-123')
-
-        return cypress.start(['--get-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        expect(console.log).to.be.calledWith('new-key-123')
-        this.expectExitWith(0)
-      })
-    })
-
-    it('logs error and exits when user isn\'t logged in', function () {
-      return user.set({})
-      .then(() => {
-        return cypress.start(['--get-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('NOT_LOGGED_IN')
-      })
-    })
-
-    it('logs error and exits when project does not have an id', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--get-key', `--project=${this.pristinePath}`])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
-      })
-    })
-
-    it('logs error and exits when project could not be found at the path', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--get-key', '--project=path/to/no/project'])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
-      })
-    })
-
-    it('logs error and exits when project token cannot be fetched', function () {
-      return Promise.all([
-        user.set({ authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'getProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .rejects(new Error())
-
-        return cypress.start(['--get-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('CANNOT_FETCH_PROJECT_TOKEN')
-      })
-    })
-  })
-
-  context('--new-key', () => {
-    it('writes out key and exits on success', function () {
-      return Promise.all([
-        user.set({ name: 'brian', authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'updateProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .resolves('new-key-123')
-
-        return cypress.start(['--new-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        expect(console.log).to.be.calledWith('new-key-123')
-        this.expectExitWith(0)
-      })
-    })
-
-    it('logs error and exits when user isn\'t logged in', function () {
-      return user.set({})
-      .then(() => {
-        return cypress.start(['--new-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('NOT_LOGGED_IN')
-      })
-    })
-
-    it('logs error and exits when project does not have an id', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--new-key', `--project=${this.pristinePath}`])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_ID', this.pristinePath)
-      })
-    })
-
-    it('logs error and exits when project could not be found at the path', function () {
-      return user.set({ authToken: 'auth-token-123' })
-      .then(() => {
-        return cypress.start(['--new-key', '--project=path/to/no/project'])
-      }).then(() => {
-        this.expectExitWithErr('NO_PROJECT_FOUND_AT_PROJECT_ROOT', 'path/to/no/project')
-      })
-    })
-
-    it('logs error and exits when project token cannot be fetched', function () {
-      return Promise.all([
-        user.set({ authToken: 'auth-token-123' }),
-
-        ProjectBase.id(this.todosPath)
-        .then((id) => {
-          this.projectId = id
-        }),
-      ])
-      .then(() => {
-        sinon.stub(api, 'updateProjectToken')
-        .withArgs(this.projectId, 'auth-token-123')
-        .rejects(new Error())
-
-        return cypress.start(['--new-key', `--project=${this.todosPath}`])
-      }).then(() => {
-        this.expectExitWithErr('CANNOT_CREATE_PROJECT_TOKEN')
-      })
-    })
-  })
-
   context('--run-project', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
@@ -508,7 +368,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase(this.noScaffolding)).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, projectType: 'e2e' })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -606,9 +466,10 @@ describe('lib/cypress', () => {
           return fs.statAsync(cfg.integrationFolder)
         }).then(() => {
           return Promise.join(
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'actions.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'files.spec.js')),
+            fs.statAsync(path.join(cfg.integrationFolder, '2-advanced-examples', 'viewport.spec.js')),
           )
         })
       })
@@ -1187,8 +1048,8 @@ describe('lib/cypress', () => {
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
             const launchedChrome = R.merge(chrome, {
-              isHeadless: false,
-              isHeaded: true,
+              isHeadless: true,
+              isHeaded: false,
             })
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)
@@ -1250,7 +1111,8 @@ describe('lib/cypress', () => {
       })
 
       // TODO: handle PORT_IN_USE short integration test
-      it('logs error and exits when port is in use', function () {
+      it('logs error and exits when port is in use', async function () {
+        sinon.stub(ProjectBase.prototype, 'getAutomation').returns({ use: () => {} })
         let server = http.createServer()
 
         server = Promise.promisifyAll(server)
@@ -1259,7 +1121,7 @@ describe('lib/cypress', () => {
         .then(() => {
           return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         }).then(() => {
-          this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
+          this.expectExitWithErr('PORT_IN_USE_SHORT', '5544')
         })
       })
     })
@@ -1375,7 +1237,7 @@ describe('lib/cypress', () => {
         // make sure we have no user object
         user.set({}),
 
-        ProjectBase.id(this.todosPath)
+        getId(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -1816,7 +1678,6 @@ describe('lib/cypress', () => {
     })
 
     it('passes filtered options to Project#open and sets cli config', function () {
-      const getConfig = sinon.spy(ProjectE2E.prototype, 'getConfig')
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
@@ -1846,12 +1707,12 @@ describe('lib/cypress', () => {
 
         return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
       }).then(() => {
-        expect(getConfig).to.be.calledWithMatch({
-          port: 2121,
-          pageLoadTimeout: 1000,
-          report: false,
-          env: { baz: 'baz' },
-        })
+        const projectOptions = openProject.getProject().options
+
+        expect(projectOptions.port).to.eq(2121)
+        expect(projectOptions.pageLoadTimeout).to.eq(1000)
+        expect(projectOptions.report).to.eq(false)
+        expect(projectOptions.env).to.eql({ baz: 'baz' })
 
         expect(open).to.be.called
 

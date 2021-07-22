@@ -246,8 +246,8 @@ class Command extends Component<Props> {
             'command-is-open': this.isOpen,
           },
         )}
-        onMouseOver={() => this._snapshot(true)}
-        onMouseOut={() => this._snapshot(false)}
+        onMouseEnter={() => this._snapshot(true)}
+        onMouseLeave={() => this._snapshot(false)}
       >
         <FlashOnClick
           message='Printed output to your console'

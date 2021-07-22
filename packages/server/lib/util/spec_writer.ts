@@ -1,5 +1,5 @@
 import { fs } from './fs'
-import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
+import { ASTNode, Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
 import path from 'path'
@@ -21,9 +21,22 @@ export interface Command {
 }
 
 export interface FileDetails {
-  absoluteFile: string
+  absoluteFile?: string
   column: number
   line: number
+}
+
+export interface SaveDetails {
+  fileDetails?: FileDetails
+  absoluteFile: string
+  runnableTitle: string
+  commands: Command[]
+  testName?: string
+}
+
+const printSettings: recast.Options = {
+  quote: 'single',
+  wrapColumn: 360,
 }
 
 const generateCommentText = (comment) => ` ==== ${comment} ==== `
@@ -46,6 +59,8 @@ export const generateCypressCommand = (cmd: Command) => {
   let stmt
 
   if (selector) {
+    // generates a statement in the form of cy.get(selector).name(message)
+    // ex. cy.get('.btn').click() or cy.get('.input').type('words')
     stmt = b.expressionStatement(
       b.callExpression(
         b.memberExpression(
@@ -63,6 +78,8 @@ export const generateCypressCommand = (cmd: Command) => {
       ),
     )
   } else {
+    // generates a statement in the form of cy.name(message)
+    // ex. cy.visit('https://example.cypress.io')
     stmt = b.expressionStatement(
       b.callExpression(
         b.memberExpression(
@@ -83,6 +100,8 @@ export const generateCypressCommand = (cmd: Command) => {
 }
 
 export const generateTest = (name: string, body: n.BlockStatement) => {
+  // creates an `it` statement with name and given body
+  // it('name', function () { body })
   const stmt = b.expressionStatement(
     b.callExpression(
       b.identifier('it'),
@@ -126,34 +145,88 @@ export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
   return body
 }
 
-export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
+export const convertCommandsToText = (commands: Command[]) => {
+  const program = b.program([])
+
+  addCommandsToBody(program.body, commands)
+
+  const { code } = recast.print(program, printSettings)
+
+  return code
+}
+
+const getIdentifier = (node: n.CallExpression): n.Identifier | undefined => {
+  const { callee } = node
+
+  if (callee.type === 'Identifier') {
+    return callee
+  }
+
+  // .only forms a member expression
+  // with the first part (`object`) being the identifier of interest
+  if (callee.type === 'MemberExpression') {
+    return callee.object as n.Identifier
+  }
+
+  return
+}
+
+const getFunctionFromExpression = (node: n.CallExpression): n.FunctionExpression | undefined => {
+  const arg1 = node.arguments[1]
+
+  // if the second argument is an object we have a test/suite configuration
+  if (arg1.type === 'ObjectExpression') {
+    return node.arguments[2] as n.FunctionExpression
+  }
+
+  return arg1 as n.FunctionExpression
+}
+
+// try to find the runnable based off line and column number
+const generateFileDetailsAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
   const { line, column } = fileDetails
 
   return {
     visitCallExpression (path) {
       const { node } = path
-      const { callee } = node
 
-      let identifier
+      const identifier = getIdentifier(node)
 
-      if (callee.type === 'Identifier') {
-        identifier = callee
-      } else if (callee.type === 'MemberExpression') {
-        identifier = callee.object
-      }
-
-      if (identifier) {
+      if (identifier && identifier.loc) {
         const columnStart = identifier.loc.start.column + 1
         const columnEnd = identifier.loc.end.column + 2
 
         if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
-          const arg1 = node.arguments[1]
-
-          const fn = (arg1.type === 'ObjectExpression' ? node.arguments[2] : arg1) as n.FunctionExpression
+          const fn = getFunctionFromExpression(node)
 
           if (!fn) {
-            return false
+            return this.abort()
           }
+
+          cb(fn)
+
+          return this.abort()
+        }
+      }
+
+      return this.traverse(path)
+    },
+  }
+}
+
+// try to find the runnable based off title
+const generateTestPathAstRules = (runnableTitle: string, fnNames: string[], cb: (fn?: n.FunctionExpression) => any): Visitor<{}> => {
+  return {
+    visitCallExpression (path) {
+      const { node } = path
+
+      const identifier = getIdentifier(node)
+
+      if (identifier && fnNames.includes(identifier.name)) {
+        const arg0 = node.arguments[0] as n.StringLiteral
+
+        if (arg0.value === runnableTitle) {
+          const fn = getFunctionFromExpression(node)
 
           cb(fn)
 
@@ -166,7 +239,7 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
   }
 }
 
-export const createTest = ({ body }: n.Program | n.BlockStatement, commands: Command[], testName: string) => {
+const createTest = ({ body }: n.Program | n.BlockStatement, commands: Command[], testName: string) => {
   const testBody = b.blockStatement([])
 
   addCommandsToBody(testBody.body, commands)
@@ -178,37 +251,74 @@ export const createTest = ({ body }: n.Program | n.BlockStatement, commands: Com
   return test
 }
 
-export const appendCommandsToTest = (fileDetails: FileDetails, commands: Command[]) => {
-  const { absoluteFile } = fileDetails
+const updateRunnableExpression = async ({ fileDetails, absoluteFile, runnableTitle }: SaveDetails, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Promise<Boolean> => {
+  // if we have file details we first try to find the runnable using line and column number
+  if (fileDetails && fileDetails.absoluteFile) {
+    const fileDetailsAst = await getAst(fileDetails.absoluteFile)
+    let fileDetailsSuccess = false
 
-  let success = false
+    const fileDetailsAstRules = generateFileDetailsAstRules(fileDetails, fnNames, (fn) => {
+      cb(fn)
 
-  const astRules = generateAstRules(fileDetails, ['it', 'specify'], (fn: n.FunctionExpression) => {
+      fileDetailsSuccess = true
+    })
+
+    visit(fileDetailsAst, fileDetailsAstRules)
+
+    if (fileDetailsSuccess) {
+      return writeAst(fileDetails.absoluteFile, fileDetailsAst)
+      .then(() => true)
+    }
+  }
+
+  // if there are no file details or the line/column are incorrect
+  // we try to then match by runnable title
+  const runnableTitleAst = await getAst(absoluteFile)
+  let runnableTitleSuccess = false
+  let runnableTitleFound = false
+
+  const runnableTitleAstRules = generateTestPathAstRules(runnableTitle, fnNames, (fn) => {
+    // if there are two runnables with the same title we can't tell which is the target
+    // so we don't save anything
+    if (runnableTitleFound) {
+      runnableTitleSuccess = false
+    } else {
+      if (fn) {
+        cb(fn)
+        runnableTitleSuccess = true
+      }
+
+      runnableTitleFound = true
+    }
+  })
+
+  visit(runnableTitleAst, runnableTitleAstRules)
+
+  if (runnableTitleSuccess) {
+    return writeAst(absoluteFile, runnableTitleAst)
+    .then(() => true)
+  }
+
+  return Promise.resolve(false)
+}
+
+export const appendCommandsToTest = async (saveDetails: SaveDetails) => {
+  const { commands } = saveDetails
+
+  return updateRunnableExpression(saveDetails, ['it', 'specify'], (fn) => {
     addCommandsToBody(fn.body.body, commands)
-
-    success = true
   })
-
-  return rewriteSpec(absoluteFile, astRules)
-  .then(() => success)
 }
 
-export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command[], testName: string) => {
-  const { absoluteFile } = fileDetails
+export const createNewTestInSuite = (saveDetails: SaveDetails) => {
+  const { commands, testName } = saveDetails
 
-  let success = false
-
-  const astRules = generateAstRules(fileDetails, ['context', 'describe'], (fn: n.FunctionExpression) => {
-    createTest(fn.body, commands, testName)
-
-    success = true
+  return updateRunnableExpression(saveDetails, ['describe', 'context'], (fn) => {
+    createTest(fn.body, commands, testName!)
   })
-
-  return rewriteSpec(absoluteFile, astRules)
-  .then(() => success)
 }
 
-export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, commands: Command[], testName: string) => {
+export const createNewTestInFile = (absoluteFile: string, commands: Command[], testName: string): Promise<Boolean> => {
   let success = false
 
   const astRules = {
@@ -229,16 +339,26 @@ export const createNewTestInFile = ({ absoluteFile }: {absoluteFile: string}, co
     },
   }
 
-  return rewriteSpec(absoluteFile, astRules)
-  .then(() => success)
+  return getAst(absoluteFile)
+  .then((ast) => {
+    visit(ast, astRules)
+
+    if (success) {
+      return writeAst(absoluteFile, ast)
+      .then(() => true)
+    }
+
+    return Promise.resolve(false)
+  })
 }
 
-export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
+const getAst = (path: string): Promise<ASTNode> => {
   return fs.readFile(path)
   .then((contents) => {
-    const ast = recast.parse(contents.toString(), {
+    return recast.parse(contents.toString(), {
       parser: {
         parse (source) {
+          // use babel parser for ts support and more
           return parse(source, {
             errorRecovery: true,
             sourceType: 'unambiguous',
@@ -249,16 +369,13 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
         },
       },
     })
-
-    visit(ast, astRules)
-
-    const { code } = recast.print(ast, {
-      quote: 'single',
-      wrapColumn: 360,
-    })
-
-    return fs.writeFile(path, code)
   })
+}
+
+const writeAst = (path: string, ast: ASTNode) => {
+  const { code } = recast.print(ast, printSettings)
+
+  return fs.writeFile(path, code)
 }
 
 export const createFile = (path: string) => {

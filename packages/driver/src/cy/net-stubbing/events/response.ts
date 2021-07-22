@@ -12,7 +12,7 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import { parseJsonBody } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 
 type Result = HandlerResult<CyHttpMessages.IncomingResponse>
 
@@ -22,7 +22,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const request = getRequest(routeId, frame.requestId)
   const resClone = _.cloneDeep(res)
 
-  parseJsonBody(res)
+  const bodyParsed = parseJsonBody(res)
 
   let responseSent = false
   let resolved = false
@@ -106,8 +106,8 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
     finishResponseStage(res)
 
-    if (_.isObject(res.body)) {
-      res.body = JSON.stringify(res.body)
+    if (bodyParsed) {
+      stringifyJsonBody(res)
     }
 
     resolve({

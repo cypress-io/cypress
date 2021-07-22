@@ -88,6 +88,24 @@ const createApp = (port) => {
     })
   })
 
+  app.get('/binary', (req, res) => {
+    const uint8 = new Uint8Array(3)
+
+    uint8[0] = 120
+    uint8[1] = 42
+    uint8[2] = 7
+
+    res.setHeader('Content-Type', 'application/octet-stream')
+
+    return res.send(Buffer.from(uint8))
+  })
+
+  app.post('/binary', (req, res) => {
+    res.setHeader('Content-Type', 'application/octet-stream')
+
+    return res.send(req.body)
+  })
+
   app.get('/1mb', (req, res) => {
     return res.type('text').send('X'.repeat(1024 * 1024))
   })

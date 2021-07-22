@@ -182,7 +182,7 @@ export class CdpAutomation {
       originalResourceType: params.type,
     }
 
-    this.automation.onBrowserPreRequest(browserPreRequest)
+    this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private onResponseReceived = (params: cdp.Network.ResponseReceivedEvent) => {

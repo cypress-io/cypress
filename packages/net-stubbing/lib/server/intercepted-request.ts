@@ -181,7 +181,7 @@ export class InterceptedRequest {
           await handleSubscription(subscription)
 
           if (stopPropagationNow) {
-            break outerLoop
+            break
           }
         }
 
@@ -195,10 +195,14 @@ export class InterceptedRequest {
           }
 
           if (immediateStaticResponse) {
-            sendStaticResponse(this, immediateStaticResponse)
+            await sendStaticResponse(this, immediateStaticResponse)
 
             return data
           }
+        }
+
+        if (stopPropagationNow) {
+          break outerLoop
         }
       }
     }

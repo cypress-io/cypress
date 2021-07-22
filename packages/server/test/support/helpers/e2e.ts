@@ -23,7 +23,7 @@ const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
-require(`${root}../lib/project-e2e`)
+require(`${root}../lib/project-base`)
 
 cp = Bluebird.promisifyAll(cp)
 
@@ -685,7 +685,7 @@ const e2e = {
       Fixtures.installStubPackage(options.project, options.stubPackage)
     }
 
-    args = ['index.js'].concat(args)
+    args = options.args || ['index.js'].concat(args)
 
     let stdout = ''
     let stderr = ''
@@ -763,7 +763,8 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
-      const sp = cp.spawn('node', args, {
+      const cmd = options.command || 'node'
+      const sp = cp.spawn(cmd, args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
         .extend({
@@ -792,6 +793,7 @@ const e2e = {
         })
         .extend(options.processEnv)
         .value(),
+        ...options.spawnOpts,
       })
 
       const ColorOutput = function () {

@@ -138,7 +138,7 @@ declare namespace CypressCommandLine {
     /**
      * Specify configuration
      */
-    config: Partial<Cypress.ResolvedConfigOptions>
+    config: Cypress.ConfigOptions
     /**
      * Path to the config file to be used.
      *

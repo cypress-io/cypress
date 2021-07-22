@@ -13,6 +13,8 @@ export type FixtureOpts = {
 
 export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
 
+export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
+
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
   'body', // doesn't exist on the OG message, but will be attached by the backend
@@ -70,9 +72,9 @@ export declare namespace NetEvent {
   }
 
   export namespace ToServer {
-    export interface AddRoute {
+    export interface AddRoute<StaticResponse> {
       routeMatcher: AnnotatedRouteMatcherOptions
-      staticResponse?: BackendStaticResponse
+      staticResponse?: StaticResponse
       hasInterceptor: boolean
       routeId: string
     }

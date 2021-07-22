@@ -1,3 +1,17 @@
+# [@cypress/vite-dev-server-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.1...@cypress/vite-dev-server-v2.0.2) (2021-07-15)
+
+
+### Bug Fixes
+
+* **vite:** autorefresh new spec files ([#17270](https://github.com/cypress-io/cypress/issues/17270)) ([99f9352](https://github.com/cypress-io/cypress/commit/99f93528c87b22656d4d732dfb2ed6843991d861))
+
+# [@cypress/vite-dev-server-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.0...@cypress/vite-dev-server-v2.0.1) (2021-06-18)
+
+
+### Bug Fixes
+
+* vite startDevServer needs to return close() ([#16950](https://github.com/cypress-io/cypress/issues/16950)) ([67b2b3b](https://github.com/cypress-io/cypress/commit/67b2b3b9be13437e56384e377c7d32c6e433e064))
+
 # [@cypress/vite-dev-server-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.7...@cypress/vite-dev-server-v2.0.0) (2021-05-31)
 
 
