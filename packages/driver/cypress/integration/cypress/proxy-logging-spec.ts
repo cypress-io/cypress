@@ -69,7 +69,7 @@ describe('Proxy Logging', () => {
         })
 
         // case depends on browser
-        const refererKey = _.keys(log.consoleProps['Request Headers']).find((k) => k.toLowerCase() === 'referer')
+        const refererKey = _.keys(log.consoleProps['Request Headers']).find((k) => k.toLowerCase() === 'referer') || 'referer'
 
         expect(log.consoleProps['Request Headers']).to.include({
           [refererKey]: window.location.href,
@@ -156,6 +156,34 @@ describe('Proxy Logging', () => {
           })
         })
         .visit('/fixtures/empty.html')
+      })
+
+      it('works with forceNetworkError', () => {
+        const logs: any[] = []
+
+        cy.on('log:added', (log) => {
+          if (log.displayName === 'fetch') {
+            logs.push(log)
+          }
+        })
+
+        cy.intercept('/foo', { forceNetworkError: true }).as('alias')
+        .then(() => {
+          return fetch('/foo')
+          .catch(() => {})
+        })
+        .wrap(logs)
+        .should((logs) => {
+          // retries...
+          expect(logs).to.have.length.greaterThan(2)
+
+          for (const log of logs) {
+            expect(log.err).to.include({ name: 'Error' })
+            expect(log.consoleProps['Error']).to.be.an('Error')
+            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'error'])
+            expect(log.state).to.eq('failed')
+          }
+        })
       })
 
       context('flags', () => {

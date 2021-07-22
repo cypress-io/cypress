@@ -52,3 +52,8 @@ export type BrowserResponseReceived = {
   status: number
   headers: { [key: string]: string | string[] }
 }
+
+export type RequestError = {
+  requestId: string
+  error: any
+}

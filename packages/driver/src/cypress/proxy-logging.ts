@@ -1,5 +1,6 @@
 import { Interception, Route } from '@packages/net-stubbing/lib/types'
-import { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy/lib/types'
+import { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
+import { makeErrFromObj } from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
@@ -94,6 +95,10 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
         consoleProps['Matched `cy.intercept()`s'] = req.interceptions
       }
 
+      if (req.error) {
+        consoleProps['Error'] = req.error
+      }
+
       return consoleProps
     },
     renderProps: () => {
@@ -133,6 +138,7 @@ class ProxyRequest {
   log?: Cypress.Log
   preRequest: BrowserPreRequest
   responseReceived?: BrowserResponseReceived
+  error?: Error
   xhr?: Cypress.WaitXHR
   interceptions: Array<Interception> = []
   displayInterceptions: Array<{ command: 'intercept' | 'route', alias?: string, type: 'stub' | 'spy' | 'function' }> = []
@@ -172,6 +178,8 @@ export class ProxyLogging {
           return this.logIncomingRequest(data)
         case 'response:received':
           return this.updateRequestWithResponse(data)
+        case 'request:error':
+          return this.updateRequestWithError(data)
         default:
           throw new Error(`unrecognized proxy:data event ${eventName}`)
       }
@@ -237,6 +245,17 @@ export class ProxyLogging {
 
     proxyRequest.responseReceived = responseReceived
     proxyRequest.log?.snapshot('response').end()
+  }
+
+  private updateRequestWithError (error: RequestError): void {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === error.requestId)
+
+    if (!proxyRequest) {
+      return debug('unmatched error event %o', error)
+    }
+
+    proxyRequest.error = makeErrFromObj(error.error)
+    proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
   /**
