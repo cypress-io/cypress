@@ -30,7 +30,7 @@ export { RequestMiddleware } from './http/request-middleware'
 
 export { ResponseMiddleware } from './http/response-middleware'
 
-export type ResourceType = 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 
 /**
  * Metadata about an HTTP request, according to the browser's pre-request event.

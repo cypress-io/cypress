@@ -177,7 +177,7 @@ const startXhrServer = (cy, state, config) => {
                 alias,
               },
             ] : [],
-            status: route?.response ? 'stubbed' : 'spied',
+            status: route ? (route?.response ? 'stubbed' : 'spied') : undefined,
           }
         },
       })

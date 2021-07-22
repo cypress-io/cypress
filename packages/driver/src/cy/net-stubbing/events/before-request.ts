@@ -27,9 +27,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const { data: req, requestId, subscription } = frame
   const { routeId } = subscription
   const route = getRoute(routeId)
-  const reqClone = _.cloneDeep(req)
 
   parseJsonBody(req)
+
+  req.responseTimeout = Cypress.config('responseTimeout')
+  const reqClone = _.cloneDeep(req)
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -67,6 +69,9 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       requestWaited: false,
       responseWaited: false,
       subscriptions: [],
+      setLogFlag: () => {
+        throw new Error('default setLogFlag reached')
+      },
     }
   }
 
@@ -116,8 +121,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
       subscribe('response:callback', responseHandler)
-
-      userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 
       return finish(true)
     },
@@ -199,7 +202,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     }
 
     if (!_.isEqual(req, reqClone)) {
-      request.log.setFlag('reqModified')
+      request.setLogFlag('reqModified')
     }
 
     resolve({
@@ -214,7 +217,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.log = Cypress.ProxyLogging.logInterception(request, route)
+  request.setLogFlag = Cypress.ProxyLogging.logInterception(request, route).setFlag
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

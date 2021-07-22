@@ -146,7 +146,7 @@ class ProxyRequest {
     opts && _.assign(this, opts)
   }
 
-  setFlag (flag: keyof ProxyRequest['flags']) {
+  setFlag = (flag: keyof ProxyRequest['flags']) => {
     this.flags[flag] = true
     this.log?.set({})
   }
@@ -174,6 +174,11 @@ export class ProxyLogging {
 
     Cypress.on('test:before:run', () => {
       // TODO: end pending logs
+      for (const proxyRequest of this.proxyRequests) {
+        if (!proxyRequest.responseReceived && proxyRequest.log) {
+          proxyRequest.log.end()
+        }
+      }
       this.unloggedPreRequests = []
       this.proxyRequests = []
       this.unmatchedXhrLogs = []
@@ -251,7 +256,6 @@ export class ProxyLogging {
         proxyRequest.setFlag(route?.response ? 'stubbed' : 'spied')
 
         log.set(getRequestLogConfig(proxyRequest))
-        log.fireChangeEvent()
 
         this.proxyRequests.push(proxyRequest)
 

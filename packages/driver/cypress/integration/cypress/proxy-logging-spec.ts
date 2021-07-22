@@ -1,336 +1,306 @@
 describe('Proxy Logging', () => {
-  const { $ } = Cypress
+  const url = '/testFlag'
+  const alias = 'aliasName'
 
-  it.only('demo', () => {
-    cy.intercept('/intercepted').as('anIntercept')
-    cy.get('body').as('someGet')
-    // .wait('@someGet')
-    .get('@someGet')
+  function testFlag (expectStatus, expectInterceptions, setupFn, getFn) {
+    return () => {
+      setupFn()
 
-    // cy.intercept('**/*.css')
-    // cy.visit('http://docs.cypress.io')
-    // cy.intercept('*')
-    cy.server()
-    cy.route('/routed').as('aRoute')
-    cy.route('/routed-stub', 'foo').as('aRouteStub')
-    cy.route('/bothmatch').as('bothMatchR')
-    cy.intercept('/bothmatch').as('bothMatchI')
-    cy.intercept('/overlap', 'k').as('overlapA')
-    cy.intercept('/overlap').as('overlapB')
-    cy.intercept('/modify-req', (req) => {
-      req.headers.foo = 'bar'
-    }).as('modifyReq')
+      let resolve
+      const p = new Promise((_resolve) => resolve = _resolve)
 
-    cy.intercept('/modify-res', (req) => {
-      req.continue((res) => {
-        res.headers.foo = 'bar'
-      })
-    }).as('modifyRes')
+      function testLog (log) {
+        expect(log.alias).to.eq(expectStatus ? alias : undefined)
+        expect(log.renderProps).to.deep.include({
+          status: expectStatus,
+          interceptions: expectInterceptions,
+        })
 
-    cy.intercept('/modify-both', (req) => {
-      req.headers.foo = 'bar'
-      req.continue((res) => {
-        res.headers.foo = 'bar'
-      })
-    })
+        resolve()
+      }
 
-    // cy.intercept('/modify-req-res').as('modifyReqRes')
-    cy.window().then(({ XMLHttpRequest }) => {
-      cy.log('👁 Unmatched XHR:')
-      .then(() => {
-        const xhr = new XMLHttpRequest()
+      cy.then(() => {
+        cy.on('log:changed', (log) => {
+          if (log.name === 'xhr') {
+            try {
+              testLog(log)
+              resolve()
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('assertions failed:', err)
+            }
+          }
+        })
 
-        xhr.open('GET', '/unmatched-xhr')
-        xhr.send()
-      })
-      .log('👁 cy.route matched XHR spy:')
-      .then(() => {
-        const xhr = new XMLHttpRequest()
+        getFn(url)
+      }).then(() => p)
 
-        xhr.open('GET', '/routed')
-        xhr.send()
-      })
-      .log('👁 cy.route matched XHR stub:')
-      .then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/routed-stub')
-        xhr.send()
-      })
-      .log('👁 cy.route and cy.intercept match:')
-      .then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/bothmatch')
-        xhr.send()
-      })
-      .log('👁 only cy.intercept matches a fetch:')
-      .then(() => {
-        fetch('/bothmatch')
-      })
-      .wait('@bothMatchI').wait('@bothMatchI')
-      .log('👁 with a few matching intercepts')
-      .then(() => {
-        fetch('/overlap')
-      })
-      .wait('@overlapA')
-      .log('👁 with req/res modification')
-      .then(() => {
-        fetch('/modify-req')
-        fetch('/modify-res')
-        fetch('/modify-both')
-      })
-    })
-  })
-
-  it('intercepted cy.visits do not wait for a pre-request', () => {
-    cy.intercept('*', () => {})
-
-    cy.visit('/fixtures/empty.html', { timeout: 100 })
-  })
-
-  let logs: Cypress.Log[]
+      if (expectStatus) {
+        cy.wait(`@${alias}`)
+      }
+    }
+  }
 
   beforeEach(() => {
-    logs = []
+    // block race conditions caused by log update debouncing
+    // @ts-ignore
+    Cypress.config('logAttrsDelay', 0)
   })
 
-  it('logs fetches', (done) => {
-    let logChanged = false
+  context('request logging', () => {
+    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+      fetch('/some-url')
 
-    fetch('/something')
-
-    cy.once('log:added', (log) => {
-      // the log should be pending
-      expect(log).to.include({
-        name: 'xhr',
-        displayName: 'fetch',
-        method: 'GET',
-        url: 'http://localhost:3500/something',
-      })
-
-      expect(log.renderProps).to.include({
-        message: 'GET /something',
-        indicator: 'pending',
-      })
-
-      expect(log.consoleProps).to.include({
-        Method: 'GET',
-        URL: 'http://localhost:3500/something',
-        'Resource Type': 'fetch',
-      })
-
-      expect(log.consoleProps['Request Headers']).to.have.property('User-Agent')
-      expect(log.consoleProps).to.not.have.property('Response Headers')
-
-      cy.on('log:changed', (log) => {
-        if (logChanged || log.renderProps.indicator === 'pending') {
-          return
-        }
-
-        // the log should be done
-        logChanged = true
-
-        expect(log).to.include({
-          name: 'xhr',
-          displayName: 'fetch',
-          method: 'GET',
-          url: 'http://localhost:3500/something',
-        })
-
+      // trigger: Cypress.Log() called
+      cy.once('log:added', (log) => {
+        expect(log.snapshots).to.be.undefined
+        expect(log.displayName).to.eq('fetch')
         expect(log.renderProps).to.include({
-          message: 'GET 404 /something',
-          indicator: 'bad',
+          indicator: 'pending',
+          message: 'GET /some-url',
         })
 
-        expect(log.consoleProps['Response Headers']).to.have.property('date')
-        expect(log.consoleProps['Response Status Code']).to.eq(404)
+        expect(log.consoleProps).to.include({
+          Method: 'GET',
+          'Resource Type': 'fetch',
+          'URL': 'http://localhost:3500/some-url',
+        })
 
-        done()
+        expect(log.consoleProps['Request Headers']).to.include({
+          'Referer': window.location.href,
+        })
+
+        expect(log.consoleProps).to.not.have.property('Response Headers')
+        expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`s')
+
+        // trigger: .snapshot('request')
+        cy.once('log:changed', (log) => {
+          expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request'])
+
+          // trigger: .snapshot('response')
+          cy.once('log:changed', (log) => {
+            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
+            expect(log.consoleProps['Response Headers']).to.include({
+              'x-powered-by': 'Express',
+            })
+
+            expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`s')
+            expect(log.renderProps).to.include({
+              indicator: 'bad',
+              message: 'GET 404 /some-url',
+            })
+
+            done()
+          })
+        })
       })
     })
-  })
 
-  context('with cy.route', () => {
-    it('unmatched xhrs are correlated', (done) => {
-      let xhrLogCount = 0
+    it('does not log an unintercepted non-xhr/fetch request', (done) => {
+      const img = new Image()
+      const logs: any[] = []
+      let imgLoaded = false
 
-      // cy.on('log:added', ({ name }) => name === 'xhr' && xhrLogCount++)
-      cy.window()
-      .then(({ XMLHttpRequest }) => {
-        const logChanges: any[] = []
+      cy.on('log:added', (log) => {
+        if (imgLoaded) return
 
-        // cy.on('log:changed', (log) => logChanges.push(log))
-        // cy.on('log:added', (log) => {
-        //   logs.push(log)
-        //   console.log('added:', log, log.browserPreRequest)
-        // })
-
-        // cy.on('log:changed', (log) => {
-        //   console.log('changed: ', log.browserPreRequest)
-        // })
-
-        // cy.once('log:changed', (log) => {
-        //   // window parent log updates first
-        //   expect(log).to.include({ name: 'window' })
-        //   cy.once('log:changed', (log) => {
-        //     // next the proxy-logging log will be updated with the intercept
-        //     expect(log).to.include({
-        //       name: 'xhr',
-        //       displayName: 'xhr',
-        //     })
-
-        //     // because there was a pre-request, this should exist on the log object
-        //     expect(log.browserPreRequest).to.include({
-        //       method: 'GET',
-        //       // url: log.url,
-        //     })
-
-        //     expect(xhrLogCount).to.eq(1)
-
-        //     done()
-        //   })
-        // })
-
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/foo')
-        xhr.send()
-
-        xhr.onload = () => {
-          const last = logChanges[logChanges.length - 1]
-        }
+        logs.push(log)
       })
-    })
-  })
 
-  context('with cy.intercept', () => {
-    it('intercepted fetches are correlated', (done) => {
-      let xhrLogCount = 0
-
-      const expectIntercept = (log) => {
-        // next the proxy-logging log will be updated with the intercept
-        expect(log).to.include({
-          name: 'xhr',
-          displayName: 'intercept',
-          url: 'http://localhost:3500/foo',
-        })
-
-        // because there was a pre-request, this should exist on the log object
-        expect(log.browserPreRequest).to.include({
-          method: 'GET',
-          url: log.url,
-        })
-
-        expect(xhrLogCount).to.eq(1)
-
+      img.onload = () => {
+        imgLoaded = true
+        expect(logs).to.have.length(0)
         done()
       }
 
-      cy.on('log:added', ({ name }) => name === 'xhr' && xhrLogCount++)
-      cy.intercept('/foo')
-      .then(() => {
-        // cy.once('log:changed', (log) => {
-        //   // route instrument log updates first
-        //   expect(log).to.include({ name: 'route' })
-        //   cy.once('log:changed', (log) => {
-        //     try {
-        //       expectIntercept(log)
-        //     } catch (err) {
-        //       cy.log('expectIntercept failed:', log)
-        //       cy.once('log:changed', expectIntercept)
-        //     }
-        //   })
-        // })
+      img.src = `/fixtures/media/cypress.png?${Date.now()}`
+    })
 
-        fetch('/foo')
+    context('with cy.intercept()', () => {
+      it('shows non-xhr/fetch log if intercepted', (done) => {
+        const src = `/fixtures/media/cypress.png?${Date.now()}`
+
+        cy.intercept('/fixtures/**/*.png*')
+        .then(() => {
+          cy.once('log:added', (log) => {
+            expect(log.displayName).to.eq('image')
+            expect(log.renderProps).to.include({
+              indicator: 'pending',
+              message: `GET ${src}`,
+            })
+
+            done()
+          })
+
+          const img = new Image()
+
+          img.src = src
+        })
+      })
+
+      it('shows cy.visit if intercepted', () => {
+        cy.intercept('/fixtures/empty.html')
+        .then(() => {
+          // trigger: cy.visit()
+          cy.once('log:added', (log) => {
+            expect(log.name).to.eq('visit')
+            // trigger: intercept Cypress.Log
+            cy.once('log:added', (log) => {
+              expect(log.displayName).to.eq('document')
+            })
+          })
+        })
+        .visit('/fixtures/empty.html')
+      })
+
+      context('flags', () => {
+        const testFlagFetch = (expectStatus, expectInterceptions, setupFn) => {
+          return testFlag(expectStatus, expectInterceptions, setupFn, (url) => fetch(url))
+        }
+
+        it('is unflagged when not intercepted', testFlagFetch(
+          undefined,
+          [],
+          () => {},
+        ))
+
+        it('spied flagged as expected', testFlagFetch(
+          'spied',
+          [{
+            command: 'intercept',
+            alias,
+            type: 'spy',
+          }],
+          () => {
+            cy.intercept(url).as(alias)
+          },
+        ))
+
+        it('spy function flagged as expected', testFlagFetch(
+          'spied',
+          [{
+            command: 'intercept',
+            alias,
+            type: 'function',
+          }],
+          () => {
+            cy.intercept(url, () => {}).as(alias)
+          },
+        ))
+
+        it('stubbed flagged as expected', testFlagFetch(
+          'stubbed',
+          [{
+            command: 'intercept',
+            alias,
+            type: 'stub',
+          }],
+          () => {
+            cy.intercept(url, 'stubbed response').as(alias)
+          },
+        ))
+
+        it('req modified flagged as expected', testFlagFetch(
+          'req modified',
+          [{
+            command: 'intercept',
+            alias,
+            type: 'function',
+          }],
+          () => {
+            cy.intercept(url, (req) => {
+              req.headers.foo = 'bar'
+            }).as(alias)
+          },
+        ))
+
+        it('res modified flagged as expected', testFlagFetch(
+          'res modified',
+          [{
+            command: 'intercept',
+            alias,
+            type: 'function',
+          }],
+          () => {
+            cy.intercept(url, (req) => {
+              req.continue((res) => {
+                res.headers.foo = 'bar'
+              })
+            }).as(alias)
+          },
+        ))
+
+        it('req + res modified flagged as expected', testFlagFetch(
+          'req + res modified',
+          [{
+            command: 'intercept',
+            alias,
+            type: 'function',
+          }],
+          () => {
+            cy.intercept(url, (req) => {
+              req.headers.foo = 'bar'
+              req.continue((res) => {
+                res.headers.foo = 'bar'
+              })
+            }).as(alias)
+          },
+        ))
       })
     })
-  })
 
-  context('with both', () => {
+    context('with cy.route()', () => {
+      context('flags', () => {
+        let $XMLHttpRequest
 
-  })
+        const testFlagXhr = (expectStatus, expectInterceptions, setupFn) => {
+          return testFlag(expectStatus, expectInterceptions, setupFn, (url) => {
+            const xhr = new $XMLHttpRequest()
 
-  context.skip('', () => {
-    it('when there is a fetch with no matching `cy.route()` or `cy.intercept()`', async () => {
-      await fetch('/')
-    })
+            xhr.open('GET', url)
+            xhr.send()
+          })
+        }
 
-    it('when there is an XHR with no matching `cy.route` or `cy.intercept`', (done) => {
-      $.get('/').fail(() => done())
-    })
+        beforeEach(() => {
+          cy.window()
+          .then(({ XMLHttpRequest }) => {
+            $XMLHttpRequest = XMLHttpRequest
+          })
+        })
 
-    it('when there is 1 matching `cy.intercept()`', () => {
-      cy.intercept('/something*').as('get')
-      .then(() => {
-        $.get('/something')
+        it('is unflagged when not routed', testFlagXhr(
+          undefined,
+          [],
+          () => {},
+        ))
+
+        it('spied flagged as expected', testFlagXhr(
+          'spied',
+          [{
+            command: 'route',
+            alias,
+            type: 'spy',
+          }],
+          () => {
+            cy.server()
+            cy.route(`${url}`).as(alias)
+          },
+        ))
+
+        it('stubbed flagged as expected', testFlagXhr(
+          'stubbed',
+          [{
+            command: 'route',
+            alias,
+            type: 'stub',
+          }],
+          () => {
+            cy.server()
+            cy.route(url, 'stubbed response').as(alias)
+          },
+        ))
       })
-      .wait('@get')
-    })
-
-    it('when there is 1 matching `cy.intercept()` stub', () => {
-      cy.visit('/fixtures/dom.html')
-      cy.get('body', { timeout: 500, log: true, includeShadowDom: true })
-      cy.intercept('/stubbed*', 'foo').as('foo')
-      cy.intercept('/spied*').as('bar')
-
-      .then(() => {
-        fetch('/another')
-        fetch('/anotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranotheranother')
-        $.get('/spied')
-        $.get('/stubbed')
-      })
-      .wait('@foo', { requestTimeout: 500, responseTimeout: 500 })
-      .wait('@bar')
-    })
-
-    it('when there is 1 matching `cy.route()`', () => {
-      cy.server()
-      cy.route('/something').as('get')
-      .window().then(({ XMLHttpRequest }) => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/something')
-        xhr.send()
-      })
-      .wait('@get')
-    })
-
-    it('when there is a matching `cy.route()` and a matching `cy.intercept()`', () => {
-      cy.intercept('/something*').as('intercept')
-      .server()
-      .route('/something').as('route')
-      .window().then(({ XMLHttpRequest }) => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/something')
-        xhr.send()
-
-        return new Promise((resolve) => xhr.onload = resolve)
-      })
-      .wait('@route')
-      .wait('@intercept')
-    })
-
-    it('when there are multiple matching `cy.route()`s/`cy.intercept()`s', () => {
-      cy.intercept('/some/thing').as('intercept')
-      cy.intercept('/some/*', (req) => {
-        req.headers['x-foo'] = 'hi'
-      }).as('intercept2')
-      .server()
-      .route('/some/thing').as('route')
-      .window().then(({ XMLHttpRequest }) => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/some/thing')
-        xhr.send()
-
-        return new Promise((resolve) => xhr.onload = resolve)
-      })
-      .wait('@route')
-      .wait('@intercept')
-      .wait('@intercept2')
     })
   })
 })
