@@ -567,11 +567,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
-    const onBrowserResponseReceived = (browserResponseReceived) => {
-      this.server.addBrowserResponseReceived(browserResponseReceived)
+    const onProxyData = (eventName, data) => {
+      this.server.emitProxyData(eventName, data)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onBrowserResponseReceived)
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onProxyData)
 
     this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,

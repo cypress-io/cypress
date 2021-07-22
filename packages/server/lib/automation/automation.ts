@@ -2,13 +2,13 @@ import Bluebird from 'bluebird'
 import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
-import { BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import { BrowserPreRequest } from '@packages/proxy'
 
 type NullableMiddlewareHook = (() => void) | null
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
-export type OnBrowserResponseReceived = (browserResponseReceived: BrowserResponseReceived) => void
+export type OnProxyData = (eventName: string, data: any) => void
 
 interface IMiddleware {
   onPush: NullableMiddlewareHook
@@ -24,7 +24,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onBrowserResponseReceived?: OnBrowserResponseReceived) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onProxyData?: OnProxyData) {
     this.requests = {}
 
     // set the middleware

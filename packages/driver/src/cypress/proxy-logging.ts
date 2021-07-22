@@ -166,16 +166,18 @@ export class ProxyLogging {
   proxyRequests: Array<ProxyRequest> = []
 
   constructor (private Cypress: Cypress.Cypress) {
-    Cypress.on('proxy:incoming:request', (browserPreRequest) => {
-      this.logIncomingRequest(browserPreRequest)
-    })
-
-    Cypress.on('browser:response:received', (browserResponseReceived) => {
-      this.updateRequestWithResponse(browserResponseReceived)
+    Cypress.on('proxy:data', (eventName, data) => {
+      switch (eventName) {
+        case 'incoming:request':
+          return this.logIncomingRequest(data)
+        case 'response:received':
+          return this.updateRequestWithResponse(data)
+        default:
+          throw new Error(`unrecognized proxy:data event ${eventName}`)
+      }
     })
 
     Cypress.on('test:before:run', () => {
-      // TODO: end pending logs
       for (const proxyRequest of this.proxyRequests) {
         if (!proxyRequest.responseReceived && proxyRequest.log) {
           proxyRequest.log.end()

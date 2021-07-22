@@ -40,7 +40,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     }
 
     this.res.on('close', () => {
-      this.socket.toDriver('browser:response:received', {
+      this.socket.toDriver('proxy:data', 'response:received', {
         requestId,
         headers: this.res.getHeaders(),
         status: this.res.statusCode,
@@ -61,7 +61,7 @@ const SendToDriver: RequestMiddleware = function () {
   const { browserPreRequest } = this.req
 
   if (browserPreRequest) {
-    this.socket.toDriver('proxy:incoming:request', browserPreRequest)
+    this.socket.toDriver('proxy:data', 'incoming:request', browserPreRequest)
   }
 
   this.next()

@@ -192,7 +192,7 @@ export class CdpAutomation {
       headers: params.response.headers,
     }
 
-    this.automation.onBrowserResponseReceived(browserResponseReceived)
+    this.automation.onProxyData?.('response:received', browserResponseReceived)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {

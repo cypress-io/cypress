@@ -325,8 +325,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
   }
 
-  addBrowserResponseReceived (browserResponseReceived) {
-    this.socket.toDriver('browser:response:received', browserResponseReceived)
+  emitProxyData (eventName, data) {
+    this.socket.toDriver('proxy:data', eventName, data)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
