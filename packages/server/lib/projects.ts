@@ -1,13 +1,49 @@
 import path from 'path'
 import browsers from './browsers'
-import { ProjectBase, Server } from './project-base'
+import { Cfg, ProjectBase, Server } from './project-base'
 import { NexusGenInputs } from './graphql/gen/nxs.gen'
 import { SocketE2E } from './socket-e2e'
 import { SocketCt } from '../../server-ct'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
+import { getSpecUrl } from './project_utils'
+import origin from './util/origin'
+import { Browser } from '@packages/launcher/lib/types'
 
 export type TestingType = 'e2e' | 'component'
+
+const khrome = {
+  name: 'chrome',
+  family: 'chromium',
+  channel: 'stable',
+  version: '91.0.4472.164',
+  displayName: 'chrome',
+  path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  minSupportedVersion: 64,
+  isHeaded: true,
+  isHeadless: false,
+  majorVersion: 91 as never,
+}
+
+function configureUrls ({
+  baseUrl,
+  clientRoute,
+  namespace,
+  xhrRoute,
+  reporterRoute,
+  port,
+}: Pick<Cfg, 'port' | 'baseUrl' | 'clientRoute' | 'namespace' | 'xhrRoute' | 'reporterRoute'>) {
+  const proxyUrl = `http://localhost:${port}`
+  const rootUrl = baseUrl ? origin(baseUrl) : proxyUrl
+
+  return {
+    proxyUrl,
+    proxyServer: proxyUrl,
+    browserUrl: `${rootUrl}${clientRoute}`,
+    reporterUrl: `${rootUrl}${reporterRoute}`,
+    xhrUrl: `${namespace}${xhrRoute}`,
+  }
+}
 
 class Projects {
   currentProjectId?: string
@@ -88,14 +124,53 @@ class Projects {
     }
   }
 
-  async launchRunner () {
+  launchRunner () {
     if (!this.openProject) {
       throw Error('Must set currentProjectId before calling launchRunner!')
     }
 
-    const options = {}
+    const spec = {
+      name: 'All Specs',
+      absolute: '__all',
+      relative: '__all',
+      specType: 'component',
+    }
 
-    return browsers.open(chrome, options, this.openProject.getAutomation())
+    let config = this.openProject.getConfig()
+
+    const urls = configureUrls({
+      baseUrl: config.baseUrl,
+      clientRoute: config.clientRoute,
+      namespace: config.namespace,
+      xhrRoute: config.xhrRoute,
+      reporterRoute: config.reporterRoute,
+      port: config.port,
+    })
+
+    config = this.openProject.updateConfig(urls)
+
+    const url = getSpecUrl({
+      absoluteSpecPath: spec.absolute,
+      specType: spec.specType as 'integration' | 'component',
+      browserUrl: urls.browserUrl,
+      integrationFolder: config.integrationFolder || 'integration',
+      componentFolder: config.componentFolder || 'component',
+      projectRoot: this.openProject.projectRoot,
+    })
+
+    interface LaunchOptions {
+      url: string
+      browser: Browser
+    }
+
+    const options: LaunchOptions = {
+      // @ts-ignore
+      browser: khrome,
+      url,
+    }
+    const { socketIoCookie, screenshotsFolder, namespace } = this.openProject.getConfig()
+
+    return browsers.open(khrome, options, this.openProject.createAutomation({ socketIoCookie, screenshotsFolder, namespace }))
   }
 
   async initializeServer () {
@@ -122,20 +197,8 @@ class Projects {
     try {
       server.open(this.openProject.getConfig(), {
         getSpec: () => null,
-        getCurrentBrowser: () => {
-          return {
-            name: 'chrome',
-            family: 'chromium',
-            channel: 'stable',
-            version: '91.0.4472.164',
-            displayName: 'chrome',
-            path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-            minSupportedVersion: 64,
-            isHeaded: true,
-            isHeadless: false,
-            majorVersion: 91 as never,
-          }
-        },
+        // @ts-ignore
+        getCurrentBrowser: () => khrome,
         onError: () => {},
         onWarning: () => {},
         shouldCorrelatePreRequests: () => true,

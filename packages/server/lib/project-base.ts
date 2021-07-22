@@ -40,8 +40,8 @@ import { NexusGenObjects } from './graphql/gen/nxs.gen'
 // and are required when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'xhrRoute' | 'reporterRoute'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'componentFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -187,6 +187,12 @@ export class ProjectBase<TServer extends Server> extends EE {
     return projectType === 'e2e'
       ? new ServerE2E() as TServer
       : new ServerCt() as TServer
+  }
+
+  updateConfig (fields: Partial<Cfg>) {
+    this._cfg = { ...this.cfg, ...fields }
+
+    return this._cfg
   }
 
   async open () {
@@ -572,6 +578,18 @@ export class ProjectBase<TServer extends Server> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
+  createAutomation ({ socketIoCookie, namespace, screenshotsFolder }: Pick<StartWebsocketOptions, 'socketIoCookie' | 'namespace' | 'screenshotsFolder'>) {
+    const onBrowserPreRequest = (browserPreRequest) => {
+      this.server.addBrowserPreRequest(browserPreRequest)
+    }
+
+    return new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest)
+  }
+
+  initializeAutomation ({ socketIoCookie, namespace, screenshotsFolder }: Pick<StartWebsocketOptions, 'socketIoCookie' | 'namespace' | 'screenshotsFolder'>) {
+    this._automation = this.createAutomation({ socketIoCookie, namespace, screenshotsFolder })
+  }
+
   startWebsockets (options: Options, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
@@ -582,11 +600,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       projectRoot,
     })
 
-    const onBrowserPreRequest = (browserPreRequest) => {
-      this.server.addBrowserPreRequest(browserPreRequest)
-    }
-
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest)
+    this.initializeAutomation({ socketIoCookie, namespace, screenshotsFolder })
 
     this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
