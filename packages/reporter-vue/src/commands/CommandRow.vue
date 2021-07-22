@@ -3,10 +3,10 @@
   @click="onSelect"
   @mouseenter="hovering = true"
   @mouseleave="hovering = false">
-    <div class="position"><slot name="position" v-bind="{ selected, hovering }"></slot></div>
-    <div class="command-name"><slot name="name" v-bind="{ selected, hovering }"></slot></div>
-    <div class="command-message"><slot name="message" v-bind="{ selected, hovering }"></slot></div>
-    <div class="command-meta"><slot name="meta" v-bind="{ selected, hovering }"></slot></div>
+    <div class="position"><slot name="position" v-bind="{ selected, hovering }" /></div>
+    <div class="command-name"><slot name="name" v-bind="{ selected, hovering }" /></div>
+    <div class="command-message"><slot name="message" v-bind="{ selected, hovering }" /></div>
+    <div class="command-meta"><slot name="meta" v-bind="{ selected, hovering }" /></div>
   </div>
 </template>
 
