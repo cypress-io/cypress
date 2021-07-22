@@ -1339,7 +1339,7 @@ jobs:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
-          name: Run tests
+          name: Run tests in CT runner
           command: yarn test-ci
           working_directory: npm/vue
       - store_test_results:
