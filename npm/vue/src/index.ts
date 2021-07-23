@@ -36,6 +36,12 @@ type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
 let initialInnerHtml = ''
 
 Cypress.on('run:start', () => {
+  // `mount` is designed to work with component testing only.
+  // it assumes ROOT_ID exists, which is not the case in e2e.
+  // if the user registers a custom command that imports `cypress/vue`,
+  // this event will be registered and cause an error when the user
+  // launches e2e (since it's common to use Cypress for both CT and E2E.
+  // https://github.com/cypress-io/cypress/issues/17438
   if (Cypress.testingType !== 'component') {
     return
   }

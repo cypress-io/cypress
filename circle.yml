@@ -258,7 +258,7 @@ commands:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
           working_directory: ~/
-          command: npm i globby fs-extra minimist fast-json-stable-stringify
+          command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
@@ -1339,8 +1339,12 @@ jobs:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
-          name: Run tests
-          command: yarn test-ci
+          name: Run component tests
+          command: yarn test:ci:ct
+          working_directory: npm/vue
+      - run:
+          name: Run e2e tests
+          command: yarn test:ci:e2e
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
