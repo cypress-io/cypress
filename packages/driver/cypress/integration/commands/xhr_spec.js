@@ -2375,9 +2375,10 @@ describe('src/cy/commands/xhr', () => {
               Method: 'GET',
               URL: 'http://localhost:3500/fixtures/app.json',
               Status: undefined,
-              'Response Status Code': 304,
               XHR: xhr.xhr,
             })
+
+            expect(consoleProps['Response Status Code']).to.be.oneOf([200, 304])
           })
         })
       })

@@ -194,8 +194,15 @@ const startXhrServer = (cy, state, config) => {
 
       const log = logs[xhr.id]
 
-      if (log && !log.get('snapshots').find((v) => v.name === 'response')) {
-        return log.snapshot('response').end()
+      if (log) {
+        // the xhr log can already have a snapshot if it's been correlated with a proxy request (not xhr stubbed), so check first
+        const hasResponseSnapshot = log.get('snapshots')?.find((v) => v.name === 'response')
+
+        if (!hasResponseSnapshot) {
+          log.snapshot('response')
+        }
+
+        log.end()
       }
     },
 

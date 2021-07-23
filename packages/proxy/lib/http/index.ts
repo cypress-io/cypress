@@ -284,7 +284,6 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.preRequests = new PreRequests()
   }
 
   setBuffer (buffer) {
