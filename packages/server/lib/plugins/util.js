@@ -11,6 +11,10 @@ const serializeError = (err) => {
 }
 
 function serializeArgument (arg) {
+  if (arg === null || arg === undefined) {
+    return arg
+  }
+
   if (typeof arg === 'function') {
     return FUNCTION_SERIALIZED
   }
@@ -27,6 +31,10 @@ function serializeArgument (arg) {
 }
 
 function deserializeArgument (arg) {
+  if (arg === null || arg === undefined) {
+    return arg
+  }
+
   if (arg === FUNCTION_SERIALIZED) {
     return function () {
       throw Error('this function is not meant to be used on it\'s own')

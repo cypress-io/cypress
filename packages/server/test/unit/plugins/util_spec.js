@@ -83,6 +83,15 @@ describe('lib/plugins/util', () => {
           args: [{ config: { e2e: '__cypress_function__' } }],
         })
       })
+
+      it('#send should not crash with null values', function () {
+        this.ipc.send('event-arg-null', { config: null })
+
+        expect(this.theProcess.send).to.be.calledWith({
+          event: 'event-arg-null',
+          args: [{ config: null }],
+        })
+      })
     })
 
     context('#arguments-deserialization', () => {
@@ -120,6 +129,18 @@ describe('lib/plugins/util', () => {
         })
 
         expect(handler).to.be.calledWith({ config: { e2e: sinon.match.func } })
+      })
+
+      it('#on should not crash with null values', function () {
+        const handler = sinon.spy()
+
+        this.ipc.on('event-arg-null', handler)
+        this.theProcess.on.yield({
+          event: 'event-arg-null',
+          args: [{ config: null }],
+        })
+
+        expect(handler).to.be.calledWith({ config: null })
       })
     })
   })
