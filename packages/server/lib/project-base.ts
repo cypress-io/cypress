@@ -679,13 +679,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.browser = browser
   }
 
-  getCurrentSpecAndBrowser () {
-    return {
-      spec: this.spec,
-      browser: this.browser,
-    }
-  }
-
   async setBrowsers (browsers = []) {
     debug('getting config before setting browsers %o', browsers)
 
