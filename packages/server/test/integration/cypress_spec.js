@@ -512,7 +512,9 @@ describe('lib/cypress', () => {
         return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
-      }).catch({ code: 'ENOENT' }, () => {})
+      }).catch((e) => {
+        expect(e.code).to.equal('ENOENT')
+      })
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
@@ -768,7 +770,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
+        this.expectExitWithErr('CONFIG_FILE_ERROR', this.todosPath)
       })
     })
 
