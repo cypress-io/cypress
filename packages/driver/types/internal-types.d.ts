@@ -3,7 +3,7 @@
 
 declare namespace Cypress {
   interface Actions {
-    (action: 'net:event', frame: any)
+    (action: 'net:stubbing:event', frame: any)
     (action: 'request:event', data: any)
   }
 

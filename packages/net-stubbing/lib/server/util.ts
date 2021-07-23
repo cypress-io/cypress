@@ -29,7 +29,7 @@ export function emit (socket: CyServer.Socket, eventName: string, data: object) 
     debug('sending event to driver %o', { eventName, data: _.chain(data).cloneDeep().omit('res.body').value() })
   }
 
-  socket.toDriver('net:event', eventName, data)
+  socket.toDriver('net:stubbing:event', eventName, data)
 }
 
 export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<any>) {

@@ -18,7 +18,7 @@ describe('cy.intercept', () => {
     })
     .then(() => {
       emitProxyLog()
-      Cypress.emit('net:event', 'before:request', {
+      Cypress.emit('net:stubbing:event', 'before:request', {
         browserRequestId: 1,
         eventId: '1',
         subscription: {
@@ -42,7 +42,7 @@ describe('cy.intercept', () => {
     })
     .then(() => {
       emitProxyLog()
-      Cypress.emit('net:event', 'before:request', {
+      Cypress.emit('net:stubbing:event', 'before:request', {
         browserRequestId: 1,
         eventId: '1',
         requestId: '1',
@@ -56,7 +56,7 @@ describe('cy.intercept', () => {
         },
       })
 
-      Cypress.emit('net:event', 'before:response', {
+      Cypress.emit('net:stubbing:event', 'before:response', {
         eventId: '1',
         requestId: '1',
         subscription: {
@@ -82,7 +82,7 @@ describe('cy.intercept', () => {
     })
     .then(() => {
       emitProxyLog()
-      Cypress.emit('net:event', 'before:request', {
+      Cypress.emit('net:stubbing:event', 'before:request', {
         browserRequestId: 1,
         eventId: '1',
         requestId: '1',
@@ -96,7 +96,7 @@ describe('cy.intercept', () => {
         },
       })
 
-      Cypress.emit('net:event', 'network:error', {
+      Cypress.emit('net:stubbing:event', 'network:error', {
         eventId: '1',
         requestId: '1',
         subscription: {
