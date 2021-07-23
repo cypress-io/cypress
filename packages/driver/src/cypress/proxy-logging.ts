@@ -22,6 +22,25 @@ function take<E> (array: E[], filterFn: (data: E) => boolean) {
   return
 }
 
+function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
+  const ret = {
+    'RouteMatcher': route.options,
+    'RouteHandler Type': !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'Function' : 'StaticResponse stub') : 'Spy',
+    'RouteHandler': route.handler,
+    'Request': interception.request,
+  }
+
+  if (interception.response) {
+    ret['Response'] = _.omitBy(interception.response, _.isNil)
+  }
+
+  const alias = interception.request.alias || route.alias
+
+  if (alias) ret['Alias'] = alias
+
+  return ret
+}
+
 function getDisplayUrl (url: string) {
   if (url.startsWith(window.location.origin)) {
     return url.slice(window.location.origin.length)
@@ -31,8 +50,12 @@ function getDisplayUrl (url: string) {
 }
 
 function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
-  const lastInterception = _.last(req.displayInterceptions)
-  const alias = lastInterception ? lastInterception.alias : undefined
+  const last = _.last(req.interceptions)
+  let alias = last ? last.interception.request.alias || last.route.alias : undefined
+
+  if (!alias && req.xhr && req.route) {
+    alias = req.route.alias
+  }
 
   return {
     alias,
@@ -92,7 +115,11 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
       }
 
       if (req.interceptions.length) {
-        consoleProps['Matched `cy.intercept()`s'] = req.interceptions
+        if (req.interceptions.length > 1) {
+          consoleProps['Matched `cy.intercept()`s'] = req.interceptions.map(formatInterception)
+        } else {
+          consoleProps['Matched `cy.intercept()`'] = formatInterception(req.interceptions[0])
+        }
       }
 
       if (req.error) {
@@ -135,8 +162,21 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
       return {
         indicator: getIndicator(),
         message,
-        interceptions: req.displayInterceptions,
         status: getStatus(),
+        interceptions: [
+          ...(req.interceptions.map(({ interception, route }) => {
+            return {
+              command: 'intercept',
+              alias: interception.request.alias || route.alias,
+              type: !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'function' : 'stub') : 'spy',
+            }
+          })),
+          ...(req.xhr ? [{
+            command: 'route',
+            alias: req.route?.alias,
+            type: _.isNil(req.route?.response) ? 'spy' : 'stub',
+          }] : []),
+        ],
       }
     },
   }
@@ -152,8 +192,9 @@ class ProxyRequest {
   responseReceived?: BrowserResponseReceived
   error?: Error
   xhr?: Cypress.WaitXHR
+  route?: any
   stack?: string
-  interceptions: Array<Interception> = []
+  interceptions: Array<{ interception: Interception, route: Route }> = []
   displayInterceptions: Array<{ command: 'intercept' | 'route', alias?: string, type: 'stub' | 'spy' | 'function' }> = []
   flags: {
     spied?: boolean
@@ -235,17 +276,12 @@ export class ProxyLogging {
       throw new Error(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url}`)
     }
 
-    proxyRequest.interceptions.push(interception)
-    proxyRequest.displayInterceptions.push({
-      command: 'intercept',
-      alias: route.alias,
-      type: route.handler ? (_.isFunction(route.handler) ? 'function' : 'stub') : 'spy',
-    })
+    proxyRequest.interceptions.push({ interception, route })
 
     proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
 
     // consider a function to be 'spying' until it actually stubs/modifies the response
-    proxyRequest.setFlag(route.handler && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
+    proxyRequest.setFlag(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
 
     return proxyRequest
   }
@@ -281,17 +317,8 @@ export class ProxyLogging {
       const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
 
       if (unmatchedXhrLog) {
-        const { log, xhr, route, stack } = unmatchedXhrLog
-        const proxyRequest = new ProxyRequest(preRequest, {
-          xhr,
-          log,
-          stack,
-          displayInterceptions: route ? [{
-            command: 'route',
-            alias: route?.alias,
-            type: _.isNil(route?.response) ? 'spy' : 'stub',
-          }] : [],
-        })
+        const { log, route } = unmatchedXhrLog
+        const proxyRequest = new ProxyRequest(preRequest, unmatchedXhrLog)
 
         if (route) {
           proxyRequest.setFlag(_.isNil(route.response) ? 'spied' : 'stubbed')

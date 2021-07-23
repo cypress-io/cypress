@@ -76,7 +76,7 @@ describe('Proxy Logging', () => {
         })
 
         expect(log.consoleProps).to.not.have.property('Response Headers')
-        expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`s')
+        expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`')
 
         // trigger: .snapshot('request')
         cy.once('log:changed', (log) => {
@@ -89,7 +89,7 @@ describe('Proxy Logging', () => {
               'x-powered-by': 'Express',
             })
 
-            expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`s')
+            expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`')
             expect(log.renderProps).to.include({
               indicator: 'bad',
               message: 'GET 404 /some-url',
@@ -156,6 +156,60 @@ describe('Proxy Logging', () => {
           })
         })
         .visit('/fixtures/empty.html')
+      })
+
+      it('intercept log has consoleProps with intercept info', (done) => {
+        cy.intercept('/some-url', 'stubbed response').as('alias')
+        .then(() => {
+          fetch('/some-url')
+        })
+
+        cy.on('log:changed', (log) => {
+          if (log.displayName !== 'fetch') return
+
+          try {
+            expect(log.renderProps).to.deep.include({
+              message: 'GET 200 /some-url',
+              indicator: 'successful',
+              status: 'stubbed',
+              interceptions: [{
+                alias: 'alias',
+                command: 'intercept',
+                type: 'stub',
+              }],
+            })
+
+            const interceptProps = log.consoleProps['Matched `cy.intercept()`']
+
+            expect(interceptProps).to.deep.eq({
+              Alias: 'alias',
+              Request: {
+                method: 'GET',
+                url: 'http://localhost:3500/some-url',
+                body: '',
+                httpVersion: '1.1',
+                responseTimeout: Cypress.config('responseTimeout'),
+                headers: interceptProps.Request.headers,
+              },
+              Response: {
+                body: 'stubbed response',
+                statusCode: 200,
+                url: 'http://localhost:3500/some-url',
+                headers: interceptProps.Response.headers,
+              },
+              RouteMatcher: {
+                url: '/some-url',
+              },
+              RouteHandler: 'stubbed response',
+              'RouteHandler Type': 'StaticResponse stub',
+            })
+
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('assertion failed:', err)
+          }
+        })
       })
 
       it('works with forceNetworkError', () => {
