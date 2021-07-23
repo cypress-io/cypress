@@ -2,7 +2,7 @@ import path from 'path'
 import browsers from './browsers'
 import Debug from 'debug'
 import { Cfg, ProjectBase, Server } from './project-base'
-import { NexusGenInputs, NexusGenEnums } from './graphql/gen/nxs.gen'
+import { NexusGenInputs } from './graphql/gen/nxs.gen'
 import { SocketE2E } from './socket-e2e'
 import { SocketCt } from '../../server-ct'
 import { createRoutes as createE2ERoutes } from './routes'
@@ -68,8 +68,6 @@ class Projects {
 
   // all known browsers on the user's machine.
   foundBrowsers?: Browser[]
-
-  testingType?: NexusGenEnums['TestingType']
 
   /**
    * Represents the current open project, if one exists.
