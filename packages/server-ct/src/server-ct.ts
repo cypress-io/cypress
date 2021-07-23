@@ -3,7 +3,7 @@ import httpsProxy from '@packages/https-proxy'
 import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import { SocketCt } from './socket-ct'
-import { Cfg } from '../../server/lib/project-base'
+import { Cfg } from '@packages/server/lib/project-base'
 
 type WarningErr = Record<string, any>
 
@@ -12,7 +12,7 @@ export class ServerCt extends ServerBase<SocketCt> {
     return super.open(config, { ...options, projectType: 'ct' })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, baseUrl, socketIoRoute } = config
 
