@@ -224,7 +224,7 @@ describe('commands', () => {
     })
 
     it('displays number of duplicates', () => {
-      cy.contains('GET --- /dup').closest('.command').find('.num-duplicates')
+      cy.contains('GET --- /dup').closest('.command').find('.num-children')
       .should('have.text', '4')
     })
 
@@ -234,9 +234,12 @@ describe('commands', () => {
     })
 
     it('expands all events after clicking arrow', () => {
-      cy.contains('GET --- /dup').closest('.command').find('.command-expander').click()
+      cy.contains('GET --- /dup').closest('.command').find('.command-child-container').should('not.exist')
+      cy.contains('GET --- /dup').closest('.command')
+      .find('.command-expander').click()
+
       cy.get('.command-name-xhr').should('have.length', 6)
-      cy.contains('GET --- /dup').closest('.command').find('.duplicates')
+      cy.contains('GET --- /dup').closest('.command').find('.command-child-container')
       .should('be.visible')
       .find('.command').should('have.length', 3)
     })

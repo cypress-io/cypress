@@ -159,7 +159,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.contains('.num-duplicates', '2')
+          cy.contains('.num-children', '2')
 
           cy.contains('.command-alias', 'getPosts')
         })
@@ -173,7 +173,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.get('.num-duplicates').should('not.be.visible')
+          cy.get('.num-children').should('not.be.visible')
 
           cy.contains('.command-alias', 'getPosts')
         })
@@ -400,7 +400,7 @@ describe('aliases', () => {
         cy.get('.command-wrapper')
         .first()
         .within(() => {
-          cy.get('.num-duplicates').should('not.be.visible')
+          cy.get('.num-children').should('not.be.visible')
 
           cy.contains('.command-alias', 'dropdown')
         })
