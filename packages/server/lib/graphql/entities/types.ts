@@ -5,6 +5,11 @@ const InitState = enumType({
   members: ['uninitialized', 'initializing', 'initialized', 'error'],
 })
 
+export const TestingType = enumType({
+  name: 'TestingType',
+  members: ['component', 'e2e'],
+})
+
 const InitStatus = objectType({
   name: 'InitStatus',
   definition (t) {
@@ -33,6 +38,10 @@ export const Project = objectType({
   name: 'Project',
   definition (t) {
     t.nonNull.string('projectRoot')
+    t.nonNull.field('testingType', {
+      type: TestingType,
+    })
+
     t.nonNull.boolean('isOpen')
     t.nonNull.boolean('isCurrent')
     t.field('plugins', {

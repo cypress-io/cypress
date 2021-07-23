@@ -1,12 +1,12 @@
 import path from 'path'
 import browsers from './browsers'
+import Debug from 'debug'
 import { Cfg, ProjectBase, Server } from './project-base'
-import { NexusGenInputs } from './graphql/gen/nxs.gen'
+import { NexusGenInputs, NexusGenEnums } from './graphql/gen/nxs.gen'
 import { SocketE2E } from './socket-e2e'
 import { SocketCt } from '../../server-ct'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
-import Debug from 'debug'
 import { getSpecUrl } from './project_utils'
 import origin from './util/origin'
 import { Browser } from './browsers/types'
@@ -69,6 +69,8 @@ class Projects {
   // all known browsers on the user's machine.
   foundBrowsers: Browser[] = []
 
+  testingType?: NexusGenEnums['TestingType']
+
   /**
    * Represents the current open project, if one exists.
    */
@@ -94,6 +96,7 @@ class Projects {
     }
 
     const type = testingType === 'component' ? 'ct' : 'e2e'
+    // this.testingType = type
 
     const projectBase = new ProjectBase({
       projectType: type,

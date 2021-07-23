@@ -42,9 +42,9 @@ import { NexusGenObjects } from './graphql/gen/nxs.gen'
 type ReceivedCypressOptions =
   Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'xhrRoute' | 'reporterRoute' | 'socketIoRoute'>>
   & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'componentFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'chromeWebSecurity' | 'downloadsFolder'>>
+  & Partial<Pick<Cypress.PluginConfigOptions, 'projectRoot' | 'testingType'>>
 
 export interface Cfg extends ReceivedCypressOptions {
-  projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   state?: {
     firstOpened?: number

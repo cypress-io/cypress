@@ -1,13 +1,16 @@
 import { inputObjectType, nonNull, mutationField, queryField } from 'nexus'
 import { projects } from '../../projects'
-import { Project } from './types'
+import { Project, TestingType } from './types'
 import { formatProject } from '../utils'
 
 const AddProjectInput = inputObjectType({
   name: 'AddProjectInput',
   definition (t) {
     t.nonNull.string('projectRoot')
-    t.nonNull.string('testingType')
+    t.nonNull.field('testingType', {
+      type: TestingType,
+    })
+
     t.nonNull.boolean('isCurrent')
   },
 })

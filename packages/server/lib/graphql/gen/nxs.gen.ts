@@ -42,7 +42,7 @@ export interface NexusGenInputs {
   AddProjectInput: { // input type
     isCurrent: boolean; // Boolean!
     projectRoot: string; // String!
-    testingType: string; // String!
+    testingType: NexusGenEnums['TestingType']; // TestingType!
   }
   SetBrowserInput: { // input type
     path: string; // String!
@@ -54,6 +54,7 @@ export interface NexusGenEnums {
   BrowserFamily: "chromium" | "firefox"
   BrowserName: "chrome" | "chromium" | "edge" | "electron" | "firefox"
   InitState: "error" | "initialized" | "initializing" | "uninitialized"
+  TestingType: "component" | "e2e"
 }
 
 export interface NexusGenScalars {
@@ -99,6 +100,7 @@ export interface NexusGenObjects {
     plugins?: NexusGenRootTypes['InitStatus'] | null; // InitStatus
     projectRoot: string; // String!
     server?: NexusGenRootTypes['InitStatus'] | null; // InitStatus
+    testingType: NexusGenEnums['TestingType']; // TestingType!
   }
   Query: {};
   Wizard: Wizard;
@@ -160,6 +162,7 @@ export interface NexusGenFieldTypes {
     plugins: NexusGenRootTypes['InitStatus'] | null; // InitStatus
     projectRoot: string; // String!
     server: NexusGenRootTypes['InitStatus'] | null; // InitStatus
+    testingType: NexusGenEnums['TestingType']; // TestingType!
   }
   Query: { // field return type
     app: NexusGenRootTypes['App'] | null; // App
@@ -219,6 +222,7 @@ export interface NexusGenFieldTypeNames {
     plugins: 'InitStatus'
     projectRoot: 'String'
     server: 'InitStatus'
+    testingType: 'TestingType'
   }
   Query: { // field return type name
     app: 'App'

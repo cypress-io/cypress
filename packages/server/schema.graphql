@@ -5,7 +5,7 @@
 input AddProjectInput {
   isCurrent: Boolean!
   projectRoot: String!
-  testingType: String!
+  testingType: TestingType!
 }
 
 """Namespace for information related to the app"""
@@ -94,6 +94,7 @@ type Project {
   plugins: InitStatus
   projectRoot: String!
   server: InitStatus
+  testingType: TestingType!
 }
 
 type Query {
@@ -106,6 +107,11 @@ type Query {
 
 input SetBrowserInput {
   path: String!
+}
+
+enum TestingType {
+  component
+  e2e
 }
 
 type Wizard {
