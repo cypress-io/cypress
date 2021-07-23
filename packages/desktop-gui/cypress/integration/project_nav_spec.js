@@ -385,7 +385,7 @@ describe('Project Nav', function () {
         // sanity check: saved browser should be found in the config
         expect(this.config.browsers.find((b) => b.name === 'firefox' && b.channel === 'stable' && b.unsupportedVersion)).to.exist
 
-        this.openProject.resolve(this.config)
+        this.openProject.resolve({ config: this.config })
       })
 
       it('defaults to first browser', () => {
