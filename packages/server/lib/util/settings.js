@@ -206,26 +206,39 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
+    const handleNormalError = (err) => {
+      debug('an error occured when reading config', err)
+      if (errors.isCypressErr(err)) {
+        throw err
+      }
+
+      return this._logReadErr(file, err)
+    }
+
     return requireAsync(file,
       {
         projectRoot,
         loadErrorCode: 'CONFIG_FILE_ERROR',
         functionNames: ['e2e', 'component'],
       })
-    .catch((e) => e.type === 'MODULE_NOT_FOUND' || e.code === 'ENOENT', (err) => {
-      debug('file not found', file)
+    .catch((err) => {
+      if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
+        debug('file not found', file)
 
-      if (/\.json$/.test(file)) {
-        debug('seeding a json config file')
+        if (/\.json$/.test(file)) {
+          debug('seeding a json config file')
 
-        return this._write(file, {})
+          return this._write(file, {})
+        }
+
+        debug('seeding a js/ts config file')
+
+        const code = /\.ts$/.test(file) ? tsCode : jsCode
+
+        return fs.writeFile(file, code).then(() => ({ configObject: {}, functionNames: [] }))
       }
 
-      debug('seeding a js/ts config file')
-
-      const code = /\.ts$/.test(file) ? tsCode : jsCode
-
-      return fs.writeFile(file, code).then(() => ({ configObject: {}, functionNames: [] }))
+      handleNormalError(err)
     })
     .then(({ result: configObject = {}, functionNames = [] }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
@@ -273,14 +286,7 @@ module.exports = {
 
         return config
       })
-    }).catch((err) => {
-      debug('an error occured when reading config', err)
-      if (errors.isCypressErr(err)) {
-        throw err
-      }
-
-      return this._logReadErr(file, err)
-    })
+    }).catch(handleNormalError)
   },
 
   readEnv (projectRoot) {
