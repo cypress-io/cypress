@@ -7,19 +7,27 @@ const { fs } = require('./fs')
 const requireAsync = require('./require_async').default
 const debug = require('debug')('cypress:server:settings')
 
-const jsCode = `const { defineConfig } = require('cypress')
+function jsCode (obj) {
+  const objJSON = obj && obj !== {} ? JSON.stringify(obj, null, 2) : `{
 
-module.export = defineConfig({
+}`
 
-})
+  return `const { defineConfig } = require('cypress')
+
+module.export = defineConfig(${objJSON})
 `
+}
 
-const tsCode = `import { defineConfig } from 'cypress'
+function tsCode (obj) {
+  const objJSON = obj && obj !== {} ? JSON.stringify(obj, null, 2) : `{
 
-export default defineConfig({
+}`
 
-})
+  return `import { defineConfig } from 'cypress'
+
+export default defineConfig(${objJSON})
 `
+}
 
 // TODO:
 // think about adding another PSemaphore
@@ -94,11 +102,21 @@ module.exports = {
   },
 
   _write (file, obj = {}) {
-    if (!/\.json$/.test(file)) {
-      return Promise.resolve(obj)
+    if (/\.json$/.test(file)) {
+      debug('writing json file')
+
+      return fs.outputJsonAsync(file, obj, { spaces: 2 })
+      .return(obj)
+      .catch((err) => {
+        return this._logWriteErr(file, err)
+      })
     }
 
-    return fs.outputJsonAsync(file, obj, { spaces: 2 })
+    debug('writing javascript file')
+
+    const code = /\.ts$/.test(file) ? tsCode : jsCode
+
+    return fs.writeFileAsync(file, code(obj))
     .return(obj)
     .catch((err) => {
       return this._logWriteErr(file, err)
@@ -216,17 +234,7 @@ module.exports = {
       if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
         debug('file not found', file)
 
-        if (/\.json$/.test(file)) {
-          debug('seeding a json config file')
-
-          return this._write(file, {})
-        }
-
-        debug('seeding a js/ts config file')
-
-        const code = /\.ts$/.test(file) ? tsCode : jsCode
-
-        return fs.writeFile(file, code).then(() => ({ configObject: {}, functionNames: [] }))
+        return this._write(file, {})
       }
 
       return Promise.reject(err)
