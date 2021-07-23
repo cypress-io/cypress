@@ -75,6 +75,16 @@ export interface NexusGenObjects {
     path: string; // String!
     version: string; // String!
   }
+  Config: { // root type
+    baseUrl?: string | null; // String
+    clientRoute?: string | null; // String
+    namespace?: string | null; // String
+    port?: number | null; // Int
+    proxyServer?: string | null; // String
+    proxyUrl?: string | null; // String
+    reporterRoute?: string | null; // String
+    xhrRoute?: string | null; // String
+  }
   InitStatus: { // root type
     message?: string | null; // String
     state: NexusGenEnums['InitState']; // InitState!
@@ -115,6 +125,16 @@ export interface NexusGenFieldTypes {
     path: string; // String!
     version: string; // String!
   }
+  Config: { // field return type
+    baseUrl: string | null; // String
+    clientRoute: string | null; // String
+    namespace: string | null; // String
+    port: number | null; // Int
+    proxyServer: string | null; // String
+    proxyUrl: string | null; // String
+    reporterRoute: string | null; // String
+    xhrRoute: string | null; // String
+  }
   InitStatus: { // field return type
     message: string | null; // String
     state: NexusGenEnums['InitState']; // InitState!
@@ -135,6 +155,7 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     app: NexusGenRootTypes['App'] | null; // App
     browsers: Array<NexusGenRootTypes['Browser'] | null>; // [Browser]!
+    config: NexusGenRootTypes['Config']; // Config!
     openProject: NexusGenRootTypes['Project'] | null; // Project
     projects: Array<NexusGenRootTypes['Project'] | null>; // [Project]!
   }
@@ -157,6 +178,16 @@ export interface NexusGenFieldTypeNames {
     path: 'String'
     version: 'String'
   }
+  Config: { // field return type name
+    baseUrl: 'String'
+    clientRoute: 'String'
+    namespace: 'String'
+    port: 'Int'
+    proxyServer: 'String'
+    proxyUrl: 'String'
+    reporterRoute: 'String'
+    xhrRoute: 'String'
+  }
   InitStatus: { // field return type name
     message: 'String'
     state: 'InitState'
@@ -177,6 +208,7 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     app: 'App'
     browsers: 'Browser'
+    config: 'Config'
     openProject: 'Project'
     projects: 'Project'
   }

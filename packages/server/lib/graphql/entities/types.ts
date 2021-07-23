@@ -15,6 +15,20 @@ const InitStatus = objectType({
   },
 })
 
+export const Config = objectType({
+  name: 'Config',
+  definition (t) {
+    t.string('baseUrl')
+    t.string('clientRoute')
+    t.string('namespace')
+    t.string('xhrRoute')
+    t.string('reporterRoute')
+    t.string('proxyUrl')
+    t.string('proxyServer')
+    t.int('port')
+  },
+})
+
 export const Project = objectType({
   name: 'Project',
   definition (t) {

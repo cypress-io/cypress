@@ -15,7 +15,7 @@
 
 // Import commands.js using ES2015 syntax:
 
-import 'virtual:windi.css'
-import '../../src/main.scss'
+// import 'virtual:windi.css'
+// import '../../src/main.scss'
 
 import './commands'

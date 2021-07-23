@@ -8,6 +8,9 @@
     "runMode": 2,
     "openMode": 0
   },
+  "env": {
+    "CypressInternal_UseInlineSpecList": true
+  },
   "nodeVersion": "system",
   "testFiles": "**/*.spec.{ts,tsx}",
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",

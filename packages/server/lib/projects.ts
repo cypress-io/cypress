@@ -12,6 +12,13 @@ import { Browser } from '@packages/launcher/lib/types'
 
 export type TestingType = 'e2e' | 'component'
 
+const spec = {
+  name: 'All Specs',
+  absolute: '__all',
+  relative: '__all',
+  specType: 'integration',
+} as const
+
 const khrome = {
   name: 'chrome',
   family: 'chromium',
@@ -129,13 +136,6 @@ class Projects {
       throw Error('Must set currentProjectId before calling launchRunner!')
     }
 
-    const spec = {
-      name: 'All Specs',
-      absolute: '__all',
-      relative: '__all',
-      specType: 'component',
-    }
-
     let config = this.openProject.getConfig()
 
     const urls = configureUrls({
@@ -161,14 +161,21 @@ class Projects {
     interface LaunchOptions {
       url: string
       browser: Browser
+      proxyServer: string
+      proxyUrl: string
+      socketIoRoute: string
     }
 
     const options: LaunchOptions = {
       // @ts-ignore
       browser: khrome,
       url,
+      proxyServer: urls.proxyServer,
+      proxyUrl: urls.proxyUrl,
+      socketIoRoute: config.socketIoRoute!,
     }
-    const { socketIoCookie, screenshotsFolder, namespace } = this.openProject.getConfig()
+
+    const { socketIoCookie, screenshotsFolder, namespace } = config
 
     return browsers.open(khrome, options, this.openProject.createAutomation({ socketIoCookie, screenshotsFolder, namespace }))
   }
@@ -195,8 +202,12 @@ class Projects {
     this.openProject._server = server
 
     try {
-      server.open(this.openProject.getConfig(), {
-        getSpec: () => null,
+      // init specs
+      const { specsStore } = await this.openProject.initializeSpecStore(this.openProject.getConfig())
+
+      // start server
+      const [port] = await server.open(this.openProject.getConfig(), {
+        getSpec: () => spec,
         // @ts-ignore
         getCurrentBrowser: () => khrome,
         onError: () => {},
@@ -205,9 +216,24 @@ class Projects {
         projectType: this.openProject.projectType,
         SocketCtor: this.openProject.projectType === 'e2e' ? SocketE2E : SocketCt,
         createRoutes: this.openProject.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
-        // @ts-ignore
-        specsStore: null,
+        specsStore,
       })
+
+      const config = this.openProject.getConfig()
+
+      // start websockets
+      this.openProject.startWebsockets({
+      }, {
+        socketIoCookie: config.socketIoCookie,
+        namespace: config.namespace,
+        screenshotsFolder: config.screenshotsFolder,
+        report: config.report,
+        reporter: config.reporter,
+        reporterOptions: config.reporterOptions,
+        projectRoot: this.openProject.projectRoot,
+      })
+
+      this.openProject.updateConfig({ port })
 
       this.openProject.serverStatus = {
         state: 'initialized',
@@ -216,7 +242,7 @@ class Projects {
     } catch (e) {
       this.openProject.serverStatus = {
         state: 'error',
-        message: null,
+        message: e.message,
       }
     }
 

@@ -36,6 +36,10 @@ type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
 let initialInnerHtml = ''
 
 Cypress.on('run:start', () => {
+  if (Cypress.testingType !== 'component') {
+    return
+  }
+
   initialInnerHtml = document.head.innerHTML
   Cypress.on('test:before:run', () => {
     Cypress.vueWrapper?.unmount()

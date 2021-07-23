@@ -40,7 +40,7 @@ import { NexusGenObjects } from './graphql/gen/nxs.gen'
 // and are required when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'xhrRoute' | 'reporterRoute'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'xhrRoute' | 'reporterRoute' | 'socketIoRoute'>>
   & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'componentFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
 
 export interface Cfg extends ReceivedCypressOptions {
