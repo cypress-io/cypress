@@ -356,7 +356,7 @@ const moduleFactory = () => {
 
       // store the currently open project
       openProject = new Project.ProjectBase({
-        projectType: args.testingType === 'component' ? 'ct' : 'e2e',
+        projectType: args.testingType === 'component' ? 'component' : 'e2e',
         projectRoot: path,
         options: {
           ...options,

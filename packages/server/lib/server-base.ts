@@ -94,7 +94,7 @@ export interface OpenServerOptions {
   project: ProjectBase<any>
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
-  projectType: 'ct' | 'e2e'
+  projectType: 'component' | 'e2e'
   onError: any
   onWarning: any
   shouldCorrelatePreRequests: () => boolean
@@ -182,7 +182,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     la(_.isPlainObject(config), 'expected plain config object', config)
 
     return Bluebird.try(() => {
-      if (!config.baseUrl && projectType === 'ct') {
+      if (!config.baseUrl && projectType === 'component') {
         throw new Error('ServerCt#open called without config.baseUrl.')
       }
 
@@ -191,7 +191,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       logger.setSettings(config)
 
       this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl && projectType === 'ct' ? config.baseUrl : undefined,
+        target: config.baseUrl && projectType === 'component' ? config.baseUrl : undefined,
       })
 
       this._socket = new SocketCtor(config) as TSocket

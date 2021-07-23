@@ -26,7 +26,7 @@ interface BaseState {
 }
 
 interface StateCT {
-  runner: 'ct'
+  runner: 'component'
   state: {
     screenshotting: boolean
   } & BaseState
@@ -117,7 +117,7 @@ export class Header extends Component<HeaderProps> {
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
           'showing-studio': studioRecorder.isOpen,
-          'display-none': this.props.runner === 'ct' && this.props.state.screenshotting,
+          'display-none': this.props.runner === 'component' && this.props.state.screenshotting,
         })}
       >
         <div className='sel-url-wrap'>
