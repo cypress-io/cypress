@@ -54,18 +54,6 @@ export const InitializeServer = mutationField((t) => {
   })
 })
 
-export const LaunchRunner = mutationField((t) => {
-  t.nonNull.field('launchRunner', {
-    type: Project,
-    async resolve (_root, args, ctx) {
-      // TODO: should we await here, or return a pending state to the client?
-      await projects.launchRunner()
-
-      return formatProject(projects.openProject!)
-    },
-  })
-})
-
 export const AddProject = mutationField((t) => {
   t.nonNull.field('addProject', {
     type: Project,

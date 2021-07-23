@@ -8,7 +8,7 @@ import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { getSpecUrl } from './project_utils'
 import origin from './util/origin'
-import { Browser } from '@packages/launcher/lib/types'
+import { Browser } from './browsers/types'
 
 export type TestingType = 'e2e' | 'component'
 
@@ -18,19 +18,6 @@ const spec = {
   relative: '__all',
   specType: 'integration',
 } as const
-
-const khrome = {
-  name: 'chrome',
-  family: 'chromium',
-  channel: 'stable',
-  version: '91.0.4472.164',
-  displayName: 'chrome',
-  path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  minSupportedVersion: 64,
-  isHeaded: true,
-  isHeadless: false,
-  majorVersion: 91 as never,
-}
 
 function configureUrls ({
   baseUrl,
@@ -55,6 +42,7 @@ function configureUrls ({
 class Projects {
   currentProjectId?: string
   projects: ProjectBase<Server>[] = []
+  currentBrowser?: Browser
 
   async addProject ({
     projectRoot,
@@ -93,6 +81,10 @@ class Projects {
     this.projects.push(projectBase)
 
     return projectBase
+  }
+
+  setBrowser (browser: Browser) {
+    this.currentBrowser = browser
   }
 
   setTestingType (testingType: TestingType) {
@@ -136,6 +128,10 @@ class Projects {
       throw Error('Must set currentProjectId before calling launchRunner!')
     }
 
+    if (!this.currentBrowser) {
+      throw Error('Must set currentBrowser before calling launchRunner!')
+    }
+
     let config = this.openProject.getConfig()
 
     const urls = configureUrls({
@@ -167,8 +163,7 @@ class Projects {
     }
 
     const options: LaunchOptions = {
-      // @ts-ignore
-      browser: khrome,
+      browser: this.currentBrowser,
       url,
       proxyServer: urls.proxyServer,
       proxyUrl: urls.proxyUrl,
@@ -177,7 +172,17 @@ class Projects {
 
     const { socketIoCookie, screenshotsFolder, namespace } = config
 
-    return browsers.open(khrome, options, this.openProject.createAutomation({ socketIoCookie, screenshotsFolder, namespace }))
+    return browsers.open(this.currentBrowser, options, this.openProject.createAutomation({ socketIoCookie, screenshotsFolder, namespace }))
+  }
+
+  async closeRunner () {
+    if (!this.openProject) {
+      return
+    }
+
+    await browsers.close()
+    this.openProject.reset()
+    await this.openProject.close()
   }
 
   async initializeServer () {
@@ -209,7 +214,7 @@ class Projects {
       const [port] = await server.open(this.openProject.getConfig(), {
         getSpec: () => spec,
         // @ts-ignore
-        getCurrentBrowser: () => khrome,
+        getCurrentBrowser: () => this.currentBrowser,
         onError: () => {},
         onWarning: () => {},
         shouldCorrelatePreRequests: () => true,

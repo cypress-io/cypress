@@ -1,5 +1,6 @@
-import { queryField, objectType, enumType } from 'nexus'
+import { queryField, objectType, enumType, mutationField, nonNull, inputObjectType } from 'nexus'
 import browsers from '@packages/server/lib/browsers'
+import { projects } from '../../projects'
 
 const BrowserName = enumType({
   name: 'BrowserName',
@@ -39,11 +40,57 @@ const Browser = objectType({
   },
 })
 
+const AllBrowsersOutput = objectType({
+  name: 'browsers',
+  definition (t) {
+    t.nonNull.list.field('all', {
+      type: Browser,
+    })
+
+    t.field('current', {
+      type: Browser,
+    })
+  },
+})
+
 export const allBrowsers = queryField((t) => {
-  t.nonNull.list.field('browsers', {
-    type: Browser,
+  t.nonNull.field('browsers', {
+    type: AllBrowsersOutput,
     async resolve (_root, args, ctx) {
-      return await browsers.get()
+      const all = await browsers.get()
+
+      return {
+        all,
+        current: projects.currentBrowser as any, // types
+      }
+    },
+  })
+})
+
+const SetBrowserInput = inputObjectType({
+  name: 'SetBrowserInput',
+  definition (t) {
+    t.nonNull.string('path')
+  },
+})
+
+export const setBrowser = mutationField((t) => {
+  t.nonNull.field('setBrowser', {
+    type: Browser,
+    args: {
+      input: nonNull(SetBrowserInput),
+    },
+    async resolve (_root, args, ctx) {
+      const all = await browsers.get()
+      const set = all.find((x) => x.path === args.input.path)
+
+      if (!set) {
+        throw Error(`Could not find browser by path ${args.input.path}`)
+      }
+
+      projects.setBrowser(set)
+
+      return set
     },
   })
 })

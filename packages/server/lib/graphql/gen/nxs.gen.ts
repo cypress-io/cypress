@@ -44,6 +44,9 @@ export interface NexusGenInputs {
     projectRoot: string; // String!
     testingType: string; // String!
   }
+  SetBrowserInput: { // input type
+    path: string; // String!
+  }
 }
 
 export interface NexusGenEnums {
@@ -99,6 +102,10 @@ export interface NexusGenObjects {
   }
   Query: {};
   Wizard: Wizard;
+  browsers: { // root type
+    all: Array<NexusGenRootTypes['Browser'] | null>; // [Browser]!
+    current?: NexusGenRootTypes['Browser'] | null; // Browser
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -141,9 +148,11 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
+    closeRunner: NexusGenRootTypes['Project']; // Project!
     initializePlugins: NexusGenRootTypes['Project']; // Project!
     initializeServer: NexusGenRootTypes['Project']; // Project!
     launchRunner: NexusGenRootTypes['Project']; // Project!
+    setBrowser: NexusGenRootTypes['Browser']; // Browser!
   }
   Project: { // field return type
     isCurrent: boolean; // Boolean!
@@ -154,13 +163,17 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App'] | null; // App
-    browsers: Array<NexusGenRootTypes['Browser'] | null>; // [Browser]!
+    browsers: NexusGenRootTypes['browsers']; // browsers!
     config: NexusGenRootTypes['Config']; // Config!
     openProject: NexusGenRootTypes['Project'] | null; // Project
     projects: Array<NexusGenRootTypes['Project'] | null>; // [Project]!
   }
   Wizard: { // field return type
     todo: boolean | null; // Boolean
+  }
+  browsers: { // field return type
+    all: Array<NexusGenRootTypes['Browser'] | null>; // [Browser]!
+    current: NexusGenRootTypes['Browser'] | null; // Browser
   }
 }
 
@@ -194,9 +207,11 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     addProject: 'Project'
+    closeRunner: 'Project'
     initializePlugins: 'Project'
     initializeServer: 'Project'
     launchRunner: 'Project'
+    setBrowser: 'Browser'
   }
   Project: { // field return type name
     isCurrent: 'Boolean'
@@ -207,7 +222,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
-    browsers: 'Browser'
+    browsers: 'browsers'
     config: 'Config'
     openProject: 'Project'
     projects: 'Project'
@@ -215,12 +230,19 @@ export interface NexusGenFieldTypeNames {
   Wizard: { // field return type name
     todo: 'Boolean'
   }
+  browsers: { // field return type name
+    all: 'Browser'
+    current: 'Browser'
+  }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
     addProject: { // args
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
+    }
+    setBrowser: { // args
+      input: NexusGenInputs['SetBrowserInput']; // SetBrowserInput!
     }
   }
 }
