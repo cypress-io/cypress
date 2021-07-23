@@ -43,7 +43,7 @@ describe('lib/plugins/util', () => {
       expect(handler).to.be.calledWith('arg1', 'arg2')
     })
 
-    it('#removeListener emoves handler', function () {
+    it('#removeListener removes handler', function () {
       const handler = sinon.spy()
 
       this.ipc.on('event-name', handler)
@@ -54,6 +54,73 @@ describe('lib/plugins/util', () => {
       })
 
       expect(handler).not.to.be.called
+    })
+
+    context('#arguments-serialization', () => {
+      it('#send should send functions arguments as a serialized string', function () {
+        this.ipc.send('event-singe-arg', function () {})
+
+        expect(this.theProcess.send).to.be.calledWith({
+          event: 'event-singe-arg',
+          args: ['__cypress_function__'],
+        })
+      })
+
+      it('#send should send functions in object arguments as a serialized string', function () {
+        this.ipc.send('event-obj-arg', { e2e () {} })
+
+        expect(this.theProcess.send).to.be.calledWith({
+          event: 'event-obj-arg',
+          args: [{ e2e: '__cypress_function__' }],
+        })
+      })
+
+      it('#send should send functions in nested object arguments as a serialized string', function () {
+        this.ipc.send('event-obj-arg', { config: { e2e () {} } })
+
+        expect(this.theProcess.send).to.be.calledWith({
+          event: 'event-obj-arg',
+          args: [{ config: { e2e: '__cypress_function__' } }],
+        })
+      })
+    })
+
+    context('#arguments-deserialization', () => {
+      it('#on should deserialise function strings into function', function () {
+        const handler = sinon.spy()
+
+        this.ipc.on('event-obj-arg', handler)
+        this.theProcess.on.yield({
+          event: 'event-obj-arg',
+          args: ['__cypress_function__'],
+        })
+
+        expect(handler).to.be.calledWith(sinon.match.func)
+      })
+
+      it('#on should deserialise function strings in object into function', function () {
+        const handler = sinon.spy()
+
+        this.ipc.on('event-obj-arg', handler)
+        this.theProcess.on.yield({
+          event: 'event-obj-arg',
+          args: [{ e2e: '__cypress_function__' }],
+        })
+
+        expect(handler).to.be.calledWith({ e2e: sinon.match.func })
+      })
+
+      it('#on should deserialise function strings in nested object into function', function () {
+        const handler = sinon.spy()
+
+        this.ipc.on('event-obj-arg', handler)
+        this.theProcess.on.yield({
+          event: 'event-obj-arg',
+          args: [{ config: { e2e: '__cypress_function__' } }],
+        })
+
+        expect(handler).to.be.calledWith({ config: { e2e: sinon.match.func } })
+      })
     })
   })
 
