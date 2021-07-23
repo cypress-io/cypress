@@ -81,7 +81,7 @@ export const createRoutes = ({
 
   // special fallback - serve local files from the project's root folder
   app.get('/__root/*', (req, res) => {
-    const file = path.join(config.projectRoot, req.params[0])
+    const file = path.join(config.projectRoot!, req.params[0])
 
     res.sendFile(file, { etag: false })
   })
