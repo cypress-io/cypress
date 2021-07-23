@@ -23,7 +23,7 @@ describe('Proxy Logging', () => {
 
       cy.then(() => {
         cy.on('log:changed', (log) => {
-          if (log.name === 'xhr') {
+          if (['request', 'xhr'].includes(log.name)) {
             try {
               testLog(log)
               resolve()

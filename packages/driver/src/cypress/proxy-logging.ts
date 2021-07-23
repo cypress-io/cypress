@@ -86,8 +86,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
   return {
     ...getDynamicRequestLogConfig(req),
     displayName: req.preRequest.resourceType,
-    // TOOD: this just gets us the indicator, update this to not be 'xhr'
-    name: 'xhr',
+    name: 'request',
     type: 'parent',
     event: true,
     url: req.preRequest.url,

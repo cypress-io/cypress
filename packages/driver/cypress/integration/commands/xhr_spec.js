@@ -1030,7 +1030,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('xhr')
+          expect(lastLog.get('name')).to.eq('request')
           expect(lastLog.get('error').message).contain('foo is not defined')
 
           done()
@@ -1053,7 +1053,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('xhr')
+          expect(lastLog.get('name')).to.eq('request')
           expect(err.message).to.include(lastLog.get('error').message)
           expect(err.message).to.include(e.message)
 
@@ -1755,7 +1755,7 @@ describe('src/cy/commands/xhr', () => {
           return null
         })
         .wait('@getFoo').then((xhr) => {
-          const log = cy.queue.logs({ name: 'xhr' })[0]
+          const log = cy.queue.logs({ name: 'request' })[0]
 
           expect(log.get('displayName')).to.eq('xhr')
           expect(log.get('alias')).to.eq('getFoo')
