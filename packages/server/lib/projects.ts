@@ -57,11 +57,29 @@ function configureUrls ({
 }
 
 class Projects {
+  // ProjectBase.id is creating by hashing the projectRoot with sha256 to get a uuid.
+  // This is useful for GraphQL caching.
   currentProjectId?: string
+
   projects: ProjectBase<Server>[] = []
+
+  // the browser the user selected to launch.
   currentBrowser?: Browser
+
+  // all known browsers on the user's machine.
   foundBrowsers: Browser[] = []
 
+  /**
+   * Represents the current open project, if one exists.
+   */
+  get openProject () {
+    return this.currentProjectId
+      ? this.projects.find((p) => p.id === this.currentProjectId)
+      : undefined
+  }
+
+  // Adds a project and initialize relevant Cypress configuration it, optionally
+  // setting the added project to be the current project.
   async addProject ({
     projectRoot,
     testingType,
@@ -103,6 +121,7 @@ class Projects {
     return projectBase
   }
 
+  // Set desired browser to use when launching the runner
   async setBrowser (input: NexusGenInputs['SetBrowserInput']) {
     const all = this.foundBrowsers || await browsers.get()
     const set = all.find((x) => x.path === input.path)
@@ -110,9 +129,6 @@ class Projects {
     if (!set) {
       throw Error(`Could not find browser by path ${input.path}`)
     }
-
-    // @ts-ignore
-    this.currentBrowser = { ...set, isHeaded: true, isHeadless: false, isChosen: true }
 
     return set
   }
@@ -184,6 +200,15 @@ class Projects {
       projectRoot: this.openProject.projectRoot,
     })
 
+    // if we don't have the isHeaded property
+    // then we're in interactive mode and we
+    // can assume its a headed browser
+    // TODO: we should clean this up
+    if (('isHeaded' in this.currentBrowser) === false) {
+      this.currentBrowser.isHeaded = true
+      this.currentBrowser.isHeadless = false
+    }
+
     const options: LaunchOptions = {
       userAgent: config.userAgent,
       chromeWebSecurity: config.chromeWebSecurity,
@@ -205,6 +230,10 @@ class Projects {
     return
   }
 
+  /**
+   * closes a runner is one is open.
+   * handles closing the server, project, websockets, etc
+   */
   async closeRunner () {
     if (!this.openProject) {
       return
@@ -217,6 +246,12 @@ class Projects {
     await this.openProject.close()
   }
 
+  /**
+   * Creates a new server and starts it, as well as the websockets
+   * and anything else necessary for launching a runner.
+   *
+   * Will terminal and return early if a server already has been started.
+   */
   async initializeServer () {
     if (!this.openProject) {
       throw Error('Must set currentProjectId before calling initializeServer!')
@@ -284,12 +319,6 @@ class Projects {
     }
 
     return
-  }
-
-  get openProject () {
-    return this.currentProjectId
-      ? this.projects.find((p) => p.id === this.currentProjectId)
-      : undefined
   }
 }
 

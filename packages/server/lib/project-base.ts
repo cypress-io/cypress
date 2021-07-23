@@ -126,6 +126,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.watchers = new Watchers()
     this.spec = null
     this.browser = null
+    // Create a unique id by hashing the project root.
+    // Used for caching by GraphQL.
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
 
     debug('Project created %o', {
