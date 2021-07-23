@@ -277,7 +277,11 @@ class Projects {
 
     try {
       // init specs
-      const { specsStore } = await this.openProject.initializeSpecStore(this.openProject.getConfig())
+      const { specsStore, ctDevServerPort } = await this.openProject.initializeSpecStore(this.openProject.getConfig())
+
+      if (this.openProject.testingType === 'component') {
+        this.openProject.updateConfig({ baseUrl: `http://localhost:${ctDevServerPort}` })
+      }
 
       // start server
       const [port] = await server.open(this.openProject.getConfig(), {
