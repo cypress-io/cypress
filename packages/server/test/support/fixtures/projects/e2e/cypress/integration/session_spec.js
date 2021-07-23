@@ -20,8 +20,6 @@ before(() => {
     return
   }
 
-  // TODO: look into why returning this promise here throws a Cypress warning in console
-  // about mixed promises and commands
   cy.wrap(Cypress.session.clearAllSavedSessions())
 })
 

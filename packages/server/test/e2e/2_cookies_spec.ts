@@ -305,10 +305,8 @@ describe('cross-origin cookies, set:cookies', () => {
 
       const cookieStr = Object.keys(req.query)[0]
 
-      console.log(cookieStr)
       const reqCookie = JSON.parse(cookieStr)
 
-      console.log({ reqCookie })
       const { value, ...cookie } = reqCookie
 
       res.cookie(name, value || 'value', {

@@ -154,9 +154,7 @@ describe('set:cookies', () => {
 
     expect(await Cypress.session.getCookies()).deep.eq([])
 
-    for (const cookie of request_cookies) {
-      await reqCookie(cookie)
-    }
+    await Promise.all(request_cookies.map((cookie) => reqCookie(cookie)))
 
     const initial_cookies = await Cypress.session.getCookies()
 

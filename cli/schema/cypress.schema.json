@@ -255,7 +255,7 @@
         "experimentalSessionSupport": {
           "type": "boolean",
           "default": false,
-          "description": "Enable experimental session support see https://github.com/cypress-io/cypress/issues/8301"
+          "description": "Enable experimental session support. See https://on.cypress.io/session"
         },
         "experimentalFetchPolyfill": {
           "type": "boolean",

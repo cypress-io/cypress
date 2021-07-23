@@ -691,22 +691,11 @@ namespace CypressSessionsTests {
   cy.session('user', ()=>{})
   cy.session('user', ()=>{}, {})
   cy.session('user', ()=>{}, {
-    exclude: {},
     validate: ()=>{}
   })
 
   cy.session() // $ExpectError
   cy.session({}) // $ExpectError
-  cy.session('user', ()=>{}, {
-    exclude: {
-      foo: {} // $ExpectError
-    },
-  })
-  cy.session('user', ()=>{}, {
-    exclude: {
-      cookies: {foo:true} // $ExpectError
-    },
-  })
   cy.session('user', ()=>{}, {
     validate: {foo:true} // $ExpectError
   })
@@ -721,6 +710,7 @@ namespace CypressCookieTests {
     expiry: 123,
     secure: true,
     sameSite: 'no_restriction',
+    hostOnly: true,
     foo: true, // $ExpectError
   })
 
@@ -729,12 +719,15 @@ namespace CypressCookieTests {
   cookie.domain
   cookie.expiry
   cookie.httpOnly
+  cookie.hostOnly
   cookie.name
   cookie.path
   cookie.sameSite
   cookie.secure
   cookie.value
   cookie.foo // $ExpectError
+}
+
 namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0

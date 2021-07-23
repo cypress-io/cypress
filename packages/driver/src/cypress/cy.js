@@ -122,14 +122,6 @@ const setTopOnError = function (Cypress, cy) {
 }
 
 const commandRunningFailed = (Cypress, state, err) => {
-  // debugger
-  // return
-  // if (state('onCommandFailed')) {
-  //   state('onCommandFailed')()
-
-  //   return
-  // }
-
   // allow for our own custom onFail function
   if (err.onFail) {
     err.onFail(err)
@@ -669,8 +661,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('reject', rejectOuterAndCancelInner)
     })
     .catch((err) => {
-      // console.log('CAUGHT ERROR', err)
-
       if (state('onCommandFailed')) {
         return state('onCommandFailed')(err, queue, next)
       }
@@ -1167,8 +1157,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       return cy.addChainer(name, (chainer, userInvocationStack, args) => {
         const { firstCall, chainerId } = chainer
-
-        cy.state('lastChainerEnqueued', chainerId)
 
         // dont enqueue / inject any new commands if
         // onInjectCommand returns false

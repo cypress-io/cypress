@@ -1,3 +1,5 @@
 {
-  "experimentalSessionSupport": true
+  "experimentalSessionSupport": true,
+  "supportFile": false,
+  "fixturesFolder": false
 }

@@ -3035,6 +3035,7 @@ declare namespace Cypress {
     domain: string
     secure: boolean
     httpOnly: boolean
+    hostOnly: boolean
     expiry: number
     sameSite: SameSiteStatus
   }
@@ -5511,6 +5512,7 @@ declare namespace Cypress {
     path: string
     domain: string
     httpOnly: boolean
+    hostOnly: boolean
     secure: boolean
     expiry?: number
     sameSite?: SameSiteStatus
