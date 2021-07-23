@@ -9,7 +9,7 @@ type WarningErr = Record<string, any>
 
 export class ServerCt extends ServerBase<SocketCt> {
   open (config: Cfg, options: OpenServerOptions) {
-    return super.open(config, { ...options, projectType: 'ct' })
+    return super.open(config, { ...options, projectType: 'component' })
   }
 
   createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {

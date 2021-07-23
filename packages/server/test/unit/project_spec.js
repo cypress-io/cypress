@@ -91,7 +91,7 @@ describe('lib/project-base', () => {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
-    const projectCt = new ProjectBase({ projectRoot: '../foo/bar', projectType: 'ct' })
+    const projectCt = new ProjectBase({ projectRoot: '../foo/bar', projectType: 'component' })
 
     await projectCt.initializeConfig()
 

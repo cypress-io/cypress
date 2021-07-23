@@ -18,7 +18,7 @@ const registerCheckForUpdates = () => {
   const checkForUpdates = (initialLaunch) => {
     Updater.check({
       initialLaunch,
-      testingType: 'ct',
+      testingType: 'component',
       onNewVersion: _.noop,
       onNoNewVersion: _.noop,
     })

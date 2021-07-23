@@ -225,7 +225,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       ctDevServerPort,
     } = await this.initializeSpecStore(cfg)
 
-    if (this.projectType === 'ct') {
+    if (this.projectType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
     }
 
@@ -235,7 +235,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      projectType: this.projectType as 'ct' | 'e2e',
+      projectType: this.projectType as 'component' | 'e2e',
       SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
       createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
       specsStore,
@@ -391,7 +391,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   }> {
     const allSpecs = await specsUtil.find(updatedConfig)
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.projectType === 'ct') {
+      if (this.projectType === 'component') {
         return spec.specType === 'component'
       }
 
@@ -457,7 +457,7 @@ export class ProjectBase<TServer extends Server> extends EE {
         // client to be shown in the SpecList.
           this.server.sendSpecList(specs, this.projectType as RunnerType)
 
-          if (this.projectType === 'ct') {
+          if (this.projectType === 'component') {
           // ct uses the dev-server to build and bundle the speces.
           // send new files to dev server
             devServer.updateSpecs(specs)
@@ -468,7 +468,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.projectType === 'ct') {
+    if (this.projectType === 'component') {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port
