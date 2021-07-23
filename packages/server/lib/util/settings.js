@@ -140,6 +140,12 @@ module.exports = {
       return 'cypress.json'
     }
 
+    // if we find a tsconfig.json let's make users life easy
+    // and create a TypeScript file.
+    if (ls.includes('tsconfig.json')) {
+      return 'cypress.config.ts'
+    }
+
     // Default is to create a new `cypress.config.js` file if one does not exist.
     return 'cypress.config.js'
   },
