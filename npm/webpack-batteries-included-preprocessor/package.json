@@ -18,6 +18,7 @@
     "babel-plugin-add-module-exports": "^1.0.2",
     "coffee-loader": "^0.9.0",
     "coffeescript": "^1.12.7",
+    "pnp-webpack-plugin": "^1.7.0",
     "ts-loader": "^8.0.2",
     "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
