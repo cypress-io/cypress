@@ -358,7 +358,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
 
-    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+    const closePreprocessor = this.testingType === 'e2e' && preprocessor.close
+      ? preprocessor.close
+      : () => {}
 
     await Promise.all([
       this.server?.close(),
