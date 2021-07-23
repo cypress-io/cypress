@@ -57,7 +57,7 @@ export const allBrowsers = queryField((t) => {
   t.nonNull.field('browsers', {
     type: AllBrowsersOutput,
     async resolve (_root, args, ctx) {
-      const all = await browsers.get()
+      const all = projects.foundBrowsers ?? await browsers.get()
 
       return {
         all,

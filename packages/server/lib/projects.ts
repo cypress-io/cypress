@@ -67,7 +67,7 @@ class Projects {
   currentBrowser?: Browser
 
   // all known browsers on the user's machine.
-  foundBrowsers: Browser[] = []
+  foundBrowsers?: Browser[]
 
   testingType?: NexusGenEnums['TestingType']
 
@@ -96,7 +96,7 @@ class Projects {
     }
 
     const projectBase = new ProjectBase({
-      projectType: testingType,
+      testingType,
       projectRoot: absoluteProjectRoot,
       options: {
         projectRoot,
@@ -123,14 +123,16 @@ class Projects {
 
   // Set desired browser to use when launching the runner
   async setBrowser (input: NexusGenInputs['SetBrowserInput']) {
-    const all = this.foundBrowsers || await browsers.get()
-    const set = all.find((x) => x.path === input.path)
+    const all = this.foundBrowsers ?? await browsers.get()
+    const desired = all.find((x) => x.path === input.path)
 
-    if (!set) {
+    if (!desired) {
       throw Error(`Could not find browser by path ${input.path}`)
     }
 
-    return set
+    this.currentBrowser = desired
+
+    return desired
   }
 
   setTestingType (testingType: TestingType) {
@@ -138,7 +140,7 @@ class Projects {
       return
     }
 
-    this.openProject.projectType = testingType
+    this.openProject.testingType = testingType
   }
 
   async initializePlugins () {
@@ -215,7 +217,7 @@ class Projects {
       isTextTerminal: config.isTextTerminal,
       downloadsFolder: config.downloadsFolder,
       browser: this.currentBrowser,
-      browsers: this.foundBrowsers,
+      browsers: this.foundBrowsers || [],
       projectRoot: this.openProject.projectRoot,
       url,
       proxyServer: urls.proxyServer,
@@ -269,7 +271,7 @@ class Projects {
       message: null,
     }
 
-    const server = this.openProject.createServer(this.openProject.projectType)
+    const server = this.openProject.createServer(this.openProject.testingType)
 
     this.openProject._server = server
 
@@ -285,9 +287,9 @@ class Projects {
         onError: () => {},
         onWarning: () => {},
         shouldCorrelatePreRequests: () => true,
-        projectType: this.openProject.projectType,
-        SocketCtor: this.openProject.projectType === 'e2e' ? SocketE2E : SocketCt,
-        createRoutes: this.openProject.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+        testingType: this.openProject.testingType,
+        SocketCtor: this.openProject.testingType === 'e2e' ? SocketE2E : SocketCt,
+        createRoutes: this.openProject.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
         specsStore,
       })
 
