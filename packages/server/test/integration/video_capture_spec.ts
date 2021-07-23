@@ -107,4 +107,13 @@ describe('Video Capture', () => {
       expect(_pt.write).calledOnce
     })
   })
+
+  context('#process', () => {
+    it('process files in nested directories', async () => {
+      const sourcePath = path.join(__dirname, '..', 'support', 'fixtures', 'videos', 'sample.mp4')
+      const compressPath = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'support', 'videos', 'sample.mp4')
+
+      await videoCapture.process(sourcePath, compressPath, 32)
+    })
+  })
 })
