@@ -171,7 +171,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
               type: !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'function' : 'stub') : 'spy',
             }
           })),
-          ...(req.xhr ? [{
+          ...(req.route ? [{
             command: 'route',
             alias: req.route?.alias,
             type: _.isNil(req.route?.response) ? 'spy' : 'stub',
