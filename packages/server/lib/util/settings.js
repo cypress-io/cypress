@@ -206,15 +206,6 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    const handleNormalError = (err) => {
-      debug('an error occured when reading config', err)
-      if (errors.isCypressErr(err)) {
-        throw err
-      }
-
-      return this._logReadErr(file, err)
-    }
-
     return requireAsync(file,
       {
         projectRoot,
@@ -238,7 +229,7 @@ module.exports = {
         return fs.writeFile(file, code).then(() => ({ configObject: {}, functionNames: [] }))
       }
 
-      handleNormalError(err)
+      return Promise.reject(err)
     })
     .then(({ result: configObject = {}, functionNames = [] }) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
@@ -286,7 +277,14 @@ module.exports = {
 
         return config
       })
-    }).catch(handleNormalError)
+    }).catch((err) => {
+      debug('an error occured when reading config', err)
+      if (errors.isCypressErr(err)) {
+        throw err
+      }
+
+      return this._logReadErr(file, err)
+    })
   },
 
   readEnv (projectRoot) {

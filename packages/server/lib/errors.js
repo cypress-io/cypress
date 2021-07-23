@@ -561,9 +561,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Learn more at https://on.cypress.io/support-file-missing-or-invalid`
     case 'CONFIG_FILE_ERROR':
       msg = stripIndent`\
-            Error when loading the config file.
+            Error when loading the config file at the following location:
+            
+            ${arg1}
     
-            You might have renamed the extension of your config file. If that's the case, restart the test runner.`.trim()
+            If you renamed the extension of your config file, restart the test runner.`.trim()
 
       if (arg2) {
         return { msg, details: arg2 }
