@@ -12,6 +12,8 @@ describe('InterceptedRequest', () => {
       }
       const state = NetStubbingState()
       const interceptedRequest = new InterceptedRequest({
+        // @ts-ignore
+        req: {},
         state,
         socket,
         matchingRoutes: [
