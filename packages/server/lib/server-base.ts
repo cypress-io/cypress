@@ -94,7 +94,7 @@ export type WarningErr = Record<string, any>
 export interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
-  projectType: 'component' | 'e2e'
+  testingType: RunnerType
   onError: any
   onWarning: any
   getCurrentBrowser: () => Browser
@@ -179,7 +179,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     shouldCorrelatePreRequests,
     specsStore,
     createRoutes,
-    projectType,
+    testingType,
     SocketCtor,
   }: OpenServerOptions) {
     debug('server open')
@@ -187,7 +187,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     la(_.isPlainObject(config), 'expected plain config object', config)
 
     return Bluebird.try(() => {
-      if (!config.baseUrl && projectType === 'component') {
+      if (!config.baseUrl && testingType === 'component') {
         throw new Error('ServerCt#open called without config.baseUrl.')
       }
 
@@ -196,7 +196,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       logger.setSettings(config)
 
       this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl && projectType === 'component' ? config.baseUrl : undefined,
+        target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
       })
 
       this._socket = new SocketCtor(config) as TSocket
@@ -608,7 +608,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.httpsProxy.connect(req, socket, head)
   }
 
-  sendSpecList (specs: Cypress.Cypress['spec'][], projectType: RunnerType) {
-    return this.socket.sendSpecList(specs, projectType)
+  sendSpecList (specs: Cypress.Cypress['spec'][], testingType: RunnerType) {
+    return this.socket.sendSpecList(specs, testingType)
   }
 }
