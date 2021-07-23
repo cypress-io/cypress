@@ -6,9 +6,12 @@ import { SocketE2E } from './socket-e2e'
 import { SocketCt } from '../../server-ct'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
+import Debug from 'debug'
 import { getSpecUrl } from './project_utils'
 import origin from './util/origin'
 import { Browser } from './browsers/types'
+
+const debug = Debug('cypress:server:projects')
 
 export type TestingType = 'e2e' | 'component'
 
@@ -18,6 +21,20 @@ const spec = {
   relative: '__all',
   specType: 'integration',
 } as const
+
+interface LaunchOptions {
+  url: string
+  browser: Browser
+  proxyServer: string
+  proxyUrl: string
+  socketIoRoute: string
+  projectRoot: string
+  browsers: Browser[]
+  userAgent?: string | null
+  chromeWebSecurity?: boolean | null
+  isTextTerminal?: boolean | null
+  downloadsFolder?: string | null
+}
 
 function configureUrls ({
   baseUrl,
@@ -43,6 +60,7 @@ class Projects {
   currentProjectId?: string
   projects: ProjectBase<Server>[] = []
   currentBrowser?: Browser
+  foundBrowsers: Browser[] = []
 
   async addProject ({
     projectRoot,
@@ -70,6 +88,8 @@ class Projects {
 
     const allBrowsers = await browsers.getAllBrowsersWith()
 
+    this.foundBrowsers = allBrowsers
+
     this.currentProjectId = projectBase.id
 
     await projectBase.initializeConfig({ browsers: allBrowsers })
@@ -83,8 +103,18 @@ class Projects {
     return projectBase
   }
 
-  setBrowser (browser: Browser) {
-    this.currentBrowser = browser
+  async setBrowser (input: NexusGenInputs['SetBrowserInput']) {
+    const all = this.foundBrowsers || await browsers.get()
+    const set = all.find((x) => x.path === input.path)
+
+    if (!set) {
+      throw Error(`Could not find browser by path ${input.path}`)
+    }
+
+    // @ts-ignore
+    this.currentBrowser = { ...set, isHeaded: true, isHeadless: false, isChosen: true }
+
+    return set
   }
 
   setTestingType (testingType: TestingType) {
@@ -123,7 +153,7 @@ class Projects {
     }
   }
 
-  launchRunner () {
+  async launchRunner () {
     if (!this.openProject) {
       throw Error('Must set currentProjectId before calling launchRunner!')
     }
@@ -154,16 +184,14 @@ class Projects {
       projectRoot: this.openProject.projectRoot,
     })
 
-    interface LaunchOptions {
-      url: string
-      browser: Browser
-      proxyServer: string
-      proxyUrl: string
-      socketIoRoute: string
-    }
-
     const options: LaunchOptions = {
+      userAgent: config.userAgent,
+      chromeWebSecurity: config.chromeWebSecurity,
+      isTextTerminal: config.isTextTerminal,
+      downloadsFolder: config.downloadsFolder,
       browser: this.currentBrowser,
+      browsers: this.foundBrowsers,
+      projectRoot: this.openProject.projectRoot,
       url,
       proxyServer: urls.proxyServer,
       proxyUrl: urls.proxyUrl,
@@ -172,13 +200,17 @@ class Projects {
 
     const { socketIoCookie, screenshotsFolder, namespace } = config
 
-    return browsers.open(this.currentBrowser, options, this.openProject.createAutomation({ socketIoCookie, screenshotsFolder, namespace }))
+    await browsers.open(this.currentBrowser, options, this.openProject.createAutomation({ socketIoCookie, screenshotsFolder, namespace }))
+
+    return
   }
 
   async closeRunner () {
     if (!this.openProject) {
       return
     }
+
+    debug('Closing runner')
 
     await browsers.close()
     this.openProject.reset()

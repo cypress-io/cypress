@@ -81,16 +81,7 @@ export const setBrowser = mutationField((t) => {
       input: nonNull(SetBrowserInput),
     },
     async resolve (_root, args, ctx) {
-      const all = await browsers.get()
-      const set = all.find((x) => x.path === args.input.path)
-
-      if (!set) {
-        throw Error(`Could not find browser by path ${args.input.path}`)
-      }
-
-      projects.setBrowser(set)
-
-      return set
+      return await projects.setBrowser(args.input) as any
     },
   })
 })
