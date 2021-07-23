@@ -199,7 +199,6 @@ class Command extends Component<Props> {
             'command-is-open': this._isOpen(),
           },
         )}
-
       >
         <FlashOnClick
           message='Printed output to your console'
@@ -207,8 +206,8 @@ class Command extends Component<Props> {
           shouldShowMessage={this._shouldShowClickMessage}
         >
           <div className='command-wrapper'
-            onMouseOver={() => this._snapshot(true)}
-            onMouseOut={() => this._snapshot(false)}
+            onMouseEnter={() => this._snapshot(true)}
+            onMouseLeave={() => this._snapshot(false)}
           >
             <div className='command-wrapper-text'>
               <span className='command-expander' >

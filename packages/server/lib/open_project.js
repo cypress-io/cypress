@@ -38,7 +38,7 @@ const moduleFactory = () => {
 
     reset: () => openProject?.reset(),
 
-    getConfig: tryToCall('getConfig'),
+    getConfig: () => openProject.getConfig(),
 
     getRecordKeys: tryToCall('getRecordKeys'),
 
@@ -84,101 +84,100 @@ const moduleFactory = () => {
 
       debug('open project url %s', url)
 
-      return openProject.getConfig()
-      .then((cfg) => {
-        _.defaults(options, {
-          browsers: cfg.browsers,
-          userAgent: cfg.userAgent,
-          proxyUrl: cfg.proxyUrl,
-          proxyServer: cfg.proxyServer,
-          socketIoRoute: cfg.socketIoRoute,
-          chromeWebSecurity: cfg.chromeWebSecurity,
-          isTextTerminal: cfg.isTextTerminal,
-          downloadsFolder: cfg.downloadsFolder,
+      const cfg = openProject.getConfig()
+
+      _.defaults(options, {
+        browsers: cfg.browsers,
+        userAgent: cfg.userAgent,
+        proxyUrl: cfg.proxyUrl,
+        proxyServer: cfg.proxyServer,
+        socketIoRoute: cfg.socketIoRoute,
+        chromeWebSecurity: cfg.chromeWebSecurity,
+        isTextTerminal: cfg.isTextTerminal,
+        downloadsFolder: cfg.downloadsFolder,
+      })
+
+      // if we don't have the isHeaded property
+      // then we're in interactive mode and we
+      // can assume its a headed browser
+      // TODO: we should clean this up
+      if (!_.has(browser, 'isHeaded')) {
+        browser.isHeaded = true
+        browser.isHeadless = false
+      }
+
+      // set the current browser object on options
+      // so we can pass it down
+      options.browser = browser
+      options.url = url
+
+      openProject.setCurrentSpecAndBrowser(spec, browser)
+
+      const automation = openProject.getAutomation()
+
+      // use automation middleware if its
+      // been defined here
+      let am = options.automationMiddleware
+
+      if (am) {
+        automation.use(am)
+      }
+
+      if (!am || !am.onBeforeRequest) {
+        automation.use({
+          onBeforeRequest (message, data) {
+            if (message === 'take:screenshot') {
+              data.specName = spec.name
+
+              return data
+            }
+          },
+        })
+      }
+
+      const afterSpec = () => {
+        if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
+
+        return runEvents.execute('after:spec', cfg, spec)
+      }
+
+      const { onBrowserClose } = options
+
+      options.onBrowserClose = () => {
+        if (spec && spec.absolute) {
+          preprocessor.removeFile(spec.absolute, cfg)
+        }
+
+        afterSpec(cfg, spec)
+        .catch((err) => {
+          openProject.options.onError(err)
         })
 
-        // if we don't have the isHeaded property
-        // then we're in interactive mode and we
-        // can assume its a headed browser
-        // TODO: we should clean this up
-        if (!_.has(browser, 'isHeaded')) {
-          browser.isHeaded = true
-          browser.isHeadless = false
+        if (onBrowserClose) {
+          return onBrowserClose()
         }
+      }
 
-        // set the current browser object on options
-        // so we can pass it down
-        options.browser = browser
-        options.url = url
+      options.onError = openProject.options.onError
 
-        openProject.setCurrentSpecAndBrowser(spec, browser)
+      relaunchBrowser = () => {
+        debug(
+          'launching browser: %o, spec: %s',
+          browser,
+          spec.relative,
+        )
 
-        const automation = openProject.getAutomation()
-
-        // use automation middleware if its
-        // been defined here
-        let am = options.automationMiddleware
-
-        if (am) {
-          automation.use(am)
-        }
-
-        if (!am || !am.onBeforeRequest) {
-          automation.use({
-            onBeforeRequest (message, data) {
-              if (message === 'take:screenshot') {
-                data.specName = spec.name
-
-                return data
-              }
-            },
-          })
-        }
-
-        const afterSpec = () => {
-          if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
-
-          return runEvents.execute('after:spec', cfg, spec)
-        }
-
-        const { onBrowserClose } = options
-
-        options.onBrowserClose = () => {
-          if (spec && spec.absolute) {
-            preprocessor.removeFile(spec.absolute, cfg)
+        return Promise.try(() => {
+          if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
+            return runEvents.execute('before:spec', cfg, spec)
           }
+        })
+        .then(() => {
+          return browsers.open(browser, options, automation)
+        })
+      }
 
-          afterSpec(cfg, spec)
-          .catch((err) => {
-            openProject.options.onError(err)
-          })
-
-          if (onBrowserClose) {
-            return onBrowserClose()
-          }
-        }
-
-        options.onError = openProject.options.onError
-
-        relaunchBrowser = () => {
-          debug(
-            'launching browser: %o, spec: %s',
-            browser,
-            spec.relative,
-          )
-
-          return Promise.try(() => {
-            if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
-              return runEvents.execute('before:spec', cfg, spec)
-            }
-          })
-          .then(() => {
-            return browsers.open(browser, options, automation)
-          })
-        }
-
-        return relaunchBrowser()
-      })
+      return relaunchBrowser()
     },
 
     getSpecs (cfg) {
@@ -284,12 +283,11 @@ const moduleFactory = () => {
       }
 
       const get = () => {
-        return openProject.getConfig()
-        .then((cfg) => {
-          createSpecsWatcher(cfg)
+        const cfg = openProject.getConfig()
 
-          return this.getSpecs(cfg)
-        })
+        createSpecsWatcher(cfg)
+
+        return this.getSpecs(cfg)
       }
 
       // immediately check the first time around

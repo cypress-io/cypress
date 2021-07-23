@@ -13,6 +13,8 @@ export interface CypressBuilderOptions extends JsonObject {
   parallel: boolean
   projectPath: string
   record: boolean
+  reporter: string
+  reporterOptions: JsonObject
   spec: string
   tsConfig: string
   watch: boolean

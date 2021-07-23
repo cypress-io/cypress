@@ -1682,6 +1682,30 @@ describe('network stubbing', { retries: 2 }, function () {
       .then(() => testDelay()).wait('@get')
     })
 
+    // https://github.com/cypress-io/cypress/issues/15188
+    it('delay works correctly with 204 No Content', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('No response ever occurred')
+
+        done()
+      })
+
+      cy.intercept('POST', '/post-only', {
+        statusCode: 204, // delay is not respected
+        delay: 5000,
+      }).as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/post-only", {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create', { timeout: 500 })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/15901
     it('can intercept utf-8 request bodies without crashing', function () {
       cy.intercept('POST', 'http://localhost:5000/api/sample')
@@ -2659,30 +2683,6 @@ describe('network stubbing', { retries: 2 }, function () {
       })
       .should('not.include', 'content-type')
       .wait('@get')
-    })
-
-    // https://github.com/cypress-io/cypress/issues/17084
-    it('does not overwrite the json-related content-type header', () => {
-      cy.intercept('/json-content-type', (req) => {
-        req.on('response', (res) => {
-          res.send({
-            statusCode: 500,
-            headers: {
-              'content-type': 'application/problem+json',
-              'access-control-allow-origin': '*',
-            },
-            body: {
-              status: 500,
-              title: 'Internal Server Error',
-            },
-          })
-        })
-      })
-
-      fetch('/json-content-type')
-      .then((res) => {
-        expect(res.headers.get('content-type')).to.eq('application/problem+json')
-      })
     })
 
     context('body parsing', function () {

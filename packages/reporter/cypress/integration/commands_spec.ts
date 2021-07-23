@@ -309,13 +309,20 @@ describe('commands', () => {
     beforeEach(() => {
       cy.spy(runner, 'emit')
       cy.clock()
-      cy.get('.command').first().trigger('mouseover')
+      cy.get('.command-wrapper').first().trigger('mouseover')
+
+      // react uses mouseover for mouseenter events,
+      // and uses e.fromElement to decide to send it
+      cy.get('.command-method').first().trigger('mouseover', {
+        fromElement: cy.$$('.command-wrapper-text:first')[0],
+      })
     })
 
     it('shows snapshot after 50ms passes', () => {
       cy.wrap(runner.emit).should('not.be.calledWith', 'runner:show:snapshot')
       cy.tick(50)
       cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 1)
+      cy.wrap(runner.emit).should('be.calledOnce')
     })
 
     describe('then mousing out', () => {

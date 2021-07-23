@@ -853,38 +853,6 @@ describe('lib/config', () => {
         })
       })
 
-      context('firefoxGcInterval', () => {
-        it('passes if a number', function () {
-          this.setup({ firefoxGcInterval: 1 })
-
-          return this.expectValidationPasses()
-        })
-
-        it('passes if null', function () {
-          this.setup({ firefoxGcInterval: null })
-
-          return this.expectValidationPasses()
-        })
-
-        it('passes if correctly shaped object', function () {
-          this.setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
-
-          return this.expectValidationPasses()
-        })
-
-        it('fails if string', function () {
-          this.setup({ firefoxGcInterval: 'foo' })
-
-          return this.expectValidationFails('a positive number or null or an object')
-        })
-
-        it('fails if invalid object', function () {
-          this.setup({ firefoxGcInterval: { foo: 'bar' } })
-
-          return this.expectValidationFails('a positive number or null or an object')
-        })
-      })
-
       function pemCertificate () {
         return {
           clientCertificates: [
@@ -1433,6 +1401,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
     })
 
+    it('warns if firefoxGcInterval is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('firefoxGcInterval', true, {
+        firefoxGcInterval: true,
+      })
+
+      expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
@@ -1466,7 +1444,6 @@ describe('lib/config', () => {
             experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
-            firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
             ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
@@ -1573,7 +1550,6 @@ describe('lib/config', () => {
               },
             },
             fileServerFolder: { value: '', from: 'default' },
-            firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
             ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },

@@ -4007,15 +4007,15 @@ describe('mouse state', () => {
         // TODO: add back assertion on Y values
         const coordsFirefox = {
           clientX: 494,
-          // clientY: 10,
+          clientY: 10,
           // layerX: 492,
           // layerY: 215,
           pageX: 494,
           pageY: 226,
           screenX: 494,
-          // screenY: 10,
+          screenY: 10,
           x: 494,
-          // y: 10,
+          y: 10,
         }
 
         let coords
@@ -4030,8 +4030,7 @@ describe('mouse state', () => {
         }
 
         const mouseout = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: true,
             button: 0,
@@ -4059,13 +4058,16 @@ describe('mouse state', () => {
             type: 'mouseout',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseout', mouseout)
         }).as('mouseout')
+
         const mouseleave = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: false,
             button: 0,
@@ -4094,13 +4096,16 @@ describe('mouse state', () => {
             type: 'mouseleave',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseleave', mouseleave)
         }).as('mouseleave')
+
         const pointerout = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: true,
             button: -1,
@@ -4129,13 +4134,15 @@ describe('mouse state', () => {
             type: 'pointerout',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerout', pointerout)
         }).as('pointerout')
         const pointerleave = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: false,
             button: -1,
@@ -4164,13 +4171,15 @@ describe('mouse state', () => {
             type: 'pointerleave',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerleave', pointerleave)
         }).as('pointerleave')
         const mouseover = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: true,
             button: 0,
@@ -4199,13 +4208,15 @@ describe('mouse state', () => {
             type: 'mouseover',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseover', mouseover)
         }).as('mouseover')
         const mouseenter = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: false,
             button: 0,
@@ -4234,13 +4245,15 @@ describe('mouse state', () => {
             type: 'mouseenter',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseenter', mouseenter)
         }).as('mouseenter')
         const pointerover = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: true,
             button: -1,
@@ -4269,13 +4282,15 @@ describe('mouse state', () => {
             type: 'pointerover',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerover', pointerover)
         }).as('pointerover')
         const pointerenter = cy.stub().callsFake((e) => {
-          expect(_.toPlainObject(e)).to.containSubset({
-            ...coords,
+          const exp = {
             altKey: false,
             bubbles: false,
             button: -1,
@@ -4304,7 +4319,10 @@ describe('mouse state', () => {
             type: 'pointerenter',
             view: cy.state('window'),
             // which: 0,
-          })
+          }
+
+          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
+          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerenter', pointerenter)
         }).as('pointerenter')
