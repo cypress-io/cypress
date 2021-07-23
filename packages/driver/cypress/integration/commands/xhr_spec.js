@@ -794,7 +794,7 @@ describe('src/cy/commands/xhr', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'xhr') {
+          if (['xhr', 'request'].includes(attrs.name)) {
             this.lastLog = log
             this.logs.push(log)
           }
@@ -1016,7 +1016,7 @@ describe('src/cy/commands/xhr', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'xhr') {
+          if (['xhr', 'request'].includes(attrs.name)) {
             this.lastLog = log
             this.logs.push(log)
           }
@@ -1207,7 +1207,7 @@ describe('src/cy/commands/xhr', () => {
           this.logs = []
 
           cy.on('log:added', (attrs, log) => {
-            if (attrs.name === 'xhr') {
+            if (['xhr', 'request'].includes(attrs.name)) {
               this.lastLog = log
               this.logs.push(log)
             }
@@ -2186,7 +2186,7 @@ describe('src/cy/commands/xhr', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'xhr') {
+        if (['xhr', 'request'].includes(attrs.name)) {
           this.lastLog = log
           this.logs.push(log)
         }
@@ -2416,7 +2416,7 @@ describe('src/cy/commands/xhr', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'xhr') {
+        if (['xhr', 'request'].includes(attrs.name)) {
           this.lastLog = log
           this.logs.push(log)
         }
@@ -2549,7 +2549,7 @@ describe('src/cy/commands/xhr', () => {
       let log = null
 
       cy.on('log:changed', (attrs, l) => {
-        if (attrs.name === 'xhr') {
+        if (['xhr', 'request'].includes(attrs.name)) {
           if (!log) {
             log = l
           }
@@ -2582,7 +2582,7 @@ describe('src/cy/commands/xhr', () => {
       let log = null
 
       cy.on('log:changed', (attrs, l) => {
-        if (attrs.name === 'xhr') {
+        if (['xhr', 'request'].includes(attrs.name)) {
           if (!log) {
             log = l
           }
@@ -2611,7 +2611,7 @@ describe('src/cy/commands/xhr', () => {
       let log = null
 
       cy.on('log:changed', (attrs, l) => {
-        if (attrs.name === 'xhr') {
+        if (['xhr', 'request'].includes(attrs.name)) {
           if (!log) {
             log = l
           }
