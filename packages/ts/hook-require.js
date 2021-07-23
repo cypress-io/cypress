@@ -24,7 +24,7 @@ function runWithSnapshot () {
     transpileOpts: {
       supportTS: isDev,
       initTranspileCache: isDev
-        ? require('dirt-simple-file-cache').DirtSimpleFileCache.initSync
+        ? () => require('dirt-simple-file-cache').DirtSimpleFileCache.initSync(projectBaseDir, { keepInMemoryCache: true })
         : function () {},
       tsconfig: {
         compilerOptions: {

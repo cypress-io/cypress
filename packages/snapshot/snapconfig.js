@@ -43,7 +43,6 @@ const LOG_INFO = '(snap|pack)*:(info|warn|error)'
  * @property {Function} pathsMapper          - maps paths to work around edge cases
  * @property {string} projectBaseDir         - the base dir of the project being snapshotted
  *
- * @property {string} mksnapshotBin          - overrides path to mksnapshot executable if provided
  * @property {string} snapshotCacheDir       - directory where esbuild metadat, snapshot metadata
  *    and snapshot entry file are stored.
  *    This is different for prod vs. dev environments
@@ -83,8 +82,6 @@ module.exports = function createConfig (env) {
       ? path.join(snapshotCacheBaseDir, 'dev')
       : path.join(snapshotCacheBaseDir, 'prod')
 
-  const mksnapshotBin = process.env.MKSNAPSHOT_BIN || undefined
-
   const snapshotEntryFile = path.join(snapshotCacheDir, 'snapshot-entry.js')
   const metaFile = path.join(snapshotCacheDir, 'esbuild-meta.json')
   const snapshotMetaFile = path.join(snapshotCacheDir, 'snapshot-meta.json')
@@ -104,7 +101,6 @@ module.exports = function createConfig (env) {
     nodeModulesOnly,
     pathsMapper,
     projectBaseDir,
-    mksnapshotBin,
     snapshotCacheDir,
     snapshotEntryFile,
     snapshotMetaFile,

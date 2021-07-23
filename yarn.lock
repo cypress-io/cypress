@@ -12120,6 +12120,13 @@ convert-source-map@^0.3.3:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-0.3.5.tgz#f1d802950af7dd2631a1febe0596550c86ab3190"
   integrity sha1-8dgClQr33SYxof6+BZZVDIarMZA=
 
+convert-source-map@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.8.0.tgz#f3373c32d21b4d780dd8004514684fb791ca4369"
+  integrity sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==
+  dependencies:
+    safe-buffer "~5.1.1"
+
 convert-source-map@~1.1.0:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.1.3.tgz#4829c877e9fe49b3161f3bf3673888e204699860"
@@ -13913,11 +13920,12 @@ dir-glob@^3.0.0, dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-dirt-simple-file-cache@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/dirt-simple-file-cache/-/dirt-simple-file-cache-0.1.2.tgz#1cbf97fb69eb106f4968f47c8092d2d5f21f7724"
-  integrity sha512-LSds2fRJjJEM7QlX85Xk8ddavYB9YAip2721YKq0l949A9m3+sVP2eexCDCLbgdPhbp+p/CVnFDQB6x56gX+OQ==
+dirt-simple-file-cache@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/dirt-simple-file-cache/-/dirt-simple-file-cache-0.4.0.tgz#f2e4e82914457027044a4fb9246b76513bf670a1"
+  integrity sha512-8iY+KIe1+e/iKuLREhsNY80hqyQjcNoc/Rd0nTO6WlNBaDJG9AG5IAi0RrLgvj2VBVJdNi+jl4pdBI+wK8DFSg==
   dependencies:
+    debug "^4.3.1"
     tslib "^2.1.0"
 
 discontinuous-range@1.0.0:
@@ -14893,10 +14901,10 @@ es6-weak-map@^2.0.1:
     es6-iterator "^2.0.3"
     es6-symbol "^3.1.1"
 
-esbuild@^0.11.10:
-  version "0.11.23"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.23.tgz#c42534f632e165120671d64db67883634333b4b8"
-  integrity sha512-iaiZZ9vUF5wJV8ob1tl+5aJTrwDczlvGP0JoMmnpC2B0ppiMCu8n8gmy5ZTGl5bcG081XBVn+U+jP+mPFm5T5Q==
+esbuild@^0.12.8:
+  version "0.12.15"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.12.15.tgz#9d99cf39aeb2188265c5983e983e236829f08af0"
+  integrity sha512-72V4JNd2+48eOVCXx49xoSWHgC3/cCy96e7mbXKY+WOWghN00cCmlGnwVLRhRHorvv0dgCyuMYBZlM2xDM5OQw==
 
 esbuild@^0.8.32:
   version "0.8.57"
@@ -18511,9 +18519,9 @@ has-flag@^4.0.0:
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
 
 has-flag@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-5.0.0.tgz#36e12f0b14052d6ffc8007c6f768a87623f6f692"
-  integrity sha512-dmhh9fPE7WRat4yiFvyhXh7LytudXDcE89VEdR3sxfWQKtFPr7jpXip5H402aeFfA36ucqSKecGEapc7N44k+g==
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-5.0.1.tgz#5483db2ae02a472d1d0691462fc587d1843cd940"
+  integrity sha512-CsNUt5x9LUdx6hnk/E2SZLsDyvfqANZSUq4+D3D8RzDJ2M+HDTIkF60ibS1vHaK55vzgiZw1bEPFG9yH7l33wA==
 
 has-glob@^0.1.1:
   version "0.1.1"
@@ -26371,15 +26379,17 @@ packherd@^0.1.1:
     performance-now "^2.1.0"
     supports-color "^8.1.1"
 
-packherd@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/packherd/-/packherd-0.3.1.tgz#e3ec7522f0d0efdc75ed4eb7e5b55475819533c3"
-  integrity sha512-ORUSkygj4DFEy75TsIGcElPi3/zlQAt6C5hz2aswca0UFmUyiZWHflxkdReYnRVOzH7w4an9ejout1Wxi2yhvQ==
+packherd@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/packherd/-/packherd-0.6.0.tgz#ff69225ca723a9779afc520aa7f270f9785e34b4"
+  integrity sha512-+nuSksctZ68oyC6odShVh3N/Pjz2XvSRHsLEVy7OnrT9H+RtjdNYU76LM47e7hq69uENydodnzShscNhzpM6FA==
   dependencies:
+    convert-source-map "^1.7.0"
     debug "^4.3.1"
     depstats "^0.2.0"
-    esbuild "^0.11.10"
+    esbuild "^0.12.8"
     performance-now "^2.1.0"
+    source-map-js "^0.6.2"
     supports-color "^8.1.1"
 
 pacote@^9.1.0, pacote@^9.5.12, pacote@^9.5.3:
@@ -31790,10 +31800,83 @@ snap-shot-it@7.9.6:
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.4"
 
-snapbuild-darwin-x64@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/snapbuild-darwin-x64/-/snapbuild-darwin-x64-0.2.2.tgz#50c4006b33311bc7d0786942d13b22d8cf9b4db5"
-  integrity sha512-WGWVjiEAGlaJ/ktX+znEGOzb+s0ZdC8OcS0B4wOQ5O8iAhAhskseXvQo721As1xSWWZvQpNKF5xs1OKlNJGmLw==
+snapbuild-android-arm64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-android-arm64/-/snapbuild-android-arm64-0.0.124.tgz#36764d7d68472b01626f5c51bfc27dd742d54310"
+  integrity sha512-gEz8AKLMgF/3UByEuea0GpGcVxYCBW0/MLFVQCEo2c9MDXLYRJHJYaRGD6DBOyBInuY2IaGL81CKC667XXVZ3w==
+
+snapbuild-darwin-64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-darwin-64/-/snapbuild-darwin-64-0.0.124.tgz#877db02d8cd9f93ac03294fa1f1c6c7e1f8491d1"
+  integrity sha512-Ll2ROp9ZlrGEPr3w1r2VU0Og/pnapEaO7NQSsYNQDknlac1MSsrXWFak7vms0BPxBab974n7BwLRcVYmhlnGJw==
+
+snapbuild-freebsd-64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-freebsd-64/-/snapbuild-freebsd-64-0.0.124.tgz#cc6e36b70d76c5513db5196d287773313cc516d4"
+  integrity sha512-agtRUYPO71ZdxwXnq91fwU69gV1aW7VSwh2AlE/5GfKEH2IKBjz4vc84x1E0i5uPgmu8indgkfOW80zKoRi4+g==
+
+snapbuild-freebsd-arm64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-freebsd-arm64/-/snapbuild-freebsd-arm64-0.0.124.tgz#ed31a99b980ffc9e5be011a86f57d72a816ce201"
+  integrity sha512-IuOPZXC72LqKoTMKrpARE6FbbMQNhVEG0VmnM3cUBTkDTAjs1M44sKSghZ+ZdMindLU3deE0BbrFKbd9rwCcZQ==
+
+snapbuild-linux-32@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-linux-32/-/snapbuild-linux-32-0.0.124.tgz#68c1fa0701cfed1b348a42624c978661c19378f8"
+  integrity sha512-KpSPKRxznScTtae9i9yYNHw+eNFadI2YFZii6veSg+Wq54addEwdlKVrkITPHMoxU1tT6k1dOo4GIOzNr7GIAw==
+
+snapbuild-linux-64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-linux-64/-/snapbuild-linux-64-0.0.124.tgz#244b663d314a4072c4ceda809e15e720df856c85"
+  integrity sha512-tpJNo0Bqe7J7GOO10kF5FLJGy4/vYmZpOdoZtx6Kcl7ASvrqAHc6D+QVU0ufnSUalzgLzdniBdz1wd1uQDqiOA==
+
+snapbuild-linux-arm64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-linux-arm64/-/snapbuild-linux-arm64-0.0.124.tgz#119375fc89239f6b6e552d04a9e5833036ca4b5a"
+  integrity sha512-899Xv5Kgp+sUjZ92Q9Qj67B/qfOogoUl6jCgIvkxBrVWnzkQAbR9jsYUpZVIA5+PAxU0dA63nmxOTWWo5u0zDg==
+
+snapbuild-linux-arm@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-linux-arm/-/snapbuild-linux-arm-0.0.124.tgz#75e6bb49a37dac69288a7fa283bcf286148f26a6"
+  integrity sha512-k0mHlG0+GMicDAYWYnsGmMngPkleN5DGcqxrKpIN6FHvFD6FbH9Tzwu/NaVRrj5+j4BxJK4SfGUp1Ep3zIIxWA==
+
+snapbuild-linux-mips64le@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-linux-mips64le/-/snapbuild-linux-mips64le-0.0.124.tgz#8f8fd46612f08394f1a4f87df02314e2bd5c16bd"
+  integrity sha512-InPmDImzKvBgg2YjJDus/fM6UG7fAg42Kwp+926AxertBe2aKowuC+6osGU5HeI6pERD1ADYkyg8FM5IQ1ElFg==
+
+snapbuild-linux-ppc64le@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-linux-ppc64le/-/snapbuild-linux-ppc64le-0.0.124.tgz#bf72e23550613c241adf7a909329d8a66e463843"
+  integrity sha512-bkn4Dlhbvvnsemt1btRsMsZI5IxwyyoXJgFR7VqQUBoc02xAv0WlCYtv0MYdbgKY0TlAnQM3rSGPD2UmcGLBwg==
+
+snapbuild-windows-32@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-windows-32/-/snapbuild-windows-32-0.0.124.tgz#421b458c83fd544c0a109c44642d393435f34eef"
+  integrity sha512-f+2FpgKg1QIC9NADFp0yMeeKzYoQP45AQjLbzAXdDBO9FFCY2bVBBnUkOSo1qrubsz49zxGSssIDCNAU+As4Sg==
+
+snapbuild-windows-64@0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild-windows-64/-/snapbuild-windows-64-0.0.124.tgz#30a6a8d96f5660f816c060098260aef1be193a6f"
+  integrity sha512-eix/0HUeLBNRedoYg7R0hHIYQISHI67ptpkiQ5g/A7/mNHF1aV7TlUyFi+ZIn2nv9YYbYw0kIWgoisQRwk4xYg==
+
+snapbuild@^0.0.124:
+  version "0.0.124"
+  resolved "https://registry.yarnpkg.com/snapbuild/-/snapbuild-0.0.124.tgz#2f97b0cff50a55b10c7587b9a6599b1b6fed762d"
+  integrity sha512-90q/LAavV2XwyJeRcLESYgepOzQJJ/L6d3LIYErKO8qy20mDc5bo4VX6ZYnMPXP8QNC8sB0cM7oL35a4haqf/A==
+  optionalDependencies:
+    snapbuild-android-arm64 "0.0.124"
+    snapbuild-darwin-64 "0.0.124"
+    snapbuild-freebsd-64 "0.0.124"
+    snapbuild-freebsd-arm64 "0.0.124"
+    snapbuild-linux-32 "0.0.124"
+    snapbuild-linux-64 "0.0.124"
+    snapbuild-linux-arm "0.0.124"
+    snapbuild-linux-arm64 "0.0.124"
+    snapbuild-linux-mips64le "0.0.124"
+    snapbuild-linux-ppc64le "0.0.124"
+    snapbuild-windows-32 "0.0.124"
+    snapbuild-windows-64 "0.0.124"
 
 snapdragon-node@^2.0.1:
   version "2.1.1"
@@ -33142,9 +33225,9 @@ supports-color@^7.0.0, supports-color@^7.1.0:
     has-flag "^4.0.0"
 
 supports-color@^9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-9.0.1.tgz#bcc43ff901cb8088d680144ac0b6553d242abd26"
-  integrity sha512-e8HnXOAd61fVNyYRcKoqGNpnpceN/+IbDlWCBVjeqfASq/kbH4JwNj1Y4TFrve+w838Ff4eupPKXtY03zhCBKQ==
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-9.0.2.tgz#50f082888e4b0a4e2ccd2d0b4f9ef4efcd332485"
+  integrity sha512-ii6tc8ImGFrgMPYq7RVAMKkhPo9vk8uA+D3oKbJq/3Pk2YSMv1+9dUAesa9UxMbxBTvxwKTQffBahNVNxEvM8Q==
   dependencies:
     has-flag "^5.0.0"
 
@@ -34147,9 +34230,9 @@ tslib@^2.0.0, tslib@^2.0.1, tslib@^2.0.3, tslib@^2.1.0:
   integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
 tslib@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.2.0.tgz#fb2c475977e35e241311ede2693cee1ec6698f5c"
-  integrity sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
+  integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
 
 tslint@5.14.0:
   version "5.14.0"
@@ -35068,17 +35151,19 @@ v8-compile-cache@^2.0.2, v8-compile-cache@^2.0.3:
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz#2de19618c66dc247dcfb6f99338035d8245a2cee"
   integrity sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==
 
-v8-snapshot@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.4.0.tgz#e7438038c60398aa33137b5d0fddefb723f7cc21"
-  integrity sha512-DO+QABeqEO22bk+SXX9R472HwrJLULlKQlU07QDNg0UAnEgPDMV7mUknrzzN3F7x8hUstHJ9HY1sh5RU/3YbZA==
+v8-snapshot@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/v8-snapshot/-/v8-snapshot-0.7.1.tgz#3a4e31bd99bff20f8569be4ba14f10d407a7911e"
+  integrity sha512-W9GeTqu5NWJTFw3eUO6YjRkHSSCtuyiYhEacruMQ99JbaGMt8BASk7S1jYDAP6GYYmgw7FPaGZY6Vdg54enNTg==
   dependencies:
     "@thlorenz/electron-mksnapshot" "^0.1.0"
     ansi-colors "^4.1.1"
+    convert-source-map "^1.8.0"
     debug "^4.1.1"
-    packherd "^0.3.1"
+    packherd "^0.6.0"
     resolve-from "^5.0.0"
-    snapbuild-darwin-x64 "^0.2.2"
+    snapbuild "^0.0.124"
+    source-map-js "^0.6.2"
     supports-color "^8.1.1"
     terser "^5.3.2"
     tslib "^2.0.1"
