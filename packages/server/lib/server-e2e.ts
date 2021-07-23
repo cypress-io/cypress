@@ -51,7 +51,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
   }
 
   open (config: Cfg, options: OpenServerOptions) {
-    return super.open(config, { ...options, projectType: 'e2e' })
+    return super.open(config, { ...options, testingType: 'e2e' })
   }
 
   createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {

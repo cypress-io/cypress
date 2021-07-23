@@ -484,7 +484,7 @@ export class SocketBase {
     return this.io.close()
   }
 
-  sendSpecList (specs, projectType: RunnerType) {
-    this.toRunner('specs:changed', { specs, projectType })
+  sendSpecList (specs, testingType: RunnerType) {
+    this.toRunner('specs:changed', { specs, testingType })
   }
 }

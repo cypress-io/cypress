@@ -128,7 +128,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', projectType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -144,7 +144,7 @@ describe('Routes', () => {
               project: this.project,
               specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
-              projectType: 'e2e',
+              testingType: 'e2e',
             })
             .spread(async (port) => {
               const automationStub = {
