@@ -415,7 +415,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
-      testingType: options.testingType,
+      testingType: this.projectType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
     })

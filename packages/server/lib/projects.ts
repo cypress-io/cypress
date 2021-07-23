@@ -95,15 +95,12 @@ class Projects {
       return exists
     }
 
-    const type = testingType === 'component' ? 'ct' : 'e2e'
-    // this.testingType = type
-
     const projectBase = new ProjectBase({
-      projectType: type,
+      projectType: testingType,
       projectRoot: absoluteProjectRoot,
       options: {
         projectRoot,
-        testingType: type,
+        testingType,
       },
     })
 
@@ -141,7 +138,7 @@ class Projects {
       return
     }
 
-    this.openProject.projectType = testingType === 'component' ? 'ct' : 'e2e'
+    this.openProject.projectType = testingType
   }
 
   async initializePlugins () {
