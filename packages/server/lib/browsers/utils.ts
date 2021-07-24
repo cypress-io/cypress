@@ -132,6 +132,24 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
+function removeFunctionsInObject (pluginConfigResult) {
+  if (pluginConfigResult) {
+    Object.keys(pluginConfigResult).forEach((key) => {
+      if (typeof pluginConfigResult[key] === 'function') {
+        delete pluginConfigResult[key]
+      } else if (typeof pluginConfigResult[key] === 'object') {
+        if (Array.isArray(pluginConfigResult[key])) {
+          pluginConfigResult[key] = pluginConfigResult[key].filter((obj) => typeof obj !== 'function')
+        } else {
+          removeFunctionsInObject(pluginConfigResult[key])
+        }
+      }
+    })
+  }
+
+  return pluginConfigResult
+}
+
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
@@ -151,11 +169,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   } else {
     // First, remove all dummy functions created on the plugins thread,
     // they don't need to be checked
-    Object.keys(pluginConfigResult).forEach((key) => {
-      if (typeof pluginConfigResult[key] === 'function') {
-        delete pluginConfigResult[key]
-      }
-    })
+    removeFunctionsInObject(pluginConfigResult)
 
     // either warn about the array or potentially error on invalid props, but not both
 
