@@ -60,10 +60,9 @@ export default async function requireAsync (filePath: string, options: RequireAs
       requireProcess.stderr.on('data', (data) => process.stderr.write(data))
     }
 
-    ipc.on('loaded', ({ result, functionNames }) => {
+    ipc.on('loaded', (result) => {
       debug('resolving with result %o', result)
-      debug('resolving with functions %o', functionNames)
-      resolve({ result, functionNames })
+      resolve(result)
     })
 
     ipc.on('load:error', (type, ...args) => {
@@ -74,6 +73,6 @@ export default async function requireAsync (filePath: string, options: RequireAs
     })
 
     debug('trigger the load of the file')
-    ipc.send('load', options.functionNames)
+    ipc.send('load')
   })
 }

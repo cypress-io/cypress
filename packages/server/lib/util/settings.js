@@ -228,7 +228,6 @@ module.exports = {
       {
         projectRoot,
         loadErrorCode: 'CONFIG_FILE_ERROR',
-        functionNames: ['e2e', 'component'],
       })
     .catch((err) => {
       if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
@@ -239,7 +238,7 @@ module.exports = {
 
       return Promise.reject(err)
     })
-    .then(({ result: configObject = {}, functionNames = [] }) => {
+    .then((configObject = {}) => {
       const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
 
       debug('resolved configObject', configObject)
@@ -250,37 +249,23 @@ module.exports = {
         }
       }
 
-      if (!/\.json$/.test(file)) {
-        // Tell the system we detected plugin functions
-        // for e2e or component that we cannot get this way.
-        // They will never be executed but will match the
-        // expected type instead of being not there.
-        functionNames.forEach((name) => {
-          configObject[name] = function () {
-            throw Error('This function whould always be executed within the plugins context')
-          }
-        })
-
-        configObject.configFile = path.relative(projectRoot, file)
-
-        return configObject
-      }
-
       const changed = this._applyRewriteRules(configObject)
 
       // if our object is unchanged
       // then just return it
       if (_.isEqual(configObject, changed)) {
+        configObject.configFile = path.relative(projectRoot, file)
+
         return configObject
       }
 
       // else write the new reduced obj
       return this._write(file, changed)
       .then(function (config) {
-        // when json configfile is written, update the value of the configfile
+        // when configfile is written, update the value of the configfile
         // with the value found.
         // NOTE: it does not have to be cypress.json.
-        // it could be ./e2e/custom-config.json
+        // it could be ./e2e/custom-config.json or cypress.config.js
         config.configFile = path.relative(projectRoot, file)
 
         return config

@@ -181,7 +181,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
+          expect(obj).to.deep.eq({ foo: 'bar', configFile: 'cypress.json' })
         })
       })
 
@@ -190,7 +190,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot, { testingType: 'component' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' } })
+          expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' }, configFile: 'cypress.json' })
         })
       })
 
@@ -199,7 +199,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' } })
+          expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' }, configFile: 'cypress.json' })
         })
       })
 
@@ -245,7 +245,7 @@ describe('lib/settings', () => {
         return this.setup().then(() => {
           return settings.write(projectRoot, { foo: 'bar' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
+          expect(obj).to.deep.eq({ foo: 'bar', configFile: 'cypress.json' })
         })
       })
 
@@ -254,7 +254,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.write(projectRoot, { projectId: 'abc123' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
+          expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true, configFile: 'cypress.json' })
         })
       })
     })
@@ -321,7 +321,7 @@ describe('lib/settings', () => {
       .then(() => {
         return fs.readJsonAsync(path.join(this.projectRoot, this.options.configFile))
         .then((json) => {
-          expect(json).to.deep.equal({ foo: 'bar' })
+          expect(json).to.deep.equal({ foo: 'bar', configFile: 'my-test-config-file.json' })
         })
       })
     })
@@ -331,7 +331,7 @@ describe('lib/settings', () => {
       .then(() => {
         return settings.read(this.projectRoot, this.options)
         .then((settings) => {
-          expect(settings).to.deep.equal({ foo: 'bar' })
+          expect(settings).to.deep.equal({ foo: 'bar', configFile: 'my-test-config-file.json' })
         })
       })
     })
