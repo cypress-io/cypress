@@ -243,10 +243,8 @@ module.exports = {
 
       debug('resolved configObject', configObject)
 
-      if ((testingType in configObject)) {
-        if (typeof configObject[testingType] === 'object') {
-          configObject = { ...configObject, ...configObject[testingType] }
-        }
+      if (testingType in configObject && typeof configObject[testingType] === 'object') {
+        configObject = { ...configObject, ...configObject[testingType] }
       }
 
       const changed = this._applyRewriteRules(configObject)

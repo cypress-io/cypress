@@ -13,6 +13,8 @@ let pluginsProcess = null
 let registeredEvents = {}
 let handlers = []
 
+const PLUGINS_FUNCTION_NAME = 'plugins'
+
 const register = (event, callback) => {
   debug(`register event '${event}'`)
 
@@ -92,9 +94,9 @@ const init = (config, options) => {
 
     const testingType = options.testingType || 'e2e'
 
-    if (typeof config[testingType] === 'function') {
+    if (typeof config[testingType][PLUGINS_FUNCTION_NAME] === 'function') {
       childArguments.push(
-        '--functionName', testingType,
+        '--functionName', `${testingType}.${PLUGINS_FUNCTION_NAME}`,
         '--file', options.configFile,
       )
     } else {

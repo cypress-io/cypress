@@ -2717,13 +2717,13 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: Omit<ConfigOptions, 'e2e' | 'component'> | TestingTypeFunctions
+    component: Omit<ConfigOptions, 'e2e' | 'component'> & { plugins?: TestingTypeFunctions }
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-     e2e: Omit<ConfigOptions, 'e2e' | 'component'> | TestingTypeFunctions
+     e2e: Omit<ConfigOptions, 'e2e' | 'component'> & { plugins?: TestingTypeFunctions }
   }
 
   type TestingTypeFunctions = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)

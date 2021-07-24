@@ -144,7 +144,18 @@ function getPluginsFunction (pluginsFile, functionName) {
   const exp = require(pluginsFile)
   const resolvedExport = exp && exp.default ? exp.default : exp
 
-  return functionName ? resolvedExport[functionName] : resolvedExport
+  if (functionName) {
+    const functionNameArray = functionName.split('.')
+    let finalFunction = resolvedExport
+
+    while (functionNameArray.length) {
+      finalFunction = finalFunction[functionNameArray.shift()]
+    }
+
+    return finalFunction
+  }
+
+  return resolvedExport
 }
 
 const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
