@@ -9,20 +9,21 @@ interface GraphQLResponseShape {
   result: any
 }
 
-// @ts-expect-error
-ipc.on('graphql:response', (event, obj: GraphQLResponseShape) => {
-  const dfd = ipcInFlight.get(obj.id)
+export function initGraphQLipc () {
+  window.ipc.on('graphql:response', (event, obj: GraphQLResponseShape) => {
+    const dfd = ipcInFlight.get(obj.id)
 
-  if (!dfd) {
-    throw new Error('Missing ipcInFlight')
-  }
+    if (!dfd) {
+      throw new Error('Missing ipcInFlight')
+    }
 
-  if (obj.result.errors) {
-    // console.log(obj.result)
-  }
+    if (obj.result.errors) {
+      // console.log(obj.result)
+    }
 
-  dfd.resolve(obj.result)
-})
+    dfd.resolve(obj.result)
+  })
+}
 
 // Relay passes a "params" object with the query name and text. So we define
 // a helper function to call our fetchGraphQL utility with params.text
@@ -38,8 +39,7 @@ export const fetchGraphql = async function fetchGraphql (
 
   ipcInFlight.set(ipcId, dfd)
 
-  // @ts-expect-error
-  ipc.send('graphql', {
+  window.ipc.send('graphql', {
     id: ipcId,
     params: {
       text: print(op.query),
@@ -49,4 +49,13 @@ export const fetchGraphql = async function fetchGraphql (
   })
 
   return dfd.promise
+}
+
+declare global {
+	interface Window{
+		ipc: {
+			on: (event: string, handler: (event: string, obj: GraphQLResponseShape) => void) => void
+			send: (event: string, ...args: any[]) => any
+    }
+	}
 }

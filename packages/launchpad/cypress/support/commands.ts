@@ -1,9 +1,21 @@
 import { mount } from '@cypress/vue'
 import { provideApolloClient } from '@vue/apollo-composable'
-import './setupWindowVars'
 import { createStoreApp, StoreApp } from '../../src/store/app'
+import { initGraphQLipc } from '../../src/graphql/graphqlIpc'
 import { apolloClient } from '../../src/graphql/apolloClient'
 import { createStoreConfig, StoreConfig } from '../../src/store/config'
+
+/**
+ * This variable is mimicing ipc provided by electron.
+ * It has to be loaded run before initializing GraphQL
+ * because graphql uses it.
+ */
+(window as any).ipc = {
+  on: () => {},
+  send: () => {},
+}
+
+initGraphQLipc()
 
 Cypress.Commands.add(
   'mount',
