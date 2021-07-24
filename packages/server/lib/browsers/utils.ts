@@ -149,6 +149,14 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
       extensions: [],
     })
   } else {
+    // First, remove all dummy functions created on the plugins thread,
+    // they don't need to be checked
+    Object.keys(pluginConfigResult).forEach((key) => {
+      if (typeof pluginConfigResult[key] === 'function') {
+        delete pluginConfigResult[key]
+      }
+    })
+
     // either warn about the array or potentially error on invalid props, but not both
 
     // strip out all the known launch option properties from the resulting object

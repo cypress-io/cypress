@@ -12,7 +12,7 @@ const serializeError = (err) => {
 
 function serializeArgument (arg) {
   if (arg === null || arg === undefined) {
-    return arg
+    return null
   }
 
   if (typeof arg === 'function') {
@@ -36,12 +36,12 @@ function serializeArgument (arg) {
 
 function deserializeArgument (arg) {
   if (arg === null || arg === undefined) {
-    return arg
+    return null
   }
 
   if (arg === FUNCTION_SERIALIZED) {
     return function () {
-      throw Error('this function is not meant to be used on it\'s own')
+      throw Error('this function is not meant to be used on it\'s own. It is the result of a deserialization and can be used to check the type of a returned object.')
     }
   }
 
