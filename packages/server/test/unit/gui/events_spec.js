@@ -675,7 +675,7 @@ describe('lib/gui/events', () => {
         .then((assert) => {
           expect(this.send.firstCall.args[0]).to.eq('response') // [1].id).to.match(/setup:dashboard:project-/)
           expect(this.send.firstCall.args[1].id).to.match(/open:project-/)
-          expect(this.send.firstCall.args[1].data).to.eql({ config: { some: 'config' }, functions: [] })
+          expect(this.send.firstCall.args[1].data).to.eql({ some: 'config' })
         })
       })
 
