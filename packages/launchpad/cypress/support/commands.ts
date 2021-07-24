@@ -1,5 +1,8 @@
 import { mount } from '@cypress/vue'
+import { provideApolloClient } from '@vue/apollo-composable'
+import './setupWindowVars'
 import { createStoreApp, StoreApp } from '../../src/store/app'
+import { apolloClient } from '../../src/graphql/apolloClient'
 import { createStoreConfig, StoreConfig } from '../../src/store/config'
 
 Cypress.Commands.add(
@@ -17,6 +20,9 @@ Cypress.Commands.add(
     options.global.plugins = options.global.plugins || []
     options.global.plugins.push(storeApp)
     options.global.plugins.push(storeConfig)
+    options.global.plugins.push({ install (app) {
+      provideApolloClient(apolloClient)
+    } })
 
     return mount(comp, options)
   },
