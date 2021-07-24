@@ -94,7 +94,7 @@ const init = (config, options) => {
 
     const testingType = options.testingType || 'e2e'
 
-    if (typeof config[testingType][PLUGINS_FUNCTION_NAME] === 'function') {
+    if (config[testingType] && typeof config[testingType][PLUGINS_FUNCTION_NAME] === 'function') {
       childArguments.push(
         '--functionName', `${testingType}.${PLUGINS_FUNCTION_NAME}`,
         '--file', options.configFile,
