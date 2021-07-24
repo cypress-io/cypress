@@ -59,7 +59,7 @@ describe('Runs List', function () {
   context('page display', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.getRuns.resolve(this.runs)
 
       this.goToRuns()
@@ -77,7 +77,7 @@ describe('Runs List', function () {
 
       cy.clock(timestamp)
       this.getCurrentUser.resolve(this.user)
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.getRuns.resolve(this.runs)
 
       this.goToRuns()
@@ -249,7 +249,7 @@ describe('Runs List', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
       this.config.projectId = this.projects[0].id
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.pingApiServer.resolve()
 
       const timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
@@ -299,7 +299,7 @@ describe('Runs List', function () {
   context('without a current user', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(null)
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.pingApiServer.resolve()
 
       this.goToRuns()
@@ -325,7 +325,7 @@ describe('Runs List', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
       this.config.projectId = undefined
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.pingApiServer.resolve()
 
       this.goToRuns()
@@ -341,7 +341,7 @@ describe('Runs List', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(null)
       this.config.projectId = undefined
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.pingApiServer.resolve()
 
       this.goToRuns()
@@ -368,7 +368,7 @@ describe('Runs List', function () {
   describe('polling runs', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.pingApiServer.resolve()
       this.getRunsAgain = this.util.deferred()
       this.ipc.getRuns.onCall(1).returns(this.getRunsAgain.promise)
@@ -459,7 +459,7 @@ describe('Runs List', function () {
   describe('manually refreshing runs', function () {
     beforeEach(function () {
       this.getCurrentUser.resolve(this.user)
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.pingApiServer.resolve()
       this.getRunsAgain = this.util.deferred()
       this.ipc.getRuns.onCall(1).returns(this.getRunsAgain.promise)
@@ -510,7 +510,7 @@ describe('Runs List', function () {
 
     describe('permissions error', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.goToRuns()
       })
 
@@ -674,7 +674,7 @@ describe('Runs List', function () {
 
     describe('timed out error', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
           this.getRuns.reject({ name: 'foo', message: 'There\'s an error', type: 'TIMED_OUT' })
@@ -689,7 +689,7 @@ describe('Runs List', function () {
 
     describe('not found error', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
           this.getRuns.reject({ name: 'foo', message: 'There\'s an error', type: 'NOT_FOUND' })
@@ -704,7 +704,7 @@ describe('Runs List', function () {
 
     describe('unauthenticated error', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
           this.getRuns.reject({ name: '', message: '', statusCode: 401 })
@@ -722,7 +722,7 @@ describe('Runs List', function () {
 
     describe('no project id error', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.ipc.setupDashboardProject.resolves(this.validCiProject)
         this.ipc.getRuns.onCall(1).resolves([])
 
@@ -753,7 +753,7 @@ describe('Runs List', function () {
 
     describe('unexpected error', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
           this.getRuns.reject({ name: 'foo', message: `{"no runs": "for you"}`, type: 'UNKNOWN' })
@@ -769,7 +769,7 @@ describe('Runs List', function () {
 
     describe('unauthorized project', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.getProjectStatus.resolve({
           state: 'UNAUTHORIZED',
         })
@@ -784,7 +784,7 @@ describe('Runs List', function () {
 
     describe('invalid project', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.ipc.setupDashboardProject.resolves(this.validCiProject)
 
         this.getProjectStatus.resolve({
@@ -821,7 +821,7 @@ describe('Runs List', function () {
       context('having never setup CI', function () {
         beforeEach(function () {
           this.config.projectId = null
-          this.openProject.resolve({ config: this.config })
+          this.openProject.resolve(this.config)
 
           this.goToRuns().then(() => {
             this.getRuns.resolve([])
@@ -845,7 +845,7 @@ describe('Runs List', function () {
 
     context('having previously set up CI', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
           this.getRuns.resolve([])

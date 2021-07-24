@@ -35,7 +35,7 @@ describe('Error Message', function () {
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
-      cy.stub(this.ipc, 'openProject').resolves({ config: this.config })
+      cy.stub(this.ipc, 'openProject').resolves(this.config)
       cy.stub(this.ipc, 'closeProject').resolves()
       cy.stub(this.ipc, 'onConfigChanged')
       cy.stub(this.ipc, 'externalOpen')

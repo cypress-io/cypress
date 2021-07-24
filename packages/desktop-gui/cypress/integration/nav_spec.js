@@ -91,7 +91,7 @@ describe('Navigation', function () {
       })
 
       it('closes off hover', function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
 
         cy.get('.docs-menu').trigger('mouseover')
         cy.get('.docs-dropdown').should('be.visible')
@@ -104,7 +104,7 @@ describe('Navigation', function () {
         describe('ci1', function () {
           context('opens on click', function () {
             beforeEach(function () {
-              this.openProject.resolve({ config: this.config })
+              this.openProject.resolve(this.config)
 
               cy.get('.docs-menu').trigger('mouseover')
               cy.get('.docs-dropdown').should('be.visible')
@@ -160,27 +160,27 @@ describe('Navigation', function () {
             })
 
             it('opens when after 4 days from first open, no projectId, and not already shown', function () {
-              this.openProject.resolve({ config: {
+              this.openProject.resolve({
                 ...this.config,
                 projectId: null,
                 state: {
                   ...this.config.state,
                   promptsShown: {},
                 },
-              } })
+              })
 
               cy.get('.prompt-ci1').should('be.visible')
             })
 
             it('sends correct utm_content when opened', function () {
-              this.openProject.resolve({ config: {
+              this.openProject.resolve({
                 ...this.config,
                 projectId: null,
                 state: {
                   ...this.config.state,
                   promptsShown: {},
                 },
-              } })
+              })
 
               cy.get('.see-other-guides').click()
               cy.wrap(this.ipc.externalOpen).should('have.been.calledWithMatch', {

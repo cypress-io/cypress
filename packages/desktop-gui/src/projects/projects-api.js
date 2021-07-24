@@ -156,7 +156,7 @@ const openProject = (project) => {
     })
   }
 
-  const updateConfig = (config, functions) => {
+  const updateConfig = (config, hasE2Eproperty) => {
     project.update({
       id: config.projectId,
       name: config.projectName,
@@ -167,7 +167,7 @@ const openProject = (project) => {
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
-    project.setE2EFunction(functions.indexOf('e2e') !== -1)
+    project.setE2EFunction(hasE2Eproperty)
     project.prompts.setPromptStates(config)
   }
 
@@ -192,7 +192,9 @@ const openProject = (project) => {
   })
 
   return ipc.openProject(project.path)
-  .then(({ config = {}, functions = [] } = {}) => {
+  .then((config = {}) => {
+    const hasE2Eproperty = !!config.e2e
+
     // In this context we know we are in e2e.
     // The configuration in e2e has already been merged with the main.
     // It is not useful to display component/e2e fields explicitely.
@@ -205,7 +207,7 @@ const openProject = (project) => {
 
     config = _.omit(config, 'e2e', 'component')
 
-    updateConfig(config, functions)
+    updateConfig(config, hasE2Eproperty)
     const projectIdAndPath = { id: config.projectId, path: project.path }
 
     specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))

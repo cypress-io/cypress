@@ -10,7 +10,7 @@ describe('Project', function () {
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
-      cy.stub(this.ipc, 'openProject').resolves({ config: this.config })
+      cy.stub(this.ipc, 'openProject').resolves(this.config)
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'closeProject').resolves()
       cy.stub(this.ipc, 'onConfigChanged')

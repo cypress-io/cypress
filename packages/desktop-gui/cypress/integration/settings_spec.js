@@ -52,7 +52,7 @@ describe('Settings', () => {
 
   describe('general functionality', () => {
     beforeEach(function () {
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -99,7 +99,7 @@ describe('Settings', () => {
   describe('configuration panel', () => {
     describe('displays config', () => {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -225,7 +225,7 @@ describe('Settings', () => {
         this.ipc.onConfigChanged.yield()
 
         cy.contains('.line', 'env:null').then(() => {
-          this.ipc.openProject.resolves({ config: this.config })
+          this.ipc.openProject.resolves(this.config)
           this.ipc.onConfigChanged.yield()
 
           cy.contains('.line', 'env:fileServerFolder')
@@ -233,7 +233,7 @@ describe('Settings', () => {
             this.ipc.openProject.resolves(setConfigEnv(this.config, null))
             this.ipc.onConfigChanged.yield()
             cy.contains('.line', 'env:null').then(() => {
-              this.ipc.openProject.resolves({ config: this.config })
+              this.ipc.openProject.resolves(this.config)
               this.ipc.onConfigChanged.yield()
 
               cy.contains('.line', 'env:fileServerFolder')
@@ -306,7 +306,7 @@ describe('Settings', () => {
         newConfig.clientUrl = 'http://localhost:8888'
         newConfig.clientUrlDisplay = 'http://localhost:8888'
         newConfig.browsers = this.browsers
-        this.openProject.resolve({ config: newConfig })
+        this.openProject.resolve(newConfig)
 
         this.goToSettings()
 
@@ -317,7 +317,7 @@ describe('Settings', () => {
         const newConfig = this.util.deepClone(this.config)
 
         newConfig.resolved.baseUrl.value = 'http://localhost:7777'
-        this.ipc.openProject.onCall(1).resolves({ config: newConfig })
+        this.ipc.openProject.onCall(1).resolves(newConfig)
         this.ipc.onConfigChanged.yield()
 
         cy.contains('http://localhost:7777')
@@ -326,9 +326,9 @@ describe('Settings', () => {
 
     context('when configFile is false', () => {
       beforeEach(function () {
-        this.openProject.resolve({ config: Cypress._.assign({
+        this.openProject.resolve(Cypress._.assign({
           configFile: false,
-        }, this.config) })
+        }, this.config))
 
         this.goToSettings()
 
@@ -342,9 +342,9 @@ describe('Settings', () => {
 
     context('when configFile is set', function () {
       beforeEach(function () {
-        this.openProject.resolve({ config: Cypress._.assign({
+        this.openProject.resolve(Cypress._.assign({
           configFile: 'special-cypress.json',
-        }, this.config) })
+        }, this.config))
 
         this.goToSettings()
 
@@ -359,7 +359,7 @@ describe('Settings', () => {
 
   describe('project id panel', () => {
     beforeEach(function () {
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -393,7 +393,7 @@ describe('Settings', () => {
   describe('record key panel', () => {
     context('when project is set up and you have access', () => {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -523,7 +523,7 @@ describe('Settings', () => {
       })
 
       it('does not show ci Keys section when project is invalid', function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.projectStatuses[0].state = 'INVALID'
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
@@ -535,7 +535,7 @@ describe('Settings', () => {
 
     context('when you are not a user of this projects org', () => {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
       })
 
       it('does not show record key', function () {
@@ -555,7 +555,7 @@ describe('Settings', () => {
 
     beforeEach(function () {
       this.navigateWithConfig = function (config) {
-        this.openProject.resolve({ config: _.defaults(config, this.config) })
+        this.openProject.resolve(_.defaults(config, this.config))
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
@@ -590,7 +590,7 @@ describe('Settings', () => {
 
   describe('proxy settings panel', () => {
     beforeEach(function () {
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.config.resolved.baseUrl.value = 'http://localhost:7777'
 
       this.projectStatuses[0].id = this.config.projectId
@@ -654,7 +654,7 @@ describe('Settings', () => {
 
     describe('no experimental features turned on', () => {
       beforeEach(function () {
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -674,7 +674,7 @@ describe('Settings', () => {
           value: true,
         }
 
-        this.openProject.resolve({ config: this.config })
+        this.openProject.resolve(this.config)
         this.projectStatuses[0].id = this.config.projectId
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -708,7 +708,7 @@ describe('Settings', () => {
             value: true,
           }
 
-          this.openProject.resolve({ config: this.config })
+          this.openProject.resolve(this.config)
           this.projectStatuses[0].id = this.config.projectId
           this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -736,7 +736,7 @@ describe('Settings', () => {
             from: 'default',
           }
 
-          this.openProject.resolve({ config: this.config })
+          this.openProject.resolve(this.config)
           this.projectStatuses[0].id = this.config.projectId
           this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -770,7 +770,7 @@ describe('Settings', () => {
       cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
       cy.stub(this.ipc, 'setUserEditor').resolves()
 
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -847,7 +847,7 @@ describe('Settings', () => {
 
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
-      this.openProject.resolve({ config: this.config })
+      this.openProject.resolve(this.config)
       this.goToSettings()
       openConfiguration()
 
@@ -877,8 +877,8 @@ describe('Settings', () => {
 
 // --
 function setConfigEnv (config, v) {
-  return { config: flow([
+  return flow([
     merge(config),
     set('resolved.env', v),
-  ])({}) }
+  ])({})
 }
