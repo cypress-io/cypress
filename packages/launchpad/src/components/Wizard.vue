@@ -25,7 +25,7 @@ import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client/core'
 import { WizardDocument } from '../generated/graphql'
 import { useQuery } from "@vue/apollo-composable";
 
