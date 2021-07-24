@@ -92,6 +92,15 @@ describe('lib/plugins/util', () => {
           args: [{ config: null }],
         })
       })
+
+      it('#send should work with arrays', function () {
+        this.ipc.send('event-arg-array', { browsers: ['chrome', 'firefox'], handlers: [function () {}, function () {}] })
+
+        expect(this.theProcess.send).to.be.calledWith({
+          event: 'event-arg-array',
+          args: [{ browsers: ['chrome', 'firefox'], handlers: ['__cypress_function__', '__cypress_function__'] }],
+        })
+      })
     })
 
     context('#arguments-deserialization', () => {
@@ -141,6 +150,18 @@ describe('lib/plugins/util', () => {
         })
 
         expect(handler).to.be.calledWith({ config: null })
+      })
+
+      it('#on should work with arrays', function () {
+        const handler = sinon.spy()
+
+        this.ipc.on('event-arg-array', handler)
+        this.theProcess.on.yield({
+          event: 'event-arg-array',
+          args: [{ browsers: ['chrome', 'firefox'], handlers: ['__cypress_function__', '__cypress_function__'] }],
+        })
+
+        expect(handler).to.be.calledWith({ browsers: ['chrome', 'firefox'], handlers: [sinon.match.func, sinon.match.func] })
       })
     })
   })

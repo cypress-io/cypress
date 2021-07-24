@@ -20,6 +20,10 @@ function serializeArgument (arg) {
   }
 
   if (typeof arg === 'object') {
+    if (_.isArray(arg)) {
+      return arg.map((argElement) => serializeArgument(argElement))
+    }
+
     return Object.keys(arg).reduce(function (acc, key) {
       acc[key] = serializeArgument(arg[key])
 
@@ -42,6 +46,10 @@ function deserializeArgument (arg) {
   }
 
   if (typeof arg === 'object') {
+    if (_.isArray(arg)) {
+      return arg.map((argElement) => deserializeArgument(argElement))
+    }
+
     return Object.keys(arg).reduce(function (acc, key) {
       acc[key] = deserializeArgument(arg[key])
 
