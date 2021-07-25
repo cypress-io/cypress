@@ -2065,7 +2065,7 @@ linux-workflow: &linux-workflow
     - runner-ct-integration-tests-chrome:
         requires:
           - build
-    - run-launchpad-integration-tests:
+    - run-launchpad-integration-tests-chrome:
         requires:
           - build
 
