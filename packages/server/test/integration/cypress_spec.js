@@ -368,7 +368,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase({ projectRoot: this.noScaffolding, projectType: 'e2e' })).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e' })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -1048,8 +1048,8 @@ describe('lib/cypress', () => {
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
             const launchedChrome = R.merge(chrome, {
-              isHeadless: false,
-              isHeaded: true,
+              isHeadless: true,
+              isHeaded: false,
             })
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)

@@ -1,12 +1,15 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
+import { dom } from '../dom'
 import { eventManager } from '../event-manager'
 
 const saveErrorMessage = (message) => {
   return `\
 ${message}\n\n\
 Cypress was unable to save these commands to your spec file. \
+You can use the copy button below to copy the commands to your clipboard. \
+\n
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
@@ -32,6 +35,23 @@ const internalMouseEvents = [
   'mouseout',
 ]
 
+const tagNamesWithoutText = [
+  'SELECT',
+  'INPUT',
+  'TEXTAREA',
+]
+
+const tagNamesWithValue = [
+  'BUTTON',
+  'INPUT',
+  'METER',
+  'LI',
+  'OPTION',
+  'PROGESS',
+  'PARAM',
+  'TEXTAREA',
+]
+
 export class StudioRecorder {
   @observable testId = null
   @observable suiteId = null
@@ -45,6 +65,8 @@ export class StudioRecorder {
   @observable _hasStarted = false
 
   fileDetails = null
+  absoluteFile = null
+  runnableTitle = null
   _currentId = 1
   _previousMouseEvent = null
 
@@ -76,6 +98,14 @@ export class StudioRecorder {
     return {
       id: this.testId,
       state: 'failed',
+    }
+  }
+
+  @computed get state () {
+    return {
+      testId: this.testId,
+      suiteId: this.suiteId,
+      url: this.url,
     }
   }
 
@@ -144,12 +174,69 @@ export class StudioRecorder {
     this.fileDetails = fileDetails
   }
 
+  setAbsoluteFile = (absoluteFile) => {
+    this.absoluteFile = absoluteFile
+  }
+
+  setRunnableTitle = (runnableTitle) => {
+    this.runnableTitle = runnableTitle
+  }
+
   _clearPreviousMouseEvent = () => {
     this._previousMouseEvent = null
   }
 
   _matchPreviousMouseEvent = (el) => {
     return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
+  }
+
+  @action initialize = (config, state) => {
+    const { studio } = state
+
+    if (studio) {
+      if (studio.testId) {
+        this.setTestId(studio.testId)
+      }
+
+      if (studio.suiteId) {
+        this.setSuiteId(studio.suiteId)
+      }
+
+      if (studio.url) {
+        this.setUrl(studio.url)
+      }
+    }
+
+    if (this.hasRunnableId) {
+      this.setAbsoluteFile(config.spec.absolute)
+      this.startLoading()
+
+      if (this.suiteId) {
+        this.Cypress.runner.setOnlySuiteId(this.suiteId)
+      } else if (this.testId) {
+        this.Cypress.runner.setOnlyTestId(this.testId)
+      }
+    }
+  }
+
+  @action interceptTest = (test) => {
+    if (this.suiteId) {
+      this.setTestId(test.id)
+    }
+
+    if (this.hasRunnableId) {
+      if (test.invocationDetails) {
+        this.setFileDetails(test.invocationDetails)
+      }
+
+      if (this.suiteId) {
+        if (test.parent && test.parent.id !== 'r1') {
+          this.setRunnableTitle(test.parent.title)
+        }
+      } else {
+        this.setRunnableTitle(test.title)
+      }
+    }
   }
 
   @action start = (body) => {
@@ -202,8 +289,11 @@ export class StudioRecorder {
 
     eventManager.emit('studio:save', {
       fileDetails: this.fileDetails,
+      absoluteFile: this.absoluteFile,
+      runnableTitle: this.runnableTitle,
       commands: this.logs,
       isSuite: !!this.suiteId,
+      isRoot: this.suiteId === 'r1',
       testName,
     })
   }
@@ -240,6 +330,10 @@ export class StudioRecorder {
       })
     })
 
+    this._body.addEventListener('contextmenu', this._openAssertionsMenu, {
+      capture: true,
+    })
+
     this._clearPreviousMouseEvent()
   }
 
@@ -256,6 +350,10 @@ export class StudioRecorder {
       this._body.removeEventListener(event, this._recordMouseEvent, {
         capture: true,
       })
+    })
+
+    this._body.removeEventListener('contextmenu', this._openAssertionsMenu, {
+      capture: true,
     })
 
     this._clearPreviousMouseEvent()
@@ -397,6 +495,12 @@ export class StudioRecorder {
 
     const $el = $(event.target)
 
+    if (this._isAssertionsMenu($el)) {
+      return
+    }
+
+    this._closeAssertionsMenu()
+
     if (!this._shouldRecordEvent(event, $el)) {
       return
     }
@@ -492,7 +596,7 @@ export class StudioRecorder {
     ]
   }
 
-  _addLog = (log) => {
+  @action _addLog = (log) => {
     log.id = this._getId()
 
     this.logs.push(log)
@@ -561,6 +665,174 @@ export class StudioRecorder {
     }
 
     return false
+  }
+
+  @action _addAssertion = ($el, ...args) => {
+    const id = this._getId()
+    const selector = this.Cypress.SelectorPlayground.getSelector($el)
+
+    const log = {
+      id,
+      selector,
+      name: 'should',
+      message: args,
+      isAssertion: true,
+    }
+
+    this.logs.push(log)
+
+    const reporterLog = {
+      id,
+      selector,
+      name: 'assert',
+      message: this._generateAssertionMessage($el, args),
+    }
+
+    this._generateBothLogs(reporterLog).forEach((commandLog) => {
+      eventManager.emit('reporter:log:add', commandLog)
+    })
+
+    this._closeAssertionsMenu()
+  }
+
+  _generateAssertionMessage = ($el, args) => {
+    const elementString = $driverUtils.stringifyActual($el)
+    const assertionString = args[0].replace(/\./g, ' ')
+
+    let message = `expect **${elementString}** to ${assertionString}`
+
+    if (args[1]) {
+      message = `${message} **${args[1]}**`
+    }
+
+    if (args[2]) {
+      message = `${message} with the value **${args[2]}**`
+    }
+
+    return message
+  }
+
+  _isAssertionsMenu = ($el) => {
+    return $el.hasClass('__cypress-studio-assertions-menu')
+  }
+
+  _openAssertionsMenu = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const $el = $(event.target)
+
+    if (this._isAssertionsMenu($el)) {
+      return
+    }
+
+    this._closeAssertionsMenu()
+
+    dom.openStudioAssertionsMenu({
+      $el,
+      $body: $(this._body),
+      props: {
+        possibleAssertions: this._generatePossibleAssertions($el),
+        addAssertion: this._addAssertion,
+        closeMenu: this._closeAssertionsMenu,
+      },
+    })
+  }
+
+  _closeAssertionsMenu = () => {
+    dom.closeStudioAssertionsMenu($(this._body))
+  }
+
+  _generatePossibleAssertions = ($el) => {
+    const tagName = $el.prop('tagName')
+
+    const possibleAssertions = []
+
+    if (!tagNamesWithoutText.includes(tagName)) {
+      const text = $el.text()
+
+      if (text) {
+        possibleAssertions.push({
+          type: 'have.text',
+          options: [{
+            value: text,
+          }],
+        })
+      }
+    }
+
+    if (tagNamesWithValue.includes(tagName)) {
+      const val = $el.val()
+
+      if (val !== undefined && val !== '') {
+        possibleAssertions.push({
+          type: 'have.value',
+          options: [{
+            value: val,
+          }],
+        })
+      }
+    }
+
+    const attributes = $.map($el[0].attributes, ({ name, value }) => {
+      if (name === 'value' || name === 'disabled') return
+
+      if (name === 'class') {
+        possibleAssertions.push({
+          type: 'have.class',
+          options: value.split(' ').map((value) => ({ value })),
+        })
+
+        return
+      }
+
+      if (name === 'id') {
+        possibleAssertions.push({
+          type: 'have.id',
+          options: [{
+            value,
+          }],
+        })
+
+        return
+      }
+
+      if (value !== undefined && value !== '') {
+        return {
+          name,
+          value,
+        }
+      }
+    })
+
+    if (attributes.length > 0) {
+      possibleAssertions.push({
+        type: 'have.attr',
+        options: attributes,
+      })
+    }
+
+    possibleAssertions.push({
+      type: 'be.visible',
+    })
+
+    const isDisabled = $el.prop('disabled')
+
+    if (isDisabled !== undefined) {
+      possibleAssertions.push({
+        type: isDisabled ? 'be.disabled' : 'be.enabled',
+      })
+    }
+
+    const isChecked = $el.prop('checked')
+
+    if (isChecked !== undefined) {
+      possibleAssertions.push({
+        type: isChecked ? 'be.checked' : 'not.be.checked',
+      })
+    }
+
+    return possibleAssertions
   }
 }
 

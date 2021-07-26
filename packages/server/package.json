@@ -185,7 +185,7 @@
     "supertest-session": "4.0.0",
     "through2": "2.0.5",
     "ts-loader": "7.0.4",
-    "tsconfig-paths": "3.9.0",
+    "tsconfig-paths": "3.10.1",
     "webpack": "4.43.0",
     "ws": "5.2.3",
     "xvfb": "cypress-io/node-xvfb#22e3783c31d81ebe64d8c0df491ea00cdc74726a",

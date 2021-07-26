@@ -1,3 +1,10 @@
+# [@cypress/schematic-v1.5.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.2...@cypress/schematic-v1.5.0) (2021-07-20)
+
+
+### Features
+
+* **cypress/schematic:** add reporter and reporter-options to builder schematic ([#17353](https://github.com/cypress-io/cypress/issues/17353)) ([b7783e6](https://github.com/cypress-io/cypress/commit/b7783e627be23120c0944eb3f186ed54256a9c93))
+
 # [@cypress/schematic-v1.4.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.1...@cypress/schematic-v1.4.2) (2021-06-29)
 
 
