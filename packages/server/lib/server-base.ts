@@ -27,7 +27,8 @@ import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import { SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
-import { Cfg, ProjectBase } from './project-base'
+import { Cfg } from './project-base'
+import { Browser } from '@packages/server/lib/browsers/types'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -91,12 +92,13 @@ const notSSE = (req, res) => {
 export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
-  project: ProjectBase<any>
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
+  getCurrentBrowser: () => Browser
+  getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
   createRoutes: (args: InitializeRoutes) => any
 }
@@ -162,13 +164,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   abstract createServer (
     app: Express,
     config: Cfg,
-    project: ProjectBase<any>,
-    request: unknown,
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
 
   open (config: Cfg, {
-    project,
+    getSpec,
+    getCurrentBrowser,
     onError,
     onWarning,
     shouldCorrelatePreRequests,
@@ -218,10 +219,11 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         nodeProxy: this.nodeProxy,
         networkProxy: this._networkProxy!,
         onError,
-        project,
+        getSpec,
+        getCurrentBrowser,
       })
 
-      return this.createServer(app, config, project, this.request, onWarning)
+      return this.createServer(app, config, onWarning)
     })
   }
 

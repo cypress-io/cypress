@@ -1,13 +1,12 @@
 import path from 'path'
 import la from 'lazy-ass'
 import check from 'check-more-types'
-import _ from 'lodash'
 import Debug from 'debug'
 
 import { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
-import spec from './controllers/spec'
+import specController from './controllers/spec'
 import reporter from './controllers/reporter'
 import runner from './controllers/runner'
 import xhrs from './controllers/xhrs'
@@ -23,7 +22,8 @@ export const createRoutes = ({
   specsStore,
   getRemoteState,
   networkProxy,
-  project,
+  getSpec,
+  getCurrentBrowser,
   onError,
 }: InitializeRoutes) => {
   // routing for the actual specs which are processed automatically
@@ -32,7 +32,7 @@ export const createRoutes = ({
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
 
-    spec.handle(test, req, res, config, next, onError)
+    specController.handle(test, req, res, config, next, onError)
   })
 
   app.get('/__cypress/socket.io.js', (req, res) => {
@@ -59,13 +59,12 @@ export const createRoutes = ({
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
     const extraOptions = {
-      specFilter: _.get(project, 'spec.specFilter'),
-      specType: _.get(project, 'spec.specType', 'integration'),
+      specFilter: getSpec()?.specFilter,
+      specType: 'integration',
     }
 
-    debug('project %o', project)
     debug('handling iframe for project spec %o', {
-      spec: project.spec,
+      spec: getSpec(),
       extraOptions,
     })
 
@@ -103,7 +102,8 @@ export const createRoutes = ({
 
     runner.serve(req, res, {
       config,
-      project,
+      getSpec,
+      getCurrentBrowser,
       getRemoteState,
       specsStore,
     })

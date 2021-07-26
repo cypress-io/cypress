@@ -54,7 +54,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     return super.open(config, { ...options, testingType: 'e2e' })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
