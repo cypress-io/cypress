@@ -182,13 +182,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     process.chdir(this.projectRoot)
 
-    const testingType = this.projectType === 'ct' ? 'component' : 'e2e'
-
     // TODO: we currently always scaffold the plugins file
     // even when headlessly or else it will cause an error when
     // we try to load it and it's not there. We must do this here
     // else initialing the plugins will instantly fail.
-    if (cfg.pluginsFile && !cfg[testingType]?.plugins) {
+    if (cfg.pluginsFile && !cfg[this.testingType]?.plugins) {
       debug('scaffolding with plugins file %s', cfg.pluginsFile)
 
       await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
