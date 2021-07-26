@@ -2,7 +2,10 @@
   <h1 class="text-3xl mt-12 text-center">{{ title }}</h1>
   <p class="text-center text-gray-400 my-2 mx-10" v-html="description" />
   <div class="mx-5">
-    <TestingType v-if="!steps.component && !steps.e2e" />
+    <TestingType
+      v-if="true" 
+      @testingTypeSet="testingTypeSet"
+    />
 
     <template v-else-if="steps.component">
       <EnvironmentSetup v-if="!steps.setup" />
@@ -19,6 +22,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, watch } from "vue";
+import { useQuery, useResult } from "@vue/apollo-composable";
+
 import { useStoreApp } from "../store/app";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
@@ -26,13 +31,20 @@ import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@apollo/client/core'
-import { WizardDocument } from '../generated/graphql'
-import { useQuery, useResult } from "@vue/apollo-composable";
+import { TestingTypeDocument, WizardDocument } from '../generated/graphql'
 
 gql`
 query Wizard {
   app {
     isFirstOpen
+  }
+}
+`
+
+gql`
+query TestingType {
+  openProject {
+    testingType
   }
 }
 `
@@ -51,10 +63,27 @@ export default defineComponent({
     const title = computed(() => storeApp.getState().title)
     const description = computed(() => storeApp.getState().description)
     const steps = computed(() => storeApp.getState().steps)
+    const { result: testingTypeResult, refetch } = useQuery(TestingTypeDocument)
 
-    const { onResult, result, loading } = useQuery(WizardDocument, {})
+    const testingTypeSet = () => {
+      console.log('Refetch')
+      refetch()
+    }
 
-    return { steps, title, description, loading, result };
+
+    const testingType = useResult(testingTypeResult, null, data => data.openProject.testingType)
+
+    watch(testingType, val => {
+      console.log('Value is', val)
+    })
+
+    return { 
+      steps, 
+      title, 
+      description, 
+      testingTypeSet,
+      testingType
+    };
   },
 });
 </script>

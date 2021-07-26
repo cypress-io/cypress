@@ -65,7 +65,11 @@ mutation setBrowser {
 `
 
 export default defineComponent({
-  setup() {
+  emits: {
+    testingTypeSet: () => true
+  },
+
+  setup(props, { emit }) {
     const storeApp = useStoreApp();
     // const storeConfig = useStoreConfig();
     const testingType = ref<Cypress.TestingType>('e2e')
@@ -80,8 +84,7 @@ export default defineComponent({
     }))
 
     onSetTestingType(result => {
-      console.log(result)
-      const testingType = result.data.setTestingType.testingType
+      emit('testingTypeSet')
     })
 
     onMounted(() => {
@@ -93,7 +96,7 @@ export default defineComponent({
 
     const selectTestingType = (testingType: TestingType) => {
       setTestingType({ input: { testingType } })
-    };
+    }
 
     return { testingTypes, selectTestingType };
   },
