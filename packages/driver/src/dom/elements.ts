@@ -1079,6 +1079,21 @@ const whitespaces = /\s+/g
 
 // When multiple space characters are considered as a single whitespace in all tags except <pre>.
 const normalizeWhitespaces = (elem) => {
+  // https://github.com/cypress-io/cypress/issues/14861
+  // Remove <style> and <script> elements inside <body>
+  if (elem.tagName === 'BODY') {
+    const e = elem.ownerDocument.createElement('test')
+
+    for (let child = elem.firstChild; child !== null; child = child.nextSibling) {
+      if (child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE') {
+        // cloning below is necessary because it moves the node from `elem` to `e` without it.
+        e.append(child.cloneNode(true))
+      }
+    }
+
+    elem = e
+  }
+
   let testText = elem.textContent || elem.innerText || $(elem).text()
 
   if (elem.tagName === 'PRE') {

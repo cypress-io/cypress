@@ -1573,13 +1573,13 @@ describe('src/cy/commands/querying', () => {
     it('will not find script elements', () => {
       cy.$$('<script>// some-script-content </script>').appendTo(cy.$$('body'))
 
-      cy.contains('some-script-content').should('not.match', 'script')
+      cy.contains('some-script-content').should('not.exist')
     })
 
     it('will not find style elements', () => {
       cy.$$('<style> some-style-content {} </style>').appendTo(cy.$$('body'))
 
-      cy.contains('some-style-content').should('not.match', 'style')
+      cy.contains('some-style-content').should('not.exist')
     })
 
     it('finds the nearest element by :contains selector', () => {
@@ -1951,6 +1951,30 @@ space
 
       it('passes when "i" flag is used with undefined option', () => {
         cy.get('#test-button').contains(/Test/i)
+      })
+    })
+
+    describe('ignores style and script tag in body', () => {
+      it('style', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('Expected to find content: ')
+
+          done()
+        })
+
+        cy.visit('fixtures/content-in-body.html')
+        cy.contains('font-size', { timeout: 500 })
+      })
+
+      it('script', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('Expected to find content: ')
+
+          done()
+        })
+
+        cy.visit('fixtures/content-in-body.html')
+        cy.contains('I am in the script tag in body', { timeout: 500 })
       })
     })
 
