@@ -390,23 +390,7 @@ commands:
         default: false
     steps:
       - restore_cached_workspace
-      - run:
-          command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec -- --') || true
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_ENABLE=${PERCY_TOKEN:-0} \
-            PERCY_PARALLEL_TOTAL=-1 \
-            $cmd yarn workspace @packages/launchpad run cypress:run --browser <<parameters.browser>>
-      - run:
-          command: |
-            if [[ <<parameters.percy>> == 'true' ]]; then
-              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-              PERCY_ENABLE=${PERCY_TOKEN:-0} \
-              PERCY_PARALLEL_TOTAL=-1 \
-              yarn percy upload packages/launchpad/cypress/screenshots/screenshot.spec.tsx/percy
-            else
-              echo "skipping percy screenshots uploading"
-            fi
+      - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
