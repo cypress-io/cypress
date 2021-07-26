@@ -99,9 +99,9 @@ export const eventManager = {
       rerun()
     })
 
-    ws.on('specs:changed', ({ specs, projectType }) => {
+    ws.on('specs:changed', ({ specs, testingType }) => {
       // do not emit the event if e2e runner is not displaying an inline spec list.
-      if (projectType === 'e2e' && state.useInlineSpecList === false) {
+      if (testingType === 'e2e' && state.useInlineSpecList === false) {
         return
       }
 
