@@ -120,12 +120,12 @@ class Projects {
   }
 
   // Set desired browser to use when launching the runner
-  async setBrowser (input: NexusGenInputs['SetBrowserInput']) {
+  async setBrowser ({ path }: NexusGenInputs['SetBrowserInput']) {
     const all = this.foundBrowsers ?? await browsers.get()
-    const desired = all.find((x) => x.path === input.path)
+    const desired = all.find((x) => x.path === path)
 
     if (!desired) {
-      throw Error(`Could not find browser by path ${input.path}`)
+      throw Error(`Could not find browser by path ${path}`)
     }
 
     this.currentBrowser = desired
@@ -133,12 +133,14 @@ class Projects {
     return desired
   }
 
-  setTestingType (testingType: TestingType) {
+  setTestingType ({ testingType }: NexusGenInputs['SetTestingTypeInput']) {
     if (!this.openProject) {
       return
     }
 
     this.openProject.testingType = testingType
+
+    return this.openProject
   }
 
   async initializePlugins () {

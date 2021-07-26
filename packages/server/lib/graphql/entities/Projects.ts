@@ -70,3 +70,26 @@ export const AddProject = mutationField((t) => {
     },
   })
 })
+
+const SetTestingTypeInput = inputObjectType({
+  name: 'SetTestingTypeInput',
+  definition (t) {
+    t.nonNull.field('testingType', {
+      type: TestingType,
+    })
+  },
+})
+
+export const SetTestingType = mutationField((t) => {
+  t.nonNull.field('setTestingType', {
+    type: Project,
+    args: {
+      input: nonNull(SetTestingTypeInput),
+    },
+    resolve (_root, args, ctx) {
+      const updatedProject = projects.setTestingType(args.input)
+
+      return formatProject(updatedProject!)
+    },
+  })
+})

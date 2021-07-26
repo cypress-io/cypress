@@ -86,6 +86,7 @@ type Mutation {
   initializeServer: Project!
   launchRunner: Project!
   setBrowser(input: SetBrowserInput!): Browser!
+  setTestingType(input: SetTestingTypeInput!): Project!
 }
 
 type Project {
@@ -107,6 +108,10 @@ type Query {
 
 input SetBrowserInput {
   path: String!
+}
+
+input SetTestingTypeInput {
+  testingType: TestingType!
 }
 
 enum TestingType {

@@ -47,6 +47,9 @@ export interface NexusGenInputs {
   SetBrowserInput: { // input type
     path: string; // String!
   }
+  SetTestingTypeInput: { // input type
+    testingType: NexusGenEnums['TestingType']; // TestingType!
+  }
 }
 
 export interface NexusGenEnums {
@@ -155,6 +158,7 @@ export interface NexusGenFieldTypes {
     initializeServer: NexusGenRootTypes['Project']; // Project!
     launchRunner: NexusGenRootTypes['Project']; // Project!
     setBrowser: NexusGenRootTypes['Browser']; // Browser!
+    setTestingType: NexusGenRootTypes['Project']; // Project!
   }
   Project: { // field return type
     isCurrent: boolean; // Boolean!
@@ -215,6 +219,7 @@ export interface NexusGenFieldTypeNames {
     initializeServer: 'Project'
     launchRunner: 'Project'
     setBrowser: 'Browser'
+    setTestingType: 'Project'
   }
   Project: { // field return type name
     isCurrent: 'Boolean'
@@ -247,6 +252,9 @@ export interface NexusGenArgTypes {
     }
     setBrowser: { // args
       input: NexusGenInputs['SetBrowserInput']; // SetBrowserInput!
+    }
+    setTestingType: { // args
+      input: NexusGenInputs['SetTestingTypeInput']; // SetTestingTypeInput!
     }
   }
 }
