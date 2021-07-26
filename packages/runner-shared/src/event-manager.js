@@ -101,9 +101,9 @@ export const eventManager = {
       rerun()
     })
 
-    ws.on('specs:changed', ({ specs, projectType }) => {
+    ws.on('specs:changed', ({ specs, testingType }) => {
       // do not emit the event if e2e runner is not displaying an inline spec list.
-      if (projectType === 'e2e' && state.useInlineSpecList === false) {
+      if (testingType === 'e2e' && state.useInlineSpecList === false) {
         return
       }
 
@@ -113,6 +113,12 @@ export const eventManager = {
     ws.on('dev-server:hmr:error', (error) => {
       Cypress.stop()
       localBus.emit('script:error', error)
+    })
+
+    ws.on('dev-server:compile:success', ({ specFile }) => {
+      if (!specFile || specFile === state.spec.absolute) {
+        rerun()
+      }
     })
 
     _.each(socketRerunEvents, (event) => {

@@ -26,7 +26,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when integrationFolder is empty', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
 
       return pristine.initializeConfig()
       .then(() => {
@@ -39,7 +39,7 @@ describe('lib/scaffold', () => {
     it('is false when integrationFolder has been changed', function () {
       const pristine = new ProjectBase({
         projectRoot: this.pristinePath,
-        projectType: 'e2e',
+        testingType: 'e2e',
         options: {
           integrationFolder: 'foo',
         },
@@ -57,7 +57,7 @@ describe('lib/scaffold', () => {
       const id = () => {
         const idsPath = Fixtures.projectPath('ids')
 
-        this.ids = new ProjectBase({ projectRoot: idsPath, projectType: 'e2e' })
+        this.ids = new ProjectBase({ projectRoot: idsPath, testingType: 'e2e' })
 
         return this.ids.initializeConfig()
         .then(() => {
@@ -72,7 +72,7 @@ describe('lib/scaffold', () => {
       const todo = () => {
         const todosPath = Fixtures.projectPath('todos')
 
-        this.todos = new ProjectBase({ projectRoot: todosPath, projectType: 'e2e' })
+        this.todos = new ProjectBase({ projectRoot: todosPath, testingType: 'e2e' })
 
         return this.todos.initializeConfig()
         .then(() => {
@@ -88,7 +88,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when files, name + bytes match to scaffold', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
 
       return pristine.initializeConfig()
       .then(() => {
@@ -101,7 +101,7 @@ describe('lib/scaffold', () => {
     })
 
     it('is false when bytes dont match scaffold', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
 
       return pristine.initializeConfig()
       .then(() => {

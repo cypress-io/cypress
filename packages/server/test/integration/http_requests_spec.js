@@ -72,7 +72,7 @@ describe('Routes', () => {
 
     nock.enableNetConnect()
 
-    this.setup = (initialUrl, obj = {}) => {
+    this.setup = (initialUrl, obj = {}, spec) => {
       if (_.isObject(initialUrl)) {
         obj = initialUrl
         initialUrl = null
@@ -128,7 +128,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', projectType: 'e2e' })
+          this.project = new ProjectBase({ projectRoot: '/path/to/project-e2e', testingType: 'e2e' })
 
           cfg.pluginsFile = false
 
@@ -141,10 +141,11 @@ describe('Routes', () => {
 
             this.server.open(cfg, {
               SocketCtor: SocketE2E,
-              project: this.project,
+              getSpec: () => spec,
+              getCurrentBrowser: () => null,
               specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
-              projectType: 'e2e',
+              testingType: 'e2e',
             })
             .spread(async (port) => {
               const automationStub = {
@@ -1100,18 +1101,21 @@ describe('Routes', () => {
 
     describe('todos', () => {
       beforeEach(function () {
-        return this.setup({
-          projectRoot: Fixtures.projectPath('todos'),
-          config: {
-            integrationFolder: 'tests',
-            fixturesFolder: 'tests/_fixtures',
-            supportFile: 'tests/_support/spec_helper.js',
-            javascripts: ['tests/etc/etc.js'],
-          },
-        })
+        this.setupServer = (spec = null) => {
+          return this.setup({
+            projectRoot: Fixtures.projectPath('todos'),
+            config: {
+              integrationFolder: 'tests',
+              fixturesFolder: 'tests/_fixtures',
+              supportFile: 'tests/_support/spec_helper.js',
+              javascripts: ['tests/etc/etc.js'],
+            },
+          }, {}, spec)
+        }
       })
 
-      it('renders iframe with variables passed in', function () {
+      it('renders iframe with variables passed in', async function () {
+        await this.setupServer()
         const contents = removeWhitespace(Fixtures.get('server/expected_todos_iframe.html'))
 
         return this.rp('http://localhost:2020/__cypress/iframes/integration/test2.coffee')
@@ -1124,7 +1128,8 @@ describe('Routes', () => {
         })
       })
 
-      it('can send back all tests', function () {
+      it('can send back all tests', async function () {
+        await this.setupServer()
         const contents = removeWhitespace(Fixtures.get('server/expected_todos_all_tests_iframe.html'))
 
         return this.rp('http://localhost:2020/__cypress/iframes/__all')
@@ -1137,11 +1142,15 @@ describe('Routes', () => {
         })
       })
 
-      it('can send back tests matching spec filter', function () {
+      it('can send back tests matching spec filter', async function () {
+        await this.setupServer({
+          specFilter: 'sub_test',
+        })
+
         // only returns tests with "sub_test" in their names
         const contents = removeWhitespace(Fixtures.get('server/expected_todos_filtered_tests_iframe.html'))
 
-        this.project.spec = {
+        this.spec = {
           specFilter: 'sub_test',
         }
 
@@ -1150,8 +1159,6 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
 
           const body = cleanResponseBody(res.body)
-
-          console.log(body)
 
           expect(body).to.eq(contents)
         })
