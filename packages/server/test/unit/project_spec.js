@@ -60,7 +60,7 @@ describe('lib/project-base', () => {
       return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
       .then((config1) => {
         this.config = config1
-        this.project = new ProjectBase({ projectRoot: this.todosPath, projectType: 'e2e' })
+        this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
         this.project._server = { close () {} }
         this.project._cfg = config1
       })
@@ -82,7 +82,7 @@ describe('lib/project-base', () => {
   })
 
   it('always resolves the projectRoot to be absolute', function () {
-    const p = new ProjectBase({ projectRoot: '../foo/bar', projectType: 'e2e' })
+    const p = new ProjectBase({ projectRoot: '../foo/bar', testingType: 'e2e' })
 
     expect(p.projectRoot).not.to.eq('../foo/bar')
     expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
@@ -92,7 +92,7 @@ describe('lib/project-base', () => {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
-    const projectCt = new ProjectBase({ projectRoot: this.todosPath, projectType: 'ct' })
+    const projectCt = new ProjectBase({ projectRoot: this.todosPath, testingType: 'component' })
 
     await projectCt.initializeConfig()
 
@@ -474,7 +474,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#close', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
       this.project._server = { close () {} }
 
@@ -535,7 +535,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#reset', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
       this.project._automation = { reset: sinon.stub() }
       this.project._server = { close () {}, reset: sinon.stub() }
     })
@@ -550,7 +550,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#getRuns', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
       sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
       sinon.stub(api, 'getProjectRuns').resolves('runs')
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
@@ -567,7 +567,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#scaffold', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       sinon.stub(scaffold, 'integration').resolves()
       sinon.stub(scaffold, 'fixture').resolves()
       sinon.stub(scaffold, 'support').resolves()
@@ -653,7 +653,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#watchSettings', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project._server = { close () {}, startWebsockets () {} }
       sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
@@ -713,7 +713,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#watchPluginsFile', () => {
     beforeEach(function () {
       sinon.stub(fs, 'pathExists').resolves(true)
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project.watchers = { watchTree: sinon.spy() }
       sinon.stub(plugins, 'init').resolves()
 
@@ -785,7 +785,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#startWebsockets', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project.watchers = {}
       this.project._server = { close () {}, startWebsockets: sinon.stub() }
       sinon.stub(ProjectBase.prototype, 'open').resolves()
@@ -817,7 +817,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#getProjectId', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.verifyExistence = sinon.stub(ProjectBase.prototype, 'verifyExistence').resolves()
     })
 
@@ -881,7 +881,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#writeProjectId', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
       sinon.stub(settings, 'write')
       .withArgs(this.project.projectRoot, { projectId: 'id-123' })
@@ -959,7 +959,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     const projectRoot = '/_test-output/path/to/project-e2e'
 
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot, projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot, testingType: 'e2e' })
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
@@ -992,7 +992,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#getRecordKeys', () => {
     beforeEach(function () {
       this.recordKeys = []
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
       sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
       sinon.stub(api, 'getProjectRecordKeys').resolves(this.recordKeys)
@@ -1013,7 +1013,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#requestAccess', () => {
     beforeEach(function () {
-      this.project = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
       sinon.stub(api, 'requestAccess').resolves('response')
     })

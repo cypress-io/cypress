@@ -2717,13 +2717,13 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: Omit<ConfigOptions, 'e2e' | 'component'> & { plugins?: TestingTypeFunctions }
+    component: Omit<ResolvedConfigOptions, TestingType> & { plugins?: TestingTypeFunctions }
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-     e2e: Omit<ConfigOptions, 'e2e' | 'component'> & { plugins?: TestingTypeFunctions }
+    e2e: Omit<ResolvedConfigOptions, TestingType> & { plugins?: TestingTypeFunctions }
   }
 
   type TestingTypeFunctions = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
@@ -2811,7 +2811,7 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, 'e2e' | 'component'>>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
   type ConfigOptions = CoreConfigOptions & {e2e?: CoreConfigOptions, component?: CoreConfigOptions }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
