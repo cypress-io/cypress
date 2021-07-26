@@ -45,8 +45,10 @@
       &:hover {
         border-top: 1px solid #e3e3e3;
       }
+    }
 
-    
+    .command-type-parent:first-child > span > .command-wrapper {
+      border-top: 0;
     }
   }
 
@@ -74,8 +76,10 @@
     &:hover {
       border-top: 1px solid #eef1f4;
     }
+  }
 
-
+  .command-type-parent:first-child > span > .command-wrapper {
+    border-top: 0;
   }
 
   .command-type-child {
