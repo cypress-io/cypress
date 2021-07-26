@@ -54,7 +54,7 @@ export const createRoutes = ({
       const _sessionStorageStr = JSON.stringify(window.sessionStorage)
       const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
 
-      const value = {}
+      const value = {} as any
 
       if (_localStorage) {
         value.localStorage = _localStorage
@@ -91,11 +91,13 @@ export const createRoutes = ({
             const { clear, value } = storageData
 
             if (clear) {
+              // @ts-ignore
               window[type].clear()
             }
 
             if (value) {
               Object.keys(value).forEach((key) => {
+                // @ts-ignore
                 window[type].setItem(key, value[key])
               })
             }

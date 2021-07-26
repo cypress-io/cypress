@@ -412,7 +412,10 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/parent\.postMessage.*localStorage/)
+        expect(res.body).to
+        .match(/parent\.postMessage/)
+        .match(/localStorage/)
+        .match(/sessionStorage/)
       })
     })
 
@@ -421,7 +424,11 @@ describe('Routes', () => {
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/localStorage\.setItem/)
+        expect(res.body).to
+        .match(/parent\.postMessage/)
+        .match(/set:storage/)
+        .match(/localStorage/)
+        .match(/sessionStorage/)
       })
     })
   })

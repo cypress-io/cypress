@@ -131,6 +131,7 @@ const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest
   }
 
   if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
+    // @ts-ignore
     delete cookie.hostOnly
   }
 

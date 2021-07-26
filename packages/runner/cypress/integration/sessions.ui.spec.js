@@ -17,14 +17,20 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
     cy.percySnapshot()
   })
 
-  it('tests sharing session', () => {
+  it('shows message for new, saved, and recreated session', () => {
     runIsolatedCypress(() => {
-      cy.defineSession('user1', () => {
-        window.localStorage.foo = 'val'
+      const stub = Cypress.sinon.stub().callsFake(() => {
+        if (stub.callCount === 3) {
+          return false
+        }
       })
 
       beforeEach(() => {
-        cy.session('user1')
+        cy.session('user1', () => {
+          window.localStorage.foo = 'val'
+        }, {
+          validate: stub,
+        })
       })
 
       it('t1', () => {
@@ -32,6 +38,10 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
       })
 
       it('t2', () => {
+        assert(true)
+      })
+
+      it('t3', () => {
         assert(true)
       })
     })
@@ -45,126 +55,42 @@ describe('runner/cypress sessions.ui.spec', { viewportWidth: 1000, viewportHeigh
     .should('contain', '1')
 
     cy.get('.test').eq(0)
-    .should('contain', 'Session (user1)')
+    .should('contain', 'Sessions (1)')
+    .should('contain', 'user1')
+    .should('contain', '(new)')
 
     cy.get('.test').eq(1)
-    .should('contain', 'Session (user1)')
-    .should('contain', 'using saved session')
+    .should('contain', 'Sessions (1)')
+    .should('contain', 'user1')
+    .should('contain', '(saved)')
+
+    cy.get('.test').eq(2)
+    .should('contain', 'Sessions (1)')
+    .should('contain', 'user1')
+    .should('contain', '(recreated)')
 
     cy.percySnapshot()
   })
 
   it('multiple sessions in a test', () => {
     runIsolatedCypress(() => {
-      cy.defineSession('user1', () => {
-        window.localStorage.foo = 'val'
-      })
-
-      cy.defineSession('user2', () => {
-        window.localStorage.foo = 'val'
-        window.localStorage.bar = 'val'
-      })
-
       it('t1', () => {
-        cy.session('user1')
-        cy.session('user2')
+        cy.session('user1', () => {
+          window.localStorage.foo = 'val'
+        })
+
+        cy.session('user2', () => {
+          window.localStorage.foo = 'val'
+          window.localStorage.bar = 'val'
+        })
       })
     })
 
     cy.get('.sessions-container').first().click()
-    .should('contain', '1')
-
-    cy.get('.sessions-container').eq(1).click()
-    .should('contain', '2')
+    .should('contain', 'Sessions (2)')
+    .should('contain', 'user1')
+    .should('contain', 'user2')
 
     cy.percySnapshot()
-  })
-
-  describe('errors', () => {
-    it('experimentalSessionSupport not enabled', () => {
-      runIsolatedCypress(() => {
-        cy.defineSession('user1', () => {
-        })
-      }, { config: { experimentalSessionSupport: false } })
-
-      cy.get('.runnable-err').should('contain', 'experimentalSessionSupport is not enabled')
-
-      cy.percySnapshot()
-    })
-
-    it('defineSession called with duplicate name', () => {
-      runIsolatedCypress(() => {
-        cy.defineSession('user1', () => {
-        })
-
-        cy.defineSession('user1', () => {
-        })
-
-        it('t1', () => {
-          cy.session('user1')
-        })
-      })
-
-      // TODO: add test for codeframe. Because of the way the tests are
-      // executed in isolated-runner, codeframes are not shown.
-      cy.get('.runnable-err').should('contain', 'cy.defineSession')
-
-      cy.percySnapshot()
-    })
-
-    it('defineSession called without steps option', () => {
-      runIsolatedCypress(() => {
-        cy.defineSession('user1')
-
-        it('t1', () => {
-          cy.session('user1')
-        })
-      })
-
-      // TODO: add test for codeframe. Because of the way the tests are
-      // executed in isolated-runner, codeframes are not shown.
-      cy.get('.runnable-err')
-      .should('contain', 'cy.defineSession')
-      .should('contain', 'steps')
-
-      cy.percySnapshot()
-    })
-
-    it('defineSession called without name option', () => {
-      runIsolatedCypress(() => {
-        cy.defineSession()
-
-        it('t1', () => {
-          cy.session('user1')
-        })
-      })
-
-      // TODO: add test for codeframe. Because of the way the tests are
-      // executed in isolated-runner, codeframes are not shown.
-      cy.get('.runnable-err')
-      .should('contain', 'cy.defineSession')
-      .should('contain', 'name')
-
-      cy.percySnapshot()
-    })
-
-    // it('navigates to blank page before each test', () => {
-    //   runIsolatedCypress(() => {
-    //     it('t1', () => {
-    //       cy.visit('/')
-    //     })
-
-    //     it('t2', () => {
-    //     })
-    //   })
-
-    //   // TODO: add test for codeframe. Because of the way the tests are
-    //   // executed in isolated-runner, codeframes are not shown.
-    //   cy.get('.runnable-err')
-    //   .should('contain', 'cy.defineSession')
-    //   .should('contain', 'name')
-
-    //   cy.percySnapshot()
-    // })
   })
 })

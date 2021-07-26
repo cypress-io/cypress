@@ -574,9 +574,6 @@ declare namespace Cypress {
   interface SessionOptions {
     validate?: () => false|void
   }
- 
-
-
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
@@ -978,7 +975,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/session
      */
-    session(id: string, setup?: Function, options?: SessionOptions): Chainable<null>
+    session(id: string, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
