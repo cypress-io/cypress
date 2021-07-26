@@ -499,7 +499,7 @@ module.exports = {
     if (options.projectRoot) {
       projects.addProject({
         projectRoot: options.projectRoot,
-        testingType: 'component', // options.testingType,
+        testingType: options.testingType,
         isCurrent: true,
       })
     }
