@@ -27,7 +27,7 @@ import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@apollo/client/core'
 import { WizardDocument } from '../generated/graphql'
-import { useQuery } from "@vue/apollo-composable";
+import { useQuery, useResult } from "@vue/apollo-composable";
 
 gql`
 query Wizard {
@@ -53,14 +53,6 @@ export default defineComponent({
     const steps = computed(() => storeApp.getState().steps)
 
     const { onResult, result, loading } = useQuery(WizardDocument, {})
-
-    onResult((result) => {
-      console.log(result)
-    })
-
-    watch(result, value => {
-      console.log(value)
-    })
 
     return { steps, title, description, loading, result };
   },

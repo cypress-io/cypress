@@ -8,12 +8,11 @@ interface State {
   backAction: () => void
   alternativeAction?: () => void
   steps: {
-      component: boolean
-      setup: boolean
-      dependencies: boolean
-      configFile: boolean
-
-      e2e: boolean
+    component: boolean
+    setup: boolean
+    dependencies: boolean
+    configFile: boolean
+    e2e: boolean
   }
 }
 

@@ -90,7 +90,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   public _server?: TServer
   public browser: any
-  public testingType: Cypress.TestingType
+  public testingType?: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
   public pluginsStatus: NexusGenObjects['InitStatus'] = {
@@ -108,7 +108,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     options,
   }: {
     projectRoot: string
-    testingType: Cypress.TestingType
+    testingType?: Cypress.TestingType
     options: Options
   }) {
     super()
@@ -198,6 +198,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async open () {
+    if (!this.testingType) {
+      throw Error('testingType must be set before starting server1')
+    }
+
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
@@ -223,7 +227,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       specsStore,
       startSpecWatcher,
       ctDevServerPort,
-    } = await this.initializeSpecStore(cfg)
+    } = await this.initializeSpecStore(cfg, { testingType: this.testingType })
 
     if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
@@ -386,25 +390,25 @@ export class ProjectBase<TServer extends Server> extends EE {
     options.onError(err)
   }
 
-  async initializeSpecStore (updatedConfig: Cfg): Promise<{
+  async initializeSpecStore (updatedConfig: Cfg, { testingType }: { testingType: Cypress.TestingType }): Promise<{
     specsStore: SpecsStore
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
     const allSpecs = await specsUtil.find(updatedConfig)
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.testingType === 'component') {
+      if (testingType === 'component') {
         return spec.specType === 'component'
       }
 
-      if (this.testingType === 'e2e') {
+      if (testingType === 'e2e') {
         return spec.specType === 'integration'
       }
 
-      throw Error(`Cannot return specType for testingType: ${this.testingType}`)
+      throw Error(`Cannot return specType for testingType: ${testingType}`)
     })
 
-    return this.initSpecStore({ specs, config: updatedConfig })
+    return this.initSpecStore({ specs, config: updatedConfig, testingType })
   }
 
   async initializePlugins (cfg, options) {
@@ -446,20 +450,22 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initSpecStore ({
     specs,
     config,
+    testingType
   }: {
     specs: Cypress.Cypress['spec'][]
-    config: any
+    config: any,
+    testingType: Cypress.TestingType
   }) {
-    const specsStore = new SpecsStore(config, this.testingType)
+    const specsStore = new SpecsStore(config, testingType)
 
     const startSpecWatcher = () => {
       return specsStore.watch({
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          this.server.sendSpecList(specs, this.testingType)
+          this.server.sendSpecList(specs, testingType)
 
-          if (this.testingType === 'component') {
+          if (testingType === 'component') {
           // ct uses the dev-server to build and bundle the speces.
           // send new files to dev server
             devServer.updateSpecs(specs)
@@ -470,7 +476,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.testingType === 'component') {
+    if (testingType === 'component') {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port

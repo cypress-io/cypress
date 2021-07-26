@@ -18,12 +18,51 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
-import { NexusGenInputs } from '@packages/server/lib/graphql/gen/nxs.gen'
 import { useMutation } from "@vue/apollo-composable"
 import { gql } from '@apollo/client/core'
+import { SetTestingTypeDocument } from '../generated/graphql'
 import { TestingType, testingTypes } from "../utils/testingTypes";
-import { useStoreConfig } from "../store/config";
 import { useStoreApp } from "../store/app";
+
+gql`
+mutation setTestingType ($input: SetTestingTypeInput!) {
+  setTestingType (input: $input) {
+    projectRoot
+    testingType
+  }
+}
+`
+
+gql`
+mutation plugins {
+  initializePlugins {
+    plugins {
+			state
+    }
+  }
+}
+`
+
+gql`
+mutation server {
+  initializeServer {
+    server {
+      state
+      message
+    } 
+  }
+}
+`
+
+gql`
+# set browsr
+# hard-coded for now
+mutation setBrowser {
+	setBrowser (input: { path: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" }) {
+    name
+  }
+}
+`
 
 export default defineComponent({
   setup() {
@@ -31,14 +70,8 @@ export default defineComponent({
     // const storeConfig = useStoreConfig();
     const testingType = ref<Cypress.TestingType>('e2e')
 
-    const { mutate: setTestingType, loading, onDone } = useMutation(gql`
-      mutation setTestingType ($input: SetTestingTypeInput!) {
-        setTestingType (input: $input) {
-          projectRoot
-          testingType
-        }
-      }
-    `, () => ({
+    const { mutate: setTestingType, onDone: onSetTestingType } = useMutation(
+      SetTestingTypeDocument, () => ({
       variables: {
         input: {
           testingType: testingType.value
@@ -46,8 +79,9 @@ export default defineComponent({
       }
     }))
 
-    onDone(result => {
-      // console.log('Done!', result)
+    onSetTestingType(result => {
+      console.log(result)
+      const testingType = result.data.setTestingType.testingType
     })
 
     onMounted(() => {
@@ -58,9 +92,7 @@ export default defineComponent({
     });
 
     const selectTestingType = (testingType: TestingType) => {
-      console.log(testingType)
       setTestingType({ input: { testingType } })
-      // storeConfig.setTestingType(testingType);
     };
 
     return { testingTypes, selectTestingType };

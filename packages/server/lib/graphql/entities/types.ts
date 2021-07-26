@@ -38,7 +38,7 @@ export const Project = objectType({
   name: 'Project',
   definition (t) {
     t.nonNull.string('projectRoot')
-    t.nonNull.field('testingType', {
+    t.field('testingType', {
       type: TestingType,
     })
 
@@ -51,5 +51,8 @@ export const Project = objectType({
     t.field('server', {
       type: InitStatus,
     })
+
+    t.nonNull.boolean('ctConfigured')
+    t.nonNull.boolean('e2eConfigured')
   },
 })

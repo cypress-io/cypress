@@ -259,6 +259,10 @@ class Projects {
       throw Error('Must set currentProjectId before calling initializeServer!')
     }
 
+    if (!this.openProject.testingType) {
+      throw Error('Must set openProject.testingType before calling initializeServer!')
+    }
+
     // already listening
     if (this.openProject._server?.listening) {
       return this.openProject
@@ -277,7 +281,10 @@ class Projects {
 
     try {
       // init specs
-      const { specsStore, ctDevServerPort } = await this.openProject.initializeSpecStore(this.openProject.getConfig())
+      const { 
+        specsStore,
+        ctDevServerPort
+      } = await this.openProject.initializeSpecStore(this.openProject.getConfig(), { testingType: this.openProject.testingType })
 
       if (this.openProject.testingType === 'component') {
         this.openProject.updateConfig({ baseUrl: `http://localhost:${ctDevServerPort}` })

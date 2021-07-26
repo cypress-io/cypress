@@ -499,7 +499,7 @@ module.exports = {
     if (options.projectRoot) {
       projects.addProject({
         projectRoot: options.projectRoot,
-        testingType: options.testingType,
+        testingType: undefined, // should support setting default? with options.testingType
         isCurrent: true,
       })
     }

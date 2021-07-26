@@ -98,12 +98,14 @@ export interface NexusGenObjects {
   }
   Mutation: {};
   Project: { // root type
+    ctConfigured: boolean; // Boolean!
+    e2eConfigured: boolean; // Boolean!
     isCurrent: boolean; // Boolean!
     isOpen: boolean; // Boolean!
     plugins?: NexusGenRootTypes['InitStatus'] | null; // InitStatus
     projectRoot: string; // String!
     server?: NexusGenRootTypes['InitStatus'] | null; // InitStatus
-    testingType: NexusGenEnums['TestingType']; // TestingType!
+    testingType?: NexusGenEnums['TestingType'] | null; // TestingType
   }
   Query: {};
   Wizard: Wizard;
@@ -161,12 +163,14 @@ export interface NexusGenFieldTypes {
     setTestingType: NexusGenRootTypes['Project']; // Project!
   }
   Project: { // field return type
+    ctConfigured: boolean; // Boolean!
+    e2eConfigured: boolean; // Boolean!
     isCurrent: boolean; // Boolean!
     isOpen: boolean; // Boolean!
     plugins: NexusGenRootTypes['InitStatus'] | null; // InitStatus
     projectRoot: string; // String!
     server: NexusGenRootTypes['InitStatus'] | null; // InitStatus
-    testingType: NexusGenEnums['TestingType']; // TestingType!
+    testingType: NexusGenEnums['TestingType'] | null; // TestingType
   }
   Query: { // field return type
     app: NexusGenRootTypes['App'] | null; // App
@@ -222,6 +226,8 @@ export interface NexusGenFieldTypeNames {
     setTestingType: 'Project'
   }
   Project: { // field return type name
+    ctConfigured: 'Boolean'
+    e2eConfigured: 'Boolean'
     isCurrent: 'Boolean'
     isOpen: 'Boolean'
     plugins: 'InitStatus'

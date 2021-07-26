@@ -90,12 +90,14 @@ type Mutation {
 }
 
 type Project {
+  ctConfigured: Boolean!
+  e2eConfigured: Boolean!
   isCurrent: Boolean!
   isOpen: Boolean!
   plugins: InitStatus
   projectRoot: String!
   server: InitStatus
-  testingType: TestingType!
+  testingType: TestingType
 }
 
 type Query {

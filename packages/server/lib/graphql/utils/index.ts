@@ -9,6 +9,8 @@ export function formatProject (project: ProjectBase<any>): NexusGenFieldTypes['P
     plugins: project.pluginsStatus,
     isCurrent: project.id === projects.currentProjectId,
     server: project.serverStatus,
-    testingType: project.testingType,
+    testingType: project.testingType || null,
+    ctConfigured: true,
+    e2eConfigured: true
   }
 }
