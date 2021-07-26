@@ -99,7 +99,7 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('sets default window size in headless mode', function () {
+    it('sets default window size and DPR in headless mode', function () {
       chrome._writeExtension.restore()
 
       return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
@@ -108,7 +108,8 @@ describe('lib/browsers/chrome', () => {
 
         expect(args).to.include.members([
           '--headless',
-          '--window-size=1920,1080',
+          '--window-size=1280,720',
+          '--force-device-scale-factor=1',
         ])
       })
     })

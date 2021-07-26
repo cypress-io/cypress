@@ -1,12 +1,14 @@
 import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
 import $driverUtils from '@packages/driver/src/cypress/utils'
-import { eventManager } from '@packages/runner-shared'
+import { eventManager } from '../event-manager'
 
 const saveErrorMessage = (message) => {
   return `\
 ${message}\n\n\
 Cypress was unable to save these commands to your spec file. \
+You can use the copy button below to copy the commands to your clipboard. \
+\n
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
@@ -45,6 +47,8 @@ export class StudioRecorder {
   @observable _hasStarted = false
 
   fileDetails = null
+  absoluteFile = null
+  runnableTitle = null
   _currentId = 1
   _previousMouseEvent = null
 
@@ -76,6 +80,14 @@ export class StudioRecorder {
     return {
       id: this.testId,
       state: 'failed',
+    }
+  }
+
+  @computed get state () {
+    return {
+      testId: this.testId,
+      suiteId: this.suiteId,
+      url: this.url,
     }
   }
 
@@ -144,12 +156,69 @@ export class StudioRecorder {
     this.fileDetails = fileDetails
   }
 
+  setAbsoluteFile = (absoluteFile) => {
+    this.absoluteFile = absoluteFile
+  }
+
+  setRunnableTitle = (runnableTitle) => {
+    this.runnableTitle = runnableTitle
+  }
+
   _clearPreviousMouseEvent = () => {
     this._previousMouseEvent = null
   }
 
   _matchPreviousMouseEvent = (el) => {
     return this._previousMouseEvent && $(el).is(this._previousMouseEvent.element)
+  }
+
+  @action initialize = (config, state) => {
+    const { studio } = state
+
+    if (studio) {
+      if (studio.testId) {
+        this.setTestId(studio.testId)
+      }
+
+      if (studio.suiteId) {
+        this.setSuiteId(studio.suiteId)
+      }
+
+      if (studio.url) {
+        this.setUrl(studio.url)
+      }
+    }
+
+    if (this.hasRunnableId) {
+      this.setAbsoluteFile(config.spec.absolute)
+      this.startLoading()
+
+      if (this.suiteId) {
+        this.Cypress.runner.setOnlySuiteId(this.suiteId)
+      } else if (this.testId) {
+        this.Cypress.runner.setOnlyTestId(this.testId)
+      }
+    }
+  }
+
+  @action interceptTest = (test) => {
+    if (this.suiteId) {
+      this.setTestId(test.id)
+    }
+
+    if (this.hasRunnableId) {
+      if (test.invocationDetails) {
+        this.setFileDetails(test.invocationDetails)
+      }
+
+      if (this.suiteId) {
+        if (test.parent && test.parent.id !== 'r1') {
+          this.setRunnableTitle(test.parent.title)
+        }
+      } else {
+        this.setRunnableTitle(test.title)
+      }
+    }
   }
 
   @action start = (body) => {
@@ -202,8 +271,11 @@ export class StudioRecorder {
 
     eventManager.emit('studio:save', {
       fileDetails: this.fileDetails,
+      absoluteFile: this.absoluteFile,
+      runnableTitle: this.runnableTitle,
       commands: this.logs,
       isSuite: !!this.suiteId,
+      isRoot: this.suiteId === 'r1',
       testName,
     })
   }
@@ -259,6 +331,29 @@ export class StudioRecorder {
     })
 
     this._clearPreviousMouseEvent()
+  }
+
+  copyToClipboard = (commandsText) => {
+    // clipboard API is not supported without secure context
+    if (window.isSecureContext && navigator.clipboard) {
+      return navigator.clipboard.writeText(commandsText)
+    }
+
+    // fallback to creating invisible textarea
+    // create the textarea in our document rather than this._body
+    // as to not interfere with the app in the aut
+    const textArea = document.createElement('textarea')
+
+    textArea.value = commandsText
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = 0
+
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    textArea.remove()
+
+    return Promise.resolve()
   }
 
   _trustEvent = (event) => {

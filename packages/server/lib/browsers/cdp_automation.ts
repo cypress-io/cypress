@@ -179,7 +179,7 @@ export class CdpAutomation {
       originalResourceType: params.type,
     }
 
-    this.automation.onBrowserPreRequest(browserPreRequest)
+    this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {

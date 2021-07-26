@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@vue/test-utils": "^2.0.0-rc.4"
+    "@vue/test-utils": "^2.0.0-rc.9"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",

@@ -23,6 +23,8 @@
 
 ✅  Scaffold base Cypress files and directories
 
+✅  Provide the ability to add new e2e files easily using `ng-generate`
+
 ✅  Optional: prompt you to add or update the default `ng e2e` command to use Cypress.
 
 ## Usage ⏯
@@ -48,6 +50,12 @@ If you have chosen to add or update the `ng e2e` command, you can also run Cypre
 
 ```shell script
 ng e2e
+```
+
+To generate new e2e spec files:
+
+```shell script
+ng generate @cypress/schematic:e2e
 ```
 
 ## Builder Options 🛠
@@ -137,6 +145,36 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
 ```
 
 Read our docs to learn more about speeding up test execution in CI via [Cypress parallelization](https://on.cypress.io/parallelization)
+
+## Generator Options
+
+### Specify Filename (bypassing CLI prompt)
+
+In order to bypass the prompt asking for your e2e spec name, simply add a `--name=` flag like this:
+
+```shell script
+ng generate @cypress/schematic:e2e --name=login
+```
+
+This will create a new spec file named `login.spec.ts` in the default Cypress folder location.
+
+
+### Specify Project
+
+Add a `--project=` flag to specify the project:
+
+```shell script
+ng generate @cypress/schematic:e2e --name=login --project=sandbox
+```
+### Specify Path
+
+Add a `--path=` flag to specify the project:
+
+```shell script
+ng generate @cypress/schematic:e2e --name=login --path=src/app/tests
+```
+
+This will create the e2e spec file in your specific location, creating folders as needed.
 
 ## Migrating from Protractor to Cypress?
 

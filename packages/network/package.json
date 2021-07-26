@@ -17,7 +17,9 @@
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
     "debug": "4.3.2",
+    "fs-extra": "8.1.0",
     "lodash": "4.17.21",
+    "node-forge": "0.10.0",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
