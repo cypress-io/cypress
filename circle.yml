@@ -384,10 +384,6 @@ commands:
       browser:
         description: browser shortname to target
         type: string
-      percy:
-        description: enable percy
-        type: boolean
-        default: false
     steps:
       - restore_cached_workspace
       - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
