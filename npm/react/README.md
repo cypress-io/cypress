@@ -43,11 +43,11 @@ If you are coming from Enzyme world, check out the [enzyme](cypress/component/ba
 
 - [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/)
 - [Unit Testing React components with Cypress](https://itnext.io/unit-testing-react-components-with-cypress-4d4cf8cd59a0)
-- [Test React Component with @cypress/react Example](https://dev.to/bahmutov/test-react-component-with-@cypress/react-example-4d99)
+- [Test React Component with @cypress/react Example](https://dev.to/bahmutov/test-react-component-with-cypress-react-unit-test-example-4d99)
 - [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
 - [Using .env and .env.test from React component tests](https://medium.com/@bahmutov/using-env-and-env-test-from-react-component-tests-c11aa2040bc8)
 - [Visual testing for React components using open source tools](https://glebbahmutov.com/blog/open-source-visual-testing-of-components/)
-- [12 Recipes for testing React applications using @cypress/react](https://dev.to/bahmutov/12-recipes-for-testing-react-applications-using-@cypress/react-46g6) (compare to [12 Recipes for testing React applications using Testing Library](https://dev.to/jooforja/12-recipes-for-testing-react-applications-using-testing-library-1bh2#portal))
+- [12 Recipes for testing React applications using @cypress/react](https://dev.to/bahmutov/12-recipes-for-testing-react-applications-using-cypress-react-unit-test-46g6) (compare to [12 Recipes for testing React applications using Testing Library](https://dev.to/jooforja/12-recipes-for-testing-react-applications-using-testing-library-1bh2#portal))
 - [Cypress Unit Testing React Components With TypeScript](https://medium.com/swlh/cypress-unit-testing-react-components-with-typescript-77b38e5043b3)
 - [Test The Interface Not The Implementation](https://glebbahmutov.com/blog/test-the-interface/) compares Jest + React Testing Library to @cypress/react + Cypress Testing Library
 - [Components People Test](https://glebbahmutov.com/blog/components-people-test/) about testing a component inside a Next.js-powered blog

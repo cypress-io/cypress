@@ -138,6 +138,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
 
   record pass
+plugin stdout
     ✓ passes
     - is pending
 
