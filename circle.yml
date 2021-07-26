@@ -1159,7 +1159,6 @@ jobs:
     steps:
       - run-launchpad-integration-tests:
           browser: chrome
-          percy: true
 
   driver-integration-tests-chrome:
     <<: *defaults
