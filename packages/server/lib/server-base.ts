@@ -25,7 +25,7 @@ import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import { RunnerType, SpecsStore } from './specs-store'
+import { SpecsStore } from './specs-store'
 import { InitializeRoutes } from '../../server-ct/src/routes-ct'
 import { Cfg, ProjectBase } from './project-base'
 
@@ -94,7 +94,7 @@ export interface OpenServerOptions {
   project: ProjectBase<any>
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
-  testingType: RunnerType
+  testingType: Cypress.TestingType
   onError: any
   onWarning: any
   shouldCorrelatePreRequests: () => boolean
@@ -602,7 +602,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.httpsProxy.connect(req, socket, head)
   }
 
-  sendSpecList (specs: Cypress.Cypress['spec'][], testingType: RunnerType) {
+  sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
     return this.socket.sendSpecList(specs, testingType)
   }
 }

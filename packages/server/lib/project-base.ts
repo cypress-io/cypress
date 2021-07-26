@@ -28,7 +28,7 @@ import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
-import { RunnerType, SpecsStore } from './specs-store'
+import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
@@ -83,7 +83,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   private _recordTests?: any = null
 
   public browser: any
-  public testingType: RunnerType
+  public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
   projectRoot: string
@@ -94,7 +94,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     options,
   }: {
     projectRoot: string
-    testingType: RunnerType
+    testingType: Cypress.TestingType
     options: Options
   }) {
     super()
@@ -168,7 +168,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  createServer (testingType: RunnerType) {
+  createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
       ? new ServerE2E() as TServer
       : new ServerCt() as TServer
@@ -421,14 +421,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     specs: Cypress.Cypress['spec'][]
     config: any
   }) {
-    const specsStore = new SpecsStore(config, this.testingType as RunnerType)
+    const specsStore = new SpecsStore(config, this.testingType)
 
     const startSpecWatcher = () => {
       return specsStore.watch({
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          this.server.sendSpecList(specs, this.testingType as RunnerType)
+          this.server.sendSpecList(specs, this.testingType)
 
           if (this.testingType === 'component') {
           // ct uses the dev-server to build and bundle the speces.
