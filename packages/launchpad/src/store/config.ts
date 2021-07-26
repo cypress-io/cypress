@@ -40,12 +40,12 @@ export class StoreConfig {
     return readonly(this.state)
   }
 
-  setTestingType (testingType?: TestingType) {
-    this.state.testingType = testingType
-    if (testingType === 'component') {
-      this.storeApp.flagComponent()
-    }
-  }
+  // setTestingType (testingType?: TestingType) {
+  //   this.state.testingType = testingType
+  //   if (testingType === 'component') {
+  //     this.storeApp.flagComponent()
+  //   }
+  // }
 
   setComponentSetup (options: ComponentSetup) {
     this.state.component = options

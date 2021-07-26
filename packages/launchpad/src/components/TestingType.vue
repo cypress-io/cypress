@@ -17,7 +17,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
+import { NexusGenInputs } from '@packages/server/lib/graphql/gen/nxs.gen'
+import { useMutation } from "@vue/apollo-composable"
+import { gql } from '@apollo/client/core'
 import { TestingType, testingTypes } from "../utils/testingTypes";
 import { useStoreConfig } from "../store/config";
 import { useStoreApp } from "../store/app";
@@ -25,7 +28,27 @@ import { useStoreApp } from "../store/app";
 export default defineComponent({
   setup() {
     const storeApp = useStoreApp();
-    const storeConfig = useStoreConfig();
+    // const storeConfig = useStoreConfig();
+    const testingType = ref<Cypress.TestingType>('e2e')
+
+    const { mutate: setTestingType, loading, onDone } = useMutation(gql`
+      mutation setTestingType ($input: SetTestingTypeInput!) {
+        setTestingType (input: $input) {
+          projectRoot
+          testingType
+        }
+      }
+    `, () => ({
+      variables: {
+        input: {
+          testingType: testingType.value
+        }
+      }
+    }))
+
+    onDone(result => {
+      // console.log('Done!', result)
+    })
 
     onMounted(() => {
       storeApp.setMeta({
@@ -35,7 +58,9 @@ export default defineComponent({
     });
 
     const selectTestingType = (testingType: TestingType) => {
-      storeConfig.setTestingType(testingType);
+      console.log(testingType)
+      setTestingType({ input: { testingType } })
+      // storeConfig.setTestingType(testingType);
     };
 
     return { testingTypes, selectTestingType };
