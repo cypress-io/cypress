@@ -306,6 +306,11 @@ class RunsList extends Component {
     })
   }
 
+  _openRuns = (e) => {
+    e.preventDefault()
+    ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs`)
+  }
+
   _openRun = (buildNumber) => {
     ipc.externalOpen(`https://on.cypress.io/dashboard/projects/${this.props.project.id}/runs/${buildNumber}`)
   }

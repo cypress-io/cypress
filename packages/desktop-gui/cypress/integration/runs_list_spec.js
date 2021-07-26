@@ -852,34 +852,101 @@ describe('Runs List', function () {
         })
       })
 
-      it('displays empty message', () => {
-        cy.contains('How to record your first run')
-      })
+      context('a/b control group', function () {
+        beforeEach(function () {
+          this.getProjectStatus.resolve({
+            orgId: '0',
+          })
+        })
 
-      it('opens project id guide on clicking "Why?"', () => {
-        cy.contains('Why?').click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
+        it('displays empty message', () => {
+          cy.contains('To record your first run')
+          cy.percySnapshot()
+        })
+
+        it('opens project id guide on clicking "Why?"', () => {
+          cy.contains('Why?').click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/what-is-a-project-id' })
+          })
+        })
+
+        it('opens dashboard on clicking "Cypress Dashboard"', () => {
+          cy.contains('Cypress Dashboard').click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)
+          })
+        })
+
+        it('shows tooltip on hover of copy to clipboard', () => {
+          cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+          cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
+        })
+
+        it('copies record key command to clipboard', () => {
+          cy.get('#code-record-command').find('.action-copy').click()
+          .then(function () {
+            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+          })
         })
       })
 
-      it('opens dashboard on clicking "Cypress Dashboard"', () => {
-        cy.contains('Cypress Dashboard').click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)
+      context('a/b test group', function () {
+        beforeEach(function () {
+          this.getProjectStatus.resolve({
+            orgId: '1',
+          })
         })
-      })
 
-      it('shows tooltip on hover of copy to clipboard', () => {
-        cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
-        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
-        cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
-      })
+        it('displays empty message', () => {
+          cy.contains('How to record your first run')
+          cy.percySnapshot()
+        })
 
-      it('copies record key command to clipboard', () => {
-        cy.get('#code-record-command').find('.action-copy').click()
-        .then(function () {
-          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+        it('displays tooltip with project id info', () => {
+          cy.get('.help-text').eq(0).find('a').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'This helps Cypress uniquely identify your project')
+          .contains('Learn more').click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/what-is-a-project-id' })
+          })
+        })
+
+        it('displays tooltip with record run command info', () => {
+          cy.get('.help-text').eq(1).find('a').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Close this application and run this command')
+          .contains('Learn more').click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/recording-project-runs' })
+          })
+        })
+
+        it('shows tooltip on hover of copy to clipboard', () => {
+          cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+          cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
+        })
+
+        it('copies record key command to clipboard', () => {
+          cy.get('#code-record-command').find('.action-copy').click()
+          .then(function () {
+            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+          })
+        })
+
+        it('displays run in ci panel with link', () => {
+          cy.contains('Run in CI').parents('.panel').contains('Show me how').click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/ci' })
+          })
+        })
+
+        it('displays sample project panel with link', () => {
+          cy.contains('Sample Project').parents('.panel').contains('See the sample').click()
+          .then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWithMatch({ url: 'https://on.cypress.io/rwa-dashboard' })
+          })
         })
       })
     })

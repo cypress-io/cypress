@@ -7,17 +7,6 @@
   }
 }
 
-.cy-tooltip {
-  &.tooltip-text-left {
-    text-align: left;
-  }
-
-  .tooltip-code {
-    color: #fff;
-    background-color: #252831;
-  }
-}
-
 .empty-no-api-server {
   em {
     color: #333;
@@ -126,9 +115,8 @@
     grid-gap: 20px;
 
     .panel {
-      border: 1px solid rgba(0, 0, 0, .05);
-      border-radius: 4px;
-      box-shadow: 1px 3px 4px rgba(0, 0, 0, .1);
+      border: 1px solid #E5E5E5;
+      border-radius: 6px;
       display: flex;
       font-size: 13px;
       padding: 12px;
@@ -136,16 +124,16 @@
       p {
         margin-bottom: 0;
         text-align: left;
-
-        &.panel-content {
-          margin-bottom: 8px;
-        }
       }
 
       .panel-icon {
         color: $brand-primary;
         font-size: 18px;
         padding-right: 12px;
+
+        &.panel-icon-small {
+          font-size: 16px;
+        }
       }
     }
   }
