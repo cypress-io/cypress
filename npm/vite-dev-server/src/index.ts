@@ -2,7 +2,7 @@ import { debug as debugFn } from 'debug'
 import { start as createDevServer, StartDevServerOptions } from './startServer'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
-export { StartDevServerOptions as StartDevServer }
+export { StartDevServerOptions }
 
 type DoneCallback = () => unknown
 

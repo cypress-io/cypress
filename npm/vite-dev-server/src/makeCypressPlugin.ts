@@ -21,8 +21,12 @@ const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
-function getSpecsPathsSet (specs: Spec[], supportFilePath) {
-  return new Set<string>([...specs.map((spec) => spec.absolute), supportFilePath])
+function getSpecsPathsSet (specs: Spec[], supportFile?: string | null) {
+  return new Set<string>(
+    supportFile
+      ? [...specs.map((spec) => spec.absolute), supportFile]
+      : specs.map((spec) => spec.absolute),
+  )
 }
 
 interface Spec{
