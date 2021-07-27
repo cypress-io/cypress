@@ -23,4 +23,7 @@ export default defineConfig({
     }),
     WindiCSS(),
   ],
+  define: {
+    'process.env': {},
+  },
 })

@@ -5,7 +5,7 @@ const pDefer = require('p-defer')
 
 const watcher = chokidar.watch('packages/server/lib/graphql/**/*.{js,ts}', {
   cwd: path.join(__dirname, '..'),
-  ignored: '*.gen.ts',
+  ignored: '**/nxs.gen.ts',
   ignoreInitial: true,
 })
 

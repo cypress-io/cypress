@@ -1,5 +1,5 @@
-import { projects } from '../../projects'
-import { ProjectBase } from '../../project-base'
+// import { projects } from '../../projects'
+import type { ProjectBase } from '../../project-base'
 import { NexusGenFieldTypes } from '../gen/nxs.gen'
 
 export function formatProject (project: ProjectBase<any>): NexusGenFieldTypes['Project'] {

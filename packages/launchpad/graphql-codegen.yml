@@ -2,7 +2,7 @@ overwrite: true
 schema: '../server/schema.graphql'
 documents: 'src/**/*.vue'
 generates:
-  src/generated/graphql.tsx:
+  src/generated/graphql.ts:
     config:
       immutableTypes: true
       useTypeImports: true

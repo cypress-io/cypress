@@ -1,5 +1,5 @@
 import { inputObjectType, nonNull, mutationField, queryField } from 'nexus'
-import { projects } from '../../projects'
+// import { projects } from '../../projects'
 import { Project } from './types'
 import { formatProject } from '../utils'
 

@@ -5,8 +5,10 @@
  */
 
 
+import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
-import type { Wizard } from "./../entities/Wizard"
+import type { Wizard, WizardFrontendFramework, WizardBundler, WizardNpmPackage } from "./../entities/Wizard"
+import type { TestingType } from "./../entities/TestingType"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -47,7 +49,11 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "reactjs" | "vuecli" | "vuejs"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
+  SupportedBundlers: "vite" | "webpack"
+  TestingTypeEnum: "component" | "e2e"
+  WizardStep: "createConfig" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
 }
 
 export interface NexusGenScalars {
@@ -74,7 +80,11 @@ export interface NexusGenObjects {
     projectRoot: string; // String!
   }
   Query: {};
+  TestingType: TestingType;
   Wizard: Wizard;
+  WizardBundler: WizardBundler;
+  WizardFrontendFramework: WizardFrontendFramework;
+  WizardNpmPackage: WizardNpmPackage;
 }
 
 export interface NexusGenInterfaces {
@@ -90,6 +100,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 export interface NexusGenFieldTypes {
   App: { // field return type
     isFirstOpen: boolean; // Boolean!
+    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   InitPluginsStatus: { // field return type
     message: string | null; // String
@@ -98,6 +109,12 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
     initializePlugins: NexusGenRootTypes['Project']; // Project!
+    wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardNavigateBack: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetBundler: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetFramework: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetTestingType: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   Project: { // field return type
     isCurrent: boolean; // Boolean!
@@ -110,14 +127,38 @@ export interface NexusGenFieldTypes {
     openProject: NexusGenRootTypes['Project'] | null; // Project
     projects: Array<NexusGenRootTypes['Project'] | null>; // [Project]!
   }
+  TestingType: { // field return type
+    description: string | null; // String
+    id: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
+    title: string | null; // String
+  }
   Wizard: { // field return type
-    todo: boolean | null; // Boolean
+    allBundlers: Array<NexusGenRootTypes['WizardBundler'] | null> | null; // [WizardBundler]
+    frameworks: Array<NexusGenRootTypes['WizardFrontendFramework'] | null> | null; // [WizardFrontendFramework]
+    step: NexusGenEnums['WizardStep'] | null; // WizardStep
+    testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
+  }
+  WizardBundler: { // field return type
+    id: NexusGenEnums['SupportedBundlers'] | null; // SupportedBundlers
+    isOnlyOption: boolean | null; // Boolean
+    isSelected: boolean | null; // Boolean
+    name: string | null; // String
+  }
+  WizardFrontendFramework: { // field return type
+    name: NexusGenEnums['FrontendFramework'] | null; // FrontendFramework
+    packagesToInstall: Array<NexusGenRootTypes['WizardNpmPackage'] | null> | null; // [WizardNpmPackage]
+    supportedBundlers: Array<NexusGenRootTypes['WizardBundler'] | null> | null; // [WizardBundler]
+  }
+  WizardNpmPackage: { // field return type
+    description: string | null; // String
+    name: string | null; // String
   }
 }
 
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
     isFirstOpen: 'Boolean'
+    wizard: 'Wizard'
   }
   InitPluginsStatus: { // field return type name
     message: 'String'
@@ -126,6 +167,12 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     addProject: 'Project'
     initializePlugins: 'Project'
+    wizardInstallDependencies: 'Wizard'
+    wizardNavigateBack: 'Wizard'
+    wizardSetBundler: 'Wizard'
+    wizardSetFramework: 'Wizard'
+    wizardSetTestingType: 'Wizard'
+    wizardValidateManualInstall: 'Wizard'
   }
   Project: { // field return type name
     isCurrent: 'Boolean'
@@ -138,8 +185,31 @@ export interface NexusGenFieldTypeNames {
     openProject: 'Project'
     projects: 'Project'
   }
+  TestingType: { // field return type name
+    description: 'String'
+    id: 'TestingTypeEnum'
+    title: 'String'
+  }
   Wizard: { // field return type name
-    todo: 'Boolean'
+    allBundlers: 'WizardBundler'
+    frameworks: 'WizardFrontendFramework'
+    step: 'WizardStep'
+    testingType: 'TestingTypeEnum'
+  }
+  WizardBundler: { // field return type name
+    id: 'SupportedBundlers'
+    isOnlyOption: 'Boolean'
+    isSelected: 'Boolean'
+    name: 'String'
+  }
+  WizardFrontendFramework: { // field return type name
+    name: 'FrontendFramework'
+    packagesToInstall: 'WizardNpmPackage'
+    supportedBundlers: 'WizardBundler'
+  }
+  WizardNpmPackage: { // field return type name
+    description: 'String'
+    name: 'String'
   }
 }
 
@@ -147,6 +217,18 @@ export interface NexusGenArgTypes {
   Mutation: {
     addProject: { // args
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
+    }
+    wizardNavigateBack: { // args
+      type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+    wizardSetBundler: { // args
+      name?: NexusGenEnums['SupportedBundlers'] | null; // SupportedBundlers
+    }
+    wizardSetFramework: { // args
+      framework: NexusGenEnums['FrontendFramework']; // FrontendFramework!
+    }
+    wizardSetTestingType: { // args
+      type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     }
   }
 }
@@ -182,7 +264,7 @@ export type NexusGenFeaturesConfig = {
 }
 
 export interface NexusGenTypes {
-  context: any;
+  context: BaseContext;
   inputTypes: NexusGenInputs;
   rootTypes: NexusGenRootTypes;
   inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars;

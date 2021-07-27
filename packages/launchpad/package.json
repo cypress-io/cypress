@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "prebuild": "yarn codegen",
+    "prebuild": "node script/build-schema.js && yarn codegen",
     "build": "vite build",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
@@ -13,7 +13,7 @@
     "dev": "NODE_ENV=development LAUNCHPAD=1 yarn start-test 5050 cypress:open",
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
-    "watch": "yarn build --watch",
+    "watch": "concurrently \"vite build --watch\" \"yarn codegen --watch\"",
     "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
   "dependencies": {
@@ -33,9 +33,10 @@
     "@iconify/vue": "3.0.0-beta.1",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
-    "@vue/apollo-composable": "4.0.0-alpha.12",
+    "@vue/apollo-composable": "^4.0.0-alpha.14",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
+    "concurrently": "^6.2.0",
     "cross-env": "6.0.3",
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",

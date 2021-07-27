@@ -9,7 +9,7 @@ interface GraphQLResponseShape {
   result: any
 }
 
-export function initGraphQLipc () {
+export function initGraphQLIPC () {
   window.ipc.on('graphql:response', (event, obj: GraphQLResponseShape) => {
     const dfd = ipcInFlight.get(obj.id)
 

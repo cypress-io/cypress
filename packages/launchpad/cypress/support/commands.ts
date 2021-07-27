@@ -1,9 +1,9 @@
 import { mount } from '@cypress/vue'
 import { provideApolloClient } from '@vue/apollo-composable'
 import { createStoreApp, StoreApp } from '../../src/store/app'
-import { initGraphQLipc } from '../../src/graphql/graphqlIpc'
-import { apolloClient } from '../../src/graphql/apolloClient'
 import { createStoreConfig, StoreConfig } from '../../src/store/config'
+import { testApolloClient } from './testApolloClient'
+import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 
 /**
  * This variable is mimicing ipc provided by electron.
@@ -14,8 +14,6 @@ import { createStoreConfig, StoreConfig } from '../../src/store/config'
   on: () => {},
   send: () => {},
 }
-
-initGraphQLipc()
 
 Cypress.Commands.add(
   'mount',
@@ -32,9 +30,11 @@ Cypress.Commands.add(
     options.global.plugins = options.global.plugins || []
     options.global.plugins.push(storeApp)
     options.global.plugins.push(storeConfig)
-    options.global.plugins.push({ install (app) {
-      provideApolloClient(apolloClient)
-    } })
+    options.global.plugins.push({
+      install (app) {
+        provideApolloClient(testApolloClient(new ClientTestContext()))
+      },
+    })
 
     return mount(comp, options)
   },

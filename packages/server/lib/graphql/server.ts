@@ -5,14 +5,14 @@ import { Server } from 'http'
 import type { AddressInfo } from 'net'
 
 import { graphqlSchema } from './schema'
-import { ExecContext } from './ExecContext'
+import { ServerContext } from './context/ServerContext'
 
 const debug = Debug('cypress:server:graphql')
 
 let app: ReturnType<typeof express>
 let server: Server
 
-export function closeGraphQLServer () {
+export function closeGraphQLServer (): Promise<void | null> {
   if (!server || !server.listening) {
     return Promise.resolve(null)
   }
@@ -28,14 +28,14 @@ export function closeGraphQLServer () {
   })
 }
 
-export function startGraphQLServer () {
+export function startGraphQLServer (): {server: Server, app: Express.Application} {
   app = express()
 
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema: graphqlSchema,
       graphiql: true,
-      context: new ExecContext({}),
+      context: new ServerContext(),
     }
   }))
 

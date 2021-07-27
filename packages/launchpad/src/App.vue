@@ -6,8 +6,7 @@
 
 <script lang="ts">
 import { provideApolloClient } from '@vue/apollo-composable'
-import { initGraphQLipc } from './graphql/graphqlIpc'
-import { apolloClient } from './graphql/apolloClient'
+import { makeApolloClient } from './graphql/apolloClient'
 import { defineComponent } from "vue";
 import Layout from "./components/Layout.vue";
 import Wizard from "./components/Wizard.vue";
@@ -19,8 +18,7 @@ export default defineComponent({
     Wizard,
   },
   setup() {
-    initGraphQLipc()
-    provideApolloClient(apolloClient)
+    provideApolloClient(makeApolloClient())
   }
 });
 </script>

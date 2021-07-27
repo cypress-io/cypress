@@ -31,7 +31,7 @@ const api = require('../api')
 const savedState = require('../saved_state')
 const { graphqlSchema } = require('../graphql/schema')
 const { startGraphQLServer } = require('../graphql/server')
-const { ExecContext } = require('../graphql/ExecContext')
+const { ServerContext } = require('../graphql/context/ServerContext')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -511,7 +511,7 @@ module.exports = {
           document: parse(params.text),
           operationName: params.name,
           variableValues: variables,
-          contextValue: new ExecContext(options),
+          contextValue: new ServerContext(options),
         })
 
         evt.sender.send('graphql:response', {
