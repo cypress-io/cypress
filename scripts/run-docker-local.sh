@@ -13,7 +13,6 @@ echo "You should be able to edit files locally"
 echo "but execute the code in the container"
 
 docker run -v $PWD:/home/person/cypress \
-  --user 12345 \
   -w /home/person/cypress${WORKING_DIR:-} \
   -it $name \
   /bin/bash
