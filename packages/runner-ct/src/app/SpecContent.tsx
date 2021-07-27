@@ -62,7 +62,7 @@ export const SpecContent = namedObserver('SpecContent', (props: SpecContentProps
           },
         )}
         >
-          <Header {...props} runner='ct' />
+          <Header {...props} runner='component' />
           {props.state.spec
             ? <Iframes {...props} />
             : (

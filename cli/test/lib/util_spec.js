@@ -3,6 +3,7 @@ require('../spec_helper')
 const os = require('os')
 const tty = require('tty')
 const snapshot = require('../support/snapshot')
+const mockedEnv = require('mocked-env')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
 const hasha = require('hasha')
@@ -250,6 +251,27 @@ describe('util', () => {
         FORCE_STDIN_TTY: false,
         FORCE_STDOUT_TTY: false,
         FORCE_STDERR_TTY: false,
+      })
+    })
+  })
+
+  context('.getOriginalNodeOptions', () => {
+    let restoreEnv
+
+    afterEach(() => {
+      if (restoreEnv) {
+        restoreEnv()
+        restoreEnv = null
+      }
+    })
+
+    it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', () => {
+      restoreEnv = mockedEnv({
+        NODE_OPTIONS: '--require foo.js',
+      })
+
+      expect(util.getOriginalNodeOptions({})).to.deep.eq({
+        ORIGINAL_NODE_OPTIONS: '--require foo.js',
       })
     })
   })

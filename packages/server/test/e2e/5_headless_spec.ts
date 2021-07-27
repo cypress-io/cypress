@@ -84,4 +84,10 @@ describe('e2e headless', function () {
     project: Fixtures.projectPath('screen-size'),
     spec: 'default_size.spec.js',
   })
+
+  e2e.it('launches at DPR 1x', {
+    headed: false,
+    project: Fixtures.projectPath('screen-size'),
+    spec: 'device_pixel_ratio.spec.js',
+  })
 })

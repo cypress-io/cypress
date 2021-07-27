@@ -426,9 +426,13 @@ export = {
     if (isHeadless) {
       args.push('--headless')
 
-      // set default headless size to 1920x1080
+      // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
-      args.push('--window-size=1920,1080')
+      args.push('--window-size=1280,720')
+
+      // set default headless DPR to 1
+      // https://github.com/cypress-io/cypress/issues/17375
+      args.push('--force-device-scale-factor=1')
     }
 
     // force ipv4
