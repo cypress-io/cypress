@@ -383,6 +383,16 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           if (test) {
             const siblings = getAllSiblingTests(test.parent, getTestById)
 
+            const testIsActuallyInSuite = findTestInSuite(this.suite, (_test) => _test === test)
+
+            // we ensure the test actually belongs to this suite.
+            // the test may not belong to the suite when a suite is skipped
+            // due to already being run on top navigation
+            // https://github.com/cypress-io/cypress/issues/9026
+            if (!testIsActuallyInSuite) {
+              return
+            }
+
             // 1. if we're the very last test in the entire allTests
             //    we wait until the root suite fires
             // 2. else if we arent the last nested suite we fire if we're
