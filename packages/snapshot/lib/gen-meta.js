@@ -32,6 +32,7 @@ async function createMeta ({
  * the modules found inside the snapshot entry.
  *
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
+ * @return {Promise<Metadata>} metadata
  */
 module.exports = async function genMeta ({
   appEntryFile,
@@ -57,6 +58,8 @@ module.exports = async function genMeta ({
     logDebug('Written to', metaFile)
 
     logInfo('Done creating snapshot metadata')
+
+    return meta
   } catch (err) {
     logError(err)
     throw err

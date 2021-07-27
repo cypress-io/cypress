@@ -10,9 +10,10 @@ const { consolidateDeps } = require('./consolidate-deps')
 module.exports = async function setup (config) {
   consolidateDeps(config)
 
-  await genMeta(config)
+  const meta = await genMeta(config)
+
   await genEntry(config)
-  await installSnapshot(config)
+  await installSnapshot(config, meta.resolverMap)
 
   saveMetaFileToPrev(config)
 }

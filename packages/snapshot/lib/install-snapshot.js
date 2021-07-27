@@ -36,6 +36,7 @@ function getSnapshotGenerator ({
   snapshotEntryFile,
   snapshotMetaPrevFile,
   usePreviousSnapshotMetadata,
+  resolverMap,
 }) {
   const {
     previousNoRewrite,
@@ -55,6 +56,7 @@ function getSnapshotGenerator ({
     previousNoRewrite,
     minify: false,
     nodeModulesOnly,
+    resolverMap,
     forceNoRewrite: [
       // recursion due to process.emit overwrites which is incorrectly rewritten
       'signal-exit/index.js',
@@ -95,17 +97,20 @@ function getSnapshotGenerator ({
  *
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
  */
-module.exports = async function installSnapshot ({
-  cypressAppSnapshotDir,
-  nodeModulesOnly,
-  projectBaseDir,
-  snapshotCacheDir,
-  mksnapshotBin,
-  snapshotEntryFile,
-  snapshotMetaFile,
-  snapshotMetaPrevFile,
-  usePreviousSnapshotMetadata,
-}) {
+module.exports = async function installSnapshot (
+  {
+    cypressAppSnapshotDir,
+    nodeModulesOnly,
+    projectBaseDir,
+    snapshotCacheDir,
+    mksnapshotBin,
+    snapshotEntryFile,
+    snapshotMetaFile,
+    snapshotMetaPrevFile,
+    usePreviousSnapshotMetadata,
+  },
+  resolverMap,
+) {
   try {
     logInfo('Generating snapshot %o', {
       nodeModulesOnly,
@@ -121,11 +126,15 @@ module.exports = async function installSnapshot ({
       snapshotMetaFile,
       snapshotMetaPrevFile,
       usePreviousSnapshotMetadata,
+      resolverMap,
     })
 
     await snapshotGenerator.createScript()
     const { v8ContextFile } = await snapshotGenerator.makeSnapshot()
-    const cypressAppSnapshotFile = path.join(cypressAppSnapshotDir, v8ContextFile)
+    const cypressAppSnapshotFile = path.join(
+      cypressAppSnapshotDir,
+      v8ContextFile,
+    )
 
     // TODO(thlorenz): should we remove it or keep it for inspection, i.e. to verify it updated?
     await fs.copyFile(
