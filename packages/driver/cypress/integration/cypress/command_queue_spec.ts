@@ -25,20 +25,22 @@ describe('src/cypress/command_queue', () => {
   let queue
 
   beforeEach(() => {
-    queue = create([
-      createCommand({
-        name: 'get',
-        logs: [log({ name: 'l1', alias: 'alias-1' }), log({ name: 'l2', alias: 'alias-1' })],
-      }),
-      createCommand({
-        name: 'find',
-        logs: [log({ name: 'l3', alias: 'alias-2' })],
-      }),
-      createCommand({
-        name: 'click',
-        logs: [log({ name: 'l4', alias: 'alias-1' }), log({ name: 'l5', alias: 'alias-3' })],
-      }),
-    ])
+    queue = create(() => {})
+
+    queue.add(createCommand({
+      name: 'get',
+      logs: [log({ name: 'l1', alias: 'alias-1' }), log({ name: 'l2', alias: 'alias-1' })],
+    }))
+
+    queue.add(createCommand({
+      name: 'find',
+      logs: [log({ name: 'l3', alias: 'alias-2' })],
+    }))
+
+    queue.add(createCommand({
+      name: 'click',
+      logs: [log({ name: 'l4', alias: 'alias-1' }), log({ name: 'l5', alias: 'alias-3' })],
+    }))
   })
 
   context('#logs', () => {
@@ -115,20 +117,6 @@ describe('src/cypress/command_queue', () => {
       expect(command.get('next')).to.be.undefined
       expect(prev.get('next')).to.equal(command)
     })
-
-    it('throws when index is negative', () => {
-      expect(() => {
-        queue.insert(-1, createCommand({ name: 'eq' }))
-      })
-      .to.throw('commandQueue.insert must be called with a valid index - the index (-1) is out of bounds')
-    })
-
-    it('throws when index is out of bounds', () => {
-      expect(() => {
-        queue.insert(4, createCommand({ name: 'eq' }))
-      })
-      .to.throw('commandQueue.insert must be called with a valid index - the index (4) is out of bounds')
-    })
   })
 
   context('#slice', () => {
@@ -155,11 +143,28 @@ describe('src/cypress/command_queue', () => {
     })
   })
 
+  context('#reset', () => {
+    it('resets the queue stopped state', () => {
+      queue.reset()
+
+      expect(queue.stopped).to.be.false
+    })
+  })
+
   context('#clear', () => {
     it('removes all commands from queue', () => {
+      queue.stop()
       queue.clear()
 
       expect(queue.get().length).to.equal(0)
+    })
+  })
+
+  context('#stop', () => {
+    it('stops the queue', () => {
+      queue.stop()
+
+      expect(queue.stopped).to.be.true
     })
   })
 
@@ -168,6 +173,18 @@ describe('src/cypress/command_queue', () => {
       expect(queue.length).to.equal(3)
       queue.insert(0, createCommand({ name: 'eq' }))
       expect(queue.length).to.equal(4)
+    })
+  })
+
+  context('.stopped', () => {
+    it('is true when queue is stopped', () => {
+      queue.stop()
+
+      expect(queue.stopped).to.true
+    })
+
+    it('is false when queue is not stopped', () => {
+      expect(queue.stopped).to.false
     })
   })
 })

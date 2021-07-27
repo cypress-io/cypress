@@ -399,4 +399,12 @@ module.exports = {
       return String.fromCharCode(`0x${p1}`)
     }))
   },
+
+  noArgsAreAFunction (args) {
+    return !_.some(args, _.isFunction)
+  },
+
+  isPromiseLike (ret) {
+    return ret && _.isFunction(ret.then)
+  },
 }
