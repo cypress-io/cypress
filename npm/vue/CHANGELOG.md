@@ -1,5 +1,188 @@
-# [@cypress/vue-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.2...@cypress/vue-v2.2.3) (2021-05-11)
+# [@cypress/vue-v3.0.0-beta.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-beta.2...@cypress/vue-v3.0.0-beta.3) (2021-06-24)
 
+
+### Bug Fixes
+
+* bumps deps for npm/vue ([#17096](https://github.com/cypress-io/cypress/issues/17096)) ([96af8bf](https://github.com/cypress-io/cypress/commit/96af8bf29d69537af0c10c69b33a0a889edcaa37))
+
+# [@cypress/vue-v3.0.0-beta.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-beta.1...@cypress/vue-v3.0.0-beta.2) (2021-06-17)
+
+
+### Bug Fixes
+
+* add latest channel to properly release npm packages ([#16994](https://github.com/cypress-io/cypress/issues/16994)) ([ac16efc](https://github.com/cypress-io/cypress/commit/ac16efca80f33e12153b0c2bd0fc3f04983ed305))
+
+# [@cypress/vue-v3.0.0-beta.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.3...@cypress/vue-v3.0.0-beta.1) (2021-05-31)
+
+
+### Continuous Integration
+
+* deliver vue3 on master ([#16728](https://github.com/cypress-io/cypress/issues/16728)) ([0ee001f](https://github.com/cypress-io/cypress/commit/0ee001f6250604711653caf5365d8aca063a9cad)), closes [#15100](https://github.com/cypress-io/cypress/issues/15100)
+
+
+### BREAKING CHANGES
+
+* no support for vue 2 anymore
+
+* build: disable auto deliver of next vue
+
+* Revert "feat(vue): vue 3 support in @cypress/vue"
+
+This reverts commit 8f55d7baaff1f240677239ae5fdc4180c4a06475.
+
+* Revert "build: disable auto deliver of next vue"
+
+This reverts commit ed46c9e5c551e57901dbdc75db2e83bf194c4b18.
+
+* chore: release @cypress/vue-v1.1.0-alpha.1
+
+[skip ci]
+* dropped support for vue 2 in favor of vue 3
+
+* test: remove filter tests not relevant in vue 3
+
+* build: try publishing as a private new major
+
+* chore: release @cypress/vue-v3.0.0-alpha.1
+
+[skip ci]
+
+* chore: bring back access public
+
+* fix: update dependency to webpack dev server
+
+* chore: release @cypress/vue-v3.0.0-alpha.2
+
+[skip ci]
+
+* chore: remove unnecessary dependency
+
+* fix: mistreatment of monorepo dependency
+
+* chore: release @cypress/vue-v3.0.0-alpha.3
+
+[skip ci]
+
+* chore: release @cypress/vue-v3.0.0-alpha.4
+
+[skip ci]
+
+* fix: use __cy_root at the root element
+
+* build: avoid using array spread (tslib imports issue)
+
+* fix: setup for cypress vue tests
+
+* fix: add cleanup event
+
+* test: make sure we use the right build of compiler
+
+* chore: downgrade VTU to rc-1
+
+* chore: release @cypress/vue-v3.0.0
+
+[skip ci]
+
+* chore: upgrade vue version to 3.0.11
+
+* fix: adjust optional peer deps
+
+* fix: allow fo any VTU 2 version using ^
+
+* test: ignore nuxt example
+
+* test: update yarn lock on vue cli
+
+* chore: release @cypress/vue-v3.0.1
+
+[skip ci]
+
+* ci: release vue@next on master
+
+* test: fix vue3 examples
+
+* ci: open only needed server in circle npm-vue
+
+Co-authored-by: semantic-release-bot <semantic-release-bot@martynus.net>
+Co-authored-by: Lachlan Miller <lachlan.miller.1990@outlook.com>
+
+# [@cypress/vue-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0...@cypress/vue-v3.0.1) (2021-04-08)
+
+### Bug Fixes
+
+* adjust optional peer deps ([735d61d](https://github.com/cypress-io/cypress/commit/735d61d15a34c04729bff692861faad2dc1b6a35))
+* allow fo any VTU 2 version using ^ ([a1da052](https://github.com/cypress-io/cypress/commit/a1da0520651eaa1d83db96fe9d692b28ad2fc727))
+
+# [@cypress/vue-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.0...@cypress/vue-v3.0.0) (2021-04-07)
+
+
+### Bug Fixes
+
+* add cleanup event ([cf51935](https://github.com/cypress-io/cypress/commit/cf51935bf5a49594b012e9a6bd9cabe983fbe500))
+* mistreatment of monorepo dependency ([a21afb2](https://github.com/cypress-io/cypress/commit/a21afb2f2204debd191586bcb250bb64ecbdfd25))
+* setup for cypress vue tests ([c27dc77](https://github.com/cypress-io/cypress/commit/c27dc77ecdb9b33c68737db690432e0418181286))
+* update dependency to webpack dev server ([717ea3a](https://github.com/cypress-io/cypress/commit/717ea3a628c26743a9fe8868e01291ad6b8c0977))
+* use __cy_root at the root element ([9cf102a](https://github.com/cypress-io/cypress/commit/9cf102ad6248a90a91ca766e2ff9267db0f208fa))
+
+
+### Features
+
+* vue3 support for @cypress/vue ([#15100](https://github.com/cypress-io/cypress/issues/15100)) ([71e85a0](https://github.com/cypress-io/cypress/commit/71e85a03682d577344e705548b5350ec84c29382))
+
+
+### Reverts
+
+* Revert "feat(vue): vue 3 support in @cypress/vue" ([53fc995](https://github.com/cypress-io/cypress/commit/53fc9958d111a8e60c6dcd873c9d89666c86dfc8))
+
+
+### BREAKING CHANGES
+
+* dropped support for vue 2 in favor of vue 3
+
+* test: remove filter tests not relevant in vue 3
+
+# [@cypress/vue-v3.0.0-alpha.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.3...@cypress/vue-v3.0.0-alpha.4) (2021-03-10)
+
+
+### Bug Fixes
+
+* **component-testing:** video recording for single browser session mode ([#15328](https://github.com/cypress-io/cypress/issues/15328)) ([cce08d2](https://github.com/cypress-io/cypress/commit/cce08d23b781b219635d43419e5b6177927e1ba5))
+
+# [@cypress/vue-v3.0.0-alpha.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.2...@cypress/vue-v3.0.0-alpha.3) (2021-02-24)
+
+
+### Bug Fixes
+
+* mistreatment of monorepo dependency ([a21afb2](https://github.com/cypress-io/cypress/commit/a21afb2f2204debd191586bcb250bb64ecbdfd25))
+
+# [@cypress/vue-v3.0.0-alpha.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-alpha.1...@cypress/vue-v3.0.0-alpha.2) (2021-02-24)
+
+
+### Bug Fixes
+
+* make webpack-dev-server a peer dependency ([#15163](https://github.com/cypress-io/cypress/issues/15163)) ([fa969fb](https://github.com/cypress-io/cypress/commit/fa969fba78d86494b5d920f573768677301fad13))
+* update dependency to webpack dev server ([717ea3a](https://github.com/cypress-io/cypress/commit/717ea3a628c26743a9fe8868e01291ad6b8c0977))
+
+# [@cypress/vue-v3.0.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.0.1...@cypress/vue-v3.0.0-alpha.1) (2021-02-18)
+
+
+### Features
+
+* vue3 support for @cypress/vue ([#15100](https://github.com/cypress-io/cypress/issues/15100)) ([71e85a0](https://github.com/cypress-io/cypress/commit/71e85a03682d577344e705548b5350ec84c29382))
+
+
+### Reverts
+
+* Revert "feat(vue): vue 3 support in @cypress/vue" ([53fc995](https://github.com/cypress-io/cypress/commit/53fc9958d111a8e60c6dcd873c9d89666c86dfc8))
+
+
+### BREAKING CHANGES
+
+* dropped support for vue 2 in favor of vue 3
+
+* test: remove filter tests not relevant in vue 3
+
+# [@cypress/vue-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.2...@cypress/vue-v2.2.3) (2021-05-11)
 
 ### Bug Fixes
 
@@ -7,15 +190,9 @@
 
 # [@cypress/vue-v2.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.1...@cypress/vue-v2.2.2) (2021-05-05)
 
-
-### Bug Fixes
-
 * accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([500cab9](https://github.com/cypress-io/cypress/commit/500cab95ef7a7d6b74b366ba8066bcf73f2955aa))
 
 # [@cypress/vue-v2.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.0...@cypress/vue-v2.2.1) (2021-04-21)
-
-
-### Bug Fixes
 
 * improve handling of userland injected styles in component testing ([#16024](https://github.com/cypress-io/cypress/issues/16024)) ([fe0b63c](https://github.com/cypress-io/cypress/commit/fe0b63c299947470c9cdce3a0d00364a1e224bdb))
 

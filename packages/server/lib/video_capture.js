@@ -155,18 +155,21 @@ module.exports = {
         return
       }
 
-      if (lengths[data.length]) {
+      if (options.webmInput) {
+        if (lengths[data.length]) {
         // this prevents multiple chunks of webm metadata from being written to the stream
         // which would crash ffmpeg
-        debugFrames('duplicate length frame received:', data.length)
+          debugFrames('duplicate length frame received:', data.length)
 
-        return
+          return
+        }
+
+        lengths[data.length] = true
       }
 
       writtenChunksCount++
 
       debugFrames('writing video frame')
-      lengths[data.length] = true
 
       if (wantsWrite) {
         if (!(wantsWrite = pt.write(data))) {

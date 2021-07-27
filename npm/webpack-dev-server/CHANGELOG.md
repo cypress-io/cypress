@@ -1,3 +1,25 @@
+# [@cypress/webpack-dev-server-v1.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.3.1...@cypress/webpack-dev-server-v1.4.0) (2021-06-17)
+
+
+### Features
+
+* **npm/webpack-dev-server,runner-ct:** Normalize webpack errors + general React/TS improvements ([#16613](https://github.com/cypress-io/cypress/issues/16613)) ([c0fc23a](https://github.com/cypress-io/cypress/commit/c0fc23a052e53354a8300dd3f783cb161ae161e1))
+
+# [@cypress/webpack-dev-server-v1.3.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.3.0...@cypress/webpack-dev-server-v1.3.1) (2021-05-26)
+
+
+### Bug Fixes
+
+* encodeURI to correctly load specs with white space ([#16416](https://github.com/cypress-io/cypress/issues/16416)) ([116fe64](https://github.com/cypress-io/cypress/commit/116fe649d74e54da9dd84bf126f08f4b9162c5d3))
+* Properly typecheck webpack-dev-server and fix several undefined issues ([#16503](https://github.com/cypress-io/cypress/issues/16503)) ([4bb1ecd](https://github.com/cypress-io/cypress/commit/4bb1ecd077fc3724e6c127982f98e1e6b0f1bb98))
+
+# [@cypress/webpack-dev-server-v1.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.2.0...@cypress/webpack-dev-server-v1.3.0) (2021-05-13)
+
+
+### Features
+
+* support webpack dev server v4 ([#16414](https://github.com/cypress-io/cypress/issues/16414)) ([0cea625](https://github.com/cypress-io/cypress/commit/0cea625f359ef554e87600ef7e7c3afa4e36da4d))
+
 # [@cypress/webpack-dev-server-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.1.6...@cypress/webpack-dev-server-v1.2.0) (2021-05-11)
 
 

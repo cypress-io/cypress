@@ -1,3 +1,67 @@
+# [@cypress/schematic-v1.5.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.2...@cypress/schematic-v1.5.0) (2021-07-20)
+
+
+### Features
+
+* **cypress/schematic:** add reporter and reporter-options to builder schematic ([#17353](https://github.com/cypress-io/cypress/issues/17353)) ([b7783e6](https://github.com/cypress-io/cypress/commit/b7783e627be23120c0944eb3f186ed54256a9c93))
+
+# [@cypress/schematic-v1.4.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.1...@cypress/schematic-v1.4.2) (2021-06-29)
+
+
+### Bug Fixes
+
+* plugin file referenced by cypress config in angular schematics ([#17143](https://github.com/cypress-io/cypress/issues/17143)) ([5c2efc7](https://github.com/cypress-io/cypress/commit/5c2efc750779b75792b579b3196c8cb8af1f72f9))
+
+# [@cypress/schematic-v1.4.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.4.0...@cypress/schematic-v1.4.1) (2021-06-29)
+
+
+### Bug Fixes
+
+* plugin file in angular schematics ([#17141](https://github.com/cypress-io/cypress/issues/17141)) ([7b4d694](https://github.com/cypress-io/cypress/commit/7b4d69430368e87108310aa5e592786a32104561))
+
+# [@cypress/schematic-v1.4.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.3.1...@cypress/schematic-v1.4.0) (2021-06-25)
+
+
+### Features
+
+* add ng generate to @cypress/schematic to generate e2e spec files ([#16962](https://github.com/cypress-io/cypress/issues/16962)) ([96a9db4](https://github.com/cypress-io/cypress/commit/96a9db4204f50a7605a5e51d51584d27aa9df164))
+
+# [@cypress/schematic-v1.3.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.3.0...@cypress/schematic-v1.3.1) (2021-06-17)
+
+
+### Bug Fixes
+
+* ensure schematic is installed as devDependency ([#16965](https://github.com/cypress-io/cypress/issues/16965)) ([b49fcaf](https://github.com/cypress-io/cypress/commit/b49fcaf9cfc929313ed681248f6ca9c0a0bdf8c5))
+* **angular:** set rxjs versions > 6.6.0 as dependency ([#16676](https://github.com/cypress-io/cypress/issues/16676)) ([46de81e](https://github.com/cypress-io/cypress/commit/46de81e75fd18bc37cb884e9a751106fff4d08ad))
+
+# [@cypress/schematic-v1.3.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.2.0...@cypress/schematic-v1.3.0) (2021-05-26)
+
+
+### Features
+
+* update @cypress/schematic to NOT remove e2e folder or dependencies.  ([#16692](https://github.com/cypress-io/cypress/issues/16692)) ([8b5bad0](https://github.com/cypress-io/cypress/commit/8b5bad096574128ea405d9cd8ffee1457fc0f595))
+
+# [@cypress/schematic-v1.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.1.0...@cypress/schematic-v1.2.0) (2021-05-21)
+
+
+### Features
+
+* schematic adds ng e2e to scripts ([#16565](https://github.com/cypress-io/cypress/issues/16565)) ([fd012e2](https://github.com/cypress-io/cypress/commit/fd012e2113f91fb1a9afba36ff55def756d14edb))
+
+# [@cypress/schematic-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.3...@cypress/schematic-v1.1.0) (2021-05-17)
+
+
+### Features
+
+* update angular schematic and sandbox to v12 ([#16534](https://github.com/cypress-io/cypress/issues/16534)) ([278006d](https://github.com/cypress-io/cypress/commit/278006d061df27684bbdd7f5a65229902870b551))
+
+# [@cypress/schematic-v1.0.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.2...@cypress/schematic-v1.0.3) (2021-05-13)
+
+
+### Bug Fixes
+
+* angular schematic readme update. add check to make sure e2e folder exists to avoid deletion error. ([#16506](https://github.com/cypress-io/cypress/issues/16506)) ([ae33b5c](https://github.com/cypress-io/cypress/commit/ae33b5c449e7009a6b1e8f9ef71a47fea435a87f))
+
 # [@cypress/schematic-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v1.0.1...@cypress/schematic-v1.0.2) (2021-05-12)
 
 

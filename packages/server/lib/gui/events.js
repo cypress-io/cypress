@@ -16,7 +16,8 @@ const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
-const { ProjectBase } = require('../project-base')
+const ProjectStatic = require('../project_static')
+
 const openProject = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
@@ -25,6 +26,7 @@ const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
+const savedState = require('../saved_state')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -235,37 +237,37 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return send(null)
 
     case 'get:orgs':
-      return ProjectBase.getOrgs()
+      return ProjectStatic.getOrgs()
       .then(send)
       .catch(sendErr)
 
     case 'get:projects':
-      return ProjectBase.getPathsAndIds()
+      return ProjectStatic.getPathsAndIds()
       .then(send)
       .catch(sendErr)
 
     case 'get:project:statuses':
-      return ProjectBase.getProjectStatuses(arg)
+      return ProjectStatic.getProjectStatuses(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:project:status':
-      return ProjectBase.getProjectStatus(arg)
+      return ProjectStatic.getProjectStatus(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:dashboard:projects':
-      return ProjectBase.getDashboardProjects()
+      return ProjectStatic.getDashboardProjects()
       .then(send)
       .catch(sendErr)
 
     case 'add:project':
-      return ProjectBase.add(arg, options)
+      return ProjectStatic.add(arg, options)
       .then(send)
       .catch(sendErr)
 
     case 'remove:project':
-      return ProjectBase.remove(arg)
+      return ProjectStatic.remove(arg)
       .then(() => {
         return send(arg)
       })
@@ -330,12 +332,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'setup:dashboard:project':
-      return openProject.createCiProject(arg)
+      return ProjectStatic.createCiProject(arg, options.projectRoot)
       .then(send)
       .catch(sendErr)
 
     case 'set:project:id':
-      return openProject.writeProjectId(arg)
+      return ProjectStatic.writeProjectId(arg, options.projectRoot)
       .then(send)
       .catch(sendErr)
 
@@ -392,9 +394,41 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return sendErr(err)
       })
 
-    case 'onboarding:closed':
+    case 'new:project:banner:closed':
       return openProject.getProject()
-      .saveState({ showedOnBoardingModal: true })
+      .saveState({ showedNewProjectBanner: true })
+      .then(sendNull)
+
+    case 'has:opened:cypress':
+      return savedState.create()
+      .then(async (state) => {
+        const currentState = await state.get()
+
+        // we check if there is any state at all so users existing before
+        // we added firstOpenedCypress are not marked as new
+        const hasOpenedCypress = !!Object.keys(currentState).length
+
+        if (!currentState.firstOpenedCypress) {
+          await state.set('firstOpenedCypress', Date.now())
+        }
+
+        return hasOpenedCypress
+      })
+      .then(send)
+
+    case 'remove:scaffolded:files':
+      return openProject.getProject()
+      .removeScaffoldedFiles()
+      .then(sendNull)
+
+    case 'set:prompt:shown':
+      return openProject.getProject()
+      .saveState({
+        promptsShown: {
+          ...openProject.getProject().state.promptsShown,
+          [arg]: Date.now(),
+        },
+      })
       .then(sendNull)
 
     case 'ping:api:server':

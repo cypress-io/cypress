@@ -41,11 +41,11 @@ class RunsList extends Component {
   componentDidMount () {
     this._pingApiServer()
     this._handlePolling()
-    this._getKey()
+    this._getRecordKeys()
   }
 
   componentDidUpdate () {
-    this._getKey()
+    this._getRecordKeys()
     this._handlePolling()
   }
 
@@ -106,7 +106,7 @@ class RunsList extends Component {
     runsApi.stopPollingRuns()
   }
 
-  _getKey () {
+  _getRecordKeys () {
     if (this._needsKey()) {
       projectsApi.getRecordKeys().then((keys = []) => {
         if (keys.length) {

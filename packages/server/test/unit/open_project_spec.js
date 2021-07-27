@@ -1,11 +1,15 @@
 require('../spec_helper')
 
+const path = require('path')
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
-const { ProjectE2E } = require(`${root}lib/project-e2e`)
+const ProjectBase = require(`${root}lib/project-base`).ProjectBase
 const openProject = require(`${root}lib/open_project`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const runEvents = require(`${root}lib/plugins/run_events`)
+const Fixtures = require('../test/../support/helpers/fixtures')
+
+const todosPath = Fixtures.projectPath('todos')
 
 describe('lib/open_project', () => {
   beforeEach(function () {
@@ -23,18 +27,27 @@ describe('lib/open_project', () => {
 
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
-    sinon.stub(ProjectE2E.prototype, 'open').resolves()
-    sinon.stub(ProjectE2E.prototype, 'reset').resolves()
-    sinon.stub(ProjectE2E.prototype, 'getSpecUrl').resolves()
-    sinon.stub(ProjectE2E.prototype, 'getConfig').resolves(this.config)
-    sinon.stub(ProjectE2E.prototype, 'getAutomation').returns(this.automation)
+    sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
+    sinon.stub(ProjectBase.prototype, 'open').resolves()
+    sinon.stub(ProjectBase.prototype, 'reset').resolves()
+    sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
+    sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
     openProject.create('/project/root')
   })
 
   context('#launch', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
+      await openProject.create('/root')
+      openProject.getProject().__setConfig({
+        browserUrl: 'http://localhost:8888/__/',
+        componentFolder: path.join(todosPath, 'component'),
+        integrationFolder: path.join(todosPath, 'tests'),
+        projectRoot: todosPath,
+        specType: 'integration',
+      })
+
       openProject.getProject().options = {}
 
       this.spec = {
@@ -77,7 +90,7 @@ describe('lib/open_project', () => {
     it('calls project.reset on launch', function () {
       return openProject.launch(this.browser, this.spec)
       .then(() => {
-        expect(ProjectE2E.prototype.reset).to.be.called
+        expect(ProjectBase.prototype.reset).to.be.called
       })
     })
 

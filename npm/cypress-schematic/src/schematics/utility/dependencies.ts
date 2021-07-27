@@ -8,7 +8,7 @@
  */
 
 import { Tree } from '@angular-devkit/schematics'
-import { JSONFile } from './json-file'
+import { JSONFile } from './jsonFile'
 
 const PKG_JSON_PATH = '/package.json'
 

@@ -1,3 +1,111 @@
+# [@cypress/vite-dev-server-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.1...@cypress/vite-dev-server-v2.0.2) (2021-07-15)
+
+
+### Bug Fixes
+
+* **vite:** autorefresh new spec files ([#17270](https://github.com/cypress-io/cypress/issues/17270)) ([99f9352](https://github.com/cypress-io/cypress/commit/99f93528c87b22656d4d732dfb2ed6843991d861))
+
+# [@cypress/vite-dev-server-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.0...@cypress/vite-dev-server-v2.0.1) (2021-06-18)
+
+
+### Bug Fixes
+
+* vite startDevServer needs to return close() ([#16950](https://github.com/cypress-io/cypress/issues/16950)) ([67b2b3b](https://github.com/cypress-io/cypress/commit/67b2b3b9be13437e56384e377c7d32c6e433e064))
+
+# [@cypress/vite-dev-server-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.7...@cypress/vite-dev-server-v2.0.0) (2021-05-31)
+
+
+### Continuous Integration
+
+* deliver vue3 on master ([#16728](https://github.com/cypress-io/cypress/issues/16728)) ([0ee001f](https://github.com/cypress-io/cypress/commit/0ee001f6250604711653caf5365d8aca063a9cad)), closes [#15100](https://github.com/cypress-io/cypress/issues/15100)
+
+
+### BREAKING CHANGES
+
+* no support for vue 2 anymore
+
+* build: disable auto deliver of next vue
+
+* Revert "feat(vue): vue 3 support in @cypress/vue"
+
+This reverts commit 8f55d7baaff1f240677239ae5fdc4180c4a06475.
+
+* Revert "build: disable auto deliver of next vue"
+
+This reverts commit ed46c9e5c551e57901dbdc75db2e83bf194c4b18.
+
+* chore: release @cypress/vue-v1.1.0-alpha.1
+
+[skip ci]
+* dropped support for vue 2 in favor of vue 3
+
+* test: remove filter tests not relevant in vue 3
+
+* build: try publishing as a private new major
+
+* chore: release @cypress/vue-v3.0.0-alpha.1
+
+[skip ci]
+
+* chore: bring back access public
+
+* fix: update dependency to webpack dev server
+
+* chore: release @cypress/vue-v3.0.0-alpha.2
+
+[skip ci]
+
+* chore: remove unnecessary dependency
+
+* fix: mistreatment of monorepo dependency
+
+* chore: release @cypress/vue-v3.0.0-alpha.3
+
+[skip ci]
+
+* chore: release @cypress/vue-v3.0.0-alpha.4
+
+[skip ci]
+
+* fix: use __cy_root at the root element
+
+* build: avoid using array spread (tslib imports issue)
+
+* fix: setup for cypress vue tests
+
+* fix: add cleanup event
+
+* test: make sure we use the right build of compiler
+
+* chore: downgrade VTU to rc-1
+
+* chore: release @cypress/vue-v3.0.0
+
+[skip ci]
+
+* chore: upgrade vue version to 3.0.11
+
+* fix: adjust optional peer deps
+
+* fix: allow fo any VTU 2 version using ^
+
+* test: ignore nuxt example
+
+* test: update yarn lock on vue cli
+
+* chore: release @cypress/vue-v3.0.1
+
+[skip ci]
+
+* ci: release vue@next on master
+
+* test: fix vue3 examples
+
+* ci: open only needed server in circle npm-vue
+
+Co-authored-by: semantic-release-bot <semantic-release-bot@martynus.net>
+Co-authored-by: Lachlan Miller <lachlan.miller.1990@outlook.com>
+
 # [@cypress/vite-dev-server-v1.2.7](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v1.2.6...@cypress/vite-dev-server-v1.2.7) (2021-05-11)
 
 

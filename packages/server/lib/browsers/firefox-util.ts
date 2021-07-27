@@ -6,6 +6,8 @@ import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
+import { CdpAutomation } from './cdp_automation'
+import * as CriClient from './cri-client'
 
 const errors = require('../errors')
 
@@ -17,6 +19,12 @@ let timings = {
   gc: [] as any[],
   cc: [] as any[],
   collections: [] as any[],
+}
+
+let driver
+
+const sendMarionette = (data) => {
+  return driver.send(new Command(data))
 }
 
 const getTabId = (tab) => {
@@ -93,6 +101,13 @@ const attachToTabMemory = Bluebird.method((tab) => {
   })
 })
 
+async function setupRemote (remotePort, automation, onError) {
+  const wsUrl = await protocol.getWsTargetFor(remotePort, 'Firefox')
+  const criClient = await CriClient.create(wsUrl, onError)
+
+  new CdpAutomation(criClient.send, criClient.on, automation)
+}
+
 const logGcDetails = () => {
   const reducedTimings = {
     ...timings,
@@ -158,14 +173,18 @@ export default {
   },
 
   setup ({
+    automation,
     extensions,
+    onError,
     url,
     marionettePort,
     foxdriverPort,
+    remotePort,
   }) {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
       this.setupMarionette(extensions, url, marionettePort),
+      remotePort && setupRemote(remotePort, automation, onError),
     ])
   },
 
@@ -241,14 +260,10 @@ export default {
       getDelayMsForRetry,
     })
 
-    const driver = new Marionette.Drivers.Promises({
+    driver = new Marionette.Drivers.Promises({
       port,
       tries: 1, // marionette-client has its own retry logic which we want to avoid
     })
-
-    const sendMarionette = (data) => {
-      return driver.send(new Command(data))
-    }
 
     debug('firefox: navigating page with webdriver')
 
@@ -301,5 +316,20 @@ export default {
 
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
+  },
+
+  async windowFocus () {
+  // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+  // this is critical for headless mode since otherwise the browser never gains focus
+    return sendMarionette({
+      name: 'WebDriver:ExecuteScript',
+      parameters: {
+        'args': [],
+        'script': `return (() => {
+        top.focus()
+      }).apply(null, arguments)\
+      `,
+      },
+    })
   },
 }

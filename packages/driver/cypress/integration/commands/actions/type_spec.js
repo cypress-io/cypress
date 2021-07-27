@@ -639,6 +639,16 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('delay', () => {
+    it('adds default delay to delta for each key sequence', () => {
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}')
+      .then(() => {
+        expect(cy.timeout).to.be.calledWith(10 * 8, true, 'type')
+      })
+    })
+
     it('adds delay to delta for each key sequence', () => {
       cy.spy(cy, 'timeout')
 
@@ -666,6 +676,72 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       cy.get(':text:first').type('foo{enter}bar{leftarrow}')
+    })
+
+    it('test config keystrokeDelay overrides global value', { keystrokeDelay: 5 }, () => {
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}')
+      .then(() => {
+        expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
+      })
+    })
+
+    it('delay will override default keystrokeDelay', () => {
+      Cypress.Keyboard.defaults({
+        keystrokeDelay: 20,
+      })
+
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}', { delay: 5 })
+      .then(() => {
+        expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
+
+        Cypress.Keyboard.reset()
+      })
+    })
+
+    it('delay will override test config keystrokeDelay', { keystrokeDelay: 1000 }, () => {
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}', { delay: 5 })
+      .then(() => {
+        expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
+      })
+    })
+
+    it('does not increase the timeout delta when delay is 0', () => {
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first').type('foo{enter}', { delay: 0 }).then(() => {
+        expect(cy.timeout).not.to.be.calledWith(0, true, 'type')
+      })
+    })
+
+    describe('errors', () => {
+      it('throws when delay is invalid', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('`cy.type()` `delay` option must be 0 (zero) or a positive number. You passed: `false`')
+          expect(err.docsUrl).to.equal('https://on.cypress.io/type')
+          done()
+        })
+
+        cy.get(':text:first').type('foo', { delay: false })
+      })
+
+      it('throws when test config keystrokeDelay is invalid', { keystrokeDelay: false }, (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('The test configuration `keystrokeDelay` option must be 0 (zero) or a positive number. You passed: `false`')
+          expect(err.docsUrl).to.equal('https://on.cypress.io/test-configuration')
+          done()
+        })
+
+        cy.get(':text:first').type('foo')
+      })
     })
   })
 

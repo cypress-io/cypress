@@ -66,12 +66,13 @@ describe('lib/browsers/chrome', () => {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.criClient.send.callCount).to.equal(4)
+        expect(this.criClient.send.callCount).to.equal(5)
         expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
 
         expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.criClient.send).to.have.been.calledWith('Page.enable')
         expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
+        expect(this.criClient.send).to.have.been.calledWith('Network.enable')
       })
     })
 
@@ -98,7 +99,7 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('sets default window size in headless mode', function () {
+    it('sets default window size and DPR in headless mode', function () {
       chrome._writeExtension.restore()
 
       return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
@@ -107,7 +108,8 @@ describe('lib/browsers/chrome', () => {
 
         expect(args).to.include.members([
           '--headless',
-          '--window-size=1920,1080',
+          '--window-size=1280,720',
+          '--force-device-scale-factor=1',
         ])
       })
     })

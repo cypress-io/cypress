@@ -364,6 +364,8 @@ export class SocketBase {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
+            case 'firefox:window:focus':
+              return firefoxUtil.windowFocus()
             case 'get:fixture':
               return getFixture(args[0], args[1])
             case 'read:file':
@@ -479,5 +481,9 @@ export class SocketBase {
 
   close () {
     return this.io.close()
+  }
+
+  sendSpecList (specs, testingType: Cypress.TestingType) {
+    this.toRunner('specs:changed', { specs, testingType })
   }
 }

@@ -167,7 +167,7 @@ Search [all issues](https://github.com/cypress-io/cypress/issues) for keywords f
 If an issue already exists you should:
 
 - Thank them for their contribution.
-- Explain that this issue if a duplicate of another issue, linking to the relevant issue (`#1234`).
+- Explain that this issue is a duplicate of another issue, linking to the relevant issue (`#1234`).
 - Add the `type: duplicate` label to the issue.
 - Close the issue.
 
@@ -282,11 +282,13 @@ Here is a list of the core packages in this repository with a short description,
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
  | [runner](./packages/runner)           | `@packages/runner`      | The runner is the minimal "chrome" around the user's application under test. |
+ | [runner-ct](./packages/runner-ct)           | `@packages/runner-ct`      | The runner for component testing |
+ | [runner-shared](./packages/runner-shared)           | `@packages/runner-shared`      | The shared components between the `runner` and the `runner-ct` packages |
  | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
- 
+
 Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
 
 Here is a list of the npm packages in this repository:

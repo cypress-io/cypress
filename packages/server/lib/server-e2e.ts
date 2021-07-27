@@ -1,24 +1,21 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import httpProxy from 'http-proxy'
 import isHtml from 'is-html'
-import la from 'lazy-ass'
 import _ from 'lodash'
 import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
-import { createInitialWorkers } from '@packages/rewriter'
 import errors from './errors'
 import fileServer from './file_server'
-import logger from './logger'
-import { ServerBase } from './server-base'
+import { OpenServerOptions, ServerBase } from './server-base'
 import { SocketE2E } from './socket-e2e'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
+import { Cfg } from './project-base'
 
 type WarningErr = Record<string, any>
 
@@ -53,48 +50,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     this._urlResolver = null
   }
 
-  open (config: Record<string, any> = {}, project, onError, onWarning) {
-    debug('server open')
-
-    la(_.isPlainObject(config), 'expected plain config object', config)
-
-    return Bluebird.try(() => {
-      const app = this.createExpressApp(config)
-
-      logger.setSettings(config)
-
-      this._nodeProxy = httpProxy.createProxyServer()
-      this._socket = new SocketE2E(config)
-
-      const getRemoteState = () => {
-        return this._getRemoteState()
-      }
-
-      this.createNetworkProxy(config, getRemoteState)
-
-      // TODO: this does not look like a good idea
-      // since we would be spawning new workers on every
-      // open + close of a project...
-      if (config.experimentalSourceRewriting) {
-        createInitialWorkers()
-      }
-
-      this.createHosts(config.hosts)
-
-      this.createRoutes({
-        app,
-        config,
-        getRemoteState,
-        networkProxy: this._networkProxy,
-        onError,
-        project,
-      })
-
-      return this.createServer(app, config, project, this.request, onWarning)
-    })
+  open (config: Cfg, options: OpenServerOptions) {
+    return super.open(config, { ...options, testingType: 'e2e' })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
@@ -168,10 +128,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         })
       })
     })
-  }
-
-  createRoutes (...args) {
-    return require('./routes').apply(null, args)
   }
 
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
@@ -423,9 +379,12 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obsfucated by the proxying so this is not an ideal solution
-        _.assign(options, {
+        _.merge(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
+          headers: {
+            'x-cypress-resolving-url': '1',
+          },
         })
       }
 

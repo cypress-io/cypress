@@ -5,16 +5,13 @@ import {
   scheduleTargetAndForget,
   targetFromTargetString,
 } from '@angular-devkit/architect'
-import { asWindowsPath, experimental, normalize } from '@angular-devkit/core'
-import { NodeJsSyncHost } from '@angular-devkit/core/node'
+import { asWindowsPath, normalize } from '@angular-devkit/core'
 import * as os from 'os'
 import { dirname, join } from 'path'
 import { open, run } from 'cypress'
 import { from, noop, Observable, of } from 'rxjs'
 import { catchError, concatMap, first, map, switchMap, tap } from 'rxjs/operators'
-import { CypressBuilderOptions } from './cypress-builder-options'
-
-export default createBuilder<CypressBuilderOptions>(runCypress)
+import { CypressBuilderOptions } from './cypressBuilderOptions'
 
 type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
   Partial<CypressCommandLine.CypressOpenOptions>;
@@ -29,14 +26,12 @@ function runCypress (
     options.env.tsConfig = join(context.workspaceRoot, options.tsConfig)
   }
 
-  const workspace = new experimental.workspace.Workspace(
-    normalize(context.workspaceRoot),
-    new NodeJsSyncHost(),
-  )
+  const projectName = context.target && context.target.project || ''
+  const workspace = context.getProjectMetadata(projectName)
 
-  return workspace.loadWorkspaceFromHost(normalize('angular.json')).pipe(
+  return from(workspace).pipe(
     map(() => os.platform() === 'win32'),
-    map((isWin) => (!isWin ? workspace.root : asWindowsPath(workspace.root))),
+    map((isWin) => (!isWin ? normalize(context.workspaceRoot) : asWindowsPath(normalize(context.workspaceRoot)))),
     map((workspaceRoot) => {
       return {
         ...options,
@@ -75,6 +70,8 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   const options: CypressOptions = {
     ...defaultOptions,
     ...userOptions,
+    //@ts-ignore
+    dev: process.env.CYPRESS_ENV === 'test',
   }
 
   if (userOptions.configFile === undefined) {
@@ -101,7 +98,9 @@ export function startDevServer (
     watch,
   }
 
+  //@ts-ignore
   return scheduleTargetAndForget(context, targetFromTargetString(devServerTarget), overrides).pipe(
+    //@ts-ignore
     map((output: any) => {
       if (!output.success && !watch) {
         throw new Error('Could not compile application files')
@@ -111,3 +110,5 @@ export function startDevServer (
     }),
   )
 }
+
+export default createBuilder<CypressBuilderOptions>(runCypress)

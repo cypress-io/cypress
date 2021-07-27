@@ -58,7 +58,7 @@ const renameSupportFolder = (obj) => {
 
 module.exports = {
   _pathToFile (projectRoot, file) {
-    return path.join(projectRoot, file)
+    return path.isAbsolute(file) ? file : path.join(projectRoot, file)
   },
 
   _err (type, file, err) {
@@ -125,7 +125,7 @@ module.exports = {
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
-    }).catch({ code: 'EACCES' }, () => {
+    }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {

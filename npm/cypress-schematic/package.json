@@ -11,24 +11,22 @@
     "build:watch": "tsc -p tsconfig.json --watch",
     "clean": "git checkout HEAD -- sandbox && git clean -f -d sandbox",
     "launch": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic && cd ..",
-    "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic --removeProtractor=false && cd ..",
+    "launch:test": "yarn link:sandbox && cd sandbox && ng add @cypress/schematic --e2eUpdate=true && cd ..",
     "link:sandbox": "yarn link && cd sandbox && yarn link @cypress/schematic",
-    "test:all": "yarn build:all && yarn test:schematics && yarn launch:test && yarn test:builders",
-    "test:builders": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/builders/cypress/index_spec.ts",
-    "test:schematics": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/schematics/cypress/index_spec.ts",
+    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json src/**/*.spec.ts",
     "test:e2e:sandbox": "cd sandbox && ng run sandbox:cypress-run",
     "unlink:sandbox": "cd sandbox && yarn unlink @cypress/schematic && cd .. && yarn unlink"
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1001.0",
-    "@angular-devkit/core": "^10.1.0",
-    "@angular-devkit/schematics": "^10.1.0",
-    "@schematics/angular": "^10.1.0",
+    "@angular-devkit/architect": "^0.1200.0",
+    "@angular-devkit/core": "^12.0.0",
+    "@angular-devkit/schematics": "^12.0.0",
+    "@schematics/angular": "^12.0.0",
     "jsonc-parser": "^3.0.0",
-    "rxjs": "6.6.2"
+    "rxjs": "~6.6.0"
   },
   "devDependencies": {
-    "@angular-devkit/schematics-cli": "^0.1102.12",
+    "@angular-devkit/schematics-cli": "^12.0.0",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^12.11.1",
@@ -56,5 +54,8 @@
     "registry": "http://registry.npmjs.org/"
   },
   "builders": "./src/builders/builders.json",
+  "ng-add": {
+    "save": "devDependencies"
+  },
   "schematics": "./src/schematics/collection.json"
 }

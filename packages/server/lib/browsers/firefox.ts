@@ -15,6 +15,7 @@ import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
+import { getRemoteDebuggingPort } from './protocol'
 
 const errors = require('../errors')
 
@@ -356,7 +357,9 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function open (browser: Browser, url, options: any = {}): Promise<BrowserInstance> {
+export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
+  // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
+  const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -368,6 +371,14 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
+
+  let remotePort
+
+  if (hasCdp) {
+    remotePort = await getRemoteDebuggingPort()
+
+    defaultLaunchOptions.args.push(`--remote-debugging-port=${remotePort}`)
+  }
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -492,16 +503,17 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
   debug('launch in firefox', { url, args: launchOptions.args })
 
   const browserInstance = await launch(browser, 'about:blank', launchOptions.args, {
-    // sets headless resolution to 1920x1080 by default
+    // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
-    MOZ_HEADLESS_WIDTH: '1920',
-    MOZ_HEADLESS_HEIGHT: '1081',
+    MOZ_HEADLESS_WIDTH: '1280',
+    MOZ_HEADLESS_HEIGHT: '721',
   })
 
-  await firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort })
-  .catch((err) => {
+  try {
+    await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
+  } catch (err) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  })
+  }
 
   if (os.platform() === 'win32') {
     // override the .kill method for Windows so that the detached Firefox process closes between specs

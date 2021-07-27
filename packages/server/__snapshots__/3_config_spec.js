@@ -115,7 +115,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out_spec.js/short defaultCommandTimeo    (1920x1080)
+  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out_spec.js/short defaultCommandTimeo     (1280x720)
      ut -- times out looking for a missing element (failed).png                                     
 
 
