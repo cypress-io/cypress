@@ -292,7 +292,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // It is is used with E2E if the CypressInternal_UseInlineSpecList flag is true.
     startSpecWatcher()
 
-    if (cfg.experimentalInteractiveRunEvents) {
+    if (!cfg.experimentalInteractiveRunEvents) {
       return
     }
 
