@@ -19,6 +19,10 @@ const tooltipOptions = {
   },
 }
 
+beforeEach(() => {
+  Cypress.$('#__cy_root').css({ position: 'relative' })
+})
+
 Cypress.Commands.add('debugMount', (content) => {
   cy.viewport(600, 1000)
   mount(DebugRenderer, {

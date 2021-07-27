@@ -14,7 +14,7 @@ declare namespace Cypress {
      * @example cy.percySnapshot()
     */
     percySnapshot(): Chainable
-    mount(): Chainable
+    mount(component: any, options?: any): Chainable
     debugMount(content: string | Record<any, any> | number): Chainable
   }
 }

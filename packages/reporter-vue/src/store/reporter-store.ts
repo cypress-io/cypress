@@ -7,6 +7,10 @@
 
 import { defineStore } from 'pinia'
 import _, { Dictionary } from 'lodash'
+import map from "lodash/fp/map";
+import sortBy from "lodash/fp/sortBy";
+import flow from "lodash/fp/flow";
+import filter from "lodash/fp/filter";
 import { EventEmitter } from 'events'
 import { useRafFn, Fn, Pausable } from '../composables/core/index'
 import { RunnableState } from '../types'
@@ -15,23 +19,27 @@ import { computed, ref, Ref, ComputedRef, watch, toRefs, reactive } from 'vue'
 type RunnableType = 'suite' | 'test'
 type RawSuite = any
 type RawTest = any
-export type TestsByState = ComputedRef<Dictionary<(Test | Suite)[]>>
+export type TestsByState = ComputedRef<Dictionary<(TestModel | SuiteModel)[]>>
+export type InstrumentType = 'agent' | 'command' | 'route'
+export type CommandType = 'parent' | 'child'
+export type IndicatorTypes = 'bad' | 'successful'
 
 interface Runnables {
-  nested: (Test | Suite)[],
-  flat: Record<string, Test | Suite>,
-  tests: Test[]
-  suites: Suite[]
+  nested: (TestModel | SuiteModel)[],
+  flat: Record<string, TestModel | SuiteModel>
+  tests: TestModel[]
+  suites: SuiteModel[]
+  hooks: HookModel[]
   testsByState: TestsByState,
   stats: ComputedRef<Dictionary<RunnableState>[]>
-  getTest: (id: string) => Test | Suite
+  getTest: (id: string) => TestModel | SuiteModel
   getHook: (id: string) => any
   addLog: (props: any) => any
 }
 
 export function Runnables(rootRunnable: RawSuite): Runnables {
   // Key value
-  const flat: Record<string, Test | Suite> = {}
+  const flat: Record<string, TestModel | SuiteModel> = {}
   
   // Hierarchical representation
   const nested = createRunnableChildren(rootRunnable, 0, flat)
@@ -41,7 +49,9 @@ export function Runnables(rootRunnable: RawSuite): Runnables {
   const tests = test
 
   const testsByState = computed(() => _.groupBy(tests, 'state'))
-  const getHook = (hook) => _.find(flat[hook.testId].hooks, h => h.hookId === hook.id)
+  const getHook = (hook) => {
+    return _.find(flat[hook.testId].hooks, h => h.hookId === hook.hookId)
+  }
   const getTest = id => flat[id]
   return {
     nested,
@@ -62,6 +72,7 @@ export function Runnables(rootRunnable: RawSuite): Runnables {
     },
   }
 }
+
 
 // @ts-ignore
 export const useStatsStore = defineStore({
@@ -127,7 +138,7 @@ export const useReporterStore = defineStore({
       })
 
       this.bus.on('test:before:run:async', (props) => {
-        this.runnables.getTest(props.id).state = 'running'
+        this.runnables.getTest(props.id).state = 'processing'
       })
 
       this.bus.on('run:end', () => {
@@ -175,52 +186,145 @@ export const useReporterStore = defineStore({
   }
 })
 
-
-interface Runnable {
+export interface RunnableModel {
   readonly id: string,
   state: ComputedRef<RunnableState>
+  level: number
 }
 
-class Test implements Runnable {
+function createHooks(hooks, test) {
+  const ordered = ['before all', 'before each', 'test body', 'after each', 'after all']
+
+  return flow(
+    sortBy('hookId'),
+    sortBy(h => ordered.indexOf(h.hookName)),
+    map(h => new HookModel(h, test)),
+    filter(h => h.commands.length > 0)
+  )(hooks)
+}
+
+export class TestModel implements RunnableModel {
   readonly type: RunnableType = 'test'
   readonly id: string
-  state: ComputedRef<RunnableState>
+  public state: ComputedRef<RunnableState>
+  public commands: CommandModel[] = []
+  public hooks: HookModel[] = []
+  public level: number
   constructor(test: RawTest) {
     this.id = test.id
-    this.state = computed(() => test.status)
+    this.state = computed(() => test.state || 'not-started')
+    this.level = test.level
+    this.title = test.title
+    // A test has many commands
+    // These commands are executed within the test body hook
+    // Or other hooks like before/after
+    // Whenever a new command is added to the test, the related hook must update
+
+    this.hooks = createHooks(test.hooks, test)
+    this.hooksByKind = _.groupBy(this.hooks, 'hookName')
   }
 }
 
-export interface Suite  {}
-export class Suite implements Runnable {
+export class HookModel {
+  public hookId: string
+  public hookName: HookName
+  public commands: CommandModel[] = []
+
+  constructor({ hookId, hookName }, test) {
+    this.hookId = hookId
+    this.hookName = hookName
+    this.commands = _.filter(test.commands, c => c.hookId === hookId)
+  }
+}
+
+// TODO: Classdocs
+export class CommandModel {
+  public hookId: string // A command belongs to a hook (Test Body is a hook)
+  public testId: string
+
+  // Unique ids, they're generated procedurally by the test runner
+  public id: string
+
+  // If the command is a route, command, or agent
+  public instrument: InstrumentType
+
+  // The message is the longer text used to display info about the command
+  // Message can also come from `renderProps.message` if it uses markdown
+  public message: string
+
+  // The name is the short text used to display info about the command
+  // e.g. `get` or `click`
+  public name: string
+
+  // Alias to `name`
+  public displayName: string
+
+  // Each command has a state, which is either 'pending' or 'done'
+  public state: RunnableState
+
+  // Either the default timeout or a specific timeout passed in to the command
+  public timeout: number
+
+  // If the command is a child or parent. Children are rendered as nested.
+  // e.g. cy.get('.selector').click() <- Here, the `click` command is a child of `get`
+  public type: CommandType = 'parent'
+
+  // If the command has found elements
+  public visible: boolean
+
+  // Custom data passed in to the command, via the Runner
+  public renderProps: { message: string, indicator: IndicatorTypes }
+
+  // The number of elements found by the command, if it's a get command
+  public numElements: number
+
+  // If there command is an event (e.g. xhr commands)
+  public event: boolean
+}
+
+export class SuiteModel implements RunnableModel {
   readonly type: RunnableType = 'suite'
   readonly id: string
-  public children: Ref<(Test | Suite)[]> = ref([])
+  public children: Ref<(TestModel | SuiteModel)[]> = ref([])
   public state: ComputedRef<RunnableState>
-  private tests: Test[] = []
-  private suites: Suite[] = []
+  public tests: Test[] = []
+  public suites: Suite[] = []
+  public hooks: HookModel[] = []
+  public level: number
   
   constructor(suite: RawSuite) {
     this.id = suite.id
-    this.tests = suite.tests // nested
-    this.suites = suite.suites // nested
-    this.children = ref([])
+    this.tests = suite.tests || []// nested
+    this.suites = suite.suites || [] // nested
+    this.children = ref(suite.children || [])
+
     this.state = computed(() => {
-      return 'failed'
+      const countByStatus = _.groupBy(this.children.value, 'state')
+      if (countByStatus.failed) return 'failed'
+      if (countByStatus.processing) return 'processing'
+      if (countByStatus['not-started']) return 'not-started'
+      if (countByStatus.pending && !countByStatus.passed) return 'pending'
+      return 'passed'
     })
+
+    this.title = suite.title
+    this.tests = ref(suite.tests || [])
+    this.suites = ref(suite.suites || [])
+    this.level = suite.level
+    this.hooks = suite.hooks
   }  
 }
 
-function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[], hooks: Hook[], level: number, runnablesById): (Suite | Test)[] {
+function createRunnables<T>(type: 'suite' | 'test', runnables: TestOrSuite<T>[], hooks: HookModel[], level: number, runnablesById): (SuiteModel | TestModel)[] {
   // @ts-ignore
 
-  _.each(runnables, (runnableProps: Test | Suite, idx) => {
+  _.each(runnables, (runnableProps: TestModel | SuiteModel, idx) => {
     runnables[idx] = createRunnable(type, runnableProps, hooks, level, runnablesById)
   })
   return runnables
 }
 
-function createRunnableChildren(props: RootRunnable, level: number, runnablesById: Record<string, Test | Suite>) {
+function createRunnableChildren(props: RootRunnable, level: number, runnablesById: Record<string, TestModel | SuiteModel>) {
   const addParentRunnables = (runnable) => {
     const parentRunnables = runnable.parentRunnables || []
 
@@ -241,42 +345,43 @@ function createRunnableChildren(props: RootRunnable, level: number, runnablesByI
   )
 }
 
-function createRunnable(type, props, hooks: Hook[], level: number, runnablesById) {
+function createRunnable(type, props, hooks: HookModel[], level: number, runnablesById) {
   runnablesById[props.id] = props
-  props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
+
+  props.hooks = _.unionBy(hooks, props.hooks, 'hookId')
+  
   if (type === 'suite') {
-    return createSuite(props as Suite, level, runnablesById)
+    return createSuite(props as SuiteModel, level, runnablesById)
   } else {
-    return createTest(props as Test, level)
+    return createTest(props as TestModel, level)
   }
 }
 
-function createTest(props, level): Test {
+function createTest(props, level): TestModel {
   const test = props
   test.level = level
   test.hooks = [
-    ...props.hooks.map(h => {
-      h.logs = []
-      return h
-    }),
-    {
+    ...props.hooks.map(h => new HookModel(h, test)),
+    new HookModel({
       hookId: props.id.toString(),
       hookName: 'test body',
+      testId: test.testId,
       invocationDetails: props.invocationDetails,
       logs: []
-    }
+    }, test)
   ]
 
-  return test
+  const testModel = new TestModel(test)
+  return testModel
 }
 
-function createSuite(props: Suite, level, runnablesById): Suite {
-  return {
+function createSuite(props: SuiteModel, level, runnablesById): SuiteModel {
+  return new SuiteModel({
     ...props,
     level,
     state: null,
     children: createRunnableChildren(props, ++level, runnablesById),
-  }
+  })
 }
 
 
