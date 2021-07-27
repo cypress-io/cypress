@@ -249,7 +249,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         // This is only used for CT right now, but it will be
         // used for E2E eventually. Until then, do not watch
         // the specs.
-        startSpecWatcher()
+        // startSpecWatcher()
 
         return Bluebird.join(
           this.checkSupportFile(cfg),
