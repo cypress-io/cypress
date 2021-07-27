@@ -282,7 +282,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // This is only used for CT right now, but it will be
     // used for E2E eventually. Until then, do not watch
     // the specs.
-    startSpecWatcher()
+    // do not start in run mode - only in interactive mode.
+    if (!cfg.isTextTerminal) {
+      startSpecWatcher()
+    }
 
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
