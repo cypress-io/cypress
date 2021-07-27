@@ -1,19 +1,8 @@
-let rootErr = null
-
-try {
-  Cypress.currentTest
-} catch (e) {
-  rootErr = e
-}
+const rootResult = Cypress.currentTest
 
 describe('currentTest', () => {
-  let suiteErr = null
+  const suiteResult = Cypress.currentTest
 
-  try {
-    Cypress.currentTest
-  } catch (e) {
-    suiteErr = e
-  }
   before(() => {
     expectMatchingCurrentTitleInHook()
   })
@@ -36,29 +25,9 @@ describe('currentTest', () => {
     .eq(cy.state('runnable').title)
   })
 
-  context('errors', () => {
-    it('throws if outside test', () => {
-      expect(rootErr).property('message').contain('outside a test')
-      expect(suiteErr).property('message').contain('outside a test')
-    })
-
-    it('throws if outside test with codeframe - root', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.codeFrame.line).eq(4)
-        done()
-      })
-
-      throw rootErr
-    })
-
-    it('throws if outside test with codeframe - suite', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.codeFrame.line).eq(13)
-        done()
-      })
-
-      throw suiteErr
-    })
+  it('returns null when outside test', () => {
+    expect(rootResult).eq(null)
+    expect(suiteResult).eq(null)
   })
 })
 

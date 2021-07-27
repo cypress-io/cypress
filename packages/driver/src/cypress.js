@@ -33,8 +33,6 @@ const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
-const $stackUtils = require('./cypress/stack_utils')
-const { errByPath } = require('./cypress/error_utils')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -197,7 +195,6 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
-    this.specWindow = specWindow
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -603,15 +600,20 @@ class $Cypress {
     const r = this.cy.state('runnable')
 
     if (!r) {
-      const invocationStack = $stackUtils.getInvocationDetails(this.specWindow, this.config)?.stack
-
-      throw errByPath('currentTest.outside_test')
-      .setUserInvocationStack(invocationStack)
+      return null
     }
 
     // if we're in a hook, ctx.currentTest is defined
     // if we're in test body, r is the currentTest
-    return r.ctx.currentTest || r
+    /**
+     * @type {Mocha.Test}
+     */
+    const currentTestRunnable = r.ctx.currentTest || r
+
+    return {
+      title: currentTestRunnable.title,
+      titlePath: currentTestRunnable.titlePath(),
+    }
   }
 
   static create (config) {

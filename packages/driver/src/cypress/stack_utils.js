@@ -91,29 +91,6 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
   }
 }
 
-const getInvocationDetails = (specWindow, config) => {
-  if (specWindow.Error) {
-    let stack = (new specWindow.Error()).stack
-
-    // note: specWindow.Cypress can be undefined or null
-    // if the user quickly reloads the tests multiple times
-
-    // firefox throws a different stack than chromium
-    // which includes stackframes from cypress_runner.js.
-    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
-    if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
-      stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
-    }
-
-    const details = getSourceDetailsForFirstLine(stack, config('projectRoot'))
-
-    return {
-      details,
-      stack,
-    }
-  }
-}
-
 const getLanguageFromExtension = (filePath) => {
   return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
 }
@@ -395,5 +372,4 @@ module.exports = {
   stackWithReplacementMarkerLineRemoved,
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
-  getInvocationDetails,
 }
