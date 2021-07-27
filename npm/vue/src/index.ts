@@ -1,5 +1,9 @@
+/* eslint-disable no-redeclare */
 /// <reference types="cypress" />
-import { Component, ComponentPublicInstance } from 'vue'
+import { ComponentPublicInstance, VNodeProps, AllowedComponentProps,
+  ComponentCustomProps, ExtractPropTypes, ExtractDefaultPropTypes,
+  Component, DefineComponent, FunctionalComponent, ComputedOptions,
+  MethodOptions, ComponentOptionsMixin, EmitsOptions, ComponentOptionsWithObjectProps, ComponentPropsOptions, ComponentOptionsWithArrayProps, ComponentOptionsWithoutProps } from 'vue'
 import { MountingOptions, VueWrapper, mount as VTUmount } from '@vue/test-utils'
 import {
   injectStylesBeforeElement,
@@ -7,6 +11,7 @@ import {
   ROOT_ID,
   setupHooks,
 } from '@cypress/mount-utils'
+import { GlobalMountOptions } from '@vue/test-utils/dist/types'
 
 const DEFAULT_COMP_NAME = 'unknown'
 
@@ -22,14 +27,14 @@ declare global {
   }
 }
 
-type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
+type CyMountOptions<Props, Data = {}> = Omit<MountingOptions<Props, Data>, 'attachTo'> & {
   log?: boolean
   /**
    * @deprecated use vue-test-utils `global` instead
    */
-  extensions?: MountingOptions<Props>['global'] & {
-    use?: MountingOptions<Props>['global']['plugins']
-    mixin?: MountingOptions<Props>['global']['mixins']
+  extensions?: GlobalMountOptions & {
+    use?: GlobalMountOptions['plugins']
+    mixin?: GlobalMountOptions['mixins']
   }
 } & Partial<StyleOptions>
 
@@ -53,14 +58,159 @@ Cypress.on('run:start', () => {
     const document: Document = cy.state('document')
     let el = document.getElementById(ROOT_ID)
 
+    if (!el) {
+      throw Error(`no element found at query #${ROOT_ID}. Please use the mount utils to mount it properly`)
+    }
+
     el.innerHTML = ''
     document.head.innerHTML = initialInnerHtml
   })
 })
 
-export function mount<Props = any> (
-  comp: Component<Props>,
-  options: CyMountOptions<Props> = {},
+type PublicProps = VNodeProps & AllowedComponentProps & ComponentCustomProps;
+
+// Class component - no props
+export function mount<V>(
+  originalComponent: {
+    new (...args: any[]): V
+    registerHooks(keys: string[]): void
+  },
+  options?: MountingOptions<any>
+): Cypress.Chainable
+
+// Class component - props
+export function mount<V, P>(
+  originalComponent: {
+    new (...args: any[]): V
+    props(Props: P): any
+    registerHooks(keys: string[]): void
+  },
+  options?: CyMountOptions<P & PublicProps>
+): Cypress.Chainable
+
+// Functional component with emits
+export function mount<Props, E extends EmitsOptions = {}>(
+  originalComponent: FunctionalComponent<Props, E>,
+  options?: CyMountOptions<Props & PublicProps>
+): Cypress.Chainable
+
+// Component declared with defineComponent
+export function mount<
+  PropsOrPropOptions = {},
+  RawBindings = {},
+  D = {},
+  C extends ComputedOptions = ComputedOptions,
+  M extends MethodOptions = MethodOptions,
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  E extends EmitsOptions = Record<string, any>,
+  EE extends string = string,
+  PP = PublicProps,
+  Props = Readonly<ExtractPropTypes<PropsOrPropOptions>>,
+  Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
+>(
+  component: DefineComponent<
+    PropsOrPropOptions,
+    RawBindings,
+    D,
+    C,
+    M,
+    Mixin,
+    Extends,
+    E,
+    EE,
+    PP,
+    Props,
+    Defaults
+  >,
+  options?: CyMountOptions<
+    Partial<Defaults> & Omit<Props & PublicProps, keyof Defaults>,
+    D
+  >
+): Cypress.Chainable
+
+// Component declared with no props
+export function mount<
+  Props = {},
+  RawBindings = {},
+  D = {},
+  C extends ComputedOptions = {},
+  M extends Record<string, Function> = {},
+  E extends EmitsOptions = Record<string, any>,
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  EE extends string = string
+>(
+  componentOptions: ComponentOptionsWithoutProps<
+    Props,
+    RawBindings,
+    D
+  >,
+  options?: CyMountOptions<Props & PublicProps, D>
+): Cypress.Chainable
+
+// Component declared with { props: [] }
+export function mount<
+  PropNames extends string,
+  RawBindings,
+  D,
+  C extends ComputedOptions = {},
+  M extends Record<string, Function> = {},
+  E extends EmitsOptions = Record<string, any>,
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  EE extends string = string,
+  Props extends Readonly<{ [key in PropNames]?: any }> = Readonly<
+    { [key in PropNames]?: any }
+  >
+>(
+  componentOptions: ComponentOptionsWithArrayProps<
+    PropNames,
+    RawBindings,
+    D,
+    C,
+    M,
+    E,
+    Mixin,
+    Extends,
+    EE,
+    Props
+  >,
+  options?: CyMountOptions<Props & PublicProps, D>
+): Cypress.Chainable
+
+// Component declared with { props: { ... } }
+export function mount<
+  // the Readonly constraint allows TS to treat the type of { required: true }
+  // as constant instead of boolean.
+  PropsOptions extends Readonly<ComponentPropsOptions>,
+  RawBindings,
+  D,
+  C extends ComputedOptions = {},
+  M extends Record<string, Function> = {},
+  E extends EmitsOptions = Record<string, any>,
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  EE extends string = string
+>(
+  componentOptions: ComponentOptionsWithObjectProps<
+    PropsOptions,
+    RawBindings,
+    D,
+    C,
+    M,
+    E,
+    Mixin,
+    Extends,
+    EE
+  >,
+  options?: CyMountOptions<ExtractPropTypes<PropsOptions> & PublicProps, D>
+): Cypress.Chainable
+
+// implementation
+export function mount (
+  componentOptions: any,
+  options: CyMountOptions<any> = {},
 ) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = DEFAULT_COMP_NAME
@@ -82,12 +232,16 @@ export function mount<Props = any> (
 
     let el = document.getElementById(ROOT_ID)
 
+    if (!el) {
+      throw Error(`no element found at query #${ROOT_ID}. Please use the mount utils to mount it properly`)
+    }
+
     injectStylesBeforeElement(options, document, el)
 
     // merge the extensions with global
     if (options.extensions) {
-      options.extensions.plugins = [].concat(options.extensions.plugins || [], options.extensions.use || [])
-      options.extensions.mixins = [].concat(options.extensions.mixins || [], options.extensions.mixin || [])
+      options.extensions.plugins = ([] as GlobalMountOptions['plugins'])?.concat(options.extensions.plugins || [], options.extensions.use || [])
+      options.extensions.mixins = ([] as GlobalMountOptions['mixins'])?.concat(options.extensions.mixins || [], options.extensions.mixin || [])
       options.global = { ...options.extensions, ...options.global }
     }
 
@@ -98,10 +252,10 @@ export function mount<Props = any> (
     el.append(componentNode)
 
     // mount the component using VTU and return the wrapper in Cypress.VueWrapper
-    const wrapper = VTUmount(comp as any, { attachTo: componentNode, ...options })
+    const wrapper = VTUmount(componentOptions, { attachTo: componentNode, ...options })
 
-    Cypress.vueWrapper = wrapper
-    Cypress.vue = wrapper.vm
+    Cypress.vueWrapper = wrapper as VueWrapper<ComponentPublicInstance>
+    Cypress.vue = wrapper.vm as ComponentPublicInstance
 
     return cy
     .wrap(wrapper, { log: false })
@@ -125,11 +279,13 @@ export function mount<Props = any> (
  *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
  */
-export function mountCallback<Props = any> (
-  component: Component<Props>,
-  options: CyMountOptions<Props> = {},
-): () => void {
-  return () => mount<Props>(component, options)
+export function mountCallback (
+  component: any,
+  options: any = {},
+): () => Cypress.Chainable {
+  return () => {
+    return mount(component, options)
+  }
 }
 
 setupHooks()
