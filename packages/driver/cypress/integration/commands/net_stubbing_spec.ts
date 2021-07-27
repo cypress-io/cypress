@@ -835,6 +835,15 @@ describe('network stubbing', { retries: 2 }, function () {
 
           cy.intercept({ hostname: 'http://website.web' })
         })
+
+        // https://github.com/cypress-io/cypress/issues/17015
+        it('string hostname can be "localhost"', () => {
+          cy.intercept({ hostname: 'localhost' })
+        })
+
+        it('string hostname can be unicode', () => {
+          cy.intercept({ hostname: 'はじめよう.みんな' })
+        })
       })
 
       context('with invalid handler', function () {
@@ -1671,6 +1680,30 @@ describe('network stubbing', { retries: 2 }, function () {
       .then(() => testDelay()).wait('@get')
       .then(() => testDelay()).wait('@get')
       .then(() => testDelay()).wait('@get')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/15188
+    it('delay works correctly with 204 No Content', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('No response ever occurred')
+
+        done()
+      })
+
+      cy.intercept('POST', '/post-only', {
+        statusCode: 204, // delay is not respected
+        delay: 5000,
+      }).as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/post-only", {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create', { timeout: 500 })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/15901

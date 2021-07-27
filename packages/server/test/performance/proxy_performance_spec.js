@@ -357,7 +357,7 @@ describe('Proxy Performance', function () {
             SocketCtor: SocketE2E,
             createRoutes,
             specsStore: new SpecsStore({}, 'e2e'),
-            projectType: 'e2e',
+            testingType: 'e2e',
           })
         }),
       )
