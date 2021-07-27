@@ -13,7 +13,7 @@ interface Options {
   [key: string]: unknown
 }
 
-export interface StartDevServer {
+export interface StartDevServerOptions {
   /**
    * the Cypress options object
    */
@@ -27,7 +27,7 @@ export interface StartDevServer {
   viteConfig?: UserConfig
 }
 
-const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
+const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile } = options.config
 
   const requiredOptions: InlineConfig = {
@@ -66,7 +66,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   return finalConfig
 }
 
-export async function start (devServerOptions: StartDevServer): Promise<ViteDevServer> {
+export async function start (devServerOptions: StartDevServerOptions): Promise<ViteDevServer> {
   if (!devServerOptions.viteConfig) {
     debug('User did not pass in any Vite dev server configuration')
     devServerOptions.viteConfig = {}
