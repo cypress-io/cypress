@@ -394,9 +394,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => CanReturnChainable): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => CanReturnChainable): void
-      overwrite(name: string, fn: (...args: any[]) => CanReturnChainable): void
+      add<T extends keyof Cypress.Chainable>(name: T, fn: Cypress.Chainable[T]): void
+      add<T extends keyof Cypress.Chainable>(name: T, options: CommandOptions, fn: Cypress.Chainable[T]): void
+      overwrite<T extends keyof Cypress.Chainable>(name: T, fn: Cypress.Chainable[T]): void
     }
 
     /**
