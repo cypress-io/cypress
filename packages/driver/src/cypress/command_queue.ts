@@ -404,7 +404,10 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       // since this failed this means that a
       // specific command failed and we should
       // highlight it in red or insert a new command
-      err.name = err.name || 'CypressError'
+      if (_.isObject(err)) {
+        err.name = err.name || 'CypressError'
+      }
+
       commandRunningFailed(Cypress, state, err)
 
       return fail(err)
