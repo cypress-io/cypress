@@ -23,8 +23,6 @@ const {
   getPathsAndIds,
   getProjectStatus,
   getProjectStatuses,
-  createCiProject,
-  writeProjectId,
 } = require(`${root}lib/project_static`)
 const ProjectUtils = require(`${root}lib/project_utils`)
 const { Automation } = require(`${root}lib/automation`)
@@ -917,14 +915,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls Settings.write with projectRoot and attrs', function () {
-      return writeProjectId('id-123').then((id) => {
+      return this.project.writeProjectId('id-123').then((id) => {
         expect(id).to.eq('id-123')
       })
     })
 
-    // TODO: This
-    xit('sets generatedProjectIdTimestamp', function () {
-      return writeProjectId('id-123').then(() => {
+    it('sets generatedProjectIdTimestamp', function () {
+      return this.project.writeProjectId('id-123').then(() => {
         expect(this.project.generatedProjectIdTimestamp).to.be.a('date')
       })
     })
@@ -999,19 +996,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls api.createProject with user session', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
+      return this.project.createCiProject({ foo: 'bar' }).then(() => {
         expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
       })
     })
 
     it('calls writeProjectId with id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
+      return this.project.createCiProject({ foo: 'bar' }).then(() => {
         expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' })
       })
     })
 
     it('returns project id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then((projectId) => {
+      return this.project.createCiProject({ foo: 'bar' }).then((projectId) => {
         expect(projectId).to.eql(this.newProject)
       })
     })

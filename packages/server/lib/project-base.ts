@@ -833,7 +833,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     logger.info('Writing Project ID', _.clone(attrs))
 
-    // TODO: We need to set this
     this.generatedProjectIdTimestamp = new Date()
 
     await settings.write(this.projectRoot, attrs)
