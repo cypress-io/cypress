@@ -8,7 +8,7 @@
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
-    "tsc": "vue-tsc --noEmit -p ${PWD}",
+    "typecheck": "vue-tsc --noEmit",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
     "test:ci:e2e": "node ../../scripts/cypress.js run --project ${PWD}",
