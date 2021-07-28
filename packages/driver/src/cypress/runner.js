@@ -383,7 +383,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           if (test) {
             const siblings = getAllSiblingTests(test.parent, getTestById)
 
-            const testIsActuallyInSuite = findTestInSuite(this.suite, (_test) => _test === test)
+            const testIsActuallyInSuite = suiteHasTest(this.suite, test.id)
 
             // we ensure the test actually belongs to this suite.
             // the test may not belong to the suite when a suite is skipped
