@@ -2,6 +2,25 @@ const { $, dom } = Cypress
 
 export {}
 
+it.only('sdf', () => {
+  cy.visit('https://localhost:4466/form')
+  cy.contains('form')
+  .then(() => {
+    cy.intercept('https://jsonplaceholder.cypress.io/*', () => {}).as('somealias')
+    // cy.intercept('http://example.com/*', { foo: true })
+    cy.$$(`<div class="btn" onclick="fetch('https://jsonplaceholder.cypress.io/users?_limit=3')">clickme </div>`).appendTo(cy.$$('body'))
+    cy.$$(`<div class="btn" onclick="fetch('https://jsonplaceholder.cypress.io/users?_limit=3')">clickme </div>`).appendTo(cy.$$('body'))
+    cy.$$(`<div class="btn" onclick="fetch('https://jsonplaceholder.cypress.io/users?_limit=3')">clickme </div>`).appendTo(cy.$$('body'))
+    cy.$$('.btn').click()
+
+    // cy.get('.btn').click({ multiple: true })
+  })
+
+  cy.wait('@somealias')
+  cy.wait('@somealias')
+  cy.wait('@somealias')
+})
+
 describe('src/cypress/dom/visibility', () => {
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
