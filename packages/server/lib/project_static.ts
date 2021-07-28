@@ -154,7 +154,7 @@ export async function add (path, options) {
 }
 
 export function getId (path) {
-  return new ProjectBase({ projectRoot: path, projectType: 'e2e', options: {} }).getProjectId()
+  return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: {} }).getProjectId()
 }
 
 export function ensureExists (path, options) {

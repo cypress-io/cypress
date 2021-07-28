@@ -3,12 +3,12 @@ import _ from 'lodash'
 import send from 'send'
 import { SpecsStore } from '@packages/server/lib/specs-store'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
-import { Cfg, ProjectBase } from '@packages/server/lib/project-base'
-import { ServerCt } from '../../server-ct'
+import { Cfg } from '@packages/server/lib/project-base'
+import { Browser } from '@packages/server/lib/browsers/types'
 
 interface ServeOptions {
   config: Cfg
-  project: ProjectBase<ServerCt>
+  getCurrentBrowser: () => Browser
   specsStore: SpecsStore
 }
 
@@ -24,7 +24,7 @@ export const handle = (req, res) => {
 export const serve = (req, res, options: ServeOptions) => {
   const config = {
     ...options.config,
-    browser: options.project.browser,
+    browser: options.getCurrentBrowser(),
     specs: options.specsStore.specFiles,
   } as Cfg
 
