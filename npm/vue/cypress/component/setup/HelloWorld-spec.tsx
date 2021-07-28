@@ -1,9 +1,14 @@
+import { h } from 'vue'
 import { mount } from '@cypress/vue'
 import HelloWorld from './HelloWorld.vue'
 
 describe('HelloWorld', () => {
-  it('playground', () => {
+  it('normal mount', () => {
     mount(HelloWorld, { props: { msg: 'Hello Cypress' } })
+  })
+
+  it('functional mount', () => {
+    mount(() => h(HelloWorld, { msg: 'Hello Cypress' }))
   })
 
   it('renders properly', () => {

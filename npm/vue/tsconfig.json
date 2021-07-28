@@ -7,11 +7,11 @@
     "lib": [
       "es2015",
       "dom"
-    ] /* Specify library files to be included in the compilation:  */,
-    "allowJs": true /* Allow javascript files to be compiled. */,
+    ]                                         /* Specify library files to be included in the compilation:  */,
+    "allowJs": true                           /* Allow javascript files to be compiled. */,
     // "checkJs": true,                       /* Report errors in .js files. */
-    // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
-    // "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "jsx": "preserve",                        /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
+    // "declaration": true                    /* Generates corresponding '.d.ts' file. */,
     // "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "dist"                          /* Redirect output structure to the directory. */,
@@ -33,8 +33,8 @@
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */
     "types": [
-      "cypress"
-    ] /* Type declaration files to be included in compilation. */,
+      "cypress", "vue"
+    ]                                         /* Type declaration files to be included in compilation. */,
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
     // "preserveSymlinks": true,              /* Do not resolve the real path of symlinks. */
 
@@ -49,6 +49,6 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "esModuleInterop": true
   },
-  "include": ["src", "cypress/component/**/*.ts", "cypress/component/**/*.vue"],
+  "include": ["src", "cypress/component/**/*.{ts,tsx}", "cypress/component/**/*.vue"],
   "exclude": ["**/Translated*.vue"]
 }
