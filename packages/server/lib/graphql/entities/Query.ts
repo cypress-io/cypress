@@ -6,6 +6,6 @@ export class Query {
     return { type: App }
   })
   static app (_, ctx: NexusGen['context']): NxsQueryResult<'app'> {
-    return new App()
+    return ctx.app
   }
 }

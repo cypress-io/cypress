@@ -1,5 +1,6 @@
-import { BaseActions } from '../actions/BaseActions'
-import { Wizard } from '../entities'
+import type { BaseActions } from '../actions/BaseActions'
+import { App, Wizard } from '../entities'
+import { Project } from '../entities/Project'
 
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.
@@ -10,8 +11,10 @@ import { Wizard } from '../entities'
  */
 export abstract class BaseContext {
   abstract readonly actions: BaseActions
+  abstract projects: Project[]
 
   wizard = new Wizard()
+  app = new App(this)
 
   isFirstOpen = false
 }

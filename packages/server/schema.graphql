@@ -10,8 +10,14 @@ input AddProjectInput {
 
 """Namespace for information related to the app"""
 type App {
+  """The active project in the app"""
+  activeProject: Project
+
   """Whether this is the first open of the application or not"""
   isFirstOpen: Boolean!
+
+  """All known projects for the app"""
+  projects: [Project!]!
 
   """Metadata about the wizard"""
   wizard: Wizard
@@ -42,14 +48,20 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type Mutation {
+  """Adds a new project to the app"""
   addProject(input: AddProjectInput!): Project!
-  initializePlugins: Project!
+
+  """Initializes the plugins for the current active project"""
+  initializePlugins: Project
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
   """Navigates backward in the wizard"""
-  wizardNavigateBack(type: TestingTypeEnum!): Wizard
+  wizardNavigateBack: Wizard
+
+  """Navigates forward in the wizard"""
+  wizardNavigateForward: Wizard
 
   """Sets the frontend bundler we want to use for the project"""
   wizardSetBundler(name: SupportedBundlers): Wizard
@@ -71,17 +83,18 @@ enum PluginsState {
   uninitialized
 }
 
+"""A Cypress project is a container"""
 type Project {
+  id: ID!
   isCurrent: Boolean!
   isOpen: Boolean!
-  plugins: InitPluginsStatus
+  pluginStatus: InitPluginsStatus!
+  plugins: [Boolean!]!
   projectRoot: String!
 }
 
 type Query {
   app: App
-  openProject: Project
-  projects: [Project]!
 }
 
 """The bundlers that we can use with Cypress"""
@@ -118,6 +131,7 @@ type Wizard {
   testingType: TestingTypeEnum
 }
 
+"""Wizard bundler"""
 type WizardBundler {
   id: SupportedBundlers
 
@@ -131,6 +145,9 @@ type WizardBundler {
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework {
+  """Whether this is the selected framework in the wizard"""
+  isSelected: Boolean
+
   """The name of the framework"""
   name: FrontendFramework
 

@@ -1,4 +1,4 @@
-import { mutationType, nonNull } from 'nexus'
+import { inputObjectType, mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, TestingTypeEnum } from '../constants'
 
 export const mutation = mutationType({
@@ -19,10 +19,15 @@ export const mutation = mutationType({
       resolve: (_, args, ctx) => ctx.wizard.setFramework(args.framework),
     })
 
+    t.field('wizardNavigateForward', {
+      type: 'Wizard',
+      description: 'Navigates forward in the wizard',
+      resolve: (_, __, ctx) => ctx.wizard.navigateForward(),
+    })
+
     t.field('wizardNavigateBack', {
       type: 'Wizard',
       description: 'Navigates backward in the wizard',
-      args: { type: nonNull(TestingTypeEnum) },
       resolve: (_, __, ctx) => ctx.wizard.navigateBack(),
     })
 
@@ -45,7 +50,40 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Validates that the manual install has occurred properly',
       resolve: (root, args, ctx) => {
-        return ctx.wizard
+        return ctx.wizard.validateManualInstall()
+      },
+    })
+
+    t.nonNull.field('addProject', {
+      type: 'Project',
+      description: 'Adds a new project to the app',
+      args: {
+        input: nonNull(
+          inputObjectType({
+            name: 'AddProjectInput',
+            definition (t) {
+              t.nonNull.string('projectRoot')
+              t.nonNull.string('testingType')
+              t.nonNull.boolean('isCurrent')
+            },
+          }),
+        ),
+      },
+      async resolve (_root, args, ctx) {
+        const addedProject = await ctx.actions.addProject(args.input)
+
+        return addedProject
+      },
+    })
+
+    t.field('initializePlugins', {
+      type: 'Project',
+      description: 'Initializes the plugins for the current active project',
+      async resolve (_root, args, ctx) {
+        // TODO: should we await here, or return a pending state to the client?
+        await ctx.actions.initializePlugins()
+
+        return ctx.app.activeProject
       },
     })
   },

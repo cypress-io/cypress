@@ -86,10 +86,15 @@ export class Wizard {
   navigateForward (): Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
-    if (idx !== WIZARD_STEP.length + 1) {
+    if (idx !== WIZARD_STEP.length - 1) {
       this.currentStep = WIZARD_STEP[idx + 1]
     }
 
+    return this
+  }
+
+  validateManualInstall (): Wizard {
+    //
     return this
   }
 }
@@ -120,9 +125,18 @@ export class WizardFrontendFramework {
   get packagesToInstall (): NxsResult<'WizardFrontendFramework', 'packagesToInstall'> {
     return []
   }
+
+  @nxs.field.boolean({
+    description: 'Whether this is the selected framework in the wizard',
+  })
+  get isSelected (): NxsResult<'WizardFrontendFramework', 'isSelected'> {
+    return true
+  }
 }
 
-@nxs.objectType()
+@nxs.objectType({
+  description: 'Wizard bundler',
+})
 export class WizardBundler {
   constructor (private wizard: Wizard, private bundler: Bundler) {}
 

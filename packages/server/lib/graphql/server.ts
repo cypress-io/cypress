@@ -31,11 +31,13 @@ export function closeGraphQLServer (): Promise<void | null> {
 export function startGraphQLServer (): {server: Server, app: Express.Application} {
   app = express()
 
+  const context = new ServerContext()
+
   app.use('/graphql', graphqlHTTP(() => {
     return {
       schema: graphqlSchema,
       graphiql: true,
-      context: new ServerContext(),
+      context,
     }
   }))
 

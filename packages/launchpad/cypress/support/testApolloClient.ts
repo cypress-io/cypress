@@ -9,7 +9,7 @@ export function testApolloClient (ctx: ClientTestContext) {
       graphql({
         source: print(op.query),
         schema: graphqlSchema,
-        contextValue: new ClientTestContext(),
+        contextValue: ctx,
       }).then((result) => {
         obs.next(result as FetchResult)
         obs.complete()

@@ -11,9 +11,8 @@ generates:
       avoidOptionals: true
       enumsAsTypes: true
     plugins:
+      - add:
+          content: '/* eslint-disable */'
       - 'typescript'
       - 'typescript-operations'
       - 'typed-document-node'
-hooks:
-  afterOneFileWrite:
-    - eslint --fix

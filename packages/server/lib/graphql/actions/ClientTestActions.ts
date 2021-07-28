@@ -6,7 +6,11 @@ export class ClientTestActions extends BaseActions {
     super(ctx)
   }
 
-  installDependencies (): void {
+  installDependencies () {
+    return
+  }
+
+  initializePlugins () {
     return
   }
 }

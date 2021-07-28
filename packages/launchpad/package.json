@@ -25,6 +25,7 @@
   "devDependencies": {
     "@apollo/client": "^3.3.21",
     "@cypress/vue": "0.0.0-development",
+    "@graphql-codegen/add": "^2.0.2",
     "@graphql-codegen/cli": "^1.21.6",
     "@graphql-codegen/typed-document-node": "^1.18.9",
     "@graphql-codegen/typescript": "^1.22.4",
