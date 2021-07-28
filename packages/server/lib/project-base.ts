@@ -4,6 +4,7 @@ import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
 
+import commitInfo from '@cypress/commit-info'
 import browsers from './browsers'
 import pkg from '@packages/root'
 import { ServerCt, SocketCt } from '@packages/server-ct'
@@ -13,6 +14,7 @@ import { Automation } from './automation'
 import config from './config'
 import cwd from './cwd'
 import errors from './errors'
+import logger from './logger'
 import Reporter from './reporter'
 import runEvents from './plugins/run_events'
 import savedState from './saved_state'
@@ -73,6 +75,12 @@ const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
+
+interface NewCiProjectDetails {
+  projectName: string
+  orgId: string | null
+  public: boolean
+}
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected watchers: Watchers
@@ -818,6 +826,37 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+  }
+
+  async writeProjectId (id: string) {
+    const attrs = { projectId: id }
+
+    logger.info('Writing Project ID', _.clone(attrs))
+
+    // TODO: We need to set this
+    this.generatedProjectIdTimestamp = new Date()
+
+    await settings.write(this.projectRoot, attrs)
+
+    return id
+  }
+
+  async createCiProject (projectDetails: NewCiProjectDetails) {
+    debug('create CI project with projectDetails %o', projectDetails)
+
+    const authToken = await user.ensureAuthToken()
+    const remoteOrigin = await commitInfo.getRemoteOrigin(this.projectRoot)
+
+    debug('found remote origin at projectRoot %o', {
+      remoteOrigin,
+      projectRoot: this.projectRoot,
+    })
+
+    const newProject = await api.createProject(projectDetails, remoteOrigin, authToken)
+
+    await this.writeProjectId(newProject.id)
+
+    return newProject
   }
 
   async verifyExistence () {

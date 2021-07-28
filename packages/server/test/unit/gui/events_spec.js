@@ -925,16 +925,17 @@ describe('lib/gui/events', () => {
 
     describe('setup:dashboard:project', () => {
       it('returns result of ProjectStatic.createCiProject', function () {
+        sinon.stub(openProject, 'createCiProject').resolves('response')
+
         return this.handleEvent('setup:dashboard:project').then((assert) => {
-          expect(this.send.firstCall.args[0]).to.eq('response')
-          expect(this.send.firstCall.args[1].id).to.match(/setup:dashboard:project-/)
+          return assert.sendCalledWith('response')
         })
       })
 
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(ProjectStatic, 'createCiProject').rejects(err)
+        sinon.stub(openProject, 'createCiProject').rejects(err)
 
         return this.handleEvent('setup:dashboard:project').then((assert) => {
           return assert.sendErrCalledWith(err)
