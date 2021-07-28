@@ -1,4 +1,14 @@
 {
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "entry"
+      }
+    ],
+    "babel-preset-typescript-vue3",
+    "@babel/preset-typescript"
+  ],
   "plugins": [
     "@babel/plugin-transform-modules-commonjs",
     [
@@ -7,6 +17,10 @@
         "extension": [
           ".js",
           ".vue"
+        ],
+        "exclude": [
+          "**/*.spec.{js,ts}",
+          "**/setup/*.vue"
         ]
       }
     ]

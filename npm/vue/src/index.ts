@@ -213,7 +213,7 @@ export function mount (
   options: CyMountOptions<any> = {},
 ) {
   // TODO: get the real displayName and props from VTU shallowMount
-  const componentName = DEFAULT_COMP_NAME
+  const componentName = getComponentDisplayName(componentOptions)
 
   const message = `<${componentName} ... />`
   let logInstance: Cypress.Log
@@ -271,6 +271,21 @@ export function mount (
       return undefined
     })
   })
+}
+
+function getComponentDisplayName (componentOptions: any): string {
+  if (componentOptions.name) {
+    return componentOptions.name
+  }
+
+  if (componentOptions.__file) {
+    const filepathSplit = componentOptions.__file.split('/')
+    const fileName = filepathSplit[filepathSplit.length - 1]
+
+    return fileName.replace(/\....?$/, '')
+  }
+
+  return DEFAULT_COMP_NAME
 }
 
 /**

@@ -1,8 +1,6 @@
 /// <reference types="cypress" />
 import MessageList from '../MessageList.vue'
-// import { mount, mountCallback } from '@cypress/vue'
-import { mount } from '@vue/test-utils'
-import { mountCallback } from '@cypress/vue'
+import { mount, mountCallback } from '@cypress/vue'
 
 // common utils for MessageList
 const getItems = () => cy.get('ul li')
@@ -16,8 +14,8 @@ describe('Props', () => {
       getItems()
       .should('have.length', 2)
       .then((list) => {
-        expect(list[0].textContent?.trim()).to.equal(messages[0])
-        expect(list[1].textContent?.trim()).to.equal(messages[1])
+        expect(list[0].textContent).to.contain(messages[0])
+        expect(list[1].textContent).to.contain(messages[1])
       })
     })
   })
@@ -76,7 +74,7 @@ describe('Props', () => {
     beforeEach(mountCallback({ template, data, components }))
 
     it('starts with two items', () => {
-      expect((Cypress.vue as any).messages).to.deep.equal(['uno', 'dos'])
+      expect(Cypress.vue.messages).to.deep.equal(['uno', 'dos'])
     })
 
     it('shows two items at the start', () => {
