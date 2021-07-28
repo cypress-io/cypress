@@ -21,8 +21,6 @@ interface SuiteProps {
 }
 
 const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
-  if (!model.shouldRender) return null
-
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
