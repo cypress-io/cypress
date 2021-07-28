@@ -30,7 +30,7 @@ describe('lib/open_project', () => {
     sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
     sinon.stub(ProjectBase.prototype, 'open').resolves()
     sinon.stub(ProjectBase.prototype, 'reset').resolves()
-    sinon.stub(ProjectBase.prototype, 'getConfig').resolves(this.config)
+    sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
     sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
