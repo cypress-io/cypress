@@ -23,6 +23,10 @@ describe('currentTest', () => {
     expect(Cypress.currentTest.title)
     .is.a('string')
     .eq(cy.state('runnable').title)
+
+    expect(Cypress.currentTest.titlePath)
+    .is.a('string')
+    .eq(cy.state('runnable').titlePath())
   })
 
   it('returns null when outside test', () => {
@@ -35,4 +39,8 @@ const expectMatchingCurrentTitleInHook = () => {
   expect(Cypress.currentTest.title)
   .is.a('string')
   .eq(cy.state('runnable').ctx.currentTest.title)
+
+  expect(Cypress.currentTest.titlePath)
+  .is.a('string')
+  .eq(cy.state('runnable').titlePath())
 }
