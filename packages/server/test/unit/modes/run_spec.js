@@ -24,7 +24,7 @@ const ProjectStatic = require(`${root}../lib/project_static`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
-    this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', projectType: 'e2e' })
+    this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })
 
   context('.getProjectId', () => {

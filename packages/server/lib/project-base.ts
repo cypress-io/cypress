@@ -28,7 +28,7 @@ import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
-import { RunnerType, SpecsStore } from './specs-store'
+import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
@@ -83,18 +83,18 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   private _recordTests?: any = null
 
   public browser: any
-  public projectType: RunnerType
+  public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
   projectRoot: string
 
   constructor ({
     projectRoot,
-    projectType,
+    testingType,
     options,
   }: {
     projectRoot: string
-    projectType: RunnerType
+    testingType: Cypress.TestingType
     options: Options
   }) {
     super()
@@ -107,14 +107,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 
-    this.projectType = projectType
+    this.testingType = testingType
     this.projectRoot = path.resolve(projectRoot)
     this.watchers = new Watchers()
     this.spec = null
     this.browser = null
 
     debug('Project created %o', {
-      projectType: this.projectType,
+      testingType: this.testingType,
       projectRoot: this.projectRoot,
     })
 
@@ -168,8 +168,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
   }
 
-  createServer (projectType: RunnerType) {
-    return projectType === 'e2e'
+  createServer (testingType: Cypress.TestingType) {
+    return testingType === 'e2e'
       ? new ServerE2E() as TServer
       : new ServerCt() as TServer
   }
@@ -178,7 +178,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = await this.getConfig()
+    let cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 
@@ -192,7 +192,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
     }
 
-    this._server = this.createServer(this.projectType)
+    this._server = this.createServer(this.testingType)
 
     cfg = await this.initializePlugins(cfg, this.options)
 
@@ -202,18 +202,19 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       ctDevServerPort,
     } = await this.initializeSpecStore(cfg)
 
-    if (this.projectType === 'ct') {
+    if (this.testingType === 'component') {
       cfg.baseUrl = `http://localhost:${ctDevServerPort}`
     }
 
     const [port, warning] = await this._server.open(cfg, {
-      project: this,
+      getCurrentBrowser: () => this.browser,
+      getSpec: () => this.spec,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      projectType: this.projectType as 'ct' | 'e2e',
-      SocketCtor: this.projectType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.projectType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      testingType: this.testingType,
+      SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
       specsStore,
     })
 
@@ -275,20 +276,25 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.saveState(stateToSave),
     ])
 
-    // start watching specs
-    // whenever a spec file is added or removed, we notify the
-    // <SpecList>
-    // This is only used for CT right now, but it will be
-    // used for E2E eventually. Until then, do not watch
-    // the specs.
-    startSpecWatcher()
-
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
       this.watchPluginsFile(cfg, this.options),
     ])
 
-    if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+    if (cfg.isTextTerminal) {
+      return
+    }
+
+    // start watching specs
+    // whenever a spec file is added or removed, we notify the
+    // <SpecList>
+    // This is only used for CT right now by general users.
+    // It is is used with E2E if the CypressInternal_UseInlineSpecList flag is true.
+    startSpecWatcher()
+
+    if (!cfg.experimentalInteractiveRunEvents) {
+      return
+    }
 
     const sys = await system.info()
     const beforeRunDetails = {
@@ -332,7 +338,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    const closePreprocessor = (this.projectType === 'e2e' && preprocessor.close) ?? undefined
+    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
 
     await Promise.all([
       this.server?.close(),
@@ -342,7 +348,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     process.chdir(localCwd)
 
-    const config = await this.getConfig()
+    const config = this.getConfig()
 
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
 
@@ -364,15 +370,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }> {
     const allSpecs = await specsUtil.find(updatedConfig)
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.projectType === 'ct') {
+      if (this.testingType === 'component') {
         return spec.specType === 'component'
       }
 
-      if (this.projectType === 'e2e') {
+      if (this.testingType === 'e2e') {
         return spec.specType === 'integration'
       }
 
-      throw Error(`Cannot return specType for projectType: ${this.projectType}`)
+      throw Error(`Cannot return specType for testingType: ${this.testingType}`)
     })
 
     return this.initSpecStore({ specs, config: updatedConfig })
@@ -421,16 +427,16 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     specs: Cypress.Cypress['spec'][]
     config: any
   }) {
-    const specsStore = new SpecsStore(config, this.projectType as RunnerType)
+    const specsStore = new SpecsStore(config, this.testingType)
 
     const startSpecWatcher = () => {
       return specsStore.watch({
         onSpecsChanged: (specs) => {
         // both e2e and CT watch the specs and send them to the
         // client to be shown in the SpecList.
-          this.server.sendSpecList(specs, this.projectType as RunnerType)
+          this.server.sendSpecList(specs, this.testingType)
 
-          if (this.projectType === 'ct') {
+          if (this.testingType === 'component') {
           // ct uses the dev-server to build and bundle the speces.
           // send new files to dev server
             devServer.updateSpecs(specs)
@@ -441,7 +447,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.projectType === 'ct') {
+    if (this.testingType === 'component') {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port
@@ -646,17 +652,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.browser = browser
   }
 
-  getCurrentSpecAndBrowser () {
-    return {
-      spec: this.spec,
-      browser: this.browser,
-    }
-  }
-
   async setBrowsers (browsers = []) {
     debug('getting config before setting browsers %o', browsers)
 
-    const cfg = await this.getConfig()
+    const cfg = this.getConfig()
 
     debug('setting config browsers to %o', browsers)
 
@@ -683,7 +682,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
-    theCfg = this.projectType === 'e2e'
+    theCfg = this.testingType === 'e2e'
       ? theCfg
       : this.injectCtSpecificConfig(theCfg)
 
@@ -715,14 +714,14 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  async getConfig (): Promise<Cfg> {
+  getConfig (): Cfg {
     if (!this._cfg) {
       throw Error('Must call #initializeConfig before accessing config.')
     }
 
     debug('project has config %o', this._cfg)
 
-    return Promise.resolve(this._cfg)
+    return this._cfg
   }
 
   // Saved state

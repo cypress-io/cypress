@@ -26,13 +26,11 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when integrationFolder is empty', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.true
       })
@@ -41,7 +39,7 @@ describe('lib/scaffold', () => {
     it('is false when integrationFolder has been changed', function () {
       const pristine = new ProjectBase({
         projectRoot: this.pristinePath,
-        projectType: 'e2e',
+        testingType: 'e2e',
         options: {
           integrationFolder: 'foo',
         },
@@ -49,9 +47,7 @@ describe('lib/scaffold', () => {
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.false
       })
@@ -61,13 +57,11 @@ describe('lib/scaffold', () => {
       const id = () => {
         const idsPath = Fixtures.projectPath('ids')
 
-        this.ids = new ProjectBase({ projectRoot: idsPath, projectType: 'e2e' })
+        this.ids = new ProjectBase({ projectRoot: idsPath, testingType: 'e2e' })
 
         return this.ids.initializeConfig()
         .then(() => {
-          return this.ids.getConfig()
-        }).then((cfg) => {
-          return this.ids.scaffold(cfg).return(cfg)
+          return this.ids.scaffold(this.ids.getConfig()).return(this.getConfig())
         }).then((cfg) => {
           return this.ids.determineIsNewProject(cfg)
         }).then((ret) => {
@@ -78,17 +72,13 @@ describe('lib/scaffold', () => {
       const todo = () => {
         const todosPath = Fixtures.projectPath('todos')
 
-        this.todos = new ProjectBase({ projectRoot: todosPath, projectType: 'e2e' })
+        this.todos = new ProjectBase({ projectRoot: todosPath, testingType: 'e2e' })
 
         return this.todos.initializeConfig()
         .then(() => {
-          return this.todos.getConfig()
-        }).then((cfg) => {
-          return this.todos.scaffold(cfg)
+          return this.todos.scaffold(this.todos.getConfig())
         }).then(() => {
-          return this.todos.getConfig()
-        }).then((cfg) => {
-          return this.todos.determineIsNewProject(cfg)
+          return this.todos.determineIsNewProject(this.todos.getConfig())
         }).then((ret) => {
           expect(ret).to.be.false
         })
@@ -98,34 +88,28 @@ describe('lib/scaffold', () => {
     })
 
     it('is true when files, name + bytes match to scaffold', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.scaffold(cfg)
+        return pristine.scaffold(pristine.getConfig())
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.true
       })
     })
 
     it('is false when bytes dont match scaffold', function () {
-      const pristine = new ProjectBase({ projectRoot: this.pristinePath, projectType: 'e2e' })
+      const pristine = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
 
       return pristine.initializeConfig()
       .then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
+        const cfg = pristine.getConfig()
+
         return pristine.scaffold(cfg)
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        const file = path.join(cfg.integrationFolder, '1-getting-started', 'todo.spec.js')
+        const file = path.join(pristine.getConfig().integrationFolder, '1-getting-started', 'todo.spec.js')
 
         // write some data to the file so it is now
         // different in file size
@@ -136,9 +120,7 @@ describe('lib/scaffold', () => {
           return fs.writeFileAsync(file, str)
         })
       }).then(() => {
-        return pristine.getConfig()
-      }).then((cfg) => {
-        return pristine.determineIsNewProject(cfg)
+        return pristine.determineIsNewProject(pristine.getConfig())
       }).then((ret) => {
         expect(ret).to.be.false
       })
