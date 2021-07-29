@@ -21,14 +21,16 @@ function serializeArgument (arg) {
 
   if (typeof arg === 'object') {
     if (_.isArray(arg)) {
-      return arg.map((argElement) => serializeArgument(argElement))
+      return arg.map(serializeArgument)
     }
 
-    return Object.keys(arg).reduce(function (acc, key) {
-      acc[key] = serializeArgument(arg[key])
+    const serializedObject = {}
 
-      return acc
-    }, {})
+    for (const [key, val] of Object.entries(arg)) {
+      serializedObject[key] = serializeArgument(val)
+    }
+
+    return serializedObject
   }
 
   return arg
