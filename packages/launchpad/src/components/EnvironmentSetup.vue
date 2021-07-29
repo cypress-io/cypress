@@ -86,8 +86,6 @@ export default defineComponent({
 
     const disabledBundlerSelect = ref(false);
 
-    debugger
-
     const setFEBundler = (bundler: SupportedBundlers) => {
       setBundler.mutate({ bundler })
     };
@@ -97,10 +95,8 @@ export default defineComponent({
     };
 
     return {
-      gql: props.gql,
       setFEFramework,
       setFEBundler,
-      bundlers: props.gql?.allBundlers,
       disabledBundlerSelect,
     };
   },
