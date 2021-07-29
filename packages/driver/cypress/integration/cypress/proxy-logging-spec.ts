@@ -12,10 +12,10 @@ describe('Proxy Logging', () => {
       const p = new Promise((_resolve) => resolve = _resolve)
 
       function testLog (log) {
-        expect(log.alias).to.eq(expectStatus ? alias : undefined)
+        expect(log.alias).to.eq(expectInterceptions.length ? alias : undefined)
         expect(log.renderProps).to.deep.include({
-          status: expectStatus,
           interceptions: expectInterceptions,
+          ...(expectStatus ? { status: expectStatus } : {}),
         })
 
         resolve()
@@ -171,7 +171,7 @@ describe('Proxy Logging', () => {
             expect(log.renderProps).to.deep.include({
               message: 'GET 200 /some-url',
               indicator: 'successful',
-              status: 'stubbed',
+              status: undefined,
               interceptions: [{
                 alias: 'alias',
                 command: 'intercept',
@@ -252,7 +252,7 @@ describe('Proxy Logging', () => {
         ))
 
         it('spied flagged as expected', testFlagFetch(
-          'spied',
+          undefined,
           [{
             command: 'intercept',
             alias,
@@ -264,7 +264,7 @@ describe('Proxy Logging', () => {
         ))
 
         it('spy function flagged as expected', testFlagFetch(
-          'spied',
+          undefined,
           [{
             command: 'intercept',
             alias,
@@ -276,7 +276,7 @@ describe('Proxy Logging', () => {
         ))
 
         it('stubbed flagged as expected', testFlagFetch(
-          'stubbed',
+          undefined,
           [{
             command: 'intercept',
             alias,
@@ -363,7 +363,7 @@ describe('Proxy Logging', () => {
         ))
 
         it('spied flagged as expected', testFlagXhr(
-          'spied',
+          undefined,
           [{
             command: 'route',
             alias,
@@ -376,7 +376,7 @@ describe('Proxy Logging', () => {
         ))
 
         it('stubbed flagged as expected', testFlagXhr(
-          'stubbed',
+          undefined,
           [{
             command: 'route',
             alias,

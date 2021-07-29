@@ -824,7 +824,7 @@ describe('src/cy/commands/xhr', () => {
               state: 'pending',
             })
 
-            expect(lastLog.get('renderProps')()).to.include({ status: 'stubbed' })
+            expect(lastLog.get('renderProps')()).to.include({ wentToOrigin: false })
 
             const snapshots = lastLog.get('snapshots')
 
@@ -855,7 +855,7 @@ describe('src/cy/commands/xhr', () => {
               state: 'pending',
             })
 
-            expect(lastLog.get('renderProps')()).to.include({ status: 'stubbed' })
+            expect(lastLog.get('renderProps')()).to.include({ wentToOrigin: false })
 
             const snapshots = lastLog.get('snapshots')
 

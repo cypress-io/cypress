@@ -35,6 +35,7 @@ describe('aliases', () => {
       addCommand(runner, {
         aliasType: 'route',
         renderProps: {
+          wentToOrigin: true,
           status: 'some status',
           interceptions: [{
             type: 'spy',
@@ -43,10 +44,10 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.badge')
-      .should('have.text', 'some status')
+      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      .should('have.text', 'some status no alias')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', 'Matched 1 cy.intercept() spy')
+      .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with no alias')
       .percySnapshot()
     })
 
@@ -54,6 +55,7 @@ describe('aliases', () => {
       addCommand(runner, {
         aliasType: 'route',
         renderProps: {
+          wentToOrigin: true,
           status: 'some status',
           interceptions: [{
             type: 'spy',
@@ -65,10 +67,12 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.badge')
-      .should('have.text', 'some status2')
+      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      .should('have.text', 'some status no alias')
+      .parent().find('.command-interceptions-count')
+      .should('have.text', '2')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', 'Matched 1 cy.intercept() spy and 1 cy.route() spy')
+      .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with no aliascy.route() spy with no alias')
       .percySnapshot()
     })
 
@@ -77,6 +81,7 @@ describe('aliases', () => {
         aliasType: 'route',
         alias: 'myAlias',
         renderProps: {
+          wentToOrigin: true,
           status: 'some status',
           interceptions: [{
             type: 'spy',
@@ -90,10 +95,12 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.badge')
-      .should('have.text', 'some statusmyAlias2')
+      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      .should('have.text', 'some status myAlias')
+      .parent().find('.command-interceptions-count')
+      .should('have.text', '2')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', 'Matched 2 cy.intercept() spies (aliased as @firstAlias, @myAlias)')
+      .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with alias @firstAliascy.intercept() spy with alias @myAlias')
       .percySnapshot()
     })
 
@@ -102,6 +109,7 @@ describe('aliases', () => {
         aliasType: 'route',
         alias: 'myAlias',
         renderProps: {
+          wentToOrigin: true,
           status: 'some status',
           interceptions: [{
             type: 'spy',
@@ -111,10 +119,10 @@ describe('aliases', () => {
         },
       })
 
-      cy.contains('.command-number', '1').parent().find('.badge')
-      .should('have.text', 'some statusmyAlias')
+      cy.contains('.command-number', '1').parent().find('.command-interceptions')
+      .should('have.text', 'some status myAlias')
       .trigger('mouseover')
-      .get('.cy-tooltip').should('have.text', 'Matched 1 cy.intercept() spy (aliased as @myAlias)')
+      .get('.cy-tooltip').should('have.text', 'This request matched:cy.intercept() spy with alias @myAlias')
       .percySnapshot()
     })
   })
@@ -252,7 +260,7 @@ describe('aliases', () => {
         .within(() => {
           cy.contains('.num-duplicates', '2')
 
-          cy.contains('.badge', 'getPosts')
+          cy.contains('.command-interceptions', 'getPosts')
         })
       })
 
@@ -266,7 +274,7 @@ describe('aliases', () => {
         .within(() => {
           cy.get('.num-duplicates').should('not.be.visible')
 
-          cy.contains('.badge', 'getPosts')
+          cy.contains('.command-interceptions', 'getPosts')
         })
       })
     })
