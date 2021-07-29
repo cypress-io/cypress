@@ -48,6 +48,7 @@ const main = async () => {
 
   const e2e = await execa('yarn', ['test-e2e'], { stdio: 'inherit' })
 
+  await resetPkg()
   await checkExit({ exitCode: e2e.exitCode, step: 'e2e' })
 }
 
