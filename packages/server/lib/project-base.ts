@@ -276,20 +276,25 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.saveState(stateToSave),
     ])
 
-    // start watching specs
-    // whenever a spec file is added or removed, we notify the
-    // <SpecList>
-    // This is only used for CT right now, but it will be
-    // used for E2E eventually. Until then, do not watch
-    // the specs.
-    startSpecWatcher()
-
     await Promise.all([
       checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
       this.watchPluginsFile(cfg, this.options),
     ])
 
-    if (cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return
+    if (cfg.isTextTerminal) {
+      return
+    }
+
+    // start watching specs
+    // whenever a spec file is added or removed, we notify the
+    // <SpecList>
+    // This is only used for CT right now by general users.
+    // It is is used with E2E if the CypressInternal_UseInlineSpecList flag is true.
+    startSpecWatcher()
+
+    if (!cfg.experimentalInteractiveRunEvents) {
+      return
+    }
 
     const sys = await system.info()
     const beforeRunDetails = {
