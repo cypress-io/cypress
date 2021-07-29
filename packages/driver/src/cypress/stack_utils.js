@@ -1,5 +1,8 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
+/**
+ * @type {typeof toExports}
+ */
 module.exports = {}
 
 const _ = require('lodash')
@@ -420,7 +423,11 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   return normalizeStackIndentation(winnowedStackLines)
 }
 
-Object.assign(module.exports, {
+// unfortunately due to our mix of typescript imports and requires
+// and circular imports, we need to mutate module.exports instead of reassign
+// so that errUtils can maintain a reference to our exports
+// and we can still mock them in testing
+const _exports = {
   replacedStack,
   getCodeFrame,
   getSourceStack,
@@ -437,4 +444,8 @@ Object.assign(module.exports, {
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
   getInvocationDetails,
-})
+}
+
+Object.assign(module.exports, _exports)
+
+module.exports = _exports

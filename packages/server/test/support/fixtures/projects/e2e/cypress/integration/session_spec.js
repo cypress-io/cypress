@@ -261,7 +261,7 @@ describe('navigates to special about:blank after session', () => {
   })
 
   it('t2', () => {
-    cy.contains('experimentalSessionSupport')
+    cy.contains('cy.session')
     cy.contains('blank page')
   })
 })

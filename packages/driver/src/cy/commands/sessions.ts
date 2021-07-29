@@ -558,7 +558,7 @@ export default function (Commands, Cypress, cy) {
           })
         }
 
-        await navigateAboutBlank()
+        cy.then(() => navigateAboutBlank())
 
         cy.then(() => sessions.clearCurrentSessionData())
         .then(() => existingSession.setup())
@@ -586,7 +586,7 @@ export default function (Commands, Cypress, cy) {
 
       // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
       function validateSession (existingSession, _onFail) {
-        navigateAboutBlank()
+        cy.then(() => navigateAboutBlank())
 
         const validatingLog = Cypress.log({
           name: 'Validate Session',
@@ -812,10 +812,6 @@ export default function (Commands, Cypress, cy) {
 }
 
 function navigateAboutBlank (session = true) {
-  // if (cy.state('window').location.href === 'about:blank') {
-  //   return Promise.resolve()
-  // }
-
   Cypress.action('cy:url:changed', '')
 
   return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
