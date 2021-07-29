@@ -140,16 +140,25 @@ const execute = (ipc, event, ids, args = []) => {
 
 let tsRegistered = false
 
+/**
+ * the plugins function can be either at the top level
+ * in a pluginsFile or in a non-dedicated cypress.config.js file
+ * This functions normalizes where the function is and runs it.
+ *
+ * @param {string} pluginsFile absolute path of the targeted file conatining the plugins function
+ * @param {string} functionName path to the function in the exported object like `"e2e.plugins"`
+ * @returns the plugins function found
+ */
 function getPluginsFunction (pluginsFile, functionName) {
   const exp = require(pluginsFile)
   const resolvedExport = exp && exp.default ? exp.default : exp
 
   if (functionName) {
-    const functionNameArray = functionName.split('.')
+    // follow the object path given in parameter to the function sought
     let finalFunction = resolvedExport
 
-    while (functionNameArray.length) {
-      finalFunction = finalFunction[functionNameArray.shift()]
+    for (const part of functionName.split('.')) {
+      finalFunction = finalFunction[part]
     }
 
     return finalFunction
