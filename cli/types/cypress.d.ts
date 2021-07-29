@@ -2467,6 +2467,10 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
+
+  type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { plugins?: PluginsFunction }
+
   interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
@@ -2714,19 +2718,17 @@ declare namespace Cypress {
     experimentalFetchPolyfill: boolean
 
     /**
-     * Override default config options for Component Testing runner.
-     * @default {}
-     */
-    component: Omit<ResolvedConfigOptions, TestingType> & { plugins?: TestingTypeFunctions }
-
-    /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: Omit<ResolvedConfigOptions, TestingType> & { plugins?: TestingTypeFunctions }
-  }
+    e2e: TestingTypeConfig
 
-  type TestingTypeFunctions = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
+    /**
+     * Override default config options for Component Testing runner.
+     * @default {}
+     */
+    component: TestingTypeConfig    
+  }
 
   /**
    * Options appended to config object on runtime.
