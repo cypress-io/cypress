@@ -21,6 +21,7 @@
     "vue": "3.1.1"
   },
   "devDependencies": {
+    "vite-plugin-purge-icons": "0.7.0",
     "@cypress/vue": "0.0.0-development",
     "@graphql-codegen/add": "^2.0.2",
     "@graphql-codegen/cli": "^1.21.6",

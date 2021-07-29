@@ -1,17 +1,28 @@
 <template>
   <button
+    style="width: fit-content"
     class="
-      border
-      px-4
-      py-2
-      rounded
-      text-sm
-      focus:border-indigo-600 focus:outline-transparent
+    flex
+    items-center
+    border
+    rounded-sm
+    gap-8px
+    focus:border-indigo-600 focus:outline-transparent
     "
-    :class="variantClasses + ' ' + additionalClasses"
+    :class="classes"
     @click="$emit('click')"
   >
-    <slot />
+    <span v-if="prefixIcon || $slots.prefix"  :class="iconClasses" class="justify-self-start">
+      <slot name="prefix">
+        <Icon :icon="prefixIcon" :class="prefixIconClass" />
+      </slot>
+    </span>
+    <span class="flex-grow"><slot /></span>
+    <span v-if="suffixIcon || $slots.suffix" :class="iconClasses" class="justify-self-end">
+      <slot name="suffix">
+        <Icon :icon="suffixIcon" :class="suffixIconClass" />
+      </slot>
+    </span>
   </button>
 </template>
 
@@ -24,9 +35,32 @@ const VariantClassesTable = {
   link: "border-transparent text-indigo-600",
 };
 
+const SizeClassesTable = {
+  sm: "px-1 py-1 text-xs",
+  md: 'px-2 py-1 text-xs',
+  lg: "px-4 py-2 text-sm",
+  xl: "px-6 py-3 text-lg"
+}
+
+const IconClassesTable = {
+  md: "h-1.25em w-1.25em",
+  lg: "h-2em w-2m",
+  xl: "h-2.5em w-2.5em"
+}
+
 export default defineComponent({
   emits: { click: null },
   props: {
+    prefixIcon: {
+      type: [String, Object] as PropType<string | ReturnType<typeof defineComponent>>,
+    },
+    suffixIcon: {
+      type: [String, Object] as PropType<string | ReturnType<typeof defineComponent>>,
+    },
+    size: {
+      type: String as PropType<"xs" | "sm" | "md" | "lg" | "xl">,
+      default: 'md'
+    },
     variant: {
       type: String as PropType<"primary" | "outline" | "link">,
       default: "primary",
@@ -35,11 +69,25 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    prefixIconClass: {
+      type: String,
+    },
+    suffixIconClass: {
+      type: String,
+    }
   },
   setup(props) {
     const variantClasses = VariantClassesTable[props.variant];
+    const sizeClasses = SizeClassesTable[props.size];
 
-    return { variantClasses, additionalClasses: props.class };
+    return {
+      iconClasses: ['flex', 'items-center', IconClassesTable[props.size]],
+      classes: [
+        variantClasses,
+        sizeClasses,
+        props.class
+      ]
+    }
   },
 });
 </script>
