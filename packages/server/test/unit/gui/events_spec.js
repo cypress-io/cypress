@@ -925,12 +925,12 @@ describe('lib/gui/events', () => {
 
     describe('set:project:id', () => {
       it('calls writeProjectId with projectRoot', function () {
-        const arg = { projectRoot: '/project/root/' }
+        const arg = { id: '1', projectRoot: '/project/root/' }
         const stub = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
 
         return this.handleEvent('set:project:id', arg)
         .then(() => {
-          expect(stub).to.be.calledWith(arg, arg.projectRoot)
+          expect(stub).to.be.calledWith(arg.id, arg.projectRoot)
           expect(this.send.firstCall.args[0]).to.eq('response')
           expect(this.send.firstCall.args[1].id).to.match(/set:project:id-/)
         })
