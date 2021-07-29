@@ -11,9 +11,10 @@ import {
   ROOT_ID,
   setupHooks,
 } from '@cypress/mount-utils'
-import { GlobalMountOptions } from '@vue/test-utils/dist/types'
 
 const DEFAULT_COMP_NAME = 'unknown'
+
+type GlobalMountOptions = Required<MountingOptions<any>>['global']
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -66,6 +67,13 @@ Cypress.on('run:start', () => {
     document.head.innerHTML = initialInnerHtml
   })
 })
+
+/**
+ * the types for mount have been copied directly from the VTU mount
+ * https://github.com/vuejs/vue-test-utils-next/blob/master/src/mount.ts
+ *
+ * If they are updated please copy and pase them again here.
+ */
 
 type PublicProps = VNodeProps & AllowedComponentProps & ComponentCustomProps;
 
@@ -273,6 +281,11 @@ export function mount (
   })
 }
 
+/**
+ * Extract the compoennt name from the object passed to mount
+ * @param componentOptions the compoennt passed to mount
+ * @returns name of the component
+ */
 function getComponentDisplayName (componentOptions: any): string {
   if (componentOptions.name) {
     return componentOptions.name
@@ -282,7 +295,11 @@ function getComponentDisplayName (componentOptions: any): string {
     const filepathSplit = componentOptions.__file.split('/')
     const fileName = filepathSplit[filepathSplit.length - 1]
 
-    return fileName.replace(/\....?$/, '')
+    // remove the extension .js, .ts or .vue from the filename to get the name of the component
+    const baseFileName = fileName.replace(/\.(js|ts|vue)?$/, '')
+
+    // if the filename is index, then we can use the direct parent foldername, else use the name itself
+    return (baseFileName === 'index' ? filepathSplit[filepathSplit.length - 2] : baseFileName)
   }
 
   return DEFAULT_COMP_NAME
