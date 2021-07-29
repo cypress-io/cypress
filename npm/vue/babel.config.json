@@ -3,14 +3,20 @@
     [
       "@babel/preset-env",
       {
-        "useBuiltIns": "entry"
+        "targets": {
+          "browsers": [
+            "last 1 Chrome version",
+            "last 1 Electron version",
+            "last 1 Firefox version"
+          ]
+        },
+        "modules": "cjs"
       }
     ],
     "babel-preset-typescript-vue3",
     "@babel/preset-typescript"
   ],
   "plugins": [
-    "@babel/plugin-transform-modules-commonjs",
     [
       "babel-plugin-istanbul",
       {

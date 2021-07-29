@@ -43,7 +43,6 @@
     "mocha": "7.1.1",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
-    "regenerator-runtime": "^0.13.9",
     "rollup": "^2.38.5",
     "rollup-plugin-istanbul": "2.0.1",
     "rollup-plugin-typescript2": "^0.29.0",
