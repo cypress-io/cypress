@@ -146,8 +146,6 @@ function removeFunctionsInObject (pluginConfigResult) {
       }
     })
   }
-
-  return pluginConfigResult
 }
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
