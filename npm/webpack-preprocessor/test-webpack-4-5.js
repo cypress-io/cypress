@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const execa = require('execa')
 const pkg = require('./package.json')
 const fs = require('fs')
@@ -27,8 +26,6 @@ const main = async () => {
     }
 
     if (step === 'e2e' || (step === 'unit' && exitCode !== 0)) {
-      console.log('Reverting to original versions:')
-      console.log(originalPkg)
       await resetPkg()
       process.exit(exitCode)
     }
