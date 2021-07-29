@@ -20,7 +20,7 @@ export const graphqlSchema = makeSchema({
   shouldGenerateArtifacts: true,
   shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN),
   // for vite
-  outputs: typeof __dirname !== 'undefined' ? {
+  outputs: dirname && __filename.endsWith('.ts') ? {
     typegen: path.join(dirname, 'gen/nxs.gen.ts'),
     schema: path.join(dirname, '..', '..', 'schema.graphql'),
   } : false,

@@ -8,8 +8,12 @@
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { Project } from "./../entities/Project"
-import type { TestingType } from "./../entities/TestingType"
-import type { Wizard, WizardFrontendFramework, WizardBundler, WizardNpmPackage } from "./../entities/Wizard"
+import type { Query } from "./../entities/Query"
+import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
+import type { Wizard } from "./../entities/Wizard"
+import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
+import type { WizardBundler } from "./../entities/WizardBundler"
+import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -69,14 +73,10 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   App: App;
-  InitPluginsStatus: { // root type
-    message?: string | null; // String
-    state: NexusGenEnums['PluginsState']; // PluginsState!
-  }
   Mutation: {};
   Project: Project;
-  Query: {};
-  TestingType: TestingType;
+  Query: Query;
+  TestingTypeInfo: TestingTypeInfo;
   Wizard: Wizard;
   WizardBundler: WizardBundler;
   WizardFrontendFramework: WizardFrontendFramework;
@@ -98,11 +98,6 @@ export interface NexusGenFieldTypes {
     activeProject: NexusGenRootTypes['Project'] | null; // Project
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['Project'][]; // [Project!]!
-    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
-  }
-  InitPluginsStatus: { // field return type
-    message: string | null; // String
-    state: NexusGenEnums['PluginsState']; // PluginsState!
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
@@ -119,23 +114,27 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     isCurrent: boolean; // Boolean!
     isOpen: boolean; // Boolean!
-    pluginStatus: NexusGenRootTypes['InitPluginsStatus']; // InitPluginsStatus!
-    plugins: boolean[]; // [Boolean!]!
+    pluginsErrorMessage: string | null; // String
+    pluginsState: NexusGenEnums['PluginsState'] | null; // PluginsState
     projectRoot: string; // String!
   }
   Query: { // field return type
-    app: NexusGenRootTypes['App'] | null; // App
+    app: NexusGenRootTypes['App']; // App!
+    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
-  TestingType: { // field return type
+  TestingTypeInfo: { // field return type
     description: string | null; // String
-    id: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
+    id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     title: string | null; // String
   }
   Wizard: { // field return type
     allBundlers: Array<NexusGenRootTypes['WizardBundler'] | null> | null; // [WizardBundler]
+    description: string | null; // String
     frameworks: Array<NexusGenRootTypes['WizardFrontendFramework'] | null> | null; // [WizardFrontendFramework]
     step: NexusGenEnums['WizardStep'] | null; // WizardStep
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
+    testingTypes: NexusGenRootTypes['TestingTypeInfo'][] | null; // [TestingTypeInfo!]
+    title: string | null; // String
   }
   WizardBundler: { // field return type
     id: NexusGenEnums['SupportedBundlers'] | null; // SupportedBundlers
@@ -160,11 +159,6 @@ export interface NexusGenFieldTypeNames {
     activeProject: 'Project'
     isFirstOpen: 'Boolean'
     projects: 'Project'
-    wizard: 'Wizard'
-  }
-  InitPluginsStatus: { // field return type name
-    message: 'String'
-    state: 'PluginsState'
   }
   Mutation: { // field return type name
     addProject: 'Project'
@@ -181,23 +175,27 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     isCurrent: 'Boolean'
     isOpen: 'Boolean'
-    pluginStatus: 'InitPluginsStatus'
-    plugins: 'Boolean'
+    pluginsErrorMessage: 'String'
+    pluginsState: 'PluginsState'
     projectRoot: 'String'
   }
   Query: { // field return type name
     app: 'App'
+    wizard: 'Wizard'
   }
-  TestingType: { // field return type name
+  TestingTypeInfo: { // field return type name
     description: 'String'
     id: 'TestingTypeEnum'
     title: 'String'
   }
   Wizard: { // field return type name
     allBundlers: 'WizardBundler'
+    description: 'String'
     frameworks: 'WizardFrontendFramework'
     step: 'WizardStep'
     testingType: 'TestingTypeEnum'
+    testingTypes: 'TestingTypeInfo'
+    title: 'String'
   }
   WizardBundler: { // field return type name
     id: 'SupportedBundlers'

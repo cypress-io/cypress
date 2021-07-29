@@ -18,9 +18,6 @@ type App {
 
   """All known projects for the app"""
   projects: [Project!]!
-
-  """Metadata about the wizard"""
-  wizard: Wizard
 }
 
 """
@@ -35,11 +32,6 @@ enum FrontendFramework {
   reactjs
   vuecli
   vuejs
-}
-
-type InitPluginsStatus {
-  message: String
-  state: PluginsState!
 }
 
 """
@@ -88,13 +80,21 @@ type Project {
   id: ID!
   isCurrent: Boolean!
   isOpen: Boolean!
-  pluginStatus: InitPluginsStatus!
-  plugins: [Boolean!]!
+
+  """If the plugin has errored, contains the associated error message"""
+  pluginsErrorMessage: String
+
+  """Plugin state for a project"""
+  pluginsState: PluginsState
   projectRoot: String!
 }
 
+"""The root "Query" type containing all entry fields for our querying"""
 type Query {
-  app: App
+  app: App!
+
+  """Metadata about the wizard, null if we arent showing the wizard"""
+  wizard: Wizard
 }
 
 """The bundlers that we can use with Cypress"""
@@ -103,15 +103,15 @@ enum SupportedBundlers {
   webpack
 }
 
-type TestingType {
-  description: String
-  id: TestingTypeEnum
-  title: String
-}
-
 enum TestingTypeEnum {
   component
   e2e
+}
+
+type TestingTypeInfo {
+  description: String
+  id: TestingTypeEnum!
+  title: String
 }
 
 """
@@ -121,6 +121,9 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler]
 
+  """The title of the page, given the current step of the wizard"""
+  description: String
+
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework]
   step: WizardStep
@@ -129,6 +132,10 @@ type Wizard {
   The testing type we are setting in the wizard, null if this has not been chosen
   """
   testingType: TestingTypeEnum
+  testingTypes: [TestingTypeInfo!]
+
+  """The title of the page, given the current step of the wizard"""
+  title: String
 }
 
 """Wizard bundler"""

@@ -17,4 +17,8 @@ export abstract class BaseContext {
   app = new App(this)
 
   isFirstOpen = false
+
+  get activeProject () {
+    return this.app.activeProject
+  }
 }

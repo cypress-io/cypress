@@ -6,6 +6,6 @@ export * from './Project'
 
 export * from './Query'
 
-export * from './TestingType'
+export * from './TestingTypeInfo'
 
 export * from './Wizard'

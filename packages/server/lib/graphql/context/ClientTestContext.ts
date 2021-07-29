@@ -6,4 +6,5 @@ import { BaseContext } from './BaseContext'
  */
 export class ClientTestContext extends BaseContext {
   readonly actions = new ClientTestActions(this)
+  readonly projects = []
 }

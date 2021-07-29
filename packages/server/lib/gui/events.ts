@@ -20,7 +20,6 @@ const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
 const openProject = require('../open_project')
-const { projects } = require('../projects')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -29,9 +28,10 @@ const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
-const { graphqlSchema } = require('../graphql/schema')
-const { startGraphQLServer } = require('../graphql/server')
-const { ServerContext } = require('../graphql/context/ServerContext')
+
+import { ServerContext } from '../graphql/context/ServerContext'
+import { graphqlSchema } from '../graphql/schema'
+import { startGraphQLServer, setServerContext } from '../graphql/server'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -40,6 +40,8 @@ const nullifyUnserializableValues = (obj) => {
     if (_.isFunction(val)) {
       return null
     }
+
+    return val
   })
 }
 
@@ -389,9 +391,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch((err) => {
         err.type = _.get(err, 'statusCode') === 403 ?
           'ALREADY_MEMBER'
-          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors && err.errors.userId, (x) => {
-            return x.join('')
-          }) ?
+          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors?.join('')) ?
             'ALREADY_REQUESTED'
             :
             err.type || 'UNKNOWN'
@@ -494,10 +494,14 @@ module.exports = {
       return
     }
 
+    // TODO: Figure out how we want to cleanup & juggle the config, so it's not jammed
+    // into the projects
+    const serverContext = setServerContext(new ServerContext())
+
     startGraphQLServer()
 
     if (options.projectRoot) {
-      projects.addProject({
+      serverContext.actions.addProject({
         projectRoot: options.projectRoot,
         testingType: options.testingType,
         isCurrent: true,
@@ -511,7 +515,7 @@ module.exports = {
           document: parse(params.text),
           operationName: params.name,
           variableValues: variables,
-          contextValue: new ServerContext(options),
+          contextValue: serverContext,
         })
 
         evt.sender.send('graphql:response', {

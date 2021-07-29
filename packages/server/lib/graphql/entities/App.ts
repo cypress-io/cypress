@@ -1,8 +1,6 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { BaseContext } from '../context/BaseContext'
-import { NexusGenTypes } from '../gen/nxs.gen'
 import { Project } from './Project'
-import { Wizard } from './Wizard'
 
 @nxs.objectType({
   description: 'Namespace for information related to the app',
@@ -15,13 +13,6 @@ export class App {
   })
   static get isFirstOpen (): NxsResult<'App', 'isFirstOpen'> {
     return true
-  }
-
-  @nxs.field.type(() => Wizard, {
-    description: 'Metadata about the wizard',
-  })
-  wizard (args, ctx: NexusGenTypes['context']): NxsResult<'App', 'wizard'> {
-    return ctx.wizard
   }
 
   @nxs.field.nonNull.list.nonNull.type(() => Project, {

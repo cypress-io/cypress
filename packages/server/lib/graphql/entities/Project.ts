@@ -1,7 +1,6 @@
-// import { createHash } from 'crypto'
-import { objectType } from 'nexus'
+import { createHash } from 'crypto'
 import { nxs, NxsResult } from 'nexus-decorators'
-import { PluginsStateEnum } from '../constants/ProjectConstants'
+import { PluginsState, PluginsStateEnum } from '../constants/ProjectConstants'
 import { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 
 export interface ProjectConfig {
@@ -13,12 +12,17 @@ export interface ProjectConfig {
   description: 'A Cypress project is a container',
 })
 export class Project {
-  constructor (private config: ProjectConfig) {}
+  readonly projectBase: ProjectBaseContract
+  private _pluginsState: PluginsState = 'uninitialized'
+  private _pluginsErrorMessage?: string
+
+  constructor (private config: ProjectConfig) {
+    this.projectBase = config.projectBase
+  }
 
   @nxs.field.nonNull.id()
   id (): NxsResult<'Project', 'id'> {
-    return '1'
-    // return createHash('sha1').update(this.projectRoot).digest('hex')
+    return createHash('sha1').update(this.projectRoot).digest('hex')
   }
 
   @nxs.field.nonNull.string()
@@ -36,23 +40,38 @@ export class Project {
     return false
   }
 
-  @nxs.field.nonNull.list.nonNull.boolean()
-  plugins (): NxsResult<'Project', 'plugins'> {
-    return []
+  @nxs.field.type(() => PluginsStateEnum, {
+    description: 'Plugin state for a project',
+  })
+  get pluginsState (): NxsResult<'Project', 'pluginsState'> {
+    return this._pluginsState
   }
 
-  @nxs.field.nonNull.type(() => InitPluginsStatus)
-  pluginStatus (): NxsResult<'Project', 'pluginStatus'> {
+  @nxs.field.string({
+    description: 'If the plugin has errored, contains the associated error message',
+  })
+  get pluginsErrorMessage (): NxsResult<'Project', 'pluginsErrorMessage'> {
+    if (this.pluginsState === 'error') {
+      return this._pluginsErrorMessage ?? null
+    }
+
+    return null
+  }
+
+  async initializePlugins (): Promise<Project> {
+    if (this.pluginsState !== 'uninitialized' && this.pluginsState !== 'error') {
+      return this
+    }
+
+    try {
+      this._pluginsState = 'initializing'
+      await this.projectBase.initializePlugins()
+      this._pluginsState = 'initialized'
+    } catch (e) {
+      this._pluginsState = 'error'
+      this._pluginsErrorMessage = e.message
+    }
+
     return this
   }
 }
-
-export const InitPluginsStatus = objectType({
-  name: 'InitPluginsStatus',
-  definition (t) {
-    t.nonNull.field('state', {
-      type: PluginsStateEnum,
-    }),
-    t.string('message')
-  },
-})

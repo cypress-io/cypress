@@ -1,4 +1,5 @@
 import { ClientTestContext } from '../context/ClientTestContext'
+import { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 import { BaseActions } from './BaseActions'
 
 export class ClientTestActions extends BaseActions {
@@ -6,11 +7,20 @@ export class ClientTestActions extends BaseActions {
     super(ctx)
   }
 
-  installDependencies () {
+  async installDependencies () {
     return
   }
 
-  initializePlugins () {
+  async initializePlugins () {
     return
+  }
+
+  createProjectBase (): ProjectBaseContract {
+    return {
+      isOpen: false,
+      async initializePlugins () {
+        return
+      },
+    }
   }
 }

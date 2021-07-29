@@ -28,16 +28,30 @@ export function closeGraphQLServer (): Promise<void | null> {
   })
 }
 
+// singleton during the lifetime of the application
+let serverContext: ServerContext | undefined
+
+// Injected this way, since we want to set this up where the IPC layer
+// is established in the server package, which should be an independent
+// layer from GraphQL
+export function setServerContext (ctx: ServerContext) {
+  serverContext = ctx
+
+  return ctx
+}
+
 export function startGraphQLServer (): {server: Server, app: Express.Application} {
   app = express()
 
-  const context = new ServerContext()
-
   app.use('/graphql', graphqlHTTP(() => {
+    if (!serverContext) {
+      throw new Error(`setServerContext has not been called`)
+    }
+
     return {
       schema: graphqlSchema,
       graphiql: true,
-      context,
+      context: serverContext,
     }
   }))
 

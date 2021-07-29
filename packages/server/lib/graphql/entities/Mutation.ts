@@ -3,7 +3,7 @@ import { BundlerEnum, FrontendFrameworkEnum, TestingTypeEnum } from '../constant
 
 export const mutation = mutationType({
   definition (t) {
-    // TODO(tim): in nexus, allow for t.wizard(...)
+    // TODO(tim): in nexus, support for t.wizard(...)
 
     t.field('wizardSetTestingType', {
       type: 'Wizard',
@@ -81,9 +81,7 @@ export const mutation = mutationType({
       description: 'Initializes the plugins for the current active project',
       async resolve (_root, args, ctx) {
         // TODO: should we await here, or return a pending state to the client?
-        await ctx.actions.initializePlugins()
-
-        return ctx.app.activeProject
+        return await ctx.activeProject?.initializePlugins() ?? null
       },
     })
   },

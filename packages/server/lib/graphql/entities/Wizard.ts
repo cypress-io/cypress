@@ -1,5 +1,8 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { FrontendFrameworkEnum, BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingType, TestingTypeEnum, BundlerDisplayNames, BundlerEnum, WizardStepEnum, WIZARD_STEP, WizardStep } from '../constants/WizardConstants'
+import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType } from '../constants/WizardConstants'
+import { TestingTypeInfo } from './TestingTypeInfo'
+import { WizardBundler } from './WizardBundler'
+import { WizardFrontendFramework } from './WizardFrontendFramework'
 
 @nxs.objectType({
   description: 'The Wizard is a container for any state associated with initial onboarding to Cypress',
@@ -24,6 +27,20 @@ export class Wizard {
     return this.chosenBundler
   }
 
+  @nxs.field.string({
+    description: 'The title of the page, given the current step of the wizard',
+  })
+  get title (): NxsResult<'Wizard', 'title'> {
+    return WIZARD_TITLES[this.currentStep]
+  }
+
+  @nxs.field.string({
+    description: 'The title of the page, given the current step of the wizard',
+  })
+  get description (): NxsResult<'Wizard', 'title'> {
+    return WIZARD_DESCRIPTIONS[this.currentStep]
+  }
+
   // GraphQL Fields:
 
   @nxs.field.type(() => WizardStepEnum)
@@ -36,6 +53,11 @@ export class Wizard {
   })
   testingType (): NxsResult<'Wizard', 'testingType'> {
     return this.chosenTestingType
+  }
+
+  @nxs.field.list.nonNull.type(() => TestingTypeInfo)
+  testingTypes (): NxsResult<'Wizard', 'testingTypes'> {
+    return TESTING_TYPES.map((t) => new TestingTypeInfo(t))
   }
 
   @nxs.field.list.type(() => WizardFrontendFramework, {
@@ -96,88 +118,5 @@ export class Wizard {
   validateManualInstall (): Wizard {
     //
     return this
-  }
-}
-
-@nxs.objectType({
-  description: 'A frontend framework that we can setup within the app',
-})
-export class WizardFrontendFramework {
-  constructor (private framework: FrontendFramework) {}
-
-  @nxs.field.type(() => FrontendFrameworkEnum, {
-    description: 'The name of the framework',
-  })
-  get name (): NxsResult<'WizardFrontendFramework', 'name'> {
-    return this.framework
-  }
-
-  @nxs.field.list.type(() => WizardBundler, {
-    description: 'All of the supported bundlers for this framework',
-  })
-  get supportedBundlers (): NxsResult<'WizardFrontendFramework', 'supportedBundlers'> {
-    return []
-  }
-
-  @nxs.field.list.type(() => WizardNpmPackage, {
-    description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
-  })
-  get packagesToInstall (): NxsResult<'WizardFrontendFramework', 'packagesToInstall'> {
-    return []
-  }
-
-  @nxs.field.boolean({
-    description: 'Whether this is the selected framework in the wizard',
-  })
-  get isSelected (): NxsResult<'WizardFrontendFramework', 'isSelected'> {
-    return true
-  }
-}
-
-@nxs.objectType({
-  description: 'Wizard bundler',
-})
-export class WizardBundler {
-  constructor (private wizard: Wizard, private bundler: Bundler) {}
-
-  @nxs.field.type(() => BundlerEnum)
-  get id (): NxsResult<'WizardBundler', 'id'> {
-    return this.bundler
-  }
-
-  @nxs.field.string()
-  get name (): NxsResult<'WizardBundler', 'name'> {
-    return BundlerDisplayNames[this.bundler]
-  }
-
-  @nxs.field.boolean({
-    description: 'Whether this is the selected framework bundler',
-  })
-  isSelected (): NxsResult<'WizardBundler', 'isSelected'> {
-    return this.wizard.bundler === this.bundler
-  }
-
-  @nxs.field.boolean({
-    description: 'Whether there are multiple options to choose from given the framework',
-  })
-  isOnlyOption (): NxsResult<'WizardBundler', 'isOnlyOption'> {
-    return true
-  }
-}
-
-@nxs.objectType({
-  description: 'Details about an NPM Package listed during the wizard install',
-})
-export class WizardNpmPackage {
-  @nxs.field.string({
-    description: 'The package name that you would npm install',
-  })
-  name (): NxsResult<'WizardNpmPackage', 'name'> {
-    return 'name'
-  }
-
-  @nxs.field.string()
-  description (): NxsResult<'WizardNpmPackage', 'description'> {
-    return 'description'
   }
 }

@@ -44,6 +44,16 @@ export const TestingTypeEnum = enumType({
   members: TESTING_TYPES,
 })
 
+export const TestingTypeNames: Record<TestingType, string> = {
+  component: 'Component Testing',
+  e2e: 'E2E Testing',
+}
+
+export const TestingTypeDescriptions: Record<TestingType, string> = {
+  component: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
+  e2e: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
+}
+
 export const WIZARD_STEP = [
   'welcome',
   'selectFramework',
@@ -58,3 +68,19 @@ export const WizardStepEnum = enumType({
   name: 'WizardStep',
   members: WIZARD_STEP,
 })
+
+export const WIZARD_TITLES: Record<WizardStep, string | null> = {
+  welcome: 'Welcome to Cypress',
+  selectFramework: 'Project Setup',
+  installDependencies: 'Install Dev Dependencies',
+  createConfig: 'Cypress.config',
+  setupComplete: 'Setup Finished',
+}
+
+export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
+  welcome: 'Choose which method of testing you would like to set up first.',
+  selectFramework: 'Confirm the front-end framework and bundler fused in your project.',
+  installDependencies: 'We need to install the following packages in order for component testing to work.',
+  createConfig: 'Cypress will now create the following config file in the local directory for this project.',
+  setupComplete: '<em>cypress.config.js</em> file was successfully added to your project.Let’s open your browser and start testing some components!',
+}

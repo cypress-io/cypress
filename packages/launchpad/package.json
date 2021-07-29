@@ -43,6 +43,7 @@
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "prismjs": "1.24.0",
+    "rollup-plugin-polyfill-node": "^0.7.0",
     "vite": "2.4.1",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",

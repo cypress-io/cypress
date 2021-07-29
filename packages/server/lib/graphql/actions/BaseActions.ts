@@ -1,33 +1,41 @@
 import { NxsMutationArgs } from 'nexus-decorators'
 import { BaseContext } from '../context/BaseContext'
+import { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 import { Project } from '../entities/Project'
 
 /**
- * Acts as the contract for all actions, implemented by ServerActions
- * and ClientTestActions
+ * Acts as the contract for all actions, inherited by:
+ *  - ServerActions
+ *  - ClientTestActions
+ *
+ * By having a "base actions" class, we can reuse this code on the client
+ * and make the client-only test doubles work as realistically as possible
  */
 export abstract class BaseActions {
   constructor (protected ctx: BaseContext) {}
 
   abstract installDependencies (): void
 
-  abstract initializePlugins(): Promise<void>
-
   /**
-   * Adds a new project
+   * Adds a new project if it doesn't already exist
    */
-  addProject (input: NxsMutationArgs<'addProject'>['input']): Project {
+  async addProject (input: NxsMutationArgs<'addProject'>['input']): Promise<Project> {
+    // Prevent adding the existing project again
     const existing = this.ctx.projects.find((p) => p.projectRoot === input.projectRoot)
 
-    // If we don't already have a projec
     if (existing) {
       return existing
     }
 
-    const newProject = new Project({ projectRoot: input.projectRoot })
+    const newProject = new Project({
+      projectRoot: input.projectRoot,
+      projectBase: await this.createProjectBase(input),
+    })
 
     this.ctx.projects.push(newProject)
 
     return newProject
   }
+
+  abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectBaseContract | Promise<ProjectBaseContract>
 }
