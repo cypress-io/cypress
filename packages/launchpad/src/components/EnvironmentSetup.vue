@@ -12,7 +12,7 @@
         name="Bundler"
         :disabled="disabledBundlerSelect"
         @select="setFEBundler"
-        :options="gql.framework?.supportedBundlers ?? gql.allBundlers"
+        :options="bundlers || []"
         :value="gql.bundler?.id ?? undefined"
         placeholder="Pick a bundler"
       />
@@ -80,7 +80,7 @@ export default defineComponent({
       required: true
     }
   },
-  setup(props) {
+  setup (props) {
     const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
     const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
 
@@ -96,6 +96,19 @@ export default defineComponent({
 
     const { result } = useQuery(WizardDocument, {})
 
+    const bundlers = useResult(result, null, data => {
+      const vals = data?.wizard?.framework?.supportedBundlers 
+        || data?.wizard?.allBundlers
+        || [] 
+
+      return vals.map<Option>(x => ({
+        name: x!.name,
+        id: x!.id!,
+        logo: './404.png',
+        description: 'TODO: add description gql server'
+      }))
+    })
+
     const frameworks = useResult(result, null, data => data?.wizard?.frameworks?.map<Option>(x => {
       return {
         name: x!.name,
@@ -106,6 +119,7 @@ export default defineComponent({
     }))
 
     return {
+      bundlers,
       frameworks,
       setFEFramework,
       setFEBundler,

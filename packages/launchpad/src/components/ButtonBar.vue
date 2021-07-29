@@ -57,7 +57,8 @@ export default defineComponent({
     const altValue = ref(false);
 
     const handleAlt = () => {
-      props.altFn?.(!altValue.value);
+      altValue.value = !altValue.value
+      props.altFn?.(altValue.value);
     };
 
     return { altValue, handleAlt };

@@ -1,7 +1,7 @@
 <template>
   <div
     :key="pkg.name"
-    v-for="(pkg, index) in gql.packagesToInstall ?? []"
+    v-for="(pkg, index) in packagesToInstall ?? []"
     class="flex text-left"
     :class="index > 0 ? 'border-t border-t-gray-200' : undefined"
   >
@@ -14,8 +14,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import { Pkg } from './InstallDependencies.vue'
 import { gql } from '@apollo/client'
-import { PackagesListFragment } from "../generated/graphql";
 
 gql`
 fragment PackagesList on Wizard {
@@ -28,15 +28,9 @@ fragment PackagesList on Wizard {
 
 export default defineComponent({
   props: {
-    gql: {
-      type: Object as PropType<PackagesListFragment>,
-      required: true
+    packagesToInstall: {
+      type: Array as PropType<readonly Pkg[]>
     }
-  },
-  setup(props) {
-    return { 
-      gql: props.gql
-    };
   },
 });
 </script>

@@ -49,7 +49,6 @@ import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { getCode, languages } from "../utils/configFile";
-import { useStoreApp } from "../store/app";
 
 export default defineComponent({
   components: {
@@ -58,7 +57,6 @@ export default defineComponent({
     CopyButton,
   },
   setup() {
-    const store = useStoreApp();
     const manualInstall = ref(false);
     const tsInstalled = ref(false);
     const language = ref<"js" | "ts">("ts");
@@ -78,24 +76,24 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      store.setMeta(originalText);
+      // store.setMeta(originalText);
 
-      store.onNext(() => {
-        store.finishSetup();
-      });
+      // store.onNext(() => {
+      //   store.finishSetup();
+      // });
 
-      store.onBack(() => {
-        store.flagDependenciesInstalled(false);
-      });
+      // store.onBack(() => {
+      //   store.flagDependenciesInstalled(false);
+      // });
 
-      store.onAlt(() => {
-        manualInstall.value = !manualInstall.value;
-        store.setMeta(manualInstall.value ? manualText : originalText);
-      });
+      // store.onAlt(() => {
+      //   manualInstall.value = !manualInstall.value;
+      //   store.setMeta(manualInstall.value ? manualText : originalText);
+      // });
 
-      import("prismjs/components/prism-typescript").then(() => {
-        tsInstalled.value = true;
-      });
+      // import("prismjs/components/prism-typescript").then(() => {
+      //   tsInstalled.value = true;
+      // });
     });
 
     const code = computed(() => getCode(language.value));
