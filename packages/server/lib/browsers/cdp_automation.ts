@@ -68,10 +68,8 @@ export function isHostOnlyCookie (cookie) {
 
   const parsedDomain = cors.parseDomain(cookie.domain)
 
-  // normally, a non-hostOnly cookie should be prefixed with a .
-  // so if it's not a top-level domain (localhost, ...) or IP address
-  // prefix it with a . so it becomes a non-hostOnly cookie
-
+  // make every cookie non-hostOnly
+  // unless it's a top-level domain (localhost, ...) or IP address
   return parsedDomain && parsedDomain.tld !== cookie.domain
 }
 

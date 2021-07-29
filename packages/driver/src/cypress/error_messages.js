@@ -1443,8 +1443,13 @@ _.extend(module.exports, {
   },
 
   sessions: {
-    callback_returned_false: {
+    validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}',
+    },
+    experimentNotEnabled: {
+      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
+      docsUrl: 'https://on.cypress.io/session',
+
     },
     session: {
       missing_argument: {
@@ -1454,6 +1459,31 @@ _.extend(module.exports, {
       duplicateId: {
         message: stripIndent`
         You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgId: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid argument. The first argument \`id\` must be an string or serializable object.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptions: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid argument. The optional third argument \`options\` must be an object.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptionUnexpected: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid option: **{{key}}**
+        Available options are: \`validate\`
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptionInvalid: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
         docsUrl: 'https://on.cypress.io/session',
       },

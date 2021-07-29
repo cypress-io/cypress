@@ -98,6 +98,7 @@ describe('e2e cookies spec', () => {
     // a hostOnly cookie is set in the browser by omitting the 'domain' property
     // so for cross-domain cookies users need to add hostOnly: true as well as 'domain'
     // TODO: un-skip when we rework cookie API to support setting hostOnly thirdparty cookies.
+    // https://github.com/cypress-io/cypress/issues/17527
     it.skip('can set hostOnly cookies', () => {
       cy.setCookie('one', 'bar', { hostOnly: true, domain: 'example.com' })
       cy.setCookie('one', 'bar', { hostOnly: true })

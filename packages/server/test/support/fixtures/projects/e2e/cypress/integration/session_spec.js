@@ -475,7 +475,7 @@ describe('options.validate failing test', () => {
   it('test fails when options.validate after setup fails command', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).contain('foo')
-      expect(err.message).contain('session validate hook')
+      expect(err.message).contain('in a session validate hook')
       expect(err.message).not.contain('not from Cypress')
       expect(err.codeFrame).exist
 
@@ -493,7 +493,7 @@ describe('options.validate failing test', () => {
 
   it('test fails when options.validate after setup throws', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).contain('session validate hook')
+      expect(err.message).contain('in a session validate hook')
       expect(err.message).not.contain('not from Cypress')
       expect(err.codeFrame).exist
 
@@ -512,7 +512,7 @@ describe('options.validate failing test', () => {
   it('test fails when options.validate after setup rejects', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).contain('validate error')
-      expect(err.message).contain('session validate hook')
+      expect(err.message).contain('in a session validate hook')
       expect(err.message).not.contain('not from Cypress')
       expect(err.codeFrame).exist
 
@@ -531,7 +531,7 @@ describe('options.validate failing test', () => {
   it('test fails when options.validate after setup returns false', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).contain('returned false')
-      expect(err.message).contain('session validate hook')
+      expect(err.message).contain('in a session validate hook')
       expect(err.message).not.contain('not from Cypress')
       expect(err.codeFrame).exist
 
@@ -550,7 +550,7 @@ describe('options.validate failing test', () => {
   it('test fails when options.validate after setup resolves false', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).contain('callback resolved false')
-      expect(err.message).contain('session validate hook')
+      expect(err.message).contain('in a session validate hook')
       expect(err.message).not.contain('not from Cypress')
       expect(err.codeFrame).exist
 
@@ -573,7 +573,7 @@ describe('options.validate failing test', () => {
   it('test fails when options.validate after setup returns Chainer<false>', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).contain('callback resolved false')
-      expect(err.message).contain('session validate hook')
+      expect(err.message).contain('in a session validate hook')
       expect(err.message).not.contain('not from Cypress')
       done()
     })

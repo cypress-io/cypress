@@ -970,12 +970,14 @@ declare namespace Cypress {
      */
     debug(options?: Partial<Loggable>): Chainable<Subject>
 
-    /**
-     * Apply a Session's cookie/localStorage data to the current test
+   /**
+     * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
+     *
+     * Only available if the `experimentalSessionSupport` config option is enabled.
      *
      * @see https://on.cypress.io/session
      */
-    session(id: string, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
+    session(id: string|object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.

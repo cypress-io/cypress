@@ -48,6 +48,8 @@ export const createRoutes = ({
   })
 
   app.get('/__cypress/automation/getLocalStorage', (req, res) => {
+    // gathers and sends localStorage and sessionStorage via postMessage to the Cypress frame
+    // detect existence of local/session storage with JSON.stringify(...).length since localStorage.length may not be accurate
     res.send(`<html><body><script>(${(function () {
       const _localStorageStr = JSON.stringify(window.localStorage)
       const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
@@ -73,8 +75,6 @@ export const createRoutes = ({
 
   /* eslint-disable no-undef */
   app.get('/__cypress/automation/setLocalStorage', (req, res) => {
-    // const origin = req.host
-
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true

@@ -5,9 +5,22 @@ const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
 const $Location = require('../../cypress/location')
 
-const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite hostOnly'.split(' ')
+// TODO: add hostOnly to COOKIE_PROPS
+// https://github.com/cypress-io/cypress/issues/363
+// https://github.com/cypress-io/cypress/issues/17527
+const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite'.split(' ')
 
 const commandNameRe = /(:)(\w)/
+
+function pickCookieProps (cookie) {
+  if (!cookie) return cookie
+
+  if (_.isArray(cookie)) {
+    return cookie.map(pickCookieProps)
+  }
+
+  return _.pick(cookie, COOKIE_PROPS)
+}
 
 const getCommandFromEvent = (event) => {
   return event.replace(commandNameRe, (match, p1, p2) => {
@@ -65,20 +78,6 @@ function cookieValidatesSecurePrefix (options) {
   return options.secure === false
 }
 
-// TODO: do something with the hostOnly property. Right now we dont return it
-// to prevent changes to the API. We will rework cookies in the future.
-function removeHostOnly (cookie) {
-  if (!cookie) return cookie
-
-  if (_.isArray(cookie)) {
-    return cookie.map(removeHostOnly)
-  }
-
-  delete cookie.hostOnly
-
-  return cookie
-}
-
 module.exports = function (Commands, Cypress, cy, state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
@@ -123,7 +122,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('clear:cookies', cookies, log, timeout)
     })
-    .then(removeHostOnly)
+    .then(pickCookieProps)
   }
 
   const handleBackendError = (command, action, onFail) => {
@@ -202,7 +201,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
-      .then(removeHostOnly)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookie = resp
 
@@ -240,7 +239,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
-      .then(removeHostOnly)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookies = resp
 
@@ -263,7 +262,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         timeout: config('responseTimeout'),
       })
 
-      const cookie = _.pick(options, COOKIE_PROPS)
+      const cookie = pickCookieProps(options)
 
       if (options.log) {
         options._log = Cypress.log({
@@ -322,7 +321,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
-      .then(removeHostOnly)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookie = resp
 
@@ -369,7 +368,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)
-      .then(removeHostOnly)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookie = resp
 

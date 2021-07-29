@@ -5,6 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
 import * as $stackUtils from '../../cypress/stack_utils'
 const currentTestRegisteredSessions = new Map()
+
 const getSessionDetails = (sessState) => {
   return {
     id: sessState.id,
@@ -13,6 +14,7 @@ const getSessionDetails = (sessState) => {
       ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: Object.keys(v.value).length } })),
     ) }
 }
+
 const getSessionDetailsForTable = (sessState) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
@@ -57,6 +59,7 @@ export default function (Commands, Cypress, cy) {
 
     cy.state('activeSessions', newSessions)
   }
+
   const getActiveSession = (id) => {
     const currentSessions = cy.state('activeSessions') || {}
 
@@ -69,16 +72,16 @@ export default function (Commands, Cypress, cy) {
   }
 
   async function mapOrigins (origins) {
-    const current_origin = $Location.create(window.location.href).origin
+    const currentOrigin = $Location.create(window.location.href).origin
 
     return _.uniq(
       _.flatten(await Promise.map(
         ([] as string[]).concat(origins), async (v) => {
           if (v === '*') {
-            return _.keys(await Cypress.backend('get:renderedHTMLOrigins')).concat([current_origin])
+            return _.keys(await Cypress.backend('get:renderedHTMLOrigins')).concat([currentOrigin])
           }
 
-          if (v === 'current_origin') return current_origin
+          if (v === 'currentOrigin') return currentOrigin
 
           return $Location.create(v).origin
         },
@@ -89,12 +92,12 @@ export default function (Commands, Cypress, cy) {
   async function _setStorageOnOrigins (originOptions) {
     const specWindow = cy.state('specWindow')
 
-    const current_origin = $Location.create(window.location.href).origin
+    const currentOrigin = $Location.create(window.location.href).origin
 
-    const current_origin_options_index = _.findIndex(originOptions, { origin: current_origin })
+    const currentOriginIndex = _.findIndex(originOptions, { origin: currentOrigin })
 
-    if (current_origin_options_index !== -1) {
-      const opts = originOptions.splice(current_origin_options_index, 1)[0]
+    if (currentOriginIndex !== -1) {
+      const opts = originOptions.splice(currentOriginIndex, 1)[0]
 
       if (!_.isEmpty(opts.localStorage)) {
         if (opts.localStorage.clear) {
@@ -125,7 +128,7 @@ export default function (Commands, Cypress, cy) {
 
     // if we're on an https domain, there is no way for the secure context to access insecure origins from iframes
     // since there is no way for the app to access localStorage on insecure contexts, we don't have to clear any localStorage on http domains.
-    if (current_origin.startsWith('https:')) {
+    if (currentOrigin.startsWith('https:')) {
       _.remove(origins, (v) => v.startsWith('http:'))
     }
 
@@ -162,6 +165,7 @@ export default function (Commands, Cypress, cy) {
 
       specWindow.addEventListener('message', onPostMessage)
     })
+    // timeout just in case something goes wrong and the iframe never loads in
     .timeout(2000)
     .catch((err) => {
       Cypress.log({
@@ -176,17 +180,16 @@ export default function (Commands, Cypress, cy) {
   }
 
   async function getAllHtmlOrigins () {
-    const current_origin = $Location.create(window.location.href).origin
+    const currentOrigin = $Location.create(window.location.href).origin
 
-    const origins = _.uniq([..._.keys(await Cypress.backend('get:renderedHTMLOrigins')), current_origin]) as string[]
+    const origins = _.uniq([..._.keys(await Cypress.backend('get:renderedHTMLOrigins')), currentOrigin]) as string[]
 
     return origins
   }
 
   function throwIfNoSessionSupport () {
     if (!Cypress.config('experimentalSessionSupport')) {
-      // TODO: proper error msg
-      throw new Error('experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands')
+      $errUtils.throwErrByPath('sessions.experimentNotEnabled')
     }
   }
 
@@ -279,7 +282,7 @@ export default function (Commands, Cypress, cy) {
     },
 
     /**
-     * 1) if we only need current_origin localStorage, access sync
+     * 1) if we only need currentOrigin localStorage, access sync
      * 2) if cross-origin http, we need to load in iframe from our proxy that will intercept all http reqs at /__cypress/automation/*
      *      and postMessage() the localStorage value to us
      * 3) if cross-origin https, since we pass-thru https conntections in the proxy, we need to
@@ -294,10 +297,10 @@ export default function (Commands, Cypress, cy) {
       }
 
       const opts = _.defaults({}, options, {
-        origin: 'current_origin',
+        origin: 'currentOrigin',
       })
 
-      const current_origin = $Location.create(window.location.href).origin
+      const currentOrigin = $Location.create(window.location.href).origin
 
       const origins = await mapOrigins(opts.origin)
 
@@ -319,7 +322,7 @@ export default function (Commands, Cypress, cy) {
         }
       }
 
-      const currentOriginIndex = origins.indexOf(current_origin)
+      const currentOriginIndex = origins.indexOf(currentOrigin)
 
       if (currentOriginIndex !== -1) {
         origins.splice(currentOriginIndex, 1)
@@ -340,14 +343,14 @@ export default function (Commands, Cypress, cy) {
           value.sessionStorage = _sessionStorage
         }
 
-        pushValue(current_origin, value)
+        pushValue(currentOrigin, value)
       }
 
       if (_.isEmpty(origins)) {
         return getResults()
       }
 
-      if (current_origin.startsWith('https:')) {
+      if (currentOrigin.startsWith('https:')) {
         _.remove(origins, (v) => v.startsWith('http:'))
       }
 
@@ -366,6 +369,8 @@ export default function (Commands, Cypress, cy) {
       const successOrigins = [] as string[]
 
       await new Promise((resolve) => {
+        // when the cross-domain iframe for each domain is loaded
+        // we can only communicate through postmessage
         onPostMessage = ((event) => {
           const data = event.data
 
@@ -383,6 +388,8 @@ export default function (Commands, Cypress, cy) {
 
         specWindow.addEventListener('message', onPostMessage)
       })
+      // timeout just in case something goes wrong and the iframe never loads in
+      .timeout(2000)
       .catch((err) => {
         Cypress.log({
           name: 'warning',
@@ -409,9 +416,9 @@ export default function (Commands, Cypress, cy) {
     },
 
     async setStorage (options: any, clearAll = false) {
-      const current_origin = $Location.create(window.location.href).origin as string
+      const currentOrigin = $Location.create(window.location.href).origin as string
 
-      const mapToCurrentOrigin = (v) => ({ ...v, origin: (v.origin && v.origin !== 'current_origin') ? $Location.create(v.origin).origin : current_origin })
+      const mapToCurrentOrigin = (v) => ({ ...v, origin: (v.origin && v.origin !== 'currentOrigin') ? $Location.create(v.origin).origin : currentOrigin })
 
       const mappedLocalStorage = _.map(options.localStorage, (v) => {
         const mapped = { origin: v.origin, localStorage: _.pick(v, 'value', 'clear') }
@@ -467,18 +474,18 @@ export default function (Commands, Cypress, cy) {
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
-        throw new Error('cy.session requires a string or object as the first argument')
+        $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }
 
       // backup session command so we can set it as codeFrame location for errors later on
       const sessionCommand = cy.state('current')
 
-      // stringfy determinitically if we were given an object
+      // stringfy deterministically if we were given an object
       id = typeof id === 'string' ? id : stringifyStable(id)
 
       if (options) {
         if (!_.isObject(options)) {
-          throw new Error('cy.session optional third argument must be an object')
+          $errUtils.throwErrByPath('sessions.session.wrongArgOptions')
         }
 
         const validopts = {
@@ -489,13 +496,13 @@ export default function (Commands, Cypress, cy) {
           const expectedType = validopts[key]
 
           if (!expectedType) {
-            throw new Error(`unexpected option **${key}** passed to cy.session options`)
+            $errUtils.throwErrByPath('sessions.session.wrongArgOptionUnexpected', { args: { key } })
           }
 
           const actualType = typeof options[key]
 
           if (actualType !== expectedType) {
-            throw new Error(`invalid option **${key}** passed to cy.session options. Expected **${expectedType}**, got ${actualType}`)
+            $errUtils.throwErrByPath('sessions.session.wrongArgOptionInvalid', { args: { key, expected: expectedType, actual: actualType } })
           }
         })
       }
@@ -511,7 +518,7 @@ export default function (Commands, Cypress, cy) {
 
         if (isUniqSessionDefinition) {
           if (currentTestRegisteredSessions.has(id)) {
-            throw $errUtils.errByPath('sessions.session.duplicateId', { id: existingSession.id })
+            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id: existingSession.id } })
           }
 
           existingSession = sessions.defineSession({
@@ -578,8 +585,6 @@ export default function (Commands, Cypress, cy) {
 
           // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
           // eslint-disable-next-line no-console
-
-          // eslint-disable-next-line no-console
           return Cypress.backend('save:session', { ...existingSession, setup: existingSession.setup.toString() }).catch(console.error)
         })
       }
@@ -634,7 +639,7 @@ export default function (Commands, Cypress, cy) {
             if (val === false) {
               // set current command to cy.session for more accurate codeFrame
               cy.state('current', sessionCommand)
-              throw $errUtils.errByPath('sessions.callback_returned_false', { reason: 'resolved false' })
+              $errUtils.throwErrByPath('sessions.validate_callback_false', { args: { reason: 'resolved false' } })
             }
 
             onSuccess()
@@ -677,15 +682,14 @@ export default function (Commands, Cypress, cy) {
             // set current command to cy.session for more accurate codeframe
             cy.state('current', sessionCommand)
 
-            return onFail($errUtils.errByPath('sessions.callback_returned_false', { reason: 'returned false' }))
-            // return onFail((new Error('Your `cy.session` **validate** callback returned false.')))
+            return onFail($errUtils.errByPath('sessions.validate_callback_false', { reason: 'returned false' }))
           }
 
           if (returnVal === undefined || Cypress.isCy(returnVal)) {
             const val = cy.state('current').get('prev')?.attributes?.subject
 
             if (val === false) {
-              return onFail((new Error('Your `cy.session` **validate** callback resolved false')))
+              return onFail($errUtils.errByPath('sessions.validate_callback_false', { reason: 'resolved false' }))
             }
           }
 
@@ -749,7 +753,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       const throwValidationError = (err) => {
-        err.message += '\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.'
+        $errUtils.modifyErrMsg(err, `\n\nThis error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.`, _.add)
 
         cy.fail(err)
       }
