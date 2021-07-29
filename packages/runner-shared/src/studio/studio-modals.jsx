@@ -28,7 +28,7 @@ export class StudioInstructionsModal extends Component {
           </h1>
           <div className='content center'>
             <div className='text'>
-              Generate and save commands directly to your test suite by interacting with your app as an end user would. Studio will track events that generate the following commands:
+              Generate and save commands directly to your test suite by interacting with your app as an end user would. Right click on an element to add an assertion. Studio will track events that generate the following commands:
             </div>
             <div className='text center-box'>
               <ul>
