@@ -337,7 +337,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'set:project:id':
-      return ProjectStatic.writeProjectId(arg, arg.projectRoot)
+      return ProjectStatic.writeProjectId(arg.id, arg.projectRoot)
       .then(send)
       .catch(sendErr)
 

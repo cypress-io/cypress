@@ -380,7 +380,7 @@ class SetupProject extends Component {
       })
     }
 
-    return dashboardProjectsApi.setProjectId(this.state.selectedProjectId)
+    return dashboardProjectsApi.setProjectId(this.state.selectedProjectId, this.props.project.path)
     .then((id) => {
       const project = dashboardProjectsStore.getProjectById(id)
 
