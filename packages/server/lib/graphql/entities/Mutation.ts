@@ -35,9 +35,9 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Sets the frontend bundler we want to use for the project',
       args: {
-        name: BundlerEnum,
+        bundler: nonNull(BundlerEnum),
       },
-      resolve: (root, args, ctx) => ctx.wizard.setBundler(args.name),
+      resolve: (root, args, ctx) => ctx.wizard.setBundler(args.bundler),
     })
 
     t.field('wizardInstallDependencies', {

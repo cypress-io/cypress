@@ -56,7 +56,7 @@ type Mutation {
   wizardNavigateForward: Wizard
 
   """Sets the frontend bundler we want to use for the project"""
-  wizardSetBundler(name: SupportedBundlers): Wizard
+  wizardSetBundler(bundler: SupportedBundlers!): Wizard
 
   """Sets the frontend framework we want to use for the project"""
   wizardSetFramework(framework: FrontendFramework!): Wizard
@@ -119,14 +119,22 @@ The Wizard is a container for any state associated with initial onboarding to Cy
 """
 type Wizard {
   """All of the bundlers to choose from"""
-  allBundlers: [WizardBundler]
+  allBundlers: [WizardBundler!]!
+  bundler: WizardBundler
+  canNavigateForward: Boolean!
 
   """The title of the page, given the current step of the wizard"""
   description: String
+  framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework]
-  step: WizardStep
+
+  """
+  A list of packages to install, null if we have not chosen both a framework and bundler
+  """
+  packagesToInstall: [WizardNpmPackage!]
+  step: WizardStep!
 
   """
   The testing type we are setting in the wizard, null if this has not been chosen
@@ -140,39 +148,37 @@ type Wizard {
 
 """Wizard bundler"""
 type WizardBundler {
-  id: SupportedBundlers
+  id: SupportedBundlers!
 
   """Whether there are multiple options to choose from given the framework"""
   isOnlyOption: Boolean
 
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
-  name: String
+  name: String!
 }
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework {
+  """The name of the framework"""
+  id: FrontendFramework
+
   """Whether this is the selected framework in the wizard"""
-  isSelected: Boolean
+  isSelected: Boolean!
 
   """The name of the framework"""
-  name: FrontendFramework
-
-  """
-  A list of packages to install, null if we have not chosen both a framework and bundler
-  """
-  packagesToInstall: [WizardNpmPackage]
+  name: String!
 
   """All of the supported bundlers for this framework"""
-  supportedBundlers: [WizardBundler]
+  supportedBundlers: [WizardBundler!]!
 }
 
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage {
-  description: String
+  description: String!
 
   """The package name that you would npm install"""
-  name: String
+  name: String!
 }
 
 enum WizardStep {

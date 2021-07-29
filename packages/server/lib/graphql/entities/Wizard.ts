@@ -3,6 +3,7 @@ import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnu
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
 import { WizardFrontendFramework } from './WizardFrontendFramework'
+import { BundleMapping, PackageMapping, WizardNpmPackage } from './WizardNpmPackage'
 
 @nxs.objectType({
   description: 'The Wizard is a container for any state associated with initial onboarding to Cypress',
@@ -19,12 +20,28 @@ export class Wizard {
     this.chosenFramework = null
   }
 
-  get framework (): FrontendFramework | null {
-    return this.chosenFramework
+  @nxs.field.type(() => WizardFrontendFramework)
+  get framework (): NxsResult<'Wizard', 'framework'> | null {
+    return this.chosenFramework ? new WizardFrontendFramework(this, this.chosenFramework) : null
   }
 
-  get bundler (): Bundler | null {
-    return this.chosenBundler
+  @nxs.field.type(() => WizardBundler)
+  get bundler (): NxsResult<'Wizard', 'bundler'> | null {
+    return this.chosenBundler ? new WizardBundler(this, this.chosenBundler) : null
+  }
+
+  @nxs.field.list.nonNull.type(() => WizardNpmPackage, {
+    description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
+  })
+  get packagesToInstall (): NxsResult<'WizardFrontendFramework', 'packagesToInstall'> {
+    if (!this.chosenFramework || !this.chosenBundler) {
+      return null
+    }
+
+    return [
+      new WizardNpmPackage(PackageMapping[this.chosenFramework]),
+      new WizardNpmPackage(BundleMapping[this.chosenBundler]),
+    ]
   }
 
   @nxs.field.string({
@@ -43,7 +60,7 @@ export class Wizard {
 
   // GraphQL Fields:
 
-  @nxs.field.type(() => WizardStepEnum)
+  @nxs.field.nonNull.type(() => WizardStepEnum)
   step (): NxsResult<'Wizard', 'step'> {
     return this.currentStep
   }
@@ -64,10 +81,10 @@ export class Wizard {
     description: 'All of the component testing frameworks to choose from',
   })
   frameworks (): NxsResult<'Wizard', 'frameworks'> {
-    return FRONTEND_FRAMEWORK.map((f) => new WizardFrontendFramework(f))
+    return FRONTEND_FRAMEWORK.map((f) => new WizardFrontendFramework(this, f))
   }
 
-  @nxs.field.list.type(() => WizardBundler, {
+  @nxs.field.nonNull.list.nonNull.type(() => WizardBundler, {
     description: 'All of the bundlers to choose from',
   })
   allBundlers (): NxsResult<'Wizard', 'allBundlers'> {
@@ -93,6 +110,12 @@ export class Wizard {
     this.chosenBundler = bundler ?? null
 
     return this
+  }
+
+  @nxs.field.nonNull.boolean()
+  canNavigateForward (): NxsResult<'Wizard', 'canNavigateForward'> {
+    // TODO: add constraints here to determine if we can move forward
+    return true
   }
 
   navigateBack (): Wizard {

@@ -8,12 +8,12 @@ import { Wizard } from './Wizard'
 export class WizardBundler {
   constructor (private wizard: Wizard, private bundler: Bundler) {}
 
-  @nxs.field.type(() => BundlerEnum)
+  @nxs.field.nonNull.type(() => BundlerEnum)
   get id (): NxsResult<'WizardBundler', 'id'> {
     return this.bundler
   }
 
-  @nxs.field.string()
+  @nxs.field.nonNull.string()
   get name (): NxsResult<'WizardBundler', 'name'> {
     return BundlerDisplayNames[this.bundler]
   }
@@ -22,13 +22,14 @@ export class WizardBundler {
     description: 'Whether this is the selected framework bundler',
   })
   isSelected (): NxsResult<'WizardBundler', 'isSelected'> {
-    return this.wizard.bundler === this.bundler
+    return this.wizard.bundler?.id === this.bundler
   }
 
   @nxs.field.boolean({
     description: 'Whether there are multiple options to choose from given the framework',
   })
   isOnlyOption (): NxsResult<'WizardBundler', 'isOnlyOption'> {
-    return true
+    // TODO: base this on the options available
+    return false
   }
 }

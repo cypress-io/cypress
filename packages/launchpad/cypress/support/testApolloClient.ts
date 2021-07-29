@@ -1,7 +1,8 @@
-import { ApolloLink, FetchResult, ApolloClient, InMemoryCache, Observable } from '@apollo/client/core'
+import { ApolloLink, FetchResult, ApolloClient, Observable } from '@apollo/client/core'
 import { graphqlSchema } from '@packages/server/lib/graphql/schema'
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 import { graphql, print } from 'graphql'
+import { makeApolloCache } from '../../src/graphql/apolloClient'
 
 export function testApolloClient (ctx: ClientTestContext) {
   const ipcLink = new ApolloLink((op) => {
@@ -22,6 +23,6 @@ export function testApolloClient (ctx: ClientTestContext) {
 
   return new ApolloClient({
     link: ipcLink,
-    cache: new InMemoryCache(),
+    cache: makeApolloCache(),
   })
 }

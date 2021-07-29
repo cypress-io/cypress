@@ -4,16 +4,16 @@
       <Select
         name="Front-end Framework"
         @select="setFEFramework"
-        :options="frameworks"
-        :value="selectedFrameworkId"
+        :options="gql.frameworks"
+        :value="gql.framework?.id ?? undefined"
         placeholder="Pick a framework"
       />
       <Select
         name="Bundler"
         :disabled="disabledBundlerSelect"
         @select="setFEBundler"
-        :options="bundlers"
-        :value="selectedBundlerId"
+        :options="gql.framework?.supportedBundlers ?? gql.allBundlers"
+        :value="gql.bundler?.id ?? undefined"
         placeholder="Pick a bundler"
       />
     </div>
@@ -21,114 +21,86 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import Select from "./Select.vue";
+import { gql } from '@apollo/client/core'
+import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
+import { useMutation} from '@vue/apollo-composable'
 
-import { Framework, supportedFrameworks } from "../utils/frameworks";
-import { Bundler, supportedBundlers } from "../utils/bundler";
-import { useStoreApp } from "../store/app";
-import { useStoreConfig } from "../store/config";
+gql`
+mutation EnvironmentSetupSetFramework($framework: FrontendFramework!) {
+  wizardSetFramework(framework: $framework) {
+    ...EnvironmentSetup
+  }
+}
+`
+
+gql`
+mutation EnvironmentSetupSetBundler($bundler: SupportedBundlers!) {
+  wizardSetBundler(bundler: $bundler) {
+    ...EnvironmentSetup
+  }
+}
+`
+
+gql`
+fragment EnvironmentSetup on Wizard {
+  bundler {
+    id
+    name
+  }
+  framework {
+    id
+    name
+    supportedBundlers {
+      id
+      name
+      isOnlyOption
+    }
+  }
+  frameworks {
+    id
+    name
+    isSelected
+  }
+  allBundlers {
+    id
+    name
+    isOnlyOption
+  }
+}
+`
 
 export default defineComponent({
   components: { WizardLayout, Select },
   props: {
-    detectedFramework: {
-      type: String,
-      default: "none",
-    },
-    detectedBundler: {
-      type: String,
-      default: "none",
-    },
+    gql: {
+      type: Object as PropType<EnvironmentSetupFragment>,
+      required: true
+    }
   },
   setup(props) {
-    const storeApp = useStoreApp();
-    const storeConfig = useStoreConfig()
+    const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
+    const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
 
-    const selectedFramework = ref<Framework | undefined>(undefined);
-    const selectedFrameworkId = ref(props.detectedFramework);
-    const selectedBundler = ref<Bundler | undefined>(undefined);
-    const selectedBundlerId = ref(props.detectedBundler);
-
-    onMounted(() => {
-      storeApp.setMeta({
-        title: "Project Setup",
-        description:
-          "Confirm the front-end framework and bundler fused in your project.",
-      });
-
-      storeApp.onBack(() => {
-        storeApp.flagComponent(false);
-      });
-
-      storeApp.onNext(() => {
-        if (!selectedFramework.value || !selectedBundler.value) {
-          return;
-        }
-        storeConfig.setComponentSetup({
-          framework: selectedFramework.value,
-          bundler: selectedBundler.value
-        });
-      });
-
-      const initialComponent = storeConfig.getState().component;
-
-      if (initialComponent) {
-        setFEFramework(initialComponent.framework);
-        setFEBundler(initialComponent.bundler);
-      }
-    });
-
-    const fwBundlerId = computed(() => selectedFramework?.value?.bundler);
     const disabledBundlerSelect = ref(false);
 
-    const setFEBundler = (bundler: Bundler) => {
-      selectedBundler.value = bundler;
-      selectedBundlerId.value = bundler.id;
+    debugger
+
+    const setFEBundler = (bundler: SupportedBundlers) => {
+      setBundler.mutate({ bundler })
     };
 
-    const bundlers = supportedBundlers.map(
-      (bundler: Bundler & { description?: string }) => {
-        if (bundler.id === props.detectedBundler) {
-          bundler.description = "(detected)";
-          setFEBundler(bundler);
-        }
-        return bundler;
-      }
-    );
-
-    const setFEFramework = (framework: Framework) => {
-      selectedFrameworkId.value = framework.id;
-      selectedFramework.value = framework;
-      disabledBundlerSelect.value = !!fwBundlerId.value;
-      if (fwBundlerId.value) {
-        const foundBundler = supportedBundlers.find(
-          (bund) => bund.id === fwBundlerId.value
-        );
-        if (foundBundler) {
-          setFEBundler(foundBundler);
-        }
-      }
+    const setFEFramework = (framework: FrontendFramework) => {
+      setFramework.mutate({ framework })
     };
-
-    const frameworks = supportedFrameworks.map(
-      (framework: Framework & { description?: string }) => {
-        if (framework.id === props.detectedFramework) {
-          framework.description = "(detected)";
-          setFEFramework(framework);
-        }
-        return framework;
-      }
-    );
 
     return {
+      gql: props.gql,
       setFEFramework,
       setFEBundler,
-      frameworks,
-      selectedFrameworkId,
-      bundlers,
-      selectedBundlerId,
+      bundlers: props.gql?.allBundlers,
       disabledBundlerSelect,
     };
   },

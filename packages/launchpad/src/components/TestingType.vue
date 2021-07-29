@@ -7,38 +7,57 @@
       @click="selectTestingType(type.id)"
     >
       <img
-        :src="type.icon"
+        :src="icons[type.id]"
         class="float-left m-5 md:mx-auto md:mb-10 md:float-none"
       />
-      <p class="text-indigo-700 text-left mt-3 md:text-center">{{ type.name }}</p>
+      <p class="text-indigo-700 text-left mt-3 md:text-center">{{ type.title }}</p>
       <p class="text-gray-400 text-sm text-left md:text-center" v-html="type.description" />
     </button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue";
-import { TestingType, testingTypes } from "../utils/testingTypes";
-import { useStoreConfig } from "../store/config";
-import { useStoreApp } from "../store/app";
+import { defineComponent } from "vue";
+import { gql } from '@apollo/client/core'
+import { useMutation } from '@vue/apollo-composable'
+import { TestingTypeIcons } from "../utils/testingTypes";
+import { TestingTypeSelectDocument, TestingTypeEnum } from '../generated/graphql'
+
+gql`
+mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
+  wizardSetTestingType(type: $testingType) {
+    step
+    testingType
+    title
+    description
+  }
+}
+`
+
+gql`
+fragment TestingType on Wizard {
+  testingTypes {
+    id
+    title
+    description
+  }
+}
+`
 
 export default defineComponent({
-  setup() {
-    const storeApp = useStoreApp();
-    const storeConfig = useStoreConfig();
+  props: ['gql'], // TODO: Figure out better typings in general
+  setup(props) {
+    const mutation = useMutation(TestingTypeSelectDocument)
 
-    onMounted(() => {
-      storeApp.setMeta({
-        title: "Welcome to Cypress",
-        description: "Choose which method of testing you would like to set up first.",
-      });
-    });
-
-    const selectTestingType = (testingType: TestingType) => {
-      storeConfig.setTestingType(testingType);
+    const selectTestingType = (testingType: TestingTypeEnum) => {
+      mutation.mutate({ testingType });
     };
 
-    return { testingTypes, selectTestingType };
+    return { 
+      icons: TestingTypeIcons,
+      testingTypes: props.gql.testingTypes, 
+      selectTestingType 
+    };
   },
 });
 </script>

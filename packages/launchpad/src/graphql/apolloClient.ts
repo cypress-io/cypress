@@ -1,6 +1,22 @@
 import { ApolloLink, FetchResult, ApolloClient, InMemoryCache, Observable } from '@apollo/client/core'
 import { fetchGraphql, initGraphQLIPC } from './graphqlIpc'
 
+export function makeApolloCache () {
+  return new InMemoryCache({
+    typePolicies: {
+      Wizard: {
+        keyFields: [],
+      },
+      App: {
+        keyFields: [],
+      },
+      WizardNpmPackage: {
+        keyFields: ['name'],
+      },
+    },
+  })
+}
+
 export function makeApolloClient () {
   initGraphQLIPC()
 
@@ -18,15 +34,6 @@ export function makeApolloClient () {
 
   return new ApolloClient({
     link: ipcLink,
-    cache: new InMemoryCache({
-      typePolicies: {
-        Wizard: {
-          keyFields: [],
-        },
-        App: {
-          keyFields: [],
-        },
-      },
-    }),
+    cache: makeApolloCache(),
   })
 }

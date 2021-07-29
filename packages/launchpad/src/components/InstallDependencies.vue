@@ -1,7 +1,7 @@
 <template>
   <WizardLayout :next="nextButtonName" alt="Install manually">
-    <PackagesList v-if="!manualInstall" />
-    <ManualInstall v-else @back="manualInstall = false" />
+    <PackagesList v-if="!manualInstall" :gql="gql" />
+    <ManualInstall v-else @back="manualInstall = false" :gql="gql" />
   </WizardLayout>
 </template>
 
@@ -11,6 +11,14 @@ import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
 import { useStoreApp } from "../store/app";
+import { gql } from '@apollo/client'
+
+gql`
+fragment InstallDependencies on Wizard {
+  ...PackagesList
+  ...ManualInstall
+}
+`
 
 export default defineComponent({
   components: {
@@ -18,19 +26,14 @@ export default defineComponent({
     PackagesList,
     ManualInstall,
   },
-  setup() {
+  props: ['gql'],
+  setup(props) {
     const store = useStoreApp();
     const manualInstall = ref(false);
     const nextButtonName = computed(() =>
       manualInstall.value ? "I've installed them" : "Install"
     );
     onMounted(() => {
-      store.setMeta({
-        title: "Install Dev Dependencies",
-        description:
-          "We need to install the following packages in order for component testing to work.",
-      });
-
       store.onAlt(() => {
         manualInstall.value = !manualInstall.value;
       });
@@ -46,7 +49,7 @@ export default defineComponent({
         }
       });
     });
-    return { manualInstall, nextButtonName };
+    return { manualInstall, nextButtonName, gql: props.gql };
   },
 });
 </script>

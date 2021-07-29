@@ -1,7 +1,7 @@
 import { reactive, readonly, inject, App } from 'vue'
+import { TestingTypeEnum } from '../generated/graphql'
 import { Bundler } from '../utils/bundler'
 import { Framework } from '../utils/frameworks'
-import { TestingType } from '../utils/testingTypes'
 import { StoreApp } from './app'
 
 interface ComponentSetup {
@@ -11,7 +11,7 @@ interface ComponentSetup {
 
 interface StateConfig {
   firstOpen: boolean
-  testingType?: TestingType
+  testingType?: TestingTypeEnum
   component?: ComponentSetup
 }
 
@@ -40,7 +40,7 @@ export class StoreConfig {
     return readonly(this.state)
   }
 
-  setTestingType (testingType?: TestingType) {
+  setTestingType (testingType?: TestingTypeEnum) {
     this.state.testingType = testingType
     if (testingType === 'component') {
       this.storeApp.flagComponent()

@@ -25,25 +25,38 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
-import { useStoreApp } from "../store/app";
-import { listPackages } from "./PackagesList.vue";
+import { computed, defineComponent, PropType } from "vue";
 import CopyButton from "./CopyButton.vue";
+import { gql } from '@apollo/client'
+import { ManualInstallFragment } from "../generated/graphql";
+
+gql`
+fragment ManualInstall on Wizard {
+  packagesToInstall {
+    name
+    description
+  }
+}
+`
 
 export default defineComponent({
-  setup() {
-    const store = useStoreApp();
-    const listOfNecessaryPackages = listPackages();
+  props: {
+    gql: {
+      type: Object as PropType<ManualInstallFragment>,
+      required: true
+    }
+  },
+  setup(props) {
     const dependenciesCode = computed(
       () =>
         "yarn add -D \\\n" +
-        listOfNecessaryPackages.value
+        (props.gql.packagesToInstall ?? [])
           .map((pack) => `                    ${pack.name} \\`)
           .join("\n")
     );
     return {
       dependenciesCode,
-      projectTitle: computed(() => store.getState().projectTitle),
+      projectTitle: 'TODO: project title in gql',
     };
   },
   components: { CopyButton },

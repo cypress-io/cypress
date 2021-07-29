@@ -13,13 +13,39 @@
     <div class="flex-grow">
       <slot />
     </div>
-    <ButtonBar :next="next" :back="back" :alt="alt" />
+    <ButtonBar :nextFn="nextFn" :backFn="backFn" :altFn="altFn" :next="next" :back="back" :alt="alt" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import ButtonBar from "./ButtonBar.vue";
+import { gql } from '@apollo/client'
+import { useMutation } from '@vue/apollo-composable'
+import { WizardLayoutNavigateForwardDocument, WizardLayoutNavigateBackDocument } from "../generated/graphql";
+
+gql`
+fragment WizardLayout on Wizard {
+  step
+  canNavigateForward
+}
+`
+
+gql`
+mutation WizardLayoutNavigateForward {
+  wizardNavigateForward {
+    ...WizardLayout
+  }
+}
+`
+
+gql`
+mutation WizardLayoutNavigateBack {
+  wizardNavigateBack {
+    ...WizardLayout
+  }
+}
+`
 
 export default defineComponent({
   components: { ButtonBar },
@@ -36,6 +62,28 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    altFn: {
+      type: Function,
+      default: undefined
+    }
   },
+  setup(props) {
+    const navigateForward = useMutation(WizardLayoutNavigateForwardDocument)
+    const navigateBack = useMutation(WizardLayoutNavigateBackDocument)
+
+    function nextFn() {
+      navigateForward.mutate()
+    }
+
+    function backFn() {
+      navigateBack.mutate()
+    }
+
+    return {
+      nextFn,
+      backFn,
+      altFn: props.altFn
+    }
+  }
 });
 </script>

@@ -21,8 +21,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
-import { useStoreApp } from "../store/app";
+import { defineComponent, ref } from "vue";
 import Button from "./Button.vue";
 import Switch from "./Switch.vue";
 
@@ -33,29 +32,35 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    nextFn: {
+      type: Function,
+      required: true
+    },
     back: {
       type: String,
       required: true,
+    },
+    backFn: {
+      type: Function,
+      required: true
     },
     alt: {
       type: String,
       default: undefined,
     },
+    altFn: {
+      type: Function,
+      default: undefined,
+    },
   },
-  setup() {
+  setup(props) {
     const altValue = ref(false);
-    const store = useStoreApp();
-    const state = computed(() => store.getState());
-    const nextFunction = computed(() => state.value.nextAction);
-    const backFunction = computed(() => state.value.backAction);
-    const altFunction = computed(() => state.value.alternativeAction);
 
     const handleAlt = () => {
-      altValue.value = !altValue.value;
-      altFunction.value?.();
+      props.altFn?.(!altValue.value);
     };
 
-    return { nextFunction, backFunction, altFunction, altValue, handleAlt };
+    return { nextFunction: props.nextFn, backFunction: props.backFn, altFunction: props.altFn, altValue, handleAlt };
   },
 });
 </script>

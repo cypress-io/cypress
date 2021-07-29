@@ -128,29 +128,33 @@ export interface NexusGenFieldTypes {
     title: string | null; // String
   }
   Wizard: { // field return type
-    allBundlers: Array<NexusGenRootTypes['WizardBundler'] | null> | null; // [WizardBundler]
+    allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
+    bundler: NexusGenRootTypes['WizardBundler'] | null; // WizardBundler
+    canNavigateForward: boolean; // Boolean!
     description: string | null; // String
+    framework: NexusGenRootTypes['WizardFrontendFramework'] | null; // WizardFrontendFramework
     frameworks: Array<NexusGenRootTypes['WizardFrontendFramework'] | null> | null; // [WizardFrontendFramework]
-    step: NexusGenEnums['WizardStep'] | null; // WizardStep
+    packagesToInstall: NexusGenRootTypes['WizardNpmPackage'][] | null; // [WizardNpmPackage!]
+    step: NexusGenEnums['WizardStep']; // WizardStep!
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
     testingTypes: NexusGenRootTypes['TestingTypeInfo'][] | null; // [TestingTypeInfo!]
     title: string | null; // String
   }
   WizardBundler: { // field return type
-    id: NexusGenEnums['SupportedBundlers'] | null; // SupportedBundlers
+    id: NexusGenEnums['SupportedBundlers']; // SupportedBundlers!
     isOnlyOption: boolean | null; // Boolean
     isSelected: boolean | null; // Boolean
-    name: string | null; // String
+    name: string; // String!
   }
   WizardFrontendFramework: { // field return type
-    isSelected: boolean | null; // Boolean
-    name: NexusGenEnums['FrontendFramework'] | null; // FrontendFramework
-    packagesToInstall: Array<NexusGenRootTypes['WizardNpmPackage'] | null> | null; // [WizardNpmPackage]
-    supportedBundlers: Array<NexusGenRootTypes['WizardBundler'] | null> | null; // [WizardBundler]
+    id: NexusGenEnums['FrontendFramework'] | null; // FrontendFramework
+    isSelected: boolean; // Boolean!
+    name: string; // String!
+    supportedBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
   }
   WizardNpmPackage: { // field return type
-    description: string | null; // String
-    name: string | null; // String
+    description: string; // String!
+    name: string; // String!
   }
 }
 
@@ -190,8 +194,12 @@ export interface NexusGenFieldTypeNames {
   }
   Wizard: { // field return type name
     allBundlers: 'WizardBundler'
+    bundler: 'WizardBundler'
+    canNavigateForward: 'Boolean'
     description: 'String'
+    framework: 'WizardFrontendFramework'
     frameworks: 'WizardFrontendFramework'
+    packagesToInstall: 'WizardNpmPackage'
     step: 'WizardStep'
     testingType: 'TestingTypeEnum'
     testingTypes: 'TestingTypeInfo'
@@ -204,9 +212,9 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
   }
   WizardFrontendFramework: { // field return type name
+    id: 'FrontendFramework'
     isSelected: 'Boolean'
-    name: 'FrontendFramework'
-    packagesToInstall: 'WizardNpmPackage'
+    name: 'String'
     supportedBundlers: 'WizardBundler'
   }
   WizardNpmPackage: { // field return type name
@@ -221,7 +229,7 @@ export interface NexusGenArgTypes {
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
     }
     wizardSetBundler: { // args
-      name?: NexusGenEnums['SupportedBundlers'] | null; // SupportedBundlers
+      bundler: NexusGenEnums['SupportedBundlers']; // SupportedBundlers!
     }
     wizardSetFramework: { // args
       framework: NexusGenEnums['FrontendFramework']; // FrontendFramework!

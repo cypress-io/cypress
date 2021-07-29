@@ -129,7 +129,7 @@ export default defineComponent({
     });
 
     const selectOption = (opt: Option) => {
-      emit("select", opt);
+      emit("select", opt.id);
     };
 
     const disabledClass = computed(() =>
