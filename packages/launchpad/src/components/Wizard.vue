@@ -33,9 +33,9 @@ gql`
 query Wizard {
   app {
     isFirstOpen
-    wizard {
-      step
-    }
+  }
+  wizard {
+    step
   }
 }
 `
