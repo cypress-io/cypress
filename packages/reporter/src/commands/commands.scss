@@ -54,8 +54,6 @@
   }
 
   .command-is-event {
-    // font-style: italic;
-
     .command-method,
     .command-message {
       color: #9a9aaa !important;
@@ -100,7 +98,6 @@
 
       .command-interceptions {
         font-style: normal;
-        background-color: $yellow-medium;
 
         .status {
           font-weight: 600;
@@ -114,6 +111,10 @@
         padding: 0 5px;
         display: inline-block;
 
+        &.route {
+          background-color: $yellow-medium;
+        }
+
         &.dom {
           background-color: darken(#D4EAFF, 3%);
         }
@@ -126,6 +127,11 @@
         &.show-count {
           padding-right: 2px;
           border-radius: 10px 0 0 10px;
+          max-width: 200px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          vertical-align: top;
         }
       }
 
@@ -152,17 +158,17 @@
 
       .num-duplicates.has-alias {
         border-radius: 10px;
-        line-height: 2;
+        line-height: 1;
         padding: 3px 5px 3px 5px;
       }
 
-      .num-duplicates.has-alias.has-duplicates {
+      .num-duplicates.has-alias.has-duplicates,
+      .command-interceptions-count {
         border-radius: 0 10px 10px 0;
         padding: 4px 5px 2px 3px;
       }
 
-      .command-alias-count,
-      .command-interceptions-count {
+      .command-alias-count {
         border-radius: 0 10px 10px 0;
         padding: 5px 6px 3px 4px;
       }
