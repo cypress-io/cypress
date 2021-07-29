@@ -96,7 +96,9 @@ export class Wizard {
     description: 'Configuration file based on bundler and framework of choice',
   })
   configFile (): NxsResult<'Wizard', 'configFile'> {
-    return new WizardCypressDevServerConfig()
+    const config = new WizardCypressDevServerConfig()
+
+    return config
   }
 
   // Internal Setters:

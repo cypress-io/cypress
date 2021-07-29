@@ -15,7 +15,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { Pkg } from './InstallDependencies.vue'
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client/core'
 
 gql`
 fragment PackagesList on Wizard {

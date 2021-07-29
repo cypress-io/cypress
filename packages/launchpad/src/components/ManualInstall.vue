@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from "vue";
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client/core'
 import CopyButton from "./CopyButton.vue";
 import { Pkg } from './InstallDependencies.vue'
 

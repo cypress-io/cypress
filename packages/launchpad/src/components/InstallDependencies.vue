@@ -56,7 +56,8 @@ export default defineComponent({
       manualInstall.value = val
     }
 
-    const { result } = useQuery(PackagesToInstallDocument)
+    // TODO: Why do I need pollInterval?
+    const { result } = useQuery(PackagesToInstallDocument, null, { pollInterval: 1000 })
 
     const packagesToInstall = useResult(result, null, data => {
       return data?.wizard?.packagesToInstall?.map(x => ({

@@ -20,7 +20,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ButtonBar from "./ButtonBar.vue";
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client/core'
 import { useMutation } from '@vue/apollo-composable'
 import { WizardLayoutNavigateForwardDocument, WizardLayoutNavigateBackDocument } from "../generated/graphql";
 

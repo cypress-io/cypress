@@ -144,7 +144,6 @@ export interface NexusGenFieldTypes {
     title: string | null; // String
   }
   WizardBundler: { // field return type
-    configFile: string; // String!
     id: NexusGenEnums['SupportedBundlers']; // SupportedBundlers!
     isOnlyOption: boolean | null; // Boolean
     isSelected: boolean | null; // Boolean
@@ -216,7 +215,6 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   WizardBundler: { // field return type name
-    configFile: 'String'
     id: 'SupportedBundlers'
     isOnlyOption: 'Boolean'
     isSelected: 'Boolean'

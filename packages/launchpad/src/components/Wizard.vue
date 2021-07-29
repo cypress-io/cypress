@@ -56,7 +56,7 @@ export default defineComponent({
     OpenBrowser,
   },
   setup() {
-    const { onResult, result, loading } = useQuery(WizardDocument, {})
+    const { onResult, result, loading } = useQuery(WizardDocument, null, { pollInterval: 1000 })
 
     onResult((result) => {
       // console.log(result)

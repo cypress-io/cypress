@@ -23,14 +23,6 @@ export class WizardBundler {
     return BundlerPackageNames[this.bundler]
   }
 
-  @nxs.field.nonNull.string()
-  get configFile (): NxsResult<'WizardBundler', 'configFile'> {
-    return `const blah = require('...')
-module.exports = () => {
-  // ... TODO ...
-}`
-  }
-
   @nxs.field.boolean({
     description: 'Whether this is the selected framework bundler',
   })

@@ -12,7 +12,7 @@
       "
     >
       <button
-        v-for="lang in languages"
+        v-for="lang of languages"
         :key="lang.id"
         @click="language = lang.id"
         class="p-4 w-28 relative focus:outline-transparent"
@@ -34,31 +34,33 @@
         />
       </button>
     </nav>
+    <h1>TODO: PrismJS seems not working</h1>
+    {{ code }}
     <div v-if="tsInstalled" class="relative">
-      <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
+      <!-- <PrismJs :key="language" :language="language">{{ code }}</PrismJs> -->
       <CopyButton v-if="manualInstall" :text="code" />
     </div>
   </WizardLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { watch, computed, defineComponent, onMounted, ref } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
 import { useQuery, useResult } from "@vue/apollo-composable";
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client/core'
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { getCode, languages } from "../utils/configFile";
-import { WizardConfigFileDocument } from "../generated/graphql";
+import { WizardDevServerConfigDocument } from "../generated/graphql";
 
 gql`
-query wizardConfigFile {
+query wizardDevServerConfig {
   wizard {
     configFile {
-      js
       ts
+      js
     }
   }
 }
@@ -94,36 +96,15 @@ export default defineComponent({
         "Create a <em>cypress.config.js</em> file with the code below to store your project configuration.",
     }
 
-    onMounted(() => {
-      console.log('Mounted')
-      // store.setMeta(originalText);
 
-      // store.onNext(() => {
-      //   store.finishSetup();
-      // });
+    const { result, onResult } = useQuery(WizardDevServerConfigDocument, null, {})
 
-      // store.onBack(() => {
-      //   store.flagDependenciesInstalled(false);
-      // });
-
-      // store.onAlt(() => {
-      //   manualInstall.value = !manualInstall.value;
-      //   store.setMeta(manualInstall.value ? manualText : originalText);
-      // });
-
-      // import("prismjs/components/prism-typescript").then(() => {
-      //   tsInstalled.value = true;
-      // });
-    });
-
-    const { result, onResult } = useQuery(WizardConfigFileDocument)
-
-    onResult(data => console.log('result', data.data.wizard?.configFile[language.value]))
-
-    const defaultResult = useResult(result)
+    watch(language, v => {
+      console.log(result.value?.wizard?.configFile.js)
+    })
 
     const code = computed(() => {
-      return defaultResult.value?.configFile[language.value] ?? ''
+      return result.value?.wizard?.configFile[language.value] || ''
     })
 
     return {

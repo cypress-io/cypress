@@ -151,7 +151,6 @@ type Wizard {
 
 """Wizard bundler"""
 type WizardBundler {
-  configFile: String!
   id: SupportedBundlers!
 
   """Whether there are multiple options to choose from given the framework"""

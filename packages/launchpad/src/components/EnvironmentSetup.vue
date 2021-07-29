@@ -94,7 +94,7 @@ export default defineComponent({
       setFramework.mutate({ framework })
     };
 
-    const { result } = useQuery(WizardDocument, {})
+    const { result } = useQuery(WizardDocument, null, {})
 
     const bundlers = useResult(result, null, data => {
       const vals = data?.wizard?.framework?.supportedBundlers 
