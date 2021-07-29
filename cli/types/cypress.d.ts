@@ -1661,7 +1661,7 @@ declare namespace Cypress {
      *    .shadow()
      *    .find('.my-button')
      *    .click()
-     * @see https://on.cypress.io/experimental
+     * @see https://on.cypress.io/shadow
      */
     shadow(): Chainable<Subject>
 
@@ -2717,13 +2717,13 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: Omit<ResolvedConfigOptions, 'e2e' | 'component'>
+    component: Omit<ResolvedConfigOptions, TestingType>
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: Omit<ResolvedConfigOptions, 'e2e' | 'component'>
+    e2e: Omit<ResolvedConfigOptions, TestingType>
   }
 
   /**
@@ -2809,7 +2809,7 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, 'e2e' | 'component'>>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
   type ConfigOptions = CoreConfigOptions & {e2e?: CoreConfigOptions, component?: CoreConfigOptions }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {

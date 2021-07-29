@@ -6,8 +6,9 @@ import { NetworkProxy } from '@packages/proxy'
 import { handle, serve, serveChunk } from './runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import { SpecsStore } from '@packages/server/lib/specs-store'
-import { Cfg, ProjectBase } from '../../server/lib/project-base'
+import { Cfg } from '@packages/server/lib/project-base'
 import { getPathToDist } from '@packages/resolve-dist'
+import { Browser } from '@packages/server/lib/browsers/types'
 
 const debug = Debug('cypress:server:routes')
 
@@ -15,7 +16,8 @@ export interface InitializeRoutes {
   app: Express
   specsStore: SpecsStore
   config: Cfg
-  project: ProjectBase<any>
+  getSpec: () => Cypress.Cypress['spec'] | null
+  getCurrentBrowser: () => Browser
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
   getRemoteState: () => any
@@ -28,7 +30,8 @@ export const createRoutes = ({
   specsStore,
   nodeProxy,
   networkProxy,
-  project,
+  getCurrentBrowser,
+  getSpec,
 }: InitializeRoutes) => {
   app.get('/__cypress/runner/*', handle)
 
@@ -88,7 +91,7 @@ export const createRoutes = ({
 
     serve(req, res, {
       config,
-      project,
+      getCurrentBrowser,
       specsStore,
     })
   })
