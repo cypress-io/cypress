@@ -2,6 +2,7 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:saved_state')
 const path = require('path')
 const Promise = require('bluebird')
+const { CYPRESS_CONFIG_FILES } = require('./configFiles')
 const appData = require('./util/app_data')
 const cwd = require('./cwd')
 const FileUtil = require('./util/file')
@@ -49,43 +50,23 @@ const formStatePath = (projectRoot) => {
 
     debug('missing project path, looking for project here')
 
-    const cypressConfigTsPath = cwd('cypress.config.ts')
-
-    return fs.pathExistsAsync(cypressConfigTsPath)
-    .then((foundTs) => {
-      if (foundTs) {
-        debug('found cypress file %s', cypressConfigTsPath)
-        projectRoot = cwd()
-      } else {
-        const cypressConfigJsPath = cwd('cypress.config.js')
-
-        // if not found with js, try with json
-        return fs.pathExistsAsync(cypressConfigJsPath)
-        .then((foundJs) => {
-          if (foundJs) {
-            debug('found cypress file %s', cypressConfigJsPath)
-            projectRoot = cwd()
-          } else {
-            const cypressJsonPath = cwd('cypress.json')
-
-            // if not found with js, try with json
-            return fs.pathExistsAsync(cypressJsonPath)
-            .then((foundJson) => {
-              if (foundJson) {
-                debug('found cypress file %s', cypressJsonPath)
-                projectRoot = cwd()
-              }
-
-              return projectRoot
-            })
-          }
-
+    return CYPRESS_CONFIG_FILES.reduce((acc, filename) => {
+      return acc.then((projectRoot) => {
+        if (projectRoot) {
           return projectRoot
-        })
-      }
+        }
 
-      return projectRoot
-    })
+        const cypressConfigPath = cwd(filename)
+
+        return fs.pathExistsAsync(cypressConfigPath).then((found) => {
+          if (found) {
+            debug('found cypress file %s', cypressConfigPath)
+
+            return cwd()
+          }
+        })
+      })
+    }, Promise.resolve())
   }).then((projectRoot) => {
     const fileName = 'state.json'
 
