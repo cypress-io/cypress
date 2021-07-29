@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.2...@cypress/vite-dev-server-v2.0.3) (2021-07-27)
+
+
+### Bug Fixes
+
+* make vite re-run on supportFile change ([#17485](https://github.com/cypress-io/cypress/issues/17485)) ([6cbf4c3](https://github.com/cypress-io/cypress/commit/6cbf4c38296d6287fbcbb0ef5ecd21cf63606153))
+
 # [@cypress/vite-dev-server-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.1...@cypress/vite-dev-server-v2.0.2) (2021-07-15)
 
 
