@@ -408,6 +408,36 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
+    it('does not call startSpecWatcher if not in interactive mode', function () {
+      const startSpecWatcherStub = sinon.stub()
+
+      sinon.stub(ProjectBase.prototype, 'initializeSpecStore').resolves({
+        startSpecWatcher: startSpecWatcherStub,
+      })
+
+      this.config.isTextTerminal = true
+
+      return this.project.open()
+      .then(() => {
+        expect(startSpecWatcherStub).not.to.be.called
+      })
+    })
+
+    it('calls startSpecWatcher if in interactive mode', function () {
+      const startSpecWatcherStub = sinon.stub()
+
+      sinon.stub(ProjectBase.prototype, 'initializeSpecStore').resolves({
+        startSpecWatcher: startSpecWatcherStub,
+      })
+
+      this.config.isTextTerminal = false
+
+      return this.project.open()
+      .then(() => {
+        expect(startSpecWatcherStub).to.be.called
+      })
+    })
+
     it('does not get system info or execute before:run if experimental flag is not enabled', function () {
       sinon.stub(system, 'info')
       this.config.experimentalInteractiveRunEvents = false
