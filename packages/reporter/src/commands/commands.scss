@@ -111,6 +111,10 @@
         background-color: $middle;
         border-radius: $borderRadius;
 
+        .status {
+          font-weight: 600;
+        }
+
         >span {
           display: inline-block;
           padding-left: 2.5px;

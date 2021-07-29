@@ -15,6 +15,7 @@ interface RenderProps {
     type: 'function' | 'stub' | 'spy'
   }>
   status?: string
+  wentToOrigin?: boolean
 }
 
 export interface CommandProps extends InstrumentProps {

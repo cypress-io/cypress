@@ -65,20 +65,15 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
 
 function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
   function getStatus (): string | undefined {
-    const { spied, stubbed, reqModified, resModified } = req.flags
+    const { stubbed, reqModified, resModified } = req.flags
 
-    if (stubbed) return 'stubbed'
+    if (stubbed) return
 
-    if (reqModified || resModified) {
-      return [
-        reqModified && 'req',
-        reqModified && resModified && '+',
-        resModified && 'res',
-        'modified',
-      ].filter((v) => v).join(' ')
-    }
+    if (reqModified && resModified) return 'req + res modified'
 
-    if (spied) return 'spied'
+    if (reqModified) return 'req modified'
+
+    if (resModified) return 'res modified'
 
     return
   }
@@ -162,6 +157,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
         indicator: getIndicator(),
         message,
         status: getStatus(),
+        wentToOrigin: !req.flags.stubbed,
         interceptions: [
           ...(req.interceptions.map(({ interception, route }) => {
             return {

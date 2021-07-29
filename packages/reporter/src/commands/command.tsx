@@ -81,64 +81,33 @@ interface InterceptionsProps {
   model: CommandModel
 }
 
-const pluralTypes = {
-  spy: 'spies',
-  stub: 'stubs',
-  function: 'functions',
-}
-
 const Interceptions = observer(({ model }: InterceptionsProps) => {
   if (!model.renderProps.interceptions || !model.renderProps.interceptions.length) return null
 
-  let title = `Matched ${ ['intercept', 'route'].map((command) => {
-    let titlePart = ''
-    let first = true
-    const interceptions = model.renderProps.interceptions!.filter((v) => v.command === command)
-
-    const counts = _.countBy(interceptions, 'type')
-
-    for (const type in counts) {
-      if (!first) {
-        titlePart += ', '
-      }
-
-      const count = counts[type]
-
-      titlePart += `${count } `
-
-      if (first) {
-        titlePart += `cy.${command}() `
-      }
-
-      titlePart += count > 1 ? pluralTypes[type] : type
-
-      const aliased = interceptions.filter((v) => v.alias && v.type === type)
-
-      if (aliased.length) {
-        const unaliasedCount = count - aliased.length
-
-        titlePart += ` (aliased as ${aliased.map(({ alias }) => `@${alias}`).join(', ')}`
-
-        if (unaliasedCount) titlePart += ` with ${unaliasedCount} unaliased`
-
-        titlePart += `)`
-      }
-
-      first = false
-    }
-
-    return titlePart
-  }).filter((v) => v).join(' and ')}`
+  function getTitle () {
+    return (
+      <span>
+        {model.renderProps.wentToOrigin ? '' : <>This request did not go to origin because the response was stubbed.<br/></>}
+        This request matched:
+        <ul>
+          {model.renderProps.interceptions?.map(({ command, alias, type }, i) => {
+            return (<li key={i}>
+              <code>cy.{command}()</code> {type} with {alias ? <>alias <code>@{alias}</code></> : 'no alias'}
+            </li>)
+          })}
+        </ul>
+      </span>
+    )
+  }
 
   const count = model.renderProps.interceptions.length
 
   const displayAlias = _.isArray(model.alias) ? _.last(model.alias as Array<any>) : (model.alias || undefined)
 
   return (
-    <Tooltip placement='top' title={title} className='cy-tooltip'>
+    <Tooltip placement='top' title={getTitle()} className='cy-tooltip'>
       <span className='badge'>
-        {model.renderProps.status ? <span className='left'>{model.renderProps.status}</span> : null}
-        {displayAlias ? <span className='middle'>{displayAlias}</span> : null}
+        <span className='middle'>{model.renderProps.status ? <span className='status'>{model.renderProps.status} </span> : null}{displayAlias || <em className="no-alias">no alias</em>}</span>
         {count > 1 ? <span className='right'>{count}</span> : null}
       </span>
     </Tooltip>
@@ -172,7 +141,11 @@ interface MessageProps {
 
 const Message = observer(({ model }: MessageProps) => (
   <span>
-    <i className={`fas fa-circle ${model.renderProps.indicator}`} />
+    <i className={cs(
+      model.renderProps.wentToOrigin ? 'fas' : 'far',
+      'fa-circle',
+      model.renderProps.indicator,
+    )} />
     <span
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
