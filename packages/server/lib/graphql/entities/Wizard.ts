@@ -2,6 +2,7 @@ import { nxs, NxsResult } from 'nexus-decorators'
 import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType } from '../constants/WizardConstants'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
+import { WizardCypressDevServerConfig } from './WizardCypressDevServerConfig'
 import { WizardFrontendFramework } from './WizardFrontendFramework'
 import { BundleMapping, PackageMapping, WizardNpmPackage } from './WizardNpmPackage'
 
@@ -89,6 +90,13 @@ export class Wizard {
   })
   allBundlers (): NxsResult<'Wizard', 'allBundlers'> {
     return BUNDLER.map((bundler) => new WizardBundler(this, bundler))
+  }
+
+  @nxs.field.nonNull.type(() => WizardCypressDevServerConfig, {
+    description: 'Configuration file based on bundler and framework of choice',
+  })
+  configFile (): NxsResult<'Wizard', 'configFile'> {
+    return new WizardCypressDevServerConfig()
   }
 
   // Internal Setters:

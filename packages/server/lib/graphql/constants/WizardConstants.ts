@@ -17,6 +17,11 @@ export const BundlerDisplayNames: Record<NexusGenEnums['SupportedBundlers'], str
   webpack: 'Webpack',
 }
 
+export const BundlerPackageNames: Record<NexusGenEnums['SupportedBundlers'], string> = {
+  vite: '@cypress/vite-dev-server',
+  webpack: '@cypress/webpack-dev-server'
+}
+
 export const FRONTEND_FRAMEWORK = ['nuxtjs', 'nextjs', 'cra', 'vuecli', 'reactjs', 'vuejs'] as const
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORK[number]

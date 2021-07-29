@@ -1,5 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { Bundler, BundlerDisplayNames, BundlerEnum } from '../constants'
+import { Bundler, BundlerDisplayNames, BundlerEnum, BundlerPackageNames } from '../constants'
 import { Wizard } from './Wizard'
 
 @nxs.objectType({
@@ -16,6 +16,19 @@ export class WizardBundler {
   @nxs.field.nonNull.string()
   get name (): NxsResult<'WizardBundler', 'name'> {
     return BundlerDisplayNames[this.bundler]
+  }
+
+  @nxs.field.nonNull.string()
+  get package (): NxsResult<'WizardBundler', 'package'> {
+    return BundlerPackageNames[this.bundler]
+  }
+
+  @nxs.field.nonNull.string()
+  get configFile (): NxsResult<'WizardBundler', 'configFile'> {
+    return `const blah = require('...')
+module.exports = () => {
+  // ... TODO ...
+}`
   }
 
   @nxs.field.boolean({

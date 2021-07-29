@@ -59,11 +59,11 @@ export default defineComponent({
     const { onResult, result, loading } = useQuery(WizardDocument, {})
 
     onResult((result) => {
-      console.log(result)
+      // console.log(result)
     })
 
     watch(result, value => {
-      console.log(value)
+      // console.log(value)
     })
 
     // the `?` is not really needed since vue-apollo will automatically

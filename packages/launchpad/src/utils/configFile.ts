@@ -1,14 +1,16 @@
-import { useStoreConfig } from '../store/config'
-
-export const getCode = (lang: 'js' | 'ts') => {
-  const component = useStoreConfig().getState().component
-
-  if (!component) {
-    return ''
+interface GetCode {
+  lang: 'js' | 'ts'
+  framework: {
+    name: string
+    configFile: string
   }
+  bundler: {
+    name: string
+    package: string
+  }
+}
 
-  const framework = component.framework
-  const bundler = component.bundler
+export const getCode = ({ lang, framework, bundler }: GetCode) => {
 
   const language = languages.find((lg) => lg.id === lang)
 

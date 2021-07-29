@@ -123,6 +123,9 @@ type Wizard {
   bundler: WizardBundler
   canNavigateForward: Boolean!
 
+  """Configuration file based on bundler and framework of choice"""
+  configFile: WizardCypressDevServerConfig!
+
   """The title of the page, given the current step of the wizard"""
   description: String
   framework: WizardFrontendFramework
@@ -148,6 +151,7 @@ type Wizard {
 
 """Wizard bundler"""
 type WizardBundler {
+  configFile: String!
   id: SupportedBundlers!
 
   """Whether there are multiple options to choose from given the framework"""
@@ -156,6 +160,16 @@ type WizardBundler {
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
   name: String!
+  package: String!
+}
+
+"""Config file to start a dev server for Component Testing"""
+type WizardCypressDevServerConfig {
+  """JS version of the config file"""
+  js: String!
+
+  """TS version of the config file"""
+  ts: String!
 }
 
 """A frontend framework that we can setup within the app"""

@@ -1,5 +1,5 @@
 <template>
-  <WizardLayout :next="nextButtonName" alt="Create file manually">
+  <WizardLayout :next="nextButtonName" alt="Create file manually" :altFn="altFn">
     <nav
       class="
         rounded-t
@@ -45,10 +45,24 @@
 import { computed, defineComponent, onMounted, ref } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
+import { useQuery, useResult } from "@vue/apollo-composable";
+import { gql } from '@apollo/client'
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { getCode, languages } from "../utils/configFile";
+import { WizardConfigFileDocument } from "../generated/graphql";
+
+gql`
+query wizardConfigFile {
+  wizard {
+    configFile {
+      js
+      ts
+    }
+  }
+}
+`
 
 export default defineComponent({
   components: {
@@ -58,6 +72,11 @@ export default defineComponent({
   },
   setup() {
     const manualInstall = ref(false);
+
+    const altFn = (val: boolean) => {
+      manualInstall.value = val
+    }
+
     const tsInstalled = ref(false);
     const language = ref<"js" | "ts">("ts");
     const nextButtonName = computed(() =>
@@ -76,6 +95,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
+      console.log('Mounted')
       // store.setMeta(originalText);
 
       // store.onNext(() => {
@@ -96,10 +116,19 @@ export default defineComponent({
       // });
     });
 
-    const code = computed(() => getCode(language.value));
+    const { result, onResult } = useQuery(WizardConfigFileDocument)
+
+    onResult(data => console.log('result', data.data.wizard?.configFile[language.value]))
+
+    const defaultResult = useResult(result)
+
+    const code = computed(() => {
+      return defaultResult.value?.configFile[language.value] ?? ''
+    })
 
     return {
       manualInstall,
+      altFn,
       nextButtonName,
       code,
       language,
