@@ -1,4 +1,4 @@
-import { createHash } from 'crypto'
+// import { createHash } from 'crypto'
 import { nxs, NxsResult } from 'nexus-decorators'
 import { PluginsState, PluginsStateEnum } from '../constants/ProjectConstants'
 import { ProjectBaseContract } from '../contracts/ProjectBaseContract'
@@ -22,7 +22,8 @@ export class Project {
 
   @nxs.field.nonNull.id()
   id (): NxsResult<'Project', 'id'> {
-    return createHash('sha1').update(this.projectRoot).digest('hex')
+    return this.projectRoot
+    // return createHash('sha1').update(this.projectRoot).digest('hex')
   }
 
   @nxs.field.nonNull.string()

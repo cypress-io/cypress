@@ -18,6 +18,15 @@ export function makeApolloClient () {
 
   return new ApolloClient({
     link: ipcLink,
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Wizard: {
+          keyFields: [],
+        },
+        App: {
+          keyFields: [],
+        },
+      },
+    }),
   })
 }
