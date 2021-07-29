@@ -54,7 +54,7 @@
   }
 
   .command-is-event {
-    font-style: italic;
+    // font-style: italic;
 
     .command-method,
     .command-message {
@@ -98,69 +98,21 @@
       flex-wrap: wrap;
       padding: 2px 5px 0;
 
-      .badge {
-        $left: #ffd273;
-        $middle: #ffdf9c;
-        $right: $left;
-        $borderRadius: 10px;
-        $padding: $borderRadius/2;
-
-        display: inline-block;
+      .command-interceptions {
         font-style: normal;
-        font-size: .9em;
-        background-color: $middle;
-        border-radius: $borderRadius;
+        background-color: $yellow-medium;
 
         .status {
           font-weight: 600;
         }
-
-        >span {
-          display: inline-block;
-          padding-left: 2.5px;
-          padding-right: 2.5px;
-
-          &:first-child {
-            padding-left: 5px;
-          }
-
-          &:last-child {
-            padding-right: 5px;
-          }
-        }
-
-        >.left {
-          border-radius: $borderRadius 0 0 $borderRadius;
-          background-color: $left;
-
-          &:only-child {
-            border-radius: inherit;
-          }
-        }
-
-        >.right {
-          border-radius: 0 $borderRadius $borderRadius 0;
-          background-color: $right;
-
-          &:only-child {
-            border-radius: inherit;
-          }
-        }
       }
 
-      .command-alias {
+      .command-alias,
+      .command-interceptions {
         border-radius: 10px;
         color: #777888;
         padding: 0 5px;
         display: inline-block;
-
-        &.show-count {
-          padding-right: 2px;
-        }
-
-        &.route {
-          background-color: $yellow-medium;
-        }
 
         &.dom {
           background-color: darken(#D4EAFF, 3%);
@@ -172,6 +124,7 @@
         }
 
         &.show-count {
+          padding-right: 2px;
           border-radius: 10px 0 0 10px;
         }
       }
@@ -188,7 +141,7 @@
 
       .num-duplicates,
       .command-alias-count,
-      .command-interception-count {
+      .command-interceptions-count {
         border-radius: 5px;
         color: #777;
         font-size: 90%;
@@ -209,13 +162,14 @@
       }
 
       .command-alias-count,
-      .command-interception-count {
+      .command-interceptions-count {
         border-radius: 0 10px 10px 0;
         padding: 5px 6px 3px 4px;
       }
 
       .num-duplicates,
-      .command-alias-count {
+      .command-alias-count,
+      .command-interceptions-count {
         background-color: darken(#ffdf9c, 8%) !important;
       }
     }
@@ -490,7 +444,7 @@
     }
 
     .command-alias,
-    .badge {
+    .command-interceptions {
       font-family: $open-sans;
       font-size: 10px;
       line-height: 1.75;
