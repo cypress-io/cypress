@@ -89,7 +89,7 @@
 import { computed, defineComponent, PropType, ref } from "vue";
 import { ClickOutside } from '../directives/ClickOutside'
 
-interface Option {
+export interface Option {
   name: string;
   description?: string;
   logo: string;
@@ -113,7 +113,7 @@ export default defineComponent({
       default: undefined,
     },
     options: {
-      type: Array as PropType<Array<Option>>,
+      type: Object as PropType<readonly Option[]>,
       required: true,
     },
     disabled: {

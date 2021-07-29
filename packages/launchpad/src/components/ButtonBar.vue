@@ -10,10 +10,10 @@
       rounded-b
     "
   >
-    <Button @click="nextFunction()">{{ next }}</Button>
-    <Button @click="backFunction()" variant="outline">{{ back }}</Button>
+    <Button @click="nextFn()">{{ next }}</Button>
+    <Button @click="backFn()" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
-    <div v-if="altFunction && alt" class="flex items-center px-3">
+    <div v-if="altFn && alt" class="flex items-center px-3">
       <label @click="handleAlt" class="text-gray-500 px-3">{{ alt }}</label>
       <Switch :value="altValue" @update="handleAlt" />
     </div>
@@ -60,7 +60,7 @@ export default defineComponent({
       props.altFn?.(!altValue.value);
     };
 
-    return { nextFunction: props.nextFn, backFunction: props.backFn, altFunction: props.altFn, altValue, handleAlt };
+    return { altValue, handleAlt };
   },
 });
 </script>

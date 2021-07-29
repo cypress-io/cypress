@@ -4,7 +4,7 @@
       <Select
         name="Front-end Framework"
         @select="setFEFramework"
-        :options="gql.frameworks"
+        :options="frameworks ?? []"
         :value="gql.framework?.id ?? undefined"
         placeholder="Pick a framework"
       />
@@ -23,10 +23,10 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
 import WizardLayout from "./WizardLayout.vue";
-import Select from "./Select.vue";
+import Select, { Option } from "./Select.vue";
 import { gql } from '@apollo/client/core'
-import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
-import { useMutation} from '@vue/apollo-composable'
+import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers, WizardDocument } from '../generated/graphql'
+import { useMutation, useQuery, useResult} from '@vue/apollo-composable'
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFramework!) {
@@ -94,7 +94,19 @@ export default defineComponent({
       setFramework.mutate({ framework })
     };
 
+    const { result } = useQuery(WizardDocument, {})
+
+    const frameworks = useResult(result, null, data => data?.wizard?.frameworks?.map<Option>(x => {
+      return {
+        name: x!.name,
+        id: x!.id!,
+        logo: './404.png',
+        description: 'TODO: add to gql server'
+      }
+    }))
+
     return {
+      frameworks,
       setFEFramework,
       setFEBundler,
       disabledBundlerSelect,

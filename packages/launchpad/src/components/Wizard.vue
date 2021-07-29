@@ -1,14 +1,14 @@
 <template>
-  <template v-if="!loading && result.wizard">
-    <h1 class="text-3xl mt-12 text-center">{{ result.wizard.title }}</h1>
-    <p class="text-center text-gray-400 my-2 mx-10" v-html="result.wizard.description" />
+  <template v-if="!loading && wizard">
+    <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
+    <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
-      <TestingType v-if="result.wizard.step === 'welcome'" :gql="result.wizard" />
-      <template v-else-if="result?.wizard.testingType === 'component'">
-        <EnvironmentSetup v-if="result.wizard.step === 'selectFramework'" :gql="result.wizard" />
-        <InstallDependencies v-else-if="result.wizard.step === 'installDependencies'" :gql="result.wizard" />
-        <ConfigFile v-else-if="result.wizard.step === 'createConfig'" />
-        <OpenBrowser v-else-if="result.wizard.step === 'setupComplete'" />
+      <TestingType v-if="wizard.step === 'welcome'" :gql="wizard" />
+      <template v-else-if="wizard.testingType === 'component'">
+        <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
+        <InstallDependencies v-else-if="wizard.step === 'installDependencies'" :gql="wizard" />
+        <ConfigFile v-else-if="wizard.step === 'createConfig'" />
+        <OpenBrowser v-else-if="wizard.step === 'setupComplete'" />
       </template>
       <template v-else>
         <WizardLayout>
@@ -28,7 +28,7 @@ import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@apollo/client/core'
 import { WizardDocument } from '../generated/graphql'
-import { useQuery } from "@vue/apollo-composable";
+import { useQuery, useResult } from "@vue/apollo-composable";
 
 gql`
 query Wizard {
@@ -66,7 +66,12 @@ export default defineComponent({
       console.log(value)
     })
 
-    return { loading, result };
+    // the `?` is not really needed since vue-apollo will automatically
+    // swallow an errors: https://v4.apollo.vuejs.org/guide-composable/query.html#result-picking
+    // but TS complains, so it's good to have it.
+    const wizard = useResult(result, null, data => data?.wizard)
+
+    return { loading, result, wizard };
   },
 });
 </script>
