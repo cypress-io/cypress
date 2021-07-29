@@ -374,7 +374,7 @@ class SetupProject extends Component {
   _setupProject () {
     if (this.state.newProject) {
       return dashboardProjectsApi.setupDashboardProject({
-        projectName: this.state.projectName,
+        projectRoot: this.props.project.path,
         orgId: this.state.selectedOrgId,
         public: this.state.public,
       })
