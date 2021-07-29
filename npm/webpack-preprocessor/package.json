@@ -11,7 +11,7 @@
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
-    "test": "node ./test-webpack-4-5.js",
+    "test": "node ./test-webpack-5.js",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
