@@ -5,6 +5,7 @@ const errors = require('../errors')
 const log = require('../log')
 const { fs } = require('./fs')
 const requireAsync = require('./require_async').default
+const { CYPRESS_CONFIG_FILES } = require('../configFiles')
 const debug = require('debug')('cypress:server:settings')
 
 function jsCode (obj) {
@@ -146,26 +147,14 @@ module.exports = {
       return options.configFile
     }
 
-    if (ls.includes('cypress.config.ts')) {
-      return 'cypress.config.ts'
-    }
-
-    if (ls.includes('cypress.config.js')) {
-      return 'cypress.config.js'
-    }
-
-    if (ls.includes('cypress.json')) {
-      return 'cypress.json'
-    }
-
-    // if we find a tsconfig.json let's make users life easy
-    // and create a TypeScript file.
-    if (ls.includes('tsconfig.json')) {
-      return 'cypress.config.ts'
+    for (const configFile of CYPRESS_CONFIG_FILES) {
+      if (ls.includes(configFile)) {
+        return configFile
+      }
     }
 
     // Default is to create a new `cypress.config.js` file if one does not exist.
-    return 'cypress.config.js'
+    return CYPRESS_CONFIG_FILES[0]
   },
 
   id (projectRoot, options = {}) {
