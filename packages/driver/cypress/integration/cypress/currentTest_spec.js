@@ -19,13 +19,13 @@ describe('currentTest', () => {
     expectMatchingCurrentTitleInHook()
   })
 
-  it('returns current test runnable', () => {
+  it('returns current test runnable properties', () => {
     expect(Cypress.currentTest.title)
     .is.a('string')
     .eq(cy.state('runnable').title)
 
     expect(Cypress.currentTest.titlePath)
-    .eq(cy.state('runnable').titlePath())
+    .deep.eq(cy.state('runnable').titlePath())
   })
 
   it('returns null when outside test', () => {
@@ -40,5 +40,5 @@ const expectMatchingCurrentTitleInHook = () => {
   .eq(cy.state('runnable').ctx.currentTest.title)
 
   expect(Cypress.currentTest.titlePath)
-  .eq(cy.state('runnable').titlePath())
+  .deep.eq(cy.state('runnable').titlePath())
 }
