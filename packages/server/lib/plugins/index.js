@@ -13,7 +13,7 @@ let pluginsProcess = null
 let registeredEvents = {}
 let handlers = []
 
-const PLUGINS_FUNCTION_NAME = 'plugins'
+const PLUGINS_FUNCTION_NAME = 'setupNodeServer'
 
 const register = (event, callback) => {
   debug(`register event '${event}'`)

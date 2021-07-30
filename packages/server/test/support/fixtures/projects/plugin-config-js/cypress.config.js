@@ -1,6 +1,6 @@
 module.exports = {
   e2e: {
-    plugins (on, config) {
+    setupNodeServer (on, config) {
       return new Promise((resolve) => {
         setTimeout(resolve, 100)
       })
