@@ -258,6 +258,20 @@ describe('lib/config', () => {
 
           return this.expectValidationFails('the value was: `false`')
         })
+
+        it('merges component specific config in the root object', function () {
+          this.setup({
+            viewportWidth: 1024,
+            component: {
+              viewportWidth: 300,
+            },
+          })
+
+          return config.get(this.projectRoot, { testingType: 'component' })
+          .then((obj) => {
+            expect(obj.viewportWidth).to.eq(300)
+          })
+        })
       })
 
       context('e2e', () => {
@@ -289,6 +303,34 @@ describe('lib/config', () => {
           this.expectValidationFails('Expected `component.baseUrl` to be a fully qualified URL (starting with `http://` or `https://`).')
 
           return this.expectValidationFails('the value was: `false`')
+        })
+
+        it('merges e2e specific config in the root object', function () {
+          this.setup({
+            viewportWidth: 300,
+            e2e: {
+              viewportWidth: 1024,
+            },
+          })
+
+          return config.get(this.projectRoot, { testingType: 'e2e' })
+          .then((obj) => {
+            expect(obj.viewportWidth).to.eq(1024)
+          })
+        })
+
+        it('default to e2e config if none is specified', function () {
+          this.setup({
+            viewportWidth: 300,
+            e2e: {
+              viewportWidth: 1024,
+            },
+          })
+
+          return config.get(this.projectRoot)
+          .then((obj) => {
+            expect(obj.viewportWidth).to.eq(1024)
+          })
         })
       })
 

@@ -104,13 +104,10 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
-      it('promises cypress.config.js -> `component` key for component testing runner', function () {
+      it('promises cypress.config.js', function () {
         return this.setup(`
           module.exports = {
             commmon_setting: true,
-            component: {
-              component_setting: 'peep'
-            }
           }
           `,
         'cypress.config.js')
@@ -119,58 +116,6 @@ describe('lib/settings', () => {
         }).then((obj) => {
           expect(obj).to.deep.eq({
             commmon_setting: true,
-            component_setting: 'peep',
-            component: {
-              component_setting: 'peep',
-            },
-            configFile: 'cypress.config.js',
-          })
-        })
-      })
-
-      it('promises cypress.config.js -> `e2e` key for component testing runner', function () {
-        return this.setup(`
-          module.exports = {
-            commmon_setting: true,
-            e2e: {
-              e2e_setting: 'e2e_setting'
-            }
-          }
-          `,
-        'cypress.config.js')
-        .then(() => {
-          return settings.read(projectRoot, { testingType: 'e2e' })
-        }).then((obj) => {
-          expect(obj).to.deep.eq({
-            commmon_setting: true,
-            e2e_setting: 'e2e_setting',
-            e2e: {
-              e2e_setting: 'e2e_setting',
-            },
-            configFile: 'cypress.config.js',
-          })
-        })
-      })
-
-      it('promises cypress.config.js assumes e2e if no runner specific keys are configured', function () {
-        return this.setup(`
-          module.exports = {
-            commmon_setting: true,
-            e2e: {
-              e2e_setting: 'e2e_setting',
-            },
-          }
-          `,
-        'cypress.config.js')
-        .then(() => {
-          return settings.read(projectRoot, {})
-        }).then((obj) => {
-          expect(obj).to.deep.eq({
-            commmon_setting: true,
-            e2e_setting: 'e2e_setting',
-            e2e: {
-              e2e_setting: 'e2e_setting',
-            },
             configFile: 'cypress.config.js',
           })
         })
@@ -182,24 +127,6 @@ describe('lib/settings', () => {
           return settings.read(projectRoot)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar', configFile: 'cypress.json' })
-        })
-      })
-
-      it('promises cypress.json and merges CT specific properties for via testingType: component', function () {
-        return this.setup({ a: 'b', component: { a: 'c' } })
-        .then(() => {
-          return settings.read(projectRoot, { testingType: 'component' })
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' }, configFile: 'cypress.json' })
-        })
-      })
-
-      it('promises cypress.json and merges e2e specific properties', function () {
-        return this.setup({ a: 'b', e2e: { a: 'c' } })
-        .then(() => {
-          return settings.read(projectRoot)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' }, configFile: 'cypress.json' })
         })
       })
 

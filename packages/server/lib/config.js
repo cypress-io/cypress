@@ -180,6 +180,10 @@ const utils = {
   },
 }
 
+function isComponentTesting (options = {}) {
+  return options.testingType === 'component'
+}
+
 module.exports = {
   utils,
 
@@ -207,11 +211,17 @@ module.exports = {
       settings.read(projectRoot, options).then(validateFile(configFilename)),
       settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
     ])
-    .spread((settings, envFile) => {
+    .spread((configObject, envFile) => {
+      const testingType = isComponentTesting(options) ? 'component' : 'e2e'
+
+      if (testingType in configObject) {
+        configObject = { ...configObject, ...configObject[testingType] }
+      }
+
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
-        config: _.cloneDeep(settings),
+        config: _.cloneDeep(configObject),
         envFile: _.cloneDeep(envFile),
         options,
       })

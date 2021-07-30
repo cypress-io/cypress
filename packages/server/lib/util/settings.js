@@ -132,10 +132,6 @@ module.exports = {
     }, _.cloneDeep(obj))
   },
 
-  isComponentTesting (options = {}) {
-    return options.testingType === 'component'
-  },
-
   configFile (projectRoot, options = {}) {
     const ls = fs.readdirSync(projectRoot)
 
@@ -228,13 +224,7 @@ module.exports = {
       return Promise.reject(err)
     })
     .then((configObject = {}) => {
-      const testingType = this.isComponentTesting(options) ? 'component' : 'e2e'
-
       debug('resolved configObject', configObject)
-
-      if (testingType in configObject && typeof configObject[testingType] === 'object') {
-        configObject = { ...configObject, ...configObject[testingType] }
-      }
 
       const changed = this._applyRewriteRules(configObject)
 
