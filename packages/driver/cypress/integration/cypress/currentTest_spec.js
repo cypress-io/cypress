@@ -25,7 +25,6 @@ describe('currentTest', () => {
     .eq(cy.state('runnable').title)
 
     expect(Cypress.currentTest.titlePath)
-    .is.a('string')
     .eq(cy.state('runnable').titlePath())
   })
 
@@ -41,6 +40,5 @@ const expectMatchingCurrentTitleInHook = () => {
   .eq(cy.state('runnable').ctx.currentTest.title)
 
   expect(Cypress.currentTest.titlePath)
-  .is.a('string')
   .eq(cy.state('runnable').titlePath())
 }
