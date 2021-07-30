@@ -177,6 +177,7 @@ export async function writeProjectId (id: string, projectRoot: string) {
 
 interface ProjectDetails {
   projectName: string
+  projectRoot: string
   orgId: string | null
   public: boolean
 }
