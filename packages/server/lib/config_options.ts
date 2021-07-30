@@ -166,6 +166,11 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
+    name: 'setupNodeServer',
+    defaultvalue: null,
+    validation: v.isFunction,
+    onlyInOverride: true,
+  }, {
     name: 'port',
     defaultValue: null,
     validation: v.isNumber,

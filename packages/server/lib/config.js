@@ -44,6 +44,7 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const folders = _(options).filter({ isFolder: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const defaultValues = createIndex(options, 'name', 'defaultValue')
+const onlyInOverrideValues = createIndex(options, 'name', 'onlyInOverride')
 
 const isCypressEnvLike = (key) => {
   return _.chain(key)
@@ -85,6 +86,10 @@ const validateNoBreakingConfig = (cfg) => {
 const validate = (cfg, onErr) => {
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
+
+    if (onlyInOverrideValues[key]) {
+      return `key ${key} is only valid in a testingType object, it is invalid to use it in the root`
+    }
 
     // does this key have a validation rule?
     if (validationFn) {
