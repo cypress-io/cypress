@@ -3802,5 +3802,5 @@
     "./packages/static/lib/static.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "7f4c876f035464c46abfc6d19c0c6255b95a58d87651790d0e1bb266122c76b9"
+  "deferredHash": "92b05b2d926785f5c3a8d561da13e7a438624e7d1eb8b30fe89a59781adea22c"
 }
