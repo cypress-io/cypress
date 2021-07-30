@@ -23,25 +23,6 @@ before(() => {
   cy.wrap(Cypress.session.clearAllSavedSessions())
 })
 
-describe('persist saved sessions between spec reruns', () => {
-  it('sets session', (done) => {
-    cy.session('persist_session', () => {
-      cy.setCookie('cookieName', 'cookieValue')
-    })
-    .then(() => {
-      if (!top.didRerun) {
-        top.didRerun = true
-        top.doNotClearSessions = true
-        top._rerun()
-      }
-    })
-    .then(() => {
-      top.didRerun = false
-      done()
-    })
-  })
-})
-
 const sessionUser = (name = 'user0') => {
   return cy.session(name, () => {
     cy.visit(`https://localhost:4466/cross_origin_iframe/${name}`)

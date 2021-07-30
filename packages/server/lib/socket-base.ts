@@ -168,6 +168,12 @@ export class SocketBase {
       },
     })
 
+    const resetRenderedHTMLOrigins = () => {
+      const origins = options.getRenderedHTMLOrigins()
+
+      Object.keys(origins).forEach((key) => delete origins[key])
+    }
+
     const onAutomationClientRequestCallback = (message, data, id) => {
       return this.onAutomation(automationClient, message, data, id)
     }
@@ -392,12 +398,15 @@ export class SocketBase {
               return session.clearSessions()
             case 'get:session':
               return session.getSession(args[0])
+            case 'reset:session:state':
+              session.clearSessions()
+              resetRenderedHTMLOrigins()
+
+              return
             case 'get:renderedHTMLOrigins':
               return options.getRenderedHTMLOrigins()
             case 'reset:renderedHTMLOrigins': {
-              const origins = options.getRenderedHTMLOrigins()
-
-              Object.keys(origins).forEach((key) => delete origins[key])
+              resetRenderedHTMLOrigins()
 
               return
             }

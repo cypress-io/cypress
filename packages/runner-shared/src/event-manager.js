@@ -65,8 +65,6 @@ export const eventManager = {
       return this._reRun(state)
     }
 
-    top._rerun = rerun
-
     ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       ws.on('automation:disconnected', action('automationDisconnected', () => {

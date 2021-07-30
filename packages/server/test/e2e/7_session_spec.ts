@@ -1,6 +1,9 @@
 import e2e from '../support/helpers/e2e'
 import parser from 'cookie-parser'
 import BodyParser from 'body-parser'
+
+const it = e2e.it
+
 const onServer = function (app) {
   app.use(parser())
 
@@ -122,8 +125,17 @@ describe('e2e sessions', () => {
     },
   })
 
-  e2e.it('session/defineSession + utils test', {
+  it('session tests', {
     spec: 'session_spec.js',
+    snapshot: true,
+    config: {
+      experimentalSessionSupport: true,
+      video: false,
+    },
+  })
+
+  it('sessions persist on reload', {
+    spec: 'session_persist_spec.js',
     snapshot: true,
     config: {
       experimentalSessionSupport: true,

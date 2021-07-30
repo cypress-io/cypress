@@ -1,4 +1,4 @@
-exports['e2e sessions / session/defineSession + utils test'] = `
+exports['e2e sessions / session tests'] = `
 
 ====================================================================================================
 
@@ -18,10 +18,15 @@ exports['e2e sessions / session/defineSession + utils test'] = `
 
 
   cross origin automations
-    ✓ get localStorage
-    ✓ set localStorage
+    ✓ get storage
+    ✓ get storage w/ sessionStorage
+    ✓ set storage
     ✓ get localStorage from all origins
     ✓ only gets localStorage from origins visited in test
+
+  args
+    ✓ accepts string or object as id
+    ✓ uses sorted stringify and rejects duplicate registrations
 
   with a blank session
     ✓ t1
@@ -31,7 +36,7 @@ exports['e2e sessions / session/defineSession + utils test'] = `
     ✓ t1
     ✓ t2
 
-  navigates to about:blank between tests
+  navigates to about:blank between tests and shows warning about session lifecycle
     ✓ t1
     ✓ t2
 
@@ -46,15 +51,56 @@ exports['e2e sessions / session/defineSession + utils test'] = `
   multiple sessions in test
     ✓ switch session during test
 
-  session hooks - before/after
+  multiple sessions in test - can switch without redefining
+    ✓ switch session during test
+
+  options.validate reruns steps when returning false
     ✓ t1
     ✓ t2
 
-  options.validate called on subsequent sessions
+  options.validate reruns steps when resolving false
     ✓ t1
     ✓ t2
 
-  options.validate returning false reruns steps
+  options.validate reruns steps when rejecting
+    ✓ t1
+    ✓ t2
+
+  options.validate reruns steps when rejecting
+    ✓ t1
+    ✓ t2
+
+  options.validate reruns steps when resolving false in cypress command
+    ✓ t1
+    ✓ t2
+
+  options.validate reruns steps when resolving false in cypress chainer
+    ✓ t1
+    ✓ t2
+
+  options.validate reruns steps when failing cypress command
+    ✓ t1
+    ✓ t2
+
+  options.validate reruns steps when failing cy.request
+    ✓ t1
+    ✓ t2
+
+  options.validate failing test
+    ✓ test fails when options.validate after setup fails command
+    ✓ test fails when options.validate after setup throws
+    ✓ test fails when options.validate after setup rejects
+    ✓ test fails when options.validate after setup returns false
+    ✓ test fails when options.validate after setup resolves false
+    ✓ test fails when options.validate after setup returns Chainer<false>
+
+  can wait for login redirect automatically
+    ✓ t1
+
+  can wait for a js redirect with an assertion
+    ✓ t1
+
+  same session name, different options, multiple tests
     ✓ t1
     ✓ t2
 
@@ -63,17 +109,18 @@ exports['e2e sessions / session/defineSession + utils test'] = `
 
   errors
     ✓ throws error when experimentalSessionSupport not enabled
-    ✓ throws if multiple defineSession calls with same name
+    ✓ throws if session has not been defined during current test
+    ✓ throws if multiple session calls with same name but different options
 
 
-  24 passing
+  49 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        24                                                                               │
-  │ Passing:      24                                                                               │
+  │ Tests:        49                                                                               │
+  │ Passing:      49                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -91,9 +138,67 @@ exports['e2e sessions / session/defineSession + utils test'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX       24       24        -        -        - │
+  │ ✔  session_spec.js                          XX:XX       49       49        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       24       24        -        -        -  
+    ✔  All specs passed!                        XX:XX       49       49        -        -        -  
+
+
+`
+
+exports['e2e sessions / sessions persist on reload'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (session_persist_spec.js)                                                  │
+  │ Searched:   cypress/integration/session_persist_spec.js                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  session_persist_spec.js                                                         (1 of 1)
+
+
+  persist saved sessions between spec reruns
+
+
+  persist saved sessions between spec reruns
+    ✓ sets session
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     session_persist_spec.js                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  session_persist_spec.js                  XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

@@ -18,8 +18,6 @@ import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
-import * as session from './session'
-
 import { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
@@ -311,7 +309,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
-      session.clearSessions()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)

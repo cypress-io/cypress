@@ -6,6 +6,15 @@ import stringifyStable from 'json-stable-stringify'
 import * as $stackUtils from '../../cypress/stack_utils'
 const currentTestRegisteredSessions = new Map()
 
+/**
+ * rules for clearing session data:
+ * if page reloads due to top navigation OR user hard reload, session data should NOT be cleared
+ * if user relaunches the browser or launches a new spec, session data SHOULD be cleared
+ * session data SHOULD be cleared between specs in run mode
+ *
+ * therefore session data should be cleared with spec browser launch
+ */
+
 const getSessionDetails = (sessState) => {
   return {
     id: sessState.id,
