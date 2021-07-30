@@ -5,8 +5,10 @@ describe('persist saved sessions between spec reruns', () => {
     cy.session('persist_session', () => {
       cy.setCookie('cookieName', 'cookieValue')
     })
-    .then(() => {
-      if (!top.count) {
+
+    if (!top.count) {
+      return cy.wrap(null).should(() => {
+        expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('(new)')
         top.count++
 
         // this simulates interactive/open mode
@@ -18,10 +20,10 @@ describe('persist saved sessions between spec reruns', () => {
         // in the browser reporter gui
         cy.$$('button.stop', top.document)[0].click()
         cy.$$('button.restart', top.document)[0].click()
-      }
+      })
+    }
 
-      cy.$$('.runnable-active', top.document)[0].click()
-    })
+    cy.$$('.runnable-active', top.document)[0].click()
 
     cy.wrap(null).should(() => {
       expect(cy.$$('.commands-container li.command:first', top.document).text()).contain('(saved)')

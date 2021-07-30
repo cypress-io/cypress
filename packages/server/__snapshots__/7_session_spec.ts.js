@@ -145,7 +145,7 @@ exports['e2e sessions / session tests'] = `
 
 `
 
-exports['e2e sessions / sessions persist on reload'] = `
+exports['e2e sessions / sessions persist on reload, and clear between specs'] = `
 
 ====================================================================================================
 
@@ -154,14 +154,15 @@ exports['e2e sessions / sessions persist on reload'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (session_persist_spec.js)                                                  │
-  │ Searched:   cypress/integration/session_persist_spec.js                                        │
+  │ Specs:      2 found (session_persist_spec_1.js, session_persist_spec_2.js)                     │
+  │ Searched:   cypress/integration/session_persist_spec_1.js, cypress/integration/session_persist │
+  │             _spec_2.js                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  session_persist_spec.js                                                         (1 of 1)
+  Running:  session_persist_spec_1.js                                                       (1 of 2)
 
 
   persist saved sessions between spec reruns
@@ -185,7 +186,34 @@ exports['e2e sessions / sessions persist on reload'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     session_persist_spec.js                                                          │
+  │ Spec Ran:     session_persist_spec_1.js                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  session_persist_spec_2.js                                                       (2 of 2)
+
+
+  after running spec with saved session
+    ✓ has an initially blank session on new spec
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     session_persist_spec_2.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -196,9 +224,11 @@ exports['e2e sessions / sessions persist on reload'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_persist_spec.js                  XX:XX        1        1        -        -        - │
+  │ ✔  session_persist_spec_1.js                XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  session_persist_spec_2.js                XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `
