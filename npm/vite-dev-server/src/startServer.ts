@@ -37,7 +37,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
+  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.

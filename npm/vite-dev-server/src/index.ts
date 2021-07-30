@@ -15,9 +15,9 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   const viteDevServer = await createDevServer(startDevServerArgs)
 
   const app = await viteDevServer.listen()
-  const port = app.config.server.port
+  const port = app.config.server.port!
 
   debug('Component testing vite server started on port', port)
 
-  return { port, close: app.httpServer.close }
+  return { port, close: app.httpServer!.close }
 }
