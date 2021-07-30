@@ -14,11 +14,13 @@ export class Wizard {
   private chosenTestingType: TestingType | null
   private chosenBundler: Bundler | null
   private chosenFramework: FrontendFramework | null
+  private chosenManualInstall: boolean
 
   constructor () {
     this.chosenTestingType = null
     this.chosenBundler = null
     this.chosenFramework = null
+    this.chosenManualInstall = false
   }
 
   @nxs.field.type(() => WizardFrontendFramework)
@@ -57,6 +59,13 @@ export class Wizard {
   })
   get description (): NxsResult<'Wizard', 'title'> {
     return WIZARD_DESCRIPTIONS[this.currentStep]
+  }
+
+  @nxs.field.nonNull.boolean({
+    description: 'Whether we have chosen manual install or not',
+  })
+  get isManualInstall (): NxsResult<'Wizard', 'isManualInstall'> {
+    return this.chosenManualInstall
   }
 
   // GraphQL Fields:
@@ -118,6 +127,12 @@ export class Wizard {
 
   setBundler (bundler?: Bundler | null): Wizard {
     this.chosenBundler = bundler ?? null
+
+    return this
+  }
+
+  setManualInstall (isManual: boolean): Wizard {
+    this.chosenManualInstall = isManual
 
     return this
   }

@@ -26,9 +26,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from "vue";
-import { gql } from '@apollo/client/core'
 import CopyButton from "./CopyButton.vue";
-import { Pkg } from './InstallDependencies.vue'
+import { gql } from '@urql/core'
+import { ManualInstallFragment } from "../generated/graphql";
 
 gql`
 fragment ManualInstall on Wizard {
@@ -41,8 +41,9 @@ fragment ManualInstall on Wizard {
 
 export default defineComponent({
   props: {
-    packagesToInstall: {
-      type: Array as PropType<readonly Pkg[]>
+    gql: {
+      type: Object as PropType<ManualInstallFragment>,
+      required: true
     }
   },
 
@@ -50,7 +51,7 @@ export default defineComponent({
     const dependenciesCode = computed(
       () =>
         "yarn add -D \\\n" +
-        (props.packagesToInstall ?? [])
+        (props.gql.packagesToInstall ?? [])
           .map((pack) => `                    ${pack.name} \\`)
           .join("\n")
     );

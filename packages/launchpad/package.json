@@ -3,8 +3,6 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "prebuild": "node script/build-schema.js && yarn codegen",
-    "build": "vite build",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn cypress:run:ct",
@@ -12,7 +10,6 @@
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
     "dev": "NODE_ENV=development LAUNCHPAD=1 yarn start-test 5050 cypress:launch",
-    "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "http-server -p 5050 dist",
     "watch": "concurrently \"vite build --watch\" \"yarn codegen --watch\"",
     "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
@@ -23,7 +20,6 @@
     "vue": "3.1.1"
   },
   "devDependencies": {
-    "@apollo/client": "^3.3.21",
     "@cypress/vue": "0.0.0-development",
     "@graphql-codegen/add": "^2.0.2",
     "@graphql-codegen/cli": "^1.21.6",
@@ -33,9 +29,10 @@
     "@graphql-typed-document-node/core": "^3.1.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
+    "@urql/core": "2.1.5",
+    "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
-    "@vue/apollo-composable": "^4.0.0-alpha.14",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
     "concurrently": "^6.2.0",
@@ -51,7 +48,8 @@
     "vue": "3.1.1",
     "vue-prism-component": "2.0.0",
     "vue-tsc": "0.0.24",
-    "windicss": "3.1.4"
+    "windicss": "3.1.4",
+    "wonka": "^4.0.15"
   },
   "files": [
     "dist",

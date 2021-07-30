@@ -20,8 +20,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ButtonBar from "./ButtonBar.vue";
-import { gql } from '@apollo/client/core'
-import { useMutation } from '@vue/apollo-composable'
+import { gql } from '@urql/core'
+import { useMutation } from '@urql/vue'
 import { WizardLayoutNavigateForwardDocument, WizardLayoutNavigateBackDocument } from "../generated/graphql";
 
 gql`
@@ -72,11 +72,11 @@ export default defineComponent({
     const navigateBack = useMutation(WizardLayoutNavigateBackDocument)
 
     function nextFn() {
-      navigateForward.mutate()
+      navigateForward.executeMutation({})
     }
 
     function backFn() {
-      navigateBack.mutate()
+      navigateBack.executeMutation({})
     }
 
     return {

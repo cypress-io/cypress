@@ -19,6 +19,25 @@ export const mutation = mutationType({
       resolve: (_, args, ctx) => ctx.wizard.setFramework(args.framework),
     })
 
+    // TODO: Move these 3 to a single wizardUpdate(input: WizardUpdateInput!)
+    t.field('wizardSetBundler', {
+      type: 'Wizard',
+      description: 'Sets the frontend bundler we want to use for the project',
+      args: {
+        bundler: nonNull(BundlerEnum),
+      },
+      resolve: (root, args, ctx) => ctx.wizard.setBundler(args.bundler),
+    })
+
+    t.field('wizardSetManualInstall', {
+      type: 'Wizard',
+      description: 'Sets the frontend bundler we want to use for the project',
+      args: {
+        isManual: nonNull('Boolean'),
+      },
+      resolve: (root, args, ctx) => ctx.wizard.setManualInstall(args.isManual),
+    })
+
     t.field('wizardNavigateForward', {
       type: 'Wizard',
       description: 'Navigates forward in the wizard',
@@ -29,15 +48,6 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Navigates backward in the wizard',
       resolve: (_, __, ctx) => ctx.wizard.navigateBack(),
-    })
-
-    t.field('wizardSetBundler', {
-      type: 'Wizard',
-      description: 'Sets the frontend bundler we want to use for the project',
-      args: {
-        bundler: nonNull(BundlerEnum),
-      },
-      resolve: (root, args, ctx) => ctx.wizard.setBundler(args.bundler),
     })
 
     t.field('wizardInstallDependencies', {

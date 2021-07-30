@@ -30,7 +30,7 @@
     >
       <template v-if="selectedOptionObject">
         <img
-          :src="selectedOptionObject.logo"
+          :src="FrameworkBundlerLogos[selectedOptionObject.id]"
           class="w-5 h-5 mr-3"
         />
         <span>
@@ -71,7 +71,7 @@
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
       >
         <img
-          :src="opt.logo"
+          :src="FrameworkBundlerLogos[opt.id]"
           class="w-5 h-5 mr-3"
         />
         <span>
@@ -88,6 +88,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from "vue";
 import { ClickOutside } from '../directives/ClickOutside'
+import { FrameworkBundlerLogos } from '../utils/logos'
 
 export interface Option {
   name: string;
@@ -113,7 +114,7 @@ export default defineComponent({
       default: undefined,
     },
     options: {
-      type: Object as PropType<readonly Option[]>,
+      type: Array as PropType<ReadonlyArray<Option>>,
       required: true,
     },
     disabled: {
@@ -141,6 +142,7 @@ export default defineComponent({
       selectedOptionObject,
       selectOption,
       disabledClass,
+      FrameworkBundlerLogos
     };
   },
 });

@@ -2,43 +2,40 @@
   <WizardLayout :next="nextButtonName" alt="Install manually" :altFn="altFn">
     <PackagesList
       v-if="!manualInstall" 
-      :packagesToInstall="packagesToInstall || []" 
+      :gql="gql" 
     />
     <ManualInstall 
       v-else 
       @back="manualInstall = false" 
-      :packagesToInstall="packagesToInstall || []" 
+      :gql="gql || []" 
     />
   </WizardLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
-import { PackagesToInstallDocument } from "../generated/graphql";
-import { useQuery, useResult } from "@vue/apollo-composable";
-import { gql } from '@apollo/client'
+import { computed, defineComponent, onMounted, ref } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
+import { useStoreApp } from "../store/app";
+import { gql } from '@urql/core'
 
 gql`
 fragment InstallDependencies on Wizard {
   ...PackagesList
   ...ManualInstall
+  isManualInstall
 }
 `
 
 gql`
-query PackagesToInstall {
-  wizard {
-    packagesToInstall {
-      name
-    }
+mutation InstallDependenciesManualInstall($isManual: Boolean!) {
+  wizardSetManualInstall(isManual: $isManual) {
+    ...InstallDependencies
   }
 }
 `
 
-export interface Pkg { name: string, description: string }
 
 export default defineComponent({
   components: {
@@ -46,31 +43,36 @@ export default defineComponent({
     PackagesList,
     ManualInstall,
   },
-  setup() {
+  props: ['gql'],
+  setup(props) {
+    // useMutation(InstallDependenciesManualInstallDocument)
+    const store = useStoreApp();
     const manualInstall = ref(false);
     const nextButtonName = computed(() =>
       manualInstall.value ? "I've installed them" : "Install"
     );
+    onMounted(() => {
+      store.onAlt(() => {
+        manualInstall.value = !manualInstall.value;
+      });
 
-    const altFn = (val: boolean) => {
-      manualInstall.value = val
-    }
+      store.onBack(() => {
+        store.flagComponentSetup(false);
+      });
 
-    // TODO: Why do I need pollInterval?
-    const { result } = useQuery(PackagesToInstallDocument, null, { pollInterval: 1000 })
-
-    const packagesToInstall = useResult(result, null, data => {
-      return data?.wizard?.packagesToInstall?.map(x => ({
-        name: x.name, 
-        description: 'TODO: Description', 
-       })) || []
-    })
-
-    return {
-      altFn,
-      packagesToInstall,
-      manualInstall,
-      nextButtonName,
+      store.onNext(() => {
+        if (manualInstall.value) {
+          store.flagDependenciesInstalled();
+        } else {
+        }
+      });
+    });
+    
+    return { 
+      manualInstall, 
+      nextButtonName, 
+      gql: computed(() => props.gql),
+      altFn() {}
     };
   },
 });

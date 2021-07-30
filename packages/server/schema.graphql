@@ -61,6 +61,9 @@ type Mutation {
   """Sets the frontend framework we want to use for the project"""
   wizardSetFramework(framework: FrontendFramework!): Wizard
 
+  """Sets the frontend bundler we want to use for the project"""
+  wizardSetManualInstall(isManual: Boolean!): Wizard
+
   """Sets the current testing type we want to use"""
   wizardSetTestingType(type: TestingTypeEnum!): Wizard
 
@@ -132,6 +135,9 @@ type Wizard {
 
   """All of the component testing frameworks to choose from"""
   frameworks: [WizardFrontendFramework]
+
+  """Whether we have chosen manual install or not"""
+  isManualInstall: Boolean!
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler

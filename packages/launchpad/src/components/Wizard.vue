@@ -20,15 +20,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue";
+import { defineComponent, watch, computed } from "vue";
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
 import { WizardDocument } from '../generated/graphql'
-import { useQuery, useResult } from "@vue/apollo-composable";
+import { useQuery } from "@urql/vue";
 
 gql`
 query Wizard {
@@ -56,22 +56,23 @@ export default defineComponent({
     OpenBrowser,
   },
   setup() {
-    const { onResult, result, loading } = useQuery(WizardDocument, null, { pollInterval: 1000 })
-
-    onResult((result) => {
-      // console.log(result)
+    const result = useQuery({
+      query: WizardDocument,
     })
 
-    watch(result, value => {
-      // console.log(value)
+    console.log(result)
+
+    // onResult((result) => {
+    //   console.log(result)
+    // })
+
+    watch(result.data, value => {
+      console.log(value)
     })
 
-    // the `?` is not really needed since vue-apollo will automatically
-    // swallow an errors: https://v4.apollo.vuejs.org/guide-composable/query.html#result-picking
-    // but TS complains, so it's good to have it.
-    const wizard = useResult(result, null, data => data?.wizard)
-
-    return { loading, result, wizard };
+    return { 
+      loading: result.fetching, 
+      wizard: computed(() => result.data.value?.wizard) };
   },
 });
 </script>

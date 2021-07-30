@@ -13,9 +13,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { Pkg } from './InstallDependencies.vue'
-import { gql } from '@apollo/client/core'
+import { defineComponent, PropType, computed } from "vue";
+import { gql } from '@urql/core'
+import { PackagesListFragment } from "../generated/graphql";
 
 gql`
 fragment PackagesList on Wizard {
@@ -28,9 +28,15 @@ fragment PackagesList on Wizard {
 
 export default defineComponent({
   props: {
-    packagesToInstall: {
-      type: Array as PropType<readonly Pkg[]>
+    gql: {
+      type: Object as PropType<PackagesListFragment>,
+      required: true
     }
+  },
+  setup(props) {
+    return { 
+      packagesToInstall: computed(() => props.gql.packagesToInstall)
+    };
   },
 });
 </script>

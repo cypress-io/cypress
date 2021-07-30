@@ -358,25 +358,6 @@
   dependencies:
     "@types/throttle-debounce" "^2.1.0"
 
-"@apollo/client@^3.3.21":
-  version "3.3.21"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.3.21.tgz#2862baa4e1ced8c5e89ebe6fc52877fc64a726aa"
-  integrity sha512-RAmZReFuKCKx0Rs5C0nVJwKomAHUHn+gGP/YvbEsXQWu0sXoncEUZa71UqlfCPVXa/0MkYOIbCXSQdOcuRrHgw==
-  dependencies:
-    "@graphql-typed-document-node/core" "^3.0.0"
-    "@types/zen-observable" "^0.8.0"
-    "@wry/context" "^0.6.0"
-    "@wry/equality" "^0.5.0"
-    fast-json-stable-stringify "^2.0.0"
-    graphql-tag "^2.12.0"
-    hoist-non-react-statics "^3.3.2"
-    optimism "^0.16.0"
-    prop-types "^15.7.2"
-    symbol-observable "^4.0.0"
-    ts-invariant "^0.8.0"
-    tslib "^1.10.0"
-    zen-observable "^0.8.14"
-
 "@ardatan/aggregate-error@0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@ardatan/aggregate-error/-/aggregate-error-0.0.6.tgz#fe6924771ea40fc98dc7a7045c2e872dc8527609"
@@ -3434,7 +3415,7 @@
     tslib "~2.2.0"
     value-or-promise "1.0.6"
 
-"@graphql-typed-document-node/core@^3.0.0", "@graphql-typed-document-node/core@^3.1.0":
+"@graphql-typed-document-node/core@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.0.tgz#0eee6373e11418bfe0b5638f654df7a4ca6a3950"
   integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
@@ -8964,11 +8945,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/zen-observable@^0.8.0":
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/@types/zen-observable/-/zen-observable-0.8.3.tgz#781d360c282436494b32fe7d9f7f8e64b3118aa3"
-  integrity sha512-fbF6oTd4sGGy0xjHPKAt+eS2CrxJ3+6gQ3FGcBoIJR2TLAyCkCyI8JqZNy+FeON0AhVgNJoUumVoZQjBFUqHkw==
-
 "@typescript-eslint/eslint-plugin@4.18.0", "@typescript-eslint/eslint-plugin@^4.18.0":
   version "4.18.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-4.18.0.tgz#50fbce93211b5b690895d20ebec6fe8db48af1f6"
@@ -9159,6 +9135,22 @@
   resolved "https://registry.yarnpkg.com/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz#aa58042711d6e3275dd37dc597e5d31e8c290a44"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
+"@urql/core@2.1.5", "@urql/core@^2.1.5":
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.1.5.tgz#8fbc0846d6020cee89dadbee07ffb0a618ab29d8"
+  integrity sha512-iX30xZ6exdJbajv2S4gxVP+1ZEh57x9gEuUrpOCLWZp84970XDSo82xoz+11I+NGWiQNZfbIs6LTLaie/iG3OQ==
+  dependencies:
+    "@graphql-typed-document-node/core" "^3.1.0"
+    wonka "^4.0.14"
+
+"@urql/vue@0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.4.3.tgz#3f97c3a45fef2033d6965c4dde81c00ac75749fd"
+  integrity sha512-r5KPa6kQG2BAWkfXoahUnz3I9F3ShuEyIVCZ3nEjTWn1BsgnYObLOzcGYWgKfzHRVF4XW7KGaBkGnAt9ls8yXg==
+  dependencies:
+    "@urql/core" "^2.1.5"
+    wonka "^4.0.14"
+
 "@vitejs/plugin-vue-jsx@1.1.6":
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue-jsx/-/plugin-vue-jsx-1.1.6.tgz#c9e7b63d1ebf537a24a0b4b3b31f4beb8055cef6"
@@ -9180,14 +9172,6 @@
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@vitejs/plugin-vue/-/plugin-vue-1.2.4.tgz#a7aa6e6a31c556a8b781de730316deeecf7f56f2"
   integrity sha512-D/3H9plevPQGgQGwmV6eecvOnooLTecPR63HPffVVWPEhbfvmtYLWgznzs456NBb2DItiRTCIa1yWxvGqC+I8A==
-
-"@vue/apollo-composable@^4.0.0-alpha.14":
-  version "4.0.0-alpha.14"
-  resolved "https://registry.yarnpkg.com/@vue/apollo-composable/-/apollo-composable-4.0.0-alpha.14.tgz#6e3358fa9b815b38384d3da59b5c2b77b2b229d3"
-  integrity sha512-bIOWRGk1j+b2ebsLfwQkzqvJd1tCpHZiBF2Qe88RTLUxtypdkdSW6YpLxwJgNoRv5W55sM9WI+nP2ziv2nqBZg==
-  dependencies:
-    throttle-debounce "^2.3.0"
-    vue-demi "^0.9.1"
 
 "@vue/babel-helper-vue-jsx-merge-props@^1.2.1":
   version "1.2.1"
@@ -10042,27 +10026,6 @@
     magic-string "^0.25.7"
     micromatch "^4.0.4"
     windicss "^3.1.4"
-
-"@wry/context@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@wry/context/-/context-0.6.0.tgz#f903eceb89d238ef7e8168ed30f4511f92d83e06"
-  integrity sha512-sAgendOXR8dM7stJw3FusRxFHF/ZinU0lffsA2YTyyIOfic86JX02qlPqPVqJNZJPAxFt+2EE8bvq6ZlS0Kf+Q==
-  dependencies:
-    tslib "^2.1.0"
-
-"@wry/equality@^0.5.0":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@wry/equality/-/equality-0.5.1.tgz#b22e4e1674d7bf1439f8ccdccfd6a785f6de68b0"
-  integrity sha512-FZKbdpbcVcbDxQrKcaBClNsQaMg9nof1RKM7mReJe5DKUzM5u8S7T+PqwNqvib5O2j2xxF1R4p5O3+b6baTrbw==
-  dependencies:
-    tslib "^2.1.0"
-
-"@wry/trie@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@wry/trie/-/trie-0.3.0.tgz#3245e74988c4e3033299e479a1bf004430752463"
-  integrity sha512-Yw1akIogPhAT6XPYsRHlZZIS0tIGmAl9EYXHi2scf7LPKKqdqmow/Hu4kEqP2cJR3EjaU/9L0ZlAjFf3hFxmug==
-  dependencies:
-    tslib "^2.1.0"
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -21578,7 +21541,7 @@ graphql-scalars@^1.10.0:
   dependencies:
     tslib "~2.2.0"
 
-graphql-tag@^2.11.0, graphql-tag@^2.12.0, graphql-tag@^2.12.5:
+graphql-tag@^2.11.0, graphql-tag@^2.12.5:
   version "2.12.5"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.12.5.tgz#5cff974a67b417747d05c8d9f5f3cb4495d0db8f"
   integrity sha512-5xNhP4063d16Pz3HBtKprutsPrmHZi5IdUGOWRxA2B6VF7BIRGOHZ5WQvDmJXZuPcBg7rYwaFxvQYjqkSdR3TQ==
@@ -29769,14 +29732,6 @@ opn@cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5:
     object-assign "^4.0.1"
     pinkie-promise "^2.0.0"
 
-optimism@^0.16.0:
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/optimism/-/optimism-0.16.1.tgz#7c8efc1f3179f18307b887e18c15c5b7133f6e7d"
-  integrity sha512-64i+Uw3otrndfq5kaoGNoY7pvOhSsjFEN4bdEFh80MWVk/dbgJfMv7VFDeCT8LxNAlEVhQmdVEbfE7X2nWNIIg==
-  dependencies:
-    "@wry/context" "^0.6.0"
-    "@wry/trie" "^0.3.0"
-
 optimist@0.6.1, optimist@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/optimist/-/optimist-0.6.1.tgz#da3ea74686fa21a19a111c326e90eb15a0196686"
@@ -37766,7 +37721,7 @@ symbol-observable@3.0.0:
   resolved "https://registry.npmjs.org/symbol-observable/-/symbol-observable-3.0.0.tgz#eea8f6478c651018e059044268375c408c15c533"
   integrity sha512-6tDOXSHiVjuCaasQSWTmHUWn4PuG7qa3+1WT031yTc/swT7+rLiw3GOrFxaH1E3lLP09dH3bVuVDf2gK5rxG3Q==
 
-symbol-observable@4.0.0, symbol-observable@^4.0.0:
+symbol-observable@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-4.0.0.tgz#5b425f192279e87f2f9b937ac8540d1984b39205"
   integrity sha512-b19dMThMV4HVFynSAM1++gBHAbk2Tc/osgLIBZMKsyqh34jb2e8Os7T6ZW/Bt3pJFdBTd2JwAnAAEQV7rSNvcQ==
@@ -38223,11 +38178,6 @@ throat@^4.0.0:
   resolved "https://registry.yarnpkg.com/throat/-/throat-4.1.0.tgz#89037cbc92c56ab18926e6ba4cbb200e15672a6a"
   integrity sha1-iQN8vJLFarGJJua6TLsgDhVnKmo=
 
-throttle-debounce@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/throttle-debounce/-/throttle-debounce-2.3.0.tgz#fd31865e66502071e411817e241465b3e9c372e2"
-  integrity sha512-H7oLPV0P7+jgvrk+6mwwwBDmxTaxnu9HMXmloNLXwnNO0ZxZ31Orah2n8lU1eMPvsaowP2CX+USCgyovXfdOFQ==
-
 throttle-debounce@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/throttle-debounce/-/throttle-debounce-3.0.1.tgz#32f94d84dfa894f786c9a1f290e7a645b6a19abb"
@@ -38656,13 +38606,6 @@ ts-essentials@^2.0.3:
   version "2.0.12"
   resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-2.0.12.tgz#c9303f3d74f75fa7528c3d49b80e089ab09d8745"
   integrity sha512-3IVX4nI6B5cc31/GFFE+i8ey/N2eA0CZDbo6n0yrz0zDX8ZJ8djmU1p+XRz7G3is0F3bB3pu2pAroFdAWQKU3w==
-
-ts-invariant@^0.8.0:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/ts-invariant/-/ts-invariant-0.8.2.tgz#62af654ebfb8b1eeb55bc9adc2f40c6b93b0ff7e"
-  integrity sha512-VI1ZSMW8soizP5dU8DsMbj/TncHf7bIUqavuE7FTeYeQat454HHurJ8wbfCnVWcDOMkyiBUWOW2ytew3xUxlRw==
-  dependencies:
-    tslib "^2.1.0"
 
 ts-loader@7.0.4:
   version "7.0.4"
@@ -40371,11 +40314,6 @@ void-elements@^2.0.1:
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
   integrity sha1-wGavtYK7HLQSjWDqkjkulNXp2+w=
 
-vue-demi@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.9.1.tgz#25d6e1ebd4d4010757ff3571e2bf6a1d7bf3de82"
-  integrity sha512-7s1lufRD2l369eFWPjgLvhqCRk0XzGWJsQc7K4q+0mZtixyGIvsK1Cg88P4NcaRIEiBuuN4q1NN4SZKFKwQswA==
-
 vue-eslint-parser@^7.0.0:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/vue-eslint-parser/-/vue-eslint-parser-7.6.0.tgz#01ea1a2932f581ff244336565d712801f8f72561"
@@ -41401,6 +41339,11 @@ winston@2.4.4:
     isstream "0.1.x"
     stack-trace "0.0.x"
 
+wonka@^4.0.14, wonka@^4.0.15:
+  version "4.0.15"
+  resolved "https://registry.yarnpkg.com/wonka/-/wonka-4.0.15.tgz#9aa42046efa424565ab8f8f451fcca955bf80b89"
+  integrity sha512-U0IUQHKXXn6PFo9nqsHphVCE5m3IntqZNB9Jjn7EB1lrR7YTDY3YWgFvEvwniTzXSvOH/XMzAZaIfJF/LvHYXg==
+
 word-wrap@^1.2.3, word-wrap@~1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"
@@ -42319,11 +42262,6 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
-
-zen-observable@^0.8.14:
-  version "0.8.15"
-  resolved "https://registry.yarnpkg.com/zen-observable/-/zen-observable-0.8.15.tgz#96415c512d8e3ffd920afd3889604e30b9eaac15"
-  integrity sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==
 
 zip-stream@^4.0.0:
   version "4.1.0"

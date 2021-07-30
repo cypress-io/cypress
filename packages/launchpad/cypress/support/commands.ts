@@ -1,5 +1,5 @@
 import { mount } from '@cypress/vue'
-import { provideApolloClient } from '@vue/apollo-composable'
+import { provideClient } from '@urql/vue'
 import { createStoreApp, StoreApp } from '../../src/store/app'
 import { createStoreConfig, StoreConfig } from '../../src/store/config'
 import { testApolloClient } from './testApolloClient'
@@ -32,7 +32,7 @@ Cypress.Commands.add(
     options.global.plugins.push(storeConfig)
     options.global.plugins.push({
       install (app) {
-        provideApolloClient(testApolloClient(new ClientTestContext()))
+        provideClient(testApolloClient(new ClientTestContext()))
       },
     })
 

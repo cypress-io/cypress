@@ -18,8 +18,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { gql } from '@apollo/client/core'
-import { useMutation } from '@vue/apollo-composable'
+import { gql } from '@urql/core'
+import { useMutation } from '@urql/vue'
 import { TestingTypeIcons } from "../utils/testingTypes";
 import { TestingTypeSelectDocument, TestingTypeEnum } from '../generated/graphql'
 
@@ -50,7 +50,7 @@ export default defineComponent({
     const mutation = useMutation(TestingTypeSelectDocument)
 
     const selectTestingType = (testingType: TestingTypeEnum) => {
-      mutation.mutate({ testingType });
+      mutation.executeMutation({ testingType });
     };
 
     return { 

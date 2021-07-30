@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts">
-import { provideApolloClient } from '@vue/apollo-composable'
-import { makeApolloClient } from './graphql/apolloClient'
+import { provideClient } from '@urql/vue'
+import { makeUrqlClient } from './graphql/urqlClient'
 import { defineComponent } from "vue";
 import Layout from "./components/Layout.vue";
 import Wizard from "./components/Wizard.vue";
@@ -18,7 +18,7 @@ export default defineComponent({
     Wizard,
   },
   setup() {
-    provideApolloClient(makeApolloClient())
+    provideClient(makeUrqlClient())
   }
 });
 </script>

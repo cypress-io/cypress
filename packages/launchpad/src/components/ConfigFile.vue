@@ -47,8 +47,8 @@
 import { watch, computed, defineComponent, onMounted, ref } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
-import { useQuery, useResult } from "@vue/apollo-composable";
-import { gql } from '@apollo/client/core'
+import { gql } from '@urql/core'
+import { useQuery } from "@urql/vue";
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
@@ -96,15 +96,16 @@ export default defineComponent({
         "Create a <em>cypress.config.js</em> file with the code below to store your project configuration.",
     }
 
-
-    const { result, onResult } = useQuery(WizardDevServerConfigDocument, null, {})
+    const { data } = useQuery({
+      query: WizardDevServerConfigDocument
+    })
 
     watch(language, v => {
-      console.log(result.value?.wizard?.configFile.js)
+      console.log(data.value?.wizard?.configFile.js)
     })
 
     const code = computed(() => {
-      return result.value?.wizard?.configFile[language.value] || ''
+      return data.value?.wizard?.configFile[language.value] || ''
     })
 
     return {

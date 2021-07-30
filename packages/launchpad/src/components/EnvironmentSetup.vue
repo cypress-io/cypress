@@ -21,12 +21,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import Select, { Option } from "./Select.vue";
-import { gql } from '@apollo/client/core'
-import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers, WizardDocument } from '../generated/graphql'
-import { useMutation, useQuery, useResult} from '@vue/apollo-composable'
+import { gql } from '@urql/core'
+import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
+import { useMutation } from '@urql/vue'
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFramework!) {
@@ -87,40 +87,40 @@ export default defineComponent({
     const disabledBundlerSelect = ref(false);
 
     const setFEBundler = (bundler: SupportedBundlers) => {
-      setBundler.mutate({ bundler })
+      setBundler.executeMutation({ bundler })
     };
 
     const setFEFramework = (framework: FrontendFramework) => {
-      setFramework.mutate({ framework })
+      setFramework.executeMutation({ framework })
     };
 
-    const { result } = useQuery(WizardDocument, null, {})
+    // const bundlers = useResult(result, null, data => {
+    //   const vals = data?.wizard?.framework?.supportedBundlers 
+    //     || data?.wizard?.allBundlers
+    //     || [] 
 
-    const bundlers = useResult(result, null, data => {
-      const vals = data?.wizard?.framework?.supportedBundlers 
-        || data?.wizard?.allBundlers
-        || [] 
+    //   return vals.map<Option>(x => ({
+    //     name: x!.name,
+    //     id: x!.id!,
+    //     logo: './404.png',
+    //     description: 'TODO: add description gql server'
+    //   }))
+    // })
 
-      return vals.map<Option>(x => ({
-        name: x!.name,
-        id: x!.id!,
-        logo: './404.png',
-        description: 'TODO: add description gql server'
-      }))
-    })
-
-    const frameworks = useResult(result, null, data => data?.wizard?.frameworks?.map<Option>(x => {
-      return {
-        name: x!.name,
-        id: x!.id!,
-        logo: './404.png',
-        description: 'TODO: add to gql server'
-      }
-    }))
+    // const frameworks = useResult(result, null, data => data?.wizard?.frameworks?.map<Option>(x => {
+    //   return {
+    //     name: x!.name,
+    //     id: x!.id!,
+    //     logo: './404.png',
+    //     description: 'TODO: add to gql server'
+    //   }
+    // }))
 
     return {
-      bundlers,
-      frameworks,
+      bundlers: computed(() => props.gql.allBundlers),
+      frameworks: computed(() => props.gql.frameworks),
+      // lachlan - is this needed??
+      gql: computed(() => props.gql),
       setFEFramework,
       setFEBundler,
       disabledBundlerSelect,

@@ -109,6 +109,7 @@ export interface NexusGenFieldTypes {
     wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetBundler: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetFramework: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetTestingType: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
@@ -137,6 +138,7 @@ export interface NexusGenFieldTypes {
     description: string | null; // String
     framework: NexusGenRootTypes['WizardFrontendFramework'] | null; // WizardFrontendFramework
     frameworks: Array<NexusGenRootTypes['WizardFrontendFramework'] | null> | null; // [WizardFrontendFramework]
+    isManualInstall: boolean; // Boolean!
     packagesToInstall: NexusGenRootTypes['WizardNpmPackage'][] | null; // [WizardNpmPackage!]
     step: NexusGenEnums['WizardStep']; // WizardStep!
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
@@ -180,6 +182,7 @@ export interface NexusGenFieldTypeNames {
     wizardNavigateForward: 'Wizard'
     wizardSetBundler: 'Wizard'
     wizardSetFramework: 'Wizard'
+    wizardSetManualInstall: 'Wizard'
     wizardSetTestingType: 'Wizard'
     wizardValidateManualInstall: 'Wizard'
   }
@@ -208,6 +211,7 @@ export interface NexusGenFieldTypeNames {
     description: 'String'
     framework: 'WizardFrontendFramework'
     frameworks: 'WizardFrontendFramework'
+    isManualInstall: 'Boolean'
     packagesToInstall: 'WizardNpmPackage'
     step: 'WizardStep'
     testingType: 'TestingTypeEnum'
@@ -247,6 +251,9 @@ export interface NexusGenArgTypes {
     }
     wizardSetFramework: { // args
       framework: NexusGenEnums['FrontendFramework']; // FrontendFramework!
+    }
+    wizardSetManualInstall: { // args
+      isManual: boolean; // Boolean!
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
