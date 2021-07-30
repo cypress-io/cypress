@@ -22,6 +22,7 @@ describe('lib/settings', () => {
     afterEach(() => {
       return fs.removeAsync('cypress.json')
       .then(() => fs.removeAsync('cypress.config.js'))
+      .then(() => fs.removeAsync('cypress.config.ts'))
       .then(clearCypressJsonCache)
     })
 
@@ -104,6 +105,23 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
+      it('fails if both a cypress.config.js and cypress.config.ts are added', function () {
+        return Promise.all([
+          fs.outputFileAsync('cypress.config.ts', ''),
+          fs.outputFileAsync('cypress.config.js', ''),
+        ]).then(() => {
+          return settings.read(projectRoot)
+        })
+        .then(() => {
+          throw Error('should throw wehn 2 files are created')
+        })
+        .catch((err) => {
+          expect(err.type).to.eq('CONFIG_FILES_LANGUAGE_CONFLICT')
+
+          expect(err.message).to.include(projectRoot)
+        })
+      })
+
       it('promises cypress.config.js', function () {
         return this.setup(`
           module.exports = {

@@ -9,7 +9,9 @@ const { CYPRESS_CONFIG_FILES } = require('../configFiles')
 const debug = require('debug')('cypress:server:settings')
 
 function jsCode (obj) {
-  const objJSON = obj && !_.isEmpty(obj) ? JSON.stringify(obj, null, 2) : `{
+  const objJSON = obj && !_.isEmpty(obj)
+    ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
+    : `{
 
 }`
 
@@ -20,7 +22,9 @@ module.export = defineConfig(${objJSON})
 }
 
 function tsCode (obj) {
-  const objJSON = obj && obj !== {} ? JSON.stringify(obj, null, 2) : `{
+  const objJSON = obj && !_.isEmpty(obj) !== {}
+    ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
+    : `{
 
 }`
 
@@ -133,8 +137,6 @@ module.exports = {
   },
 
   configFile (projectRoot, options = {}) {
-    const ls = fs.readdirSync(projectRoot)
-
     if (options.configFile === false) {
       return false
     }
@@ -143,10 +145,27 @@ module.exports = {
       return options.configFile
     }
 
-    for (const configFile of CYPRESS_CONFIG_FILES) {
-      if (ls.includes(configFile)) {
-        return configFile
+    const ls = fs.readdirSync(projectRoot)
+
+    const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => ls.includes(file))
+
+    // if we only found one default file, it is the one
+    if (foundConfigFiles.length === 1) {
+      return foundConfigFiles[0]
+    }
+
+    // if we found more than one, it might just be the json that is still migrating
+    if (foundConfigFiles.length > 1) {
+      const evaluatedFiles = foundConfigFiles.filter((file) => file !== 'cypress.json')
+
+      // if we found more than one evaluated file (js or ts)
+      // we can't trust that migration has been doen properly
+      if (evaluatedFiles.length > 1) {
+        return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot)
       }
+
+      // else, just ignore the cypress.json and return the other one
+      return evaluatedFiles[0]
     }
 
     // Default is to create a new `cypress.config.js` file if one does not exist.

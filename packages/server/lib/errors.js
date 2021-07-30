@@ -1008,6 +1008,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/setupNodeServer
         `
+
+    case `CONFIG_FILES_LANGUAGE_CONFLICT`:
+      return stripIndent`
+          There is both a \`cypress.config.js\` and a \`cypress.config.ts\` in the location below:
+
+          ${arg1}
+
+          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          `
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
     default:
