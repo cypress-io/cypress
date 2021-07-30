@@ -68,7 +68,7 @@ const Runner = {
       const container = (
         <Container
           config={config}
-          runner='ct'
+          runner='component'
           state={state}
           App={App}
           hasSpecFile={util.hasSpecFile}

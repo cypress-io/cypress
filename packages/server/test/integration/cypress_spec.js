@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
 const R = require('ramda')
@@ -368,7 +369,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase({ projectRoot: this.noScaffolding, projectType: 'e2e' })).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e' })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
