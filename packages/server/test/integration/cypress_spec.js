@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 require('../spec_helper')
 const { clearCypressJsonCache } = require('../cache_helper')
 
