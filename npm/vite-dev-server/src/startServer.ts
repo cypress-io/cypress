@@ -13,7 +13,7 @@ interface Options {
   [key: string]: unknown
 }
 
-export interface StartDevServer {
+export interface StartDevServerOptions {
   /**
    * the Cypress options object
    */
@@ -27,7 +27,7 @@ export interface StartDevServer {
   viteConfig?: UserConfig
 }
 
-const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
+const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile } = options.config
 
   const requiredOptions: InlineConfig = {
@@ -37,7 +37,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
+  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
@@ -66,7 +66,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   return finalConfig
 }
 
-export async function start (devServerOptions: StartDevServer): Promise<ViteDevServer> {
+export async function start (devServerOptions: StartDevServerOptions): Promise<ViteDevServer> {
   if (!devServerOptions.viteConfig) {
     debug('User did not pass in any Vite dev server configuration')
     devServerOptions.viteConfig = {}
