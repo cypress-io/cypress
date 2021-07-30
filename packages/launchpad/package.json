@@ -18,6 +18,8 @@
     "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
   "dependencies": {
+    "@urql/core": "2.1.5",
+    "@urql/vue": "^0.4.3",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
     "vue": "3.1.1"
