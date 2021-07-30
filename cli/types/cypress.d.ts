@@ -2727,7 +2727,7 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: TestingTypeConfig    
+    component: TestingTypeConfig
   }
 
   /**
