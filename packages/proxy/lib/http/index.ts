@@ -275,8 +275,6 @@ export class Http {
   }
 
   reset () {
-    // TODO: when to reset marked origins?
-    // this.renderedHTMLOrigins = {}
     this.buffers.reset()
     this.preRequests = new PreRequests()
   }
