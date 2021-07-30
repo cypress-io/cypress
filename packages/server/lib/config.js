@@ -106,8 +106,13 @@ const validate = (cfg, onErr) => {
 }
 
 const validateFile = (file) => {
-  return (settings) => {
-    return validate(settings, (errMsg) => {
+  return (configObject) => {
+    // disallow use of pluginFile in evaluated configuration files
+    if (/\.(ts|js)$/.test(file) && configObject.pluginsFile) {
+      errors.throw('CONFLICT_PLUGINSFILE_CONFIGJS', file)
+    }
+
+    return validate(configObject, (errMsg) => {
       return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
     })
   }

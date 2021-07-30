@@ -7,7 +7,6 @@ const debug = require('debug')('test')
 const config = require(`${root}lib/config`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
-const { fs } = require(`${root}lib/util/fs`)
 const findSystemNode = require(`${root}lib/util/find_system_node`)
 const scaffold = require(`${root}lib/scaffold`)
 let settings = require(`${root}lib/util/settings`)
@@ -55,8 +54,8 @@ describe('lib/config', () => {
     beforeEach(function () {
       this.projectRoot = '/_test-output/path/to/project'
 
-      this.setup = (cypressJson = {}, cypressEnvJson = {}) => {
-        sinon.stub(fs, 'readdirSync').withArgs(this.projectRoot).returns([])
+      this.setup = (cypressJson = {}, cypressEnvJson = {}, fileName = 'cypress.config.js') => {
+        sinon.stub(settings, 'configFile').withArgs(this.projectRoot).returns(fileName)
         sinon.stub(settings, 'read').withArgs(this.projectRoot).resolves(cypressJson)
         sinon.stub(settings, 'readEnv').withArgs(this.projectRoot).resolves(cypressEnvJson)
       }
@@ -525,21 +524,27 @@ describe('lib/config', () => {
 
       context('pluginsFile', () => {
         it('passes if a string', function () {
-          this.setup({ pluginsFile: 'cypress/plugins' })
+          this.setup({ pluginsFile: 'cypress/plugins' }, {}, 'cypress.json')
 
           return this.expectValidationPasses()
         })
 
         it('passes if false', function () {
-          this.setup({ pluginsFile: false })
+          this.setup({ pluginsFile: false }, {}, 'cypress.json')
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or false', function () {
-          this.setup({ pluginsFile: 42 })
+          this.setup({ pluginsFile: 42 }, {}, 'cypress.json')
 
           return this.expectValidationFails('be a string')
+        })
+
+        it('fails if used in a js file', function () {
+          this.setup({ pluginsFile: 'cypress/plugins' }, {}, 'cypress.config.js')
+
+          return this.expectValidationFails('cannot be set in a `cypress.config.js`')
         })
       })
 

@@ -1000,6 +1000,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/component-testing
         `
+    case 'CONFLICT_PLUGINSFILE_CONFIGJS':
+      return stripIndent`
+        \`pluginsFile\` cannot be set in a \`${arg1}\` file. 
+        
+        \`pluginsFile\` is deprecated and will error in cypress 9.0, prefer using the \`setupNodeServer\` function instead.
+
+        https://on.cypress.io/setupNodeServer
+        `
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
     default:
