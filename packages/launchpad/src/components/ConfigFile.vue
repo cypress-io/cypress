@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { watch, computed, defineComponent, onMounted, ref } from "vue";
+import { watch, computed, defineComponent, ref } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
 import { gql } from '@urql/core'
@@ -52,7 +52,7 @@ import { useQuery } from "@urql/vue";
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
-import { getCode, languages } from "../utils/configFile";
+import { languages } from "../utils/configFile";
 import { WizardDevServerConfigDocument } from "../generated/graphql";
 
 gql`

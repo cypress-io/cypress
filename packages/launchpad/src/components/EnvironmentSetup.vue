@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
-import Select, { Option } from "./Select.vue";
+import Select from "./Select.vue";
 import { gql } from '@urql/core'
 import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
@@ -93,28 +93,6 @@ export default defineComponent({
     const setFEFramework = (framework: FrontendFramework) => {
       setFramework.executeMutation({ framework })
     };
-
-    // const bundlers = useResult(result, null, data => {
-    //   const vals = data?.wizard?.framework?.supportedBundlers 
-    //     || data?.wizard?.allBundlers
-    //     || [] 
-
-    //   return vals.map<Option>(x => ({
-    //     name: x!.name,
-    //     id: x!.id!,
-    //     logo: './404.png',
-    //     description: 'TODO: add description gql server'
-    //   }))
-    // })
-
-    // const frameworks = useResult(result, null, data => data?.wizard?.frameworks?.map<Option>(x => {
-    //   return {
-    //     name: x!.name,
-    //     id: x!.id!,
-    //     logo: './404.png',
-    //     description: 'TODO: add to gql server'
-    //   }
-    // }))
 
     return {
       bundlers: computed(() => props.gql.allBundlers),

@@ -37,6 +37,7 @@
     </div>
     <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch" :style="`background-image: url('${bottomBackground}');`" style="background-position: bottom center;background-repeat: no-repeat;">
       <SideBarItem
+        :key="i.icon"
         v-for="i in sideMenuDefinition"
         :icon="i.icon"
         :active="!!i.active"
