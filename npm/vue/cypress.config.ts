@@ -8,10 +8,10 @@ export default defineConfig({
   video: false,
   responseTimeout: 2500,
   projectId: '134ej7',
-  testFiles: '**/*spec.js',
   experimentalFetchPolyfill: true,
   component: {
-    plugins (on, config) {
+    testFiles: '**/*spec.js',
+    setupNodeServer (on, config) {
       if (config.testingType !== 'component') {
         throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
       }

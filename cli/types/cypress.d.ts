@@ -302,7 +302,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
+    config<K extends keyof ResolvedConfigOptions>(key: K): ResolvedConfigOptions[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -311,7 +311,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
+    config<K extends keyof ResolvedConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -2813,7 +2813,7 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
+  type CoreConfigOptions = Partial<TestingTypeConfig>
   type ConfigOptions = CoreConfigOptions & {e2e?: CoreConfigOptions, component?: CoreConfigOptions }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
