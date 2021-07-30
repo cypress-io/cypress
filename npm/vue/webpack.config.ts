@@ -30,7 +30,7 @@ export default {
         loader: 'vue-loader',
       },
       {
-        test: /\.js$/,
+        test: /\.[j,t]s$/,
         loader: 'babel-loader',
       },
       // this will apply to both plain `.css` files
