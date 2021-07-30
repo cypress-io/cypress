@@ -39,6 +39,7 @@ export const fetchGraphql = async function fetchGraphql (
 
   ipcInFlight.set(ipcId, dfd)
 
+  // console.log('OPERATION', op)
   window.ipc.send('graphql', {
     id: ipcId,
     params: {

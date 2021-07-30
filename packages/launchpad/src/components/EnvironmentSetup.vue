@@ -3,32 +3,55 @@
     <div class="m-5">
       <Select
         name="Front-end Framework"
-        @select="setFEFramework"
+        @select="select"
+        :value="selected"
         :options="frameworks"
-        :value="selectedFrameworkId"
         placeholder="Pick a framework"
       />
-      <Select
+
+      <div>
+        You chose: {{ selected }}.
+      </div>
+      <!-- <Select
         name="Bundler"
         :disabled="disabledBundlerSelect"
         @select="setFEBundler"
         :options="bundlers"
         :value="selectedBundlerId"
         placeholder="Pick a bundler"
-      />
+      /> -->
     </div>
   </WizardLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent } from "vue";
 import WizardLayout from "./WizardLayout.vue";
-import Select from "./Select.vue";
+import Select, { Option } from "./Select.vue";
+import { gql, useMutation, useQuery } from "@urql/vue";
+import { EnvironmentSetupDocument, FrontendFramework, SetFrameworkDocument } from "../generated/graphql";
 
-import { Framework, supportedFrameworks } from "../utils/frameworks";
-import { Bundler, supportedBundlers } from "../utils/bundler";
-import { useStoreApp } from "../store/app";
-import { useStoreConfig } from "../store/config";
+gql`
+query EnvironmentSetup {
+  wizard {
+    frameworks {
+      name
+      isSelected
+    }
+  }
+}
+`
+
+gql`
+mutation SetFramework($framework: FrontendFramework!) {
+  wizardSetFramework(framework: $framework) {
+    frameworks{
+      name
+      isSelected
+    }
+  }
+}
+`
 
 export default defineComponent({
   components: { WizardLayout, Select },
@@ -43,93 +66,36 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const storeApp = useStoreApp();
-    const storeConfig = useStoreConfig()
+    const wizard = useQuery({ query: EnvironmentSetupDocument })
 
-    const selectedFramework = ref<Framework | undefined>(undefined);
-    const selectedFrameworkId = ref(props.detectedFramework);
-    const selectedBundler = ref<Bundler | undefined>(undefined);
-    const selectedBundlerId = ref(props.detectedBundler);
+    const frameworks = computed(() => {
+      return wizard.data?.value?.wizard?.frameworks?.map<Option & { isSelected: boolean }>(x => ({
+        name: x!.name!,
+        id: x!.name!,
+        isSelected: x?.isSelected ?? false
+      })) || []
+    })
 
-    onMounted(() => {
-      storeApp.setMeta({
-        title: "Project Setup",
-        description:
-          "Confirm the front-end framework and bundler fused in your project.",
-      });
+    const selected = computed(() => {
+      return frameworks.value.find(x => x.isSelected)?.id
+    })
 
-      storeApp.onBack(() => {
-        storeApp.flagComponent(false);
-      });
-
-      storeApp.onNext(() => {
-        if (!selectedFramework.value || !selectedBundler.value) {
-          return;
-        }
-        storeConfig.setComponentSetup({
-          framework: selectedFramework.value,
-          bundler: selectedBundler.value
-        });
-      });
-
-      const initialComponent = storeConfig.getState().component;
-
-      if (initialComponent) {
-        setFEFramework(initialComponent.framework);
-        setFEBundler(initialComponent.bundler);
-      }
-    });
-
-    const fwBundlerId = computed(() => selectedFramework?.value?.bundler);
-    const disabledBundlerSelect = ref(false);
-
-    const setFEBundler = (bundler: Bundler) => {
-      selectedBundler.value = bundler;
-      selectedBundlerId.value = bundler.id;
-    };
-
-    const bundlers = supportedBundlers.map(
-      (bundler: Bundler & { description?: string }) => {
-        if (bundler.id === props.detectedBundler) {
-          bundler.description = "(detected)";
-          setFEBundler(bundler);
-        }
-        return bundler;
-      }
-    );
-
-    const setFEFramework = (framework: Framework) => {
-      selectedFrameworkId.value = framework.id;
-      selectedFramework.value = framework;
-      disabledBundlerSelect.value = !!fwBundlerId.value;
-      if (fwBundlerId.value) {
-        const foundBundler = supportedBundlers.find(
-          (bund) => bund.id === fwBundlerId.value
-        );
-        if (foundBundler) {
-          setFEBundler(foundBundler);
-        }
-      }
-    };
-
-    const frameworks = supportedFrameworks.map(
-      (framework: Framework & { description?: string }) => {
-        if (framework.id === props.detectedFramework) {
-          framework.description = "(detected)";
-          setFEFramework(framework);
-        }
-        return framework;
-      }
-    );
+    const setFramework = useMutation(SetFrameworkDocument)
 
     return {
-      setFEFramework,
-      setFEBundler,
+      selected,
+      wizard,
+      select: (framework: Option) => {
+        // @ts-ignore todo: type this
+        setFramework.executeMutation({ framework: framework.id as FrontendFramework })
+      },
       frameworks,
-      selectedFrameworkId,
-      bundlers,
-      selectedBundlerId,
-      disabledBundlerSelect,
+      // setFEFramework,
+      // setFEBundler,
+      // selectedFrameworkId,
+      // bundlers,
+      // selectedBundlerId,
+      // disabledBundlerSelect,
     };
   },
 });

@@ -7,7 +7,7 @@ import { WizardNpmPackage } from './WizardNpmPackage'
   description: 'A frontend framework that we can setup within the app',
 })
 export class WizardFrontendFramework {
-  constructor (private framework: FrontendFramework) {}
+  constructor (private framework: FrontendFramework, private selected: boolean) {}
 
   @nxs.field.type(() => FrontendFrameworkEnum, {
     description: 'The name of the framework',
@@ -34,6 +34,6 @@ export class WizardFrontendFramework {
     description: 'Whether this is the selected framework in the wizard',
   })
   get isSelected (): NxsResult<'WizardFrontendFramework', 'isSelected'> {
-    return true
+    return this.selected
   }
 }

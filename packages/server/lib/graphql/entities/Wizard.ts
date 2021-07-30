@@ -64,7 +64,7 @@ export class Wizard {
     description: 'All of the component testing frameworks to choose from',
   })
   frameworks (): NxsResult<'Wizard', 'frameworks'> {
-    return FRONTEND_FRAMEWORK.map((f) => new WizardFrontendFramework(f))
+    return FRONTEND_FRAMEWORK.map((f) => new WizardFrontendFramework(f, f === this.chosenFramework ))
   }
 
   @nxs.field.list.type(() => WizardBundler, {

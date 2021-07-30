@@ -21,10 +21,27 @@
 </template>
 
 <script lang="ts">
+import { gql } from "@urql/core";
+import { useMutation } from "@urql/vue";
 import { computed, defineComponent, ref } from "vue";
+import { NavigateBackDocument, NavigateForwardDocument } from "../generated/graphql";
 import { useStoreApp } from "../store/app";
 import Button from "./Button.vue";
 import Switch from "./Switch.vue";
+
+gql`
+mutation NavigateForward {
+  wizardNavigateForward {
+    step
+  }
+}`
+
+gql`
+mutation NavigateBack {
+  wizardNavigateBack {
+    step
+  }
+}`
 
 export default defineComponent({
   components: { Button, Switch },
@@ -46,8 +63,12 @@ export default defineComponent({
     const altValue = ref(false);
     const store = useStoreApp();
     const state = computed(() => store.getState());
-    const nextFunction = computed(() => state.value.nextAction);
-    const backFunction = computed(() => state.value.backAction);
+    // const nextFunction = computed(() => state.value.nextAction);
+    // const backFunction = computed(() => state.value.backAction);
+
+    const back = useMutation(NavigateBackDocument)
+    const forward = useMutation(NavigateForwardDocument)
+
     const altFunction = computed(() => state.value.alternativeAction);
 
     const handleAlt = () => {
@@ -55,7 +76,13 @@ export default defineComponent({
       altFunction.value?.();
     };
 
-    return { nextFunction, backFunction, altFunction, altValue, handleAlt };
+    return { 
+      nextFunction: () => forward.executeMutation({}), 
+      backFunction: () => back.executeMutation({}),
+      altFunction, 
+      altValue, 
+      handleAlt 
+    };
   },
 });
 </script>

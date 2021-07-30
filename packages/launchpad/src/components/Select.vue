@@ -29,10 +29,10 @@
       v-click-outside="() => (isOpen = false)"
     >
       <template v-if="selectedOptionObject">
-        <img
+        <!-- <img
           :src="selectedOptionObject.logo"
           class="w-5 h-5 mr-3"
-        />
+        /> -->
         <span>
           {{ selectedOptionObject.name }}
         </span>
@@ -70,10 +70,10 @@
         focus="1"
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
       >
-        <img
+        <!-- <img
           :src="opt.logo"
           class="w-5 h-5 mr-3"
-        />
+        /> -->
         <span>
           {{ opt.name }}
         </span>
@@ -89,10 +89,10 @@
 import { computed, defineComponent, PropType, ref } from "vue";
 import { ClickOutside } from '../directives/ClickOutside'
 
-interface Option {
+export interface Option {
   name: string;
   description?: string;
-  logo: string;
+  logo?: string;
   id: string;
 }
 

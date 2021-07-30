@@ -1,19 +1,25 @@
 <template>
-  <h1 class="text-3xl mt-12 text-center">{{ title }}</h1>
-  <p class="text-center text-gray-400 my-2 mx-10" v-html="description" />
-  <div class="mx-5">
-    <TestingType v-if="!steps.component && !steps.e2e" />
+  <div v-if="!wizard.data">
+    LOADING
+  </div>
 
-    <template v-else-if="steps.component">
-      <EnvironmentSetup v-if="!steps.setup" />
-      <InstallDependencies v-else-if="!steps.dependencies" />
-      <ConfigFile v-else-if="!steps.configFile" />
-      <OpenBrowser v-else />
-    </template>
+  <div v-else>
+    <h1 class="text-3xl mt-12 text-center">{{ title }}</h1>
+    <p class="text-center text-gray-400 my-2 mx-10" v-html="description" />
+    <div class="mx-5">
+      <TestingType v-if="wizard.data?.value?.wizard?.step === 'welcome'" />
+      <div v-if="wizard.data?.value?.wizard?.step === 'welcome'">OK</div>
+      <div v-else>{{ wizard.data?.value?.wizard?.step }}</div>
 
-    <template v-else-if="steps.e2e">
-      <div>Here be dragons</div>
-    </template>
+      <template v-else-if="wizard.data?.value?.wizard?.testingType === 'component'">
+        <EnvironmentSetup v-if="wizard.data?.value?.wizard?.step === 'selectFramework'" />
+        <InstallDependencies v-else-if="wizard.data?.value?.wizard?.step === 'installDependencies'" />
+      </template>
+
+      <template v-else-if="wizard.data?.value?.wizard?.testingType === 'e2e'">
+        <div>Here be dragons</div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -27,7 +33,7 @@ import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@apollo/client/core'
 import { WizardDocument } from '../generated/graphql'
-import { useQuery } from "@vue/apollo-composable";
+import { useQuery as useUrqlQuery } from "@urql/vue";
 
 gql`
 query Wizard {
@@ -36,6 +42,7 @@ query Wizard {
   }
   wizard {
     step
+    testingType
   }
 }
 `
@@ -49,23 +56,24 @@ export default defineComponent({
     OpenBrowser,
   },
   setup() {
+    const wizard = useUrqlQuery({
+      query: WizardDocument
+    })
+
+    watch(wizard.data, result => {
+      console.log('urql!', result?.wizard?.step)
+    }, { immediate: true })
+
     const storeApp = useStoreApp();
 
     const title = computed(() => storeApp.getState().title)
     const description = computed(() => storeApp.getState().description)
-    const steps = computed(() => storeApp.getState().steps)
 
-    const { onResult, result, loading } = useQuery(WizardDocument, {})
-
-    onResult((result) => {
-      console.log(result)
-    })
-
-    watch(result, value => {
-      console.log(value)
-    })
-
-    return { steps, title, description, loading, result };
+    return { 
+      title, 
+      description, 
+      wizard: wizard 
+    };
   },
 });
 </script>

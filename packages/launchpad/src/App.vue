@@ -11,6 +11,12 @@ import { defineComponent } from "vue";
 import Layout from "./components/Layout.vue";
 import Wizard from "./components/Wizard.vue";
 
+import { createClient, provideClient } from '@urql/vue'
+
+const client = createClient({
+  url: 'http://localhost:52159/graphql',
+});
+
 export default defineComponent({
   name: "App",
   components: {
@@ -18,6 +24,7 @@ export default defineComponent({
     Wizard,
   },
   setup() {
+    provideClient(client);
     provideApolloClient(makeApolloClient())
   }
 });
