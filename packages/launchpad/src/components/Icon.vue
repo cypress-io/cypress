@@ -1,15 +1,15 @@
 <template>
-  <i class="flex align-center justify-center" v-if="icon">
-    <slot name="prefix">
+  <span>
+    <i class="flex align-center justify-center">
       <component
-        v-if="typeof icon !== 'string'"
-        :is="icon"
-        :class="$attrs.class"/>
-      <i v-else :data-icon="icon"
-        :class="$attrs.class"
-        class="iconify"></i>
-    </slot>
-  </i>
+          v-if="typeof icon !== 'string'"
+          :is="icon"
+          :class="$attrs.class"/>
+        <i v-else :data-icon="icon"
+          :class="$attrs.class"
+          class="iconify"></i>
+    </i>
+  </span>
 </template>
 
 <script lang="ts">

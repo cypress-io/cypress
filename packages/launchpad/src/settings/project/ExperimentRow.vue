@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import StatusIndicator from '../components/StatusIndicator.vue'
+import StatusIndicator from '../../components/StatusIndicator.vue'
 
 export interface Experiment {
   key: string

@@ -1,29 +1,35 @@
 <template>  
-    <div class="relative text-gray-600 focus-within:text-gray-400">
+    <div class="relative text-gray-600" :class="[containerAttrs, {
+      'focus-within:text-gray-400': $attrs.disabled,
+      'w-350px': true
+      }]">
       <span class="absolute inset-y-0 left-0 flex items-center pl-2">
-        <button type="submit" class="p-1 focus:outline-none focus:shadow-outline">
-          <i :data-icon="prefixIcon" :class="prefixIconClass" class="iconify"></i>
-        </button>
+        <slot name="prefix" :iconClass="prefixIconClass" :containerClass="buttonClass">
+            <button type="submit" :class="buttonClass" v-if="prefixIcon || $slots.prefix">
+              <i :data-icon="prefixIcon" :class="prefixIconClass" class="iconify"></i>          
+            </button>
+          </slot>
       </span>
       <input
         :autocomplete="false"
         autocorrect="off"
         :spellcheck="false"
         v-model="localValue"
-        v-bind="$attrs"
+        v-bind="inputAttrs"
         :type="type"
         :class="
-        {
-          'suffix': suffixIcon,
-          'pl-10': prefixIcon,
+        [inputClass, {
+          'suffix': suffixIcon || $slots.suffix,
+          'pr-10': suffixIcon || $slots.suffix,
+          'pl-8': prefixIcon || $slots.prefix,
           'bg-color-red-500': true,
           'py-2 mr-10px': size === 'md',
           'py-1 mr-10px': size === 'sm'
-        }
+        }]
         "
         class="
           w-full
-          text-sm
+          h-full
           rounded
           border-transparent
         disabled:bg-cool-gray-100
@@ -37,9 +43,11 @@
           focus:bg-white
           focus:text-gray-900">
         <span class="absolute inset-y-0 right-0 flex items-center pr-2">
-        <button type="submit" class="p-1 focus:outline-none focus:shadow-outline">
-          <i :data-icon="suffixIcon" :class="suffixIconClass" class="iconify"></i>
-        </button>
+          <slot name="suffix" :iconClass="suffixIconClass" :containerClass="buttonClass">
+            <button type="submit" v-if="suffixIcon || $slots.suffix" :class="buttonClass">
+              <i :data-icon="suffixIcon" :class="suffixIconClass" class="iconify"></i>          
+            </button>
+          </slot>
       </span>
     </div>
 </template>
@@ -47,12 +55,9 @@
 <script lang="ts">
 import { defineComponent, computed, PropType } from 'vue'
 import { useModelWrapper } from '../composables'
+import { omit } from 'lodash'
 
-const IconClassesTable = {
-  md: "h-1.25em w-1.25em",
-  lg: "h-2em w-2m",
-  xl: "h-2.5em w-2.5em"
-}
+const buttonClass = "p-1 focus:outline-none focus:shadow-outline"
 
 export default defineComponent({
   inheritAttrs: false,
@@ -79,13 +84,18 @@ export default defineComponent({
     },
     suffixIconClass: {
       type: String
+    },
+    inputClass: {
+      type: [String, Array, Object],
     }
   },
   setup(props, {emit, attrs}) {
     return {
       type: computed(() => props.type || 'text'),
       localValue: useModelWrapper(props, emit, 'modelValue'),
-      iconClasses: ['flex', 'items-center', IconClassesTable[props.size]],
+      buttonClass,
+      inputAttrs: omit(attrs, 'class'),
+      containerAttrs: attrs.class || {}
     }
   }
 })
