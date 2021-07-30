@@ -9,7 +9,7 @@ const { CYPRESS_CONFIG_FILES } = require('../configFiles')
 const debug = require('debug')('cypress:server:settings')
 
 function jsCode (obj) {
-  const objJSON = obj && obj !== {} ? JSON.stringify(obj, null, 2) : `{
+  const objJSON = obj && !_.isEmpty(obj) ? JSON.stringify(obj, null, 2) : `{
 
 }`
 
