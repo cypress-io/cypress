@@ -12,7 +12,6 @@ import RecordKey from './RecordKey.vue'
 import Experiments from './Experiments.vue'
 import ProjectId from './ProjectId.vue'
 
-
 export default defineComponent({
   components: { ProjectId, Experiments, RecordKey }
 })

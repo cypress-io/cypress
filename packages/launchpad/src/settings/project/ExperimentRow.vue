@@ -1,10 +1,10 @@
 <template>
   <div role="row" class="grid grid-flow-row">
     <div class="inline leading-loose">
-      <h3 class="text-indigo-600 text-lg font-thin inline" role="rowheader">{{ experiment.name }}</h3>
+      <h3 class="text-indigo-600 text-md inline" role="rowheader">{{ experiment.name }}</h3>
       <span class="bg-purple-100 text-purple-600 rounded-sm text-sm py-2px px-4px ml-12px font-mono">{{ experiment.key }}</span>
     </div>
-    <span role="definition" class="text-cool-gray-500 text-sm font-thin">Lorem ipsum dolor sit amet consectetur adipisicing elit. onsectetur adipisicing elit. .</span>
+    <span role="definition" class="text-cool-gray-500 text-sm">Lorem ipsum dolor sit amet consectetur adipisicing elit. onsectetur adipisicing elit. .</span>
     <div class="
     row-start-1
     row-end-3

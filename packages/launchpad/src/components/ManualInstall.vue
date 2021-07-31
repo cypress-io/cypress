@@ -12,6 +12,7 @@
     "
   >
     <div
+      :key="i"
       v-for="i in [0, 1, 2]"
       class="rounded-md h-3 w-3 border border-1-gray-600"
     />

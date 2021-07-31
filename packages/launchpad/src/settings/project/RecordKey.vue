@@ -5,12 +5,12 @@
      <div class="inline-flex justify-start gap-10px">
       <Input v-model="recordKey" class="w-200px" inputClass="font-mono text-xs" disabled size="sm" :type="showRecordKey ? 'text' : 'password'">
         <template #prefix>
-          <Icon icon="mdi:star-circle" class="text-cool-gray-400" />
+          <Icon icon="foundation:key" class="text-cool-gray-400" />
         </template>
         <template #suffix="{containerClass}">
           <button :class="containerClass" @click="showRecordKey = !showRecordKey" class="text-cool-gray-400 hover:text-cool-gray-500">
-            <Icon v-show="showRecordKey" icon="mdi:eye-outline" />
-            <Icon v-show="!showRecordKey" icon="mdi:eye-off-outline" />
+            <Icon v-show="!showRecordKey" icon="mdi:eye-outline" />
+            <Icon v-show="showRecordKey" icon="mdi:eye-off-outline" />
           </button>
         </template>
       </Input>
@@ -22,7 +22,7 @@
       </Button>
       <Button variant="outline" @click="openManageKeys">
         <template #prefix>
-          <Icon class="w-16px h-16px text-cool-gray-400" icon="mdi:star-circle" />
+          <Icon class="w-16px h-16px text-cool-gray-400" icon="foundation:key" />
         </template>
         Manage Keys
       </Button>
