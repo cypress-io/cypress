@@ -1339,6 +1339,10 @@ jobs:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
+          name: Type Check
+          command: yarn typecheck
+          working_directory: npm/vue
+      - run:
           name: Run component tests
           command: yarn test:ci:ct
           working_directory: npm/vue

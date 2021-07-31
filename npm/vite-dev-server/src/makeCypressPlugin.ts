@@ -106,7 +106,7 @@ export const makeCypressPlugin = (
         // as soon as we find one of the specs, we trigger the re-run of tests
         for (const mod of moduleImporters.values()) {
           debug('handleHotUpdate - mod.file', mod.file)
-          if (specsPathsSet.has(mod.file)) {
+          if (mod.file && specsPathsSet.has(mod.file)) {
             debug('handleHotUpdate - compile success')
             devServerEvents.emit('dev-server:compile:success', { specFile: mod.file })
 
