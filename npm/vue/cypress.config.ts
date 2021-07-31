@@ -11,11 +11,7 @@ export default defineConfig({
   experimentalFetchPolyfill: true,
   component: {
     testFiles: '**/*spec.{js,ts,tsx}',
-    setupNodeServer (on, config) {
-      if (config.testingType !== 'component') {
-        throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
-      }
-
+    setupDevServer (options) {
       if (!webpackConfig.resolve) {
         webpackConfig.resolve = {}
       }
@@ -25,8 +21,14 @@ export default defineConfig({
         '@vue/compiler-core$': '@vue/compiler-core/dist/compiler-core.cjs.js',
       }
 
+      return startDevServer({ options, webpackConfig })
+    },
+    setupNodeServer (on, config) {
+      if (config.testingType !== 'component') {
+        throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
+      }
+
       require('@cypress/code-coverage/task')(on, config)
-      on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
 
       return config
     },

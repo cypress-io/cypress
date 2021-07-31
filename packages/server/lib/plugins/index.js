@@ -96,7 +96,8 @@ const init = (config, options) => {
 
     if (typeof config[PLUGINS_FUNCTION_NAME] === 'function') {
       childArguments.push(
-        '--functionName', `${testingType}.${PLUGINS_FUNCTION_NAME}`,
+        '--testingType', testingType,
+        '--functionName', PLUGINS_FUNCTION_NAME,
         '--file', options.configFile,
       )
     } else {

@@ -36,6 +36,7 @@ const getDefaultPreprocessor = function (config) {
 }
 
 let plugins
+let setupDevServerFunction
 
 const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
@@ -86,6 +87,10 @@ const load = (ipc, config, pluginsFile) => {
   Promise
   .try(() => {
     debug('run plugins function')
+
+    if (setupDevServerFunction) {
+      register('dev-server:start', setupDevServerFunction)
+    }
 
     return plugins(register, config)
   })
@@ -138,7 +143,11 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-let tsRegistered = false
+function interopRequire (pluginsFile) {
+  const exp = require(pluginsFile)
+
+  return exp && exp.default ? exp.default : exp
+}
 
 /**
  * the plugins function can be either at the top level
@@ -149,27 +158,24 @@ let tsRegistered = false
  * @param {string} functionName path to the function in the exported object like `"e2e.plugins"`
  * @returns the plugins function found
  */
-function getPluginsFunction (pluginsFile, functionName) {
-  const exp = require(pluginsFile)
-  const resolvedExport = exp && exp.default ? exp.default : exp
+function getPluginsFunction (resolvedExport, testingType, functionName) {
+  if (testingType) {
+    resolvedExport = resolvedExport[testingType]
+  }
 
   if (functionName) {
-    // follow the object path given in parameter to the function sought
-    let finalFunction = resolvedExport
-
-    for (const part of functionName.split('.')) {
-      finalFunction = finalFunction[part]
-    }
-
-    return finalFunction
+    resolvedExport = resolvedExport[functionName]
   }
 
   return resolvedExport
 }
 
-const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
-  debug('pluginsFile:', pluginsFile)
-  debug('functionName:', functionName)
+let tsRegistered = false
+
+const runPlugins = (ipc, pluginsFile, projectRoot, testingType, functionName) => {
+  debug('plugins file:', pluginsFile)
+  debug('testingType:', testingType)
+  debug('function name:', functionName)
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
@@ -200,9 +206,16 @@ const runPlugins = (ipc, pluginsFile, projectRoot, functionName) => {
 
   try {
     debug('require pluginsFile "%s", functionName "%s"', pluginsFile, functionName)
-    plugins = getPluginsFunction(pluginsFile, functionName)
+    const pluginsObject = interopRequire(pluginsFile)
+
+    plugins = getPluginsFunction(pluginsObject, testingType, functionName)
+
+    if (testingType === 'component') {
+      setupDevServerFunction = pluginsObject[testingType].setupDevServer
+    }
 
     debug('plugins %o', plugins)
+    debug('setupDevServerFunction %o', setupDevServerFunction)
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)

@@ -2470,6 +2470,13 @@ declare namespace Cypress {
   type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
 
   type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeServer?: PluginsFunction }
+  type TestingTypeConfigComponent = TestingTypeConfig & { 
+    /**
+     * Return the setup of your server
+     * @arg options the dev server options to pass directly to the dev-server
+     */
+    setupDevServer(options: DevServerOptions): Promise<ResolvedDevServerConfig> 
+  }
 
   interface ResolvedConfigOptions {
     /**
@@ -2727,7 +2734,7 @@ declare namespace Cypress {
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: TestingTypeConfig
+    component: TestingTypeConfigComponent 
   }
 
   /**
@@ -2813,8 +2820,8 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type CoreConfigOptions = Partial<TestingTypeConfig>
-  type ConfigOptions = CoreConfigOptions & {e2e?: CoreConfigOptions, component?: CoreConfigOptions }
+  type DeepPartial<T> = T extends Function ? T : (T extends object ? { [P in keyof T]?: DeepPartial<T[P]>; } : T);
+  type ConfigOptions = DeepPartial<ResolvedConfigOptions>
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
