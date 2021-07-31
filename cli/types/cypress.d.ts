@@ -2469,7 +2469,7 @@ declare namespace Cypress {
 
   type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
 
-  type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeServer?: PluginsFunction }
+  type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeEvents?: PluginsFunction }
   type TestingTypeConfigComponent = TestingTypeConfig & { 
     /**
      * Return the setup of your server

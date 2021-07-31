@@ -184,7 +184,7 @@ const Configuration = observer(({ project }) => (
           {project.hasE2EFunction ?
             <>
               <td><span className='function'>function</span></td>
-              <td>set in the <code>e2e.setupNodeServer()</code> function in the {configFileFormatted(project.configFile)}</td>
+              <td>set in the <code>e2e.setupNodeEvents()</code> function in the {configFileFormatted(project.configFile)}</td>
             </>
             :
             <>

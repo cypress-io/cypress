@@ -1,6 +1,6 @@
 module.exports = {
   e2e: {
-    setupNodeServer (on, config) {
+    setupNodeEvents (on, config) {
       return new Promise((resolve) => {
         setTimeout(resolve, 100)
       })

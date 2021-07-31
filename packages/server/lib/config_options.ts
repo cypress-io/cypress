@@ -166,7 +166,7 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'setupNodeServer',
+    name: 'setupNodeEvents',
     defaultvalue: null,
     validation: v.isFunction,
     onlyInOverride: true,
