@@ -7,7 +7,7 @@
       <template v-else-if="wizard.testingType === 'component'">
         <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
         <InstallDependencies v-else-if="wizard.step === 'installDependencies'" :gql="wizard" />
-        <ConfigFile v-else-if="wizard.step === 'createConfig'" />
+        <ConfigFile v-else-if="wizard.step === 'createConfig'" :gql="wizard" />
         <OpenBrowser v-else-if="wizard.step === 'setupComplete'" />
       </template>
       <template v-else>
@@ -41,6 +41,7 @@ query Wizard {
     description
     testingType
     ...TestingType
+    ...ConfigFile
     ...InstallDependencies
     ...EnvironmentSetup
   }
@@ -56,15 +57,7 @@ export default defineComponent({
     OpenBrowser,
   },
   setup() {
-    const result = useQuery({
-      query: WizardDocument,
-    })
-
-    console.log(result)
-
-    // onResult((result) => {
-    //   console.log(result)
-    // })
+    const result = useQuery({ query: WizardDocument })
 
     watch(result.data, value => {
       console.log(value)

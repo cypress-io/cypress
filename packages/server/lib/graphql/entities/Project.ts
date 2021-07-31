@@ -26,6 +26,13 @@ export class Project {
     // return createHash('sha1').update(this.projectRoot).digest('hex')
   }
 
+  @nxs.field.nonNull.string({
+    description: 'The title of the project',
+  })
+  get title (): NxsResult<'Project', 'title'> {
+    return 'design-system' // TODO: make this real
+  }
+
   @nxs.field.nonNull.string()
   get projectRoot (): NxsResult<'Project', 'projectRoot'> {
     return this.config.projectRoot

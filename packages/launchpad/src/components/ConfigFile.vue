@@ -34,35 +34,28 @@
         />
       </button>
     </nav>
-    <h1>TODO: PrismJS seems not working</h1>
-    {{ code }}
     <div v-if="tsInstalled" class="relative">
-      <!-- <PrismJs :key="language" :language="language">{{ code }}</PrismJs> -->
-      <CopyButton v-if="manualInstall" :text="code" />
+      <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
+      <CopyButton v-if="manualInstall && code" :text="code" />
     </div>
   </WizardLayout>
 </template>
 
 <script lang="ts">
-import { watch, computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, ref, PropType } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
 import { gql } from '@urql/core'
-import { useQuery } from "@urql/vue";
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { languages } from "../utils/configFile";
-import { WizardDevServerConfigDocument } from "../generated/graphql";
+import { ConfigFileFragment } from "../generated/graphql";
 
 gql`
-query wizardDevServerConfig {
-  wizard {
-    configFile {
-      ts
-      js
-    }
-  }
+fragment ConfigFile on Wizard {
+  sampleCodeJs: sampleCode(lang: js)
+  sampleCodeTs: sampleCode(lang: ts)
 }
 `
 
@@ -72,7 +65,13 @@ export default defineComponent({
     PrismJs,
     CopyButton,
   },
-  setup() {
+  props: {
+    gql: {
+      type: Object as PropType<ConfigFileFragment>,
+      required: true
+    }
+  },
+  setup(props) {
     const manualInstall = ref(false);
 
     const altFn = (val: boolean) => {
@@ -96,23 +95,20 @@ export default defineComponent({
         "Create a <em>cypress.config.js</em> file with the code below to store your project configuration.",
     }
 
-    const { data } = useQuery({
-      query: WizardDevServerConfigDocument
-    })
-
-    watch(language, v => {
-      console.log(data.value?.wizard?.configFile.js)
-    })
-
-    const code = computed(() => {
-      return data.value?.wizard?.configFile[language.value] || ''
-    })
+    import("prismjs/components/prism-typescript").then(() => {
+      tsInstalled.value = true;
+    });
 
     return {
       manualInstall,
       altFn,
       nextButtonName,
-      code,
+      code: computed(() => {
+        if (language.value === 'js') {
+          return props.gql.sampleCodeJs
+        }
+        return props.gql.sampleCodeTs
+      }),
       language,
       languages,
       tsInstalled,

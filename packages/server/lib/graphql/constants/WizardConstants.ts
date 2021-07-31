@@ -1,4 +1,5 @@
 import { enumType } from 'nexus'
+import dedent from 'dedent'
 
 import type { NexusGenEnums } from '../gen/nxs.gen'
 
@@ -19,7 +20,7 @@ export const BundlerDisplayNames: Record<NexusGenEnums['SupportedBundlers'], str
 
 export const BundlerPackageNames: Record<NexusGenEnums['SupportedBundlers'], string> = {
   vite: '@cypress/vite-dev-server',
-  webpack: '@cypress/webpack-dev-server'
+  webpack: '@cypress/webpack-dev-server',
 }
 
 export const FRONTEND_FRAMEWORK = ['nuxtjs', 'nextjs', 'cra', 'vuecli', 'reactjs', 'vuejs'] as const
@@ -88,4 +89,89 @@ export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
   installDependencies: 'We need to install the following packages in order for component testing to work.',
   createConfig: 'Cypress will now create the following config file in the local directory for this project.',
   setupComplete: '<em>cypress.config.js</em> file was successfully added to your project.Let’s open your browser and start testing some components!',
+}
+
+export const CODE_SNIPPETS: Partial<Record<NexusGenEnums['FrontendFramework'], Record<NexusGenEnums['WizardCodeSnippetLang'], string> | null>> = {
+  nextjs: {
+    js: dedent`
+      const injectNextDevServer = require('@cypress/react/plugins/next')
+
+      module.exports = {
+        component (on, config) {
+          injectNextDevServer(on, config)
+        },
+      }
+    `,
+    ts: dedent`
+      import { defineConfig } from 'cypress'
+      import injectNextDevServer from '@cypress/react/plugins/next'
+
+      export default defineConfig({
+        component (on, config) {
+          injectNextDevServer(on, config)
+        },
+      })
+    `,
+  },
+  nuxtjs: {
+    js: dedent`
+      const { startDevServer } = require('@cypress/webpack-dev-server')
+      const { getWebpackConfig } = require('nuxt')
+
+      module.exports = {
+        component (on, config) {
+          on('dev-server:start', async (options) => {
+            let webpackConfig = await getWebpackConfig('modern', 'dev')
+
+            return startDevServer({
+              options,
+              webpackConfig,
+            })
+          })
+        },
+      }
+    `,
+    ts: dedent`
+      import { defineConfig } from 'cypress'
+      import { startDevServer } from '@cypress/webpack-dev-server'
+      import { getWebpackConfig } from 'nuxt'
+
+      export default defineConfig({
+        component (on, config) {
+          on('dev-server:start', async (options) => {
+            let webpackConfig = await getWebpackConfig('modern', 'dev')
+
+            return startDevServer({
+              options,
+              webpackConfig,
+            })
+          })
+        },
+      })
+    `,
+  },
+}
+
+export const PACKAGES_DESCRIPTIONS = {
+  '@cypress/vue': 'Allows Cypress to mount each Vue component using <em>cy.mount()</em>',
+  '@cypress/react': 'Allows Cypress to mount each React component using <em>cy.mount()</em>',
+  '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
+  '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
+  '@cypress/storybook': 'Allows Cypress to automatically read and test each of your stories',
+} as const
+
+export type NpmPackages = keyof typeof PACKAGES_DESCRIPTIONS
+
+export const PackageMapping: Record<FrontendFramework, NpmPackages> = {
+  nextjs: '@cypress/react',
+  cra: '@cypress/react',
+  reactjs: '@cypress/react',
+  nuxtjs: '@cypress/vue',
+  vuecli: '@cypress/vue',
+  vuejs: '@cypress/vue',
+}
+
+export const BundleMapping: Record<Bundler, NpmPackages> = {
+  vite: '@cypress/vite-dev-server',
+  webpack: '@cypress/webpack-dev-server',
 }

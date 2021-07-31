@@ -1,6 +1,4 @@
 import { ref } from 'vue'
-import { SupportedBundlerWebpack } from '../utils/bundler'
-import { SupportedFrameworkNext } from '../utils/frameworks'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {
@@ -18,14 +16,14 @@ describe('<ConfigFile />', () => {
         ></button>
         {display.value ? <ConfigFile /> : undefined}
       </div>
-    )).then(() => {
-      Cypress.storeConfig.setComponentSetup({
-        bundler: SupportedBundlerWebpack,
-        framework: SupportedFrameworkNext,
-      })
-
-      cy.get('[data-cy="show"]').click({ force: true })
+    ), {
+      setupContext (ctx) {
+        ctx.wizard.setBundler('webpack')
+        ctx.wizard.setFramework('nextjs')
+      },
     })
+
+    cy.get('[data-cy="show"]').click({ force: true })
   })
 
   it('playground', { viewportWidth: 1280, viewportHeight: 1024 }, () => {

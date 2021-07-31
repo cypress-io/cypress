@@ -1,22 +1,17 @@
 import { ref } from 'vue'
-import { Framework } from '../utils/frameworks'
 import Select from './Select.vue'
-import LogoVue from '../images/logos/vue.svg'
-import LogoReact from '../images/logos/react.svg'
 
 const manyOptions = [
   {
     name: 'VueJs',
-    logo: LogoVue,
     id: 'vue',
   },
   {
     name: 'ReactJs',
     description: '(detected)',
-    logo: LogoReact,
     id: 'react',
   },
-]
+] as const
 
 describe('<BigSelect />', () => {
   it('playground', () => {
@@ -47,7 +42,6 @@ describe('<BigSelect />', () => {
         options={[
           {
             name: 'VueJs',
-            logo: 'vue',
             id: 'vue',
           },
         ]}

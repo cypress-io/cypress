@@ -9135,12 +9135,20 @@
   resolved "https://registry.yarnpkg.com/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz#aa58042711d6e3275dd37dc597e5d31e8c290a44"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
-"@urql/core@2.1.5", "@urql/core@^2.1.5":
+"@urql/core@2.1.5", "@urql/core@>=2.1.0", "@urql/core@^2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.1.5.tgz#8fbc0846d6020cee89dadbee07ffb0a618ab29d8"
   integrity sha512-iX30xZ6exdJbajv2S4gxVP+1ZEh57x9gEuUrpOCLWZp84970XDSo82xoz+11I+NGWiQNZfbIs6LTLaie/iG3OQ==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.0"
+    wonka "^4.0.14"
+
+"@urql/exchange-execute@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@urql/exchange-execute/-/exchange-execute-1.0.4.tgz#b23ee44832788649393caa21f50aa80e9af36921"
+  integrity sha512-Ig/5lmOiAkNrnO5ekV0iBlRXuMdsYl2eFpqC3erGNAV8YvxiXSjZpDIugOVvRMq9h34PQQbfHwDIgE5MiTRmTA==
+  dependencies:
+    "@urql/core" ">=2.1.0"
     wonka "^4.0.14"
 
 "@urql/vue@0.4.3":

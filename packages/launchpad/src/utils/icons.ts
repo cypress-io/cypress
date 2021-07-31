@@ -5,10 +5,12 @@ import LogoNuxt from '../images/logos/nuxt.svg'
 import LogoVue from '../images/logos/vue.svg'
 import LogoReact from '../images/logos/react.svg'
 
-import { FrontendFramework } from '../generated/graphql'
-import { BundlerId } from './bundler'
+import componentLogo from '../images/testingTypes/component.svg'
+import e2eLogo from '../images/testingTypes/e2e.svg'
 
-export const FrameworkBundlerLogos: Record<FrontendFramework | BundlerId, string> = {
+import { FrontendFramework, SupportedBundlers, TestingTypeEnum } from '../generated/graphql'
+
+export const FrameworkBundlerLogos: Record<FrontendFramework | SupportedBundlers, string> = {
   webpack: LogoWebpack,
   vite: LogoVite,
   vuejs: LogoVue,
@@ -17,4 +19,9 @@ export const FrameworkBundlerLogos: Record<FrontendFramework | BundlerId, string
   nuxtjs: LogoNuxt,
   reactjs: LogoReact,
   cra: LogoReact,
+}
+
+export const TestingTypeIcons: Record<TestingTypeEnum, string> = {
+  e2e: e2eLogo,
+  component: componentLogo,
 }

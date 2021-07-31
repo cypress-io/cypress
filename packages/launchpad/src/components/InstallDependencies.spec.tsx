@@ -1,14 +1,12 @@
-import { SupportedBundlerWebpack } from '../utils/bundler'
-import { SupportedFrameworkNext } from '../utils/frameworks'
 import InstallDependencies from './InstallDependencies.vue'
 
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
-    cy.mount(() => <InstallDependencies />).then(() => {
-      Cypress.storeConfig.setComponentSetup({
-        bundler: SupportedBundlerWebpack,
-        framework: SupportedFrameworkNext,
-      })
+    cy.mount(() => <InstallDependencies />, {
+      setupContext (ctx) {
+        ctx.wizard.setBundler('webpack')
+        ctx.wizard.setFramework('nextjs')
+      },
     })
   })
 

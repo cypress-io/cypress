@@ -10,7 +10,7 @@
       />
       <Select
         name="Bundler"
-        :disabled="disabledBundlerSelect"
+        :disabled="bundlers.length === 1"
         @select="setFEBundler"
         :options="bundlers || []"
         :value="gql.bundler?.id ?? undefined"
@@ -56,7 +56,6 @@ fragment EnvironmentSetup on Wizard {
     supportedBundlers {
       id
       name
-      isOnlyOption
     }
   }
   frameworks {
@@ -67,7 +66,6 @@ fragment EnvironmentSetup on Wizard {
   allBundlers {
     id
     name
-    isOnlyOption
   }
 }
 `
@@ -95,9 +93,8 @@ export default defineComponent({
     };
 
     return {
-      bundlers: computed(() => props.gql.allBundlers),
-      frameworks: computed(() => props.gql.frameworks),
-      // lachlan - is this needed??
+      bundlers: computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers),
+      frameworks: computed(() => props.gql.frameworks ?? []),
       gql: computed(() => props.gql),
       setFEFramework,
       setFEBundler,

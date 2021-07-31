@@ -6,8 +6,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue"
-import { useStoreApp } from "../store/app"
+import { defineComponent } from "vue"
 import Button from "./Button.vue"
 
 export default defineComponent({

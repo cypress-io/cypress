@@ -1,10 +1,9 @@
-import { nxs, NxsResult } from 'nexus-decorators'
-import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType } from '../constants/WizardConstants'
+import { nxs, NxsArgs, NxsResult } from 'nexus-decorators'
+import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, CODE_SNIPPETS, PackageMapping, BundleMapping } from '../constants/WizardConstants'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
-import { WizardCypressDevServerConfig } from './WizardCypressDevServerConfig'
 import { WizardFrontendFramework } from './WizardFrontendFramework'
-import { BundleMapping, PackageMapping, WizardNpmPackage } from './WizardNpmPackage'
+import { WizardNpmPackage } from './WizardNpmPackage'
 
 @nxs.objectType({
   description: 'The Wizard is a container for any state associated with initial onboarding to Cypress',
@@ -87,7 +86,7 @@ export class Wizard {
     return TESTING_TYPES.map((t) => new TestingTypeInfo(t))
   }
 
-  @nxs.field.list.type(() => WizardFrontendFramework, {
+  @nxs.field.nonNull.list.nonNull.type(() => WizardFrontendFramework, {
     description: 'All of the component testing frameworks to choose from',
   })
   frameworks (): NxsResult<'Wizard', 'frameworks'> {
@@ -101,13 +100,19 @@ export class Wizard {
     return BUNDLER.map((bundler) => new WizardBundler(this, bundler))
   }
 
-  @nxs.field.nonNull.type(() => WizardCypressDevServerConfig, {
+  @nxs.field.string({
     description: 'Configuration file based on bundler and framework of choice',
+    args (t) {
+      t.nonNull.arg('lang', {
+        type: nxs.enumType('WizardCodeSnippetLang', ['js', 'ts']),
+        default: 'js',
+      })
+    },
   })
-  configFile (): NxsResult<'Wizard', 'configFile'> {
-    const config = new WizardCypressDevServerConfig()
-
-    return config
+  sampleCode (args: NxsArgs<'Wizard', 'sampleCode'>): NxsResult<'Wizard', 'configFile'> {
+    return this.chosenFramework
+      ? CODE_SNIPPETS[this.chosenFramework]?.[args.lang] ?? null
+      : null
   }
 
   // Internal Setters:
@@ -121,6 +126,9 @@ export class Wizard {
 
   setFramework (framework: FrontendFramework): Wizard {
     this.chosenFramework = framework
+    if (framework !== 'reactjs' && framework !== 'vuejs') {
+      this.chosenBundler = 'webpack'
+    }
 
     return this
   }
@@ -143,21 +151,29 @@ export class Wizard {
     return true
   }
 
+  private get filteredSteps (): ReadonlyArray<WizardStep> {
+    if (!this.needsConfig()) {
+      return WIZARD_STEP.filter((s) => s !== 'createConfig')
+    }
+
+    return WIZARD_STEP
+  }
+
   navigateBack (): Wizard {
-    const idx = WIZARD_STEP.indexOf(this.currentStep)
+    const idx = this.filteredSteps.indexOf(this.currentStep)
 
     if (idx !== 0) {
-      this.currentStep = WIZARD_STEP[idx - 1]
+      this.currentStep = this.filteredSteps[idx - 1]
     }
 
     return this
   }
 
   navigateForward (): Wizard {
-    const idx = WIZARD_STEP.indexOf(this.currentStep)
+    const idx = this.filteredSteps.indexOf(this.currentStep)
 
-    if (idx !== WIZARD_STEP.length - 1) {
-      this.currentStep = WIZARD_STEP[idx + 1]
+    if (idx !== this.filteredSteps.length - 1) {
+      this.currentStep = this.filteredSteps[idx + 1]
     }
 
     return this
@@ -166,5 +182,9 @@ export class Wizard {
   validateManualInstall (): Wizard {
     //
     return this
+  }
+
+  private needsConfig (): boolean {
+    return Boolean(this.chosenFramework && CODE_SNIPPETS[this.chosenFramework])
   }
 }

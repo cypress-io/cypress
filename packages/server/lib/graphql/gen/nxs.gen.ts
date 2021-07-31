@@ -14,7 +14,6 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
-import type { WizardCypressDevServerConfig } from "./../entities/WizardCypressDevServerConfig"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -59,6 +58,7 @@ export interface NexusGenEnums {
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
+  WizardCodeSnippetLang: "js" | "ts"
   WizardStep: "createConfig" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
 }
 
@@ -80,7 +80,6 @@ export interface NexusGenObjects {
   TestingTypeInfo: TestingTypeInfo;
   Wizard: Wizard;
   WizardBundler: WizardBundler;
-  WizardCypressDevServerConfig: WizardCypressDevServerConfig;
   WizardFrontendFramework: WizardFrontendFramework;
   WizardNpmPackage: WizardNpmPackage;
 }
@@ -120,6 +119,7 @@ export interface NexusGenFieldTypes {
     pluginsErrorMessage: string | null; // String
     pluginsState: NexusGenEnums['PluginsState'] | null; // PluginsState
     projectRoot: string; // String!
+    title: string; // String!
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
@@ -134,12 +134,12 @@ export interface NexusGenFieldTypes {
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
     bundler: NexusGenRootTypes['WizardBundler'] | null; // WizardBundler
     canNavigateForward: boolean; // Boolean!
-    configFile: NexusGenRootTypes['WizardCypressDevServerConfig']; // WizardCypressDevServerConfig!
     description: string | null; // String
     framework: NexusGenRootTypes['WizardFrontendFramework'] | null; // WizardFrontendFramework
-    frameworks: Array<NexusGenRootTypes['WizardFrontendFramework'] | null> | null; // [WizardFrontendFramework]
+    frameworks: NexusGenRootTypes['WizardFrontendFramework'][]; // [WizardFrontendFramework!]!
     isManualInstall: boolean; // Boolean!
     packagesToInstall: NexusGenRootTypes['WizardNpmPackage'][] | null; // [WizardNpmPackage!]
+    sampleCode: string | null; // String
     step: NexusGenEnums['WizardStep']; // WizardStep!
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
     testingTypes: NexusGenRootTypes['TestingTypeInfo'][] | null; // [TestingTypeInfo!]
@@ -147,17 +147,12 @@ export interface NexusGenFieldTypes {
   }
   WizardBundler: { // field return type
     id: NexusGenEnums['SupportedBundlers']; // SupportedBundlers!
-    isOnlyOption: boolean | null; // Boolean
     isSelected: boolean | null; // Boolean
     name: string; // String!
     package: string; // String!
   }
-  WizardCypressDevServerConfig: { // field return type
-    js: string; // String!
-    ts: string; // String!
-  }
   WizardFrontendFramework: { // field return type
-    id: NexusGenEnums['FrontendFramework'] | null; // FrontendFramework
+    id: NexusGenEnums['FrontendFramework']; // FrontendFramework!
     isSelected: boolean; // Boolean!
     name: string; // String!
     supportedBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -193,6 +188,7 @@ export interface NexusGenFieldTypeNames {
     pluginsErrorMessage: 'String'
     pluginsState: 'PluginsState'
     projectRoot: 'String'
+    title: 'String'
   }
   Query: { // field return type name
     app: 'App'
@@ -207,12 +203,12 @@ export interface NexusGenFieldTypeNames {
     allBundlers: 'WizardBundler'
     bundler: 'WizardBundler'
     canNavigateForward: 'Boolean'
-    configFile: 'WizardCypressDevServerConfig'
     description: 'String'
     framework: 'WizardFrontendFramework'
     frameworks: 'WizardFrontendFramework'
     isManualInstall: 'Boolean'
     packagesToInstall: 'WizardNpmPackage'
+    sampleCode: 'String'
     step: 'WizardStep'
     testingType: 'TestingTypeEnum'
     testingTypes: 'TestingTypeInfo'
@@ -220,14 +216,9 @@ export interface NexusGenFieldTypeNames {
   }
   WizardBundler: { // field return type name
     id: 'SupportedBundlers'
-    isOnlyOption: 'Boolean'
     isSelected: 'Boolean'
     name: 'String'
     package: 'String'
-  }
-  WizardCypressDevServerConfig: { // field return type name
-    js: 'String'
-    ts: 'String'
   }
   WizardFrontendFramework: { // field return type name
     id: 'FrontendFramework'
@@ -257,6 +248,11 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+  }
+  Wizard: {
+    sampleCode: { // args
+      lang: NexusGenEnums['WizardCodeSnippetLang']; // WizardCodeSnippetLang!
     }
   }
 }

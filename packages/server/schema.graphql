@@ -90,6 +90,9 @@ type Project {
   """Plugin state for a project"""
   pluginsState: PluginsState
   projectRoot: String!
+
+  """The title of the project"""
+  title: String!
 }
 
 """The root "Query" type containing all entry fields for our querying"""
@@ -126,15 +129,12 @@ type Wizard {
   bundler: WizardBundler
   canNavigateForward: Boolean!
 
-  """Configuration file based on bundler and framework of choice"""
-  configFile: WizardCypressDevServerConfig!
-
   """The title of the page, given the current step of the wizard"""
   description: String
   framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
-  frameworks: [WizardFrontendFramework]
+  frameworks: [WizardFrontendFramework!]!
 
   """Whether we have chosen manual install or not"""
   isManualInstall: Boolean!
@@ -143,6 +143,9 @@ type Wizard {
   A list of packages to install, null if we have not chosen both a framework and bundler
   """
   packagesToInstall: [WizardNpmPackage!]
+
+  """Configuration file based on bundler and framework of choice"""
+  sampleCode(lang: WizardCodeSnippetLang! = js): String
   step: WizardStep!
 
   """
@@ -159,28 +162,21 @@ type Wizard {
 type WizardBundler {
   id: SupportedBundlers!
 
-  """Whether there are multiple options to choose from given the framework"""
-  isOnlyOption: Boolean
-
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
   name: String!
   package: String!
 }
 
-"""Config file to start a dev server for Component Testing"""
-type WizardCypressDevServerConfig {
-  """JS version of the config file"""
-  js: String!
-
-  """TS version of the config file"""
-  ts: String!
+enum WizardCodeSnippetLang {
+  js
+  ts
 }
 
 """A frontend framework that we can setup within the app"""
 type WizardFrontendFramework {
   """The name of the framework"""
-  id: FrontendFramework
+  id: FrontendFramework!
 
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!

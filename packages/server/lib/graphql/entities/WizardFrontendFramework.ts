@@ -9,7 +9,7 @@ import { WizardBundler } from './WizardBundler'
 export class WizardFrontendFramework {
   constructor (private wizard: Wizard, private framework: FrontendFramework) {}
 
-  @nxs.field.type(() => FrontendFrameworkEnum, {
+  @nxs.field.nonNull.type(() => FrontendFrameworkEnum, {
     description: 'The name of the framework',
   })
   get id (): NxsResult<'WizardFrontendFramework', 'id'> {
@@ -27,8 +27,11 @@ export class WizardFrontendFramework {
     description: 'All of the supported bundlers for this framework',
   })
   get supportedBundlers (): NxsResult<'WizardFrontendFramework', 'supportedBundlers'> {
-    // TODO: make this filtered to the framework
-    return BUNDLER.map((bundler) => new WizardBundler(this.wizard, bundler))
+    if (!this.wizard.framework || this.wizard.framework.id === 'reactjs' || this.wizard.framework.id === 'vuejs') {
+      return BUNDLER.map((bundler) => new WizardBundler(this.wizard, bundler))
+    }
+
+    return [new WizardBundler(this.wizard, 'webpack')]
   }
 
   @nxs.field.nonNull.boolean({

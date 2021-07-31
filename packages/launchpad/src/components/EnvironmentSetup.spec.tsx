@@ -1,6 +1,13 @@
+import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {
+  let testContext: ClientTestContext
+
+  beforeEach(() => {
+    testContext = new ClientTestContext()
+  })
+
   it('playground', { viewportWidth: 800 }, () => {
     cy.mount(() => (
       <div class="m-10">
@@ -16,13 +23,15 @@ describe('<EnvironmentSetup />', () => {
       <div class="m-10">
         <EnvironmentSetup detectedFramework="nuxt" />
       </div>
-    ))
+    ), {
+      setupContext: () => testContext,
+    })
 
     cy.contains('NuxtJs').should('exist')
     cy.contains('Next Step')
     .click()
     .then(() => {
-      expect(Cypress.storeConfig.getState().component?.bundler.id).to.equal(
+      expect(testContext.wizard.bundler?.id).to.equal(
         'webpack',
       )
     })
@@ -33,7 +42,7 @@ describe('<EnvironmentSetup />', () => {
       <div class="m-10">
         <EnvironmentSetup detectedFramework="nuxt" />
       </div>
-    ))
+    ), { setupContext: () => testContext })
 
     cy.contains('NuxtJs').click()
     cy.contains('ReactJs').click()
@@ -43,7 +52,7 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('Next Step')
     .click()
     .then(() => {
-      expect(Cypress.storeConfig.getState().component?.bundler.id).to.equal('vite')
+      expect(testContext.wizard.bundler?.id).to.equal('vite')
     })
   })
 
@@ -52,7 +61,7 @@ describe('<EnvironmentSetup />', () => {
       <div class="m-10">
         <EnvironmentSetup detectedFramework="vue" />
       </div>
-    ))
+    ), { setupContext: () => testContext })
 
     cy.contains('a bundler').click()
     cy.contains('ViteJs').click()
@@ -62,7 +71,7 @@ describe('<EnvironmentSetup />', () => {
     cy.contains('Next Step')
     .click()
     .then(() => {
-      expect(Cypress.storeConfig.getState().component?.bundler.id).to.equal(
+      expect(testContext.wizard.bundler?.id).to.equal(
         'webpack',
       )
     })

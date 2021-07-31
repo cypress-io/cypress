@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "tsc": "vue-tsc --noEmit",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn cypress:run:ct",
@@ -30,6 +31,7 @@
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@urql/core": "2.1.5",
+    "@urql/exchange-execute": "^1.0.4",
     "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",

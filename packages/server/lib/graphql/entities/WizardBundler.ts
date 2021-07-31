@@ -29,12 +29,4 @@ export class WizardBundler {
   isSelected (): NxsResult<'WizardBundler', 'isSelected'> {
     return this.wizard.bundler?.id === this.bundler
   }
-
-  @nxs.field.boolean({
-    description: 'Whether there are multiple options to choose from given the framework',
-  })
-  isOnlyOption (): NxsResult<'WizardBundler', 'isOnlyOption'> {
-    // TODO: base this on the options available
-    return false
-  }
 }

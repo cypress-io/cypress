@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
+export type CyMountOptions<Props> = Omit<MountingOptions<Props>, 'attachTo'> & {
   log?: boolean
   /**
    * @deprecated use vue-test-utils `global` instead

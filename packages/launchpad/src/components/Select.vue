@@ -88,12 +88,11 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from "vue";
 import { ClickOutside } from '../directives/ClickOutside'
-import { FrameworkBundlerLogos } from '../utils/logos'
+import { FrameworkBundlerLogos } from '../utils/icons'
 
 export interface Option {
   name: string;
   description?: string;
-  logo: string;
   id: string;
 }
 
