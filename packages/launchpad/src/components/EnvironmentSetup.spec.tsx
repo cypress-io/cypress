@@ -1,17 +1,34 @@
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
+import { gql } from '@urql/core'
+import { EnvironmentSetupFragment, TestEnvironmentSetupDocument } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {
+  let gqlVal: EnvironmentSetupFragment
   let testContext: ClientTestContext
+
+  gql`
+    query TestEnvironmentSetup {
+      wizard {
+        ...EnvironmentSetup
+      }
+    }
+  `
 
   beforeEach(() => {
     testContext = new ClientTestContext()
+    testContext.wizard.setFramework('nuxtjs')
+    cy.testQuery(TestEnvironmentSetupDocument, testContext).then((result) => {
+      if (result.wizard) {
+        gqlVal = result.wizard
+      }
+    })
   })
 
   it('playground', { viewportWidth: 800 }, () => {
     cy.mount(() => (
       <div class="m-10">
-        <EnvironmentSetup detectedFramework="nuxt" />
+        <EnvironmentSetup gql={gqlVal} />
       </div>
     ))
 
@@ -21,7 +38,7 @@ describe('<EnvironmentSetup />', () => {
   it('should select webpack and nuxt when nuxt is detected', () => {
     cy.mount(() => (
       <div class="m-10">
-        <EnvironmentSetup detectedFramework="nuxt" />
+        <EnvironmentSetup gql={gqlVal} />
       </div>
     ), {
       setupContext: () => testContext,
@@ -40,7 +57,7 @@ describe('<EnvironmentSetup />', () => {
   it('should allow to change bundler if not set by framework', () => {
     cy.mount(() => (
       <div class="m-10">
-        <EnvironmentSetup detectedFramework="nuxt" />
+        <EnvironmentSetup gql={gqlVal} />
       </div>
     ), { setupContext: () => testContext })
 
@@ -57,11 +74,17 @@ describe('<EnvironmentSetup />', () => {
   })
 
   it('should reset the bundler if set by new framework', () => {
-    cy.mount(() => (
-      <div class="m-10">
-        <EnvironmentSetup detectedFramework="vue" />
-      </div>
-    ), { setupContext: () => testContext })
+    testContext.wizard.setFramework('vuejs')
+    cy.testQuery(TestEnvironmentSetupDocument, testContext).then(({ wizard }) => {
+      // For typescript
+      if (wizard) {
+        cy.mount(() => (
+          <div class="m-10">
+            <EnvironmentSetup gql={wizard} />
+          </div>
+        ))
+      }
+    })
 
     cy.contains('a bundler').click()
     cy.contains('ViteJs').click()

@@ -53,5 +53,4 @@
     "noErrorTruncation": true,
     "experimentalDecorators": true,
   },
-  "exclude": ["./src/samples"]
 }

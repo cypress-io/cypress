@@ -1,7 +1,31 @@
+import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
+import { gql } from '@urql/core'
 import { ref } from 'vue'
+import { ConfigFileFragment, TestConfigFileDocument } from '../generated/graphql-test'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {
+  let gqlVal: ConfigFileFragment
+  let testContext: ClientTestContext
+
+  gql`
+    query TestConfigFile {
+      wizard {
+        ...ConfigFile
+      }
+    }
+  `
+
+  beforeEach(() => {
+    testContext = new ClientTestContext()
+    testContext.wizard.setFramework('nuxtjs')
+    cy.testQuery(TestConfigFileDocument, testContext).then((result) => {
+      if (result.wizard) {
+        gqlVal = result.wizard
+      }
+    })
+  })
+
   beforeEach(() => {
     const display = ref(false)
 
@@ -14,7 +38,7 @@ describe('<ConfigFile />', () => {
           }}
           class="hidden"
         ></button>
-        {display.value ? <ConfigFile /> : undefined}
+        {display.value ? <ConfigFile gql={gqlVal} /> : undefined}
       </div>
     ), {
       setupContext (ctx) {

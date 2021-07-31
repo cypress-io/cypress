@@ -17,7 +17,6 @@ import { computed, defineComponent, onMounted, ref } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
-import { useStoreApp } from "../store/app";
 import { gql } from '@urql/core'
 
 gql`
@@ -46,26 +45,25 @@ export default defineComponent({
   props: ['gql'],
   setup(props) {
     // useMutation(InstallDependenciesManualInstallDocument)
-    const store = useStoreApp();
     const manualInstall = ref(false);
     const nextButtonName = computed(() =>
       manualInstall.value ? "I've installed them" : "Install"
     );
     onMounted(() => {
-      store.onAlt(() => {
-        manualInstall.value = !manualInstall.value;
-      });
+      // store.onAlt(() => {
+      //   manualInstall.value = !manualInstall.value;
+      // });
 
-      store.onBack(() => {
-        store.flagComponentSetup(false);
-      });
+      // store.onBack(() => {
+      //   store.flagComponentSetup(false);
+      // });
 
-      store.onNext(() => {
-        if (manualInstall.value) {
-          store.flagDependenciesInstalled();
-        } else {
-        }
-      });
+      // store.onNext(() => {
+      //   if (manualInstall.value) {
+      //     store.flagDependenciesInstalled();
+      //   } else {
+      //   }
+      // });
     });
     
     return { 

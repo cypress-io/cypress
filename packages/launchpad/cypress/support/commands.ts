@@ -1,6 +1,5 @@
 import { mount, CyMountOptions } from '@cypress/vue'
-import { provideClient } from '@urql/vue'
-import { createStoreApp, StoreApp } from '../../src/store/app'
+import { provideClient, TypedDocumentNode } from '@urql/vue'
 import { testApolloClient } from './testApolloClient'
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 import { Component } from 'vue'
@@ -25,15 +24,11 @@ Cypress.Commands.add(
   'mount',
   <C extends Component>(comp: C, options: CyMountOptions<C> & SetupContextOpts) => {
     const { setupContext, ...rest } = options
-    const storeApp = createStoreApp()
-
-    Cypress.storeApp = storeApp
 
     options = options || {}
     options.global = options.global || {}
 
     options.global.plugins = options.global.plugins || []
-    options.global.plugins.push(storeApp)
     options.global.plugins.push({
       install () {
         const testCtx = new ClientTestContext()
@@ -54,12 +49,10 @@ declare global {
        * Install all vue plugins and globals then mount
        */
       mount<Props = any>(comp: Component<Props>, options?: CyMountOptions<Props> & SetupContextOpts): Cypress.Chainable<any>
-    }
-    interface Cypress {
       /**
-       * The sroreApp used in the mount command
+       * Executes a fragment query
        */
-      storeApp: StoreApp
+      testQuery<Result, Variables>(source: TypedDocumentNode<Result, Variables>, testContext?: ClientTestContext): Cypress.Chainable<Result>
     }
   }
 }

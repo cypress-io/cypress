@@ -52,18 +52,49 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
-import { useStoreApp } from "../store/app";
+import { computed, defineComponent, PropType } from "vue";
 import SideBarItem from "./SideBarItem.vue";
 import bottomBackground from '../images/bottom_filler.svg'
+import { gql } from "@urql/core";
+import { useQuery } from '@urql/vue'
+import { LayoutDocument } from "../generated/graphql";
+// import { LayoutFragment } from "../generated/graphql";
+
+// TODO: Make this a fragment?
+// gql`
+// fragment Layout on App {
+//   activeProject {
+//     title
+//   }
+// }
+// `
+
+gql`
+query Layout {
+  app {
+    activeProject {
+      title
+    }
+  }
+}
+`
 
 export default defineComponent({
   components: {
     SideBarItem,
   },
+  // props: {
+  //   gql: {
+  //     type: Object as PropType<LayoutFragment>,
+  //     required: true
+  //   }
+  // },
   setup() {
-    const store = useStoreApp();
-    const projectTitle = computed(() => store.getState().projectTitle);
+    const result = useQuery({
+      query: LayoutDocument
+    })
+
+    const projectTitle = computed(() => result.data.value?.app.activeProject?.title);
 
     const sideMenuDefinition = [
       { icon: "clarity:dashboard-line" },
