@@ -9,7 +9,7 @@ describe('<Wizard />', () => {
 
     cy.get('h1').should('contain', 'Project Setup')
     cy.contains('Pick a framework').click()
-    cy.contains('VueJs').click()
+    cy.contains('Vue.js').click()
     cy.contains('Pick a bundler').click()
     cy.contains('Vite').click()
     cy.contains('Next').click()

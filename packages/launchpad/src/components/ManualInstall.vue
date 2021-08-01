@@ -47,7 +47,6 @@ export default defineComponent({
       required: true
     }
   },
-
   setup(props) {
     const dependenciesCode = computed(
       () =>

@@ -27,7 +27,7 @@ export class WizardFrontendFramework {
     description: 'All of the supported bundlers for this framework',
   })
   get supportedBundlers (): NxsResult<'WizardFrontendFramework', 'supportedBundlers'> {
-    if (!this.wizard.framework || this.wizard.framework.id === 'reactjs' || this.wizard.framework.id === 'vuejs') {
+    if (!this.wizard.framework || this.wizard.framework.id === 'react' || this.wizard.framework.id === 'vue') {
       return BUNDLER.map((bundler) => new WizardBundler(this.wizard, bundler))
     }
 

@@ -1,13 +1,14 @@
 import { ref } from 'vue'
+import { FrontendFramework } from '../generated/graphql-test'
 import Select from './Select.vue'
 
 const manyOptions = [
   {
-    name: 'VueJs',
+    name: 'Vue.js',
     id: 'vue',
   },
   {
-    name: 'ReactJs',
+    name: 'React.js',
     description: '(detected)',
     id: 'react',
   },
@@ -25,7 +26,7 @@ describe('<BigSelect />', () => {
       </div>
     ))
 
-    cy.contains('button', 'ReactJs').click()
+    cy.contains('button', 'React.js').click()
   })
 
   it('renders the name', () => {
@@ -56,7 +57,7 @@ describe('<BigSelect />', () => {
       <Select name="Front-end Framework" options={manyOptions} value="react" />
     ))
 
-    cy.contains('button', 'ReactJs').should('exist')
+    cy.contains('button', 'React.js').should('exist')
   })
 
   it('should select the clicked item', () => {
@@ -68,15 +69,15 @@ describe('<BigSelect />', () => {
         options={manyOptions}
         value={val.value}
         // @ts-ignore
-        onSelect={(newVal: Framework) => {
-          val.value = newVal.id
+        onSelect={(newVal: FrontendFramework) => {
+          val.value = newVal
         }}
       />
     ))
 
-    cy.contains('button', 'ReactJs').click()
-    cy.contains('VueJs').click()
-    cy.contains('ReactJs').should('not.exist')
+    cy.contains('button', 'React.js').click()
+    cy.contains('Vue.js').click()
+    cy.contains('React.js').should('not.exist')
   })
 
   it('should close when clicking on the body', () => {
@@ -87,10 +88,10 @@ describe('<BigSelect />', () => {
       </div>
     ))
 
-    cy.contains('button', 'VueJs').click()
-    cy.contains('ReactJs').should('be.visible')
+    cy.contains('button', 'Vue.js').click()
+    cy.contains('React.js').should('be.visible')
     cy.contains('click out').click()
-    cy.contains('ReactJs').should('not.exist')
+    cy.contains('React.js').should('not.exist')
   })
 
   it('should not budge when disabled', () => {
@@ -105,7 +106,7 @@ describe('<BigSelect />', () => {
       </div>
     ))
 
-    cy.contains('button', 'VueJs').click({ force: true })
-    cy.contains('ReactJs').should('not.exist')
+    cy.contains('button', 'Vue.js').click({ force: true })
+    cy.contains('React.js').should('not.exist')
   })
 })

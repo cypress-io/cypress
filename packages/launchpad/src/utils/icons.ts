@@ -13,11 +13,11 @@ import { FrontendFramework, SupportedBundlers, TestingTypeEnum } from '../genera
 export const FrameworkBundlerLogos: Record<FrontendFramework | SupportedBundlers, string> = {
   webpack: LogoWebpack,
   vite: LogoVite,
-  vuejs: LogoVue,
+  vue: LogoVue,
   vuecli: LogoVue,
   nextjs: LogoNext,
   nuxtjs: LogoNuxt,
-  reactjs: LogoReact,
+  react: LogoReact,
   cra: LogoReact,
 }
 

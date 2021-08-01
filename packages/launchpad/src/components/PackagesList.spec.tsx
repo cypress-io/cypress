@@ -14,7 +14,7 @@ describe('<PackagesList />', () => {
   let gqlVal: PackagesListFragment
 
   beforeEach(() => {
-    cy.testQuery(TestPackagesListDocument).then(({ wizard }) => {
+    cy.graphql(TestPackagesListDocument).then(({ wizard }) => {
       if (wizard) {
         gqlVal = wizard
       }

@@ -1,11 +1,34 @@
+import { gql } from '@urql/core'
 import InstallDependencies from './InstallDependencies.vue'
+import { TestInstallDependenciesDocument } from '../generated/graphql-test'
+import { computed, defineComponent } from '@vue/runtime-core'
+import { useQuery } from '@urql/vue'
 
 describe('<InstallDependencies />', () => {
+  gql`
+  query TestInstallDependencies {
+    wizard {
+      ...InstallDependencies
+    }
+  }
+  `
+
   beforeEach(() => {
-    cy.mount(() => <InstallDependencies />, {
+    cy.mount(defineComponent({
+      setup () {
+        const result = useQuery({ query: TestInstallDependenciesDocument })
+
+        return {
+          gql: computed(() => result.data.value?.wizard),
+        }
+      },
+      render (props) {
+        return props.gql ? <InstallDependencies gql={props.gql} /> : <div />
+      },
+    }), {
       setupContext (ctx) {
         ctx.wizard.setBundler('webpack')
-        ctx.wizard.setFramework('nextjs')
+        ctx.wizard.setFramework('react')
       },
     })
   })

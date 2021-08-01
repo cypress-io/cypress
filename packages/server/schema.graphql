@@ -29,9 +29,9 @@ enum FrontendFramework {
   cra
   nextjs
   nuxtjs
-  reactjs
+  react
+  vue
   vuecli
-  vuejs
 }
 
 """
@@ -145,7 +145,7 @@ type Wizard {
   packagesToInstall: [WizardNpmPackage!]
 
   """Configuration file based on bundler and framework of choice"""
-  sampleCode(lang: WizardCodeSnippetLang! = js): String
+  sampleCode(lang: WizardCodeLanguage! = js): String
   step: WizardStep!
 
   """
@@ -168,7 +168,7 @@ type WizardBundler {
   package: String!
 }
 
-enum WizardCodeSnippetLang {
+enum WizardCodeLanguage {
   js
   ts
 }

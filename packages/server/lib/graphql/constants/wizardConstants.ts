@@ -23,7 +23,7 @@ export const BundlerPackageNames: Record<NexusGenEnums['SupportedBundlers'], str
   webpack: '@cypress/webpack-dev-server',
 }
 
-export const FRONTEND_FRAMEWORK = ['nuxtjs', 'nextjs', 'cra', 'vuecli', 'reactjs', 'vuejs'] as const
+export const FRONTEND_FRAMEWORK = ['nuxtjs', 'nextjs', 'cra', 'vuecli', 'react', 'vue'] as const
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORK[number]
 
@@ -35,8 +35,8 @@ export const FrontendFrameworkEnum = enumType({
 export const FrameworkDisplayNames: Record<NexusGenEnums['FrontendFramework'], string> = {
   cra: 'Create React App',
   vuecli: 'Vue CLI',
-  reactjs: 'React.js',
-  vuejs: 'Vue.js',
+  react: 'React.js',
+  vue: 'Vue.js',
   nextjs: 'Next.js',
   nuxtjs: 'Nuxt.js',
 }
@@ -88,10 +88,23 @@ export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
   selectFramework: 'Confirm the front-end framework and bundler fused in your project.',
   installDependencies: 'We need to install the following packages in order for component testing to work.',
   createConfig: 'Cypress will now create the following config file in the local directory for this project.',
-  setupComplete: '<em>cypress.config.js</em> file was successfully added to your project.Let’s open your browser and start testing some components!',
+  setupComplete: '<em>cypress.config.js</em> file was successfully added to your project. Let’s open your browser and start testing some components!',
 }
 
-export const CODE_SNIPPETS: Partial<Record<NexusGenEnums['FrontendFramework'], Record<NexusGenEnums['WizardCodeSnippetLang'], string> | null>> = {
+export const WIZARD_ALT_DESCRIPTIONS = {
+
+} as const
+
+export const WIZARD_CODE_LANGUAGE = ['js', 'ts'] as const
+
+export type WizardCodeLanguage = typeof WIZARD_CODE_LANGUAGE[number]
+
+export const WizardCodeLanguageEnum = enumType({
+  name: 'WizardCodeLanguage',
+  members: WIZARD_CODE_LANGUAGE,
+})
+
+export const FRAMEWORK_CONFIG_FILE: Partial<Record<NexusGenEnums['FrontendFramework'], Record<NexusGenEnums['WizardCodeLanguage'], string> | null>> = {
   nextjs: {
     js: dedent`
       const injectNextDevServer = require('@cypress/react/plugins/next')
@@ -165,10 +178,10 @@ export type NpmPackages = keyof typeof PACKAGES_DESCRIPTIONS
 export const PackageMapping: Record<FrontendFramework, NpmPackages> = {
   nextjs: '@cypress/react',
   cra: '@cypress/react',
-  reactjs: '@cypress/react',
+  react: '@cypress/react',
   nuxtjs: '@cypress/vue',
   vuecli: '@cypress/vue',
-  vuejs: '@cypress/vue',
+  vue: '@cypress/vue',
 }
 
 export const BundleMapping: Record<Bundler, NpmPackages> = {

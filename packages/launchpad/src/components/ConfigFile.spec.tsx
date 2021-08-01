@@ -19,7 +19,7 @@ describe('<ConfigFile />', () => {
   beforeEach(() => {
     testContext = new ClientTestContext()
     testContext.wizard.setFramework('nuxtjs')
-    cy.testQuery(TestConfigFileDocument, testContext).then((result) => {
+    cy.graphql(TestConfigFileDocument, { testContext }).then((result) => {
       if (result.wizard) {
         gqlVal = result.wizard
       }

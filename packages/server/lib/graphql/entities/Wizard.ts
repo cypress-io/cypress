@@ -1,5 +1,6 @@
 import { nxs, NxsArgs, NxsResult } from 'nexus-decorators'
-import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, CODE_SNIPPETS, PackageMapping, BundleMapping } from '../constants/WizardConstants'
+import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, PackageMapping, BundleMapping, WizardCodeLanguageEnum } from '../constants/wizardConstants'
+import { wizardGetConfigCode } from '../util/wizardGetConfigCode'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
 import { WizardFrontendFramework } from './WizardFrontendFramework'
@@ -70,7 +71,7 @@ export class Wizard {
   // GraphQL Fields:
 
   @nxs.field.nonNull.type(() => WizardStepEnum)
-  step (): NxsResult<'Wizard', 'step'> {
+  get step (): NxsResult<'Wizard', 'step'> {
     return this.currentStep
   }
 
@@ -104,15 +105,21 @@ export class Wizard {
     description: 'Configuration file based on bundler and framework of choice',
     args (t) {
       t.nonNull.arg('lang', {
-        type: nxs.enumType('WizardCodeSnippetLang', ['js', 'ts']),
+        type: WizardCodeLanguageEnum,
         default: 'js',
       })
     },
   })
   sampleCode (args: NxsArgs<'Wizard', 'sampleCode'>): NxsResult<'Wizard', 'configFile'> {
-    return this.chosenFramework
-      ? CODE_SNIPPETS[this.chosenFramework]?.[args.lang] ?? null
-      : null
+    if (!this.framework || !this.bundler) {
+      return null
+    }
+
+    return wizardGetConfigCode({
+      framework: this.framework,
+      bundler: this.bundler,
+      lang: args.lang,
+    })
   }
 
   // Internal Setters:
@@ -126,7 +133,7 @@ export class Wizard {
 
   setFramework (framework: FrontendFramework): Wizard {
     this.chosenFramework = framework
-    if (framework !== 'reactjs' && framework !== 'vuejs') {
+    if (framework !== 'react' && framework !== 'vue') {
       this.chosenBundler = 'webpack'
     }
 
@@ -151,29 +158,21 @@ export class Wizard {
     return true
   }
 
-  private get filteredSteps (): ReadonlyArray<WizardStep> {
-    if (!this.needsConfig()) {
-      return WIZARD_STEP.filter((s) => s !== 'createConfig')
-    }
-
-    return WIZARD_STEP
-  }
-
   navigateBack (): Wizard {
-    const idx = this.filteredSteps.indexOf(this.currentStep)
+    const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== 0) {
-      this.currentStep = this.filteredSteps[idx - 1]
+      this.currentStep = WIZARD_STEP[idx - 1]
     }
 
     return this
   }
 
   navigateForward (): Wizard {
-    const idx = this.filteredSteps.indexOf(this.currentStep)
+    const idx = WIZARD_STEP.indexOf(this.currentStep)
 
-    if (idx !== this.filteredSteps.length - 1) {
-      this.currentStep = this.filteredSteps[idx + 1]
+    if (idx !== WIZARD_STEP.length - 1) {
+      this.currentStep = WIZARD_STEP[idx + 1]
     }
 
     return this
@@ -182,9 +181,5 @@ export class Wizard {
   validateManualInstall (): Wizard {
     //
     return this
-  }
-
-  private needsConfig (): boolean {
-    return Boolean(this.chosenFramework && CODE_SNIPPETS[this.chosenFramework])
   }
 }

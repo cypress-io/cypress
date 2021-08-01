@@ -14,7 +14,7 @@ describe('<ManualInstall />', () => {
   let gqlVal: ManualInstallFragment
 
   beforeEach(() => {
-    cy.testQuery(TestManualInstallDocument).then((result) => {
+    cy.graphql(TestManualInstallDocument).then((result) => {
       if (result.wizard) {
         gqlVal = result.wizard
       }

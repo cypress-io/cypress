@@ -1,1 +1,1 @@
-export * from './WizardConstants'
+export * from './wizardConstants'

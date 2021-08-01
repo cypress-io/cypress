@@ -54,11 +54,11 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
-  FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "reactjs" | "vuecli" | "vuejs"
+  FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
-  WizardCodeSnippetLang: "js" | "ts"
+  WizardCodeLanguage: "js" | "ts"
   WizardStep: "createConfig" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
 }
 
@@ -252,7 +252,7 @@ export interface NexusGenArgTypes {
   }
   Wizard: {
     sampleCode: { // args
-      lang: NexusGenEnums['WizardCodeSnippetLang']; // WizardCodeSnippetLang!
+      lang: NexusGenEnums['WizardCodeLanguage']; // WizardCodeLanguage!
     }
   }
 }
