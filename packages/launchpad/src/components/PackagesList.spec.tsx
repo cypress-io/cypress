@@ -1,27 +1,11 @@
-import { gql } from '@urql/core'
-import { PackagesListFragment, TestPackagesListDocument } from '../generated/graphql-test'
+import { PackagesListFragmentDoc } from '../generated/graphql'
 import PackagesList from './PackagesList.vue'
 
 describe('<PackagesList />', () => {
-  gql`
-    query TestPackagesList {
-      wizard {
-        ...PackagesList
-      }
-    }
-  `
-
-  let gqlVal: PackagesListFragment
-
-  beforeEach(() => {
-    cy.graphql(TestPackagesListDocument).then(({ wizard }) => {
-      if (wizard) {
-        gqlVal = wizard
-      }
-    })
-  })
-
   it('playground', () => {
-    cy.mount(() => <PackagesList gql={gqlVal} />)
+    cy.mountFragment(PackagesListFragmentDoc, {
+      type: (ctx) => ctx.wizard,
+      render: (gqlVal) => <PackagesList gql={gqlVal} />,
+    })
   })
 })

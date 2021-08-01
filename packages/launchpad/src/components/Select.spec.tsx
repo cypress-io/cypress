@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import type { FrontendFramework } from '../generated/graphql-test'
 import Select from './Select.vue'
 
 const manyOptions = [

@@ -1,50 +1,29 @@
-import { gql } from '@urql/core'
 import { ref } from 'vue'
-import { ConfigFileFragment, TestConfigFileDocument } from '../generated/graphql-test'
-import { ClientTestContext } from '../graphql/graphqlFake'
+import { ConfigFileFragmentDoc } from '../generated/graphql'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {
-  let gqlVal: ConfigFileFragment
-  let testContext: ClientTestContext
-
-  gql`
-    query TestConfigFile {
-      wizard {
-        ...ConfigFile
-      }
-    }
-  `
-
-  beforeEach(() => {
-    testContext = new ClientTestContext()
-    testContext.wizard.setFramework('nuxtjs')
-    cy.graphql(TestConfigFileDocument, { testContext }).then((result) => {
-      if (result.wizard) {
-        gqlVal = result.wizard
-      }
-    })
-  })
-
   beforeEach(() => {
     const display = ref(false)
 
-    cy.mount(() => (
-      <div class="m-10">
-        <button
-          data-cy="show"
-          onClick={() => {
-            display.value = true
-          }}
-          class="hidden"
-        ></button>
-        {display.value ? <ConfigFile gql={gqlVal} /> : undefined}
-      </div>
-    ), {
-      setupContext (ctx) {
-        ctx.wizard.setBundler('webpack')
-        ctx.wizard.setFramework('nextjs')
+    cy.mountFragment(ConfigFileFragmentDoc, {
+      type: (ctx) => {
+        ctx.wizard.setFramework('nuxtjs')
+
+        return ctx.wizard
       },
+      render: (gqlVal) => (
+        <div class="m-10">
+          <button
+            data-cy="show"
+            onClick={() => {
+              display.value = true
+            }}
+            class="hidden"
+          ></button>
+          {display.value ? <ConfigFile gql={gqlVal} /> : undefined}
+        </div>
+      ),
     })
 
     cy.get('[data-cy="show"]').click({ force: true })

@@ -13,6 +13,7 @@
     "postinstall": "echo '@packages/graphql needs: yarn build'"
   },
   "dependencies": {
+    "express-graphql": "^0.12.0",
     "graphql": "^15.5.1",
     "graphql-scalars": "^1.10.0",
     "nexus": "^1.1.0",

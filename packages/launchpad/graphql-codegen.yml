@@ -16,18 +16,8 @@ generates:
       - 'typescript'
       - 'typescript-operations'
       - 'typed-document-node'
-  src/generated/graphql-test.ts:
-    documents: 'src/**/*.{spec.tsx,vue}'
-    config:
-      immutableTypes: true
-      useTypeImports: true
-      preResolveTypes: true
-      onlyOperationTypes: true
-      avoidOptionals: true
-      enumsAsTypes: true
+  ../graphql/src/testing/testUnionType.ts:
     plugins:
       - add:
           content: '/* eslint-disable */'
-      - 'typescript'
-      - 'typescript-operations'
-      - 'typed-document-node'
+      - './script/codegen-mount.js'

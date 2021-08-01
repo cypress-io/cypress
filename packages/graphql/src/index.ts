@@ -9,3 +9,5 @@ export * from './constants'
 export * from './schema'
 
 export * from './contracts'
+
+export { execute, parse } from 'graphql'

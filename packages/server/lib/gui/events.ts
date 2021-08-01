@@ -2,7 +2,6 @@
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
-const { execute, parse } = require('graphql')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
@@ -30,7 +29,7 @@ const api = require('../api')
 const savedState = require('../saved_state')
 
 import { ServerContext } from '../graphql/ServerContext'
-import { graphqlSchema } from '@packages/graphql'
+import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 
 const nullifyUnserializableValues = (obj) => {

@@ -3,6 +3,7 @@ import path from 'path'
 import { JSONResolver, DateTimeResolver } from 'graphql-scalars'
 import * as entities from './entities'
 import * as constants from './constants'
+import * as testingTypes from './testing/testUnionType'
 
 const customScalars = [
   asNexusMethod(JSONResolver, 'json'),
@@ -16,9 +17,9 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : ''
 process.cwd ??= () => ''
 
 export const graphqlSchema = makeSchema({
-  types: [entities, constants, customScalars],
-  shouldGenerateArtifacts: true,
-  shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN),
+  types: [entities, constants, customScalars, dirname ? null : testingTypes],
+  shouldGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN),
+  shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN_EXIT),
   // for vite
   outputs: dirname && __filename.endsWith('.ts') ? {
     typegen: path.join(dirname, 'gen/nxs.gen.ts'),
