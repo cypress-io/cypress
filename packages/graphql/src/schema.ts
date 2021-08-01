@@ -16,12 +16,14 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : ''
 // for vite
 process.cwd ??= () => ''
 
+const isCodegen = Boolean(process.env.GRAPHQL_CODEGEN)
+
 export const graphqlSchema = makeSchema({
   types: [entities, constants, customScalars, dirname ? null : testingTypes],
-  shouldGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN),
+  shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN_EXIT),
   // for vite
-  outputs: dirname && __filename.endsWith('.ts') ? {
+  outputs: isCodegen ? {
     typegen: path.join(dirname, 'gen/nxs.gen.ts'),
     schema: path.join(dirname, '..', 'schema.graphql'),
   } : false,

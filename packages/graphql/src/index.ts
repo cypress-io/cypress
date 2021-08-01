@@ -6,7 +6,7 @@ export * from './actions/BaseActions'
 
 export * from './constants'
 
-export * from './schema'
+export { graphqlSchema } from './schema'
 
 export * from './contracts'
 

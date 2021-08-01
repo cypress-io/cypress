@@ -3,7 +3,7 @@ const childProcess = require('child_process')
 const path = require('path')
 const pDefer = require('p-defer')
 
-const watcher = chokidar.watch('packages/server/lib/graphql/**/*.{js,ts}', {
+const watcher = chokidar.watch('packages/graphql/src/**/*.{js,ts}', {
   cwd: path.join(__dirname, '..'),
   ignored: '**/nxs.gen.ts',
   ignoreInitial: true,
