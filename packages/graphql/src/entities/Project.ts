@@ -1,7 +1,7 @@
 // import { createHash } from 'crypto'
 import { nxs, NxsResult } from 'nexus-decorators'
-import { PluginsState, PluginsStateEnum } from '../constants/ProjectConstants'
-import { ProjectBaseContract } from '../contracts/ProjectBaseContract'
+import { PluginsState, PluginsStateEnum } from '../constants/projectConstants'
+import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 
 export interface ProjectConfig {
   projectRoot: string

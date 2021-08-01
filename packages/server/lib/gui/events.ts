@@ -29,9 +29,9 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
-import { ServerContext } from '../graphql/context/ServerContext'
-import { graphqlSchema } from '../graphql/schema'
-import { startGraphQLServer, setServerContext } from '../graphql/server'
+import { ServerContext } from '../graphql/ServerContext'
+import { graphqlSchema } from '@packages/graphql'
+import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned

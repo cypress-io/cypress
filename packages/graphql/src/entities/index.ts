@@ -9,3 +9,9 @@ export * from './Query'
 export * from './TestingTypeInfo'
 
 export * from './Wizard'
+
+export * from './WizardBundler'
+
+export * from './WizardFrontendFramework'
+
+export * from './WizardNpmPackage'

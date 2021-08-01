@@ -1,5 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { BaseContext } from '../context/BaseContext'
+import type { BaseContext } from '../context/BaseContext'
 import { Project } from './Project'
 
 @nxs.objectType({

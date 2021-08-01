@@ -1,7 +1,7 @@
 import type { NxsMutationArgs } from 'nexus-decorators'
 import { ProjectBase } from '../project-base'
-import { ServerContext } from '../context/ServerContext'
-import { BaseActions } from './BaseActions'
+import type { ServerContext } from './ServerContext'
+import { BaseActions } from '@packages/graphql'
 
 /**
  *

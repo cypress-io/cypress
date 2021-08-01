@@ -6,17 +6,17 @@ export class TestingTypeInfo {
   constructor (private _id: _TestingType) {}
 
   @nxs.field.nonNull.type(() => TestingTypeEnum)
-  get id (): NxsResult<'TestingType', 'id'> {
+  get id (): NxsResult<'TestingTypeInfo', 'id'> {
     return this._id
   }
 
   @nxs.field.string()
-  get title (): NxsResult<'TestingType', 'title'> {
+  get title (): NxsResult<'TestingTypeInfo', 'title'> {
     return TestingTypeNames[this.id]
   }
 
   @nxs.field.string()
-  get description (): NxsResult<'TestingType', 'description'> {
+  get description (): NxsResult<'TestingTypeInfo', 'description'> {
     return TestingTypeDescriptions[this.id]
   }
 }

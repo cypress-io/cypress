@@ -1,7 +1,7 @@
-import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 import { gql } from '@urql/core'
 import { ref } from 'vue'
 import { ConfigFileFragment, TestConfigFileDocument } from '../generated/graphql-test'
+import { ClientTestContext } from '../graphql/graphqlFake'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {

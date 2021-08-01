@@ -1,6 +1,6 @@
-import { NxsMutationArgs } from 'nexus-decorators'
-import { BaseContext } from '../context/BaseContext'
-import { ProjectBaseContract } from '../contracts/ProjectBaseContract'
+import type { NxsMutationArgs } from 'nexus-decorators'
+import type { BaseContext } from '../context/BaseContext'
+import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 import { Project } from '../entities/Project'
 
 /**

@@ -1,6 +1,6 @@
 import { FRAMEWORK_CONFIG_FILE, WizardCodeLanguage } from '../constants/wizardConstants'
-import { WizardBundler } from '../entities/WizardBundler'
-import { WizardFrontendFramework } from '../entities/WizardFrontendFramework'
+import type { WizardBundler } from '../entities/WizardBundler'
+import type { WizardFrontendFramework } from '../entities/WizardFrontendFramework'
 
 interface GetCodeOpts {
   framework: WizardFrontendFramework
@@ -17,11 +17,12 @@ export const wizardGetConfigCode = (opts: GetCodeOpts): string | null => {
   const { framework, bundler, lang } = opts
 
   const comments = `Component testing, ${LanguageNames[opts.lang]}, ${framework.name}, ${bundler.name}`
+  const frameworkConfig = FRAMEWORK_CONFIG_FILE[framework.id]
 
-  if (FRAMEWORK_CONFIG_FILE[framework.name]) {
+  if (frameworkConfig) {
     return `// ${comments}
 
-${FRAMEWORK_CONFIG_FILE[framework.name]}`
+${frameworkConfig[lang]}`
   }
 
   const exportStatement =

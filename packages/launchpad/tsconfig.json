@@ -52,5 +52,6 @@
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true,
+    "importsNotUsedAsValues": "error"
   },
 }

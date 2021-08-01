@@ -1,6 +1,4 @@
-import type { ClientTestContext } from '../context/ClientTestContext'
-import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
-import { BaseActions } from './BaseActions'
+import { BaseActions, BaseContext, ProjectBaseContract } from '@packages/graphql'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
@@ -23,4 +21,9 @@ export class ClientTestActions extends BaseActions {
       },
     }
   }
+}
+
+export class ClientTestContext extends BaseContext {
+  readonly actions = new ClientTestActions(this)
+  readonly projects = []
 }

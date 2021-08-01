@@ -22,7 +22,7 @@ export const graphqlSchema = makeSchema({
   // for vite
   outputs: dirname && __filename.endsWith('.ts') ? {
     typegen: path.join(dirname, 'gen/nxs.gen.ts'),
-    schema: path.join(dirname, '..', '..', 'schema.graphql'),
+    schema: path.join(dirname, '..', 'schema.graphql'),
   } : false,
   contextType: {
     module: path.join(dirname, './context/BaseContext.ts'),

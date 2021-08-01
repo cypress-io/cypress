@@ -1,8 +1,8 @@
-import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 import { gql } from '@urql/core'
 import { useQuery } from '@urql/vue'
 import { computed, defineComponent } from '@vue/runtime-core'
 import { EnvironmentSetupFragment, TestEnvironmentSetupDocument } from '../generated/graphql-test'
+import { ClientTestContext } from '../graphql/graphqlFake'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {

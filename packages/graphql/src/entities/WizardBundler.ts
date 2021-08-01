@@ -1,6 +1,6 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { Bundler, BundlerDisplayNames, BundlerEnum, BundlerPackageNames } from '../constants'
-import { Wizard } from './Wizard'
+import type { Wizard } from './Wizard'
 
 @nxs.objectType({
   description: 'Wizard bundler',

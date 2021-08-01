@@ -3,11 +3,14 @@
   "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
+  "browser": "src/index.ts",
   "scripts": {
     "build": "tsc",
+    "types": "tsc --noEmit",
     "build-prod": "yarn build",
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "echo '@packages/static needs: yarn build'"
+    "clean": "rm src/**/*.js && rm src/*.js || echo 'cleaned'",
+    "postinstall": "echo '@packages/graphql needs: yarn build'"
   },
   "dependencies": {
     "graphql": "^15.5.1",
@@ -15,9 +18,12 @@
     "nexus": "^1.1.0",
     "nexus-decorators": "^0.2.0"
   },
+  "devDependencies": {
+    "@types/dedent": "^0.7.0"
+  },
   "files": [
-    "dist",
-    "lib"
+    "src",
+    "schema.graphql"
   ],
   "types": "src/index.ts"
 }

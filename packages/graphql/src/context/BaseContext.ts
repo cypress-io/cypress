@@ -1,6 +1,6 @@
 import type { BaseActions } from '../actions/BaseActions'
 import { App, Wizard } from '../entities'
-import { Project } from '../entities/Project'
+import type { Project } from '../entities/Project'
 
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.

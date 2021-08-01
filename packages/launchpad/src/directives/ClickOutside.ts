@@ -1,4 +1,4 @@
-import { DirectiveBinding } from 'vue'
+import type { DirectiveBinding } from 'vue'
 
 /**
  * Runs the binding when clicking outside of the targetted component

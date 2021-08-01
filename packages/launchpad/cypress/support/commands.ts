@@ -3,9 +3,9 @@ import urql, { TypedDocumentNode } from '@urql/vue'
 import { print, graphql, OperationDefinitionNode } from 'graphql'
 
 import { testApolloClient } from './testApolloClient'
-import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
-import { Component } from 'vue'
-import { graphqlSchema } from '@packages/server/lib/graphql/schema'
+import type { Component } from 'vue'
+import { graphqlSchema } from '@packages/graphql'
+import { ClientTestContext } from '../../src/graphql/graphqlFake'
 
 /**
  * This variable is mimicing ipc provided by electron.

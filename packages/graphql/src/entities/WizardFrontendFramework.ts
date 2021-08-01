@@ -1,7 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { BUNDLER, FrameworkDisplayNames, FrontendFramework, FrontendFrameworkEnum } from '../constants'
-import { Wizard } from './Wizard'
 import { WizardBundler } from './WizardBundler'
+import type { Wizard } from './Wizard'
 
 @nxs.objectType({
   description: 'A frontend framework that we can setup within the app',

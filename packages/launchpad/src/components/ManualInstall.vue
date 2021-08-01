@@ -29,7 +29,7 @@
 import { computed, defineComponent, PropType } from "vue";
 import CopyButton from "./CopyButton.vue";
 import { gql } from '@urql/core'
-import { ManualInstallFragment } from "../generated/graphql";
+import type { ManualInstallFragment } from "../generated/graphql";
 
 gql`
 fragment ManualInstall on Wizard {

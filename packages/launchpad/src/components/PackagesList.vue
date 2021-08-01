@@ -15,7 +15,7 @@
 <script lang="ts">
 import { defineComponent, PropType, computed } from "vue";
 import { gql } from '@urql/core'
-import { PackagesListFragment } from "../generated/graphql";
+import type { PackagesListFragment } from "../generated/graphql";
 
 gql`
 fragment PackagesList on Wizard {

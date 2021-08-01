@@ -1,11 +1,11 @@
 import { graphqlHTTP } from 'express-graphql'
 import express from 'express'
 import Debug from 'debug'
-import { Server } from 'http'
+import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 
 import { graphqlSchema } from './schema'
-import { ServerContext } from './context/ServerContext'
+import type { BaseContext } from './context/BaseContext'
 
 const debug = Debug('cypress:server:graphql')
 
@@ -29,12 +29,12 @@ export function closeGraphQLServer (): Promise<void | null> {
 }
 
 // singleton during the lifetime of the application
-let serverContext: ServerContext | undefined
+let serverContext: BaseContext | undefined
 
 // Injected this way, since we want to set this up where the IPC layer
 // is established in the server package, which should be an independent
 // layer from GraphQL
-export function setServerContext (ctx: ServerContext) {
+export function setServerContext (ctx: BaseContext) {
   serverContext = ctx
 
   return ctx

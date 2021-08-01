@@ -200,8 +200,7 @@
   "files": [
     "config",
     "lib",
-    "patches",
-    "schema.graphql"
+    "patches"
   ],
   "types": "index.d.ts",
   "productName": "Cypress",

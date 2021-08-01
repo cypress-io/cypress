@@ -50,7 +50,7 @@ import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { languages } from "../utils/configFile";
-import { ConfigFileFragment } from "../generated/graphql";
+import type { ConfigFileFragment } from "../generated/graphql";
 
 gql`
 fragment ConfigFile on Wizard {
