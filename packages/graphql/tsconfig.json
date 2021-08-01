@@ -1,0 +1,8 @@
+{
+  "extends": "../ts/tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "noImplicitAny": true,  
+    "importsNotUsedAsValues": "error"
+  }
+}

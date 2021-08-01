@@ -1,0 +1,23 @@
+{
+  "name": "@packages/graphql",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "yarn build",
+    "clean-deps": "rm -rf node_modules",
+    "postinstall": "echo '@packages/static needs: yarn build'"
+  },
+  "dependencies": {
+    "graphql": "^15.5.1",
+    "graphql-scalars": "^1.10.0",
+    "nexus": "^1.1.0",
+    "nexus-decorators": "^0.2.0"
+  },
+  "files": [
+    "dist",
+    "lib"
+  ],
+  "types": "src/index.ts"
+}

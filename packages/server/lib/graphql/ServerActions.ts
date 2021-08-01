@@ -1,5 +1,5 @@
 import type { NxsMutationArgs } from 'nexus-decorators'
-import { ProjectBase } from '../../project-base'
+import { ProjectBase } from '../project-base'
 import { ServerContext } from '../context/ServerContext'
 import { BaseActions } from './BaseActions'
 

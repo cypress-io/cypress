@@ -1,5 +1,5 @@
-import { ServerActions } from '../actions/ServerActions'
-import { Project } from '../entities/Project'
+import { ServerActions } from './ServerActions'
+import { Project } from '@packages/graphql'
 import { BaseContext } from './BaseContext'
 
 export class ServerContext extends BaseContext {

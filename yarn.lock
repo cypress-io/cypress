@@ -28567,6 +28567,13 @@ nexus-decorators@^0.1.3:
   dependencies:
     stack-utils "^2.0.3"
 
+nexus-decorators@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/nexus-decorators/-/nexus-decorators-0.2.0.tgz#bc4e083ba76ec92f6d138a15c514f09c91b36e45"
+  integrity sha512-2fqklCLsFWRs08yuSJpau3FyRkR0DDVRD/DSI+a3wC5f+n/mwOMqh9KTdOpe6bqWVUoq/OzmWUCa6wHr0OA1xA==
+  dependencies:
+    stack-utils "^2.0.3"
+
 nexus@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.1.0.tgz#3d8fa05c29e7a61aa55f64ef5e0ba43dd76b3ed6"
