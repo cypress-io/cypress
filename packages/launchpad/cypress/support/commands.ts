@@ -6,11 +6,11 @@ import { testApolloClient } from './testApolloClient'
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 
 /**
- * This variable is mimicing ipc provided by electron.
- * It has to be loaded run before initializing GraphQL
- * because graphql uses it.
- */
-(window as any).ipc = {
+   * This variable is mimicing ipc provided by electron.
+   * It has to be loaded run before initializing GraphQL
+   * because graphql uses it.
+   */
+;(window as any).ipc = {
   on: () => {},
   send: () => {},
 }

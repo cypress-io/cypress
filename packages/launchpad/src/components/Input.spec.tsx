@@ -1,5 +1,7 @@
 import { ref } from 'vue'
 import Input from './Input.vue'
+import CoffeeIcon from 'virtual:vite-icons/mdi/coffee'
+import HeartIcon from 'virtual:vite-icons/mdi/heart'
 
 describe('<Input />', () => {
   it('playground', () => {
@@ -14,11 +16,11 @@ describe('<Input />', () => {
       </div>
 
       <div>Input with Icon
-      <Input modelValue={lorem} prefixIcon="mdi:coffee" prefixIconClasses="text-gray-cool-500"></Input>
+      <Input modelValue={ lorem } prefixIcon={ HeartIcon } prefixIconClasses="text-gray-cool-500"></Input>
       </div>
 
       <div>Input with Icon
-      <Input data-testid="suffix-icon" modelValue={lorem} prefixIcon="mdi:coffee" prefixIconClasses="text-gray-cool-500" suffixIcon="mdi:coffee" suffixIconClass="text-gray-cool-500"></Input>
+      <Input data-testid="suffix-icon" modelValue={ lorem } prefixIcon={HeartIcon} prefixIconClasses="text-gray-cool-500" suffixIcon={ CoffeeIcon } suffixIconClass="text-gray-cool-500"></Input>
       </div>
 
       <div>

@@ -11,19 +11,13 @@
         </button>
       </slot>
     </span>
-    <input
-        class="w-full h-full rounded border-transparent disabled:bg-cool-gray-100 disabled:text-cool-gray-400 border-cool-gray-300 focus:border-gray-500 focus:bg-white bg-gray-100 focus:ring-0 focus:outline-none focus:bg-white focus:text-gray-900 border-1 px-2 py-2 indent-4px"
-        :autocomplete="false"
-        autocorrect="off"
-        :spellcheck="false"
-        v-model="localValue"
-        v-bind="inputAttrs"
-        :type="type"
-        :class="[inputClass, {
+    <span class="w-full h-full px-2 py-2 indent-4px"
+    :class="{
           'pr-36px': hasSuffix,
           'pl-32px': hasPrefix,
-        }]"
-      />
+        }"
+    ><slot></slot></span>
+    
     <span class="absolute inset-y-0 right-0 flex items-center pr-2">
       <slot name="suffix" :iconClass="suffixIconClass" :containerClass="buttonClass">
         <button type="submit" v-if="suffixIcon || $slots.suffix" :class="buttonClass">

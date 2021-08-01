@@ -38,6 +38,7 @@
     <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch" :style="`background-image: url('${bottomBackground}');`" style="background-position: bottom center;background-repeat: no-repeat;">
       <SideBarItem
         v-for="i in sideMenuDefinition"
+        class="pr-8px"
         :icon="i.icon"
         :active="!!i.active"
       />
@@ -55,6 +56,9 @@ import { computed, defineComponent } from "vue";
 import { useStoreApp } from "../store/app";
 import SideBarItem from "./SideBarItem.vue";
 import bottomBackground from '../images/bottom_filler.svg'
+import IconDashboardLine from 'virtual:vite-icons/clarity/dashboard-line'
+import IconTerminalLine from 'virtual:vite-icons/clarity/terminal-line'
+import IconSettingsLine from 'virtual:vite-icons/clarity/settings-line'
 
 export default defineComponent({
   components: {
@@ -65,9 +69,9 @@ export default defineComponent({
     const projectTitle = computed(() => store.getState().projectTitle);
 
     const sideMenuDefinition = [
-      { icon: "clarity:dashboard-line" },
-      { icon: "clarity-terminal-line" },
-      { icon: "clarity-settings-line", active: true },
+      { icon: IconDashboardLine },
+      { icon: IconTerminalLine },
+      { icon: IconSettingsLine, active: true },
     ];
 
     return { projectTitle, sideMenuDefinition, bottomBackground };

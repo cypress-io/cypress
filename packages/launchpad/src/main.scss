@@ -39,7 +39,10 @@ textarea {
 	border-color: #6b7280;
 	border-width: 1px;
 	border-radius: 0;
-  padding: .35rem .5rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 	font-size: 1rem;
 	line-height: 1.25rem
 }
@@ -218,4 +221,40 @@ select {
 
 [type=file]:focus {
 	outline: 1px auto -webkit-focus-ring-color
+}
+
+
+input[type="search"].dark {
+  background: #222;
+  color: #fff;
+}
+
+input[type="search"].light {
+  background: #fff;
+  color: #222;
+}
+input[type="search"].suffix::-webkit-search-cancel-button {
+  @apply pr-3.25em;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  margin: 1em;
+  height: 1em;
+  width: 1em;
+  border-radius: 50em;
+  background: url(https://pro.fontawesome.com/releases/v5.10.0/svgs/solid/times-circle.svg)
+    no-repeat 50% 50%;
+  background-size: contain;
+  opacity: 0;
+  pointer-events: none;
+}
+
+input[type="search"]:focus::-webkit-search-cancel-button {
+  opacity: 0.3;
+  pointer-events: all;
+}
+
+input[type="search"].dark::-webkit-search-cancel-button {
+  filter: invert(1);
 }

@@ -1,24 +1,18 @@
 <template>
-  <span>
-    <i class="flex align-center justify-center">
-      <component
-          v-if="typeof icon !== 'string'"
-          :is="icon"
-          :class="$attrs.class"/>
-        <i v-else :data-icon="icon"
-          :class="$attrs.class"
-          class="iconify"></i>
-    </i>
-  </span>
+  <span class="flex align-center justify-center">
+    <component :is="icon" :class="$attrs.class">
+  </component></span>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent} from 'vue'
+import type { IconType } from '../types'
 
 export default defineComponent({
   props: {
     icon: {
-      type: [String, Object] as PropType<string | ReturnType<typeof defineComponent>>,
+      type: Object as IconType,
+      required: true
     }
   }
 })

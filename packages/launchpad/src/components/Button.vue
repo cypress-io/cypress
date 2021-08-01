@@ -28,6 +28,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import type { IconType } from '../types'
 
 const VariantClassesTable = {
   primary: "border-indigo-600 bg-indigo-600 text-white",
@@ -52,10 +53,10 @@ export default defineComponent({
   emits: { click: null },
   props: {
     prefixIcon: {
-      type: [String, Object] as PropType<string | ReturnType<typeof defineComponent>>,
+      type: Object as IconType,
     },
     suffixIcon: {
-      type: [String, Object] as PropType<string | ReturnType<typeof defineComponent>>,
+      type: Object as IconType,
     },
     size: {
       type: String as PropType<"xs" | "sm" | "md" | "lg" | "xl">,
