@@ -50,12 +50,8 @@ export default defineComponent({
     },
   },
   setup(props, { emit, attrs, slots }) {
-    const hasSuffix = computed(() => !!(props.suffixIcon || slots.suffix))
-    const hasPrefix = computed(() => !!(props.prefixIcon || slots.prefix))
 
     return {
-      hasSuffix,
-      hasPrefix,
       localValue: useModelWrapper(props, emit, 'modelValue'),
       buttonClass,  
       containerAttrs: attrs.class || {}
