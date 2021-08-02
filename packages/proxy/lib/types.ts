@@ -30,7 +30,7 @@ export { RequestMiddleware } from './http/request-middleware'
 
 export { ResponseMiddleware } from './http/response-middleware'
 
-export type ResourceType = 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 
 /**
  * Metadata about an HTTP request, according to the browser's pre-request event.
@@ -39,6 +39,21 @@ export type BrowserPreRequest = {
   requestId: string
   method: string
   url: string
+  headers: { [key: string]: string | string[] }
   resourceType: ResourceType
   originalResourceType: string | undefined
+}
+
+/**
+ * Notification that the browser has received a response for a request for which a pre-request may have been emitted.
+ */
+export type BrowserResponseReceived = {
+  requestId: string
+  status: number
+  headers: { [key: string]: string | string[] }
+}
+
+export type RequestError = {
+  requestId: string
+  error: any
 }

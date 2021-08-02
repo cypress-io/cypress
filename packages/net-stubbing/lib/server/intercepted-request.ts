@@ -148,6 +148,7 @@ export class InterceptedRequest {
         const eventFrame: NetEvent.ToDriver.Event<any> = {
           eventId,
           subscription,
+          browserRequestId: this.req.browserPreRequest && this.req.browserPreRequest.requestId,
           requestId: this.id,
           data,
         }
