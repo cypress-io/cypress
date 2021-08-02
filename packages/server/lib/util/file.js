@@ -13,6 +13,17 @@ const { default: pQueue } = require('p-queue')
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
 
+function getUid () {
+  try {
+    // eslint-disable-next-line no-restricted-properties
+    return process.geteuid()
+  } catch (err) {
+    // process.geteuid() can fail, return a constant
+    // @see https://github.com/cypress-io/cypress/issues/17415
+    return 1
+  }
+}
+
 class File {
   constructor (options = {}) {
     if (!options.path) {
@@ -23,7 +34,7 @@ class File {
 
     // If multiple users write to a specific directory is os.tmpdir, permission errors can arise.
     // Instead, we make a user specific directory with os.tmpdir.
-    this._lockFileDir = path.join(os.tmpdir(), `cypress-${os.userInfo().uid}`)
+    this._lockFileDir = path.join(os.tmpdir(), `cypress-${getUid()}`)
     this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
 
     this._queue = new pQueue({ concurrency: 1 })

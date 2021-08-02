@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 import dayjs from 'dayjs'
 import parser from 'cookie-parser'
 import e2e from '../support/helpers/e2e'
