@@ -2374,7 +2374,7 @@ describe('src/cy/commands/xhr', () => {
             expect(consoleProps).to.include({
               Method: 'GET',
               URL: 'http://localhost:3500/fixtures/app.json',
-              Status: undefined,
+              'Request went to origin?': 'yes',
               XHR: xhr.xhr,
             })
 
