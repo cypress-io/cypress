@@ -3,10 +3,11 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "tsc": "vue-tsc --noEmit",
+    "build": "vite build",
+    "types": "vue-tsc --noEmit",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
-    "test": "yarn cypress:run && yarn tsc",
+    "test": "yarn cypress:run && yarn types",
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
