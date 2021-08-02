@@ -30,7 +30,6 @@ describe('<Icon />', () => {
       'orange',
       'amber',
       'emerald',
-      'blue',
       'indigo',
       'fuchsia',
       'pink',
