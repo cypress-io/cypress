@@ -2835,6 +2835,7 @@ declare namespace Cypress {
    * Config model of cypress. To be used in `cypress.config.js`
    */
   type ConfigOptions = Omit<ConfigOptionsMergedWithTestingTypes, 'pluginsFile' | 'supportFile' | 'supportFolder'>
+    // make setupDevServer required in component
     & {component?: {setupDevServer: TestingTypeConfigComponent['setupDevServer'] }}
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
