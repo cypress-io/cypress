@@ -40,5 +40,5 @@ const expectMatchingCurrentTitleInHook = () => {
   .eq(cy.state('runnable').ctx.currentTest.title)
 
   expect(Cypress.currentTest.titlePath)
-  .deep.eq(cy.state('runnable').titlePath())
+  .deep.eq(cy.state('runnable').ctx.currentTest.titlePath())
 }
