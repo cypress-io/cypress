@@ -137,15 +137,17 @@ const isValidTestingTypeConfig = (key, config) => {
   }
 
   for (const rule of configOptions.options) {
-    if (rule.name in config && rule.validation) {
+    if (rule.name in config) {
       if (typeof rule.onlyInOverride === 'string' && rule.onlyInOverride !== key) {
         return `key \`${rule.name}\` is only valid in the \`${rule.onlyInOverride}\` object, invalid use of this key in the \`${key}\` object`
       }
 
-      const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
+      if (rule.validation) {
+        const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
 
-      if (status !== true) {
-        return status
+        if (status !== true) {
+          return status
+        }
       }
     }
   }

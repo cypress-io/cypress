@@ -246,7 +246,7 @@ describe('lib/config', () => {
 
         it('fails if not a plain object or a function', function () {
           this.setup({ component: false })
-          this.expectValidationFails('to be a plain object or a function')
+          this.expectValidationFails('to be a plain object')
 
           return this.expectValidationFails('the value was: `false`')
         })
@@ -269,6 +269,46 @@ describe('lib/config', () => {
           return config.get(this.projectRoot, { testingType: 'component' })
           .then((obj) => {
             expect(obj.viewportWidth).to.eq(300)
+          })
+        })
+
+        describe('setupDevServer', function () {
+          it('allows setupDevServer in component', function () {
+            this.setup({
+              viewportWidth: 1024,
+              component: {
+                setupDevServer () {
+                  // noop
+                },
+              },
+            })
+
+            return config.get(this.projectRoot, { testingType: 'component' })
+            .then((obj) => {
+              expect(obj.component.setupDevServer).to.be.a('function')
+            })
+          })
+
+          it('disallows setupDevServer in root', function () {
+            this.setup({
+              setupDevServer () {
+                // noop
+              },
+            })
+
+            return this.expectValidationFails('\`component\`')
+          })
+
+          it('disallows setupDevServer in e2e', function () {
+            this.setup({
+              e2e: {
+                setupDevServer () {
+                  // noop
+                },
+              },
+            })
+
+            return this.expectValidationFails('\`component\`')
           })
         })
       })

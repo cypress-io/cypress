@@ -89,10 +89,10 @@ const validate = (cfg, onErr) => {
 
     if (onlyInOverrideValues[key]) {
       if (onlyInOverrideValues[key] === true) {
-        return `key \`${key}\` is only valid in a testingType object, it is invalid to use it in the root`
+        return onErr(`key \`${key}\` is only valid in a testingType object, it is invalid to use it in the root`)
       }
 
-      return `key \`${key}\` is only valid in the \`${onlyInOverrideValues[key]}\` object, it is invalid to use it in the root`
+      return onErr(`key \`${key}\` is only valid in the \`${onlyInOverrideValues[key]}\` object, it is invalid to use it in the root`)
     }
 
     // does this key have a validation rule?
@@ -226,12 +226,6 @@ module.exports = {
       settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
     ])
     .spread((configObject, envFile) => {
-      const testingType = isComponentTesting(options) ? 'component' : 'e2e'
-
-      if (testingType in configObject) {
-        configObject = { ...configObject, ...configObject[testingType] }
-      }
-
       return this.set({
         projectName: this.getNameFromRoot(projectRoot),
         projectRoot,
@@ -261,7 +255,17 @@ module.exports = {
     config.projectRoot = projectRoot
     config.projectName = projectName
 
-    return this.mergeDefaults(config, options)
+    const testingType = isComponentTesting(options) ? 'component' : 'e2e'
+
+    return this.mergeDefaults(config, options).then((configObject = {}) => {
+      if (testingType in configObject) {
+        configObject = { ...configObject, ...configObject[testingType] }
+      }
+
+      debug('merged config is %o', config)
+
+      return configObject
+    })
   },
 
   mergeDefaults (config = {}, options = {}) {
