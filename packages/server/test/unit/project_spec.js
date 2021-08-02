@@ -688,12 +688,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
       this.watch = sinon.stub(this.project.watchers, 'watch')
+      this.watchTree = sinon.stub(this.project.watchers, 'watchTree')
     })
 
     it('watches cypress.json and cypress.env.json', function () {
       this.project.watchSettings({ onSettingsChanged () {} }, {})
-      expect(this.watch).to.be.calledTwice
-      expect(this.watch).to.be.calledWith('/path/to/cypress.json')
+      expect(this.watchTree).to.be.calledWith('/path/to/cypress.json')
 
       expect(this.watch).to.be.calledWith('/path/to/cypress.env.json')
     })
