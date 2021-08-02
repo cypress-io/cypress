@@ -2473,7 +2473,7 @@ declare namespace Cypress {
   type TestingTypeConfigComponent = TestingTypeConfig & {
     /**
      * Return the setup of your server
-     * @arg options the dev server options to pass directly to the dev-server
+     * @param options the dev server options to pass directly to the dev-server
      */
     setupDevServer(options: DevServerOptions): Promise<ResolvedDevServerConfig>
   }
@@ -2511,7 +2511,7 @@ declare namespace Cypress {
     reporter: string
     /**
      * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
-     * @default "spec"
+     * @default {}
      */
     reporterOptions: { [key: string]: any }
     /**
@@ -2551,7 +2551,7 @@ declare namespace Cypress {
     taskTimeout: number
     /**
      * Path to folder where application files will attempt to be served from
-     * @default root project folder
+     * @default "root project folder"
      */
     fileServerFolder: string
     /**
@@ -2562,6 +2562,7 @@ declare namespace Cypress {
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
+     * @deprecated use the testFiles glob in the e2e object
      */
     integrationFolder: string
     /**
@@ -2572,6 +2573,7 @@ declare namespace Cypress {
     /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
+     * @deprecated nodeVersion will soon be fixed to "system" to avoid confusion
      */
     nodeVersion: 'system' | 'bundled'
     /**
@@ -2701,6 +2703,7 @@ declare namespace Cypress {
     blockHosts: null | string | string[]
     /**
      * Path to folder containing component test files.
+     * @deprecated use the testFiles pattern inside the component object instead
      */
     componentFolder: false | string
     /**
@@ -2709,6 +2712,7 @@ declare namespace Cypress {
     projectId: null | string
     /**
      * Path to the support folder.
+     * @deprecated use supportFile instead
      */
     supportFolder: string
     /**
@@ -2817,19 +2821,21 @@ declare namespace Cypress {
     keystrokeDelay?: number
   }
 
+  // here we need to use the `Function` type to type setup functions options properly
+  // if we don't, they will be typed as any
+  /* tslint:disable-next-line ban-types */
+  type DeepPartial<T> = T extends Function ? T : T extends object ? { [P in keyof T]?: DeepPartial<T[P]>; } : T
+
   /**
-   * All configuration items are optional.
-   */
-  type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]>; } : T
-  /**
-   * ConfigOptions after the current testingType has been merget into the root. 
+   * ConfigOptions after the current testingType has been merget into the root.
    */
   type ConfigOptionsMergedWithTestingTypes = DeepPartial<ResolvedConfigOptions>
 
   /**
    * Config model of cypress. To be used in `cypress.config.js`
    */
-  type ConfigOptions = Omit<Cypress.ConfigOptionsMergedWithTestingTypes, 'pluginsFile' | 'supportFile'>
+  type ConfigOptions = Omit<ConfigOptionsMergedWithTestingTypes, 'pluginsFile' | 'supportFile' | 'supportFolder'>
+    & {component?: {setupDevServer: TestingTypeConfigComponent['setupDevServer'] }}
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
