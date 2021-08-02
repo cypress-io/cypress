@@ -21,7 +21,6 @@ describe('<Icon />', () => {
       'xl',
       '2xl',
       '3xl',
-      '4xl',
       '6xl',
     ]
 
