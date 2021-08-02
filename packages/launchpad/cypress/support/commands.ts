@@ -6,7 +6,6 @@ import { createStoreConfig, StoreConfig } from '../../src/store/config'
 import { testApolloClient } from './testApolloClient'
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 
-
 /**
    * This variable is mimicing ipc provided by electron.
    * It has to be loaded run before initializing GraphQL
