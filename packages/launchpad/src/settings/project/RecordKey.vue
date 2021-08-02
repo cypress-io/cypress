@@ -29,7 +29,7 @@
       </Input>
       <Button
         variant="outline"
-        @click="clipboard.copy"
+        @click="clipboard.copy()"
         :prefixIcon="IconDashedSquare"
         prefixIconClass="text-cool-gray-500"
       >{{ clipboard.copied.value ? 'Copied!' : 'Copy' }}</Button>

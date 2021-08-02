@@ -12,7 +12,7 @@
         readonly
         v-model="formattedProjectId"
       ></InlineCodeEditor>
-      <Button variant="outline" @click="clipboard.copy">
+      <Button variant="outline" @click="clipboard.copy()">
         <template #prefix>
           <Icon class="text-cool-gray-600" :icon="IconDashedSquare" />
         </template>

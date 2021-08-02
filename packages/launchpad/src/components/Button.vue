@@ -3,7 +3,6 @@
     style="width: fit-content"
     class="flex items-center border rounded-sm gap-8px focus:border-indigo-600 focus:outline-transparent"
     :class="classes"
-    @click="$emit('click')"
   >
     <span v-if="prefixIcon || $slots.prefix" :class="iconClasses" class="justify-self-start">
       <slot name="prefix">
@@ -22,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmit, defineProps, PropType } from "vue"
+import { defineProps, PropType } from "vue"
 import type { IconType } from '../types'
 
 const VariantClassesTable = {
@@ -43,8 +42,6 @@ const IconClassesTable = {
   lg: "h-2em w-2m",
   xl: "h-2.5em w-2.5em"
 }
-
-defineEmit(['click'])
 
 const props = defineProps({
   prefixIcon: {
