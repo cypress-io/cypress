@@ -45,7 +45,6 @@ Cypress.Commands.add(
 declare global {
   namespace Cypress {
     interface Chainable {
-      
       /**
        * Install all vue plugins and globals then mount
        */
