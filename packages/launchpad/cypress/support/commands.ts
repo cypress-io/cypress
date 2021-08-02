@@ -6,7 +6,6 @@ import { createStoreConfig, StoreConfig } from '../../src/store/config'
 import { testApolloClient } from './testApolloClient'
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
 
-
 /**
    * This variable is mimicing ipc provided by electron.
    * It has to be loaded run before initializing GraphQL
@@ -16,8 +15,6 @@ import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTe
   on: () => {},
   send: () => {},
 }
-
-// before(() => cy.configureCypressTestingLibrary({}))
 
 Cypress.Commands.add(
   'mount',
@@ -47,7 +44,6 @@ Cypress.Commands.add(
 declare global {
   namespace Cypress {
     interface Chainable {
-      
       /**
        * Install all vue plugins and globals then mount
        */
