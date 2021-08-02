@@ -1,19 +1,17 @@
 <template>
-  <span class="flex align-center justify-center">
-    <component :is="icon" :class="$attrs.class"></component>
+  <span class="flex align-center justify-center" v-if="icon">
+    <component :is="icon" :class="$attrs.class" />
   </span>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { defineProps } from 'vue'
+// TODO: the validator for icon fails when I use IconType as the expected type.
+// Not sure why.
+// @ts-ignore
 import type { IconType } from '../types'
 
-export default defineComponent({
-  props: {
-    icon: {
-      type: Object as IconType,
-      required: true
-    }
-  }
-})
+defineProps<{
+  icon?: any
+}>()
 </script>

@@ -5,33 +5,23 @@
     @click="$emit('update', !value)"
   >
     <span
-      class="
-        absolute
-        block
-        toggle
-        border border-1 border-gray-300
-        rounded-md
-        bg-white
-      "
+      class="absolute block toggle border border-1 border-gray-300 rounded-md bg-white"
       :class="value ? 'toggle-on' : ''"
     />
   </button>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts" setup>
+import { defineEmit, defineProps } from "vue"
 
-export default defineComponent({
-  emits: {
-    update: Boolean,
+defineProps({
+  value: {
+    type: Boolean,
+    default: false,
   },
-  props: {
-    value: {
-      type: Boolean,
-      default: false,
-    },
-  },
-});
+})
+
+defineEmit(['update'])
 </script>
 
 <style scoped>

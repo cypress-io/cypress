@@ -27,24 +27,16 @@
 <script lang="ts">
 import { defineComponent, computed, PropType } from 'vue'
 import { useModelWrapper } from '../composables'
-import { omit } from 'lodash'
 import Icon from './Icon.vue'
+import {IconType } from '../types'
 
 const buttonClass = "p-1 focus:outline-none focus:shadow-outline flex items-center"
 
 export const iconProps = {
-  prefixIcon: {
-    type: String
-  },
-  prefixIconClass: {
-    type: String
-  },
-  suffixIcon: {
-    type: String
-  },
-  suffixIconClass: {
-    type: String
-  },
+  prefixIcon: Object as PropType<IconType>,
+  prefixIconClass: String,
+  suffixIcon: Object as PropType<IconType>,
+  suffixIconClass: String,
 }
 
 export default defineComponent({

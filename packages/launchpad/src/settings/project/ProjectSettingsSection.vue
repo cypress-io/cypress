@@ -6,6 +6,6 @@
     <p class="text-sm text-cool-gray-400 leading-snug mb-16px">
       <slot name="description"></slot>
     </p>
-    <slot/>
+    <slot />
   </section>
 </template>

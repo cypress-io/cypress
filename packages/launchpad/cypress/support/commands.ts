@@ -1,9 +1,11 @@
 import { mount } from '@cypress/vue'
+import '@testing-library/cypress/add-commands';
 import { provideClient } from '@urql/vue'
 import { createStoreApp, StoreApp } from '../../src/store/app'
 import { createStoreConfig, StoreConfig } from '../../src/store/config'
 import { testApolloClient } from './testApolloClient'
 import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTestContext'
+
 
 /**
    * This variable is mimicing ipc provided by electron.
@@ -14,6 +16,8 @@ import { ClientTestContext } from '@packages/server/lib/graphql/context/ClientTe
   on: () => {},
   send: () => {},
 }
+
+// before(() => cy.configureCypressTestingLibrary({}))
 
 Cypress.Commands.add(
   'mount',
@@ -43,6 +47,7 @@ Cypress.Commands.add(
 declare global {
   namespace Cypress {
     interface Chainable {
+      
       /**
        * Install all vue plugins and globals then mount
        */

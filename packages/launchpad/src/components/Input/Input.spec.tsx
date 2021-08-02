@@ -20,7 +20,7 @@ describe('<Input />', () => {
       </div>
 
       <div>Input with Icon
-      <Input data-testid="suffix-icon" modelValue={ lorem } prefixIcon={HeartIcon} prefixIconClasses="text-gray-cool-500" suffixIcon={ CoffeeIcon } suffixIconClass="text-gray-cool-500"></Input>
+      <Input modelValue={ lorem } prefixIcon={HeartIcon} prefixIconClasses="text-gray-cool-500" suffixIcon={ CoffeeIcon } suffixIconClass="text-gray-cool-500"></Input>
       </div>
 
       <div>
@@ -45,7 +45,6 @@ describe('<Input />', () => {
         <Input data-testid="search" type="search"/>
       </div>
       </div>
-    )).get('[data-testid=suffix-icon]').focus().click()
-      // .get('[data-testid=search]').focus().click().type('Lorem ipsum dolor sit amet, consectetur adipisicing elit. Incidunt cum, rerum atque perferendis eum quia reiciendis adipisci? Libero tempore nesciunt alias provident? Ab vel non deserunt rerum magni quo sit?', { delay: 0})
+    ))
   })
 })

@@ -4,21 +4,11 @@
   </Layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { provideClient } from '@urql/vue'
 import { makeUrqlClient } from './graphql/urqlClient'
-import { defineComponent } from "vue";
-import Layout from "./components/Layout.vue";
-import Wizard from "./components/Wizard.vue";
+import Layout from "./components/Layout.vue"
+import Wizard from "./components/Wizard.vue"
 
-export default defineComponent({
-  name: "App",
-  components: {
-    Layout,
-    Wizard,
-  },
-  setup() {
-    provideClient(makeUrqlClient())
-  }
-});
+provideClient(makeUrqlClient())
 </script>

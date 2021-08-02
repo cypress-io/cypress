@@ -22,46 +22,22 @@
   </ProjectSettingsSection>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, ref, onMounted } from 'vue'
+<script lang="ts" setup>
+import { ref, onMounted, computed } from 'vue'
 import "prismjs"
 import "@packages/reporter/src/errors/prism.scss"
 import IconCodeBraces from 'virtual:vite-icons/mdi/code-braces'
 import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
-import Input from '../../components/Input/Input.vue'
 import Button from '../../components/Button.vue'
 import ProjectSettingsSection from './ProjectSettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
-import PrismJs from "vue-prism-component"
 import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
 
-export default defineComponent({
-  components: {
-    PrismJs,
-    Input,
-    Button,
-    ProjectSettingsSection,
-    InlineCodeEditor
-  },
-  setup() {
-    const projectId = ref('74e08848-f0f6-11eb-9a03-0242ac130003')
-    const yamlRegistered = ref(false)
-    // await import("prismjs/components/prism-yaml")
-    onMounted(() => {
-      import("prismjs/components/prism-yaml").then(() => {
-        yamlRegistered.value = true
-      })
-    })
-    return {
-      formattedProjectId: computed(() => `projectId: '${projectId.value}'`),
-      clipboard: useClipboard({ source: projectId }),
-      projectId,
-      yamlRegistered,
-      IconCodeBraces,
-      IconDashedSquare
-    }
-  },
-})
+const projectId = ref('74e08848-f0f6-11eb-9a03-0242ac130003')
+const formattedProjectId = computed(() => `projectId: '${projectId.value}'`)
+const clipboard = useClipboard({ source: projectId })
+
+onMounted(() => import("prismjs/components/prism-yaml"))
 </script>
 
 <style lang="scss" scoped>

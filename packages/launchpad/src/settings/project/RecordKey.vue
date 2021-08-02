@@ -8,60 +8,55 @@
     <div class="inline-flex justify-start gap-10px">
       <Input
         v-model="recordKey"
-        class="w-200px"
         inputClass="font-mono text-xs"
         disabled
-        size="sm"
         :type="showRecordKey ? 'text' : 'password'"
       >
         <template #prefix>
-          <Icon icon="foundation:key" class="text-cool-gray-400" />
+          <Icon :icon="IconKey" class="text-cool-gray-400" />
         </template>
         <template #suffix="{ containerClass }">
           <button
             :class="containerClass"
             @click="showRecordKey = !showRecordKey"
+            aria-label="Record Key Visibility Toggle"
             class="text-cool-gray-400 hover:text-cool-gray-500"
           >
-            <Icon v-show="!showRecordKey" icon="mdi:eye-outline" />
-            <Icon v-show="showRecordKey" icon="mdi:eye-off-outline" />
+            <Icon v-if="showRecordKey" :icon="IconEyeOpen" />
+            <Icon v-else :icon="IconEyeClosed" />
           </button>
         </template>
       </Input>
-      <Button variant="outline" @click="clipboard.copy">
-        <template #prefix>
-          <Icon class="text-cool-gray-600" icon="si-glyph:square-dashed-2" />
-        </template>
-        {{ clipboard.copied.value ? 'Copied!' : 'Copy' }}
-      </Button>
-      <Button variant="outline" @click="openManageKeys">
-        <template #prefix>
-          <Icon class="w-16px h-16px text-cool-gray-400" icon="foundation:key" />
-        </template>
-        Manage Keys
-      </Button>
+      <Button
+        variant="outline"
+        @click="clipboard.copy"
+        :prefixIcon="IconDashedSquare"
+        prefixIconClass="text-cool-gray-500"
+      >{{ clipboard.copied.value ? 'Copied!' : 'Copy' }}</Button>
+      <Button
+        variant="outline"
+        @click="openManageKeys"
+        :prefixIcon="IconKey"
+        prefixIconClass="text-cool-gray-500 w-1.2rem h-1.2rem"
+      >Manage Keys</Button>
     </div>
   </ProjectSettingsSection>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script lang="ts" setup>
+import { ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import ProjectSettingsSection from './ProjectSettingsSection.vue'
 import Icon from '../../components/Icon.vue'
 import Button from '../../components/Button.vue'
 import Input from '../../components/Input/Input.vue'
+import IconKey from 'virtual:vite-icons/foundation/key'
+import IconEyeOpen from 'virtual:vite-icons/mdi/eye-outline'
+import IconEyeClosed from 'virtual:vite-icons/mdi/eye-off-outline'
+import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
 
-export default defineComponent({
-  components: { Icon, Button, Input, ProjectSettingsSection },
-  setup() {
-    const recordKey = ref('oeiwj123roi')
-    return {
-      clipboard: useClipboard({ source: recordKey }),
-      openManageKeys: () => { },
-      recordKey,
-      showRecordKey: ref(false)
-    }
-  },
-})
+const recordKey = ref('12e1oihd')
+const clipboard = useClipboard({ source: recordKey })
+const openManageKeys = () => { }
+const showRecordKey = ref(false)
 </script>

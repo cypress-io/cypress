@@ -1,43 +1,31 @@
 <template>
   <prism-editor
     class="font-mono leading-tight prism-editor"
-    :readonly="readonly"
     v-model="localValue"
+    :readonly="readonly"
     :highlight="highlighter"
-  ></prism-editor>
+  />
 </template>
 
-<script>
+<script setup lang="ts">
 import prism from "prismjs"
 import { PrismEditor } from "vue-prism-editor" //
 import "vue-prism-editor/dist/prismeditor.min.css" // import the styles somewhere
 import "prismjs/themes/prism.css" // import syntax highlighting styles
 // import highlighting library (you can use any library you want just return html string)
 import { useModelWrapper } from "../composables"
-import { defineComponent } from "vue"
+import { defineProps, defineEmit } from "vue"
 
-export default defineComponent({
-  components: {
-    PrismEditor,
-  },
-  props: {
-    modelValue: {
-      type: String,
-    },
-    readonly: {
-      type: Boolean,
-    }
-  },
-  setup(props, { emit }) {
-    const highlighter = (code) => {
-      return prism.highlight(code, prism.languages.js)
-    }
-    return {
-      localValue: useModelWrapper(props, emit, 'modelValue'),
-      highlighter
-    }
-  },
-})
+const props = defineProps<{
+  modelValue: string
+  readonly?: boolean
+}>()
+
+const emit = defineEmit(['update:modelValue'])
+
+// @ts-ignore
+const highlighter = (code) => prism.highlight(code, prism.languages.js)
+const localValue = useModelWrapper(props, emit, 'modelValue')
 </script>
 
 <style>

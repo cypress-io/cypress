@@ -8,7 +8,14 @@ export const sections = {
   user: {}
 }
 
-export const experiments = [
+export interface Experiment {
+  name: string
+  description: string
+  enabled: boolean
+  key: string
+}
+
+export const experiments: Experiment[] = [
   {
     name: 'Studio Mode',
     description: 'Enable Studio Mode',

@@ -1,10 +1,10 @@
 <template>
-  <div :class="[wrapperStyles, 'w-350px']">
+  <div class="relative text-gray-600 overflow-hidden w-350px">
     <IconWrapper v-bind="{ ...iconWrapperProps, class: $attrs.class }">
       <template #default="slotProps">
         <CodeEditor
-          :class="[inputStyles, wrapperStyles, slotProps.iconOffsetClasses]"
-          class="font-mono"
+          :class="[slotProps.iconOffsetClasses]"
+          class="font-mono w-full h-full rounded border-transparent disabled:bg-cool-gray-100 disabled:text-cool-gray-400 border-cool-gray-300 focus:border-gray-500 focus:bg-white bg-gray-100 focus:ring-0 focus:outline-none focus:bg-white focus:text-gray-900 border-1 py-2 px-4 whitespace-pre overflow-auto"
           :readonly="readonly"
           v-model="localValue"
         />
@@ -13,35 +13,26 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { defineProps, defineEmit } from 'vue'
 import CodeEditor from '../CodeEditor.vue'
 import { useModelWrapper } from '../../composables'
-import { wrapperStyles, inputStyles } from './input-styles'
 import IconWrapper, { iconProps } from '../IconWrapper.vue'
 import { pick, keys } from 'lodash'
 
-export default defineComponent({
-  components: { CodeEditor, IconWrapper },
-  props: {
-    modelValue: {
-      type: String,
-    },
-    readonly: {
-      type: Boolean
-    },
-    ...iconProps
+const props = defineProps({
+  modelValue: {
+    type: String,
   },
-  setup(props, { emit }) {
-    const iconWrapperProps = pick(props, keys(iconProps))
-    return {
-      iconWrapperProps,
-      wrapperStyles,
-      inputStyles,
-      localValue: useModelWrapper(props, emit, 'modelValue')
-    }
-  }
+  readonly: {
+    type: Boolean
+  },
+  ...iconProps
 })
+
+const emit = defineEmit(['update:modelValue'])
+const iconWrapperProps = pick(props, keys(iconProps))
+const localValue = useModelWrapper(props, emit, 'modelValue')
 </script>
 
 <style lang="scss">

@@ -53,7 +53,8 @@
     "vue-prism-editor": "^2.0.0-alpha.2",
     "vue-tsc": "0.0.24",
     "windicss": "3.1.4",
-    "wonka": "^4.0.15"
+    "wonka": "^4.0.15",
+    "@testing-library/cypress": "8.0.0"
   },
   "files": [
     "dist",
