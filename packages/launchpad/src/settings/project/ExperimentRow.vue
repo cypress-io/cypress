@@ -8,7 +8,7 @@
     </div>
     <span role="definition" class="text-cool-gray-500 text-sm">{{ experiment.description }}</span>
     <div
-      class="row-start-1 row-end-3 col-start-2 col-end-auto inline-grid items-center justify-center ml-20px"
+      class="row-start-1 row-end-3 col-start-2 col-end-auto inline-grid items-center justify-self-end ml-20px"
     >
       <StatusIndicator
         :type="experiment.enabled ? 'success' : 'disabled'"

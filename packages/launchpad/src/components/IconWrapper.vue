@@ -1,7 +1,7 @@
 <template>
     <span class="absolute z-1 inset-y-0 left-0 flex items-center pl-2">
       <slot name="prefix" :iconClass="prefixIconClass" :containerClass="buttonClass">
-        <button type="submit" :class="buttonClass" v-if="hasPrefix">
+        <button type="submit" :class="buttonClass">
           <Icon :icon="prefixIcon" :class="prefixIconClass" />
         </button>
       </slot>
@@ -10,14 +10,14 @@
     :class="containerAttrs"
     ><slot
     :iconOffsetClasses="{
-      'pr-36px': hasSuffix,
-      'pl-32px': hasPrefix,
-      }"
+      suffix: 'pr-36px',
+      prefix: 'pl-32px',
+    }"
     ></slot></span>
     
     <span class="absolute z-1 inset-y-0 right-0 flex items-center pr-2">
       <slot name="suffix" :iconClass="suffixIconClass" :containerClass="buttonClass">
-        <button type="submit" v-if="hasSuffix" :class="buttonClass">
+        <button type="submit" :class="buttonClass">
           <Icon :icon="suffixIcon" :class="suffixIconClass" />
         </button>
       </slot>
