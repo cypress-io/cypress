@@ -83,11 +83,18 @@ const validateNoBreakingConfig = (cfg) => {
   })
 }
 
-const validate = (cfg, onErr) => {
+/**
+ * validate a root config object
+ * @param {object} cfg config object to validate
+ * @param {(errMsg:string) => void} onErr function run when invalid config is found
+ * @param {boolean} bypassRootLimitations skip checks related to position when we are working with merged configs
+ * @returns
+ */
+function validate (cfg, onErr, bypassRootLimitations = false) {
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
 
-    if (onlyInOverrideValues[key]) {
+    if (!bypassRootLimitations && onlyInOverrideValues[key]) {
       if (onlyInOverrideValues[key] === true) {
         return onErr(`key \`${key}\` is only valid in a testingType object, it is invalid to use it in the root`)
       }
@@ -387,7 +394,7 @@ module.exports = {
       }
 
       return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
-    })
+    }, true)
 
     let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
 
