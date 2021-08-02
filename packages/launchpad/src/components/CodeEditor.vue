@@ -1,7 +1,7 @@
 <template>
   <div>
     <prism-editor
-      class="font-mono leading-tight py-2"
+      class="font-mono leading-tight prism-editor"
       v-model="localValue"
       :highlight="highlighter"
     ></prism-editor>
@@ -41,5 +41,9 @@ export default defineComponent({
 <style>
 .prism-editor__line-number {
   display: none;
+}
+
+.prism-editor textarea {
+  @apply focus:ring-0 focus:outline-none;
 }
 </style>

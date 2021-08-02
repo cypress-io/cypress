@@ -58,20 +58,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  pre {
-    @apply bg-transparent m-0 p-0;
-  }
-.hide-scrollbar {
-  
-  &::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
-
-  /* Track */
-  &::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 5px grey;
-    border-radius: 10px;
-  }
+pre {
+  @apply bg-transparent m-0 p-0;
 }
 </style>
