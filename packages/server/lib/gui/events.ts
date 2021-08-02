@@ -390,7 +390,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch((err) => {
         err.type = _.get(err, 'statusCode') === 403 ?
           'ALREADY_MEMBER'
-          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors?.join('')) ?
+          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors?.userId?.join('')) ?
             'ALREADY_REQUESTED'
             :
             err.type || 'UNKNOWN'

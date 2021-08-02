@@ -20,4 +20,4 @@ generates:
     plugins:
       - add:
           content: '/* eslint-disable */'
-      - './script/codegen-mount.js'
+      - 'script/codegen-mount.js'
