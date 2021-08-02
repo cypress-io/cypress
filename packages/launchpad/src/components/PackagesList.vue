@@ -1,6 +1,7 @@
 <template>
   <div
-    v-for="(pkg, index) in listOfNecessaryPackages"
+    :key="pkg.name"
+    v-for="(pkg, index) in packagesToInstall ?? []"
     class="flex text-left"
     :class="index > 0 ? 'border-t border-t-gray-200' : undefined"
   >
@@ -12,26 +13,30 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
-import { useStoreConfig } from "../store/config";
-import { getPackages } from "../utils/packages";
+import { defineComponent, PropType, computed } from "vue";
+import { gql } from '@urql/core'
+import type { PackagesListFragment } from "../generated/graphql";
 
-
-export function listPackages() {
-  const store = useStoreConfig();
-  const framework = computed(() => store.getState().component?.framework);
-  const bundler = computed(() => store.getState().component?.bundler);
-  const listOfNecessaryPackages = computed(() =>
-    framework.value && bundler.value
-      ? getPackages(framework.value, bundler.value)
-      : []
-  );
-  return listOfNecessaryPackages;
+gql`
+fragment PackagesList on Wizard {
+  packagesToInstall {
+    name
+    description
+  }
 }
+`
 
 export default defineComponent({
-  setup() {
-    return { listOfNecessaryPackages: listPackages() };
+  props: {
+    gql: {
+      type: Object as PropType<PackagesListFragment>,
+      required: true
+    }
+  },
+  setup(props) {
+    return { 
+      packagesToInstall: computed(() => props.gql.packagesToInstall)
+    };
   },
 });
 </script>

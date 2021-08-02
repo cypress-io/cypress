@@ -26,7 +26,7 @@
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
     /* Strict Type-Checking Options */
     // "traceResolution": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     /**
      * Skip type checking of all declaration files (*.d.ts).
@@ -47,10 +47,11 @@
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [] /* List of folders to include type definitions from. */
-    "types": ["node", "chrome", "./cypress/support", "./index", "./vue-shims", "./vite-env"],                           /* Type declaration files to be included in compilation. */
+    "types": ["node", "chrome", "./index", "./vue-shims", "./vite-env"],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "importsNotUsedAsValues": "error"
   },
 }

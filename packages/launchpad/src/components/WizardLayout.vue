@@ -13,13 +13,39 @@
     <div class="flex-grow">
       <slot />
     </div>
-    <ButtonBar :next="next" :back="back" :alt="alt" />
+    <ButtonBar :nextFn="nextFn" :backFn="backFn" :altFn="altFn" :next="next" :back="back" :alt="alt" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import ButtonBar from "./ButtonBar.vue";
+import { gql } from '@urql/core'
+import { useMutation } from '@urql/vue'
+import { WizardLayoutNavigateDocument } from "../generated/graphql";
+
+gql`
+fragment WizardLayout on Wizard {
+  step
+  canNavigateForward
+}
+`
+
+gql`
+mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
+  wizardNavigate(direction: $direction) {
+    ...WizardLayout
+  }
+}
+`
+
+// gql`
+// mutation WizardLayoutNavigateBack {
+//   wizardNavigateBack {
+//     ...WizardLayout
+//   }
+// }
+// `
 
 export default defineComponent({
   components: { ButtonBar },
@@ -36,6 +62,26 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    altFn: {
+      type: Function as PropType<() => void>,
+      default: undefined
+    }
   },
+  setup() {
+    const navigate = useMutation(WizardLayoutNavigateDocument)
+
+    function nextFn() {
+      navigate.executeMutation({ direction: 'forward' })
+    }
+
+    function backFn() {
+      navigate.executeMutation({ direction: 'back' })
+    }
+
+    return {
+      nextFn,
+      backFn,
+    }
+  }
 });
 </script>

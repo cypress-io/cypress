@@ -1,16 +1,42 @@
 <template>
-  <WizardLayout :next="nextButtonName" alt="Install manually">
-    <PackagesList v-if="!manualInstall" />
-    <ManualInstall v-else @back="manualInstall = false" />
+  <WizardLayout :next="nextButtonName" alt="Install manually" :altFn="altFn">
+    <PackagesList
+      v-if="!manualInstall" 
+      :gql="gql" 
+    />
+    <ManualInstall 
+      v-else 
+      @back="manualInstall = false" 
+      :gql="gql || []" 
+    />
   </WizardLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, PropType } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
-import { useStoreApp } from "../store/app";
+import { gql } from '@urql/core'
+import { useMutation } from "@urql/vue";
+import { InstallDependenciesFragment, InstallDependenciesManualInstallDocument } from "../generated/graphql";
+
+gql`
+fragment InstallDependencies on Wizard {
+  ...PackagesList
+  ...ManualInstall
+  isManualInstall
+}
+`
+
+gql`
+mutation InstallDependenciesManualInstall($isManual: Boolean!) {
+  wizardSetManualInstall(isManual: $isManual) {
+    ...InstallDependencies
+  }
+}
+`
+
 
 export default defineComponent({
   components: {
@@ -18,35 +44,26 @@ export default defineComponent({
     PackagesList,
     ManualInstall,
   },
-  setup() {
-    const store = useStoreApp();
-    const manualInstall = ref(false);
+  props: {
+    gql: {
+      type: Object as PropType<InstallDependenciesFragment>,
+      required: true
+    }
+  },
+  setup(props) {
+    const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
     const nextButtonName = computed(() =>
-      manualInstall.value ? "I've installed them" : "Install"
+      props.gql.isManualInstall ? "I've installed them" : "Install"
     );
-    onMounted(() => {
-      store.setMeta({
-        title: "Install Dev Dependencies",
-        description:
-          "We need to install the following packages in order for component testing to work.",
-      });
 
-      store.onAlt(() => {
-        manualInstall.value = !manualInstall.value;
-      });
-
-      store.onBack(() => {
-        store.flagComponentSetup(false);
-      });
-
-      store.onNext(() => {
-        if (manualInstall.value) {
-          store.flagDependenciesInstalled();
-        } else {
-        }
-      });
-    });
-    return { manualInstall, nextButtonName };
+    return { 
+      manualInstall: computed(() => props.gql.isManualInstall),
+      nextButtonName, 
+      gql: computed(() => props.gql),
+      altFn(val) {
+        toggleManual.executeMutation({ isManual: val })
+      }
+    };
   },
 });
 </script>

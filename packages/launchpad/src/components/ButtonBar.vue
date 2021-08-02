@@ -10,10 +10,10 @@
       rounded-b
     "
   >
-    <Button @click="nextFunction()">{{ next }}</Button>
-    <Button @click="backFunction()" variant="outline">{{ back }}</Button>
+    <Button @click="nextFn">{{ next }}</Button>
+    <Button @click="backFn" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
-    <div v-if="altFunction && alt" class="flex items-center px-3">
+    <div v-if="altFn && alt" class="flex items-center px-3">
       <label @click="handleAlt" class="text-gray-500 px-3">{{ alt }}</label>
       <Switch :value="altValue" @update="handleAlt" />
     </div>
@@ -21,8 +21,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
-import { useStoreApp } from "../store/app";
+import { defineComponent, PropType, ref } from "vue";
 import Button from "./Button.vue";
 import Switch from "./Switch.vue";
 
@@ -33,29 +32,36 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    nextFn: {
+      type: Function as PropType<() => void>,
+      required: true
+    },
     back: {
       type: String,
       required: true,
+    },
+    backFn: {
+      type: Function as PropType<() => void>,
+      required: true
     },
     alt: {
       type: String,
       default: undefined,
     },
+    altFn: {
+      type: Function as PropType<(value: unknown) => void>,
+      default: undefined,
+    },
   },
-  setup() {
+  setup(props) {
     const altValue = ref(false);
-    const store = useStoreApp();
-    const state = computed(() => store.getState());
-    const nextFunction = computed(() => state.value.nextAction);
-    const backFunction = computed(() => state.value.backAction);
-    const altFunction = computed(() => state.value.alternativeAction);
 
     const handleAlt = () => {
-      altValue.value = !altValue.value;
-      altFunction.value?.();
+      altValue.value = !altValue.value
+      props.altFn?.(altValue.value);
     };
 
-    return { nextFunction, backFunction, altFunction, altValue, handleAlt };
+    return { altValue, handleAlt };
   },
 });
 </script>

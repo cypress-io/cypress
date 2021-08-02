@@ -33,7 +33,7 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import { NexusGenObjects } from './graphql/gen/nxs.gen'
+import type { ProjectBaseContract } from '@packages/graphql'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -78,7 +78,7 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export type Server = ServerE2E | ServerCt
 
-export class ProjectBase<TServer extends Server> extends EE {
+export class ProjectBase<TServer extends Server> extends EE implements ProjectBaseContract {
   // id is sha256 of projectRoot
   public id: string
 
@@ -93,9 +93,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false
-  public pluginsStatus: NexusGenObjects['InitPluginsStatus'] = {
-    state: 'uninitialized',
-  }
   private generatedProjectIdTimestamp: any
   projectRoot: string
 
@@ -399,7 +396,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.initSpecStore({ specs, config: updatedConfig })
   }
 
-  async initializePlugins (cfg, options) {
+  // TODO(tim): Improve this when we completely overhaul the rest of the code here,
+  async initializePlugins (cfg = this._cfg, options = this.options) {
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
@@ -482,6 +480,11 @@ export class ProjectBase<TServer extends Server> extends EE {
       return Promise.resolve()
     }
 
+    // TODO(tim): remove this when we properly clean all of this up
+    if (options) {
+      this.options = options
+    }
+
     const found = await fs.pathExists(cfg.pluginsFile)
 
     debug(`plugins file found? ${found}`)
@@ -498,7 +501,7 @@ export class ProjectBase<TServer extends Server> extends EE {
         debug('plugins file changed')
 
         // re-init plugins after a change
-        this.initializePlugins(cfg, options)
+        this.initializePlugins(cfg)
         .catch((err) => {
           options.onError(err)
         })

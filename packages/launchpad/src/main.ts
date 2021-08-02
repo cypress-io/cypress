@@ -1,15 +1,12 @@
 import { createApp } from 'vue'
 import './main.scss'
 import 'virtual:windi.css'
+import urql from '@urql/vue'
 import App from './App.vue'
-import { createStoreApp } from './store/app'
-import { createStoreConfig } from './store/config'
+import { makeUrqlClient } from './graphql/urqlClient'
 
 const app = createApp(App)
 
-const storeApp = createStoreApp()
-
-app.use(storeApp)
-app.use(createStoreConfig(storeApp))
+app.use(urql, makeUrqlClient())
 
 app.mount('#app')

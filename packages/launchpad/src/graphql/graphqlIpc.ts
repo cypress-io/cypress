@@ -1,5 +1,5 @@
 import pDefer from 'p-defer'
-import type { Operation } from '@apollo/client'
+import type { Operation } from '@urql/core'
 import { print } from 'graphql'
 
 export const ipcInFlight = new Map<string, pDefer.DeferredPromise<any>>()
@@ -9,7 +9,7 @@ interface GraphQLResponseShape {
   result: any
 }
 
-export function initGraphQLipc () {
+export function initGraphQLIPC () {
   window.ipc.on('graphql:response', (event, obj: GraphQLResponseShape) => {
     const dfd = ipcInFlight.get(obj.id)
 
@@ -43,7 +43,7 @@ export const fetchGraphql = async function fetchGraphql (
     id: ipcId,
     params: {
       text: print(op.query),
-      name: op.operationName,
+      name: op.key,
     },
     variables: op.variables,
   })

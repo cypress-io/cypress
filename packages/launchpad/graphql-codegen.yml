@@ -1,8 +1,8 @@
 overwrite: true
-schema: '../server/schema.graphql'
-documents: 'src/**/*.vue'
+schema: '../graphql/schema.graphql'
 generates:
-  src/generated/graphql.tsx:
+  src/generated/graphql.ts:
+    documents: 'src/**/*.vue'
     config:
       immutableTypes: true
       useTypeImports: true
@@ -11,9 +11,13 @@ generates:
       avoidOptionals: true
       enumsAsTypes: true
     plugins:
+      - add:
+          content: '/* eslint-disable */'
       - 'typescript'
       - 'typescript-operations'
       - 'typed-document-node'
-hooks:
-  afterOneFileWrite:
-    - eslint --fix
+  ../graphql/src/testing/testUnionType.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'script/codegen-mount.js'

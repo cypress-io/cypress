@@ -1,5 +1,5 @@
 <template>
-  <WizardLayout :next="nextButtonName" alt="Create file manually">
+  <WizardLayout :next="nextButtonName" alt="Create file manually" :altFn="altFn">
     <nav
       class="
         rounded-t
@@ -12,7 +12,7 @@
       "
     >
       <button
-        v-for="lang in languages"
+        v-for="lang of languages"
         :key="lang.id"
         @click="language = lang.id"
         class="p-4 w-28 relative focus:outline-transparent"
@@ -36,20 +36,28 @@
     </nav>
     <div v-if="tsInstalled" class="relative">
       <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
-      <CopyButton v-if="manualInstall" :text="code" />
+      <CopyButton v-if="manualInstall && code" :text="code" />
     </div>
   </WizardLayout>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, ref, PropType } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
+import { gql } from '@urql/core'
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
-import { getCode, languages } from "../utils/configFile";
-import { useStoreApp } from "../store/app";
+import { languages } from "../utils/configFile";
+import type { ConfigFileFragment } from "../generated/graphql";
+
+gql`
+fragment ConfigFile on Wizard {
+  sampleCodeJs: sampleCode(lang: js)
+  sampleCodeTs: sampleCode(lang: ts)
+}
+`
 
 export default defineComponent({
   components: {
@@ -57,9 +65,19 @@ export default defineComponent({
     PrismJs,
     CopyButton,
   },
-  setup() {
-    const store = useStoreApp();
+  props: {
+    gql: {
+      type: Object as PropType<ConfigFileFragment>,
+      required: true
+    }
+  },
+  setup(props) {
     const manualInstall = ref(false);
+
+    const altFn = (val: boolean) => {
+      manualInstall.value = val
+    }
+
     const tsInstalled = ref(false);
     const language = ref<"js" | "ts">("ts");
     const nextButtonName = computed(() =>
@@ -77,33 +95,20 @@ export default defineComponent({
         "Create a <em>cypress.config.js</em> file with the code below to store your project configuration.",
     }
 
-    onMounted(() => {
-      store.setMeta(originalText);
-
-      store.onNext(() => {
-        store.finishSetup();
-      });
-
-      store.onBack(() => {
-        store.flagDependenciesInstalled(false);
-      });
-
-      store.onAlt(() => {
-        manualInstall.value = !manualInstall.value;
-        store.setMeta(manualInstall.value ? manualText : originalText);
-      });
-
-      import("prismjs/components/prism-typescript").then(() => {
-        tsInstalled.value = true;
-      });
+    import("prismjs/components/prism-typescript").then(() => {
+      tsInstalled.value = true;
     });
-
-    const code = computed(() => getCode(language.value));
 
     return {
       manualInstall,
+      altFn,
       nextButtonName,
-      code,
+      code: computed(() => {
+        if (language.value === 'js') {
+          return props.gql.sampleCodeJs
+        }
+        return props.gql.sampleCodeTs
+      }),
       language,
       languages,
       tsInstalled,

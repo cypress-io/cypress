@@ -10,7 +10,7 @@ const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
 const runEvents = require('./plugins/run_events')
 const { getSpecUrl } = require('./project_utils')
-const { closeGraphQLServer } = require('./graphql/server')
+const { closeGraphQLServer } = require('@packages/graphql/src/server')
 const errors = require('./errors')
 
 const moduleFactory = () => {

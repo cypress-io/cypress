@@ -1,31 +1,32 @@
 import { ref } from 'vue'
-import { SupportedBundlerWebpack } from '../utils/bundler'
-import { SupportedFrameworkNext } from '../utils/frameworks'
+import { ConfigFileFragmentDoc } from '../generated/graphql'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {
   beforeEach(() => {
     const display = ref(false)
 
-    cy.mount(() => (
-      <div class="m-10">
-        <button
-          data-cy="show"
-          onClick={() => {
-            display.value = true
-          }}
-          class="hidden"
-        ></button>
-        {display.value ? <ConfigFile /> : undefined}
-      </div>
-    )).then(() => {
-      Cypress.storeConfig.setComponentSetup({
-        bundler: SupportedBundlerWebpack,
-        framework: SupportedFrameworkNext,
-      })
+    cy.mountFragment(ConfigFileFragmentDoc, {
+      type: (ctx) => {
+        ctx.wizard.setFramework('nuxtjs')
 
-      cy.get('[data-cy="show"]').click({ force: true })
+        return ctx.wizard
+      },
+      render: (gqlVal) => (
+        <div class="m-10">
+          <button
+            data-cy="show"
+            onClick={() => {
+              display.value = true
+            }}
+            class="hidden"
+          ></button>
+          {display.value ? <ConfigFile gql={gqlVal} /> : undefined}
+        </div>
+      ),
     })
+
+    cy.get('[data-cy="show"]').click({ force: true })
   })
 
   it('playground', { viewportWidth: 1280, viewportHeight: 1024 }, () => {
