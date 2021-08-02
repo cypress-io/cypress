@@ -1,5 +1,5 @@
 import { nxs, NxsArgs, NxsResult } from 'nexus-decorators'
-import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, PackageMapping, BundleMapping, WizardCodeLanguageEnum } from '../constants/wizardConstants'
+import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, PackageMapping, BundleMapping, WizardCodeLanguageEnum, WizardNavigateDirection } from '../constants/wizardConstants'
 import { wizardGetConfigCode } from '../util/wizardGetConfigCode'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
@@ -158,7 +158,17 @@ export class Wizard {
     return true
   }
 
-  navigateBack (): Wizard {
+  navigate (direction: WizardNavigateDirection): Wizard {
+    if (direction === 'back') {
+      this.navigateBack()
+    }
+
+    this.navigateForward()
+
+    return this
+  }
+
+  private navigateBack (): Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== 0) {
@@ -168,7 +178,7 @@ export class Wizard {
     return this
   }
 
-  navigateForward (): Wizard {
+  private navigateForward (): Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== WIZARD_STEP.length - 1) {

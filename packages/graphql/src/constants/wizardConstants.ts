@@ -23,6 +23,15 @@ export const BundlerPackageNames: Record<NexusGenEnums['SupportedBundlers'], str
   webpack: '@cypress/webpack-dev-server',
 }
 
+export const WIZARD_NAVIGATE_DIRECTION = ['forward', 'back'] as const
+
+export type WizardNavigateDirection = typeof WIZARD_NAVIGATE_DIRECTION[number]
+
+export const WizardNavigateDirectionEnum = enumType({
+  name: 'WizardNavigateDirection',
+  members: WIZARD_NAVIGATE_DIRECTION,
+})
+
 export const FRONTEND_FRAMEWORK = ['nuxtjs', 'nextjs', 'cra', 'vuecli', 'react', 'vue'] as const
 
 export type FrontendFramework = typeof FRONTEND_FRAMEWORK[number]

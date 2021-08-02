@@ -1,5 +1,5 @@
 import { inputObjectType, mutationType, nonNull } from 'nexus'
-import { BundlerEnum, FrontendFrameworkEnum, TestingTypeEnum } from '../constants'
+import { BundlerEnum, FrontendFrameworkEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
 
 export const mutation = mutationType({
   definition (t) {
@@ -41,13 +41,16 @@ export const mutation = mutationType({
     t.field('wizardNavigateForward', {
       type: 'Wizard',
       description: 'Navigates forward in the wizard',
-      resolve: (_, __, ctx) => ctx.wizard.navigateForward(),
+      resolve: (_, __, ctx) => ctx.wizard.navigate('forward'),
     })
 
-    t.field('wizardNavigateBack', {
+    t.field('wizardNavigate', {
       type: 'Wizard',
+      args: {
+        direction: nonNull(WizardNavigateDirectionEnum),
+      },
       description: 'Navigates backward in the wizard',
-      resolve: (_, __, ctx) => ctx.wizard.navigateBack(),
+      resolve: (_, args, ctx) => ctx.wizard.navigate(args.direction),
     })
 
     t.field('wizardInstallDependencies', {
