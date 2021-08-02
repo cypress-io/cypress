@@ -23,9 +23,15 @@ const log = (props = {}) => {
 
 describe('src/cypress/command_queue', () => {
   let queue
+  const state = () => {}
+  const timeouts = { timeout () {} }
+  const stability = { whenStable () {} }
+  const cleanup = () => {}
+  const fail = () => {}
+  const isCy = () => {}
 
   beforeEach(() => {
-    queue = create(() => {})
+    queue = create(state, timeouts, stability, cleanup, fail, isCy)
 
     queue.add(createCommand({
       name: 'get',

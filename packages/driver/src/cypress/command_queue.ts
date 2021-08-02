@@ -10,8 +10,15 @@ import $errUtils from './error_utils'
 
 const debugErrors = Debug('cypress:driver:errors')
 
-// TODO: can this be abstracted along with the one in cy.js
-// or does it need to be in this file?
+interface Command {
+  get(key: string): any
+  get(): any
+  set(key: string, value: any): any
+  set(options: any): any
+  attributes: object
+  finishLogs(): void
+}
+
 const __stackReplacementMarker = (fn, ctx, args) => {
   return fn.apply(ctx, args)
 }
@@ -52,17 +59,21 @@ const commandRunningFailed = (Cypress, state, err) => {
 
         return obj
       }
+
+      return
     },
   })
 }
 
 export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
   const queue = createQueue()
-  let stopped = false
 
-  const get = () => {
-    return queue.get()
-  }
+  const get = queue.get.bind(queue)
+  const slice = queue.slice.bind(queue)
+  const at = queue.at.bind(queue)
+  const reset = queue.reset.bind(queue)
+  const clear = queue.clear.bind(queue)
+  const stop = queue.stop.bind(queue)
 
   const logs = (filter) => {
     let logs = _.flatten(_.invokeMap(queue.get(), 'get', 'logs'))
@@ -83,20 +94,14 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
   }
 
   const add = (command) => {
-    queue.add({
-      data: command,
-      run () {},
-    })
+    queue.add(command)
   }
 
-  const insert = (index: number, command) => {
-    queue.insert(index, {
-      data: command,
-      run () {},
-    })
+  const insert = (index: number, command: Command) => {
+    queue.insert(index, command)
 
-    const prev = at(index - 1)
-    const next = at(index + 1)
+    const prev = at(index - 1) as Command
+    const next = at(index + 1) as Command
 
     if (prev) {
       prev.set('next', command)
@@ -111,35 +116,15 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
     return command
   }
 
-  const slice = (index: number) => {
-    return queue.slice(index)
-  }
-
-  const at = (index: number) => {
-    return queue.at(index)
-  }
-
   const find = (attrs) => {
     const matchesAttrs = _.matches(attrs)
 
-    return _.find(queue.get(), (command) => {
+    return _.find(queue.get(), (command: Command) => {
       return matchesAttrs(command.attributes)
     })
   }
 
-  const reset = () => {
-    queue.reset()
-  }
-
-  const clear = () => {
-    queue.clear()
-  }
-
-  const stop = () => {
-    queue.stop()
-  }
-
-  const runCommand = function (command) {
+  const runCommand = (command: Command) => {
     // bail here prior to creating a new promise
     // because we could have stopped / canceled
     // prior to ever making it through our first
@@ -152,14 +137,10 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
     state('chainerId', command.get('chainerId'))
 
     return stability.whenStable(() => {
-      // TODO: handle this event
-      // @trigger "invoke:start", command
-
       state('nestedIndex', state('index'))
 
       return command.get('args')
     })
-
     .then((args) => {
       // store this if we enqueue new commands
       // to check for promise violations
@@ -210,11 +191,8 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       }
 
       if (!(!enqueuedCmd || !!_.isUndefined(ret))) {
-        // TODO: clean this up in the utility function
-        // to conditionally stringify functions
         ret = _.isFunction(ret) ?
-          ret.toString()
-          :
+          ret.toString() :
           $utils.stringify(ret)
 
         // if we got a return value and we enqueued
@@ -279,23 +257,26 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
     const next = () => {
       // bail if we've been told to abort in case
       // an old command continues to run after
-      if (stopped) {
+      if (queue.stopped) {
         return
       }
 
       // start at 0 index if we dont have one
       let index = state('index') || state('index', 0)
 
-      const command = at(index)
+      const command = at(index) as Command
 
       // if the command should be skipped
       // just bail and increment index
       // and set the subject
-      // TODO DRY THIS LOGIC UP
       if (command && command.get('skip')) {
         // must set prev + next since other
         // operations depend on this state being correct
-        command.set({ prev: at(index - 1), next: at(index + 1) })
+        command.set({
+          prev: at(index - 1) as Command,
+          next: at(index + 1) as Command,
+        })
+
         state('index', index + 1)
         state('subject', command.get('subject'))
 
@@ -345,7 +326,8 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
         // in between different hooks like before + beforeEach
         // else run will be called again and index would start
         // over at 0
-        state('index', (index += 1))
+        index += 1
+        state('index', index)
 
         Cypress.action('cy:command:end', command)
 
@@ -361,91 +343,54 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       })
     }
 
-    let inner
-
-    // this ends up being the parent promise wrapper
-    const promise = new Bluebird((resolve, reject) => {
-      // bubble out the inner promise
-      // we must use a resolve(null) here
-      // so the outer promise is first defined
-      // else this will kick off the 'next' call
-      // too soon and end up running commands prior
-      // to promise being defined
-      inner = Bluebird
-      .resolve(null)
-      .then(next)
-      .then(resolve)
-      .catch(reject)
-
-      // can't use onCancel argument here because
-      // its called asynchronously
-
-      // when we manually reject our outer promise we
-      // have to immediately cancel the inner one else
-      // it won't be notified and its callbacks will
-      // continue to be invoked
-      // normally we don't have to do this because rejections
-      // come from the inner promise and bubble out to our outer
-      //
-      // but when we manually reject the outer promise we
-      // have to go in the opposite direction from outer -> inner
-      const rejectOuterAndCancelInner = function (err) {
-        inner.cancel()
-
-        return reject(err)
-      }
-
-      state('resolve', resolve)
-      state('reject', rejectOuterAndCancelInner)
-    })
-    .catch((err) => {
+    const onError = (err: Error | string) => {
       debugErrors('caught error in promise chain: %o', err)
 
-      // since this failed this means that a
-      // specific command failed and we should
-      // highlight it in red or insert a new command
+      // since this failed this means that a specific command failed
+      // and we should highlight it in red or insert a new command
       if (_.isObject(err)) {
+        // @ts-ignore
         err.name = err.name || 'CypressError'
       }
 
       commandRunningFailed(Cypress, state, err)
 
       return fail(err)
-    })
-    .finally(cleanup)
-
-    // cancel both promises
-    const cancel = function () {
-      promise.cancel()
-      inner.cancel()
-
-      // notify the world
-      return Cypress.action('cy:canceled')
     }
 
-    state('cancel', cancel)
-    state('promise', promise)
+    const { promise, reject, cancel } = queue.run({
+      onRun: next,
+      onError,
+      onFinish: cleanup,
+    })
 
-    // return this outer bluebird promise
+    state('promise', promise)
+    state('reject', reject)
+    state('cancel', () => {
+      cancel()
+
+      Cypress.action('cy:canceled')
+    })
+
     return promise
   }
 
   return {
-    get,
     logs,
     names,
     add,
     insert,
-    slice,
-    at,
     find,
     run,
+    get,
+    slice,
+    at,
     reset,
     clear,
     stop,
 
     get length () {
-      return queue.get().length
+      return queue.length
     },
 
     get stopped () {

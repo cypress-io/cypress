@@ -1,36 +1,37 @@
 import Bluebird from 'bluebird'
 
-export interface Queueable {
-  run: () => Bluebird<any> | Promise<any> | void
-  data: any
+interface QueueRunProps {
+  onRun: () => Bluebird<any> | Promise<any>
+  onError: (err: Error) => void
+  onFinish: () => void
 }
 
-export const create = (queueables: Queueable[] = []) => {
+export const create = <T>(queueables: T[] = []) => {
   let stopped = false
 
-  const get = () => {
-    return queueables.map((q) => q.data)
+  const get = (): T[] => {
+    return queueables
   }
 
-  const add = (queueable: Queueable) => {
+  const add = (queueable: T) => {
     queueables.push(queueable)
   }
 
-  const insert = (index: number, queueable: Queueable) => {
+  const insert = (index: number, queueable: T) => {
     if (index < 0 || index > queueables.length) {
       throw new Error(`queue.insert must be called with a valid index - the index (${index}) is out of bounds`)
     }
 
     queueables.splice(index, 0, queueable)
 
-    return queueable.data
+    return queueable
   }
 
   const slice = (index: number) => {
-    return queueables.slice(index).map((q) => q.data)
+    return queueables.slice(index)
   }
 
-  const at = (index: number) => {
+  const at = (index: number): T => {
     return get()[index]
   }
 
@@ -46,16 +47,49 @@ export const create = (queueables: Queueable[] = []) => {
     stopped = true
   }
 
-  const run = () => {
-    const next = () => {
-      // bail if we've been told to abort in case
-      // an old command continues to run after
-      if (stopped) {
-        return
+  const run = ({ onRun, onError, onFinish }: QueueRunProps) => {
+    let inner
+    let rejectOuterAndCancelInner
+
+    // this ends up being the parent promise wrapper
+    const promise = new Bluebird((resolve, reject) => {
+      // bubble out the inner promise. we must use a resolve(null) here
+      // so the outer promise is first defined else this will kick off
+      // the 'next' call too soon and end up running commands prior to
+      // the promise being defined
+      inner = Bluebird
+      .resolve(null)
+      .then(onRun)
+      .then(resolve)
+      .catch(reject)
+
+      // can't use onCancel argument here because it's called asynchronously.
+      // when we manually reject our outer promise we have to immediately
+      // cancel the inner one else it won't be notified and its callbacks
+      // will continue to be invoked. normally we don't have to do this
+      // because rejections come from the inner promise and bubble out to
+      // our outer, but when we manually reject the outer promise, we
+      // have to go in the opposite direction from outer -> inner
+      rejectOuterAndCancelInner = (err) => {
+        inner.cancel()
+        reject(err)
       }
+    })
+    .catch(onError)
+    .finally(onFinish)
+
+    const cancel = () => {
+      promise.cancel()
+      inner.cancel()
     }
 
-    next()
+    return {
+      promise,
+      cancel,
+      // wrapped to ensure `rejectOuterAndCancelInner` is assigned
+      // before reject is called
+      reject: (err) => rejectOuterAndCancelInner(err),
+    }
   }
 
   return {

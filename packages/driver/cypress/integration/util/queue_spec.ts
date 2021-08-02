@@ -1,11 +1,6 @@
-import { create, Queueable } from '../../../src/util/queue'
+import Bluebird from 'bluebird'
 
-const createQueueable = (data = {}): Queueable => {
-  return {
-    data,
-    run () {},
-  }
-}
+import { create } from '../../../src/util/queue'
 
 const ids = (queueables) => queueables.map((q) => q.id)
 
@@ -14,9 +9,9 @@ describe('src/util/queue', () => {
 
   beforeEach(() => {
     queue = create([
-      createQueueable({ id: '1' }),
-      createQueueable({ id: '2' }),
-      createQueueable({ id: '3' }),
+      { id: '1' },
+      { id: '2' },
+      { id: '3' },
     ])
   })
 
@@ -30,8 +25,8 @@ describe('src/util/queue', () => {
 
   context('#add', () => {
     it('adds queueable to end of queue', () => {
-      queue.add(createQueueable({ id: '4' }))
-      queue.add(createQueueable({ id: '5' }))
+      queue.add({ id: '4' })
+      queue.add({ id: '5' })
 
       expect(ids(queue.get())).to.eql(['1', '2', '3', '4', '5'])
     })
@@ -39,40 +34,40 @@ describe('src/util/queue', () => {
 
   context('#insert', () => {
     it('inserts queueable into queue at index', () => {
-      queue.insert(1, createQueueable({ id: '4' }))
+      queue.insert(1, { id: '4' })
 
       expect(ids(queue.get())).to.eql(['1', '4', '2', '3'])
     })
 
     it('returns the queueable', () => {
-      const queueable = createQueueable({ id: '4' })
+      const queueable = { id: '4' }
       const result = queue.insert(1, queueable)
 
-      expect(result).to.equal(queueable.data)
+      expect(result).to.equal(queueable)
     })
 
     it('works with start boundary index', () => {
-      queue.insert(0, createQueueable({ id: '4' }))
+      queue.insert(0, { id: '4' })
 
       expect(ids(queue.get())).to.eql(['4', '1', '2', '3'])
     })
 
     it('works with end boundary index', () => {
-      queue.insert(3, createQueueable({ id: '4' }))
+      queue.insert(3, { id: '4' })
 
       expect(ids(queue.get())).to.eql(['1', '2', '3', '4'])
     })
 
     it('throws when index is negative', () => {
       expect(() => {
-        queue.insert(-1, createQueueable({ id: '4' }))
+        queue.insert(-1, { id: '4' })
       })
       .to.throw('queue.insert must be called with a valid index - the index (-1) is out of bounds')
     })
 
     it('throws when index is out of bounds', () => {
       expect(() => {
-        queue.insert(4, createQueueable({ id: '4' }))
+        queue.insert(4, { id: '4' })
       })
       .to.throw('queue.insert must be called with a valid index - the index (4) is out of bounds')
     })
@@ -119,10 +114,78 @@ describe('src/util/queue', () => {
     })
   })
 
+  context('#run', () => {
+    let props
+
+    beforeEach(() => {
+      props = {
+        onRun: cy.stub(),
+        onError: cy.stub(),
+        onFinish: cy.stub(),
+      }
+    })
+
+    it('runs the onRun function', () => {
+      return queue.run(props).promise.then(() => {
+        expect(props.onRun).to.be.called
+      })
+    })
+
+    it('returns the promise and the cancel and reject functions', () => {
+      const result = queue.run(props)
+
+      expect(result.promise).to.be.an.instanceOf(Bluebird)
+      expect(result.cancel).to.be.a('function')
+      expect(result.reject).to.be.a('function')
+    })
+
+    it('calls onError if onRun errors', () => {
+      const expectedErr = new Error('onRun failed')
+
+      props.onRun.throws(expectedErr)
+
+      return queue.run(props).promise.then(() => {
+        expect(props.onError).to.be.calledWith(expectedErr)
+      })
+    })
+
+    it('calls onError when outer promise is rejected', () => {
+      const expectedErr = new Error('rejected')
+
+      // hold up running with a never-resolving promise
+      // giving us time to reject the outer promise
+      props.onRun = () => {
+        return new Promise(() => {})
+      }
+
+      const { promise, reject } = queue.run(props)
+
+      reject(expectedErr)
+
+      return promise.then(() => {
+        expect(props.onError).to.be.calledWith(expectedErr)
+      })
+    })
+
+    it('calls onFinish if it succeeds', () => {
+      return queue.run(props).promise.then(() => {
+        expect(props.onFinish).to.be.called
+      })
+    })
+
+    it('calls onFinish if it fails', () => {
+      props.onRun.throws(new Error('fails'))
+
+      return queue.run(props).promise.then(() => {
+        expect(props.onFinish).to.be.called
+      })
+    })
+  })
+
   context('.length', () => {
     it('is the number of queueables in the queue', () => {
       expect(queue.length).to.equal(3)
-      queue.insert(0, createQueueable({ id: '4' }))
+      queue.insert(0, { id: '4' })
       expect(queue.length).to.equal(4)
     })
   })
