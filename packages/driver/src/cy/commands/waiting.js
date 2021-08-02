@@ -277,6 +277,10 @@ module.exports = (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('wait.invalid_arguments')
       }
 
+      if (_.isFunction(userOptions)) {
+        $errUtils.throwErrByPath('wait.invalid_arguments_function')
+      }
+
       options = _.defaults({}, userOptions, { log: true })
       const args = [subject, msOrAlias, options]
 
