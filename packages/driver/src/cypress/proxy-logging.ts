@@ -88,25 +88,20 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
     method: req.preRequest.method,
     timeout: 0,
     consoleProps: () => {
+      // high-level request information
       const consoleProps = {
+        'Resource Type': req.preRequest.resourceType,
         Method: req.preRequest.method,
         URL: req.preRequest.url,
-        Status: getStatus(),
-        'Resource Type': req.preRequest.resourceType,
-        'Request Headers': req.preRequest.headers,
+        'Request went to origin?': req.flags.stubbed ? 'no (response was stubbed, see below)' : 'yes',
       }
 
-      if (req.responseReceived) {
-        _.assign(consoleProps, {
-          'Response Status Code': req.responseReceived.status,
-          'Response Headers': req.responseReceived.headers,
-        })
-      }
+      if (req.flags.reqModified) consoleProps['Request modified?'] = 'yes'
 
-      if (req.xhr) {
-        consoleProps['Response Body'] = req.xhr.responseBody
-        consoleProps['XHR'] = req.xhr.xhr
-      }
+      if (req.flags.resModified) consoleProps['Response modified?'] = 'yes'
+
+      // details on matched XHR/intercept
+      if (req.xhr) consoleProps['XHR'] = req.xhr.xhr
 
       if (req.interceptions.length) {
         if (req.interceptions.length > 1) {
@@ -114,10 +109,6 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
         } else {
           consoleProps['Matched `cy.intercept()`'] = formatInterception(req.interceptions[0])
         }
-      }
-
-      if (req.error) {
-        consoleProps['Error'] = req.error
       }
 
       if (req.stack) {
@@ -130,6 +121,28 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
             },
           ]
         }
+      }
+
+      // details on request/response/errors
+      consoleProps['Request Headers'] = req.preRequest.headers
+
+      if (req.responseReceived) {
+        _.assign(consoleProps, {
+          'Response Status Code': req.responseReceived.status,
+          'Response Headers': req.responseReceived.headers,
+        })
+      }
+
+      let resBody
+
+      if (req.xhr) {
+        consoleProps['Response Body'] = req.xhr.responseBody
+      } else if ((resBody = _.chain(req.interceptions).last().get('interception.response.body').value())) {
+        consoleProps['Response Body'] = resBody
+      }
+
+      if (req.error) {
+        consoleProps['Error'] = req.error
       }
 
       return consoleProps

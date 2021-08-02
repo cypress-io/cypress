@@ -233,6 +233,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
+        request.setLogFlag('stubbed')
+
         sendStaticResponse(requestId, responseHandler)
 
         return updateRequest(req)

@@ -65,6 +65,7 @@ describe('Proxy Logging', () => {
         expect(log.consoleProps).to.include({
           Method: 'GET',
           'Resource Type': 'fetch',
+          'Request went to origin?': 'yes',
           'URL': 'http://localhost:3500/some-url',
         })
 
@@ -94,6 +95,10 @@ describe('Proxy Logging', () => {
               indicator: 'bad',
               message: 'GET 404 /some-url',
             })
+
+            expect(Object.keys(log.consoleProps)).to.deep.eq(
+              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'Request Headers', 'Response Status Code', 'Response Headers'],
+            )
 
             done()
           })
@@ -178,6 +183,10 @@ describe('Proxy Logging', () => {
                 type: 'stub',
               }],
             })
+
+            expect(Object.keys(log.consoleProps)).to.deep.eq(
+              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'Matched `cy.intercept()`', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
+            )
 
             const interceptProps = log.consoleProps['Matched `cy.intercept()`']
 
@@ -284,6 +293,21 @@ describe('Proxy Logging', () => {
           }],
           () => {
             cy.intercept(url, 'stubbed response').as(alias)
+          },
+        ))
+
+        it('stubbed flagged as expected with req.reply', testFlagFetch(
+          undefined,
+          [{
+            command: 'intercept',
+            alias,
+            type: 'function',
+          }],
+          () => {
+            cy.intercept(url, (req) => {
+              req.headers.foo = 'bar'
+              req.reply('stubby mc stub')
+            }).as(alias)
           },
         ))
 
