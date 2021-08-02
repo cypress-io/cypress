@@ -12,8 +12,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
+<script lang="ts" setup>
+import { computed, defineProps} from "vue";
 import { gql } from '@urql/core'
 import type { PackagesListFragment } from "../generated/graphql";
 
@@ -26,17 +26,9 @@ fragment PackagesList on Wizard {
 }
 `
 
-export default defineComponent({
-  props: {
-    gql: {
-      type: Object as PropType<PackagesListFragment>,
-      required: true
-    }
-  },
-  setup(props) {
-    return { 
-      packagesToInstall: computed(() => props.gql.packagesToInstall)
-    };
-  },
-});
+const props = defineProps<{
+  gql: PackagesListFragment
+}>()
+
+const packagesToInstall = computed(() => props.gql.packagesToInstall)
 </script>
