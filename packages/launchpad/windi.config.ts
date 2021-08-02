@@ -3,7 +3,6 @@ import Colors from 'windicss/colors'
 import { map, reduce, kebabCase } from 'lodash'
 import formPlugin from 'windicss/plugin/forms'
 
-console.log(formPlugin)
 
 const safelist = reduce(Colors, (acc, variants, colorName) => {
   const name = kebabCase(colorName)
@@ -12,6 +11,7 @@ const safelist = reduce(Colors, (acc, variants, colorName) => {
 }, '')
 
 export default defineConfig({
+  // This adds !important to all utility classes. https://csswizardry.com/2016/05/the-importance-of-important/ 
   important: true,
   theme: {
     extend: {
@@ -23,7 +23,6 @@ export default defineConfig({
       },
     },
   },
-  // plguins: [formPlugin],
   safelist,
   extract: {
     // accepts globs and file paths relative to project root
