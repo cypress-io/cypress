@@ -9,7 +9,7 @@ declare namespace Cypress {
   type ViewportOrientation = 'portrait' | 'landscape'
   type PrevSubject = 'optional' | 'element' | 'document' | 'window'
   type TestingType = 'e2e' | 'component'
-  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptionsMergedWithTestingTypes | Promise<ConfigOptionsMergedWithTestingTypes>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -323,7 +323,7 @@ declare namespace Cypress {
     })
     ```
      */
-    config(Object: ConfigOptions): void
+    config(Object: ConfigOptionsMergedWithTestingTypes): void
 
     // no real way to type without generics
     /**
@@ -2467,7 +2467,7 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
-  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptions | undefined)
+  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptionsMergedWithTestingTypes | undefined)
 
   type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeEvents?: PluginsFunction }
   type TestingTypeConfigComponent = TestingTypeConfig & {
@@ -2812,7 +2812,7 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptionsMergedWithTestingTypes, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -2821,7 +2821,15 @@ declare namespace Cypress {
    * All configuration items are optional.
    */
   type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]>; } : T
-  type ConfigOptions = DeepPartial<ResolvedConfigOptions>
+  /**
+   * ConfigOptions after the current testingType has been merget into the root. 
+   */
+  type ConfigOptionsMergedWithTestingTypes = DeepPartial<ResolvedConfigOptions>
+
+  /**
+   * Config model of cypress. To be used in `cypress.config.js`
+   */
+  type ConfigOptions = Omit<Cypress.ConfigOptionsMergedWithTestingTypes, 'pluginsFile' | 'supportFile'>
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
@@ -5237,7 +5245,7 @@ declare namespace Cypress {
 
   interface BeforeRunDetails {
     browser?: Browser
-    config: ConfigOptions
+    config: ConfigOptionsMergedWithTestingTypes
     cypressVersion: string
     group?: string
     parallel?: boolean

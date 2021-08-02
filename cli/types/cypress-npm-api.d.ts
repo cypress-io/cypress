@@ -138,7 +138,7 @@ declare namespace CypressCommandLine {
     /**
      * Specify configuration
      */
-    config: Cypress.ConfigOptions
+    config: Cypress.ConfigOptionsMergedWithTestingTypes
     /**
      * Path to the config file to be used.
      *
