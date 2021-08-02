@@ -661,7 +661,8 @@ export default function (Commands, Cypress, cy) {
         cy.state('onCommandFailed', (err, queue, next) => {
           const index = _.findIndex(queue.commands, (v: any) => _commandToResume && v.attributes.chainerId === _commandToResume.chainerId)
 
-          // attach codeframe and cleanse the stack trace since we may not hit the cy.fail callback
+          // attach codeframe and cleanse the stack trace since we will not hit the cy.fail callback
+          // if this is the first time validate fails
           if (typeof err === 'string') {
             err = new Error(err)
           }
