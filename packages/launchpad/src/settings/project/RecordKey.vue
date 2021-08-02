@@ -1,14 +1,28 @@
 <template>
   <ProjectSettingsSection>
-     <template #title>Record Key</template>
-     <template #description>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio cum dolorem doloribus voluptate consectetur recusandae? <a>Learn more</a>.</template>
-     <div class="inline-flex justify-start gap-10px">
-      <Input v-model="recordKey" class="w-200px" inputClass="font-mono text-xs" disabled size="sm" :type="showRecordKey ? 'text' : 'password'">
+    <template #title>Record Key</template>
+    <template #description>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio cum dolorem doloribus voluptate consectetur recusandae?
+      <a>Learn more</a>.
+    </template>
+    <div class="inline-flex justify-start gap-10px">
+      <Input
+        v-model="recordKey"
+        class="w-200px"
+        inputClass="font-mono text-xs"
+        disabled
+        size="sm"
+        :type="showRecordKey ? 'text' : 'password'"
+      >
         <template #prefix>
           <Icon icon="foundation:key" class="text-cool-gray-400" />
         </template>
-        <template #suffix="{containerClass}">
-          <button :class="containerClass" @click="showRecordKey = !showRecordKey" class="text-cool-gray-400 hover:text-cool-gray-500">
+        <template #suffix="{ containerClass }">
+          <button
+            :class="containerClass"
+            @click="showRecordKey = !showRecordKey"
+            class="text-cool-gray-400 hover:text-cool-gray-500"
+          >
             <Icon v-show="!showRecordKey" icon="mdi:eye-outline" />
             <Icon v-show="showRecordKey" icon="mdi:eye-off-outline" />
           </button>
@@ -26,8 +40,8 @@
         </template>
         Manage Keys
       </Button>
-     </div>
-   </ProjectSettingsSection>
+    </div>
+  </ProjectSettingsSection>
 </template>
 
 <script lang="ts">
@@ -36,7 +50,7 @@ import { useClipboard } from '@vueuse/core'
 import ProjectSettingsSection from './ProjectSettingsSection.vue'
 import Icon from '../../components/Icon.vue'
 import Button from '../../components/Button.vue'
-import Input from '../../components/Input.vue'
+import Input from '../../components/Input/Input.vue'
 
 export default defineComponent({
   components: { Icon, Button, Input, ProjectSettingsSection },
@@ -44,7 +58,7 @@ export default defineComponent({
     const recordKey = ref('oeiwj123roi')
     return {
       clipboard: useClipboard({ source: recordKey }),
-      openManageKeys: () => {},
+      openManageKeys: () => { },
       recordKey,
       showRecordKey: ref(false)
     }

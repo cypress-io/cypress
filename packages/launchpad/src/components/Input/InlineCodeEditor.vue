@@ -1,17 +1,16 @@
 <template>
-<div
-    :class="[wrapperStyles]">
+  <div :class="[wrapperStyles, 'w-350px']">
     <IconWrapper v-bind="{ ...iconWrapperProps, class: $attrs.class }">
       <template #default="slotProps">
-      <CodeEditor
-    :class="[inputStyles, wrapperStyles, slotProps.iconOffsetClasses]"
-    class="font-mono"
-    v-model="localValue"/>
-        </template>
+        <CodeEditor
+          :class="[inputStyles, wrapperStyles, slotProps.iconOffsetClasses]"
+          class="font-mono"
+          :readonly="readonly"
+          v-model="localValue"
+        />
+      </template>
     </IconWrapper>
   </div>
-
-  
 </template>
 
 <script lang="ts">
@@ -24,9 +23,12 @@ import { pick, keys } from 'lodash'
 
 export default defineComponent({
   components: { CodeEditor, IconWrapper },
-    props: {
+  props: {
     modelValue: {
       type: String,
+    },
+    readonly: {
+      type: Boolean
     },
     ...iconProps
   },
@@ -59,7 +61,8 @@ export default defineComponent({
   }
 }
 
-.prism-editor__editor, .prism-editor__textarea {
+.prism-editor__editor,
+.prism-editor__textarea {
   @apply whitespace-pre;
 }
 </style>

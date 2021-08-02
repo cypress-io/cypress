@@ -1,6 +1,5 @@
 <template>
-  <div
-    :class="[wrapperStyles, { 'focus-within:text-gray-400': disabled }]">
+  <div :class="[wrapperStyles, 'w-350px', { 'focus-within:text-gray-400': disabled }]">
     <IconWrapper v-bind="{ ...iconWrapperProps, class: $attrs.class }">
       <template #default="slotProps">
         <input
@@ -11,8 +10,8 @@
           v-model="localValue"
           :type="type"
           :class="[inputStyles, inputClass, slotProps.iconOffsetClasses]"
-          />
-        </template>
+        />
+      </template>
     </IconWrapper>
   </div>
 </template>

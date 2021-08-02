@@ -1,5 +1,5 @@
 export const wrapperStyles = `
-  relative text-gray-600 overflow-hidden w-350px
+  relative text-gray-600 overflow-hidden
 `
 
 export const inputStyles = `
