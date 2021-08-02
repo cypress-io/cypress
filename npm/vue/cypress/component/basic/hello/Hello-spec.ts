@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import Hello from './Hello.vue'
 import { mount } from '@cypress/vue'
 

@@ -108,8 +108,8 @@ class RunsList extends Component {
 
   _getRecordKeys () {
     if (this._needsKey()) {
-      projectsApi.getRecordKeys().then((keys = []) => {
-        if (keys.length) {
+      projectsApi.getRecordKeys().then((keys) => {
+        if (keys && keys.length) {
           this.setState({ recordKey: keys[0].id })
         }
       })
