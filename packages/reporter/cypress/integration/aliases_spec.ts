@@ -133,10 +133,19 @@ describe('aliases', () => {
         addCommand(runner, {
           alias: 'getUsers',
           aliasType: 'route',
-          displayName: 'xhr stub',
+          displayName: 'xhr',
           event: true,
           name: 'xhr',
-          renderProps: { message: 'GET --- /users', indicator: 'passed' },
+          renderProps: {
+            message: 'GET --- /users',
+            indicator: 'passed',
+            wentToOrigin: false,
+            interceptions: [{
+              type: 'stub',
+              command: 'route',
+              alias: 'getUsers',
+            }],
+          },
         })
 
         addCommand(runner, {
@@ -181,7 +190,7 @@ describe('aliases', () => {
         addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
-          displayName: 'xhr stub',
+          displayName: 'xhr',
           event: true,
           name: 'xhr',
           // @ts-ignore
@@ -191,7 +200,7 @@ describe('aliases', () => {
         addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
-          displayName: 'xhr stub',
+          displayName: 'xhr',
           event: true,
           name: 'xhr',
           // @ts-ignore
@@ -284,28 +293,55 @@ describe('aliases', () => {
         addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
-          displayName: 'xhr stub',
+          displayName: 'xhr',
           event: true,
           name: 'xhr',
-          renderProps: { message: 'GET --- /posts', indicator: 'passed' },
+          renderProps: {
+            message: 'GET --- /users',
+            indicator: 'passed',
+            wentToOrigin: false,
+            interceptions: [{
+              type: 'stub',
+              command: 'route',
+              alias: 'getUsers',
+            }],
+          },
         })
 
         addCommand(runner, {
           alias: 'getUsers',
           aliasType: 'route',
-          displayName: 'xhr stub',
+          displayName: 'xhr',
           event: true,
           name: 'xhr',
-          renderProps: { message: 'GET --- /users', indicator: 'passed' },
+          renderProps: {
+            message: 'GET --- /users',
+            indicator: 'passed',
+            wentToOrigin: false,
+            interceptions: [{
+              type: 'stub',
+              command: 'route',
+              alias: 'getUsers',
+            }],
+          },
         })
 
         addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
-          displayName: 'xhr stub',
+          displayName: 'xhr',
           event: true,
           name: 'xhr',
-          renderProps: { message: 'GET --- /posts', indicator: 'passed' },
+          renderProps: {
+            message: 'GET --- /posts',
+            indicator: 'passed',
+            wentToOrigin: false,
+            interceptions: [{
+              type: 'stub',
+              command: 'route',
+              alias: 'getPosts',
+            }],
+          },
         })
 
         addCommand(runner, {

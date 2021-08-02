@@ -102,7 +102,7 @@ const Interceptions = observer(({ model }: InterceptionsProps) => {
 
   const count = model.renderProps.interceptions.length
 
-  const displayAlias = _.isArray(model.alias) ? _.last(model.alias as Array<any>) : (model.alias || undefined)
+  const displayAlias = _.chain(model.renderProps.interceptions).last().get('alias').value()
 
   return (
     <Tooltip placement='top' title={getTitle()} className='cy-tooltip'>
