@@ -59,6 +59,7 @@ export interface NexusGenEnums {
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
+  WizardNavigateDirection: "back" | "forward"
   WizardStep: "createConfig" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
 }
 
@@ -104,7 +105,7 @@ export interface NexusGenFieldTypes {
     addProject: NexusGenRootTypes['Project']; // Project!
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardNavigateBack: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetBundler: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetFramework: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -173,7 +174,7 @@ export interface NexusGenFieldTypeNames {
     addProject: 'Project'
     initializePlugins: 'Project'
     wizardInstallDependencies: 'Wizard'
-    wizardNavigateBack: 'Wizard'
+    wizardNavigate: 'Wizard'
     wizardNavigateForward: 'Wizard'
     wizardSetBundler: 'Wizard'
     wizardSetFramework: 'Wizard'
@@ -236,6 +237,9 @@ export interface NexusGenArgTypes {
   Mutation: {
     addProject: { // args
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
+    }
+    wizardNavigate: { // args
+      direction: NexusGenEnums['WizardNavigateDirection']; // WizardNavigateDirection!
     }
     wizardSetBundler: { // args
       bundler: NexusGenEnums['SupportedBundlers']; // SupportedBundlers!

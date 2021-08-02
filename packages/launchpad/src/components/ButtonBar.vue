@@ -10,8 +10,8 @@
       rounded-b
     "
   >
-    <Button @click="nextFn()">{{ next }}</Button>
-    <Button @click="backFn()" variant="outline">{{ back }}</Button>
+    <Button @click="nextFn">{{ next }}</Button>
+    <Button @click="backFn" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
     <div v-if="altFn && alt" class="flex items-center px-3">
       <label @click="handleAlt" class="text-gray-500 px-3">{{ alt }}</label>
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import Button from "./Button.vue";
 import Switch from "./Switch.vue";
 
@@ -33,7 +33,7 @@ export default defineComponent({
       required: true,
     },
     nextFn: {
-      type: Function,
+      type: Function as PropType<() => void>,
       required: true
     },
     back: {
@@ -41,7 +41,7 @@ export default defineComponent({
       required: true,
     },
     backFn: {
-      type: Function,
+      type: Function as PropType<() => void>,
       required: true
     },
     alt: {
@@ -49,7 +49,7 @@ export default defineComponent({
       default: undefined,
     },
     altFn: {
-      type: Function,
+      type: Function as PropType<(value: unknown) => void>,
       default: undefined,
     },
   },

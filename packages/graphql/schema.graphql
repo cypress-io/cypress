@@ -50,7 +50,7 @@ type Mutation {
   wizardInstallDependencies: Wizard
 
   """Navigates backward in the wizard"""
-  wizardNavigateBack: Wizard
+  wizardNavigate(direction: WizardNavigateDirection!): Wizard
 
   """Navigates forward in the wizard"""
   wizardNavigateForward: Wizard
@@ -186,6 +186,11 @@ type WizardFrontendFramework {
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
+}
+
+enum WizardNavigateDirection {
+  back
+  forward
 }
 
 """Details about an NPM Package listed during the wizard install"""

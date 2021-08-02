@@ -21,7 +21,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
-    "vue": "3.1.1"
+    "vue": "3.2.0-beta.7"
   },
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
@@ -50,7 +50,7 @@
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-windicss": "1.2.4",
-    "vue": "3.1.1",
+    "vue": "3.2.0-beta.7",
     "vue-prism-component": "2.0.0",
     "vue-tsc": "0.0.24",
     "windicss": "3.1.4",
