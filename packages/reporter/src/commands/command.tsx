@@ -82,7 +82,7 @@ interface InterceptionsProps {
 }
 
 const Interceptions = observer(({ model }: InterceptionsProps) => {
-  if (!model.renderProps.interceptions || !model.renderProps.interceptions.length) return null
+  if (!model.renderProps.interceptions?.length) return null
 
   function getTitle () {
     return (
