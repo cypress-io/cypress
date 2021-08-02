@@ -259,6 +259,14 @@ declare namespace Cypress {
     spec: Spec
 
     /**
+     * Currently executing test runnable instance.
+     */
+    currentTest: {
+      title: string,
+      titlePath: string[]
+    }
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser

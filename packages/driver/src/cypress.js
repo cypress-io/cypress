@@ -605,6 +605,26 @@ class $Cypress {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
+  get currentTest () {
+    const r = this.cy.state('runnable')
+
+    if (!r) {
+      return null
+    }
+
+    // if we're in a hook, ctx.currentTest is defined
+    // if we're in test body, r is the currentTest
+    /**
+     * @type {Mocha.Test}
+     */
+    const currentTestRunnable = r.ctx.currentTest || r
+
+    return {
+      title: currentTestRunnable.title,
+      titlePath: currentTestRunnable.titlePath(),
+    }
+  }
+
   static create (config) {
     return new $Cypress(config)
   }
