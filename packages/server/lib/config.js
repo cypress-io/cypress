@@ -88,7 +88,11 @@ const validate = (cfg, onErr) => {
     const validationFn = validationRules[key]
 
     if (onlyInOverrideValues[key]) {
-      return `key ${key} is only valid in a testingType object, it is invalid to use it in the root`
+      if (onlyInOverrideValues[key] === true) {
+        return `key \`${key}\` is only valid in a testingType object, it is invalid to use it in the root`
+      }
+
+      return `key \`${key}\` is only valid in the \`${onlyInOverrideValues[key]}\` object, it is invalid to use it in the root`
     }
 
     // does this key have a validation rule?

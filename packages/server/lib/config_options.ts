@@ -44,7 +44,7 @@ export const options = [
     name: 'component',
     // runner-ct overrides
     defaultValue: null,
-    validation: v.isOverrideFunction,
+    validation: v.isValidTestingTypeConfig,
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
@@ -74,7 +74,7 @@ export const options = [
     name: 'e2e',
     // e2e runner overrides
     defaultValue: null,
-    validation: v.isOverrideFunction,
+    validation: v.isValidTestingTypeConfig,
   }, {
     name: 'env',
     validation: v.isPlainObject,
@@ -166,11 +166,6 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'setupNodeEvents',
-    defaultvalue: null,
-    validation: v.isFunction,
-    onlyInOverride: true,
-  }, {
     name: 'port',
     defaultValue: null,
     validation: v.isNumber,
@@ -220,6 +215,16 @@ export const options = [
     defaultValue: 'cypress/screenshots',
     validation: v.isStringOrFalse,
     isFolder: true,
+  }, {
+    name: 'setupNodeEvents',
+    defaultvalue: null,
+    validation: v.isFunction,
+    onlyInOverride: true,
+  }, {
+    name: 'setupDevServer',
+    defaultvalue: null,
+    validation: v.isFunction,
+    onlyInOverride: 'component',
   }, {
     name: 'socketId',
     defaultValue: null,

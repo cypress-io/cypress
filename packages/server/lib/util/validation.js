@@ -129,7 +129,7 @@ const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
-const isValidConfig = (key, config) => {
+const isValidTestingTypeConfig = (key, config) => {
   const status = isPlainObject(key, config)
 
   if (status !== true) {
@@ -138,6 +138,10 @@ const isValidConfig = (key, config) => {
 
   for (const rule of configOptions.options) {
     if (rule.name in config && rule.validation) {
+      if (typeof rule.onlyInOverride === 'string' && rule.onlyInOverride !== key) {
+        return `key \`${rule.name}\` is only valid in the \`${rule.onlyInOverride}\` object, invalid use of this key in the \`${key}\` object`
+      }
+
       const status = rule.validation(`${key}.${rule.name}`, config[rule.name])
 
       if (status !== true) {
@@ -165,18 +169,6 @@ const isOneOf = (...values) => {
 
     return errMsg(key, value, `one of these values: ${strings}`)
   }
-}
-
-const isOverrideFunction = (key, value) => {
-  if (typeof value !== 'function' && !_.isPlainObject(value) && value !== null) {
-    return errMsg(key, value, `a plain object or a function`)
-  }
-
-  if (value === null || typeof value === 'function') {
-    return true
-  }
-
-  return isValidConfig(key, value)
 }
 
 /**
@@ -278,9 +270,7 @@ module.exports = {
 
   isValidRetriesConfig,
 
-  isValidConfig,
-
-  isOverrideFunction,
+  isValidTestingTypeConfig,
 
   isPlainObject,
 
