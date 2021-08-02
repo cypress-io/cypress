@@ -20,7 +20,7 @@ import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUni
 
 Cypress.Commands.add(
   'mount',
-  <C extends Component>(comp: C, options: CyMountOptions<C> = {}) => {
+  <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
     options.global = options.global || {}
 
     options.global.plugins = options.global.plugins || []

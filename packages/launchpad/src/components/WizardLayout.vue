@@ -63,7 +63,7 @@ export default defineComponent({
       default: undefined,
     },
     altFn: {
-      type: Function as PropType<() => void>,
+      type: Function as PropType<(val: boolean) => void>,
       default: undefined
     }
   },

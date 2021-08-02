@@ -1001,6 +1001,8 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
+      # run type checking for each individual package
+      - run: yarn lerna run types
       # check for compile errors with the releaserc scripts
       - run: yarn test-npm-package-release-script
       - verify-mocha-results:
