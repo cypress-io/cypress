@@ -25,7 +25,6 @@ describe('currentTest', () => {
     .eq(cy.state('runnable').title)
     .eq('returns current test runnable properties')
 
-
     expect(Cypress.currentTest.titlePath)
     .deep.eq(cy.state('runnable').titlePath())
   })
