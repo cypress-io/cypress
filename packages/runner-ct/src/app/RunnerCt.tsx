@@ -184,13 +184,9 @@ const RunnerCt = namedObserver('RunnerCt',
         <WarningMessage
           key={warning.message}
           warning={warning}
-          onDismissWarning={() => removeWarning(warning)}
+          onDismissWarning={() => state.removeWarning(warning)}
         />
       ))
-    }
-
-    const removeWarning = (warning) => {
-      state.removeWarning(warning)
     }
 
     return (
