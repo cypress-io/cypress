@@ -128,6 +128,8 @@ export default class Command extends Instrument {
   }
 
   isMatchingEvent (command: Command) {
+    if (command.type === 'system') return false
+
     return command.event && this.matches(command)
   }
 
