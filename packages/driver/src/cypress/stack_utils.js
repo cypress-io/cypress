@@ -1,14 +1,14 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
-const _ = require('lodash')
-const path = require('path')
-const errorStackParser = require('error-stack-parser')
-const { codeFrameColumns } = require('@babel/code-frame')
+import _ from 'lodash'
+import path from 'path'
+import errorStackParser from 'error-stack-parser'
+import { codeFrameColumns } from '@babel/code-frame'
 
-const $utils = require('./utils')
-const $errUtils = require('./error_utils')
-const $sourceMapUtils = require('./source_map_utils')
-const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
+import $utils from './utils'
+import * as $errUtils from './error_utils'
+import $sourceMapUtils from './source_map_utils'
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/server/lib/util/stack_utils'
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/

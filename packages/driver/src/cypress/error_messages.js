@@ -1,9 +1,7 @@
-module.exports = {}
-
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
-const { normalizedStack } = require('./stack_utils')
+const $stackUtils = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -103,10 +101,7 @@ const cyStripIndent = (str, indentSize) => {
   }).join('\n')
 }
 
-// unfortunately due to our mix of typescript imports and requires
-// and circular imports, we need to mutate module.exports instead of reassign
-// otherwise modules that are circularly importing will recieve empty object
-_.extend(module.exports, {
+export default {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',
   },
@@ -1014,7 +1009,7 @@ _.extend(module.exports, {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but a network error occurred while making the request:
 
-          ${normalizedStack(innerErr)}
+          ${$stackUtils.normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
@@ -2054,4 +2049,4 @@ _.extend(module.exports, {
     missing: '`XMLHttpRequest#xhr` is missing.',
     network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
   },
-})
+}

@@ -7,7 +7,7 @@ const sinon = require('sinon')
 const fakeTimers = require('@sinonjs/fake-timers')
 
 const $dom = require('./dom')
-const $errorMessages = require('./cypress/error_messages')
+const $errorMessages = require('./cypress/error_messages').default
 const $Chainer = require('./cypress/chainer')
 const $Command = require('./cypress/command')
 const $Commands = require('./cypress/commands')

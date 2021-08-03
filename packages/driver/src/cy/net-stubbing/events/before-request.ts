@@ -11,7 +11,7 @@ import {
   validateStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
-import $errUtils from '../../../cypress/error_utils'
+import * as $errUtils from '../../../cypress/error_utils'
 import { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { NetEvent } from '@packages/net-stubbing/lib/types'

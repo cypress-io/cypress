@@ -1,6 +1,6 @@
 import { Interception, Route } from '@packages/net-stubbing/lib/types'
 import { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
-import { makeErrFromObj } from './error_utils'
+import * as $errUtils from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
@@ -312,7 +312,7 @@ export class ProxyLogging {
       return debug('unmatched error event %o', error)
     }
 
-    proxyRequest.error = makeErrFromObj(error.error)
+    proxyRequest.error = $errUtils.makeErrFromObj(error.error)
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 

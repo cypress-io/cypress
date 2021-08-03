@@ -1,6 +1,11 @@
-const $errUtils = require('@packages/driver/src/cypress/error_utils')
+const { allowTsModuleStubbing } = require('../../support/helpers')
+
+allowTsModuleStubbing()
+
 const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
-const $errorMessages = require('@packages/driver/src/cypress/error_messages')
+
+const $errUtils = require('@packages/driver/src/cypress/error_utils')
+const $errorMessages = require('@packages/driver/src/cypress/error_messages').default
 
 describe('driver/src/cypress/error_utils', () => {
   context('.modifyErrMsg', () => {
@@ -382,10 +387,10 @@ describe('driver/src/cypress/error_utils', () => {
     let err
 
     beforeEach(() => {
-      cy.stub($stackUtils, 'replacedStack').returns('replaced stack')
-      cy.stub($stackUtils, 'stackWithUserInvocationStackSpliced').returns({ stack: 'spliced stack' })
-      cy.stub($stackUtils, 'getSourceStack').returns(sourceStack)
-      cy.stub($stackUtils, 'getCodeFrame').returns(codeFrame)
+      $stackUtils.replacedStack = cy.stub().returns('replaced stack')
+      $stackUtils.stackWithUserInvocationStackSpliced = cy.stub().returns({ stack: 'spliced stack' })
+      $stackUtils.getSourceStack = cy.stub().returns(sourceStack)
+      $stackUtils.getCodeFrame = cy.stub().returns(codeFrame)
 
       err = { stack: 'Error: original stack message\n at originalStack (foo.js:1:1)' }
     })
