@@ -34,8 +34,6 @@
         />
       </button>
     </nav>
-    <h1>TODO: PrismJS seems not working</h1>
-    {{ code }}
     <div v-if="tsInstalled" class="relative">
       <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
       <CopyButton v-if="manualInstall && code" :text="code" />
