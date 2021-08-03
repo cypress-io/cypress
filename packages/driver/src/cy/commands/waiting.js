@@ -25,8 +25,6 @@ const throwErr = (arg) => {
 }
 
 module.exports = (Commands, Cypress, cy, state) => {
-  let userOptions = null
-
   const waitNumber = (subject, ms, options) => {
     // increase the timeout by the delta
     cy.timeout(ms, true, 'wait')
@@ -55,7 +53,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       log = options._log = Cypress.log({
         type: 'parent',
         aliasType: 'route',
-        options: userOptions,
+        options,
       })
     }
 
@@ -267,21 +265,19 @@ module.exports = (Commands, Cypress, cy, state) => {
 
   Commands.addAll({ prevSubject: 'optional' }, {
     wait (subject, msOrAlias, options = {}) {
-      userOptions = options
-
       // check to ensure options is an object
       // if its a string the user most likely is trying
       // to wait on multiple aliases and forget to make this
       // an array
-      if (_.isString(userOptions)) {
+      if (_.isString(options)) {
         $errUtils.throwErrByPath('wait.invalid_arguments')
       }
 
-      if (_.isFunction(userOptions)) {
+      if (_.isFunction(options)) {
         $errUtils.throwErrByPath('wait.invalid_arguments_function')
       }
 
-      options = _.defaults({}, userOptions, { log: true })
+      options = _.defaults({}, options, { log: true })
       const args = [subject, msOrAlias, options]
 
       try {
