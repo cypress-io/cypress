@@ -737,7 +737,7 @@ describe('src/cy/commands/waiting', () => {
 
         it('throws when passed caallback function', (done) => {
           cy.on('fail', (err) => {
-            expect(err.message).to.eq('`cy.wait()` was passed invalid arguments. You cannot pass callback function, instead you have to use \'then\' method.')
+            expect(err.message).to.eq('`cy.wait()` was passed invalid arguments. You cannot pass a function. If you would like to wait on the result of a `cy.wait()`, use `cy.then()`.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
 
             done()

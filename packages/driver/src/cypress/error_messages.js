@@ -1952,7 +1952,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/wait',
     },
     invalid_arguments_function: {
-      message: `${cmd('wait')} was passed invalid arguments. You cannot pass callback function, instead you have to use 'then' method.`,
+      message: `${cmd('wait')} was passed invalid arguments. You cannot pass a function. If you would like to wait on the result of a ${cmd('wait')}, use ${cmd('then')}.`,
       docsUrl: 'https://on.cypress.io/wait',
     },
     timed_out: {
