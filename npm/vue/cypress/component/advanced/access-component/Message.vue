@@ -24,7 +24,6 @@
     },
     methods: {
       handleClick() {
-        console.log('lalala')
         this.$emit('message-clicked', this.message)
       }
     }
