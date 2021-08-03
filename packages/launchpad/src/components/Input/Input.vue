@@ -31,7 +31,8 @@
 
 
 <script lang="ts" setup>
-import { PropType, defineProps, defineEmit, computed } from 'vue'
+import type { PropType } from 'vue'
+import { defineProps, defineEmits, computed } from 'vue'
 import { useModelWrapper } from '../../composables'
 import { omit, pick, keys } from 'lodash'
 import IconWrapper, { iconProps } from '../IconWrapper.vue'
@@ -54,7 +55,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmit(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
 
 const iconWrapperProps = computed(() => pick(props, keys(iconProps)))
 const type = computed(() => props.type || 'text')

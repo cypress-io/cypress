@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, PropType } from "vue"
+import { defineProps } from "vue"
 import type { IconType } from '../types'
 
 const VariantClassesTable = {
@@ -43,37 +43,20 @@ const IconClassesTable = {
   xl: "h-2.5em w-2.5em"
 }
 
-const props = defineProps({
-  prefixIcon: {
-    type: Object as IconType,
-  },
-  suffixIcon: {
-    type: Object as IconType,
-  },
-  size: {
-    type: String as PropType<"xs" | "sm" | "md" | "lg" | "xl">,
-    default: 'md'
-  },
-  variant: {
-    type: String as PropType<"primary" | "outline" | "link">,
-    default: "primary",
-  },
-  class: {
-    type: String,
-    default: "",
-  },
-  prefixIconClass: {
-    type: String,
-  },
-  suffixIconClass: {
-    type: String,
-  }
-})
+const props = defineProps<{
+  prefixIcon?: IconType
+  suffixIcon?: IconType
+  size?: "xs" | "sm" | "md" | "lg" | "xl"
+  variant?: "primary" | "outline" | "link"
+  prefixIconClass?: string
+  suffixIconClass?: string
+  class?: string
+}>()
 
-const variantClasses = VariantClassesTable[props.variant]
-const sizeClasses = SizeClassesTable[props.size]
+const variantClasses = VariantClassesTable[props.variant || 'primary']
+const sizeClasses = SizeClassesTable[props.size || 'md']
 
-const iconClasses = ['flex', 'items-center', IconClassesTable[props.size]]
+const iconClasses = ['flex', 'items-center', IconClassesTable[props.size || 'md']]
 const classes = [
   variantClasses,
   sizeClasses,

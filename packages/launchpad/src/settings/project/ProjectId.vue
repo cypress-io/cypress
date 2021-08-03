@@ -34,8 +34,9 @@ import { useClipboard } from '@vueuse/core'
 import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
 
 const projectId = ref('74e08848-f0f6-11eb-9a03-0242ac130003')
-const formattedProjectId = computed(() => `projectId: '${projectId.value}'`)
 const clipboard = useClipboard({ source: projectId })
+
+const formattedProjectId = computed(() => `projectId: '${projectId.value}'`)
 
 onMounted(() => import("prismjs/components/prism-yaml"))
 </script>

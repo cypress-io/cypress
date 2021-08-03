@@ -6,12 +6,9 @@
 
 <script lang="ts" setup>
 import { defineProps } from 'vue'
-// TODO: the validator for icon fails when I use IconType as the expected type.
-// Not sure why.
-// @ts-ignore
 import type { IconType } from '../types'
 
 defineProps<{
-  icon?: any
+  icon?: IconType
 }>()
 </script>

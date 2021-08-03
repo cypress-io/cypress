@@ -1,3 +1,3 @@
-import type { PropType, defineComponent, FunctionalComponent, SVGAttributes } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
-export type IconType = PropType<ReturnType<typeof defineComponent> & FunctionalComponent<SVGAttributes, {}>>
+export type IconType = FunctionalComponent<SVGAttributes, {}>
