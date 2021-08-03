@@ -335,7 +335,6 @@ describe('multiple sessions in test - can switch without redefining', () => {
     })
 
     cy.then(() => {
-      console.clear()
       expect(clearSpy).calledTwice
     })
 
