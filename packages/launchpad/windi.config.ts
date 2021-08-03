@@ -1,17 +1,16 @@
 import { defineConfig } from 'windicss/helpers'
 import Colors from 'windicss/colors'
 import { map, reduce, kebabCase } from 'lodash'
-import formPlugin from 'windicss/plugin/forms'
-
 
 const safelist = reduce(Colors, (acc, variants, colorName) => {
   const name = kebabCase(colorName)
+
   return `${acc}
-    ${map(variants, (_, k) => `bg-${name}-${k} text-${name}-${k}`).join(' ')}`
+    ${map(variants, (_: string, k: string) => `bg-${name}-${k} text-${name}-${k}`).join(' ')}`
 }, '')
 
 export default defineConfig({
-  // This adds !important to all utility classes. https://csswizardry.com/2016/05/the-importance-of-important/ 
+  // This adds !important to all utility classes. https://csswizardry.com/2016/05/the-importance-of-important/
   important: true,
   theme: {
     extend: {
