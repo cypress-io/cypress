@@ -12,7 +12,7 @@
         readonly
         v-model="formattedProjectId"
       ></InlineCodeEditor>
-      <Button variant="outline" @click="clipboard.copy()">
+      <Button variant="outline" @click="clipboard.copy(projectId)">
         <template #prefix>
           <Icon class="text-cool-gray-600" :icon="IconDashedSquare" />
         </template>
@@ -33,8 +33,13 @@ import ProjectSettingsSection from './ProjectSettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
 import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
 
+const props = defineProps<{
+  mockClipboard?: typeof useClipboard
+}>()
+
 const projectId = ref('74e08848-f0f6-11eb-9a03-0242ac130003')
-const clipboard = useClipboard({ source: projectId })
+// for testing - copy requires browser permissions and fails in chrome on CI otherwise.
+const clipboard = props.mockClipboard?.() || useClipboard({ source: projectId })
 
 const formattedProjectId = computed(() => `projectId: '${projectId.value}'`)
 
