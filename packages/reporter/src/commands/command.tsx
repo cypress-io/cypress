@@ -78,6 +78,43 @@ const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesRef
   </span>
 ))
 
+interface InterceptionsProps {
+  model: CommandModel
+}
+
+const Interceptions = observer(({ model }: InterceptionsProps) => {
+  if (!model.renderProps.interceptions?.length) return null
+
+  function getTitle () {
+    return (
+      <span>
+        {model.renderProps.wentToOrigin ? '' : <>This request did not go to origin because the response was stubbed.<br/></>}
+        This request matched:
+        <ul>
+          {model.renderProps.interceptions?.map(({ command, alias, type }, i) => {
+            return (<li key={i}>
+              <code>cy.{command}()</code> {type} with {alias ? <>alias <code>@{alias}</code></> : 'no alias'}
+            </li>)
+          })}
+        </ul>
+      </span>
+    )
+  }
+
+  const count = model.renderProps.interceptions.length
+
+  const displayAlias = _.chain(model.renderProps.interceptions).last().get('alias').value()
+
+  return (
+    <Tooltip placement='top' title={getTitle()} className='cy-tooltip'>
+      <span>
+        <span className={cs('command-interceptions', 'route', count > 1 && 'show-count')}>{model.renderProps.status ? <span className='status'>{model.renderProps.status} </span> : null}{displayAlias || <em className="no-alias">no alias</em>}</span>
+        {count > 1 ? <span className={'command-interceptions-count'}>{count}</span> : null}
+      </span>
+    </Tooltip>
+  )
+})
+
 interface AliasesProps {
   isOpen: boolean
   model: CommandModel
@@ -85,7 +122,7 @@ interface AliasesProps {
 }
 
 const Aliases = observer(({ model, aliasesWithDuplicates, isOpen }: AliasesProps) => {
-  if (!model.alias) return null
+  if (!model.alias || model.aliasType === 'route') return null
 
   return (
     <span>
@@ -114,7 +151,11 @@ interface MessageProps {
 
 const Message = observer(({ model }: MessageProps) => (
   <span>
-    <i className={`fas fa-circle ${model.renderProps.indicator}`} />
+    <i className={cs(
+      model.renderProps.wentToOrigin ? 'fas' : 'far',
+      'fa-circle',
+      model.renderProps.indicator,
+    )} />
     <span
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
@@ -166,10 +207,6 @@ class Command extends Component<Props> {
   render () {
     const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
-
-    if (model.name === 'Clear Page') {
-      console.log(model.name, model.group, model.id)
-    }
 
     if (model.group && this.props.groupId !== model.group) {
       return null
@@ -239,6 +276,7 @@ class Command extends Component<Props> {
                   <span className='num-elements'>{model.numElements}</span>
                 </Tooltip>
                 <span className='alias-container'>
+                  <Interceptions model={model} />
                   <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
                   <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
                     <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>

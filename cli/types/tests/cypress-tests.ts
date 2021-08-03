@@ -701,32 +701,10 @@ namespace CypressSessionsTests {
     validate: { foo: true } // $ExpectError
   })
 }
-
-namespace CypressCookieTests {
-  cy.getCookie('foo') // $ExpectType Chainable<Cookie | null>
-
-  cy.setCookie('foo', 'val', { // $ExpectType Chainable<Cookie>
-    log: false,
-    domain: 'example.com',
-    expiry: 123,
-    secure: true,
-    sameSite: 'no_restriction',
-    hostOnly: true,
-    foo: true, // $ExpectError
-  })
-
-  const cookie: Cypress.Cookie = {} as unknown as Cypress.Cookie
-
-  cookie.domain
-  cookie.expiry
-  cookie.httpOnly
-  cookie.hostOnly
-  cookie.name
-  cookie.path
-  cookie.sameSite
-  cookie.secure
-  cookie.value
-  cookie.foo // $ExpectError
+namespace CypressCurrentTest {
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType string[]
+  Cypress.currentTest() // $ExpectError
 }
 
 namespace CypressKeyboardTests {

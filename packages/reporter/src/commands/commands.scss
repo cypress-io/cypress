@@ -107,7 +107,16 @@
       flex-wrap: wrap;
       padding: 2px 5px 0;
 
-      .command-alias {
+      .command-interceptions {
+        font-style: normal;
+
+        .status {
+          font-weight: 600;
+        }
+      }
+
+      .command-alias,
+      .command-interceptions {
         border-radius: 10px;
         color: #777888;
         padding: 0 5px;
@@ -148,7 +157,8 @@
       }
 
       .num-children,
-      .command-alias-count {
+      .command-alias-count
+      .command-interceptions-count {
         border-radius: 5px;
         color: #777;
         font-size: 90%;
@@ -163,7 +173,8 @@
         padding: 3px 5px 3px 5px;
       }
 
-      .num-children.has-alias.has-children {
+      .num-children.has-alias.has-children,
+      .command-interceptions-count {
         border-radius: 0 10px 10px 0;
         padding: 4px 5px 2px 3px;
       }
@@ -174,7 +185,8 @@
       }
 
       .num-children,
-      .command-alias-count {
+      .command-alias-count,
+      .command-interceptions-count {
         background-color: darken(#ffdf9c, 8%) !important;
       }
     }
@@ -476,7 +488,8 @@
       display: none;
     }
 
-    .command-alias {
+    .command-alias,
+    .command-interceptions {
       font-family: $open-sans;
       font-size: 10px;
       line-height: 1.75;

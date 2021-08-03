@@ -177,6 +177,16 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
   return runMiddlewareStack()
 }
 
+function getUniqueRequestId (requestId: string) {
+  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
+
+  if (match) {
+    return `${match[1]}-retry-${Number(match[2]) + 1}`
+  }
+
+  return `${requestId}-retry-1`
+}
+
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
@@ -240,9 +250,14 @@ export class Http {
     const onError = () => {
       if (ctx.req.browserPreRequest) {
         // browsers will retry requests in the event of network errors, but they will not send pre-requests,
-        // so try to re-use the current browserPreRequest for the next retry
-        ctx.debug('Re-using pre-request data %o', ctx.req.browserPreRequest)
-        this.addPendingBrowserPreRequest(ctx.req.browserPreRequest)
+        // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
+        const preRequest = {
+          ...ctx.req.browserPreRequest,
+          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+        }
+
+        ctx.debug('Re-using pre-request data %o', preRequest)
+        this.addPendingBrowserPreRequest(preRequest)
       }
     }
 
@@ -276,7 +291,6 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.preRequests = new PreRequests()
   }
 
   setBuffer (buffer) {

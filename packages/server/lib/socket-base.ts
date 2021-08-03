@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import { onNetEvent } from '@packages/net-stubbing'
+import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
 import errors from './errors'
@@ -380,7 +380,7 @@ export class SocketBase {
             case 'write:file':
               return files.writeFile(config.projectRoot, args[0], args[1], args[2])
             case 'net':
-              return onNetEvent({
+              return onNetStubbingEvent({
                 eventName: args[0],
                 frame: args[1],
                 state: options.netStubbingState,

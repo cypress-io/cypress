@@ -8,6 +8,8 @@ type NullableMiddlewareHook = (() => void) | null
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
+export type onRequestEvent = (eventName: string, data: any) => void
+
 interface IMiddleware {
   onPush: NullableMiddlewareHook
   onBeforeRequest: NullableMiddlewareHook
@@ -22,7 +24,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: onRequestEvent) {
     this.requests = {}
 
     // set the middleware
