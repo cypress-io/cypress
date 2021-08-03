@@ -64,7 +64,7 @@ namespace CypressIsCyTests {
 
 declare namespace Cypress {
   interface Chainable {
-    newCommand: (arg: string) => void;
+    newCommand: (arg: string) => void
   }
 }
 

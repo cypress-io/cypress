@@ -262,7 +262,7 @@ declare namespace Cypress {
      * Currently executing test runnable instance.
      */
     currentTest: {
-      title: string,
+      title: string
       titlePath: string[]
     }
 
@@ -402,9 +402,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add<T extends keyof Cypress.Chainable>(name: T, fn: Cypress.Chainable[T]): void
-      add<T extends keyof Cypress.Chainable>(name: T, options: CommandOptions, fn: Cypress.Chainable[T]): void
-      overwrite<T extends keyof Cypress.Chainable>(name: T, fn: Cypress.Chainable[T]): void
+      add<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
+      add<T extends keyof Chainable>(name: T, options: CommandOptions, fn: Chainable[T]): void
+      overwrite<T extends keyof Chainable>(name: T, fn: Chainable[T]): void
     }
 
     /**
