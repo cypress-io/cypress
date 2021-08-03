@@ -34,7 +34,7 @@ import { useClipboard } from '@vueuse/core'
 import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
 
 const props = defineProps<{
-  mockClipboard?: typeof useClipboard
+  mockClipboard?: any
 }>()
 
 const projectId = ref('74e08848-f0f6-11eb-9a03-0242ac130003')

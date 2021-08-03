@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import ProjectId from './ProjectId.vue'
 
 describe('<ProjectId />', () => {
@@ -13,6 +13,8 @@ describe('<ProjectId />', () => {
         copied.value = 'Copied!'
       },
       copied,
+      text: computed(() => ''),
+      isSupported: true,
     })
 
     cy.mount(() => (

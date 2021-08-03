@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, computed } from 'vue'
+import { computed } from 'vue'
 import ExperimentRow from './ExperimentRow.vue'
 import ProjectSettingsSection from './ProjectSettingsSection.vue'
 import { experiments as defaultExperiments } from './projectSettings'
