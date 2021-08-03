@@ -1000,6 +1000,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/component-testing
         `
+    // TODO: update with vetted cypress language
     case 'CONFLICT_PLUGINSFILE_CONFIGJS':
       return stripIndent`
         \`pluginsFile\` cannot be set in a \`${arg1}\` file. 
@@ -1009,7 +1010,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         https://on.cypress.io/setupNodeEvents
         `
 
-    case `CONFIG_FILES_LANGUAGE_CONFLICT`:
+    // TODO: update with vetted cypress language
+    case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
           There is both a \`cypress.config.js\` and a \`cypress.config.ts\` in the location below:
 
@@ -1017,6 +1019,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
           Cypress does not know which one to read for config. Please remove one of the two and try again.
           `
+
+    // TODO: update with vetted cypress language
+    case 'DEPREACTED_CYPRESS_JSON':
+      return stripIndent`
+          in 9.0, cypress.json will not be supported anymore.
+          please see the docs to migrate it to cypress.config.js
+          `
+
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
     default:

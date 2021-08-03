@@ -180,6 +180,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     let cfg = this.getConfig()
 
+    if (typeof cfg.configFile === 'string' && /\.json$/.test(cfg.configFile)) {
+      this.options.onWarning(errors.get('DEPREACTED_CYPRESS_JSON', cfg.configFile))
+    }
+
     process.chdir(this.projectRoot)
 
     // TODO: we currently always scaffold the plugins file
