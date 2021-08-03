@@ -55,7 +55,7 @@ const getCurrentOriginStorage = () => {
   return value
 }
 
-const setPostMessageLocalStorage = (specWindow, originOptions) => {
+const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   const origins = originOptions.map((v) => v.origin) as string[]
 
   const iframes: JQuery<HTMLElement>[] = []
@@ -67,6 +67,8 @@ const setPostMessageLocalStorage = (specWindow, originOptions) => {
   if (isSecureContext(specWindow.location.href)) {
     _.remove(origins, (v) => !isSecureContext(v))
   }
+
+  if (!origins.length) return []
 
   _.each(origins, (u) => {
     const $iframe = $(`<iframe src="${`${u}/__cypress/automation/setLocalStorage?${u}`}"></iframe>`)
@@ -142,7 +144,7 @@ const getConsoleProps = (sessState) => {
   return ret
 }
 
-const getPostMessageLocalStorage = (specWindow, origins) => {
+const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   const results = [] as any[]
   const iframes: JQuery<HTMLElement>[] = []
   let onPostMessage

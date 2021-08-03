@@ -699,29 +699,51 @@ describe('consoleProps', () => {
   })
 })
 
-// Cypress.config('experimentalSessionSupport', false)
+// because browsers prevent an https page from embedding http domains, we filter out
+// insecure origins (contexts) when top is a secure context when we clear cross origin session data
+// the first test in each suite visits insecure origin with sessionSupport OFF so data is not cleared
+// on test:before:run, which allows the next run to switch top back to a secure context
+// and finally we turn sessionSupport back ON for the 3rd tests, which will now try to clear insecure
+// bar.foo.com data.
 describe('ignores setting insecure context data when on secure context', () => {
-  it('sets insecure content', { experimentalSessionSupport: false }, () => {
-    cy.visit('http://bar.foo.com:4465/form')
-    // cy.visit('http://example.com')
-    .then(() => {
-      localStorage.key1 = 'val1'
+  describe('no cross origin secure origins, nothing to clear', () => {
+    it('sets insecure content', { experimentalSessionSupport: false }, () => {
+      cy.visit('http://bar.foo.com:4465/form')
+    })
+
+    let logSpy
+
+    it('nothing to clear - 1/2', { experimentalSessionSupport: false }, () => {
+      cy.visit('https://localhost:4466/form')
+      .then(() => {
+        logSpy = Cypress.sinon.spy(Cypress, 'log')
+      })
+    })
+
+    it('nothing to clear - 2/2', { experimentalSessionSupport: true }, () => {
+      top.logSpy = logSpy
+      expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
     })
   })
 
-  let logSpy
-
-  it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionSupport: false }, () => {
-    cy.visit('https://localhost:4466/form')
-    .then(() => {
-      logSpy = Cypress.sinon.spy(Cypress, 'log')
-      localStorage.key1 = 'val1'
+  describe('only secure origins cleared', () => {
+    it('sets insecure content', { experimentalSessionSupport: false }, () => {
+      cy.visit('http://bar.foo.com:4465/form')
     })
-  })
 
-  it('clears only secure context data - 2/2', { experimentalSessionSupport: true }, () => {
-    top.logSpy = logSpy
-    expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
+    let logSpy
+
+    it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionSupport: false }, () => {
+      cy.visit('https://localhost:4466/cross_origin_iframe/foo')
+      .then(() => {
+        logSpy = Cypress.sinon.spy(Cypress, 'log')
+      })
+    })
+
+    it('clears only secure context data - 2/2', { experimentalSessionSupport: true }, () => {
+      top.logSpy = logSpy
+      expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
+    })
   })
 })
 
