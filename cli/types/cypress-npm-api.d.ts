@@ -335,8 +335,7 @@ declare namespace CypressCommandLine {
   }
 }
 
-declare module 'cypress' {
-  /**
+/**
    * Cypress NPM module interface.
    * @see https://on.cypress.io/module-api
    * @example
@@ -345,46 +344,46 @@ declare module 'cypress' {
     cypress.run().then(results => ...)
     ```
   */
-  interface CypressNpmApi {
-    /**
-     * Execute a headless Cypress test run.
-     * @see https://on.cypress.io/module-api#cypress-run
-     * @example
-     ```
-     const cypress = require('cypress')
-     // runs all spec files matching a wildcard
-     cypress.run({
-       spec: 'cypress/integration/admin*-spec.js'
-     }).then(results => {
-       if (results.status === 'failed') {
-          // Cypress could not run
-        } else {
-          // inspect results object
-       }
-     })
-     ```
-     */
-    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
-    /**
-     * Opens Cypress GUI. Resolves with void when the
-     * GUI is closed.
-     * @see https://on.cypress.io/module-api#cypress-open
-     */
-    open(options?: Partial<CypressCommandLine.CypressOpenOptions>): Promise<void>
+declare module 'cypress' {
+  /**
+   * Execute a headless Cypress test run.
+   * @see https://on.cypress.io/module-api#cypress-run
+   * @example
+   ```
+    const cypress = require('cypress')
+    // runs all spec files matching a wildcard
+    cypress.run({
+      spec: 'cypress/integration/admin*-spec.js'
+    }).then(results => {
+      if (results.status === 'failed') {
+        // Cypress could not run
+      } else {
+        // inspect results object
+      }
+    })
+    ```
+    */
+  export function run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
+  /**
+   * Opens Cypress GUI. Resolves with void when the
+   * GUI is closed.
+   * @see https://on.cypress.io/module-api#cypress-open
+   */
+  export function open(options?: Partial<CypressCommandLine.CypressOpenOptions>): Promise<void>
 
-    /**
-     * Utility functions for parsing CLI arguments the same way
-     * Cypress does
-     */
-    cli: CypressCommandLine.CypressCliParser
+  /**
+   * Utility functions for parsing CLI arguments the same way
+   * Cypress does
+   */
+  export const cli: CypressCommandLine.CypressCliParser
 
-    /**
-     * Type helper to make writing `cypress.config.ts` easier
-     */
-    defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
-  }
+  /**
+   * Type helper to make writing `cypress.config.ts` easier
+   */
+  export function defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
 
-  // export Cypress NPM module interface
-  const cypress: CypressNpmApi
-  export = cypress
+  /**
+   * Types for configuring cypress in cypress.config.ts
+   */
+  export type ConfigOptions = Cypress.ConfigOptions
 }
