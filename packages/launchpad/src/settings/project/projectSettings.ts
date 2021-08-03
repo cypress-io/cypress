@@ -5,7 +5,7 @@ export const sections = {
       description: 'Enable or disable experiments',
     },
   ],
-  user: {}
+  user: {},
 }
 
 export interface Experiment {
@@ -20,18 +20,18 @@ export const experiments: Experiment[] = [
     name: 'Studio Mode',
     description: 'Enable Studio Mode',
     enabled: true,
-    key: 'experimentalStudio'
+    key: 'experimentalStudio',
   },
   {
     name: 'Fetch Polyfill',
     description: 'Enable Fetch Polyfill',
     enabled: true,
-    key: 'experimentalFetchPolyfill'
+    key: 'experimentalFetchPolyfill',
   },
   {
     name: 'Interactive Run Events',
     description: 'Enable Interactive Run Events',
     enabled: false,
-    key: 'experimentalInteractiveRunEvents'
-  }
+    key: 'experimentalInteractiveRunEvents',
+  },
 ]

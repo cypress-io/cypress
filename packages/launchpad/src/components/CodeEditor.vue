@@ -14,17 +14,17 @@ import "vue-prism-editor/dist/prismeditor.min.css" // import the styles somewher
 import "prismjs/themes/prism.css" // import syntax highlighting styles
 // import highlighting library (you can use any library you want just return html string)
 import { useModelWrapper } from "../composables"
-import { defineProps, defineEmit } from "vue"
+import { defineProps, defineEmits } from "vue"
 
 const props = defineProps<{
   modelValue: string
   readonly?: boolean
 }>()
 
-const emit = defineEmit(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
 
 // @ts-ignore
-const highlighter = (code) => prism.highlight(code, prism.languages.js)
+const highlighter = (code: string) => prism.highlight(code, prism.languages.js)
 const localValue = useModelWrapper(props, emit, 'modelValue')
 </script>
 

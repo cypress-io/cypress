@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmit, defineProps } from "vue"
+import { defineEmits, defineProps } from "vue"
 
 defineProps({
   value: {
@@ -21,7 +21,7 @@ defineProps({
   },
 })
 
-defineEmit(['update'])
+defineEmits(['update'])
 </script>
 
 <style scoped>

@@ -9,21 +9,22 @@ describe('<RecordKey />', () => {
       </div>
     ))
   })
+
   it('renders the record key view with the correct title', () => {
     cy.findByText('Record Key')
   })
 
   it(`has an input that's hidden by default`, () => {
     cy.get('input[type="password"]').as('Record Key Input')
-      .should('be.visible')
-      .get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')
-      .click()
-      .get('input[type="password"]').should('not.exist')
-      .get('input[type="text"]').should('be.visible')
-      .get('@Password Toggle')
-      .click()
-      .get('input[type="text"]').should('not.exist')
-      .get('input[type="password"]').should('be.visible')
+    .should('be.visible')
+    .get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')
+    .click()
+    .get('input[type="password"]').should('not.exist')
+    .get('input[type="text"]').should('be.visible')
+    .get('@Password Toggle')
+    .click()
+    .get('input[type="text"]').should('not.exist')
+    .get('input[type="password"]').should('be.visible')
   })
 
   it('has a managed keys button', () => {

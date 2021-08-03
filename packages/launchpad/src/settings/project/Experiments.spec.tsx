@@ -2,6 +2,7 @@ import Experiments from './Experiments.vue'
 import { experiments as defaultExperiments } from './projectSettings'
 
 const experiments = [defaultExperiments[0]]
+
 describe('<Experiments />', () => {
   beforeEach(() => {
     cy.viewport(800, 600)

@@ -12,6 +12,7 @@
 import { computed, defineProps } from 'vue'
 
 export type StatusIndicatorType = 'success' | 'warning' | 'error' | 'disabled'
+
 const typeClasses: Record<StatusIndicatorType, string> = {
   success: 'text-green-600',
   error: 'text-red-600',
@@ -20,7 +21,7 @@ const typeClasses: Record<StatusIndicatorType, string> = {
 }
 
 const props = defineProps<{
-  type: StatusIndicatorType
+  type: StatusIndicatorType,
 }>()
 
 const classes = computed(() => props.type ? typeClasses[props.type] : [])

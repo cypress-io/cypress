@@ -1,11 +1,8 @@
-import { ref } from 'vue'
 import Button from './Button.vue'
 import IconCoffee from 'virtual:vite-icons/mdi/coffee'
 
 describe('<Button />', () => {
   it('playground', { viewportWidth: 200, viewportHeight: 300 }, () => {
-    const valueRef = ref(false)
-
     cy.mount(() => (
       <div class="p-6 grid gap-2">
         <Button size="sm">Primary with text</Button>

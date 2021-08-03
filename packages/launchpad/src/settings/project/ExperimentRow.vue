@@ -10,9 +10,9 @@
     <div
       class="row-start-1 row-end-3 col-start-2 col-end-auto inline-grid items-center justify-self-end ml-20px"
     >
-      <StatusIndicator
-        :type="experiment.enabled ? 'success' : 'disabled'"
-      >{{ experiment.enabled ? 'Enabled' : 'Disabled' }}</StatusIndicator>
+      <StatusIndicator :type="experiment.enabled ? 'success' : 'disabled'">
+        {{ experiment.enabled ? 'Enabled' : 'Disabled' }}
+      </StatusIndicator>
     </div>
   </div>
 </template>

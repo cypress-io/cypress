@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmit } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 import CodeEditor from '../CodeEditor.vue'
 import { useModelWrapper } from '../../composables'
 import IconWrapper, { iconProps } from '../IconWrapper.vue'
@@ -33,7 +33,7 @@ const props = defineProps({
   ...iconProps
 })
 
-const emit = defineEmit(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
 const iconWrapperProps = pick(props, keys(iconProps))
 const localValue = useModelWrapper(props, emit, 'modelValue')
 </script>
