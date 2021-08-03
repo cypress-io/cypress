@@ -7,6 +7,6 @@ module.exports = {
     // this line forces releasing 2.X releases on the latest channel
     { name: 'npm/vue/v2', range: '2.X.X' },
     // this one releases v3 on master as beta on the next channel
-    { name: 'master', channel: 'next', prerelease: 'beta' },
+    { name: 'master', channel: 'next' },
   ],
 }

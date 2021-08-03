@@ -10,12 +10,12 @@ describe('Props', () => {
     it('has props', () => {
       const messages = ['one 🍎', 'two 🍌']
 
-      mount(MessageList, { propsData: { messages } })
+      mount(MessageList, { props: { messages } })
       getItems()
       .should('have.length', 2)
       .then((list) => {
-        expect(list[0].textContent.trim()).to.equal(messages[0])
-        expect(list[1].textContent.trim()).to.equal(messages[1])
+        expect(list[0].textContent).to.contain(messages[0])
+        expect(list[1].textContent).to.contain(messages[1])
       })
     })
   })

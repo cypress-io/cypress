@@ -700,6 +700,12 @@ namespace CypressTaskTests {
   })
 }
 
+namespace CypressCurrentTest {
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType string[]
+  Cypress.currentTest() // $ExpectError
+}
+
 namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0

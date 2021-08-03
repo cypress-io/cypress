@@ -259,6 +259,14 @@ declare namespace Cypress {
     spec: Spec
 
     /**
+     * Currently executing test runnable instance.
+     */
+    currentTest: {
+      title: string,
+      titlePath: string[]
+    }
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
@@ -1661,7 +1669,7 @@ declare namespace Cypress {
      *    .shadow()
      *    .find('.my-button')
      *    .click()
-     * @see https://on.cypress.io/experimental
+     * @see https://on.cypress.io/shadow
      */
     shadow(): Chainable<Subject>
 
@@ -5509,6 +5517,7 @@ declare namespace Cypress {
 
   interface Log {
     end(): Log
+    error(error: Error): Log
     finish(): void
     get<K extends keyof LogConfig>(attr: K): LogConfig[K]
     get(): LogConfig
