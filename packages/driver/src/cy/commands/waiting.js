@@ -53,7 +53,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       log = options._log = Cypress.log({
         type: 'parent',
         aliasType: 'route',
-        options,
+        // avoid circular reference
+        options: _.omit(options, '_log'),
       })
     }
 
