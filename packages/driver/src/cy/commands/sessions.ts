@@ -317,6 +317,7 @@ export default function (Commands, Cypress, cy) {
     },
 
     async setSessionData (data) {
+      await sessions.clearCurrentSessionData()
       const allHtmlOrigins = await getAllHtmlOrigins()
 
       let _localStorage = data.localStorage || []

@@ -24,7 +24,10 @@ before(() => {
 })
 
 const sessionUser = (name = 'user0') => {
+  console.log('session User')
+
   return cy.session(name, () => {
+    console.log('cyvisit')
     cy.visit(`https://localhost:4466/cross_origin_iframe/${name}`)
     cy.window().then((win) => {
       win.localStorage.username = name
@@ -316,6 +319,8 @@ describe('multiple sessions in test', () => {
 
 describe('multiple sessions in test - can switch without redefining', () => {
   it('switch session during test', () => {
+    const clearSpy = cy.spy(Cypress.session, 'clearCurrentSessionData')
+
     sessionUser('bob')
     sessionUser('alice')
     cy.url().should('eq', 'about:blank')
@@ -329,7 +334,16 @@ describe('multiple sessions in test - can switch without redefining', () => {
       ],
     })
 
+    cy.then(() => {
+      console.clear()
+      expect(clearSpy).calledTwice
+    })
+
     sessionUser('bob')
+
+    cy.then(() => {
+      expect(clearSpy).calledThrice
+    })
 
     cy.url().should('eq', 'about:blank')
 
