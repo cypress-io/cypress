@@ -1019,7 +1019,7 @@ export default {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
 
-          ${normalizedStack(innerErr)}
+          ${$stackUtils.normalizedStack(innerErr)}
 
           Route: ${format(route)}
 

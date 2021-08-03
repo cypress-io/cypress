@@ -22,6 +22,10 @@ if (!Error.captureStackTrace) {
 }
 
 const prepareErrorForSerialization = (err) => {
+  if (typeof err === 'string') {
+    err = new Error(err)
+  }
+
   if (err[ERR_PREPARED_FOR_SERIALIZATION]) {
     return err
   }
