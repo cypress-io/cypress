@@ -414,4 +414,34 @@ describe('Proxy Logging', () => {
       })
     })
   })
+
+  context('Cypress.ProxyLogging', () => {
+    describe('.logInterception', () => {
+      it('creates a fake log for unmatched requests', () => {
+        const interception = {
+          id: 'request123',
+          request: {
+            url: 'http://foo',
+            method: 'GET',
+            headers: {},
+          },
+        }
+
+        const route = {}
+
+        const ret = Cypress.ProxyLogging.logInterception(interception, route)
+
+        expect(ret.preRequest).to.deep.eq({
+          requestId: 'request123',
+          resourceType: 'other',
+          originalResourceType: 'Request with no browser pre-request',
+          url: 'http://foo',
+          method: 'GET',
+          headers: {},
+        })
+
+        expect(ret.log.get('name')).to.eq('request')
+      })
+    })
+  })
 })
