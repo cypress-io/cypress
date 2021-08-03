@@ -20,6 +20,7 @@ import { useGlobalHotKey } from '../lib/useHotKey'
 import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
+import { WarningMessage } from './WarningMessage'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
 import { NoSpec } from './NoSpec'
 
@@ -176,72 +177,91 @@ const RunnerCt = namedObserver('RunnerCt',
       state.updateSpecListWidth(width)
     }
 
-    return (
-      <SplitPane
-        split="vertical"
-        allowResize={false}
-        maxSize={hideIfScreenshotting(state, () => 50)}
-        minSize={hideIfScreenshotting(state, () => 50)}
-        defaultSize={hideIfScreenshotting(state, () => 50)}
-      >
-        {state.screenshotting
-          ? <span />
-          : (
-            <LeftNavMenu
-              activeIndex={activeIndex}
-              items={navItems}
-            />
-          )}
-        <SplitPane
-          ref={splitPaneRef}
-          split="vertical"
-          minSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? 30 : 0)}
-          maxSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? 600 : 0)}
-          defaultSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? state.specListWidth : 0)}
-          className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
-          pane2Style={{
-            borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
-          }}
-          onDragFinished={persistWidth('ctSpecListWidth')}
-          onChange={animationFrameDebounce(updateSpecListWidth)}
-        >
-          {
-            state.specs.length < 1 ? (
-              <NoSpec message="No specs found">
-                <p className={runnerCtStyles.noSpecsDescription}>
-                  Create a new spec file in
-                  {' '}
-                  <span className={runnerCtStyles.folder}>
-                    {
-                      props.config.componentFolder
-                        ? props.config.componentFolder.replace(props.config.projectRoot, '')
-                        : 'the component specs folder'
-                    }
-                  </span>
-                  {' '}
-                  and it will immediately appear here.
-                </p>
-              </NoSpec>
-            ) : (
-              <SpecList
-                searchRef={searchRef}
-                className={cs(styles.specsList, {
-                  'display-none': hideSpecsListIfNecessary(state),
-                })}
-                specs={props.state.specs}
-                selectedFile={state.spec ? state.spec.relative : undefined}
-                onFileClick={runSpec}
-              />
-            )
-          }
+    const renderWarnings = () => {
+      const { warnings } = state
 
-          <SpecContent
-            state={props.state}
-            eventManager={props.eventManager}
-            config={props.config}
-          />
+      return warnings.map((warning, i) => (
+        <WarningMessage
+          key={warning.message}
+          warning={warning}
+          onDismissWarning={() => removeWarning(warning)}
+        />
+      ))
+    }
+
+    const removeWarning = (warning) => {
+      state.removeWarning(warning)
+    }
+
+    return (
+      <>
+        {renderWarnings()}
+        <SplitPane
+          split="vertical"
+          allowResize={false}
+          maxSize={hideIfScreenshotting(state, () => 50)}
+          minSize={hideIfScreenshotting(state, () => 50)}
+          defaultSize={hideIfScreenshotting(state, () => 50)}
+        >
+          {state.screenshotting
+            ? <span />
+            : (
+              <LeftNavMenu
+                activeIndex={activeIndex}
+                items={navItems}
+              />
+            )}
+          <SplitPane
+            ref={splitPaneRef}
+            split="vertical"
+            minSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? 30 : 0)}
+            maxSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? 600 : 0)}
+            defaultSize={hideIfScreenshotting(state, () => state.isSpecsListOpen ? state.specListWidth : 0)}
+            className={cs('primary', { isSpecsListClosed: !state.isSpecsListOpen })}
+            pane2Style={{
+              borderLeft: '1px solid rgba(230, 232, 234, 1)' /* $metal-20 */,
+            }}
+            onDragFinished={persistWidth('ctSpecListWidth')}
+            onChange={animationFrameDebounce(updateSpecListWidth)}
+          >
+            {
+              state.specs.length < 1 ? (
+                <NoSpec message="No specs found">
+                  <p className={runnerCtStyles.noSpecsDescription}>
+                  Create a new spec file in
+                    {' '}
+                    <span className={runnerCtStyles.folder}>
+                      {
+                        props.config.componentFolder
+                          ? props.config.componentFolder.replace(props.config.projectRoot, '')
+                          : 'the component specs folder'
+                      }
+                    </span>
+                    {' '}
+                  and it will immediately appear here.
+                  </p>
+                </NoSpec>
+              ) : (
+                <SpecList
+                  searchRef={searchRef}
+                  className={cs(styles.specsList, {
+                    'display-none': hideSpecsListIfNecessary(state),
+                  })}
+                  specs={props.state.specs}
+                  selectedFile={state.spec ? state.spec.relative : undefined}
+                  onFileClick={runSpec}
+                />
+              )
+            }
+
+            <SpecContent
+              state={props.state}
+              eventManager={props.eventManager}
+              config={props.config}
+            />
+          </SplitPane>
         </SplitPane>
-      </SplitPane>
+      </>
     )
   })
 

@@ -55,6 +55,10 @@ const _defaults: Defaults = {
   callbackAfterUpdate: null,
 }
 
+export interface Warning{
+  message: string
+}
+
 export default class State extends BaseStore {
   defaults = _defaults
 
@@ -105,6 +109,8 @@ export default class State extends BaseStore {
   @observable readyToRunTests = false
   @observable activePlugin: string | null = null
   @observable plugins: UIPlugin[] = []
+
+  @observable warnings: Warning[] = []
 
   constructor ({
     spec,
@@ -190,6 +196,14 @@ export default class State extends BaseStore {
         top: (actualHeight + this.headerHeight + nudge),
       },
     }
+  }
+
+  @action addWarning (warning: Warning) {
+    this.warnings.push(warning)
+  }
+
+  @action removeWarning (warning: Warning) {
+    this.warnings
   }
 
   @action setScreenshotting (screenshotting: boolean) {
