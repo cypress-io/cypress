@@ -1,6 +1,6 @@
 import { cacheExchange, Client, createClient, dedupExchange, errorExchange } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
-import { graphqlSchema } from '@packages/graphql'
+import { graphqlSchema } from '../../../graphql'
 import type { ClientTestContext } from '../../src/graphql/ClientTestContext'
 
 interface TestApolloClientConfig {
