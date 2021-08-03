@@ -20,7 +20,7 @@
     "@cypress/vue": "0.0.0-development",
     "@testing-library/cypress": "7.0.4",
     "@vitejs/plugin-vue": "1.2.0",
-    "@vue/compiler-sfc": "3.0.9",
+    "@vue/compiler-sfc": "3.2.0-beta.7",
     "cypress": "0.0.0-development",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",

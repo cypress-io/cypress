@@ -1,8 +1,11 @@
 {
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "allowJs": false,
+    "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
-    "noImplicitAny": true,  
     "importsNotUsedAsValues": "error"
   }
 }

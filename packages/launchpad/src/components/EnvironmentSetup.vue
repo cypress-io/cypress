@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
-import Select from "./Select.vue";
+import Select, { Option } from "./Select.vue";
 import { gql } from '@urql/core'
 import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'

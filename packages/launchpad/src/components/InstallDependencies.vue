@@ -60,7 +60,7 @@ export default defineComponent({
       manualInstall: computed(() => props.gql.isManualInstall),
       nextButtonName, 
       gql: computed(() => props.gql),
-      altFn(val) {
+      altFn (val: boolean) {
         toggleManual.executeMutation({ isManual: val })
       }
     };

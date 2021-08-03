@@ -172,7 +172,7 @@ export class Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== 0) {
-      this.currentStep = WIZARD_STEP[idx - 1]
+      this.currentStep = WIZARD_STEP[idx - 1]!
     }
 
     return this
@@ -182,7 +182,7 @@ export class Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== WIZARD_STEP.length - 1) {
-      this.currentStep = WIZARD_STEP[idx + 1]
+      this.currentStep = WIZARD_STEP[idx + 1]!
     }
 
     return this

@@ -57,10 +57,8 @@ export default defineComponent({
     OpenBrowser,
   },
   setup() {
-    const result = useQuery({ query: WizardDocument })
-
-    watch(result.data, value => {
-      console.log(value)
+    const result = useQuery({
+      query: WizardDocument,
     })
 
     return { 

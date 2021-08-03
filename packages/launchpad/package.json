@@ -19,6 +19,8 @@
     "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
   "dependencies": {
+    "@iconify/json": "1.1.368",
+    "@iconify/vue": "3.0.0-beta.1",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
     "vue": "3.2.0-beta.7"
@@ -33,11 +35,13 @@
     "@graphql-typed-document-node/core": "^3.1.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
+    "@testing-library/cypress": "8.0.0",
     "@urql/core": "2.1.5",
     "@urql/exchange-execute": "^1.0.4",
     "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
+    "@vueuse/core": "5.2.0",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
     "concurrently": "^6.2.0",
@@ -49,9 +53,11 @@
     "vite": "^2.4.4",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",
+    "vite-plugin-purge-icons": "0.7.0",
     "vite-plugin-windicss": "1.2.4",
     "vue": "3.2.0-beta.7",
     "vue-prism-component": "2.0.0",
+    "vue-prism-editor": "^2.0.0-alpha.2",
     "vue-tsc": "0.0.24",
     "windicss": "3.1.4",
     "wonka": "^4.0.15"

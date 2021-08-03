@@ -39,14 +39,6 @@ mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
 }
 `
 
-// gql`
-// mutation WizardLayoutNavigateBack {
-//   wizardNavigateBack {
-//     ...WizardLayout
-//   }
-// }
-// `
-
 export default defineComponent({
   components: { ButtonBar },
   props: {
@@ -67,7 +59,7 @@ export default defineComponent({
       default: undefined
     }
   },
-  setup() {
+  setup(props) {
     const navigate = useMutation(WizardLayoutNavigateDocument)
 
     function nextFn() {

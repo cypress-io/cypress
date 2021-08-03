@@ -17,5 +17,7 @@
 
 import 'virtual:windi.css'
 import '../../src/main.scss'
+import '@iconify/iconify'
+import '@purge-icons/generated'
 
 import './commands'
