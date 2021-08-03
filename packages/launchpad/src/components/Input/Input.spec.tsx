@@ -20,7 +20,7 @@ describe('<Input />', () => {
           <Input
             modelValue={lorem}
             prefixIcon={HeartIcon}
-            prefixIconClasses='text-gray-cool-500'
+            prefixIconClass='text-gray-cool-500'
           />
         </div>
 
@@ -28,7 +28,7 @@ describe('<Input />', () => {
           <Input
             modelValue={lorem}
             prefixIcon={HeartIcon}
-            prefixIconClasses='text-gray-cool-500'
+            prefixIconClass='text-gray-cool-500'
             suffixIcon={CoffeeIcon}
             suffixIconClass='text-gray-cool-500'
           />
@@ -44,7 +44,6 @@ describe('<Input />', () => {
           <Input
             type={visible.value ? 'text' : 'password'}
             modelValue={text.value}
-            onChange={(e: KeyboardEvent) => text.value = (e.target as HTMLInputElement).value}
           />
           <button onClick={() => visible.value = !visible.value}>
             Toggle
@@ -56,7 +55,6 @@ describe('<Input />', () => {
           <Input
             type={visible.value ? 'text' : 'password'}
             modelValue={text.value}
-            onChange={(e: KeyboardEvent) => text.value = (e.target as HTMLInputElement).value}
             disabled
           />
           <button onClick={() => visible.value = !visible.value}>Toggle</button>

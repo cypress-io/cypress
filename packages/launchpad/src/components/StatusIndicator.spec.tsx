@@ -8,7 +8,7 @@ const types = {
   disabled: `Nah`,
 } as const
 
-const renderStatusIndicator = (status: StatusIndicatorType, text: string) => {
+const renderStatusIndicator = (text: string, status: StatusIndicatorType) => {
   return (
     <span class="inline text-center">
       {status}
@@ -28,7 +28,7 @@ describe('<StatusIndicator />', () => {
       <div class="p-12">
         <h1 class="text-2xl pb-4">Status Indicators</h1>
         <div class="inline-flex gap-4">
-          {Object.entries(types).map(([text, type]) => renderStatusIndicator(text, type))}
+          {Object.entries(types).map(([type, text]) => renderStatusIndicator(text, type as StatusIndicatorType))}
         </div>
       </div>
     ))

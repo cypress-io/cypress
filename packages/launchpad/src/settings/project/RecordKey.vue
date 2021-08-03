@@ -15,9 +15,8 @@
         <template #prefix>
           <Icon :icon="IconKey" class="text-cool-gray-400" />
         </template>
-        <template #suffix="{ containerClass }">
+        <template>
           <button
-            :class="containerClass"
             @click="showRecordKey = !showRecordKey"
             aria-label="Record Key Visibility Toggle"
             class="text-cool-gray-400 hover:text-cool-gray-500"

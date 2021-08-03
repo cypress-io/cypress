@@ -47,7 +47,7 @@ const props = defineProps<{
   prefixIcon?: IconType
   suffixIcon?: IconType
   size?: "xs" | "sm" | "md" | "lg" | "xl"
-  variant?: "primary" | "outline" | "link"
+  variant?: "primary" | "outline" | "link" | "underline"
   prefixIconClass?: string
   suffixIconClass?: string
   class?: string

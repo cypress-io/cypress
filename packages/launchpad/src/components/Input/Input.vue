@@ -31,28 +31,26 @@
 
 
 <script lang="ts" setup>
-import type { PropType } from 'vue'
 import { computed } from 'vue'
 import { useModelWrapper } from '../../composables'
 import { omit, pick, keys } from 'lodash'
+import type { IconType } from '../../types'
 import IconWrapper, { iconProps } from '../IconWrapper.vue'
 
-const props = defineProps({
-  ...iconProps,
-  type: {
-    type: String as PropType<HTMLInputElement['type']>
-  },
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  inputClass: {
-    type: [String, Array, Object],
-  }
+  // ...iconProps,
+const props = withDefaults(defineProps<{
+  prefixIcon?: IconType,
+  prefixIconClass?: string,
+  suffixIcon?: IconType,
+  suffixIconClass?: string,
+  type?: HTMLInputElement['type']
+  modelValue?: string
+  disabled: boolean
+  inputClass?: string | Array<any> | object
+}>(), {
+  modelValue: '',
+  disabled: false,
+  type: 'text'
 })
 
 const emit = defineEmits(['update:modelValue'])

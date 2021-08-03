@@ -9,6 +9,6 @@ import { defineProps } from 'vue'
 import type { IconType } from '../types'
 
 defineProps<{
-  icon?: IconType
+  icon?: IconType | string
 }>()
 </script>

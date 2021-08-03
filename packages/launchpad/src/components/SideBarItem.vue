@@ -15,12 +15,14 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from "vue"
+import { defineProps, HTMLAttributes } from "vue"
 import Icon from './Icon.vue'
 import type { IconType } from '../types'
 
-defineProps<{
-  icon: any
+interface Props extends HTMLAttributes {
+  icon: IconType | string
   active?: boolean
-}>()
+}
+
+defineProps<Props>()
 </script>

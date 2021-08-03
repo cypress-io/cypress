@@ -16,8 +16,16 @@ describe('<SideBarItem />', () => {
 
     cy.mount(() => (
       <div class="m-10px w-140px border">
-        <SideBarItem onClick={() => onClick(0)} active={active.value === 0}icon="mdi:coffee" />
-        <SideBarItem onClick={() => onClick(1)} icon="mdi:coffee" active={active.value === 1}/>
+        <SideBarItem
+          onClick={() => onClick(0)}
+          active={active.value === 0}
+          icon="mdi:coffee"
+        />
+        <SideBarItem
+          onClick={() => onClick(1)}
+          icon="mdi:coffee"
+          active={active.value === 1}
+        />
       </div>
     ))
   })

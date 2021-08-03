@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { useModelWrapper } from '../composables'
 import Icon from './Icon.vue'
 import type { IconType } from '../types'
@@ -50,7 +50,6 @@ export default defineComponent({
     },
   },
   setup(props, { emit, attrs, slots }) {
-
     return {
       localValue: useModelWrapper(props, emit, 'modelValue'),
       buttonClass,  
@@ -58,6 +57,4 @@ export default defineComponent({
     }
   }
 })
-
-
 </script>
