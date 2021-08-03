@@ -101,7 +101,6 @@ export default class Hook implements HookProps {
     const lastCommand = _.last(this.commands)
 
     if (lastCommand &&
-      lastCommand.name !== 'page load' &&
       lastCommand.isMatchingEvent &&
       lastCommand.isMatchingEvent(command) &&
       lastCommand.addChild

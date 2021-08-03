@@ -75,6 +75,7 @@ export default class Command extends Instrument {
     return this._isOpen || (this._isOpen === null
       && (
         (this.group && this.type === 'system' && this.hasChildren) ||
+        _.some(this.children, (v) => v.hasChildren) ||
         _.last(this.children)?.isOpen ||
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
         _.some(this.children, (v) => v.state === 'failed')
@@ -128,6 +129,8 @@ export default class Command extends Instrument {
   }
 
   isMatchingEvent (command: Command) {
+    if (command.name === 'page load') return false
+
     if (command.type === 'system') return false
 
     return command.event && this.matches(command)

@@ -93,6 +93,15 @@
     }
   }
 
+  .command-type-system.command-is-event,
+  .command-name-session {
+    > span > .command-wrapper {
+      .num-children {
+        display: none;
+      }
+    }
+  }
+
   .command-wrapper {
     background-color: #eef1f4;
     color: #777;
@@ -143,6 +152,7 @@
           overflow: hidden;
           text-overflow: ellipsis;
           vertical-align: top;
+          height: 18px;
         }
       }
 
@@ -173,15 +183,14 @@
         padding: 3px 5px 3px 5px;
       }
 
-      .num-children.has-alias.has-children,
       .command-interceptions-count {
         border-radius: 0 10px 10px 0;
-        padding: 4px 5px 2px 3px;
+        padding: 2px 5px;
       }
 
       .command-alias-count {
         border-radius: 0 10px 10px 0;
-        padding: 5px 6px 3px 4px;
+        padding: 2px 5px;
       }
 
       .num-children,
@@ -357,6 +366,7 @@
 
       .fa-circle {
         padding: 4px;
+        padding-right: 2px;
         display: inline-block;
       }
     
@@ -522,13 +532,13 @@
 
   .command-has-num-elements .num-elements,
   .num-children,
-  .command-has-children.command-is-open > span > .command-wrapper .num-children.has-alias.has-children  {
+  .command-has-children.command-is-open > span > .command-wrapper .num-children.has-children  {
     display: none;
   }
 
   .command-has-num-elements.no-elements .num-elements,
   .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-children .num-children.has-alias.has-children {
+  .command-has-children .num-children.has-children {
     display: inline;
   }
 
