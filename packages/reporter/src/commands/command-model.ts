@@ -137,9 +137,6 @@ export default class Command extends Instrument {
   }
 
   addChild (command: Command) {
-    console.log('addchild to', this.name, command.name, command.group)
-    // if (this.name === 'Clear Page') console.log(this.name)
-
     command.isChild = true
     command.setGroup(this.id)
     this.children.push(command)
