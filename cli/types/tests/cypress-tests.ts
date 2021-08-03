@@ -696,7 +696,7 @@ namespace CypressSessionsTests {
   })
 
   cy.session() // $ExpectError
-  cy.session(/sdf/) // $ExpectError
+  cy.session(null) // $ExpectError
   cy.session('user', () => {}, {
     validate: { foo: true } // $ExpectError
   })
