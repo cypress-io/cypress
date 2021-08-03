@@ -4,6 +4,7 @@ import InlineCodeEditor from './InlineCodeEditor.vue'
 import Input from './Input.vue'
 
 describe('InlineCodeEditor', () => {
+  // seems we have a problem with defineEmits
   it('renders', () => {
     const myCode = ref('console.log("I LOVE formatted code.")')
 

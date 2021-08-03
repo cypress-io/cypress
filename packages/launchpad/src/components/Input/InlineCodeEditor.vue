@@ -17,7 +17,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps, defineEmits } from 'vue'
 import CodeEditor from '../CodeEditor.vue'
 import { useModelWrapper } from '../../composables'
 import IconWrapper, { iconProps } from '../IconWrapper.vue'

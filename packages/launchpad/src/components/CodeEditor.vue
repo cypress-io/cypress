@@ -9,12 +9,10 @@
 
 <script setup lang="ts">
 import prism from "prismjs"
-import { PrismEditor } from "vue-prism-editor" //
+import { PrismEditor } from "vue-prism-editor"
 import "vue-prism-editor/dist/prismeditor.min.css" // import the styles somewhere
 import "prismjs/themes/prism.css" // import syntax highlighting styles
-// import highlighting library (you can use any library you want just return html string)
 import { useModelWrapper } from "../composables"
-import { defineProps, defineEmits } from "vue"
 
 const props = defineProps<{
   modelValue: string

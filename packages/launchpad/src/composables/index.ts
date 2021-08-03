@@ -11,6 +11,8 @@ export function useModelWrapper<T, N extends string = 'modelValue'> (
 ) {
   return computed({
     get: () => props[name],
-    set: (value: any) => emit(`update:${name}` as any, value),
+    set: (value: any) => {
+      emit(`update:${name}` as any, value)
+    },
   })
 }

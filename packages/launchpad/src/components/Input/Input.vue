@@ -32,7 +32,7 @@
 
 <script lang="ts" setup>
 import type { PropType } from 'vue'
-import { defineProps, defineEmits, computed } from 'vue'
+import { computed } from 'vue'
 import { useModelWrapper } from '../../composables'
 import { omit, pick, keys } from 'lodash'
 import IconWrapper, { iconProps } from '../IconWrapper.vue'
