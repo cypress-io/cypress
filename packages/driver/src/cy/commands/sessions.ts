@@ -4,6 +4,7 @@ import $Location from '../../cypress/location'
 import $errUtils from '../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
 import * as $stackUtils from '../../cypress/stack_utils'
+import Bluebird from 'bluebird'
 const currentTestRegisteredSessions = new Map()
 
 /**
@@ -31,6 +32,89 @@ const getSessionDetailsForTable = (sessState) => {
   )
 }
 
+const isSecureContext = (url) => url.startsWith('https:')
+
+const getCurrentOriginStorage = () => {
+  // localStorage.length propery is not always accurate, we must stringify to check for entries
+  // for ex) try setting localStorge.key = 'val' and reading localStorage.length, may be 0.
+  const _localStorageStr = JSON.stringify(window.localStorage)
+  const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
+  const _sessionStorageStr = JSON.stringify(window.sessionStorage)
+  const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
+
+  const value = {} as any
+
+  if (_localStorage) {
+    value.localStorage = _localStorage
+  }
+
+  if (_sessionStorage) {
+    value.sessionStorage = _sessionStorage
+  }
+
+  return value
+}
+
+const setPostMessageLocalStorage = (specWindow, originOptions) => {
+  const origins = originOptions.map((v) => v.origin) as string[]
+
+  const iframes: JQuery<HTMLElement>[] = []
+
+  const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
+
+  // if we're on an https domain, there is no way for the secure context to access insecure origins from iframes
+  // since there is no way for the app to access localStorage on insecure contexts, we don't have to clear any localStorage on http domains.
+  if (isSecureContext(specWindow.location.href)) {
+    _.remove(origins, (v) => !isSecureContext(v))
+  }
+
+  _.each(origins, (u) => {
+    const $iframe = $(`<iframe src="${`${u}/__cypress/automation/setLocalStorage?${u}`}"></iframe>`)
+
+    $iframe.appendTo($iframeContainer)
+    iframes.push($iframe)
+  })
+
+  let onPostMessage
+
+  const successOrigins = [] as string[]
+
+  return new Bluebird((resolve) => {
+    onPostMessage = (event) => {
+      const data = event.data
+
+      if (data.type === 'set:storage:load') {
+        if (!event.source) {
+          throw new Error('failed to get localStorage')
+        }
+
+        const opts = _.find(originOptions, { origin: event.origin })!
+
+        event.source.postMessage({ type: 'set:storage:data', data: opts }, '*')
+      } else if (data.type === 'set:storage:complete') {
+        successOrigins.push(event.origin)
+        if (successOrigins.length === origins.length) {
+          resolve()
+        }
+      }
+    }
+
+    specWindow.addEventListener('message', onPostMessage)
+  })
+  // timeout just in case something goes wrong and the iframe never loads in
+  .timeout(2000)
+  .finally(() => {
+    specWindow.removeEventListener('message', onPostMessage)
+    $iframeContainer.remove()
+  })
+  .catch((err) => {
+    Cypress.log({
+      name: 'warning',
+      message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
+    })
+  })
+}
+
 const getConsoleProps = (sessState) => {
   const ret = {
     id: sessState.id,
@@ -56,6 +140,57 @@ const getConsoleProps = (sessState) => {
   }
 
   return ret
+}
+
+const getPostMessageLocalStorage = (specWindow, origins) => {
+  const results = [] as any[]
+  const iframes: JQuery<HTMLElement>[] = []
+  let onPostMessage
+  const successOrigins = [] as string[]
+
+  const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
+
+  _.each(origins, (u) => {
+    const $iframe = $(`<iframe src="${`${u}/__cypress/automation/getLocalStorage`}"></iframe>`)
+
+    $iframe.appendTo($iframeContainer)
+    iframes.push($iframe)
+  })
+
+  return new Bluebird((resolve) => {
+    // when the cross-domain iframe for each domain is loaded
+    // we can only communicate through postmessage
+    onPostMessage = ((event) => {
+      const data = event.data
+
+      if (data.type !== 'localStorage') return
+
+      const value = data.value
+
+      results.push([event.origin, value])
+
+      successOrigins.push(event.origin)
+      if (successOrigins.length === origins.length) {
+        resolve(results)
+      }
+    })
+
+    specWindow.addEventListener('message', onPostMessage)
+  })
+  // timeout just in case something goes wrong and the iframe never loads in
+  .timeout(2000)
+  .finally(() => {
+    specWindow.removeEventListener('message', onPostMessage)
+    $iframeContainer.remove()
+  })
+  .catch((err) => {
+    Cypress.log({
+      name: 'warning',
+      message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
+    })
+
+    return []
+  })
 }
 
 export default function (Commands, Cypress, cy) {
@@ -87,7 +222,7 @@ export default function (Commands, Cypress, cy) {
       _.flatten(await Promise.map(
         ([] as string[]).concat(origins), async (v) => {
           if (v === '*') {
-            return _.keys(await Cypress.backend('get:renderedHTMLOrigins')).concat([currentOrigin])
+            return _.keys(await Cypress.backend('get:rendered:html:origins')).concat([currentOrigin])
           }
 
           if (v === 'currentOrigin') return currentOrigin
@@ -129,69 +264,13 @@ export default function (Commands, Cypress, cy) {
       return
     }
 
-    const origins = originOptions.map((v) => v.origin) as string[]
-
-    const iframes: JQuery<HTMLElement>[] = []
-
-    const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
-
-    // if we're on an https domain, there is no way for the secure context to access insecure origins from iframes
-    // since there is no way for the app to access localStorage on insecure contexts, we don't have to clear any localStorage on http domains.
-    if (currentOrigin.startsWith('https:')) {
-      _.remove(origins, (v) => v.startsWith('http:'))
-    }
-
-    _.each(origins, (u) => {
-      const $iframe = $(`<iframe src="${`${u}/__cypress/automation/setLocalStorage?${u}`}"></iframe>`)
-
-      $iframe.appendTo($iframeContainer)
-      iframes.push($iframe)
-    })
-
-    let onPostMessage
-
-    const successOrigins = [] as string[]
-
-    await new Promise((resolve) => {
-      onPostMessage = (event) => {
-        const data = event.data
-
-        if (data.type === 'set:storage:load') {
-          if (!event.source) {
-            throw new Error('failed to get localStorage')
-          }
-
-          const opts = _.find(originOptions, { origin: event.origin })!
-
-          event.source.postMessage({ type: 'set:storage:data', data: opts }, '*')
-        } else if (data.type === 'set:storage:complete') {
-          successOrigins.push(event.origin)
-          if (successOrigins.length === origins.length) {
-            resolve()
-          }
-        }
-      }
-
-      specWindow.addEventListener('message', onPostMessage)
-    })
-    // timeout just in case something goes wrong and the iframe never loads in
-    .timeout(2000)
-    .catch((err) => {
-      Cypress.log({
-        name: 'warning',
-        message: `failed to set session storage on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
-      })
-    })
-    .finally(() => {
-      specWindow.removeEventListener('message', onPostMessage)
-      $iframeContainer.remove()
-    })
+    await setPostMessageLocalStorage(specWindow, originOptions)
   }
 
   async function getAllHtmlOrigins () {
     const currentOrigin = $Location.create(window.location.href).origin
 
-    const origins = _.uniq([..._.keys(await Cypress.backend('get:renderedHTMLOrigins')), currentOrigin]) as string[]
+    const origins = _.uniq([..._.keys(await Cypress.backend('get:rendered:html:origins')), currentOrigin]) as string[]
 
     return origins
   }
@@ -335,24 +414,9 @@ export default function (Commands, Cypress, cy) {
 
       if (currentOriginIndex !== -1) {
         origins.splice(currentOriginIndex, 1)
-        // localStorage.length propery is not always accurate, we must stringify to check for entries
-        // for ex) try setting localStorge.key = 'val' and reading localStorage.length, may be 0.
-        const _localStorageStr = JSON.stringify(window.localStorage)
-        const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
-        const _sessionStorageStr = JSON.stringify(window.sessionStorage)
-        const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
+        const currentOriginStorage = getCurrentOriginStorage()
 
-        const value = {} as any
-
-        if (_localStorage) {
-          value.localStorage = _localStorage
-        }
-
-        if (_sessionStorage) {
-          value.sessionStorage = _sessionStorage
-        }
-
-        pushValue(currentOrigin, value)
+        pushValue(currentOrigin, currentOriginStorage)
       }
 
       if (_.isEmpty(origins)) {
@@ -363,51 +427,10 @@ export default function (Commands, Cypress, cy) {
         _.remove(origins, (v) => v.startsWith('http:'))
       }
 
-      const iframes: JQuery<HTMLElement>[] = []
+      const postMessageResults = await getPostMessageLocalStorage(specWindow, origins)
 
-      const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
-
-      _.each(origins, (u) => {
-        const $iframe = $(`<iframe src="${`${u}/__cypress/automation/getLocalStorage`}"></iframe>`)
-
-        $iframe.appendTo($iframeContainer)
-        iframes.push($iframe)
-      })
-
-      let onPostMessage
-      const successOrigins = [] as string[]
-
-      await new Promise((resolve) => {
-        // when the cross-domain iframe for each domain is loaded
-        // we can only communicate through postmessage
-        onPostMessage = ((event) => {
-          const data = event.data
-
-          if (data.type !== 'localStorage') return
-
-          const value = data.value
-
-          pushValue(event.origin, value)
-
-          successOrigins.push(event.origin)
-          if (successOrigins.length === origins.length) {
-            resolve()
-          }
-        })
-
-        specWindow.addEventListener('message', onPostMessage)
-      })
-      // timeout just in case something goes wrong and the iframe never loads in
-      .timeout(2000)
-      .catch((err) => {
-        Cypress.log({
-          name: 'warning',
-          message: `failed to set session storage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
-        })
-      })
-      .finally(() => {
-        specWindow.removeEventListener('message', onPostMessage)
-        $iframeContainer.remove()
+      postMessageResults.forEach((val) => {
+        pushValue(val[0], val[1])
       })
 
       return getResults()
@@ -462,7 +485,7 @@ export default function (Commands, Cypress, cy) {
           return navigateAboutBlank(false)
           .then(() => sessions.clearCurrentSessionData())
           .then(() => {
-            return Cypress.backend('reset:renderedHTMLOrigins')
+            return Cypress.backend('reset:rendered:html:origins')
           })
         }
 
@@ -553,7 +576,7 @@ export default function (Commands, Cypress, cy) {
         message: `${existingSession.id > 50 ? `${existingSession.id.substr(0, 47)}...` : existingSession.id}`,
       })
 
-      async function runsetup (existingSession) {
+      function runSetup (existingSession) {
         Cypress.log({
           name: 'Create New Session',
           state: 'passed',
@@ -574,13 +597,16 @@ export default function (Commands, Cypress, cy) {
           })
         }
 
-        cy.then(() => navigateAboutBlank())
+        return cy.then(async () => {
+          await navigateAboutBlank()
+          await sessions.clearCurrentSessionData()
 
-        cy.then(() => sessions.clearCurrentSessionData())
-        .then(() => existingSession.setup())
+          return existingSession.setup()
+        })
+        .then(async () => {
+          await navigateAboutBlank()
+          const data = await sessions.getCurrentSessionData()
 
-        return cy.then(() => sessions.getCurrentSessionData())
-        .then((data) => {
           Cypress.log({ groupEnd: true, emitOnly: true })
 
           _.extend(existingSession, data)
@@ -600,8 +626,6 @@ export default function (Commands, Cypress, cy) {
 
       // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
       function validateSession (existingSession, _onFail) {
-        cy.then(() => navigateAboutBlank())
-
         const validatingLog = Cypress.log({
           name: 'Validate Session',
           message: '',
@@ -748,7 +772,7 @@ export default function (Commands, Cypress, cy) {
 
         hadValidationError = true
 
-        return runsetup(existingSession)
+        return runSetup(existingSession)
         .then(() => {
           cy.then(() => {
             return validateSession(existingSession, throwValidationError)
@@ -769,20 +793,18 @@ export default function (Commands, Cypress, cy) {
       }
 
       return cy.then(async () => {
-        if (existingSession.hydrated) return
-
-        const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
-
-        // we have a saved session on the server AND setup matches
-        if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
-          _.extend(existingSession, serverStoredSession)
-          existingSession.hydrated = true
-        }
-      }).then(() => {
         if (!existingSession.hydrated) {
-          onValidationError = throwValidationError
+          const serverStoredSession = await sessions.getSession(existingSession.id).catch(_.noop)
 
-          return runsetup(existingSession)
+          // we have a saved session on the server AND setup matches
+          if (serverStoredSession && serverStoredSession.setup === existingSession.setup.toString()) {
+            _.extend(existingSession, serverStoredSession)
+            existingSession.hydrated = true
+          } else {
+            onValidationError = throwValidationError
+
+            return runSetup(existingSession)
+          }
         }
 
         Cypress.log({
@@ -791,7 +813,10 @@ export default function (Commands, Cypress, cy) {
           state: 'passed',
           type: 'system',
           message: ``,
+          groupStart: true,
         })
+
+        await navigateAboutBlank()
 
         _log.set({
           renderProps: () => {
@@ -806,9 +831,10 @@ export default function (Commands, Cypress, cy) {
           consoleProps: () => getConsoleProps(existingSession),
         })
 
-        return sessions.setSessionData(existingSession)
+        await sessions.setSessionData(existingSession)
       })
       .then(async () => {
+        Cypress.log({ groupEnd: true, emitOnly: true })
         if (existingSession.validate) {
           await validateSession(existingSession, onValidationError)
         }

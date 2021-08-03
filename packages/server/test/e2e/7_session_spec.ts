@@ -117,6 +117,10 @@ describe('e2e sessions', () => {
       port: 44665,
       https: true,
       onServer,
+    }, {
+      port: 4465,
+      // https: true,
+      onServer,
     }],
     settings: {
       hosts: {

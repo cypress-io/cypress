@@ -103,6 +103,9 @@ const cyStripIndent = (str, indentSize) => {
   }).join('\n')
 }
 
+// unfortunately due to our mix of typescript imports and requires
+// and circular imports, we need to mutate module.exports instead of reassign
+// otherwise modules that are circularly importing will recieve empty object
 _.extend(module.exports, {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',

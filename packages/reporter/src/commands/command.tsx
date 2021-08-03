@@ -167,6 +167,10 @@ class Command extends Component<Props> {
     const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
 
+    if (model.name === 'Clear Page') {
+      console.log(model.name, model.group, model.id)
+    }
+
     if (model.group && this.props.groupId !== model.group) {
       return null
     }

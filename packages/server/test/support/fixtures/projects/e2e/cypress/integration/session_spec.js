@@ -359,7 +359,15 @@ function SuiteWithValidateFn (id, fn) {
     return fn(validate.callCount)
   })
 
+  let numPageLoads = 0
+
   beforeEach(() => {
+    cy.on('log:added', (attr) => {
+      if (attr.name === 'page load') {
+        numPageLoads++
+      }
+    })
+
     cy.session(id, setup, {
       validate,
     })
@@ -372,12 +380,19 @@ function SuiteWithValidateFn (id, fn) {
 
     expect(setup).calledOnce
     expect(validate).calledOnce
+    // (1,2) about:blank before & after session creation
+    // (3) after validate runs
+    expect(numPageLoads, 'number of page loads').eq(3)
   })
 
   it('t2', () => {
     cy.url().should('eq', 'about:blank')
     expect(setup).calledTwice
     expect(validate).calledThrice
+    // (4) about:blank before session rehydrating
+    // (5,6) about:blank before & after setup function
+    // (7) about:blank after 2nd validate runs
+    expect(numPageLoads, 'number of page loads').eq(7)
   })
 }
 
@@ -401,7 +416,7 @@ describe('options.validate reruns steps when rejecting', () => {
   })
 })
 
-describe('options.validate reruns steps when rejecting', () => {
+describe('options.validate reruns steps when throwing', () => {
   SuiteWithValidateFn('validate_reject', (callCount) => {
     if (callCount === 2) {
       throw new Error('validate error')
@@ -681,6 +696,32 @@ describe('consoleProps', () => {
         },
       ],
     })
+  })
+})
+
+// Cypress.config('experimentalSessionSupport', false)
+describe('ignores setting insecure context data when on secure context', () => {
+  it('sets insecure content', { experimentalSessionSupport: false }, () => {
+    cy.visit('http://bar.foo.com:4465/form')
+    // cy.visit('http://example.com')
+    .then(() => {
+      localStorage.key1 = 'val1'
+    })
+  })
+
+  let logSpy
+
+  it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionSupport: false }, () => {
+    cy.visit('https://localhost:4466/form')
+    .then(() => {
+      logSpy = Cypress.sinon.spy(Cypress, 'log')
+      localStorage.key1 = 'val1'
+    })
+  })
+
+  it('clears only secure context data - 2/2', { experimentalSessionSupport: true }, () => {
+    top.logSpy = logSpy
+    expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
   })
 })
 

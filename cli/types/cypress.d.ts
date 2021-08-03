@@ -2681,6 +2681,11 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
+     * Enable experimental session support. See https://on.cypress.io/session
+     * @default false
+     */
+    experimentalSessionSupport: boolean
+    /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
      */

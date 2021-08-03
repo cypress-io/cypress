@@ -403,9 +403,9 @@ export class SocketBase {
               resetRenderedHTMLOrigins()
 
               return
-            case 'get:renderedHTMLOrigins':
+            case 'get:rendered:html:origins':
               return options.getRenderedHTMLOrigins()
-            case 'reset:renderedHTMLOrigins': {
+            case 'reset:rendered:html:origins': {
               resetRenderedHTMLOrigins()
 
               return
