@@ -3,7 +3,6 @@ const { allowTsModuleStubbing } = require('../../support/helpers')
 allowTsModuleStubbing()
 
 const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
-
 const $errUtils = require('@packages/driver/src/cypress/error_utils')
 const $errorMessages = require('@packages/driver/src/cypress/error_messages').default
 
