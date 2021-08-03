@@ -1001,6 +1001,8 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
+      # run type checking for each individual package
+      - run: yarn lerna run types
       # check for compile errors with the releaserc scripts
       - run: yarn test-npm-package-release-script
       - verify-mocha-results:
@@ -1292,9 +1294,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          name: Run tests
-          command: yarn workspace @cypress/webpack-preprocessor test
-      - run:
           name: Test babelrc
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/use-babelrc
@@ -1319,6 +1318,9 @@ jobs:
           name: Test React app
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
 
   npm-webpack-dev-server:
@@ -1359,6 +1361,10 @@ jobs:
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
+      - run:
+          name: Type Check
+          command: yarn typecheck
+          working_directory: npm/vue
       - run:
           name: Run component tests
           command: yarn test:ci:ct

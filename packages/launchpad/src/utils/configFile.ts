@@ -11,7 +11,6 @@ interface GetCode {
 }
 
 export const getCode = ({ lang, framework, bundler }: GetCode) => {
-
   const language = languages.find((lg) => lg.id === lang)
 
   const comments = `Component testing, ${language?.name}, ${framework.name}, ${bundler.name}`

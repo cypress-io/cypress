@@ -5,6 +5,7 @@
     "noImplicitAny": true,
     "allowJs": false,
     "noUncheckedIndexedAccess": true,
+    "experimentalDecorators": true,
     "importsNotUsedAsValues": "error"
   }
 }

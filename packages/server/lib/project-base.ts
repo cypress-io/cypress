@@ -33,7 +33,7 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import { ProjectBaseContract } from './graphql/contracts/ProjectBaseContract'
+import type { ProjectBaseContract } from '@packages/graphql'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist

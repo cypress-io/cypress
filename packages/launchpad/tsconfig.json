@@ -26,7 +26,7 @@
     // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
     /* Strict Type-Checking Options */
     // "traceResolution": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     /**
      * Skip type checking of all declaration files (*.d.ts).
@@ -52,5 +52,6 @@
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true,
-  },
+    "importsNotUsedAsValues": "error"
+  }
 }

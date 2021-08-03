@@ -2,7 +2,6 @@
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
-const { execute, parse } = require('graphql')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
@@ -29,9 +28,9 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
-import { ServerContext } from '../graphql/context/ServerContext'
-import { graphqlSchema } from '../graphql/schema'
-import { startGraphQLServer, setServerContext } from '../graphql/server'
+import { ServerContext } from '../graphql/ServerContext'
+import { graphqlSchema, parse, execute } from '@packages/graphql'
+import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -339,12 +338,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'setup:dashboard:project':
-      return ProjectStatic.createCiProject(arg, options.projectRoot)
+      return ProjectStatic.createCiProject(arg, arg.projectRoot)
       .then(send)
       .catch(sendErr)
 
     case 'set:project:id':
-      return ProjectStatic.writeProjectId(arg, options.projectRoot)
+      return ProjectStatic.writeProjectId(arg.id, arg.projectRoot)
       .then(send)
       .catch(sendErr)
 
@@ -391,7 +390,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch((err) => {
         err.type = _.get(err, 'statusCode') === 403 ?
           'ALREADY_MEMBER'
-          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors?.join('')) ?
+          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors?.userId?.join('')) ?
             'ALREADY_REQUESTED'
             :
             err.type || 'UNKNOWN'

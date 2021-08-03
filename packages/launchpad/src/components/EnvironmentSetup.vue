@@ -10,7 +10,7 @@
       />
       <Select
         name="Bundler"
-        :disabled="disabledBundlerSelect"
+        :disabled="bundlers.length === 1"
         @select="setFEBundler"
         :options="bundlers || []"
         :value="gql.bundler?.id ?? undefined"
@@ -56,7 +56,6 @@ fragment EnvironmentSetup on Wizard {
     supportedBundlers {
       id
       name
-      isOnlyOption
     }
   }
   frameworks {
@@ -67,7 +66,6 @@ fragment EnvironmentSetup on Wizard {
   allBundlers {
     id
     name
-    isOnlyOption
   }
 }
 `
@@ -94,32 +92,9 @@ export default defineComponent({
       setFramework.executeMutation({ framework })
     };
 
-    // const bundlers = useResult(result, null, data => {
-    //   const vals = data?.wizard?.framework?.supportedBundlers 
-    //     || data?.wizard?.allBundlers
-    //     || [] 
-
-    //   return vals.map<Option>(x => ({
-    //     name: x!.name,
-    //     id: x!.id!,
-    //     logo: './404.png',
-    //     description: 'TODO: add description gql server'
-    //   }))
-    // })
-
-    // const frameworks = useResult(result, null, data => data?.wizard?.frameworks?.map<Option>(x => {
-    //   return {
-    //     name: x!.name,
-    //     id: x!.id!,
-    //     logo: './404.png',
-    //     description: 'TODO: add to gql server'
-    //   }
-    // }))
-
     return {
-      bundlers: computed(() => props.gql.allBundlers),
-      frameworks: computed(() => props.gql.frameworks),
-      // lachlan - is this needed??
+      bundlers: computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers),
+      frameworks: computed(() => props.gql.frameworks ?? []),
       gql: computed(() => props.gql),
       setFEFramework,
       setFEBundler,

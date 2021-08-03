@@ -41,13 +41,13 @@ export const mutation = mutationType({
     t.field('wizardNavigateForward', {
       type: 'Wizard',
       description: 'Navigates forward in the wizard',
-      resolve: (_, __, ctx) => ctx.wizard.navigateForward(),
+      resolve: (_, __, ctx) => ctx.wizard.navigate('forward'),
     })
 
     t.field('wizardNavigateBack', {
       type: 'Wizard',
       description: 'Navigates backward in the wizard',
-      resolve: (_, __, ctx) => ctx.wizard.navigateBack(),
+      resolve: (_, __, ctx) => ctx.wizard.navigate('back'),
     })
 
     t.field('wizardInstallDependencies', {

@@ -13,12 +13,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from "vue";
+import { computed, defineComponent, PropType } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
-import { useStoreApp } from "../store/app";
 import { gql } from '@urql/core'
+import { useMutation } from "@urql/vue";
+import { InstallDependenciesFragment, InstallDependenciesManualInstallDocument } from "../generated/graphql";
 
 gql`
 fragment InstallDependencies on Wizard {
@@ -43,36 +44,25 @@ export default defineComponent({
     PackagesList,
     ManualInstall,
   },
-  props: ['gql'],
+  props: {
+    gql: {
+      type: Object as PropType<InstallDependenciesFragment>,
+      required: true
+    }
+  },
   setup(props) {
-    // useMutation(InstallDependenciesManualInstallDocument)
-    const store = useStoreApp();
-    const manualInstall = ref(false);
+    const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
     const nextButtonName = computed(() =>
-      manualInstall.value ? "I've installed them" : "Install"
+      props.gql.isManualInstall ? "I've installed them" : "Install"
     );
-    onMounted(() => {
-      store.onAlt(() => {
-        manualInstall.value = !manualInstall.value;
-      });
 
-      store.onBack(() => {
-        store.flagComponentSetup(false);
-      });
-
-      store.onNext(() => {
-        if (manualInstall.value) {
-          store.flagDependenciesInstalled();
-        } else {
-        }
-      });
-    });
-    
     return { 
-      manualInstall, 
+      manualInstall: computed(() => props.gql.isManualInstall),
       nextButtonName, 
       gql: computed(() => props.gql),
-      altFn() {}
+      altFn (val: boolean) {
+        toggleManual.executeMutation({ isManual: val })
+      }
     };
   },
 });

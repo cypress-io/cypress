@@ -1,5 +1,7 @@
 import * as React from 'react'
-import { action } from '@storybook/addon-actions'
+// TODO: This is causing a "module not defined error"
+// Find out why and fix it
+// import { action } from '@storybook/addon-actions'
 
 import { createStory, createStorybookConfig } from 'stories/util'
 
@@ -10,6 +12,9 @@ import typography from 'css/derived/jsTypography.scss'
 import { TextSize } from 'css'
 import { PaddedBox } from '../surface/paddedBox/PaddedBox'
 import { Icon } from '../icon/Icon'
+
+// stub it for now
+const action = (action: string) => undefined
 
 export default createStorybookConfig({
   title: 'Core/Button',

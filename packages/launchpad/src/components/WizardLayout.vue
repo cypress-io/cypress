@@ -18,11 +18,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import ButtonBar from "./ButtonBar.vue";
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { WizardLayoutNavigateForwardDocument, WizardLayoutNavigateBackDocument } from "../generated/graphql";
+import { WizardLayoutNavigateDocument } from "../generated/graphql";
 
 gql`
 fragment WizardLayout on Wizard {
@@ -32,16 +32,8 @@ fragment WizardLayout on Wizard {
 `
 
 gql`
-mutation WizardLayoutNavigateForward {
-  wizardNavigateForward {
-    ...WizardLayout
-  }
-}
-`
-
-gql`
-mutation WizardLayoutNavigateBack {
-  wizardNavigateBack {
+mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
+  wizardNavigate(direction: $direction) {
     ...WizardLayout
   }
 }
@@ -63,26 +55,24 @@ export default defineComponent({
       default: undefined,
     },
     altFn: {
-      type: Function,
+      type: Function as PropType<(val: boolean) => void>,
       default: undefined
     }
   },
   setup(props) {
-    const navigateForward = useMutation(WizardLayoutNavigateForwardDocument)
-    const navigateBack = useMutation(WizardLayoutNavigateBackDocument)
+    const navigate = useMutation(WizardLayoutNavigateDocument)
 
     function nextFn() {
-      navigateForward.executeMutation({})
+      navigate.executeMutation({ direction: 'forward' })
     }
 
     function backFn() {
-      navigateBack.executeMutation({})
+      navigate.executeMutation({ direction: 'back' })
     }
 
     return {
       nextFn,
       backFn,
-      altFn: props.altFn
     }
   }
 });

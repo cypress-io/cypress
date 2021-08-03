@@ -1,14 +1,16 @@
-import { SupportedBundlerWebpack } from '../utils/bundler'
-import { SupportedFrameworkNext } from '../utils/frameworks'
 import InstallDependencies from './InstallDependencies.vue'
+import { InstallDependenciesFragmentDoc } from '../generated/graphql'
 
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
-    cy.mount(() => <InstallDependencies />).then(() => {
-      Cypress.storeConfig.setComponentSetup({
-        bundler: SupportedBundlerWebpack,
-        framework: SupportedFrameworkNext,
-      })
+    cy.mountFragment(InstallDependenciesFragmentDoc, {
+      type: (ctx) => {
+        ctx.wizard.setBundler('webpack')
+        ctx.wizard.setFramework('react')
+
+        return ctx.wizard
+      },
+      render: (gqlVal) => <InstallDependencies gql={gqlVal} />,
     })
   })
 

@@ -923,9 +923,28 @@ describe('lib/gui/events', () => {
       })
     })
 
+    describe('set:project:id', () => {
+      it('calls writeProjectId with projectRoot', function () {
+        const arg = { id: '1', projectRoot: '/project/root/' }
+        const stub = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
+
+        return this.handleEvent('set:project:id', arg)
+        .then(() => {
+          expect(stub).to.be.calledWith(arg.id, arg.projectRoot)
+          expect(this.send.firstCall.args[0]).to.eq('response')
+          expect(this.send.firstCall.args[1].id).to.match(/set:project:id-/)
+        })
+      })
+    })
+
     describe('setup:dashboard:project', () => {
       it('returns result of ProjectStatic.createCiProject', function () {
-        return this.handleEvent('setup:dashboard:project').then((assert) => {
+        const arg = { projectRoot: '/project/root/' }
+        const stub = sinon.stub(ProjectStatic, 'createCiProject').resolves()
+
+        return this.handleEvent('setup:dashboard:project', arg)
+        .then(() => {
+          expect(stub).to.be.calledWith(arg, arg.projectRoot)
           expect(this.send.firstCall.args[0]).to.eq('response')
           expect(this.send.firstCall.args[1].id).to.match(/setup:dashboard:project-/)
         })
@@ -936,7 +955,8 @@ describe('lib/gui/events', () => {
 
         sinon.stub(ProjectStatic, 'createCiProject').rejects(err)
 
-        return this.handleEvent('setup:dashboard:project').then((assert) => {
+        return this.handleEvent('setup:dashboard:project', { projectRoot: '/foo/bar' })
+        .then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })

@@ -1,8 +1,8 @@
 overwrite: true
-schema: '../server/schema.graphql'
-documents: 'src/**/*.vue'
+schema: '../graphql/schema.graphql'
 generates:
   src/generated/graphql.ts:
+    documents: 'src/**/*.vue'
     config:
       immutableTypes: true
       useTypeImports: true
@@ -16,3 +16,8 @@ generates:
       - 'typescript'
       - 'typescript-operations'
       - 'typed-document-node'
+  ../graphql/src/testing/testUnionType.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'script/codegen-mount.js'
