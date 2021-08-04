@@ -71,8 +71,8 @@ const cypressModuleApi = {
 
   /**
    * This function should not be used in pure JavaScript
-   * By the type of its argument it allows autocomplettion and
-   * type chekcing of the configuration given by users.
+   * By the type of its argument it allows autocompletion and
+   * type checking of the configuration given by users.
    *
    * @see ../types/cypress-npm-api.d.ts
    * @param {Cypress.ConfigOptions} config
