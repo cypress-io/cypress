@@ -11,7 +11,7 @@
       class="row-start-1 row-end-3 col-start-2 col-end-auto inline-grid items-center justify-self-end ml-20px"
     >
       <StatusIndicator :type="experiment.enabled ? 'success' : 'disabled'">
-        {{ experiment.enabled ? 'Enabled' : 'Disabled' }}
+        {{ experiment.enabled ? t('status.enabled') : t('status.disabled') }}
       </StatusIndicator>
     </div>
   </div>
@@ -20,6 +20,7 @@
 <script lang="ts" setup>
 import { defineProps } from 'vue'
 import StatusIndicator from '../../components/StatusIndicator.vue'
+import { useI18n } from '../../composables';
 
 export interface Experiment {
   key: string
@@ -31,4 +32,6 @@ export interface Experiment {
 defineProps<{
   experiment: Experiment
 }>()
+
+const { t } = useI18n()
 </script>

@@ -8,9 +8,6 @@
 <script lang="ts" setup>
 import ExternalEditorSettings from './ExternalEditorSettings.vue'
 import ProxySettings from './ProxySettings.vue'
-// import RecordKey from './RecordKey.vue'
-// import Experiments from './Experiments.vue'
-// import ProjectId from './ProjectId.vue'
 </script>
 
 <style lang="scss" scoped>
