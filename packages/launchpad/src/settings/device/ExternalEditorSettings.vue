@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
-import Select from '../../components/Select.vue';
+import Select from '../../components/Select/Select.vue';
 import { useI18n } from '../../composables';
 
 const { t } = useI18n()

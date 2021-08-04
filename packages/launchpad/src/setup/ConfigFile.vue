@@ -48,7 +48,7 @@ import "@packages/reporter/src/errors/prism.scss";
 import { gql } from '@urql/core'
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
-import CopyButton from "./CopyButton.vue";
+import CopyButton from "../components/Button/CopyButton.vue";
 import { languages } from "../utils/configFile";
 import type { ConfigFileFragment } from "../generated/graphql";
 

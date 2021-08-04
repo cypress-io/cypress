@@ -1,6 +1,6 @@
 import HeartIcon from 'virtual:vite-icons/mdi/heart'
 import InlineCodeEditor from './InlineCodeEditor.vue'
-import Input from './Input.vue'
+import Input from '../input/Input.vue'
 
 describe('InlineCodeEditor', () => {
   it('renders', () => {

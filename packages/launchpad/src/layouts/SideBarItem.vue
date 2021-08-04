@@ -16,7 +16,7 @@
 
 <script lang="ts" setup>
 import { defineProps, HTMLAttributes } from "vue"
-import Icon from './Icon.vue'
+import Icon from '../components/icon/Icon.vue'
 import type { IconType } from '../types'
 
 interface Props extends HTMLAttributes {
