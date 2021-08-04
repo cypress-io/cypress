@@ -87,6 +87,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
   projectRoot: string
+  isOpen: boolean = false
 
   constructor ({
     projectRoot,
@@ -309,6 +310,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       system: _.pick(sys, 'osName', 'osVersion'),
     }
 
+    this.isOpen = true
+
     return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
@@ -339,6 +342,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async close () {
+    if (!this.isOpen) {
+      return Promise.resolve()
+    }
+
     debug('closing project instance %s', this.projectRoot)
 
     this.spec = null
@@ -357,6 +364,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     const config = this.getConfig()
 
     if (config.isTextTerminal || !config.experimentalInteractiveRunEvents) return
+
+    this.isOpen = false
 
     return runEvents.execute('after:run', config)
   }
@@ -513,9 +522,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     configFile,
     projectRoot,
   }: {
-    projectRoot: string
-    configFile?: string | boolean
     onSettingsChanged?: false | (() => void)
+    configFile?: string | boolean
+    projectRoot: string
   }) {
     // bail if we havent been told to
     // watch anything (like in run mode)
@@ -527,12 +536,16 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const obj = {
       onChange: () => {
+        debug('settings files have changed')
+
         // dont fire change events if we generated
         // a project id less than 1 second ago
         if (this.generatedProjectIdTimestamp &&
           ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
           return
         }
+
+        debug('run onSettingsChanged')
 
         // call our callback function
         // when settings change!
