@@ -10,7 +10,7 @@
   }
 
   .command {
-    cursor:default;
+    cursor: default;
     margin: 0;
   }
 
@@ -52,7 +52,7 @@
     }
   }
 
-  .command-type-system.command-is-event > span > .command-wrapper{
+  .command-type-system.command-is-event > span > .command-wrapper {
     user-select: none;
     font-style: unset;
     .command-method,
@@ -108,7 +108,7 @@
     min-height: 20px;
 
     &:hover {
-      background-color: #E0E5E7;
+      background-color: #e0e5e7;
     }
 
     .command-wrapper-text {
@@ -136,12 +136,12 @@
         }
 
         &.dom {
-          background-color: darken(#D4EAFF, 3%);
+          background-color: darken(#d4eaff, 3%);
         }
 
         &.agent,
         &.primitive {
-          background-color: darken(#FFE0DE, 3%);
+          background-color: darken(#ffe0de, 3%);
         }
 
         &.show-count {
@@ -167,8 +167,7 @@
       }
 
       .num-children,
-      .command-alias-count
-      .command-interceptions-count {
+      .command-alias-count .command-interceptions-count {
         border-radius: 5px;
         color: #777;
         font-size: 90%;
@@ -333,21 +332,21 @@
 
   .command-state-warn > span > .command-wrapper {
     font-style: unset;
-      background-color: $warn-background;
-      border-left: 2px solid hsl(42, 56%, 53%);
+    background-color: $warn-background;
+    border-left: 2px solid hsl(42, 56%, 53%);
 
-      &:hover {
-        background-color:$warn-header-background;
-      }
+    &:hover {
+      background-color: $warn-header-background;
+    }
 
-      .command-wrapper-text .command-method {
-        color: $warn-text;
-      }
+    .command-wrapper-text .command-method {
+      color: $warn-text;
+    }
   }
 
   .command .runnable-err-wrapper {
-    padding:0;
-    border:0;
+    padding: 0;
+    border: 0;
     margin: 0;
     margin-bottom: 5px;
   }
@@ -369,24 +368,24 @@
         padding-right: 2px;
         display: inline-block;
       }
-    
+
       .fa-circle.successful {
         color: $pending;
       }
-    
+
       .fa-circle.aborted {
         color: $fail;
       }
-    
+
       .fa-circle.bad {
-        color: #F0AD4E;
+        color: #f0ad4e;
       }
-    
+
       .fa-circle.pending {
-        color: #AAA;
+        color: #aaa;
       }
     }
-  } 
+  }
 
   .command-name-assert {
     .command-method {
@@ -417,7 +416,6 @@
         span {
           background-color: $pending;
           color: white;
-
         }
       }
       .command-message {
@@ -528,11 +526,13 @@
   .command-error {
     font-style: normal;
   }
- 
 
   .command-has-num-elements .num-elements,
   .num-children,
-  .command-has-children.command-is-open > span > .command-wrapper .num-children.has-children  {
+  .command-has-children.command-is-open
+    > span
+    > .command-wrapper
+    .num-children.has-children {
     display: none;
   }
 
@@ -548,33 +548,32 @@
     }
   }
 
-  .command-has-children.command-has-console-props > span > .command-wrapper:hover {
+  .command-has-children.command-has-console-props
+    > span
+    > .command-wrapper:hover {
     .command-parent-print-btn {
       opacity: 1;
       pointer-events: unset;
-      
+
       &:hover {
         box-shadow: 0 0 3px #33333370;
         background-color: #333333;
-
       }
     }
   }
-
- 
 
   .command-has-children.command-has-console-props > span > .command-wrapper {
     position: relative;
     .command-parent-print-btn {
       opacity: 0;
       position: absolute;
-      top:0;
-      right:0;
+      top: 0;
+      right: 0;
       pointer-events: none;
       transition: all 50ms;
       background-color: #333333a0;
       padding: 2px 4px;
-      color: white
+      color: white;
     }
   }
 
@@ -591,7 +590,7 @@
     width: 15px;
 
     i {
-      margin-right :0;
+      margin-right: 0;
     }
   }
 
@@ -605,17 +604,15 @@
     i {
       @extend .#{$fa-css-prefix}-caret-right;
     }
-
   }
-
 
   .command-has-children > span > .command-wrapper {
     .command-expander {
       display: block;
     }
-   .command-progress {
-     visibility: hidden;
-   }
+    .command-progress {
+      visibility: hidden;
+    }
   }
 
   .command-is-open > span > .command-wrapper {
@@ -624,8 +621,6 @@
         @extend .#{$fa-css-prefix}-caret-down;
       }
     }
-
-  
 
     .command-alias {
       border-radius: 10px !important;
@@ -643,7 +638,6 @@
     .command-number {
       display: none;
     }
-
   }
 
   .command-is-pinned > span > .command-wrapper,
@@ -659,13 +653,13 @@
 
   .command {
     &.command-is-studio > span > .command-wrapper:hover {
-        .command-pin {
-          display: none;
-        }
-        .command-number {
-          display: block;
-        }
+      .command-pin {
+        display: none;
       }
+      .command-number {
+        display: block;
+      }
+    }
   }
 
   .command-state-pending > span > .command-wrapper:hover {
