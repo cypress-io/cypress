@@ -27,4 +27,3 @@ interface Props extends HTMLAttributes {
 
 defineProps<Props>()
 </script>
-  
