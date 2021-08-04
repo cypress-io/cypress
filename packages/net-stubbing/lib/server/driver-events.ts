@@ -106,7 +106,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
   return ret
 }
 
-type OnNetEventOpts = {
+type OnNetStubbingEventOpts = {
   eventName: string
   state: NetStubbingState
   socket: CyServer.Socket
@@ -115,7 +115,7 @@ type OnNetEventOpts = {
   frame: NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
 }
 
-export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
+export async function onNetStubbingEvent (opts: OnNetStubbingEventOpts): Promise<any> {
   const { state, getFixture, args, eventName, frame } = opts
 
   debug('received driver event %o', { eventName, args })

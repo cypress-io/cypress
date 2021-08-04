@@ -6,7 +6,7 @@ import Debug from 'debug'
 import { create as createQueue } from '../util/queue'
 import $dom from '../dom'
 import $utils from './utils'
-import $errUtils from './error_utils'
+import * as $errUtils from './error_utils'
 
 const debugErrors = Debug('cypress:driver:errors')
 
@@ -344,6 +344,10 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
     }
 
     const onError = (err: Error | string) => {
+      if (state('onCommandFailed')) {
+        return state('onCommandFailed')(err, queue, next)
+      }
+
       debugErrors('caught error in promise chain: %o', err)
 
       // since this failed this means that a specific command failed

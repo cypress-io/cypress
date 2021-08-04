@@ -9,6 +9,7 @@ const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
 const runEvents = require('./plugins/run_events')
+const session = require('./session')
 const { getSpecUrl } = require('./project_utils')
 const errors = require('./errors')
 
@@ -171,6 +172,9 @@ const moduleFactory = () => {
           if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
             return runEvents.execute('before:spec', cfg, spec)
           }
+
+          // clear all session data before each spec
+          session.clearSessions()
         })
         .then(() => {
           return browsers.open(browser, options, automation)
