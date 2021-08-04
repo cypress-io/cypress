@@ -1,4 +1,4 @@
-export { onNetEvent } from './driver-events'
+export { onNetStubbingEvent } from './driver-events'
 
 export { InterceptError } from './middleware/error'
 

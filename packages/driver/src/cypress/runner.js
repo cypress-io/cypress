@@ -383,6 +383,16 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           if (test) {
             const siblings = getAllSiblingTests(test.parent, getTestById)
 
+            const testIsActuallyInSuite = suiteHasTest(this.suite, test.id)
+
+            // we ensure the test actually belongs to this suite.
+            // the test may not belong to the suite when a suite is skipped
+            // due to already being run on top navigation
+            // https://github.com/cypress-io/cypress/issues/9026
+            if (!testIsActuallyInSuite) {
+              return
+            }
+
             // 1. if we're the very last test in the entire allTests
             //    we wait until the root suite fires
             // 2. else if we arent the last nested suite we fire if we're
@@ -1492,6 +1502,8 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
         })
       }
 
+      cy.state('duringUserTestExecution', false)
+
       // our runnable is about to run, so let cy know. this enables
       // us to always have a correct runnable set even when we are
       // running lifecycle events
@@ -1535,6 +1547,11 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
 
         // call the original method with our
         // custom onNext function
+
+        // this tells us we are now running test execution code
+        // since all test:before:run:async listeners have completed
+        cy.state('duringUserTestExecution', true)
+
         return runnableRun.call(runnable, onNext)
       })
     },

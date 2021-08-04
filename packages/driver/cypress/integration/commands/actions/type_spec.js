@@ -3546,7 +3546,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       .then(() => {
         return withMutableReporterState(() => {
-          const spyTableName = cy.spy(top.console, 'groupCollapsed')
+          const spyTableName = cy.spy(top.console, 'group')
           const spyTableData = cy.spy(top.console, 'table')
 
           const commandLogEl = getCommandLogWithText('foo', 'message-text')

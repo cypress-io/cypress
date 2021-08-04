@@ -22,6 +22,10 @@ if (!Error.captureStackTrace) {
 }
 
 const prepareErrorForSerialization = (err) => {
+  if (typeof err === 'string') {
+    err = new Error(err)
+  }
+
   if (err[ERR_PREPARED_FOR_SERIALIZATION]) {
     return err
   }
@@ -236,7 +240,7 @@ class CypressError extends Error {
   }
 }
 
-const getUserInvocationStack = (err) => {
+const getUserInvocationStackFromError = (err) => {
   return err.userInvocationStack
 }
 
@@ -287,7 +291,7 @@ const docsUrlByParents = (msgPath) => {
     return // reached root
   }
 
-  const obj = _.get($errorMessages, msgPath)
+  const obj = _.get($errorMessages.default, msgPath)
 
   if (obj.hasOwnProperty('docsUrl')) {
     return obj.docsUrl
@@ -297,7 +301,7 @@ const docsUrlByParents = (msgPath) => {
 }
 
 const errByPath = (msgPath, args) => {
-  let msgValue = _.get($errorMessages, msgPath)
+  let msgValue = _.get($errorMessages.default, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -495,7 +499,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
   })
 }
 
-module.exports = {
+export {
   appendErrMsg,
   createUncaughtException,
   cypressErr,
@@ -503,7 +507,7 @@ module.exports = {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
-  getUserInvocationStack,
+  getUserInvocationStackFromError,
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,

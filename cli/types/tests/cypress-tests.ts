@@ -686,6 +686,28 @@ namespace CypressTaskTests {
   })
 }
 
+namespace CypressSessionsTests {
+  Cypress.config('experimentalSessionSupport') // $ExpectType boolean
+  cy.session('user')
+  cy.session('user', () => {})
+  cy.session({ name: 'bob' }, () => {})
+  cy.session('user', () => {}, {})
+  cy.session('user', () => {}, {
+    validate: () => {}
+  })
+
+  cy.session() // $ExpectError
+  cy.session(null) // $ExpectError
+  cy.session('user', () => {}, {
+    validate: { foo: true } // $ExpectError
+  })
+}
+namespace CypressCurrentTest {
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType string[]
+  Cypress.currentTest() // $ExpectError
+}
+
 namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0

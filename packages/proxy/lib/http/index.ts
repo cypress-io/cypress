@@ -56,6 +56,7 @@ export type ServerCtx = Readonly<{
   shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
@@ -176,6 +177,16 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
   return runMiddlewareStack()
 }
 
+function getUniqueRequestId (requestId: string) {
+  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
+
+  if (match) {
+    return `${match[1]}-retry-${Number(match[2]) + 1}`
+  }
+
+  return `${requestId}-retry-1`
+}
+
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
@@ -188,6 +199,7 @@ export class Http {
   preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
+  renderedHTMLOrigins: {[key: string]: boolean} = {}
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -229,6 +241,7 @@ export class Http {
           ...opts,
         })
       },
+      getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -237,9 +250,14 @@ export class Http {
     const onError = () => {
       if (ctx.req.browserPreRequest) {
         // browsers will retry requests in the event of network errors, but they will not send pre-requests,
-        // so try to re-use the current browserPreRequest for the next retry
-        ctx.debug('Re-using pre-request data %o', ctx.req.browserPreRequest)
-        this.addPendingBrowserPreRequest(ctx.req.browserPreRequest)
+        // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
+        const preRequest = {
+          ...ctx.req.browserPreRequest,
+          requestId: getUniqueRequestId(ctx.req.browserPreRequest.requestId),
+        }
+
+        ctx.debug('Re-using pre-request data %o', preRequest)
+        this.addPendingBrowserPreRequest(preRequest)
       }
     }
 
@@ -251,6 +269,10 @@ export class Http {
 
       return ctx.debug('Warning: Request was not fulfilled with a response.')
     })
+  }
+
+  getRenderedHTMLOrigins = () => {
+    return this.renderedHTMLOrigins
   }
 
   async handleSourceMapRequest (req: Request, res: Response) {
@@ -269,7 +291,6 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.preRequests = new PreRequests()
   }
 
   setBuffer (buffer) {

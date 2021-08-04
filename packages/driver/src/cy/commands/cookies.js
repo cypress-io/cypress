@@ -5,9 +5,22 @@ const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
 const $Location = require('../../cypress/location')
 
+// TODO: add hostOnly to COOKIE_PROPS
+// https://github.com/cypress-io/cypress/issues/363
+// https://github.com/cypress-io/cypress/issues/17527
 const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite'.split(' ')
 
 const commandNameRe = /(:)(\w)/
+
+function pickCookieProps (cookie) {
+  if (!cookie) return cookie
+
+  if (_.isArray(cookie)) {
+    return cookie.map(pickCookieProps)
+  }
+
+  return _.pick(cookie, COOKIE_PROPS)
+}
 
 const getCommandFromEvent = (event) => {
   return event.replace(commandNameRe, (match, p1, p2) => {
@@ -109,6 +122,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('clear:cookies', cookies, log, timeout)
     })
+    .then(pickCookieProps)
   }
 
   const handleBackendError = (command, action, onFail) => {
@@ -142,8 +156,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   // TODO: handle failure here somehow
   // maybe by tapping into the Cypress reset
   // stuff, or handling this in the runner itself?
+  // Cypress sessions will clear cookies on its own before each test
   Cypress.on('test:before:run:async', () => {
-    return getAndClear()
+    if (!Cypress.config.experimentalSessionSupport) {
+      return getAndClear()
+    }
   })
 
   return Commands.addAll({
@@ -184,6 +201,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookie = resp
 
@@ -221,6 +239,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookies = resp
 
@@ -243,7 +262,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         timeout: config('responseTimeout'),
       })
 
-      const cookie = _.pick(options, COOKIE_PROPS)
+      const cookie = pickCookieProps(options)
 
       if (options.log) {
         options._log = Cypress.log({
@@ -302,6 +321,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookie = resp
 
@@ -348,6 +368,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)
+      .then(pickCookieProps)
       .then((resp) => {
         options.cookie = resp
 
