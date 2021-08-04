@@ -11,17 +11,17 @@ const debug = Debug('cypress:server:require_async')
 let requireProcess: cp.ChildProcess | null
 
 interface RequireAsyncOptions{
-    projectRoot: string
-    loadErrorCode: string
-    /**
-     * members of the object returned that are functions and will need to be wrapped
-     */
-    functionNames: string[]
+  projectRoot: string
+  loadErrorCode: string
+  /**
+   * members of the object returned that are functions and will need to be wrapped
+   */
+  functionNames: string[]
 }
 
 interface ChildOptions{
-    stdio: 'inherit'
-    execArgv?: string[]
+  stdio: 'inherit'
+  execArgv?: string[]
 }
 
 const killChildProcess = () => {
