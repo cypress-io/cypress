@@ -160,6 +160,7 @@ export const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => 
     testCurrentRetry: 0,
     type: 'parent',
     url: 'http://example.com',
+    hasConsoleProps: true,
   }
 
   runner.emit('reporter:log:add', Object.assign(defaultLog, log))

@@ -1,6 +1,5 @@
 .reporter {
   .commands-container {
-    background-color: #eef1f4;
     font-family: $monospace;
     min-width: $reporter-contents-min-width;
     padding: 0;
@@ -11,7 +10,7 @@
   }
 
   .command {
-    cursor: pointer;
+    cursor: default;
     margin: 0;
   }
 
@@ -42,34 +41,45 @@
       background-color: #eef1f4;
     }
 
-    .command-type-parent {
+    .command-type-parent > span > .command-wrapper {
       &:hover {
         border-top: 1px solid #e3e3e3;
       }
+    }
 
-      &:first-child {
-        border-top: 0;
-      }
+    .command-type-parent:first-child > span > .command-wrapper {
+      border-top: 0;
     }
   }
 
-  .command-is-event {
+  .command-type-system.command-is-event > span > .command-wrapper {
+    user-select: none;
+    font-style: unset;
     .command-method,
     .command-message {
-      color: #9a9aaa !important;
+      color: #525252;
+      font-weight: 700;
+    }
+  }
+  .command-is-event > span > .command-wrapper {
+    font-style: italic;
+
+    .command-method,
+    .command-message {
+      color: #9a9aaa;
     }
   }
 
-  .command-type-parent {
+  .command-type-parent > span > .command-wrapper {
     border-top: 1px solid #e3e3e3;
 
     &:hover {
       border-top: 1px solid #eef1f4;
     }
+  }
 
-    &:first-child {
-      border-top: 0;
-    }
+  .command-type-parent:first-child > span > .command-wrapper {
+    border-top: 0;
   }
 
   .command-type-child {
@@ -83,12 +93,22 @@
     }
   }
 
+  .command-type-system.command-is-event,
+  .command-name-session {
+    > span > .command-wrapper {
+      .num-children {
+        display: none;
+      }
+    }
+  }
+
   .command-wrapper {
+    background-color: #eef1f4;
     color: #777;
     min-height: 20px;
 
     &:hover {
-      background-color: #E0E5E7;
+      background-color: #e0e5e7;
     }
 
     .command-wrapper-text {
@@ -116,12 +136,12 @@
         }
 
         &.dom {
-          background-color: darken(#D4EAFF, 3%);
+          background-color: darken(#d4eaff, 3%);
         }
 
         &.agent,
         &.primitive {
-          background-color: darken(#FFE0DE, 3%);
+          background-color: darken(#ffe0de, 3%);
         }
 
         &.show-count {
@@ -132,10 +152,11 @@
           overflow: hidden;
           text-overflow: ellipsis;
           vertical-align: top;
+          height: 18px;
         }
       }
 
-      // ensures alias & number of duplicates don't break if reporter
+      // ensures alias & number of children commands don't break if reporter
       // width is narrow
       .alias-container {
         white-space: nowrap;
@@ -145,9 +166,8 @@
         }
       }
 
-      .num-duplicates,
-      .command-alias-count,
-      .command-interceptions-count {
+      .num-children,
+      .command-alias-count .command-interceptions-count {
         border-radius: 5px;
         color: #777;
         font-size: 90%;
@@ -156,24 +176,23 @@
         margin-left: 0;
       }
 
-      .num-duplicates.has-alias {
+      .num-children.has-alias {
         border-radius: 10px;
         line-height: 1;
         padding: 3px 5px 3px 5px;
       }
 
-      .num-duplicates.has-alias.has-duplicates,
       .command-interceptions-count {
         border-radius: 0 10px 10px 0;
-        padding: 4px 5px 2px 3px;
+        padding: 2px 5px;
       }
 
       .command-alias-count {
         border-radius: 0 10px 10px 0;
-        padding: 5px 6px 3px 4px;
+        padding: 2px 5px;
       }
 
-      .num-duplicates,
+      .num-children,
       .command-alias-count,
       .command-interceptions-count {
         background-color: darken(#ffdf9c, 8%) !important;
@@ -183,6 +202,9 @@
     .command-progress {
       height: 2px;
     }
+  }
+  .command-child-container {
+    margin-left: 10px;
   }
 
   .command-number {
@@ -198,7 +220,7 @@
     }
   }
 
-  .command-state-pending .command-number {
+  .command-state-pending > span > .command-wrapper .command-number {
     i {
       line-height: 18px;
       display: inline-block;
@@ -302,40 +324,66 @@
     text-overflow: ellipsis;
   }
 
-  .command-wrapper .fa-circle {
-    display: none;
+  .command-wrapper {
+    .fa-circle {
+      display: none;
+    }
   }
 
-  .command-name-xhr,
-  .command-name-request {
-    .command-status {
-      font-weight: 700;
-      color: #565554;
-      margin-right: 3px;
+  .command-state-warn > span > .command-wrapper {
+    font-style: unset;
+    background-color: $warn-background;
+    border-left: 2px solid hsl(42, 56%, 53%);
+
+    &:hover {
+      background-color: $warn-header-background;
     }
 
-    .command-body {
-      color: #565554;
+    .command-wrapper-text .command-method {
+      color: $warn-text;
     }
+  }
 
-    &.command-with-indicator .fa-circle {
-      display: inline-block;
-    }
+  .command .runnable-err-wrapper {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    margin-bottom: 5px;
+  }
 
-    .fa-circle.successful {
-      color: $pending;
-    }
+  .command-with-indicator {
+    > span > .command-wrapper {
+      .command-status {
+        font-weight: 700;
+        color: #565554;
+        margin-right: 3px;
+      }
 
-    .fa-circle.aborted {
-      color: $fail;
-    }
+      .command-body {
+        color: #565554;
+      }
 
-    .fa-circle.bad {
-      color: #F0AD4E;
-    }
+      .fa-circle {
+        padding: 4px;
+        padding-right: 2px;
+        display: inline-block;
+      }
 
-    .fa-circle.pending {
-      color: #AAA;
+      .fa-circle.successful {
+        color: $pending;
+      }
+
+      .fa-circle.aborted {
+        color: $fail;
+      }
+
+      .fa-circle.bad {
+        color: #f0ad4e;
+      }
+
+      .fa-circle.pending {
+        color: #aaa;
+      }
     }
   }
 
@@ -368,7 +416,6 @@
         span {
           background-color: $pending;
           color: white;
-
         }
       }
       .command-message {
@@ -476,20 +523,58 @@
     display: inline-block;
   }
 
+  .command-error {
+    font-style: normal;
+  }
+
   .command-has-num-elements .num-elements,
-  .num-duplicates {
+  .num-children,
+  .command-has-children.command-is-open
+    > span
+    > .command-wrapper
+    .num-children.has-children {
     display: none;
   }
 
   .command-has-num-elements.no-elements .num-elements,
   .command-has-num-elements.multiple-elements .num-elements,
-  .command-has-duplicates .num-duplicates {
+  .command-has-children .num-children.has-children {
     display: inline;
   }
 
-  .command-is-duplicate .num-duplicates,
-  .command-name-assert.command-has-num-elements .num-elements {
-    display: none;
+  .command-has-children > span > .command-wrapper:hover {
+    .command-expander {
+      color: #999;
+    }
+  }
+
+  .command-has-children.command-has-console-props
+    > span
+    > .command-wrapper:hover {
+    .command-parent-print-btn {
+      opacity: 1;
+      pointer-events: unset;
+
+      &:hover {
+        box-shadow: 0 0 3px #33333370;
+        background-color: #333333;
+      }
+    }
+  }
+
+  .command-has-children.command-has-console-props > span > .command-wrapper {
+    position: relative;
+    .command-parent-print-btn {
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      right: 0;
+      pointer-events: none;
+      transition: all 50ms;
+      background-color: #333333a0;
+      padding: 2px 4px;
+      color: white;
+    }
   }
 
   .command-pin {
@@ -505,7 +590,7 @@
     width: 15px;
 
     i {
-      margin-right :0;
+      margin-right: 0;
     }
   }
 
@@ -519,46 +604,22 @@
     i {
       @extend .#{$fa-css-prefix}-caret-right;
     }
-
-    &:hover {
-      color: #999;
-    }
   }
 
-  .command-has-duplicates,
-  .command-has-duplicates:hover {
-    .command-number {
+  .command-has-children > span > .command-wrapper {
+    .command-expander {
       display: block;
     }
-
-    .command-number {
-      display: none;
-    }
-  }
-
-  .command-has-duplicates .command-expander {
-    display: block;
-  }
-
-  .command-is-duplicate {
-    &:first-child {
-      border-top: solid 1px #e3e3e3;
-    }
-
-    .command-expander {
+    .command-progress {
       visibility: hidden;
     }
   }
 
-  .command-is-open {
+  .command-is-open > span > .command-wrapper {
     .command-expander {
       i {
         @extend .#{$fa-css-prefix}-caret-down;
       }
-    }
-
-    .num-duplicates {
-      display: none;
     }
 
     .command-alias {
@@ -566,8 +627,21 @@
     }
   }
 
-  .command-is-pinned,
-  .command:not(.command-is-studio):hover {
+  .command-has-snapshot > span > .command-wrapper {
+    cursor: pointer;
+  }
+  .command-has-console-props > span > .command-wrapper {
+    cursor: pointer;
+  }
+
+  .command-has-children > span > .command-wrapper {
+    .command-number {
+      display: none;
+    }
+  }
+
+  .command-is-pinned > span > .command-wrapper,
+  .command-has-snapshot > span > .command-wrapper:hover {
     .command-number {
       display: none;
     }
@@ -577,24 +651,18 @@
     }
   }
 
-  .command-has-duplicates:hover .duplicates .command-pin,
-  .command-has-duplicates:hover > span > .command-wrapper .command-pin {
-    display: none;
-  }
-
-  .command-has-duplicates.command-is-pinned > span > .command-wrapper,
-  .command-is-duplicate.command-is-pinned > span > .command-wrapper,
-  .command-is-duplicate > span > .command-wrapper:hover {
-    .command-expander {
-      display: none;
-    }
-
-    .command-pin {
-      display: block;
+  .command {
+    &.command-is-studio > span > .command-wrapper:hover {
+      .command-pin {
+        display: none;
+      }
+      .command-number {
+        display: block;
+      }
     }
   }
 
-  .command-state-pending > span .command-wrapper:hover {
+  .command-state-pending > span > .command-wrapper:hover {
     .command-number {
       display: block;
     }

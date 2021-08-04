@@ -56,6 +56,7 @@ export type ServerCtx = Readonly<{
   shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
@@ -198,6 +199,7 @@ export class Http {
   preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
+  renderedHTMLOrigins: {[key: string]: boolean} = {}
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -239,6 +241,7 @@ export class Http {
           ...opts,
         })
       },
+      getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getPreRequest: (cb) => {
         this.preRequests.get(ctx.req, ctx.debug, cb)
       },
@@ -266,6 +269,10 @@ export class Http {
 
       return ctx.debug('Warning: Request was not fulfilled with a response.')
     })
+  }
+
+  getRenderedHTMLOrigins = () => {
+    return this.renderedHTMLOrigins
   }
 
   async handleSourceMapRequest (req: Request, res: Response) {
