@@ -417,6 +417,10 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectBa
     return config.updateWithPluginValues(cfg, modifiedCfg)
   }
 
+  createConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
+    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
+  }
+
   async startCtDevServer (specs: Cypress.Cypress['spec'][], config: any) {
     // CT uses a dev-server to build the bundle.
     // We start the dev server here.
@@ -791,6 +795,10 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectBa
   // to refresh it - just close and open the project again.
   determineIsNewProject (folder) {
     return scaffold.isNewProject(folder)
+  }
+
+  writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
+    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
   }
 
   scaffold (cfg: Cfg) {

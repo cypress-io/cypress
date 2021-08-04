@@ -1,4 +1,3 @@
-// import { createHash } from 'crypto'
 import { nxs, NxsResult } from 'nexus-decorators'
 import { PluginsState, PluginsStateEnum } from '../constants/projectConstants'
 import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
@@ -11,7 +10,7 @@ export interface ProjectConfig {
 @nxs.objectType({
   description: 'A Cypress project is a container',
 })
-export class Project {
+export class Project implements ProjectBaseContract {
   readonly projectBase: ProjectBaseContract
   private _pluginsState: PluginsState = 'uninitialized'
   private _pluginsErrorMessage?: string
@@ -64,6 +63,10 @@ export class Project {
     }
 
     return null
+  }
+
+  createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
+    this.projectBase.createConfigFile({ code, configFilename })
   }
 
   async initializePlugins (): Promise<Project> {

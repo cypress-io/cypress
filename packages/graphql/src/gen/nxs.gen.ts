@@ -6,14 +6,14 @@
 
 
 import type { BaseContext } from "./../context/BaseContext"
-import type { App } from "./../entities/App.js"
-import type { Project } from "./../entities/Project.js"
-import type { Query } from "./../entities/Query.js"
-import type { TestingTypeInfo } from "./../entities/TestingTypeInfo.js"
-import type { Wizard } from "./../entities/Wizard.js"
-import type { WizardBundler } from "./../entities/WizardBundler.js"
-import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework.js"
-import type { WizardNpmPackage } from "./../entities/WizardNpmPackage.js"
+import type { App } from "./../entities/App"
+import type { Project } from "./../entities/Project"
+import type { Query } from "./../entities/Query"
+import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
+import type { Wizard } from "./../entities/Wizard"
+import type { WizardBundler } from "./../entities/WizardBundler"
+import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
+import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -103,6 +103,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
+    appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -172,6 +173,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     addProject: 'Project'
+    appCreateConfigFile: 'App'
     initializePlugins: 'Project'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
@@ -237,6 +239,10 @@ export interface NexusGenArgTypes {
   Mutation: {
     addProject: { // args
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
+    }
+    appCreateConfigFile: { // args
+      code: string; // String!
+      configFilename: string; // String!
     }
     wizardNavigate: { // args
       direction: NexusGenEnums['WizardNavigateDirection']; // WizardNavigateDirection!

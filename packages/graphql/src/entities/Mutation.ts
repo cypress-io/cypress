@@ -67,6 +67,24 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('appCreateConfigFile', {
+      type: 'App',
+      args: {
+        code: nonNull('String'),
+        configFilename: nonNull('String'),
+      },
+      description: 'Create a Cypress config file for a new project',
+      resolve: (root, args, ctx) => {
+        if (!ctx.activeProject) {
+          throw Error('Cannot write config file without an active project')
+        }
+
+        ctx.activeProject.projectBase.createConfigFile({ ...args })
+
+        return ctx.app
+      },
+    })
+
     t.nonNull.field('addProject', {
       type: 'Project',
       description: 'Adds a new project to the app',

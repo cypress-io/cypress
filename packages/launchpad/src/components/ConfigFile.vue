@@ -1,5 +1,10 @@
 <template>
-  <WizardLayout :next="nextButtonName" alt="Create file manually" :altFn="altFn">
+  <WizardLayout 
+    :next="nextButtonName" 
+    alt="Create file manually" 
+    :altFn="altFn"
+    :nextFn="createConfig"
+  >
     <nav
       class="
         rounded-t
@@ -41,8 +46,8 @@
   </WizardLayout>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, ref, PropType } from "vue";
+<script lang="ts" setup>
+import { computed, ref } from "vue";
 import "prismjs";
 import "@packages/reporter/src/errors/prism.scss";
 import { gql } from '@urql/core'
@@ -50,7 +55,8 @@ import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "./CopyButton.vue";
 import { languages } from "../utils/configFile";
-import type { ConfigFileFragment } from "../generated/graphql";
+import { ConfigFileFragment, ProjectRootFragment, AppCreateConfigFileDocument } from "../generated/graphql";
+import { useMutation } from "@urql/vue";
 
 gql`
 fragment ConfigFile on Wizard {
@@ -59,51 +65,72 @@ fragment ConfigFile on Wizard {
 }
 `
 
-export default defineComponent({
-  components: {
-    WizardLayout,
-    PrismJs,
-    CopyButton,
-  },
-  props: {
-    gql: {
-      type: Object as PropType<ConfigFileFragment>,
-      required: true
+gql`
+fragment ProjectRoot on App {
+  activeProject {
+    projectRoot
+  }
+}
+`
+
+gql`
+mutation appCreateConfigFile($code: String!, $configFilename: String!) {
+  appCreateConfigFile(code: $code, configFilename: $configFilename) {
+    activeProject {
+      projectRoot
     }
-  },
-  setup(props) {
-    const manualInstall = ref(false);
+  }
+}
+`
 
-    const altFn = (val: boolean) => {
-      manualInstall.value = val
-    }
+const props = defineProps<{
+  wizard: ConfigFileFragment 
+  app: ProjectRootFragment | undefined
+}>()
 
-    const tsInstalled = ref(false);
-    const language = ref<"js" | "ts">("ts");
-    const nextButtonName = computed(() =>
-      manualInstall.value ? "I've added this file" : "Create File"
-    );
 
-    import("prismjs/components/prism-typescript").then(() => {
-      tsInstalled.value = true;
-    });
+const manualInstall = ref(false);
 
-    return {
-      manualInstall,
-      altFn,
-      nextButtonName,
-      code: computed(() => {
-        if (language.value === 'js') {
-          return props.gql.sampleCodeJs
-        }
-        return props.gql.sampleCodeTs
-      }),
-      language,
-      languages,
-      tsInstalled,
-    };
-  },
+const altFn = (val: boolean) => {
+  manualInstall.value = val
+}
+
+const tsInstalled = ref(false);
+const language = ref<"js" | "ts">("ts");
+const nextButtonName = computed(() =>
+  manualInstall.value ? "I've added this file" : "Create File"
+);
+
+import("prismjs/components/prism-typescript").then(() => {
+  tsInstalled.value = true;
 });
+
+
+const createConfigFile = useMutation(AppCreateConfigFileDocument)
+
+const createConfig = async () => {
+  console.log('Creating!')
+  if (!props.app?.activeProject?.projectRoot) {
+    throw Error(`Expected active project to be set with a projectRoot. This should never happen.`)
+  }
+
+  if (!code.value) {
+    // should be impossible 
+    throw Error(`Code is required to create a config file. Got ${code.value}.`)
+  }
+
+  await createConfigFile.executeMutation({ 
+    code: code.value,
+    configFilename: `cypress.config.${language.value}`
+  })
+}
+
+const code = computed(() => {
+  if (language.value === 'js') {
+    return props.wizard.sampleCodeJs
+  }
+  return props.wizard.sampleCodeTs
+})
 </script>
 
 <style>

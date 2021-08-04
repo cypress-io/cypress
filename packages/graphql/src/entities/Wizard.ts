@@ -1,5 +1,22 @@
 import { nxs, NxsArgs, NxsResult } from 'nexus-decorators'
-import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, PackageMapping, BundleMapping, WizardCodeLanguageEnum, WizardNavigateDirection } from '../constants/wizardConstants'
+import {
+  BUNDLER,
+  FrontendFramework,
+  Bundler,
+  FRONTEND_FRAMEWORK,
+  TestingTypeEnum,
+  WizardStepEnum,
+  WIZARD_STEP,
+  WizardStep,
+  WIZARD_TITLES,
+  WIZARD_DESCRIPTIONS,
+  TESTING_TYPES,
+  TestingType,
+  PackageMapping,
+  BundleMapping,
+  WizardCodeLanguageEnum,
+  WizardNavigateDirection,
+} from '../constants/wizardConstants'
 import { wizardGetConfigCode } from '../util/wizardGetConfigCode'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'

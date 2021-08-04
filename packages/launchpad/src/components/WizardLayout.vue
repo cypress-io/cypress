@@ -17,8 +17,7 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
+<script lang="ts" setup>
 import ButtonBar from "./ButtonBar.vue";
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
@@ -39,41 +38,26 @@ mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
 }
 `
 
-export default defineComponent({
-  components: { ButtonBar },
-  props: {
-    next: {
-      type: String,
-      default: "Next Step",
-    },
-    back: {
-      type: String,
-      default: "Back",
-    },
-    alt: {
-      type: String,
-      default: undefined,
-    },
-    altFn: {
-      type: Function as PropType<(val: boolean) => void>,
-      default: undefined
-    }
-  },
-  setup(props) {
-    const navigate = useMutation(WizardLayoutNavigateDocument)
+const props = withDefaults(
+  defineProps<{
+    next: string
+    back: string
+    alt?: string
+    altFn?: (val: boolean) => void
+    nextFn?: (...args: unknown[]) => any
+}>(), {
+  next: 'Next Step',
+  back: 'Back Step',
+})
 
-    function nextFn() {
-      navigate.executeMutation({ direction: 'forward' })
-    }
+const navigate = useMutation(WizardLayoutNavigateDocument)
 
-    function backFn() {
-      navigate.executeMutation({ direction: 'back' })
-    }
+async function nextFn() {
+  await props.nextFn?.()
+  navigate.executeMutation({ direction: 'forward' })
+}
 
-    return {
-      nextFn,
-      backFn,
-    }
-  }
-});
+function backFn() {
+  navigate.executeMutation({ direction: 'back' })
+}
 </script>
