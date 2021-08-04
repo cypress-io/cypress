@@ -45,7 +45,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
-import ProjectSettingsSection from './ProjectSettingsSection.vue'
+import ProjectSettingsSection from '../SettingsSection.vue'
 import Icon from '../../components/Icon.vue'
 import Button from '../../components/Button.vue'
 import Input from '../../components/Input/Input.vue'

@@ -1,5 +1,5 @@
 <template>
-  <section class="pt-24px">
+  <section>
     <h2 class="text-xl font-medium text-cool-gray-900 leading-normal">
       <slot name="title"></slot>
     </h2>
