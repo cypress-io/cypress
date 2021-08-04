@@ -193,8 +193,6 @@ const openProject = (project) => {
 
   return ipc.openProject(project.path)
   .then((config = {}) => {
-    const hasE2Eproperty = !!config.e2e
-
     // In this context we know we are in e2e.
     // The configuration in e2e has already been merged with the main.
     // It is not useful to display component/e2e fields explicitely.
@@ -207,7 +205,7 @@ const openProject = (project) => {
 
     config = _.omit(config, 'e2e', 'component')
 
-    updateConfig(config, hasE2Eproperty)
+    updateConfig(config, !!config.e2e)
     const projectIdAndPath = { id: config.projectId, path: project.path }
 
     specsStore.setFilter(projectIdAndPath, localData.get(specsStore.getSpecsFilterId(projectIdAndPath)))
