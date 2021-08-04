@@ -3,8 +3,8 @@ import { Warning } from '../lib/state'
 import styles from './WarningMessage.module.scss'
 
 interface WarningMessageProps{
-	warning: Warning
-	onDismissWarning: () => void
+  warning: Warning
+  onDismissWarning: () => void
 }
 
 export const WarningMessage: React.FC<WarningMessageProps> =
