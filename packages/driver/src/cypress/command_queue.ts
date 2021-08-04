@@ -132,11 +132,11 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
     })
 
     // store this if we enqueue new commands to check for promise violations
-    let subject
+    let commandReturnvalue
     let enqueuedCmd
 
-    const commandEnqueued = (obj) => {
-      return enqueuedCmd = obj
+    const commandEnqueued = (cmd) => {
+      enqueuedCmd = cmd
     }
 
     // only check for command enqueing when none of our args are functions
@@ -148,7 +148,7 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
 
     // run the command's fn with runnable's context
     try {
-      subject = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
+      commandReturnvalue = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
     } catch (err) {
       throw err
     } finally {
@@ -156,15 +156,15 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       Cypress.removeListener('command:enqueued', commandEnqueued)
     }
 
-    state('commandIntermediateValue', subject)
+    state('commandIntermediateValue', commandReturnvalue)
 
     // we cannot pass our cypress instance or our chainer back into bluebird
     // else it will create a thenable which is never resolved
-    if (isCy(subject)) {
+    if (isCy(commandReturnvalue)) {
       return null
     }
 
-    if (!(!enqueuedCmd || !$utils.isPromiseLike(subject))) {
+    if (!(!enqueuedCmd || !$utils.isPromiseLike(commandReturnvalue))) {
       return $errUtils.throwErrByPath(
         'miscellaneous.command_returned_promise_and_commands', {
           args: {
@@ -175,10 +175,10 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       )
     }
 
-    if (!(!enqueuedCmd || !!_.isUndefined(subject))) {
-      subject = _.isFunction(subject) ?
-        subject.toString() :
-        $utils.stringify(subject)
+    if (!(!enqueuedCmd || !!_.isUndefined(commandReturnvalue))) {
+      commandReturnvalue = _.isFunction(commandReturnvalue) ?
+        commandReturnvalue.toString() :
+        $utils.stringify(commandReturnvalue)
 
       // if we got a return value and we enqueued a new command and we
       // didn't return cy or an undefined value then throw
@@ -186,11 +186,13 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
         'miscellaneous.returned_value_and_commands_from_custom_command', {
           args: {
             current: command.get('name'),
-            returned: subject,
+            returned: commandReturnvalue,
           },
         },
       )
     }
+
+    let subject = await commandReturnvalue
 
     state('commandIntermediateValue', undefined)
 
@@ -287,6 +289,7 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       Cypress.action('cy:command:start', command)
 
       await runCommand(command)
+
       // each successful command invocation should
       // always reset the timeout for the current runnable
       // unless it already has a state.  if it has a state
