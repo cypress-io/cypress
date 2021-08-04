@@ -177,21 +177,15 @@ const RunnerCt = namedObserver('RunnerCt',
       state.updateSpecListWidth(width)
     }
 
-    const renderWarnings = () => {
-      const { warnings } = state
-
-      return warnings.map((warning, i) => (
-        <WarningMessage
-          key={warning.message}
-          warning={warning}
-          onDismissWarning={() => state.removeWarning(warning)}
-        />
-      ))
-    }
-
     return (
       <>
-        {renderWarnings()}
+        {state.warnings.map((warning, i) => (
+          <WarningMessage
+            key={warning.message}
+            warning={warning}
+            onDismissWarning={() => state.removeWarning(warning)}
+          />
+        ))}
         <SplitPane
           split="vertical"
           allowResize={false}
