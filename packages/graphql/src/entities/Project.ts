@@ -68,10 +68,6 @@ export class Project implements ProjectBaseContract {
     return null
   }
 
-  createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
-    this.projectBase.createConfigFile({ code, configFilename })
-  }
-
   async initializePlugins (): Promise<Project> {
     if (this.pluginsState !== 'uninitialized' && this.pluginsState !== 'error') {
       return this

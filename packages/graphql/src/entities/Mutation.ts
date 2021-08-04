@@ -79,7 +79,7 @@ export const mutation = mutationType({
           throw Error('Cannot write config file without an active project')
         }
 
-        ctx.activeProject.projectBase.createConfigFile({ ...args })
+        ctx.actions.createConfigFile({ ...args })
 
         return ctx.app
       },
