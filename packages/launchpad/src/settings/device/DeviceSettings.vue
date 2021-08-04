@@ -1,6 +1,6 @@
 <template>
-  <main class="children:pb-7 children:border-b-1">
-    <ExternalEditorSettings/>
+  <main class="children:pt-7 children:pb-7 children:border-b-1">
+    <ExternalEditorSettings class="pt-0"/>
     <ProxySettings/>
   </main>
 </template>

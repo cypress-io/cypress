@@ -24,7 +24,7 @@
   },
   "settingsPage": {
     "proxy": {
-      "title": "Proxy",
+      "title": "Proxy Settings",
       "description": "Cypress auto-detected the following proxy settings from your operating system.",
       "bypassList": "Proxy Bypass List",
       "proxyServer": "Proxy Server"
