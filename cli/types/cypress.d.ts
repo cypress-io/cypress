@@ -565,7 +565,6 @@ declare namespace Cypress {
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
-
   interface SessionOptions {
     validate?: () => false|void
   }
