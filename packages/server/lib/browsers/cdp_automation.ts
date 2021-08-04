@@ -21,7 +21,7 @@ type CyCookieFilter = chrome.cookies.GetAllDetails
 
 export const screencastOpts: cdp.Page.StartScreencastRequest = {
   format: 'jpeg',
-  everyNthFrame: Number(process.env.CYPRESS_EVERY_NTH_FRAME || 10),
+  everyNthFrame: Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5),
 }
 
 function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
