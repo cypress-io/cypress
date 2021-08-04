@@ -1,10 +1,15 @@
-require('graceful-fs').gracefulify(require('fs'))
-const debug = require('debug')('cypress:server:require_async:child')
-const tsNodeUtil = require('./ts_node')
-const util = require('../plugins/util')
-const ipc = util.wrapIpc(process)
+import { gracefulify } from 'graceful-fs'
+import * as fs from 'fs'
+import Debug from 'debug'
+import * as tsNodeUtil from './ts_node'
+import { wrapIpc, serializeError } from '../plugins/util'
+import { suppress } from './suppress_warnings'
 
-require('./suppress_warnings').suppress()
+const ipc = wrapIpc(process as any)
+const debug = Debug('cypress:server:require_async:child')
+
+gracefulify(fs)
+suppress()
 
 const { file, projectRoot, loadErrorCode } = require('minimist')(process.argv.slice(2))
 
@@ -13,13 +18,13 @@ let tsRegistered = false
 run(ipc, file, projectRoot)
 
 /**
- * runs and returns the passed `requiredFile` file in the ipc `load` event
+ * Runs and returns the passed `requiredFile` file in the ipc `load` event
  * @param {*} ipc Inter Process Comunication protocol
- * @param {*} requiredFile the file we are trying to load
- * @param {*} projectRoot the root of the typescript project (useful mainly for tsnode)
+ * @param {string} requiredFile the file we are trying to load
+ * @param {string} projectRoot the root of the typescript project (useful mainly for tsnode)
  * @returns
  */
-function run (ipc, requiredFile, projectRoot) {
+function run (ipc, requiredFile: string, projectRoot: string) {
   debug('requiredFile:', requiredFile)
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
@@ -35,17 +40,17 @@ function run (ipc, requiredFile, projectRoot) {
   }
 
   process.on('uncaughtException', (err) => {
-    debug('uncaught exception:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
+    debug('uncaught exception:', serializeError(err))
+    ipc.send('error', serializeError(err))
 
     return false
   })
 
-  process.on('unhandledRejection', (event) => {
+  process.on('unhandledRejection', (event?: {reason: string}) => {
     const err = (event && event.reason) || event
 
-    debug('unhandled rejection:', util.serializeError(err))
-    ipc.send('error', util.serializeError(err))
+    debug('unhandled rejection:', serializeError(err))
+    ipc.send('error', serializeError(err))
 
     return false
   })
@@ -53,7 +58,7 @@ function run (ipc, requiredFile, projectRoot) {
   ipc.on('load', () => {
     try {
       debug('try loading', requiredFile)
-      const exp = require(requiredFile)
+      const exp = require(requiredFile) as any
 
       const result = exp.default || exp
 
