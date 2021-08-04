@@ -10,7 +10,8 @@
     "build-prod": "yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm src/**/*.js && rm src/*.js || echo 'cleaned'",
-    "postinstall": "echo '@packages/graphql needs: yarn build'"
+    "postinstall": "echo '@packages/graphql needs: yarn build'",
+    "test-unit": "mocha -r @packages/ts/register test/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
     "dedent": "^0.7.0",

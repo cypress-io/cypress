@@ -160,19 +160,19 @@ export class Wizard {
 
   navigate (direction: WizardNavigateDirection): Wizard {
     if (direction === 'back') {
-      this.navigateBack()
+      return this.navigateBack()
     }
 
-    this.navigateForward()
-
-    return this
+    return this.navigateForward()
   }
 
   private navigateBack (): Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== 0) {
-      this.currentStep = WIZARD_STEP[idx - 1]!
+      const i = idx - 1
+
+      this.currentStep = WIZARD_STEP[i]!
     }
 
     return this
