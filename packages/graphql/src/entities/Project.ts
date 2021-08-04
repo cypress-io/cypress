@@ -3,6 +3,7 @@ import { PluginsState, PluginsStateEnum } from '../constants/projectConstants'
 import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 
 export interface ProjectConfig {
+  isCurrent: boolean
   projectRoot: string
   projectBase: ProjectBaseContract
 }
@@ -14,9 +15,11 @@ export class Project implements ProjectBaseContract {
   readonly projectBase: ProjectBaseContract
   private _pluginsState: PluginsState = 'uninitialized'
   private _pluginsErrorMessage?: string
+  private _isCurrent: boolean = false
 
   constructor (private config: ProjectConfig) {
     this.projectBase = config.projectBase
+    this._isCurrent = config.isCurrent
   }
 
   @nxs.field.nonNull.id()
@@ -44,7 +47,7 @@ export class Project implements ProjectBaseContract {
 
   @nxs.field.nonNull.boolean()
   isCurrent (): NxsResult<'Project', 'isCurrent'> {
-    return false
+    return this._isCurrent
   }
 
   @nxs.field.type(() => PluginsStateEnum, {

@@ -28,6 +28,7 @@ export abstract class BaseActions {
     }
 
     const newProject = new Project({
+      isCurrent: input.isCurrent,
       projectRoot: input.projectRoot,
       projectBase: await this.createProjectBase(input),
     })
