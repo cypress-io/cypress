@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from "vue";
-import Button from "../components/Button/Button.vue";
+import Button from "../components/button/Button.vue";
 import Switch from "../components/switch/Switch.vue";
 
 export default defineComponent({
