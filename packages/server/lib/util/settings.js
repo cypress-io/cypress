@@ -159,7 +159,7 @@ module.exports = {
       const evaluatedFiles = foundConfigFiles.filter((file) => file !== 'cypress.json')
 
       // if we found more than one evaluated file (js or ts)
-      // we can't trust that migration has been doen properly
+      // we can't trust that migration has been done properly
       if (evaluatedFiles.length > 1) {
         return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot)
       }
