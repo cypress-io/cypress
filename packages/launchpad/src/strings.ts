@@ -9,6 +9,6 @@ export const settingsStrings = {
   },
   project: {
     title: 'Project Settings',
-    description: 'Settings for this project'
+    description: 'Settings for this project',
   },
 }
