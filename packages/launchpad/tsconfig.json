@@ -47,11 +47,12 @@
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [] /* List of folders to include type definitions from. */
-    "types": ["node", "chrome", "./index", "./vue-shims", "./vite-env", "@testing-library/cypress"], /* Type declaration files to be included in compilation. */
+    "types": ["node", "chrome", "./index", "./vue-shims", "./vite-env", "@testing-library/cypress", "@intlify/vite-plugin-vue-i18n/client"], /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "importsNotUsedAsValues": "error"
   }
 }

@@ -1,6 +1,6 @@
 <template>
-  <main class="children:pb-7 children:border-b-1">
-    <ProjectId />
+  <main class="children:pt-7 children:pb-7 children:border-b-1">
+    <ProjectId class="pt-0"/>
     <RecordKey />
     <Experiments />
   </main>

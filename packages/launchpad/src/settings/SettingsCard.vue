@@ -1,5 +1,5 @@
 <template>
-  <main class="p-4 w-650px mx-auto my-0">
+  <div class="p-4 min-w-650px mx-auto my-0">
     <section class="border-1 border-gray-300 rounded overflow-hidden">
 
       <!-- The Settings Card Header -->
@@ -20,7 +20,7 @@
         <slot/>
       </div>
     </section>
-  </main>
+  </div>
 </template>
 
 <script lang="ts" setup>

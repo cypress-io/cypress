@@ -1,13 +1,13 @@
 <template>
   <div class="absolute top-2 right-2">
     <transition name="fade">
-      <span class="mx-3" v-show="showCopied">Copied</span>
+      <span class="mx-3" v-show="showCopied">{{ t('clipboard.copied') }}</span>
     </transition>
     <button
       class="bg-gray-50 px-3 py-1 rounded text-indigo-600"
       @click="copyToClipboard"
     >
-      Copy
+      {{ t('clipboard.copy') }}
     </button>
   </div>
   <textarea class="absolute -top-96" ref="textElement">{{ text }}</textarea>
@@ -15,6 +15,7 @@
 
 <script lang="ts">
 import { defineComponent, nextTick, ref } from "vue";
+import { useI18n } from "../composables";
 
 export default defineComponent({
   props: {
@@ -33,7 +34,8 @@ export default defineComponent({
       await nextTick()
       showCopied.value = false
     };
-    return { copyToClipboard, textElement, showCopied };
+    const { t } = useI18n()
+    return { copyToClipboard, textElement, showCopied, t };
   },
 });
 </script>

@@ -1,0 +1,58 @@
+{
+  "links": {
+    "learnMore": "Learn more."
+  },
+  "clipboard": {
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "launchpad": {
+    "projectSetup": {
+      "frameworkLabel": "Front-end Framework",
+      "frameworkPlaceholder": "Pick a framework",
+      "bundlerLabel": "Bundler",
+      "bundlerPlaceholder": "Pick a bundler"
+    },
+    "install": {
+      "startButton": "Install",
+      "confirmManualInstall": "I've installed them"
+    }
+  },
+  "settingsPage": {
+    "proxy": {
+      "title": "Proxy",
+      "description": "Cypress auto-detected the following proxy settings from your operating system.",
+      "bypassList": "Proxy Bypass List",
+      "proxyServer": "Proxy Server"
+    },
+    "editor": {
+      "title": "External Editor",
+      "description": "External editor to use for editing code opened when using Cypress."
+    },
+    "projectId": {
+      "title": "Project ID",
+      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
+    },
+    "recordKey": {
+      "title": "Record Key",
+      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
+      "manageKeys": "Manage Keys"
+    },
+    "project": {
+      "title": "Project Settings",
+      "description": "Settings for this project."
+    },
+    "experiments": {
+      "title": "Experiments",
+      "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}"
+    },
+    "device": {
+      "title": "Device Settings",
+      "description": "Settings for this device."
+    }
+  }
+}

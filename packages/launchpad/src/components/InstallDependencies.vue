@@ -20,6 +20,7 @@ import ManualInstall from "./ManualInstall.vue";
 import { gql } from '@urql/core'
 import { useMutation } from "@urql/vue";
 import { InstallDependenciesFragment, InstallDependenciesManualInstallDocument } from "../generated/graphql";
+import { useI18n } from "../composables";
 
 gql`
 fragment InstallDependencies on Wizard {
@@ -51,9 +52,12 @@ export default defineComponent({
     }
   },
   setup(props) {
+    const { t } = useI18n()
     const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
     const nextButtonName = computed(() =>
-      props.gql.isManualInstall ? "I've installed them" : "Install"
+      props.gql.isManualInstall ?
+        t('launchpad.install.confirmManualInstall') :
+        t('launchpad.install.startButton')
     );
 
     return { 

@@ -2,12 +2,12 @@ import '@testing-library/cypress/add-commands'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
-
 import { testApolloClient } from './testApolloClient'
 import { Component, computed, defineComponent, h } from 'vue'
 
 import { ClientTestContext } from '../../src/graphql/ClientTestContext'
 import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUnionType'
+import { createI18n } from '../../src/locales/i18n'
 
 /**
  * This variable is mimicing ipc provided by electron.
@@ -23,8 +23,8 @@ Cypress.Commands.add(
   'mount',
   <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
     options.global = options.global || {}
-
     options.global.plugins = options.global.plugins || []
+    options.global.plugins.push(createI18n())
     options.global.plugins.push({
       install (app) {
         app.use(urql, testApolloClient({
@@ -65,6 +65,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
   }), {
     global: {
       plugins: [
+        createI18n(),
         {
           install (app) {
             app.use(urql, testApolloClient({
