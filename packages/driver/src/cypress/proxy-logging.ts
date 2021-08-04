@@ -1,6 +1,6 @@
 import { Interception, Route } from '@packages/net-stubbing/lib/types'
 import { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
-import { makeErrFromObj } from './error_utils'
+import * as $errUtils from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
@@ -270,7 +270,7 @@ export class ProxyLogging {
   /**
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
-  logInterception (interception: Interception, route: Route): ProxyRequest | undefined {
+  logInterception (interception: Interception, route: Route): ProxyRequest {
     const unloggedPreRequest = take(this.unloggedPreRequests, ({ requestId }) => requestId === interception.browserRequestId)
 
     if (unloggedPreRequest) {
@@ -278,10 +278,18 @@ export class ProxyLogging {
       this.createProxyRequestLog(unloggedPreRequest)
     }
 
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+    let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
-      throw new Error(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url}`)
+      // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
+      debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
+
+      proxyRequest = this.createProxyRequestLog({
+        requestId: interception.browserRequestId || interception.id,
+        resourceType: 'other',
+        originalResourceType: 'Request with no browser pre-request',
+        ..._.pick(interception.request, ['url', 'method', 'headers']),
+      })
     }
 
     proxyRequest.interceptions.push({ interception, route })
@@ -312,7 +320,7 @@ export class ProxyLogging {
       return debug('unmatched error event %o', error)
     }
 
-    proxyRequest.error = makeErrFromObj(error.error)
+    proxyRequest.error = $errUtils.makeErrFromObj(error.error)
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
@@ -349,12 +357,14 @@ export class ProxyLogging {
     this.createProxyRequestLog(preRequest)
   }
 
-  private createProxyRequestLog (preRequest: BrowserPreRequest) {
+  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest {
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
     proxyRequest.log = this.Cypress.log(logConfig).snapshot('request')
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
+
+    return proxyRequest
   }
 }

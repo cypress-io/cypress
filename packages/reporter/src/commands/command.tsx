@@ -15,6 +15,7 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import CommandModel from './command-model'
+import TestError from '../errors/test-error'
 
 const md = new Markdown()
 
@@ -128,8 +129,8 @@ const Aliases = observer(({ model, aliasesWithDuplicates, isOpen }: AliasesProps
       {_.map(([] as Array<Alias>).concat(model.alias), (alias) => {
         const aliases = [alias]
 
-        if (!isOpen && model.hasDuplicates) {
-          aliases.push(..._.compact(model.duplicates.map((dupe) => dupe.alias)))
+        if (!isOpen && model.hasChildren) {
+          aliases.push(..._.compact(model.children.map((dupe) => dupe.alias)))
         }
 
         return (
@@ -189,11 +190,12 @@ interface Props {
   appState: AppState
   events: Events
   runnablesStore: RunnablesStore
+  groupId?: number
 }
 
 @observer
 class Command extends Component<Props> {
-  @observable isOpen = false
+  @observable isOpen: boolean|null = null
   private _showTimeout?: TimeoutID
 
   static defaultProps = {
@@ -205,6 +207,14 @@ class Command extends Component<Props> {
   render () {
     const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
+
+    if (model.group && this.props.groupId !== model.group) {
+      return null
+    }
+
+    if (model.showError) {
+      return <TestError model={model} onPrintToConsole={this._onClick}/>
+    }
 
     return (
       <li
@@ -222,22 +232,28 @@ class Command extends Component<Props> {
             'command-with-indicator': !!model.renderProps.indicator,
             'command-scaled': message && message.length > 100,
             'no-elements': !model.numElements,
+            'command-has-snapshot': model.hasSnapshot,
+            'command-has-console-props': model.hasConsoleProps,
             'multiple-elements': model.numElements > 1,
-            'command-has-duplicates': model.hasDuplicates,
-            'command-is-duplicate': model.isDuplicate,
-            'command-is-open': this.isOpen,
+            'command-has-children': model.hasChildren,
+            'command-is-child': model.isChild,
+            'command-is-open': this._isOpen(),
           },
         )}
-        onMouseEnter={() => this._snapshot(true)}
-        onMouseLeave={() => this._snapshot(false)}
       >
         <FlashOnClick
           message='Printed output to your console'
           onClick={this._onClick}
           shouldShowMessage={this._shouldShowClickMessage}
         >
-          <div className='command-wrapper'>
+          <div className='command-wrapper'
+            onMouseEnter={() => this._snapshot(true)}
+            onMouseLeave={() => this._snapshot(false)}
+          >
             <div className='command-wrapper-text'>
+              <span className='command-expander' >
+                <i className='fas' />
+              </span>
               <span className='command-number'>
                 <i className='fas fa-spinner fa-spin' />
                 <span>{model.number || ''}</span>
@@ -245,11 +261,8 @@ class Command extends Component<Props> {
               <span className='command-pin'>
                 <i className='fas fa-thumbtack' />
               </span>
-              <span className='command-expander' onClick={this._toggleOpen}>
-                <i className='fas' />
-              </span>
               <span className='command-method'>
-                <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
+                <span>{model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}</span>
               </span>
               <span className='command-message'>
                 {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
@@ -264,36 +277,45 @@ class Command extends Component<Props> {
                 </Tooltip>
                 <span className='alias-container'>
                   <Interceptions model={model} />
-                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this.isOpen} />
-                  <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
-                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
+                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} isOpen={this._isOpen()} />
+                  <Tooltip placement='top' title={`This event occurred ${model.numChildren} times`} className='cy-tooltip'>
+                    <span className={cs('num-children', { 'has-alias': model.alias, 'has-children': model.numChildren > 1 })}>{model.numChildren}</span>
                   </Tooltip>
                 </span>
+
               </span>
             </div>
             <Progress model={model} />
+
           </div>
         </FlashOnClick>
-        {this._duplicates()}
+        {this._children()}
       </li>
     )
   }
 
-  _duplicates () {
+  _isOpen () {
+    const { model } = this.props
+
+    return !!model.isOpen
+  }
+
+  _children () {
     const { appState, events, model, runnablesStore } = this.props
 
-    if (!this.isOpen || !model.hasDuplicates) return null
+    if (!this._isOpen()) return
 
     return (
-      <ul className='duplicates'>
-        {_.map(model.duplicates, (duplicate) => (
+      <ul className='command-child-container'>
+        {_.map(model.children, (child) => (
           <Command
-            key={duplicate.id}
-            model={duplicate}
+            key={child.id}
+            model={child}
             appState={appState}
             events={events}
             runnablesStore={runnablesStore}
             aliasesWithDuplicates={null}
+            groupId={model.id}
           />
         ))}
       </ul>
@@ -305,16 +327,20 @@ class Command extends Component<Props> {
   }
 
   _shouldShowClickMessage = () => {
-    return !this.props.appState.isRunning && this._isPinned()
-  }
+    if (this.props.model.hasChildren) {
+      return false
+    }
 
-  @action _toggleOpen = (e: MouseEvent) => {
-    e.stopPropagation()
-
-    this.isOpen = !this.isOpen
+    return !this.props.appState.isRunning && !!this.props.model.hasConsoleProps
   }
 
   @action _onClick = () => {
+    if (this.props.model.hasChildren) {
+      this.props.model.toggleOpen()
+
+      return
+    }
+
     if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model

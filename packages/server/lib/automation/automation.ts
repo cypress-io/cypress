@@ -62,11 +62,11 @@ export class Automation {
       // if we have an onRequest function
       // then just invoke that
       if (onReq) {
-        return onReq(msg, data)
+        return Bluebird.resolve(onReq(msg, data))
       }
 
       // do the default
-      return this.requestAutomationResponse(msg, data, fn)
+      return Bluebird.resolve(this.requestAutomationResponse(msg, data, fn))
     }
   }
 
@@ -118,6 +118,8 @@ export class Automation {
           return this.cookies.getCookie(data, automate)
         case 'set:cookie':
           return this.cookies.setCookie(data, automate)
+        case 'set:cookies':
+          return this.cookies.setCookies(data, automate)
         case 'clear:cookies':
           return this.cookies.clearCookies(data, automate)
         case 'clear:cookie':
