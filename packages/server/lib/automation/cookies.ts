@@ -1,7 +1,7 @@
-import Bluebird from 'bluebird'
-import Debug from 'debug'
 import _ from 'lodash'
+import Debug from 'debug'
 import extension from '@packages/extension'
+import { isHostOnlyCookie } from '../browsers/cdp_automation'
 
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
@@ -49,9 +49,11 @@ export const normalizeGetCookieProps = (props) => {
     return props
   }
 
-  const cookie = normalizeCookieProps(props)
+  if (props.hostOnly === false || (props.hostOnly && !isHostOnlyCookie(props))) {
+    delete props.hostOnly
+  }
 
-  return _.omit(cookie, 'hostOnly')
+  return normalizeCookieProps(props)
 }
 
 export class Cookies {
@@ -60,7 +62,7 @@ export class Cookies {
 
   constructor (private cyNamespace, private cookieNamespace) {}
 
-  isNamespaced (cookie) {
+  isNamespaced = (cookie) => {
     const name = cookie && cookie.name
 
     // if the cookie has no name, return false
@@ -71,10 +73,16 @@ export class Cookies {
     return name.startsWith(this.cyNamespace) || (name === this.cookieNamespace)
   }
 
+  throwIfNamespaced = (data) => {
+    if (this.isNamespaced(data)) {
+      throw new Error('Sorry, you cannot modify a Cypress namespaced cookie.')
+    }
+  }
+
   getCookies (data, automate) {
     debug('getting:cookies %o', data)
 
-    return automate(data)
+    return automate('get:cookies', data)
     .then((cookies) => {
       cookies = normalizeGetCookies(cookies)
       cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie))
@@ -103,10 +111,7 @@ export class Cookies {
   }
 
   setCookie (data, automate) {
-    if (this.isNamespaced(data)) {
-      throw new Error('Sorry, you cannot set a Cypress namespaced cookie.')
-    }
-
+    this.throwIfNamespaced(data)
     const cookie = normalizeCookieProps(data)
 
     // lets construct the url ourselves right now
@@ -125,11 +130,27 @@ export class Cookies {
     })
   }
 
-  clearCookie (data, automate) {
-    if (this.isNamespaced(data)) {
-      throw new Error('Sorry, you cannot clear a Cypress namespaced cookie.')
-    }
+  setCookies (cookies, automate) {
+    cookies = cookies.map((data) => {
+      this.throwIfNamespaced(data)
+      const cookie = normalizeCookieProps(data)
 
+      // lets construct the url ourselves right now
+      // unless we already have a URL
+      cookie.url = data.url != null ? data.url : extension.getCookieUrl(data)
+
+      return cookie
+    })
+
+    debug('set:cookies %o', cookies)
+
+    return automate('set:cookies', cookies)
+    // .tap(console.log)
+    .return(cookies)
+  }
+
+  clearCookie (data, automate) {
+    this.throwIfNamespaced(data)
     debug('clear:cookie %o', data)
 
     return automate(data)
@@ -142,17 +163,15 @@ export class Cookies {
     })
   }
 
-  clearCookies (data, automate) {
-    const cookies = _.reject(normalizeCookies(data), (cookie) => this.isNamespaced(cookie))
+  async clearCookies (data, automate) {
+    const cookiesToClear = data
 
-    debug('clear:cookies %o', cookies)
+    const cookies = _.reject(normalizeCookies(cookiesToClear), this.isNamespaced)
 
-    const clear = (cookie) => {
-      return automate('clear:cookie', { name: cookie.name, domain: cookie.domain })
-      .then(normalizeCookieProps)
-    }
+    debug('clear:cookies %o', cookies.length)
 
-    return Bluebird.map(cookies, clear)
+    return automate('clear:cookies', cookies)
+    .mapSeries(normalizeCookieProps)
   }
 
   changeCookie (data) {

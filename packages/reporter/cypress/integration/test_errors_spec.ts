@@ -247,26 +247,10 @@ describe('test errors', () => {
       cy.percySnapshot()
     })
 
-    it('does not show code frame when not included on error', () => {
-      commandErr.codeFrame = undefined
-
-      cy
-      .get('.test-err-code-frame')
-      .should('not.exist')
-    })
-
     it('use correct language class', () => {
       cy
       .get('.test-err-code-frame pre')
       .should('have.class', 'language-javascript')
-    })
-
-    it('falls back to text language class', () => {
-      // @ts-ignore
-      commandErr.codeFrame.language = null
-      cy
-      .get('.test-err-code-frame pre')
-      .should('have.class', 'language-text')
     })
 
     it('displays tooltip on hover', () => {
@@ -282,6 +266,26 @@ describe('test errors', () => {
         line: 2,
         column: 7,
       },
+    })
+  })
+
+  describe('code frames', () => {
+    it('does not show code frame when not included on error', () => {
+      commandErr.codeFrame = undefined
+      setError(commandErr)
+
+      cy
+      .get('.test-err-code-frame')
+      .should('not.exist')
+    })
+
+    it('falls back to text language class', () => {
+      // @ts-ignore
+      commandErr.codeFrame.language = null
+      setError(commandErr)
+      cy
+      .get('.test-err-code-frame pre')
+      .should('have.class', 'language-text')
     })
   })
 
