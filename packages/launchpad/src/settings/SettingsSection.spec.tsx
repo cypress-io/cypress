@@ -1,6 +1,6 @@
-import ProjectSettingsSection from './ProjectSettingsSection.vue'
+import SettingsSection from './SettingsSection.vue'
 
-describe('<ProjectSettingsSection />', () => {
+describe('<SettingsSection />', () => {
   it('renders the description and title slots', () => {
     cy.viewport(800, 600)
 
@@ -12,7 +12,7 @@ describe('<ProjectSettingsSection />', () => {
     }
 
     // @ts-ignore - doesn't know about vSlots
-    cy.mount(() => <ProjectSettingsSection vSlots={slots} />)
+    cy.mount(() => <SettingsSection vSlots={slots} />)
     .get('h1').should('contain.text', title)
     .get('p').should('contain.text', description)
   })

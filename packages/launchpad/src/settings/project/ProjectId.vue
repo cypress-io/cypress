@@ -1,5 +1,5 @@
 <template>
-  <ProjectSettingsSection>
+  <SettingsSection>
     <template #title>Project ID</template>
     <template
       #description
@@ -19,7 +19,7 @@
         {{ clipboard.copied.value ? 'Copied!' : 'Copy' }}
       </Button>
     </div>
-  </ProjectSettingsSection>
+  </SettingsSection>
 </template>
 
 <script lang="ts" setup>
@@ -29,7 +29,7 @@ import "@packages/reporter/src/errors/prism.scss"
 import IconCodeBraces from 'virtual:vite-icons/mdi/code-braces'
 import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
 import Button from '../../components/Button.vue'
-import ProjectSettingsSection from './ProjectSettingsSection.vue'
+import SettingsSection from '../SettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
 import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
 

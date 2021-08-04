@@ -1,5 +1,5 @@
 <template>
-  <ProjectSettingsSection>
+  <SettingsSection>
     <template #title>Experiments</template>
     <template
       #description
@@ -15,13 +15,13 @@
         :experiment="experiment"
       />
     </div>
-  </ProjectSettingsSection>
+  </SettingsSection>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import ExperimentRow from './ExperimentRow.vue'
-import ProjectSettingsSection from './ProjectSettingsSection.vue'
+import SettingsSection from '../SettingsSection.vue'
 import { experiments as defaultExperiments } from './projectSettings'
 import type { Experiment } from './projectSettings'
 
