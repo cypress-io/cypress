@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
-const { normalizedStack } = require('./stack_utils')
+const $stackUtils = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -101,7 +101,7 @@ const cyStripIndent = (str, indentSize) => {
   }).join('\n')
 }
 
-module.exports = {
+export default {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',
   },
@@ -1009,7 +1009,7 @@ module.exports = {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but a network error occurred while making the request:
 
-          ${normalizedStack(innerErr)}
+          ${$stackUtils.normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
@@ -1019,7 +1019,7 @@ module.exports = {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
 
-          ${normalizedStack(innerErr)}
+          ${$stackUtils.normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
@@ -1438,6 +1438,59 @@ module.exports = {
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
     whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
+  },
+
+  sessions: {
+    validate_callback_false: {
+      message: 'Your `cy.session` **validate** callback {{reason}}',
+    },
+    experimentNotEnabled: {
+      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
+      docsUrl: 'https://on.cypress.io/session',
+    },
+    session: {
+      duplicateId: {
+        message: stripIndent`
+        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgId: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid argument. The first argument \`id\` must be an string or serializable object.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptions: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid argument. The optional third argument \`options\` must be an object.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptionUnexpected: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid option: **{{key}}**
+        Available options are: \`validate\`
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptionInvalid: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      not_found: {
+        message: stripIndent`
+        No session is defined with the name
+          **{{id}}**
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\`
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+    },
   },
 
   setCookie: {

@@ -304,6 +304,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
       this.networkProxy.reset()

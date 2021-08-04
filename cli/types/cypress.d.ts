@@ -565,6 +565,10 @@ declare namespace Cypress {
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
+  interface SessionOptions {
+    validate?: () => false|void
+  }
+
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
@@ -959,6 +963,15 @@ declare namespace Cypress {
      * @see https://on.cypress.io/debug
      */
     debug(options?: Partial<Loggable>): Chainable<Subject>
+
+   /**
+     * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
+     *
+     * Only available if the `experimentalSessionSupport` config option is enabled.
+     *
+     * @see https://on.cypress.io/session
+     */
+    session(id: string|object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -2661,6 +2674,11 @@ declare namespace Cypress {
      * @default 'top'
      */
     scrollBehavior: scrollBehaviorOptions
+    /**
+     * Enable experimental session support. See https://on.cypress.io/session
+     * @default false
+     */
+    experimentalSessionSupport: boolean
     /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false

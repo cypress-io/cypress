@@ -7,7 +7,7 @@ const sinon = require('sinon')
 const fakeTimers = require('@sinonjs/fake-timers')
 
 const $dom = require('./dom')
-const $errorMessages = require('./cypress/error_messages')
+const $errorMessages = require('./cypress/error_messages').default
 const $Chainer = require('./cypress/chainer')
 const $Command = require('./cypress/command')
 const $Commands = require('./cypress/commands')
@@ -454,6 +454,9 @@ class $Cypress {
 
       case 'cy:visit:failed':
         return this.emit('visit:failed', args[0])
+
+      case 'cy:visit:blank':
+        return this.emitThen('visit:blank', args[0])
 
       case 'cy:viewport:changed':
         return this.emit('viewport:changed', ...args)
