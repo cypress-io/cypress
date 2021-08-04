@@ -154,7 +154,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
@@ -269,6 +269,8 @@ export class CdpAutomation {
         return true
       case 'remote:debugger:protocol':
         return this.sendDebuggerCommandFn(data.command, data.params)
+      case 'remote:debugger:event':
+        return this.onFn(data.event, data.callback)
       case 'take:screenshot':
         return this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         .catch((err) => {
