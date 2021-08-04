@@ -2004,6 +2004,10 @@ export default {
       message: `${cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.`,
       docsUrl: 'https://on.cypress.io/wait',
     },
+    invalid_arguments_function: {
+      message: `${cmd('wait')} was passed invalid arguments. You cannot pass a function. If you would like to wait on the result of a ${cmd('wait')}, use ${cmd('then')}.`,
+      docsUrl: 'https://on.cypress.io/wait',
+    },
     timed_out: {
       message: `${cmd('wait')} timed out waiting \`{{timeout}}ms\` for the {{num}} {{type}} to the route: \`{{alias}}\`. No {{type}} ever occurred.`,
       docsUrl: 'https://on.cypress.io/wait',
