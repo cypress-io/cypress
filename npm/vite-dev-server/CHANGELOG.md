@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.4...@cypress/vite-dev-server-v2.0.5) (2021-08-04)
+
+
+### Bug Fixes
+
+* reload every spec file when support updated ([#17598](https://github.com/cypress-io/cypress/issues/17598)) ([efc38b6](https://github.com/cypress-io/cypress/commit/efc38b67497b48db5b3a636acac3be45dd930593))
+
 # [@cypress/vite-dev-server-v2.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.3...@cypress/vite-dev-server-v2.0.4) (2021-07-31)
 
 
