@@ -49,7 +49,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.17.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -58,7 +58,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.17.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
         user: node
     environment:
       PLATFORM: linux
