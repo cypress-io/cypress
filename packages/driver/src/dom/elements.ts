@@ -1075,6 +1075,20 @@ const getElements = ($el) => {
   return els
 }
 
+// Remove <style> and <script> elements inside <body>. Even though the contains
+// selector avoids selecting them with :not(script,style), it will find the
+// text anyway and attribute it to the <body>
+// https://github.com/cypress-io/cypress/issues/14861
+const removeScriptAndStyleElements = (elem) => {
+  const $elem = $(elem)
+
+  if (!isSelector($elem, 'body')) return elem
+
+  $elem.find('script,style').remove()
+
+  return $elem[0]
+}
+
 const whitespaces = /\s+/g
 
 // When multiple space characters are considered as a single whitespace in all tags except <pre>.
@@ -1108,12 +1122,14 @@ const getContainsSelector = (text, filter = '', options: {
 
     // taken from jquery's normal contains method
     cyContainsSelector = function (elem) {
-      let testText = normalizeWhitespaces(elem)
+      elem = removeScriptAndStyleElements(elem)
+      const testText = normalizeWhitespaces(elem)
 
       return text.test(testText)
     }
   } else if (_.isString(text)) {
     cyContainsSelector = function (elem) {
+      elem = removeScriptAndStyleElements(elem)
       let testText = normalizeWhitespaces(elem)
 
       if (!options.matchCase) {
