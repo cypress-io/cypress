@@ -181,6 +181,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     let cfg = this.getConfig()
 
     if (typeof cfg.configFile === 'string' && /\.json$/.test(cfg.configFile)) {
+      errors.warning('DEPREACTED_CYPRESS_JSON', cfg.configFile)
+
       this.options.onWarning(errors.get('DEPREACTED_CYPRESS_JSON', cfg.configFile))
     }
 
