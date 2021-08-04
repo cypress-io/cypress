@@ -17,9 +17,9 @@
 </template>
 
 <script lang="ts" setup>
-import CodeEditor from '../CodeEditor.vue'
+import CodeEditor from './CodeEditor.vue'
 import { useModelWrapper } from '../../composables'
-import IconWrapper, { iconProps } from '../IconWrapper.vue'
+import IconWrapper, { iconProps } from '../icon/IconWrapper.vue'
 import { pick, keys } from 'lodash'
 
 const props = defineProps({

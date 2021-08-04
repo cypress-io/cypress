@@ -87,8 +87,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType, ref } from "vue";
-import { ClickOutside } from '../directives/ClickOutside'
-import { FrameworkBundlerLogos } from '../utils/icons'
+import { ClickOutside } from '../../directives/ClickOutside'
+import { FrameworkBundlerLogos } from '../../utils/icons'
 
 export interface Option {
   name: string;
