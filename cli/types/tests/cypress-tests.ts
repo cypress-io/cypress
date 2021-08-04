@@ -690,6 +690,7 @@ namespace CypressSessionsTests {
   Cypress.config('experimentalSessionSupport') // $ExpectType boolean
   cy.session('user')
   cy.session('user', () => {})
+  cy.session({ name: 'bob' }, () => {})
   cy.session('user', () => {}, {})
   cy.session('user', () => {}, {
     validate: () => {}

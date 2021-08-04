@@ -487,8 +487,7 @@ class $Cypress {
 
       case 'cy:collect:run:state':
         return this.emitThen('collect:run:state')
-      case 'cy:rerun':
-        return this.emit('rerun')
+
       case 'cy:scrolled':
         return this.emit('scrolled', ...args)
 

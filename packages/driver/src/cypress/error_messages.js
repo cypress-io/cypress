@@ -1447,13 +1447,8 @@ export default {
     experimentNotEnabled: {
       message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
       docsUrl: 'https://on.cypress.io/session',
-
     },
     session: {
-      missing_argument: {
-        message: `${cmd('session')} requires a {{name}}.`,
-        docsUrl: 'https://on.cypress.io/session',
-      },
       duplicateId: {
         message: stripIndent`
         You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
@@ -1493,10 +1488,6 @@ export default {
 
         \`cy.session(id, setup)\`
         `,
-        docsUrl: 'https://on.cypress.io/session',
-      },
-      invalid_argument: {
-        message: `${cmd('session')} must be passed a string or the return value from \`cy.session\`. You passed:\n\n\`{{value}}\``,
         docsUrl: 'https://on.cypress.io/session',
       },
     },

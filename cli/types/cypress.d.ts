@@ -565,19 +565,6 @@ declare namespace Cypress {
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
-  interface LocalStorageData {
-    origin: string
-    value: object
-  }
-
-  type sessionExcludeFilterCookies = {
-    domain?: string|RegExp
-    name?: string| RegExp
-  } | string | RegExp
-  type sessionExcludeFilterLocalStorage = {
-    origin?: string|RegExp
-    key?: string| RegExp
-  } | string | RegExp
 
   interface SessionOptions {
     validate?: () => false|void
