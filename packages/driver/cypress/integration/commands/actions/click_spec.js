@@ -4711,7 +4711,7 @@ describe('mouse state', () => {
     })
 
     it('can print table of keys on click', () => {
-      const spyTableName = cy.spy(top.console, 'groupCollapsed')
+      const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
       cy.get('input:first').click()
@@ -4737,7 +4737,7 @@ describe('mouse state', () => {
     })
 
     it('can print table of keys on dblclick', () => {
-      const spyTableName = cy.spy(top.console, 'groupCollapsed')
+      const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
       cy.get('input:first').dblclick()
@@ -4766,7 +4766,7 @@ describe('mouse state', () => {
     })
 
     it('can print table of keys on rightclick', () => {
-      const spyTableName = cy.spy(top.console, 'groupCollapsed')
+      const spyTableName = cy.spy(top.console, 'group')
       const spyTableData = cy.spy(top.console, 'table')
 
       cy.get('input:first').rightclick()

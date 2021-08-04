@@ -16,6 +16,7 @@ fs = Promise.promisifyAll(fs)
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
  */
 const isSandboxNeeded = () => {
+  // eslint-disable-next-line no-restricted-properties
   return (os.platform() === 'linux') && (process.geteuid() === 0)
 }
 
