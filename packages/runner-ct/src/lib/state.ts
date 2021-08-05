@@ -203,7 +203,9 @@ export default class State extends BaseStore {
   }
 
   @action removeWarning (warning: Warning) {
-    this.warnings
+    const index = this.warnings.findIndex((warn) => warn.message === warning.message)
+
+    this.warnings.splice(index, 1)
   }
 
   @action setScreenshotting (screenshotting: boolean) {
