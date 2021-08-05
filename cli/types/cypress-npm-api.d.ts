@@ -363,27 +363,27 @@ declare module 'cypress' {
     })
     ```
     */
-  export function run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
+  function run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
   /**
    * Opens Cypress GUI. Resolves with void when the
    * GUI is closed.
    * @see https://on.cypress.io/module-api#cypress-open
    */
-  export function open(options?: Partial<CypressCommandLine.CypressOpenOptions>): Promise<void>
+  function open(options?: Partial<CypressCommandLine.CypressOpenOptions>): Promise<void>
 
   /**
    * Utility functions for parsing CLI arguments the same way
    * Cypress does
    */
-  export const cli: CypressCommandLine.CypressCliParser
+  const cli: CypressCommandLine.CypressCliParser
 
   /**
    * Type helper to make writing `cypress.config.ts` easier
    */
-  export function defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
+  function defineConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
 
   /**
    * Types for configuring cypress in cypress.config.ts
    */
-  export type ConfigOptions = Cypress.ConfigOptions
+  type ConfigOptions = Cypress.ConfigOptions
 }
