@@ -108,10 +108,16 @@ import("prismjs/components/prism-typescript").then(() => {
 
 const createConfigFile = useMutation(AppCreateConfigFileDocument)
 
+const code = computed(() => {
+  if (language.value === 'js') {
+    return props.wizard.sampleCodeJs
+  }
+  return props.wizard.sampleCodeTs
+})
+
 const createConfig = async () => {
-  console.log('Creating!')
   if (!props.app?.activeProject?.projectRoot) {
-    throw Error(`Expected active project to be set with a projectRoot. This should never happen.`)
+    throw Error(`Cannot find the active project's projectRoot. This should never happen.`)
   }
 
   if (!code.value) {
@@ -124,13 +130,6 @@ const createConfig = async () => {
     configFilename: `cypress.config.${language.value}`
   })
 }
-
-const code = computed(() => {
-  if (language.value === 'js') {
-    return props.wizard.sampleCodeJs
-  }
-  return props.wizard.sampleCodeTs
-})
 </script>
 
 <style>

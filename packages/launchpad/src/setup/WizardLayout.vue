@@ -47,7 +47,7 @@ const props = withDefaults(
     nextFn?: (...args: unknown[]) => any
 }>(), {
   next: 'Next Step',
-  back: 'Back Step',
+  back: 'Back,
 })
 
 const navigate = useMutation(WizardLayoutNavigateDocument)
