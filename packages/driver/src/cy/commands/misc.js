@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 
+const $Command = require('../../cypress/command')
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
@@ -24,11 +25,11 @@ module.exports = (Commands, Cypress, cy, state) => {
       if (state('current').get('injected')) {
         const restoreCmdIndex = state('index') + 1
 
-        cy.queue.splice(restoreCmdIndex, 0, {
+        cy.queue.insert(restoreCmdIndex, $Command.create({
           args: [state('subject')],
           name: 'log-restore',
           fn: (subject) => subject,
-        })
+        }))
 
         state('index', restoreCmdIndex)
       }
