@@ -635,4 +635,8 @@ export const eventManager = {
   saveState (state) {
     ws.emit('save:app:state', state)
   },
+
+  externalOpen (href) {
+    ws.emit('external:open', href)
+  },
 }

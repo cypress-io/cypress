@@ -10,6 +10,8 @@ export { default as EditorPickerModal } from './file-opener/editor-picker-modal'
 
 export { default as FileOpener } from './file-opener/file-opener'
 
+export { default as MarkdownRenderer } from './markdown-renderer'
+
 export * from './file-opener/file-model'
 
 export * from './select'
