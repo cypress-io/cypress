@@ -43,24 +43,19 @@ const commandRunningFailed = (Cypress, state, err) => {
     consoleProps () {
       if (!current) return
 
-      const obj = {}
+      const consoleProps = {}
       const prev = current.get('prev')
 
-      // if type isnt parent then we know its dual or child
+      if (current.get('type') === 'parent' || !prev) return
+
+      // if type isn't parent then we know its dual or child
       // and we can add Applied To if there is a prev command
       // and it is a parent
-      if (current.get('type') !== 'parent' && prev) {
-        const ret = $dom.isElement(prev.get('subject')) ?
-          $dom.getElements(prev.get('subject'))
-          :
-          prev.get('subject')
+      consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
+        $dom.getElements(prev.get('subject')) :
+        prev.get('subject')
 
-        obj['Applied To'] = ret
-
-        return obj
-      }
-
-      return
+      return consoleProps
     },
   })
 }
@@ -68,12 +63,7 @@ const commandRunningFailed = (Cypress, state, err) => {
 export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
   const queue = createQueue()
 
-  const get = queue.get.bind(queue)
-  const slice = queue.slice.bind(queue)
-  const at = queue.at.bind(queue)
-  const reset = queue.reset.bind(queue)
-  const clear = queue.clear.bind(queue)
-  const stop = queue.stop.bind(queue)
+  const { get, slice, at, reset, clear, stop } = queue
 
   const logs = (filter) => {
     let logs = _.flatten(_.invokeMap(queue.get(), 'get', 'logs'))
