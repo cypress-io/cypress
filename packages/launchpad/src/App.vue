@@ -7,8 +7,8 @@
 <script lang="ts" setup>
 import { provideClient } from '@urql/vue'
 import { makeUrqlClient } from './graphql/urqlClient'
-import Layout from "./components/Layout.vue"
-import Wizard from "./components/Wizard.vue"
+import Layout from "./layouts/Layout.vue"
+import Wizard from "./setup/Wizard.vue"
 
 provideClient(makeUrqlClient())
 </script>

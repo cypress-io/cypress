@@ -2,19 +2,19 @@
   <WizardLayout>
     <div class="m-5">
       <Select
-        name="Front-end Framework"
+        :name="t('launchpad.projectSetup.frameworkLabel')"
         @select="setFEFramework"
         :options="frameworks ?? []"
         :value="gql.framework?.id ?? undefined"
-        placeholder="Pick a framework"
+        :placeholder="t('launchpad.projectSetup.frameworkPlaceholder')"
       />
       <Select
-        name="Bundler"
+        :name="t('launchpad.projectSetup.bundlerLabel')"
         :disabled="bundlers.length === 1"
         @select="setFEBundler"
         :options="bundlers || []"
         :value="gql.bundler?.id ?? undefined"
-        placeholder="Pick a bundler"
+        :placeholder="t('launchpad.projectSetup.bundlerPlaceholder')"
       />
     </div>
   </WizardLayout>
@@ -23,10 +23,11 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
-import Select, { Option } from "./Select.vue";
+import Select from "../components/select/Select.vue";
 import { gql } from '@urql/core'
 import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
+import { useI18n } from "../composables";
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFramework!) {
@@ -92,6 +93,8 @@ export default defineComponent({
       setFramework.executeMutation({ framework })
     };
 
+    const { t } = useI18n()
+
     return {
       bundlers: computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers),
       frameworks: computed(() => props.gql.frameworks ?? []),
@@ -99,6 +102,7 @@ export default defineComponent({
       setFEFramework,
       setFEBundler,
       disabledBundlerSelect,
+      t
     };
   },
 });

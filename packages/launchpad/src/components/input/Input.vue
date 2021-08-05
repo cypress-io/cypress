@@ -35,9 +35,8 @@ import { computed } from 'vue'
 import { useModelWrapper } from '../../composables'
 import { omit, pick, keys } from 'lodash'
 import type { IconType } from '../../types'
-import IconWrapper, { iconProps } from '../IconWrapper.vue'
+import IconWrapper, { iconProps } from '../icon/IconWrapper.vue'
 
-  // ...iconProps,
 const props = withDefaults(defineProps<{
   prefixIcon?: IconType,
   prefixIconClass?: string,
@@ -45,7 +44,7 @@ const props = withDefaults(defineProps<{
   suffixIconClass?: string,
   type?: HTMLInputElement['type']
   modelValue?: string
-  disabled: boolean
+  disabled?: boolean
   inputClass?: string | Array<any> | object
 }>(), {
   modelValue: '',

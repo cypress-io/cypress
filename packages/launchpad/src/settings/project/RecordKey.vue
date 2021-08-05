@@ -1,9 +1,10 @@
 <template>
   <ProjectSettingsSection>
-    <template #title>Record Key</template>
+    <template #title>{{t('settingsPage.recordKey.title')}}</template>
     <template #description>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio cum dolorem doloribus voluptate consectetur recusandae?
-      <a>Learn more</a>.
+      <i18n-t keypath="settingsPage.recordKey.description">
+        <a href="https://docs.cypress.io" target="_blank">{{ t('links.learnMore') }}</a>
+      </i18n-t>
     </template>
     <div class="inline-flex justify-start gap-10px">
       <Input
@@ -15,14 +16,14 @@
         <template #prefix>
           <Icon :icon="IconKey" class="text-cool-gray-400" />
         </template>
-        <template>
+        <template #suffix>
           <button
             @click="showRecordKey = !showRecordKey"
             aria-label="Record Key Visibility Toggle"
             class="text-cool-gray-400 hover:text-cool-gray-500"
           >
-            <Icon v-if="showRecordKey" :icon="IconEyeOpen" />
-            <Icon v-else :icon="IconEyeClosed" />
+            <Icon v-if="showRecordKey" :icon="IconEyeOpen"></Icon>
+            <Icon v-else :icon="IconEyeClosed"></Icon>
           </button>
         </template>
       </Input>
@@ -31,24 +32,26 @@
         @click="clipboard.copy()"
         :prefixIcon="IconDashedSquare"
         prefixIconClass="text-cool-gray-500"
-      >{{ clipboard.copied.value ? 'Copied!' : 'Copy' }}</Button>
+      >{{ clipboard.copied.value ? t('clipboard.copied') : t('clipboard.copy') }}</Button>
       <Button
         variant="outline"
         @click="openManageKeys"
         :prefixIcon="IconKey"
         prefixIconClass="text-cool-gray-500 w-1.2rem h-1.2rem"
-      >Manage Keys</Button>
+      >{{ t('settingsPage.recordKey.manageKeys') }}</Button>
     </div>
+
   </ProjectSettingsSection>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
+import { useI18n } from '../../composables'
 import ProjectSettingsSection from '../SettingsSection.vue'
-import Icon from '../../components/Icon.vue'
-import Button from '../../components/Button.vue'
-import Input from '../../components/Input/Input.vue'
+import Icon from '../../components/icon/Icon.vue'
+import Button from '../../components/button/Button.vue'
+import Input from '../../components/input/Input.vue'
 import IconKey from 'virtual:vite-icons/foundation/key'
 import IconEyeOpen from 'virtual:vite-icons/mdi/eye-outline'
 import IconEyeClosed from 'virtual:vite-icons/mdi/eye-off-outline'
@@ -58,4 +61,5 @@ const recordKey = ref('12e1oihd')
 const clipboard = useClipboard({ source: recordKey })
 const openManageKeys = () => { }
 const showRecordKey = ref(false)
+const { t } = useI18n()
 </script>

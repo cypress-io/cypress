@@ -14,7 +14,7 @@ describe('<RecordKey />', () => {
     cy.findByText('Record Key')
   })
 
-  xit(`has an input that's hidden by default`, () => {
+  it(`has an input that's hidden by default`, () => {
     cy.get('input[type="password"]').as('Record Key Input')
     .should('be.visible')
     .get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')

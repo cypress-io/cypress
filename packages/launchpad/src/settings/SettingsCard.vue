@@ -1,5 +1,5 @@
 <template>
-  <main class="p-4 w-650px mx-auto my-0">
+  <div class="p-4 min-w-650px mx-auto my-0">
     <section class="border-1 border-gray-300 rounded overflow-hidden">
 
       <!-- The Settings Card Header -->
@@ -20,12 +20,12 @@
         <slot/>
       </div>
     </section>
-  </main>
+  </div>
 </template>
 
 <script lang="ts" setup>
   import IconCaret from 'virtual:vite-icons/mdi/caret'
-  import Icon from '../components/Icon.vue'
+  import Icon from '../components/icon/Icon.vue'
   import { useToggle } from '@vueuse/core'
   import type { IconType } from '../types'
 

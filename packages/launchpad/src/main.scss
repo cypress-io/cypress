@@ -16,6 +16,10 @@ em {
   @apply text-purple-400 not-italic;
 }
 
+a {
+  @apply text-indigo-600 hover:underline;
+}
+
 /**
  * Utilities
  * -------------------------

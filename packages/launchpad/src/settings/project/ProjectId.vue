@@ -1,9 +1,11 @@
 <template>
   <SettingsSection>
-    <template #title>Project ID</template>
-    <template
-      #description
-    >Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio cum dolorem doloribus voluptate consectetur recusandae?</template>
+    <template #title>{{ t('settingsPage.projectId.title') }}</template>
+    <template #description>
+      <i18n-t keypath="settingsPage.projectId.description">
+        <a href="https://docs.cypress.io" target="_blank">{{ t('links.learnMore') }}</a>
+      </i18n-t>
+    </template>
     <div class="inline-grid grid-flow-col justify-start gap-10px">
       <InlineCodeEditor
         class="text-sm"
@@ -16,7 +18,7 @@
         <template #prefix>
           <Icon class="text-cool-gray-600" :icon="IconDashedSquare" />
         </template>
-        {{ clipboard.copied.value ? 'Copied!' : 'Copy' }}
+        {{ clipboard.copied.value ? t('clipboard.copied') : t('clipboard.copy') }}
       </Button>
     </div>
   </SettingsSection>
@@ -28,10 +30,11 @@ import "prismjs"
 import "@packages/reporter/src/errors/prism.scss"
 import IconCodeBraces from 'virtual:vite-icons/mdi/code-braces'
 import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
-import Button from '../../components/Button.vue'
+import Button from '../../components/button/Button.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
-import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
+import InlineCodeEditor from '../../components/code/InlineCodeEditor.vue'
+import { useI18n } from '../../composables'
 
 const props = defineProps<{
   mockClipboard?: any
@@ -44,6 +47,7 @@ const clipboard = props.mockClipboard?.() || useClipboard({ source: projectId })
 const formattedProjectId = computed(() => `projectId: '${projectId.value}'`)
 
 onMounted(() => import("prismjs/components/prism-yaml"))
+const { t } = useI18n()
 </script>
 
 <style lang="scss" scoped>

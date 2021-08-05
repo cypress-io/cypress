@@ -10,7 +10,7 @@ describe('<ProjectId />', () => {
     const copied = ref('')
     const useClipboard = () => ({
       copy: () => {
-        copied.value = 'Copied!'
+        copied.value = 'Copied'
       },
       copied,
       text: computed(() => ''),
@@ -28,7 +28,7 @@ describe('<ProjectId />', () => {
     .click()
     .findByText('Copy')
     .should('not.exist')
-    .findByText('Copied!')
+    .findByText('Copied')
     .should('be.visible')
   })
 })

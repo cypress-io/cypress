@@ -53,7 +53,7 @@ import "@packages/reporter/src/errors/prism.scss";
 import { gql } from '@urql/core'
 import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
-import CopyButton from "./CopyButton.vue";
+import CopyButton from "../components/button/CopyButton.vue";
 import { languages } from "../utils/configFile";
 import { ConfigFileFragment, ProjectRootFragment, AppCreateConfigFileDocument } from "../generated/graphql";
 import { useMutation } from "@urql/vue";
