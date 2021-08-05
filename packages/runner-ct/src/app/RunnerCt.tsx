@@ -169,6 +169,8 @@ const RunnerCt = namedObserver('RunnerCt',
       window.addEventListener('resize', onWindowResize)
       window.dispatchEvent(new Event('resize'))
 
+      eventManager.start(config)
+
       return () => window.removeEventListener('resize', onWindowResize)
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
