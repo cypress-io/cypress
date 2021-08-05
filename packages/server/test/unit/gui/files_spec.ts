@@ -35,6 +35,7 @@ describe('gui/files', () => {
 
       this.err = new Error('foo')
 
+      sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves()
       sinon.stub(ProjectBase.prototype, 'open').resolves()
       sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
 
