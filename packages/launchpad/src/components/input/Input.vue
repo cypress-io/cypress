@@ -35,7 +35,7 @@ import { computed } from 'vue'
 import { useModelWrapper } from '../../composables'
 import { omit, pick, keys } from 'lodash'
 import type { IconType } from '../../types'
-import IconWrapper, { iconProps } from '../IconWrapper.vue'
+import IconWrapper, { iconProps } from '../icon/IconWrapper.vue'
 
 const props = withDefaults(defineProps<{
   prefixIcon?: IconType,

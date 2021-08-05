@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { defineProps } from "vue"
-import type { IconType } from '../types'
+import type { IconType } from '../../types'
 
 const VariantClassesTable = {
   primary: "border-indigo-600 bg-indigo-600 text-white",

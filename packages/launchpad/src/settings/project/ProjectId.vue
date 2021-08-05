@@ -30,10 +30,10 @@ import "prismjs"
 import "@packages/reporter/src/errors/prism.scss"
 import IconCodeBraces from 'virtual:vite-icons/mdi/code-braces'
 import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
-import Button from '../../components/Button.vue'
+import Button from '../../components/button/Button.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
-import InlineCodeEditor from '../../components/Input/InlineCodeEditor.vue'
+import InlineCodeEditor from '../../components/code/InlineCodeEditor.vue'
 import { useI18n } from '../../composables'
 
 const props = defineProps<{

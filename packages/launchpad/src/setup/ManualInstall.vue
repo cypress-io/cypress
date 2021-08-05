@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from "vue";
-import CopyButton from "./CopyButton.vue";
+import CopyButton from "../components/button/CopyButton.vue";
 import { gql } from '@urql/core'
 import type { ManualInstallFragment } from "../generated/graphql";
 

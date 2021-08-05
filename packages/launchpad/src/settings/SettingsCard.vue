@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
   import IconCaret from 'virtual:vite-icons/mdi/caret'
-  import Icon from '../components/Icon.vue'
+  import Icon from '../components/icon/Icon.vue'
   import { useToggle } from '@vueuse/core'
   import type { IconType } from '../types'
 

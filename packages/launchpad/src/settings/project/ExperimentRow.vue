@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { defineProps } from 'vue'
-import StatusIndicator from '../../components/StatusIndicator.vue'
+import StatusIndicator from '../../components/badge/StatusIndicator.vue'
 import { useI18n } from '../../composables';
 
 export interface Experiment {
