@@ -7,7 +7,11 @@
       <template v-else-if="wizard.testingType === 'component'">
         <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
         <InstallDependencies v-else-if="wizard.step === 'installDependencies'" :gql="wizard" />
-        <ConfigFile v-else-if="wizard.step === 'createConfig'" :gql="wizard" />
+        <ConfigFile 
+          v-else-if="wizard.step === 'createConfig'" 
+          :wizard="wizard" 
+          :app="app" 
+        />
         <OpenBrowser v-else-if="wizard.step === 'setupComplete'" />
       </template>
       <template v-else>
@@ -34,6 +38,7 @@ gql`
 query Wizard {
   app {
     isFirstOpen
+    ...ProjectRoot
   }
   wizard {
     step
@@ -63,7 +68,9 @@ export default defineComponent({
 
     return { 
       loading: result.fetching, 
-      wizard: computed(() => result.data.value?.wizard) };
+      wizard: computed(() => result.data.value?.wizard),
+      app: computed(() => result.data.value?.app) 
+    };
   },
 });
 </script>

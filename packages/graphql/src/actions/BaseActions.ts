@@ -1,4 +1,6 @@
 import type { NxsMutationArgs } from 'nexus-decorators'
+import fs from 'fs'
+import path from 'path'
 import type { BaseContext } from '../context/BaseContext'
 import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 import { Project } from '../entities/Project'
@@ -16,6 +18,16 @@ export abstract class BaseActions {
 
   abstract installDependencies (): void
 
+  createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create config file without activeProject.`)
+    }
+
+    fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
+  }
+
   /**
    * Adds a new project if it doesn't already exist
    */
@@ -28,6 +40,7 @@ export abstract class BaseActions {
     }
 
     const newProject = new Project({
+      isCurrent: input.isCurrent,
       projectRoot: input.projectRoot,
       projectBase: await this.createProjectBase(input),
     })

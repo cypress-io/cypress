@@ -13,16 +13,24 @@
     <div class="flex-grow">
       <slot />
     </div>
-    <ButtonBar :nextFn="nextFn" :backFn="backFn" :altFn="altFn" :next="next" :back="back" :alt="alt" />
+    <ButtonBar 
+      :nextFn="nextFn" 
+      :canNavigateForward="canNavigateForward"
+      :backFn="backFn" 
+      :altFn="altFn" 
+      :next="nextLabel" 
+      :back="backLabel" 
+      :alt="alt" 
+    />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
-import ButtonBar from "./ButtonBar.vue";
-import { gql } from '@urql/core'
-import { useMutation } from '@urql/vue'
-import { WizardLayoutNavigateDocument } from "../generated/graphql";
+<script lang="ts" setup>
+import ButtonBar from "./ButtonBar.vue"
+import { computed } from "vue"
+import { useMutation, gql } from '@urql/vue'
+import { WizardLayoutFragment, WizardLayoutNavigateDocument } from "../generated/graphql"
+import { useI18n } from "../composables"
 
 gql`
 fragment WizardLayout on Wizard {
@@ -39,41 +47,28 @@ mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
 }
 `
 
-export default defineComponent({
-  components: { ButtonBar },
-  props: {
-    next: {
-      type: String,
-      default: "Next Step",
-    },
-    back: {
-      type: String,
-      default: "Back",
-    },
-    alt: {
-      type: String,
-      default: undefined,
-    },
-    altFn: {
-      type: Function as PropType<(val: boolean) => void>,
-      default: undefined
-    }
-  },
-  setup(props) {
-    const navigate = useMutation(WizardLayoutNavigateDocument)
+const { t } = useI18n()
 
-    function nextFn() {
-      navigate.executeMutation({ direction: 'forward' })
-    }
+const props = defineProps<{
+    next?: string
+    back?: string
+    alt?: string
+    canNavigateForward?: boolean
+    altFn?: (val: boolean) => void
+    nextFn?: (...args: unknown[]) => any,
+}>()
 
-    function backFn() {
-      navigate.executeMutation({ direction: 'back' })
-    }
+const nextLabel = computed(() => props.next || t('launchpad.step.next'))
+const backLabel = computed(() => props.back || t('launchpad.step.back'))
 
-    return {
-      nextFn,
-      backFn,
-    }
-  }
-});
+const navigate = useMutation(WizardLayoutNavigateDocument)
+
+async function nextFn() {
+  await props.nextFn?.()
+  navigate.executeMutation({ direction: 'forward' })
+}
+
+function backFn() {
+  navigate.executeMutation({ direction: 'back' })
+}
 </script>

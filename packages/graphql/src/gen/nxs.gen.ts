@@ -103,6 +103,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
+    appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -172,6 +173,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     addProject: 'Project'
+    appCreateConfigFile: 'App'
     initializePlugins: 'Project'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
@@ -237,6 +239,10 @@ export interface NexusGenArgTypes {
   Mutation: {
     addProject: { // args
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
+    }
+    appCreateConfigFile: { // args
+      code: string; // String!
+      configFilename: string; // String!
     }
     wizardNavigate: { // args
       direction: NexusGenEnums['WizardNavigateDirection']; // WizardNavigateDirection!

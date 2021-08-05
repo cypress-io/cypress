@@ -10,7 +10,7 @@
       rounded-b
     "
   >
-    <Button @click="nextFn">{{ next }}</Button>
+    <Button @click="nextFn" :disabled="!canNavigateForward">{{ next }}</Button>
     <Button @click="backFn" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
     <div v-if="altFn && alt" class="flex items-center px-3">
@@ -52,6 +52,10 @@ export default defineComponent({
       type: Function as PropType<(value: boolean) => void>,
       default: undefined,
     },
+    canNavigateForward: {
+      type: Boolean,
+      default: true
+    }
   },
   setup(props) {
     const altValue = ref(false);

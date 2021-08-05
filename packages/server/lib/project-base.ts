@@ -793,6 +793,10 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectBa
     return scaffold.isNewProject(folder)
   }
 
+  writeConfigFile ({ code, configFilename }: { code: string, configFilename: string }) {
+    fs.writeFileSync(path.resolve(this.projectRoot, configFilename), code)
+  }
+
   scaffold (cfg: Cfg) {
     debug('scaffolding project %s', this.projectRoot)
 

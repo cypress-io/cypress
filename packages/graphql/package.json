@@ -10,7 +10,9 @@
     "build-prod": "yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm src/**/*.js && rm src/*.js || echo 'cleaned'",
-    "postinstall": "echo '@packages/graphql needs: yarn build'"
+    "postinstall": "echo '@packages/graphql needs: yarn build'",
+    "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
+    "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
     "dedent": "^0.7.0",
@@ -22,7 +24,10 @@
     "nexus-decorators": "^0.2.0"
   },
   "devDependencies": {
-    "@types/dedent": "^0.7.0"
+    "@types/dedent": "^0.7.0",
+    "chai": "^4.2.0",
+    "mocha": "^8.1.3",
+    "snap-shot-it": "7.9.3"
   },
   "files": [
     "src",

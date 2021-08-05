@@ -1,5 +1,22 @@
 import { nxs, NxsArgs, NxsResult } from 'nexus-decorators'
-import { BUNDLER, FrontendFramework, Bundler, FRONTEND_FRAMEWORK, TestingTypeEnum, WizardStepEnum, WIZARD_STEP, WizardStep, WIZARD_TITLES, WIZARD_DESCRIPTIONS, TESTING_TYPES, TestingType, PackageMapping, BundleMapping, WizardCodeLanguageEnum, WizardNavigateDirection } from '../constants/wizardConstants'
+import {
+  BUNDLER,
+  FrontendFramework,
+  Bundler,
+  FRONTEND_FRAMEWORK,
+  TestingTypeEnum,
+  WizardStepEnum,
+  WIZARD_STEP,
+  WizardStep,
+  WIZARD_TITLES,
+  WIZARD_DESCRIPTIONS,
+  TESTING_TYPES,
+  TestingType,
+  PackageMapping,
+  BundleMapping,
+  WizardCodeLanguageEnum,
+  WizardNavigateDirection,
+} from '../constants/wizardConstants'
 import { wizardGetConfigCode } from '../util/wizardGetConfigCode'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
@@ -131,8 +148,13 @@ export class Wizard {
     return this
   }
 
-  setFramework (framework: FrontendFramework): Wizard {
+  setFramework (framework: FrontendFramework | null): Wizard {
     this.chosenFramework = framework
+
+    if (framework === null) {
+      return this
+    }
+
     if (framework !== 'react' && framework !== 'vue') {
       this.chosenBundler = 'webpack'
     }
@@ -154,25 +176,33 @@ export class Wizard {
 
   @nxs.field.nonNull.boolean()
   canNavigateForward (): NxsResult<'Wizard', 'canNavigateForward'> {
+    if (this.currentStep === 'selectFramework' && !this.chosenBundler && !this.chosenFramework) {
+      return false
+    }
+
     // TODO: add constraints here to determine if we can move forward
     return true
   }
 
   navigate (direction: WizardNavigateDirection): Wizard {
     if (direction === 'back') {
-      this.navigateBack()
+      return this.navigateBack()
     }
 
-    this.navigateForward()
+    if (!this.canNavigateForward()) {
+      return this
+    }
 
-    return this
+    return this.navigateForward()
   }
 
   private navigateBack (): Wizard {
     const idx = WIZARD_STEP.indexOf(this.currentStep)
 
     if (idx !== 0) {
-      this.currentStep = WIZARD_STEP[idx - 1]!
+      const i = idx - 1
+
+      this.currentStep = WIZARD_STEP[i]!
     }
 
     return this
@@ -190,6 +220,13 @@ export class Wizard {
 
   validateManualInstall (): Wizard {
     //
+    return this
+  }
+
+  // for testing - bypass canNavigateForward checks
+  setStep (step: typeof WIZARD_STEP[number]): Wizard {
+    this.currentStep = step
+
     return this
   }
 }

@@ -20,8 +20,14 @@
   </button>
 </template>
 
+<script lang="ts">
+export default defineComponent({
+  inheritAttrs: true,
+})
+</script>
+
 <script lang="ts" setup>
-import { defineProps } from "vue"
+import { defineProps, ButtonHTMLAttributes, computed, defineComponent, useAttrs } from "vue"
 import type { IconType } from '../../types'
 
 const VariantClassesTable = {
@@ -50,16 +56,19 @@ const props = defineProps<{
   variant?: "primary" | "outline" | "link" | "underline"
   prefixIconClass?: string
   suffixIconClass?: string
-  class?: string
 }>()
+
+const attrs = useAttrs() as ButtonHTMLAttributes
 
 const variantClasses = VariantClassesTable[props.variant || 'primary']
 const sizeClasses = SizeClassesTable[props.size || 'md']
 
 const iconClasses = ['flex', 'items-center', IconClassesTable[props.size || 'md']]
-const classes = [
+
+const classes = computed(() => [
   variantClasses,
   sizeClasses,
-  props.class
-]
+  attrs.class,
+  attrs.disabled ? 'opacity-50' : ''
+])
 </script>

@@ -43,6 +43,9 @@ type Mutation {
   """Adds a new project to the app"""
   addProject(input: AddProjectInput!): Project!
 
+  """Create a Cypress config file for a new project"""
+  appCreateConfigFile(code: String!, configFilename: String!): App
+
   """Initializes the plugins for the current active project"""
   initializePlugins: Project
 

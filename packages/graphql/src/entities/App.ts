@@ -26,6 +26,6 @@ export class App {
     description: 'The active project in the app',
   })
   get activeProject (): NxsResult<'App', 'activeProject'> {
-    return this.projects.find((p) => p.isOpen) ?? null
+    return this.projects.find((p) => p.isCurrent) ?? null
   }
 }
