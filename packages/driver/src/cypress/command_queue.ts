@@ -45,7 +45,7 @@ const commandRunningFailed = (Cypress, state, err) => {
 
       const prev = current.get('prev')
 
-      if (current.get('type') === 'parent' || prev) return
+      if (current.get('type') === 'parent' || !prev) return
 
       const consoleProps = {}
       const prevSubject = prev.get('subject')
