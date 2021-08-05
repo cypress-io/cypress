@@ -1,14 +1,14 @@
 <template>
   <WizardLayout>
     <div class="m-5">
-      <Select
+      <SelectFramework
         :name="t('launchpad.projectSetup.frameworkLabel')"
         @select="setFEFramework"
         :options="frameworks ?? []"
         :value="gql.framework?.id ?? undefined"
         :placeholder="t('launchpad.projectSetup.frameworkPlaceholder')"
       />
-      <Select
+      <SelectFramework
         :name="t('launchpad.projectSetup.bundlerLabel')"
         :disabled="bundlers.length === 1"
         @select="setFEBundler"
@@ -23,7 +23,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref, computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
-import Select from "../components/select/Select.vue";
+import SelectFramework from "../components/select/SelectFramework.vue";
 import { gql } from '@urql/core'
 import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
@@ -72,7 +72,7 @@ fragment EnvironmentSetup on Wizard {
 `
 
 export default defineComponent({
-  components: { WizardLayout, Select },
+  components: { WizardLayout, SelectFramework },
   props: {
     gql: {
       type: Object as PropType<EnvironmentSetupFragment>,
