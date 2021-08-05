@@ -298,6 +298,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           onReloadBrowser: undefined,
           onFocusTests,
           onSpecChanged: undefined,
+          onConnect: undefined,
         }, {
           socketIoCookie: '__socket.io',
           namespace: '__cypress',
@@ -505,6 +506,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#close', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
+
+      this.project.isOpen = true
 
       this.project._server = { close () {} }
 
