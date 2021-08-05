@@ -61,16 +61,25 @@ function run (ipc, requiredFile, projectRoot) {
 
       debug('config %o', result)
     } catch (err) {
-      debug('failed to load requiredFile:\n%s', err.code, err.stack)
-      if (err.code === 'ENOENT' || err.code === 'MODULE_NOT_FOUND') {
-        ipc.send('load:error', err.code, requiredFile, err.stack)
+      if (err.name === 'TSError') {
+        const cleanMessage = err.message
+        // beause of this https://github.com/TypeStrong/ts-node/issues/1418
+        // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
+        // eslint-disable-next-line no-control-regex
+        .replace(/\u001b\[.*?m/g, '')
+        // replace the first line with better text (remove potentially misleading word TypeScript for example)
+        .replace(/^.*\n/g, 'Error compiling file\n')
 
-        return
+        ipc.send('load:error', loadErrorCode, requiredFile, cleanMessage)
+      } else {
+        debug('failed to load file:%s\n%s: %s', requiredFile, err.code, err.message)
+
+        if (err.code === 'ENOENT' || err.code === 'MODULE_NOT_FOUND') {
+          ipc.send('load:error', err.code, requiredFile, err)
+        }
+
+        ipc.send('load:error', loadErrorCode, requiredFile, err.message)
       }
-
-      ipc.send('load:error', loadErrorCode, requiredFile, err.stack)
-
-      return
     }
   })
 }
