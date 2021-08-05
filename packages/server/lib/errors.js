@@ -563,7 +563,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       msg = stripIndent`\
             Error when loading the config file at the following location:
             
-            ${arg1}
+            \`${arg1}\`
     
             If you renamed the extension of your config file, restart the test runner.`.trim()
 
