@@ -2144,7 +2144,7 @@ describe('network stubbing', { retries: 2 }, function () {
             cy.get('#result').should('contain', 'stubbed data')
 
             cy.get('#request').click()
-            cy.get('#result').should('contain', 'client') // Fail
+            cy.get('#result').should('contain', 'client')
           })
 
           it('works with reply and fallthrough', () => {
@@ -2180,7 +2180,7 @@ describe('network stubbing', { retries: 2 }, function () {
             cy.get('#result').should('contain', 'nothing stubbed data 2')
 
             cy.get('#request').click()
-            cy.get('#result').should('contain', 'client') // Fail
+            cy.get('#result').should('contain', 'client')
           })
         })
       })
