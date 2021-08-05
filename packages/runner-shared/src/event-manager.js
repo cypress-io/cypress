@@ -99,6 +99,10 @@ export const eventManager = {
       rerun()
     })
 
+    ws.on('project:warning', (warning) => {
+      state.addWarning(warning)
+    })
+
     ws.on('specs:changed', ({ specs, testingType }) => {
       // do not emit the event if e2e runner is not displaying an inline spec list.
       if (testingType === 'e2e' && state.useInlineSpecList === false) {
@@ -125,7 +129,7 @@ export const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
-        Cypress.emit(event, ...args)
+        Cypress && Cypress.emit(event, ...args)
       })
     })
 

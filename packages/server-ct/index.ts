@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import browsers from '@packages/server/lib/browsers'
 import openProject from '@packages/server/lib/open_project'
+import * as random from '@packages/server/lib/util/random'
 import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
@@ -46,11 +47,61 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
       specType: 'component',
     }
 
+    /**
+     * store warnings in this var
+     * before the runner is connected
+     */
+    let warningStack: any[] = []
+    let isRunnerConnected = false
+    /**
+     * as soon as the runner is connected,
+     * this variable contains a socket to talk
+     * to the runner-ct
+     */
+    let cySocket
+
+    /**
+     * Push project-wide warnings to the runner-ct
+     * @param warning
+     */
+    const showWarning = (warning) => {
+      const warnObj = { ...warning }
+
+      warnObj.message = warning.message
+      cySocket.toRunner('project:warning', warnObj)
+    }
+
     const options = {
       browsers: [browser],
+      onWarning (warning) {
+        // when the runner is connected
+        // we can show the warinng without loosing them
+        if (isRunnerConnected) {
+          showWarning(warning)
+        } else {
+          // until the runner is connected stack
+        // the warnings
+          warningStack.push(warning)
+        }
+      },
+      onConnect (id, socket, _cySocket) {
+        cySocket = _cySocket
+        if (warningStack.length) {
+          warningStack.forEach((warning) => {
+            showWarning(warning)
+          })
+
+          warningStack = []
+        }
+      },
     }
 
     debug('create project')
+
+    // runner-ct will need access to communications before
+    // we run a spec. assigning a socketId before we create
+    // when we open, the app already has a connection
+    args.config.socketId = random.id()
 
     return openProject.create(projectRoot, args, options)
     .then((project) => {

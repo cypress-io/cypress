@@ -63,6 +63,7 @@ interface Options {
   onFocusTests?: WebSocketOptionsCallback
   onSpecChanged?: WebSocketOptionsCallback
   onSavedStateChanged?: WebSocketOptionsCallback
+  onConnect?: WebSocketOptionsCallback
 
   [key: string]: any
 }
@@ -182,9 +183,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     let cfg = this.getConfig()
 
     if (typeof cfg.configFile === 'string' && /\.json$/.test(cfg.configFile)) {
-      errors.warning('DEPREACTED_CYPRESS_JSON', cfg.configFile)
+      errors.warning('DEPRECATED_CYPRESS_JSON', cfg.configFile)
 
-      this.options.onWarning(errors.get('DEPREACTED_CYPRESS_JSON', cfg.configFile))
+      this.options.onWarning(errors.get('DEPRECATED_CYPRESS_JSON', cfg.configFile))
     }
 
     process.chdir(this.projectRoot)
@@ -268,6 +269,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       onReloadBrowser: this.options.onReloadBrowser,
       onFocusTests: this.options.onFocusTests,
       onSpecChanged: this.options.onSpecChanged,
+      onConnect: this.options.onConnect,
     }, {
       socketIoCookie: cfg.socketIoCookie,
       namespace: cfg.namespace,
@@ -620,8 +622,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
         this.emit('capture:video:frames', data)
       },
 
-      onConnect: (id: string) => {
-        debug('socket:connected')
+      onConnect: (id: string, socket, cySocket) => {
+        options.onConnect?.(id, socket, cySocket)
         this.emit('socket:connected', id)
       },
 

@@ -288,7 +288,7 @@ export class SocketBase {
       })
 
       socket.on('app:connect', (socketId) => {
-        return options.onConnect(socketId, socket)
+        return options.onConnect(socketId, socket, this)
       })
 
       socket.on('set:runnables:and:maybe:record:tests', async (runnables, cb) => {
