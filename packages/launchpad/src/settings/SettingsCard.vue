@@ -16,7 +16,7 @@
       </header>
 
       <!-- Content of the Settings Card -->
-      <div class="pl-6 pr-10 pt-6 pb-8 border-t-width-1px border-gray-300" v-if="isOpen">
+      <div class="pl-6 pr-10 pt-6 pb-6 border-t-width-1px border-gray-300" v-if="isOpen">
         <slot/>
       </div>
     </section>
