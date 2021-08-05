@@ -4,4 +4,13 @@
   background-color:#fcf8e3;
   border-color:#faebcc;
   padding:15px 20px;
+  white-space: pre-wrap;
+}
+
+.close{
+  float: right;
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
 }

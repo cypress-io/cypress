@@ -132,4 +132,42 @@ describe('RunnerCt', () => {
       cy.get(selectors.noSpecSelectedReporter).should('exist')
     })
   })
+
+  context('show warning', () => {
+    it('show warning', () => {
+      const state = makeState({ spec: null })
+
+      state.addWarning({ message: 'this is a warning' })
+
+      mount(
+        <RunnerCt
+          state={state}
+          // @ts-ignore - this is difficult to stub. Real one breaks things.
+          eventManager={new FakeEventManager()}
+          config={fakeConfig}
+        />,
+      )
+
+      cy.contains('this is a warning').should('exist')
+    })
+
+    it('dismiss warning', () => {
+      const state = makeState({ spec: null })
+
+      state.addWarning({ message: 'this is a warning' })
+
+      mount(
+        <RunnerCt
+          state={state}
+          // @ts-ignore - this is difficult to stub. Real one breaks things.
+          eventManager={new FakeEventManager()}
+          config={fakeConfig}
+        />,
+      )
+
+      cy.contains('this is a warning').should('exist')
+      cy.get('[aria-label="dismiss"]').click()
+      cy.contains('this is a warning').should('not.exist')
+    })
+  })
 })

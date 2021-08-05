@@ -8,10 +8,14 @@ interface WarningMessageProps{
 }
 
 export const WarningMessage: React.FC<WarningMessageProps> =
-  ({ warning }) => {
+  ({ warning, onDismissWarning }) => {
     return (
-      <pre className={styles.warning}>
-        {JSON.stringify(warning.message)}
-      </pre>
+      <div className={styles.warning}>
+        <button aria-label="dismiss" className={styles.close} onClick={onDismissWarning}>
+          <i className='fas fa-times' />
+        </button>
+        <h3>Warning</h3>
+        {warning.message}
+      </div>
     )
   }
