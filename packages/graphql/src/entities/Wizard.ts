@@ -148,8 +148,13 @@ export class Wizard {
     return this
   }
 
-  setFramework (framework: FrontendFramework): Wizard {
+  setFramework (framework: FrontendFramework | null): Wizard {
     this.chosenFramework = framework
+
+    if (framework === null) {
+      return this
+    }
+
     if (framework !== 'react' && framework !== 'vue') {
       this.chosenBundler = 'webpack'
     }
@@ -171,6 +176,10 @@ export class Wizard {
 
   @nxs.field.nonNull.boolean()
   canNavigateForward (): NxsResult<'Wizard', 'canNavigateForward'> {
+    if (this.currentStep === 'selectFramework' && !this.chosenBundler && !this.chosenFramework) {
+      return false
+    }
+
     // TODO: add constraints here to determine if we can move forward
     return true
   }
@@ -178,6 +187,10 @@ export class Wizard {
   navigate (direction: WizardNavigateDirection): Wizard {
     if (direction === 'back') {
       return this.navigateBack()
+    }
+
+    if (!this.canNavigateForward()) {
+      return this
     }
 
     return this.navigateForward()
@@ -207,6 +220,13 @@ export class Wizard {
 
   validateManualInstall (): Wizard {
     //
+    return this
+  }
+
+  // for testing - bypass canNavigateForward checks
+  setStep (step: typeof WIZARD_STEP[number]): Wizard {
+    this.currentStep = step
+
     return this
   }
 }

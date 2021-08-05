@@ -40,7 +40,11 @@ export function setServerContext (ctx: BaseContext) {
   return ctx
 }
 
-export function startGraphQLServer (): {server: Server, app: Express.Application} {
+export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }): Promise<{
+  server: Server
+  app: Express.Application
+  endpoint: string
+}> {
   app = express()
 
   app.use('/graphql', graphqlHTTP(() => {
@@ -55,17 +59,22 @@ export function startGraphQLServer (): {server: Server, app: Express.Application
     }
   }))
 
-  server = app.listen(52159, () => {
-    if (process.env.NODE_ENV === 'development') {
-      /* eslint-disable-next-line no-console */
-      console.log('GraphQL server is running at http://localhost:52159/graphql')
-    }
+  return new Promise((resolve, reject) => {
+    server = app.listen(port, () => {
+      if (process.env.NODE_ENV === 'development') {
+        /* eslint-disable-next-line no-console */
+        console.log(`GraphQL server is running at http://localhost:${port}/graphql`)
+      }
 
-    debug(`GraphQL Server at http://localhost:${(server.address() as AddressInfo).port}/graphql`)
+      const endpoint = `http://localhost:${(server.address() as AddressInfo).port}/graphql`
+
+      debug(`GraphQL Server at ${endpoint}`)
+
+      return resolve({
+        server,
+        endpoint,
+        app,
+      })
+    })
   })
-
-  return {
-    server,
-    app,
-  }
 }

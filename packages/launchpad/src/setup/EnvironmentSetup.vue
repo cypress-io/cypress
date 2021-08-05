@@ -1,5 +1,5 @@
 <template>
-  <WizardLayout>
+  <WizardLayout :canNavigateForward="gql.canNavigateForward">
     <div class="m-5">
       <Select
         :name="t('launchpad.projectSetup.frameworkLabel')"
@@ -47,6 +47,7 @@ mutation EnvironmentSetupSetBundler($bundler: SupportedBundlers!) {
 
 gql`
 fragment EnvironmentSetup on Wizard {
+  canNavigateForward
   bundler {
     id
     name

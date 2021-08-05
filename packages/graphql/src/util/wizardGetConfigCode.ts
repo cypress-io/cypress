@@ -32,7 +32,7 @@ ${frameworkConfig[lang]}`
     lang === 'js'
       ? ''
       : [
-          `import { startdevServer } from \'${bundler.package}\'`,
+          `import { startDevServer } from \'${bundler.package}\'`,
           `import webpackConfig from './webpack.config'`,
           '',
       ].join('\n')

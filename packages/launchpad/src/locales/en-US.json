@@ -20,6 +20,10 @@
     "install": {
       "startButton": "Install",
       "confirmManualInstall": "I've installed them"
+    },
+    "step": {
+      "next": "Next Step",
+      "back": "Back"
     }
   },
   "settingsPage": {

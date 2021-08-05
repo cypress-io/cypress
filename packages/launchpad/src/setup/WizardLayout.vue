@@ -13,15 +13,24 @@
     <div class="flex-grow">
       <slot />
     </div>
-    <ButtonBar :nextFn="nextFn" :backFn="backFn" :altFn="altFn" :next="next" :back="back" :alt="alt" />
+    <ButtonBar 
+      :nextFn="nextFn" 
+      :canNavigateForward="canNavigateForward"
+      :backFn="backFn" 
+      :altFn="altFn" 
+      :next="nextLabel" 
+      :back="backLabel" 
+      :alt="alt" 
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import ButtonBar from "./ButtonBar.vue";
-import { gql } from '@urql/core'
-import { useMutation } from '@urql/vue'
-import { WizardLayoutNavigateDocument } from "../generated/graphql";
+import ButtonBar from "./ButtonBar.vue"
+import { computed } from "vue"
+import { useMutation, gql } from '@urql/vue'
+import { WizardLayoutFragment, WizardLayoutNavigateDocument } from "../generated/graphql"
+import { useI18n } from "../composables"
 
 gql`
 fragment WizardLayout on Wizard {
@@ -38,17 +47,19 @@ mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
 }
 `
 
-const props = withDefaults(
-  defineProps<{
-    next: string
-    back: string
+const { t } = useI18n()
+
+const props = defineProps<{
+    next?: string
+    back?: string
     alt?: string
+    canNavigateForward?: boolean
     altFn?: (val: boolean) => void
-    nextFn?: (...args: unknown[]) => any
-}>(), {
-  next: 'Next Step',
-  back: 'Back,
-})
+    nextFn?: (...args: unknown[]) => any,
+}>()
+
+const nextLabel = computed(() => props.next || t('launchpad.step.next'))
+const backLabel = computed(() => props.back || t('launchpad.step.back'))
 
 const navigate = useMutation(WizardLayoutNavigateDocument)
 
