@@ -71,6 +71,7 @@ describe('lib/project-base', () => {
     Fixtures.remove()
 
     if (this.project) {
+      this.project.isOpen = true
       this.project.close()
     }
   })
@@ -101,6 +102,7 @@ describe('lib/project-base', () => {
       expect(projectCt._cfg.viewportWidth).to.eq(500)
       expect(projectCt._cfg.baseUrl).to.eq('http://localhost:9999')
       expect(projectCt.startCtDevServer).to.have.beenCalled
+      projectCt.isOpen = true
       projectCt.close()
     })
   })
