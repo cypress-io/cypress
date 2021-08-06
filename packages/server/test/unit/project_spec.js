@@ -259,6 +259,33 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(cfg).ok
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/17614
+    it('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
+      config.get.restore()
+      sinon.stub(config, 'get').returns({
+        integrationFolder,
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: true,
+      })
+
+      await this.project.initializeConfig()
+      .then(() => {
+        const cfg = this.project.getConfig()
+
+        expect(cfg.chromeWebSecurity).eq(true)
+        expect(cfg.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+          },
+        ])
+      })
+    })
   })
 
   context('#initializeConfig', function () {
