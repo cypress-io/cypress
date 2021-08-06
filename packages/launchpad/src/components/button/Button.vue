@@ -32,7 +32,7 @@ import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from "v
 
 const VariantClassesTable = {
   primary: "border-indigo-600 bg-indigo-600 text-white",
-  outline: "border-gray-200 text-indigo-600",
+  outline: "border-gray-200 text-indigo-600 bg-white",
   link: "border-transparent text-indigo-600",
 }
 

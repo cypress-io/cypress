@@ -68,5 +68,5 @@ const externalEditors = [
 ]
 
 const { t } = useI18n()
-const selectedEditor = ref(null)
+const selectedEditor = ref()
 </script>
