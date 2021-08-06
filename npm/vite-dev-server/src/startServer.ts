@@ -59,7 +59,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
 
-  if (options.specs.length || supportFile) {
+  if ((options.specs && options.specs.length) || supportFile) {
     finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
   }
 
