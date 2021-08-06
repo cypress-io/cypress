@@ -90,7 +90,8 @@ const validateNoBreakingConfig = (cfg) => {
  * @param {boolean} bypassRootLimitations skip checks related to position when we are working with merged configs
  * @returns
  */
-function validate (cfg, onErr, bypassRootLimitations = false) {
+function validate (cfg, onErr,
+  { bypassRootLimitations } = { bypassRootLimitations: false }) {
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
 
@@ -262,13 +263,7 @@ module.exports = {
     config.projectRoot = projectRoot
     config.projectName = projectName
 
-    const testingType = isComponentTesting(options) ? 'component' : 'e2e'
-
     return this.mergeDefaults(config, options).then((configObject = {}) => {
-      if (testingType in configObject) {
-        configObject = { ...configObject, ...configObject[testingType] }
-      }
-
       debug('merged config is %o', config)
 
       return configObject
@@ -276,6 +271,7 @@ module.exports = {
   },
 
   mergeDefaults (config = {}, options = {}) {
+    // 1 - merge the CLI options
     const resolved = {}
 
     config.rawJson = _.cloneDeep(config)
@@ -292,6 +288,7 @@ module.exports = {
       config[key] = val
     }).value()
 
+    // 2 - cleanup baseUrl & env
     let url = config.baseUrl
 
     if (url) {
@@ -300,8 +297,6 @@ module.exports = {
       // https://regexr.com/48rvt
       config.baseUrl = url.replace(/\/\/+$/, '/')
     }
-
-    _.defaults(config, defaultValues)
 
     // split out our own app wide env from user env variables
     // and delete envFile
@@ -325,6 +320,22 @@ module.exports = {
       config.numTestsKeptInMemory = 0
     }
 
+    // 3 - validate config again here so that we catch
+    // configuration errors coming from the CLI overrides
+    // or env var overrides
+    validate(config, (errMsg) => {
+      return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+    })
+
+    const testingType = isComponentTesting(options) ? 'component' : 'e2e'
+
+    if (testingType in config) {
+      config = { ...config, ...config[testingType] }
+    }
+
+    // 3 - merge the defaults
+    _.defaults(config, defaultValues)
+
     config = this.setResolvedConfigValues(config, defaultValues, resolved)
 
     if (config.port) {
@@ -334,13 +345,6 @@ module.exports = {
     config = this.setAbsolutePaths(config, defaultValues)
 
     config = this.setParentTestsPaths(config)
-
-    // validate config again here so that we catch
-    // configuration errors coming from the CLI overrides
-    // or env var overrides
-    validate(config, (errMsg) => {
-      return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
-    })
 
     validateNoBreakingConfig(config)
 
@@ -394,7 +398,7 @@ module.exports = {
       }
 
       return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
-    }, true)
+    }, { bypassRootLimitations: true })
 
     let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
 
