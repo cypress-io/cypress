@@ -14,7 +14,7 @@ import { createI18n } from '../../src/locales/i18n'
  * It has to be loaded run before initializing GraphQL
  * because graphql uses it.
  */
-(window as any).ipc = {
+;(window as any).ipc = {
   on: () => {},
   send: () => {},
 }
