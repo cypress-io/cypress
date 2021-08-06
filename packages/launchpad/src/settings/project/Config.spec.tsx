@@ -4,7 +4,7 @@ import { defaultMessages } from '../../locales/i18n'
 import { each } from 'lodash'
 
 describe('<Config/>', () => {
-  it('renders the title, description, code, and legend', { viewportHeight: 800, viewportWidth: 1200 }, () => {
+  it('renders the title, description, code, and legend', () => {
     cy.mount(() => <div class="p-12 resize-x overflow-auto"><Config /></div>)
     cy.get('[data-testid=config-code]').contains(jsonObject)
     cy.contains(defaultMessages.settingsPage.config.title)
