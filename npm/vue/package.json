@@ -11,7 +11,6 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
-    "test:ci:e2e": "node ../../scripts/cypress.js run --project ${PWD}",
     "test:ci:ct": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
