@@ -564,63 +564,6 @@ describe('network stubbing', { retries: 2 }, function () {
         })
       })
 
-      it('has displayName req for spies', function () {
-        cy.intercept('/foo*').as('getFoo')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@getFoo')
-        .then(() => {
-          const log = _.last(cy.queue.logs()) as any
-
-          expect(log.get('displayName')).to.eq('req')
-        })
-      })
-
-      it('has displayName req stub for stubs', function () {
-        cy.intercept('/foo*', { body: 'foo' }).as('getFoo')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@getFoo')
-        .then(() => {
-          const log = _.last(cy.queue.logs()) as any
-
-          expect(log.get('displayName')).to.eq('req stub')
-        })
-      })
-
-      it('has displayName req fn for request handlers', function () {
-        cy.intercept('/foo*', () => {}).as('getFoo')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@getFoo')
-        .then(() => {
-          const log = _.last(cy.queue.logs()) as any
-
-          expect(log.get('displayName')).to.eq('req fn')
-        })
-      })
-
-      // TODO: implement log niceties
-      it.skip('#consoleProps', function () {
-        cy.intercept('*', {
-          foo: 'bar',
-        }).as('foo').then(function () {
-          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'route',
-            Method: 'GET',
-            URL: '*',
-            Status: 200,
-            Response: {
-              foo: 'bar',
-            },
-            Alias: 'foo',
-          })
-        })
-      })
-
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.intercept(/foo/, {}).then(() => {
@@ -3266,7 +3209,7 @@ describe('network stubbing', { retries: 2 }, function () {
         $.get('/fixtures/app.json')
       }).wait('@getFoo').then(function (res) {
         const log = cy.queue.logs({
-          displayName: 'req',
+          displayName: 'xhr',
         })[0]
 
         expect(log.get('alias')).to.eq('getFoo')

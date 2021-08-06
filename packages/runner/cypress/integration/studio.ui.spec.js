@@ -63,6 +63,7 @@ describe('studio ui', () => {
       cy.get('.runner').find('.url-menu').should('be.visible')
       cy.get('.runner').find('.url-menu').find('.btn-submit').should('be.disabled')
 
+      cy.get('.studio-save').should('be.visible')
       cy.percySnapshot()
     })
   })

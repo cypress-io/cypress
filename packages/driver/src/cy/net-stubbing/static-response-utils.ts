@@ -8,7 +8,7 @@ import {
 import {
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
-import $errUtils from '../../cypress/error_utils'
+import * as $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']

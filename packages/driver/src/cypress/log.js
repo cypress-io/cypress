@@ -11,9 +11,9 @@ const $errUtils = require('./error_utils')
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
-const parentOrChildRe = /parent|child/
+const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -72,7 +72,11 @@ const toSerializedJSON = function (attrs) {
 }
 
 const getDisplayProps = (attrs) => {
-  return _.pick(attrs, DISPLAY_PROPS)
+  return {
+    ..._.pick(attrs, DISPLAY_PROPS),
+    hasSnapshot: !!attrs.snapshots,
+    hasConsoleProps: !!attrs.consoleProps,
+  }
 }
 
 const getConsoleProps = (attrs) => {
@@ -179,7 +183,7 @@ const defaults = function (state, config, obj) {
     return t._currentRetry || 0
   }
 
-  return _.defaults(obj, {
+  _.defaults(obj, {
     id: (counter += 1),
     state: 'pending',
     instrument: 'command',
@@ -202,6 +206,22 @@ const defaults = function (state, config, obj) {
       return {}
     },
   })
+
+  const logGroup = _.last(state('logGroup'))
+
+  if (logGroup) {
+    obj.group = logGroup
+  }
+
+  if (obj.groupEnd) {
+    state('logGroup', _.slice(state('logGroup'), 0, -1))
+  }
+
+  if (obj.groupStart) {
+    state('logGroup', (state('logGroup') || []).concat(obj.id))
+  }
+
+  return obj
 }
 
 const Log = function (cy, state, config, obj) {
@@ -301,16 +321,6 @@ const Log = function (cy, state, config, obj) {
 
     pick (...args) {
       return _.pick(attributes, args)
-    },
-
-    publicInterface () {
-      return {
-        get: _.bind(this.get, this),
-        on: _.bind(this.on, this),
-        off: _.bind(this.off, this),
-        pick: _.bind(this.pick, this),
-        attributes,
-      }
     },
 
     snapshot (name, options = {}) {
@@ -446,7 +456,11 @@ const Log = function (cy, state, config, obj) {
       // unless its already been 'ended'
       // or has been specifically told not to auto resolve
       if (this._shouldAutoEnd()) {
-        return this.snapshot().end()
+        if (this.get('snapshot') !== false) {
+          this.snapshot()
+        }
+
+        return this.end()
       }
     },
 
@@ -590,6 +604,14 @@ const create = function (Cypress, cy, state, config) {
     }
 
     addToLogs(log)
+
+    if (options.sessionInfo) {
+      Cypress.emit('session:add', log.toJSON())
+    }
+
+    if (options.emitOnly) {
+      return
+    }
 
     triggerLog(log)
 

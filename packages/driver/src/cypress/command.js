@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const utils = require('./utils')
 
 class $Command {
   constructor (obj = {}) {
@@ -124,6 +125,10 @@ class $Command {
   }
 
   static create (obj) {
+    if (utils.isInstanceOf(obj, $Command)) {
+      return obj
+    }
+
     return new $Command(obj)
   }
 }

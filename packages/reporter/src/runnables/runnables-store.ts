@@ -9,6 +9,7 @@ import RouteModel, { RouteProps } from '../routes/route-model'
 import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
 import RunnableModel from './runnable-model'
 import SuiteModel, { SuiteProps } from './suite-model'
+import { SessionProps } from '../sessions/sessions-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -24,7 +25,7 @@ interface Props {
   scroller: Scroller
 }
 
-export type LogProps = AgentProps | CommandProps | RouteProps
+export type LogProps = AgentProps | CommandProps | RouteProps | SessionProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
 

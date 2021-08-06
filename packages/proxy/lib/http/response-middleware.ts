@@ -228,6 +228,14 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
+  const isRenderedHTML = reqWillRenderHtml(this.req)
+
+  if (isRenderedHTML) {
+    const origin = new URL(this.req.proxiedUrl).origin
+
+    this.getRenderedHTMLOrigins()[origin] = true
+  }
+
   const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
@@ -242,7 +250,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'full'
     }
 
-    if (!reqWillRenderHtml(this.req)) {
+    if (!isRenderedHTML) {
       return false
     }
 
