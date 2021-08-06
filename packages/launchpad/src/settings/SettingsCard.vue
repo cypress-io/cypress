@@ -27,12 +27,13 @@
   import IconCaret from 'virtual:vite-icons/mdi/caret'
   import Icon from '../components/icon/Icon.vue'
   import { useToggle } from '@vueuse/core'
-  import type { IconType } from '../types'
+  import type { FunctionalComponent, SVGAttributes } from 'vue'
+  
 
   defineProps<{
     title: string,
     description: string,
-    icon: IconType
+    icon: FunctionalComponent<SVGAttributes, {}>
   }>()
 
   const [ isOpen, toggleOpen ] = useToggle(false)

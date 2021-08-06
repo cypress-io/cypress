@@ -49,7 +49,7 @@
                 <span class="absolute inset-y-0 right-0 pr-8 flex items-center">
                   <slot name="item-suffix" :selected="selected" :active="active" :value="option">
                     <span v-if="selected" class="text-indigo-500 absolute flex pr-8 items-center">
-                      <CheckIcon class="text-sm" aria-hidden="true" />
+                      <Icon :icon="CheckIcon" class="text-sm" aria-hidden="true"/>
                     </span>
                   </slot>
                 </span>
