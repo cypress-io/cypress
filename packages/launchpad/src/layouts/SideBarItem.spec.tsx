@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import SideBarItem from './SideBarItem.vue'
+import IconCoffee from 'virtual:vite-icons/mdi/coffee'
 
 describe('<SideBarItem />', () => {
   it('playground', () => {
@@ -19,11 +20,11 @@ describe('<SideBarItem />', () => {
         <SideBarItem
           onClick={() => onClick(0)}
           active={active.value === 0}
-          icon="mdi:coffee"
+          icon={IconCoffee}
         />
         <SideBarItem
           onClick={() => onClick(1)}
-          icon="mdi:coffee"
+          icon={IconCoffee}
           active={active.value === 1}
         />
       </div>

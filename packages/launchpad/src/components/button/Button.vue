@@ -27,8 +27,8 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import { defineProps, ButtonHTMLAttributes, computed, defineComponent, useAttrs } from "vue"
-import type { IconType } from '../../types'
+import { defineProps, computed, defineComponent, useAttrs } from "vue"
+import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from "vue"
 
 const VariantClassesTable = {
   primary: "border-indigo-600 bg-indigo-600 text-white",
@@ -50,8 +50,8 @@ const IconClassesTable = {
 }
 
 const props = defineProps<{
-  prefixIcon?: IconType
-  suffixIcon?: IconType
+  prefixIcon?: FunctionalComponent<SVGAttributes>
+  suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: "xs" | "sm" | "md" | "lg" | "xl"
   variant?: "primary" | "outline" | "link" | "underline"
   prefixIconClass?: string

@@ -17,11 +17,10 @@
 <script lang="ts" setup>
 import { defineProps } from "vue"
 import Icon from '../components/icon/Icon.vue'
-import type { IconType } from '../types'
-import type { HTMLAttributes } from 'vue'
+import type { HTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 interface Props extends HTMLAttributes {
-  icon: IconType | string
+  icon: FunctionalComponent<SVGAttributes>
   active?: boolean
 }
 

@@ -2,6 +2,11 @@
   "links": {
     "learnMore": "Learn more."
   },
+  "components": {
+    "select": {
+      "placeholder": "Choose an option..."
+    }
+  },
   "clipboard": {
     "copy": "Copy",
     "copied": "Copied"
@@ -35,7 +40,8 @@
     },
     "editor": {
       "title": "External Editor",
-      "description": "External editor to use for editing code opened when using Cypress."
+      "description": "External editor to use for editing code opened when using Cypress.",
+      "noEditorSelectedPlaceholder": "Choose your editor..."
     },
     "projectId": {
       "title": "Project ID",

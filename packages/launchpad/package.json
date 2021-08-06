@@ -33,6 +33,7 @@
     "@graphql-codegen/typescript": "^1.22.4",
     "@graphql-codegen/typescript-operations": "^1.18.3",
     "@graphql-typed-document-node/core": "^3.1.0",
+    "@headlessui/vue": "1.4.0",
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
