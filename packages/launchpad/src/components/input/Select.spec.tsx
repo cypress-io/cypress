@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import Icon from '../icon/Icon.vue'
 import IconHeart from 'virtual:vite-icons/mdi/heart'
 import { defaultMessages } from '../../locales/i18n'
@@ -112,7 +111,7 @@ describe('<Select />', () => {
 
   describe('#placeholder', () => {
     it('default placeholder when theres no value selected', () => {
-      mountSelect({ modelValue: ref(null) })
+      mountSelect({ modelValue: undefined })
       .get(inputSelector)
       .should('contain.text', selectText.placeholder)
     })
@@ -120,14 +119,14 @@ describe('<Select />', () => {
     it('custom placeholder when theres no value selected', () => {
       mountSelect({
         placeholder: 'My placeholder',
-        modelValue: ref(null),
+        modelValue: undefined,
       }).get(inputSelector).should('contain.text', 'My placeholder')
     })
 
     it('does not render the placeholder after selecting an option', () => {
       mountSelect({
         placeholder: 'A placeholder',
-        modelValue: ref(null),
+        modelValue: undefined,
       }).get(inputSelector)
       .should('contain.text', 'A placeholder')
       .then(openSelect)
@@ -139,7 +138,7 @@ describe('<Select />', () => {
     it('does not render the placeholder when there is a value selected', () => {
       mountSelect({
         placeholder: 'A placeholder',
-        modelValue: ref(defaultOptions[0]).value,
+        modelValue: defaultOptions[0],
       }).get(inputSelector).should('not.contain.text', 'A placeholder')
     })
   })
@@ -198,7 +197,7 @@ describe('<Select />', () => {
         { name: 'Bella', id: '5r2rj3' },
       ]
 
-      let firstSelect = null
+      let firstSelect = undefined
       let secondSelect = moreOptions[0]
 
       cy.mount(() => (<div class="w-350px p-12">

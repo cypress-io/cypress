@@ -15,11 +15,11 @@
             'pl-8': $slots['input-prefix'],
           }
         ">
-          <span v-if="!modelValue?.[itemValue]">
+          <span v-if="!modelValue">
             {{ placeholder ? placeholder : t('components.select.placeholder') }}
           </span>
         <slot name="selected" v-else>
-          {{ get(modelValue, itemValue) }}
+          {{ get(modelValue, itemValue || '') }}
         </slot>
       </span>
         <span class="absolute inset-y-0 right-0 pr-2 flex items-center">
@@ -91,7 +91,7 @@ interface Option {
 
 withDefaults(defineProps<{
   options: Option[],
-  modelValue?: Option | null // Current object being selected
+  modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string
   itemValue?: string // The key of the modelValue to render
