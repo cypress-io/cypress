@@ -19,4 +19,5 @@ export const getPort = (href: string) => {
 
 export class FakeEventManager {
   on (evt: string) {}
+  start () {}
 }
