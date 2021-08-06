@@ -92,7 +92,11 @@ const load = (ipc, config, pluginsFile) => {
       register('dev-server:start', setupDevServerFunction)
     }
 
-    return plugins(register, config)
+    if (plugins) {
+      return plugins(register, config)
+    }
+
+    return
   })
   .tap(() => {
     if (!registeredEventsByName['file:preprocessor']) {
@@ -211,7 +215,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType, functionName) =>
     plugins = getPluginsFunction(pluginsObject, testingType, functionName)
 
     if (testingType === 'component') {
-      setupDevServerFunction = pluginsObject[testingType].setupDevServer
+      setupDevServerFunction = pluginsObject.component.setupDevServer
     }
 
     debug('plugins %o', plugins)
@@ -223,7 +227,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType, functionName) =>
     return
   }
 
-  if (typeof plugins !== 'function') {
+  if (typeof plugins !== 'function' && !setupDevServerFunction) {
     debug('not a function')
     ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
 

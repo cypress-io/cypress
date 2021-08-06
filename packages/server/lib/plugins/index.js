@@ -81,7 +81,9 @@ const init = (config, options) => {
 
     registeredEvents = {}
 
-    const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
+    const pluginsFile = config.pluginsFile === false
+      ? path.join(__dirname, 'child', 'default_plugins_file.js')
+      : config.pluginsFile
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
@@ -94,14 +96,14 @@ const init = (config, options) => {
 
     const testingType = options.testingType || 'e2e'
 
-    if (typeof config[PLUGINS_FUNCTION_NAME] === 'function') {
+    if (/\.json$/.test(options.configFile)) {
+      childArguments.push('--file', pluginsFile)
+    } else {
       childArguments.push(
         '--testingType', testingType,
         '--functionName', PLUGINS_FUNCTION_NAME,
         '--file', options.configFile,
       )
-    } else {
-      childArguments.push('--file', pluginsFile)
     }
 
     if (config.resolvedNodePath) {
