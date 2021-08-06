@@ -1,7 +1,10 @@
 // @ts-check
+
+const { defineConfig } = require('cypress')
+
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const path = require('path')
-const babelConfig = require('../../babel.config.js')
+const babelConfig = require('./babel.config')
 
 /** @type import("webpack").Configuration */
 const webpackConfig = {
@@ -57,17 +60,29 @@ const webpackConfig = {
   },
 }
 
-/**
- * @type Cypress.PluginConfig
- */
-module.exports = (on, config) => {
-  if (config.testingType !== 'component') {
-    throw Error(`This is a component testing project. testingType should be 'component'. Received '${config.testingType}'`)
-  }
-
-  on('dev-server:start', (options) => {
-    return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
-  })
-
-  return config
-}
+module.exports = defineConfig({
+  viewportWidth: 400,
+  viewportHeight: 400,
+  video: false,
+  projectId: 'z9dxah',
+  ignoreTestFiles: [
+    '**/__snapshots__/*',
+    '**/__image_snapshots__/*',
+  ],
+  experimentalFetchPolyfill: true,
+  component: {
+    componentFolder: '.',
+    env: {
+      reactDevtools: true,
+    },
+    testFiles: '**/*spec.{js,jsx,ts,tsx}',
+    setupDevServer (options) {
+      return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
+    },
+  },
+  e2e: {
+    setupNodeEvents () {
+      throw Error('This is a component testing project. Please use `cypress open-ct` to run it')
+    },
+  },
+})
