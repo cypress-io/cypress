@@ -62,7 +62,7 @@ const webpackConfig = {
  */
 module.exports = (on, config) => {
   if (config.testingType !== 'component') {
-    throw Error(`This is a component testing project. testingType should be 'component'. Received ${config.testingType}`)
+    throw Error(`This is a component testing project. testingType should be 'component'. Received '${config.testingType}'`)
   }
 
   on('dev-server:start', (options) => {

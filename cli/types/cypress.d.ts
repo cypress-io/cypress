@@ -2488,7 +2488,7 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
-  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptionsMergedWithTestingTypes | undefined)
+  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptionsMergedWithTestingTypes | undefined | void)
 
   type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeEvents?: PluginsFunction }
   type TestingTypeConfigComponent = TestingTypeConfig & {

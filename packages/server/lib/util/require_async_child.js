@@ -1,4 +1,5 @@
 require('graceful-fs').gracefulify(require('fs'))
+const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:require_async:child')
 const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
@@ -62,11 +63,9 @@ function run (ipc, requiredFile, projectRoot) {
       debug('config %o', result)
     } catch (err) {
       if (err.name === 'TSError') {
-        const cleanMessage = err.message
         // beause of this https://github.com/TypeStrong/ts-node/issues/1418
         // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
-        // eslint-disable-next-line no-control-regex
-        .replace(/\u001b\[.*?m/g, '')
+        const cleanMessage = stripAnsi(err.message)
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
