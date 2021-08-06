@@ -10,19 +10,29 @@
         <span class="absolute inset-y-0 flex items-center">
           <slot name="input-prefix" :value="modelValue" :open="open"></slot>
         </span>
-        <span :class="
+        <span class="pr-4" :class="
           {
             'pl-8': $slots['input-prefix'],
-            'pr-4': $slots['input-suffix'],
           }
         ">
-          <span v-if="placeholder && !modelValue">{{ placeholder }}
+          <span v-if="!modelValue?.[itemValue]">
+            {{ placeholder ? placeholder : t('components.select.placeholder') }}
           </span>
         <slot name="selected" v-else>
           {{ get(modelValue, itemValue) }}
         </slot>
       </span>
-        <span class="absolute inset-y-0 right-0 pr-2 flex items-center"><slot name="input-suffix" :value="modelValue" :open="open"></slot></span>
+        <span class="absolute inset-y-0 right-0 pr-2 flex items-center">
+          <slot name="input-suffix" :value="modelValue" :open="open">
+            <Icon :icon="IconCaret" class="text-lg transform transition-transform"
+              data-testid="icon-caret"
+              aria-hidden="true"
+              :class="{
+              'rotate-0 text-indigo-600': open,
+              'rotate-180 text-gray-500': !open
+            }"/>
+          </slot>
+        </span>
         
       </ListboxButton>
 
@@ -38,7 +48,7 @@
                   <slot name="item-prefix" :selected="selected" :active="active" :value="option"></slot>
                 </span>
                 <span class="inline-block" :class="{
-                  'pl-4': $slots['item-prefix'],
+                  'pl-8': $slots['item-prefix'],
                   'pr-4': $slots['item-suffix'],
                 }">
                   <slot name="item-body" :selected="selected" :active="active" :value="option">
@@ -46,10 +56,13 @@
                   </slot>
                 </span>
 
-                <span class="absolute inset-y-0 right-0 pr-8 flex items-center">
+                <span class="absolute inset-y-0 right-0 pr-8 flex text-sm items-center">
                   <slot name="item-suffix" :selected="selected" :active="active" :value="option">
-                    <span v-if="selected" class="text-indigo-500 absolute flex pr-8 items-center">
-                      <Icon :icon="CheckIcon" class="text-sm" aria-hidden="true"/>
+                    <span v-if="selected" class="text-indigo-500 absolute flex items-center">
+                      <Icon :icon="IconCheck"
+                        class="text-sm" 
+                        data-testid="icon-check"
+                        aria-hidden="true"/>
                     </span>
                   </slot>
                 </span>
@@ -64,8 +77,13 @@
 
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
-import CheckIcon from 'virtual:vite-icons/mdi/check'
+import IconCheck from 'virtual:vite-icons/mdi/check'
+import IconCaret from 'virtual:vite-icons/mdi/caret'
+import Icon from '../icon/Icon.vue'
 import { get } from 'lodash'
+import { useI18n } from '../../composables'
+
+const { t } = useI18n()
 
 interface Option {
   [key: string]: any
@@ -81,8 +99,8 @@ withDefaults(defineProps<{
 }>(), {
   placeholder: '',
   label: '',
-  itemValue: '',
-  itemKey: ''
+  itemValue: 'value',
+  itemKey: 'key'
 })
 
 defineEmits(['update:modelValue'])

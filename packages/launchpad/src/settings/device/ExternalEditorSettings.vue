@@ -2,19 +2,14 @@
   <SettingsSection>
     <template #title>{{ t('settingsPage.editor.title') }}</template>
     <template #description>{{ t('settingsPage.editor.description') }}</template>
-    <Select :options="externalEditors" v-model="selectedEditor" item-value="name" placeholder="Choose an editor..." class="w-300px">
+    <Select :options="externalEditors"
+      v-model="selectedEditor"
+      item-value="name"
+      :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
+      class="w-300px">
       <template #input-prefix="{ value }">
         <Icon v-if="value" :icon="value.icon" class="text-md"></Icon>
         <Icon v-else :icon="IconTerminal" class="text-gray-600 text-md"></Icon>
-      </template>
-      <template #input-suffix="{ open }">
-        <Icon :icon="IconCaret" class="text-lg transform transition-transform" :class="{
-          'rotate-0 text-indigo-600': open,
-          'rotate-180 text-gray-500': !open
-        }"></Icon>
-      </template>
-      <template #item-body="{value}">
-        <span class="pl-2">{{ value.name }}</span>
       </template>
       <template #item-prefix="{value}">
         <Icon :icon="value.icon" class="text-md"></Icon>
@@ -27,7 +22,6 @@
 
 import { ref } from 'vue'
 import Icon from '../../components/icon/Icon.vue'
-import IconCaret from 'virtual:vite-icons/mdi/caret'
 import SettingsSection from '../SettingsSection.vue'
 import { useI18n } from '../../composables';
 import Select from '../../components/input/Select.vue';
