@@ -32,6 +32,17 @@
     }
   },
   "settingsPage": {
+    "resolvedConfiguration": {
+      "title": "Resolved Configuration",
+      "description": "Since the options in the {0} can be set dynamically by your development environment, please refer to the legend below to understand how the configuration options are resolved.",
+      "legend": {
+        "environmentVariable": "Set from environment variables",
+        "defaultValue": "Default values",
+        "dynamic": "Set a runtime by the {0} function",
+        "cli": "Set from CLI arguments",
+        "config": "Set from {0}"
+      }
+    },
     "proxy": {
       "title": "Proxy Settings",
       "description": "Cypress auto-detected the following proxy settings from your operating system.",
