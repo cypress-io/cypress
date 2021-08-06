@@ -20,7 +20,6 @@ const {
 const generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair)
 
 const ipAddressRe = /^[\d\.]+$/
-const asterisksRe = /\*/g
 
 const CAattrs = [{
   name: 'commonName',
@@ -118,6 +117,10 @@ const ServerExtensions = [{
 }, {
   name: 'subjectKeyIdentifier',
 }]
+
+function hostnameToFilename (hostname) {
+  return hostname.replace(/\*/g, '_')
+}
 
 class CA {
   constructor (caFolder) {
@@ -231,7 +234,7 @@ class CA {
     const keyPrivatePem = pki.privateKeyToPem(keysServer.privateKey)
     const keyPublicPem = pki.publicKeyToPem(keysServer.publicKey)
 
-    const dest = mainHost.replace(asterisksRe, '_')
+    const dest = hostnameToFilename(mainHost)
 
     return Promise.all([
       fs.outputFileAsync(path.join(this.certsFolder, `${dest}.pem`), certPem),
@@ -241,8 +244,22 @@ class CA {
     .return([certPem, keyPrivatePem])
   }
 
+  clearDataForHostname (hostname) {
+    const dest = hostnameToFilename(hostname)
+
+    return Promise.all([
+      fs.remove(path.join(this.certsFolder, `${dest}.pem`)),
+      fs.remove(path.join(this.keysFolder, `${dest}.key`)),
+      fs.remove(path.join(this.keysFolder, `${dest}.public.key`)),
+    ])
+  }
+
+  getPrivateKeyPath (hostname) {
+    return path.join(this.keysFolder, `${hostnameToFilename(hostname)}.key`)
+  }
+
   getCertificateKeysForHostname (hostname) {
-    const dest = hostname.replace(asterisksRe, '_')
+    const dest = hostnameToFilename(hostname)
 
     return Promise.all([
       fs.readFileAsync(path.join(this.certsFolder, `${dest}.pem`)),
