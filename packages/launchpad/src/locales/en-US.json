@@ -11,6 +11,9 @@
     "copy": "Copy",
     "copied": "Copied"
   },
+  "file": {
+    "edit": "Edit"
+  },
   "status": {
     "enabled": "Enabled",
     "disabled": "Disabled"
@@ -32,15 +35,30 @@
     }
   },
   "settingsPage": {
-    "resolvedConfiguration": {
+    "config": {
       "title": "Resolved Configuration",
       "description": "Since the options in the {0} can be set dynamically by your development environment, please refer to the legend below to understand how the configuration options are resolved.",
       "legend": {
-        "environmentVariable": "Set from environment variables",
-        "defaultValue": "Default values",
-        "dynamic": "Set a runtime by the {0} function",
-        "cli": "Set from CLI arguments",
-        "config": "Set from {0}"
+        "env": {
+          "label": "env",
+          "description": "Set from environment variables"
+        },
+        "default": {
+          "label": "default",
+          "description": "Default values"
+        },
+        "dynamic": {
+          "label": "dynamic",
+          "description": "Set by the {0} function"
+        },
+        "cli": {
+          "label": "cli",
+          "description": "Set from CLI arguments"
+        },
+        "config": {
+          "label": "config",
+          "description": "Set from {0}"
+        }
       }
     },
     "proxy": {
