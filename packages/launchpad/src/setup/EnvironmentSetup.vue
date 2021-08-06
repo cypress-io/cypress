@@ -2,19 +2,19 @@
   <WizardLayout :canNavigateForward="gql.canNavigateForward">
     <div class="m-5">
       <SelectFramework
-        :name="t('launchpad.projectSetup.frameworkLabel')"
+        :name="t('setupPage.projectSetup.frameworkLabel')"
         @select="setFEFramework"
         :options="frameworks ?? []"
         :value="gql.framework?.id ?? undefined"
-        :placeholder="t('launchpad.projectSetup.frameworkPlaceholder')"
+        :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
       />
       <SelectFramework
-        :name="t('launchpad.projectSetup.bundlerLabel')"
+        :name="t('setupPage.projectSetup.bundlerLabel')"
         :disabled="bundlers.length === 1"
         @select="setFEBundler"
         :options="bundlers || []"
         :value="gql.bundler?.id ?? undefined"
-        :placeholder="t('launchpad.projectSetup.bundlerPlaceholder')"
+        :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
       />
     </div>
   </WizardLayout>

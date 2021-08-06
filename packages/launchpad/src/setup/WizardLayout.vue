@@ -58,8 +58,8 @@ const props = defineProps<{
     nextFn?: (...args: unknown[]) => any,
 }>()
 
-const nextLabel = computed(() => props.next || t('launchpad.step.next'))
-const backLabel = computed(() => props.back || t('launchpad.step.back'))
+const nextLabel = computed(() => props.next || t('setupPage.step.next'))
+const backLabel = computed(() => props.back || t('setupPage.step.back'))
 
 const navigate = useMutation(WizardLayoutNavigateDocument)
 

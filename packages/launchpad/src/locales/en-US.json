@@ -3,6 +3,9 @@
     "learnMore": "Learn more."
   },
   "components": {
+    "modal": {
+      "dismiss": "Dismiss"
+    },
     "select": {
       "placeholder": "Choose an option..."
     }
@@ -18,7 +21,7 @@
     "enabled": "Enabled",
     "disabled": "Disabled"
   },
-  "launchpad": {
+  "setupPage": {
     "projectSetup": {
       "frameworkLabel": "Front-end Framework",
       "frameworkPlaceholder": "Pick a framework",
@@ -33,6 +36,25 @@
       "next": "Next Step",
       "back": "Back"
     }
+  },
+  "globalPage": {
+    "empty": {
+      "title": "Welcome to Cypress!",
+      "helper": "Add your first project below to start testing with Cypress.",
+      "dropText": "Drag your project here or {0}",
+      "browseManually": "browse manually."
+    },
+    "searchPlaceholder": "Search Projects",
+    "newProjectButton": "New Project"
+  },
+  "welcomeGuide": {
+    "header": {
+      "title": "Cypress",
+      "description": "A powerful open-source testing platform for developers and engineering teams all around the world."
+    },
+    "projectListHeader": "Recently Viewed Projects",
+    "linkHeader": "Quick Access",
+    "confirmWelcomeGuide": "Show the welcome guide when opening Cypress."
   },
   "settingsPage": {
     "config": {
