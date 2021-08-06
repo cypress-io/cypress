@@ -1,15 +1,16 @@
-const _ = require('lodash')
-const utils = require('fluent-ffmpeg/lib/utils')
-const debug = require('debug')('cypress:server:video')
-const ffmpeg = require('fluent-ffmpeg')
-const stream = require('stream')
-const Promise = require('bluebird')
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
-const BlackHoleStream = require('black-hole-stream')
-const { fs } = require('./util/fs')
+import _ from 'lodash'
+import utils from 'fluent-ffmpeg/lib/utils'
+import Debug from 'debug'
+import ffmpeg from 'fluent-ffmpeg'
+import stream from 'stream'
+import Bluebird from 'bluebird'
+import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
+import BlackHoleStream from 'black-hole-stream'
+import { fs } from './util/fs'
 
+const debug = Debug('cypress:server:video')
 // extra verbose logs for logging individual frames
-const debugFrames = require('debug')('cypress-verbose:server:video:frames')
+const debugFrames = Debug('cypress-verbose:server:video:frames')
 
 debug('using ffmpeg from %s', ffmpegPath)
 
@@ -17,14 +18,24 @@ ffmpeg.setFfmpegPath(ffmpegPath)
 
 const deferredPromise = function () {
   let reject
-  let resolve = (reject = null)
-  const promise = new Promise((_resolve, _reject) => {
+  let resolve
+  const promise = new Bluebird((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
   })
 
   return { promise, resolve, reject }
 }
+
+type StartOptions = {
+  // If set, expect input frames as webm chunks.
+  webmInput?: boolean
+  // Callback for asynchronous errors in video processing/compression.
+  onError?: (err: Error, stdout: string, stderr: string) => void
+}
+
+// Progress callback called with percentage `0 <= p <= 1` of compression progress.
+type OnProgress = (p: number) => void
 
 module.exports = {
   generateFfmpegChaptersConfig (tests) {
@@ -59,7 +70,7 @@ module.exports = {
   },
 
   getCodecData (src) {
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
       return ffmpeg()
       .on('stderr', (stderr) => {
         return debug('get codecData stderr log %o', { message: stderr })
@@ -79,7 +90,7 @@ module.exports = {
   },
 
   getChapters (fileName) {
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
       ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
         if (err) {
           return reject(err)
@@ -94,13 +105,20 @@ module.exports = {
     debug('copying from %s to %s', src, dest)
 
     return fs
-    .copyAsync(src, dest, { overwrite: true })
-    .catch({ code: 'ENOENT' }, () => {})
-  },
-  // dont yell about ENOENT errors
+    .copy(src, dest, { overwrite: true })
+    .catch((err) => {
+      if (err.code === 'ENOENT') {
+        debug('caught ENOENT error on copy, ignoring %o', { src, dest, err })
 
-  start (name, options = {}) {
-    const pt = stream.PassThrough()
+        return
+      }
+
+      throw err
+    })
+  },
+
+  start (name, options: StartOptions = {}) {
+    const pt = new stream.PassThrough()
     const ended = deferredPromise()
     let done = false
     let wantsWrite = true
@@ -117,10 +135,10 @@ module.exports = {
       // in some cases (webm) ffmpeg will crash if fewer than 2 buffers are
       // written to the stream, so we don't end capture until we get at least 2
       if (writtenChunksCount < 2) {
-        return new Promise((resolve) => {
+        return new Bluebird((resolve) => {
           pt.once('data', resolve)
         })
-        .then(endVideoCapture)
+        .then(() => endVideoCapture())
         .timeout(waitForMoreChunksTimeout)
       }
 
@@ -187,7 +205,7 @@ module.exports = {
     }
 
     const startCapturing = () => {
-      return new Promise((resolve) => {
+      return new Bluebird((resolve) => {
         const cmd = ffmpeg({
           source: pt,
           priority: 20,
@@ -209,7 +227,7 @@ module.exports = {
           debug('capture errored: %o', { error: err.message, stdout, stderr })
 
           // bubble errors up
-          options.onError(err, stdout, stderr)
+          options.onError?.(err, stdout, stderr)
 
           // reject the ended promise
           return ended.reject(err)
@@ -245,7 +263,7 @@ module.exports = {
     }
 
     return startCapturing()
-    .then(({ cmd, startedVideoCapture }) => {
+    .then(({ cmd, startedVideoCapture }: any) => {
       return {
         _pt: pt,
         cmd,
@@ -256,10 +274,10 @@ module.exports = {
     })
   },
 
-  async process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
+  async process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress: OnProgress = function () {}) {
     const metaFileName = `${name}.meta`
 
-    const maybeGenerateMetaFile = Promise.method(() => {
+    const maybeGenerateMetaFile = Bluebird.method(() => {
       if (!ffmpegchaptersConfig) {
         return false
       }
@@ -272,7 +290,7 @@ module.exports = {
 
     let total = null
 
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
       debug('processing video from %s to %s video compression %o',
         name, cname, videoCompression)
 
@@ -312,6 +330,7 @@ module.exports = {
 
         const progressed = utils.timemarkToSeconds(progress.timemark)
 
+        // @ts-ignore
         const percent = progressed / total
 
         if (percent < 1) {
@@ -323,24 +342,22 @@ module.exports = {
 
         return reject(err)
       })
-      .on('end', () => {
+      .on('end', async () => {
         debug('compression ended')
 
         // we are done progressing
         onProgress(1)
 
         // rename and obliterate the original
-        return fs.moveAsync(cname, name, {
+        await fs.move(cname, name, {
           overwrite: true,
         })
-        .then(() => {
-          if (addChaptersMeta) {
-            return fs.unlink(metaFileName)
-          }
-        })
-        .then(() => {
-          return resolve()
-        })
+
+        if (addChaptersMeta) {
+          await fs.unlink(metaFileName)
+        }
+
+        resolve()
       }).save(cname)
     })
   },
