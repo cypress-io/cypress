@@ -19,8 +19,7 @@
           <span v-if="placeholder && !modelValue">{{ placeholder }}
           </span>
         <slot name="selected" v-else>
-          <!-- {{ get(modelValue, itemValue) }} -->
-          {{ modelValue[itemValue] }}
+          {{ get(modelValue, itemValue) }}
         </slot>
       </span>
         <span class="absolute inset-y-0 right-0 pr-2 flex items-center"><slot name="input-suffix" :value="modelValue" :open="open"></slot></span>
@@ -39,12 +38,11 @@
                   <slot name="item-prefix" :selected="selected" :active="active" :value="option"></slot>
                 </span>
                 <span class="inline-block" :class="{
-                  'pl-4': $slots['row-prefix'],
-                  'pr-4': $slots['row-suffix'],
+                  'pl-4': $slots['item-prefix'],
+                  'pr-4': $slots['item-suffix'],
                 }">
                   <slot name="item-body" :selected="selected" :active="active" :value="option">
-                    <!-- {{ get(option, itemValue) }} -->
-                    {{ option[itemValue] }}
+                    {{ get(option, itemValue) }}
                   </slot>
                 </span>
 
@@ -55,7 +53,7 @@
                     </span>
                   </slot>
                 </span>
-            </li>            
+            </li>
           </ListboxOption>
         </ListboxOptions>
       </transition>
@@ -65,30 +63,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
 import CheckIcon from 'virtual:vite-icons/mdi/check'
-// import { get as _get } from 'lodash'
+import { get } from 'lodash'
 
-// const get = _get
+interface Option {
+  [key: string]: any
+}
 
-const props = withDefaults(defineProps<{
-  options?: any,
-  modelValue?: string // Current object being selected
+withDefaults(defineProps<{
+  options: Option[],
+  modelValue?: Option | null // Current object being selected
   placeholder?: string
   label?: string
   itemValue?: string // The key of the modelValue to render
   itemKey?: string
 }>(), {
-  options: [],
-  modelValue: '',
   placeholder: '',
   label: '',
   itemValue: '',
   itemKey: ''
 })
 
-const emits = defineEmits<{
-  'update:modelValue': () => {}
-}>()
+defineEmits(['update:modelValue'])
 </script>
