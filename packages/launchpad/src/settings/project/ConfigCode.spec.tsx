@@ -15,6 +15,7 @@ describe('<ConfigCode />', () => {
          * but that would require making the Copy behavior accesible.
          */
       }
+      { /* @ts-ignore */ }
       <ConfigCode data-testid="code" tabindex={0} class="" code={jsonString} />
     </div>))
   })
@@ -24,7 +25,7 @@ describe('<ConfigCode />', () => {
   })
 
   // This needs to be skipped because it cannot be tested unless "Emulate a focused page" is checked.
-  xit('can be double clicked to copy the code', () => {
+  it('can be double clicked to copy the code', () => {
     cy.findByText(defaultMessages.clipboard.copied).should('not.be.visible').get(selector)
     .focus().dblclick()
 
