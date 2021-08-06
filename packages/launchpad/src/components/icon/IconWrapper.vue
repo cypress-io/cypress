@@ -28,7 +28,9 @@
 import { defineComponent, PropType } from 'vue'
 import { useModelWrapper } from '../../composables'
 import Icon from './Icon.vue'
-import type { IconType } from '../../types'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
+
+type IconType = FunctionalComponent<SVGAttributes>
 
 const buttonClass = "p-1 focus:outline-none focus:shadow-outline flex items-center"
 
