@@ -263,15 +263,14 @@ module.exports = {
     config.projectRoot = projectRoot
     config.projectName = projectName
 
-    return this.mergeDefaults(config, options).then((configObject = {}) => {
-      debug('merged config is %o', config)
+    return this.mergeAllConfigs(config, options).then((configObject = {}) => {
+      debug('merged config is %o', configObject)
 
       return configObject
     })
   },
 
-  mergeDefaults (config = {}, options = {}) {
-    // 1 - merge the CLI options
+  mergeCLIOptions (config, options) {
     const resolved = {}
 
     config.rawJson = _.cloneDeep(config)
@@ -288,7 +287,10 @@ module.exports = {
       config[key] = val
     }).value()
 
-    // 2 - cleanup baseUrl & env
+    return resolved
+  },
+
+  cleanUpConfig (config, options, resolved) {
     let url = config.baseUrl
 
     if (url) {
@@ -319,10 +321,13 @@ module.exports = {
       // to zero
       config.numTestsKeptInMemory = 0
     }
+  },
 
-    // 3 - validate config again here so that we catch
-    // configuration errors coming from the CLI overrides
-    // or env var overrides
+  mergeAllConfigs (config = {}, options = {}) {
+    const resolved = this.mergeCLIOptions(config, options)
+
+    this.cleanUpConfig(config, options, resolved)
+
     validate(config, (errMsg) => {
       return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
     })
@@ -370,7 +375,7 @@ module.exports = {
     return _.each(obj, (val, key) => {
       if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
         // recurse setting overrides
-        // inside of this nested objected
+        // inside of this nested object
         return this.setPluginResolvedOn(resolvedObj[key], val)
       }
 
@@ -808,5 +813,4 @@ module.exports = {
   getNameFromRoot (root = '') {
     return path.basename(root)
   },
-
 }

@@ -10,8 +10,8 @@ export default defineConfig({
   fileServerFolder: 'src',
   projectId: 'nf7zag',
   component: {
-    componentFolder: '.',
-    testFiles: 'src/app/**/*cy-spec.ts',
+    componentFolder: 'src',
+    testFiles: '**/*cy-spec.ts',
     setupDevServer (options) {
       return startDevServer({
         options,

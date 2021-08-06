@@ -71,11 +71,10 @@ module.exports = defineConfig({
   ],
   experimentalFetchPolyfill: true,
   component: {
-    componentFolder: '.',
+    testFiles: '**/*spec.{js,jsx,ts,tsx}',
     env: {
       reactDevtools: true,
     },
-    testFiles: '**/*spec.{js,jsx,ts,tsx}',
     setupDevServer (options) {
       return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
     },
