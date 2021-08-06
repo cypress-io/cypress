@@ -182,6 +182,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     let cfg = this.getConfig()
 
+    // don't show the deprecation warning in e2e tests to avoid polluting snapshots
     if (typeof cfg.configFile === 'string' && /\.json$/.test(cfg.configFile) && process.env.CYPRESS_INTERNAL_ENV !== 'test') {
       this.options.onWarning(errors.get('DEPRECATED_CYPRESS_JSON', cfg.configFile))
     }
