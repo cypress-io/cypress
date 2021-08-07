@@ -5,11 +5,12 @@ const { fs } = require('../../lib/util/fs')
 
 const noScaffoldingPath = Fixtures.projectPath('no-scaffolding')
 const supportPath = path.join(noScaffoldingPath, 'cypress', 'support')
+const pluginsPath = path.join(noScaffoldingPath, 'cypress', 'plugins')
 
 describe('e2e new project', () => {
   e2e.setup()
 
-  it('passes', function () {
+  it('creates a sample supportFile & a sample pluginsFile', function () {
     return fs
     .statAsync(supportPath)
     .then(() => {
@@ -21,7 +22,7 @@ describe('e2e new project', () => {
         snapshot: true,
       })
       .then(() => {
-        return fs.statAsync(supportPath)
+        return Promise.all([fs.statAsync(supportPath), fs.statAsync(pluginsPath)])
       })
     })
   })

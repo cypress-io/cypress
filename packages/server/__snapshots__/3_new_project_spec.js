@@ -1,4 +1,4 @@
-exports['e2e new project passes 1'] = `
+exports['e2e new project creates a sample supportFile & a sample pluginsFile 1'] = `
 
 ====================================================================================================
 

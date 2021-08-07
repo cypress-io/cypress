@@ -195,7 +195,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // even when headlessly or else it will cause an error when
     // we try to load it and it's not there. We must do this here
     // else initialing the plugins will instantly fail.
-    if (cfg.pluginsFile && (!cfg.configFile || cfg.configFile && !/\.json$/.test(cfg.configFile))) {
+    if (cfg.pluginsFile && (!cfg.configFile || /\.json$/.test(cfg.configFile))) {
       debug('scaffolding with plugins file %s', cfg.pluginsFile)
 
       await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
