@@ -27,6 +27,7 @@ describe('lib/plugins', () => {
     const options = {
       onWarning,
       testingType: 'e2e',
+      configFile: 'cypress.json',
     }
 
     return plugins.init(projectConfig, options)
