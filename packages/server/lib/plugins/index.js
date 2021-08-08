@@ -98,12 +98,15 @@ const init = (config, options) => {
 
     if (/\.json$/.test(options.configFile)) {
       childArguments.push('--file', pluginsFile)
-    } else {
+    } else if (options[testingType] && options[testingType][PLUGINS_FUNCTION_NAME]) {
       childArguments.push(
         '--testingType', testingType,
         '--functionName', PLUGINS_FUNCTION_NAME,
         '--file', options.configFile,
       )
+    } else {
+      // if the file is evealuated but there is no plugins function, fall back on default plugins
+      childArguments.push('--file', path.join(__dirname, 'child', 'default_plugins_file.js'))
     }
 
     if (config.resolvedNodePath) {

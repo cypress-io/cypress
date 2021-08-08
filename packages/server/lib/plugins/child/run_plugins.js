@@ -163,12 +163,10 @@ function interopRequire (pluginsFile) {
  * @returns the plugins function found
  */
 function getPluginsFunction (resolvedExport, testingType, functionName) {
-  if (testingType) {
-    resolvedExport = resolvedExport[testingType]
-  }
-
-  if (functionName) {
-    resolvedExport = resolvedExport[functionName]
+  if (testingType && functionName) {
+    if (resolvedExport[testingType]) {
+      return resolvedExport[testingType][functionName]
+    }
   }
 
   return resolvedExport
