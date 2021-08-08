@@ -1,2 +1,3 @@
 <template>
+  Global Page
 </template>

@@ -44,9 +44,9 @@ const SizeClassesTable = {
 }
 
 const IconClassesTable = {
-  md: "h-1.25em w-1.25em",
-  lg: "h-2em w-2m",
-  xl: "h-2.5em w-2.5em"
+  md: "min-h-1.25em min-w-1.25em",
+  lg: "min-h-2em min-w-2em",
+  xl: "min-h-2.5em min-w-2.5em"
 }
 
 const props = defineProps<{
