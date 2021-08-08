@@ -167,6 +167,7 @@ describe('Routes', () => {
 
             pluginsModule.init(cfg, {
               projectRoot: cfg.projectRoot,
+              configFile: 'cypress.json',
             }),
           ])
         }

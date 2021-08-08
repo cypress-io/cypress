@@ -81,9 +81,9 @@ const init = (config, options) => {
 
     registeredEvents = {}
 
-    const pluginsFile = config.pluginsFile === false
-      ? path.join(__dirname, 'child', 'default_plugins_file.js')
-      : config.pluginsFile
+    const pluginsFile = typeof config.pluginsFile === 'string'
+      ? config.pluginsFile
+      : path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
