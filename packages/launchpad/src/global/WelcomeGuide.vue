@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useI18n } from "../composables";
+import { useI18n } from "../composables"
 import Checkbox from '../components/checkbox/Checkbox.vue'
 import Button from '../components/button/Button.vue'
 import WelcomeGuideLinks from './WelcomeGuideLinks.vue'
