@@ -162,10 +162,10 @@ function interopRequire (pluginsFile) {
  * @param {string} functionName path to the function in the exported object like `"e2e.plugins"`
  * @returns the plugins function found
  */
-function getPluginsFunction (resolvedExport, testingType, functionName) {
-  if (testingType && functionName) {
+function getPluginsFunction (resolvedExport, testingType) {
+  if (testingType) {
     if (resolvedExport[testingType]) {
-      return resolvedExport[testingType][functionName]
+      return resolvedExport[testingType].setupNodeEvents
     }
   }
 
@@ -174,10 +174,9 @@ function getPluginsFunction (resolvedExport, testingType, functionName) {
 
 let tsRegistered = false
 
-const runPlugins = (ipc, pluginsFile, projectRoot, testingType, functionName) => {
+const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
   debug('plugins file:', pluginsFile)
   debug('testingType:', testingType)
-  debug('function name:', functionName)
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
@@ -207,12 +206,12 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType, functionName) =>
   }
 
   try {
-    debug('require pluginsFile "%s", functionName "%s"', pluginsFile, functionName)
+    debug('require pluginsFile "%s"', pluginsFile)
     const pluginsObject = interopRequire(pluginsFile)
 
-    plugins = getPluginsFunction(pluginsObject, testingType, functionName)
+    plugins = getPluginsFunction(pluginsObject, testingType)
 
-    if (testingType === 'component') {
+    if (testingType === 'component' && pluginsObject.component) {
       setupDevServerFunction = pluginsObject.component.setupDevServer
     }
 

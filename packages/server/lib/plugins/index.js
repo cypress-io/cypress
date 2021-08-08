@@ -13,8 +13,6 @@ let pluginsProcess = null
 let registeredEvents = {}
 let handlers = []
 
-const PLUGINS_FUNCTION_NAME = 'setupNodeEvents'
-
 const register = (event, callback) => {
   debug(`register event '${event}'`)
 
@@ -98,14 +96,13 @@ const init = (config, options) => {
 
     if (/\.json$/.test(options.configFile)) {
       childArguments.push('--file', pluginsFile)
-    } else if (options[testingType] && options[testingType][PLUGINS_FUNCTION_NAME]) {
+    } else if (config[testingType] && (config[testingType].setupNodeEvents || (testingType === 'component' && config.component.setupDevServer))) {
       childArguments.push(
         '--testingType', testingType,
-        '--functionName', PLUGINS_FUNCTION_NAME,
         '--file', options.configFile,
       )
     } else {
-      // if the file is evealuated but there is no plugins function, fall back on default plugins
+      // if the config file is evaluated but there is no plugins function, fall back on default plugins
       childArguments.push('--file', path.join(__dirname, 'child', 'default_plugins_file.js'))
     }
 
