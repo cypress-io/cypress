@@ -1,7 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 
-// import type { BaseContext } from '../context/BaseContext'
-
 export interface AuthenticatedUser {
   name: string
   email: string
