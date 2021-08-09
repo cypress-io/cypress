@@ -3,18 +3,15 @@
 
   <div v-if="error">An error occurred while authenticating: {{ error }}</div>
 
-  <div v-else-if="data?.user">
+  <div v-else-if="data?.user?.email">
     <p>
-      Congrats you authenticated
+      Congrats {{ data?.user?.email }}, you authenticated with Cypress Cloud.
     </p>
-    <Button @click="fetchRuns">Make an authenticated API request</Button>
   </div>
 
   <div v-else>
     Nothing here yet
   </div>
-
-  {{ data?.user }}
 </template>
 
 <script lang="ts" setup>
@@ -27,6 +24,7 @@ import Button from '../components/button/Button.vue'
 gql`
 fragment User on App {
   user {
+    email
     authToken
   }
 }
@@ -46,10 +44,6 @@ const error = ref<string>()
 const handleAuth = async () => {
   const result = await authenticate.executeMutation({})
   error.value = result.error?.message ?? undefined
-}
-
-const fetchRuns = async () => {
-  console.log('Ok fetching')
 }
 
 const props = defineProps<{
