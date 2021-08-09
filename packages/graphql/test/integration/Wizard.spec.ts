@@ -2,12 +2,25 @@ import type { NxsMutationArgs } from 'nexus-decorators'
 import snapshot from 'snap-shot-it'
 import { expect } from 'chai'
 import axios from 'axios'
-import { BaseActions, BaseContext, Project, Wizard } from '../../src'
+import { BaseActions, BaseContext, Project, User, Wizard } from '../../src'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
 
 class TestActions extends BaseActions {
+  async authenticate () {
+    this.ctx.user = new User({
+      authToken: 'test-auth-token',
+      email: 'test@cypress.io',
+      name: 'cypress test',
+    })
+  }
+
+  async getRuns ({ projectId }: { projectId: string }) {
+  }
+
   installDependencies () {}
+
   createConfigFile () {}
+
   createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
     return new Project({
       isCurrent: true,
@@ -27,6 +40,7 @@ interface TestContextInjectionOptions {
 class TestContext extends BaseContext {
   projects: Project[] = []
   readonly actions: BaseActions
+  user: undefined
 
   constructor ({ wizard }: TestContextInjectionOptions = {}) {
     super()
@@ -124,6 +138,37 @@ describe('Wizard', () => {
       `)
 
       snapshot(result)
+    })
+  })
+})
+
+describe('App', () => {
+  describe('authenticate', () => {
+    it('assigns a new user', async () => {
+      const context = new TestContext()
+      const { endpoint } = await initGraphql(context)
+
+      const result = await makeRequest(endpoint, `
+        mutation Authenticate {
+          authenticate {
+            user {
+              email
+              name
+              authToken
+            }
+          }
+        }
+      `)
+
+      expect(result).to.eql({
+        authenticate: {
+          user: {
+            email: 'test@cypress.io',
+            name: 'cypress test',
+            authToken: 'test-auth-token',
+          },
+        },
+      })
     })
   })
 })
