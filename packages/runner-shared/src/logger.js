@@ -58,6 +58,8 @@ export const logger = {
   _logArgs (consoleProps) {
     const args = this._getArgs(consoleProps)
 
+    if (!args) return
+
     this.log(`%cArgs:`, 'font-weight: bold')
 
     args.forEach((arg, index) => {
