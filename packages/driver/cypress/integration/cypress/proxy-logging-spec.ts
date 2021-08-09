@@ -43,12 +43,6 @@ describe('Proxy Logging', () => {
     }
   }
 
-  beforeEach(() => {
-    // block race conditions caused by log update debouncing
-    // @ts-ignore
-    Cypress.config('logAttrsDelay', 0)
-  })
-
   context('request logging', () => {
     it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
