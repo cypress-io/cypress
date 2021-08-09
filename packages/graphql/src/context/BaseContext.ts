@@ -12,10 +12,10 @@ import type { Project } from '../entities/Project'
 export abstract class BaseContext {
   abstract readonly actions: BaseActions
   abstract projects: Project[]
+  abstract user?: User
 
   wizard = new Wizard()
   app = new App(this)
-  user = new User(this)
 
   isFirstOpen = false
 

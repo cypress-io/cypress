@@ -1,7 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
 import { Project } from './Project'
-
+import { User } from './User'
 
 @nxs.objectType({
   description: 'Namespace for information related to the app',
@@ -28,5 +28,12 @@ export class App {
   })
   get activeProject (): NxsResult<'App', 'activeProject'> {
     return this.projects.find((p) => p.isCurrent) ?? null
+  }
+
+  @nxs.field.type(() => User, {
+    description: 'Cypress Cloud',
+  })
+  get user (): NxsResult<'App', 'user'> {
+    return this.ctx.user ?? null
   }
 }

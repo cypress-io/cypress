@@ -1,48 +1,60 @@
 <template>
-  <button @click="auth">Auth</button>
-  {{ data }}
-  Token: {{ data?.authToken }}
-  is auth: {{ data?.authenticated }}
-  {{ authed }}
-  'email': {{ gql.email }}
+  <Button @click="handleAuth">Click to Authenticate</Button>
+
+  <div v-if="error">An error occurred while authenticating: {{ error }}</div>
+
+  <div v-else-if="data?.user">
+    <p>
+      Congrats you authenticated
+    </p>
+    <Button @click="fetchRuns">Make an authenticated API request</Button>
+  </div>
+
+  <div v-else>
+    Nothing here yet
+  </div>
+
+  {{ data?.user }}
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref,watch } from 'vue'
 import { gql } from "@urql/core"
 import { useMutation } from "@urql/vue"
-import { AuthDocument, AuthFragment, WizardLayoutNavigateDocument } from '../generated/graphql'
+import { AuthenticateDocument, UserFragment } from '../generated/graphql'
+import Button from '../components/button/Button.vue'
 
 gql`
-fragment Auth on User {
-  authenticated
-  authToken
-  email
-}
-`
-
-gql`
-mutation Auth {
-  authenticate {
-    ...Auth
+fragment User on App {
+  user {
+    authToken
   }
 }
 `
 
-const authMut = useMutation(AuthDocument)
+gql`
+mutation authenticate {
+  authenticate {
+    ...User
+  }
+}
+`
 
-const navigate = useMutation(WizardLayoutNavigateDocument)
+const authenticate = useMutation(AuthenticateDocument)
+const error = ref<string>()
 
-const auth = () => {
-  authMut.executeMutation({}).then(res => {
-    console.log('res', res)
-  })
+const handleAuth = async () => {
+  const result = await authenticate.executeMutation({})
+  error.value = result.error?.message ?? undefined
+}
+
+const fetchRuns = async () => {
+  console.log('Ok fetching')
 }
 
 const props = defineProps<{
-  gql?: AuthFragment | null
+  gql?: UserFragment | null
 }>()
 
 const data = computed(() => props.gql)
-const authed = computed(() => props.gql?.authToken)
 </script>

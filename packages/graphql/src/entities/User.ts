@@ -1,8 +1,6 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import type { BaseContext } from '../context/BaseContext'
 
-// @ts-ignore
-import auth from '@packages/server/lib/gui/auth'
+// import type { BaseContext } from '../context/BaseContext'
 
 export interface AuthenticatedUser {
   name: string
@@ -14,9 +12,7 @@ export interface AuthenticatedUser {
   description: 'Namespace for information related to authentication with Cypress Cloud',
 })
 export class User {
-  user?: AuthenticatedUser
-
-  constructor (private ctx: BaseContext) {}
+  constructor (private user: AuthenticatedUser) {}
 
   @nxs.field.string()
   get name (): NxsResult<'User', 'name'> {
@@ -31,20 +27,5 @@ export class User {
   @nxs.field.string()
   get authToken (): NxsResult<'User', 'authToken'> {
     return this.user?.authToken ?? null
-  }
-
-  @nxs.field.boolean()
-  get authenticated (): NxsResult<'User', 'authenticated'> {
-    return !!this.user?.authToken
-  }
-
-  async authenticate () {
-    const msg = (...args: any) => {
-      console.log('Message is', ...args)
-    }
-
-    const user: AuthenticatedUser = await auth.start(msg, 'launchpad')
-    this.user = user
-    return this
   }
 }

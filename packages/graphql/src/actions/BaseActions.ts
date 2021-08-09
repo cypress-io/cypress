@@ -51,4 +51,6 @@ export abstract class BaseActions {
   }
 
   abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectBaseContract | Promise<ProjectBaseContract>
+  abstract authenticate (): Promise<void>
+  abstract getRuns ({ projectId }: { projectId: string }): Promise<void>
 }

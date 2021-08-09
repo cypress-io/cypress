@@ -18,6 +18,9 @@ type App {
 
   """All known projects for the app"""
   projects: [Project!]!
+
+  """Cypress Cloud"""
+  user: User
 }
 
 """
@@ -47,7 +50,7 @@ type Mutation {
   appCreateConfigFile(code: String!, configFilename: String!): App
 
   """Auth with Cypress Cloud"""
-  authenticate: User!
+  authenticate: App
 
   """Initializes the plugins for the current active project"""
   initializePlugins: Project
@@ -105,6 +108,9 @@ type Project {
 type Query {
   app: App!
 
+  """Get runs for a given projectId on Cypress Cloud"""
+  runs(projectId: String!): App
+
   """Namespace for user and authentication"""
   user: User
 
@@ -132,7 +138,6 @@ type TestingTypeInfo {
 """Namespace for information related to authentication with Cypress Cloud"""
 type User {
   authToken: String
-  authenticated: Boolean
   email: String
   name: String
 }

@@ -102,11 +102,12 @@ export interface NexusGenFieldTypes {
     activeProject: NexusGenRootTypes['Project'] | null; // Project
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['Project'][]; // [Project!]!
+    user: NexusGenRootTypes['User'] | null; // User
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
-    authenticate: NexusGenRootTypes['User']; // User!
+    authenticate: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -128,6 +129,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
+    runs: NexusGenRootTypes['App'] | null; // App
     user: NexusGenRootTypes['User'] | null; // User
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
@@ -138,7 +140,6 @@ export interface NexusGenFieldTypes {
   }
   User: { // field return type
     authToken: string | null; // String
-    authenticated: boolean | null; // Boolean
     email: string | null; // String
     name: string | null; // String
   }
@@ -180,11 +181,12 @@ export interface NexusGenFieldTypeNames {
     activeProject: 'Project'
     isFirstOpen: 'Boolean'
     projects: 'Project'
+    user: 'User'
   }
   Mutation: { // field return type name
     addProject: 'Project'
     appCreateConfigFile: 'App'
-    authenticate: 'User'
+    authenticate: 'App'
     initializePlugins: 'Project'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
@@ -206,6 +208,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    runs: 'App'
     user: 'User'
     wizard: 'Wizard'
   }
@@ -216,7 +219,6 @@ export interface NexusGenFieldTypeNames {
   }
   User: { // field return type name
     authToken: 'String'
-    authenticated: 'Boolean'
     email: 'String'
     name: 'String'
   }
@@ -276,6 +278,11 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+  }
+  Query: {
+    runs: { // args
+      projectId: string; // String!
     }
   }
   Wizard: {

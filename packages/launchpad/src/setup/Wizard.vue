@@ -1,6 +1,6 @@
 <template>
   <template v-if="!loading && wizard">
-    <Auth :gql="user" />
+    <Auth :gql="app" />
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
@@ -33,7 +33,7 @@ import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@urql/core'
-import { UserDocument, WizardDocument } from '../generated/graphql'
+import { WizardDocument } from '../generated/graphql'
 import { useQuery } from "@urql/vue";
 
 gql`
@@ -41,6 +41,7 @@ query Wizard {
   app {
     isFirstOpen
     ...ProjectRoot
+    ...User
   }
   wizard {
     step
@@ -51,14 +52,6 @@ query Wizard {
     ...ConfigFile
     ...InstallDependencies
     ...EnvironmentSetup
-  }
-}
-`
-
-gql`
-query User {
-  user {
-    ...Auth
   }
 }
 `
@@ -77,19 +70,10 @@ export default defineComponent({
       query: WizardDocument,
     })
 
-    const userResult = useQuery({
-      query: UserDocument,
-    })
-
-    watch(userResult.data, (val) => {
-      console.log(val?.user?.authenticated)
-    })
-
     return { 
       loading: result.fetching, 
       wizard: computed(() => result.data.value?.wizard),
       app: computed(() => result.data.value?.app),
-      user: computed(() => userResult.data.value?.user),
     };
   },
 });
