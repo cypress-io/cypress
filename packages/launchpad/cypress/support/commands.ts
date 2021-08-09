@@ -14,7 +14,7 @@ import { createI18n } from '../../src/locales/i18n'
  * It has to be loaded run before initializing GraphQL
  * because graphql uses it.
  */
-(window as any).ipc = {
+;(window as any).ipc = {
   on: () => {},
   send: () => {},
 }
@@ -23,6 +23,8 @@ Cypress.Commands.add(
   'mount',
   <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
     options.global = options.global || {}
+    options.global.stubs = options.global.stubs || {}
+    options.global.stubs.transition = false
     options.global.plugins = options.global.plugins || []
     options.global.plugins.push(createI18n())
     options.global.plugins.push({
@@ -64,6 +66,9 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
     },
   }), {
     global: {
+      stubs: {
+        transition: false,
+      },
       plugins: [
         createI18n(),
         {

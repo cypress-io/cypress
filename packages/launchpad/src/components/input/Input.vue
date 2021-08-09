@@ -32,15 +32,15 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { useModelWrapper } from '../../composables'
 import { omit, pick, keys } from 'lodash'
-import type { IconType } from '../../types'
 import IconWrapper, { iconProps } from '../icon/IconWrapper.vue'
 
 const props = withDefaults(defineProps<{
-  prefixIcon?: IconType,
+  prefixIcon?: FunctionalComponent<SVGAttributes>,
   prefixIconClass?: string,
-  suffixIcon?: IconType,
+  suffixIcon?: FunctionalComponent<SVGAttributes>,
   suffixIconClass?: string,
   type?: HTMLInputElement['type']
   modelValue?: string

@@ -10,9 +10,9 @@ export default {
 }
 </script>
 <script lang="ts" setup>
-import type { IconType } from '../../types'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 defineProps<{
-  icon?: IconType | string
+  icon?: FunctionalComponent<SVGAttributes, {}>
 }>()
 </script>

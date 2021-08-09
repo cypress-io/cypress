@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 min-w-650px mx-auto my-0">
-    <section class="border-1 border-gray-300 rounded overflow-hidden">
+    <section class="border-1 border-gray-300 rounded">
 
       <!-- The Settings Card Header -->
       <header @click="toggleOpen()" data-testid="settings-card-header" class="bg-cool-gray-100 py-4 pl-6 pr-3 select-none cursor-pointer grid gap-4">
@@ -27,12 +27,13 @@
   import IconCaret from 'virtual:vite-icons/mdi/caret'
   import Icon from '../components/icon/Icon.vue'
   import { useToggle } from '@vueuse/core'
-  import type { IconType } from '../types'
+  import type { FunctionalComponent, SVGAttributes } from 'vue'
+  
 
   defineProps<{
     title: string,
     description: string,
-    icon: IconType
+    icon: FunctionalComponent<SVGAttributes, {}>
   }>()
 
   const [ isOpen, toggleOpen ] = useToggle(false)

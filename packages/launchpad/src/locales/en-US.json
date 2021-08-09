@@ -2,9 +2,17 @@
   "links": {
     "learnMore": "Learn more."
   },
+  "components": {
+    "select": {
+      "placeholder": "Choose an option..."
+    }
+  },
   "clipboard": {
     "copy": "Copy",
     "copied": "Copied"
+  },
+  "file": {
+    "edit": "Edit"
   },
   "status": {
     "enabled": "Enabled",
@@ -27,6 +35,32 @@
     }
   },
   "settingsPage": {
+    "config": {
+      "title": "Resolved Configuration",
+      "description": "Since the options in the {0} can be set dynamically by your development environment, please refer to the legend below to understand how the configuration options are resolved.",
+      "legend": {
+        "env": {
+          "label": "env",
+          "description": "Set from environment variables"
+        },
+        "default": {
+          "label": "default",
+          "description": "Default values"
+        },
+        "dynamic": {
+          "label": "dynamic",
+          "description": "Set by the {0} function"
+        },
+        "cli": {
+          "label": "cli",
+          "description": "Set from CLI arguments"
+        },
+        "config": {
+          "label": "config",
+          "description": "Set from {0}"
+        }
+      }
+    },
     "proxy": {
       "title": "Proxy Settings",
       "description": "Cypress auto-detected the following proxy settings from your operating system.",
@@ -35,7 +69,8 @@
     },
     "editor": {
       "title": "External Editor",
-      "description": "External editor to use for editing code opened when using Cypress."
+      "description": "External editor to use for editing code opened when using Cypress.",
+      "noEditorSelectedPlaceholder": "Choose your editor..."
     },
     "projectId": {
       "title": "Project ID",
