@@ -19,12 +19,13 @@ export const logger = {
     if (_.isEmpty(consoleProps)) return
 
     this._logValues(consoleProps)
+    this._logArgs(consoleProps)
     this._logGroups(consoleProps)
     this._logTable(consoleProps)
   },
 
   _logValues (consoleProps) {
-    const formattedLog = this._formatted(_.omit(consoleProps, 'groups', 'table'))
+    const formattedLog = this._formatted(_.omit(consoleProps, 'args', 'groups', 'table'))
 
     _.each(formattedLog, (value, key) => {
       // don't log empty strings
@@ -52,6 +53,24 @@ export const logger = {
     const lengths = _(obj).keys().map('length').value()
 
     return Math.max(...lengths)
+  },
+
+  _logArgs (consoleProps) {
+    const args = this._getArgs(consoleProps)
+
+    this.log(`%cArgs:`, 'font-weight: bold')
+
+    args.forEach((arg, index) => {
+      this.log(`%c  [${index}]:`, 'font-weight: bold', arg)
+    })
+  },
+
+  _getArgs (consoleProps) {
+    const args = _.result(consoleProps, 'args')
+
+    if (!args) return
+
+    return args
   },
 
   _logGroups (consoleProps) {
