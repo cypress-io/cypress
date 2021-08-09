@@ -258,7 +258,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(require('morgan')('dev'))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -268,6 +268,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.disable('x-powered-by')
 
     return app
+  }
+
+  useMorgan () {
+    return require('morgan')('dev')
   }
 
   getHttpServer () {
@@ -611,5 +615,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
     return this.socket.sendSpecList(specs, testingType)
+  }
+
+  // used for testing
+  __setMiddleware (middleware: any) {
+    this._middleware = middleware
   }
 }
