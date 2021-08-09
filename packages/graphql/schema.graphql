@@ -55,6 +55,9 @@ type Mutation {
   """Initializes the plugins for the current active project"""
   initializePlugins: Project
 
+  """Log out of Cypress Cloud"""
+  logout: App
+
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 

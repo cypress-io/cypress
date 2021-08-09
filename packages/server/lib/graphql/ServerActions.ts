@@ -4,6 +4,9 @@ import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, User } from '@packages/graphql'
 
 // @ts-ignore
+import user from '@packages/server/lib/user'
+
+// @ts-ignore
 import auth from '@packages/server/lib/gui/auth'
 
 // @ts-ignore
@@ -33,6 +36,11 @@ export class ServerActions extends BaseActions {
     const user: AuthenticatedUser = await auth.start(() => {}, 'launchpad')
 
     this.ctx.user = new User(user)
+  }
+
+  async logout () {
+    await user.logOut()
+    this.ctx.user = undefined
   }
 
   async getRuns ({ projectId }: { projectId: string }) {

@@ -111,7 +111,22 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Auth with Cypress Cloud',
       async resolve (_root, args, ctx) {
+        // already authenticated this session - just return
+        if (ctx.user) {
+          return ctx.app
+        }
+
         await ctx.actions.authenticate()
+
+        return ctx.app
+      },
+    })
+
+    t.field('logout', {
+      type: 'App',
+      description: 'Log out of Cypress Cloud',
+      async resolve (_root, args, ctx) {
+        await ctx.actions.logout()
 
         return ctx.app
       },

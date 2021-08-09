@@ -7,6 +7,7 @@
     <p>
       Congrats {{ data?.user?.email }}, you authenticated with Cypress Cloud.
     </p>
+    <Button @click="handleLogout">Log out</Button>
   </div>
 
   <div v-else>
@@ -15,10 +16,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref,watch } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from "@urql/core"
 import { useMutation } from "@urql/vue"
-import { AuthenticateDocument, UserFragment } from '../generated/graphql'
+import { AuthenticateDocument, UserFragment, LogoutDocument } from '../generated/graphql'
 import Button from '../components/button/Button.vue'
 
 gql`
@@ -38,12 +39,27 @@ mutation authenticate {
 }
 `
 
+gql`
+mutation Logout {
+  logout {
+    ...User
+  }
+}
+`
+
 const authenticate = useMutation(AuthenticateDocument)
+const logout = useMutation(LogoutDocument)
 const error = ref<string>()
 
 const handleAuth = async () => {
   const result = await authenticate.executeMutation({})
   error.value = result.error?.message ?? undefined
+}
+
+const handleLogout = async () => {
+  // clear this for good measure
+  error.value = undefined
+  await logout.executeMutation({})
 }
 
 const props = defineProps<{
