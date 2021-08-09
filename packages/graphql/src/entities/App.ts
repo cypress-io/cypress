@@ -2,6 +2,7 @@ import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
 import { Project } from './Project'
 
+
 @nxs.objectType({
   description: 'Namespace for information related to the app',
 })

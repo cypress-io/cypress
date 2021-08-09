@@ -107,6 +107,25 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('authenticate', {
+      type: 'User',
+      description: 'Auth with Cypress Cloud',
+      // args: {
+      //   input: nonNull(
+      //     inputObjectType({
+      //       name: 'Authenticate',
+      //       definition (t) {
+      //       }
+      //     })
+      //   )
+      // }
+      async resolve (_root, args, ctx) {
+        console.log('Auth!!')
+        await ctx.user.authenticate()
+        return ctx.user
+      }
+    })
+
     t.field('initializePlugins', {
       type: 'Project',
       description: 'Initializes the plugins for the current active project',

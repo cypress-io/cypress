@@ -1,5 +1,6 @@
 <template>
   <template v-if="!loading && wizard">
+    <Auth :gql="user" />
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
@@ -25,13 +26,14 @@
 
 <script lang="ts">
 import { defineComponent, watch, computed } from "vue";
+import Auth from './Auth.vue'
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@urql/core'
-import { WizardDocument } from '../generated/graphql'
+import { UserDocument, WizardDocument } from '../generated/graphql'
 import { useQuery } from "@urql/vue";
 
 gql`
@@ -53,11 +55,20 @@ query Wizard {
 }
 `
 
+gql`
+query User {
+  user {
+    ...Auth
+  }
+}
+`
+
 export default defineComponent({
   components: {
     TestingType,
     EnvironmentSetup,
     InstallDependencies,
+    Auth,
     ConfigFile,
     OpenBrowser,
   },
@@ -66,10 +77,19 @@ export default defineComponent({
       query: WizardDocument,
     })
 
+    const userResult = useQuery({
+      query: UserDocument,
+    })
+
+    watch(userResult.data, (val) => {
+      console.log(val?.user?.authenticated)
+    })
+
     return { 
       loading: result.fetching, 
       wizard: computed(() => result.data.value?.wizard),
-      app: computed(() => result.data.value?.app) 
+      app: computed(() => result.data.value?.app),
+      user: computed(() => userResult.data.value?.user),
     };
   },
 });

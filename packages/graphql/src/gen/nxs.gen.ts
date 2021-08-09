@@ -9,6 +9,7 @@ import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { Project } from "./../entities/Project"
 import type { Query } from "./../entities/Query"
+import type { User } from "./../entities/User"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
@@ -79,6 +80,7 @@ export interface NexusGenObjects {
   Project: Project;
   Query: Query;
   TestingTypeInfo: TestingTypeInfo;
+  User: User;
   Wizard: Wizard;
   WizardBundler: WizardBundler;
   WizardFrontendFramework: WizardFrontendFramework;
@@ -104,6 +106,7 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
+    authenticate: NexusGenRootTypes['User']; // User!
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -125,12 +128,19 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
+    user: NexusGenRootTypes['User'] | null; // User
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   TestingTypeInfo: { // field return type
     description: string | null; // String
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     title: string | null; // String
+  }
+  User: { // field return type
+    authToken: string | null; // String
+    authenticated: boolean | null; // Boolean
+    email: string | null; // String
+    name: string | null; // String
   }
   Wizard: { // field return type
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -174,6 +184,7 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     addProject: 'Project'
     appCreateConfigFile: 'App'
+    authenticate: 'User'
     initializePlugins: 'Project'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
@@ -195,12 +206,19 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    user: 'User'
     wizard: 'Wizard'
   }
   TestingTypeInfo: { // field return type name
     description: 'String'
     id: 'TestingTypeEnum'
     title: 'String'
+  }
+  User: { // field return type name
+    authToken: 'String'
+    authenticated: 'Boolean'
+    email: 'String'
+    name: 'String'
   }
   Wizard: { // field return type name
     allBundlers: 'WizardBundler'

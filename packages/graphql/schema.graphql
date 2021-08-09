@@ -46,6 +46,9 @@ type Mutation {
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
 
+  """Auth with Cypress Cloud"""
+  authenticate: User!
+
   """Initializes the plugins for the current active project"""
   initializePlugins: Project
 
@@ -102,6 +105,9 @@ type Project {
 type Query {
   app: App!
 
+  """Namespace for user and authentication"""
+  user: User
+
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard
 }
@@ -121,6 +127,14 @@ type TestingTypeInfo {
   description: String
   id: TestingTypeEnum!
   title: String
+}
+
+"""Namespace for information related to authentication with Cypress Cloud"""
+type User {
+  authToken: String
+  authenticated: Boolean
+  email: String
+  name: String
 }
 
 """
