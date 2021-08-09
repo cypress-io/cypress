@@ -21,11 +21,9 @@ const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
-function getSpecsPathsSet (specs: Spec[], supportFile?: string | null) {
+function getSpecsPathsSet (specs: Spec[]) {
   return new Set<string>(
-    supportFile
-      ? [...specs.map((spec) => spec.absolute), supportFile]
-      : specs.map((spec) => spec.absolute),
+    specs.map((spec) => spec.absolute),
   )
 }
 
@@ -42,10 +40,10 @@ export const makeCypressPlugin = (
 ): Plugin => {
   let base = '/'
 
-  let specsPathsSet = getSpecsPathsSet(specs, supportFilePath)
+  let specsPathsSet = getSpecsPathsSet(specs)
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
-    specsPathsSet = getSpecsPathsSet(specs, supportFilePath)
+    specsPathsSet = getSpecsPathsSet(specs)
   })
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
@@ -106,8 +104,15 @@ export const makeCypressPlugin = (
         // as soon as we find one of the specs, we trigger the re-run of tests
         for (const mod of moduleImporters.values()) {
           debug('handleHotUpdate - mod.file', mod.file)
+          if (mod.file === supportFilePath) {
+            debug('handleHotUpdate - support compile success')
+            devServerEvents.emit('dev-server:compile:success')
+
+            return []
+          }
+
           if (mod.file && specsPathsSet.has(mod.file)) {
-            debug('handleHotUpdate - compile success')
+            debug('handleHotUpdate - spec compile success', mod.file)
             devServerEvents.emit('dev-server:compile:success', { specFile: mod.file })
 
             return []
