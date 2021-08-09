@@ -8,18 +8,21 @@
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "typecheck": "vue-tsc --noEmit",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",
-    "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
+    "test:ci:e2e": "node ../../scripts/cypress.js run --project ${PWD}",
+    "test:ci:ct": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env"
   },
   "dependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@vue/test-utils": "^2.0.0-rc.9"
+    "@vue/test-utils": "^2.0.0-rc.10"
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
+    "@babel/plugin-transform-modules-commonjs": "7.9.6",
     "@babel/preset-env": "7.9.5",
+    "@babel/preset-typescript": "7.10.1",
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@intlify/vue-i18n-loader": "2.0.0-rc.1",
@@ -27,10 +30,11 @@
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
-    "@vue/compiler-sfc": "^3.0.5",
+    "@vue/compiler-sfc": "3.1.5",
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
-    "babel-plugin-istanbul": "6.0.0",
+    "babel-plugin-istanbul": "^6.0.0",
+    "babel-preset-typescript-vue3": "^2.0.14",
     "css-loader": "3.4.2",
     "cypress": "0.0.0-development",
     "debug": "4.3.2",
@@ -43,12 +47,13 @@
     "rollup-plugin-istanbul": "2.0.1",
     "rollup-plugin-typescript2": "^0.29.0",
     "tailwindcss": "1.1.4",
-    "typescript": "3.9.6",
-    "vue": "3.0.11",
+    "typescript": "^4.2.3",
+    "vue": "3.1.5",
     "vue-i18n": "9.0.0-rc.6",
     "vue-loader": "16.1.2",
     "vue-router": "^4.0.0",
     "vue-style-loader": "4.1.2",
+    "vue-tsc": "0.2.2",
     "vuex": "^4.0.0",
     "webpack": "4.42.0"
   },
@@ -76,7 +81,6 @@
     "cypress",
     "vue"
   ],
-  "unpkg": "dist/cypress-vue.browser.js",
   "module": "dist/cypress-vue.esm-bundler.js",
   "peerDependenciesMeta": {
     "@cypress/webpack-dev-server": {

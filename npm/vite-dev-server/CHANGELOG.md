@@ -1,3 +1,25 @@
+# [@cypress/vite-dev-server-v2.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.4...@cypress/vite-dev-server-v2.0.5) (2021-08-04)
+
+
+### Bug Fixes
+
+* reload every spec file when support updated ([#17598](https://github.com/cypress-io/cypress/issues/17598)) ([efc38b6](https://github.com/cypress-io/cypress/commit/efc38b67497b48db5b3a636acac3be45dd930593))
+
+# [@cypress/vite-dev-server-v2.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.3...@cypress/vite-dev-server-v2.0.4) (2021-07-31)
+
+
+### Bug Fixes
+
+* **server:** correctly include projectRoot when adding a CI project from GUI ([#17514](https://github.com/cypress-io/cypress/issues/17514)) ([e49b3a4](https://github.com/cypress-io/cypress/commit/e49b3a4b9fc99bb392235b7cad36139faff08eec))
+* only rerun if current spec+deps changed ([#17269](https://github.com/cypress-io/cypress/issues/17269)) ([1433b64](https://github.com/cypress-io/cypress/commit/1433b64d25f186774471593892c1c03aa954c4e3))
+
+# [@cypress/vite-dev-server-v2.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.2...@cypress/vite-dev-server-v2.0.3) (2021-07-27)
+
+
+### Bug Fixes
+
+* make vite re-run on supportFile change ([#17485](https://github.com/cypress-io/cypress/issues/17485)) ([6cbf4c3](https://github.com/cypress-io/cypress/commit/6cbf4c38296d6287fbcbb0ef5ecd21cf63606153))
+
 # [@cypress/vite-dev-server-v2.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.1...@cypress/vite-dev-server-v2.0.2) (2021-07-15)
 
 

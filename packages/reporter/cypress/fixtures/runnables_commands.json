@@ -30,7 +30,8 @@
           "testId": "r3",
           "timeout": 4000,
           "numElements": 1,
-          "type": "parent"
+          "type": "parent",
+          "hasConsoleProps": true
         },
         {
           "hookId": "r3",
@@ -113,8 +114,7 @@
           "event": true,
           "testId": "r3",
           "timeout": 4000,
-          "type": "parent",
-          "alias": "dup0"
+          "type": "parent"
         },
         {
           "hookId": "r3",
@@ -127,8 +127,7 @@
           "event": true,
           "testId": "r3",
           "timeout": 4000,
-          "type": "parent",
-          "alias": "dup1"
+          "type": "parent"
         },
         {
           "hookId": "r3",

@@ -564,63 +564,6 @@ describe('network stubbing', { retries: 2 }, function () {
         })
       })
 
-      it('has displayName req for spies', function () {
-        cy.intercept('/foo*').as('getFoo')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@getFoo')
-        .then(() => {
-          const log = _.last(cy.queue.logs()) as any
-
-          expect(log.get('displayName')).to.eq('req')
-        })
-      })
-
-      it('has displayName req stub for stubs', function () {
-        cy.intercept('/foo*', { body: 'foo' }).as('getFoo')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@getFoo')
-        .then(() => {
-          const log = _.last(cy.queue.logs()) as any
-
-          expect(log.get('displayName')).to.eq('req stub')
-        })
-      })
-
-      it('has displayName req fn for request handlers', function () {
-        cy.intercept('/foo*', () => {}).as('getFoo')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@getFoo')
-        .then(() => {
-          const log = _.last(cy.queue.logs()) as any
-
-          expect(log.get('displayName')).to.eq('req fn')
-        })
-      })
-
-      // TODO: implement log niceties
-      it.skip('#consoleProps', function () {
-        cy.intercept('*', {
-          foo: 'bar',
-        }).as('foo').then(function () {
-          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            Command: 'route',
-            Method: 'GET',
-            URL: '*',
-            Status: 200,
-            Response: {
-              foo: 'bar',
-            },
-            Alias: 'foo',
-          })
-        })
-      })
-
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.intercept(/foo/, {}).then(() => {
@@ -2184,6 +2127,61 @@ describe('network stubbing', { retries: 2 }, function () {
             cy.get('#request').click()
             cy.get('#result').should('contain', 'client')
           })
+
+          it('works with reply', () => {
+            cy.intercept({
+              method: 'POST',
+              times: 1,
+              url: '/post-only',
+            },
+            (req) => {
+              req.reply('stubbed data')
+            }).as('interceptor')
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
+
+          it('works with reply and fallthrough', () => {
+            let times = 0
+
+            cy.intercept({
+              method: 'POST',
+              times: 3,
+              url: '/post-only',
+            },
+            (req) => {
+              req.reply(`${req.body === 'foo' ? 'foo' : 'nothing'} stubbed data ${times++}`)
+            })
+
+            cy.intercept({
+              method: 'POST',
+              times: 2,
+              url: '/post-only',
+            },
+            (req) => {
+              req.body = 'foo'
+            })
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'foo stubbed data 0')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'foo stubbed data 1')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'nothing stubbed data 2')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
         })
       })
     })
@@ -2683,6 +2681,31 @@ describe('network stubbing', { retries: 2 }, function () {
       })
       .should('not.include', 'content-type')
       .wait('@get')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17084
+    it('does not overwrite the json-related content-type header', () => {
+      cy.intercept('/json-content-type', (req) => {
+        req.on('response', (res) => {
+          res.send({
+            statusCode: 500,
+            headers: {
+              'content-type': 'application/problem+json',
+              'access-control-allow-origin': '*',
+            },
+            body: {
+              status: 500,
+              title: 'Internal Server Error',
+            },
+          })
+        })
+      })
+      .then(() => {
+        return fetch('/json-content-type')
+        .then((res) => {
+          expect(res.headers.get('content-type')).to.eq('application/problem+json')
+        })
+      })
     })
 
     context('body parsing', function () {
@@ -3241,7 +3264,7 @@ describe('network stubbing', { retries: 2 }, function () {
         $.get('/fixtures/app.json')
       }).wait('@getFoo').then(function (res) {
         const log = cy.queue.logs({
-          displayName: 'req',
+          displayName: 'xhr',
         })[0]
 
         expect(log.get('alias')).to.eq('getFoo')

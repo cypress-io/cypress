@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es5", "dom"],
+    "allowJs": true,
+    "moduleResolution": "node"
+  },
+  "include": ["**/*.ts"]
+}
