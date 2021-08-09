@@ -94,7 +94,7 @@ const init = (config, options) => {
 
     const testingType = options.testingType || 'e2e'
 
-    if (/\.json$/.test(options.configFile)) {
+    if (/\.json$/.test(options.configFile) || options.configFile === false) {
       childArguments.push('--file', pluginsFile)
     } else if (config[testingType] && (config[testingType].setupNodeEvents || (testingType === 'component' && config.component.setupDevServer))) {
       childArguments.push(
