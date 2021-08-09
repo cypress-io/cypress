@@ -73,7 +73,7 @@ export default defineComponent({
     return { 
       loading: result.fetching, 
       wizard: computed(() => result.data.value?.wizard),
-      app: computed(() => result.data.value?.app),
+      app: computed(() => result.data.value?.app)
     };
   },
 });

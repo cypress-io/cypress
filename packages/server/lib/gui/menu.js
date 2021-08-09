@@ -172,7 +172,7 @@ module.exports = {
       })
     }
 
-    if (true) {
+    if (options.withDevTools) {
       template.push(
         {
           label: 'Developer Tools',
