@@ -8,6 +8,8 @@ type NullableMiddlewareHook = (() => void) | null
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
+export type onRequestEvent = (eventName: string, data: any) => void
+
 interface IMiddleware {
   onPush: NullableMiddlewareHook
   onBeforeRequest: NullableMiddlewareHook
@@ -22,7 +24,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: onRequestEvent) {
     this.requests = {}
 
     // set the middleware
@@ -60,11 +62,11 @@ export class Automation {
       // if we have an onRequest function
       // then just invoke that
       if (onReq) {
-        return onReq(msg, data)
+        return Bluebird.resolve(onReq(msg, data))
       }
 
       // do the default
-      return this.requestAutomationResponse(msg, data, fn)
+      return Bluebird.resolve(this.requestAutomationResponse(msg, data, fn))
     }
   }
 
@@ -116,6 +118,8 @@ export class Automation {
           return this.cookies.getCookie(data, automate)
         case 'set:cookie':
           return this.cookies.setCookie(data, automate)
+        case 'set:cookies':
+          return this.cookies.setCookies(data, automate)
         case 'clear:cookies':
           return this.cookies.clearCookies(data, automate)
         case 'clear:cookie':

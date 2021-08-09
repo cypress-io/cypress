@@ -1,10 +1,23 @@
 // @ts-check
 /// <reference types="next" />
 const debug = require('debug')('@cypress/react')
-const loadConfig = require('next/dist/next-server/server/config').default
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config').default
 
 async function getNextWebpackConfig (config) {
+  let loadConfig
+
+  try {
+    loadConfig = require('next/dist/next-server/server/config').default
+  } catch (e) {
+    if (e.code === 'MODULE_NOT_FOUND') {
+      // Starting from 11.0.2-canary.23, the server config file
+      // is not in the next-server folder anymore.
+      // @ts-ignore
+      loadConfig = require('next/dist/server/config').default
+    }
+
+    throw e
+  }
   const nextConfig = await loadConfig('development', config.projectRoot)
   const nextWebpackConfig = await getNextJsBaseWebpackConfig(
     config.projectRoot,

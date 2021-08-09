@@ -16,6 +16,7 @@ import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
 import { CypressIncomingRequest } from '@packages/proxy'
 import { InterceptedRequest } from './intercepted-request'
+import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
@@ -29,7 +30,7 @@ export function emit (socket: CyServer.Socket, eventName: string, data: object) 
     debug('sending event to driver %o', { eventName, data: _.chain(data).cloneDeep().omit('res.body').value() })
   }
 
-  socket.toDriver('net:event', eventName, data)
+  socket.toDriver('net:stubbing:event', eventName, data)
 }
 
 export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<any>) {
@@ -77,24 +78,6 @@ function _getFakeClientResponse (opts: {
   _.merge(clientResponse, opts)
 
   return clientResponse
-}
-
-const caseInsensitiveGet = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return obj[key]
-    }
-  }
-}
-
-const caseInsensitiveHas = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return true
-    }
-  }
-
-  return false
 }
 
 export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {

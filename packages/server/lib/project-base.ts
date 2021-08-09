@@ -41,7 +41,7 @@ import type { ProjectBaseContract } from '@packages/graphql'
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
   Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -591,7 +591,11 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectBa
       this.server.addBrowserPreRequest(browserPreRequest)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest)
+    const onRequestEvent = (eventName, data) => {
+      this.server.emitRequestEvent(eventName, data)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
 
     this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
@@ -693,7 +697,7 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectBa
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {
-        if (browser.family === 'chromium') {
+        if (browser.family === 'chromium' || theCfg.chromeWebSecurity) {
           return browser
         }
 

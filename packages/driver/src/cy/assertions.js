@@ -76,7 +76,7 @@ const create = function (Cypress, cy) {
     const assertions = []
 
     // grab the rest of the queue'd commands
-    for (let cmd of cy.queue.slice(index).get()) {
+    for (let cmd of cy.queue.slice(index)) {
       // don't break on utilities, just skip over them
       if (cmd.is('utility')) {
         continue
