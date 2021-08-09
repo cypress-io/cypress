@@ -9,17 +9,11 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 
 @observer
 class RunsListEmpty extends Component {
-  state = {
-    recordKey: null,
-  }
-
   componentDidMount () {
-    this._getRecordKeys()
     this._updateProjectStatus()
   }
 
   componentDidUpdate () {
-    this._getRecordKeys()
     this._updateProjectStatus()
   }
 
@@ -28,16 +22,6 @@ class RunsListEmpty extends Component {
 
     if (!project.orgId) {
       projectsApi.updateProjectStatus(project)
-    }
-  }
-
-  _getRecordKeys = () => {
-    if (!this.state.recordKey) {
-      projectsApi.getRecordKeys().then((keys) => {
-        if (keys && keys.length) {
-          this.setState({ recordKey: keys[0].id })
-        }
-      })
     }
   }
 
@@ -91,7 +75,7 @@ class RunsListEmpty extends Component {
   }
 
   _recordCommand = () => {
-    return `cypress run --record --key ${this.state.recordKey || '<record-key>'}`
+    return `cypress run --record --key ${this.props.recordKey || '<record-key>'}`
   }
 
   _control = () => {

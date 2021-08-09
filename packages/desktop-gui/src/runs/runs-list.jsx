@@ -24,6 +24,7 @@ import RunsListEmpty from './runs-list-empty'
 @observer
 class RunsList extends Component {
   state = {
+    recordKey: null,
     isLoading: true,
     hasApiServer: false,
     apiUrl: '',
@@ -39,10 +40,12 @@ class RunsList extends Component {
   componentDidMount () {
     this._pingApiServer()
     this._handlePolling()
+    this._getRecordKeys()
   }
 
   componentDidUpdate () {
     this._handlePolling()
+    this._getRecordKeys()
   }
 
   componentWillUnmount () {
@@ -100,6 +103,27 @@ class RunsList extends Component {
 
   _stopPolling () {
     runsApi.stopPollingRuns()
+  }
+
+  _getRecordKeys () {
+    if (this._needsKey()) {
+      projectsApi.getRecordKeys().then((keys) => {
+        if (keys && keys.length) {
+          this.setState({ recordKey: keys[0].id })
+        }
+      })
+    }
+  }
+
+  _needsKey () {
+    return (
+      !this.state.recordKey &&
+      authStore.isAuthenticated &&
+      !this.runsStore.isLoading &&
+      !this.runsStore.error &&
+      !this.runsStore.runs.length &&
+      this.props.project.id
+    )
   }
 
   render () {
@@ -179,7 +203,7 @@ class RunsList extends Component {
       // OR they have setup CI
       }
 
-      return <RunsListEmpty project={this.props.project} />
+      return <RunsListEmpty project={this.props.project} recordKey={this.state.recordKey} />
     }
     //--------End Run States----------//
 
