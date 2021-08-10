@@ -4,6 +4,8 @@ import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 export interface TestSourceTypeLookup {
   App: NexusGenObjects['App'],
   Mutation: NexusGenObjects['Mutation'],
+  NavigationItem: NexusGenObjects['NavigationItem'],
+  NavigationMenu: NexusGenObjects['NavigationMenu'],
   Project: NexusGenObjects['Project'],
   Query: NexusGenObjects['Query'],
   TestingTypeInfo: NexusGenObjects['TestingTypeInfo'],
@@ -22,6 +24,8 @@ export const testUnionType = unionType({
     t.members(
       'App',
       'Mutation',
+      'NavigationItem',
+      'NavigationMenu',
       'Project',
       'Query',
       'TestingTypeInfo',

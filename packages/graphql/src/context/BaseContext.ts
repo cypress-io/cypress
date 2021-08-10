@@ -1,5 +1,5 @@
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard } from '../entities'
+import { App, NavigationMenu, Wizard } from '../entities'
 import type { Project } from '../entities/Project'
 
 /**
@@ -14,6 +14,7 @@ export abstract class BaseContext {
   abstract projects: Project[]
 
   wizard = new Wizard()
+  navigationMenu = new NavigationMenu()
   app = new App(this)
 
   isFirstOpen = false

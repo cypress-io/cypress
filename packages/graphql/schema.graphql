@@ -74,6 +74,25 @@ type Mutation {
   wizardValidateManualInstall: Wizard
 }
 
+enum NavItem {
+  learn
+  projectSetup
+  runs
+  settings
+}
+
+"""Container describing a single nav item"""
+type NavigationItem {
+  name: NavItem!
+  selected: Boolean!
+}
+
+"""Container for state associated with the side navigation menu"""
+type NavigationMenu {
+  items: [NavigationItem]!
+  selected: NavItem!
+}
+
 enum PluginsState {
   error
   initialized
@@ -101,6 +120,9 @@ type Project {
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!
+
+  """Metadata about the nagivation menu"""
+  navigationMenu: NavigationMenu
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard

@@ -1,6 +1,7 @@
 import { nxs, NxsQueryResult, NxsResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'
+import { NavigationMenu } from './NavigationMenu'
 import { Wizard } from './Wizard'
 
 @nxs.objectType({
@@ -17,5 +18,12 @@ export class Query {
   })
   wizard (args: unknown, ctx: NexusGenTypes['context']): NxsResult<'App', 'wizard'> {
     return ctx.wizard
+  }
+
+  @nxs.field.type(() => NavigationMenu, {
+    description: 'Metadata about the nagivation menu',
+  })
+  navigationMenu (args: unknown, ctx: NexusGenTypes['context']): NxsResult<'App', 'navigationMenu'> {
+    return ctx.navigationMenu
   }
 }

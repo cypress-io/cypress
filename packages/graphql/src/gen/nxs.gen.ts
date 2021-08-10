@@ -7,6 +7,7 @@
 
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
+import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { Project } from "./../entities/Project"
 import type { Query } from "./../entities/Query"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
@@ -14,6 +15,7 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { NavigationItem } from "./../entities/NavigationItem"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -55,6 +57,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
+  NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
@@ -76,6 +79,8 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   App: App;
   Mutation: {};
+  NavigationItem: NavigationItem;
+  NavigationMenu: NavigationMenu;
   Project: Project;
   Query: Query;
   TestingTypeInfo: TestingTypeInfo;
@@ -114,6 +119,14 @@ export interface NexusGenFieldTypes {
     wizardSetTestingType: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
+  NavigationItem: { // field return type
+    name: NexusGenEnums['NavItem']; // NavItem!
+    selected: boolean; // Boolean!
+  }
+  NavigationMenu: { // field return type
+    items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
+    selected: NexusGenEnums['NavItem']; // NavItem!
+  }
   Project: { // field return type
     id: string; // ID!
     isCurrent: boolean; // Boolean!
@@ -125,6 +138,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
+    navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   TestingTypeInfo: { // field return type
@@ -184,6 +198,14 @@ export interface NexusGenFieldTypeNames {
     wizardSetTestingType: 'Wizard'
     wizardValidateManualInstall: 'Wizard'
   }
+  NavigationItem: { // field return type name
+    name: 'NavItem'
+    selected: 'Boolean'
+  }
+  NavigationMenu: { // field return type name
+    items: 'NavigationItem'
+    selected: 'NavItem'
+  }
   Project: { // field return type name
     id: 'ID'
     isCurrent: 'Boolean'
@@ -195,6 +217,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    navigationMenu: 'NavigationMenu'
     wizard: 'Wizard'
   }
   TestingTypeInfo: { // field return type name
