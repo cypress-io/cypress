@@ -110,6 +110,7 @@ export interface NexusGenFieldTypes {
     addProject: NexusGenRootTypes['Project']; // Project!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
+    navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -120,7 +121,9 @@ export interface NexusGenFieldTypes {
     wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   NavigationItem: { // field return type
-    name: NexusGenEnums['NavItem']; // NavItem!
+    iconPath: string; // String!
+    id: NexusGenEnums['NavItem']; // NavItem!
+    name: string; // String!
     selected: boolean; // Boolean!
   }
   NavigationMenu: { // field return type
@@ -189,6 +192,7 @@ export interface NexusGenFieldTypeNames {
     addProject: 'Project'
     appCreateConfigFile: 'App'
     initializePlugins: 'Project'
+    navigationMenuSetItem: 'NavigationMenu'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
     wizardNavigateForward: 'Wizard'
@@ -199,7 +203,9 @@ export interface NexusGenFieldTypeNames {
     wizardValidateManualInstall: 'Wizard'
   }
   NavigationItem: { // field return type name
-    name: 'NavItem'
+    iconPath: 'String'
+    id: 'NavItem'
+    name: 'String'
     selected: 'Boolean'
   }
   NavigationMenu: { // field return type name
@@ -266,6 +272,9 @@ export interface NexusGenArgTypes {
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
+    }
+    navigationMenuSetItem: { // args
+      type: NexusGenEnums['NavItem']; // NavItem!
     }
     wizardNavigate: { // args
       direction: NexusGenEnums['WizardNavigateDirection']; // WizardNavigateDirection!

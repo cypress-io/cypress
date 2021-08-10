@@ -1,5 +1,5 @@
 import { inputObjectType, mutationType, nonNull } from 'nexus'
-import { BundlerEnum, FrontendFrameworkEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
+import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
 
 export const mutation = mutationType({
   definition (t) {
@@ -105,6 +105,13 @@ export const mutation = mutationType({
 
         return addedProject
       },
+    })
+
+    t.field('navigationMenuSetItem', {
+      type: 'NavigationMenu',
+      description: 'Set the current navigation item',
+      args: { type: nonNull(NavItemEnum) },
+      resolve: (root, args, ctx) => ctx.navigationMenu.setSelectedItem(args.type),
     })
 
     t.field('initializePlugins', {

@@ -103,15 +103,15 @@ export const NAV_ITEM_INFO: Record<NavItem, NavItemDetails> = {
   },
   runs: {
     displayName: 'Runs',
-    iconPath: 'clarity/dashboard-line',
+    iconPath: 'clarity/bullet-list-line',
   },
   learn: {
     displayName: 'Learn',
-    iconPath: 'clarity/dashboard-line',
+    iconPath: 'clarity/terminal-line',
   },
   settings: {
     displayName: 'Settings',
-    iconPath: 'clarity/dashboard-line',
+    iconPath: 'clarity/settings-line',
   },
 }
 

@@ -1,5 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { NavItem, NavItemEnum } from '../constants'
+import { NavItem, NavItemEnum, NAV_ITEM_INFO } from '../constants'
 import type { NavigationMenu } from './NavigationMenu'
 
 @nxs.objectType({
@@ -12,12 +12,22 @@ export class NavigationItem {
   ) {}
 
   @nxs.field.nonNull.type(() => NavItemEnum)
-  get name (): NxsResult<'NavigationItem', 'name'> {
+  get id (): NxsResult<'NavigationItem', 'id'> {
     return this.navItemName
   }
 
   @nxs.field.nonNull.boolean()
-  get selected (): NxsResult<'NavigationMenu', 'selected'> {
-    return this.navigation.selected === this.navItemName
+  get selected (): NxsResult<'NavigationItem', 'selected'> {
+    return this.navigation.selected === this.id
+  }
+
+  @nxs.field.nonNull.string()
+  get iconPath (): NxsResult<'NavigationMenu', 'iconPath'> {
+    return NAV_ITEM_INFO[this.navItemName].iconPath
+  }
+
+  @nxs.field.nonNull.string()
+  get name (): NxsResult<'NavigationMenu', 'name'> {
+    return NAV_ITEM_INFO[this.navItemName].iconPath
   }
 }

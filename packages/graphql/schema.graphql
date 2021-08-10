@@ -49,6 +49,9 @@ type Mutation {
   """Initializes the plugins for the current active project"""
   initializePlugins: Project
 
+  """Set the current navigation item"""
+  navigationMenuSetItem(type: NavItem!): NavigationMenu
+
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
@@ -83,7 +86,9 @@ enum NavItem {
 
 """Container describing a single nav item"""
 type NavigationItem {
-  name: NavItem!
+  iconPath: String!
+  id: NavItem!
+  name: String!
   selected: Boolean!
 }
 

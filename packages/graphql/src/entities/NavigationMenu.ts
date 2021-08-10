@@ -17,4 +17,12 @@ export class NavigationMenu {
   get selected (): NxsResult<'NavigationMenu', 'selected'> {
     return this._selected
   }
+
+  // Internal Setters:
+
+  setSelectedItem (item: NavItem): NavigationMenu {
+    this._selected = item
+
+    return this
+  }
 }
