@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.0.6](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.5...@cypress/vite-dev-server-v2.0.6) (2021-08-10)
+
+
+### Bug Fixes
+
+* prevent vite from crashing where there are no support files or s… ([#17641](https://github.com/cypress-io/cypress/issues/17641)) ([1d2b053](https://github.com/cypress-io/cypress/commit/1d2b053322eb36935928122e4552563a7f98f35d)), closes [#17624](https://github.com/cypress-io/cypress/issues/17624) [#17373](https://github.com/cypress-io/cypress/issues/17373)
+
 # [@cypress/vite-dev-server-v2.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.4...@cypress/vite-dev-server-v2.0.5) (2021-08-04)
 
 
