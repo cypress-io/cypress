@@ -28,6 +28,6 @@ export class NavigationItem {
 
   @nxs.field.nonNull.string()
   get name (): NxsResult<'NavigationMenu', 'name'> {
-    return NAV_ITEM_INFO[this.navItemName].iconPath
+    return NAV_ITEM_INFO[this.navItemName].displayName
   }
 }

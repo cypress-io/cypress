@@ -75,7 +75,7 @@ query Layout {
 
   navigationMenu {
     items {
-      id,
+      id
       name
       selected
       iconPath
