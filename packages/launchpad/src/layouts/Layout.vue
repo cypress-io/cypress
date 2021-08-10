@@ -48,7 +48,7 @@
       <img src="../images/cypress_s.png" class="m-4 mx-auto w-7" />
     </div>
     <div class="flex items-stretch flex-col">
-      <slot />
+      <slot :item="selected" />
     </div>
   </div>
 </template>
@@ -120,6 +120,11 @@ export default defineComponent({
       setMenuItem.executeMutation({ type })
     }
 
+    const selected = computed(() => {
+      const item = result.data?.value?.navigationMenu?.items.find(item => item!.selected)
+      return item?.id ?? null
+    })
+
     const sideMenuDefinition = computed(() => 
       result.data?.value?.navigationMenu?.items.map(item => ({
         ...item,
@@ -133,6 +138,7 @@ export default defineComponent({
     return { 
       handleSelect,
       projectTitle, 
+      selected,
       sideMenuDefinition, 
       bottomBackground,
       IconDashboardLine
