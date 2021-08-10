@@ -21,7 +21,7 @@ describe('<ConfigFile />', () => {
             }}
             class="hidden"
           ></button>
-          {display.value ? <ConfigFile gql={gqlVal} /> : undefined}
+          {display.value ? <ConfigFile wizard={gqlVal} app={undefined}/> : undefined}
         </div>
       ),
     })
