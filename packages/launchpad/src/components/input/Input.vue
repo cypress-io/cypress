@@ -1,67 +1,71 @@
 <template>
-  <div
-    class="relative text-gray-600 overflow-hidden w-350px"
-    :class="[{ 'focus-within:text-gray-400': disabled }]"
-  >
-    <IconWrapper v-bind="{ ...iconWrapperProps, class: $attrs.class }">
-      <template #prefix>
-        <slot name="prefix"></slot>
-      </template>
-      <template #suffix>
-        <slot name="suffix"></slot>
-      </template>
-      <template #default="slotProps">
-        <input
-          v-bind="{ ...omitAttrs($attrs), disabled }"
-          autocomplete="off"
-          autocorrect="off"
-          :spellcheck="false"
-          v-model="localValue"
-          class="w-full h-full rounded border-transparent disabled:bg-cool-gray-100 disabled:text-cool-gray-400 border-cool-gray-300 focus:border-gray-500 focus:bg-white bg-gray-100 focus:ring-0 focus:outline-none focus:bg-white focus:text-gray-900 border-1 py-2 px-4 whitespace-pre overflow-auto"
-          :type="type"
-          :class="[inputClass, {
-            [slotProps.iconOffsetClasses.prefix]: $slots.prefix || prefixIcon,
-            [slotProps.iconOffsetClasses.suffix]: $slots.suffix || suffixIcon
-          }]"
-        />
-      </template>
-    </IconWrapper>
+  <div class="p-0 m-0 border-0" :class="$attrs.class">
+    <div class="relative rounded-md shadow-sm">
+      <div v-if="hasPrefix" class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <span class="text-gray-500">
+          <slot v-if="$slots.prefix" name="prefix"></slot>
+          <Icon v-else-if="prefixIcon" :icon="prefixIcon" :class="prefixIconClasses"></Icon>
+          <Icon v-else-if="type === 'search'" :icon="IconSearch" class=""/>
+        </span>
+      </div>
+      <input :type="type" v-model="localValue" :class="_inputClasses" class="placeholder-gray-400 leading-normal focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 py-2 border-gray-300 rounded-md" v-bind="inputAttrs" />
+      <div v-if="hasSuffix" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+        <span class="text-gray-500">
+          <Icon :icon="suffixIcon" :class="suffixIconClasses"></Icon>
+          <slot name="suffix"></slot>
+        </span>
+      </div>
+    </div>
   </div>
 </template>
 
-
-<script lang="ts" setup>
-import { computed } from 'vue'
-import type { FunctionalComponent, SVGAttributes } from 'vue'
-import { useModelWrapper } from '../../composables'
-import { omit, pick, keys } from 'lodash'
-import IconWrapper, { iconProps } from '../icon/IconWrapper.vue'
-
-const props = withDefaults(defineProps<{
-  prefixIcon?: FunctionalComponent<SVGAttributes>,
-  prefixIconClass?: string,
-  suffixIcon?: FunctionalComponent<SVGAttributes>,
-  suffixIconClass?: string,
-  type?: HTMLInputElement['type']
-  modelValue?: string
-  disabled?: boolean
-  inputClass?: string | Array<any> | object
-}>(), {
-  modelValue: '',
-  disabled: false,
-  type: 'text'
-})
-
-const emit = defineEmits(['update:modelValue'])
-
-const iconWrapperProps = computed(() => pick(props, keys(iconProps)))
-const type = computed(() => props.type || 'text')
-const localValue = useModelWrapper(props, emit, 'modelValue')
-const omitAttrs = (attrs) => omit(attrs, 'class')
+<script lang="ts">
+export default {
+  inheritAttrs: false
+}
 </script>
 
-<style>
-input {
-  line-height: 1 !important;
-}
-</style>
+<script lang="ts" setup>
+import _ from 'lodash'
+import IconSearch from 'virtual:vite-icons/mdi/magnify'
+import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+import { computed, useSlots, useAttrs } from 'vue'
+import { useModelWrapper } from '../../composables'
+
+const slots = useSlots()
+const attrs = useAttrs()
+
+const inputAttrs = _.omit(attrs, 'class')
+
+const props = withDefaults(defineProps<{
+  type?: InputHTMLAttributes['type']
+  inputClasses?: string | string[] | Record<string, string>
+  prefixIcon?: FunctionalComponent<SVGAttributes, {}>
+  prefixIconClasses?: string | string[] | Record<string, string>
+  suffixIcon?: FunctionalComponent<SVGAttributes, {}>
+  suffixIconClasses?: string | string[] | Record<string, string>
+  modelValue?: string
+}>(), {
+  type: 'text',
+  modelValue: ''
+})
+
+const emits = defineEmits(['update:modelValue'])
+
+const localValue = useModelWrapper(props, emits, 'modelValue')
+
+const hasPrefix = computed(() => {
+  return slots.prefix || props.prefixIcon || props.type === 'search'
+})
+
+const hasSuffix = computed(() => {
+  return slots.suffix || props.suffixIcon
+})
+
+const _inputClasses = computed(() => ([
+  props.inputClasses,
+  hasPrefix ? 'pl-10' : 'pl-4',
+  hasSuffix ? 'pr-6' : 'pr-0'
+]))
+
+</script>

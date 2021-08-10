@@ -7,7 +7,7 @@
       </i18n-t>
     </template>
     <div class="inline-flex justify-start gap-10px">
-      <Input
+      <InputOld
         v-model="recordKey"
         inputClass="font-mono text-xs"
         disabled
@@ -26,7 +26,7 @@
             <Icon v-else :icon="IconEyeClosed"></Icon>
           </button>
         </template>
-      </Input>
+      </InputOld>
       <Button
         variant="outline"
         @click="clipboard.copy()"
@@ -51,7 +51,7 @@ import { useI18n } from '../../composables'
 import ProjectSettingsSection from '../SettingsSection.vue'
 import Icon from '../../components/icon/Icon.vue'
 import Button from '../../components/button/Button.vue'
-import Input from '../../components/input/Input.vue'
+import InputOld from '../../components/input/InputOld.vue'
 import IconKey from 'virtual:vite-icons/foundation/key'
 import IconEyeOpen from 'virtual:vite-icons/mdi/eye-outline'
 import IconEyeClosed from 'virtual:vite-icons/mdi/eye-off-outline'

@@ -1,23 +1,23 @@
 import { ref } from 'vue'
-import Input from './Input.vue'
+import InputOld from './InputOld.vue'
 import CoffeeIcon from 'virtual:vite-icons/mdi/coffee'
 import HeartIcon from 'virtual:vite-icons/mdi/heart'
 
-describe('<Input />', () => {
+describe('<InputOld />', () => {
   it('playground', () => {
     const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
     const visible = ref(true)
     const text = ref('hello world')
 
     cy.mount(() => (
-      <div class='m-10'>
+      <div className='m-10'>
         <div>
           Input with text:
-          <Input modelValue={lorem} />
+          <InputOld modelValue={lorem} />
         </div>
 
         <div>Input with Icon
-          <Input
+          <InputOld
             modelValue={lorem}
             prefixIcon={HeartIcon}
             prefixIconClass='text-gray-cool-500'
@@ -25,7 +25,7 @@ describe('<Input />', () => {
         </div>
 
         <div>Input with Icon
-          <Input
+          <InputOld
             modelValue={lorem}
             prefixIcon={HeartIcon}
             prefixIconClass='text-gray-cool-500'
@@ -36,12 +36,12 @@ describe('<Input />', () => {
 
         <div>
           Input with text, disabled:
-          <Input disabled modelValue={lorem} />
+          <InputOld disabled modelValue={lorem} />
         </div>
 
         <div>
           Secure input with text:
-          <Input
+          <InputOld
             type={visible.value ? 'text' : 'password'}
             modelValue={text.value}
           />
@@ -52,7 +52,7 @@ describe('<Input />', () => {
 
         <div>
           Secure input with text (disabled):
-          <Input
+          <InputOld
             type={visible.value ? 'text' : 'password'}
             modelValue={text.value}
             disabled
@@ -62,7 +62,7 @@ describe('<Input />', () => {
 
         <div>
           Search input:
-          <Input data-testid='search' type='search'/>
+          <InputOld data-testid='search' type='search'/>
         </div>
       </div>
     ))
