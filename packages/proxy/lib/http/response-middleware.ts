@@ -93,7 +93,10 @@ function resIsGzipped (res: IncomingMessage) {
 }
 
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
-  let opts: CookieOptions = { domain }
+  let opts: CookieOptions = {
+    domain,
+    sameSite: 'strict',
+  }
 
   if (!v) {
     v = ''
