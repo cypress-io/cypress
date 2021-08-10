@@ -133,15 +133,12 @@ export default defineComponent({
       })) ?? []
     )
 
-    console.log(sideMenuDefinition)
-
     return { 
       handleSelect,
       projectTitle, 
       selected,
       sideMenuDefinition, 
       bottomBackground,
-      IconDashboardLine
     };
   },
 });
