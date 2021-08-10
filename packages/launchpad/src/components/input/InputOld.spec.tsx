@@ -10,7 +10,7 @@ describe('<InputOld />', () => {
     const text = ref('hello world')
 
     cy.mount(() => (
-      <div className='m-10'>
+      <div class='m-10'>
         <div>
           Input with text:
           <InputOld modelValue={lorem} />
