@@ -11,7 +11,7 @@ import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
-import { CdpAutomation } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
@@ -273,9 +273,7 @@ const _maybeRecordVideo = async function (client, options) {
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', {
-    format: 'jpeg',
-  })
+  await client.send('Page.startScreencast', screencastOpts)
 
   return client
 }

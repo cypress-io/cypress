@@ -31,7 +31,10 @@
       }
     },
     {
-      "files": "*.tsx",
+      "files": [
+        "*.tsx",
+        "*.jsx"
+      ],
       "rules": {
         "no-unused-vars": "off",
         "react/jsx-no-bind": "off",

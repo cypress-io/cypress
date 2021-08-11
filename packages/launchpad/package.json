@@ -50,6 +50,7 @@
     "cross-env": "6.0.3",
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
+    "javascript-time-ago": "2.3.8",
     "prismjs": "1.24.0",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "vite": "^2.4.4",

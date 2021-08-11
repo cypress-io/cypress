@@ -56,8 +56,8 @@ export default defineComponent({
     const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
     const nextButtonName = computed(() =>
       props.gql.isManualInstall ?
-        t('launchpad.install.confirmManualInstall') :
-        t('launchpad.install.startButton')
+        t('setupPage.install.confirmManualInstall') :
+        t('setupPage.install.startButton')
     );
 
     return { 

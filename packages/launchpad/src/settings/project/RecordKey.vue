@@ -1,6 +1,6 @@
 <template>
   <ProjectSettingsSection>
-    <template #title>{{t('settingsPage.recordKey.title')}}</template>
+    <template #title>{{ t('settingsPage.recordKey.title') }}</template>
     <template #description>
       <i18n-t keypath="settingsPage.recordKey.description">
         <a href="https://docs.cypress.io" target="_blank">{{ t('links.learnMore') }}</a>
@@ -9,7 +9,8 @@
     <div class="inline-flex justify-start gap-10px">
       <Input
         v-model="recordKey"
-        inputClass="font-mono text-xs"
+        class="font-mono"
+        inputClasses="text-sm"
         disabled
         :type="showRecordKey ? 'text' : 'password'"
       >
@@ -40,7 +41,6 @@
         prefixIconClass="text-cool-gray-500 w-1.2rem h-1.2rem"
       >{{ t('settingsPage.recordKey.manageKeys') }}</Button>
     </div>
-
   </ProjectSettingsSection>
 </template>
 

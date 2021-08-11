@@ -8,7 +8,7 @@
     </template>
     <div class="inline-grid grid-flow-col justify-start gap-10px">
       <InlineCodeEditor
-        class="text-sm"
+        class="max-w-400px"
         :prefixIcon="IconCodeBraces"
         prefixIconClass="text-cool-gray-400"
         readonly

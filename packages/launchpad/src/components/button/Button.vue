@@ -38,15 +38,15 @@ const VariantClassesTable = {
 
 const SizeClassesTable = {
   sm: "px-1 py-1 text-xs",
-  md: 'px-2 py-1 text-xs',
+  md: 'px-2 py-1 text-sm',
   lg: "px-4 py-2 text-sm",
   xl: "px-6 py-3 text-lg"
 }
 
 const IconClassesTable = {
-  md: "h-1.25em w-1.25em",
-  lg: "h-2em w-2m",
-  xl: "h-2.5em w-2.5em"
+  md: "min-h-1.25em min-w-1.25em max-h-1.25em max-w-1.25em",
+  lg: "min-h-2em min-w-2em max-h-2em max-w-2em",
+  xl: "min-h-2.5em min-w-2.5em max-w-2.5em max-h-2.5em "
 }
 
 const props = defineProps<{
