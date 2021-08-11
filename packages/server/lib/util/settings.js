@@ -156,16 +156,7 @@ module.exports = {
 
     // if we found more than one, it might just be the json that is still migrating
     if (foundConfigFiles.length > 1) {
-      const evaluatedFiles = foundConfigFiles.filter((file) => file !== 'cypress.json')
-
-      // if we found more than one evaluated file (js or ts)
-      // we can't trust that migration has been done properly
-      if (evaluatedFiles.length > 1) {
-        return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot)
-      }
-
-      // else, just ignore the cypress.json and return the other one
-      return evaluatedFiles[0]
+      return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
     }
 
     // Default is to create a new `cypress.config.js` file if one does not exist.

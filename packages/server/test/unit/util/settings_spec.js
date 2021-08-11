@@ -2,10 +2,12 @@ require('../../spec_helper')
 const { fs } = require(`../../../lib/util/fs`)
 const setting = require(`../../../lib/util/settings`)
 
+let readStub
+
 describe('lib/util/settings', () => {
   describe('pathToConfigFile', () => {
     beforeEach(() => {
-      sinon.stub(fs, 'readdirSync').returns(['cypress.json'])
+      readStub = sinon.stub(fs, 'readdirSync').returns(['cypress.json'])
     })
 
     it('supports relative path', () => {
@@ -22,6 +24,21 @@ describe('lib/util/settings', () => {
       })
 
       expect(path).to.equal('/users/pepper/cypress/e2e/cypress.config.json')
+    })
+
+    it('errors if there is json & js', () => {
+      readStub.returns(['cypress.json', 'cypress.config.js'])
+      expect(() => setting.pathToConfigFile('/cypress')).to.throw('`cypress.config.js` and a `cypress.json`')
+    })
+
+    it('errors if there is ts & js', () => {
+      readStub.returns(['cypress.config.ts', 'cypress.config.js'])
+      expect(() => setting.pathToConfigFile('/cypress')).to.throw('`cypress.config.js` and a `cypress.config.ts`')
+    })
+
+    it('errors if all three are there', () => {
+      readStub.returns(['cypress.config.ts', 'cypress.json', 'cypress.config.js'])
+      expect(() => setting.pathToConfigFile('/cypress')).to.throw('`cypress.config.js` and a `cypress.config.ts`')
     })
   })
 })

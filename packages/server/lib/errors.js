@@ -1024,7 +1024,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
-          There is both a \`cypress.config.js\` and a \`cypress.config.ts\` in the location below:
+          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
 
           ${arg1}
 
