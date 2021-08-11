@@ -9635,7 +9635,18 @@
     estree-walker "^2.0.1"
     source-map "^0.6.1"
 
-"@vue/compiler-dom@3.2.0", "@vue/compiler-dom@^3.2.0-beta.5":
+"@vue/compiler-core@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-core/-/compiler-core-3.2.2.tgz#8d3e29f129579ed9b14f48af735fd8d95f248504"
+  integrity sha512-QhCI0ZU5nAR0LMcLgzW3v75374tIrHGp8XG5CzJS7Nsy+iuignbE4MZ2XJfh5TGIrtpuzfWA4eTIfukZf/cRdg==
+  dependencies:
+    "@babel/parser" "^7.12.0"
+    "@babel/types" "^7.12.0"
+    "@vue/shared" "3.2.2"
+    estree-walker "^2.0.1"
+    source-map "^0.6.1"
+
+"@vue/compiler-dom@3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@vue/compiler-dom/-/compiler-dom-3.2.0.tgz#91bc35afddbd634b186e6da4c594f5705f68d6bb"
   integrity sha512-CqfATmX04+58LNBTTUPRBLyYGLP0bxtL+8b7B8pEvXja7fpmxiYcKBQsdaXfyqoRJsaTzA7eVXQt/t0dYhu/SQ==
@@ -9643,7 +9654,15 @@
     "@vue/compiler-core" "3.2.0"
     "@vue/shared" "3.2.0"
 
-"@vue/compiler-sfc@3.2.0", "@vue/compiler-sfc@^3.0.5", "@vue/compiler-sfc@^3.2.0-beta.5":
+"@vue/compiler-dom@3.2.2", "@vue/compiler-dom@^3.2.0-beta.5":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-dom/-/compiler-dom-3.2.2.tgz#26e198498746c53047c3744d26fc95e670692ab7"
+  integrity sha512-ggcc+NV/ENIE0Uc3TxVE/sKrhYVpLepMAAmEiQ047332mbKOvUkowz4TTFZ+YkgOIuBOPP0XpCxmCMg7p874mA==
+  dependencies:
+    "@vue/compiler-core" "3.2.2"
+    "@vue/shared" "3.2.2"
+
+"@vue/compiler-sfc@3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@vue/compiler-sfc/-/compiler-sfc-3.2.0.tgz#cc83702a21d03235923bc128e2d399e341bb9b95"
   integrity sha512-EWxdXID+a71UPQV/xNZwL60X9AJtumxIBWMBmvT8gT9ng57Ux52nDJVcErLl0AkT53h9sGP2K9Jt51gGSgTWEQ==
@@ -9666,6 +9685,29 @@
     postcss-selector-parser "^6.0.4"
     source-map "^0.6.1"
 
+"@vue/compiler-sfc@^3.0.11", "@vue/compiler-sfc@^3.0.5", "@vue/compiler-sfc@^3.2.0-beta.5":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-sfc/-/compiler-sfc-3.2.2.tgz#5b7b13b07689be8e4880d856f72d1be500785be9"
+  integrity sha512-hrtqpQ5L6IPn5v7yVRo7uvLcQxv0z1+KBjZBWMBOcrXz4t+PKUxU/SWd6Tl9T8FDmYlunzKUh6lcx+2CLo6f5A==
+  dependencies:
+    "@babel/parser" "^7.13.9"
+    "@babel/types" "^7.13.0"
+    "@types/estree" "^0.0.48"
+    "@vue/compiler-core" "3.2.2"
+    "@vue/compiler-dom" "3.2.2"
+    "@vue/compiler-ssr" "3.2.2"
+    "@vue/shared" "3.2.2"
+    consolidate "^0.16.0"
+    estree-walker "^2.0.1"
+    hash-sum "^2.0.0"
+    lru-cache "^5.1.1"
+    magic-string "^0.25.7"
+    merge-source-map "^1.1.0"
+    postcss "^8.1.10"
+    postcss-modules "^4.0.0"
+    postcss-selector-parser "^6.0.4"
+    source-map "^0.6.1"
+
 "@vue/compiler-ssr@3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@vue/compiler-ssr/-/compiler-ssr-3.2.0.tgz#e444d1ef72957810d64e30abf66c1d8de9dc40d9"
@@ -9673,6 +9715,14 @@
   dependencies:
     "@vue/compiler-dom" "3.2.0"
     "@vue/shared" "3.2.0"
+
+"@vue/compiler-ssr@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-ssr/-/compiler-ssr-3.2.2.tgz#633bb8e01f00a969c35ca12db32be7fe4c7185a9"
+  integrity sha512-rVl1agMFhdEN3Go0bCriXo+3cysxKIuRP0yh1Wd8ysRrKfAmokyDhUA8PrGSq2Ymj/LdZTh+4OKfj3p2+C+hlA==
+  dependencies:
+    "@vue/compiler-dom" "3.2.2"
+    "@vue/shared" "3.2.2"
 
 "@vue/component-compiler-utils@^3.1.0", "@vue/component-compiler-utils@^3.1.2":
   version "3.2.0"
@@ -9724,10 +9774,15 @@
     "@vue/shared" "3.2.0"
     csstype "^2.6.8"
 
-"@vue/shared@3.2.0", "@vue/shared@^3.2.0-beta.5":
+"@vue/shared@3.2.0":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.0.tgz#f24386a54ca7e43da83ae3695be5ca92f2f946e0"
   integrity sha512-MgdilC3YHYSCFuNlxZBgugh8B9/h/h+nQ6lkeaxqFWW+FnV/JzCwW4Bh5bYIYvBleG8QZjFwxdmdqSAWLXzgEA==
+
+"@vue/shared@3.2.2", "@vue/shared@^3.2.0-beta.5":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.2.tgz#6104185ebd57af5a14ac51c1f491b2205fc24054"
+  integrity sha512-dvYb318tk9uOzHtSaT3WII/HscQSIRzoCZ5GyxEb3JlkEXASpAUAQwKnvSe2CudnF8XHFRTB7VITWSnWNLZUtA==
 
 "@vue/test-utils@^2.0.0-rc.10":
   version "2.0.0-rc.10"
@@ -40661,6 +40716,14 @@ vite-plugin-windicss@1.2.4:
     chalk "^4.1.1"
     debug "^4.3.2"
     windicss "^3.1.4"
+
+vite-svg-loader@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/vite-svg-loader/-/vite-svg-loader-2.1.1.tgz#ca4ac6b7208b1ef5268b425f904dc36908c327b5"
+  integrity sha512-TOMwQgA44SIre5xKpS5HrERbXdRPt7VN41WVi2WIzTEtxwIKQJV7XYsUeslBXCS7RPUAly00/oAdMCN6qT+/Rg==
+  dependencies:
+    "@vue/compiler-sfc" "^3.0.11"
+    svgo "^2.3.0"
 
 vite@^2.4.4:
   version "2.4.4"
