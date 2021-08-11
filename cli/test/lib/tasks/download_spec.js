@@ -312,6 +312,64 @@ describe('lib/tasks/download', function () {
     })
   })
 
+  context('with proxy env vars', () => {
+    const testUriHttp = 'http://anything.com'
+    const testUriHttps = 'https://anything.com'
+
+    beforeEach(function () {
+      this.env = _.clone(process.env)
+      // add a default no_proxy which does not match the testUri
+      process.env.NO_PROXY = 'localhost,.org'
+    })
+
+    afterEach(function () {
+      process.env = this.env
+    })
+
+    it('uses http_proxy on http request', () => {
+      process.env.http_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
+    })
+
+    it('ignores http_proxy on https request', () => {
+      process.env.http_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
+      process.env.https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+    })
+
+    it('falls back to npm_config_proxy', () => {
+      process.env.npm_config_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+      process.env.npm_config_https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+      process.env.https_proxy = 'https://baz'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://baz')
+    })
+
+    it('respects no_proxy on http and https requests', () => {
+      process.env.NO_PROXY = 'localhost,.com'
+
+      process.env.http_proxy = 'http://foo'
+      process.env.https_proxy = 'https://bar'
+
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq(null)
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
+    })
+
+    it('ignores no_proxy for npm proxy configs, prefers https over http', () => {
+      process.env.NO_PROXY = 'localhost,.com'
+
+      process.env.npm_config_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+
+      process.env.npm_config_https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('https://bar')
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+    })
+  })
+
   context('with CA and CAFILE env vars', () => {
     beforeEach(function () {
       this.env = _.clone(process.env)
