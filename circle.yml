@@ -324,6 +324,9 @@ commands:
                 channel: <<parameters.install-chrome-channel>>
                 version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
       - run:
+          command: top -i
+          background: true
+      - run:
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
@@ -342,7 +345,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES -c video=false
             fi
           working_directory: packages/driver
       - verify-mocha-results
