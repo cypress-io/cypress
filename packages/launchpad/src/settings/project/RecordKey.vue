@@ -10,7 +10,7 @@
       <Input
         v-model="recordKey"
         class="font-mono"
-        inputClasses="text-xs"
+        inputClasses="text-sm"
         disabled
         :type="showRecordKey ? 'text' : 'password'"
       >
