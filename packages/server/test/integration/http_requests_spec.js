@@ -1529,7 +1529,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(302)
-          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/')
+          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/; SameSite=Strict')
 
           expect(res.headers['location']).to.eq('/')
         })
@@ -1552,7 +1552,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(302)
-          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/')
+          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/; SameSite=Strict')
 
           expect(res.headers['location']).to.eq('/css')
         })
@@ -1577,7 +1577,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(302)
-          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/')
+          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/; SameSite=Strict')
 
           expect(res.headers['location']).to.eq('/css?q=search')
         })
@@ -1602,7 +1602,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(302)
-          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/')
+          expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=getbootstrap.com; Path=/; SameSite=Strict')
 
           expect(res.headers['location']).to.eq('https://www.google.com/search?q=cypress')
         })
@@ -1650,7 +1650,7 @@ describe('Routes', () => {
             .then((res) => {
               expect(res.statusCode).to.eq(code)
 
-              expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=example.com; Path=/')
+              expect(res.headers['set-cookie']).to.include('__cypress.initial=true; Domain=example.com; Path=/; SameSite=Strict')
             })
           })
         })
@@ -1966,7 +1966,7 @@ describe('Routes', () => {
 
           expect(setCookie[0]).to.eq('userId=123; Path=/')
 
-          expect(setCookie[1]).to.eq('__cypress.initial=; Domain=localhost; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT')
+          expect(setCookie[1]).to.eq('__cypress.initial=; Domain=localhost; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict')
         })
       })
 
@@ -1991,7 +1991,7 @@ describe('Routes', () => {
 
           expect(res.headers['set-cookie']).to.deep.eq([
             'userId=123; Path=/',
-            '__cypress.initial=true; Domain=localhost; Path=/',
+            '__cypress.initial=true; Domain=localhost; Path=/; SameSite=Strict',
           ])
         })
       })
