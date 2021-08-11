@@ -1,12 +1,14 @@
-import { ref } from 'vue'
-import { ConfigFileFragmentDoc, ProjectRootFragmentDoc } from '../generated/graphql'
+import {
+  ConfigFileFragment,
+  ConfigFileFragmentDoc,
+  ProjectRootFragment,
+  ProjectRootFragmentDoc,
+} from '../generated/graphql'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {
   beforeEach(() => {
-    const display = ref(false)
-
-    cy.mountFragmentsOnRoot([
+    cy.mountFragmentList([
       ConfigFileFragmentDoc,
       ProjectRootFragmentDoc,
     ], {
@@ -14,31 +16,22 @@ describe('<ConfigFile />', () => {
         ctx.wizard.setFramework('cra')
         ctx.wizard.setBundler('webpack')
 
-        return ctx
+        return [ctx.wizard, ctx.app]
       },
-      render: (gqlVal) => {
-        return (<div class="m-10">
-          <button
-            data-cy="show"
-            onClick={() => {
-              display.value = true
-            }}
-            class="hidden"
-          ></button>
-          {
-            display.value
-              ? <ConfigFile
-                wizard={gqlVal.wizard}
-                app={gqlVal.app}
-              />
-              : undefined
-          }
-        </div>
+      render: (gql) => {
+        // @ts-ignore - TODO: fix types
+        const wizard = gql.wizard as any as ConfigFileFragment
+        // @ts-ignore - TODO: fix types
+        const app = gql.app as any as ProjectRootFragment
+
+        return (
+          <ConfigFile
+            wizard={wizard}
+            app={app}
+          />
         )
       },
     })
-
-    cy.get('[data-cy="show"]').click({ force: true })
   })
 
   it('playground', { viewportWidth: 1280, viewportHeight: 1024 }, () => {
