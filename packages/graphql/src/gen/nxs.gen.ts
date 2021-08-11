@@ -9,6 +9,7 @@ import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { Project } from "./../entities/Project"
 import type { Query } from "./../entities/Query"
+import type { User } from "./../entities/User"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
@@ -79,6 +80,7 @@ export interface NexusGenObjects {
   Project: Project;
   Query: Query;
   TestingTypeInfo: TestingTypeInfo;
+  User: User;
   Wizard: Wizard;
   WizardBundler: WizardBundler;
   WizardFrontendFramework: WizardFrontendFramework;
@@ -100,11 +102,14 @@ export interface NexusGenFieldTypes {
     activeProject: NexusGenRootTypes['Project'] | null; // Project
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['Project'][]; // [Project!]!
+    user: NexusGenRootTypes['User'] | null; // User
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['Project']; // Project!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
+    authenticate: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
+    logout: NexusGenRootTypes['App'] | null; // App
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -125,12 +130,19 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
+    runs: NexusGenRootTypes['App'] | null; // App
+    user: NexusGenRootTypes['User'] | null; // User
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   TestingTypeInfo: { // field return type
     description: string | null; // String
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     title: string | null; // String
+  }
+  User: { // field return type
+    authToken: string | null; // String
+    email: string | null; // String
+    name: string | null; // String
   }
   Wizard: { // field return type
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -170,11 +182,14 @@ export interface NexusGenFieldTypeNames {
     activeProject: 'Project'
     isFirstOpen: 'Boolean'
     projects: 'Project'
+    user: 'User'
   }
   Mutation: { // field return type name
     addProject: 'Project'
     appCreateConfigFile: 'App'
+    authenticate: 'App'
     initializePlugins: 'Project'
+    logout: 'App'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
     wizardNavigateForward: 'Wizard'
@@ -195,12 +210,19 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    runs: 'App'
+    user: 'User'
     wizard: 'Wizard'
   }
   TestingTypeInfo: { // field return type name
     description: 'String'
     id: 'TestingTypeEnum'
     title: 'String'
+  }
+  User: { // field return type name
+    authToken: 'String'
+    email: 'String'
+    name: 'String'
   }
   Wizard: { // field return type name
     allBundlers: 'WizardBundler'
@@ -258,6 +280,11 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+  }
+  Query: {
+    runs: { // args
+      projectId: string; // String!
     }
   }
   Wizard: {

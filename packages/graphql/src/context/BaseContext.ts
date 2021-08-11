@@ -1,5 +1,5 @@
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard } from '../entities'
+import { App, User, Wizard } from '../entities'
 import type { Project } from '../entities/Project'
 
 /**
@@ -12,6 +12,7 @@ import type { Project } from '../entities/Project'
 export abstract class BaseContext {
   abstract readonly actions: BaseActions
   abstract projects: Project[]
+  abstract user?: User = undefined
 
   wizard = new Wizard()
   app = new App(this)

@@ -6,6 +6,8 @@ export * from './Project'
 
 export * from './Query'
 
+export * from './User'
+
 export * from './TestingTypeInfo'
 
 export * from './Wizard'
