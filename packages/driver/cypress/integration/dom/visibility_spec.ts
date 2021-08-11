@@ -23,7 +23,6 @@ describe('src/cypress/dom/visibility', () => {
 
   context('isVisible', () => {
     it('exposes isVisible', () => {
-      // cy.wait(10000000)
       expect(dom.isVisible).to.be.a('function')
     })
 

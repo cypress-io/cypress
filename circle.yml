@@ -345,7 +345,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES -c video=false
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES -c videoCompression=false
             fi
           working_directory: packages/driver
       - verify-mocha-results

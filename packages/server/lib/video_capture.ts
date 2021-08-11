@@ -258,17 +258,15 @@ export function start (name, options: StartOptions = {}) {
     })
   }
 
-  startCapturing
-  writeVideoFrame
-  endVideoCapture
-
-  return Promise.resolve({
-    endVideoCapture () {
-      return Bluebird.resolve()
-    },
-    writeVideoFrame () {
-
-    },
+  return startCapturing()
+  .then(({ cmd, startedVideoCapture }: any) => {
+    return {
+      _pt: pt,
+      cmd,
+      endVideoCapture,
+      writeVideoFrame,
+      startedVideoCapture,
+    }
   })
 }
 
