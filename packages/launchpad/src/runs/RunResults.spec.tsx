@@ -1,12 +1,8 @@
 import RunResults from './RunResults.vue'
 
-let results
+const results = { pass: 5, fail: 0, skip: 0, flake: 2 }
 
 describe('<RunResults />', () => {
-  beforeEach(() => {
-    results = { pass: 5, fail: 0, skip: 0, flake: 2 }
-  })
-
   it('playground', () => {
     cy.mount(() => (<RunResults {...results}/>))
   })
