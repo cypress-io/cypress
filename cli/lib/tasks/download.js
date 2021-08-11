@@ -9,22 +9,13 @@ const request = require('@cypress/request')
 const Promise = require('bluebird')
 const requestProgress = require('request-progress')
 const { stripIndent } = require('common-tags')
+const getProxyFromURI = require('./getProxyFromURI')
 
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
 
 const defaultBaseUrl = 'https://download.cypress.io/'
-
-const getProxyUrl = () => {
-  return process.env.HTTPS_PROXY ||
-    process.env.https_proxy ||
-    process.env.npm_config_https_proxy ||
-    process.env.HTTP_PROXY ||
-    process.env.http_proxy ||
-    process.env.npm_config_proxy ||
-    null
-}
 
 const getRealOsArch = () => {
   // os.arch() returns the arch for which this node was compiled
@@ -205,7 +196,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
 // {filename: ..., downloaded: true}
 const downloadFromUrl = ({ url, downloadDestination, progress, ca }) => {
   return new Promise((resolve, reject) => {
-    const proxy = getProxyUrl()
+    const proxy = getProxyFromURI(new URL(url))
 
     debug('Downloading package', {
       url,
@@ -357,6 +348,5 @@ const start = (opts) => {
 module.exports = {
   start,
   getUrl,
-  getProxyUrl,
   getCA,
 }
