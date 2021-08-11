@@ -34,8 +34,8 @@ interface Spec{
 
 export const makeCypressPlugin = (
   projectRoot: string,
-  supportFilePath: string,
-  devServerEvents: EventEmitter,
+  supportFilePath: string | false,
+  devServerEvents: NodeJS.EventEmitter,
   specs: Spec[],
 ): Plugin => {
   let base = '/'

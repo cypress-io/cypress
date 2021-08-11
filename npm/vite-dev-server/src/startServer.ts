@@ -6,18 +6,11 @@ import { makeCypressPlugin } from './makeCypressPlugin'
 
 const debug = Debug('cypress:vite-dev-server:start')
 
-interface Options {
-  specs: Cypress.Cypress['spec'][]
-  config: Record<string, string>
-  devServerEvents: EventEmitter
-  [key: string]: unknown
-}
-
 export interface StartDevServerOptions {
   /**
    * the Cypress options object
    */
-  options: Options
+  options: Cypress.DevServerOptions
   /**
    * By default, vite will use your vite.config file to
    * Start the server. If you need additional plugins or
