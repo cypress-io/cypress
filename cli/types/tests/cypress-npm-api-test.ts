@@ -31,13 +31,13 @@ cypress.run({
 })
 
 // provide only some config options
-const runConfig: Cypress.ConfigOptions = {
+const RunGroupConfig: Cypress.ConfigOptions = {
   baseUrl: 'http://localhost:8080',
   env: {
     login: false
   },
 }
-cypress.run({ config: runConfig })
+cypress.run({ config: RunGroupConfig })
 
 cypress.run({}).then((results) => {
   results as CypressCommandLine.CypressRunResult // $ExpectType CypressRunResult

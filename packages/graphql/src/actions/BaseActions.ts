@@ -4,6 +4,7 @@ import path from 'path'
 import type { BaseContext } from '../context/BaseContext'
 import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
 import { Project } from '../entities/Project'
+import type { RunGroup } from '../entities/run/Run'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -53,5 +54,5 @@ export abstract class BaseActions {
   abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectBaseContract | Promise<ProjectBaseContract>
   abstract authenticate (): Promise<void>
   abstract logout (): Promise<void>
-  abstract getRuns ({ projectId }: { projectId: string }): Promise<void>
+  abstract getRuns ({ projectId }: { projectId: string }): Promise<RunGroup[]>
 }

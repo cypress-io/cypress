@@ -234,7 +234,7 @@ module.exports = {
     return rp.get({
       url: apiRoutes.projectRuns(projectId),
       json: true,
-      timeout: options.timeout != null ? options.timeout : 10000,
+      timeout: options.timeout != null ? options.timeout : 20000,
       auth: {
         bearer: authToken,
       },

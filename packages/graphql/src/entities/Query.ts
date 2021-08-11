@@ -2,6 +2,7 @@ import { nxs, NxsArgs, NxsQueryResult, NxsResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'
 import { NavigationMenu } from './NavigationMenu'
+import { RunGroup } from './run'
 import { User } from './User'
 import { Wizard } from './Wizard'
 
@@ -35,16 +36,13 @@ export class Query {
     return ctx.user ?? null
   }
 
-  @nxs.field.type(() => App, {
+  @nxs.field.nonNull.list.type(() => RunGroup, {
     description: 'Get runs for a given projectId on Cypress Cloud',
     args (t) {
       t.nonNull.string('projectId')
     },
   })
-
   async runs (args: NxsArgs<'Query', 'runs'>, ctx: NexusGenTypes['context']): Promise<NxsResult<'App', 'runs'>> {
-    await ctx.actions.getRuns({ projectId: args.projectId })
-
-    return ctx.app
+    return await ctx.actions.getRuns({ projectId: args.projectId })
   }
 }

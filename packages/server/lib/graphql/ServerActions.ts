@@ -1,6 +1,7 @@
 import type { NxsMutationArgs } from 'nexus-decorators'
 import { ProjectBase } from '../project-base'
 import type { ServerContext } from './ServerContext'
+import { RunGroup, RunGroupConfig } from '@packages/graphql/src/entities/run'
 import { AuthenticatedUser, BaseActions, User } from '@packages/graphql'
 
 // @ts-ignore
@@ -43,10 +44,9 @@ export class ServerActions extends BaseActions {
     this.ctx.user = undefined
   }
 
-  async getRuns ({ projectId }: { projectId: string }) {
-    const runs = await api.getProjectRuns(projectId, this.ctx.user?.authToken)
+  async getRuns ({ projectId }: { projectId: string }): Promise<RunGroup[]> {
+    const runs = await api.getProjectRuns(projectId, this.ctx.user?.authToken) as RunGroupConfig[]
 
-    /* eslint-disable-next-line no-console */
-    console.log({ runs })
+    return runs.map((run) => new RunGroup(run))
   }
 }

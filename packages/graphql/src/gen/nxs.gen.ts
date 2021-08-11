@@ -9,6 +9,8 @@ import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { Project } from "./../entities/Project"
+import type { RunGroup } from "./../entities/run/Run"
+import type { RunCommit } from "./../entities/run/RunCommit"
 import type { Query } from "./../entities/Query"
 import type { User } from "./../entities/User"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
@@ -60,6 +62,7 @@ export interface NexusGenEnums {
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
+  RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
@@ -84,6 +87,8 @@ export interface NexusGenObjects {
   NavigationMenu: NavigationMenu;
   Project: Project;
   Query: Query;
+  RunCommit: RunCommit;
+  RunGroup: RunGroup;
   TestingTypeInfo: TestingTypeInfo;
   User: User;
   Wizard: Wizard;
@@ -147,9 +152,28 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    runs: NexusGenRootTypes['App'] | null; // App
+    runs: Array<NexusGenRootTypes['RunGroup'] | null>; // [RunGroup]!
     user: NexusGenRootTypes['User'] | null; // User
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+  }
+  RunCommit: { // field return type
+    authorEmail: string; // String!
+    authorName: string; // String!
+    branch: string; // String!
+    message: string; // String!
+    sha: string; // String!
+    url: string; // String!
+  }
+  RunGroup: { // field return type
+    commit: NexusGenRootTypes['RunCommit']; // RunCommit!
+    completedAt: string; // String!
+    createdAt: string; // String!
+    status: NexusGenEnums['RunGroupStatus']; // RunGroupStatus!
+    totalDuration: number; // Int!
+    totalFailed: number; // Int!
+    totalPassed: number; // Int!
+    totalPending: number; // Int!
+    totalSkipped: number; // Int!
   }
   TestingTypeInfo: { // field return type
     description: string | null; // String
@@ -239,9 +263,28 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     app: 'App'
     navigationMenu: 'NavigationMenu'
-    runs: 'App'
+    runs: 'RunGroup'
     user: 'User'
     wizard: 'Wizard'
+  }
+  RunCommit: { // field return type name
+    authorEmail: 'String'
+    authorName: 'String'
+    branch: 'String'
+    message: 'String'
+    sha: 'String'
+    url: 'String'
+  }
+  RunGroup: { // field return type name
+    commit: 'RunCommit'
+    completedAt: 'String'
+    createdAt: 'String'
+    status: 'RunGroupStatus'
+    totalDuration: 'Int'
+    totalFailed: 'Int'
+    totalPassed: 'Int'
+    totalPending: 'Int'
+    totalSkipped: 'Int'
   }
   TestingTypeInfo: { // field return type name
     description: 'String'

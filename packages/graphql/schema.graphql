@@ -139,13 +139,47 @@ type Query {
   navigationMenu: NavigationMenu
 
   """Get runs for a given projectId on Cypress Cloud"""
-  runs(projectId: String!): App
+  runs(projectId: String!): [RunGroup]!
 
   """Namespace for user and authentication"""
   user: User
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard
+}
+
+"""Represents a commit on run on Cypress Cloud"""
+type RunCommit {
+  authorEmail: String!
+  authorName: String!
+  branch: String!
+  message: String!
+  sha: String!
+  url: String!
+}
+
+"""Represents a run on Cypress Cloud"""
+type RunGroup {
+  commit: RunCommit!
+  completedAt: String!
+  createdAt: String!
+  status: RunGroupStatus!
+  totalDuration: Int!
+  totalFailed: Int!
+  totalPassed: Int!
+  totalPending: Int!
+  totalSkipped: Int!
+}
+
+enum RunGroupStatus {
+  cancelled
+  errored
+  failed
+  noTests
+  passed
+  running
+  timedOut
+  unclaimed
 }
 
 """The bundlers that we can use with Cypress"""
