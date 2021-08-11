@@ -1,18 +1,31 @@
 <template>
   <div class="p-0 m-0 border-0" :class="$attrs.class">
     <div class="relative rounded-md shadow-sm">
-      <div v-if="hasPrefix" class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <span class="text-gray-500">
-          <slot v-if="$slots.prefix" name="prefix"></slot>
-          <Icon v-else-if="prefixIcon" :icon="prefixIcon" :class="prefixIconClasses"></Icon>
-          <Icon v-else-if="type === 'search'" :icon="IconSearch" class=""/>
+      <div v-if="hasPrefix" class="absolute inset-y-0 left-0 pl-4 flex items-center">
+        <span class="text-gray-500 text-sm flex items-center justify-center">
+          <slot name="prefix">
+            <Icon
+              v-if="prefixIcon"
+              class="pointer-events-none"
+              :icon="prefixIcon"
+              :class="prefixIconClasses"
+            ></Icon>
+            <Icon v-else-if="type === 'search'" :icon="IconSearch" />
+          </slot>
         </span>
       </div>
-      <input :type="type" v-model="localValue" :class="_inputClasses" class="placeholder-gray-400 leading-normal focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 py-2 border-gray-300 rounded-md" v-bind="inputAttrs" />
-      <div v-if="hasSuffix" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-        <span class="text-gray-500">
-          <Icon :icon="suffixIcon" :class="suffixIconClasses"></Icon>
-          <slot name="suffix"></slot>
+      <input
+        :type="type"
+        v-model="localValue"
+        :class="_inputClasses"
+        class="placeholder-gray-400 disabled:bg-gray-50 disabled:text-gray-400 leading-normal focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 py-2 border-gray-300 rounded-md"
+        v-bind="inputAttrs"
+      />
+      <div v-if="hasSuffix" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+        <span class="text-gray-500 text-sm flex items-center justify-center">
+          <slot name="suffix">
+            <Icon :icon="suffixIcon" class="pointer-events-none" :class="suffixIconClasses"></Icon>
+          </slot>
         </span>
       </div>
     </div>

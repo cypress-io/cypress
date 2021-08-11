@@ -21,12 +21,8 @@
 <script lang="ts" setup>
 import Button from '../components/button/Button.vue'
 
-type Item = {
-  [key: string]: string
-}
-
 defineProps<{
-  items: Item[]
+  items: Record<string, string>[]
   header: string
 }>()
 </script>

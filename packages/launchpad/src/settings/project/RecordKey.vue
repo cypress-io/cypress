@@ -1,15 +1,16 @@
 <template>
   <ProjectSettingsSection>
-    <template #title>{{t('settingsPage.recordKey.title')}}</template>
+    <template #title>{{ t('settingsPage.recordKey.title') }}</template>
     <template #description>
       <i18n-t keypath="settingsPage.recordKey.description">
         <a href="https://docs.cypress.io" target="_blank">{{ t('links.learnMore') }}</a>
       </i18n-t>
     </template>
     <div class="inline-flex justify-start gap-10px">
-      <InputOld
+      <Input
         v-model="recordKey"
-        inputClass="font-mono text-xs"
+        class="font-mono"
+        inputClasses="text-xs"
         disabled
         :type="showRecordKey ? 'text' : 'password'"
       >
@@ -26,7 +27,7 @@
             <Icon v-else :icon="IconEyeClosed"></Icon>
           </button>
         </template>
-      </InputOld>
+      </Input>
       <Button
         variant="outline"
         @click="clipboard.copy()"
@@ -40,7 +41,6 @@
         prefixIconClass="text-cool-gray-500 w-1.2rem h-1.2rem"
       >{{ t('settingsPage.recordKey.manageKeys') }}</Button>
     </div>
-
   </ProjectSettingsSection>
 </template>
 
@@ -51,7 +51,7 @@ import { useI18n } from '../../composables'
 import ProjectSettingsSection from '../SettingsSection.vue'
 import Icon from '../../components/icon/Icon.vue'
 import Button from '../../components/button/Button.vue'
-import InputOld from '../../components/input/InputOld.vue'
+import Input from '../../components/input/Input.vue'
 import IconKey from 'virtual:vite-icons/foundation/key'
 import IconEyeOpen from 'virtual:vite-icons/mdi/eye-outline'
 import IconEyeClosed from 'virtual:vite-icons/mdi/eye-off-outline'

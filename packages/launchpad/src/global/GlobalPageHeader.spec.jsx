@@ -2,7 +2,7 @@ import { defaultMessages } from '../locales/i18n'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 
-const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"`
+const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"]`
 
 describe('<GlobalPageHeader />', () => {
   it('renders and has a reactive input', () => {

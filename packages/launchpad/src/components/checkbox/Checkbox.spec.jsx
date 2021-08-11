@@ -11,7 +11,7 @@ describe('<Checkbox />', () => {
       id="welcome-opt-out"
       vModel={value}
     >
-      <span class="text-gray-800 font-light">Show the welcome guide when openinig Cypress.</span>
+      <span class="text-gray-800 font-light">Show the welcome guide when opening Cypress.</span>
     </Checkbox>))
   })
 })
