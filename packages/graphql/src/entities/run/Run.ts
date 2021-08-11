@@ -1,5 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import type { RunGroupStatus, RunGroupStatusEnum } from '../../constants'
+import { RunGroupStatus, RunGroupStatusEnum } from '../../constants'
 import { RunCommit } from './RunCommit'
 
 export interface RunCommitConfig {
