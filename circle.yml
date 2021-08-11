@@ -1869,7 +1869,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-documentation
           browser: firefox
-          command: "yarn cypress run"
+          command: "yarn cypress run -c video=false"
           wait-on: http://localhost:3000
           server-start-command: yarn serve:dist
 
