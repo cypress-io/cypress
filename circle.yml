@@ -42,6 +42,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
+        - disable-video-develop-binary-documentation-firefox
   requires:
     - create-build-artifacts
 
