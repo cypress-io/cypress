@@ -58,6 +58,9 @@ type Mutation {
   """Log out of Cypress Cloud"""
   logout: App
 
+  """Set the current navigation item"""
+  navigationMenuSetItem(type: NavItem!): NavigationMenu
+
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
@@ -81,6 +84,27 @@ type Mutation {
 
   """Validates that the manual install has occurred properly"""
   wizardValidateManualInstall: Wizard
+}
+
+enum NavItem {
+  learn
+  projectSetup
+  runs
+  settings
+}
+
+"""Container describing a single nav item"""
+type NavigationItem {
+  iconPath: String!
+  id: NavItem!
+  name: String!
+  selected: Boolean!
+}
+
+"""Container for state associated with the side navigation menu"""
+type NavigationMenu {
+  items: [NavigationItem]!
+  selected: NavItem!
 }
 
 enum PluginsState {
@@ -110,6 +134,9 @@ type Project {
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!
+
+  """Metadata about the nagivation menu"""
+  navigationMenu: NavigationMenu
 
   """Get runs for a given projectId on Cypress Cloud"""
   runs(projectId: String!): App

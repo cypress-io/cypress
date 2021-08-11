@@ -7,6 +7,7 @@
 
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
+import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { Project } from "./../entities/Project"
 import type { Query } from "./../entities/Query"
 import type { User } from "./../entities/User"
@@ -15,6 +16,7 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { NavigationItem } from "./../entities/NavigationItem"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -56,6 +58,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
+  NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
@@ -77,6 +80,8 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   App: App;
   Mutation: {};
+  NavigationItem: NavigationItem;
+  NavigationMenu: NavigationMenu;
   Project: Project;
   Query: Query;
   TestingTypeInfo: TestingTypeInfo;
@@ -110,6 +115,7 @@ export interface NexusGenFieldTypes {
     authenticate: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['Project'] | null; // Project
     logout: NexusGenRootTypes['App'] | null; // App
+    navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -118,6 +124,16 @@ export interface NexusGenFieldTypes {
     wizardSetManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetTestingType: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
+  }
+  NavigationItem: { // field return type
+    iconPath: string; // String!
+    id: NexusGenEnums['NavItem']; // NavItem!
+    name: string; // String!
+    selected: boolean; // Boolean!
+  }
+  NavigationMenu: { // field return type
+    items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
+    selected: NexusGenEnums['NavItem']; // NavItem!
   }
   Project: { // field return type
     id: string; // ID!
@@ -130,6 +146,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
+    navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     runs: NexusGenRootTypes['App'] | null; // App
     user: NexusGenRootTypes['User'] | null; // User
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -190,6 +207,7 @@ export interface NexusGenFieldTypeNames {
     authenticate: 'App'
     initializePlugins: 'Project'
     logout: 'App'
+    navigationMenuSetItem: 'NavigationMenu'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
     wizardNavigateForward: 'Wizard'
@@ -198,6 +216,16 @@ export interface NexusGenFieldTypeNames {
     wizardSetManualInstall: 'Wizard'
     wizardSetTestingType: 'Wizard'
     wizardValidateManualInstall: 'Wizard'
+  }
+  NavigationItem: { // field return type name
+    iconPath: 'String'
+    id: 'NavItem'
+    name: 'String'
+    selected: 'Boolean'
+  }
+  NavigationMenu: { // field return type name
+    items: 'NavigationItem'
+    selected: 'NavItem'
   }
   Project: { // field return type name
     id: 'ID'
@@ -210,6 +238,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    navigationMenu: 'NavigationMenu'
     runs: 'App'
     user: 'User'
     wizard: 'Wizard'
@@ -265,6 +294,9 @@ export interface NexusGenArgTypes {
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
+    }
+    navigationMenuSetItem: { // args
+      type: NexusGenEnums['NavItem']; // NavItem!
     }
     wizardNavigate: { // args
       direction: NexusGenEnums['WizardNavigateDirection']; // WizardNavigateDirection!

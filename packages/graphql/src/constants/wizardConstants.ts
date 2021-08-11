@@ -69,6 +69,20 @@ export const TestingTypeDescriptions: Record<TestingType, string> = {
   e2e: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
 }
 
+export const NAV_ITEM = [
+  'projectSetup',
+  'runs',
+  'learn',
+  'settings',
+] as const
+
+export type NavItem = typeof NAV_ITEM[number]
+
+export const NavItemEnum = enumType({
+  name: 'NavItem',
+  members: NAV_ITEM,
+})
+
 export const WIZARD_STEP = [
   'welcome',
   'selectFramework',
@@ -76,6 +90,30 @@ export const WIZARD_STEP = [
   'createConfig',
   'setupComplete',
 ] as const
+
+interface NavItemDetails {
+  displayName: string
+  iconPath: string
+}
+
+export const NAV_ITEM_INFO: Record<NavItem, NavItemDetails> = {
+  projectSetup: {
+    displayName: 'Project Setup',
+    iconPath: 'clarity/dashboard-line',
+  },
+  runs: {
+    displayName: 'Runs',
+    iconPath: 'clarity/bullet-list-line',
+  },
+  learn: {
+    displayName: 'Learn',
+    iconPath: 'clarity/terminal-line',
+  },
+  settings: {
+    displayName: 'Settings',
+    iconPath: 'clarity/settings-line',
+  },
+}
 
 export type WizardStep = typeof WIZARD_STEP[number]
 

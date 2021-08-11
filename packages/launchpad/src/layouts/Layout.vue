@@ -37,17 +37,18 @@
     </div>
     <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch" :style="`background-image: url('${bottomBackground}');`" style="background-position: bottom center;background-repeat: no-repeat;">
       <SideBarItem
-        v-for="(i, idx) in sideMenuDefinition"
-        :key="idx"
+        v-for="i in sideMenuDefinition"
+        :key="i.id"
         class="pr-8px"
         :icon="i.icon"
-        :active="!!i.active"
+        :active="!!i.selected"
+        @click="handleSelect(i.id)"
       />
       <div class="flex-grow" />
       <img src="../images/cypress_s.png" class="m-4 mx-auto w-7" />
     </div>
     <div class="flex items-stretch flex-col">
-      <slot />
+      <slot :item="selected" />
     </div>
   </div>
 </template>
@@ -57,11 +58,12 @@ import { computed, defineComponent } from "vue";
 import SideBarItem from "./SideBarItem.vue";
 import bottomBackground from '../images/bottom_filler.svg'
 import { gql } from "@urql/core";
-import { useQuery } from '@urql/vue'
-import { LayoutDocument } from "../generated/graphql";
+import { useMutation, useQuery } from '@urql/vue'
+import { LayoutDocument, NavigationMenuSetItemDocument, NavItem } from "../generated/graphql";
 import IconDashboardLine from 'virtual:vite-icons/clarity/dashboard-line'
 import IconTerminalLine from 'virtual:vite-icons/clarity/terminal-line'
 import IconSettingsLine from 'virtual:vite-icons/clarity/settings-line'
+import IconRunsLine from 'virtual:vite-icons/clarity/bullet-list-line'
 
 gql`
 query Layout {
@@ -70,27 +72,74 @@ query Layout {
       title
     }
   }
+
+  navigationMenu {
+    items {
+      id
+      name
+      selected
+      iconPath
+    }
+  }
 }
 `
+
+gql`
+mutation NavigationMenuSetItem($type: NavItem!) {
+  navigationMenuSetItem (type: $type) {
+    items {
+      name
+      selected
+    }
+  }
+} 
+`
+
+const icons = {
+  'clarity/dashboard-line': IconDashboardLine,
+  'clarity/terminal-line': IconTerminalLine,
+  'clarity/settings-line': IconSettingsLine,
+  'clarity/bullet-list-line': IconRunsLine,
+}
 
 export default defineComponent({
   components: {
     SideBarItem,
   },
+
   setup() {
     const result = useQuery({
       query: LayoutDocument
     })
 
+    const setMenuItem = useMutation(NavigationMenuSetItemDocument)
+
     const projectTitle = computed(() => result.data.value?.app.activeProject?.title);
 
-    const sideMenuDefinition = [
-      { icon: IconDashboardLine },
-      { icon: IconTerminalLine },
-      { icon: IconSettingsLine, active: true },
-    ];
+    const handleSelect = (type: NavItem) => {
+      setMenuItem.executeMutation({ type })
+    }
 
-    return { projectTitle, sideMenuDefinition, bottomBackground };
+    const selected = computed(() => {
+      const item = result.data?.value?.navigationMenu?.items.find(item => item!.selected)
+      return item?.id ?? null
+    })
+
+    const sideMenuDefinition = computed(() => 
+      result.data?.value?.navigationMenu?.items.map(item => ({
+        ...item,
+        id: item!.id,
+        icon: icons[item!.iconPath]
+      })) ?? []
+    )
+
+    return { 
+      handleSelect,
+      projectTitle, 
+      selected,
+      sideMenuDefinition, 
+      bottomBackground,
+    };
   },
 });
 </script>

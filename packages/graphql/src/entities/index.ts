@@ -2,6 +2,8 @@ export * from './App'
 
 export * from './Mutation'
 
+export * from './NavigationMenu'
+
 export * from './Project'
 
 export * from './Query'
