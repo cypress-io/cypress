@@ -114,6 +114,31 @@ export const mutation = mutationType({
       resolve: (root, args, ctx) => ctx.navigationMenu.setSelectedItem(args.type),
     })
 
+    t.field('authenticate', {
+      type: 'App',
+      description: 'Auth with Cypress Cloud',
+      async resolve (_root, args, ctx) {
+        // already authenticated this session - just return
+        if (ctx.user) {
+          return ctx.app
+        }
+
+        await ctx.actions.authenticate()
+
+        return ctx.app
+      },
+    })
+
+    t.field('logout', {
+      type: 'App',
+      description: 'Log out of Cypress Cloud',
+      async resolve (_root, args, ctx) {
+        await ctx.actions.logout()
+
+        return ctx.app
+      },
+    })
+
     t.field('initializePlugins', {
       type: 'Project',
       description: 'Initializes the plugins for the current active project',

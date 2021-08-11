@@ -23,7 +23,7 @@
     "@iconify/vue": "3.0.0-beta.1",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
-    "vue": "3.2.0-beta.7"
+    "vue": "3.2.0"
   },
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
@@ -57,7 +57,7 @@
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-purge-icons": "0.7.0",
     "vite-plugin-windicss": "1.2.4",
-    "vue": "3.2.0-beta.7",
+    "vue": "3.2.0",
     "vue-i18n": "9.2.0-beta.1",
     "vue-prism-component": "2.0.0",
     "vue-prism-editor": "^2.0.0-alpha.2",

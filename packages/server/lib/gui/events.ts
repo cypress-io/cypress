@@ -40,7 +40,7 @@ const nullifyUnserializableValues = (obj) => {
       return null
     }
 
-    return val
+    return undefined
   })
 }
 

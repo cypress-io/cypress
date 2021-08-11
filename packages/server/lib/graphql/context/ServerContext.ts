@@ -4,6 +4,7 @@ import { ServerActions } from '../ServerActions'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)
+  user: undefined
 
   projects: Project[] = []
 }

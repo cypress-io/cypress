@@ -10,7 +10,9 @@ describe('<InstallDependencies />', () => {
 
         return ctx.wizard
       },
-      render: (gqlVal) => <InstallDependencies gql={gqlVal} />,
+      render: (gqlVal) => {
+        return <InstallDependencies gql={gqlVal} />
+      },
     })
   })
 
