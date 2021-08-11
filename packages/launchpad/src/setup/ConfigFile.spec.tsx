@@ -1,19 +1,23 @@
 import { ref } from 'vue'
-import { ConfigFileFragmentDoc } from '../generated/graphql'
+import { ConfigFileFragmentDoc, ProjectRootFragmentDoc } from '../generated/graphql'
 import ConfigFile from './ConfigFile.vue'
 
 describe('<ConfigFile />', () => {
   beforeEach(() => {
     const display = ref(false)
 
-    cy.mountFragment(ConfigFileFragmentDoc, {
+    cy.mountFragmentsOnRoot([
+      ConfigFileFragmentDoc,
+      ProjectRootFragmentDoc,
+    ], {
       type: (ctx) => {
-        ctx.wizard.setFramework('nuxtjs')
+        ctx.wizard.setFramework('cra')
+        ctx.wizard.setBundler('webpack')
 
-        return ctx.wizard
+        return ctx
       },
-      render: (gqlVal) => (
-        <div class="m-10">
+      render: (gqlVal) => {
+        return (<div class="m-10">
           <button
             data-cy="show"
             onClick={() => {
@@ -21,9 +25,17 @@ describe('<ConfigFile />', () => {
             }}
             class="hidden"
           ></button>
-          {display.value ? <ConfigFile wizard={gqlVal} app={undefined}/> : undefined}
+          {
+            display.value
+              ? <ConfigFile
+                wizard={gqlVal.wizard}
+                app={gqlVal.app}
+              />
+              : undefined
+          }
         </div>
-      ),
+        )
+      },
     })
 
     cy.get('[data-cy="show"]').click({ force: true })

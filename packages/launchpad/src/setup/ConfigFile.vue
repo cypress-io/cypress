@@ -85,7 +85,7 @@ mutation appCreateConfigFile($code: String!, $configFilename: String!) {
 
 const props = defineProps<{
   wizard: ConfigFileFragment 
-  app: ProjectRootFragment | undefined
+  app: ProjectRootFragment
 }>()
 
 
