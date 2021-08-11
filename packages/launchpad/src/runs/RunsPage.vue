@@ -1,9 +1,8 @@
 <template>
 	<main class="min-w-650px max-w-800px">
 		<RunCard 
-      v-for="{commit, run} of runGroups" 
-      :run="run"
-      :commit="commit"
+      v-for="run of runs" 
+      :gql="run"
     />
 	</main>
 </template>
@@ -11,39 +10,23 @@
 <script lang="ts" setup>
 import { gql } from "@urql/core";
 import { useQuery } from "@urql/vue";
-import { computed } from "vue-demi";
-import { RunGroupsDocument } from "../generated/graphql";
+import { computed } from "vue";
+import { AppDocument, } from "../generated/graphql";
 import RunCard from "./RunCard.vue";
 
 gql`
-query RunGroups {
-  runs(projectId: "ypt4pf") {
-    createdAt
-    totalPassed
-    totalFailed
-    totalPending
-    totalSkipped
-    totalDuration
-    status
-    commit {
-      authorName
-      authorEmail
-      message
-      branch
+query App {
+  app {
+    runGroups(projectId: "ypt4pf") {
+      ...RunCard
     }
   }
 }
 `
 
-const result = useQuery({ query: RunGroupsDocument })
+const result = useQuery({ query: AppDocument })
 
-const runGroups = computed(() => {
-  return result.data.value?.runs!.map((group) => {
-    const { commit, ...run } = group!
-    return {
-      commit,
-      run
-    }
-  })
-}) 
+// TODO: Is there something less convoluted to avoid the fact everything
+// is nullable in GraphQL?
+const runs = computed(() => result?.data?.value?.app?.runGroups || [])!
 </script>

@@ -19,6 +19,7 @@ const props = defineProps<{
   status: RunGroupStatus
 }>()
 
+// TODO: figure out how/if we can get number tests passed / num tests to run
 const progress = typeof props.status === 'number' ? props.status : 0
 
 </script>

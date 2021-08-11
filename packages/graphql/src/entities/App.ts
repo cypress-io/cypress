@@ -1,6 +1,8 @@
+import { nonNull, stringArg } from 'nexus'
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
 import { Project } from './Project'
+import { RunGroup } from './run'
 import { User } from './User'
 
 @nxs.objectType({
@@ -28,6 +30,19 @@ export class App {
   })
   get activeProject (): NxsResult<'App', 'activeProject'> {
     return this.projects.find((p) => p.isCurrent) ?? null
+  }
+
+  @nxs.field.nonNull.list.type(() => RunGroup, {
+    description: 'Runs for the current active project',
+    args: {
+      projectId: nonNull(stringArg())
+    }
+  })
+  async runGroups ({ projectId } : { projectId: string }): Promise<NxsResult<'App', 'runGroups'>> {
+    console.log('fetch for', projectId)
+    const res = await this.ctx.actions.getRuns({ projectId })
+    console.log(res)
+    return res
   }
 
   @nxs.field.type(() => User, {

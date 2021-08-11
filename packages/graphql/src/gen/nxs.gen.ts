@@ -112,6 +112,7 @@ export interface NexusGenFieldTypes {
     activeProject: NexusGenRootTypes['Project'] | null; // Project
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['Project'][]; // [Project!]!
+    runGroups: Array<NexusGenRootTypes['RunGroup'] | null>; // [RunGroup]!
     user: NexusGenRootTypes['User'] | null; // User
   }
   Mutation: { // field return type
@@ -152,7 +153,6 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    runs: Array<NexusGenRootTypes['RunGroup'] | null>; // [RunGroup]!
     user: NexusGenRootTypes['User'] | null; // User
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
@@ -223,6 +223,7 @@ export interface NexusGenFieldTypeNames {
     activeProject: 'Project'
     isFirstOpen: 'Boolean'
     projects: 'Project'
+    runGroups: 'RunGroup'
     user: 'User'
   }
   Mutation: { // field return type name
@@ -263,7 +264,6 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     app: 'App'
     navigationMenu: 'NavigationMenu'
-    runs: 'RunGroup'
     user: 'User'
     wizard: 'Wizard'
   }
@@ -330,6 +330,11 @@ export interface NexusGenFieldTypeNames {
 }
 
 export interface NexusGenArgTypes {
+  App: {
+    runGroups: { // args
+      projectId: string; // String!
+    }
+  }
   Mutation: {
     addProject: { // args
       input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
@@ -355,11 +360,6 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    }
-  }
-  Query: {
-    runs: { // args
-      projectId: string; // String!
     }
   }
   Wizard: {

@@ -1,7 +1,8 @@
 import RunsPage from './RunsPage.vue'
 
-describe('<RunsPage />', () => {
+xdescribe('<RunsPage />', () => {
   it('playground', () => {
+    cy.mountFragment(
     cy.mount(() => (
       <RunsPage />
     ))

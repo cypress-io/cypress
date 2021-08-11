@@ -1,39 +1,55 @@
+import type { RunCommitConfig, RunGroupConfig } from '@packages/graphql/src'
+import { RunCardFragmentDoc } from '../generated/graphql'
 import RunCard from './RunCard.vue'
+
 
 describe('<RunCard />', { viewportHeight: 400 }, () => {
   it('playground', () => {
+    const commit: Partial<RunCommitConfig> = {
+      authorName: 'Ryan',
+      branch: 'master',
+      message: 'Updating the hover state for the button component'
+    }
+
+    const run: Partial<RunGroupConfig> = {
+      createdAt: '2016-05-13T02:35:12.748Z',
+      totalPassed: 5,
+      totalFailed: 0,
+      totalPending: 0,
+      totalSkipped: 0,
+      totalDuration: 16000,
+      status: 'failed'
+    }
+
+    cy.mountFragment(RunCardFragmentDoc, {
+      type: (ctx) => {
+        return ctx.app.runGroups({ projectId: 'test-id' })[0]
+      },
+      render: (gql) => {
+        console.log({ gql }) 
+        return (
+          <RunCard gql={gql[0]} />
+        )
+      }
+    })
+
     cy.mount(() => (
       <div class="bg-gray-100 h-screen p-3">
         <RunCard
-          status="ko"
-          name="Updating the hover state for the button component"
-          branch="master"
-          author="Ryan"
-          timestamp={new Date().getTime()}
-          results={{ pass: 5, fail: 0, skip: 0, flake: 2 }}/>
-        <RunCard
-          status="warn"
-          name="Fixing broken tests"
-          branch="master"
-          author="Ryan"
-          timestamp={new Date().getTime()}
-          results={{ pass: 15, fail: 1, skip: 0, flake: 3 }}
+          run={run}
+          commit={commit}
         />
         <RunCard
-          status="ok"
-          name="Adding a hover state to the button component"
-          branch="master"
-          author="Ryan"
-          timestamp={new Date().getTime()}
-          results={{ pass: 20, fail: 2, skip: 0, flake: 0 }}
+          run={{...run, status: 'passed'}}
+          commit={{...commit, message: 'fixing the tests'}}
         />
         <RunCard
-          status={25}
-          name="In progress"
-          branch="master"
-          author="Bart"
-          timestamp={new Date().getTime()}
-          results={{ pass: 12, fail: 0, skip: 0, flake: 0 }}
+          run={{...run, status: 'pending'}}
+          commit={{...commit, message: 'adding some information'}}
+        />
+        <RunCard
+          run={{...run, status: 'cancelled'}}
+          commit={{...commit, message: 'cancelling this one'}}
         />
       </div>
     ))
