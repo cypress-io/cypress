@@ -8,15 +8,11 @@
       <template v-else-if="wizard.testingType === 'component'">
         <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
         <InstallDependencies v-else-if="wizard.step === 'installDependencies'" :gql="wizard" />
-        <ConfigFile 
-          v-else-if="wizard.step === 'createConfig'" 
-          :wizard="wizard" 
-          :app="app" 
-        />
+        <ConfigFile v-else-if="wizard.step === 'createConfig'" :wizard="wizard" :app="app" />
         <OpenBrowser v-else-if="wizard.step === 'setupComplete'" />
       </template>
       <template v-else>
-        <WizardLayout>
+        <WizardLayout :canNavigateForward="wizard.canNavigateForward">
           <div>Here be dragons</div>
         </WizardLayout>
       </template>
@@ -24,7 +20,7 @@
   </template>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { defineComponent, watch, computed } from "vue";
 import Auth from './Auth.vue'
 import TestingType from "./TestingType.vue";
@@ -32,6 +28,7 @@ import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
+import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
 import { WizardDocument } from '../generated/graphql'
 import { useQuery } from "@urql/vue";
@@ -55,26 +52,10 @@ query Wizard {
   }
 }
 `
+const result = useQuery({ query: WizardDocument })
 
-export default defineComponent({
-  components: {
-    TestingType,
-    EnvironmentSetup,
-    InstallDependencies,
-    Auth,
-    ConfigFile,
-    OpenBrowser,
-  },
-  setup() {
-    const result = useQuery({
-      query: WizardDocument,
-    })
+const loading = result.fetching
+const wizard = computed(() => result.data.value?.wizard)
+const app = computed(() => result.data.value?.app!)
 
-    return { 
-      loading: result.fetching, 
-      wizard: computed(() => result.data.value?.wizard),
-      app: computed(() => result.data.value?.app!) 
-    };
-  },
-});
 </script>
