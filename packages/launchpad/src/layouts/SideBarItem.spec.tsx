@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import SideBarItem from './SideBarItem.vue'
 import IconCoffee from 'virtual:vite-icons/mdi/coffee'
 
-describe('<SideBarItem />', () => {
+describe('<SideBarItem />', { viewportWidth: 200, viewportHeight: 150 }, () => {
   it('playground', () => {
     const active = ref(0)
     const onClick = (value) => {

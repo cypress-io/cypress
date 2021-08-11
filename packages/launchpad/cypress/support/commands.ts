@@ -84,11 +84,71 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
   }).then(() => ctx)
 }
 
+function mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T[], options: MountFragmentConfig<T>): Cypress.Chainable<ClientTestContext> {
+  const ctx = new ClientTestContext()
+
+  return mount(defineComponent({
+    name: `mountFragmentList`,
+    setup () {
+      const getTypeCondition = (source: any) => (source.definitions[0] as any).typeCondition.name.value.toLowerCase()
+      const frags = source.map((src) => {
+        /**
+         * generates something like
+         * wizard {
+         *    ... MyFragment
+         * }
+         *
+         * for each fragment passed in.
+         */
+        const parent = getTypeCondition(src)
+
+        return `${parent} {
+          ...${(src.definitions[0] as FragmentDefinitionNode).name.value}
+        }`
+      })
+
+      const query = `
+        query MountFragmentTest {
+          ${frags.join('\n')}
+        }
+
+        ${source.map(print)}
+      `
+
+      const result = useQuery({
+        query,
+      })
+
+      return {
+        gql: computed(() => result.data.value),
+      }
+    },
+    render: (props) => {
+      return props.gql ? options.render(props.gql) : h('div')
+    },
+  }), {
+    global: {
+      stubs: {
+        transition: false,
+      },
+      plugins: [
+        createI18n(),
+        {
+          install (app) {
+            app.use(urql, testApolloClient({
+              context: ctx,
+              rootValue: options.type(ctx),
+            }))
+          },
+        },
+      ],
+    },
+  }).then(() => ctx)
+}
+
 Cypress.Commands.add('mountFragment', mountFragment)
 
-Cypress.Commands.add('mountFragmentList', (source, options) => {
-  return mountFragment(source, options, true)
-})
+Cypress.Commands.add('mountFragmentList', mountFragmentList)
 
 type GetRootType<T> = T extends TypedDocumentNode<infer U, any>
   ? U extends { __typename?: infer V }
@@ -106,7 +166,7 @@ type MountFragmentConfig<T extends TypedDocumentNode> = {
 
 type MountFragmentListConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
-  render: (frag: Exclude<T['__resultType'], undefined>[]) => JSX.Element
+  render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
   type: (ctx: ClientTestContext) => GetRootType<T>[]
 } & CyMountOptions<unknown>
 
@@ -127,8 +187,8 @@ declare global {
       /**
        * Mount helper for a component with a GraphQL fragment, as a list
        */
-       mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
-        fragment: T,
+      mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result, Variables>>(
+        fragment: T[],
         config: MountFragmentListConfig<T>
       ): Cypress.Chainable<ClientTestContext>
     }
