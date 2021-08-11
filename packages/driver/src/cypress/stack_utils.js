@@ -1,13 +1,14 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
-const _ = require('lodash')
-const path = require('path')
-const errorStackParser = require('error-stack-parser')
-const { codeFrameColumns } = require('@babel/code-frame')
+import _ from 'lodash'
+import path from 'path'
+import errorStackParser from 'error-stack-parser'
+import { codeFrameColumns } from '@babel/code-frame'
 
-const $utils = require('./utils')
-const $sourceMapUtils = require('./source_map_utils')
-const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
+import $utils from './utils'
+import * as $errUtils from './error_utils'
+import $sourceMapUtils from './source_map_utils'
+import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/server/lib/util/stack_utils'
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -88,6 +89,66 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
   return {
     stack: unsplitStack(messageLines, stackLines),
     index: commandCallIndex + messageLines.length + 1,
+  }
+}
+
+const getInvocationDetails = (specWindow, config) => {
+  if (specWindow.Error) {
+    let stack = (new specWindow.Error()).stack
+
+    // note: specWindow.Cypress can be undefined or null
+    // if the user quickly reloads the tests multiple times
+
+    // firefox throws a different stack than chromium
+    // which includes stackframes from cypress_runner.js.
+    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
+    if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
+      stack = stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+    }
+
+    const details = getSourceDetailsForFirstLine(stack, config('projectRoot'))
+
+    return {
+      details,
+      stack,
+    }
+  }
+}
+
+const getUserInvocationStack = (err, state) => {
+  const current = state('current')
+
+  const currentAssertionCommand = current?.get('currentAssertionCommand')
+  const withInvocationStack = currentAssertionCommand || current
+  // user assertion errors (expect().to, etc) get their invocation stack
+  // attached to the error thrown from chai
+  // command errors and command assertion errors (default assertion or cy.should)
+  // have the invocation stack attached to the current command
+  // prefer err.userInvocation stack if it's been set
+  let userInvocationStack = $errUtils.getUserInvocationStackFromError(err) || state('currentAssertionUserInvocationStack')
+
+  // if there is no user invocation stack from an assertion or it is the default
+  // assertion, meaning it came from a command (e.g. cy.get), prefer the
+  // command's user invocation stack so the code frame points to the command.
+  // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+  // points to the `cy.should`, but the error came from inside the callback,
+  // so we need to prefer that.
+  if (
+    !userInvocationStack
+    || err.isDefaultAssertionErr
+    || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+  ) {
+    userInvocationStack = withInvocationStack?.get('userInvocationStack')
+  }
+
+  if (!userInvocationStack) return
+
+  if (
+    $errUtils.isCypressErr(err)
+    || $errUtils.isAssertionErr(err)
+    || $errUtils.isChaiValidationErr(err)
+  ) {
+    return userInvocationStack
   }
 }
 
@@ -262,7 +323,7 @@ const getSourceDetailsForLine = (projectRoot, line) => {
     fileUrl: generatedDetails.file,
     originalFile,
     relativeFile,
-    absoluteFile: relativeFile ? path.join(projectRoot, relativeFile) : undefined,
+    absoluteFile: (relativeFile && projectRoot) ? path.join(projectRoot, relativeFile) : undefined,
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,
@@ -357,7 +418,8 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   return normalizeStackIndentation(winnowedStackLines)
 }
 
-module.exports = {
+export {
+  replacedStack,
   getCodeFrame,
   getSourceStack,
   getStackLines,
@@ -365,11 +427,12 @@ module.exports = {
   hasCrossFrameStacks,
   normalizedStack,
   normalizedUserInvocationStack,
-  replacedStack,
+  getUserInvocationStack,
   stackWithContentAppended,
   stackWithLinesDroppedFromMarker,
   stackWithoutMessage,
   stackWithReplacementMarkerLineRemoved,
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
+  getInvocationDetails,
 }
