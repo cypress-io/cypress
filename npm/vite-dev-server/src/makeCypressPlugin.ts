@@ -34,8 +34,8 @@ interface Spec{
 
 export const makeCypressPlugin = (
   projectRoot: string,
-  supportFilePath: string,
-  devServerEvents: EventEmitter,
+  supportFilePath: string | false,
+  devServerEvents: NodeJS.EventEmitter,
   specs: Spec[],
 ): Plugin => {
   let base = '/'
@@ -93,8 +93,10 @@ export const makeCypressPlugin = (
       let moduleImporters = server.moduleGraph.fileToModulesMap.get(file)
       let iterationNumber = 0
 
+      const exploredFiles = new Set<string>()
+
       // until we reached a point where the current module is imported by no other
-      while (moduleImporters && moduleImporters.size) {
+      while (moduleImporters?.size) {
         if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
           debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
 
@@ -108,19 +110,27 @@ export const makeCypressPlugin = (
             debug('handleHotUpdate - support compile success')
             devServerEvents.emit('dev-server:compile:success')
 
+            // if we update support we know we have to re-run it all
+            // no need to ckeck further
             return []
           }
 
           if (mod.file && specsPathsSet.has(mod.file)) {
             debug('handleHotUpdate - spec compile success', mod.file)
             devServerEvents.emit('dev-server:compile:success', { specFile: mod.file })
+            // if we find one spec, does not mean we are done yet,
+            // there could be other spec files to re-run
+            // see https://github.com/cypress-io/cypress/issues/17691
+          }
 
-            return []
+          // to avoid circular updates, keep track of what we updated
+          if (mod.file) {
+            exploredFiles.add(mod.file)
           }
         }
 
         // get all the modules that import the current one
-        moduleImporters = getImporters(moduleImporters)
+        moduleImporters = getImporters(moduleImporters, exploredFiles)
         iterationNumber += 1
       }
 
@@ -129,11 +139,13 @@ export const makeCypressPlugin = (
   }
 }
 
-function getImporters (modules: Set<ModuleNode>): Set<ModuleNode> {
+function getImporters (modules: Set<ModuleNode>, alreadyExploredFiles: Set<string>): Set<ModuleNode> {
   const allImporters = new Set<ModuleNode>()
 
   modules.forEach((m) => {
-    m.importers.forEach((imp) => allImporters.add(imp))
+    if (m.file && !alreadyExploredFiles.has(m.file)) {
+      m.importers.forEach((imp) => allImporters.add(imp))
+    }
   })
 
   return allImporters

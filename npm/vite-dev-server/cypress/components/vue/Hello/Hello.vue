@@ -3,12 +3,16 @@
     <input v-model="username" />
     <div v-if="error" class="error">{{ error }}</div>
     <img src="./logo.png" />
+    <Card/>
   </div>
 </template>
 
 <script>
+import Card from "../Card/Card.vue"
+
 export default {
   name: "Hello",
+  components: { Card },
   data() {
     return {
       username: "",
