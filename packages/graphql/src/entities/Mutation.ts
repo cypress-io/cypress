@@ -86,7 +86,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('addProject', {
-      type: 'Project',
+      type: 'LocalProject',
       description: 'Adds a new project to the app',
       args: {
         input: nonNull(
@@ -94,8 +94,7 @@ export const mutation = mutationType({
             name: 'AddProjectInput',
             definition (t) {
               t.nonNull.string('projectRoot')
-              t.nonNull.string('testingType')
-              t.nonNull.boolean('isCurrent')
+              t.string('projectId')
             },
           }),
         ),
@@ -136,15 +135,6 @@ export const mutation = mutationType({
         await ctx.actions.logout()
 
         return ctx.app
-      },
-    })
-
-    t.field('initializePlugins', {
-      type: 'Project',
-      description: 'Initializes the plugins for the current active project',
-      async resolve (_root, args, ctx) {
-        // TODO: should we await here, or return a pending state to the client?
-        return await ctx.activeProject?.initializePlugins() ?? null
       },
     })
   },

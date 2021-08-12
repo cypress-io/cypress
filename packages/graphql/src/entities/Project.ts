@@ -1,38 +1,29 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { PluginsState, PluginsStateEnum } from '../constants/projectConstants'
-import type { ProjectBaseContract } from '../contracts/ProjectBaseContract'
-
-export interface ProjectConfig {
-  isCurrent: boolean
-  projectRoot: string
-  projectBase: ProjectBaseContract
-}
+import { ProjectBase } from '../../../server/lib/project-base'
+import type { ProjectContract } from '../contracts/ProjectContract'
+import { Config } from './Config'
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
 })
-export class Project implements ProjectBaseContract {
-  readonly projectBase: ProjectBaseContract
-  private _pluginsState: PluginsState = 'uninitialized'
-  private _pluginsErrorMessage?: string
-  private _isCurrent: boolean = false
-
-  constructor (private config: ProjectConfig) {
-    this.projectBase = config.projectBase
-    this._isCurrent = config.isCurrent
-  }
+export class Project implements ProjectContract {
+  constructor (private meta: { config: Config }) {}
 
   @nxs.field.nonNull.id()
   id (): NxsResult<'Project', 'id'> {
-    return this.projectRoot
-    // return createHash('sha1').update(this.projectRoot).digest('hex')
+    return this.meta.config.projectRoot
   }
 
-  @nxs.field.nonNull.string({
-    description: 'The title of the project',
+  @nxs.field.string({
+    description: 'Used to associate project with Cypress cloud'
   })
-  get title (): NxsResult<'Project', 'title'> {
-    return 'design-system' // TODO: make this real
+  async projectId (): Promise<NxsResult<'Project', 'projectId'>> {
+    const base = new ProjectBase({ 
+      projectRoot: this.meta.config.projectRoot,
+      testingType: 'e2e',
+      options: {}
+    })
+    return await base.getProjectId()
   }
 
   @nxs.field.nonNull.string()
@@ -40,48 +31,8 @@ export class Project implements ProjectBaseContract {
     return this.config.projectRoot
   }
 
-  @nxs.field.nonNull.boolean()
-  get isOpen (): NxsResult<'Project', 'isOpen'> {
-    return this.config.projectBase.isOpen
-  }
-
-  @nxs.field.nonNull.boolean()
-  isCurrent (): NxsResult<'Project', 'isCurrent'> {
-    return this._isCurrent
-  }
-
-  @nxs.field.type(() => PluginsStateEnum, {
-    description: 'Plugin state for a project',
-  })
-  get pluginsState (): NxsResult<'Project', 'pluginsState'> {
-    return this._pluginsState
-  }
-
-  @nxs.field.string({
-    description: 'If the plugin has errored, contains the associated error message',
-  })
-  get pluginsErrorMessage (): NxsResult<'Project', 'pluginsErrorMessage'> {
-    if (this.pluginsState === 'error') {
-      return this._pluginsErrorMessage ?? null
-    }
-
-    return null
-  }
-
-  async initializePlugins (): Promise<Project> {
-    if (this.pluginsState !== 'uninitialized' && this.pluginsState !== 'error') {
-      return this
-    }
-
-    try {
-      this._pluginsState = 'initializing'
-      await this.projectBase.initializePlugins()
-      this._pluginsState = 'initialized'
-    } catch (e) {
-      this._pluginsState = 'error'
-      this._pluginsErrorMessage = e.message
-    }
-
-    return this
+  @nxs.field.nonNull.type(() => Config)
+  get config (): NxsResult<'Project', 'config'> {
+    return this.meta.config
   }
 }

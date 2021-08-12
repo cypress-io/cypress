@@ -3,24 +3,36 @@
 
 
 input AddProjectInput {
-  isCurrent: Boolean!
+  projectId: String
   projectRoot: String!
-  testingType: String!
 }
 
 """Namespace for information related to the app"""
 type App {
-  """The active project in the app"""
-  activeProject: Project
-
   """Whether this is the first open of the application or not"""
   isFirstOpen: Boolean!
 
   """All known projects for the app"""
-  projects: [Project!]!
+  projects: [LocalProject!]!
 
   """Cypress Cloud"""
   user: User
+}
+
+type Config {
+  projectId: String!
+  projectRoot: String!
+}
+
+"""A Cypress project is a container"""
+type DashboardProject {
+  config: Config!
+  id: ID!
+
+  """Used to associate project with Cypress cloud"""
+  projectId: String
+  projectRoot: String!
+  runs: [Run!]
 }
 
 """
@@ -42,18 +54,25 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
+"""A Cypress project is a container"""
+type LocalProject {
+  config: Config!
+  id: ID!
+
+  """Used to associate project with Cypress cloud"""
+  projectId: String
+  projectRoot: String!
+}
+
 type Mutation {
   """Adds a new project to the app"""
-  addProject(input: AddProjectInput!): Project!
+  addProject(input: AddProjectInput!): LocalProject!
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
 
   """Auth with Cypress Cloud"""
   authenticate: App
-
-  """Initializes the plugins for the current active project"""
-  initializePlugins: Project
 
   """Log out of Cypress Cloud"""
   logout: App
@@ -114,23 +133,6 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress project is a container"""
-type Project {
-  id: ID!
-  isCurrent: Boolean!
-  isOpen: Boolean!
-
-  """If the plugin has errored, contains the associated error message"""
-  pluginsErrorMessage: String
-
-  """Plugin state for a project"""
-  pluginsState: PluginsState
-  projectRoot: String!
-
-  """The title of the project"""
-  title: String!
-}
-
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!
@@ -138,14 +140,18 @@ type Query {
   """Metadata about the nagivation menu"""
   navigationMenu: NavigationMenu
 
-  """Get runs for a given projectId on Cypress Cloud"""
-  runs(projectId: String!): App
-
-  """Namespace for user and authentication"""
-  user: User
+  """
+  Namespace for data accessible from Cypress Cloud for authenticated users
+  """
+  viewer: Viewer
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard
+}
+
+"""Run"""
+type Run {
+  id: String!
 }
 
 """The bundlers that we can use with Cypress"""
@@ -170,6 +176,16 @@ type User {
   authToken: String
   email: String
   name: String
+}
+
+"""Namespace for information related to the viewer"""
+type Viewer {
+  authToken: String!
+  email: String!
+  name: String!
+
+  """All known projects for the app"""
+  projects: [DashboardProject!]!
 }
 
 """

@@ -502,8 +502,10 @@ module.exports = {
     if (options.projectRoot) {
       serverContext.actions.addProject({
         projectRoot: options.projectRoot,
-        testingType: options.testingType,
-        isCurrent: true,
+      })
+
+      serverContext.actions.addProject({
+        projectRoot: options.projectRoot.replace('launchpad', 'runner'),
       })
     }
 

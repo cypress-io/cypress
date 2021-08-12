@@ -1,6 +1,6 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
-import { Project } from './Project'
+import { LocalProject } from './LocalProject'
 import { User } from './User'
 
 @nxs.objectType({
@@ -16,18 +16,11 @@ export class App {
     return true
   }
 
-  @nxs.field.nonNull.list.nonNull.type(() => Project, {
+  @nxs.field.nonNull.list.nonNull.type(() => LocalProject, {
     description: 'All known projects for the app',
   })
   get projects (): NxsResult<'App', 'projects'> {
-    return this.ctx.projects
-  }
-
-  @nxs.field.type(() => Project, {
-    description: 'The active project in the app',
-  })
-  get activeProject (): NxsResult<'App', 'activeProject'> {
-    return this.projects.find((p) => p.isCurrent) ?? null
+    return this.ctx.localProjects
   }
 
   @nxs.field.type(() => User, {
