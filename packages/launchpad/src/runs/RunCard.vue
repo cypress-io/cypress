@@ -14,7 +14,7 @@
 				</span>
 			</div>
 		</div>
-		<RunResults totals="runGroupTotals" class="m-6 ml-0" />
+		<RunResults :totals="runGroupTotals" class="m-6 ml-0" />
 	</div>
 </template>
 

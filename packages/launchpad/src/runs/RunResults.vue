@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 // bi:check-lg
-import type { RunGroupTotals } from '@packages/graphql'
+import type { RunGroupTotals } from '@packages/graphql/src/entities/run'
 import IconPass from 'virtual:vite-icons/bi/check-lg'
 // eva:close-fill
 import IconFail from 'virtual:vite-icons/eva/close-fill'
