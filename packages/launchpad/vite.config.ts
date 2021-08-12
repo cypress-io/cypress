@@ -7,6 +7,7 @@ import PurgeIcons from 'vite-plugin-purge-icons'
 import Components from 'vite-plugin-components'
 import ViteIcons, { ViteIconsResolver } from 'vite-plugin-icons'
 import VueI18n from '@intlify/vite-plugin-vue-i18n'
+import VueSvgLoader from 'vite-svg-loader'
 
 export default defineConfig({
   base: './',
@@ -25,6 +26,7 @@ export default defineConfig({
       customComponentResolvers: ViteIconsResolver(),
     }),
     WindiCSS(),
+    VueSvgLoader(),
   ],
   define: {
     'process.env': {},

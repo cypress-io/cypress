@@ -58,6 +58,7 @@
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-purge-icons": "0.7.0",
     "vite-plugin-windicss": "1.2.4",
+    "vite-svg-loader": "2.1.1",
     "vue": "3.2.0",
     "vue-i18n": "9.2.0-beta.1",
     "vue-prism-component": "2.0.0",
