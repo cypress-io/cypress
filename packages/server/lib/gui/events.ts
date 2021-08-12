@@ -504,9 +504,9 @@ module.exports = {
         projectRoot: options.projectRoot,
       })
 
-      serverContext.actions.addProject({
-        projectRoot: options.projectRoot.replace('launchpad', 'runner'),
-      })
+      // serverContext.actions.addProject({
+      //   projectRoot: options.projectRoot.replace('launchpad', 'runner'),
+      // })
     }
 
     ipc.on('graphql', async (evt, { id, params, variables }) => {

@@ -7,7 +7,7 @@
 
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
-import type { Run, DashboardProject } from "./../entities/DashboardProject"
+import type { DashboardProject } from "./../entities/DashboardProject"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { LocalProject } from "./../entities/LocalProject"
 import type { Query } from "./../entities/Query"
@@ -18,7 +18,9 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
+import type { RunCommit } from "./../entities/run/RunCommit"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -61,6 +63,7 @@ export interface NexusGenEnums {
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
+  RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
@@ -87,7 +90,8 @@ export interface NexusGenObjects {
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
   Query: Query;
-  Run: Run;
+  RunCommit: RunCommit;
+  RunGroup: RunGroup;
   TestingTypeInfo: TestingTypeInfo;
   User: User;
   Viewer: Viewer;
@@ -122,7 +126,7 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
-    runs: NexusGenRootTypes['Run'][] | null; // [Run!]
+    runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
     title: string; // String!
   }
   LocalProject: { // field return type
@@ -163,8 +167,24 @@ export interface NexusGenFieldTypes {
     viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
-  Run: { // field return type
-    id: string; // String!
+  RunCommit: { // field return type
+    authorEmail: string; // String!
+    authorName: string; // String!
+    branch: string; // String!
+    message: string; // String!
+    sha: string; // String!
+    url: string; // String!
+  }
+  RunGroup: { // field return type
+    commit: NexusGenRootTypes['RunCommit']; // RunCommit!
+    completedAt: string; // String!
+    createdAt: string; // String!
+    status: NexusGenEnums['RunGroupStatus']; // RunGroupStatus!
+    totalDuration: number; // Int!
+    totalFailed: number; // Int!
+    totalPassed: number; // Int!
+    totalPending: number; // Int!
+    totalSkipped: number; // Int!
   }
   TestingTypeInfo: { // field return type
     description: string | null; // String
@@ -180,8 +200,9 @@ export interface NexusGenFieldTypes {
     authToken: string | null; // String
     authenticated: boolean; // Boolean!
     email: string | null; // String
+    getProjectByProjectId: NexusGenRootTypes['DashboardProject'] | null; // DashboardProject
     name: string | null; // String
-    projects: NexusGenRootTypes['DashboardProject'][]; // [DashboardProject!]!
+    projects: Array<NexusGenRootTypes['DashboardProject'] | null> | null; // [DashboardProject]
   }
   Wizard: { // field return type
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -231,7 +252,7 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
-    runs: 'Run'
+    runs: 'RunGroup'
     title: 'String'
   }
   LocalProject: { // field return type name
@@ -272,8 +293,24 @@ export interface NexusGenFieldTypeNames {
     viewer: 'Viewer'
     wizard: 'Wizard'
   }
-  Run: { // field return type name
-    id: 'String'
+  RunCommit: { // field return type name
+    authorEmail: 'String'
+    authorName: 'String'
+    branch: 'String'
+    message: 'String'
+    sha: 'String'
+    url: 'String'
+  }
+  RunGroup: { // field return type name
+    commit: 'RunCommit'
+    completedAt: 'String'
+    createdAt: 'String'
+    status: 'RunGroupStatus'
+    totalDuration: 'Int'
+    totalFailed: 'Int'
+    totalPassed: 'Int'
+    totalPending: 'Int'
+    totalSkipped: 'Int'
   }
   TestingTypeInfo: { // field return type name
     description: 'String'
@@ -289,6 +326,7 @@ export interface NexusGenFieldTypeNames {
     authToken: 'String'
     authenticated: 'Boolean'
     email: 'String'
+    getProjectByProjectId: 'DashboardProject'
     name: 'String'
     projects: 'DashboardProject'
   }
@@ -351,6 +389,11 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+  }
+  Viewer: {
+    getProjectByProjectId: { // args
+      projectId: string; // String!
     }
   }
   Wizard: {

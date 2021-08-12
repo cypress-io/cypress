@@ -6,7 +6,8 @@ import type { ProjectContract } from '../contracts/ProjectContract'
 import { LocalProject } from '../entities/LocalProject'
 import { Config } from '../entities/Config'
 import type { Cfg } from '../../../server/lib/project-base'
-import type { Run, Viewer } from '../entities'
+import type { Viewer } from '../entities'
+import type { RunGroup } from '../entities/run'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -57,5 +58,5 @@ export abstract class BaseActions {
   abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectContract | Promise<ProjectContract>
   abstract authenticate (): Promise<void>
   abstract logout (): Promise<void>
-  abstract getRuns (payload: { projectId: string, authToken: string }): Promise<Run[]>
+  abstract getRuns (payload: { projectId: string, authToken: string }): Promise<RunGroup[]>
 }
