@@ -28,8 +28,9 @@
 <script lang="ts" setup>
 import ButtonBar from "./ButtonBar.vue"
 import { computed } from "vue"
-import { useMutation, gql } from '@urql/vue'
-import { WizardLayoutFragment, WizardLayoutNavigateDocument } from "../generated/graphql"
+import { useMutation } from '@urql/vue'
+import { gql } from '@urql/core'
+import { WizardLayoutNavigateDocument } from "../generated/graphql"
 import { useI18n } from "../composables"
 
 gql`

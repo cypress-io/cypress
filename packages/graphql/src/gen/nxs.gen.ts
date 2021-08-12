@@ -109,9 +109,9 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 
 export interface NexusGenFieldTypes {
   App: { // field return type
+    activeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
-    user: NexusGenRootTypes['User'] | null; // User
   }
   Config: { // field return type
     projectId: string; // String!
@@ -123,18 +123,20 @@ export interface NexusGenFieldTypes {
     projectId: string | null; // String
     projectRoot: string; // String!
     runs: NexusGenRootTypes['Run'][] | null; // [Run!]
+    title: string; // String!
   }
   LocalProject: { // field return type
     config: NexusGenRootTypes['Config']; // Config!
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
+    title: string; // String!
   }
   Mutation: { // field return type
     addProject: NexusGenRootTypes['LocalProject']; // LocalProject!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
-    authenticate: NexusGenRootTypes['App'] | null; // App
-    logout: NexusGenRootTypes['App'] | null; // App
+    authenticate: NexusGenRootTypes['Viewer'] | null; // Viewer
+    logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -175,9 +177,10 @@ export interface NexusGenFieldTypes {
     name: string | null; // String
   }
   Viewer: { // field return type
-    authToken: string; // String!
-    email: string; // String!
-    name: string; // String!
+    authToken: string | null; // String
+    authenticated: boolean; // Boolean!
+    email: string | null; // String
+    name: string | null; // String
     projects: NexusGenRootTypes['DashboardProject'][]; // [DashboardProject!]!
   }
   Wizard: { // field return type
@@ -215,9 +218,9 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
+    activeProject: 'LocalProject'
     isFirstOpen: 'Boolean'
     projects: 'LocalProject'
-    user: 'User'
   }
   Config: { // field return type name
     projectId: 'String'
@@ -229,18 +232,20 @@ export interface NexusGenFieldTypeNames {
     projectId: 'String'
     projectRoot: 'String'
     runs: 'Run'
+    title: 'String'
   }
   LocalProject: { // field return type name
     config: 'Config'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
+    title: 'String'
   }
   Mutation: { // field return type name
     addProject: 'LocalProject'
     appCreateConfigFile: 'App'
-    authenticate: 'App'
-    logout: 'App'
+    authenticate: 'Viewer'
+    logout: 'Viewer'
     navigationMenuSetItem: 'NavigationMenu'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
@@ -282,6 +287,7 @@ export interface NexusGenFieldTypeNames {
   }
   Viewer: { // field return type name
     authToken: 'String'
+    authenticated: 'Boolean'
     email: 'String'
     name: 'String'
     projects: 'DashboardProject'

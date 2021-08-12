@@ -127,7 +127,7 @@ export function defaults (options = {}) {
     height: null,
     minWidth: null,
     minHeight: null,
-    devTools: false,
+    devTools: true, // false,
     trackState: false,
     contextMenu: false,
     recordFrameRate: null,
@@ -198,7 +198,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   }
 
   // open dev tools if they're true
-  if (options.devTools) {
+  if (true) {
     // and possibly detach dev tools if true
     win.webContents.openDevTools()
   }

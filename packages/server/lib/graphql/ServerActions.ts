@@ -1,7 +1,7 @@
 import type { NxsMutationArgs } from 'nexus-decorators'
 import { ProjectBase } from '../project-base'
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, Run, Viewer } from '@packages/graphql'
+import { AuthenticatedUser, BaseActions, Run } from '@packages/graphql'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -34,13 +34,12 @@ export class ServerActions extends BaseActions {
 
   async authenticate () {
     const viewer: AuthenticatedUser = await auth.start(() => {}, 'launchpad')
-
-    this.ctx.viewer = new Viewer(this.ctx, viewer)
+    this.ctx.viewer.setAuthenticatedConfig(viewer)
   }
 
   async logout () {
     await user.logOut()
-    this.ctx.viewer = undefined
+    this.ctx.viewer.setAuthenticatedConfig(undefined)
   }
 
   async getRuns ({ projectId, authToken }: { projectId: string, authToken: string }): Promise<Run[]> {

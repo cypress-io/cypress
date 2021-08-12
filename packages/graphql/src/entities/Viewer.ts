@@ -12,7 +12,11 @@ export interface AuthenticatedUser {
   description: 'Namespace for information related to the viewer',
 })
 export class Viewer {
-  constructor (private ctx: BaseContext, private config: AuthenticatedUser) {}
+  constructor (private ctx: BaseContext, private config?: AuthenticatedUser) {}
+
+  setAuthenticatedConfig (config: AuthenticatedUser | undefined) {
+    this.config = config
+  }
 
   @nxs.field.nonNull.list.nonNull.type(() => DashboardProject, {
     description: 'All known projects for the app',
@@ -22,18 +26,23 @@ export class Viewer {
       new DashboardProject(p.config, this.ctx, this))
   }
 
-  @nxs.field.nonNull.string()
+  @nxs.field.nonNull.boolean()
+  get authenticated (): NxsResult<'Viewer', 'authenticated'> {
+    return !!this.config?.authToken
+  }
+
+  @nxs.field.string()
   get name (): NxsResult<'Viewer', 'name'> {
-    return this.config.name
+    return this.config?.name ?? null
   }
 
-  @nxs.field.nonNull.string()
+  @nxs.field.string()
   get email (): NxsResult<'Viewer', 'email'> {
-    return this.config.email ?? null
+    return this.config?.email ?? null
   }
 
-  @nxs.field.nonNull.string()
+  @nxs.field.string()
   get authToken (): NxsResult<'Viewer', 'authToken'> {
-    return this.config.authToken
+    return this.config?.authToken ?? null
   }
 }

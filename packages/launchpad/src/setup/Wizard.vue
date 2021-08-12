@@ -1,6 +1,6 @@
 <template>
   <template v-if="!loading && wizard">
-    <Auth :gql="app" />
+    <Auth :gql="viewer" />
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineComponent, watch, computed } from "vue";
+import { computed } from "vue";
 import Auth from './Auth.vue'
 import TestingType from "./TestingType.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
@@ -30,15 +30,17 @@ import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
-import { WizardDocument } from '../generated/graphql'
+import { RootDocument } from '../generated/graphql'
 import { useQuery } from "@urql/vue";
 
 gql`
-query Wizard {
+query Root {
   app {
     isFirstOpen
     ...ProjectRoot
-    ...User
+  }
+  viewer {
+    ...Authenticate
   }
   wizard {
     step
@@ -52,10 +54,10 @@ query Wizard {
   }
 }
 `
-const result = useQuery({ query: WizardDocument })
+const result = useQuery({ query: RootDocument })
 
 const loading = result.fetching
 const wizard = computed(() => result.data.value?.wizard)
 const app = computed(() => result.data.value?.app!)
-
+const viewer = computed(() => result.data.value?.viewer)
 </script>

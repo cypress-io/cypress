@@ -14,6 +14,11 @@ export class Project implements ProjectContract {
     return this.meta.config.projectRoot
   }
 
+  @nxs.field.nonNull.string()
+  title (): NxsResult<'Project', 'title'> {
+    return 'Title'
+  }
+
   @nxs.field.string({
     description: 'Used to associate project with Cypress cloud'
   })

@@ -6,7 +6,7 @@ import type { ProjectContract } from '../contracts/ProjectContract'
 import { LocalProject } from '../entities/LocalProject'
 import { Config } from '../entities/Config'
 import type { Cfg } from '../../../server/lib/project-base'
-import type { Run } from '../entities'
+import type { Run, Viewer } from '../entities'
 
 /**
  * Acts as the contract for all actions, inherited by:

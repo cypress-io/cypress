@@ -1,40 +1,41 @@
 <template>
-  <Button @click="handleAuth">Click to Authenticate</Button>
-
   <div v-if="error">An error occurred while authenticating: {{ error }}</div>
 
-  <div v-else-if="data?.user?.email">
+  <div v-else-if="data?.authenticated">
     <p>
-      Congrats {{ data?.user?.email }}, you authenticated with Cypress Cloud.
+      Congrats {{ data?.email }}, you authenticated with Cypress Cloud.
     </p>
     <Button @click="handleLogout">Log out</Button>
   </div>
 
   <div v-else>
-    Nothing here yet
+    <Button @click="handleAuth">Click to Authenticate</Button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { gql } from "@urql/core"
 import { useMutation } from "@urql/vue"
-import { AuthenticateDocument, UserFragment, LogoutDocument } from '../generated/graphql'
+import { 
+  AuthenticateDocument, 
+  AuthenticateFragment, 
+  LogoutDocument
+  } from '../generated/graphql'
 import Button from '../components/button/Button.vue'
 
 gql`
-fragment User on App {
-  user {
-    email
-    authToken
-  }
+fragment Authenticate on Viewer {
+  email
+  authToken
+  authenticated
 }
 `
 
 gql`
 mutation authenticate {
   authenticate {
-    ...User
+    ...Authenticate
   }
 }
 `
@@ -42,7 +43,7 @@ mutation authenticate {
 gql`
 mutation Logout {
   logout {
-    ...User
+    ...Authenticate
   }
 }
 `
@@ -56,15 +57,19 @@ const handleAuth = async () => {
   error.value = result.error?.message ?? undefined
 }
 
+const props = defineProps<{
+  gql?: AuthenticateFragment | null
+}>()
+
 const handleLogout = async () => {
   // clear this for good measure
   error.value = undefined
   await logout.executeMutation({})
 }
 
-const props = defineProps<{
-  gql?: UserFragment | null
-}>()
-
 const data = computed(() => props.gql)
+
+watch(data, (val) => {
+  console.log(val?.authToken)
+})
 </script>

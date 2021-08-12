@@ -9,14 +9,14 @@ input AddProjectInput {
 
 """Namespace for information related to the app"""
 type App {
+  """Active project"""
+  activeProject: LocalProject
+
   """Whether this is the first open of the application or not"""
   isFirstOpen: Boolean!
 
   """All known projects for the app"""
   projects: [LocalProject!]!
-
-  """Cypress Cloud"""
-  user: User
 }
 
 type Config {
@@ -33,6 +33,7 @@ type DashboardProject {
   projectId: String
   projectRoot: String!
   runs: [Run!]
+  title: String!
 }
 
 """
@@ -62,6 +63,7 @@ type LocalProject {
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
+  title: String!
 }
 
 type Mutation {
@@ -72,10 +74,10 @@ type Mutation {
   appCreateConfigFile(code: String!, configFilename: String!): App
 
   """Auth with Cypress Cloud"""
-  authenticate: App
+  authenticate: Viewer
 
   """Log out of Cypress Cloud"""
-  logout: App
+  logout: Viewer
 
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): NavigationMenu
@@ -180,9 +182,10 @@ type User {
 
 """Namespace for information related to the viewer"""
 type Viewer {
-  authToken: String!
-  email: String!
-  name: String!
+  authToken: String
+  authenticated: Boolean!
+  email: String
+  name: String
 
   """All known projects for the app"""
   projects: [DashboardProject!]!

@@ -117,7 +117,7 @@ module.exports = {
       y: state.browserY,
       width: state.browserWidth || 1280,
       height: state.browserHeight || 720,
-      devTools: state.isBrowserDevToolsOpen,
+      devTools: true, // state.isBrowserDevToolsOpen,
       minWidth: 100,
       minHeight: 100,
       contextMenu: true,
@@ -127,7 +127,7 @@ module.exports = {
         height: 'browserHeight',
         x: 'browserX',
         y: 'browserY',
-        devTools: 'isBrowserDevToolsOpen',
+        devTools: true // 'isBrowserDevToolsOpen',
       },
       webPreferences: {
         sandbox: true,

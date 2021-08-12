@@ -75,9 +75,9 @@ export const mutation = mutationType({
       },
       description: 'Create a Cypress config file for a new project',
       resolve: (root, args, ctx) => {
-        if (!ctx.activeProject) {
-          throw Error('Cannot write config file without an active project')
-        }
+        // if (!ctx.activeProject) {
+        //   throw Error('Cannot write config file without an active project')
+        // }
 
         ctx.actions.createConfigFile({ ...args })
 
@@ -114,27 +114,25 @@ export const mutation = mutationType({
     })
 
     t.field('authenticate', {
-      type: 'App',
+      type: 'Viewer',
       description: 'Auth with Cypress Cloud',
       async resolve (_root, args, ctx) {
         // already authenticated this session - just return
-        if (ctx.user) {
-          return ctx.app
+        if (ctx.viewer.authenticated) {
+          return ctx.viewer
         }
 
         await ctx.actions.authenticate()
-
-        return ctx.app
+        return ctx.viewer
       },
     })
 
     t.field('logout', {
-      type: 'App',
+      type: 'Viewer',
       description: 'Log out of Cypress Cloud',
       async resolve (_root, args, ctx) {
         await ctx.actions.logout()
-
-        return ctx.app
+        return ctx.viewer
       },
     })
   },

@@ -12,11 +12,11 @@ export abstract class BaseContext {
   abstract readonly actions: BaseActions
   abstract localProjects: LocalProject[]
   abstract dashboardProjects: DashboardProject[]
-  abstract viewer?: Viewer = undefined
 
   wizard = new Wizard()
   navigationMenu = new NavigationMenu()
   app = new App(this)
+  viewer = new Viewer(this) 
 
   isFirstOpen = false
 }
