@@ -18,5 +18,9 @@ export abstract class BaseContext {
   navigationMenu = new NavigationMenu()
   app = new App(this)
 
+  get activeProject () {
+    return this.app.activeProject
+  }
+
   isFirstOpen = false
 }
