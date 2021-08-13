@@ -12,11 +12,11 @@ export interface RunCommitConfig {
 }
 
 export interface RunGroupTotals {
-  totalPassed: number
-  totalFailed: number
-  totalPending: number
-  totalSkipped: number
-  totalDuration: number
+  totalPassed: number | null
+  totalFailed: number | null
+  totalPending: number | null
+  totalSkipped: number | null
+  totalDuration: number | null
 }
 
 export interface RunGroupConfig extends RunGroupTotals {
@@ -48,22 +48,22 @@ export class RunGroup {
     return this.config.completedAt
   }
 
-  @nxs.field.nonNull.int()
+  @nxs.field.int()
   get totalPassed (): NxsResult<'Run', 'totalPassed'> {
     return this.config.totalPassed
   }
 
-  @nxs.field.nonNull.int()
+  @nxs.field.int()
   get totalFailed (): NxsResult<'Run', 'totalFailed'> {
     return this.config.totalFailed
   }
 
-  @nxs.field.nonNull.int()
+  @nxs.field.int()
   get totalPending (): NxsResult<'Run', 'totalPending'> {
     return this.config.totalPending
   }
 
-  @nxs.field.nonNull.int()
+  @nxs.field.int()
   get totalSkipped (): NxsResult<'Run', 'totalSkipped'> {
     return this.config.totalSkipped
   }

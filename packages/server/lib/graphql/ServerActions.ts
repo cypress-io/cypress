@@ -36,6 +36,7 @@ export class ServerActions extends BaseActions {
   async authenticate () {
     const config: AuthenticatedUser = await auth.start(() => {}, 'launchpad')
     const viewer = new Viewer(this.ctx, config)
+
     this.ctx.viewer = viewer
   }
 
@@ -45,8 +46,8 @@ export class ServerActions extends BaseActions {
   }
 
   async getRuns ({ projectId, authToken }: { projectId: string, authToken: string }): Promise<RunGroup[]> {
-    console.log('Calling getRuns')
     const runs = await api.getProjectRuns(projectId, authToken)
-    return runs.map(run => new RunGroup(run))
+
+    return runs.map((run) => new RunGroup(run))
   }
 }

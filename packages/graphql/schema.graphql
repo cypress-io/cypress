@@ -168,10 +168,10 @@ type RunGroup {
   createdAt: String!
   status: RunGroupStatus!
   totalDuration: Int!
-  totalFailed: Int!
-  totalPassed: Int!
-  totalPending: Int!
-  totalSkipped: Int!
+  totalFailed: Int
+  totalPassed: Int
+  totalPending: Int
+  totalSkipped: Int
 }
 
 enum RunGroupStatus {

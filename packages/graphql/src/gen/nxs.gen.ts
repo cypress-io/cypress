@@ -181,10 +181,10 @@ export interface NexusGenFieldTypes {
     createdAt: string; // String!
     status: NexusGenEnums['RunGroupStatus']; // RunGroupStatus!
     totalDuration: number; // Int!
-    totalFailed: number; // Int!
-    totalPassed: number; // Int!
-    totalPending: number; // Int!
-    totalSkipped: number; // Int!
+    totalFailed: number | null; // Int
+    totalPassed: number | null; // Int
+    totalPending: number | null; // Int
+    totalSkipped: number | null; // Int
   }
   TestingTypeInfo: { // field return type
     description: string | null; // String

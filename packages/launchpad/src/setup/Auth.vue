@@ -11,8 +11,6 @@
   <div v-else>
     <Button @click="handleAuth">Click to Authenticate</Button>
   </div>
-  
-  {{ data }}
 </template>
 
 <script lang="ts" setup>
@@ -22,9 +20,8 @@ import { useMutation, useQuery } from "@urql/vue"
 import { 
   LoginDocument,
   LogoutDocument,
-  AuthenticateFragment,
-AuthDocument
-  } from '../generated/graphql'
+  AuthDocument
+} from '../generated/graphql'
 import Button from '../components/button/Button.vue'
 
 gql`
