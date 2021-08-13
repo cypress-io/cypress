@@ -14,11 +14,7 @@ export interface AuthenticatedUser {
   description: 'Namespace for information related to the viewer',
 })
 export class Viewer {
-  constructor (private ctx: BaseContext, private config?: AuthenticatedUser) {}
-
-  setAuthenticatedConfig (config: AuthenticatedUser | undefined) {
-    this.config = config
-  }
+  constructor (private ctx: BaseContext, private viewer: AuthenticatedUser) {}
 
   // @nxs.field.nullable.type(() => DashboardProject, {
   @nxs.field.nullable.type(() => DashboardProject, {
@@ -28,10 +24,6 @@ export class Viewer {
     }
   })
   getProjectByProjectId ({ projectId }: NexusGenArgTypes['Viewer']['getProjectByProjectId']): NxsResult<'Viewer', 'getProjectByProjectId'> {
-    if (!this.config?.authToken) {
-      return null
-    }
-
     const project = this.ctx.localProjects.find(async p => {
       return await p.projectId() === projectId
     })
@@ -40,7 +32,7 @@ export class Viewer {
       return null
     }
 
-    return new DashboardProject(project.config, this.ctx, this.authToken!)
+    return new DashboardProject(project.config, this.ctx, this.viewer.authToken)
   }
 
   @nxs.field.list.nullable.type(() => DashboardProject, {
@@ -55,23 +47,18 @@ export class Viewer {
       new DashboardProject(p.config, this.ctx, this.authToken!))
   }
 
-  @nxs.field.nonNull.boolean()
-  get authenticated (): NxsResult<'Viewer', 'authenticated'> {
-    return !!this.config?.authToken
-  }
-
-  @nxs.field.string()
+  @nxs.field.nonNull.string()
   get name (): NxsResult<'Viewer', 'name'> {
-    return this.config?.name ?? null
+    return this.viewer.name
   }
 
-  @nxs.field.string()
+  @nxs.field.nonNull.string()
   get email (): NxsResult<'Viewer', 'email'> {
-    return this.config?.email ?? null
+    return this.viewer.email
   }
 
-  @nxs.field.string()
+  @nxs.field.nonNull.string()
   get authToken (): NxsResult<'Viewer', 'authToken'> {
-    return this.config?.authToken ?? null
+    return this.viewer.authToken
   }
 }

@@ -74,7 +74,7 @@ type Mutation {
   appCreateConfigFile(code: String!, configFilename: String!): App
 
   """Auth with Cypress Cloud"""
-  authenticate: Viewer
+  login: Viewer
 
   """Log out of Cypress Cloud"""
   logout: Viewer
@@ -211,13 +211,12 @@ type User {
 
 """Namespace for information related to the viewer"""
 type Viewer {
-  authToken: String
-  authenticated: Boolean!
-  email: String
+  authToken: String!
+  email: String!
 
   """Active project"""
   getProjectByProjectId(projectId: String!): DashboardProject
-  name: String
+  name: String!
 
   """All known projects for the app"""
   projects: [DashboardProject]
