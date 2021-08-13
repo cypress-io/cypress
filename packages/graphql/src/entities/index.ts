@@ -10,8 +10,6 @@ export * from './LocalProject'
 
 export * from './Query'
 
-export * from './User'
-
 export * from './TestingTypeInfo'
 
 export * from './Viewer'
