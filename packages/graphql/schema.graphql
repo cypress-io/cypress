@@ -167,7 +167,7 @@ type RunGroup {
   completedAt: String!
   createdAt: String!
   status: RunGroupStatus!
-  totalDuration: Int!
+  totalDuration: Int
   totalFailed: Int
   totalPassed: Int
   totalPending: Int
@@ -200,13 +200,6 @@ type TestingTypeInfo {
   description: String
   id: TestingTypeEnum!
   title: String
-}
-
-"""Namespace for information related to authentication with Cypress Cloud"""
-type User {
-  authToken: String
-  email: String
-  name: String
 }
 
 """Namespace for information related to the viewer"""

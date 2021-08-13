@@ -50,27 +50,27 @@ export class RunGroup {
 
   @nxs.field.int()
   get totalPassed (): NxsResult<'Run', 'totalPassed'> {
-    return this.config.totalPassed
+    return this.config.totalPassed ?? null
   }
 
   @nxs.field.int()
   get totalFailed (): NxsResult<'Run', 'totalFailed'> {
-    return this.config.totalFailed
+    return this.config.totalFailed ?? null
   }
 
   @nxs.field.int()
   get totalPending (): NxsResult<'Run', 'totalPending'> {
-    return this.config.totalPending
+    return this.config.totalPending ?? null
   }
 
   @nxs.field.int()
   get totalSkipped (): NxsResult<'Run', 'totalSkipped'> {
-    return this.config.totalSkipped
+    return this.config.totalSkipped ?? null
   }
 
-  @nxs.field.nonNull.int()
+  @nxs.field.int()
   get totalDuration (): NxsResult<'Run', 'totalDuration'> {
-    return this.config.totalDuration
+    return this.config.totalDuration ?? null
   }
 
   @nxs.field.nonNull.type(() => RunCommit)

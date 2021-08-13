@@ -11,7 +11,6 @@ import type { DashboardProject } from "./../entities/DashboardProject"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { LocalProject } from "./../entities/LocalProject"
 import type { Query } from "./../entities/Query"
-import type { User } from "./../entities/User"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Viewer } from "./../entities/Viewer"
 import type { Wizard } from "./../entities/Wizard"
@@ -93,7 +92,6 @@ export interface NexusGenObjects {
   RunCommit: RunCommit;
   RunGroup: RunGroup;
   TestingTypeInfo: TestingTypeInfo;
-  User: User;
   Viewer: Viewer;
   Wizard: Wizard;
   WizardBundler: WizardBundler;
@@ -180,7 +178,7 @@ export interface NexusGenFieldTypes {
     completedAt: string; // String!
     createdAt: string; // String!
     status: NexusGenEnums['RunGroupStatus']; // RunGroupStatus!
-    totalDuration: number; // Int!
+    totalDuration: number | null; // Int
     totalFailed: number | null; // Int
     totalPassed: number | null; // Int
     totalPending: number | null; // Int
@@ -190,11 +188,6 @@ export interface NexusGenFieldTypes {
     description: string | null; // String
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     title: string | null; // String
-  }
-  User: { // field return type
-    authToken: string | null; // String
-    email: string | null; // String
-    name: string | null; // String
   }
   Viewer: { // field return type
     authToken: string; // String!
@@ -315,11 +308,6 @@ export interface NexusGenFieldTypeNames {
     description: 'String'
     id: 'TestingTypeEnum'
     title: 'String'
-  }
-  User: { // field return type name
-    authToken: 'String'
-    email: 'String'
-    name: 'String'
   }
   Viewer: { // field return type name
     authToken: 'String'
