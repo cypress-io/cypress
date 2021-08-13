@@ -1,5 +1,4 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { ProjectBase } from '../../../server/lib/project-base'
 import type { ProjectContract } from '../contracts/ProjectContract'
 import { Config } from './Config'
 
@@ -20,15 +19,11 @@ export class Project implements ProjectContract {
   }
 
   @nxs.field.string({
-    description: 'Used to associate project with Cypress cloud'
+    description: 'Used to associate project with Cypress cloud',
   })
-  async projectId (): Promise<NxsResult<'Project', 'projectId'>> {
-    const base = new ProjectBase({ 
-      projectRoot: this.meta.config.projectRoot,
-      testingType: 'e2e',
-      options: {}
-    })
-    return await base.getProjectId()
+  projectId (): NxsResult<'Project', 'projectId'> {
+    // TODO: Dynamic
+    return 'ypt4pf'
   }
 
   @nxs.field.nonNull.string()
