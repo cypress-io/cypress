@@ -1,26 +1,22 @@
+const wrapDevServer = require('../utils/wrap-devserver')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const findReactScriptsWebpackConfig = require('./findReactScriptsWebpackConfig')
 
-module.exports = (
-  on,
-  config, {
-    webpackConfigPath,
-  } = {
-    webpackConfigPath: 'react-scripts/config/webpack.config',
-  },
-) => {
-  on('dev-server:start', async (options) => {
-    return startDevServer({
-      options,
-      webpackConfig: findReactScriptsWebpackConfig(config, {
-        webpackConfigPath,
-      }),
-    })
+function startReactScriptsDevServer (options, {
+  webpackConfigPath,
+} = {
+  webpackConfigPath: 'react-scripts/config/webpack.config',
+}) {
+  return startDevServer({
+    options,
+    webpackConfig: findReactScriptsWebpackConfig(options.config, {
+      webpackConfigPath,
+    }),
   })
+}
 
+module.exports = wrapDevServer(startReactScriptsDevServer, (config) => {
   config.env.reactDevtools = true
 
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
   return config
-}
+})

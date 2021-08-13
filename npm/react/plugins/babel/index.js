@@ -1,12 +1,13 @@
+const wrapDevServer = require('../utils/wrap-devserver')
 const getBabelWebpackConfig = require('./getBabelWebpackConfig')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 
-module.exports = (on, config, moduleOptions) => {
-  on('dev-server:start', async (options) => {
-    return startDevServer({ options, webpackConfig: getBabelWebpackConfig(on, config, moduleOptions) })
-  })
+function startBabelDevServer (options, moduleOptions) {
+  return startDevServer({ options, webpackConfig: getBabelWebpackConfig(options.config, moduleOptions) })
+}
 
+module.exports = wrapDevServer(startBabelDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config
-}
+})

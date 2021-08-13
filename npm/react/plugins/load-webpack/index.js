@@ -1,5 +1,5 @@
-// @ts-check
 const path = require('path')
+const wrapDevServer = require('../utils/wrap-devserver')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const tryLoadWebpackConfig = require('../utils/tryLoadWebpackConfig')
 
@@ -10,26 +10,18 @@ function normalizeWebpackPath (config, webpackConfigPath) {
     : path.resolve(config.projectRoot, webpackConfigPath)
 }
 
-/**
- * Injects dev-server based on the webpack config file.
- *
- * **Important:** `webpackFilename` path is relative to the project root (cypress.json location)
- * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
- */
-function injectWebpackDevServer (on, config, { webpackFilename }) {
-  const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(config, webpackFilename))
+function startWebpackDevServer (options, { webpackFilename }) {
+  const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(options.config, webpackFilename))
 
   if (!webpackConfig) {
     throw new Error(`Can not load webpack config from path ${webpackFilename}.`)
   }
 
-  on('dev-server:start', async (options) => {
-    return startDevServer({ options, webpackConfig })
-  })
+  return startDevServer({ options, webpackConfig })
+}
 
+module.exports = wrapDevServer(startWebpackDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config
-}
-
-module.exports = injectWebpackDevServer
+})
