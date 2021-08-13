@@ -6,12 +6,10 @@
 </template>
 
 <script lang="ts" setup>
-// eva:checkmark-circle-2-fill
-import IconPass from 'virtual:vite-icons/eva/checkmark-circle-2-fill'
-// eva:close-circle-fill
-import IconFail from 'virtual:vite-icons/eva/close-circle-fill'
-// dashicons:warning
-import IconWarn from 'virtual:vite-icons/dashicons/warning'
+import IconPass from '../icons/pass.svg?component'
+import IconFail from '../icons/fail.svg?component'
+import IconWarn from '../icons/warn.svg?component'
+
 import ProgressCircle from "../components/progress/ProgressCircle.vue"
 import type { RunGroupStatus } from '../generated/graphql'
 
