@@ -2488,7 +2488,7 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
-  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => ConfigOptionsMergedWithTestingTypes | undefined | void)
+  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => Promise<ConfigOptionsMergedWithTestingTypes> | ConfigOptionsMergedWithTestingTypes | undefined | void)
 
   type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeEvents?: PluginsFunction }
   type TestingTypeConfigComponent = TestingTypeConfig & {
@@ -2496,7 +2496,7 @@ declare namespace Cypress {
      * Return the setup of your server
      * @param options the dev server options to pass directly to the dev-server
      */
-    setupDevServer(options: DevServerOptions): Promise<ResolvedDevServerConfig>
+    setupDevServer(options: DevServerOptions): Promise<ResolvedDevServerConfig> | ResolvedDevServerConfig
   }
 
   interface ResolvedConfigOptions {
