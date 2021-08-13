@@ -839,19 +839,19 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       delete hook.ctx.currentTest
     }
 
-    let test = getTest()
+    const test = getTestFromHookOrFindTest(hook)
+    // let test = getTestFromHook(hook)
 
-    // https://github.com/cypress-io/cypress/issues/9162
-    // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
-    // But it caused tests to hang when there's a failure in before().
-    // That's why getTest() is revived and checks if the state is 'pending'.
-    if (!test || test.state === 'pending') {
-      // set the hook's id from the test because
-      // hooks do not have their own id, their
-      // commands need to grouped with the test
-      // and we can only associate them by this id
-      test = getTestFromHookOrFindTest(hook)
-    }
+    // // https://github.com/cypress-io/cypress/issues/9162
+    // // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
+    // // But it caused tests to hang when there's a failure in before().
+    // // That's why getTest() is revived and checks if the state is 'pending'.
+    // if (!test || test.state === 'pending') {
+    //   // set the hook's id from the test because
+    //   // hooks do not have their own id, their
+    //   // commands need to grouped with the test
+    //   // and we can only associate them by this id
+    // }
 
     if (!test) {
       // we couldn't find a test to run with this hook
@@ -866,7 +866,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // make sure we set this test as the current now
     // else its possible that our TEST_AFTER_RUN_EVENT
     // will never fire if this failed in a before hook
-    // setTest(test)
+    setTest(test)
 
     return Cypress.action('runner:hook:start', wrap(hook))
   })
