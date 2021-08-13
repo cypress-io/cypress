@@ -2,7 +2,7 @@ const path = require('path')
 const wrapDevServer = require('../utils/wrap-devserver')
 const findNextWebpackConfig = require('./findNextWebpackConfig')
 
-function startNextDevServer (options, { webpackFilename }) {
+function startNextDevServer (options) {
   const webpackConfig = await findNextWebpackConfig(options.config)
 
   // require('webpack') now points to nextjs bundled version
