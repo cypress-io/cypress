@@ -617,7 +617,7 @@ commands:
         enum: ["", "electron", "chrome", "firefox"]
         default: ""
       video:
-        description: Change Cypress video option 
+        description: Cypress video option 
         type: boolean
         default: true
       command:
@@ -708,7 +708,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> -- -c video=<<parameters.video>> --browser <<parameters.browser>> 
+                        <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -732,7 +732,7 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>> -c video=<<parameters.video>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
