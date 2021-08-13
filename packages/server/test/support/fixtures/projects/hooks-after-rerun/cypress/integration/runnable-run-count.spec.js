@@ -11,6 +11,14 @@ function incrState (key) {
 }
 
 /**
+ * Nested hooks reruning when a global hook is present
+ * fix https://github.com/cypress-io/cypress/issues/17705
+ */
+before(() => {
+  /* */
+})
+
+/**
  * BeforeEach should be rerun again after domain switch
  * Before will run again after domain switch on the first test to run of a suite
  * After hook will always run on last test of a suite

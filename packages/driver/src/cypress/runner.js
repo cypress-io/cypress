@@ -866,7 +866,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // make sure we set this test as the current now
     // else its possible that our TEST_AFTER_RUN_EVENT
     // will never fire if this failed in a before hook
-    setTest(test)
+    // setTest(test)
 
     return Cypress.action('runner:hook:start', wrap(hook))
   })
