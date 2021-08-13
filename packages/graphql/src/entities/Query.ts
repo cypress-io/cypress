@@ -18,7 +18,6 @@ export class Query {
     description: 'Namespace for data accessible from Cypress Cloud for authenticated users',
   })
   viewer (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'viewer'> {
-    console.log('viewer is', ctx.viewer || null)
     return ctx.viewer ?? null
   }
 

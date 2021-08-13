@@ -127,7 +127,7 @@ module.exports = {
         height: 'browserHeight',
         x: 'browserX',
         y: 'browserY',
-        devTools: true // 'isBrowserDevToolsOpen',
+        devTools: 'isBrowserDevToolsOpen',
       },
       webPreferences: {
         sandbox: true,

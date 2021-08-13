@@ -9,20 +9,21 @@ import { RunGroup } from './run'
   description: 'A Cypress project is a container',
 })
 export class DashboardProject extends Project {
-  constructor(
+  constructor (
     config: ProjectContract,
-    private context: BaseContext, 
-    private authToken: string
+    private context: BaseContext,
+    private authToken: string,
   ) {
     super({ config: new Config(config) })
   }
 
   @nxs.field.list.nonNull.type(() => RunGroup)
   async runs (): Promise<NxsResult<'Project', 'run'>> {
-    const result = await this.context.actions.getRuns({ 
+    const result = await this.context.actions.getRuns({
       projectId: await this.projectId(),
-      authToken: this.authToken
+      authToken: this.authToken,
     })
+
     return result
   }
 }

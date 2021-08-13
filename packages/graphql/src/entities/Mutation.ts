@@ -119,12 +119,11 @@ export const mutation = mutationType({
       async resolve (_root, args, ctx) {
         // already authenticated this session - just return
         if (ctx.viewer) {
-          console.log('using cached user', ctx.viewer)
           return ctx.viewer
         }
 
         await ctx.actions.authenticate()
-        console.log('Created viewer!', ctx.viewer)
+
         return ctx.viewer
       },
     })
@@ -133,9 +132,8 @@ export const mutation = mutationType({
       type: 'Viewer',
       description: 'Log out of Cypress Cloud',
       async resolve (_root, args, ctx) {
-        console.log('deleting viewer!', ctx.viewer)
         await ctx.actions.logout()
-        console.log('deleted viewer!', ctx.viewer)
+
         return ctx.viewer
       },
     })

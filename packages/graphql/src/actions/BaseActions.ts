@@ -5,8 +5,6 @@ import type { BaseContext } from '../context/BaseContext'
 import type { ProjectContract } from '../contracts/ProjectContract'
 import { LocalProject } from '../entities/LocalProject'
 import { Config } from '../entities/Config'
-import type { Cfg } from '../../../server/lib/project-base'
-import type { Viewer } from '../entities'
 import type { RunGroup } from '../entities/run'
 
 /**
@@ -23,13 +21,13 @@ export abstract class BaseActions {
   abstract installDependencies (): void
 
   createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
-    // const project = this.ctx.activeProject
+    const project = this.ctx.activeProject
 
-    // if (!project) {
-    //   throw Error(`Cannot create config file without activeProject.`)
-    // }
+    if (!project) {
+      throw Error(`Cannot create config file without activeProject.`)
+    }
 
-    // fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
+    fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
   }
 
   /**
@@ -46,8 +44,8 @@ export abstract class BaseActions {
     const newProject = new LocalProject({
       config: new Config({
         projectRoot: input.projectRoot,
-        projectId: input.projectId
-      })
+        projectId: input.projectId,
+      }),
     })
 
     this.ctx.localProjects.push(newProject)

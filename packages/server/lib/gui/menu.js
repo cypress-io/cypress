@@ -11,7 +11,7 @@ let onLogOutClicked = function () {}
 module.exports = {
   set (options = {}) {
     _.defaults(options, {
-      withDevTools: true //  false,
+      withDevTools: false,
     })
 
     // this set by modes/interactive and needs to be preserved if the menu

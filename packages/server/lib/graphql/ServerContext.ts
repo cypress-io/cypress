@@ -16,8 +16,6 @@ export class ServerContext extends BaseContext {
       this.viewer = Object.keys(cachedUser).length > 0
         ? new Viewer(this, cachedUser)
         : null
-
-      console.log(this.viewer)
     })
   }
 
