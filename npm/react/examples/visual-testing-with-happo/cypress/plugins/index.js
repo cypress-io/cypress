@@ -1,11 +1,17 @@
-// load file preprocessor that comes with this plugin
+// @ts-check
+
+// load file setupDevServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install
-const preprocessor = require('@cypress/react/plugins/react-scripts')
+const setupDevServer = require('@cypress/react/plugins/react-scripts')
+// @ts-ignore
 const happoTask = require('happo-cypress/task')
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on, config) => {
   on('task', happoTask)
-  preprocessor(on, config)
+  setupDevServer(on, config)
 
   // IMPORTANT to return the config object
   // with the any changed environment variables

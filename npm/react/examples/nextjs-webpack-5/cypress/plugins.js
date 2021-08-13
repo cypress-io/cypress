@@ -1,3 +1,4 @@
+// @ts-check
 const injectNextDevServer = require('@cypress/react/plugins/next')
 
 /**
