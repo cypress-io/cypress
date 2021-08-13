@@ -616,6 +616,10 @@ commands:
         type: enum
         enum: ["", "electron", "chrome", "firefox"]
         default: ""
+      video:
+        description: Change Cypress video option 
+        type: boolean
+        default: true
       command:
         description: Test command to run to start Cypress tests
         type: string
@@ -704,7 +708,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> -- --browser <<parameters.browser>>
+                        <<parameters.command>> -- --browser <<parameters.browser>> -c video=<<parameters.video>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -1870,7 +1874,8 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-documentation
           browser: firefox
-          command: "yarn cypress run -c video=false"
+          command: "yarn cypress run"
+          video: false
           wait-on: http://localhost:3000
           server-start-command: yarn serve:dist
 
