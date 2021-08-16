@@ -1,5 +1,5 @@
 const path = require('path')
-const wrapDevServer = require('../utils/wrap-devserver')
+const returnInjectDevServerFunction = require('../utils/wrap-devserver')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const tryLoadWebpackConfig = require('../utils/tryLoadWebpackConfig')
 
@@ -20,7 +20,7 @@ function startWebpackDevServer (options, { webpackFilename }) {
   return startDevServer({ options, webpackConfig })
 }
 
-module.exports = wrapDevServer(startWebpackDevServer, (config) => {
+module.exports = returnInjectDevServerFunction(startWebpackDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config
