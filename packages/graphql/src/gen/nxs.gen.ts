@@ -121,6 +121,7 @@ export interface NexusGenFieldTypes {
   }
   DashboardProject: { // field return type
     config: NexusGenRootTypes['Config']; // Config!
+    description: string | null; // String
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -129,6 +130,7 @@ export interface NexusGenFieldTypes {
   }
   LocalProject: { // field return type
     config: NexusGenRootTypes['Config']; // Config!
+    description: string | null; // String
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -241,6 +243,7 @@ export interface NexusGenFieldTypeNames {
   }
   DashboardProject: { // field return type name
     config: 'Config'
+    description: 'String'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
@@ -249,6 +252,7 @@ export interface NexusGenFieldTypeNames {
   }
   LocalProject: { // field return type name
     config: 'Config'
+    description: 'String'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'

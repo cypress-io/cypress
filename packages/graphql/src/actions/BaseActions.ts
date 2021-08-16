@@ -41,18 +41,19 @@ export abstract class BaseActions {
       return existing
     }
 
-    const newProject = new LocalProject({
-      config: new Config({
-        projectRoot: input.projectRoot,
-        projectId: input.projectId,
-      }),
+    const config = new Config({
+      projectRoot: input.projectRoot,
+      projectId: input.projectId,
     })
+
+    const newProject = new LocalProject(config, this.ctx)
 
     this.ctx.localProjects.push(newProject)
 
     return newProject
   }
 
+  abstract getProjectId (projectRoot: string): Promise<string | null>
   abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectContract | Promise<ProjectContract>
   abstract authenticate (): Promise<void>
   abstract logout (): Promise<void>

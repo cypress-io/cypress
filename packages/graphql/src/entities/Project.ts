@@ -1,4 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
+import type { BaseContext } from '../context/BaseContext'
 import type { ProjectContract } from '../contracts/ProjectContract'
 import { Config } from './Config'
 
@@ -6,11 +7,16 @@ import { Config } from './Config'
   description: 'A Cypress project is a container',
 })
 export class Project implements ProjectContract {
-  constructor (private meta: { config: Config }) {}
+  constructor (private _config: Config, private ctx: BaseContext) {}
+
+  @nxs.field.nonNull.type(() => Config)
+  get config (): NxsResult<'Project', 'config'> {
+    return this._config
+  }
 
   @nxs.field.nonNull.id()
   id (): NxsResult<'Project', 'id'> {
-    return this.meta.config.projectRoot
+    return this.config.projectRoot
   }
 
   @nxs.field.nonNull.string()
@@ -21,18 +27,19 @@ export class Project implements ProjectContract {
   @nxs.field.string({
     description: 'Used to associate project with Cypress cloud',
   })
-  projectId (): NxsResult<'Project', 'projectId'> {
-    // TODO: Dynamic
-    return 'ypt4pf'
+  async description (): Promise<NxsResult<'Project', 'projectId'>> {
+    return await this.ctx.actions.getProjectId(this.projectRoot)
+  }
+
+  @nxs.field.string({
+    description: 'Used to associate project with Cypress cloud',
+  })
+  async projectId (): Promise<NxsResult<'Project', 'projectId'>> {
+    return await this.ctx.actions.getProjectId(this.projectRoot)
   }
 
   @nxs.field.nonNull.string()
   get projectRoot (): NxsResult<'Project', 'projectRoot'> {
     return this.config.projectRoot
-  }
-
-  @nxs.field.nonNull.type(() => Config)
-  get config (): NxsResult<'Project', 'config'> {
-    return this.meta.config
   }
 }
