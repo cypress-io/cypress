@@ -32,6 +32,9 @@ export class ClientTestActions extends BaseActions {
   async getRuns () {
     return []
   }
+  async getRecordKeys () {
+    return []
+  }
 }
 
 const createLocalProject = (ctx: ClientTestContext) => new LocalProject(new Config({ projectRoot: '/usr/dev/project' }), ctx)
