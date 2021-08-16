@@ -8,24 +8,20 @@ describe('App', () => {
       const { endpoint } = await initGraphql(context)
 
       const result = await makeRequest(endpoint, `
-        mutation Authenticate {
-          authenticate {
-            user {
-              email
-              name
-              authToken
-            }
+        mutation Login {
+          login {
+            email
+            name
+            authToken
           }
         }
       `)
 
       expect(result).to.eql({
-        authenticate: {
-          user: {
-            email: 'test@cypress.io',
-            name: 'cypress test',
-            authToken: 'test-auth-token',
-          },
+        login: {
+          email: 'test@cypress.io',
+          name: 'cypress test',
+          authToken: 'test-auth-token',
         },
       })
     })
