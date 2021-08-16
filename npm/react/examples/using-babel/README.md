@@ -36,7 +36,7 @@ See spec files [src/\*.spec.js](src). The specs are bundled using [.babelrc](.ba
 ```js
 // let's bundle spec files and the components they include using
 // the same bundling settings as the project by loading .babelrc
-const setupDevServer = require('@cypress/react/plugins/babelrc')
+const setupDevServer = require('@cypress/react/plugins/babel')
 module.exports = (on, config) => {
   setupDevServer(on, config)
   // IMPORTANT to return the config object
