@@ -35,6 +35,7 @@ type DashboardProject {
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
+  recordKeys: [String!]
   runs: [RunGroup!]
   title: String!
 }

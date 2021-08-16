@@ -57,8 +57,11 @@ import IconEyeOpen from 'virtual:vite-icons/mdi/eye-outline'
 import IconEyeClosed from 'virtual:vite-icons/mdi/eye-off-outline'
 import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
 
-const recordKey = ref('12e1oihd')
-const clipboard = useClipboard({ source: recordKey })
+const props = defineProps<{
+  recordKey: string
+}>()
+
+const clipboard = useClipboard({ source: ref(props.recordKey) })
 const openManageKeys = () => { }
 const showRecordKey = ref(false)
 const { t } = useI18n()

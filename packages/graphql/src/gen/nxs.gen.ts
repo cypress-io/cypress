@@ -125,6 +125,7 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
+    recordKeys: string[] | null; // [String!]
     runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
     title: string; // String!
   }
@@ -247,6 +248,7 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
+    recordKeys: 'String'
     runs: 'RunGroup'
     title: 'String'
   }

@@ -14,7 +14,7 @@
         readonly
         v-model="formattedProjectId"
       ></InlineCodeEditor>
-      <Button variant="outline" @click="clipboard.copy(projectId)">
+      <Button variant="outline" @click="clipboard.copy(gql?.projectId)">
         <template #prefix>
           <Icon class="text-cool-gray-600" :icon="IconDashedSquare" />
         </template>
@@ -26,6 +26,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue'
+import { gql } from '@urql/core'
 import "prismjs"
 import "@packages/reporter/src/errors/prism.scss"
 import IconCodeBraces from 'virtual:vite-icons/mdi/code-braces'
@@ -35,16 +36,22 @@ import SettingsSection from '../SettingsSection.vue'
 import { useClipboard } from '@vueuse/core'
 import InlineCodeEditor from '../../components/code/InlineCodeEditor.vue'
 import { useI18n } from '../../composables'
+import type { ProjectIdFragment } from '../../generated/graphql'
+
+gql`
+fragment ProjectId on LocalProject {
+  projectId
+}
+`
 
 const props = defineProps<{
-  mockClipboard?: any
+  mockClipboard?: any,
+  gql?: ProjectIdFragment
 }>()
 
-const projectId = ref('74e08848-f0f6-11eb-9a03-0242ac130003')
-// for testing - copy requires browser permissions and fails in chrome on CI otherwise.
-const clipboard = props.mockClipboard?.() || useClipboard({ source: projectId })
+const clipboard = props.mockClipboard?.() || useClipboard({ source: ref(props.gql?.projectId || '') })
 
-const formattedProjectId = computed(() => `projectId: '${projectId.value}'`)
+const formattedProjectId = computed(() => `projectId: '${props.gql?.projectId}'`)
 
 onMounted(() => import("prismjs/components/prism-yaml"))
 const { t } = useI18n()
