@@ -122,11 +122,6 @@ export const makeCypressPlugin = (
             // there could be other spec files to re-run
             // see https://github.com/cypress-io/cypress/issues/17691
           }
-
-          // to avoid circular updates, keep track of what we updated
-          if (mod.file) {
-            exploredFiles.add(mod.file)
-          }
         }
 
         // get all the modules that import the current one
@@ -144,7 +139,10 @@ function getImporters (modules: Set<ModuleNode>, alreadyExploredFiles: Set<strin
 
   modules.forEach((m) => {
     if (m.file && !alreadyExploredFiles.has(m.file)) {
-      m.importers.forEach((imp) => allImporters.add(imp))
+      alreadyExploredFiles.add(m.file)
+      m.importers.forEach((imp) => {
+        allImporters.add(imp)
+      })
     }
   })
 
