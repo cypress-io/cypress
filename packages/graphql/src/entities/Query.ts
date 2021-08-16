@@ -1,8 +1,8 @@
-import { nxs, NxsArgs, NxsQueryResult, NxsResult } from 'nexus-decorators'
+import { nxs, NxsQueryResult, NxsResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'
 import { NavigationMenu } from './NavigationMenu'
-import { User } from './User'
+import { Viewer } from './Viewer'
 import { Wizard } from './Wizard'
 
 @nxs.objectType({
@@ -12,6 +12,13 @@ export class Query {
   @nxs.field.nonNull.type(() => App)
   app (_: unknown, ctx: NexusGen['context']): NxsQueryResult<'app'> {
     return ctx.app
+  }
+
+  @nxs.field.type(() => Viewer, {
+    description: 'Namespace for data accessible from Cypress Cloud for authenticated users',
+  })
+  viewer (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'viewer'> {
+    return ctx.viewer ?? null
   }
 
   @nxs.field.type(() => Wizard, {
@@ -26,25 +33,5 @@ export class Query {
   })
   navigationMenu (args: unknown, ctx: NexusGenTypes['context']): NxsResult<'App', 'navigationMenu'> {
     return ctx.navigationMenu
-  }
-
-  @nxs.field.type(() => User, {
-    description: 'Namespace for user and authentication',
-  })
-  user (args: unknown, ctx: NexusGenTypes['context']): NxsResult<'App', 'user'> {
-    return ctx.user ?? null
-  }
-
-  @nxs.field.type(() => App, {
-    description: 'Get runs for a given projectId on Cypress Cloud',
-    args (t) {
-      t.nonNull.string('projectId')
-    },
-  })
-
-  async runs (args: NxsArgs<'Query', 'runs'>, ctx: NexusGenTypes['context']): Promise<NxsResult<'App', 'runs'>> {
-    await ctx.actions.getRuns({ projectId: args.projectId })
-
-    return ctx.app
   }
 }

@@ -1,4 +1,4 @@
-import { BaseActions, BaseContext, ProjectBaseContract } from '@packages/graphql'
+import { BaseActions, BaseContext, ProjectContract } from '@packages/graphql'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
@@ -13,7 +13,7 @@ export class ClientTestActions extends BaseActions {
     return
   }
 
-  createProjectBase (): ProjectBaseContract {
+  createProjectBase (): ProjectContract {
     return {
       isOpen: false,
       async initializePlugins () {

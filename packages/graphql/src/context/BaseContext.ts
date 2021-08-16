@@ -1,6 +1,5 @@
 import type { BaseActions } from '../actions/BaseActions'
-import { App, NavigationMenu, Wizard, User } from '../entities'
-import type { Project } from '../entities/Project'
+import { App, NavigationMenu, Wizard, LocalProject, Viewer, DashboardProject } from '../entities'
 
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.
@@ -11,16 +10,17 @@ import type { Project } from '../entities/Project'
  */
 export abstract class BaseContext {
   abstract readonly actions: BaseActions
-  abstract projects: Project[]
-  abstract user?: User = undefined
+  abstract localProjects: LocalProject[]
+  abstract dashboardProjects: DashboardProject[]
+  abstract viewer: null | Viewer
 
   wizard = new Wizard()
   navigationMenu = new NavigationMenu()
   app = new App(this)
 
-  isFirstOpen = false
-
   get activeProject () {
     return this.app.activeProject
   }
+
+  isFirstOpen = false
 }

@@ -1,1 +1,1 @@
-export * from './ProjectBaseContract'
+export * from './ProjectContract'

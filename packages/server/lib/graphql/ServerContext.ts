@@ -1,23 +1,24 @@
 import { ServerActions } from './ServerActions'
-import { Project, BaseContext, User, AuthenticatedUser } from '@packages/graphql'
+import { LocalProject, BaseContext, AuthenticatedUser, DashboardProject, Viewer } from '@packages/graphql'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)
-  user?: User
+  viewer: Viewer | null = null
 
   constructor () {
     super()
 
     user.get().then((cachedUser: AuthenticatedUser) => {
       // cache returns empty object if user is undefined
-      this.user = Object.keys(cachedUser).length > 0
-        ? new User(cachedUser)
-        : undefined
+      this.viewer = Object.keys(cachedUser).length > 0
+        ? new Viewer(this, cachedUser)
+        : null
     })
   }
 
-  projects: Project[] = []
+  localProjects: LocalProject[] = []
+  dashboardProjects: DashboardProject[] = []
 }

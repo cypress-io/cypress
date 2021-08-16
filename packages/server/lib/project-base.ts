@@ -33,7 +33,7 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import type { ProjectBaseContract } from '@packages/graphql'
+import type { ProjectContract } from '@packages/graphql'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -41,7 +41,7 @@ import type { ProjectBaseContract } from '@packages/graphql'
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
   Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'projectId'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -78,7 +78,7 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export type Server = ServerE2E | ServerCt
 
-export class ProjectBase<TServer extends Server> extends EE implements ProjectBaseContract {
+export class ProjectBase<TServer extends Server> extends EE implements ProjectContract {
   // id is sha256 of projectRoot
   public id: string
 

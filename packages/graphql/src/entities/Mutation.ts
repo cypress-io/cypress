@@ -75,9 +75,9 @@ export const mutation = mutationType({
       },
       description: 'Create a Cypress config file for a new project',
       resolve: (root, args, ctx) => {
-        if (!ctx.activeProject) {
-          throw Error('Cannot write config file without an active project')
-        }
+        // if (!ctx.activeProject) {
+        //   throw Error('Cannot write config file without an active project')
+        // }
 
         ctx.actions.createConfigFile({ ...args })
 
@@ -86,7 +86,7 @@ export const mutation = mutationType({
     })
 
     t.nonNull.field('addProject', {
-      type: 'Project',
+      type: 'LocalProject',
       description: 'Adds a new project to the app',
       args: {
         input: nonNull(
@@ -94,8 +94,7 @@ export const mutation = mutationType({
             name: 'AddProjectInput',
             definition (t) {
               t.nonNull.string('projectRoot')
-              t.nonNull.string('testingType')
-              t.nonNull.boolean('isCurrent')
+              t.string('projectId')
             },
           }),
         ),
@@ -114,37 +113,28 @@ export const mutation = mutationType({
       resolve: (root, args, ctx) => ctx.navigationMenu.setSelectedItem(args.type),
     })
 
-    t.field('authenticate', {
-      type: 'App',
+    t.field('login', {
+      type: 'Viewer',
       description: 'Auth with Cypress Cloud',
       async resolve (_root, args, ctx) {
         // already authenticated this session - just return
-        if (ctx.user) {
-          return ctx.app
+        if (ctx.viewer) {
+          return ctx.viewer
         }
 
         await ctx.actions.authenticate()
 
-        return ctx.app
+        return ctx.viewer
       },
     })
 
     t.field('logout', {
-      type: 'App',
+      type: 'Viewer',
       description: 'Log out of Cypress Cloud',
       async resolve (_root, args, ctx) {
         await ctx.actions.logout()
 
-        return ctx.app
-      },
-    })
-
-    t.field('initializePlugins', {
-      type: 'Project',
-      description: 'Initializes the plugins for the current active project',
-      async resolve (_root, args, ctx) {
-        // TODO: should we await here, or return a pending state to the client?
-        return await ctx.activeProject?.initializePlugins() ?? null
+        return ctx.viewer
       },
     })
   },
