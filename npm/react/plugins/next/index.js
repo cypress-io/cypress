@@ -1,5 +1,5 @@
 const path = require('path')
-const returnInjectDevServerFunction = require('../utils/wrap-devserver')
+const returnInjectDevServerFunction = require('../utils/return-injectdevserver-function')
 const findNextWebpackConfig = require('./findNextWebpackConfig')
 
 async function startNextDevServer (options) {

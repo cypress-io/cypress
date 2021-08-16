@@ -1,4 +1,4 @@
-const returnInjectDevServerFunction = require('../utils/wrap-devserver')
+const returnInjectDevServerFunction = require('../utils/return-injectdevserver-function')
 const getBabelWebpackConfig = require('./getBabelWebpackConfig')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 
