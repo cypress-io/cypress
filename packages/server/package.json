@@ -117,7 +117,7 @@
     "ts-node": "8.5.4",
     "tslib": "2.3.0",
     "underscore.string": "3.3.5",
-    "url-parse": "1.5.1",
+    "url-parse": "1.5.2",
     "uuid": "8.3.2",
     "which": "2.0.2",
     "widest-line": "3.1.0",

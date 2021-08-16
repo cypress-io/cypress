@@ -5,7 +5,7 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
-const { CdpAutomation } = require('./cdp_automation')
+const { CdpAutomation, screencastOpts } = require('./cdp_automation')
 const savedState = require('../saved_state')
 const utils = require('./utils')
 const errors = require('../errors')
@@ -62,7 +62,7 @@ const _getAutomation = function (win, options, parent) {
         return fn(message, data)
       }
 
-      await sendCommand('Page.startScreencast')
+      await sendCommand('Page.startScreencast', screencastOpts)
 
       const ret = await fn(message, data)
 
@@ -104,9 +104,7 @@ const _maybeRecordVideo = function (webContents, options) {
       }
     })
 
-    await webContents.debugger.sendCommand('Page.startScreencast', {
-      format: 'jpeg',
-    })
+    await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
   }
 }
 

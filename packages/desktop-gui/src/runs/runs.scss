@@ -22,6 +22,10 @@
 .first-run-instructions {
   padding: 40px 130px;
 
+  &.new-first-run-instructions {
+    padding: 40px 100px;
+  }
+
   a {
     cursor: pointer;
   }
@@ -46,6 +50,18 @@
       flex-shrink: 0;
       font-size: 13px;
       font-weight: normal;
+    }
+  }
+
+  .step {
+    display: flex;
+    font-weight: 400;
+    font-size: 14px;
+    margin: 20px 0 10px;
+    line-height: 18px;
+
+    .help-text {
+      margin-left: auto;
     }
   }
 
@@ -74,7 +90,8 @@
     margin-top: 25px;
     margin-bottom: 25px;
   }
-  h4, .center {
+
+  .center {
     text-align: center;
   }
 
@@ -84,6 +101,41 @@
     background-color: #252831;
     border-radius: 3px;
     color: #eee;
+  }
+
+  .subtitle {
+    color: #666;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  .panel-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+
+    .panel {
+      border: 1px solid #E5E5E5;
+      border-radius: 6px;
+      display: flex;
+      font-size: 13px;
+      padding: 12px;
+
+      p {
+        margin-bottom: 0;
+        text-align: left;
+      }
+
+      .panel-icon {
+        color: $brand-primary;
+        font-size: 18px;
+        padding-right: 12px;
+
+        &.panel-icon-small {
+          font-size: 16px;
+        }
+      }
+    }
   }
 }
 

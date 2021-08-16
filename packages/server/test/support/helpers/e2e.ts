@@ -788,6 +788,9 @@ const e2e = {
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
+          // disable frame skipping to make quick Chromium tests have matching snapshots/working video
+          CYPRESS_EVERY_NTH_FRAME: 1,
+
           // force file watching for use with --no-exit
           ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
