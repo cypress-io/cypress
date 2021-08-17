@@ -1,7 +1,7 @@
 import type { NxsMutationArgs } from 'nexus-decorators'
 import { ProjectBase } from '../project-base'
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, Viewer } from '@packages/graphql'
+import { AuthenticatedUser, BaseActions, LocalProject, TestingType, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
 
 // @ts-ignore
@@ -31,6 +31,22 @@ export class ServerActions extends BaseActions {
 
   installDependencies () {
     //
+  }
+
+  async initializePlugins () {
+  }
+
+  async initializeProject (projectRoot: string, testingType: TestingType, options: any = {}) {
+    const base = new ProjectBase({
+      projectRoot,
+      testingType,
+      options
+    })
+    return base
+  }
+
+  async setActiveProject (projectRoot: string, testingType: TestingType): Promise<LocalProject> {
+    
   }
 
   createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {

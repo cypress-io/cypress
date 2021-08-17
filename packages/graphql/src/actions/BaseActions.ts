@@ -6,6 +6,8 @@ import type { ProjectContract } from '../contracts/ProjectContract'
 import { LocalProject } from '../entities/LocalProject'
 import { Config } from '../entities/Config'
 import type { RunGroup } from '../entities/run'
+import type { TestingType } from '../constants'
+import type { ProjectBase } from '@packages/server/lib/project-base'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -19,6 +21,8 @@ export abstract class BaseActions {
   constructor (protected ctx: BaseContext) {}
 
   abstract installDependencies (): void
+  abstract initializePlugins (): Promise<void>
+  abstract initializeProject (projectRoot: string, testingType: TestingType, options?: any): Promise<ProjectBase<any>>
 
   createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
     const project = this.ctx.activeProject
@@ -52,6 +56,8 @@ export abstract class BaseActions {
 
     return newProject
   }
+
+  abstract setActiveProject (projectRoot: string, testingType: TestingType): Promise<LocalProject>
 
   abstract getProjectId (projectRoot: string): Promise<string | null>
   abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectContract | Promise<ProjectContract>

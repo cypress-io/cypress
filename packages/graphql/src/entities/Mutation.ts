@@ -137,5 +137,15 @@ export const mutation = mutationType({
         return ctx.viewer
       },
     })
+
+    t.field('initializePlugins', {
+      type: 'LocalProject',
+      description: '',
+      async resolve (_root, args, ctx) {
+        await ctx.activeProject?.initializePlugins()
+
+        return ctx.activeProject ?? null
+      },
+    })
   },
 })

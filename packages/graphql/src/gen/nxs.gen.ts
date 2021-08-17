@@ -133,6 +133,7 @@ export interface NexusGenFieldTypes {
     config: NexusGenRootTypes['Config']; // Config!
     description: string | null; // String
     id: string; // ID!
+    plugins: NexusGenEnums['PluginsState']; // PluginsState!
     projectId: string | null; // String
     projectRoot: string; // String!
     title: string; // String!
@@ -140,6 +141,7 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     addProject: NexusGenRootTypes['LocalProject']; // LocalProject!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
+    initializePlugins: NexusGenRootTypes['LocalProject'] | null; // LocalProject
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
@@ -256,6 +258,7 @@ export interface NexusGenFieldTypeNames {
     config: 'Config'
     description: 'String'
     id: 'ID'
+    plugins: 'PluginsState'
     projectId: 'String'
     projectRoot: 'String'
     title: 'String'
@@ -263,6 +266,7 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     addProject: 'LocalProject'
     appCreateConfigFile: 'App'
+    initializePlugins: 'LocalProject'
     login: 'Viewer'
     logout: 'Viewer'
     navigationMenuSetItem: 'NavigationMenu'

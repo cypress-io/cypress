@@ -6,6 +6,8 @@ import { LocalProject } from './LocalProject'
   description: 'Namespace for information related to the app',
 })
 export class App {
+  private activeProjectRoot?: string 
+
   constructor (private ctx: BaseContext) {}
 
   @nxs.field.nonNull.boolean({
@@ -19,8 +21,7 @@ export class App {
     description: 'Active project',
   })
   get activeProject (): NxsResult<'App', 'activeProject'> {
-    // TODO: Figure out how to model project and dashboard project relationship
-    return this.ctx.localProjects[0]!
+    return this.ctx.localProjects.find(x => x.projectRoot === this.activeProjectRoot) ?? null
   }
 
   @nxs.field.nonNull.list.nonNull.type(() => LocalProject, {
@@ -28,5 +29,9 @@ export class App {
   })
   get projects (): NxsResult<'App', 'projects'> {
     return this.ctx.localProjects
+  }
+
+  setActiveProject (projectRoot: string) {
+    this.activeProjectRoot = projectRoot
   }
 }

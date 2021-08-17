@@ -67,6 +67,9 @@ type LocalProject {
   description: String
   id: ID!
 
+  """State of plugins file that resolves configuration"""
+  plugins: PluginsState!
+
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
@@ -79,6 +82,9 @@ type Mutation {
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
+
+  """"""
+  initializePlugins: LocalProject
 
   """Auth with Cypress Cloud"""
   login: Viewer

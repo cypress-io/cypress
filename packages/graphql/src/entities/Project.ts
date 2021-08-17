@@ -7,7 +7,7 @@ import { Config } from './Config'
   description: 'A Cypress project is a container',
 })
 export class Project implements ProjectContract {
-  constructor (private _config: Config, private ctx: BaseContext) {}
+  constructor (private _config: Config, private _ctx: BaseContext) {}
 
   @nxs.field.nonNull.type(() => Config)
   get config (): NxsResult<'Project', 'config'> {
@@ -41,5 +41,9 @@ export class Project implements ProjectContract {
   @nxs.field.nonNull.string()
   get projectRoot (): NxsResult<'Project', 'projectRoot'> {
     return this.config.projectRoot
+  }
+
+  get ctx () {
+    return this._ctx
   }
 }
