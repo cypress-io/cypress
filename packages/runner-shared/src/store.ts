@@ -26,6 +26,14 @@ export abstract class BaseStore {
   }
 
   @action setSpecs (specs: Cypress.Cypress['spec'][]) {
+    const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
+
+    this.specs.forEach((oldSpec) => {
+      if (!newSpecsAbsolutes.has(oldSpec.absolute) && this.spec?.absolute === oldSpec.absolute) {
+        this.spec = undefined
+      }
+    })
+
     this.specs = specs
   }
 
