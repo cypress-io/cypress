@@ -17191,10 +17191,10 @@ electron-to-chromium@^1.3.247, electron-to-chromium@^1.3.378, electron-to-chromi
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.727.tgz#857e310ca00f0b75da4e1db6ff0e073cc4a91ddf"
   integrity sha512-Mfz4FIB4FSvEwBpDfdipRIrwd6uo8gUDoRDF4QEYb4h4tSuI3ov594OrjU6on042UlFHouIJpClDODGkPcBSbg==
 
-electron@13.1.7:
-  version "13.1.7"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-13.1.7.tgz#7e17f5c93a8d182a2a486884fed3dc34ab101be9"
-  integrity sha512-sVfpP/0s6a82FK32LMuEe9L+aWZw15u3uYn9xUJArPjy4OZHteE6yM5871YCNXNiDnoCLQ5eqQWipiVgHsf8nQ==
+electron@13.2.0:
+  version "13.2.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-13.2.0.tgz#54c8387359c6fa7aede2d06f9be21073afdfe616"
+  integrity sha512-ZnRm1WWhHIKyoNAKVz7nPOHG42v5dhe0uqFsGW5x/KLK8kikHEXIduRnC4Y2XanckHeUFI9tZddWVSIBgqGBGg==
   dependencies:
     "@electron/get" "^1.0.1"
     "@types/node" "^14.6.2"
