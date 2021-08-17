@@ -502,6 +502,7 @@ module.exports = {
     if (options.projectRoot) {
       serverContext.actions.addProject({
         projectRoot: options.projectRoot,
+        isActiveProject: true,
       })
 
       // serverContext.actions.addProject({

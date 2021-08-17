@@ -4,12 +4,13 @@ import * as Bluebird from 'bluebird'
 // TODO: Clean up this file
 
 // TODO: some of these types can be combined with cli/types/index.d.ts
+export const BROWSER_FAMILY = ['chromium', 'firefox'] as const
 
 type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
 
-type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-type BrowserFamily = 'chromium' | 'firefox'
+export type BrowserFamily = typeof BROWSER_FAMILY[number]
 
 export type PlatformName = 'darwin' | 'linux' | 'win32'
 

@@ -95,6 +95,7 @@ export const mutation = mutationType({
             definition (t) {
               t.nonNull.string('projectRoot')
               t.string('projectId')
+              t.boolean('isActiveProject')
             },
           }),
         ),
@@ -140,11 +141,21 @@ export const mutation = mutationType({
 
     t.field('initializePlugins', {
       type: 'LocalProject',
-      description: '',
+      description: 'initializes the plugins and sets the resolved configuration object on project base',
       async resolve (_root, args, ctx) {
-        await ctx.activeProject?.initializePlugins()
+        await ctx.activeProject?.initializePlugins() ?? null
 
-        return ctx.activeProject ?? null
+        return ctx.activeProject
+      },
+    })
+
+    t.field('initializeProject', {
+      type: 'LocalProject',
+      description: 'creates a new project base associated with the local project, wrapping existing (legacy) functionality',
+      resolve (_root, args, ctx) {
+        ctx.activeProject?.initializeProject() ?? null
+
+        return ctx.activeProject
       },
     })
   },

@@ -17,6 +17,7 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { Browser } from "./../entities/Browser"
 import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
 import type { RunCommit } from "./../entities/run/RunCommit"
@@ -53,15 +54,17 @@ declare global {
 
 export interface NexusGenInputs {
   AddProjectInput: { // input type
+    isActiveProject?: boolean | null; // Boolean
     projectId?: string | null; // String
     projectRoot: string; // String!
   }
 }
 
 export interface NexusGenEnums {
+  BrowserFamily: "chromium" | "firefox"
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
-  PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
+  PluginsState: "initialized" | "uninitialized"
   RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
@@ -82,6 +85,7 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   App: App;
+  Browser: Browser;
   Config: {};
   DashboardProject: DashboardProject;
   LocalProject: LocalProject;
@@ -112,12 +116,26 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 export interface NexusGenFieldTypes {
   App: { // field return type
     activeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
+    browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
+  }
+  Browser: { // field return type
+    channel: string; // String!
+    displayName: string; // String!
+    family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
+    isHeaded: boolean; // Boolean!
+    isHeadless: boolean; // Boolean!
+    majorVersion: string; // String!
+    name: string; // String!
+    path: string; // String!
+    version: string; // String!
   }
   Config: { // field return type
     projectId: string; // String!
     projectRoot: string; // String!
+    viewportHeight: number; // Int!
+    viewportWidth: number; // Int!
   }
   DashboardProject: { // field return type
     config: NexusGenRootTypes['Config']; // Config!
@@ -142,6 +160,7 @@ export interface NexusGenFieldTypes {
     addProject: NexusGenRootTypes['LocalProject']; // LocalProject!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializePlugins: NexusGenRootTypes['LocalProject'] | null; // LocalProject
+    initializeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
@@ -237,12 +256,26 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
     activeProject: 'LocalProject'
+    browsers: 'Browser'
     isFirstOpen: 'Boolean'
     projects: 'LocalProject'
+  }
+  Browser: { // field return type name
+    channel: 'String'
+    displayName: 'String'
+    family: 'BrowserFamily'
+    isHeaded: 'Boolean'
+    isHeadless: 'Boolean'
+    majorVersion: 'String'
+    name: 'String'
+    path: 'String'
+    version: 'String'
   }
   Config: { // field return type name
     projectId: 'String'
     projectRoot: 'String'
+    viewportHeight: 'Int'
+    viewportWidth: 'Int'
   }
   DashboardProject: { // field return type name
     config: 'Config'
@@ -267,6 +300,7 @@ export interface NexusGenFieldTypeNames {
     addProject: 'LocalProject'
     appCreateConfigFile: 'App'
     initializePlugins: 'LocalProject'
+    initializeProject: 'LocalProject'
     login: 'Viewer'
     logout: 'Viewer'
     navigationMenuSetItem: 'NavigationMenu'

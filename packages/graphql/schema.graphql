@@ -3,6 +3,7 @@
 
 
 input AddProjectInput {
+  isActiveProject: Boolean
   projectId: String
   projectRoot: String!
 }
@@ -12,6 +13,9 @@ type App {
   """Active project"""
   activeProject: LocalProject
 
+  """All known projects for the app"""
+  browsers: [Browser!]!
+
   """Whether this is the first open of the application or not"""
   isFirstOpen: Boolean!
 
@@ -19,9 +23,29 @@ type App {
   projects: [LocalProject!]!
 }
 
+"""Container representing a browser"""
+type Browser {
+  channel: String!
+  displayName: String!
+  family: BrowserFamily!
+  isHeaded: Boolean!
+  isHeadless: Boolean!
+  majorVersion: String!
+  name: String!
+  path: String!
+  version: String!
+}
+
+enum BrowserFamily {
+  chromium
+  firefox
+}
+
 type Config {
   projectId: String!
   projectRoot: String!
+  viewportHeight: Int!
+  viewportWidth: Int!
 }
 
 """A Cypress project is a container"""
@@ -83,8 +107,15 @@ type Mutation {
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
 
-  """"""
+  """
+  initializes the plugins and sets the resolved configuration object on project base
+  """
   initializePlugins: LocalProject
+
+  """
+  creates a new project base associated with the local project, wrapping existing (legacy) functionality
+  """
+  initializeProject: LocalProject
 
   """Auth with Cypress Cloud"""
   login: Viewer
@@ -142,9 +173,7 @@ type NavigationMenu {
 }
 
 enum PluginsState {
-  error
   initialized
-  initializing
   uninitialized
 }
 

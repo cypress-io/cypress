@@ -8,6 +8,8 @@ import { Config } from '../entities/Config'
 import type { RunGroup } from '../entities/run'
 import type { TestingType } from '../constants'
 import type { ProjectBase } from '@packages/server/lib/project-base'
+import type { Browser as TBrowser } from '@packages/server/lib/browsers/types'
+import type { Browser } from '../entities/Browser'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -21,7 +23,7 @@ export abstract class BaseActions {
   constructor (protected ctx: BaseContext) {}
 
   abstract installDependencies (): void
-  abstract initializePlugins (): Promise<void>
+  abstract initializePlugins (base: LocalProject, browsers: Browser[]): Promise<any>
   abstract initializeProject (projectRoot: string, testingType: TestingType, options?: any): Promise<ProjectBase<any>>
 
   createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
@@ -41,6 +43,10 @@ export abstract class BaseActions {
     // Prevent adding the existing project again
     const existing = this.ctx.localProjects.find((p) => p.projectRoot === input.projectRoot)
 
+    if (input.isActiveProject) {
+      this.setActiveProject(input.projectRoot, 'component')
+    }
+
     if (existing) {
       return existing
     }
@@ -57,7 +63,8 @@ export abstract class BaseActions {
     return newProject
   }
 
-  abstract setActiveProject (projectRoot: string, testingType: TestingType): Promise<LocalProject>
+  abstract setActiveProject (projectRoot: string, testingType: TestingType): LocalProject
+  abstract getBrowsers (): Promise<TBrowser[]>
 
   abstract getProjectId (projectRoot: string): Promise<string | null>
   abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectContract | Promise<ProjectContract>

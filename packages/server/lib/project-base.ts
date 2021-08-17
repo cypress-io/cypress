@@ -34,6 +34,7 @@ import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
 import type { ProjectContract } from '@packages/graphql'
+import type { Browser } from './browsers/types'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -688,7 +689,7 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
     return this.automation
   }
 
-  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
+  async initializeConfig (browsers: Browser[] = []): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {

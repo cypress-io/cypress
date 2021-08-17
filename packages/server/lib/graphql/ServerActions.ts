@@ -3,6 +3,7 @@ import { ProjectBase } from '../project-base'
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, LocalProject, TestingType, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
+import type { Browser as TBrowser } from '@packages/server/lib/browsers/types'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -12,6 +13,9 @@ import auth from '@packages/server/lib/gui/auth'
 
 // @ts-ignore
 import api from '@packages/server/lib/api'
+
+// @ts-ignore
+import browsers from '@packages/server/lib/browsers'
 
 import { getId } from '@packages/server/lib/project_static'
 
@@ -33,20 +37,52 @@ export class ServerActions extends BaseActions {
     //
   }
 
-  async initializePlugins () {
+  async initializePlugins (project: LocalProject) {
+    const cfg = project.projectBase.getConfig()
+    const resolvedConfig = await project.projectBase.initializePlugins(cfg)
+
+    return resolvedConfig
   }
 
   async initializeProject (projectRoot: string, testingType: TestingType, options: any = {}) {
     const base = new ProjectBase({
       projectRoot,
       testingType,
-      options
+      options,
     })
+
+    if (!this.ctx.app.browserCache) {
+      await this.ctx.app.cacheBrowsers()
+    }
+
+    await base.initializeConfig(
+      // we need to pass browsers - the getting of browsers and
+      // config initialization is now decoupled, but the legacy
+      // ProjectBase expects browsers to have been globally when
+      // #initializeConfig is called.
+      // @ts-ignore - something is wrong with types?
+      this.ctx.app.browserCache!.map((x) => {
+        return {
+          name: x.name,
+          family: x.family,
+          channel: x.channel,
+          displayName: x.displayName,
+          path: x.path,
+          version: x.version,
+          majorVersion: x.majorVersion,
+          isHeadless: x.isHeadless,
+          isHeaded: x.isHeaded,
+        }
+      }),
+    )
+
     return base
   }
 
-  async setActiveProject (projectRoot: string, testingType: TestingType): Promise<LocalProject> {
-    
+  setActiveProject (projectRoot: string, testingType: TestingType): LocalProject {
+    this.ctx.app.setActiveProject(projectRoot)
+
+    return this.ctx.app.activeProject!
   }
 
   createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
@@ -85,5 +121,9 @@ export class ServerActions extends BaseActions {
     const projectId: string = await getId(projectRoot)
 
     return projectId ?? null
+  }
+
+  getBrowsers (): Promise<TBrowser[]> {
+    return browsers.get()
   }
 }

@@ -13,4 +13,14 @@ export class Config {
   get projectRoot (): NxsResult<'Config', 'projectRoot'> {
     return this.config.projectRoot
   }
+
+  @nxs.field.nonNull.int()
+  get viewportHeight (): NxsResult<'Config', 'viewportHeight'> {
+    return this.config.viewportHeight
+  }
+
+  @nxs.field.nonNull.int()
+  get viewportWidth (): NxsResult<'Config', 'viewportWidth'> {
+    return this.config.viewportWidth
+  }
 }

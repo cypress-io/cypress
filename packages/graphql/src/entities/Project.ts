@@ -43,7 +43,11 @@ export class Project implements ProjectContract {
     return this.config.projectRoot
   }
 
-  get ctx () {
+  get ctx (): BaseContext {
     return this._ctx
+  }
+
+  setConfig (cfg: Config): void {
+    this._config = cfg
   }
 }
