@@ -13,6 +13,14 @@ import auth from '@packages/server/lib/gui/auth'
 // @ts-ignore
 import api from '@packages/server/lib/api'
 
+import { getId } from '@packages/server/lib/project_static'
+
+interface RecordKey {
+  id: string
+  createdAt: string
+  lastUsedAt: string
+}
+
 /**
  *
  */
@@ -49,5 +57,17 @@ export class ServerActions extends BaseActions {
     const runs = await api.getProjectRuns(projectId, authToken)
 
     return runs.map((run) => new RunGroup(run))
+  }
+
+  async getRecordKeys ({ projectId, authToken }: { projectId: string, authToken: string }): Promise<string[]> {
+    const keys: RecordKey[] = await api.getProjectRecordKeys(projectId, authToken)
+
+    return keys.map((x) => x.id)
+  }
+
+  async getProjectId (projectRoot: string) {
+    const projectId: string = await getId(projectRoot)
+
+    return projectId ?? null
   }
 }

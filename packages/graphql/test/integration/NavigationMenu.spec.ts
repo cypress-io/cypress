@@ -1,42 +1,10 @@
-import type { NxsMutationArgs } from 'nexus-decorators'
 import { expect } from 'chai'
 import snapshot from 'snap-shot-it'
 import axios from 'axios'
-import { BaseActions, BaseContext, Project, Wizard } from '../../src'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
 import type { NavigationItem } from '../../src/entities/NavigationItem'
-
-class TestActions extends BaseActions {
-  installDependencies () {}
-  createConfigFile () {}
-  createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
-    return new Project({
-      isCurrent: true,
-      projectRoot: '/foo/bar',
-      projectBase: {
-        isOpen: true,
-        initializePlugins: () => Promise.resolve(),
-      },
-    })
-  }
-}
-
-interface TestContextInjectionOptions {
-  wizard?: Wizard
-}
-
-class TestContext extends BaseContext {
-  projects: Project[] = []
-  readonly actions: BaseActions
-
-  constructor ({ wizard }: TestContextInjectionOptions = {}) {
-    super()
-    this.actions = new TestActions(this)
-    if (wizard) {
-      this.wizard = wizard
-    }
-  }
-}
+import type { BaseContext } from '../../src'
+import { TestContext } from './utils'
 
 /**
  * Creates a new GraphQL server to query during integration tests.

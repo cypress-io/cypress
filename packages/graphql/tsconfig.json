@@ -4,6 +4,7 @@
     "strict": true,
     "noImplicitAny": true,
     "allowJs": false,
+    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
     "importsNotUsedAsValues": "error"

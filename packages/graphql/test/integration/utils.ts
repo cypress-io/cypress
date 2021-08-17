@@ -1,47 +1,58 @@
-import type { NxsMutationArgs } from 'nexus-decorators'
 import axios from 'axios'
-import { BaseActions, BaseContext, Project, User, Wizard } from '../../src'
+import type { NxsMutationArgs } from 'nexus-decorators'
+import { BaseActions, BaseContext, DashboardProject, LocalProject, Viewer, Wizard } from '../../src'
+import { Config } from '../../src/entities/Config'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
 
-class TestActions extends BaseActions {
+interface TestContextInjectionOptions {
+  wizard?: Wizard
+}
+
+export class TestActions extends BaseActions {
+  ctx: BaseContext
+
+  constructor (_ctx: BaseContext) {
+    super(_ctx)
+    this.ctx = _ctx
+  }
+
+  installDependencies () {}
+  createConfigFile () {}
+  createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
+    return new LocalProject(
+      new Config({
+        projectRoot: '/foo/bar',
+      }),
+      this.ctx,
+    )
+  }
   async authenticate () {
-    this.ctx.user = new User({
+    this.ctx.viewer = new Viewer(this.ctx, {
       authToken: 'test-auth-token',
       email: 'test@cypress.io',
       name: 'cypress test',
     })
   }
 
-  async getRuns ({ projectId }: { projectId: string }) {}
-
   async logout () {
-    this.ctx.user = undefined
+    this.ctx.viewer = null
   }
-
-  installDependencies () {}
-
-  createConfigFile () {}
-
-  createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
-    return new Project({
-      isCurrent: true,
-      projectRoot: '/foo/bar',
-      projectBase: {
-        isOpen: true,
-        initializePlugins: () => Promise.resolve(),
-      },
-    })
+  async getProjectId () {
+    return 'test-project-id'
   }
-}
-
-interface TestContextInjectionOptions {
-  wizard?: Wizard
+  async getRuns () {
+    return []
+  }
+  async getRecordKeys () {
+    return []
+  }
 }
 
 export class TestContext extends BaseContext {
-  projects: Project[] = []
+  localProjects: LocalProject[] = []
+  dashboardProjects: DashboardProject[] = []
   readonly actions: BaseActions
-  user: undefined
+  viewer = null
 
   constructor ({ wizard }: TestContextInjectionOptions = {}) {
     super()

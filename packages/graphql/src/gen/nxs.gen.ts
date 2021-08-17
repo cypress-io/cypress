@@ -17,9 +17,9 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
-import type { RunGroup } from "./../entities/run/Run"
+import type { RunGroup } from "./../entities/run/Run.js"
 import type { NavigationItem } from "./../entities/NavigationItem"
-import type { RunCommit } from "./../entities/run/RunCommit"
+import type { RunCommit } from "./../entities/run/RunCommit.js"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -121,14 +121,17 @@ export interface NexusGenFieldTypes {
   }
   DashboardProject: { // field return type
     config: NexusGenRootTypes['Config']; // Config!
+    description: string | null; // String
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
+    recordKeys: string[] | null; // [String!]
     runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
     title: string; // String!
   }
   LocalProject: { // field return type
     config: NexusGenRootTypes['Config']; // Config!
+    description: string | null; // String
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -241,14 +244,17 @@ export interface NexusGenFieldTypeNames {
   }
   DashboardProject: { // field return type name
     config: 'Config'
+    description: 'String'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
+    recordKeys: 'String'
     runs: 'RunGroup'
     title: 'String'
   }
   LocalProject: { // field return type name
     config: 'Config'
+    description: 'String'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'

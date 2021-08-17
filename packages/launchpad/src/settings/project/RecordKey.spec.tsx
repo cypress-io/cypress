@@ -5,7 +5,7 @@ describe('<RecordKey />', () => {
     cy.viewport(800, 600)
     cy.mount(() => (
       <div class="py-4 px-8">
-        <RecordKey />
+        <RecordKey recordKey="aaa-bbb-ccc-ddd" />
       </div>
     ))
   })
