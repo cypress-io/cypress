@@ -25,7 +25,7 @@ export abstract class BaseStore {
     this.specRunId = nanoid()
   }
 
-  @action setSpecs (specs: Cypress.Cypress['spec'][]) {
+  @action checkCurrentSpecStillExists (specs: Cypress.Cypress['spec'][]) {
     const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
 
     this.specs.forEach((oldSpec) => {
@@ -33,6 +33,10 @@ export abstract class BaseStore {
         this.spec = undefined
       }
     })
+  }
+
+  @action setSpecs (specs: Cypress.Cypress['spec'][]) {
+    this.checkCurrentSpecStillExists(specs)
 
     this.specs = specs
   }
