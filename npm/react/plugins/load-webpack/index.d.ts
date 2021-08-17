@@ -1,8 +1,8 @@
 interface AdditionalOptions {
-	/**
-	 * Location of the weppack.config Cypress should use
-	 */
-	 webpackFilename?: string
+  /**
+   * Location of the weppack.config Cypress should use
+   */
+   webpackFilename?: string
 }
 
 /**
