@@ -151,3 +151,15 @@ pre.copy-to-clipboard {
     }
   }
 }
+
+.cy-tooltip {
+  &.tooltip-text-left {
+    text-align: left;
+  }
+
+  .tooltip-code {
+    color: #fff;
+    background-color: #252831;
+    border: none;
+  }
+}

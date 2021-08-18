@@ -122,11 +122,6 @@ export const makeCypressPlugin = (
             // there could be other spec files to re-run
             // see https://github.com/cypress-io/cypress/issues/17691
           }
-
-          // to avoid circular updates, keep track of what we updated
-          if (mod.file) {
-            exploredFiles.add(mod.file)
-          }
         }
 
         // get all the modules that import the current one
@@ -139,12 +134,21 @@ export const makeCypressPlugin = (
   }
 }
 
+/**
+ * Gets all the modules that import the set of modules passed in parameters
+ * @param modules the set of module whose dependents to return
+ * @param alreadyExploredFiles set of files that have already been looked at and should be avoided in case of circular dependency
+ * @returns a set of ModuleMode that import directly the current modules
+ */
 function getImporters (modules: Set<ModuleNode>, alreadyExploredFiles: Set<string>): Set<ModuleNode> {
   const allImporters = new Set<ModuleNode>()
 
   modules.forEach((m) => {
     if (m.file && !alreadyExploredFiles.has(m.file)) {
-      m.importers.forEach((imp) => allImporters.add(imp))
+      alreadyExploredFiles.add(m.file)
+      m.importers.forEach((imp) => {
+        allImporters.add(imp)
+      })
     }
   })
 

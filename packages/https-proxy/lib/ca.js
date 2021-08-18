@@ -20,7 +20,6 @@ const {
 const generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair)
 
 const ipAddressRe = /^[\d\.]+$/
-const asterisksRe = /\*/g
 
 const CAattrs = [{
   name: 'commonName',
@@ -119,6 +118,10 @@ const ServerExtensions = [{
   name: 'subjectKeyIdentifier',
 }]
 
+function hostnameToFilename (hostname) {
+  return hostname.replace(/\*/g, '_')
+}
+
 class CA {
   constructor (caFolder) {
     if (!caFolder) {
@@ -167,9 +170,9 @@ class CA {
       this.CAkeys = keys
 
       return Promise.all([
-        fs.outputFileAsync(path.join(this.certsFolder, 'ca.pem'), pki.certificateToPem(cert)),
-        fs.outputFileAsync(path.join(this.keysFolder, 'ca.private.key'), pki.privateKeyToPem(keys.privateKey)),
-        fs.outputFileAsync(path.join(this.keysFolder, 'ca.public.key'), pki.publicKeyToPem(keys.publicKey)),
+        fs.outputFileAsync(this.getCACertPath(), pki.certificateToPem(cert)),
+        fs.outputFileAsync(this.getCAPrivateKeyPath(), pki.privateKeyToPem(keys.privateKey)),
+        fs.outputFileAsync(this.getCAPublicKeyPath(), pki.publicKeyToPem(keys.publicKey)),
         this.writeCAVersion(),
       ])
     })
@@ -177,9 +180,9 @@ class CA {
 
   loadCA () {
     return Promise.props({
-      certPEM: fs.readFileAsync(path.join(this.certsFolder, 'ca.pem'), 'utf-8'),
-      keyPrivatePEM: fs.readFileAsync(path.join(this.keysFolder, 'ca.private.key'), 'utf-8'),
-      keyPublicPEM: fs.readFileAsync(path.join(this.keysFolder, 'ca.public.key'), 'utf-8'),
+      certPEM: fs.readFileAsync(this.getCACertPath(), 'utf-8'),
+      keyPrivatePEM: fs.readFileAsync(this.getCAPrivateKeyPath(), 'utf-8'),
+      keyPublicPEM: fs.readFileAsync(this.getCAPublicKeyPath(), 'utf-8'),
     })
     .then((results) => {
       this.CAcert = pki.certificateFromPem(results.certPEM)
@@ -231,27 +234,57 @@ class CA {
     const keyPrivatePem = pki.privateKeyToPem(keysServer.privateKey)
     const keyPublicPem = pki.publicKeyToPem(keysServer.publicKey)
 
-    const dest = mainHost.replace(asterisksRe, '_')
+    const baseFilename = hostnameToFilename(mainHost)
 
     return Promise.all([
-      fs.outputFileAsync(path.join(this.certsFolder, `${dest}.pem`), certPem),
-      fs.outputFileAsync(path.join(this.keysFolder, `${dest}.key`), keyPrivatePem),
-      fs.outputFileAsync(path.join(this.keysFolder, `${dest}.public.key`), keyPublicPem),
+      fs.outputFileAsync(this.getCertPath(baseFilename), certPem),
+      fs.outputFileAsync(this.getPrivateKeyPath(baseFilename), keyPrivatePem),
+      fs.outputFileAsync(this.getPublicKeyPath(baseFilename), keyPublicPem),
     ])
     .return([certPem, keyPrivatePem])
   }
 
-  getCertificateKeysForHostname (hostname) {
-    const dest = hostname.replace(asterisksRe, '_')
+  clearDataForHostname (hostname) {
+    const baseFilename = hostnameToFilename(hostname)
 
     return Promise.all([
-      fs.readFileAsync(path.join(this.certsFolder, `${dest}.pem`)),
-      fs.readFileAsync(path.join(this.keysFolder, `${dest}.key`)),
+      fs.remove(this.getCertPath(baseFilename)),
+      fs.remove(this.getPrivateKeyPath(baseFilename)),
+      fs.remove(this.getPublicKeyPath(baseFilename)),
     ])
+  }
+
+  getCertificateKeysForHostname (hostname) {
+    const baseFilename = hostnameToFilename(hostname)
+
+    return Promise.all([
+      fs.readFileAsync(this.getCertPath(baseFilename)),
+      fs.readFileAsync(this.getPrivateKeyPath(baseFilename)),
+    ])
+  }
+
+  getPrivateKeyPath (baseFilename) {
+    return path.join(this.keysFolder, `${baseFilename}.key`)
+  }
+
+  getPublicKeyPath (baseFilename) {
+    return path.join(this.keysFolder, `${baseFilename}.public.key`)
+  }
+
+  getCertPath (baseFilename) {
+    return path.join(this.certsFolder, `${baseFilename}.pem`)
   }
 
   getCACertPath () {
     return path.join(this.certsFolder, 'ca.pem')
+  }
+
+  getCAPrivateKeyPath () {
+    return path.join(this.keysFolder, 'ca.private.key')
+  }
+
+  getCAPublicKeyPath () {
+    return path.join(this.keysFolder, 'ca.public.key')
   }
 
   getCAVersionPath () {
@@ -286,7 +319,7 @@ class CA {
   static create (caFolder) {
     const ca = new CA(caFolder)
 
-    return fs.statAsync(path.join(ca.certsFolder, 'ca.pem'))
+    return fs.statAsync(ca.getCACertPath())
     .bind(ca)
     .then(ca.assertMinimumCAVersion)
     .tapCatch(ca.removeAll)
