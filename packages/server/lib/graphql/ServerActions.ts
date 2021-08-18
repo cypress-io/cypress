@@ -13,7 +13,11 @@ import auth from '@packages/server/lib/gui/auth'
 // @ts-ignore
 import api from '@packages/server/lib/api'
 
+// @ts-ignore
+import browsers from '@packages/server/lib/browsers'
+
 import { getId } from '@packages/server/lib/project_static'
+import { FoundBrowser } from '@packages/launcher'
 
 interface RecordKey {
   id: string
@@ -69,5 +73,9 @@ export class ServerActions extends BaseActions {
     const projectId: string = await getId(projectRoot)
 
     return projectId ?? null
+  }
+
+  getBrowsers (): Promise<FoundBrowser[]> {
+    return browsers.get()
   }
 }

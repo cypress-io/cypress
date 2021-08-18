@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { NxsMutationArgs } from 'nexus-decorators'
+import type { FoundBrowser } from '@packages/launcher'
 import { BaseActions, BaseContext, DashboardProject, LocalProject, Viewer, Wizard } from '../../src'
 import { Config } from '../../src/entities/Config'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
@@ -37,6 +38,7 @@ export class TestActions extends BaseActions {
   async logout () {
     this.ctx.viewer = null
   }
+
   async getProjectId () {
     return 'test-project-id'
   }
@@ -45,6 +47,20 @@ export class TestActions extends BaseActions {
   }
   async getRecordKeys () {
     return []
+  }
+
+  async getBrowsers () {
+    const browser: FoundBrowser = {
+      displayName: 'chrome',
+      family: 'chromium',
+      majorVersion: '1.0.0',
+      name: 'chrome',
+      channel: 'dev',
+      version: '1.0.0',
+      path: '/dev/chrome',
+    }
+
+    return [browser]
   }
 }
 

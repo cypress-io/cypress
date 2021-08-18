@@ -17,6 +17,7 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { Browser } from "./../entities/Browser"
 import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
 import type { RunCommit } from "./../entities/run/RunCommit"
@@ -59,6 +60,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  BrowserFamily: "chromium" | "firefox"
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
@@ -82,6 +84,7 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   App: App;
+  Browser: Browser;
   Config: {};
   DashboardProject: DashboardProject;
   LocalProject: LocalProject;
@@ -112,8 +115,20 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 export interface NexusGenFieldTypes {
   App: { // field return type
     activeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
+    browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
+  }
+  Browser: { // field return type
+    channel: string; // String!
+    displayName: string; // String!
+    family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
+    isHeaded: boolean; // Boolean!
+    isHeadless: boolean; // Boolean!
+    majorVersion: string; // String!
+    name: string; // String!
+    path: string; // String!
+    version: string; // String!
   }
   Config: { // field return type
     projectId: string; // String!
@@ -235,8 +250,20 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
     activeProject: 'LocalProject'
+    browsers: 'Browser'
     isFirstOpen: 'Boolean'
     projects: 'LocalProject'
+  }
+  Browser: { // field return type name
+    channel: 'String'
+    displayName: 'String'
+    family: 'BrowserFamily'
+    isHeaded: 'Boolean'
+    isHeadless: 'Boolean'
+    majorVersion: 'String'
+    name: 'String'
+    path: 'String'
+    version: 'String'
   }
   Config: { // field return type name
     projectId: 'String'
