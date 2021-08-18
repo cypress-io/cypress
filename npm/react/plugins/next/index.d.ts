@@ -1,5 +1,5 @@
 /**
- * Setups a Cypress component testing environment for your NextJs application
+ * Sets up a Cypress component testing environment for your NextJs application
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
  */
