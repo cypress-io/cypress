@@ -8,6 +8,20 @@ import fs from 'fs'
 
 import { startDevServer } from '../'
 
+const touch = (path, callback) => {
+  const time = new Date()
+
+  fs.utimes(path, time, time, (err) => {
+    if (err) {
+      return fs.open(path, 'w', (err, fd) => {
+        err ? callback(err) : fs.close(fd, callback)
+      })
+    }
+
+    callback()
+  })
+}
+
 const requestSpecFile = (port: number) => {
   return new Promise((res) => {
     const opts = {
@@ -87,9 +101,13 @@ describe('#startDevServer', () => {
       },
     })
 
-    return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:success', () => {
-        close(() => res())
+    return new Promise<void>((res) => {
+      touch(`${root}/test/fixtures/foo.spec.js`, () => res())
+    }).then(() => {
+      return new Promise((res) => {
+        devServerEvents.on('dev-server:compile:success', () => {
+          close(() => res())
+        })
       })
     })
   })
