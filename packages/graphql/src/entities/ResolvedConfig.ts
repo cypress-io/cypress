@@ -20,12 +20,15 @@ class ResolvedOption {
     return this.resolveFromConfig.value.toString()
   }
 
-  @nxs.field.string() // type(() => ResolvedConfigOptionEnum)
+  @nxs.field.type(() => ResolvedConfigOptionEnum)
   get from () {
     return this.resolveFromConfig.from
   }
 }
 
+@nxs.objectType({
+  description: 'Resolve config for a project',
+})
 export class ResolvedConfig {
   constructor (private resolvedConfig: ResolvedConfigurationOptions) {}
 
