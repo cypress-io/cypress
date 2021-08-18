@@ -1,5 +1,5 @@
 /**
- * Inject a dev server for using Cypress compoennt testing with CRACO (https://github.com/gsoft-inc/craco)
+ * Setup a dev server for using Cypress compoennt testing with CRACO (https://github.com/gsoft-inc/craco)
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
  * @param cracoConfig the object exported of your craco.config.js file

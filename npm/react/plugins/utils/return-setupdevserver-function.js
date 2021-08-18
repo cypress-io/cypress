@@ -1,4 +1,4 @@
-module.exports = function returnInjectDevServerFunction (devServer, postProcessConfig = () => {}) {
+module.exports = function returnSetupDevServerFunction (devServer, postProcessConfig = () => {}) {
   return (...args) => {
     // Old CT plugin signature: setupDevServer(on, config)
     if (typeof args[0] === 'function') {

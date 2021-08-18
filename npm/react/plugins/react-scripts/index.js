@@ -1,4 +1,4 @@
-const returnInjectDevServerFunction = require('../utils/return-injectdevserver-function')
+const returnSetupDevServerFunction = require('../utils/return-setupdevserver-function')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const findReactScriptsWebpackConfig = require('./findReactScriptsWebpackConfig')
 
@@ -15,7 +15,7 @@ function startReactScriptsDevServer (options, {
   })
 }
 
-module.exports = returnInjectDevServerFunction(startReactScriptsDevServer, (config) => {
+module.exports = returnSetupDevServerFunction(startReactScriptsDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config

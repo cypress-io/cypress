@@ -10,7 +10,7 @@ interface AdditionalOptions {
 }
 
 /**
- * Inject a webpack dev server with the proper configuration for babel transpilation
+ * Setup a webpack dev server with the proper configuration for babel transpilation
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
  * @param additionalOptions additional options object (create an empty object it to see how to use it)

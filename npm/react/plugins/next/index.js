@@ -1,5 +1,5 @@
 const path = require('path')
-const returnInjectDevServerFunction = require('../utils/return-injectdevserver-function')
+const returnSetupDevServerFunction = require('../utils/return-setupdevserver-function')
 const findNextWebpackConfig = require('./findNextWebpackConfig')
 
 async function startNextDevServer (options) {
@@ -15,7 +15,7 @@ async function startNextDevServer (options) {
   })
 }
 
-module.exports = returnInjectDevServerFunction(startNextDevServer, (config) => {
+module.exports = returnSetupDevServerFunction(startNextDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config
