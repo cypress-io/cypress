@@ -19,6 +19,17 @@ const debug = Debug('cypress:server:config')
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars } from './util/config'
 
+export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime'] as const
+
+export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
+
+export type ResolvedConfigurationOptions = Partial<{
+  [x in keyof Cypress.ResolvedConfigOptions]: {
+    from: ResolvedConfigurationOptionSource
+    value: ResolvedConfigurationOptionSource
+  }
+}>
+
 export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 
 export const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
