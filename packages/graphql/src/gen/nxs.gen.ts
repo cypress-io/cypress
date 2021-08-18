@@ -20,8 +20,8 @@ import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
 import type { Browser } from "./../entities/Browser"
 import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
+import type { ResolvedConfig, ResolvedOption } from "./../entities/ResolvedConfig"
 import type { RunCommit } from "./../entities/run/RunCommit"
-import type { ResolvedOption } from "./../entities/ResolvedConfig"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -61,6 +61,7 @@ export interface NexusGenEnums {
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
+  ResolvedConfigOption: "config" | "default" | "env" | "plugin" | "runtime"
   RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
@@ -88,7 +89,7 @@ export interface NexusGenObjects {
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
   Query: Query;
-  ResolvedConfig: {};
+  ResolvedConfig: ResolvedConfig;
   ResolvedOption: ResolvedOption;
   RunCommit: RunCommit;
   RunGroup: RunGroup;
@@ -223,7 +224,7 @@ export interface NexusGenFieldTypes {
     watchForFileChanges: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
   }
   ResolvedOption: { // field return type
-    from: string | null; // String
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
     value: string | null; // String
   }
   RunCommit: { // field return type
@@ -403,7 +404,7 @@ export interface NexusGenFieldTypeNames {
     watchForFileChanges: 'ResolvedOption'
   }
   ResolvedOption: { // field return type name
-    from: 'String'
+    from: 'ResolvedConfigOption'
     value: 'String'
   }
   RunCommit: { // field return type name

@@ -160,6 +160,7 @@ type Query {
   wizard: Wizard
 }
 
+"""Resolve config for a project"""
 type ResolvedConfig {
   animationDistanceThreshold: ResolvedOption
   baseUrl: ResolvedOption
@@ -211,8 +212,16 @@ type ResolvedConfig {
   watchForFileChanges: ResolvedOption
 }
 
+enum ResolvedConfigOption {
+  config
+  default
+  env
+  plugin
+  runtime
+}
+
 type ResolvedOption {
-  from: String
+  from: ResolvedConfigOption
   value: String
 }
 
