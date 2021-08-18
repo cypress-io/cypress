@@ -203,7 +203,14 @@ export function allowed (obj = {}) {
   return _.pick(obj, propertyNames)
 }
 
-export function get (projectRoot, options = {}) {
+export type FullConfig = 
+  Cypress.RuntimeConfigOptions & 
+  Cypress.ResolvedConfigOptions &
+  { 
+    resolved: ResolvedConfigurationOptions
+  }
+
+export function get (projectRoot, options = {}): Promise<FullConfig> {
   return Promise.all([
     settings.read(projectRoot, options).then(validateFile('cypress.json')),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),

@@ -500,9 +500,7 @@ module.exports = {
     startGraphQLServer()
 
     if (options.projectRoot) {
-      serverContext.actions.addProject({
-        projectRoot: options.projectRoot,
-      })
+      await serverContext.actions.addProject(options.projectRoot).initialize()
 
       // serverContext.actions.addProject({
       //   projectRoot: options.projectRoot.replace('launchpad', 'runner'),

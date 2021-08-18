@@ -21,6 +21,7 @@ import type { Browser } from "./../entities/Browser"
 import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
 import type { RunCommit } from "./../entities/run/RunCommit"
+import type { ResolvedOption } from "./../entities/ResolvedConfig"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -53,10 +54,6 @@ declare global {
 }
 
 export interface NexusGenInputs {
-  AddProjectInput: { // input type
-    projectId?: string | null; // String
-    projectRoot: string; // String!
-  }
 }
 
 export interface NexusGenEnums {
@@ -85,13 +82,14 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   App: App;
   Browser: Browser;
-  Config: {};
   DashboardProject: DashboardProject;
   LocalProject: LocalProject;
   Mutation: {};
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
   Query: Query;
+  ResolvedConfig: {};
+  ResolvedOption: ResolvedOption;
   RunCommit: RunCommit;
   RunGroup: RunGroup;
   TestingTypeInfo: TestingTypeInfo;
@@ -128,13 +126,7 @@ export interface NexusGenFieldTypes {
     path: string; // String!
     version: string; // String!
   }
-  Config: { // field return type
-    projectId: string; // String!
-    projectRoot: string; // String!
-  }
   DashboardProject: { // field return type
-    config: NexusGenRootTypes['Config']; // Config!
-    description: string | null; // String
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -143,15 +135,13 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   LocalProject: { // field return type
-    config: NexusGenRootTypes['Config']; // Config!
-    description: string | null; // String
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
+    resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     title: string; // String!
   }
   Mutation: { // field return type
-    addProject: NexusGenRootTypes['LocalProject']; // LocalProject!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     init: NexusGenRootTypes['App'] | null; // App
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
@@ -181,6 +171,60 @@ export interface NexusGenFieldTypes {
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+  }
+  ResolvedConfig: { // field return type
+    animationDistanceThreshold: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    baseUrl: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    blockHosts: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    chromeWebSecurity: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    componentFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    defaultCommandTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    downloadsFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    env: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    execTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    experimentalFetchPolyfill: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    experimentalInteractiveRunEvents: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    experimentalSessionSupport: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    experimentalSourceRewriting: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    experimentalStudio: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    fileServerFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    fixturesFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    ignoreTestFiles: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    includeShadowDom: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    integrationFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    nodeVersion: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    numTestsKeptInMemory: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    pageLoadTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    pluginsFile: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    port: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    projectId: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    redirectionLimit: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    reporter: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    requestTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    resolvedNodePath: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    resolvedNodeVersion: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    retries: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    screenshotOnRunFailure: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    screenshotsFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    scrollBehavior: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    supportFile: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    supportFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    taskTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    testFiles: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    trashAssetsBeforeRuns: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    userAgent: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    video: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    videoCompression: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    videoUploadOnPasses: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    videosFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    viewportHeight: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    viewportWidth: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    waitForAnimations: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+    watchForFileChanges: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
+  }
+  ResolvedOption: { // field return type
+    from: string | null; // String
+    value: string | null; // String
   }
   RunCommit: { // field return type
     authorEmail: string; // String!
@@ -262,13 +306,7 @@ export interface NexusGenFieldTypeNames {
     path: 'String'
     version: 'String'
   }
-  Config: { // field return type name
-    projectId: 'String'
-    projectRoot: 'String'
-  }
   DashboardProject: { // field return type name
-    config: 'Config'
-    description: 'String'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
@@ -277,15 +315,13 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   LocalProject: { // field return type name
-    config: 'Config'
-    description: 'String'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
+    resolvedConfig: 'ResolvedConfig'
     title: 'String'
   }
   Mutation: { // field return type name
-    addProject: 'LocalProject'
     appCreateConfigFile: 'App'
     init: 'App'
     login: 'Viewer'
@@ -315,6 +351,60 @@ export interface NexusGenFieldTypeNames {
     navigationMenu: 'NavigationMenu'
     viewer: 'Viewer'
     wizard: 'Wizard'
+  }
+  ResolvedConfig: { // field return type name
+    animationDistanceThreshold: 'ResolvedOption'
+    baseUrl: 'ResolvedOption'
+    blockHosts: 'ResolvedOption'
+    chromeWebSecurity: 'ResolvedOption'
+    componentFolder: 'ResolvedOption'
+    defaultCommandTimeout: 'ResolvedOption'
+    downloadsFolder: 'ResolvedOption'
+    env: 'ResolvedOption'
+    execTimeout: 'ResolvedOption'
+    experimentalFetchPolyfill: 'ResolvedOption'
+    experimentalInteractiveRunEvents: 'ResolvedOption'
+    experimentalSessionSupport: 'ResolvedOption'
+    experimentalSourceRewriting: 'ResolvedOption'
+    experimentalStudio: 'ResolvedOption'
+    fileServerFolder: 'ResolvedOption'
+    fixturesFolder: 'ResolvedOption'
+    ignoreTestFiles: 'ResolvedOption'
+    includeShadowDom: 'ResolvedOption'
+    integrationFolder: 'ResolvedOption'
+    nodeVersion: 'ResolvedOption'
+    numTestsKeptInMemory: 'ResolvedOption'
+    pageLoadTimeout: 'ResolvedOption'
+    pluginsFile: 'ResolvedOption'
+    port: 'ResolvedOption'
+    projectId: 'ResolvedOption'
+    redirectionLimit: 'ResolvedOption'
+    reporter: 'ResolvedOption'
+    requestTimeout: 'ResolvedOption'
+    resolvedNodePath: 'ResolvedOption'
+    resolvedNodeVersion: 'ResolvedOption'
+    retries: 'ResolvedOption'
+    screenshotOnRunFailure: 'ResolvedOption'
+    screenshotsFolder: 'ResolvedOption'
+    scrollBehavior: 'ResolvedOption'
+    supportFile: 'ResolvedOption'
+    supportFolder: 'ResolvedOption'
+    taskTimeout: 'ResolvedOption'
+    testFiles: 'ResolvedOption'
+    trashAssetsBeforeRuns: 'ResolvedOption'
+    userAgent: 'ResolvedOption'
+    video: 'ResolvedOption'
+    videoCompression: 'ResolvedOption'
+    videoUploadOnPasses: 'ResolvedOption'
+    videosFolder: 'ResolvedOption'
+    viewportHeight: 'ResolvedOption'
+    viewportWidth: 'ResolvedOption'
+    waitForAnimations: 'ResolvedOption'
+    watchForFileChanges: 'ResolvedOption'
+  }
+  ResolvedOption: { // field return type name
+    from: 'String'
+    value: 'String'
   }
   RunCommit: { // field return type name
     authorEmail: 'String'
@@ -382,9 +472,6 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
-    addProject: { // args
-      input: NexusGenInputs['AddProjectInput']; // AddProjectInput!
-    }
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
@@ -428,7 +515,7 @@ export interface NexusGenTypeInterfaces {
 
 export type NexusGenObjectNames = keyof NexusGenObjects;
 
-export type NexusGenInputNames = keyof NexusGenInputs;
+export type NexusGenInputNames = never;
 
 export type NexusGenEnumNames = keyof NexusGenEnums;
 

@@ -2,11 +2,6 @@
 ### Do not make changes to this file directly
 
 
-input AddProjectInput {
-  projectId: String
-  projectRoot: String!
-}
-
 """Namespace for information related to the app"""
 type App {
   """Active project"""
@@ -38,17 +33,8 @@ enum BrowserFamily {
   firefox
 }
 
-type Config {
-  projectId: String!
-  projectRoot: String!
-}
-
 """A Cypress project is a container"""
 type DashboardProject {
-  config: Config!
-
-  """Used to associate project with Cypress cloud"""
-  description: String
   id: ID!
 
   """Used to associate project with Cypress cloud"""
@@ -80,22 +66,16 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 
 """A Cypress project is a container"""
 type LocalProject {
-  config: Config!
-
-  """Used to associate project with Cypress cloud"""
-  description: String
   id: ID!
 
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
+  resolvedConfig: ResolvedConfig
   title: String!
 }
 
 type Mutation {
-  """Adds a new project to the app"""
-  addProject(input: AddProjectInput!): LocalProject!
-
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
 
@@ -178,6 +158,62 @@ type Query {
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard
+}
+
+type ResolvedConfig {
+  animationDistanceThreshold: ResolvedOption
+  baseUrl: ResolvedOption
+  blockHosts: ResolvedOption
+  chromeWebSecurity: ResolvedOption
+  componentFolder: ResolvedOption
+  defaultCommandTimeout: ResolvedOption
+  downloadsFolder: ResolvedOption
+  env: ResolvedOption
+  execTimeout: ResolvedOption
+  experimentalFetchPolyfill: ResolvedOption
+  experimentalInteractiveRunEvents: ResolvedOption
+  experimentalSessionSupport: ResolvedOption
+  experimentalSourceRewriting: ResolvedOption
+  experimentalStudio: ResolvedOption
+  fileServerFolder: ResolvedOption
+  fixturesFolder: ResolvedOption
+  ignoreTestFiles: ResolvedOption
+  includeShadowDom: ResolvedOption
+  integrationFolder: ResolvedOption
+  nodeVersion: ResolvedOption
+  numTestsKeptInMemory: ResolvedOption
+  pageLoadTimeout: ResolvedOption
+  pluginsFile: ResolvedOption
+  port: ResolvedOption
+  projectId: ResolvedOption
+  redirectionLimit: ResolvedOption
+  reporter: ResolvedOption
+  requestTimeout: ResolvedOption
+  resolvedNodePath: ResolvedOption
+  resolvedNodeVersion: ResolvedOption
+  retries: ResolvedOption
+  screenshotOnRunFailure: ResolvedOption
+  screenshotsFolder: ResolvedOption
+  scrollBehavior: ResolvedOption
+  supportFile: ResolvedOption
+  supportFolder: ResolvedOption
+  taskTimeout: ResolvedOption
+  testFiles: ResolvedOption
+  trashAssetsBeforeRuns: ResolvedOption
+  userAgent: ResolvedOption
+  video: ResolvedOption
+  videoCompression: ResolvedOption
+  videoUploadOnPasses: ResolvedOption
+  videosFolder: ResolvedOption
+  viewportHeight: ResolvedOption
+  viewportWidth: ResolvedOption
+  waitForAnimations: ResolvedOption
+  watchForFileChanges: ResolvedOption
+}
+
+type ResolvedOption {
+  from: String
+  value: String
 }
 
 """Represents a commit on run on Cypress Cloud"""

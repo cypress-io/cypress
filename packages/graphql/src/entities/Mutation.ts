@@ -1,8 +1,5 @@
-import { inputObjectType, mutationType, nonNull } from 'nexus'
+import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
-
-// @ts-ignore
-import * as config from '@packages/server/lib/config'
 
 export const mutation = mutationType({
   definition (t) {
@@ -88,27 +85,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.field('addProject', {
-      type: 'LocalProject',
-      description: 'Adds a new project to the app',
-      args: {
-        input: nonNull(
-          inputObjectType({
-            name: 'AddProjectInput',
-            definition (t) {
-              t.nonNull.string('projectRoot')
-              t.string('projectId')
-            },
-          }),
-        ),
-      },
-      async resolve (_root, args, ctx) {
-        const addedProject = await ctx.actions.addProject(args.input)
-
-        return addedProject
-      },
-    })
-
     t.field('navigationMenuSetItem', {
       type: 'NavigationMenu',
       description: 'Set the current navigation item',
@@ -145,9 +121,6 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Log out of Cypress Cloud',
       async resolve (_root, args, ctx) {
-        console.log(
-          await config.get(ctx.app.activeProject?.projectRoot, {})
-        )
         return ctx.app
       },
     })
