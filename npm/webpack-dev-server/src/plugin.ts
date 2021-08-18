@@ -150,7 +150,15 @@ export default class CypressCTOptionsPlugin {
    * @param module
    */
   sendSuccessEventIfSpecRecursively (module: Module) {
-    const updatedSpecFile = this.files.find((file) => module.identifier().endsWith(file.absolute))
+    const identifier = module.identifier()
+
+    if (this.supportFile && identifier.endsWith(this.supportFile)) {
+      this.devServerEvents.emit('dev-server:compile:success')
+
+      return
+    }
+
+    const updatedSpecFile = this.files.find((file) => identifier.endsWith(file.absolute))
 
     if (updatedSpecFile) {
       this.devServerEvents.emit('dev-server:compile:success', { specFile: updatedSpecFile.absolute })
