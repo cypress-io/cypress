@@ -39,7 +39,7 @@ export class Browser implements BrowserContract {
   }
 
   @nxs.field.string()
-  get majorVersion (): NxsResult<'Browser', 'majorVersion'> {
+  get majorVersion (): NxsResult<'Browser', 'major'> {
     return this.config.majorVersion?.toString() ?? null
   }
 }

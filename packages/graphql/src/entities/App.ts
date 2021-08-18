@@ -7,7 +7,7 @@ import { Browser } from './Browser'
   description: 'Namespace for information related to the app',
 })
 export class App {
-  private _browserCache: Browser[] = []
+  private _browserCache?: Browser[]
 
   constructor (private ctx: BaseContext) {}
 
@@ -56,6 +56,6 @@ export class App {
   }
 
   get browserCache (): Browser[] | null {
-    return this._browserCache.length ? this._browserCache : null
+    return this._browserCache ? this._browserCache : null
   }
 }
