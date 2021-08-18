@@ -1,8 +1,8 @@
-const _ = require('lodash')
-const toBoolean = require('underscore.string/toBoolean')
+import _ from 'lodash'
+import toBoolean from 'underscore.string/toBoolean'
 
 // https://github.com/cypress-io/cypress/issues/6810
-const toArray = (value) => {
+const toArray = (value: any) => {
   const valueIsNotStringOrArray = typeof (value) !== 'string' || (value[0] !== '[' && value[value.length - 1] !== ']')
 
   if (valueIsNotStringOrArray) {
@@ -28,7 +28,7 @@ const toArray = (value) => {
 // toArray() above doesn't handle JSON string properly.
 // For example, '[{a:b,c:d},{e:f,g:h}]' isn't the parsed object but ['{a:b', 'c:d}', '{e:f', 'g:h}']. It's useless.
 // Because of that, we check if the value is a JSON string.
-const fromJson = (value) => {
+const fromJson = (value: string) => {
   try {
     return JSON.parse(value)
   } catch (e) {
@@ -36,7 +36,7 @@ const fromJson = (value) => {
   }
 }
 
-module.exports = (value) => {
+export const coerce = (value: string) => {
   const num = _.toNumber(value)
 
   if (_.invoke(num, 'toString') === value) {

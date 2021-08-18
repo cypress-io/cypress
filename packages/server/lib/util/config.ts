@@ -4,7 +4,7 @@ import {
   CYPRESS_ENV_PREFIX_LENGTH,
   CYPRESS_RESERVED_ENV_VARS,
 } from '../config'
-import coerce from './coerce'
+import { coerce } from './coerce'
 
 export const isDefault = (config: Record<string, any>, prop: string) => {
   return config.resolved[prop].from === 'default'
@@ -12,6 +12,10 @@ export const isDefault = (config: Record<string, any>, prop: string) => {
 
 export const getProcessEnvVars = (obj: NodeJS.ProcessEnv) => {
   return _.reduce(obj, (memo, value, key) => {
+    if (!value) {
+      return memo
+    }
+
     if (isCypressEnvLike(key)) {
       memo[removeEnvPrefix(key)] = coerce(value)
     }
