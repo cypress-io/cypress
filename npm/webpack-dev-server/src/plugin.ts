@@ -1,11 +1,11 @@
-import webpack, { Compiler } from 'webpack'
+import webpack from 'webpack'
+// eslint-disable-next-line no-duplicate-imports
+import type { Compiler, Compilation, Module } from 'webpack'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 import semver from 'semver'
 import fs, { PathLike } from 'fs'
 import path from 'path'
-// eslint-disable-next-line no-duplicate-imports
-import type { Compilation } from 'webpack'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
@@ -44,6 +44,7 @@ export default class CypressCTOptionsPlugin {
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
+  private refreshCompile: boolean = false
 
   constructor (options: CypressCTOptionsPluginOptionsWithEmitter) {
     this.files = options.files
@@ -60,7 +61,7 @@ export default class CypressCTOptionsPlugin {
     }
   };
 
-  private setupCustomHMR = (compiler: webpack.Compiler) => {
+  private setupCustomHMR = (compiler: Compiler) => {
     compiler.hooks.afterCompile.tap(
       'CypressCTOptionsPlugin',
       (compilation) => {
@@ -85,12 +86,10 @@ export default class CypressCTOptionsPlugin {
       },
     )
 
-    compiler.hooks.afterEmit.tap(
+    compiler.hooks.done.tap(
       'CypressCTOptionsPlugin',
-      (compilation) => {
-        if (!compilation.getStats().hasErrors()) {
-          this.devServerEvents.emit('dev-server:compile:success')
-        }
+      () => {
+        this.refreshCompile = true
       },
     )
   }
@@ -127,10 +126,41 @@ export default class CypressCTOptionsPlugin {
       'CypressCTOptionsPlugin',
       (context) => this.pluginFunc(context as CypressCTWebpackContext),
     )
+
+    compilation.hooks.succeedModule.tap(
+      'CypressCTOptionsPlugin',
+      (module) => {
+        // only run refreshes after first compile is done
+        if (this.refreshCompile) {
+          this.sendSuccessEventIfSpecRecursively(module)
+        }
+      },
+    )
   };
 
   apply (compiler: Compiler): void {
     this.setupCustomHMR(compiler)
     compiler.hooks.compilation.tap('CypressCTOptionsPlugin', (compilation) => this.plugin(compilation as Webpack45Compilation))
+  }
+
+  /**
+   * If the current module is in the spec list,
+   * send a `dev-server:compile:success` event.
+   * If it is not try its issuer
+   * @param module
+   */
+  sendSuccessEventIfSpecRecursively (module: Module) {
+    const updatedSpecFile = this.files.find((file) => module.identifier().endsWith(file.absolute))
+
+    if (updatedSpecFile) {
+      this.devServerEvents.emit('dev-server:compile:success', { specFile: updatedSpecFile.absolute })
+    }
+
+    const issuer = module.issuer
+
+    // if we are not an entry point
+    if (issuer) {
+      this.sendSuccessEventIfSpecRecursively(issuer)
+    }
   }
 }
