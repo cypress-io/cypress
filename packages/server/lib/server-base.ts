@@ -182,49 +182,47 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    return Bluebird.try(() => {
-      if (!config.baseUrl && testingType === 'component') {
-        throw new Error('ServerCt#open called without config.baseUrl.')
-      }
+    if (!config.baseUrl && testingType === 'component') {
+      throw new Error('ServerCt#open called without config.baseUrl.')
+    }
 
-      const app = this.createExpressApp(config)
+    const app = this.createExpressApp(config)
 
-      logger.setSettings(config)
+    logger.setSettings(config)
 
-      this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
-      })
-
-      this._socket = new SocketCtor(config) as TSocket
-
-      clientCertificates.loadClientCertificateConfig(config)
-
-      const getRemoteState = () => {
-        return this._getRemoteState()
-      }
-
-      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
-
-      if (config.experimentalSourceRewriting) {
-        createInitialWorkers()
-      }
-
-      this.createHosts(config.hosts)
-
-      createRoutes({
-        app,
-        config,
-        specsStore,
-        getRemoteState,
-        nodeProxy: this.nodeProxy,
-        networkProxy: this._networkProxy!,
-        onError,
-        getSpec,
-        getCurrentBrowser,
-      })
-
-      return this.createServer(app, config, onWarning)
+    this._nodeProxy = httpProxy.createProxyServer({
+      target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
     })
+
+    this._socket = new SocketCtor(config) as TSocket
+
+    clientCertificates.loadClientCertificateConfig(config)
+
+    const getRemoteState = () => {
+      return this._getRemoteState()
+    }
+
+    this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+    if (config.experimentalSourceRewriting) {
+      createInitialWorkers()
+    }
+
+    this.createHosts(config.hosts)
+
+    createRoutes({
+      app,
+      config,
+      specsStore,
+      getRemoteState,
+      nodeProxy: this.nodeProxy,
+      networkProxy: this._networkProxy!,
+      onError,
+      getSpec,
+      getCurrentBrowser,
+    })
+
+    return this.createServer(app, config, onWarning)
   }
 
   createExpressApp (config) {
@@ -258,7 +256,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(require('morgan')('dev'))
+      app.use(this.useMorgan())
     }
 
     // errorhandler
@@ -268,6 +266,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.disable('x-powered-by')
 
     return app
+  }
+
+  useMorgan () {
+    return require('morgan')('dev')
   }
 
   getHttpServer () {
@@ -611,5 +613,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
     return this.socket.sendSpecList(specs, testingType)
+  }
+
+  // used for testing
+  __setMiddleware (middleware: any) {
+    this._middleware = middleware
   }
 }
