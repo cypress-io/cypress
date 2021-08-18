@@ -6,7 +6,7 @@ interface AdditionalOptions {
 }
 
 /**
- * Setups a Cypress component testing environment for your Create React App environment
+ * Sets up a Cypress component testing environment for your Create React App environment
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
  * @param additionalOptions additional options object (create an empty object to see how to use it)
