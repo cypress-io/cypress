@@ -118,7 +118,7 @@ const JSONOrCoerce = (str) => {
   }
 
   // nupe :-(
-  return coerceUtil(str)
+  return coerceUtil.coerce(str)
 }
 
 const sanitizeAndConvertNestedArgs = (str, argname) => {
@@ -213,7 +213,7 @@ module.exports = {
       cwd: process.cwd(),
       testingType: 'e2e',
     })
-    .mapValues(coerceUtil)
+    .mapValues(coerceUtil.coerce)
     .value()
 
     debug('argv parsed: %o', options)
