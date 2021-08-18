@@ -123,9 +123,7 @@ export interface NexusGenFieldTypes {
     channel: string; // String!
     displayName: string; // String!
     family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
-    isHeaded: boolean; // Boolean!
-    isHeadless: boolean; // Boolean!
-    majorVersion: string; // String!
+    majorVersion: string | null; // String
     name: string; // String!
     path: string; // String!
     version: string; // String!
@@ -258,8 +256,6 @@ export interface NexusGenFieldTypeNames {
     channel: 'String'
     displayName: 'String'
     family: 'BrowserFamily'
-    isHeaded: 'Boolean'
-    isHeadless: 'Boolean'
     majorVersion: 'String'
     name: 'String'
     path: 'String'

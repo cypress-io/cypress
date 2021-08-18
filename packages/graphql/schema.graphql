@@ -12,7 +12,7 @@ type App {
   """Active project"""
   activeProject: LocalProject
 
-  """All known projects for the app"""
+  """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]!
 
   """Whether this is the first open of the application or not"""
@@ -27,9 +27,7 @@ type Browser {
   channel: String!
   displayName: String!
   family: BrowserFamily!
-  isHeaded: Boolean!
-  isHeadless: Boolean!
-  majorVersion: String!
+  majorVersion: String
   name: String!
   path: String!
   version: String!

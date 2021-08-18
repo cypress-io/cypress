@@ -2,8 +2,6 @@ import { nxs, NxsResult } from 'nexus-decorators'
 import { BrowserFamilyEnum } from '../constants'
 import type { BrowserContract } from '../contracts/BrowserContract'
 
-export const browserContactProps = ['name', 'family', 'channel', 'displayName', 'name', 'path', 'version', 'isHeaded', 'isHeadless', 'majorVersion'] as const
-
 @nxs.objectType({
   description: 'Container representing a browser',
 })
@@ -40,18 +38,8 @@ export class Browser implements BrowserContract {
     return this.config.version
   }
 
-  @nxs.field.nonNull.boolean()
-  get isHeaded (): NxsResult<'Browser', 'isHeaded'> {
-    return this.config.isHeaded
-  }
-
-  @nxs.field.nonNull.boolean()
-  get isHeadless (): NxsResult<'Browser', 'isHeadless'> {
-    return this.config.isHeadless
-  }
-
-  @nxs.field.nonNull.string()
+  @nxs.field.string()
   get majorVersion (): NxsResult<'Browser', 'majorVersion'> {
-    return this.config.majorVersion.toString()
+    return this.config.majorVersion?.toString() ?? null
   }
 }
