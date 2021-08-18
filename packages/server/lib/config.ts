@@ -19,15 +19,17 @@ const debug = Debug('cypress:server:config')
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars } from './util/config'
 
-export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime'] as const
+export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
 
+export type ResolvedFromConfig = {
+  from: ResolvedConfigurationOptionSource
+  value: ResolvedConfigurationOptionSource
+}
+
 export type ResolvedConfigurationOptions = Partial<{
-  [x in keyof Cypress.ResolvedConfigOptions]: {
-    from: ResolvedConfigurationOptionSource
-    value: ResolvedConfigurationOptionSource
-  }
+  [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
 }>
 
 export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
@@ -326,7 +328,7 @@ export function setResolvedConfigValues (config, defaults, resolved) {
 // Given an object "resolvedObj" and a list of overrides in "obj"
 // marks all properties from "obj" inside "resolvedObj" using
 // {value: obj.val, from: "plugin"}
-export function setPluginResolvedOn (resolvedObj, obj) {
+export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Record<string, any>) {
   return _.each(obj, (val, key) => {
     if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
       // recurse setting overrides
@@ -334,10 +336,12 @@ export function setPluginResolvedOn (resolvedObj, obj) {
       return setPluginResolvedOn(resolvedObj[key], val)
     }
 
-    resolvedObj[key] = {
+    const valueFrom: ResolvedFromConfig = {
       value: val,
       from: 'plugin',
     }
+
+    resolvedObj[key] = valueFrom
   })
 }
 
@@ -367,7 +371,7 @@ export function updateWithPluginValues (cfg, overrides) {
     originalResolvedBrowsers = {
       value: cfg.browsers,
       from: 'default',
-    }
+    } as ResolvedFromConfig
   }
 
   const diffs = deepDiff(cfg, overrides, true)
@@ -427,7 +431,7 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
   .pick(publicConfigKeys)
   .mapValues((val, key) => {
     let r
-    const source = (s) => {
+    const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
       return {
         value: val,
         from: s,
@@ -719,7 +723,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
         resolved[cfgKey] = {
           value: val,
           from: 'env',
-        }
+        } as ResolvedFromConfig
       }
 
       memo.push(key)
@@ -747,7 +751,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
 }
 
 export function getResolvedRuntimeConfig (config, runtimeConfig) {
-  const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v) => ({ value: v, from: 'runtime' }))
+  const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v): ResolvedFromConfig => ({ value: v, from: 'runtime' }))
 
   return {
     ...config,
