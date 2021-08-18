@@ -484,7 +484,7 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
-  start (options, bus, { startGraphQL } = { startGraphQL: true }) {
+  async start (options, bus, { startGraphQL } = { startGraphQL: true }) {
     // curry left options
     ipc.on('request', _.partial(this.handleEvent, options, bus))
 
@@ -508,6 +508,10 @@ module.exports = {
       //   projectRoot: options.projectRoot.replace('launchpad', 'runner'),
       // })
     }
+
+    // find and cache browsers.
+    // browsers are needed for when we initialize the project's configuration.
+    await serverContext.app.cacheBrowsers()
 
     ipc.on('graphql', async (evt, { id, params, variables }) => {
       try {

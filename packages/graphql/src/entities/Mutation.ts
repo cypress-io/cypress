@@ -1,6 +1,9 @@
 import { inputObjectType, mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
 
+// @ts-ignore
+import * as config from '@packages/server/lib/config'
+
 export const mutation = mutationType({
   definition (t) {
     // TODO(tim): in nexus, support for t.wizard(...)
@@ -135,6 +138,17 @@ export const mutation = mutationType({
         await ctx.actions.logout()
 
         return ctx.viewer
+      },
+    })
+
+    t.field('init', {
+      type: 'App',
+      description: 'Log out of Cypress Cloud',
+      async resolve (_root, args, ctx) {
+        console.log(
+          await config.get(ctx.app.activeProject?.projectRoot, {})
+        )
+        return ctx.app
       },
     })
   },
