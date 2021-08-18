@@ -6,6 +6,7 @@ import type { ProjectContract } from '../contracts/ProjectContract'
 import { LocalProject } from '../entities/LocalProject'
 import { Config } from '../entities/Config'
 import type { RunGroup } from '../entities/run'
+import type { FoundBrowser } from '@packages/launcher'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -60,4 +61,5 @@ export abstract class BaseActions {
 
   abstract getRuns (payload: { projectId: string, authToken: string }): Promise<RunGroup[]>
   abstract getRecordKeys (payload: { projectId: string, authToken: string }): Promise<string[]>
+  abstract getBrowsers (): Promise<FoundBrowser[]>
 }

@@ -12,11 +12,30 @@ type App {
   """Active project"""
   activeProject: LocalProject
 
+  """Browsers found that are compatible with Cypress"""
+  browsers: [Browser!]!
+
   """Whether this is the first open of the application or not"""
   isFirstOpen: Boolean!
 
   """All known projects for the app"""
   projects: [LocalProject!]!
+}
+
+"""Container representing a browser"""
+type Browser {
+  channel: String!
+  displayName: String!
+  family: BrowserFamily!
+  majorVersion: String
+  name: String!
+  path: String!
+  version: String!
+}
+
+enum BrowserFamily {
+  chromium
+  firefox
 }
 
 type Config {

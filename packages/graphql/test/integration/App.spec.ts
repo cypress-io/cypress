@@ -26,4 +26,29 @@ describe('App', () => {
       })
     })
   })
+
+  describe('browsers', () => {
+    it('assigns a new user', async () => {
+      const context = new TestContext()
+      const { endpoint } = await initGraphql(context)
+
+      const result = await makeRequest(endpoint, `
+        query Browsers {
+          app {
+            browsers {
+              name
+            }
+          }
+        }
+      `)
+
+      expect(result).to.eql({
+        app: {
+          browsers: [{
+            name: 'chrome',
+          }],
+        },
+      })
+    })
+  })
 })
