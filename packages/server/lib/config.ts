@@ -9,7 +9,6 @@ import scaffold from './scaffold'
 import { fs } from './util/fs'
 import keys from './util/keys'
 import origin from './util/origin'
-import coerce from './util/coerce'
 import settings from './util/settings'
 import Debug from 'debug'
 import pathHelpers from './util/path_helpers'
@@ -18,13 +17,17 @@ import findSystemNode from './util/find_system_node'
 const debug = Debug('cypress:server:config')
 
 import { options, breakingOptions } from './config_options'
+import { getProcessEnvVars } from './util/config'
 
-const CYPRESS_ENV_PREFIX = 'CYPRESS_'
-const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
-const CYPRESS_RESERVED_ENV_VARS = [
+export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
+
+export const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
+
+export const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
 ]
-const CYPRESS_SPECIAL_ENV_VARS = [
+
+export const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
@@ -46,18 +49,6 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const folders = _(options).filter({ isFolder: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const defaultValues: Record<string, any> = createIndex(options, 'name', 'defaultValue')
-
-const isCypressEnvLike = (key) => {
-  return _.chain(key)
-  .invoke('toUpperCase')
-  .startsWith(CYPRESS_ENV_PREFIX)
-  .value() &&
-  !_.includes(CYPRESS_RESERVED_ENV_VARS, key)
-}
-
-const removeEnvPrefix = (key) => {
-  return key.slice(CYPRESS_ENV_PREFIX_LENGTH)
-}
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   return _.reduce(folders, (memo, folder) => {
@@ -742,17 +733,6 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
   // envProc is from process env vars
   // envCLI is from CLI arguments
   return _.extend(envCfg, envFile, envProc, envCLI)
-}
-
-export function getProcessEnvVars (obj = {}) {
-  return _.reduce(obj, (memo, value, key) => {
-    if (isCypressEnvLike(key)) {
-      memo[removeEnvPrefix(key)] = coerce(value)
-    }
-
-    return memo
-  }
-  , {})
 }
 
 export function getResolvedRuntimeConfig (config, runtimeConfig) {
