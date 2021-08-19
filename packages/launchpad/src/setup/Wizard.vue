@@ -56,5 +56,4 @@ const result = useQuery({ query: RootDocument })
 const loading = result.fetching
 const wizard = computed(() => result.data.value?.wizard)
 const app = computed(() => result.data.value?.app!)
-const viewer = computed(() => result.data.value?.viewer)
 </script>

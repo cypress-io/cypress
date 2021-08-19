@@ -4,13 +4,11 @@ describe('<RunIcon />', { viewportWidth: 80, viewportHeight: 200 }, () => {
   it('playground', () => {
     cy.mount(() => (
       <div class="p-3 flex flex-col align-middle justify-center w-screen">
-        <RunIcon status="ko"/>
+        <RunIcon status="failed"/>
         <hr/>
-        <RunIcon status="ok"/>
+        <RunIcon status="passed"/>
         <hr/>
-        <RunIcon status="warn"/>
-        <hr/>
-        <RunIcon status={45} />
+        <RunIcon status="cancelled"/>
       </div>
     ))
   })
