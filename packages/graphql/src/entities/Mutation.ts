@@ -116,13 +116,5 @@ export const mutation = mutationType({
         return ctx.viewer
       },
     })
-
-    t.field('init', {
-      type: 'App',
-      description: 'Log out of Cypress Cloud',
-      async resolve (_root, args, ctx) {
-        return ctx.app
-      },
-    })
   },
 })
