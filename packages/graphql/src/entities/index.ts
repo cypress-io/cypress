@@ -8,6 +8,8 @@ export * from './NavigationMenu'
 
 export * from './LocalProject'
 
+export * from './ResolvedConfig'
+
 export * from './Query'
 
 export * from './TestingTypeInfo'

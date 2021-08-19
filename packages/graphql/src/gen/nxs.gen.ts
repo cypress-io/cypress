@@ -10,6 +10,7 @@ import type { App } from "./../entities/App"
 import type { DashboardProject } from "./../entities/DashboardProject"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { LocalProject } from "./../entities/LocalProject"
+import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
 import type { Query } from "./../entities/Query"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Viewer } from "./../entities/Viewer"
@@ -20,7 +21,6 @@ import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
 import type { Browser } from "./../entities/Browser"
 import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
-import type { ResolvedConfig, ResolvedOption } from "./../entities/ResolvedConfig"
 import type { RunCommit } from "./../entities/run/RunCommit"
 import type { core } from "nexus"
 declare global {
@@ -62,6 +62,7 @@ export interface NexusGenEnums {
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
   ResolvedConfigOption: "config" | "default" | "env" | "plugin" | "runtime"
+  ResolvedType: "array" | "boolean" | "json" | "number" | "string"
   RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
@@ -89,8 +90,13 @@ export interface NexusGenObjects {
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
   Query: Query;
+  ResolvedBooleanOption: ResolvedBooleanOption;
   ResolvedConfig: ResolvedConfig;
-  ResolvedOption: ResolvedOption;
+  ResolvedJsonOption: ResolvedJsonOption;
+  ResolvedNumberOption: ResolvedNumberOption;
+  ResolvedOptionBase: ResolvedOptionBase;
+  ResolvedStringListOption: ResolvedStringListOption;
+  ResolvedStringOption: ResolvedStringOption;
   RunCommit: RunCommit;
   RunGroup: RunGroup;
   TestingTypeInfo: TestingTypeInfo;
@@ -173,58 +179,82 @@ export interface NexusGenFieldTypes {
     viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
-  ResolvedConfig: { // field return type
-    animationDistanceThreshold: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    baseUrl: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    blockHosts: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    chromeWebSecurity: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    componentFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    defaultCommandTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    downloadsFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    env: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    execTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    experimentalFetchPolyfill: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    experimentalInteractiveRunEvents: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    experimentalSessionSupport: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    experimentalSourceRewriting: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    experimentalStudio: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    fileServerFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    fixturesFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    ignoreTestFiles: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    includeShadowDom: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    integrationFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    nodeVersion: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    numTestsKeptInMemory: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    pageLoadTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    pluginsFile: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    port: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    projectId: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    redirectionLimit: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    reporter: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    requestTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    resolvedNodePath: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    resolvedNodeVersion: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    retries: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    screenshotOnRunFailure: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    screenshotsFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    scrollBehavior: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    supportFile: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    supportFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    taskTimeout: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    testFiles: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    trashAssetsBeforeRuns: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    userAgent: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    video: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    videoCompression: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    videoUploadOnPasses: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    videosFolder: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    viewportHeight: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    viewportWidth: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    waitForAnimations: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-    watchForFileChanges: NexusGenRootTypes['ResolvedOption'] | null; // ResolvedOption
-  }
-  ResolvedOption: { // field return type
+  ResolvedBooleanOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+    value: boolean | null; // Boolean
+  }
+  ResolvedConfig: { // field return type
+    animationDistanceThreshold: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    baseUrl: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    blockHosts: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    chromeWebSecurity: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    componentFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    defaultCommandTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    downloadsFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    env: NexusGenRootTypes['ResolvedJsonOption'] | null; // ResolvedJsonOption
+    execTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    experimentalFetchPolyfill: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    experimentalInteractiveRunEvents: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    experimentalSessionSupport: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    experimentalSourceRewriting: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    experimentalStudio: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    fileServerFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    fixturesFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    ignoreTestFiles: NexusGenRootTypes['ResolvedStringListOption'] | null; // ResolvedStringListOption
+    includeShadowDom: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    integrationFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    nodeVersion: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    numTestsKeptInMemory: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    pageLoadTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    pluginsFile: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    port: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    projectId: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    redirectionLimit: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    reporter: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    requestTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    resolvedNodePath: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    resolvedNodeVersion: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    retries: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    screenshotOnRunFailure: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    screenshotsFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    scrollBehavior: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    supportFile: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    supportFolder: NexusGenRootTypes['ResolvedOptionBase'] | null; // ResolvedOptionBase
+    taskTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    testFiles: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    trashAssetsBeforeRuns: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    userAgent: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    video: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    videoCompression: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    videoUploadOnPasses: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    videosFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    viewportHeight: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    viewportWidth: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
+    waitForAnimations: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    watchForFileChanges: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+  }
+  ResolvedJsonOption: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+    value: string | null; // String
+  }
+  ResolvedNumberOption: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+    value: string | null; // String
+  }
+  ResolvedOptionBase: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+  }
+  ResolvedStringListOption: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+    value: Array<string | null> | null; // [String]
+  }
+  ResolvedStringOption: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
     value: string | null; // String
   }
   RunCommit: { // field return type
@@ -353,58 +383,82 @@ export interface NexusGenFieldTypeNames {
     viewer: 'Viewer'
     wizard: 'Wizard'
   }
-  ResolvedConfig: { // field return type name
-    animationDistanceThreshold: 'ResolvedOption'
-    baseUrl: 'ResolvedOption'
-    blockHosts: 'ResolvedOption'
-    chromeWebSecurity: 'ResolvedOption'
-    componentFolder: 'ResolvedOption'
-    defaultCommandTimeout: 'ResolvedOption'
-    downloadsFolder: 'ResolvedOption'
-    env: 'ResolvedOption'
-    execTimeout: 'ResolvedOption'
-    experimentalFetchPolyfill: 'ResolvedOption'
-    experimentalInteractiveRunEvents: 'ResolvedOption'
-    experimentalSessionSupport: 'ResolvedOption'
-    experimentalSourceRewriting: 'ResolvedOption'
-    experimentalStudio: 'ResolvedOption'
-    fileServerFolder: 'ResolvedOption'
-    fixturesFolder: 'ResolvedOption'
-    ignoreTestFiles: 'ResolvedOption'
-    includeShadowDom: 'ResolvedOption'
-    integrationFolder: 'ResolvedOption'
-    nodeVersion: 'ResolvedOption'
-    numTestsKeptInMemory: 'ResolvedOption'
-    pageLoadTimeout: 'ResolvedOption'
-    pluginsFile: 'ResolvedOption'
-    port: 'ResolvedOption'
-    projectId: 'ResolvedOption'
-    redirectionLimit: 'ResolvedOption'
-    reporter: 'ResolvedOption'
-    requestTimeout: 'ResolvedOption'
-    resolvedNodePath: 'ResolvedOption'
-    resolvedNodeVersion: 'ResolvedOption'
-    retries: 'ResolvedOption'
-    screenshotOnRunFailure: 'ResolvedOption'
-    screenshotsFolder: 'ResolvedOption'
-    scrollBehavior: 'ResolvedOption'
-    supportFile: 'ResolvedOption'
-    supportFolder: 'ResolvedOption'
-    taskTimeout: 'ResolvedOption'
-    testFiles: 'ResolvedOption'
-    trashAssetsBeforeRuns: 'ResolvedOption'
-    userAgent: 'ResolvedOption'
-    video: 'ResolvedOption'
-    videoCompression: 'ResolvedOption'
-    videoUploadOnPasses: 'ResolvedOption'
-    videosFolder: 'ResolvedOption'
-    viewportHeight: 'ResolvedOption'
-    viewportWidth: 'ResolvedOption'
-    waitForAnimations: 'ResolvedOption'
-    watchForFileChanges: 'ResolvedOption'
-  }
-  ResolvedOption: { // field return type name
+  ResolvedBooleanOption: { // field return type name
     from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+    value: 'Boolean'
+  }
+  ResolvedConfig: { // field return type name
+    animationDistanceThreshold: 'ResolvedNumberOption'
+    baseUrl: 'ResolvedStringOption'
+    blockHosts: 'ResolvedStringOption'
+    chromeWebSecurity: 'ResolvedBooleanOption'
+    componentFolder: 'ResolvedStringOption'
+    defaultCommandTimeout: 'ResolvedNumberOption'
+    downloadsFolder: 'ResolvedStringOption'
+    env: 'ResolvedJsonOption'
+    execTimeout: 'ResolvedNumberOption'
+    experimentalFetchPolyfill: 'ResolvedBooleanOption'
+    experimentalInteractiveRunEvents: 'ResolvedBooleanOption'
+    experimentalSessionSupport: 'ResolvedBooleanOption'
+    experimentalSourceRewriting: 'ResolvedBooleanOption'
+    experimentalStudio: 'ResolvedBooleanOption'
+    fileServerFolder: 'ResolvedStringOption'
+    fixturesFolder: 'ResolvedStringOption'
+    ignoreTestFiles: 'ResolvedStringListOption'
+    includeShadowDom: 'ResolvedBooleanOption'
+    integrationFolder: 'ResolvedStringOption'
+    nodeVersion: 'ResolvedStringOption'
+    numTestsKeptInMemory: 'ResolvedNumberOption'
+    pageLoadTimeout: 'ResolvedNumberOption'
+    pluginsFile: 'ResolvedStringOption'
+    port: 'ResolvedNumberOption'
+    projectId: 'ResolvedStringOption'
+    redirectionLimit: 'ResolvedNumberOption'
+    reporter: 'ResolvedStringOption'
+    requestTimeout: 'ResolvedNumberOption'
+    resolvedNodePath: 'ResolvedStringOption'
+    resolvedNodeVersion: 'ResolvedStringOption'
+    retries: 'ResolvedNumberOption'
+    screenshotOnRunFailure: 'ResolvedBooleanOption'
+    screenshotsFolder: 'ResolvedStringOption'
+    scrollBehavior: 'ResolvedStringOption'
+    supportFile: 'ResolvedStringOption'
+    supportFolder: 'ResolvedOptionBase'
+    taskTimeout: 'ResolvedNumberOption'
+    testFiles: 'ResolvedStringOption'
+    trashAssetsBeforeRuns: 'ResolvedBooleanOption'
+    userAgent: 'ResolvedStringOption'
+    video: 'ResolvedBooleanOption'
+    videoCompression: 'ResolvedNumberOption'
+    videoUploadOnPasses: 'ResolvedBooleanOption'
+    videosFolder: 'ResolvedStringOption'
+    viewportHeight: 'ResolvedNumberOption'
+    viewportWidth: 'ResolvedNumberOption'
+    waitForAnimations: 'ResolvedBooleanOption'
+    watchForFileChanges: 'ResolvedBooleanOption'
+  }
+  ResolvedJsonOption: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+    value: 'String'
+  }
+  ResolvedNumberOption: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+    value: 'String'
+  }
+  ResolvedOptionBase: { // field return type name
+    from: 'ResolvedConfigOption'
+  }
+  ResolvedStringListOption: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+    value: 'String'
+  }
+  ResolvedStringOption: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
     value: 'String'
   }
   RunCommit: { // field return type name

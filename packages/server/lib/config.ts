@@ -25,7 +25,8 @@ export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
 
 export type ResolvedFromConfig = {
   from: ResolvedConfigurationOptionSource
-  value: ResolvedConfigurationOptionSource
+  // TODO: Generic somehow with better type safety
+  value: any
 }
 
 export type ResolvedConfigurationOptions = Partial<{
@@ -203,10 +204,10 @@ export function allowed (obj = {}) {
   return _.pick(obj, propertyNames)
 }
 
-export type FullConfig = 
-  Cypress.RuntimeConfigOptions & 
+export type FullConfig =
+  Cypress.RuntimeConfigOptions &
   Cypress.ResolvedConfigOptions &
-  { 
+  {
     resolved: ResolvedConfigurationOptions
   }
 
