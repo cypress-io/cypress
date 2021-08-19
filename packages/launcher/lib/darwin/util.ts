@@ -106,17 +106,14 @@ export function needsDarwinWorkaround (): boolean {
 }
 
 export async function darwinDetectionWorkaround (): Promise<FoundBrowser[]> {
-  // TODO: add tests
-  // TODO: update circle to build the binary in CI and manually test this out
-  // TODO: fix CT detecting browsers twice
-
   const nodePath = await findSystemNode.findNodeInFullPath()
+  let args = ['./detection-workaround.js']
 
-  const { stdout } = await utils.execa(
-    nodePath,
-    ['-r', '@packages/ts/register.js', './detection-workaround.js'],
-    { cwd: __dirname },
-  )
+  if (process.env.CYPRESS_INTERNAL_ENV === 'development') {
+    args = ['-r', '@packages/ts/register.js'].concat(args)
+  }
+
+  const { stdout } = await utils.execa(nodePath, args, { cwd: __dirname })
 
   return JSON.parse(stdout)
 }

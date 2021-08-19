@@ -1,4 +1,4 @@
-const { detect } = require('../detect.ts')
+const { detect } = require('../detect')
 
 detect(undefined, false).then((browsers) => {
   // eslint-disable-next-line no-console

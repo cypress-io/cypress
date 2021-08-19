@@ -138,7 +138,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
 }
 
 /** returns list of detected browsers */
-export const detect = (goalBrowsers?: Browser[], macWorkaround = true): Bluebird<FoundBrowser[]> => {
+export const detect = (goalBrowsers?: Browser[], useDarwinWorkaround = true): Bluebird<FoundBrowser[]> => {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   if (!goalBrowsers) {
@@ -154,7 +154,7 @@ export const detect = (goalBrowsers?: Browser[], macWorkaround = true): Bluebird
   // of spawning a single child process instead of multiple. If this fails,
   // we fall back to to the slower, default method
   // https://github.com/cypress-io/cypress/issues/17773
-  if (macWorkaround && needsDarwinWorkaround()) {
+  if (useDarwinWorkaround && needsDarwinWorkaround()) {
     log('using darwin detection workaround')
     if (log.enabled) {
       // eslint-disable-next-line no-console
