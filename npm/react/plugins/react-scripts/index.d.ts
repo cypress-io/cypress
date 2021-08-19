@@ -18,6 +18,6 @@ declare function setupCRADevServer(on: Cypress.PluginEvents, config: Cypress.Plu
  * @param additionalOptions  additional options object (create an empty object to see how to use it)
  * @returns the resolved dev server object that cypress can use to start testing
  */
-declare function setupCRADevServer(options: Cypress.DevServerOptions, additionalOptions?: AdditionalOptions): Cypress.ResolvedDevServerConfig
+declare function setupCRADevServer(options: Cypress.DevServerConfig, additionalOptions?: AdditionalOptions): Cypress.ResolvedDevServerConfig
 
 export = setupCRADevServer;

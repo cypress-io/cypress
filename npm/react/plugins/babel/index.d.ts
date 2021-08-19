@@ -22,6 +22,6 @@ declare function setupBabelDevServer(on: Cypress.PluginEvents, config: Cypress.P
  * @param additionalOptions additional options object (create an empty object to see how to use it)
  * @returns the resolved dev server object that cypress can use to start testing
  */
-declare function setupBabelDevServer(options: Cypress.DevServerOptions, additionalOptions?: AdditionalOptions): Cypress.ResolvedDevServerConfig
+declare function setupBabelDevServer(options: Cypress.DevServerConfig, additionalOptions?: AdditionalOptions): Cypress.ResolvedDevServerConfig
 
 export = setupBabelDevServer;

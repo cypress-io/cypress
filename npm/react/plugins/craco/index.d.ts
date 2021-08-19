@@ -11,6 +11,6 @@ declare function setupCracoDevServer(on: Cypress.PluginEvents, config: Cypress.P
  * @param cracoConfig the object exported of your craco.config.js file
  * @returns the resolved dev server object that cypress can use to start testing
  */
-declare function setupCracoDevServer(options: Cypress.DevServerOptions, cracoConfig: any): Cypress.ResolvedDevServerConfig
+declare function setupCracoDevServer(options: Cypress.DevServerConfig, cracoConfig: any): Cypress.ResolvedDevServerConfig
 
 export = setupCracoDevServer;

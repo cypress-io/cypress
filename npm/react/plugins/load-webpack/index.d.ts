@@ -18,6 +18,6 @@ declare function setupWebpackDevServer(on: Cypress.PluginEvents, config: Cypress
  * @param additionalOptions  additional options object (create an empty object to see how to use it)
  * @returns the resolved dev server object that cypress can use to start testing
  */
-declare function setupWebpackDevServer(options: Cypress.DevServerOptions, additionalOptions?: AdditionalOptions): Cypress.ResolvedDevServerConfig
+declare function setupWebpackDevServer(options: Cypress.DevServerConfig, additionalOptions?: AdditionalOptions): Cypress.ResolvedDevServerConfig
 
 export = setupWebpackDevServer;

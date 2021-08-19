@@ -9,6 +9,6 @@ declare function setupNextDevServer(on: Cypress.PluginEvents, config: Cypress.Pl
  * @param options comes from the `setupDevServer()` function first argument
  * @returns the resolved dev server object that cypress can use to start testing
  */
-declare function setupNextDevServer(options: Cypress.DevServerOptions): Cypress.ResolvedDevServerConfig
+declare function setupNextDevServer(options: Cypress.DevServerConfig): Cypress.ResolvedDevServerConfig
 
 export = setupNextDevServer;

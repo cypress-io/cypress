@@ -5,8 +5,8 @@ import webpackDevServerPkg from 'webpack-dev-server/package.json'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
-  /* this is the Cypress options object */
-  options: Cypress.DevServerOptions
+  /* this is the Cypress dev server configuration object */
+  options: Cypress.DevServerConfig
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
   /* base html template to render in AUT */
