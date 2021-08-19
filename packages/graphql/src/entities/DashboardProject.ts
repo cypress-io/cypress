@@ -1,6 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
-import type { ProjectContract } from '../contracts'
 import { Project } from './Project'
 import { RunGroup } from './run'
 
@@ -9,11 +8,11 @@ import { RunGroup } from './run'
 })
 export class DashboardProject extends Project {
   constructor (
-    config: ProjectContract,
+    projectRoot: string,
     private context: BaseContext,
     private authToken: string,
   ) {
-    super(config.projectRoot, context)
+    super(projectRoot, context)
   }
 
   @nxs.field.list.nonNull.type(() => RunGroup)

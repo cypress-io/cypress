@@ -19,9 +19,9 @@ import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
 import type { Browser } from "./../entities/Browser"
-import type { RunGroup } from "./../entities/run/Run"
+import type { RunGroup } from "./../entities/run/Run.js"
 import type { NavigationItem } from "./../entities/NavigationItem"
-import type { RunCommit } from "./../entities/run/RunCommit"
+import type { RunCommit } from "./../entities/run/RunCommit.js"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
