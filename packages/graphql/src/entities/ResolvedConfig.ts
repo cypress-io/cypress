@@ -345,7 +345,7 @@ export class ResolvedConfig {
     return this.resolvedConfig.userAgent ? new ResolvedStringOption(this.resolvedConfig.userAgent) : null
   }
 
-  @nxs.field.type((): NxsResult<'ResolvedConfig', 'nxs'> => ResolvedOptionBase)
+  @nxs.field.type((): NxsResult<'ResolvedConfig', 'nxs'> => ResolvedStringOption)
   get supportFolder (): NxsResult<'ResolvedConfig', 'supportFolder'> {
     return this.resolvedConfig.supportFolder ? new ResolvedStringOption(this.resolvedConfig.supportFolder) : null
   }

@@ -220,7 +220,7 @@ export interface NexusGenFieldTypes {
     screenshotsFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     scrollBehavior: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     supportFile: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
-    supportFolder: NexusGenRootTypes['ResolvedOptionBase'] | null; // ResolvedOptionBase
+    supportFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     taskTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     testFiles: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     trashAssetsBeforeRuns: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
@@ -424,7 +424,7 @@ export interface NexusGenFieldTypeNames {
     screenshotsFolder: 'ResolvedStringOption'
     scrollBehavior: 'ResolvedStringOption'
     supportFile: 'ResolvedStringOption'
-    supportFolder: 'ResolvedOptionBase'
+    supportFolder: 'ResolvedStringOption'
     taskTimeout: 'ResolvedNumberOption'
     testFiles: 'ResolvedStringOption'
     trashAssetsBeforeRuns: 'ResolvedBooleanOption'

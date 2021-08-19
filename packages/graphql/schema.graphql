@@ -203,7 +203,7 @@ type ResolvedConfig {
   screenshotsFolder: ResolvedStringOption
   scrollBehavior: ResolvedStringOption
   supportFile: ResolvedStringOption
-  supportFolder: ResolvedOptionBase
+  supportFolder: ResolvedStringOption
   taskTimeout: ResolvedNumberOption
   testFiles: ResolvedStringOption
   trashAssetsBeforeRuns: ResolvedBooleanOption
