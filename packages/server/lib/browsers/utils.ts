@@ -225,7 +225,7 @@ export = {
         debug('copied extension')
 
         // ensure write access before overwriting
-        return fs.chmodAsync(extensionBg, 0o0644)
+        return fs.chmod(extensionBg, 0o0644)
       })
       .then(() => {
         // and overwrite background.js with the final string bytes
