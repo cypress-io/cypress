@@ -1,10 +1,16 @@
 import GlobalProjectCard from './GlobalProjectCard.vue'
 
+const lastWeek = () => {
+  const today = new Date()
+
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7).getTime()
+}
+
 describe('<GlobalProjectCard />', () => {
   it('renders', () => {
     const project = {
       name: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-      lastRun: new Date('2021-08-01T00:00:00.000Z').getTime(),
+      lastRun: lastWeek(),
       lastRunStatus: 'passed',
     }
 

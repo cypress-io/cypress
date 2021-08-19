@@ -1,7 +1,8 @@
-import type { NxsMutationArgs } from 'nexus-decorators'
-import { ProjectBase } from '../project-base'
+import fs from 'fs'
+import path from 'path'
+
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, Viewer } from '@packages/graphql'
+import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
 
 // @ts-ignore
@@ -15,6 +16,8 @@ import api from '@packages/server/lib/api'
 
 // @ts-ignore
 import browsers from '@packages/server/lib/browsers'
+
+import * as config from '@packages/server/lib/config'
 
 import { getId } from '@packages/server/lib/project_static'
 import { FoundBrowser } from '@packages/launcher'
@@ -37,12 +40,19 @@ export class ServerActions extends BaseActions {
     //
   }
 
-  createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
-    return new ProjectBase({
-      projectRoot: input.projectRoot,
-      testingType: 'component',
-      options: {},
-    })
+  addProject (projectRoot: string) {
+    // no need to re-add
+    const found = this.ctx.localProjects.find((x) => x.projectRoot === projectRoot)
+
+    if (found) {
+      return found
+    }
+
+    const localProject = new LocalProject(projectRoot, this.ctx)
+
+    this.ctx.localProjects.push(localProject)
+
+    return localProject
   }
 
   async authenticate () {
@@ -77,5 +87,19 @@ export class ServerActions extends BaseActions {
 
   getBrowsers (): Promise<FoundBrowser[]> {
     return browsers.get()
+  }
+
+  initializeConfig (projectRoot: string): Promise<config.FullConfig> {
+    return config.get(projectRoot)
+  }
+
+  createConfigFile (code: string, configFilename: string): void {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create config file without activeProject.`)
+    }
+
+    fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
   }
 }

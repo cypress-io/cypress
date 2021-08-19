@@ -1,7 +1,5 @@
-import type { NxsMutationArgs } from 'nexus-decorators'
-import { BaseActions, BaseContext, DashboardProject, LocalProject, ProjectContract } from '@packages/graphql'
-import type { Project } from '../../../graphql/src/entities/Project'
-import { Config } from '../../../graphql/src/entities/Config'
+import { BaseActions, BaseContext, DashboardProject, LocalProject } from '@packages/graphql'
+import type { FullConfig } from '@packages/server/lib/config'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
@@ -18,13 +16,7 @@ export class ClientTestActions extends BaseActions {
 
   async authenticate () {}
   async createConfigFile () {}
-  async createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
-    const contract: ProjectContract = {
-      projectRoot: '',
-    }
 
-    return contract
-  }
   async logout () {}
   async getProjectId () {
     return 'test-project-id'
@@ -35,17 +27,28 @@ export class ClientTestActions extends BaseActions {
   async getRecordKeys () {
     return []
   }
+  async getBrowsers () {
+    return []
+  }
+
+  addProject () {
+    return createTestProject('/some/new/project', this.ctx)
+  }
+
+  async initializeConfig () {
+    // @ts-ignore
+    return {} as FullConfig
+  }
 }
 
-const createLocalProject = (ctx: ClientTestContext) => new LocalProject(new Config({ projectRoot: '/usr/dev/project' }), ctx)
+const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
 
 export class ClientTestContext extends BaseContext {
   readonly actions = new ClientTestActions(this)
   readonly projects = []
 
-  private testProject = createLocalProject(this)
-
-  localProjects: Project[] = [this.testProject]
+  // localProjects: Project[] = [this.testProject]
   dashboardProjects: DashboardProject[] = []
+  localProjects: LocalProject[] = [createTestProject('/new/project', this)]
   viewer = null
 }

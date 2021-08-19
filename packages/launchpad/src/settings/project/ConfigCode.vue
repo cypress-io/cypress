@@ -28,7 +28,8 @@ import { useI18n } from '../../composables'
 import { useClipboard } from '@vueuse/core'
 
 defineProps<{
-  code: string
+  code: string,
+  mockCopy?: () => any
 }>()
 
 const { copy, copied } = useClipboard()

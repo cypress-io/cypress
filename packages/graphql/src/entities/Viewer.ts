@@ -32,7 +32,7 @@ export class Viewer {
       return null
     }
 
-    return new DashboardProject(project.config, this.ctx, this.viewer.authToken)
+    return new DashboardProject(project.projectRoot, this.ctx, this.viewer.authToken)
   }
 
   @nxs.field.list.nullable.type(() => DashboardProject, {
@@ -44,7 +44,7 @@ export class Viewer {
     }
 
     return this.ctx.localProjects.map((p) => {
-      return new DashboardProject(p.config, this.ctx, this.authToken!)
+      return new DashboardProject(p.projectRoot, this.ctx, this.authToken!)
     })
   }
 

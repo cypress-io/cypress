@@ -1,8 +1,6 @@
 import axios from 'axios'
-import type { NxsMutationArgs } from 'nexus-decorators'
 import type { FoundBrowser } from '@packages/launcher'
 import { BaseActions, BaseContext, DashboardProject, LocalProject, Viewer, Wizard } from '../../src'
-import { Config } from '../../src/entities/Config'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
 
 interface TestContextInjectionOptions {
@@ -19,14 +17,11 @@ export class TestActions extends BaseActions {
 
   installDependencies () {}
   createConfigFile () {}
-  createProjectBase (input: NxsMutationArgs<'addProject'>['input']) {
-    return new LocalProject(
-      new Config({
-        projectRoot: '/foo/bar',
-      }),
-      this.ctx,
-    )
+
+  addProject (projectRoot: string) {
+    return new LocalProject(projectRoot, this.ctx)
   }
+
   async authenticate () {
     this.ctx.viewer = new Viewer(this.ctx, {
       authToken: 'test-auth-token',
@@ -62,6 +57,8 @@ export class TestActions extends BaseActions {
 
     return [browser]
   }
+
+  async initializeConfig () {}
 }
 
 export class TestContext extends BaseContext {

@@ -1,12 +1,8 @@
-import type { NxsMutationArgs } from 'nexus-decorators'
-import fs from 'fs'
-import path from 'path'
 import type { BaseContext } from '../context/BaseContext'
-import type { ProjectContract } from '../contracts/ProjectContract'
-import { LocalProject } from '../entities/LocalProject'
-import { Config } from '../entities/Config'
 import type { RunGroup } from '../entities/run'
 import type { FoundBrowser } from '@packages/launcher'
+import type { LocalProject } from '../entities'
+import type { FullConfig } from '@packages/server/lib/config'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -21,45 +17,16 @@ export abstract class BaseActions {
 
   abstract installDependencies (): void
 
-  createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
-    const project = this.ctx.activeProject
+  abstract createConfigFile (code: string, configFilename: string): void
 
-    if (!project) {
-      throw Error(`Cannot create config file without activeProject.`)
-    }
-
-    fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
-  }
-
-  /**
-   * Adds a new project if it doesn't already exist
-   */
-  async addProject (input: NxsMutationArgs<'addProject'>['input']): Promise<LocalProject> {
-    // Prevent adding the existing project again
-    const existing = this.ctx.localProjects.find((p) => p.projectRoot === input.projectRoot)
-
-    if (existing) {
-      return existing
-    }
-
-    const config = new Config({
-      projectRoot: input.projectRoot,
-      projectId: input.projectId,
-    })
-
-    const newProject = new LocalProject(config, this.ctx)
-
-    this.ctx.localProjects.push(newProject)
-
-    return newProject
-  }
+  abstract addProject (projectRoot: string): LocalProject
 
   abstract getProjectId (projectRoot: string): Promise<string | null>
-  abstract createProjectBase(input: NxsMutationArgs<'addProject'>['input']): ProjectContract | Promise<ProjectContract>
   abstract authenticate (): Promise<void>
   abstract logout (): Promise<void>
 
   abstract getRuns (payload: { projectId: string, authToken: string }): Promise<RunGroup[]>
   abstract getRecordKeys (payload: { projectId: string, authToken: string }): Promise<string[]>
   abstract getBrowsers (): Promise<FoundBrowser[]>
+  abstract initializeConfig (projectRoot: string): Promise<FullConfig>
 }

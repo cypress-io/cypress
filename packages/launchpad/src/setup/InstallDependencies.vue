@@ -1,5 +1,10 @@
 <template>
-  <WizardLayout :next="nextButtonName" alt="Install manually" :altFn="altFn">
+  <WizardLayout 
+    :next="nextButtonName" 
+    alt="Install manually" 
+    :altFn="altFn"
+    :canNavigateForward="gql.canNavigateForward"
+  >
     <PackagesList
       v-if="!manualInstall" 
       :gql="gql" 
@@ -27,6 +32,7 @@ fragment InstallDependencies on Wizard {
   ...PackagesList
   ...ManualInstall
   isManualInstall
+  canNavigateForward
 }
 `
 

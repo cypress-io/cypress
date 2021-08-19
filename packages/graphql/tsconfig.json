@@ -1,12 +1,16 @@
 {
   "extends": "../ts/tsconfig.json",
+  "include": [
+    "src/*.ts",
+    "src/**/*.ts"
+  ],
   "compilerOptions": {
     "strict": true,
-    "noImplicitAny": true,
     "allowJs": false,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "types": ["cypress"]
   }
 }

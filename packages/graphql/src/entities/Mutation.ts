@@ -1,4 +1,4 @@
-import { inputObjectType, mutationType, nonNull } from 'nexus'
+import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
 
 export const mutation = mutationType({
@@ -75,34 +75,13 @@ export const mutation = mutationType({
       },
       description: 'Create a Cypress config file for a new project',
       resolve: (root, args, ctx) => {
-        // if (!ctx.activeProject) {
-        //   throw Error('Cannot write config file without an active project')
-        // }
+        if (!ctx.activeProject) {
+          throw Error('Cannot write config file without an active project')
+        }
 
-        ctx.actions.createConfigFile({ ...args })
+        ctx.actions.createConfigFile(args.code, args.configFilename)
 
         return ctx.app
-      },
-    })
-
-    t.nonNull.field('addProject', {
-      type: 'LocalProject',
-      description: 'Adds a new project to the app',
-      args: {
-        input: nonNull(
-          inputObjectType({
-            name: 'AddProjectInput',
-            definition (t) {
-              t.nonNull.string('projectRoot')
-              t.string('projectId')
-            },
-          }),
-        ),
-      },
-      async resolve (_root, args, ctx) {
-        const addedProject = await ctx.actions.addProject(args.input)
-
-        return addedProject
       },
     })
 
