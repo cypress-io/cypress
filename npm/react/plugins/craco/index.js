@@ -1,13 +1,20 @@
-const returnSetupDevServerFunction = require('../utils/return-setupdevserver-function')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const { createWebpackDevConfig } = require('@craco/craco')
+const { getLegacySetupDevServer } = require('../utils/legacy-setup-dev-server')
 
-function startCracoDevServer (options, cracoConfig) {
-  return startDevServer({ options, webpackConfig: createWebpackDevConfig(cracoConfig) })
+function setupCracoDevServer (devServerConfig, cracoConfig) {
+  return startDevServer({
+    options: devServerConfig,
+    webpackConfig: createWebpackDevConfig(cracoConfig),
+  })
 }
 
-module.exports = returnSetupDevServerFunction(startCracoDevServer, (config) => {
+// Legacy signature
+module.exports = getLegacySetupDevServer(setupCracoDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config
 })
+
+// New signature
+module.exports.setupCracoDevServer = setupCracoDevServer

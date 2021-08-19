@@ -1,7 +1,7 @@
 const path = require('path')
-const returnSetupDevServerFunction = require('../utils/return-setupdevserver-function')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const tryLoadWebpackConfig = require('../utils/tryLoadWebpackConfig')
+const { getLegacySetupDevServer } = require('../utils/legacy-setup-dev-server')
 
 /** @type {(config: Cypress.PluginConfigOptions, path: string) => string} */
 function normalizeWebpackPath (config, webpackConfigPath) {
@@ -10,18 +10,25 @@ function normalizeWebpackPath (config, webpackConfigPath) {
     : path.resolve(config.projectRoot, webpackConfigPath)
 }
 
-function startWebpackDevServer (options, { webpackFilename }) {
-  const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(options.config, webpackFilename))
+function setupWebpackDevServer (devServerConfig, { webpackFilename }) {
+  const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(devServerConfig.config, webpackFilename))
 
   if (!webpackConfig) {
     throw new Error(`Can not load webpack config from path ${webpackFilename}.`)
   }
 
-  return startDevServer({ options, webpackConfig })
+  return startDevServer({
+    options: devServerConfig,
+    webpackConfig,
+  })
 }
 
-module.exports = returnSetupDevServerFunction(startWebpackDevServer, (config) => {
+// Legacy signature
+module.exports = getLegacySetupDevServer(setupWebpackDevServer, (config) => {
   config.env.reactDevtools = true
 
   return config
 })
+
+// New signature
+module.exports.setupWebpackDevServer = setupWebpackDevServer
