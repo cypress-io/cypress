@@ -2,10 +2,10 @@ const { startDevServer } = require('@cypress/webpack-dev-server')
 const getBabelWebpackConfig = require('./getBabelWebpackConfig')
 const { getLegacySetupDevServer } = require('../utils/legacy-setup-dev-server')
 
-function setupBabelDevServer (devServerConfig, moduleOptions) {
+function setupBabelDevServer (devServerConfig, options) {
   return startDevServer({
     options: devServerConfig,
-    webpackConfig: getBabelWebpackConfig(devServerConfig.config, moduleOptions),
+    webpackConfig: getBabelWebpackConfig(devServerConfig.config, options),
   })
 }
 
