@@ -150,7 +150,6 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
-    init: NexusGenRootTypes['App'] | null; // App
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
@@ -354,7 +353,6 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
-    init: 'App'
     login: 'Viewer'
     logout: 'Viewer'
     navigationMenuSetItem: 'NavigationMenu'

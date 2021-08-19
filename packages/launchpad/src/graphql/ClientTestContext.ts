@@ -32,7 +32,7 @@ export class ClientTestActions extends BaseActions {
   }
 
   addProject () {
-    return new LocalProject('foo', this.ctx)
+    return createTestProject('/some/new/project', this.ctx)
   }
 
   async initializeConfig () {
@@ -41,12 +41,14 @@ export class ClientTestActions extends BaseActions {
   }
 }
 
+const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
+
 export class ClientTestContext extends BaseContext {
   readonly actions = new ClientTestActions(this)
   readonly projects = []
 
   // localProjects: Project[] = [this.testProject]
   dashboardProjects: DashboardProject[] = []
-  localProjects: LocalProject[] = []
+  localProjects: LocalProject[] = [createTestProject('/new/project', this)]
   viewer = null
 }

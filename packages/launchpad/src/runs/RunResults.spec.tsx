@@ -1,9 +1,16 @@
+import type { RunGroupTotals } from '@packages/graphql/src/entities/run/Run'
 import RunResults from './RunResults.vue'
 
-const results = { pass: 5, fail: 0, skip: 0, flake: 2 }
+const totals: RunGroupTotals = {
+  totalDuration: 1000,
+  totalPassed: 5,
+  totalFailed: 0,
+  totalSkipped: 0,
+  totalPending: 4,
+}
 
 describe('<RunResults />', () => {
   it('playground', () => {
-    cy.mount(() => (<RunResults {...results}/>))
+    cy.mount(() => <RunResults totals={totals} />)
   })
 })
