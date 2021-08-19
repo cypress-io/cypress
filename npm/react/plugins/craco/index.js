@@ -17,4 +17,7 @@ module.exports = getLegacySetupDevServer(setupCracoDevServer, (config) => {
 })
 
 // New signature
-module.exports.setupCracoDevServer = setupCracoDevServer
+// - Note that this also includes a change to the second argument!
+module.exports.setupCracoDevServer = (devServerConfig, { cracoConfig }) => {
+  return setupCracoDevServer(devServerConfig, cracoConfig)
+}
