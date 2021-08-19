@@ -4,6 +4,7 @@ import os from 'os'
 import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
+import { needsDarwinWorkaround, darwinDetectionWorkaround } from './darwin/util'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
@@ -137,11 +138,42 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
 }
 
 /** returns list of detected browsers */
-export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
+export const detect = (goalBrowsers?: Browser[], macWorkaround = true): Bluebird<FoundBrowser[]> => {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   if (!goalBrowsers) {
     goalBrowsers = browsers
+  }
+
+  // BigSur (darwin 20.x) and Electron 12+ cause huge performance issues when
+  // spawning child processes, which is the way we find browsers via execa.
+  // The performance cost is multiplied by the number of binary variants of
+  // each browser plus any fallback lookups we do.
+  // The workaround gets around this by breaking out of the bundled Electron
+  // Node.js and using the user's Node.js if possible. It only pays the cost
+  // of spawning a single child process instead of multiple. If this fails,
+  // we fall back to to the slower, default method
+  // https://github.com/cypress-io/cypress/issues/17773
+  if (macWorkaround && needsDarwinWorkaround()) {
+    log('using darwin detection workaround')
+    if (log.enabled) {
+      // eslint-disable-next-line no-console
+      console.time('time taken detecting browsers (darwin workaround)')
+    }
+
+    return Bluebird.resolve(darwinDetectionWorkaround())
+    .catch((err) => {
+      log('darwin workaround failed, falling back to normal detection')
+      log(err.stack)
+
+      return detect(goalBrowsers, false)
+    })
+    .finally(() => {
+      if (log.enabled) {
+        // eslint-disable-next-line no-console
+        console.timeEnd('time taken detecting browsers (darwin workaround)')
+      }
+    })
   }
 
   const removeDuplicates = uniqBy((browser: FoundBrowser) => {

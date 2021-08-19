@@ -2,9 +2,13 @@ import { log } from '../log'
 import { notInstalledErr } from '../errors'
 import { prop, tap } from 'ramda'
 import { utils } from '../utils'
-import fs from 'fs-extra'
+import * as fs from 'fs-extra'
+import * as os from 'os'
 import * as path from 'path'
 import * as plist from 'plist'
+import * as semver from 'semver'
+import { FoundBrowser } from '../types'
+import * as findSystemNode from '@packages/server/lib/util/find_system_node'
 
 /** parses Info.plist file from given application and returns a property */
 export function parsePlist (p: string, property: string): Promise<string> {
@@ -95,4 +99,24 @@ export function findApp ({ appName, executable, appId, versionProperty }: FindAp
   }
 
   return tryMdFind().catch(tryFullApplicationFind)
+}
+
+export function needsDarwinWorkaround (): boolean {
+  return os.platform() === 'darwin' && semver.gte(os.release(), '20.0.0')
+}
+
+export async function darwinDetectionWorkaround (): Promise<FoundBrowser[]> {
+  // TODO: add tests
+  // TODO: update circle to build the binary in CI and manually test this out
+  // TODO: fix CT detecting browsers twice
+
+  const nodePath = await findSystemNode.findNodeInFullPath()
+
+  const { stdout } = await utils.execa(
+    nodePath,
+    ['-r', '@packages/ts/register.js', './detection-workaround.js'],
+    { cwd: __dirname },
+  )
+
+  return JSON.parse(stdout)
 }

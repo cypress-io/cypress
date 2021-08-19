@@ -19,7 +19,8 @@
     "fs-extra": "8.1.0",
     "lodash": "4.17.21",
     "plist": "3.0.1",
-    "ramda": "0.27.1"
+    "ramda": "0.27.1",
+    "semver": "7.3.5"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - tgriesser/fix/mac-build
+        - issue-17773-slow-browser-detection
 
 defaults: &defaults
   parallelism: 1
