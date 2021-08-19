@@ -39,13 +39,16 @@ export class ServerActions extends BaseActions {
 
   addProject (projectRoot: string) {
     // no need to re-add
-    const found = this.ctx.localProjects.find(x => x.projectRoot === projectRoot)
+    const found = this.ctx.localProjects.find((x) => x.projectRoot === projectRoot)
+
     if (found) {
       return found
     }
 
     const localProject = new LocalProject(projectRoot, this.ctx)
+
     this.ctx.localProjects.push(localProject)
+
     return localProject
   }
 

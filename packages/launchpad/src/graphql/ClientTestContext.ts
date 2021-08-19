@@ -1,4 +1,4 @@
-import { BaseActions, BaseContext, DashboardProject, LocalProject, } from '@packages/graphql'
+import { BaseActions, BaseContext, DashboardProject, LocalProject } from '@packages/graphql'
 import type { FullConfig } from '@packages/server/lib/config'
 
 export class ClientTestActions extends BaseActions {

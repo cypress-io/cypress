@@ -1,6 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { FullConfig } from '@packages/server/lib/config'
-import type { BaseContext } from '../context/BaseContext'
 import { Project } from './Project'
 import { ResolvedConfig } from './ResolvedConfig'
 
@@ -8,14 +7,11 @@ import { ResolvedConfig } from './ResolvedConfig'
   description: 'A Cypress project is a container',
 })
 export class LocalProject extends Project {
-  private fullConfig?: FullConfig 
+  private fullConfig?: FullConfig
 
-  constructor(projectRoot: string, ctx: BaseContext) {
-    super(projectRoot, ctx)
-  }
-
-  async initialize () {
+  async initialize (): Promise<LocalProject> {
     this.fullConfig = await this.ctx.actions.initializeConfig(this.projectRoot)
+
     return this
   }
 
