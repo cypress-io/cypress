@@ -9,7 +9,7 @@
     "types": "tsc --noEmit",
     "build-prod": "yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
-    "clean": "rm src/**/*.js && rm src/*.js && rm test/**/*.js || echo 'cleaned'",
+    "clean": "rm ./src/**/*.js && rm ./src/*.js && rm ./test/**/*.js || echo 'cleaned'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
