@@ -23,7 +23,7 @@ export function parsePlist (p: string, property: string): Promise<string> {
   return fs
   .readFile(pl, 'utf8')
   .then(plist.parse)
-  .then(prop(property))
+  .then((obj) => obj[property])
   .then(String) // explicitly convert value to String type
   .catch(failed) // to make TS compiler happy
 }

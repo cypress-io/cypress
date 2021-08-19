@@ -7,7 +7,7 @@ import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
-import {
+import type {
   Browser,
   DetectedBrowser,
   FoundBrowser,
@@ -22,7 +22,8 @@ type HasVersion = Partial<FoundBrowser> & {
 }
 
 export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
-  const majorVersion = parseInt(browser.version.split('.')[0]) || browser.version
+  const ver = browser.version.split('.')[0] ?? browser.version
+  const majorVersion = parseInt(ver) || browser.version
 
   const unsupportedVersion = browser.minSupportedVersion && majorVersion < browser.minSupportedVersion
 
@@ -62,7 +63,13 @@ const helpers: Helpers = {
 }
 
 function getHelper (platform?: NodeJS.Platform): PlatformHelper {
-  return helpers[platform || os.platform()]
+  const helper = helpers[platform || os.platform()]
+
+  if (!helper) {
+    throw Error(`Could not find helper for ${platform}`)
+  }
+
+  return helper
 }
 
 function lookup (
