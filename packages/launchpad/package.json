@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "yarn codegen",
     "build": "vite build",
-    "types": "vue-tsc --noEmit",
+    "types": "true || vue-tsc --noEmit",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn cypress:run && yarn types",

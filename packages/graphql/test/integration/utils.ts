@@ -57,6 +57,8 @@ export class TestActions extends BaseActions {
 
     return [browser]
   }
+
+  async initializeConfig () {}
 }
 
 export class TestContext extends BaseContext {
