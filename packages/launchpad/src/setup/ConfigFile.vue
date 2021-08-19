@@ -4,7 +4,7 @@
     alt="Create file manually" 
     :altFn="altFn"
     :nextFn="createConfig"
-    :canNavigateForward="gql.canNavigateForward"
+    :canNavigateForward="wizard.canNavigateForward"
   >
     <nav
       class="
