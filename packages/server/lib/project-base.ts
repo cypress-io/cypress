@@ -690,9 +690,6 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
 
   async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
-    console.log(this.options)
-    console.log({ browsers })
-    console.log('theCfg.browsers', theCfg.browsers)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       theCfg.browsers = browsers
