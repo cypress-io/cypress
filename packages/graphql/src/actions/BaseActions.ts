@@ -1,5 +1,3 @@
-import fs from 'fs'
-import path from 'path'
 import type { BaseContext } from '../context/BaseContext'
 import type { RunGroup } from '../entities/run'
 import type { FoundBrowser } from '@packages/launcher'
@@ -19,15 +17,7 @@ export abstract class BaseActions {
 
   abstract installDependencies (): void
 
-  createConfigFile ({ code, configFilename }: { code: string, configFilename: string }): void {
-    const project = this.ctx.activeProject
-
-    if (!project) {
-      throw Error(`Cannot create config file without activeProject.`)
-    }
-
-    fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
-  }
+  abstract createConfigFile (code: string, configFilename: string): void
 
   abstract addProject (projectRoot: string): LocalProject
 

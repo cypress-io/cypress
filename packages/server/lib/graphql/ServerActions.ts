@@ -1,3 +1,6 @@
+import fs from 'fs'
+import path from 'path'
+
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
@@ -88,5 +91,15 @@ export class ServerActions extends BaseActions {
 
   initializeConfig (projectRoot: string): Promise<config.FullConfig> {
     return config.get(projectRoot)
+  }
+
+  createConfigFile (code: string, configFilename: string): void {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create config file without activeProject.`)
+    }
+
+    fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
   }
 }

@@ -4,6 +4,7 @@
     alt="Create file manually" 
     :altFn="altFn"
     :nextFn="createConfig"
+    :canNavigateForward="gql.canNavigateForward"
   >
     <nav
       class="
@@ -60,6 +61,7 @@ import { useMutation } from "@urql/vue";
 
 gql`
 fragment ConfigFile on Wizard {
+  canNavigateForward
   sampleCodeJs: sampleCode(lang: js)
   sampleCodeTs: sampleCode(lang: ts)
 }
