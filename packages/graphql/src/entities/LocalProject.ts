@@ -1,26 +1,27 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import type { FullConfig } from '@packages/server/lib/config'
 import { Project } from './Project'
-import { ResolvedConfig } from './ResolvedConfig'
+import { Config } from './Config'
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
 })
 export class LocalProject extends Project {
-  private fullConfig?: FullConfig
+  private _config?: Config
 
   async initialize (): Promise<LocalProject> {
-    this.fullConfig = await this.ctx.actions.initializeConfig(this.projectRoot)
+    this._config = await this.ctx.actions.initializeConfig(this.projectRoot)
 
     return this
   }
 
-  @nxs.field.type(() => ResolvedConfig)
-  resolvedConfig (): NxsResult<'LocalProject', 'resolvedConfig'> {
-    if (!this.fullConfig) {
-      return null
-    }
+  setConfig (config: Config): Config {
+    this._config = config
 
-    return new ResolvedConfig(this.fullConfig.resolved)
+    return this._config
+  }
+
+  @nxs.field.type(() => Config)
+  get resolvedConfig (): NxsResult<'LocalProject', 'config'> {
+    return this._config ?? null
   }
 }

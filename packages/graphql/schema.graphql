@@ -33,6 +33,58 @@ enum BrowserFamily {
   firefox
 }
 
+"""Resolve config for a project"""
+type Config {
+  animationDistanceThreshold: ResolvedNumberOption
+  baseUrl: ResolvedStringOption
+  blockHosts: ResolvedStringOption
+  chromeWebSecurity: ResolvedBooleanOption
+  componentFolder: ResolvedStringOption
+  defaultCommandTimeout: ResolvedNumberOption
+  downloadsFolder: ResolvedStringOption
+  env: ResolvedJsonOption
+  execTimeout: ResolvedNumberOption
+  experimentalFetchPolyfill: ResolvedBooleanOption
+  experimentalInteractiveRunEvents: ResolvedBooleanOption
+  experimentalSessionSupport: ResolvedBooleanOption
+  experimentalSourceRewriting: ResolvedBooleanOption
+  experimentalStudio: ResolvedBooleanOption
+  fileServerFolder: ResolvedStringOption
+  fixturesFolder: ResolvedStringOption
+  ignoreTestFiles: ResolvedStringListOption
+  includeShadowDom: ResolvedBooleanOption
+  integrationFolder: ResolvedStringOption
+  nodeVersion: ResolvedStringOption
+  numTestsKeptInMemory: ResolvedNumberOption
+  pageLoadTimeout: ResolvedNumberOption
+  pluginsFile: ResolvedStringOption
+  port: ResolvedNumberOption
+  projectId: ResolvedStringOption
+  redirectionLimit: ResolvedNumberOption
+  reporter: ResolvedStringOption
+  requestTimeout: ResolvedNumberOption
+  resolvedNodePath: ResolvedStringOption
+  resolvedNodeVersion: ResolvedStringOption
+  retries: ResolvedNumberOption
+  screenshotOnRunFailure: ResolvedBooleanOption
+  screenshotsFolder: ResolvedStringOption
+  scrollBehavior: ResolvedStringOption
+  supportFile: ResolvedStringOption
+  supportFolder: ResolvedStringOption
+  taskTimeout: ResolvedNumberOption
+  testFiles: ResolvedStringOption
+  trashAssetsBeforeRuns: ResolvedBooleanOption
+  userAgent: ResolvedStringOption
+  video: ResolvedBooleanOption
+  videoCompression: ResolvedNumberOption
+  videoUploadOnPasses: ResolvedBooleanOption
+  videosFolder: ResolvedStringOption
+  viewportHeight: ResolvedNumberOption
+  viewportWidth: ResolvedNumberOption
+  waitForAnimations: ResolvedBooleanOption
+  watchForFileChanges: ResolvedBooleanOption
+}
+
 """A Cypress project is a container"""
 type DashboardProject {
   id: ID!
@@ -71,13 +123,16 @@ type LocalProject {
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
-  resolvedConfig: ResolvedConfig
+  resolvedConfig: Config
   title: String!
 }
 
 type Mutation {
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
+
+  """Log out of Cypress Cloud"""
+  initializePlugins: LocalProject
 
   """Auth with Cypress Cloud"""
   login: Viewer
@@ -161,58 +216,6 @@ type ResolvedBooleanOption {
   from: ResolvedConfigOption
   type: ResolvedType!
   value: Boolean
-}
-
-"""Resolve config for a project"""
-type ResolvedConfig {
-  animationDistanceThreshold: ResolvedNumberOption
-  baseUrl: ResolvedStringOption
-  blockHosts: ResolvedStringOption
-  chromeWebSecurity: ResolvedBooleanOption
-  componentFolder: ResolvedStringOption
-  defaultCommandTimeout: ResolvedNumberOption
-  downloadsFolder: ResolvedStringOption
-  env: ResolvedJsonOption
-  execTimeout: ResolvedNumberOption
-  experimentalFetchPolyfill: ResolvedBooleanOption
-  experimentalInteractiveRunEvents: ResolvedBooleanOption
-  experimentalSessionSupport: ResolvedBooleanOption
-  experimentalSourceRewriting: ResolvedBooleanOption
-  experimentalStudio: ResolvedBooleanOption
-  fileServerFolder: ResolvedStringOption
-  fixturesFolder: ResolvedStringOption
-  ignoreTestFiles: ResolvedStringListOption
-  includeShadowDom: ResolvedBooleanOption
-  integrationFolder: ResolvedStringOption
-  nodeVersion: ResolvedStringOption
-  numTestsKeptInMemory: ResolvedNumberOption
-  pageLoadTimeout: ResolvedNumberOption
-  pluginsFile: ResolvedStringOption
-  port: ResolvedNumberOption
-  projectId: ResolvedStringOption
-  redirectionLimit: ResolvedNumberOption
-  reporter: ResolvedStringOption
-  requestTimeout: ResolvedNumberOption
-  resolvedNodePath: ResolvedStringOption
-  resolvedNodeVersion: ResolvedStringOption
-  retries: ResolvedNumberOption
-  screenshotOnRunFailure: ResolvedBooleanOption
-  screenshotsFolder: ResolvedStringOption
-  scrollBehavior: ResolvedStringOption
-  supportFile: ResolvedStringOption
-  supportFolder: ResolvedStringOption
-  taskTimeout: ResolvedNumberOption
-  testFiles: ResolvedStringOption
-  trashAssetsBeforeRuns: ResolvedBooleanOption
-  userAgent: ResolvedStringOption
-  video: ResolvedBooleanOption
-  videoCompression: ResolvedNumberOption
-  videoUploadOnPasses: ResolvedBooleanOption
-  videosFolder: ResolvedStringOption
-  viewportHeight: ResolvedNumberOption
-  viewportWidth: ResolvedNumberOption
-  waitForAnimations: ResolvedBooleanOption
-  watchForFileChanges: ResolvedBooleanOption
 }
 
 enum ResolvedConfigOption {

@@ -33,6 +33,12 @@ export type ResolvedConfigurationOptions = Partial<{
   [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
 }>
 
+export type FullConfiguration = {
+  [x in keyof Cypress.ConfigOptions]: Cypress.ConfigOptions[x]
+} & {
+  resolved: ResolvedConfigurationOptions
+}
+
 export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 
 export const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length

@@ -1,8 +1,9 @@
 import fs from 'fs'
 import path from 'path'
+import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
+import { AuthenticatedUser, BaseActions, Config, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
 
 // @ts-ignore
@@ -13,6 +14,12 @@ import auth from '@packages/server/lib/gui/auth'
 
 // @ts-ignore
 import api from '@packages/server/lib/api'
+
+// @ts-ignore
+import plugins from '@packages/server/lib/plugins'
+
+// @ts-ignore
+import settings from '@packages/server/lib/util/settings'
 
 // @ts-ignore
 import browsers from '@packages/server/lib/browsers'
@@ -27,6 +34,8 @@ interface RecordKey {
   createdAt: string
   lastUsedAt: string
 }
+
+const debug = Debug('cypress:graphql:server-actions')
 
 /**
  *
@@ -89,8 +98,10 @@ export class ServerActions extends BaseActions {
     return browsers.get()
   }
 
-  initializeConfig (projectRoot: string): Promise<config.FullConfig> {
-    return config.get(projectRoot)
+  async initializeConfig (projectRoot: string): Promise<Config> {
+    const cfg = await config.get(projectRoot)
+
+    return new Config(cfg)
   }
 
   createConfigFile (code: string, configFilename: string): void {
@@ -101,5 +112,30 @@ export class ServerActions extends BaseActions {
     }
 
     fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
+  }
+
+  async initializePlugins (projectRoot: string, projectConfig: Config, browsers) {
+    const allowedCfg = config.allowed(projectConfig.rawConfig)
+
+    const modifiedCfg = await plugins.init(allowedCfg, {
+      projectRoot,
+      configFile: settings.pathToConfigFile(projectRoot, {}),
+      testingType: 'component',
+      onError: (err: Error) => { /* TODO: do we need this in GraphQL? */ },
+      onWarning: () => { /* TODO: do we need this in GraphQL? */ },
+    })
+
+    debug('plugin config yielded: %o', modifiedCfg)
+
+    // Need to pass in the browsers for whatever reason
+    // TODO: Should't need to do that, at least not here.
+    const updatedCfg = config.updateWithPluginValues(
+      projectConfig.rawConfig,
+      { ... modifiedCfg, browsers },
+    )
+
+    debug('updated config yielded: %o', updatedCfg)
+
+    return new Config(updatedCfg)
   }
 }

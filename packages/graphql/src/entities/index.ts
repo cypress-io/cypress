@@ -8,7 +8,7 @@ export * from './NavigationMenu'
 
 export * from './LocalProject'
 
-export * from './ResolvedConfig'
+export * from './Config'
 
 export * from './Query'
 

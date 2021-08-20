@@ -10,7 +10,7 @@ import type { App } from "./../entities/App"
 import type { DashboardProject } from "./../entities/DashboardProject"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { LocalProject } from "./../entities/LocalProject"
-import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
+import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, Config } from "./../entities/Config"
 import type { Query } from "./../entities/Query"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Viewer } from "./../entities/Viewer"
@@ -84,6 +84,7 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   App: App;
   Browser: Browser;
+  Config: Config;
   DashboardProject: DashboardProject;
   LocalProject: LocalProject;
   Mutation: {};
@@ -91,7 +92,6 @@ export interface NexusGenObjects {
   NavigationMenu: NavigationMenu;
   Query: Query;
   ResolvedBooleanOption: ResolvedBooleanOption;
-  ResolvedConfig: ResolvedConfig;
   ResolvedJsonOption: ResolvedJsonOption;
   ResolvedNumberOption: ResolvedNumberOption;
   ResolvedOptionBase: ResolvedOptionBase;
@@ -133,57 +133,7 @@ export interface NexusGenFieldTypes {
     path: string; // String!
     version: string; // String!
   }
-  DashboardProject: { // field return type
-    id: string; // ID!
-    projectId: string | null; // String
-    projectRoot: string; // String!
-    recordKeys: string[] | null; // [String!]
-    runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
-    title: string; // String!
-  }
-  LocalProject: { // field return type
-    id: string; // ID!
-    projectId: string | null; // String
-    projectRoot: string; // String!
-    resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
-    title: string; // String!
-  }
-  Mutation: { // field return type
-    appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
-    login: NexusGenRootTypes['Viewer'] | null; // Viewer
-    logout: NexusGenRootTypes['Viewer'] | null; // Viewer
-    navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardSetBundler: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardSetFramework: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardSetManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardSetTestingType: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
-  }
-  NavigationItem: { // field return type
-    iconPath: string; // String!
-    id: NexusGenEnums['NavItem']; // NavItem!
-    name: string; // String!
-    selected: boolean; // Boolean!
-  }
-  NavigationMenu: { // field return type
-    items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
-    selected: NexusGenEnums['NavItem']; // NavItem!
-  }
-  Query: { // field return type
-    app: NexusGenRootTypes['App']; // App!
-    navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
-    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
-  }
-  ResolvedBooleanOption: { // field return type
-    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
-    type: NexusGenEnums['ResolvedType']; // ResolvedType!
-    value: boolean | null; // Boolean
-  }
-  ResolvedConfig: { // field return type
+  Config: { // field return type
     animationDistanceThreshold: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     baseUrl: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     blockHosts: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
@@ -232,6 +182,57 @@ export interface NexusGenFieldTypes {
     viewportWidth: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     waitForAnimations: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
     watchForFileChanges: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+  }
+  DashboardProject: { // field return type
+    id: string; // ID!
+    projectId: string | null; // String
+    projectRoot: string; // String!
+    recordKeys: string[] | null; // [String!]
+    runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
+    title: string; // String!
+  }
+  LocalProject: { // field return type
+    id: string; // ID!
+    projectId: string | null; // String
+    projectRoot: string; // String!
+    resolvedConfig: NexusGenRootTypes['Config'] | null; // Config
+    title: string; // String!
+  }
+  Mutation: { // field return type
+    appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
+    initializePlugins: NexusGenRootTypes['LocalProject'] | null; // LocalProject
+    login: NexusGenRootTypes['Viewer'] | null; // Viewer
+    logout: NexusGenRootTypes['Viewer'] | null; // Viewer
+    navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
+    wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetBundler: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetFramework: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardSetTestingType: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizardValidateManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
+  }
+  NavigationItem: { // field return type
+    iconPath: string; // String!
+    id: NexusGenEnums['NavItem']; // NavItem!
+    name: string; // String!
+    selected: boolean; // Boolean!
+  }
+  NavigationMenu: { // field return type
+    items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
+    selected: NexusGenEnums['NavItem']; // NavItem!
+  }
+  Query: { // field return type
+    app: NexusGenRootTypes['App']; // App!
+    navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
+    viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
+    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+  }
+  ResolvedBooleanOption: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+    value: boolean | null; // Boolean
   }
   ResolvedJsonOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
@@ -336,57 +337,7 @@ export interface NexusGenFieldTypeNames {
     path: 'String'
     version: 'String'
   }
-  DashboardProject: { // field return type name
-    id: 'ID'
-    projectId: 'String'
-    projectRoot: 'String'
-    recordKeys: 'String'
-    runs: 'RunGroup'
-    title: 'String'
-  }
-  LocalProject: { // field return type name
-    id: 'ID'
-    projectId: 'String'
-    projectRoot: 'String'
-    resolvedConfig: 'ResolvedConfig'
-    title: 'String'
-  }
-  Mutation: { // field return type name
-    appCreateConfigFile: 'App'
-    login: 'Viewer'
-    logout: 'Viewer'
-    navigationMenuSetItem: 'NavigationMenu'
-    wizardInstallDependencies: 'Wizard'
-    wizardNavigate: 'Wizard'
-    wizardNavigateForward: 'Wizard'
-    wizardSetBundler: 'Wizard'
-    wizardSetFramework: 'Wizard'
-    wizardSetManualInstall: 'Wizard'
-    wizardSetTestingType: 'Wizard'
-    wizardValidateManualInstall: 'Wizard'
-  }
-  NavigationItem: { // field return type name
-    iconPath: 'String'
-    id: 'NavItem'
-    name: 'String'
-    selected: 'Boolean'
-  }
-  NavigationMenu: { // field return type name
-    items: 'NavigationItem'
-    selected: 'NavItem'
-  }
-  Query: { // field return type name
-    app: 'App'
-    navigationMenu: 'NavigationMenu'
-    viewer: 'Viewer'
-    wizard: 'Wizard'
-  }
-  ResolvedBooleanOption: { // field return type name
-    from: 'ResolvedConfigOption'
-    type: 'ResolvedType'
-    value: 'Boolean'
-  }
-  ResolvedConfig: { // field return type name
+  Config: { // field return type name
     animationDistanceThreshold: 'ResolvedNumberOption'
     baseUrl: 'ResolvedStringOption'
     blockHosts: 'ResolvedStringOption'
@@ -435,6 +386,57 @@ export interface NexusGenFieldTypeNames {
     viewportWidth: 'ResolvedNumberOption'
     waitForAnimations: 'ResolvedBooleanOption'
     watchForFileChanges: 'ResolvedBooleanOption'
+  }
+  DashboardProject: { // field return type name
+    id: 'ID'
+    projectId: 'String'
+    projectRoot: 'String'
+    recordKeys: 'String'
+    runs: 'RunGroup'
+    title: 'String'
+  }
+  LocalProject: { // field return type name
+    id: 'ID'
+    projectId: 'String'
+    projectRoot: 'String'
+    resolvedConfig: 'Config'
+    title: 'String'
+  }
+  Mutation: { // field return type name
+    appCreateConfigFile: 'App'
+    initializePlugins: 'LocalProject'
+    login: 'Viewer'
+    logout: 'Viewer'
+    navigationMenuSetItem: 'NavigationMenu'
+    wizardInstallDependencies: 'Wizard'
+    wizardNavigate: 'Wizard'
+    wizardNavigateForward: 'Wizard'
+    wizardSetBundler: 'Wizard'
+    wizardSetFramework: 'Wizard'
+    wizardSetManualInstall: 'Wizard'
+    wizardSetTestingType: 'Wizard'
+    wizardValidateManualInstall: 'Wizard'
+  }
+  NavigationItem: { // field return type name
+    iconPath: 'String'
+    id: 'NavItem'
+    name: 'String'
+    selected: 'Boolean'
+  }
+  NavigationMenu: { // field return type name
+    items: 'NavigationItem'
+    selected: 'NavItem'
+  }
+  Query: { // field return type name
+    app: 'App'
+    navigationMenu: 'NavigationMenu'
+    viewer: 'Viewer'
+    wizard: 'Wizard'
+  }
+  ResolvedBooleanOption: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+    value: 'Boolean'
   }
   ResolvedJsonOption: { // field return type name
     from: 'ResolvedConfigOption'

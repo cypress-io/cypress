@@ -29,5 +29,7 @@ module.exports = (on, config) => {
     })
   }
 
+  config.defaultCommandTimeout = 1234
+
   return config // IMPORTANT to return a config
 }

@@ -116,5 +116,25 @@ export const mutation = mutationType({
         return ctx.viewer
       },
     })
+
+    t.field('initializePlugins', {
+      type: 'LocalProject',
+      description: 'Log out of Cypress Cloud',
+      async resolve (_root, args, ctx) {
+        if (!ctx.activeProject || !ctx.activeProject.resolvedConfig || !ctx.app.browserCache) {
+          return null
+        }
+
+        const config = await ctx.actions.initializePlugins(
+          ctx.activeProject.projectRoot,
+          ctx.activeProject.resolvedConfig,
+          ctx.app.browserCache,
+        )
+
+        ctx.activeProject.setConfig(config)
+
+        return ctx.activeProject
+      },
+    })
   },
 })
