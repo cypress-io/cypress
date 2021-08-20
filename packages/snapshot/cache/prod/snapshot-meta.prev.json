@@ -23,7 +23,6 @@
     "./packages/server/lib/util/suppress_warnings.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
-    "./packages/socket/lib/socket.ts",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
     "./ws/lib/websocket.js"
@@ -561,7 +560,6 @@
     "./packages/electron/node_modules/get-stream/buffer-stream.js",
     "./packages/example/node_modules/glob/glob.js",
     "./packages/example/node_modules/glob/sync.js",
-    "./packages/https-proxy/index.js",
     "./packages/https-proxy/test/helpers/certs.js",
     "./packages/launcher/index.js",
     "./packages/launcher/lib/log.ts",
@@ -752,6 +750,7 @@
     "./packages/server/node_modules/winston/lib/winston/transports/transport.js",
     "./packages/server/node_modules/winston/node_modules/async/lib/async.js",
     "./packages/socket/index.ts",
+    "./packages/socket/lib/socket.ts",
     "./packages/socket/node_modules/debug/src/browser.js",
     "./packages/socket/node_modules/debug/src/index.js",
     "./packages/socket/node_modules/engine.io-client/lib/transports/polling-xhr.js",
@@ -761,8 +760,7 @@
     "./packages/socket/node_modules/socket.io/dist/index.js",
     "./packages/socket/node_modules/socket.io/dist/namespace.js",
     "./packages/socket/node_modules/socket.io/dist/parent-namespace.js",
-    "./packages/socket/node_modules/socket.io/dist/socket.js",
-    "./packages/ts/register.js"
+    "./packages/socket/node_modules/socket.io/dist/socket.js"
   ],
   "healthy": [
     "./node_modules/@babel/parser/lib/index.js",
@@ -3395,6 +3393,7 @@
     "./packages/extension/index.js",
     "./packages/extension/lib/extension.js",
     "./packages/extension/lib/util.js",
+    "./packages/https-proxy/index.js",
     "./packages/https-proxy/lib/proxy.js",
     "./packages/https-proxy/lib/server.js",
     "./packages/https-proxy/lib/util/parse.js",
@@ -3799,7 +3798,8 @@
     "./packages/socket/node_modules/socket.io/dist/client.js",
     "./packages/socket/node_modules/socket.io/package.json",
     "./packages/static/index.js",
-    "./packages/static/lib/static.js"
+    "./packages/static/lib/static.js",
+    "./packages/ts/register.js"
   ],
   "deferredHashFile": "yarn.lock",
   "deferredHash": "92b05b2d926785f5c3a8d561da13e7a438624e7d1eb8b30fe89a59781adea22c"
