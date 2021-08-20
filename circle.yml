@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - tgriesser/fix/mac-build
+        - issue-17773-slow-browser-detection
 
 defaults: &defaults
   parallelism: 1
@@ -49,7 +49,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -58,7 +58,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
         user: node
     environment:
       PLATFORM: linux
@@ -1126,6 +1126,7 @@ jobs:
 
   runner-integration-tests-electron:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1488,7 +1489,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-17773-slow-browser-detection" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

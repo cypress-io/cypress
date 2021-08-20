@@ -75,7 +75,7 @@ const onSubmitNewProject = function (orgId) {
 
     it('displays empty runs page', function () {
       cy.get('.setup-project').should('not.exist')
-      cy.contains('To record your first')
+      cy.contains('How to record your first')
       cy.contains('cypress run --record --key record-key-123')
     })
 

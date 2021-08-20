@@ -982,7 +982,7 @@ declare namespace Cypress {
      *      .its('contentType')
      *      .should('eq', 'text/html')
      */
-    document(options?: Partial<Loggable>): Chainable<Document>
+    document(options?: Partial<Loggable & Timeoutable>): Chainable<Document>
 
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
