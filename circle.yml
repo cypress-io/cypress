@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - tgriesser/fix/mac-build
+        - issue-17773-slow-browser-detection
 
 defaults: &defaults
   parallelism: 1
@@ -49,7 +49,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -58,7 +58,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
         user: node
     environment:
       PLATFORM: linux
@@ -258,7 +258,7 @@ commands:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
           working_directory: ~/
-          command: npm i globby fs-extra minimist fast-json-stable-stringify
+          command: npm i globby@11.0.4 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
 
   install-required-node:
     # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
@@ -1126,6 +1126,7 @@ jobs:
 
   runner-integration-tests-electron:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1271,9 +1272,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          name: Run tests
-          command: yarn workspace @cypress/webpack-preprocessor test
-      - run:
           name: Test babelrc
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/use-babelrc
@@ -1298,6 +1296,9 @@ jobs:
           name: Test React app
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
 
   npm-webpack-dev-server:
@@ -1339,8 +1340,16 @@ jobs:
           name: Build
           command: yarn workspace @cypress/vue build
       - run:
-          name: Run tests
-          command: yarn test-ci
+          name: Type Check
+          command: yarn typecheck
+          working_directory: npm/vue
+      - run:
+          name: Run component tests
+          command: yarn test:ci:ct
+          working_directory: npm/vue
+      - run:
+          name: Run e2e tests
+          command: yarn test:ci:e2e
           working_directory: npm/vue
       - store_test_results:
           path: npm/vue/test_results
@@ -1480,7 +1489,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-17773-slow-browser-detection" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

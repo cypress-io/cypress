@@ -685,7 +685,7 @@ const e2e = {
       Fixtures.installStubPackage(options.project, options.stubPackage)
     }
 
-    args = ['index.js'].concat(args)
+    args = options.args || ['index.js'].concat(args)
 
     let stdout = ''
     let stderr = ''
@@ -763,7 +763,8 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
-      const sp = cp.spawn('node', args, {
+      const cmd = options.command || 'node'
+      const sp = cp.spawn(cmd, args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
         .extend({
@@ -787,11 +788,15 @@ const e2e = {
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
+          // disable frame skipping to make quick Chromium tests have matching snapshots/working video
+          CYPRESS_EVERY_NTH_FRAME: 1,
+
           // force file watching for use with --no-exit
           ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),
+        ...options.spawnOpts,
       })
 
       const ColorOutput = function () {

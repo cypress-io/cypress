@@ -35,7 +35,7 @@ describe('index.spec', () => {
     expect(stub_setInterval.firstCall.args[1]).eq(1000 * 60 * 60)
     expect(Updater.check.callCount).eq(1)
     expect(Updater.check.firstCall.args[0]).includes({
-      testingType: 'ct',
+      testingType: 'component',
       initialLaunch: true,
     })
   })

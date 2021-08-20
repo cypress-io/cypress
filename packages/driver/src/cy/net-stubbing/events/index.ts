@@ -71,12 +71,12 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
     state('aliasedRequests', [])
   })
 
-  Cypress.on('net:event', (eventName, frame: NetEvent.ToDriver.Event<any>) => {
+  Cypress.on('net:stubbing:event', (eventName, frame: NetEvent.ToDriver.Event<any>) => {
     Bluebird.try(async () => {
       const handler = netEventHandlers[eventName]
 
       if (!handler) {
-        throw new Error(`received unknown net:event in driver: ${eventName}`)
+        throw new Error(`received unknown net:stubbing:event in driver: ${eventName}`)
       }
 
       const emitResolved = (result: HandlerResult<any>) => {

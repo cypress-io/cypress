@@ -15,15 +15,13 @@ const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', '
 // TODO: shouldn't this be on the trailing edge, not leading?
 const debounce = (fn) => _.debounce(fn, 250, { leading: true })
 
-export type RunnerType = 'ct' | 'e2e'
-
 export class SpecsStore {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
 
   constructor (
     private cypressConfig: Record<string, any>,
-    private runner: RunnerType,
+    private runner: Cypress.TestingType,
   ) {}
 
   get specDirectory () {
@@ -31,7 +29,7 @@ export class SpecsStore {
       return this.cypressConfig.resolved.integrationFolder.value
     }
 
-    if (this.runner === 'ct') {
+    if (this.runner === 'component') {
       return this.cypressConfig.resolved.componentFolder.value
     }
   }

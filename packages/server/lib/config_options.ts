@@ -37,6 +37,10 @@ export const options = [
     defaultValue: '/__/',
     isInternal: true,
   }, {
+    name: 'clientCertificates',
+    defaultValue: [],
+    validation: v.isValidClientCertificatesSet,
+  }, {
     name: 'component',
     // runner-ct overrides
     defaultValue: {},
@@ -99,17 +103,15 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalSessionSupport',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: v.isString,
     isFolder: true,
-  }, {
-    name: 'firefoxGcInterval',
-    defaultValue: {
-      runMode: 1,
-      openMode: null,
-    },
-    validation: v.isValidFirefoxGcInterval,
   }, {
     name: 'fixturesFolder',
     defaultValue: 'cypress/fixtures',
@@ -326,6 +328,10 @@ export const breakingOptions = [
   }, {
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'firefoxGcInterval',
+    errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
   },
 ]

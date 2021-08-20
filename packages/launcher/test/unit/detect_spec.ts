@@ -1,12 +1,13 @@
 require('../spec_helper')
-import { firefoxGcWarning, detect, detectByPath, setMajorVersion } from '../../lib/detect'
+import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
-const os = require('os')
+import os from 'os'
 import { log } from '../log'
 import { project } from 'ramda'
+import * as darwinUtil from '../../lib/darwin/util'
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -61,6 +62,21 @@ describe('browser detection', () => {
 
       // @ts-ignore
       expect(res.majorVersion).to.equal(foundBrowser.version)
+    })
+
+    it('creates warning when version is unsupported', () => {
+      const foundBrowser = {
+        displayName: 'TestBro',
+        name: 'test browser',
+        version: '9000.1',
+        minSupportedVersion: 9001,
+      }
+
+      const res = setMajorVersion(foundBrowser)
+
+      // @ts-ignore
+      expect(res.warning).to.contain('does not support running TestBro version 9000')
+      .and.contain('TestBro newer than or equal to 9001')
     })
   })
 
@@ -143,18 +159,35 @@ describe('browser detection', () => {
       })
     })
 
-    // @see https://github.com/cypress-io/cypress/issues/8241
-    it('adds warnings to Firefox versions less than 80', async () => {
+    it('creates warning when version is unsupported', async () => {
       execa.withArgs('/good-firefox', ['--version'])
-      .resolves({ stdout: 'Mozilla Firefox 80.0' })
+      .resolves({ stdout: 'Mozilla Firefox 85.0' })
 
-      execa.withArgs('/bad-firefox', ['--version'])
-      .resolves({ stdout: 'Mozilla Firefox 79.1' })
+      const foundBrowser = await detectByPath('/good-firefox')
 
-      expect(await detectByPath('/good-firefox')).to.not.have.property('warning')
-      expect(await detectByPath('/bad-firefox')).to.include({
-        warning: firefoxGcWarning,
-      })
+      expect(foundBrowser.warning).to.contain('does not support running Custom Firefox version 85')
+      .and.contain('Firefox newer than or equal to 86')
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/17773
+  context('darwin performance workaround', () => {
+    let browsers
+
+    beforeEach(() => {
+      sinon.stub(os, 'platform').returns('darwin')
+      sinon.stub(os, 'release').returns('20.0.0')
+
+      browsers = []
+
+      sinon.stub(darwinUtil, 'darwinDetectionWorkaround').resolves(browsers)
+    })
+
+    it('uses workaround when on darwin 20.0.0+', async () => {
+      const result = await detect()
+
+      expect(darwinUtil.darwinDetectionWorkaround).to.be.called
+      expect(result).to.equal(browsers)
     })
   })
 })

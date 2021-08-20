@@ -4,6 +4,7 @@ const onSubmitNewProject = function (orgId) {
     .contains('.btn', 'Set up project').click()
     .then(() => {
       expect(this.ipc.setupDashboardProject).to.be.calledWith({
+        projectRoot: '/foo/bar',
         projectName: this.config.projectName,
         orgId,
         public: false,
@@ -21,6 +22,7 @@ const onSubmitNewProject = function (orgId) {
     .then(() => {
       expect(this.ipc.setupDashboardProject).to.be.calledWith({
         projectName: 'New Project',
+        projectRoot: '/foo/bar',
         orgId,
         public: true,
       })
@@ -73,7 +75,7 @@ const onSubmitNewProject = function (orgId) {
 
     it('displays empty runs page', function () {
       cy.get('.setup-project').should('not.exist')
-      cy.contains('To record your first')
+      cy.contains('How to record your first')
       cy.contains('cypress run --record --key record-key-123')
     })
 
@@ -114,7 +116,7 @@ describe('Connect to Dashboard', function () {
       cy.stub(this.ipc, 'getRecordKeys').resolves(this.keys)
       cy.stub(this.ipc, 'pingApiServer').resolves()
       cy.stub(this.ipc, 'externalOpen')
-      cy.stub(this.ipc, 'setProjectId').resolvesArg(0)
+      cy.stub(this.ipc, 'setProjectId').callsFake((arg) => Promise.resolve(arg.id))
       cy.stub(this.ipc, 'beginAuth').resolves()
 
       this.getCurrentUser = this.util.deferred()
@@ -485,7 +487,7 @@ describe('Connect to Dashboard', function () {
             cy.get('.setup-project')
             .contains('.btn', 'Set up project').click()
             .then(() => {
-              expect(this.ipc.setProjectId).to.be.calledWith(this.dashboardProjects[1].id)
+              expect(this.ipc.setProjectId).to.be.calledWith({ id: this.dashboardProjects[1].id, projectRoot: '/foo/bar' })
             })
           })
 

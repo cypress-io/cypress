@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-properties */
 require('../spec_helper')
 
 const R = require('ramda')
@@ -33,6 +34,7 @@ const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const { getId } = require(`${root}lib/project_static`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
@@ -367,7 +369,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new ProjectBase({ projectRoot: this.noScaffolding, projectType: 'e2e' })).getProjectId()
+        return (new ProjectBase({ projectRoot: this.noScaffolding, testingType: 'e2e' })).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -1047,8 +1049,8 @@ describe('lib/cypress', () => {
             // when we work with the browsers we set a few extra flags
             const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
             const launchedChrome = R.merge(chrome, {
-              isHeadless: false,
-              isHeaded: true,
+              isHeadless: true,
+              isHeaded: false,
             })
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)
@@ -1110,7 +1112,8 @@ describe('lib/cypress', () => {
       })
 
       // TODO: handle PORT_IN_USE short integration test
-      it('logs error and exits when port is in use', function () {
+      it('logs error and exits when port is in use', async function () {
+        sinon.stub(ProjectBase.prototype, 'getAutomation').returns({ use: () => {} })
         let server = http.createServer()
 
         server = Promise.promisifyAll(server)
@@ -1119,7 +1122,7 @@ describe('lib/cypress', () => {
         .then(() => {
           return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         }).then(() => {
-          this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
+          this.expectExitWithErr('PORT_IN_USE_SHORT', '5544')
         })
       })
     })
@@ -1235,7 +1238,7 @@ describe('lib/cypress', () => {
         // make sure we have no user object
         user.set({}),
 
-        ProjectBase.id(this.todosPath)
+        getId(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -1676,7 +1679,6 @@ describe('lib/cypress', () => {
     })
 
     it('passes filtered options to Project#open and sets cli config', function () {
-      const getConfig = sinon.spy(ProjectBase.prototype, 'getConfig')
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
@@ -1706,12 +1708,12 @@ describe('lib/cypress', () => {
 
         return Events.handleEvent(options, {}, {}, 123, 'open:project', this.todosPath)
       }).then(() => {
-        expect(getConfig).to.be.calledWithMatch({
-          port: 2121,
-          pageLoadTimeout: 1000,
-          report: false,
-          env: { baz: 'baz' },
-        })
+        const projectOptions = openProject.getProject().options
+
+        expect(projectOptions.port).to.eq(2121)
+        expect(projectOptions.pageLoadTimeout).to.eq(1000)
+        expect(projectOptions.report).to.eq(false)
+        expect(projectOptions.env).to.eql({ baz: 'baz' })
 
         expect(open).to.be.called
 

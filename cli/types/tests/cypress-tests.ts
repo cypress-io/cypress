@@ -257,6 +257,15 @@ describe('then', () => {
       $p // $ExpectType JQuery<HTMLParagraphElement>
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/16669
+  it('any as default', () => {
+    cy.get('body')
+    .then(() => ({} as any))
+    .then(v => {
+      v // $ExpectType any
+    })
+  })
 })
 
 cy.wait(['@foo', '@bar'])
@@ -675,6 +684,28 @@ namespace CypressTaskTests {
   cy.task('foo').then((val) => {
     val // $ExpectType unknown
   })
+}
+
+namespace CypressSessionsTests {
+  Cypress.config('experimentalSessionSupport') // $ExpectType boolean
+  cy.session('user')
+  cy.session('user', () => {})
+  cy.session({ name: 'bob' }, () => {})
+  cy.session('user', () => {}, {})
+  cy.session('user', () => {}, {
+    validate: () => {}
+  })
+
+  cy.session() // $ExpectError
+  cy.session(null) // $ExpectError
+  cy.session('user', () => {}, {
+    validate: { foo: true } // $ExpectError
+  })
+}
+namespace CypressCurrentTest {
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType string[]
+  Cypress.currentTest() // $ExpectError
 }
 
 namespace CypressKeyboardTests {

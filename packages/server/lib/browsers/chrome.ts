@@ -11,7 +11,7 @@ import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
-import { CdpAutomation } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
@@ -273,9 +273,7 @@ const _maybeRecordVideo = async function (client, options) {
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', {
-    format: 'jpeg',
-  })
+  await client.send('Page.startScreencast', screencastOpts)
 
   return client
 }
@@ -426,9 +424,13 @@ export = {
     if (isHeadless) {
       args.push('--headless')
 
-      // set default headless size to 1920x1080
+      // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
-      args.push('--window-size=1920,1080')
+      args.push('--window-size=1280,720')
+
+      // set default headless DPR to 1
+      // https://github.com/cypress-io/cypress/issues/17375
+      args.push('--force-device-scale-factor=1')
     }
 
     // force ipv4
