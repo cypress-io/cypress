@@ -1,4 +1,7 @@
 // prevent esbuild from including snapshot related modules
 const hook = './hook'
 
-require(`${hook}-require`)
+// Ensuring we only hook the require once
+if (require.name !== 'customRequire') {
+  require(`${hook}-require`)
+}
