@@ -16,6 +16,7 @@ Require stack:
 - lib/modes/run.js
 - lib/modes/run-e2e.js
 - lib/modes/index.js
+- lib/open_project.ts
 - lib/cypress.js
 - index.js
 - 
