@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
-import webpackDevServerPkg from 'webpack-dev-server/package.json'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
+import { webpackDevServerFacts } from './webpackDevServerFacts'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
   /* this is the Cypress options object */
@@ -53,15 +53,17 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     hot: false,
   }
 
-  if (webpackDevServerPkg.version.match(/3\./)) {
+  if (webpackDevServerFacts.isV3()) {
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
     }
-  } else if (webpackDevServerPkg.version.match(/4\./)) {
+  } else if (webpackDevServerFacts.isV4()) {
     webpackDevServerConfig = {
+      host: 'localhost',
+      port: 0,
       ...userWebpackConfig?.devServer,
       devMiddleware: {
         publicPath: devServerPublicPathRoute,
@@ -69,9 +71,8 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       hot: false,
     }
   } else {
-    throw Error(`@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`)
+    throw webpackDevServerFacts.unsupported()
   }
 
-  // @ts-ignore types for webpack v5 are incorrect?
   return new WebpackDevServer(compiler, webpackDevServerConfig)
 }
