@@ -14,7 +14,7 @@ const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const browsers = require(`${root}../lib/browsers`)
-const openProject = require(`${root}../lib/open_project`)
+const { openProject } = require('../../../lib/open_project')
 const open = require(`${root}../lib/util/open`)
 const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
@@ -834,6 +834,15 @@ describe('lib/gui/events', () => {
           expect(openProject.getProject()).to.be.null
 
           return assert.sendCalledWith([null, null])
+        })
+      })
+
+      it('is noop and returns null when no project is open', function () {
+        openProject.__reset()
+        expect(openProject.getProject()).to.be.null
+
+        return this.handleEvent('close:project').then((assert) => {
+          return assert.sendCalledWith(null)
         })
       })
     })

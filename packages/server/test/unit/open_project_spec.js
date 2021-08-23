@@ -4,7 +4,7 @@ const path = require('path')
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
-const openProject = require(`${root}lib/open_project`)
+const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const runEvents = require(`${root}lib/plugins/run_events`)
 const Fixtures = require('../test/../support/helpers/fixtures')
@@ -34,12 +34,12 @@ describe('lib/open_project', () => {
     sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
-    openProject.create('/project/root')
+    return openProject.create('/project/root', {}, {})
   })
 
   context('#launch', () => {
     beforeEach(async function () {
-      await openProject.create('/root')
+      await openProject.create('/root', {}, {})
       openProject.getProject().__setConfig({
         browserUrl: 'http://localhost:8888/__/',
         componentFolder: path.join(todosPath, 'component'),
@@ -271,13 +271,16 @@ describe('lib/open_project', () => {
     })
 
     it('destroys and creates specsWatcher as expected', function () {
-      expect(openProject.specsWatcher).to.exist
-      openProject.stopSpecsWatcher()
-      expect(openProject.specsWatcher).to.be.null
-
       return openProject.getSpecChanges()
       .then(() => {
         expect(openProject.specsWatcher).to.exist
+        openProject.stopSpecsWatcher()
+        expect(openProject.specsWatcher).to.be.null
+
+        return openProject.getSpecChanges()
+        .then(() => {
+          expect(openProject.specsWatcher).to.exist
+        })
       })
     })
   })

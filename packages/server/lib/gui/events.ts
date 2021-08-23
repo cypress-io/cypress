@@ -18,7 +18,7 @@ const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
-const openProject = require('../open_project')
+const { openProject } = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
