@@ -116,5 +116,13 @@ export const mutation = mutationType({
         return ctx.viewer
       },
     })
+
+    t.field('initializeOpenProjet', {
+      type: 'Viewer',
+      description: 'Initializes open_project global singleton to manager current project state',
+      async resolve (_root, args, ctx) {
+        await ctx.actions.initializeOpenProject(ctx.launchOptions)
+      },
+    })
   },
 })

@@ -1,5 +1,7 @@
+import type { LaunchOptions } from '../../../server/lib/gui/events'
 import type { BaseActions } from '../actions/BaseActions'
-import { App, NavigationMenu, Wizard, LocalProject, Viewer, DashboardProject } from '../entities'
+import type { LocalProject, Viewer, DashboardProject } from '../entities'
+import { App, Wizard, NavigationMenu } from '../entities'
 
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.
@@ -14,12 +16,18 @@ export abstract class BaseContext {
   abstract dashboardProjects: DashboardProject[]
   abstract viewer: null | Viewer
 
+  constructor(private _launchOptions: LaunchOptions) {}
+
   wizard = new Wizard()
   navigationMenu = new NavigationMenu()
   app = new App(this)
 
   get activeProject () {
     return this.app.activeProject
+  }
+  
+  get launchOptions () {
+    return this._launchOptions
   }
 
   isFirstOpen = false

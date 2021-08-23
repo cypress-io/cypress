@@ -3,6 +3,7 @@ import type { RunGroup } from '../entities/run'
 import type { FoundBrowser } from '@packages/launcher'
 import type { LocalProject } from '../entities'
 import type { FullConfig } from '@packages/server/lib/config'
+import type { LaunchOptions } from '@packages/server/lib/gui/events'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -29,4 +30,6 @@ export abstract class BaseActions {
   abstract getRecordKeys (payload: { projectId: string, authToken: string }): Promise<string[]>
   abstract getBrowsers (): Promise<FoundBrowser[]>
   abstract initializeConfig (projectRoot: string): Promise<FullConfig>
+
+  abstract initializeOpenProject (options: LaunchOptions): Promise<void>
 }
