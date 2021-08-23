@@ -55,7 +55,7 @@ export interface Cfg extends ReceivedCypressOptions {
 type WebSocketOptionsCallback = (...args: any[]) => any
 
 export interface OpenProjectLaunchOptions {
-  args: LaunchArgs
+  args?: LaunchArgs
 
   configFile?: string | boolean
   browsers?: FoundBrowser[]

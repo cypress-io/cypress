@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import browsers from '@packages/server/lib/browsers'
-import openProject from '@packages/server/lib/open_project'
+import { LaunchArgs, openProject } from '@packages/server/lib/open_project'
 import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
@@ -29,7 +29,7 @@ const registerCheckForUpdates = () => {
 }
 
 // Partial because there are probably other options that are not included in this type.
-export const start = async (projectRoot: string, args: Record<string, any>) => {
+export const start = async (projectRoot: string, args: LaunchArgs) => {
   if (process.env['CYPRESS_INTERNAL_ENV'] === 'production') {
     registerCheckForUpdates()
   }
@@ -48,7 +48,7 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
 
     const options = {
       browsers: [browser],
-    }
+    } as const
 
     debug('create project')
 

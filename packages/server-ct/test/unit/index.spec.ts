@@ -1,5 +1,5 @@
 const Updater = require('@packages/server/lib/updater')
-import openProject from '@packages/server/lib/open_project'
+import { openProject } from '@packages/server/lib/open_project'
 import browsers from '@packages/server/lib/browsers'
 import sinon from 'sinon'
 import { expect } from 'chai'
