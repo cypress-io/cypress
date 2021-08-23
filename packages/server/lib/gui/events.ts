@@ -31,7 +31,6 @@ const savedState = require('../saved_state')
 import { ServerContext } from '../graphql/ServerContext'
 import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
-import { PlatformName } from '../../../launcher'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -322,7 +321,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           })
         })
 
-        console.log({ arg, options })
         return openProject.create(arg, options, {
           onFocusTests,
           onSpecChanged,
@@ -477,19 +475,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   }
 }
 
-export interface LaunchOptions {
-  _: [string] // Cypress App binary location
-  config: Record<string, unknown>
-  cwd: string
-  project: string // projectRoot
-  projectRoot: string // same as above
-  testingType: Cypress.TestingType
-  invokedFromCli: boolean
-  os: PlatformName
-
-  onFocusTests?: () => any
-}
-
 module.exports = {
   nullifyUnserializableValues,
 
@@ -501,7 +486,6 @@ module.exports = {
 
   async start (options, bus, { startGraphQL } = { startGraphQL: true }) {
     // curry left options
-    console.log(options)
     ipc.on('request', _.partial(this.handleEvent, options, bus))
 
     // support not starting server for testing purposes.
