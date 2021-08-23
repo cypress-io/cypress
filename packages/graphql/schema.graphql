@@ -131,8 +131,11 @@ type Mutation {
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
 
-  """Log out of Cypress Cloud"""
+  """Initialize plugins and update config"""
   initializePlugins: LocalProject
+
+  """Initialize plugins and update config"""
+  initializeServer: LocalProject
 
   """Auth with Cypress Cloud"""
   login: Viewer

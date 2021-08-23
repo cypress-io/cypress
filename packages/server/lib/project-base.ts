@@ -35,6 +35,7 @@ import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-c
 import { checkSupportFile } from './project_utils'
 import type { ProjectContract } from '@packages/graphql'
 
+
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
 // and are required when creating a project.
@@ -181,6 +182,136 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
     return testingType === 'e2e'
       ? new ServerE2E() as TServer
       : new ServerCt() as TServer
+  }
+
+  async openGraphQL (cfg: Cfg) {
+    debug('opening project instance %s', this.projectRoot)
+    debug('project open options %o', this.options)
+
+    process.chdir(this.projectRoot)
+
+    // TODO: we currently always scaffold the plugins file
+    // even when headlessly or else it will cause an error when
+    // we try to load it and it's not there. We must do this here
+    // else initialing the plugins will instantly fail.
+    if (cfg.pluginsFile) {
+      debug('scaffolding with plugins file %s', cfg.pluginsFile)
+
+      await scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
+    }
+
+    this._server = this.createServer(this.testingType)
+
+    const {
+      specsStore,
+      startSpecWatcher,
+      ctDevServerPort,
+    } = await this.initializeSpecStore(cfg)
+
+    if (this.testingType === 'component') {
+      cfg.baseUrl = `http://localhost:${ctDevServerPort}`
+    }
+
+    const [port, warning] = await this._server.open(cfg, {
+      getCurrentBrowser: () => this.browser,
+      getSpec: () => this.spec,
+      onError: this.options.onError,
+      onWarning: this.options.onWarning,
+      shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
+      testingType: this.testingType,
+      SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
+      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      specsStore,
+    })
+
+    // if we didnt have a cfg.port
+    // then get the port once we
+    // open the server
+    if (!cfg.port) {
+      cfg.port = port
+
+      // and set all the urls again
+      _.extend(cfg, config.setUrls(cfg))
+    }
+
+    cfg.proxyServer = cfg.proxyUrl
+
+    // store the cfg from
+    // opening the server
+    this._cfg = cfg
+
+    debug('project config: %o', _.omit(cfg, 'resolved'))
+
+    if (warning) {
+      this.options.onWarning(warning)
+    }
+
+    // save the last time they opened the project
+    // along with the first time they opened it
+    const now = Date.now()
+    const stateToSave = {
+      lastOpened: now,
+    } as any
+
+    if (!cfg.state || !cfg.state.firstOpened) {
+      stateToSave.firstOpened = now
+    }
+
+    this.watchSettings({
+      onSettingsChanged: this.options.onSettingsChanged,
+      projectRoot: this.projectRoot,
+      configFile: this.options.configFile,
+    })
+
+    this.startWebsockets({
+      onReloadBrowser: this.options.onReloadBrowser,
+      onFocusTests: this.options.onFocusTests,
+      onSpecChanged: this.options.onSpecChanged,
+    }, {
+      socketIoCookie: cfg.socketIoCookie,
+      namespace: cfg.namespace,
+      screenshotsFolder: cfg.screenshotsFolder,
+      report: cfg.report,
+      reporter: cfg.reporter,
+      reporterOptions: cfg.reporterOptions,
+      projectRoot: this.projectRoot,
+    })
+
+    await Promise.all([
+      this.scaffold(cfg),
+      this.saveState(stateToSave),
+    ])
+
+    await Promise.all([
+      checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
+      this.watchPluginsFile(cfg, this.options),
+    ])
+
+    if (cfg.isTextTerminal) {
+      return
+    }
+
+    // start watching specs
+    // whenever a spec file is added or removed, we notify the
+    // <SpecList>
+    // This is only used for CT right now by general users.
+    // It is is used with E2E if the CypressInternal_UseInlineSpecList flag is true.
+    startSpecWatcher()
+
+    if (!cfg.experimentalInteractiveRunEvents) {
+      return
+    }
+
+    const sys = await system.info()
+    const beforeRunDetails = {
+      config: cfg,
+      cypressVersion: pkg.version,
+      system: _.pick(sys, 'osName', 'osVersion'),
+    }
+
+    this.isOpen = true
+
+    return runEvents.execute('before:run', cfg, beforeRunDetails)
   }
 
   async open () {

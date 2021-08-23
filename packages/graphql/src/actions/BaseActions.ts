@@ -30,4 +30,5 @@ export abstract class BaseActions {
   abstract getBrowsers (): Promise<FoundBrowser[]>
   abstract initializeConfig (projectRoot: string): Promise<Config>
   abstract initializePlugins (projectRoot: string, projectConfig: Config, browsers: Browser[]): Promise<Config>
+  abstract initializeServer (...args: any[]): Promise<LocalProject>
 }

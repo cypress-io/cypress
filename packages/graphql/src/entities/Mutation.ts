@@ -119,7 +119,7 @@ export const mutation = mutationType({
 
     t.field('initializePlugins', {
       type: 'LocalProject',
-      description: 'Log out of Cypress Cloud',
+      description: 'Initialize plugins and update config',
       async resolve (_root, args, ctx) {
         if (!ctx.activeProject || !ctx.activeProject.resolvedConfig || !ctx.app.browserCache) {
           return null
@@ -132,6 +132,27 @@ export const mutation = mutationType({
         )
 
         ctx.activeProject.setConfig(config)
+
+        return ctx.activeProject
+      },
+    })
+
+    t.field('initializeServer', {
+      type: 'LocalProject',
+      description: 'Initialize plugins and update config',
+      async resolve (_root, args, ctx) {
+        if (!ctx.activeProject || !ctx.activeProject.resolvedConfig || !ctx.app.browserCache) {
+          return null
+        }
+
+        const config = await ctx.actions.initializeServer(
+          ctx.activeProject
+          // ctx.activeProject.projectRoot,
+          // ctx.activeProject.resolvedConfig,
+          // ctx.app.browserCache,
+        )
+
+        // ctx.activeProject.setConfig(config)
 
         return ctx.activeProject
       },

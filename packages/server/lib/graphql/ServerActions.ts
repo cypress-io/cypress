@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import Debug from 'debug'
 
+import { ProjectBase } from '@packages/server/lib/project-base'
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, Config, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
@@ -137,5 +138,17 @@ export class ServerActions extends BaseActions {
     debug('updated config yielded: %o', updatedCfg)
 
     return new Config(updatedCfg)
+  }
+
+  async initializeServer (localProject: LocalProject) {
+    const base = new ProjectBase({
+      projectRoot: localProject.projectRoot,
+      testingType: 'component',
+      options: {}  
+    })
+
+    await base.openGraphQL(localProject.resolvedConfig)
+
+    return localProject
   }
 }
