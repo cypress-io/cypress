@@ -1,34 +1,57 @@
-const _ = require('lodash')
-const la = require('lazy-ass')
-const debug = require('debug')('cypress:server:open_project')
-const Promise = require('bluebird')
-const chokidar = require('chokidar')
-const pluralize = require('pluralize')
-const Project = require('./project-base')
-const browsers = require('./browsers')
-const specsUtil = require('./util/specs')
-const preprocessor = require('./plugins/preprocessor')
-const runEvents = require('./plugins/run_events')
-const session = require('./session')
-const { getSpecUrl } = require('./project_utils')
-const errors = require('./errors')
+import _ from 'lodash'
+import la from 'lazy-ass'
+import Debug from 'debug'
+import Bluebird from 'bluebird'
+import chokidar from 'chokidar'
+import pluralize from 'pluralize'
+import { ProjectBase, OpenProjectLaunchOptions } from './project-base'
+import browsers from './browsers'
+import specsUtil from './util/specs'
+import preprocessor from './plugins/preprocessor'
+import runEvents from './plugins/run_events'
+import * as session from './session'
+import { getSpecUrl } from './project_utils'
+import errors from './errors'
+import { FoundBrowser, PlatformName } from '../../launcher'
+import { AutomationMiddleware } from './automation'
 
-const moduleFactory = () => {
-  let openProject = null
-  let relaunchBrowser = null
+const debug = Debug('cypress:server:open_project')
+
+interface FactoryAPI {
+  specsWatcher: chokidar.FSWatcher | null
+  [x: string]: any
+}
+
+export interface LaunchArgs {
+  _: [string] // Cypress App binary location
+  config: Record<string, unknown>
+  cwd: string
+  configFile?: string
+  project: string // projectRoot
+  projectRoot: string // same as above
+  testingType: Cypress.TestingType
+  invokedFromCli: boolean
+  os: PlatformName
+
+  onFocusTests?: () => any
+}
+
+const moduleFactory = (): FactoryAPI => {
+  let openProject: ProjectBase<any> | null = null
+  let relaunchBrowser: ((...args: unknown[]) => void) | null = null
 
   const reset = () => {
     openProject = null
     relaunchBrowser = null
   }
 
-  const tryToCall = (method) => {
-    return (...args) => {
-      if (openProject) {
+  const tryToCall = (method: keyof ProjectBase<any>) => {
+    return (...args: unknown[]) => {
+      if (openProject && openProject[method]) {
         return openProject[method](...args)
       }
 
-      return Promise.resolve(null)
+      return Bluebird.resolve(null)
     }
   }
 
@@ -39,7 +62,7 @@ const moduleFactory = () => {
 
     reset: () => openProject?.reset(),
 
-    getConfig: () => openProject.getConfig(),
+    getConfig: () => openProject?.getConfig(),
 
     getRecordKeys: tryToCall('getRecordKeys'),
 
@@ -51,20 +74,36 @@ const moduleFactory = () => {
       return openProject
     },
 
-    changeUrlToSpec (spec) {
+    changeUrlToSpec (spec: Cypress.Cypress['spec']) {
+      if (!openProject) {
+        return
+      }
+
       const newSpecUrl = getSpecUrl({
         absoluteSpecPath: spec.absolute,
         specType: spec.specType,
         browserUrl: openProject.cfg.browserUrl,
-        integrationFolder: openProject.cfg.integrationFolder,
-        componentFolder: openProject.cfg.componentFolder,
+        integrationFolder: openProject.cfg.integrationFolder || 'integration',
+        componentFolder: openProject.cfg.componentFolder || 'component',
         projectRoot: openProject.projectRoot,
       })
 
       openProject.changeToUrl(newSpecUrl)
     },
 
-    launch (browser, spec, options = {}) {
+    launch (browser, spec: Cypress.Cypress['spec'], options: {
+      browser?: FoundBrowser
+      url?: string
+      automationMiddleware?: AutomationMiddleware
+      onBrowserClose?: (...args: unknown[]) => void
+      onError: (err: Error) => void
+    } = {
+      onError: () => undefined,
+    }) {
+      if (!openProject) {
+        throw Error('Cannot launch runner if openProject is undefined!')
+      }
+
       debug('resetting project state, preparing to launch browser %s for spec %o options %o',
         browser.name, spec, options)
 
@@ -78,8 +117,8 @@ const moduleFactory = () => {
         absoluteSpecPath: spec.absolute,
         specType: spec.specType,
         browserUrl: openProject.cfg.browserUrl,
-        integrationFolder: openProject.cfg.integrationFolder,
-        componentFolder: openProject.cfg.componentFolder,
+        integrationFolder: openProject.cfg.integrationFolder || 'integration',
+        componentFolder: openProject.cfg.componentFolder || 'component?',
         projectRoot: openProject.projectRoot,
       })
 
@@ -137,7 +176,7 @@ const moduleFactory = () => {
       }
 
       const afterSpec = () => {
-        if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Promise.resolve()
+        if (!openProject || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) return Bluebird.resolve()
 
         return runEvents.execute('after:spec', cfg, spec)
       }
@@ -149,9 +188,9 @@ const moduleFactory = () => {
           preprocessor.removeFile(spec.absolute, cfg)
         }
 
-        afterSpec(cfg, spec)
+        afterSpec()
         .catch((err) => {
-          openProject.options.onError(err)
+          openProject!.options.onError(err)
         })
 
         if (onBrowserClose) {
@@ -168,7 +207,7 @@ const moduleFactory = () => {
           spec.relative,
         )
 
-        return Promise.try(() => {
+        return Bluebird.try(() => {
           if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents) {
             return runEvents.execute('before:spec', cfg, spec)
           }
@@ -186,7 +225,7 @@ const moduleFactory = () => {
 
     getSpecs (cfg) {
       return specsUtil.find(cfg)
-      .then((specs = []) => {
+      .then((specs: Cypress.Cypress['spec'][] = []) => {
         // TODO merge logic with "run.js"
         if (debug.enabled) {
           const names = _.map(specs, 'name')
@@ -219,8 +258,8 @@ const moduleFactory = () => {
       })
     },
 
-    getSpecChanges (options = {}) {
-      let currentSpecs = null
+    getSpecChanges (options: OpenProjectLaunchOptions) {
+      let currentSpecs: Cypress.Cypress['spec'][]
 
       _.defaults(options, {
         onChange: () => { },
@@ -235,7 +274,7 @@ const moduleFactory = () => {
 
         currentSpecs = specs
 
-        return options.onChange(specs)
+        return options.onChange?.(specs)
       }
 
       const checkForSpecUpdates = _.debounce(() => {
@@ -287,6 +326,10 @@ const moduleFactory = () => {
       }
 
       const get = () => {
+        if (!openProject) {
+          return
+        }
+
         const cfg = openProject.getConfig()
 
         createSpecsWatcher(cfg)
@@ -336,7 +379,7 @@ const moduleFactory = () => {
       return this.closeOpenProjectAndBrowsers()
     },
 
-    async create (path, args = {}, options = {}) {
+    async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions) {
       debug('open_project create %s', path)
 
       _.defaults(options, {
@@ -359,7 +402,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = new Project.ProjectBase({
+      openProject = new ProjectBase({
         testingType: args.testingType === 'component' ? 'component' : 'e2e',
         projectRoot: path,
         options: {
