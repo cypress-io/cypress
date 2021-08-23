@@ -34,14 +34,16 @@ import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
 import type { ProjectContract } from '@packages/graphql'
+import type { FoundBrowser } from '@packages/launcher'
+import { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
 // and are required when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'projectId'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -54,8 +56,11 @@ export interface Cfg extends ReceivedCypressOptions {
 
 type WebSocketOptionsCallback = (...args: any[]) => any
 
-interface Options {
+export interface OpenProjectLaunchOptions {
+  args: LaunchArgs
+
   configFile?: string | boolean
+  browsers?: FoundBrowser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
   onSettingsChanged?: false | (() => void)
@@ -65,6 +70,7 @@ interface Options {
   onFocusTests?: WebSocketOptionsCallback
   onSpecChanged?: WebSocketOptionsCallback
   onSavedStateChanged?: WebSocketOptionsCallback
+  onChange?: WebSocketOptionsCallback
 
   [key: string]: any
 }
@@ -83,7 +89,7 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
   public id: string
 
   protected watchers: Watchers
-  public options: Options
+  public options: OpenProjectLaunchOptions
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -103,7 +109,7 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
   }: {
     projectRoot: string
     testingType: Cypress.TestingType
-    options: Options
+    options: OpenProjectLaunchOptions
   }) {
     super()
 
@@ -577,7 +583,7 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  startWebsockets (options: Options, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
+  startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
@@ -876,7 +882,7 @@ export class ProjectBase<TServer extends Server> extends EE implements ProjectCo
   // For testing
   // Do not use this method outside of testing
   // pass all your options when you create a new instance!
-  __setOptions (options: Options) {
+  __setOptions (options: OpenProjectLaunchOptions) {
     this.options = options
   }
 

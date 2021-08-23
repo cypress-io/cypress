@@ -1,4 +1,4 @@
-import fse from 'fs-extra'
+import * as fse from 'fs-extra'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
 import { tap, trim, prop } from 'ramda'

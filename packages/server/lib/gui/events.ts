@@ -31,6 +31,8 @@ const savedState = require('../saved_state')
 import { ServerContext } from '../graphql/ServerContext'
 import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
+import { LaunchArgs } from '../open_project'
+import type { EventEmitter } from 'events'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -484,7 +486,7 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
-  async start (options, bus, { startGraphQL } = { startGraphQL: true }) {
+  async start (options: LaunchArgs, bus: EventEmitter, { startGraphQL } = { startGraphQL: true }) {
     // curry left options
     ipc.on('request', _.partial(this.handleEvent, options, bus))
 
