@@ -480,6 +480,9 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
+  /**
+   * @param options {open_project.LaunchArgs}
+   */
   start (options, bus) {
     // curry left options
     return ipc.on('request', _.partial(this.handleEvent, options, bus))
