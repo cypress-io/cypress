@@ -32,7 +32,6 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import type { FoundBrowser } from '@packages/launcher'
 import { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -58,7 +57,7 @@ export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
 
   configFile?: string | boolean
-  browsers?: FoundBrowser[]
+  browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
   onSettingsChanged?: false | (() => void)

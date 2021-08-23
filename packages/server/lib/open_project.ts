@@ -12,7 +12,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import { FoundBrowser, PlatformName } from '../../launcher'
+import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
 import { AutomationMiddleware } from './automation'
 
 const debug = Debug('cypress:server:open_project')
@@ -22,13 +22,14 @@ interface LaunchOpts {
   url?: string
   automationMiddleware?: AutomationMiddleware
   onBrowserClose?: (...args: unknown[]) => void
-  onError: (err: Error) => void
+  onError?: (err: Error) => void
 }
 
 export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
+  browser: Browser
   configFile?: string
   project: string // projectRoot
   projectRoot: string // same as above

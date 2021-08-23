@@ -44,11 +44,11 @@ export const start = async (projectRoot: string, args: LaunchArgs) => {
       absolute: '__all',
       relative: '__all',
       specType: 'component',
-    }
+    } as const
 
     const options = {
       browsers: [browser],
-    } as const
+    }
 
     debug('create project')
 
