@@ -497,7 +497,7 @@ module.exports = {
 
     // TODO: Figure out how we want to cleanup & juggle the config, so it's not jammed
     // into the projects
-    const serverContext = setServerContext(new ServerContext())
+    const serverContext = setServerContext(new ServerContext(options))
 
     startGraphQLServer()
 

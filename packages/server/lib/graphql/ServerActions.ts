@@ -4,7 +4,7 @@ import path from 'path'
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
-import openProject from '@packages/server/lib/open_project')
+import * as openProject from '@packages/server/lib/open_project'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -22,7 +22,6 @@ import * as config from '@packages/server/lib/config'
 
 import { getId } from '@packages/server/lib/project_static'
 import { FoundBrowser } from '@packages/launcher'
-import type { LaunchOptions } from '../gui/events'
 
 interface RecordKey {
   id: string
@@ -105,7 +104,7 @@ export class ServerActions extends BaseActions {
     fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
   }
 
-  async initializeOpenProject (options: LaunchOptions) {
-    openProject.create(
+  async initializeOpenProject (args: openProject.LaunchArgs) {
+    openProject
   }
 }

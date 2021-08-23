@@ -1,4 +1,5 @@
-import type { LaunchOptions } from '../../../server/lib/gui/events'
+import type { LaunchArgs } from '@packages/server/lib/open_project'
+// import type { OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
 import type { BaseActions } from '../actions/BaseActions'
 import type { LocalProject, Viewer, DashboardProject } from '../entities'
 import { App, Wizard, NavigationMenu } from '../entities'
@@ -16,7 +17,7 @@ export abstract class BaseContext {
   abstract dashboardProjects: DashboardProject[]
   abstract viewer: null | Viewer
 
-  constructor(private _launchOptions: LaunchOptions) {}
+  constructor(private _launchArgs: LaunchArgs) {}
 
   wizard = new Wizard()
   navigationMenu = new NavigationMenu()
@@ -26,8 +27,8 @@ export abstract class BaseContext {
     return this.app.activeProject
   }
   
-  get launchOptions () {
-    return this._launchOptions
+  get launchArgs () {
+    return this._launchArgs
   }
 
   isFirstOpen = false

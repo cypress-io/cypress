@@ -3,13 +3,14 @@ import { LocalProject, BaseContext, AuthenticatedUser, DashboardProject, Viewer 
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
+import type { LaunchArgs } from '../open_project'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)
   viewer: Viewer | null = null
 
-  constructor () {
-    super()
+  constructor (args: LaunchArgs) {
+    super(args)
 
     user.get().then((cachedUser: AuthenticatedUser) => {
       // cache returns empty object if user is undefined
