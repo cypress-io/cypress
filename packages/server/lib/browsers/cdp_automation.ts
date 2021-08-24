@@ -2,11 +2,11 @@
 
 import _ from 'lodash'
 import Bluebird from 'bluebird'
-import cdp from 'devtools-protocol'
+import type cdp from 'devtools-protocol'
 import { cors } from '@packages/network'
 import debugModule from 'debug'
-import { Automation } from '../automation'
-import { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { Automation } from '../automation'
+import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
