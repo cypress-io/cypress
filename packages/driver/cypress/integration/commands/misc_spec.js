@@ -94,6 +94,23 @@ describe('src/cy/commands/misc', () => {
           expect(lastLog.get('message')).to.eq('msg, 1, 2, 3, 4')
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/17862
+      it('log will preserve casing of object properties', function () {
+        const objectToLog = {
+          camelCase: 'foo',
+          ALL_CAPS: 'bar',
+        }
+
+        cy.log(objectToLog)
+        .then(() => {
+          const { lastLog } = this
+
+          Object.keys(objectToLog).forEach((key) => {
+            expect(lastLog.get('message')).to.contain(key)
+          })
+        })
+      })
     })
   })
 

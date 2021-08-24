@@ -114,7 +114,7 @@ module.exports = {
     // lodash shits the bed if our object has a 'length'
     // property so we have to normalize that
     if (_.has(obj, 'length')) {
-      obj.Length = obj.length
+      obj[Symbol.for('length')] = obj.length
       delete obj.length
     }
 
@@ -146,10 +146,8 @@ module.exports = {
   },
 
   stringifyActualObj (obj) {
-    obj = this.normalizeObjWithLength(obj)
-
-    const str = _.reduce(obj, (memo, value, key) => {
-      memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
+    const str = _.reduce(_.keys(obj), (memo, key) => {
+      memo.push(`${key}: ${this.stringifyActual(obj[key])}`)
 
       return memo
     }, [])

@@ -105,7 +105,7 @@ describe('driver/src/cypress/utils', () => {
       it('can have length property', function () {
         const o = { length: 10, foo: 'bar' }
 
-        expect(this.str(o)).to.eq('{foo: bar, length: 10}')
+        expect(this.str(o)).to.eq('{length: 10, foo: bar}')
       })
     })
 
