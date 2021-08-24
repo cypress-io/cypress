@@ -62,6 +62,7 @@ describe('lib/browsers/chrome', () => {
     })
 
     afterEach(function () {
+      mockfs.restore()
       expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
