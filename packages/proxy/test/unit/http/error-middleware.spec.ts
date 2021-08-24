@@ -15,7 +15,6 @@ describe('http/error-middleware', function () {
     expect(_.keys(ErrorMiddleware)).to.have.ordered.members([
       'LogError',
       'SendToDriver',
-      'InterceptError',
       'AbortRequest',
       'UnpipeResponse',
       'DestroyResponse',
