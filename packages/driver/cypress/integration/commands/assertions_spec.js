@@ -1197,6 +1197,20 @@ describe('src/cy/commands/assertions', () => {
         })
       })
     })
+
+    describe('escape markdown', () => {
+      // https://github.com/cypress-io/cypress/issues/17357
+      it('images', (done) => {
+        const text = 'hello world ![JSDoc example](/slides/img/jsdoc.png)'
+        const result = 'hello world ``![JSDoc example](/slides/img/jsdoc.png)``'
+
+        expectMarkdown(
+          () => expect(text).to.equal(text),
+          `expected **${result}** to equal **${result}**`,
+          done,
+        )
+      })
+    })
   })
 
   context('chai overrides', () => {

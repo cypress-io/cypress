@@ -28,6 +28,7 @@ const leadingWhitespaces = /\*\*'\s*/g
 const trailingWhitespaces = /\s*'\*\*/g
 const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
+const imageMarkdown = /!\[.*?\]\(.*?\)/g
 
 let assertProto = null
 let matchProto = null
@@ -128,6 +129,10 @@ chai.use((chai, u) => {
       .replace(allSingleQuotes, '')
       .replace(allQuoteMarkers, '\'') // put escaped quotes back
     })
+  }
+
+  const escapeMarkdown = (message) => {
+    return message.replace(imageMarkdown, '``$&``')
   }
 
   const replaceArgMessages = (args, str) => {
@@ -447,6 +452,7 @@ chai.use((chai, u) => {
       const actual = chaiUtils.getActual(this, customArgs)
 
       message = removeOrKeepSingleQuotesBetweenStars(message)
+      message = escapeMarkdown(message)
 
       try {
         assertProto.apply(this, args)
