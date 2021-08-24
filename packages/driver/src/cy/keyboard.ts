@@ -689,11 +689,7 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  private SUPPORTS_BEFOREINPUT_EVENT
-
-  constructor (Cypress, private state: State) {
-    this.SUPPORTS_BEFOREINPUT_EVENT = Cypress.isBrowser({ family: 'chromium' })
-  }
+  constructor (private state: State) {}
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
@@ -1174,7 +1170,6 @@ export class Keyboard {
         this.fireSimulatedEvent(elToType, 'keypress', key, options)
       ) {
         if (
-          !this.SUPPORTS_BEFOREINPUT_EVENT ||
           shouldIgnoreEvent('beforeinput', key.events) ||
           this.fireSimulatedEvent(elToType, 'beforeinput', key, options)
         ) {
@@ -1317,8 +1312,8 @@ export class Keyboard {
   }
 }
 
-const create = (Cypress, state) => {
-  return new Keyboard(Cypress, state)
+const create = (state) => {
+  return new Keyboard(state)
 }
 
 let _defaults
