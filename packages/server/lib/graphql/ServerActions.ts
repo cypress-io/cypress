@@ -4,6 +4,7 @@ import path from 'path'
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
+import { openProject, LaunchArgs, LaunchOpts } from '@packages/server/lib/open_project'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -21,6 +22,8 @@ import * as config from '@packages/server/lib/config'
 
 import { getId } from '@packages/server/lib/project_static'
 import { FoundBrowser } from '@packages/launcher'
+import { OpenProjectLaunchOptions } from '../project-base'
+import { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
 
 interface RecordKey {
   id: string
@@ -101,5 +104,17 @@ export class ServerActions extends BaseActions {
     }
 
     fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
+  }
+
+  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {
+    return openProject.create(args.projectRoot, args, options)
+  }
+
+  async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
+    return openProject.launch(browser, spec, options)
+  }
+
+  resolveOpenProjectConfig () {
+    return openProject.getConfig() ?? null
   }
 }

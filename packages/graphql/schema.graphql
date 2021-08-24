@@ -79,6 +79,14 @@ type Mutation {
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
 
+  """
+  Initializes open_project global singleton to manager current project state
+  """
+  initializeOpenProject(testingType: TestingTypeEnum!): App
+
+  """Launches project from open_project global singleton"""
+  launchOpenProject(testingType: TestingTypeEnum!): App
+
   """Auth with Cypress Cloud"""
   login: Viewer
 

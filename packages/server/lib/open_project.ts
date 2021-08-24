@@ -18,7 +18,7 @@ import { closeGraphQLServer } from '@packages/graphql/src/server'
 
 const debug = Debug('cypress:server:open_project')
 
-interface LaunchOpts {
+export interface LaunchOpts {
   browser?: FoundBrowser
   url?: string
   automationMiddleware?: AutomationMiddleware
@@ -67,7 +67,7 @@ export class OpenProject {
   }
 
   getConfig () {
-    return this.openProject!.getConfig()
+    return this.openProject?.getConfig()
   }
 
   getRecordKeys () {
@@ -362,10 +362,7 @@ export class OpenProject {
       this.componentSpecsWatcher = null
     }
 
-    return Promise.all([
-      this.closeOpenProjectAndBrowsers(),
-      closeGraphQLServer(),
-    ])
+    return closeGraphQLServer()
   }
 
   closeBrowser () {

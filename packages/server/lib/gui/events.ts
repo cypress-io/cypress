@@ -497,16 +497,12 @@ module.exports = {
 
     // TODO: Figure out how we want to cleanup & juggle the config, so it's not jammed
     // into the projects
-    const serverContext = setServerContext(new ServerContext())
+    const serverContext = setServerContext(new ServerContext(options, {}))
 
     startGraphQLServer()
 
     if (options.projectRoot) {
-      await serverContext.actions.addProject(options.projectRoot).initialize()
-
-      // serverContext.actions.addProject({
-      //   projectRoot: options.projectRoot.replace('launchpad', 'runner'),
-      // })
+      serverContext.actions.addProject(options.projectRoot)
     }
 
     // find and cache browsers.

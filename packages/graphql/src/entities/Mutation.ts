@@ -1,5 +1,6 @@
 import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
+import type { BrowserContract } from '../contracts/BrowserContract'
 
 export const mutation = mutationType({
   definition (t) {
@@ -114,6 +115,77 @@ export const mutation = mutationType({
         await ctx.actions.logout()
 
         return ctx.viewer
+      },
+    })
+
+    t.field('initializeOpenProject', {
+      type: 'App',
+      args: {
+        testingType: nonNull(TestingTypeEnum),
+      },
+      description: 'Initializes open_project global singleton to manager current project state',
+      async resolve (_root, args, ctx) {
+        const browsers = ctx.app.browserCache
+
+        if (!browsers?.length) {
+          throw Error(`Need to call App#cacheBrowsers before opening a project.`)
+        }
+
+        await ctx.actions.initializeOpenProject({
+          ...ctx.launchArgs,
+          testingType: args.testingType,
+          config: {
+            browsers: browsers.map((x): BrowserContract => {
+              return {
+                name: x.name,
+                family: x.family,
+                majorVersion: x.majorVersion,
+                channel: x.channel,
+                displayName: x.displayName,
+                path: x.path,
+                version: x.version,
+              }
+            }),
+          },
+        }, ctx.launchOptions)
+
+        return ctx.app
+      },
+    })
+
+    t.field('launchOpenProject', {
+      type: 'App',
+      description: 'Launches project from open_project global singleton',
+      args: {
+        testingType: nonNull(TestingTypeEnum),
+      },
+      async resolve (_root, args, ctx) {
+        if (!ctx.app.browserCache?.length) {
+          throw Error(`Need to call App#cacheBrowsers before opening a project.`)
+        }
+
+        const chrome = ctx.app.browserCache.find((x) => x.name === 'chrome')!
+
+        const browser: BrowserContract = {
+          name: chrome.name,
+          family: chrome.family,
+          majorVersion: chrome.majorVersion,
+          channel: chrome.channel,
+          displayName: chrome.displayName,
+          path: chrome.path,
+          version: chrome.version,
+        }
+
+        const spec: Cypress.Cypress['spec'] = {
+          name: '',
+          absolute: '',
+          relative: '',
+          specType: args.testingType === 'e2e' ? 'integration' : 'component',
+        }
+
+        await ctx.actions.launchOpenProject(browser, spec, {})
+
+        return ctx.app
       },
     })
   },

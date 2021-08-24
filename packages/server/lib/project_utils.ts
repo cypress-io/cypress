@@ -85,7 +85,7 @@ export const getSpecUrl = ({
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 
   // if we don't have a absoluteSpecPath or its __all
-  if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+  if (!absoluteSpecPath || absoluteSpecPath === '__all') {
     const url = normalizeSpecUrl(browserUrl, '/__all')
 
     debug('returning url to run all specs: %s', url)

@@ -815,7 +815,7 @@ describe('lib/gui/events', () => {
         expect(openProject.getProject()).to.be.null
 
         return this.handleEvent('close:project').then((assert) => {
-          return assert.sendCalledWith([null, null])
+          return assert.sendCalledWith(null)
         })
       })
 
@@ -833,7 +833,7 @@ describe('lib/gui/events', () => {
           // it should store the opened project
           expect(openProject.getProject()).to.be.null
 
-          return assert.sendCalledWith([null, null])
+          return assert.sendCalledWith(null)
         })
       })
 

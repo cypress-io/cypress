@@ -150,6 +150,8 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
+    initializeOpenProject: NexusGenRootTypes['App'] | null; // App
+    launchOpenProject: NexusGenRootTypes['App'] | null; // App
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
@@ -353,6 +355,8 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
+    initializeOpenProject: 'App'
+    launchOpenProject: 'App'
     login: 'Viewer'
     logout: 'Viewer'
     navigationMenuSetItem: 'NavigationMenu'
@@ -528,6 +532,12 @@ export interface NexusGenArgTypes {
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
+    }
+    initializeOpenProject: { // args
+      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+    launchOpenProject: { // args
+      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     }
     navigationMenuSetItem: { // args
       type: NexusGenEnums['NavItem']; // NavItem!
