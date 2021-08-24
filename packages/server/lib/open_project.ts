@@ -362,10 +362,7 @@ export class OpenProject {
       this.componentSpecsWatcher = null
     }
 
-    return Promise.all([
-      this.closeOpenProjectAndBrowsers(),
-      closeGraphQLServer(),
-    ])
+    return closeGraphQLServer()
   }
 
   closeBrowser () {
