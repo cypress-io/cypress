@@ -2,8 +2,8 @@ import type { BaseContext } from '../context/BaseContext'
 import type { RunGroup } from '../entities/run'
 import type { FoundBrowser } from '@packages/launcher'
 import type { LocalProject } from '../entities'
-import type { LaunchArgs, LaunchOpts, OpenProject } from '../../../server/lib/open_project'
-import type { Cfg, OpenProjectLaunchOptions } from '../../../server/lib/project-base'
+import type { LaunchArgs, LaunchOpts, OpenProject } from '@packages/server/lib/open_project'
+import type { Cfg, OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
 import type { BrowserContract } from '../contracts/BrowserContract'
 
 /**

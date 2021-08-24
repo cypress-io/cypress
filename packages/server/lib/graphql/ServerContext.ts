@@ -4,7 +4,7 @@ import { LocalProject, BaseContext, AuthenticatedUser, DashboardProject, Viewer 
 // @ts-ignore
 import user from '@packages/server/lib/user'
 import type { LaunchArgs } from '../open_project'
-import { OpenProjectLaunchOptions } from '../project-base'
+import type { OpenProjectLaunchOptions } from '../project-base'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)
