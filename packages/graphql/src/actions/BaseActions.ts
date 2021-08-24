@@ -2,9 +2,8 @@ import type { BaseContext } from '../context/BaseContext'
 import type { RunGroup } from '../entities/run'
 import type { FoundBrowser } from '@packages/launcher'
 import type { LocalProject } from '../entities'
-import type { FullConfig } from '@packages/server/lib/config'
 import type { LaunchArgs, LaunchOpts, OpenProject } from '../../../server/lib/open_project'
-import type { OpenProjectLaunchOptions } from '../../../server/lib/project-base'
+import type { Cfg, OpenProjectLaunchOptions } from '../../../server/lib/project-base'
 import type { BrowserContract } from '../contracts/BrowserContract'
 
 /**
@@ -31,8 +30,8 @@ export abstract class BaseActions {
   abstract getRuns (payload: { projectId: string, authToken: string }): Promise<RunGroup[]>
   abstract getRecordKeys (payload: { projectId: string, authToken: string }): Promise<string[]>
   abstract getBrowsers (): Promise<FoundBrowser[]>
-  abstract initializeConfig (projectRoot: string): Promise<FullConfig>
 
   abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions): Promise<OpenProject>
-  abstract launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void>
+  abstract launchOpenProject (browser: BrowserContract, spec: Cypress.Cypress['spec'], options: LaunchOpts): Promise<void>
+  abstract resolveOpenProjectConfig (): Cfg | null
 }

@@ -1,8 +1,8 @@
 <template>
   <template v-if="!loading && wizard">
     <Auth />
-    <Button @click="launchCt">Launch CT</Button>
-    <Button @click="launchE2E">Launch E2E</Button>
+    <Button @click="launchCt">Launch CT in Chrome</Button>
+    <Button @click="launchE2E">Launch E2E in Chrome</Button>
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
@@ -34,8 +34,6 @@ import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
 import { 
   RootDocument, 
-  InitializeOpenProjectMutation, 
-  LaunchOpenProjectMutation, 
   InitializeOpenProjectDocument,
   LaunchOpenProjectDocument
 } from '../generated/graphql'

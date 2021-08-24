@@ -121,18 +121,18 @@ export const mutation = mutationType({
     t.field('initializeOpenProject', {
       type: 'App',
       args: {
-        testingType: nonNull(TestingTypeEnum)
+        testingType: nonNull(TestingTypeEnum),
       },
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
-        console.log(ctx.launchArgs, ctx.launchOptions)
         const browsers = ctx.app.browserCache
+
         if (!browsers?.length) {
           throw Error(`Need to call App#cacheBrowsers before opening a project.`)
         }
 
-        await ctx.actions.initializeOpenProject({ 
-          ...ctx.launchArgs, 
+        await ctx.actions.initializeOpenProject({
+          ...ctx.launchArgs,
           testingType: args.testingType,
           config: {
             browsers: browsers.map((x): BrowserContract => {
@@ -145,10 +145,10 @@ export const mutation = mutationType({
                 path: x.path,
                 version: x.version,
               }
-            })
-          }
+            }),
+          },
         }, ctx.launchOptions)
-        
+
         return ctx.app
       },
     })
@@ -157,15 +157,15 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Launches project from open_project global singleton',
       args: {
-        testingType: nonNull(TestingTypeEnum)
+        testingType: nonNull(TestingTypeEnum),
       },
       async resolve (_root, args, ctx) {
-        const browsers = ctx.app.browserCache
-        if (!browsers?.length) {
+        if (!ctx.app.browserCache?.length) {
           throw Error(`Need to call App#cacheBrowsers before opening a project.`)
         }
 
-        const chrome = browsers.find(x => x.name === 'chrome')!
+        const chrome = ctx.app.browserCache.find((x) => x.name === 'chrome')!
+
         const browser: BrowserContract = {
           name: chrome.name,
           family: chrome.family,
@@ -176,14 +176,15 @@ export const mutation = mutationType({
           version: chrome.version,
         }
 
-        await ctx.actions.launchOpenProject(browser, 
-          {
-            name: '',
-            absolute: '',
-            relative: '',
-            specType: 'e2e',
-          }, {})
-        
+        const spec: Cypress.Cypress['spec'] = {
+          name: '',
+          absolute: '',
+          relative: '',
+          specType: args.testingType === 'e2e' ? 'integration' : 'component',
+        }
+
+        await ctx.actions.launchOpenProject(browser, spec, {})
+
         return ctx.app
       },
     })

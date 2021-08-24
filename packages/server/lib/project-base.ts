@@ -51,6 +51,7 @@ export interface Cfg extends ReceivedCypressOptions {
     firstOpened?: number
     lastOpened?: number
   }
+  resolved: config.ResolvedConfigurationOptions
 }
 
 type WebSocketOptionsCallback = (...args: any[]) => any

@@ -67,7 +67,7 @@ export class OpenProject {
   }
 
   getConfig () {
-    return this.openProject!.getConfig()
+    return this.openProject?.getConfig()
   }
 
   getRecordKeys () {

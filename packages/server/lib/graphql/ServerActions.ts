@@ -110,11 +110,11 @@ export class ServerActions extends BaseActions {
     return openProject.create(args.projectRoot, args, options)
   }
 
-  async launchOpenProject (
-    browser: BrowserContract, 
-    spec: any, 
-    options: LaunchOpts
-  ): Promise<void> {
-    openProject.launch(browser, spec, options)
+  async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
+    return openProject.launch(browser, spec, options)
+  }
+
+  resolveOpenProjectConfig () {
+    return openProject.getConfig() ?? null
   }
 }
