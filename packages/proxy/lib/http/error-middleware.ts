@@ -1,9 +1,10 @@
 import debugModule from 'debug'
 import type { HttpMiddleware } from '.'
-import type { InterceptError } from '@packages/net-stubbing'
 import type { Readable } from 'stream'
 import type { Request } from '@cypress/request'
 import errors from '@packages/server/lib/errors'
+
+export type { InterceptError } from '@packages/net-stubbing'
 
 const debug = debugModule('cypress:proxy:http:error-middleware')
 
@@ -56,8 +57,6 @@ export const DestroyResponse: ErrorMiddleware = function () {
   this.res.destroy()
   this.end()
 }
-
-export type { InterceptError }
 
 export default {
   LogError,
