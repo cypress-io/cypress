@@ -4,8 +4,8 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
 
-import AgentModel from './agent-model'
-import { Alias } from '../instruments/instrument-model'
+import type AgentModel from './agent-model'
+import type { Alias } from '../instruments/instrument-model'
 
 export interface AgentProps {
   model: AgentModel

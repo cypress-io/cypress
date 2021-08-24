@@ -267,6 +267,8 @@ module.exports = {
             '@typescript-eslint',
           ],
           rules: {
+            'no-duplicate-imports': 'off',
+            '@typescript-eslint/no-duplicate-imports': 'error',
             'no-undef': 'off',
             'no-unused-vars': 'off',
             '@typescript-eslint/no-unused-vars': [

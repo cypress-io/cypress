@@ -56,7 +56,7 @@ export default class Err {
     return /(AssertionError|CypressError)/.test(this.name)
   }
 
-  update (props?: Partial<ErrProps>) {
+  update (props?: Partial<ErrProps | Err>) {
     if (!props) return
 
     if (props.name) this.name = props.name

@@ -4,8 +4,9 @@ import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
-import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
-import { SessionProps } from '../sessions/sessions-model'
+import type TestModel from '../test/test-model'
+import type { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
+import type { SessionProps } from '../sessions/sessions-model'
 
 const localBus = new EventEmitter()
 

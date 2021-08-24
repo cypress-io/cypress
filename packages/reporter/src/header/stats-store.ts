@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
-import { TestState } from '../test/test-model'
-import { IntervalID } from '../lib/types'
+import type { TestState } from '../test/test-model'
+import type { IntervalID } from '../lib/types'
 
 export interface StatsStoreStartInfo {
   startTime: string

@@ -4,7 +4,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 
 import events, { Events } from '../lib/events'
-import SessionsModel from './sessions-model'
+import type SessionsModel from './sessions-model'
 import Collapsible from '../collapsible/collapsible'
 import FlashOnClick from '../lib/flash-on-click'
 

@@ -10,8 +10,8 @@ import ErrorStack from '../errors/error-stack'
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
-import Attempt from '../attempts/attempt-model'
-import Command from '../commands/command-model'
+import type Attempt from '../attempts/attempt-model'
+import type Command from '../commands/command-model'
 
 interface DocsUrlProps {
   url: string | string[]

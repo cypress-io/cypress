@@ -7,9 +7,9 @@ import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
-import { RunnablesStore, RunnableArray } from './runnables-store'
-import { Scroller } from '../lib/scroller'
-import { AppState } from '../lib/app-state'
+import type { RunnablesStore, RunnableArray } from './runnables-store'
+import type { Scroller } from '../lib/scroller'
+import type { AppState } from '../lib/app-state'
 import FileOpener from '../lib/file-opener'
 
 const Loading = () => (

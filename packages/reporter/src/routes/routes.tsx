@@ -6,7 +6,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import Collapsible from '../collapsible/collapsible'
-import RouteModel from './route-model'
+import type RouteModel from './route-model'
 
 export interface RouteProps {
   model: RouteModel

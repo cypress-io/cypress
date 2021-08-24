@@ -12,8 +12,8 @@ import events, { Events } from '../lib/events'
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
 
-import SuiteModel from './suite-model'
-import TestModel from '../test/test-model'
+import type SuiteModel from './suite-model'
+import type TestModel from '../test/test-model'
 
 interface SuiteProps {
   eventManager?: Events

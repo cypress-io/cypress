@@ -6,7 +6,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import defaultEvents, { Events } from '../lib/events'
-import { AppState } from '../lib/app-state'
+import type { AppState } from '../lib/app-state'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null

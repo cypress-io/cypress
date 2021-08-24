@@ -10,11 +10,11 @@ import Tooltip from '@cypress/react-tooltip'
 import appState, { AppState } from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
-import { TimeoutID } from '../lib/types'
+import type { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
-import { Alias, AliasObject } from '../instruments/instrument-model'
+import type { Alias, AliasObject } from '../instruments/instrument-model'
 
-import CommandModel from './command-model'
+import type CommandModel from './command-model'
 import TestError from '../errors/test-error'
 
 const md = new Markdown()

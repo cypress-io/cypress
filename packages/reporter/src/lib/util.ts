@@ -1,4 +1,4 @@
-import { KeyboardEvent } from 'react'
+import type { KeyboardEvent } from 'react'
 
 const INDENT_BASE = 5
 const INDENT_AMOUNT = 15

@@ -8,7 +8,7 @@ import { render } from 'react-dom'
 // @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
-import { RunnablesErrorModel } from './runnables/runnable-error'
+import type { RunnablesErrorModel } from './runnables/runnable-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
 import runnablesStore, { RunnablesStore } from './runnables/runnables-store'

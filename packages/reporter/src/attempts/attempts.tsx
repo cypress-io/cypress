@@ -8,8 +8,8 @@ import Collapsible from '../collapsible/collapsible'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
-import TestModel from '../test/test-model'
-import AttemptModel from './attempt-model'
+import type TestModel from '../test/test-model'
+import type AttemptModel from './attempt-model'
 import Sessions from '../sessions/sessions'
 
 const NoCommands = () => (

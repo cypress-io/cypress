@@ -9,7 +9,7 @@ import appState, { AppState } from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
 import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
-import TestModel from './test-model'
+import type TestModel from './test-model'
 
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'

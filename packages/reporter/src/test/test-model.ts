@@ -1,16 +1,16 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
-import { FileDetails } from '@packages/ui-components'
+import type { FileDetails } from '@packages/ui-components'
 
 import Attempt from '../attempts/attempt-model'
 import Err from '../errors/err-model'
-import { HookProps } from '../hooks/hook-model'
+import type { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
-import { CommandProps } from '../commands/command-model'
-import { AgentProps } from '../agents/agent-model'
-import { RouteProps } from '../routes/route-model'
-import { RunnablesStore, LogProps } from '../runnables/runnables-store'
-import { SessionProps } from '../sessions/sessions-model'
+import type { CommandProps } from '../commands/command-model'
+import type { AgentProps } from '../agents/agent-model'
+import type { RouteProps } from '../routes/route-model'
+import type { RunnablesStore, LogProps } from '../runnables/runnables-store'
+import type { SessionProps } from '../sessions/sessions-model'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 

@@ -2,12 +2,13 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import { FileDetails } from '@packages/ui-components'
+import type { FileDetails } from '@packages/ui-components'
 
 import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
-import HookModel, { HookName } from './hook-model'
+import type HookModel from './hook-model'
+import type { HookName } from './hook-model'
 import FileOpener from '../lib/file-opener'
 
 export interface HookHeaderProps {

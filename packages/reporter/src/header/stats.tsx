@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import { StatsStore } from './stats-store'
+import type { StatsStore } from './stats-store'
 
 const count = (num: number) => num > 0 ? num : '--'
 const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
