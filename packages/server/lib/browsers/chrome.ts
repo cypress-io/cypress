@@ -375,7 +375,7 @@ export = {
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
-    fs.chmodSync(extensionBg, 0o0644)
+    await fs.chmod(extensionBg, 0o0644)
     await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest
