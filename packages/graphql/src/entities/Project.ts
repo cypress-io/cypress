@@ -1,6 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
 import type { ProjectContract } from '../contracts/ProjectContract'
+import { ResolvedConfig } from './ResolvedConfig'
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
@@ -28,5 +29,16 @@ export class Project implements ProjectContract {
   @nxs.field.nonNull.string()
   get projectRoot (): NxsResult<'Project', 'projectRoot'> {
     return this._projectRoot
+  }
+
+  @nxs.field.type(() => ResolvedConfig)
+  resolvedConfig (): NxsResult<'Project', 'resolvedConfig'> {
+    const cfg = this.ctx.actions.resolveOpenProjectConfig()
+
+    if (!cfg) {
+      throw Error('openProject.getConfig is null. Have you initialized the current project?')
+    }
+
+    return new ResolvedConfig(cfg.resolved)
   }
 }

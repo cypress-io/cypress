@@ -1,5 +1,5 @@
 overwrite: true
-schema: '../graphql/schema.graphql'
+schema: '../graphql/schemas/stitched.graphql'
 generates:
   src/generated/graphql.ts:
     documents: 'src/**/*.vue'

@@ -4,7 +4,7 @@
 			<RunIcon :status="run.status" />
 		</div>
 		<div class="pl-4 border-l border-gray-200 flex-grow">
-			<h2 class="font-medium text-indigo-500 leading-4">{{ run.commit.message }}</h2>
+			<h2 class="font-medium text-indigo-500 leading-4">{{ run.commitInfo.message }}</h2>
 			<div class="flex">
 				<span v-for="info in runInfo" class="flex items-center mr-3 mt-1">
 					<component v-if="info.icon" :is="info.icon" class="mr-1 text-gray-500 text-sm" />
@@ -26,12 +26,11 @@ import IconUserCircle from 'virtual:vite-icons/bx/bx-user-circle'
 // carbon:branch
 import IconBranch from 'virtual:vite-icons/carbon/branch'
 import { gql } from '@urql/core'
-import type { RunFragment } from '../generated/graphql'
+import type { RunCardFragment } from '../generated/graphql'
 import { computed } from 'vue-demi'
-import type { RunGroupTotals } from '@packages/graphql/src/entities/run'
 
 gql`
-fragment Run on RunGroup {
+fragment RunCard on CloudRun {
 	createdAt
 	totalPassed
 	totalFailed
@@ -39,7 +38,7 @@ fragment Run on RunGroup {
 	totalSkipped
 	totalDuration
 	status
-	commit {
+	commitInfo {
 		authorName
 		authorEmail
 		message
@@ -49,7 +48,7 @@ fragment Run on RunGroup {
 `
 
 const props = defineProps<{
-	gql: RunFragment
+	gql: RunCardFragment
 }>()
 
 const run = computed(() => props.gql)
@@ -66,7 +65,8 @@ const runInfo = [{
 	text: new Date(run.value.createdAt).toLocaleTimeString()
 }]
 
-const runGroupTotals: RunGroupTotals = {
+// TIM(review): is this needed??
+const runGroupTotals = {
  totalPassed: props.gql.totalPassed || 0,
  totalFailed: props.gql.totalFailed || 0,
  totalPending: props.gql.totalPending || 0,

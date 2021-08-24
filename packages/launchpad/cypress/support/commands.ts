@@ -2,7 +2,7 @@ import '@testing-library/cypress/add-commands'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
-import { testApolloClient } from './testApolloClient'
+import { testUrqlClient } from './testUrqlClient'
 import { Component, computed, defineComponent, h } from 'vue'
 
 import { ClientTestContext } from '../../src/graphql/ClientTestContext'
@@ -29,7 +29,7 @@ Cypress.Commands.add(
     options.global.plugins.push(createI18n())
     options.global.plugins.push({
       install (app) {
-        app.use(urql, testApolloClient({
+        app.use(urql, testUrqlClient({
           context: new ClientTestContext(),
         }))
       },
@@ -73,7 +73,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
         createI18n(),
         {
           install (app) {
-            app.use(urql, testApolloClient({
+            app.use(urql, testUrqlClient({
               context: ctx,
               rootValue: options.type(ctx),
             }))
@@ -135,7 +135,7 @@ function mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result
         createI18n(),
         {
           install (app) {
-            app.use(urql, testApolloClient({
+            app.use(urql, testUrqlClient({
               context: ctx,
               rootValue: options.type(ctx),
             }))

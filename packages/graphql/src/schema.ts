@@ -1,6 +1,7 @@
 import { makeSchema, asNexusMethod } from 'nexus'
 import path from 'path'
 import { JSONResolver, DateTimeResolver } from 'graphql-scalars'
+
 import * as entities from './entities'
 import * as constants from './constants'
 import * as testingTypes from './testing/testUnionType'
@@ -25,7 +26,7 @@ export const graphqlSchema = makeSchema({
   // for vite
   outputs: isCodegen ? {
     typegen: path.join(dirname, 'gen/nxs.gen.ts'),
-    schema: path.join(dirname, '..', 'schema.graphql'),
+    schema: path.join(dirname, '..', 'schemas', 'client.graphql'),
   } : false,
   contextType: {
     module: path.join(dirname, './context/BaseContext.ts'),

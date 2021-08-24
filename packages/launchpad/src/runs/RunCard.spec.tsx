@@ -1,12 +1,11 @@
-import { RunGroup } from '../../../graphql/src/entities/run'
-import { RunFragmentDoc } from '../generated/graphql'
+import { RunCardFragmentDoc } from '../generated/graphql'
 import RunCard from './RunCard.vue'
 
 describe('<RunCard />', { viewportHeight: 400 }, () => {
   it('playground', () => {
-    cy.mountFragment(RunFragmentDoc, {
+    cy.mountFragment(RunCardFragmentDoc, {
       type: (ctx) => {
-        return new RunGroup({
+        return {
           createdAt: new Date().toString(),
           completedAt: new Date().toString(),
           status: 'passed',
@@ -24,7 +23,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
           totalFailed: 0,
           totalSkipped: 0,
           totalPending: 4,
-        })
+        }
       },
       render: (gqlVal) => {
         return (

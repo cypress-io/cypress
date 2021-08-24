@@ -1,4 +1,4 @@
-import { BaseActions, BaseContext, DashboardProject, LocalProject } from '@packages/graphql'
+import { BaseActions, BaseContext, Project } from '@packages/graphql'
 import type { FullConfig } from '@packages/server/lib/config'
 
 export class ClientTestActions extends BaseActions {
@@ -16,6 +16,16 @@ export class ClientTestActions extends BaseActions {
 
   async authenticate () {}
   async createConfigFile () {}
+
+  async initializeOpenProject () {}
+
+  async launchOpenProject () {
+
+  }
+
+  resolveOpenProjectConfig () {
+    return null
+  }
 
   async logout () {}
   async getProjectId () {
@@ -41,14 +51,13 @@ export class ClientTestActions extends BaseActions {
   }
 }
 
-const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
+const createTestProject = (projectRoot: string, ctx: BaseContext) => new Project(projectRoot, ctx)
 
 export class ClientTestContext extends BaseContext {
   readonly actions = new ClientTestActions(this)
   readonly projects = []
 
   // localProjects: Project[] = [this.testProject]
-  dashboardProjects: DashboardProject[] = []
-  localProjects: LocalProject[] = [createTestProject('/new/project', this)]
+  localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
 }

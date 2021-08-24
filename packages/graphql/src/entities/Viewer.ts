@@ -1,8 +1,6 @@
-import { nonNull, stringArg } from 'nexus'
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
-import type { NexusGenArgTypes } from '../gen/nxs.gen'
-import { DashboardProject } from './DashboardProject'
+import { Project } from './Project'
 
 export interface AuthenticatedUser {
   name: string
@@ -16,26 +14,7 @@ export interface AuthenticatedUser {
 export class Viewer {
   constructor (private ctx: BaseContext, private viewer: AuthenticatedUser) {}
 
-  // @nxs.field.nullable.type(() => DashboardProject, {
-  @nxs.field.nullable.type(() => DashboardProject, {
-    description: 'Active project',
-    args: {
-      projectId: nonNull(stringArg()),
-    },
-  })
-  getProjectByProjectId ({ projectId }: NexusGenArgTypes['Viewer']['getProjectByProjectId']): NxsResult<'Viewer', 'getProjectByProjectId'> {
-    const project = this.ctx.localProjects.find(async (p) => {
-      return await p.projectId() === projectId
-    })
-
-    if (!project) {
-      return null
-    }
-
-    return new DashboardProject(project.projectRoot, this.ctx, this.viewer.authToken)
-  }
-
-  @nxs.field.list.nullable.type(() => DashboardProject, {
+  @nxs.field.list.nullable.type(() => Project, {
     description: 'All known projects for the app',
   })
   get projects (): NxsResult<'Viewer', 'projects'> {
@@ -44,7 +23,7 @@ export class Viewer {
     }
 
     return this.ctx.localProjects.map((p) => {
-      return new DashboardProject(p.projectRoot, this.ctx, this.authToken!)
+      return new Project(p.projectRoot, this.ctx)
     })
   }
 

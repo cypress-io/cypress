@@ -30,11 +30,11 @@ gql`
 query RunPageRoot {
 	viewer {
 		...Authenticate
-		getProjectByProjectId(projectId: "ypt4pf") {
-			runs {
-				...Run
-			}
-		}
+		# getProjectByProjectId(projectId: "ypt4pf") {
+		# 	runs {
+		# 		...Run
+		# 	}
+		# }
 	}
 }
 `
@@ -46,5 +46,5 @@ const { data, fetching } = useQuery({
   }
 })
 
-const runs =  computed(() => data?.value?.viewer?.getProjectByProjectId?.runs || [])
+const runs = [] // computed(() => data?.value?.viewer?.getProjectByProjectId?.runs || [])
 </script>

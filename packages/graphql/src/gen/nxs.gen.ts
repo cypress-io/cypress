@@ -7,9 +7,7 @@
 
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
-import type { DashboardProject } from "./../entities/DashboardProject"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
-import type { LocalProject } from "./../entities/LocalProject"
 import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
 import type { Query } from "./../entities/Query"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
@@ -18,10 +16,9 @@ import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { Project } from "./../entities/Project"
 import type { Browser } from "./../entities/Browser"
-import type { RunGroup } from "./../entities/run/Run"
 import type { NavigationItem } from "./../entities/NavigationItem"
-import type { RunCommit } from "./../entities/run/RunCommit"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -63,7 +60,6 @@ export interface NexusGenEnums {
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"
   ResolvedConfigOption: "config" | "default" | "env" | "plugin" | "runtime"
   ResolvedType: "array" | "boolean" | "json" | "number" | "string"
-  RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
@@ -84,11 +80,10 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   App: App;
   Browser: Browser;
-  DashboardProject: DashboardProject;
-  LocalProject: LocalProject;
   Mutation: {};
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
+  Project: Project;
   Query: Query;
   ResolvedBooleanOption: ResolvedBooleanOption;
   ResolvedConfig: ResolvedConfig;
@@ -97,8 +92,6 @@ export interface NexusGenObjects {
   ResolvedOptionBase: ResolvedOptionBase;
   ResolvedStringListOption: ResolvedStringListOption;
   ResolvedStringOption: ResolvedStringOption;
-  RunCommit: RunCommit;
-  RunGroup: RunGroup;
   TestingTypeInfo: TestingTypeInfo;
   Viewer: Viewer;
   Wizard: Wizard;
@@ -119,10 +112,10 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 
 export interface NexusGenFieldTypes {
   App: { // field return type
-    activeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
+    activeProject: NexusGenRootTypes['Project'] | null; // Project
     browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
     isFirstOpen: boolean; // Boolean!
-    projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
+    projects: NexusGenRootTypes['Project'][]; // [Project!]!
   }
   Browser: { // field return type
     channel: string; // String!
@@ -132,21 +125,6 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     path: string; // String!
     version: string; // String!
-  }
-  DashboardProject: { // field return type
-    id: string; // ID!
-    projectId: string | null; // String
-    projectRoot: string; // String!
-    recordKeys: string[] | null; // [String!]
-    runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
-    title: string; // String!
-  }
-  LocalProject: { // field return type
-    id: string; // ID!
-    projectId: string | null; // String
-    projectRoot: string; // String!
-    resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
-    title: string; // String!
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
@@ -173,6 +151,13 @@ export interface NexusGenFieldTypes {
   NavigationMenu: { // field return type
     items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
     selected: NexusGenEnums['NavItem']; // NavItem!
+  }
+  Project: { // field return type
+    id: string; // ID!
+    projectId: string | null; // String
+    projectRoot: string; // String!
+    resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
+    title: string; // String!
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
@@ -258,25 +243,6 @@ export interface NexusGenFieldTypes {
     type: NexusGenEnums['ResolvedType']; // ResolvedType!
     value: string | null; // String
   }
-  RunCommit: { // field return type
-    authorEmail: string; // String!
-    authorName: string; // String!
-    branch: string; // String!
-    message: string; // String!
-    sha: string; // String!
-    url: string; // String!
-  }
-  RunGroup: { // field return type
-    commit: NexusGenRootTypes['RunCommit']; // RunCommit!
-    completedAt: string; // String!
-    createdAt: string; // String!
-    status: NexusGenEnums['RunGroupStatus']; // RunGroupStatus!
-    totalDuration: number | null; // Int
-    totalFailed: number | null; // Int
-    totalPassed: number | null; // Int
-    totalPending: number | null; // Int
-    totalSkipped: number | null; // Int
-  }
   TestingTypeInfo: { // field return type
     description: string | null; // String
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
@@ -285,9 +251,8 @@ export interface NexusGenFieldTypes {
   Viewer: { // field return type
     authToken: string; // String!
     email: string; // String!
-    getProjectByProjectId: NexusGenRootTypes['DashboardProject'] | null; // DashboardProject
     name: string; // String!
-    projects: Array<NexusGenRootTypes['DashboardProject'] | null> | null; // [DashboardProject]
+    projects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
   }
   Wizard: { // field return type
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -324,10 +289,10 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   App: { // field return type name
-    activeProject: 'LocalProject'
+    activeProject: 'Project'
     browsers: 'Browser'
     isFirstOpen: 'Boolean'
-    projects: 'LocalProject'
+    projects: 'Project'
   }
   Browser: { // field return type name
     channel: 'String'
@@ -337,21 +302,6 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     path: 'String'
     version: 'String'
-  }
-  DashboardProject: { // field return type name
-    id: 'ID'
-    projectId: 'String'
-    projectRoot: 'String'
-    recordKeys: 'String'
-    runs: 'RunGroup'
-    title: 'String'
-  }
-  LocalProject: { // field return type name
-    id: 'ID'
-    projectId: 'String'
-    projectRoot: 'String'
-    resolvedConfig: 'ResolvedConfig'
-    title: 'String'
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
@@ -378,6 +328,13 @@ export interface NexusGenFieldTypeNames {
   NavigationMenu: { // field return type name
     items: 'NavigationItem'
     selected: 'NavItem'
+  }
+  Project: { // field return type name
+    id: 'ID'
+    projectId: 'String'
+    projectRoot: 'String'
+    resolvedConfig: 'ResolvedConfig'
+    title: 'String'
   }
   Query: { // field return type name
     app: 'App'
@@ -463,25 +420,6 @@ export interface NexusGenFieldTypeNames {
     type: 'ResolvedType'
     value: 'String'
   }
-  RunCommit: { // field return type name
-    authorEmail: 'String'
-    authorName: 'String'
-    branch: 'String'
-    message: 'String'
-    sha: 'String'
-    url: 'String'
-  }
-  RunGroup: { // field return type name
-    commit: 'RunCommit'
-    completedAt: 'String'
-    createdAt: 'String'
-    status: 'RunGroupStatus'
-    totalDuration: 'Int'
-    totalFailed: 'Int'
-    totalPassed: 'Int'
-    totalPending: 'Int'
-    totalSkipped: 'Int'
-  }
   TestingTypeInfo: { // field return type name
     description: 'String'
     id: 'TestingTypeEnum'
@@ -490,9 +428,8 @@ export interface NexusGenFieldTypeNames {
   Viewer: { // field return type name
     authToken: 'String'
     email: 'String'
-    getProjectByProjectId: 'DashboardProject'
     name: 'String'
-    projects: 'DashboardProject'
+    projects: 'Project'
   }
   Wizard: { // field return type name
     allBundlers: 'WizardBundler'
@@ -556,11 +493,6 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    }
-  }
-  Viewer: {
-    getProjectByProjectId: { // args
-      projectId: string; // String!
     }
   }
   Wizard: {

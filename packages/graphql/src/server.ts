@@ -4,7 +4,7 @@ import Debug from 'debug'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 
-import { graphqlSchema } from './schema'
+import { combinedSchema } from './stitching/stitching'
 import type { BaseContext } from './context/BaseContext'
 
 const debug = Debug('cypress:server:graphql')
@@ -53,7 +53,7 @@ export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }
     }
 
     return {
-      schema: graphqlSchema,
+      schema: combinedSchema,
       graphiql: true,
       context: serverContext,
     }

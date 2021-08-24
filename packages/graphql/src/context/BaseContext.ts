@@ -1,7 +1,7 @@
 import type { LaunchArgs } from '@packages/server/lib/open_project'
 import type { OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard, NavigationMenu, LocalProject, Viewer, DashboardProject } from '../entities'
+import { App, Wizard, NavigationMenu, Project, Viewer } from '../entities'
 
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.
@@ -12,8 +12,7 @@ import { App, Wizard, NavigationMenu, LocalProject, Viewer, DashboardProject } f
  */
 export abstract class BaseContext {
   abstract readonly actions: BaseActions
-  abstract localProjects: LocalProject[]
-  abstract dashboardProjects: DashboardProject[]
+  abstract localProjects: Project[]
   abstract viewer: null | Viewer
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
