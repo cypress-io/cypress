@@ -8,7 +8,7 @@ import { needsDarwinWorkaround, darwinDetectionWorkaround } from './darwin/util'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
 import { log } from './log'
-import {
+import type {
   Browser,
   DetectedBrowser,
   FoundBrowser,
