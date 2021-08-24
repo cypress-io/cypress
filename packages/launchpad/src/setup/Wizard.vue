@@ -1,6 +1,8 @@
 <template>
   <template v-if="!loading && wizard">
     <Auth />
+    <Button @click="launchCt">Launch CT</Button>
+    <Button @click="launchE2E">Launch E2E</Button>
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
@@ -30,8 +32,15 @@ import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
-import { RootDocument } from '../generated/graphql'
-import { useQuery } from "@urql/vue";
+import { 
+  RootDocument, 
+  InitializeOpenProjectMutation, 
+  LaunchOpenProjectMutation, 
+  InitializeOpenProjectDocument,
+  LaunchOpenProjectDocument
+} from '../generated/graphql'
+import { useMutation, useQuery } from "@urql/vue";
+import Button from '../components/button/Button.vue'
 
 gql`
 query Root {
@@ -51,9 +60,44 @@ query Root {
   }
 }
 `
+
+gql`
+mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
+  initializeOpenProject (testingType: $testingType) {
+    projects {
+      __typename # don't really care about result at this point
+    }
+  }
+}
+`
+
+gql`
+mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
+  launchOpenProject (testingType: $testingType) {
+    projects {
+      __typename # don't really care about result at this point
+    }
+  }
+}
+`
+
 const result = useQuery({ query: RootDocument })
 
 const loading = result.fetching
 const wizard = computed(() => result.data.value?.wizard)
 const app = computed(() => result.data.value?.app!)
+
+const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
+const launchOpenProject = useMutation(LaunchOpenProjectDocument)
+
+const launchCt = async () => {
+  const r1 = await initializeOpenProject.executeMutation({ testingType: 'component' })
+  console.log(r1.error)
+  await launchOpenProject.executeMutation({ testingType: 'component' })
+}
+
+const launchE2E = async () => {
+  await initializeOpenProject.executeMutation({ testingType: 'e2e' })
+  await launchOpenProject.executeMutation({ testingType: 'e2e' })
+}
 </script>

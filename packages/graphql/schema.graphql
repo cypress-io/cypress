@@ -82,10 +82,10 @@ type Mutation {
   """
   Initializes open_project global singleton to manager current project state
   """
-  initializeOpenProject: App
+  initializeOpenProject(testingType: TestingTypeEnum!): App
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: App
+  launchOpenProject(testingType: TestingTypeEnum!): App
 
   """Auth with Cypress Cloud"""
   login: Viewer

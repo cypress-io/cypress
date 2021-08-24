@@ -533,6 +533,12 @@ export interface NexusGenArgTypes {
       code: string; // String!
       configFilename: string; // String!
     }
+    initializeOpenProject: { // args
+      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+    launchOpenProject: { // args
+      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
     navigationMenuSetItem: { // args
       type: NexusGenEnums['NavItem']; // NavItem!
     }

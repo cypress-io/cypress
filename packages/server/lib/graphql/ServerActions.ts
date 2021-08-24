@@ -107,7 +107,7 @@ export class ServerActions extends BaseActions {
   }
 
   async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {
-    openProject.create(args.projectRoot, args, options)
+    return openProject.create(args.projectRoot, args, options)
   }
 
   async launchOpenProject (

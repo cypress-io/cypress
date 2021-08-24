@@ -120,6 +120,9 @@ export const mutation = mutationType({
 
     t.field('initializeOpenProject', {
       type: 'App',
+      args: {
+        testingType: nonNull(TestingTypeEnum)
+      },
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
         console.log(ctx.launchArgs, ctx.launchOptions)
@@ -128,8 +131,9 @@ export const mutation = mutationType({
           throw Error(`Need to call App#cacheBrowsers before opening a project.`)
         }
 
-        await ctx.actions.initializeOpenProject({
-          ...ctx.launchArgs,
+        await ctx.actions.initializeOpenProject({ 
+          ...ctx.launchArgs, 
+          testingType: args.testingType,
           config: {
             browsers: browsers.map((x): BrowserContract => {
               return {
@@ -152,6 +156,9 @@ export const mutation = mutationType({
     t.field('launchOpenProject', {
       type: 'App',
       description: 'Launches project from open_project global singleton',
+      args: {
+        testingType: nonNull(TestingTypeEnum)
+      },
       async resolve (_root, args, ctx) {
         const browsers = ctx.app.browserCache
         if (!browsers?.length) {
