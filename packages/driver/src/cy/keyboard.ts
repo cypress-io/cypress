@@ -8,7 +8,7 @@ import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
-import { HTMLTextLikeElement } from '../dom/elements'
+import type { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
@@ -689,9 +689,7 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  constructor (private state: State) {
-    null
-  }
+  constructor (private state: State) {}
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
