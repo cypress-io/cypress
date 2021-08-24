@@ -57,10 +57,11 @@ export const DestroyResponse: ErrorMiddleware = function () {
   this.end()
 }
 
+export type { InterceptError }
+
 export default {
   LogError,
   SendToDriver,
-  InterceptError,
   AbortRequest,
   UnpipeResponse,
   DestroyResponse,
