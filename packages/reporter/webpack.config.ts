@@ -1,6 +1,6 @@
 import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-import { Configuration } from 'webpack'
+import type { Configuration } from 'webpack'
 
 // @ts-ignore
 const config: Configuration = {
