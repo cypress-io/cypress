@@ -863,11 +863,6 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     hook.id = test.id
     hook.ctx.currentTest = test
 
-    // make sure we set this test as the current now
-    // else its possible that our TEST_AFTER_RUN_EVENT
-    // will never fire if this failed in a before hook
-    // setTest(test)
-
     return Cypress.action('runner:hook:start', wrap(hook))
   })
 
@@ -1348,6 +1343,11 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
       if (!test || _runner.stopped) {
         return _next()
       }
+
+      // make sure we set this test as the current now
+      // else its possible that our TEST_AFTER_RUN_EVENT
+      // will never fire if this failed in a before hook
+      setTest(test)
 
       // first time seeing a retried test
       // that hasn't already replaced our test
