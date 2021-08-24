@@ -1,5 +1,6 @@
 import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
+import type { BrowserContract } from '../contracts/BrowserContract'
 
 export const mutation = mutationType({
   definition (t) {
@@ -117,11 +118,66 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('initializeOpenProjet', {
-      type: 'Viewer',
+    t.field('initializeOpenProject', {
+      type: 'App',
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
-        await ctx.actions.initializeOpenProject(ctx.launchOptions)
+        console.log(ctx.launchArgs, ctx.launchOptions)
+        const browsers = ctx.app.browserCache
+        if (!browsers?.length) {
+          throw Error(`Need to call App#cacheBrowsers before opening a project.`)
+        }
+
+        await ctx.actions.initializeOpenProject({
+          ...ctx.launchArgs,
+          config: {
+            browsers: browsers.map((x): BrowserContract => {
+              return {
+                name: x.name,
+                family: x.family,
+                majorVersion: x.majorVersion,
+                channel: x.channel,
+                displayName: x.displayName,
+                path: x.path,
+                version: x.version,
+              }
+            })
+          }
+        }, ctx.launchOptions)
+        
+        return ctx.app
+      },
+    })
+
+    t.field('launchOpenProject', {
+      type: 'App',
+      description: 'Launches project from open_project global singleton',
+      async resolve (_root, args, ctx) {
+        const browsers = ctx.app.browserCache
+        if (!browsers?.length) {
+          throw Error(`Need to call App#cacheBrowsers before opening a project.`)
+        }
+
+        const chrome = browsers.find(x => x.name === 'chrome')!
+        const browser: BrowserContract = {
+          name: chrome.name,
+          family: chrome.family,
+          majorVersion: chrome.majorVersion,
+          channel: chrome.channel,
+          displayName: chrome.displayName,
+          path: chrome.path,
+          version: chrome.version,
+        }
+
+        await ctx.actions.launchOpenProject(browser, 
+          {
+            name: '',
+            absolute: '',
+            relative: '',
+            specType: 'e2e',
+          }, {})
+        
+        return ctx.app
       },
     })
   },

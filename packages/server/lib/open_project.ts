@@ -18,7 +18,7 @@ import { closeGraphQLServer } from '@packages/graphql/src/server'
 
 const debug = Debug('cypress:server:open_project')
 
-interface LaunchOpts {
+export interface LaunchOpts {
   browser?: FoundBrowser
   url?: string
   automationMiddleware?: AutomationMiddleware
