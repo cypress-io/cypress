@@ -10,8 +10,6 @@ export * from './Query'
 
 export * from './TestingTypeInfo'
 
-export * from './Viewer'
-
 export * from './Wizard'
 
 export * from './WizardBundler'

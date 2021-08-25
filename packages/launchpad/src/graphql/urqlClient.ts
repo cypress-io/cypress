@@ -2,12 +2,19 @@ import {
   Client,
   createClient,
   dedupExchange,
-  cacheExchange,
+  // cacheExchange,
   errorExchange,
   fetchExchange,
 } from '@urql/core'
+import { cacheExchange } from '@urql/exchange-graphcache'
 
 import { initGraphQLIPC } from './graphqlIpc'
+
+export function makeCacheExchange () {
+  return cacheExchange({
+    //
+  })
+}
 
 export function makeUrqlClient (): Client {
   initGraphQLIPC()
@@ -17,7 +24,7 @@ export function makeUrqlClient (): Client {
     url: 'http://localhost:52159/graphql',
     exchanges: [
       dedupExchange,
-      cacheExchange,
+      makeCacheExchange(),
       errorExchange({
         onError (error) {
           // eslint-disable-next-line

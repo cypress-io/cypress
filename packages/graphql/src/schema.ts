@@ -25,10 +25,12 @@ export const graphqlSchema = makeSchema({
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN_EXIT),
   sourceTypes: isCodegen ? {
-    modules: [{
-      alias: 'cloudGen',
-      module: path.join(dirname, 'generated/cloud-source-types.gen.ts'),
-    }],
+    modules: [
+      {
+        alias: 'cloudGen',
+        module: path.join(dirname, 'generated/cloud-source-types.gen.ts'),
+      },
+    ],
   } : undefined,
   // for vite
   outputs: isCodegen ? {

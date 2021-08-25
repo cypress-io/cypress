@@ -11,6 +11,12 @@ generates:
       - 'typescript'
       - add:
           content: 'export type CloudQuery = Query'
+  src/generated/introspection.json:
+    schema: '../graphql/schemas/schema.graphql'
+    plugins:
+      - 'introspection'
+    config:
+      schemaDescription: false
   src/generated/graphql.ts:
     schema: '../graphql/schemas/schema.graphql'
     documents: 'src/**/*.vue'
@@ -25,7 +31,8 @@ generates:
           content: '/* eslint-disable */'
       - 'typescript'
       - 'typescript-operations'
-      - 'typed-document-node'
+      - 'typed-document-node':
+          flattenGeneratedTypes: true
   ../graphql/src/testing/testUnionType.ts:
     schema: '../graphql/schemas/schema.graphql'
     plugins:

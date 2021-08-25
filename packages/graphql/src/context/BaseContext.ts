@@ -1,10 +1,15 @@
 import type { LaunchArgs } from '@packages/server/lib/open_project'
 import type { OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
+import type { GraphQLResolveInfo } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard, NavigationMenu, Project, Viewer } from '../entities'
-import type { NexusGenArgTypes, NexusGenObjects } from '../gen/nxs.gen'
+import { App, Wizard, NavigationMenu, Project } from '../entities'
+import type { NexusGenObjects } from '../gen/nxs.gen'
 
-type CloudQueryArgs<M> = M extends keyof NexusGenArgTypes['CloudQuery'] ? NexusGenArgTypes['CloudQuery'][M] : unknown
+export interface AuthenticatedUser {
+  name?: string
+  email?: string
+  authToken?: string
+}
 
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.
@@ -14,9 +19,20 @@ type CloudQueryArgs<M> = M extends keyof NexusGenArgTypes['CloudQuery'] ? NexusG
  * without the need to endlessly mock things.
  */
 export abstract class BaseContext {
+  protected _authenticatedUser: AuthenticatedUser | null = null
+
+  get authenticatedUser () {
+    return this._authenticatedUser ?? null
+  }
+
+  setAuthenticatedUser (authUser: AuthenticatedUser | null) {
+    this._authenticatedUser = authUser
+
+    return this
+  }
+
   abstract readonly actions: BaseActions
   abstract localProjects: Project[]
-  abstract viewer: null | Viewer
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
 
@@ -24,9 +40,9 @@ export abstract class BaseContext {
   navigationMenu = new NavigationMenu()
   app = new App(this)
 
-  abstract batchedCloudExecute(): NexusGenObjects['CloudQuery']
+  abstract delegateToRemoteQuery(info: GraphQLResolveInfo): NexusGenObjects['Query'] | null
 
-  abstract batchedCloudExecuteMethod<M extends keyof NexusGenObjects['CloudQuery']>(method: M, args: CloudQueryArgs<M>): NexusGenObjects['CloudQuery'][M]
+  abstract delegateToRemoteQueryBatched(info: GraphQLResolveInfo): NexusGenObjects['Query'] | null
 
   get activeProject () {
     return this.app.activeProject

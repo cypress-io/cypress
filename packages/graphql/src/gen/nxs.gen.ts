@@ -11,7 +11,6 @@ import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
 import type { Query } from "./../entities/Query"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
-import type { Viewer } from "./../entities/Viewer"
 import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
@@ -86,7 +85,6 @@ export interface NexusGenObjects {
   CloudProject: cloudGen.CloudProject;
   CloudProjectConnection: cloudGen.CloudProjectConnection;
   CloudProjectEdge: cloudGen.CloudProjectEdge;
-  CloudQuery: cloudGen.CloudQuery;
   CloudRecordKey: cloudGen.CloudRecordKey;
   CloudRun: cloudGen.CloudRun;
   CloudRunCommitInfo: cloudGen.CloudRunCommitInfo;
@@ -103,11 +101,9 @@ export interface NexusGenObjects {
   ResolvedConfig: ResolvedConfig;
   ResolvedJsonOption: ResolvedJsonOption;
   ResolvedNumberOption: ResolvedNumberOption;
-  ResolvedOptionBase: ResolvedOptionBase;
   ResolvedStringListOption: ResolvedStringListOption;
   ResolvedStringOption: ResolvedStringOption;
   TestingTypeInfo: TestingTypeInfo;
-  Viewer: Viewer;
   Wizard: Wizard;
   WizardBundler: WizardBundler;
   WizardFrontendFramework: WizardFrontendFramework;
@@ -117,6 +113,7 @@ export interface NexusGenObjects {
 export interface NexusGenInterfaces {
   CloudEdge: cloudGen.CloudEdge;
   Node: cloudGen.Node;
+  ResolvedOptionBase: ResolvedOptionBase;
 }
 
 export interface NexusGenUnions {
@@ -158,12 +155,6 @@ export interface NexusGenFieldTypes {
   CloudProjectEdge: { // field return type
     todo: boolean | null; // Boolean
   }
-  CloudQuery: { // field return type
-    cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
-    cloudProjectsByIds: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
-    node: NexusGenRootTypes['Node'] | null; // Node
-    viewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
-  }
   CloudRecordKey: { // field return type
     id: string; // ID!
   }
@@ -201,6 +192,7 @@ export interface NexusGenFieldTypes {
     node: NexusGenRootTypes['CloudRun'] | null; // CloudRun
   }
   CloudUser: { // field return type
+    email: string | null; // String
     fullName: string | null; // String
     id: string; // ID!
   }
@@ -208,8 +200,8 @@ export interface NexusGenFieldTypes {
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializeOpenProject: NexusGenRootTypes['App'] | null; // App
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
-    login: NexusGenRootTypes['Viewer'] | null; // Viewer
-    logout: NexusGenRootTypes['Viewer'] | null; // Viewer
+    login: NexusGenRootTypes['Query'] | null; // Query
+    logout: NexusGenRootTypes['Query'] | null; // Query
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -246,9 +238,10 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
-    cloud: NexusGenRootTypes['CloudQuery'] | null; // CloudQuery
+    cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
+    cloudProjectsByIds: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
+    viewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   ResolvedBooleanOption: { // field return type
@@ -316,9 +309,6 @@ export interface NexusGenFieldTypes {
     type: NexusGenEnums['ResolvedType']; // ResolvedType!
     value: string | null; // String
   }
-  ResolvedOptionBase: { // field return type
-    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
-  }
   ResolvedStringListOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
     type: NexusGenEnums['ResolvedType']; // ResolvedType!
@@ -333,12 +323,6 @@ export interface NexusGenFieldTypes {
     description: string | null; // String
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     title: string | null; // String
-  }
-  Viewer: { // field return type
-    authToken: string; // String!
-    email: string; // String!
-    name: string; // String!
-    projects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
   }
   Wizard: { // field return type
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -377,6 +361,10 @@ export interface NexusGenFieldTypes {
   Node: { // field return type
     id: string; // ID!
   }
+  ResolvedOptionBase: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+  }
 }
 
 export interface NexusGenFieldTypeNames {
@@ -410,12 +398,6 @@ export interface NexusGenFieldTypeNames {
   }
   CloudProjectEdge: { // field return type name
     todo: 'Boolean'
-  }
-  CloudQuery: { // field return type name
-    cloudProject: 'CloudProject'
-    cloudProjectsByIds: 'CloudProject'
-    node: 'Node'
-    viewer: 'CloudUser'
   }
   CloudRecordKey: { // field return type name
     id: 'ID'
@@ -454,6 +436,7 @@ export interface NexusGenFieldTypeNames {
     node: 'CloudRun'
   }
   CloudUser: { // field return type name
+    email: 'String'
     fullName: 'String'
     id: 'ID'
   }
@@ -461,8 +444,8 @@ export interface NexusGenFieldTypeNames {
     appCreateConfigFile: 'App'
     initializeOpenProject: 'App'
     launchOpenProject: 'App'
-    login: 'Viewer'
-    logout: 'Viewer'
+    login: 'Query'
+    logout: 'Query'
     navigationMenuSetItem: 'NavigationMenu'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
@@ -499,9 +482,10 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
-    cloud: 'CloudQuery'
+    cloudProject: 'CloudProject'
+    cloudProjectsByIds: 'CloudProject'
     navigationMenu: 'NavigationMenu'
-    viewer: 'Viewer'
+    viewer: 'CloudUser'
     wizard: 'Wizard'
   }
   ResolvedBooleanOption: { // field return type name
@@ -569,9 +553,6 @@ export interface NexusGenFieldTypeNames {
     type: 'ResolvedType'
     value: 'String'
   }
-  ResolvedOptionBase: { // field return type name
-    from: 'ResolvedConfigOption'
-  }
   ResolvedStringListOption: { // field return type name
     from: 'ResolvedConfigOption'
     type: 'ResolvedType'
@@ -586,12 +567,6 @@ export interface NexusGenFieldTypeNames {
     description: 'String'
     id: 'TestingTypeEnum'
     title: 'String'
-  }
-  Viewer: { // field return type name
-    authToken: 'String'
-    email: 'String'
-    name: 'String'
-    projects: 'Project'
   }
   Wizard: { // field return type name
     allBundlers: 'WizardBundler'
@@ -630,6 +605,10 @@ export interface NexusGenFieldTypeNames {
   Node: { // field return type name
     id: 'ID'
   }
+  ResolvedOptionBase: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+  }
 }
 
 export interface NexusGenArgTypes {
@@ -639,17 +618,6 @@ export interface NexusGenArgTypes {
       before?: number | null; // Int
       first?: number | null; // Int
       last?: number | null; // Int
-    }
-  }
-  CloudQuery: {
-    cloudProject: { // args
-      slug: string; // String!
-    }
-    cloudProjectsByIds: { // args
-      ids: string[]; // [ID!]!
-    }
-    node: { // args
-      id: string; // ID!
     }
   }
   CloudRunCommitInfo: {
@@ -696,6 +664,7 @@ export interface NexusGenArgTypes {
 
 export interface NexusGenAbstractTypeMembers {
   Node: "CloudOrganization" | "CloudProject" | "CloudRecordKey" | "CloudRun" | "CloudUser"
+  ResolvedOptionBase: "ResolvedBooleanOption" | "ResolvedJsonOption" | "ResolvedNumberOption" | "ResolvedStringListOption" | "ResolvedStringOption"
 }
 
 export interface NexusGenTypeInterfaces {
@@ -704,6 +673,11 @@ export interface NexusGenTypeInterfaces {
   CloudRecordKey: "Node"
   CloudRun: "Node"
   CloudUser: "Node"
+  ResolvedBooleanOption: "ResolvedOptionBase"
+  ResolvedJsonOption: "ResolvedOptionBase"
+  ResolvedNumberOption: "ResolvedOptionBase"
+  ResolvedStringListOption: "ResolvedOptionBase"
+  ResolvedStringOption: "ResolvedOptionBase"
 }
 
 export type NexusGenObjectNames = keyof NexusGenObjects;

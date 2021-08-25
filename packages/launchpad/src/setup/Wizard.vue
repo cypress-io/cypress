@@ -1,6 +1,6 @@
 <template>
   <template v-if="!loading && wizard">
-    <Auth />
+    <Auth :gql="auth" />
     <Button @click="launchCt">Launch CT in Chrome</Button>
     <Button @click="launchE2E">Launch E2E in Chrome</Button>
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
@@ -56,6 +56,7 @@ query Root {
     ...InstallDependencies
     ...EnvironmentSetup
   }
+  ...Auth
 }
 `
 
@@ -84,6 +85,7 @@ const result = useQuery({ query: RootDocument })
 const loading = result.fetching
 const wizard = computed(() => result.data.value?.wizard)
 const app = computed(() => result.data.value?.app!)
+const auth = computed(() => result.data.value)
 
 const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 const launchOpenProject = useMutation(LaunchOpenProjectDocument)

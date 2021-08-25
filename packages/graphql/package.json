@@ -6,6 +6,7 @@
   "browser": "src/index.ts",
   "scripts": {
     "build": "node script/build-schema.js",
+    "watch": "node script/watch-schema.js",
     "types": "tsc --noEmit",
     "build-prod": "yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
@@ -17,6 +18,8 @@
   "dependencies": {
     "@graphql-tools/batch-delegate": "^8.0.12",
     "@graphql-tools/delegate": "^8.1.1",
+    "@graphql-tools/utils": "^8.1.2",
+    "@graphql-tools/wrap": "^8.0.13",
     "cross-fetch": "^3.1.4",
     "dedent": "^0.7.0",
     "express": "4.17.1",

@@ -17,7 +17,9 @@ export class ClientTestActions extends BaseActions {
   async authenticate () {}
   async createConfigFile () {}
 
-  async initializeOpenProject () {}
+  async initializeOpenProject () {
+    return null
+  }
 
   async launchOpenProject () {
 
@@ -60,6 +62,14 @@ export class ClientTestContext extends BaseContext {
   // localProjects: Project[] = [this.testProject]
   localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
+
+  delegateToRemoteQuery() {
+    return null
+  }
+
+  delegateToRemoteQueryBatched() {
+    return null
+  }
 
   batchedCloudExecute () {
     return null

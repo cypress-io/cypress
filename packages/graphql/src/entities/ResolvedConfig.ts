@@ -19,11 +19,14 @@ const ResolvedTypeEnum = enumType({
   members: RESOLVED_TYPE,
 })
 
-@nxs.objectType()
+@nxs.interfaceType()
 export abstract class ResolvedOptionBase {
   constructor (protected resolveFromConfig: ResolvedFromConfig) {}
 
-  abstract get type (): ResolvedType
+  @nxs.field.nonNull.type(() => ResolvedTypeEnum)
+  get type (): ResolvedType {
+    throw new Error('Abstract')
+  }
 
   @nxs.field.type(() => ResolvedConfigOptionEnum)
   get from (): ResolvedFromConfig['from'] {

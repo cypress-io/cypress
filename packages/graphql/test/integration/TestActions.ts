@@ -1,5 +1,5 @@
 import type { FoundBrowser } from '@packages/launcher'
-import { BaseActions, BaseContext, Viewer, Project } from '../../src'
+import { BaseActions, BaseContext, Project } from '../../src'
 
 export class TestActions extends BaseActions {
   ctx: BaseContext
@@ -27,7 +27,7 @@ export class TestActions extends BaseActions {
   async launchOpenProject () {}
 
   async authenticate () {
-    this.ctx.viewer = new Viewer(this.ctx, {
+    this.ctx.setAuthenticatedUser({
       authToken: 'test-auth-token',
       email: 'test@cypress.io',
       name: 'cypress test',
@@ -35,7 +35,7 @@ export class TestActions extends BaseActions {
   }
 
   async logout () {
-    this.ctx.viewer = null
+    this.ctx.setAuthenticatedUser(null)
   }
 
   async getProjectId () {

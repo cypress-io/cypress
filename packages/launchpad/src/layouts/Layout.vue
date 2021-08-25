@@ -72,7 +72,6 @@ query Layout {
       title
     }
   }
-
   navigationMenu {
     items {
       id

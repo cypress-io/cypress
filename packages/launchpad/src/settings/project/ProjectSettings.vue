@@ -39,11 +39,9 @@ query ProjectSettings($projectId: String!) {
       ...ProjectId
     }
   }
-  # viewer {
   #   getProjectByProjectId(projectId: $projectId) {
   #     recordKeys
   #   }
-  # }
 }
 `
 

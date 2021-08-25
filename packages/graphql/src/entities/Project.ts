@@ -1,3 +1,4 @@
+import type { GraphQLResolveInfo } from 'graphql'
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
 import type { ProjectContract } from '../contracts/ProjectContract'
@@ -43,7 +44,7 @@ export class Project implements ProjectContract {
   }
 
   @nxs.field.type(() => 'CloudProject')
-  cloudProject (): NxsResult<'Project', 'cloudProject'> {
-    return this.ctx.batchedCloudExecuteMethod('cloudProject', { slug: this.projectId })
+  cloudProject (args, ctx, info: GraphQLResolveInfo): NxsResult<'Project', 'cloudProject'> {
+    return this.ctx.delegateToRemoteQuery(info) as any
   }
 }

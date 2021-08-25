@@ -73,21 +73,6 @@ type CloudProjectEdge {
   todo: Boolean
 }
 
-type CloudQuery {
-  """Lookup an individual project by the slug"""
-  cloudProject(slug: String!): CloudProject
-  cloudProjectsByIds(
-    """A list of Relay IDs"""
-    ids: [ID!]!
-  ): [CloudProject]
-
-  """Returns an object conforming to the Relay spec"""
-  node(id: ID!): Node
-
-  """A user within the Cypress Cloud"""
-  viewer: CloudUser
-}
-
 type CloudRecordKey implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -166,6 +151,8 @@ enum CloudRunStatus {
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
+  email: String
+
   """The display name of the user, if we have one"""
   fullName: String
 
@@ -212,10 +199,10 @@ type Mutation {
   launchOpenProject(testingType: TestingTypeEnum!): App
 
   """Auth with Cypress Cloud"""
-  login: Viewer
+  login: Query
 
   """Log out of Cypress Cloud"""
-  logout: Viewer
+  logout: Query
 
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): NavigationMenu
@@ -302,22 +289,21 @@ type Project {
 type Query {
   app: App!
 
-  """Cloud Query"""
-  cloud: CloudQuery
+  """Lookup an individual project by the slug"""
+  cloudProject: CloudProject
+  cloudProjectsByIds: [CloudProject]
 
   """Metadata about the nagivation menu"""
   navigationMenu: NavigationMenu
 
-  """
-  Namespace for data accessible from Cypress Cloud for authenticated users
-  """
-  viewer: Viewer
+  """A user within the Cypress Cloud"""
+  viewer: CloudUser
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard
 }
 
-type ResolvedBooleanOption {
+type ResolvedBooleanOption implements ResolvedOptionBase {
   from: ResolvedConfigOption
   type: ResolvedType!
   value: Boolean
@@ -386,29 +372,30 @@ enum ResolvedConfigOption {
 """
 An JSON object represented as a string via JSON.stringify. Useful for representing complex types like `env`
 """
-type ResolvedJsonOption {
+type ResolvedJsonOption implements ResolvedOptionBase {
   from: ResolvedConfigOption
   type: ResolvedType!
   value: String
 }
 
-type ResolvedNumberOption {
+type ResolvedNumberOption implements ResolvedOptionBase {
   from: ResolvedConfigOption
   type: ResolvedType!
   value: String
 }
 
-type ResolvedOptionBase {
+interface ResolvedOptionBase {
   from: ResolvedConfigOption
+  type: ResolvedType!
 }
 
-type ResolvedStringListOption {
+type ResolvedStringListOption implements ResolvedOptionBase {
   from: ResolvedConfigOption
   type: ResolvedType!
   value: [String]
 }
 
-type ResolvedStringOption {
+type ResolvedStringOption implements ResolvedOptionBase {
   from: ResolvedConfigOption
   type: ResolvedType!
   value: String
@@ -437,16 +424,6 @@ type TestingTypeInfo {
   description: String
   id: TestingTypeEnum!
   title: String
-}
-
-"""Namespace for information related to the viewer"""
-type Viewer {
-  authToken: String!
-  email: String!
-  name: String!
-
-  """All known projects for the app"""
-  projects: [Project]
 }
 
 """

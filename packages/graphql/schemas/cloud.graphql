@@ -120,6 +120,8 @@ enum CloudRunStatus {
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
 type CloudUser implements Node {
+  email: String
+
   """The display name of the user, if we have one"""
   fullName: String
 

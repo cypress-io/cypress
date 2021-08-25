@@ -1,9 +1,9 @@
 <template>
   <div v-if="error">An error occurred while authenticating: {{ error }}</div>
 
-  <div v-else-if="data?.value?.viewer">
+  <div v-else-if="viewer">
     <p>
-      Congrats {{ data?.value?.viewer?.email }}, you authenticated with Cypress Cloud.
+      Congrats {{ viewer?.email }}, you authenticated with Cypress Cloud.
     </p>
     <Button @click="handleLogout">Log out</Button>
   </div>
@@ -14,27 +14,33 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from "@urql/core"
-import { useMutation, useQuery } from "@urql/vue"
+import { useMutation } from "@urql/vue"
 import { 
   LoginDocument,
   LogoutDocument,
-  AuthDocument
+  AuthFragment
 } from '../generated/graphql'
 import Button from '../components/button/Button.vue'
 
+const props = defineProps<{
+  gql: AuthFragment | undefined
+}>()
+
 gql`
-fragment Authenticate on Viewer {
-  email
-  authToken
+fragment Auth on Query {
+  viewer {
+    email
+    fullName
+  }
 }
 `
 
 gql`
 mutation Logout {
   logout {
-    ...Authenticate
+    ...Auth
   }
 }
 `
@@ -42,15 +48,7 @@ mutation Logout {
 gql`
 mutation Login {
   login {
-    ...Authenticate
-  }
-}
-`
-
-gql`
-query Auth {
-  viewer {
-    ...Authenticate
+    ...Auth
   }
 }
 `
@@ -59,7 +57,7 @@ const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
 const error = ref<string>()
 
-const additionalTypenames = { additionalTypenames: ['Viewer'] }
+const additionalTypenames = { additionalTypenames: ['CloudUser'] }
 
 const handleAuth = async () => {
   const result = await login.executeMutation({}, additionalTypenames)
@@ -72,16 +70,5 @@ const handleLogout = async () => {
   await logout.executeMutation({}, additionalTypenames)
 }
 
-const result = useQuery({ 
-  query: AuthDocument,
-  context: {
-    additionalTypenames: ['Viewer']
-  }
-})
-
-const data = computed(() => result.data)
-
-watch(result, (val) => {
-  console.log(val.data.value?.viewer)
-})
+const viewer = computed(() => props.gql?.viewer)
 </script>

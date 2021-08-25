@@ -1,8 +1,8 @@
+// import type { GraphQLResolveInfo } from 'graphql'
 import { nxs, NxsQueryResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'
 import { NavigationMenu } from './NavigationMenu'
-import { Viewer } from './Viewer'
 import { Wizard } from './Wizard'
 
 @nxs.objectType({
@@ -14,12 +14,12 @@ export class Query {
     return ctx.app
   }
 
-  @nxs.field.type(() => Viewer, {
-    description: 'Namespace for data accessible from Cypress Cloud for authenticated users',
-  })
-  viewer (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'viewer'> {
-    return ctx.viewer ?? null
-  }
+  // @nxs.field.type(() => 'CloudUser', {
+  //   description: 'Namespace for data accessible from Cypress Cloud for authenticated users',
+  // })
+  // viewer (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'viewer'> {
+  //   return null
+  // }
 
   @nxs.field.type(() => Wizard, {
     description: 'Metadata about the wizard, null if we arent showing the wizard',
@@ -33,12 +33,5 @@ export class Query {
   })
   navigationMenu (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'navigationMenu'> {
     return ctx.navigationMenu
-  }
-
-  @nxs.field.type(() => 'CloudQuery', {
-    description: 'Cloud Query',
-  })
-  cloud (): NxsQueryResult<'cloud'> {
-    return null
   }
 }

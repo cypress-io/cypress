@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts" setup>
+import {} from '@packages/graphql/src/index'
 import { provideClient } from '@urql/vue'
 import { makeUrqlClient } from './graphql/urqlClient'
 import Layout from "./layouts/Layout.vue"

@@ -2,22 +2,22 @@ import fs from 'fs'
 import path from 'path'
 
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, Project, Viewer } from '@packages/graphql'
+import { BaseActions, Project } from '@packages/graphql'
 // import { RunGroup } from '@packages/graphql/src/entities/run'
-import { openProject, LaunchArgs, LaunchOpts } from '@packages/server/lib/open_project'
+import { openProject, LaunchArgs, LaunchOpts } from '../open_project'
 
 // @ts-ignore
-import user from '@packages/server/lib/user'
+import user from '../user'
 
 // @ts-ignore
-import auth from '@packages/server/lib/gui/auth'
+import auth from '../gui/auth'
 
 // @ts-ignore
-import browsers from '@packages/server/lib/browsers'
+import browsers from '../browsers'
 
-import * as config from '@packages/server/lib/config'
+import * as config from '../config'
 
-import { getId } from '@packages/server/lib/project_static'
+import { getId } from '../project_static'
 import { FoundBrowser } from '@packages/launcher'
 import { OpenProjectLaunchOptions } from '../project-base'
 import { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
@@ -50,15 +50,16 @@ export class ServerActions extends BaseActions {
   }
 
   async authenticate () {
-    const config: AuthenticatedUser = await auth.start(() => {}, 'launchpad')
-    const viewer = new Viewer(this.ctx, config)
-
-    this.ctx.viewer = viewer
+    this.ctx.setAuthenticatedUser(await auth.start(() => {}, 'launchpad'))
   }
 
   async logout () {
-    await user.logOut()
-    this.ctx.viewer = null
+    try {
+      await user.logOut()
+    } catch {
+      //
+    }
+    this.ctx.setAuthenticatedUser(null)
   }
 
   async getProjectId (projectRoot: string) {

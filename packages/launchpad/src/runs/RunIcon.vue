@@ -6,10 +6,10 @@
 </template>
 
 <script lang="ts" setup>
+import { gql } from '@urql/vue'
 import IconPass from '../icons/pass.svg?component'
 import IconFail from '../icons/fail.svg?component'
 import IconWarn from '../icons/warn.svg?component'
-
 import ProgressCircle from "../components/progress/ProgressCircle.vue"
 import type { CloudRunStatus } from '../generated/graphql'
 
