@@ -73,7 +73,7 @@ describe('src/cy/commands/screenshot', () => {
         expect(Cypress.automation).not.to.be.called
       })
     })
- 
+
     it('is noop when screenshotOnRunFailure is false', () => {
       Cypress.config('isInteractive', false)
       cy.stub(Screenshot, 'getConfig').returns({
