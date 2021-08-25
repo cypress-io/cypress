@@ -1,9 +1,9 @@
 import _ from 'lodash'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
-import { HttpMiddleware } from './'
+import type { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
