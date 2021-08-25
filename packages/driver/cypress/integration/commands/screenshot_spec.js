@@ -73,7 +73,7 @@ describe('src/cy/commands/screenshot', () => {
         expect(Cypress.automation).not.to.be.called
       })
     })
-
+ 
     it('is noop when screenshotOnRunFailure is false', () => {
       Cypress.config('isInteractive', false)
       cy.stub(Screenshot, 'getConfig').returns({
@@ -818,20 +818,20 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       it('sets timeout to Cypress.config(responseTimeout)', {
-        responseTimeout: 2500,
+        responseTimeout: 5000,
       }, () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
         cy.screenshot().then(() => {
-          expect(timeout).to.be.calledWith(2500)
+          expect(timeout).to.be.calledWith(5000)
         })
       })
 
       it('can override timeout', () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        cy.screenshot({ timeout: 1000 }).then(() => {
-          expect(timeout).to.be.calledWith(1000)
+        cy.screenshot({ timeout: 5000 }).then(() => {
+          expect(timeout).to.be.calledWith(5000)
         })
       })
 
@@ -1056,7 +1056,7 @@ describe('src/cy/commands/screenshot', () => {
       })
 
       it('throws after timing out', function (done) {
-        Cypress.automation.withArgs('take:screenshot').resolves(Promise.delay(1000))
+        Cypress.automation.withArgs('take:screenshot').resolves(Promise.delay(5000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -1066,13 +1066,13 @@ describe('src/cy/commands/screenshot', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('screenshot')
           expect(lastLog.get('message')).to.eq('foo')
-          expect(err.message).to.eq('`cy.screenshot()` timed out waiting `50ms` to complete.')
+          expect(err.message).to.eq('`cy.screenshot()` timed out waiting `100ms` to complete.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/screenshot')
 
           done()
         })
 
-        cy.screenshot('foo', { timeout: 50 })
+        cy.screenshot('foo', { timeout: 100 })
       })
     })
 
