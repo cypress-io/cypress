@@ -66,6 +66,15 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 
 """A Cypress project is a container"""
 type LocalProject {
+  """
+  Whether the user has configured component testing. Based on the existance of a 'component' key in their cypress.json
+  """
+  hasSetupComponentTesting: Boolean!
+
+  """
+  Whether the user has configured e2e testing or not, based on the existance of a 'component' key in their cypress.json
+  """
+  hasSetupE2ETesting: Boolean!
   id: ID!
 
   """Used to associate project with Cypress cloud"""
@@ -177,9 +186,11 @@ type ResolvedConfig {
   baseUrl: ResolvedStringOption
   blockHosts: ResolvedStringOption
   chromeWebSecurity: ResolvedBooleanOption
+  component: ResolvedConfig
   componentFolder: ResolvedStringOption
   defaultCommandTimeout: ResolvedNumberOption
   downloadsFolder: ResolvedStringOption
+  e2e: ResolvedConfig
   env: ResolvedJsonOption
   execTimeout: ResolvedNumberOption
   experimentalFetchPolyfill: ResolvedBooleanOption

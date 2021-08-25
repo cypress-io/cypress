@@ -6,21 +6,21 @@
 
 
 import type { BaseContext } from "./../context/BaseContext"
-import type { App } from "./../entities/App.js"
-import type { DashboardProject } from "./../entities/DashboardProject.js"
-import type { NavigationMenu } from "./../entities/NavigationMenu.js"
-import type { LocalProject } from "./../entities/LocalProject.js"
-import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig.js"
-import type { Query } from "./../entities/Query.js"
-import type { TestingTypeInfo } from "./../entities/TestingTypeInfo.js"
-import type { Viewer } from "./../entities/Viewer.js"
-import type { Wizard } from "./../entities/Wizard.js"
-import type { WizardBundler } from "./../entities/WizardBundler.js"
-import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework.js"
-import type { WizardNpmPackage } from "./../entities/WizardNpmPackage.js"
-import type { Browser } from "./../entities/Browser.js"
+import type { App } from "./../entities/App"
+import type { DashboardProject } from "./../entities/DashboardProject"
+import type { NavigationMenu } from "./../entities/NavigationMenu"
+import type { LocalProject } from "./../entities/LocalProject"
+import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
+import type { Query } from "./../entities/Query"
+import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
+import type { Viewer } from "./../entities/Viewer"
+import type { Wizard } from "./../entities/Wizard"
+import type { WizardBundler } from "./../entities/WizardBundler"
+import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
+import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
+import type { Browser } from "./../entities/Browser"
 import type { RunGroup } from "./../entities/run/Run.js"
-import type { NavigationItem } from "./../entities/NavigationItem.js"
+import type { NavigationItem } from "./../entities/NavigationItem"
 import type { RunCommit } from "./../entities/run/RunCommit.js"
 import type { core } from "nexus"
 declare global {
@@ -142,6 +142,8 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   LocalProject: { // field return type
+    hasSetupComponentTesting: boolean; // Boolean!
+    hasSetupE2ETesting: boolean; // Boolean!
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -190,9 +192,11 @@ export interface NexusGenFieldTypes {
     baseUrl: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     blockHosts: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     chromeWebSecurity: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    component: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     componentFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     defaultCommandTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     downloadsFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    e2e: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     env: NexusGenRootTypes['ResolvedJsonOption'] | null; // ResolvedJsonOption
     execTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     experimentalFetchPolyfill: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
@@ -347,6 +351,8 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   LocalProject: { // field return type name
+    hasSetupComponentTesting: 'Boolean'
+    hasSetupE2ETesting: 'Boolean'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
@@ -395,9 +401,11 @@ export interface NexusGenFieldTypeNames {
     baseUrl: 'ResolvedStringOption'
     blockHosts: 'ResolvedStringOption'
     chromeWebSecurity: 'ResolvedBooleanOption'
+    component: 'ResolvedConfig'
     componentFolder: 'ResolvedStringOption'
     defaultCommandTimeout: 'ResolvedNumberOption'
     downloadsFolder: 'ResolvedStringOption'
+    e2e: 'ResolvedConfig'
     env: 'ResolvedJsonOption'
     execTimeout: 'ResolvedNumberOption'
     experimentalFetchPolyfill: 'ResolvedBooleanOption'

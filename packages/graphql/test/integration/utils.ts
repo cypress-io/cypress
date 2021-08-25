@@ -2,9 +2,14 @@ import axios from 'axios'
 import type { FoundBrowser } from '@packages/launcher'
 import { BaseActions, BaseContext, DashboardProject, LocalProject, Viewer, Wizard } from '../../src'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
+import type { LaunchArgs } from '@packages/server/lib/open_project'
+import type { Cfg, OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
 
 interface TestContextInjectionOptions {
   wizard?: Wizard
+  launchArgs?: LaunchArgs
+  launchOptions?: OpenProjectLaunchOptions
+  Actions?: typeof TestActions
 }
 
 export class TestActions extends BaseActions {
@@ -17,6 +22,15 @@ export class TestActions extends BaseActions {
 
   installDependencies () {}
   createConfigFile () {}
+
+  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {}
+  async launchOpenProject () {}
+  resolveOpenProjectConfig (): Cfg {
+    return {
+      projectRoot: '/root/path',
+      resolved: {},
+    }
+  }
 
   addProject (projectRoot: string) {
     return new LocalProject(projectRoot, this.ctx)
@@ -67,9 +81,20 @@ export class TestContext extends BaseContext {
   readonly actions: BaseActions
   viewer = null
 
-  constructor ({ wizard }: TestContextInjectionOptions = {}) {
-    super()
-    this.actions = new TestActions(this)
+  constructor ({ wizard, launchArgs, launchOptions, Actions }: TestContextInjectionOptions = {}) {
+    super(launchArgs || {
+      config: {},
+      cwd: '/current/working/dir',
+      _: ['/current/working/dir'],
+      projectRoot: '/project/root',
+      invokedFromCli: false,
+      browser: null,
+      testingType: 'e2e',
+      project: '/project/root',
+      os: 'linux',
+    }, launchOptions || {})
+
+    this.actions = Actions ? new Actions(this) : new TestActions(this)
     if (wizard) {
       this.wizard = wizard
     }

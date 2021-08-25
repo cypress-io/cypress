@@ -2,7 +2,7 @@ import type { BaseContext } from '../context/BaseContext'
 import type { RunGroup } from '../entities/run'
 import type { FoundBrowser } from '@packages/launcher'
 import type { LocalProject } from '../entities'
-import type { LaunchArgs, LaunchOpts, OpenProject } from '@packages/server/lib/open_project'
+import type { LaunchArgs, LaunchOpts } from '@packages/server/lib/open_project'
 import type { Cfg, OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
 import type { BrowserContract } from '../contracts/BrowserContract'
 
@@ -31,7 +31,7 @@ export abstract class BaseActions {
   abstract getRecordKeys (payload: { projectId: string, authToken: string }): Promise<string[]>
   abstract getBrowsers (): Promise<FoundBrowser[]>
 
-  abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions): Promise<OpenProject>
+  abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions): Promise<void>
   abstract launchOpenProject (browser: BrowserContract, spec: Cypress.Cypress['spec'], options: LaunchOpts): Promise<void>
   abstract resolveOpenProjectConfig (): Cfg | null
 }
