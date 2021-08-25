@@ -135,7 +135,7 @@ export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
   selectFramework: 'Confirm the front-end framework and bundler fused in your project.',
   installDependencies: 'We need to install the following packages in order for component testing to work.',
   createConfig: 'Cypress will now create the following config file in the local directory for this project.',
-  setupComplete: '<em>cypress.config.js</em> file was successfully added to your project. Let’s open your browser and start testing some components!',
+  setupComplete: 'Setup complete! Let’s open your browser and start writing some tests!',
 }
 
 export const WIZARD_ALT_DESCRIPTIONS = {
