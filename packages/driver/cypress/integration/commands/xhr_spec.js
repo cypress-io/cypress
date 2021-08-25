@@ -1030,7 +1030,7 @@ describe('src/cy/commands/xhr', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('request')
+          expect(['xhr', 'request']).to.contain(lastLog.get('name'))
           expect(lastLog.get('error').message).contain('foo is not defined')
 
           done()

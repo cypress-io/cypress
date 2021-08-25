@@ -2,7 +2,7 @@ import { HtmlJsRewriter, rewriteHtmlJsAsync, rewriteJsAsync } from '@packages/re
 import duplexify from 'duplexify'
 import { concatStream } from '@packages/network'
 import stream from 'stream'
-import { SecurityOpts } from './rewriter'
+import type { SecurityOpts } from './rewriter'
 
 const pumpify = require('pumpify')
 const utf8Stream = require('utf8-stream')

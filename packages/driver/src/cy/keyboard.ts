@@ -8,7 +8,7 @@ import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
-import { HTMLTextLikeElement } from '../dom/elements'
+import type { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
@@ -689,11 +689,7 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  private SUPPORTS_BEFOREINPUT_EVENT
-
-  constructor (private Cypress, private state: State) {
-    this.SUPPORTS_BEFOREINPUT_EVENT = Cypress.isBrowser({ family: 'chromium' })
-  }
+  constructor (private state: State) {}
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
@@ -1174,7 +1170,6 @@ export class Keyboard {
         this.fireSimulatedEvent(elToType, 'keypress', key, options)
       ) {
         if (
-          !this.SUPPORTS_BEFOREINPUT_EVENT ||
           shouldIgnoreEvent('beforeinput', key.events) ||
           this.fireSimulatedEvent(elToType, 'beforeinput', key, options)
         ) {
@@ -1317,8 +1312,8 @@ export class Keyboard {
   }
 }
 
-const create = (Cypress, state) => {
-  return new Keyboard(Cypress, state)
+const create = (state) => {
+  return new Keyboard(state)
 }
 
 let _defaults
