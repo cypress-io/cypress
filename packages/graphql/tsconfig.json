@@ -5,12 +5,9 @@
     "src/**/*.ts"
   ],
   "compilerOptions": {
-    "strict": true,
-    "allowJs": false,
-    "skipLibCheck": true,
-    "noUncheckedIndexedAccess": true,
-    "experimentalDecorators": true,
-    "importsNotUsedAsValues": "error",
-    "types": ["cypress"]
-  }
+    "importHelpers": true
+  },
+  "files": [
+    "./../ts/index.d.ts"
+  ],
 }
