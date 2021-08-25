@@ -31,7 +31,7 @@ const savedState = require('../saved_state')
 import { ServerContext } from '../graphql/ServerContext'
 import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
-import { LaunchArgs } from '../open_project'
+import type { LaunchArgs } from '../open_project'
 import type { EventEmitter } from 'events'
 
 const nullifyUnserializableValues = (obj) => {

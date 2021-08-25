@@ -21,9 +21,9 @@ import browsers from '@packages/server/lib/browsers'
 import * as config from '@packages/server/lib/config'
 
 import { getId } from '@packages/server/lib/project_static'
-import { FoundBrowser } from '@packages/launcher'
-import { OpenProjectLaunchOptions } from '../project-base'
-import { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
+import type { FoundBrowser } from '@packages/launcher'
+import type { OpenProjectLaunchOptions } from '../project-base'
+import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
 
 interface RecordKey {
   id: string
