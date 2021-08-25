@@ -41,4 +41,9 @@ export class Project implements ProjectContract {
 
     return new ResolvedConfig(cfg.resolved)
   }
+
+  @nxs.field.type(() => 'CloudProject')
+  cloudProject (): NxsResult<'Project', 'cloudProject'> {
+    return this.ctx.batchedCloudExecuteMethod('cloudProject', { slug: this.projectId })
+  }
 }

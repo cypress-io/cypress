@@ -23,4 +23,10 @@ export class ServerContext extends BaseContext {
   }
 
   localProjects: Project[] = []
+
+  // batchedCloudExecute (args, info) {
+  // }
+
+  // batchedCloudExecuteMethod (args, info) {
+  // }
 }

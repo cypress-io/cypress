@@ -161,14 +161,16 @@ type PageInfo {
 }
 
 type Query {
+  """Lookup an individual project by the slug"""
+  cloudProject(slug: String!): CloudProject
   cloudProjectsByIds(
     """A list of Relay IDs"""
     ids: [ID!]!
   ): [CloudProject]
 
-  """Conforms to the Relay spec"""
+  """Returns an object conforming to the Relay spec"""
   node(id: ID!): Node
 
-  """Lookup an individual project by the slug"""
-  project(slug: String!): CloudProject
+  """A user within the Cypress Cloud"""
+  viewer: CloudUser
 }

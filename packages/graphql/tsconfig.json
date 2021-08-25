@@ -8,6 +8,7 @@
     "strict": true,
     "allowJs": false,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "noUncheckedIndexedAccess": true,
     "experimentalDecorators": true,
     "importsNotUsedAsValues": "error",

@@ -11,5 +11,3 @@ export { graphqlSchema } from './schema'
 export * from './contracts'
 
 export { execute, parse } from 'graphql'
-
-export { combinedSchema } from './stitching/stitching'

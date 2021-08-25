@@ -60,4 +60,12 @@ export class ClientTestContext extends BaseContext {
   // localProjects: Project[] = [this.testProject]
   localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
+
+  batchedCloudExecute () {
+    return null
+  }
+
+  batchedCloudExecuteMethod () {
+    return null
+  }
 }

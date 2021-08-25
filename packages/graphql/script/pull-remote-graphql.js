@@ -5,6 +5,7 @@ const minimist = require('minimist')
 const rp = require('@cypress/request-promise')
 const fs = require('fs')
 const path = require('path')
+const { buildSchema, introspectionFromSchema } = require('graphql')
 
 const parsedArgv = minimist(process.argv)
 
@@ -20,6 +21,7 @@ if (!parsedArgv.env || !ENV_MAP[parsedArgv.env]) {
 
 rp.get(`${ENV_MAP[parsedArgv.env]}/tr-graphql-schema`).then((body) => {
   fs.writeFileSync(path.join(__dirname, '../schemas/cloud.graphql'), body)
+  fs.writeFileSync(path.join(__dirname, '../src/generated/cloud-introspection.gen.json'), JSON.stringify(introspectionFromSchema(buildSchema(body))))
   process.exit(0)
 }).catch((e) => {
   // eslint-disable-next-line no-console

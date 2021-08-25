@@ -8,7 +8,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
         return {
           createdAt: new Date().toString(),
           completedAt: new Date().toString(),
-          status: 'passed',
+          status: 'PASSED' as const,
           id: '1',
           commit: {
             message: 'Updating the hover state for the button component',

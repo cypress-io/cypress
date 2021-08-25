@@ -22,12 +22,12 @@ export class NavigationItem {
   }
 
   @nxs.field.nonNull.string()
-  get iconPath (): NxsResult<'NavigationMenu', 'iconPath'> {
+  get iconPath (): NxsResult<'NavigationItem', 'iconPath'> {
     return NAV_ITEM_INFO[this.navItemName].iconPath
   }
 
   @nxs.field.nonNull.string()
-  get name (): NxsResult<'NavigationMenu', 'name'> {
+  get name (): NxsResult<'NavigationItem', 'name'> {
     return NAV_ITEM_INFO[this.navItemName].displayName
   }
 }

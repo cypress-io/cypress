@@ -1,7 +1,18 @@
 overwrite: true
-schema: '../graphql/schemas/stitched.graphql'
+config:
+  enumsAsTypes: true
+  declarationKind: 'interface'
 generates:
+  ../graphql/src/generated/cloud-source-types.gen.ts:
+    schema: '../graphql/schemas/cloud.graphql'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript'
+      - add:
+          content: 'export type CloudQuery = Query'
   src/generated/graphql.ts:
+    schema: '../graphql/schemas/schema.graphql'
     documents: 'src/**/*.vue'
     config:
       immutableTypes: true
@@ -9,7 +20,6 @@ generates:
       preResolveTypes: true
       onlyOperationTypes: true
       avoidOptionals: true
-      enumsAsTypes: true
     plugins:
       - add:
           content: '/* eslint-disable */'
@@ -17,6 +27,7 @@ generates:
       - 'typescript-operations'
       - 'typed-document-node'
   ../graphql/src/testing/testUnionType.ts:
+    schema: '../graphql/schemas/schema.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'

@@ -1,5 +1,6 @@
 {
   "extends": [
+    "plugin:@cypress/dev/general",
     "plugin:@cypress/dev/tests"
   ],
   "parser": "@typescript-eslint/parser",

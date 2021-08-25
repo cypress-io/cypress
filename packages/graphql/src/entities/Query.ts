@@ -34,4 +34,11 @@ export class Query {
   navigationMenu (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'navigationMenu'> {
     return ctx.navigationMenu
   }
+
+  @nxs.field.type(() => 'CloudQuery', {
+    description: 'Cloud Query',
+  })
+  cloud (): NxsQueryResult<'cloud'> {
+    return null
+  }
 }
