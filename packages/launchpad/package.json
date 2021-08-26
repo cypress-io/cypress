@@ -14,7 +14,7 @@
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
     "dev": "NODE_ENV=development LAUNCHPAD=1 node ../../scripts/cypress open",
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
-    "start": "http-server -p 5050 dist",
+    "start": "vite --port 3001",
     "watch": "concurrently \"vite build --watch\" \"yarn codegen --watch\"",
     "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
