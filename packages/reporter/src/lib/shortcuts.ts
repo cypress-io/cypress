@@ -1,5 +1,5 @@
 // @ts-ignore
-import dom from '@packages/driver/src/dom'
+import { isTextLike } from '@packages/driver/src/dom'
 import events from './events'
 import appState from './app-state'
 import { action } from 'mobx'
@@ -16,7 +16,7 @@ class Shortcuts {
   _handleKeyDownEvent (event: KeyboardEvent) {
     // if typing into an input, textarea, etc, don't trigger any shortcuts
     // @ts-ignore
-    if (dom.isTextLike(event.target)) return
+    if (isTextLike(event.target)) return
 
     switch (event.key) {
       case 'r': !appState.studioActive && events.emit('restart')

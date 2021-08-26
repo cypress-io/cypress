@@ -29,7 +29,9 @@ import * as $Downloads from './cypress/downloads'
 import * as $Server from './cypress/server'
 import * as $Screenshot from './cypress/screenshot'
 import * as $SelectorPlayground from './cypress/selector_playground'
+
 import * as $utils from './cypress/utils'
+
 import * as $errUtils from './cypress/error_utils'
 import * as $scriptUtils from './cypress/script_utils'
 import * as browserInfo from './cypress/browser'
@@ -676,3 +678,5 @@ $Cypress.prototype.lolex = fakeTimers
 $Cypress.$ = $
 $Cypress.utils = $utils
 export default $Cypress
+
+export * from './cypress/utils'

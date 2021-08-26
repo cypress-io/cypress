@@ -1,6 +1,5 @@
 import sinon from 'sinon'
 import $ from 'jquery'
-import driver from '@packages/driver'
 import { eventManager } from '../event-manager'
 import { dom } from '../dom'
 
@@ -32,8 +31,6 @@ describe('StudioRecorder', () => {
 
     sinon.stub(dom, 'closeStudioAssertionsMenu')
     sinon.stub(dom, 'openStudioAssertionsMenu')
-
-    driver.$ = $
 
     sinon.stub(eventManager, 'emit')
     sinon.stub(eventManager, 'getCypress').returns({

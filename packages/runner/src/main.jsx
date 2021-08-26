@@ -1,7 +1,7 @@
 import { action, autorun, configure } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
-import { utils as driverUtils } from '@packages/driver'
+import { decodeBase64Unicode } from '@packages/driver'
 
 import App, { SPEC_LIST_WIDTH } from './app/app'
 import NoSpec from './errors/no-spec'
@@ -14,7 +14,7 @@ configure({ enforceActions: 'always' })
 const Runner = {
   start (el, base64Config) {
     action('started', () => {
-      const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+      const config = JSON.parse(decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
       const useInlineSpecList = (config.env || {}).CypressInternal_UseInlineSpecList

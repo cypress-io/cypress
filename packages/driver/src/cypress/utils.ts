@@ -406,3 +406,5 @@ export function noArgsAreAFunction (args) {
 export function isPromiseLike (ret) {
   return ret && _.isFunction(ret.then)
 }
+
+export { $ }

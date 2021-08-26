@@ -10,7 +10,7 @@ import { automation } from './automation'
 import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
-import $Cypress, { $ } from '@packages/driver'
+import { $Cypress, $ } from '@packages/driver'
 
 const ws = client.connect({
   path: '/__socket.io',

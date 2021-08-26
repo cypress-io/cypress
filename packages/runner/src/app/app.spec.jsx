@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
-import driver from '@packages/driver'
+import { $ } from '@packages/driver'
 
 import { Message } from '@packages/runner-shared'
 import * as reporter from '@packages/reporter'
@@ -46,7 +46,7 @@ const shallowRender = (component) => {
 
 describe('<App />', () => {
   beforeEach(() => {
-    driver.$.returns({
+    $.returns({
       outerHeight () {
         return 10
       },
