@@ -4,5 +4,8 @@
   "retries": {
     "runMode": 2,
     "openMode": 0
+  },
+  "reporterOptions": {
+    "configFile": "../../mocha-reporter-config.json"
   }
 }

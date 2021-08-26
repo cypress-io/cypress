@@ -3,5 +3,8 @@
   "video": true,
   "env": {
     "reactDevtools": true
+  },
+  "reporterOptions": {
+    "configFile": "../../mocha-reporter-config.json"
   }
 }
