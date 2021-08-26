@@ -33,7 +33,7 @@ import OpenBrowser from "./OpenBrowser.vue";
 import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
 import { 
-  RootDocument, 
+  WizardDocument, 
   InitializeOpenProjectDocument,
   LaunchOpenProjectDocument
 } from '../generated/graphql'
@@ -41,7 +41,7 @@ import { useMutation, useQuery } from "@urql/vue";
 import Button from '../components/button/Button.vue'
 
 gql`
-query Root {
+query Wizard {
   app {
     isFirstOpen
     ...ProjectRoot
@@ -80,7 +80,7 @@ mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
 }
 `
 
-const result = useQuery({ query: RootDocument })
+const result = useQuery({ query: WizardDocument })
 
 const loading = result.fetching
 const wizard = computed(() => result.data.value?.wizard)

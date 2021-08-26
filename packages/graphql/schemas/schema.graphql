@@ -158,6 +158,9 @@ type CloudUser implements Node {
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+
+  """Record keys for the service"""
+  recordKeys: [String!]
 }
 
 """
@@ -249,7 +252,7 @@ type NavigationItem {
 
 """Container for state associated with the side navigation menu"""
 type NavigationMenu {
-  items: [NavigationItem]!
+  items: [NavigationItem!]!
   selected: NavItem!
 }
 
@@ -289,15 +292,21 @@ type Project {
 type Query {
   app: App!
 
+  """Returns an object conforming to the Relay spec"""
+  cloudNode(id: ID!): Node
+
   """Lookup an individual project by the slug"""
-  cloudProject: CloudProject
-  cloudProjectsByIds: [CloudProject]
+  cloudProject(slug: String!): CloudProject
+  cloudProjectsByIds(
+    """A list of Relay IDs"""
+    ids: [ID!]!
+  ): [CloudProject]
+
+  """A user within the Cypress Cloud"""
+  cloudViewer: CloudUser
 
   """Metadata about the nagivation menu"""
   navigationMenu: NavigationMenu
-
-  """A user within the Cypress Cloud"""
-  viewer: CloudUser
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard

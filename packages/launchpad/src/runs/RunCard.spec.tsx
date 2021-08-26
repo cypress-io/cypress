@@ -1,4 +1,4 @@
-import { RunCardFragmentDoc } from '../generated/graphql'
+import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunCard from './RunCard.vue'
 
 describe('<RunCard />', { viewportHeight: 400 }, () => {

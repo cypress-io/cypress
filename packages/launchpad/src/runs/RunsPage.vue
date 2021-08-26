@@ -4,13 +4,13 @@
       Loading, please wait a bit.
     </div>
 
-    <div v-else-if="data?.viewer">
-      <RunCard 
+    <!-- <div v-else-if="data?.cloudViewer">
+      <RunCard
         v-for="run of runs" 
         :gql="run"
         :key="run.createdAt"
       />
-    </div>
+    </div> -->
 
     <div v-else>
       <Auth :gql="data" />
@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { gql } from '@urql/core'
 import { useQuery } from '@urql/vue'
 import RunCard from './RunCard.vue'
@@ -28,15 +29,18 @@ import { RunsPageDocument } from '../generated/graphql'
 gql`
 query RunsPage {
   ...Auth
+  cloudViewer {
+    id
+  }
 }
 `
 
-const { data, fetching } = useQuery({ 
-  query: RunsPageDocument, 
-  context: {
-    additionalTypenames: ['CloudUser']
-  }
+const result = useQuery({ 
+  query: RunsPageDocument,
 })
+
+const data = computed(() => result.data.value)
+const fetching = computed(() => result.fetching.value)
 
 const runs = [] // computed(() => data?.value?.viewer?.getProjectByProjectId?.runs || [])
 </script>

@@ -195,6 +195,7 @@ export interface NexusGenFieldTypes {
     email: string | null; // String
     fullName: string | null; // String
     id: string; // ID!
+    recordKeys: string[] | null; // [String!]
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
@@ -219,7 +220,7 @@ export interface NexusGenFieldTypes {
     selected: boolean; // Boolean!
   }
   NavigationMenu: { // field return type
-    items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
+    items: NexusGenRootTypes['NavigationItem'][]; // [NavigationItem!]!
     selected: NexusGenEnums['NavItem']; // NavItem!
   }
   PageInfo: { // field return type
@@ -238,10 +239,11 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
+    cloudNode: NexusGenRootTypes['Node'] | null; // Node
     cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
     cloudProjectsByIds: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
+    cloudViewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    viewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
   }
   ResolvedBooleanOption: { // field return type
@@ -439,6 +441,7 @@ export interface NexusGenFieldTypeNames {
     email: 'String'
     fullName: 'String'
     id: 'ID'
+    recordKeys: 'String'
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
@@ -482,10 +485,11 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     app: 'App'
+    cloudNode: 'Node'
     cloudProject: 'CloudProject'
     cloudProjectsByIds: 'CloudProject'
+    cloudViewer: 'CloudUser'
     navigationMenu: 'NavigationMenu'
-    viewer: 'CloudUser'
     wizard: 'Wizard'
   }
   ResolvedBooleanOption: { // field return type name
@@ -653,6 +657,17 @@ export interface NexusGenArgTypes {
     }
     wizardSetTestingType: { // args
       type: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
+    }
+  }
+  Query: {
+    cloudNode: { // args
+      id: string; // ID!
+    }
+    cloudProject: { // args
+      slug: string; // String!
+    }
+    cloudProjectsByIds: { // args
+      ids: string[]; // [ID!]!
     }
   }
   Wizard: {

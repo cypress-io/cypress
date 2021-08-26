@@ -1,5 +1,5 @@
 import InstallDependencies from './InstallDependencies.vue'
-import { InstallDependenciesFragmentDoc } from '../generated/graphql'
+import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
 
 describe('<InstallDependencies />', () => {
   beforeEach(() => {

@@ -109,6 +109,7 @@
     "ansi-styles": "3.2.1",
     "arg": "4.1.2",
     "ascii-table": "0.0.9",
+    "autobarrel": "^1.0.1",
     "aws-sdk": "2.447.0",
     "babel-eslint": "10.1.0",
     "bluebird": "3.5.3",

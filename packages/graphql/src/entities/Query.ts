@@ -14,13 +14,6 @@ export class Query {
     return ctx.app
   }
 
-  // @nxs.field.type(() => 'CloudUser', {
-  //   description: 'Namespace for data accessible from Cypress Cloud for authenticated users',
-  // })
-  // viewer (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'viewer'> {
-  //   return null
-  // }
-
   @nxs.field.type(() => Wizard, {
     description: 'Metadata about the wizard, null if we arent showing the wizard',
   })

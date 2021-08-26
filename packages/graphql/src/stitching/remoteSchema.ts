@@ -5,7 +5,7 @@
  * to create a single unified schema for fetching from the client.
  */
 import { buildClientSchema, GraphQLObjectType } from 'graphql'
-import { core, queryField } from 'nexus'
+import { arg, core, queryField } from 'nexus'
 
 // Using the introspection, since Vite doesn't like the fs.readFile
 import introspectionResult from '../generated/cloud-introspection.gen.json'
@@ -26,25 +26,35 @@ const fields = typeof queryConfig.fields === 'function' ? queryConfig.fields : q
 
 const queryFieldsToAdd: core.NexusExtendTypeDef<'Query'>[] = []
 
-const ALLOWED = ['viewer', 'cloudProject', 'cloudProjectsByIds']
-
+// TODO: make this process simpler in Nexus
 for (const [fieldName, fieldConfig] of Object.entries(fields)) {
-  if (ALLOWED.includes(fieldName)) {
-    const { wrapping, namedType } = core.unwrapGraphQLDef(fieldConfig.type)
+  const { wrapping, namedType } = core.unwrapGraphQLDef(fieldConfig.type)
+  const args: core.ArgsRecord = {}
+  const argEntries = Object.entries(fieldConfig.args ?? {})
 
-    // Add the query fields that we want to include
-    queryFieldsToAdd.push(
-      queryField(fieldName, {
-        type: core.applyNexusWrapping(namedType.name, wrapping),
-        // TODO: Fix these types in Nexus to accept null
-        description: fieldConfig.description ?? undefined,
-        deprecation: fieldConfig.deprecationReason ?? undefined,
-        resolve (root, args, ctx, info) {
-          return ctx.delegateToRemoteQuery(info)
-        },
-      }),
-    )
+  for (const [fieldName, argInfo] of argEntries) {
+    const { wrapping: argWrapping, namedType: argType } = core.unwrapGraphQLDef(argInfo.type)
+
+    args[fieldName] = arg({
+      type: core.applyNexusWrapping(argType.name, argWrapping),
+      description: argInfo.description ?? undefined,
+      default: argInfo.defaultValue,
+    })
   }
+
+  // Add the query fields that we want to include
+  queryFieldsToAdd.push(
+    queryField(fieldName, {
+      type: core.applyNexusWrapping(namedType.name, wrapping),
+      args,
+      // TODO: Fix these types in Nexus to accept null
+      description: fieldConfig.description ?? undefined,
+      deprecation: fieldConfig.deprecationReason ?? undefined,
+      resolve (root, args, ctx, info) {
+        return ctx.delegateToRemoteQuery(info)
+      },
+    }),
+  )
 }
 
 export const remoteSchemaTypes = {

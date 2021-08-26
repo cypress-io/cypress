@@ -3,11 +3,11 @@
     <template v-if="app">
       <ProjectId 
         class="pt-0"
-        :gql="app?.activeProject || undefined"
+        :gql="app?.activeProject ?? null"
       />
-      <template v-if="viewer?.getProjectByProjectId?.recordKeys?.length">
+      <template v-if="viewer?.recordKeys?.length">
         <RecordKey 
-          v-for="key of viewer?.getProjectByProjectId?.recordKeys"
+          v-for="key of viewer?.recordKeys"
           :key="key"
           :recordKey="key"
         />
@@ -33,25 +33,30 @@ import { useQuery } from '@urql/vue'
 import { ProjectSettingsDocument } from '../../generated/graphql'
 
 gql`
-query ProjectSettings($projectId: String!) {
+query ProjectSettings { # ($projectId: String!)
   app {
     activeProject {
       ...ProjectId
+      cloudProject {
+        id
+      }
     }
   }
-  #   getProjectByProjectId(projectId: $projectId) {
-  #     recordKeys
-  #   }
+  cloudViewer {
+    id
+    fullName
+    recordKeys
+  }
 }
 `
 
 const { data } = useQuery({ 
   query: ProjectSettingsDocument, 
   variables: {
-    projectId: "ypt4pf"
+    // projectId: "ypt4pf"
   } 
 })
 
 const app = computed(() => data.value?.app)
-const viewer = computed(() => data.value?.viewer)
+const viewer = computed(() => data.value?.cloudViewer)
 </script>

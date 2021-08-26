@@ -11,6 +11,7 @@ import VueSvgLoader from 'vite-svg-loader'
 
 export default defineConfig({
   base: './',
+  mode: 'development',
   build: {
     minify: false,
   },

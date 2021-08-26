@@ -5,7 +5,7 @@
 //   ConfigFileFragmentDoc,
 //   ProjectRootFragment,
 //   ProjectRootFragmentDoc,
-// } from '../generated/graphql'
+// } from '../generated/graphql-test'
 // import ConfigFile from './ConfigFile.vue'
 //
 // // TODO: failing on CI. Find out why.

@@ -19,7 +19,7 @@ if (!parsedArgv.env || !ENV_MAP[parsedArgv.env]) {
   throw new Error(`Expected --env to be one of ${Object.keys(ENV_MAP).join(', ')}`)
 }
 
-rp.get(`${ENV_MAP[parsedArgv.env]}/tr-graphql-schema`).then((body) => {
+rp.get(`${ENV_MAP[parsedArgv.env]}/test-runner-graphql-schema`).then((body) => {
   fs.writeFileSync(path.join(__dirname, '../schemas/cloud.graphql'), body)
   fs.writeFileSync(path.join(__dirname, '../src/generated/cloud-introspection.gen.json'), JSON.stringify(introspectionFromSchema(buildSchema(body))))
   process.exit(0)

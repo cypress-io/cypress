@@ -127,6 +127,9 @@ type CloudUser implements Node {
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+
+  """Record keys for the service"""
+  recordKeys: [String!]
 }
 
 """
@@ -163,6 +166,9 @@ type PageInfo {
 }
 
 type Query {
+  """Returns an object conforming to the Relay spec"""
+  cloudNode(id: ID!): Node
+
   """Lookup an individual project by the slug"""
   cloudProject(slug: String!): CloudProject
   cloudProjectsByIds(
@@ -170,9 +176,6 @@ type Query {
     ids: [ID!]!
   ): [CloudProject]
 
-  """Returns an object conforming to the Relay spec"""
-  node(id: ID!): Node
-
   """A user within the Cypress Cloud"""
-  viewer: CloudUser
+  cloudViewer: CloudUser
 }

@@ -1,5 +1,5 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
-import { wrappedRemoteSchema, BaseContext, AuthenticatedUser, Project } from '@packages/graphql'
+import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project } from '@packages/graphql'
 
 import { ServerActions } from './ServerActions'
 
@@ -30,11 +30,12 @@ export class ServerContext extends BaseContext {
   delegateToRemoteQuery (info: GraphQLResolveInfo) {
     try {
       return delegateToSchema({
-        schema: wrappedRemoteSchema,
+        schema: remoteSchemaWrapped,
         info,
         context: this,
       }) as any
     } catch (e) {
+      // eslint-disable-next-line
       console.error(e)
     }
 

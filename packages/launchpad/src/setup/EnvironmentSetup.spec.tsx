@@ -1,4 +1,4 @@
-import { EnvironmentSetupFragmentDoc } from '../generated/graphql'
+import { EnvironmentSetupFragmentDoc } from '../generated/graphql-test'
 import EnvironmentSetup from './EnvironmentSetup.vue'
 
 describe('<EnvironmentSetup />', () => {

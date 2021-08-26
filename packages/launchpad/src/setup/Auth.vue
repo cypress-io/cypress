@@ -30,7 +30,8 @@ const props = defineProps<{
 
 gql`
 fragment Auth on Query {
-  viewer {
+  cloudViewer {
+    id
     email
     fullName
   }
@@ -57,18 +58,17 @@ const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
 const error = ref<string>()
 
-const additionalTypenames = { additionalTypenames: ['CloudUser'] }
 
 const handleAuth = async () => {
-  const result = await login.executeMutation({}, additionalTypenames)
+  const result = await login.executeMutation({})
   error.value = result.error?.message ?? undefined
 }
 
 const handleLogout = async () => {
   // clear this for good measure
   error.value = undefined
-  await logout.executeMutation({}, additionalTypenames)
+  await logout.executeMutation({})
 }
 
-const viewer = computed(() => props.gql?.viewer)
+const viewer = computed(() => props.gql?.cloudViewer)
 </script>

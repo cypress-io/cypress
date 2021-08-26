@@ -1,0 +1,7 @@
+{
+  "paths": [
+    "packages/graphql/src/**"
+  ],
+  "ignore": [],
+  "exclude": []
+}

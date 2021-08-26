@@ -2,35 +2,46 @@ import {
   Client,
   createClient,
   dedupExchange,
-  // cacheExchange,
-  errorExchange,
+  // errorExchange,
   fetchExchange,
 } from '@urql/core'
-import { cacheExchange } from '@urql/exchange-graphcache'
+import { cacheExchange as graphCacheExchange } from '@urql/exchange-graphcache'
 
-import { initGraphQLIPC } from './graphqlIpc'
+// import { initGraphQLIPC } from './graphqlIpc'
+import { urqlSchema } from '../generated/urql-introspection'
 
 export function makeCacheExchange () {
-  return cacheExchange({
-    //
+  return graphCacheExchange({
+    // @ts-expect-error
+    schema: urqlSchema,
+    keys: {
+      Query: () => {
+        return null
+      },
+      NavigationMenu: (data) => {
+        // debugger
+        return data.__typename
+      },
+    },
   })
 }
 
 export function makeUrqlClient (): Client {
-  initGraphQLIPC()
+  // initGraphQLIPC()
 
   // TODO: investigate creating ipcExchange
   return createClient({
     url: 'http://localhost:52159/graphql',
+    requestPolicy: 'cache-and-network',
     exchanges: [
       dedupExchange,
+      // errorExchange({
+      //   onError (error) {
+      //     // eslint-disable-next-line
+      //     console.error(error)
+      //   },
+      // }),
       makeCacheExchange(),
-      errorExchange({
-        onError (error) {
-          // eslint-disable-next-line
-          console.error(error)
-        },
-      }),
       fetchExchange,
     ],
   })
