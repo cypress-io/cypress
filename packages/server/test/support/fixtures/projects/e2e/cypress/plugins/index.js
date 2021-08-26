@@ -21,7 +21,9 @@ const webpackConfig = {
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
+  if (config.testingType === 'component') {
+    on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
+  }
 
   let performance = {
     track: () => Promise.resolve(),

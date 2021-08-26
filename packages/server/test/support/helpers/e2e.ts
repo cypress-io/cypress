@@ -534,7 +534,7 @@ const e2e = {
           return spec
         }
 
-        const specDir = options.testingType === 'e2e' ? 'integration' : 'component'
+        const specDir = options.testingType === 'component' ? 'component' : 'integration'
 
         return path.join(options.project, 'cypress', specDir, spec)
       })
@@ -553,7 +553,7 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
-      `--testingType=${options.testingType}`,
+      `--testingType=${options.testingType || 'e2e'}`,
     ]
 
     if (options.testingType === 'component') {
