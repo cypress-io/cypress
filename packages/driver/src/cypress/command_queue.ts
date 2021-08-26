@@ -4,8 +4,8 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 
 import { create as createQueue } from '../util/queue'
-import $dom from '../dom'
-import $utils from './utils'
+import * as $dom from '../dom'
+import * as $utils from './utils'
 import * as $errUtils from './error_utils'
 
 const debugErrors = Debug('cypress:driver:errors')

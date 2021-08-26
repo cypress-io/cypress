@@ -10,8 +10,8 @@ import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
 import type { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
-import $utils from '../cypress/utils'
-import $window from '../dom/window'
+import * as $utils from '../cypress/utils'
+import * as $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
 

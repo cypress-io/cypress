@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 function mutateConfiguration (testConfigOverride, config, env) {
   const globalConfig = _.clone(config())

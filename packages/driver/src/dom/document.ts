@@ -1,4 +1,4 @@
-const $jquery = require('./jquery')
+import * as $jquery from './jquery'
 
 const docNode = window.Node.DOCUMENT_NODE
 const docFragmentNode = window.Node.DOCUMENT_FRAGMENT_NODE

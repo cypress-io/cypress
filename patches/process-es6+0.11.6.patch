@@ -1,0 +1,15 @@
+diff --git a/node_modules/process-es6/browser.js b/node_modules/process-es6/browser.js
+index 4edf678..be29421 100644
+--- a/node_modules/process-es6/browser.js
++++ b/node_modules/process-es6/browser.js
+@@ -1,6 +1,10 @@
+ // shim for using process in browser
+ // based off https://github.com/defunctzombie/node-process/blob/master/browser.js
+ 
++let global
++if (window) {
++  global = window.global = globalThis
++}
+ function defaultSetTimout() {
+     throw new Error('setTimeout has not been defined');
+ }

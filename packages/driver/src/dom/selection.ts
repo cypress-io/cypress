@@ -2,7 +2,9 @@ import _ from 'lodash'
 import * as $document from './document'
 import * as $elements from './elements'
 
-const debug = require('debug')('cypress:driver:selection')
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:selection')
 
 const INTERNAL_STATE = '__Cypress_state__'
 

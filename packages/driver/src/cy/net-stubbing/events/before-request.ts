@@ -1,9 +1,9 @@
 import _ from 'lodash'
 
-import {
+import { SERIALIZABLE_REQ_PROPS } from '../types'
+import type {
   Interception,
   CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
 import { parseJsonBody, stringifyJsonBody } from './utils'
