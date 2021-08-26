@@ -2,6 +2,7 @@ const sinon = require('sinon')
 const { logger } = require('./logger')
 
 describe('logger', () => {
+  // https://github.com/cypress-io/cypress/issues/17542
   it('cy.log() shows all arguments in each line when there are multiple args', () => {
     const spy = sinon.spy(logger, 'log')
 
