@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 
 import * as $utils from '../../cypress/utils'
 import * as $errUtils from '../../cypress/error_utils'
-import * as $Location from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS
 // https://github.com/cypress-io/cypress/issues/363

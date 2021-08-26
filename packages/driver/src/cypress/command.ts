@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import * as utils from './utils'
 
-class $Command {
+export class $Command {
   constructor (obj = {}) {
     this.reset()
 

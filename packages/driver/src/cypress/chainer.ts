@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import * as $stackUtils from './stack_utils'
 
-class $Chainer {
+export class $Chainer {
   constructor (userInvocationStack, specWindow) {
     this.userInvocationStack = userInvocationStack
     this.specWindow = specWindow
@@ -53,5 +53,3 @@ class $Chainer {
     return chain
   }
 }
-
-export default $Chainer

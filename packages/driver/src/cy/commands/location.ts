@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 
 import { throwErrByPath } from '../../cypress/error_utils'
 
-export default (Commands, Cypress, cy) => {
+export const $Location = (Commands, Cypress, cy) => {
   Commands.addAll({
     url (options = {}) {
       const userOptions = options

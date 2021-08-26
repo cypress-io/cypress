@@ -7,7 +7,7 @@ import Promise from 'bluebird'
 import * as $utils from '../../cypress/utils'
 import * as $errUtils from '../../cypress/error_utils'
 import * as $Log from '../../cypress/log'
-import * as $Location from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:navigation')

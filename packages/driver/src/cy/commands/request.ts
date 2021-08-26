@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 
 import * as $utils from '../../cypress/utils'
 import * as $errUtils from '../../cypress/error_utils'
-import * as $Location from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 
 const isOptional = (memo, val, key) => {
   if (_.isNull(val)) {

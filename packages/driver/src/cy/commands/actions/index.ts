@@ -1,17 +1,27 @@
-export * as Check from './check'
+import * as Check from './check'
+import * as Click from './click'
+import * as Focus from './focus'
+import * as Hover from './hover'
+import * as Scroll from './scroll'
+import * as Select from './select'
+import * as Submit from './submit'
+import * as Type from './type'
+import * as Trigger from './trigger'
 
-export * as Click from './click'
+export { Check }
 
-export * as Focus from './focus'
+export { Click }
 
-export * as Hover from './hover'
+export { Focus }
 
-export * as Scroll from './scroll'
+export { Hover }
 
-export * as Select from './select'
+export { Scroll }
 
-export * as Submit from './submit'
+export { Select }
 
-export * as Type from './type'
+export { Submit }
 
-export * as Trigger from './trigger'
+export { Type }
+
+export { Trigger }

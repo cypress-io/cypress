@@ -1,71 +1,73 @@
-import { action, autorun, configure } from 'mobx'
-import React from 'react'
-import { render } from 'react-dom'
-import { decodeBase64Unicode } from '@packages/driver'
+// import { action, autorun, configure } from 'mobx'
+// import React from 'react'
+// import { render } from 'react-dom'
+// // import { decodeBase64Unicode } from '@packages/driver'
 
-import App, { SPEC_LIST_WIDTH } from './app/app'
-import NoSpec from './errors/no-spec'
-import State from './lib/state'
+// import App, { SPEC_LIST_WIDTH } from './app/app'
+// import NoSpec from './errors/no-spec'
+// import State from './lib/state'
 import { Container, eventManager } from '@packages/runner-shared'
-import util from './lib/util'
+// import util from './lib/util'
 
-configure({ enforceActions: 'always' })
+export * from './foo'
 
-const Runner = {
-  start (el, base64Config) {
-    action('started', () => {
-      const config = JSON.parse(decodeBase64Unicode(base64Config))
+// configure({ enforceActions: 'always' })
 
-      const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
-      const useInlineSpecList = (config.env || {}).CypressInternal_UseInlineSpecList
+// const Runner = {
+//   start (el, base64Config) {
+//     action('started', () => {
+//       const config = JSON.parse(decodeBase64Unicode(base64Config))
 
-      const state = new State({
-        reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
-        specs: config.specs,
-        useInlineSpecList,
-        specListWidth: NO_COMMAND_LOG ? 0 : useInlineSpecList ? SPEC_LIST_WIDTH : 0,
-      })
+//       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
+//       const useInlineSpecList = (config.env || {}).CypressInternal_UseInlineSpecList
 
-      Runner.state = state
-      Runner.configureMobx = configure
+//       const state = new State({
+//         reporterWidth: NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth,
+//         specs: config.specs,
+//         useInlineSpecList,
+//         specListWidth: NO_COMMAND_LOG ? 0 : useInlineSpecList ? SPEC_LIST_WIDTH : 0,
+//       })
 
-      const setSpecByUrlHash = () => {
-        const specPath = util.integrationSpecPath()
+//       Runner.state = state
+//       Runner.configureMobx = configure
 
-        if (specPath) {
-          state.updateSpecByUrl(specPath)
-        }
-      }
+//       const setSpecByUrlHash = () => {
+//         const specPath = util.integrationSpecPath()
 
-      setSpecByUrlHash()
+//         if (specPath) {
+//           state.updateSpecByUrl(specPath)
+//         }
+//       }
 
-      autorun(() => {
-        const { spec } = state
+//       setSpecByUrlHash()
 
-        if (spec) {
-          util.updateIntegrationSpecPath(spec.name)
-        }
-      })
+//       autorun(() => {
+//         const { spec } = state
 
-      window.addEventListener('hashchange', setSpecByUrlHash)
+//         if (spec) {
+//           util.updateIntegrationSpecPath(spec.name)
+//         }
+//       })
 
-      state.updateDimensions(config.viewportWidth, config.viewportHeight)
+//       window.addEventListener('hashchange', setSpecByUrlHash)
 
-      const container = (
-        <Container
-          config={config}
-          runner='e2e'
-          state={state}
-          App={App}
-          NoSpec={NoSpec}
-          hasSpecFile={util.hasSpecFile}
-          eventManager={eventManager}
-        />
-      )
+//       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
-      render(container, el)
-    })()
-  },
-}
+//       const container = (
+//         <Container
+//           config={config}
+//           runner='e2e'
+//           state={state}
+//           App={App}
+//           NoSpec={NoSpec}
+//           hasSpecFile={util.hasSpecFile}
+//           eventManager={eventManager}
+//         />
+//       )
 
-window.Runner = Runner
+//       render(container, el)
+//     })()
+//   },
+// }
+
+// window.Runner = Runner

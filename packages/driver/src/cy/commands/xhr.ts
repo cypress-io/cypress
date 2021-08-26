@@ -6,7 +6,7 @@ import * as $utils from '../../cypress/utils'
 import * as $errUtils from '../../cypress/error_utils'
 import * as $stackUtils from '../../cypress/stack_utils'
 import * as $Server from '../../cypress/server'
-import * as $Location from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 
 let server = null
 

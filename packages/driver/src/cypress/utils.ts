@@ -7,7 +7,7 @@ import $ from 'jquery'
 
 import * as $dom from '../dom'
 import * as $jquery from '../dom/jquery'
-import * as $Location from './location'
+import { $Location } from './location'
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g

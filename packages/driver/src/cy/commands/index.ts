@@ -1,53 +1,107 @@
-export * from './actions'
+import * as Actions from './actions'
 
-export * as Agents from './agents'
+import * as Agents from './agents'
 
-export * as Aliasing from './aliasing'
+import * as Aliasing from './aliasing'
 
-export * as Angular from './angular'
+import * as Angular from './angular'
 
-export * as Asserting from './asserting'
+import * as Asserting from './asserting'
 
-export * as Clock from './clock'
+import * as Clock from './clock'
 
-export * as Commands from './commands'
+import * as Commands from './commands'
 
-export * as Connectors from './connectors'
+import * as Connectors from './connectors'
 
-export * as Cookies from './cookies'
+import * as Cookies from './cookies'
 
-export * as Debugging from './debugging'
+import * as Debugging from './debugging'
 
-export * as Exec from './exec'
+import * as Exec from './exec'
 
-export * as Files from './files'
+import * as Files from './files'
 
-export * as Fixtures from './fixtures'
+import * as Fixtures from './fixtures'
 
-export * as LocalStorage from './local_storage'
+import * as LocalStorage from './local_storage'
 
-export * as Location from './location'
+import * as Location from './location'
 
-export * as Misc from './misc'
+import * as Misc from './misc'
 
-export * as Popups from './popups'
+import * as Popups from './popups'
 
-export * as Navigation from './navigation'
+import * as Navigation from './navigation'
 
-export * as Querying from './querying'
+import * as Querying from './querying'
 
-export * as Request from './request'
+import * as Request from './request'
 
-export * as Sessions from './sessions'
+import * as Sessions from './sessions'
 
-export * as Screenshot from './screenshot'
+import * as Screenshot from './screenshot'
 
-export * as Task from './task'
+import * as Task from './task'
 
-export * as Traversals from './traversals'
+import * as Traversals from './traversals'
 
-export * as Waiting from './waiting'
+import * as Waiting from './waiting'
 
-export * as Window from './window'
+import * as Window from './window'
 
-export * as Xhr from './xhr'
+import * as Xhr from './xhr'
+
+export { Actions }
+
+export { Agents }
+
+export { Aliasing }
+
+export { Angular }
+
+export { Asserting }
+
+export { Clock }
+
+export { Commands }
+
+export { Connectors }
+
+export { Cookies }
+
+export { Debugging }
+
+export { Exec }
+
+export { Files }
+
+export { Fixtures }
+
+export { LocalStorage }
+
+export { Location }
+
+export { Misc }
+
+export { Popups }
+
+export { Navigation }
+
+export { Querying }
+
+export { Request }
+
+export { Sessions }
+
+export { Screenshot }
+
+export { Task }
+
+export { Traversals }
+
+export { Waiting }
+
+export { Window }
+
+export { Xhr }

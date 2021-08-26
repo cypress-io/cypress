@@ -17,7 +17,7 @@ const reFile = /^file:\/\//
 const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 const reQueryParam = /\?[^/]+/
 
-class $Location {
+export class $Location {
   constructor (remote) {
     this.remote = new UrlParse(remote)
   }
@@ -252,5 +252,3 @@ class $Location {
     return location.getObject()
   }
 }
-
-export default $Location

@@ -1,4 +1,4 @@
-import $Location from '../cypress/location'
+import { $Location } from '../cypress/location'
 import * as $utils from '../cypress/utils'
 
 export const create = (state) => {

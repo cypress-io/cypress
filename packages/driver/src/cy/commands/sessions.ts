@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import $Location from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 import * as $errUtils from '../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
 import * as $stackUtils from '../../cypress/stack_utils'

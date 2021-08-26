@@ -20,7 +20,7 @@ const warnOnWhitelistRenamed = (obj, type) => {
   }
 }
 
-const $Cookies = (namespace, domain) => {
+export const $Cookies = (namespace, domain) => {
   const isNamespaced = (name) => {
     return _.startsWith(name, namespace)
   }
@@ -155,5 +155,3 @@ $Cookies.create = (namespace, domain) => {
   // set the $Cookies function onto the Cypress instance
   return $Cookies(namespace, domain)
 }
-
-export default $Cookies
