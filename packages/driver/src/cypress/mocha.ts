@@ -11,7 +11,6 @@ import * as mocha from 'mocha'
 
 const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
 
-debugger
 const { Test, Runner, Runnable, Hook, Suite } = Mocha
 
 const runnerRun = Runner.prototype.run

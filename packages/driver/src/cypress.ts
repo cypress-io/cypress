@@ -155,11 +155,11 @@ export class $Cypress {
       return null
     }
 
-    // this.Cookies = $Cookies.create(config.namespace, d)
+    this.Cookies = $Cookies.create(config.namespace, d)
 
-    // this.ProxyLogging = new ProxyLogging(this)
+    this.ProxyLogging = new ProxyLogging(this)
 
-    // return this.action('cypress:config', config)
+    return this.action('cypress:config', config)
   }
 
   initialize ({ $autIframe, onSpecReady }) {
@@ -218,39 +218,39 @@ export class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    // $scriptUtils.runScripts(specWindow, scripts)
-    // .catch((error) => {
-    //   this.runner.onSpecError('error')({ error })
-    // })
-    // .then(() => {
-    //   return (new Promise((resolve) => {
-    //     if (this.$autIframe) {
-    //       resolve()
-    //     } else {
-    //       // block initialization if the iframe has not been created yet
-    //       // Used in CT when async chunks for plugins take their time to download/parse
-    //       this._onInitialize = resolve
-    //     }
-    //   }))
-    // })
-    // .then(() => {
-    //   // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
-    //   // this is critical for headless mode since otherwise the browser never gains focus
-    //   if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
-    //     window.addEventListener('blur', () => {
-    //       this.backend('firefox:window:focus')
-    //     })
+    $scriptUtils.runScripts(specWindow, scripts)
+    .catch((error) => {
+      this.runner.onSpecError('error')({ error })
+    })
+    .then(() => {
+      return (new Promise((resolve) => {
+        if (this.$autIframe) {
+          resolve()
+        } else {
+          // block initialization if the iframe has not been created yet
+          // Used in CT when async chunks for plugins take their time to download/parse
+          this._onInitialize = resolve
+        }
+      }))
+    })
+    .then(() => {
+      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+      // this is critical for headless mode since otherwise the browser never gains focus
+      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
+        window.addEventListener('blur', () => {
+          this.backend('firefox:window:focus')
+        })
 
-    //     if (!document.hasFocus()) {
-    //       return this.backend('firefox:window:focus')
-    //     }
-    //   }
-    // })
-    // .then(() => {
-    //   this.cy.initialize(this.$autIframe)
+        if (!document.hasFocus()) {
+          return this.backend('firefox:window:focus')
+        }
+      }
+    })
+    .then(() => {
+      this.cy.initialize(this.$autIframe)
 
-    //   this.onSpecReady()
-    // })
+      this.onSpecReady()
+    })
   }
 
   action (eventName, ...args) {

@@ -4,8 +4,6 @@ import {
   PLAIN_FIELDS,
   STRING_MATCHER_FIELDS,
   DICT_STRING_MATCHER_FIELDS,
-} from '@packages/net-stubbing/lib/types'
-import type {
   RouteHandler,
   RouteMatcherOptions,
   RouteMatcher,
