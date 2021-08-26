@@ -39,16 +39,14 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
     }
 
     if (webpackDevServerFacts.isV4()) {
-      // @ts-expect-error @types do not yet support v4
       await webpackDevServer.start()
 
       resolve({
         // @ts-expect-error @types do not yet support v4
         port: webpackDevServer.options.port,
         close: (done?: DoneCallback) => {
-          // @ts-expect-error @types do not yet support v4
           webpackDevServer.stop()
-          .then(done)
+          done?.()
         },
       })
 

@@ -56,23 +56,30 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
   if (webpackDevServerFacts.isV3()) {
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
+      // @ts-expect-error ignore webpack-dev-server v3 type errors
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
     }
-  } else if (webpackDevServerFacts.isV4()) {
+
+    // @ts-expect-error ignore webpack-dev-server v3 type errors
+    return new WebpackDevServer(compiler, webpackDevServerConfig)
+  }
+
+  if (webpackDevServerFacts.isV4()) {
     webpackDevServerConfig = {
       host: 'localhost',
-      port: 0,
+      port: 'auto',
       ...userWebpackConfig?.devServer,
       devMiddleware: {
         publicPath: devServerPublicPathRoute,
       },
       hot: false,
     }
-  } else {
-    throw webpackDevServerFacts.unsupported()
+
+    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
+    return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
-  return new WebpackDevServer(compiler, webpackDevServerConfig)
+  throw webpackDevServerFacts.unsupported()
 }
