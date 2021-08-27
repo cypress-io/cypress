@@ -1666,6 +1666,7 @@ describe('network stubbing', { retries: 2 }, function () {
         }).as('getUrl')
 
         cy.window().then((win) => {
+          debugger
           const xhr = new win.XMLHttpRequest()
 
           xhr.open('GET', '/users?someKey=someValue')

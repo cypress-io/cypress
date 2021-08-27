@@ -2,9 +2,9 @@ import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
 
-import * as $dom from '../../../dom'
-import * as $utils from '../../../cypress/utils'
-import * as $errUtils from '../../../cypress/error_utils'
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
 
 const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)

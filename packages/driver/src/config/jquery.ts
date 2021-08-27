@@ -5,7 +5,7 @@ import _ from 'lodash'
 
 import 'jquery.scrollto'
 
-import * as $dom from '../dom'
+import $dom from '../dom'
 
 // force jquery to have the same visible
 // and hidden logic as cypress

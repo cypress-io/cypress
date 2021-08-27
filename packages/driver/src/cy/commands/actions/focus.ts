@@ -1,9 +1,9 @@
 import _ from 'lodash'
 
-import * as $dom from '../../../dom'
-import * as $utils from '../../../cypress/utils'
-import * as $errUtils from '../../../cypress/error_utils'
-import * as $elements from '../../../dom/elements'
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $elements from '../../../dom/elements'
 
 export default (Commands, Cypress, cy) => {
   return Commands.addAll({ prevSubject: ['element', 'window'] }, {

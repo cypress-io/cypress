@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable prefer-rest-params */
 // tests in driver/cypress/integration/commands/assertions_spec.js
 
@@ -6,10 +7,10 @@ import $ from 'jquery'
 import chai from 'chai'
 import sinonChai from '@cypress/sinon-chai'
 
-import * as $dom from '../dom'
-import * as $utils from '../cypress/utils'
-import * as $errUtils from '../cypress/error_utils'
-import * as $stackUtils from '../cypress/stack_utils'
+import $dom from '../dom'
+import $utils from '../cypress/utils'
+import $errUtils from '../cypress/error_utils'
+import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
 import * as chaiInspect from './chai/inspect'
 
@@ -38,6 +39,12 @@ let existProto = null
 let getMessage = null
 let chaiUtils = null
 let create = null
+let replaceArgMessages = null
+let removeOrKeepSingleQuotesBetweenStars = null
+let setSpecWindowGlobals = null
+let restoreAsserts = null
+let overrideExpect = null
+let overrideChaiAsserts = null
 
 chai.use(sinonChai)
 
@@ -105,7 +112,7 @@ chai.use((chai, u) => {
 
   // remove any single quotes between our **,
   // except escaped quotes, empty strings and number strings.
-  const removeOrKeepSingleQuotesBetweenStars = (message) => {
+  removeOrKeepSingleQuotesBetweenStars = (message) => {
     // remove any single quotes between our **, preserving escaped quotes
     // and if an empty string, put the quotes back
     return message.replace(allBetweenFourStars, (match) => {
@@ -136,7 +143,7 @@ chai.use((chai, u) => {
     return message.replace(imageMarkdown, '``$&``')
   }
 
-  const replaceArgMessages = (args, str) => {
+  replaceArgMessages = (args, str) => {
     return _.reduce(args, (memo, value, index) => {
       if (_.isString(value)) {
         value = value
@@ -157,7 +164,7 @@ chai.use((chai, u) => {
     , [])
   }
 
-  const restoreAsserts = function () {
+  restoreAsserts = function () {
     chai.util.inspect = _inspect
     chai.util.getMessage = getMessage
     chai.util.objDisplay = objDisplay
@@ -205,7 +212,7 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (specWindow, state, assertFn) {
+  overrideChaiAsserts = function (specWindow, state, assertFn) {
     chai.Assertion.prototype.assert = createPatchedAssert(specWindow, state, assertFn)
 
     const _origGetmessage = function (obj, args) {
@@ -476,7 +483,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const overrideExpect = (specWindow, state) => {
+  overrideExpect = (specWindow, state) => {
     // only override assertions for this specific
     // expect function instance so we do not affect
     // the outside world
@@ -510,7 +517,7 @@ chai.use((chai, u) => {
     return fn
   }
 
-  const setSpecWindowGlobals = function (specWindow, state) {
+  setSpecWindowGlobals = function (specWindow, state) {
     const expect = overrideExpect(specWindow, state)
     const assert = overrideAssert(specWindow, state)
 
@@ -534,22 +541,14 @@ chai.use((chai, u) => {
 
     return setSpecWindowGlobals(specWindow, state)
   }
-
-  // module.exports = {
-  //   replaceArgMessages,
-
-  //   removeOrKeepSingleQuotesBetweenStars,
-
-  //   setSpecWindowGlobals,
-
-  //   restoreAsserts,
-
-  //   overrideExpect,
-
-  //   overrideChaiAsserts,
-
-  //   create,
-  // }
 })
 
-export { create }
+export default {
+  create,
+  replaceArgMessages,
+  removeOrKeepSingleQuotesBetweenStars,
+  setSpecWindowGlobals,
+  restoreAsserts,
+  overrideExpect,
+  overrideChaiAsserts,
+}

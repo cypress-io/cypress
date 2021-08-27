@@ -1,13 +1,15 @@
 /* eslint-disable prefer-rest-params */
 // @ts-nocheck
 import _ from 'lodash'
-import * as $errUtils from './error_utils'
-import { getTestFromRunnable } from './utils'
-import * as $stackUtils from './stack_utils'
+import $errUtils from './error_utils'
+import $utils from './utils'
+import $stackUtils from './stack_utils'
 
 // in the browser mocha is coming back
 // as window
 import * as mocha from 'mocha'
+
+const { getTestFromRunnable } = $utils
 
 const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
 
@@ -458,7 +460,7 @@ const patchSuiteHooks = (specWindow, config) => {
   })
 }
 
-export const restore = () => {
+const restore = () => {
   restoreRunnerRun()
   restoreRunnerFail()
   restoreRunnableRun()
@@ -487,7 +489,7 @@ const override = (specWindow, Cypress, config) => {
   patchSuiteHooks(specWindow, config)
 }
 
-export const create = (specWindow, Cypress, config) => {
+const create = (specWindow, Cypress, config) => {
   restore()
 
   override(specWindow, Cypress, config)
@@ -525,4 +527,9 @@ export const create = (specWindow, Cypress, config) => {
       return _mocha.suite
     },
   }
+}
+
+export default {
+  create,
+  restore,
 }

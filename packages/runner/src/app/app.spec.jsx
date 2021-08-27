@@ -1,16 +1,16 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 
 import { Message } from '@packages/runner-shared'
 import * as reporter from '@packages/reporter'
 import State from '../lib/state'
+import App from './app'
 
 const Reporter = reporter.Reporter = () => <div />
 
-import App from './app'
-
+const $ = $Cypress.$
 const reporterWidth = 500
 
 const createProps = ({ state } = {}) => ({

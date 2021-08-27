@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import _ from 'lodash'
-import * as $dom from '../../dom'
+import $dom from '../../dom'
 
 export default function (Commands, Cypress, cy, state) {
   Commands.addAll({ type: 'utility', prevSubject: true }, {

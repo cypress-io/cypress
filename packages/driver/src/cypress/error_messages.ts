@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { stripIndent } from 'common-tags'
 import capitalize from 'underscore.string/capitalize'
-import * as $stackUtils from './stack_utils'
+import $stackUtils from './stack_utils'
 
 const divider = (num, char) => {
   return Array(num).join(char)

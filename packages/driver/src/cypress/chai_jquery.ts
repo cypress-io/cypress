@@ -1,8 +1,8 @@
 // @ts-nocheck
 import _ from 'lodash'
 import $ from 'jquery'
-import * as $dom from '../dom'
-import * as $elements from '../dom/elements'
+import $dom from '../dom'
+import $elements from '../dom/elements'
 
 const selectors = {
   visible: 'visible',

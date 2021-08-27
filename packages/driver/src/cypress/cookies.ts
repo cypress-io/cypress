@@ -3,7 +3,7 @@
 import _ from 'lodash'
 import Cookies from 'js-cookie'
 
-import * as $errUtils from './error_utils'
+import $errUtils from './error_utils'
 
 let isDebugging = false
 let isDebuggingVerbose = false

@@ -1,12 +1,13 @@
+// @ts-nocheck
 /* global cy, Cypress */
 import _ from 'lodash'
 import whatIsCircular from '@cypress/what-is-circular'
 import UrlParse from 'url-parse'
 import Promise from 'bluebird'
 
-import * as $utils from '../../cypress/utils'
-import * as $errUtils from '../../cypress/error_utils'
-import * as $Log from '../../cypress/log'
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+import $Log from '../../cypress/log'
 import { $Location } from '../../cypress/location'
 
 import debugFn from 'debug'

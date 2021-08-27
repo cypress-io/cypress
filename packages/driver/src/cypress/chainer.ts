@@ -1,6 +1,6 @@
 // @ts-nocheck
 import _ from 'lodash'
-import * as $stackUtils from './stack_utils'
+import $stackUtils from './stack_utils'
 
 export class $Chainer {
   constructor (userInvocationStack, specWindow) {

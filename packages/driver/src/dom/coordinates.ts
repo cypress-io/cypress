@@ -1,11 +1,9 @@
-// @ts-nocheck
-
 import _ from 'lodash'
-import * as $window from './window'
-import * as $elements from './elements'
+import $window from './window'
+import $elements from './elements'
 
-export const getElementAtPointFromViewport = (doc, x, y) => {
-  return $elements.elementFromPoint(doc, x, y)
+const getElementAtPointFromViewport = (doc, x, y) => {
+  // return $elements.elementFromPoint(doc, x, y)
 }
 
 const isAutIframe = (win) => {
@@ -26,7 +24,7 @@ const getFirstValidSizedRect = (el) => {
 /**
  * @param {JQuery<HTMLElement>} $el
  */
-export const getElementPositioning = ($el) => {
+const getElementPositioning = ($el) => {
   let autFrame
 
   const el = $el[0]
@@ -129,7 +127,7 @@ export const getElementPositioning = ($el) => {
   }
 }
 
-export const getCoordsByPosition = (left, top, xPosition = 'center', yPosition = 'center') => {
+const getCoordsByPosition = (left, top, xPosition = 'center', yPosition = 'center') => {
   const getLeft = () => {
     /* eslint-disable default-case */
     switch (xPosition) {
@@ -222,7 +220,7 @@ const getBottomRightCoordinates = (rect) => {
   return getCoordsByPosition(x, y, 'right', 'bottom')
 }
 
-export const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
+const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   const positionProps = getElementPositioning($el)
 
   const { fromElViewport, fromElWindow, fromAutWindow } = positionProps
@@ -252,7 +250,7 @@ export const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   return positionProps
 }
 
-export const getElementCoordinatesByPosition = ($el, position) => {
+const getElementCoordinatesByPosition = ($el, position) => {
   position = position || 'center'
 
   const positionProps = getElementPositioning($el)
@@ -324,4 +322,16 @@ const calculations = {
   getBottomLeftCoordinates,
   getBottomCoordinates,
   getBottomRightCoordinates,
+}
+
+export default {
+  getCoordsByPosition,
+
+  getElementPositioning,
+
+  getElementAtPointFromViewport,
+
+  getElementCoordinatesByPosition,
+
+  getElementCoordinatesByPositionRelativeToXY,
 }

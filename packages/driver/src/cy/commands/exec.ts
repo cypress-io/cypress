@@ -3,7 +3,7 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import * as $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({

@@ -1,8 +1,10 @@
 // @ts-ignore
-import { isTextLike } from '@packages/driver/src/dom'
+import $dom from '@packages/driver/src/dom'
 import events from './events'
 import appState from './app-state'
 import { action } from 'mobx'
+
+const { isTextLike } = $dom
 
 class Shortcuts {
   start () {

@@ -1,12 +1,12 @@
 // @ts-nocheck
-
 import $ from 'jquery'
 import _ from 'lodash'
-import * as $dom from '../dom'
-import * as $elements from '../dom/elements'
-import * as $Keyboard from './keyboard'
-import * as $selection from '../dom/selection'
+import $dom from '../dom'
+import $elements from '../dom/elements'
+import $Keyboard from './keyboard'
+import $selection from '../dom/selection'
 import debugFn from 'debug'
+
 const debug = debugFn('cypress:driver:mouse')
 
 /**
@@ -42,7 +42,7 @@ const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
-export const create = (state, keyboard, focused, Cypress) => {
+const create = (state, keyboard, focused, Cypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
@@ -757,4 +757,8 @@ const toCoordsEventOptions = (x, y, win) => {
     layerX: x + scrollX,
     layerY: x + scrollY,
   }
+}
+
+export default {
+  create,
 }

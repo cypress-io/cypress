@@ -3,8 +3,8 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import * as $dom from '../../dom'
-import * as $errUtils from '../../cypress/error_utils'
+import $dom from '../../dom'
+import $errUtils from '../../cypress/error_utils'
 
 const reExistence = /exist/
 const reHaveLength = /length/

@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import * as $document from './document'
-import * as $elements from './elements'
+import $document from './document'
+import $elements from './elements'
 
 import debugFn from 'debug'
 
@@ -744,7 +744,7 @@ const interceptSelect = function () {
 //     el = el.firstChild
 //   return el
 
-export {
+export default {
   getSelectionBounds,
   deleteRightOfCursor,
   deleteLeftOfCursor,

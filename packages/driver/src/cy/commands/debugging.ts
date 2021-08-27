@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 
-import * as $utils from '../../cypress/utils'
+import $utils from '../../cypress/utils'
 
 const resume = (state, resumeAll = true) => {
   const onResume = state('onResume')

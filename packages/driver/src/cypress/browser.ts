@@ -1,7 +1,7 @@
 // @ts-nocheck
 import _ from 'lodash'
-import * as $utils from './utils'
-import * as $errUtils from './error_utils'
+import $utils from './utils'
+import $errUtils from './error_utils'
 
 const _isBrowser = (browser, matcher, errPrefix) => {
   let isMatch

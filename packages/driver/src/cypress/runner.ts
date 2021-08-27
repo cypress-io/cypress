@@ -6,10 +6,10 @@ import _ from 'lodash'
 import dayjs from 'dayjs'
 import Promise from 'bluebird'
 
-import * as $Log from './log'
-import * as $utils from './utils'
-import * as $errUtils from './error_utils'
-import * as $stackUtils from './stack_utils'
+import $Log from './log'
+import $utils from './utils'
+import $errUtils from './error_utils'
+import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
 
@@ -1003,755 +1003,757 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
   })
 }
 
-export const create = (specWindow, mocha, Cypress, cy, state) => {
-  let _runnableId = 0
-  let _hookId = 0
-  let _uncaughtFn = null
-  let _resumedAtTestIndex = null
+export default {
+  create: (specWindow, mocha, Cypress, cy, state) => {
+    let _runnableId = 0
+    let _hookId = 0
+    let _uncaughtFn = null
+    let _resumedAtTestIndex = null
 
-  const _runner = mocha.getRunner()
+    const _runner = mocha.getRunner()
 
-  _runner.suite = mocha.getRootSuite()
+    _runner.suite = mocha.getRootSuite()
 
-  function isNotAlreadyRunTest (test) {
-    return _resumedAtTestIndex == null || getTestIndexFromId(test.id) >= _resumedAtTestIndex
-  }
-
-  const getTestFromHookOrFindTest = (hook) => {
-    const test = getTestFromHook(hook)
-
-    if (test) {
-      return test
+    function isNotAlreadyRunTest (test) {
+      return _resumedAtTestIndex == null || getTestIndexFromId(test.id) >= _resumedAtTestIndex
     }
 
-    const suite = hook.parent
+    const getTestFromHookOrFindTest = (hook) => {
+      const test = getTestFromHook(hook)
 
-    let foundTest
+      if (test) {
+        return test
+      }
 
-    if (hook.hookName === 'after all') {
-      foundTest = findLastTestInSuite(suite, isNotAlreadyRunTest)
-    } else if (hook.hookName === 'before all') {
-      foundTest = findTestInSuite(suite, isNotAlreadyRunTest)
+      const suite = hook.parent
+
+      let foundTest
+
+      if (hook.hookName === 'after all') {
+        foundTest = findLastTestInSuite(suite, isNotAlreadyRunTest)
+      } else if (hook.hookName === 'before all') {
+        foundTest = findTestInSuite(suite, isNotAlreadyRunTest)
+      }
+
+      // if test has retried, we getTestById will give us the last attempt
+      foundTest = foundTest && getTestById(foundTest.id)
+
+      return foundTest
     }
 
-    // if test has retried, we getTestById will give us the last attempt
-    foundTest = foundTest && getTestById(foundTest.id)
+    // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+    const onSpecError = (handlerType) => (event) => {
+      let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
-    return foundTest
-  }
+      debugErrors('uncaught spec error: %o', originalErr)
 
-  // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-  const onSpecError = (handlerType) => (event) => {
-    let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
+      $errUtils.logError(Cypress, handlerType, originalErr)
 
-    debugErrors('uncaught spec error: %o', originalErr)
+      // we can stop here because this error will fail the current test
+      if (state('runnable')) {
+        cy.onUncaughtException({
+          frameType: 'spec',
+          handlerType,
+          err,
+        })
 
-    $errUtils.logError(Cypress, handlerType, originalErr)
+        return undefined
+      }
 
-    // we can stop here because this error will fail the current test
-    if (state('runnable')) {
-      cy.onUncaughtException({
+      err = $errUtils.createUncaughtException({
         frameType: 'spec',
         handlerType,
+        state,
         err,
       })
 
+      // otherwise there's no test to associate this error to
+      const appendMsg = [
+        'Cypress could not associate this error to any specific test.',
+        'We dynamically generated a new test to display this failure.',
+      ].join('\n\n')
+
+      err = $errUtils.appendErrMsg(err, appendMsg)
+
+      // we use this below to create a test and tie this error to it
+      _uncaughtFn = () => {
+        throw err
+      }
+
+      // return undefined so the browser does its default
+      // uncaught exception behavior (logging to console)
       return undefined
     }
 
-    err = $errUtils.createUncaughtException({
-      frameType: 'spec',
-      handlerType,
-      state,
-      err,
-    })
+    specWindow.addEventListener('error', onSpecError('error'))
+    specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
 
-    // otherwise there's no test to associate this error to
-    const appendMsg = [
-      'Cypress could not associate this error to any specific test.',
-      'We dynamically generated a new test to display this failure.',
-    ].join('\n\n')
+    // hold onto the _runnables for faster lookup later
+    let _test = null
+    let _tests = []
+    let _testsById = {}
+    const _testsQueue = []
+    const _testsQueueById = {}
+    // only used during normalization
+    const _runnables = []
+    const _logsById = {}
+    let _emissions = {
+      started: {},
+      ended: {},
+    }
+    let _startTime = null
+    let _onlyTestId = null
+    let _onlySuiteId = null
 
-    err = $errUtils.appendErrMsg(err, appendMsg)
-
-    // we use this below to create a test and tie this error to it
-    _uncaughtFn = () => {
-      throw err
+    const getRunnableId = () => {
+      return `r${++_runnableId}`
     }
 
-    // return undefined so the browser does its default
-    // uncaught exception behavior (logging to console)
-    return undefined
-  }
-
-  specWindow.addEventListener('error', onSpecError('error'))
-  specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
-
-  // hold onto the _runnables for faster lookup later
-  let _test = null
-  let _tests = []
-  let _testsById = {}
-  const _testsQueue = []
-  const _testsQueueById = {}
-  // only used during normalization
-  const _runnables = []
-  const _logsById = {}
-  let _emissions = {
-    started: {},
-    ended: {},
-  }
-  let _startTime = null
-  let _onlyTestId = null
-  let _onlySuiteId = null
-
-  const getRunnableId = () => {
-    return `r${++_runnableId}`
-  }
-
-  const getHookId = () => {
-    return `h${++_hookId}`
-  }
-
-  const setTestsById = (tbid) => {
-    return _testsById = tbid
-  }
-
-  const setTests = (t) => {
-    return _tests = t
-  }
-
-  const getTests = () => {
-    return _tests
-  }
-
-  const onRunnable = (r) => {
-    // set defualt retries at onRunnable time instead of onRunnableRun
-    return _runnables.push(r)
-  }
-
-  const onLogsById = (l) => {
-    return _logsById[l.id] = l
-  }
-
-  const getTest = () => {
-    return _test
-  }
-
-  const setTest = (t) => {
-    return _test = t
-  }
-
-  const getTestById = (id) => {
-    // perf short circuit
-    if (!id) {
-      return
+    const getHookId = () => {
+      return `h${++_hookId}`
     }
 
-    return _testsById[id]
-  }
-
-  const replaceTest = (runnable, id) => {
-    const testsQueueIndex = _.findIndex(_testsQueue, { id })
-
-    _testsQueue.splice(testsQueueIndex, 1, runnable)
-
-    _testsQueueById[id] = runnable
-
-    const testsIndex = _.findIndex(_tests, { id })
-
-    _tests.splice(testsIndex, 1, runnable)
-
-    _testsById[id] = runnable
-  }
-
-  const setOnlyTestId = (testId) => {
-    _onlyTestId = testId
-  }
-
-  const getOnlyTestId = () => _onlyTestId
-
-  const setOnlySuiteId = (suiteId) => {
-    _onlySuiteId = suiteId
-  }
-
-  const getOnlySuiteId = () => _onlySuiteId
-
-  overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
-
-  // this forces mocha to enqueue a duplicate test in the case of test retries
-  const replacePreviousAttemptWith = (test) => {
-    const prevAttempt = _testsById[test.id]
-
-    const prevAttempts = prevAttempt.prevAttempts || []
-
-    const newPrevAttempts = prevAttempts.concat([prevAttempt])
-
-    delete prevAttempt.prevAttempts
-
-    test.prevAttempts = newPrevAttempts
-
-    replaceTest(test, test.id)
-  }
-
-  const maybeHandleRetry = (runnable, err) => {
-    if (!err) return
-
-    const r = runnable
-    const isHook = r.type === 'hook'
-    const isTest = r.type === 'test'
-    const test = getTest() || getTestFromHook(runnable, getTestById)
-    const hookName = isHook && getHookName(r)
-    const isBeforeEachHook = isHook && !!hookName.match(/before each/)
-    const isAfterEachHook = isHook && !!hookName.match(/after each/)
-    const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
-    const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
-
-    const fail = function () {
-      return err
-    }
-    const noFail = function () {
-      return
+    const setTestsById = (tbid) => {
+      return _testsById = tbid
     }
 
-    if (err) {
-      if (willRetry) {
-        test.state = 'failed'
-        test.final = false
+    const setTests = (t) => {
+      return _tests = t
+    }
+
+    const getTests = () => {
+      return _tests
+    }
+
+    const onRunnable = (r) => {
+      // set defualt retries at onRunnable time instead of onRunnableRun
+      return _runnables.push(r)
+    }
+
+    const onLogsById = (l) => {
+      return _logsById[l.id] = l
+    }
+
+    const getTest = () => {
+      return _test
+    }
+
+    const setTest = (t) => {
+      return _test = t
+    }
+
+    const getTestById = (id) => {
+      // perf short circuit
+      if (!id) {
+        return
       }
 
-      if (willRetry && isBeforeEachHook) {
-        delete runnable.err
-        test._retriesBeforeEachFailedTestFn = test.fn
+      return _testsById[id]
+    }
 
-        // this prevents afterEach hooks that exist at a deeper level than the failing one from running
-        // we will always skip remaining beforeEach hooks since they will always be same level or deeper
-        test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
-        setHookFailureProps(test, runnable, err)
-        test.fn = function () {
-          throw err
+    const replaceTest = (runnable, id) => {
+      const testsQueueIndex = _.findIndex(_testsQueue, { id })
+
+      _testsQueue.splice(testsQueueIndex, 1, runnable)
+
+      _testsQueueById[id] = runnable
+
+      const testsIndex = _.findIndex(_tests, { id })
+
+      _tests.splice(testsIndex, 1, runnable)
+
+      _testsById[id] = runnable
+    }
+
+    const setOnlyTestId = (testId) => {
+      _onlyTestId = testId
+    }
+
+    const getOnlyTestId = () => _onlyTestId
+
+    const setOnlySuiteId = (suiteId) => {
+      _onlySuiteId = suiteId
+    }
+
+    const getOnlySuiteId = () => _onlySuiteId
+
+    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
+
+    // this forces mocha to enqueue a duplicate test in the case of test retries
+    const replacePreviousAttemptWith = (test) => {
+      const prevAttempt = _testsById[test.id]
+
+      const prevAttempts = prevAttempt.prevAttempts || []
+
+      const newPrevAttempts = prevAttempts.concat([prevAttempt])
+
+      delete prevAttempt.prevAttempts
+
+      test.prevAttempts = newPrevAttempts
+
+      replaceTest(test, test.id)
+    }
+
+    const maybeHandleRetry = (runnable, err) => {
+      if (!err) return
+
+      const r = runnable
+      const isHook = r.type === 'hook'
+      const isTest = r.type === 'test'
+      const test = getTest() || getTestFromHook(runnable, getTestById)
+      const hookName = isHook && getHookName(r)
+      const isBeforeEachHook = isHook && !!hookName.match(/before each/)
+      const isAfterEachHook = isHook && !!hookName.match(/after each/)
+      const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
+      const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
+
+      const fail = function () {
+        return err
+      }
+      const noFail = function () {
+        return
+      }
+
+      if (err) {
+        if (willRetry) {
+          test.state = 'failed'
+          test.final = false
         }
 
-        return noFail()
-      }
+        if (willRetry && isBeforeEachHook) {
+          delete runnable.err
+          test._retriesBeforeEachFailedTestFn = test.fn
 
-      if (willRetry && isAfterEachHook) {
-        // if we've already failed this attempt from an afterEach hook then we've already enqueud another attempt
-        // so return early
-        if (test._retriedFromAfterEachHook) {
+          // this prevents afterEach hooks that exist at a deeper level than the failing one from running
+          // we will always skip remaining beforeEach hooks since they will always be same level or deeper
+          test._skipHooksWithLevelGreaterThan = runnable.titlePath().length
+          setHookFailureProps(test, runnable, err)
+          test.fn = function () {
+            throw err
+          }
+
           return noFail()
         }
 
-        setHookFailureProps(test, runnable, err)
+        if (willRetry && isAfterEachHook) {
+          // if we've already failed this attempt from an afterEach hook then we've already enqueud another attempt
+          // so return early
+          if (test._retriedFromAfterEachHook) {
+            return noFail()
+          }
 
-        const newTest = test.clone()
+          setHookFailureProps(test, runnable, err)
 
-        newTest._currentRetry = test._currentRetry + 1
+          const newTest = test.clone()
 
-        test.parent.testsQueue.unshift(newTest)
+          newTest._currentRetry = test._currentRetry + 1
 
-        // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
-        test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
-        test._retriedFromAfterEachHook = true
+          test.parent.testsQueue.unshift(newTest)
 
-        Cypress.action('runner:retry', wrap(test), test.err)
+          // this prevents afterEach hooks that exist at a deeper (or same) level than the failing one from running
+          test._skipHooksWithLevelGreaterThan = runnable.titlePath().length - 1
+          test._retriedFromAfterEachHook = true
 
-        return noFail()
+          Cypress.action('runner:retry', wrap(test), test.err)
+
+          return noFail()
+        }
       }
+
+      return fail()
     }
 
-    return fail()
-  }
+    const createEmptyOnlyTest = (suite) => {
+      const test = mocha.createTest('New Test', _.noop)
 
-  const createEmptyOnlyTest = (suite) => {
-    const test = mocha.createTest('New Test', _.noop)
+      test.id = getRunnableId()
 
-    test.id = getRunnableId()
+      suite.addTest(test)
+      suite.appendOnlyTest(test)
 
-    suite.addTest(test)
-    suite.appendOnlyTest(test)
+      test.invocationDetails = suite.invocationDetails
 
-    test.invocationDetails = suite.invocationDetails
+      setOnlyTestId(test.id)
 
-    setOnlyTestId(test.id)
+      return test
+    }
 
-    return test
-  }
+    return {
+      onSpecError,
+      setOnlyTestId,
+      setOnlySuiteId,
 
-  return {
-    onSpecError,
-    setOnlyTestId,
-    setOnlySuiteId,
+      normalizeAll (tests) {
+        // if we have an uncaught error then slice out
+        // all of the tests and suites and just generate
+        // a single test since we received an uncaught
+        // error prior to processing any of mocha's tests
+        // which could have occurred in a separate support file
+        if (_uncaughtFn) {
+          _runner.suite.suites = []
+          _runner.suite.tests = []
+          // prevents .only on suite from hiding uncaught error
+          _runner.suite._onlySuites = []
 
-    normalizeAll (tests) {
-      // if we have an uncaught error then slice out
-      // all of the tests and suites and just generate
-      // a single test since we received an uncaught
-      // error prior to processing any of mocha's tests
-      // which could have occurred in a separate support file
-      if (_uncaughtFn) {
-        _runner.suite.suites = []
-        _runner.suite.tests = []
-        // prevents .only on suite from hiding uncaught error
-        _runner.suite._onlySuites = []
+          // create a runnable to associate for the failure
+          mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
+        }
 
-        // create a runnable to associate for the failure
-        mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
-      }
+        return normalizeAll(
+          _runner.suite,
+          tests,
+          setTestsById,
+          setTests,
+          onRunnable,
+          onLogsById,
+          getRunnableId,
+          getHookId,
+          getOnlyTestId,
+          getOnlySuiteId,
+          createEmptyOnlyTest,
+        )
+      },
 
-      return normalizeAll(
-        _runner.suite,
-        tests,
-        setTestsById,
-        setTests,
-        onRunnable,
-        onLogsById,
-        getRunnableId,
-        getHookId,
-        getOnlyTestId,
-        getOnlySuiteId,
-        createEmptyOnlyTest,
-      )
-    },
+      run (fn) {
+        if (_startTime == null) {
+          _startTime = dayjs().toJSON()
+        }
 
-    run (fn) {
-      if (_startTime == null) {
-        _startTime = dayjs().toJSON()
-      }
+        _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)
+        return _runner.run((failures) => {
+          // if we happen to make it all the way through
+          // the run, then just set _runner.stopped to true here
+          _runner.stopped = true
 
-      return _runner.run((failures) => {
-        // if we happen to make it all the way through
-        // the run, then just set _runner.stopped to true here
+          // remove all the listeners
+          // so no more events fire
+          // since a test failure may 'leak' after a run completes
+          _runner.removeAllListeners()
+
+          // TODO this functions is not correctly
+          // synchronized with the 'end' event that
+          // we manage because of uncaught hook errors
+          if (fn) {
+            return fn(failures, getTestResults(_tests))
+          }
+        })
+      },
+
+      onRunnableRun (runnableRun, runnable, args) {
+        // extract out the next(fn) which mocha uses to
+        // move to the next runnable - this will be our async seam
+        const _next = args[0]
+
+        const test = getTest() || getTestFromRunnable(runnable)
+
+        // if there's no test, this is likely a rouge before/after hook
+        // that should not have run, so skip this runnable
+        if (!test || _runner.stopped) {
+          return _next()
+        }
+
+        // first time seeing a retried test
+        // that hasn't already replaced our test
+        if (test._currentRetry > 0 && _testsById[test.id] !== test) {
+          replacePreviousAttemptWith(test)
+        }
+
+        // closure for calculating the actual
+        // runtime of a runnables fn exection duration
+        // and also the run of the runnable:after:run:async event
+        let lifecycleStart
+        let wallClockStartedAt = null
+        let wallClockEnd = null
+        let fnDurationStart = null
+        let fnDurationEnd = null
+        let afterFnDurationStart = null
+        let afterFnDurationEnd = null
+
+        // when this is a hook, capture the real start
+        // date so we can calculate our test's duration
+        // including all of its hooks
+        wallClockStartedAt = new Date()
+
+        if (!test.wallClockStartedAt) {
+          // if we don't have lifecycle timings yet
+          lifecycleStart = wallClockStartedAt
+        }
+
+        if (test.wallClockStartedAt == null) {
+          test.wallClockStartedAt = wallClockStartedAt
+        }
+
+        // if this isnt a hook, then the name is 'test'
+        const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+
+        // set hook id to hook id or test id
+        const hookId = runnable.type === 'hook' ? runnable.hookId : runnable.id
+
+        // if we haven't yet fired this event for this test
+        // that means that we need to reset the previous state
+        // of cy - since we now have a new 'test' and all of the
+        // associated _runnables will share this state
+        if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+          fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+
+          // this is the earliest we can set test._retries since test:before:run
+          // will load in testConfigOverrides (per test configuration)
+          const retries = Cypress.getTestRetries() ?? -1
+
+          test._retries = retries
+        }
+
+        const isHook = runnable.type === 'hook'
+
+        const isAfterEachHook = isHook && hookName.match(/after each/)
+        const isBeforeEachHook = isHook && hookName.match(/before each/)
+
+        // if we've been told to skip hooks at a certain nested level
+        // this happens if we're handling a runnable that is going to retry due to failing in a hook
+        const shouldSkipRunnable = test._skipHooksWithLevelGreaterThan != null
+          && isHook
+          && (isBeforeEachHook || isAfterEachHook && runnable.titlePath().length > test._skipHooksWithLevelGreaterThan)
+
+        if (shouldSkipRunnable) {
+          return _next.call(this)
+        }
+
+        const next = (err) => {
+          // now set the duration of the after runnable run async event
+          afterFnDurationEnd = (wallClockEnd = new Date())
+
+          switch (runnable.type) {
+            case 'hook':
+              // reset runnable duration to include lifecycle
+              // and afterFn timings purely for the mocha runner.
+              // this is what it 'feels' like to the user
+              runnable.duration = wallClockEnd - wallClockStartedAt
+
+              setTestTimingsForHook(test, hookName, {
+                hookId: runnable.hookId,
+                fnDuration: fnDurationEnd - fnDurationStart,
+                afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+              })
+
+              break
+
+            case 'test':
+              // if we are currently on a test then
+              // recalculate its duration to be based
+              // against that (purely for the mocha reporter)
+              test.duration = wallClockEnd - test.wallClockStartedAt
+
+              // but still preserve its actual function
+              // body duration for timings
+              setTestTimings(test, 'test', {
+                fnDuration: fnDurationEnd - fnDurationStart,
+                afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+              })
+
+              break
+
+            default:
+              break
+          }
+
+          return _next.call(runnable, err)
+        }
+
+        const onNext = (err) => {
+          // when done with the function set that to end
+          fnDurationEnd = new Date()
+
+          // and also set the afterFnDuration to this same date
+          afterFnDurationStart = fnDurationEnd
+
+          // attach error right now
+          // if we have one
+          if (err) {
+            const PendingErrorMessages = ['sync skip', 'async skip call', 'async skip; aborting execution']
+
+            if (_.find(PendingErrorMessages, err.message) !== undefined) {
+              err.isPending = true
+            }
+
+            runnable.err = $errUtils.wrapErr(err)
+          } else {
+            // https://github.com/cypress-io/cypress/issues/9209
+            // Mocha reuses runnable object. Because of that, runnable.err isn't undefined even when err is undefined.
+            // It causes Cypress to take superfluous screenshots.
+            delete runnable.err
+          }
+
+          err = maybeHandleRetry(runnable, err)
+
+          return runnableAfterRunAsync(runnable, Cypress)
+          .then(() => {
+            // once we complete callback with the
+            // original err
+            next(err)
+
+            // return null here to signal to bluebird
+            // that we did not forget to return a promise
+            // because mocha internally does not return
+            // the test.run(fn)
+            return null
+          }).catch((err) => {
+            next(err)
+
+            // return null here to signal to bluebird
+            // that we did not forget to return a promise
+            // because mocha internally does not return
+            // the test.run(fn)
+            return null
+          })
+        }
+
+        cy.state('duringUserTestExecution', false)
+
+        // our runnable is about to run, so let cy know. this enables
+        // us to always have a correct runnable set even when we are
+        // running lifecycle events
+        // and also get back a function result handler that we use as
+        // an async seam
+        cy.setRunnable(runnable, hookId)
+
+        // TODO: handle promise timeouts here!
+        // whenever any runnable is about to run
+        // we figure out what test its associated to
+        // if its a hook, and then we fire the
+        // test:before:run:async action if its not
+        // been fired before for this test
+        return testBeforeRunAsync(test, Cypress)
+        .catch((err) => {
+          // TODO: if our async tasks fail
+          // then allow us to cause the test
+          // to fail here by blowing up its fn
+          // callback
+          const { fn } = runnable
+
+          const restore = () => {
+            return runnable.fn = fn
+          }
+
+          runnable.fn = () => {
+            restore()
+
+            throw err
+          }
+        }).finally(() => {
+          if (lifecycleStart) {
+            // capture how long the lifecycle took as part
+            // of the overall wallClockDuration of our test
+            setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
+          }
+
+          // capture the moment we're about to invoke
+          // the runnable's callback function
+          fnDurationStart = new Date()
+
+          // call the original method with our
+          // custom onNext function
+
+          // this tells us we are now running test execution code
+          // since all test:before:run:async listeners have completed
+          cy.state('duringUserTestExecution', true)
+
+          return runnableRun.call(runnable, onNext)
+        })
+      },
+
+      getStartTime () {
+        return _startTime
+      },
+
+      setStartTime (iso) {
+        _startTime = iso
+      },
+
+      countByTestState (tests, state) {
+        const count = _.filter(tests, (test, key) => {
+          return test.state === state
+        })
+
+        return count.length
+      },
+
+      setNumLogs (num) {
+        return $Log.setCounter(num)
+      },
+
+      getEmissions () {
+        return _emissions
+      },
+
+      getTestsState () {
+        const id = _test != null ? _test.id : undefined
+        const tests = {}
+
+        // bail if we dont have a current test
+        if (!id) {
+          return {}
+        }
+
+        // search through all of the tests
+        // until we find the current test
+        // and break then
+        for (let testRunnable of _tests) {
+          if (testRunnable.id === id) {
+            break
+          } else {
+            const test = serializeTest(testRunnable)
+
+            test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+
+            tests[test.id] = test
+          }
+        }
+
+        return tests
+      },
+
+      stop () {
+        if (_runner.stopped) {
+          return
+        }
+
         _runner.stopped = true
+
+        // abort the run
+        _runner.abort()
+
+        // emit the final 'end' event
+        // since our reporter depends on this event
+        // and mocha may never fire this because our
+        // runnable may never finish
+        _runner.emit('end')
 
         // remove all the listeners
         // so no more events fire
-        // since a test failure may 'leak' after a run completes
         _runner.removeAllListeners()
+      },
 
-        // TODO this functions is not correctly
-        // synchronized with the 'end' event that
-        // we manage because of uncaught hook errors
-        if (fn) {
-          return fn(failures, getTestResults(_tests))
+      getDisplayPropsForLog: $Log.getDisplayProps,
+
+      getConsolePropsForLogById (logId) {
+        const attrs = _logsById[logId]
+
+        if (attrs) {
+          return $Log.getConsoleProps(attrs)
         }
-      })
-    },
+      },
 
-    onRunnableRun (runnableRun, runnable, args) {
-      // extract out the next(fn) which mocha uses to
-      // move to the next runnable - this will be our async seam
-      const _next = args[0]
+      getSnapshotPropsForLogById (logId) {
+        const attrs = _logsById[logId]
 
-      const test = getTest() || getTestFromRunnable(runnable)
+        if (attrs) {
+          return $Log.getSnapshotProps(attrs)
+        }
+      },
 
-      // if there's no test, this is likely a rouge before/after hook
-      // that should not have run, so skip this runnable
-      if (!test || _runner.stopped) {
-        return _next()
-      }
+      resumeAtTest (id, emissions = {}) {
+        _resumedAtTestIndex = getTestIndexFromId(id)
 
-      // first time seeing a retried test
-      // that hasn't already replaced our test
-      if (test._currentRetry > 0 && _testsById[test.id] !== test) {
-        replacePreviousAttemptWith(test)
-      }
+        _emissions = emissions
 
-      // closure for calculating the actual
-      // runtime of a runnables fn exection duration
-      // and also the run of the runnable:after:run:async event
-      let lifecycleStart
-      let wallClockStartedAt = null
-      let wallClockEnd = null
-      let fnDurationStart = null
-      let fnDurationEnd = null
-      let afterFnDurationStart = null
-      let afterFnDurationEnd = null
+        for (let test of _tests) {
+          if (getTestIndexFromId(test.id) !== _resumedAtTestIndex) {
+            test._ALREADY_RAN = true
+            test.pending = true
+          } else {
+            // bail so we can stop now
+            return
+          }
+        }
+      },
 
-      // when this is a hook, capture the real start
-      // date so we can calculate our test's duration
-      // including all of its hooks
-      wallClockStartedAt = new Date()
+      getResumedAtTestIndex () {
+        return _resumedAtTestIndex
+      },
 
-      if (!test.wallClockStartedAt) {
-        // if we don't have lifecycle timings yet
-        lifecycleStart = wallClockStartedAt
-      }
+      cleanupQueue (numTestsKeptInMemory) {
+        const cleanup = (queue) => {
+          if (queue.length > numTestsKeptInMemory) {
+            const test = queue.shift()
 
-      if (test.wallClockStartedAt == null) {
-        test.wallClockStartedAt = wallClockStartedAt
-      }
+            delete _testsQueueById[test.id]
 
-      // if this isnt a hook, then the name is 'test'
-      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+            _.each(RUNNABLE_LOGS, (logs) => {
+              return _.each(test[logs], (attrs) => {
+                // we know our attrs have been cleaned
+                // now, so lets store that
+                attrs._hasBeenCleanedUp = true
 
-      // set hook id to hook id or test id
-      const hookId = runnable.type === 'hook' ? runnable.hookId : runnable.id
-
-      // if we haven't yet fired this event for this test
-      // that means that we need to reset the previous state
-      // of cy - since we now have a new 'test' and all of the
-      // associated _runnables will share this state
-      if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
-        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
-
-        // this is the earliest we can set test._retries since test:before:run
-        // will load in testConfigOverrides (per test configuration)
-        const retries = Cypress.getTestRetries() ?? -1
-
-        test._retries = retries
-      }
-
-      const isHook = runnable.type === 'hook'
-
-      const isAfterEachHook = isHook && hookName.match(/after each/)
-      const isBeforeEachHook = isHook && hookName.match(/before each/)
-
-      // if we've been told to skip hooks at a certain nested level
-      // this happens if we're handling a runnable that is going to retry due to failing in a hook
-      const shouldSkipRunnable = test._skipHooksWithLevelGreaterThan != null
-        && isHook
-        && (isBeforeEachHook || isAfterEachHook && runnable.titlePath().length > test._skipHooksWithLevelGreaterThan)
-
-      if (shouldSkipRunnable) {
-        return _next.call(this)
-      }
-
-      const next = (err) => {
-        // now set the duration of the after runnable run async event
-        afterFnDurationEnd = (wallClockEnd = new Date())
-
-        switch (runnable.type) {
-          case 'hook':
-            // reset runnable duration to include lifecycle
-            // and afterFn timings purely for the mocha runner.
-            // this is what it 'feels' like to the user
-            runnable.duration = wallClockEnd - wallClockStartedAt
-
-            setTestTimingsForHook(test, hookName, {
-              hookId: runnable.hookId,
-              fnDuration: fnDurationEnd - fnDurationStart,
-              afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+                return $Log.reduceMemory(attrs)
+              })
             })
 
-            break
-
-          case 'test':
-            // if we are currently on a test then
-            // recalculate its duration to be based
-            // against that (purely for the mocha reporter)
-            test.duration = wallClockEnd - test.wallClockStartedAt
-
-            // but still preserve its actual function
-            // body duration for timings
-            setTestTimings(test, 'test', {
-              fnDuration: fnDurationEnd - fnDurationStart,
-              afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
-            })
-
-            break
-
-          default:
-            break
+            return cleanup(queue)
+          }
         }
 
-        return _next.call(runnable, err)
-      }
+        return cleanup(_testsQueue)
+      },
 
-      const onNext = (err) => {
-        // when done with the function set that to end
-        fnDurationEnd = new Date()
+      addLog (attrs, isInteractive) {
+        // we dont need to hold a log reference
+        // to anything in memory when we're headless
+        // because you cannot inspect any logs
 
-        // and also set the afterFnDuration to this same date
-        afterFnDurationStart = fnDurationEnd
+        if (!isInteractive) {
+          return
+        }
 
-        // attach error right now
-        // if we have one
-        if (err) {
-          const PendingErrorMessages = ['sync skip', 'async skip call', 'async skip; aborting execution']
+        let test = getTestById(attrs.testId)
 
-          if (_.find(PendingErrorMessages, err.message) !== undefined) {
-            err.isPending = true
+        // bail if for whatever reason we
+        // cannot associate this log to a test
+        if (!test) {
+          return
+        }
+
+        // if this test isnt in the current queue
+        // then go ahead and add it
+        if (!_testsQueueById[test.id]) {
+          _testsQueueById[test.id] = true
+          _testsQueue.push(test)
+        }
+
+        const existing = _logsById[attrs.id]
+
+        if (existing) {
+          // because log:state:changed may
+          // fire at a later time, its possible
+          // we've already cleaned up these attrs
+          // and in that case we don't want to do
+          // anything at all
+          if (existing._hasBeenCleanedUp) {
+            return
           }
 
-          runnable.err = $errUtils.wrapErr(err)
-        } else {
-          // https://github.com/cypress-io/cypress/issues/9209
-          // Mocha reuses runnable object. Because of that, runnable.err isn't undefined even when err is undefined.
-          // It causes Cypress to take superfluous screenshots.
-          delete runnable.err
+          // mutate the existing object
+          return _.extend(existing, attrs)
         }
 
-        err = maybeHandleRetry(runnable, err)
+        _logsById[attrs.id] = attrs
 
-        return runnableAfterRunAsync(runnable, Cypress)
-        .then(() => {
-          // once we complete callback with the
-          // original err
-          next(err)
+        const { testId, instrument } = attrs
 
-          // return null here to signal to bluebird
-          // that we did not forget to return a promise
-          // because mocha internally does not return
-          // the test.run(fn)
-          return null
-        }).catch((err) => {
-          next(err)
+        test = getTestById(testId)
 
-          // return null here to signal to bluebird
-          // that we did not forget to return a promise
-          // because mocha internally does not return
-          // the test.run(fn)
-          return null
-        })
-      }
+        if (test) {
+          // pluralize the instrument
+          // as a property on the runnable
+          let name
+          const logs = test[name = `${instrument}s`] != null ? test[name] : (test[name] = [])
 
-      cy.state('duringUserTestExecution', false)
-
-      // our runnable is about to run, so let cy know. this enables
-      // us to always have a correct runnable set even when we are
-      // running lifecycle events
-      // and also get back a function result handler that we use as
-      // an async seam
-      cy.setRunnable(runnable, hookId)
-
-      // TODO: handle promise timeouts here!
-      // whenever any runnable is about to run
-      // we figure out what test its associated to
-      // if its a hook, and then we fire the
-      // test:before:run:async action if its not
-      // been fired before for this test
-      return testBeforeRunAsync(test, Cypress)
-      .catch((err) => {
-        // TODO: if our async tasks fail
-        // then allow us to cause the test
-        // to fail here by blowing up its fn
-        // callback
-        const { fn } = runnable
-
-        const restore = () => {
-          return runnable.fn = fn
+          // else push it onto the logs
+          return logs.push(attrs)
         }
-
-        runnable.fn = () => {
-          restore()
-
-          throw err
-        }
-      }).finally(() => {
-        if (lifecycleStart) {
-          // capture how long the lifecycle took as part
-          // of the overall wallClockDuration of our test
-          setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
-        }
-
-        // capture the moment we're about to invoke
-        // the runnable's callback function
-        fnDurationStart = new Date()
-
-        // call the original method with our
-        // custom onNext function
-
-        // this tells us we are now running test execution code
-        // since all test:before:run:async listeners have completed
-        cy.state('duringUserTestExecution', true)
-
-        return runnableRun.call(runnable, onNext)
-      })
-    },
-
-    getStartTime () {
-      return _startTime
-    },
-
-    setStartTime (iso) {
-      _startTime = iso
-    },
-
-    countByTestState (tests, state) {
-      const count = _.filter(tests, (test, key) => {
-        return test.state === state
-      })
-
-      return count.length
-    },
-
-    setNumLogs (num) {
-      return $Log.setCounter(num)
-    },
-
-    getEmissions () {
-      return _emissions
-    },
-
-    getTestsState () {
-      const id = _test != null ? _test.id : undefined
-      const tests = {}
-
-      // bail if we dont have a current test
-      if (!id) {
-        return {}
-      }
-
-      // search through all of the tests
-      // until we find the current test
-      // and break then
-      for (let testRunnable of _tests) {
-        if (testRunnable.id === id) {
-          break
-        } else {
-          const test = serializeTest(testRunnable)
-
-          test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
-
-          tests[test.id] = test
-        }
-      }
-
-      return tests
-    },
-
-    stop () {
-      if (_runner.stopped) {
-        return
-      }
-
-      _runner.stopped = true
-
-      // abort the run
-      _runner.abort()
-
-      // emit the final 'end' event
-      // since our reporter depends on this event
-      // and mocha may never fire this because our
-      // runnable may never finish
-      _runner.emit('end')
-
-      // remove all the listeners
-      // so no more events fire
-      _runner.removeAllListeners()
-    },
-
-    getDisplayPropsForLog: $Log.getDisplayProps,
-
-    getConsolePropsForLogById (logId) {
-      const attrs = _logsById[logId]
-
-      if (attrs) {
-        return $Log.getConsoleProps(attrs)
-      }
-    },
-
-    getSnapshotPropsForLogById (logId) {
-      const attrs = _logsById[logId]
-
-      if (attrs) {
-        return $Log.getSnapshotProps(attrs)
-      }
-    },
-
-    resumeAtTest (id, emissions = {}) {
-      _resumedAtTestIndex = getTestIndexFromId(id)
-
-      _emissions = emissions
-
-      for (let test of _tests) {
-        if (getTestIndexFromId(test.id) !== _resumedAtTestIndex) {
-          test._ALREADY_RAN = true
-          test.pending = true
-        } else {
-          // bail so we can stop now
-          return
-        }
-      }
-    },
-
-    getResumedAtTestIndex () {
-      return _resumedAtTestIndex
-    },
-
-    cleanupQueue (numTestsKeptInMemory) {
-      const cleanup = (queue) => {
-        if (queue.length > numTestsKeptInMemory) {
-          const test = queue.shift()
-
-          delete _testsQueueById[test.id]
-
-          _.each(RUNNABLE_LOGS, (logs) => {
-            return _.each(test[logs], (attrs) => {
-            // we know our attrs have been cleaned
-            // now, so lets store that
-              attrs._hasBeenCleanedUp = true
-
-              return $Log.reduceMemory(attrs)
-            })
-          })
-
-          return cleanup(queue)
-        }
-      }
-
-      return cleanup(_testsQueue)
-    },
-
-    addLog (attrs, isInteractive) {
-      // we dont need to hold a log reference
-      // to anything in memory when we're headless
-      // because you cannot inspect any logs
-
-      if (!isInteractive) {
-        return
-      }
-
-      let test = getTestById(attrs.testId)
-
-      // bail if for whatever reason we
-      // cannot associate this log to a test
-      if (!test) {
-        return
-      }
-
-      // if this test isnt in the current queue
-      // then go ahead and add it
-      if (!_testsQueueById[test.id]) {
-        _testsQueueById[test.id] = true
-        _testsQueue.push(test)
-      }
-
-      const existing = _logsById[attrs.id]
-
-      if (existing) {
-        // because log:state:changed may
-        // fire at a later time, its possible
-        // we've already cleaned up these attrs
-        // and in that case we don't want to do
-        // anything at all
-        if (existing._hasBeenCleanedUp) {
-          return
-        }
-
-        // mutate the existing object
-        return _.extend(existing, attrs)
-      }
-
-      _logsById[attrs.id] = attrs
-
-      const { testId, instrument } = attrs
-
-      test = getTestById(testId)
-
-      if (test) {
-        // pluralize the instrument
-        // as a property on the runnable
-        let name
-        const logs = test[name = `${instrument}s`] != null ? test[name] : (test[name] = [])
-
-        // else push it onto the logs
-        return logs.push(attrs)
-      }
-    },
-  }
+      },
+    }
+  },
 }
 
 const mixinLogs = (test) => {

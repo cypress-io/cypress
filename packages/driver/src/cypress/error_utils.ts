@@ -5,10 +5,10 @@
 import _ from 'lodash'
 import chai from 'chai'
 
-import * as $dom from '../dom'
-import * as $utils from './utils'
-import * as $stackUtils from './stack_utils'
-import * as $errorMessages from './error_messages'
+import $dom from '../dom'
+import $utils from './utils'
+import $stackUtils from './stack_utils'
+import $errorMessages from './error_messages'
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -23,7 +23,7 @@ if (!Error.captureStackTrace) {
   }
 }
 
-export const prepareErrorForSerialization = (err) => {
+const prepareErrorForSerialization = (err) => {
   if (typeof err === 'string') {
     err = new Error(err)
   }
@@ -55,7 +55,7 @@ export const prepareErrorForSerialization = (err) => {
   return err
 }
 
-export const wrapErr = (err) => {
+const wrapErr = (err) => {
   if (!err) return
 
   prepareErrorForSerialization(err)
@@ -63,27 +63,27 @@ export const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
-export const isAssertionErr = (err = {}) => {
+const isAssertionErr = (err = {}) => {
   return err.name === 'AssertionError'
 }
 
-export const isChaiValidationErr = (err = {}) => {
+const isChaiValidationErr = (err = {}) => {
   return _.startsWith(err.message, 'Invalid Chai property')
 }
 
-export const isCypressErr = (err = {}) => {
+const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
 }
 
-export const isSpecError = (spec, err) => {
+const isSpecError = (spec, err) => {
   return _.includes(err.stack, spec.relative)
 }
 
-export const mergeErrProps = (origErr, ...newProps) => {
+const mergeErrProps = (origErr, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
 
-export const stackWithReplacedProps = (err, props) => {
+const stackWithReplacedProps = (err, props) => {
   const {
     message: originalMessage,
     name: originalName,
@@ -121,7 +121,7 @@ export const stackWithReplacedProps = (err, props) => {
   return originalStack.replace(originalName, `${name}: ${message}`)
 }
 
-export const modifyErrMsg = (err, newErrMsg, cb) => {
+const modifyErrMsg = (err, newErrMsg, cb) => {
   err.stack = $stackUtils.normalizedStack(err)
 
   const newMessage = cb(err.message, newErrMsg)
@@ -133,7 +133,7 @@ export const modifyErrMsg = (err, newErrMsg, cb) => {
   return err
 }
 
-export const appendErrMsg = (err, errMsg) => {
+const appendErrMsg = (err, errMsg) => {
   return modifyErrMsg(err, errMsg, (msg1, msg2) => {
     // we don't want to just throw in extra
     // new lines if there isn't even a msg
@@ -145,7 +145,7 @@ export const appendErrMsg = (err, errMsg) => {
   })
 }
 
-export const makeErrFromObj = (obj) => {
+const makeErrFromObj = (obj) => {
   const err2 = new Error(obj.message)
 
   err2.name = obj.name
@@ -160,7 +160,7 @@ export const makeErrFromObj = (obj) => {
   return err2
 }
 
-export const throwErr = (err, options = {}) => {
+const throwErr = (err, options = {}) => {
   if (_.isString(err)) {
     err = cypressErr({ message: err })
   }
@@ -190,7 +190,7 @@ export const throwErr = (err, options = {}) => {
   throw err
 }
 
-export const throwErrByPath = (errPath, options = {}) => {
+const throwErrByPath = (errPath, options = {}) => {
   const err = errByPath(errPath, options.args)
 
   // gets rid of internal stack lines that just build the error
@@ -201,7 +201,7 @@ export const throwErrByPath = (errPath, options = {}) => {
   return throwErr(err, options)
 }
 
-export const warnByPath = (errPath, options = {}) => {
+const warnByPath = (errPath, options = {}) => {
   const errObj = errByPath(errPath, options.args)
   let err = errObj.message
 
@@ -242,29 +242,29 @@ export class CypressError extends Error {
   }
 }
 
-export const getUserInvocationStackFromError = (err) => {
+const getUserInvocationStackFromError = (err) => {
   return err.userInvocationStack
 }
 
-export const internalErr = (err) => {
+const internalErr = (err) => {
   const newErr = new InternalCypressError(err.message)
 
   return mergeErrProps(newErr, err)
 }
 
-export const cypressErr = (err) => {
+const cypressErr = (err) => {
   const newErr = new CypressError(err.message)
 
   return mergeErrProps(newErr, err)
 }
 
-export const cypressErrByPath = (errPath, options = {}) => {
+const cypressErrByPath = (errPath, options = {}) => {
   const errObj = errByPath(errPath, options.args)
 
   return cypressErr(errObj)
 }
 
-export const replaceErrMsgTokens = (errMessage, args) => {
+const replaceErrMsgTokens = (errMessage, args) => {
   if (!errMessage) return errMessage
 
   const replace = (str, argValue, argKey) => {
@@ -286,14 +286,14 @@ export const replaceErrMsgTokens = (errMessage, args) => {
 }
 
 // recursively try for a default docsUrl
-export const docsUrlByParents = (msgPath) => {
+const docsUrlByParents = (msgPath) => {
   msgPath = msgPath.split('.').slice(0, -1).join('.')
 
   if (!msgPath) {
     return // reached root
   }
 
-  const obj = _.get($errorMessages.default, msgPath)
+  const obj = _.get($errorMessages, msgPath)
 
   if (obj.hasOwnProperty('docsUrl')) {
     return obj.docsUrl
@@ -302,8 +302,8 @@ export const docsUrlByParents = (msgPath) => {
   return docsUrlByParents(msgPath)
 }
 
-export const errByPath = (msgPath, args) => {
-  let msgValue = _.get($errorMessages.default, msgPath)
+const errByPath = (msgPath, args) => {
+  let msgValue = _.get($errorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -329,7 +329,7 @@ export const errByPath = (msgPath, args) => {
   })
 }
 
-export const createUncaughtException = ({ frameType, handlerType, state, err }) => {
+const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
@@ -352,7 +352,7 @@ export const createUncaughtException = ({ frameType, handlerType, state, err }) 
 // stacks from command failures and assertion failures have the right message
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
-export const stackAndCodeFrameIndex = (err, userInvocationStack) => {
+const stackAndCodeFrameIndex = (err, userInvocationStack) => {
   if (!userInvocationStack) return { stack: err.stack }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
@@ -362,7 +362,7 @@ export const stackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
 }
 
-export const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
+const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
 
   stack = $stackUtils.stackWithContentAppended(err, stack)
@@ -371,7 +371,7 @@ export const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack, index }
 }
 
-export const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
+const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
@@ -385,7 +385,7 @@ export const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
 
 // all errors flow through this function before they're finally thrown
 // or used to reject promises
-export const processErr = (errObj = {}, config) => {
+const processErr = (errObj = {}, config) => {
   let docsUrl = errObj.docsUrl
 
   if (config('isInteractive') || !docsUrl) {
@@ -428,7 +428,7 @@ const convertErrorEventPropertiesToObject = (args) => {
   })
 }
 
-export const errorFromErrorEvent = (event) => {
+const errorFromErrorEvent = (event) => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
 
@@ -456,7 +456,7 @@ export const errorFromErrorEvent = (event) => {
   }
 }
 
-export const errorFromProjectRejectionEvent = (event) => {
+const errorFromProjectRejectionEvent = (event) => {
   // Bluebird triggers "unhandledrejection" with its own custom error event
   // where the `promise` and `reason` are attached to event.detail
   // http://bluebirdjs.com/docs/api/error-management-configuration.html
@@ -472,13 +472,13 @@ export const errorFromProjectRejectionEvent = (event) => {
   }
 }
 
-export const errorFromUncaughtEvent = (handlerType, event) => {
+const errorFromUncaughtEvent = (handlerType, event) => {
   return handlerType === 'error' ?
     errorFromErrorEvent(event) :
     errorFromProjectRejectionEvent(event)
 }
 
-export const logError = (Cypress, handlerType, err, handled = false) => {
+const logError = (Cypress, handlerType, err, handled = false) => {
   Cypress.log({
     message: `${err.name}: ${err.message}`,
     name: 'uncaught exception',
@@ -499,4 +499,28 @@ export const logError = (Cypress, handlerType, err, handled = false) => {
       return consoleObj
     },
   })
+}
+
+export default {
+  appendErrMsg,
+  createUncaughtException,
+  cypressErr,
+  cypressErrByPath,
+  enhanceStack,
+  errByPath,
+  errorFromUncaughtEvent,
+  getUserInvocationStackFromError,
+  isAssertionErr,
+  isChaiValidationErr,
+  isCypressErr,
+  isSpecError,
+  logError,
+  makeErrFromObj,
+  mergeErrProps,
+  modifyErrMsg,
+  processErr,
+  throwErr,
+  throwErrByPath,
+  warnByPath,
+  wrapErr,
 }

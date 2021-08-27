@@ -4,7 +4,7 @@ import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
 
-import * as $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 
 const ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 

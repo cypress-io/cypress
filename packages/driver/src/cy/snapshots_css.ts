@@ -4,7 +4,7 @@ import _ from 'lodash'
 import md5 from 'md5'
 
 import LimitedMap from '../util/limited_map'
-import * as $utils from '../cypress/utils'
+import $utils from '../cypress/utils'
 
 const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
 const screenStylesheetRe = /(screen|all)/

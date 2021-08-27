@@ -107,7 +107,11 @@ const ensureCorrectHighlightPositions = (sel) => {
       border: cy.$$('div[data-layer=Border]'),
     }
 
-    const dims = _.mapValues(els, ($el) => $el[0].getBoundingClientRect())
+    const dims = _.mapValues(els, ($el) => {
+      debugger
+
+      return $el[0].getBoundingClientRect()
+    })
 
     const doc = els.content[0].ownerDocument
 

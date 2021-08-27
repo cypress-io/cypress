@@ -4,17 +4,17 @@ import $ from 'jquery'
 import Promise from 'bluebird'
 
 import debugFn from 'debug'
-import * as $dom from '../dom'
-import * as $elements from '../dom/elements'
-import * as $errUtils from '../cypress/error_utils'
+import $dom from '../dom'
+import $elements from '../dom/elements'
+import $errUtils from '../cypress/error_utils'
 const debug = debugFn('cypress:driver:actionability')
 
-export const delay = 50
+const delay = 50
 
 const getFixedOrStickyEl = $dom.getFirstFixedOrStickyPositionParent
 const getStickyEl = $dom.getFirstStickyPositionParent
 
-export const dispatchPrimedChangeEvents = function (state) {
+const dispatchPrimedChangeEvents = function (state) {
   // if we have a changeEvent, dispatch it
   let changeEvent
 
@@ -32,7 +32,7 @@ const scrollBehaviorOptionsMap = {
   nearest: 'nearest',
 }
 
-export const getPositionFromArguments = function (positionOrX, y, options) {
+const getPositionFromArguments = function (positionOrX, y, options) {
   let position; let x
 
   if (_.isObject(positionOrX)) {
@@ -288,7 +288,7 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 }
 
-export const verify = function (cy, $el, options, callbacks) {
+const verify = function (cy, $el, options, callbacks) {
   _.defaults(options, {
     ensure: {
       position: true,
@@ -452,4 +452,11 @@ export const verify = function (cy, $el, options, callbacks) {
 
     return retryActionability()
   })
+}
+
+export default {
+  delay,
+  verify,
+  dispatchPrimedChangeEvents,
+  getPositionFromArguments,
 }

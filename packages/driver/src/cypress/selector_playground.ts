@@ -1,77 +1,78 @@
-// @ts-nocheck
 import _ from 'lodash'
 import uniqueSelector from '@cypress/unique-selector'
 
-import * as $utils from './utils'
-import * as $errUtils from './error_utils'
+import $utils from './utils'
+import $errUtils from './error_utils'
 
 const SELECTOR_PRIORITIES = 'data-cy data-test data-testid id class tag attributes nth-child'.split(' ')
 
-const _reset = () => {
+const reset = () => {
   return {
     onElement: null,
     selectorPriority: SELECTOR_PRIORITIES,
   }
 }
 
-let _defaults = _reset()
+let defaults = reset()
 
-export function reset () {
-  _defaults = _reset()
-}
+export default {
+  reset () {
+    defaults = reset()
+  },
 
-export function getSelectorPriority () {
-  return _defaults.selectorPriority
-}
+  getSelectorPriority () {
+    return defaults.selectorPriority
+  },
 
-export function getOnElement () {
-  return _defaults.onElement
-}
+  getOnElement () {
+    return defaults.onElement
+  },
 
-export function getSelector ($el) {
-  // if we have a callback, and it returned truthy
-  const selector = _defaults.onElement && _defaults.onElement($el)
+  getSelector ($el) {
+    // if we have a callback, and it returned truthy
+    const selector = defaults.onElement && defaults.onElement($el)
 
-  if (selector) {
-    // and it returned a string
-    if (_.isString(selector)) {
-      // use this!
-      return selector
+    if (selector) {
+      // and it returned a string
+      if (_.isString(selector)) {
+        // use this!
+        return selector
+      }
     }
-  }
 
-  // else use uniqueSelector with the priorities
-  return uniqueSelector($el.get(0), {
-    selectorTypes: defaults.selectorPriority,
-  })
-}
-
-export function defaults (props) {
-  if (!_.isPlainObject(props)) {
-    $errUtils.throwErrByPath('selector_playground.defaults_invalid_arg', {
-      args: { arg: $utils.stringify(props) },
+    // else use uniqueSelector with the priorities
+    return uniqueSelector($el.get(0), {
+      selectorTypes: defaults.selectorPriority,
     })
-  }
+  },
 
-  const { selectorPriority: priority, onElement } = props
-
-  if (priority) {
-    if (!_.isArray(priority)) {
-      $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
-        args: { arg: $utils.stringify(priority) },
+  defaults (props) {
+    if (!_.isPlainObject(props)) {
+      $errUtils.throwErrByPath('selector_playground.defaults_invalid_arg', {
+        args: { arg: $utils.stringify(props) },
       })
     }
 
-    _defaults.selectorPriority = priority
-  }
+    const { selectorPriority: priority, onElement } = props
 
-  if (onElement) {
-    if (!_.isFunction(onElement)) {
-      $errUtils.throwErrByPath('selector_playground.defaults_invalid_on_element', {
-        args: { arg: $utils.stringify(onElement) },
-      })
+    if (priority) {
+      if (!_.isArray(priority)) {
+        $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
+          args: { arg: $utils.stringify(priority) },
+        })
+      }
+
+      defaults.selectorPriority = priority
     }
 
-    _defaults.onElement = onElement
-  }
+    if (onElement) {
+      if (!_.isFunction(onElement)) {
+        $errUtils.throwErrByPath('selector_playground.defaults_invalid_on_element', {
+          args: { arg: $utils.stringify(onElement) },
+        })
+      }
+
+      defaults.onElement = onElement
+    }
+  },
 }

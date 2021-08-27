@@ -1,17 +1,17 @@
+// @ts-nocheck
 // NOT patched jquery
 import $ from 'jquery'
 import _ from '../config/lodash'
-import * as $utils from '../cypress/utils'
-import * as $document from './document'
-import * as $jquery from './jquery'
-import * as $selection from './selection'
-import { parentHasDisplayNone } from './visibility'
-import * as $window from './window'
+import $utils from '../cypress/utils'
+import $document from './document'
+import $jquery from './jquery'
+import $selection from './selection'
+import $visibility from './visibility'
+import $window from './window'
 import Debug from 'debug'
 
-const debug = Debug('cypress:driver:elements')
-
 const { wrap } = $jquery
+const debug = Debug('cypress:driver:elements')
 
 const fixedOrStickyRe = /(fixed|sticky)/
 

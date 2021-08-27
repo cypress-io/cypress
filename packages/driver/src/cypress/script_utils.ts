@@ -3,8 +3,8 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 
-import * as $networkUtils from './network_utils'
-import * as $sourceMapUtils from './source_map_utils'
+import $networkUtils from './network_utils'
+import $sourceMapUtils from './source_map_utils'
 
 const fetchScript = (scriptWindow, script) => {
   return $networkUtils.fetch(script.relativeUrl, scriptWindow)
@@ -38,15 +38,17 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 }
 
 // Supports either scripts as objects or as async import functions
-export const runScripts = (specWindow, scripts) => {
-  // if scripts contains at least one promise
-  if (scripts.length && typeof scripts[0] === 'function') {
-    // chain the loading promises
-    // NOTE: since in evalScripts, scripts are evaluated in order,
-    // we chose to respect this constraint here too.
-    // indeed _.each goes through the array in order
-    return Bluebird.each(scripts, (script) => script())
-  }
+export default {
+  runScripts: (specWindow, scripts) => {
+    // if scripts contains at least one promise
+    if (scripts.length && typeof scripts[0] === 'function') {
+      // chain the loading promises
+      // NOTE: since in evalScripts, scripts are evaluated in order,
+      // we chose to respect this constraint here too.
+      // indeed _.each goes through the array in order
+      return Bluebird.each(scripts, (script) => script())
+    }
 
-  return runScriptsFromUrls(specWindow, scripts)
+    return runScriptsFromUrls(specWindow, scripts)
+  },
 }

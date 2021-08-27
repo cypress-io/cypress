@@ -3,8 +3,8 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import * as $utils from '../../cypress/utils'
-import * as $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
 import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS

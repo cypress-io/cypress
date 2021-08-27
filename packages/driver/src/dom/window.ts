@@ -1,13 +1,13 @@
 // @ts-nocheck
 
-import * as $jquery from './jquery'
-import * as $document from './document'
+import $jquery from './jquery'
+import $document from './document'
 
 /**
  * @param {HTMLElement} el
  * @returns {Window & typeof globalThis}
  */
-export const getWindowByElement = function (el) {
+const getWindowByElement = function (el) {
   if (isWindow(el)) {
     return el
   }
@@ -17,12 +17,12 @@ export const getWindowByElement = function (el) {
   return getWindowByDocument(doc)
 }
 
-export const getWindowByDocument = (doc) => {
+const getWindowByDocument = (doc) => {
   // parentWindow for IE
   return doc.defaultView || doc.parentWindow
 }
 
-export const isWindow = function (obj) {
+const isWindow = function (obj) {
   try {
     if ($jquery.isJquery(obj)) {
       obj = obj[0]
@@ -32,4 +32,10 @@ export const isWindow = function (obj) {
   } catch (error) {
     return false
   }
+}
+
+export default {
+  getWindowByDocument,
+  getWindowByElement,
+  isWindow,
 }

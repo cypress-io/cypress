@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import * as blankContents from '../blank-contents'
 import { visitFailure } from '../visit-failure'
 import { selectorPlaygroundModel } from '../selector-playground'
@@ -7,6 +7,8 @@ import { eventManager } from '../event-manager'
 import { dom } from '../dom'
 import { logger } from '../logger'
 import { studioRecorder } from '../studio'
+
+const $ = $Cypress.$
 
 export class AutIframe {
   constructor (config) {

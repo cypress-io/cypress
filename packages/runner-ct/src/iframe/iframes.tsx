@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
-import { $Cypress } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import {
   SnapshotControls,
   ScriptError,

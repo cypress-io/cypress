@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import $ from 'jquery'
 import { $Location } from '../../cypress/location'
-import * as $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
-import * as $stackUtils from '../../cypress/stack_utils'
+import $stackUtils from '../../cypress/stack_utils'
 import Bluebird from 'bluebird'
 const currentTestRegisteredSessions = new Map()
 

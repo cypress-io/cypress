@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
-import * as $dom from '../../dom'
-import * as $elements from '../../dom/elements'
+import $dom from '../../dom'
+import $elements from '../../dom/elements'
 import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')

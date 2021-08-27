@@ -4,7 +4,7 @@ import _ from 'lodash'
 import capitalize from 'underscore.string/capitalize'
 import minimatch from 'minimatch'
 
-import * as $errUtils from './error_utils'
+import $errUtils from './error_utils'
 import * as $XHR from './xml_http_request'
 import { makeContentWindowListener } from './events'
 
@@ -161,12 +161,12 @@ const getFullyQualifiedUrl = (contentWindow, url) => {
 }
 
 // override the defaults for all servers
-export const defaults = (obj = {}) => {
+const defaults = (obj = {}) => {
   // merge obj into defaults
   return _.extend(serverDefaults, obj)
 }
 
-export const create = (options = {}) => {
+const create = (options = {}) => {
   options = _.defaults(options, serverDefaults)
 
   const xhrs = {}
@@ -662,4 +662,9 @@ export const create = (options = {}) => {
   }
 
   return server
+}
+
+export default {
+  create,
+  defaults,
 }

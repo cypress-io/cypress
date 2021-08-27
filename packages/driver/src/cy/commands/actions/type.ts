@@ -2,13 +2,13 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import * as $dom from '../../../dom'
-import * as $elements from '../../../dom/elements'
-import * as $selection from '../../../dom/selection'
-import * as $utils from '../../../cypress/utils'
-import * as $errUtils from '../../../cypress/error_utils'
-import * as $actionability from '../../actionability'
-import * as $Keyboard from '../../../cy/keyboard'
+import $dom from '../../../dom'
+import $elements from '../../../dom/elements'
+import $selection from '../../../dom/selection'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
+import $Keyboard from '../../../cy/keyboard'
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
 

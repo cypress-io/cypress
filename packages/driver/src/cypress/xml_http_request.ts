@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import * as $errUtils from './error_utils'
+import $errUtils from './error_utils'
 
 const isCypressHeaderRe = /^X-Cypress-/i
 
@@ -165,6 +165,8 @@ Object.defineProperties(XMLHttpRequest.prototype, {
   },
 })
 
-export const create = (xhr) => {
-  return new XMLHttpRequest(xhr)
+export default {
+  create: (xhr) => {
+    return new XMLHttpRequest(xhr)
+  },
 }

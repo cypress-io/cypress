@@ -4,7 +4,7 @@ import type {
   RouteMatcherOptions,
   StaticResponse,
 } from '@packages/net-stubbing/lib/types'
-import * as $utils from '../../cypress/utils'
+import $utils from '../../cypress/utils'
 
 // properties that, if they are the only ones set, make sense to display as the display url
 const standaloneDisplayUrlProps: Array<keyof RouteMatcherOptions> = ['url', 'path', 'pathname']

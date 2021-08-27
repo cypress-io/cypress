@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import * as $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
 
 const clearLocalStorage = (state, keys) => {

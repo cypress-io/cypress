@@ -42,72 +42,75 @@ const eventHasReturnValue = (e) => {
   return true
 }
 
-export function bindTo (contentWindow, callbacks = {}) {
-  if (listenersAdded) {
-    return
-  }
-
-  removeAllListeners()
-
-  listenersAdded = true
-
-  addListener(contentWindow, 'error', callbacks.onError('error'))
-  addListener(contentWindow, 'unhandledrejection', callbacks.onError('unhandledrejection'))
-
-  addListener(contentWindow, 'beforeunload', (e) => {
-    // bail if we've canceled this event (from another source)
-    // or we've set a returnValue on the original event
-    if (e.defaultPrevented || eventHasReturnValue(e)) {
+export default {
+  bindTo (contentWindow, callbacks = {}) {
+    if (listenersAdded) {
       return
     }
 
-    callbacks.onBeforeUnload(e)
-  })
-
-  addListener(contentWindow, 'unload', (e) => {
-    // when we unload we need to remove all of the event listeners
     removeAllListeners()
 
-    // else we know to proceed onwards!
-    callbacks.onUnload(e)
-  })
+    listenersAdded = true
 
-  addListener(contentWindow, 'hashchange', (e) => {
-    callbacks.onNavigation('hashchange', e)
-  })
+    addListener(contentWindow, 'error', callbacks.onError('error'))
+    addListener(contentWindow, 'unhandledrejection', callbacks.onError('unhandledrejection'))
 
-  for (let attr of HISTORY_ATTRS) {
-    const orig = contentWindow.history?.[attr]
+    addListener(contentWindow, 'beforeunload', (e) => {
+      // bail if we've canceled this event (from another source)
+      // or we've set a returnValue on the original event
+      if (e.defaultPrevented || eventHasReturnValue(e)) {
+        return
+      }
 
-    if (!orig) {
-      continue
+      callbacks.onBeforeUnload(e)
+    })
+
+    addListener(contentWindow, 'unload', (e) => {
+      // when we unload we need to remove all of the event listeners
+      removeAllListeners()
+
+      // else we know to proceed onwards!
+      callbacks.onUnload(e)
+    })
+
+    addListener(contentWindow, 'hashchange', (e) => {
+      callbacks.onNavigation('hashchange', e)
+    })
+
+    for (let attr of HISTORY_ATTRS) {
+      const orig = contentWindow.history?.[attr]
+
+      if (!orig) {
+        continue
+      }
+
+      contentWindow.history[attr] = function (...args) {
+        orig.apply(this, args)
+
+        return callbacks.onNavigation(attr, args)
+      }
     }
 
-    contentWindow.history[attr] = function (...args) {
-      orig.apply(this, args)
+    addListener(contentWindow, 'submit', (e) => {
+      // if we've prevented the default submit action
+      // without stopping propagation, we will still
+      // receive this event even though the form
+      // did not submit
+      if (e.defaultPrevented) {
+        return
+      }
 
-      return callbacks.onNavigation(attr, args)
-    }
-  }
+      // else we know to proceed onwards!
+      return callbacks.onSubmit(e)
+    })
 
-  addListener(contentWindow, 'submit', (e) => {
-    // if we've prevented the default submit action
-    // without stopping propagation, we will still
-    // receive this event even though the form
-    // did not submit
-    if (e.defaultPrevented) {
-      return
-    }
+    // Handling the situation where "_top" is set on the <form> / <a> element, either in
+    // html or dynamically, by tapping in at the capture phase of the events
+    addListener(contentWindow, 'submit', handleInvalidEventTarget, true)
+    addListener(contentWindow, 'click', handleInvalidAnchorTarget, true)
 
-    // else we know to proceed onwards!
-    return callbacks.onSubmit(e)
-  })
+    contentWindow.alert = callbacks.onAlert
+    contentWindow.confirm = callbacks.onConfirm
+  },
 
-  // Handling the situation where "_top" is set on the <form> / <a> element, either in
-  // html or dynamically, by tapping in at the capture phase of the events
-  addListener(contentWindow, 'submit', handleInvalidEventTarget, true)
-  addListener(contentWindow, 'click', handleInvalidAnchorTarget, true)
-
-  contentWindow.alert = callbacks.onAlert
-  contentWindow.confirm = callbacks.onConfirm
 }

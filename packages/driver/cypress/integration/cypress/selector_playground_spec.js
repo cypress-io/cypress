@@ -1,4 +1,5 @@
-const { SelectorPlayground, $ } = Cypress
+const $ = Cypress.$
+const SelectorPlayground = Cypress.SelectorPlayground
 
 const SELECTOR_DEFAULTS = [
   'data-cy', 'data-test', 'data-testid', 'id', 'class', 'tag', 'attributes', 'nth-child',
@@ -81,10 +82,11 @@ describe('src/cypress/selector_playground', () => {
   })
 
   context('.getSelector', () => {
-    it('uses defaults.selectorPriority', () => {
+    it.only('uses defaults.selectorPriority', () => {
       const $div = $('<div data-cy=\'main button 123\' data-foo-bar-baz=\'quux\' data-test=\'qwerty\' data-foo=\'bar\' />')
 
       Cypress.$('body').append($div)
+      debugger
 
       expect(SelectorPlayground.getSelector($div)).to.eq('[data-cy="main button 123"]')
 

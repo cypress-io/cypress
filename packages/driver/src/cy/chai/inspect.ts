@@ -71,8 +71,6 @@ export function create (chai) {
     }
 
     if (value && typeof value.inspect === 'function' &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
       // Also filter out any prototype objects using the circular check.
       !(value.constructor && value.constructor.prototype === value)) {
       let ret = value.inspect(recurseTimes, ctx)

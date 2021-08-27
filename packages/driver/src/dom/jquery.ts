@@ -3,16 +3,16 @@ import $ from 'jquery'
 import _ from 'lodash'
 
 // wrap the object in jquery
-export const wrap = (obj) => {
+const wrap = (obj) => {
   return $(obj)
 }
 
-export const query = (selector, context) => {
+const query = (selector, context) => {
   return new $.fn.init(selector, context)
 }
 
 // pull out the raw elements if this is wrapped
-export const unwrap = function (obj) {
+const unwrap = function (obj) {
   if (isJquery(obj)) {
     // return an array of elements
     return obj.toArray()
@@ -21,7 +21,7 @@ export const unwrap = function (obj) {
   return obj
 }
 
-export const isJquery = (obj) => {
+const isJquery = (obj) => {
   let hasJqueryProperty = false
 
   try {
@@ -37,4 +37,11 @@ export const isJquery = (obj) => {
   // for actual jquery, it should be the version number
   // so we ensure that it is a string (rather than HTML element)
   return !!hasJqueryProperty && typeof _.get(obj, 'constructor.prototype.jquery') === 'string'
+}
+
+export default {
+  isJquery,
+  unwrap,
+  query,
+  wrap,
 }

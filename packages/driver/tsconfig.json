@@ -1,4 +1,5 @@
 {
+  "extends": "./../ts/tsconfig.json",
   "compilerOptions": {
     "module": "esnext",
     "lib": [
@@ -17,6 +18,8 @@
     "esModuleInterop": true
   },
   "include": [
-    "**/*.ts"
-  ]
+    "*.ts",
+    "lib/*.ts",
+    "lib/**/*.ts"
+  ],
 }

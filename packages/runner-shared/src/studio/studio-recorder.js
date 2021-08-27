@@ -1,9 +1,7 @@
 import { action, computed, observable } from 'mobx'
-import * as $driverUtils from '@packages/driver/src/cypress/utils'
 import { dom } from '../dom'
 import { eventManager } from '../event-manager'
-
-const $ = $driverUtils.$
+import $ from 'jquery'
 
 const saveErrorMessage = (message) => {
   return `\

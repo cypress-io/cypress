@@ -3,9 +3,9 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import * as $dom from '../../../dom'
-import * as $errUtils from '../../../cypress/error_utils'
-import * as $actionability from '../../actionability'
+import $dom from '../../../dom'
+import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
 
 const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'

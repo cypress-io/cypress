@@ -2,7 +2,7 @@ const { $, dom } = Cypress
 
 export {}
 
-describe('src/cypress/dom/visibility', () => {
+describe('src/cypress/dom/elements#visibility', () => {
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
   })

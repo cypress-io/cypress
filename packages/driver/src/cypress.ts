@@ -7,36 +7,37 @@ import minimatch from 'minimatch'
 import Promise from 'bluebird'
 import sinon from 'sinon'
 import fakeTimers from '@sinonjs/fake-timers'
-
-import * as $dom from './dom'
-import $errorMessages from './cypress/error_messages'
-import * as $Chainer from './cypress/chainer'
-import * as $Command from './cypress/command'
-import * as $Commands from './cypress/commands'
-import { $Cookies } from './cypress/cookies'
-import * as $Cy from './cypress/cy'
-import * as $Events from './cypress/events'
-import * as $Keyboard from './cy/keyboard'
-import * as $SetterGetter from './cypress/setter_getter'
-import * as $Log from './cypress/log'
-import { $Location } from './cypress/location'
-import * as $LocalStorage from './cypress/local_storage'
-import { ProxyLogging } from './cypress/proxy-logging'
-import * as $Mocha from './cypress/mocha'
-import * as $Mouse from './cy/mouse'
-import * as $Runner from './cypress/runner'
-import * as $Downloads from './cypress/downloads'
-import * as $Server from './cypress/server'
-import * as $Screenshot from './cypress/screenshot'
-import * as $SelectorPlayground from './cypress/selector_playground'
-
-import * as $utils from './cypress/utils'
-
-import * as $errUtils from './cypress/error_utils'
-import * as $scriptUtils from './cypress/script_utils'
-import browserInfo from './cypress/browser'
-import * as resolvers from './cypress/resolvers'
 import debugFn from 'debug'
+
+import browserInfo from './cypress/browser'
+import $scriptUtils from './cypress/script_utils'
+
+import $Commands from './cypress/commands'
+import $Cy from './cypress/cy'
+import $dom from './dom'
+import $Downloads from './cypress/downloads'
+import $errorMessages from './cypress/error_messages'
+import $errUtils from './cypress/error_utils'
+import $Log from './cypress/log'
+import $LocalStorage from './cypress/local_storage'
+import $Mocha from './cypress/mocha'
+import $Mouse from './cy/mouse'
+import $Runner from './cypress/runner'
+import $Screenshot from './cypress/screenshot'
+import $SelectorPlayground from './cypress/selector_playground'
+import $Server from './cypress/server'
+import $SetterGetter from './cypress/setter_getter'
+import $utils from './cypress/utils'
+
+import { $Chainer } from './cypress/chainer'
+import { $Cookies } from './cypress/cookies'
+import { $Command } from './cypress/command'
+import { $Location } from './cypress/location'
+import ProxyLogging from './cypress/proxy-logging'
+
+import * as $Events from './cypress/events'
+import $Keyboard from './cy/keyboard'
+import * as resolvers from './cypress/resolvers'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -54,7 +55,7 @@ const throwPrivateCommandInterface = (method) => {
   })
 }
 
-export class $Cypress {
+class $Cypress {
   constructor (config = {}) {
     this.cy = null
     this.chai = null
@@ -678,5 +679,3 @@ $Cypress.prototype.lolex = fakeTimers
 $Cypress.$ = $
 $Cypress.utils = $utils
 export default $Cypress
-
-export * from './cypress/utils'

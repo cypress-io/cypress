@@ -24,7 +24,7 @@ import * as Files from './files'
 
 import * as Fixtures from './fixtures'
 
-import * as LocalStorage from './local_storage'
+import LocalStorage from './local_storage'
 
 import * as Location from './location'
 
@@ -40,7 +40,7 @@ import * as Request from './request'
 
 import * as Sessions from './sessions'
 
-import * as Screenshot from './screenshot'
+import Screenshot from './screenshot'
 
 import * as Task from './task'
 
@@ -48,7 +48,7 @@ import * as Traversals from './traversals'
 
 import * as Waiting from './waiting'
 
-import * as Window from './window'
+import Window from './window'
 
 import * as Xhr from './xhr'
 

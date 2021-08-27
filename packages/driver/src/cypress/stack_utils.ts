@@ -5,9 +5,9 @@ import path from 'path'
 import errorStackParser from 'error-stack-parser'
 import { codeFrameColumns } from '@babel/code-frame'
 
-import * as $utils from './utils'
-import * as $errUtils from './error_utils'
-import * as $sourceMapUtils from './source_map_utils'
+import $utils from './utils'
+import $errUtils from './error_utils'
+import $sourceMapUtils from './source_map_utils'
 import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } from '@packages/server/lib/util/stack_utils'
 
 const whitespaceRegex = /^(\s*)*/
@@ -418,7 +418,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   return normalizeStackIndentation(winnowedStackLines)
 }
 
-export {
+export default {
   replacedStack,
   getCodeFrame,
   getSourceStack,

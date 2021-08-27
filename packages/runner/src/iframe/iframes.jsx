@@ -2,7 +2,7 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import {
   SnapshotControls,
   ScriptError,
@@ -14,6 +14,7 @@ import {
 } from '@packages/runner-shared'
 
 import util from '../lib/util'
+const $ = $Cypress.$
 
 @observer
 export default class Iframes extends Component {

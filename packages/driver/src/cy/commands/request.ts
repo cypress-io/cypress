@@ -2,8 +2,8 @@ import _ from 'lodash'
 import whatIsCircular from '@cypress/what-is-circular'
 import Promise from 'bluebird'
 
-import * as $utils from '../../cypress/utils'
-import * as $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
 import { $Location } from '../../cypress/location'
 
 const isOptional = (memo, val, key) => {

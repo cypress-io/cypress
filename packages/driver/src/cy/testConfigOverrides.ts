@@ -73,6 +73,8 @@ class TestConfigOverride {
   }
 }
 
-export function create () {
-  return new TestConfigOverride()
+export default {
+  create () {
+    return new TestConfigOverride()
+  },
 }

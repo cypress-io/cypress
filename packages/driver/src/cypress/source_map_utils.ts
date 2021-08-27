@@ -6,14 +6,14 @@ import Promise from 'bluebird'
 // @ts-ignore
 import mappingsWasm from 'source-map/lib/mappings.wasm'
 
-import * as $utils from './utils'
+import $utils from './utils'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
 let sourceMapConsumers = {}
 
-export const initializeSourceMapConsumer = (file, sourceMap) => {
+const initializeSourceMapConsumer = (file, sourceMap) => {
   if (!sourceMap) return Promise.resolve(null)
 
   SourceMapConsumer.initialize({
@@ -27,7 +27,7 @@ export const initializeSourceMapConsumer = (file, sourceMap) => {
   })
 }
 
-export const extractSourceMap = (file, fileContents) => {
+const extractSourceMap = (file, fileContents) => {
   let sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
 
   if (!sourceMapMatch) return null
@@ -43,7 +43,7 @@ export const extractSourceMap = (file, fileContents) => {
   return sourceMap
 }
 
-export const getSourceContents = (filePath, sourceFile) => {
+const getSourceContents = (filePath, sourceFile) => {
   if (!sourceMapConsumers[filePath]) return null
 
   try {
@@ -57,7 +57,7 @@ export const getSourceContents = (filePath, sourceFile) => {
   }
 }
 
-export const getSourcePosition = (filePath, position) => {
+const getSourcePosition = (filePath, position) => {
   const sourceMapConsumer = sourceMapConsumers[filePath]
 
   if (!sourceMapConsumer) return null
@@ -88,4 +88,11 @@ const base64toJs = (base64) => {
   } catch (err) {
     return null
   }
+}
+
+export default {
+  getSourcePosition,
+  getSourceContents,
+  extractSourceMap,
+  initializeSourceMapConsumer,
 }

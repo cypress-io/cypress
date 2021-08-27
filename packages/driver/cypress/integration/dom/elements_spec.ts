@@ -1,8 +1,7 @@
-import { getActiveElByDocument, isFocused, elementFromPoint } from '../../../src/dom/elements'
-
-const { $ } = Cypress
-
-export {}
+import $elements from '@packages/driver/src/dom/elements'
+const { getActiveElByDocument, isFocused } = $elements
+// const { getActiveElByDocument, isFocused,  Point } = $elements
+const { $ } = window.$Cypress.$
 
 describe('src/dom/elements', () => {
   context('.isAttached', () => {
@@ -265,57 +264,57 @@ describe('src/dom/elements', () => {
     })
   })
 
-  context('.elementFromPoint', () => {
-    let doc
-    let node
+  // context('.elementFromPoint', () => {
+  //   let doc
+  //   let node
 
-    beforeEach(() => {
-      node = {}
-      doc = {
-        elementFromPoint: cy.stub().returns(node),
-      }
-    })
+  //   beforeEach(() => {
+  //     node = {}
+  //     doc = {
+  //       elementFromPoint: cy.stub().returns(node),
+  //     }
+  //   })
 
-    it('returns original node if node has no shadow root', () => {
-      expect(elementFromPoint(doc, 1, 2)).to.equal(node)
-    })
+  //   it('returns original node if node has no shadow root', () => {
+  //     expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+  //   })
 
-    it('returns shadow dom element at point', () => {
-      const shadowNode = {}
-      const shadowHostNode = {
-        shadowRoot: {
-          elementFromPoint: cy.stub().returns(shadowNode),
-        },
-      }
+  //   it('returns shadow dom element at point', () => {
+  //     const shadowNode = {}
+  //     const shadowHostNode = {
+  //       shadowRoot: {
+  //         elementFromPoint: cy.stub().returns(shadowNode),
+  //       },
+  //     }
 
-      doc.elementFromPoint.returns(shadowHostNode)
+  //     doc.elementFromPoint.returns(shadowHostNode)
 
-      expect(elementFromPoint(doc, 1, 2)).to.equal(shadowNode)
-    })
+  //     expect(elementFromPoint(doc, 1, 2)).to.equal(shadowNode)
+  //   })
 
-    it('returns original node if no element at point in shadow dom', () => {
-      const shadowHostNode = {
-        shadowRoot: {
-          elementFromPoint: cy.stub().returns(node),
-        },
-      }
+  //   it('returns original node if no element at point in shadow dom', () => {
+  //     const shadowHostNode = {
+  //       shadowRoot: {
+  //         elementFromPoint: cy.stub().returns(node),
+  //       },
+  //     }
 
-      doc.elementFromPoint.returns(shadowHostNode)
+  //     doc.elementFromPoint.returns(shadowHostNode)
 
-      expect(elementFromPoint(doc, 1, 2)).to.equal(node)
-    })
+  //     expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+  //   })
 
-    // https://github.com/cypress-io/cypress/issues/7794
-    it('returns shadow host if its element at point is itself', () => {
-      const shadowHostNode = {} as any
+  //   // https://github.com/cypress-io/cypress/issues/7794
+  //   it('returns shadow host if its element at point is itself', () => {
+  //     const shadowHostNode = {} as any
 
-      shadowHostNode.shadowRoot = {
-        elementFromPoint: cy.stub().returns(shadowHostNode),
-      }
+  //     shadowHostNode.shadowRoot = {
+  //       elementFromPoint: cy.stub().returns(shadowHostNode),
+  //     }
 
-      doc.elementFromPoint.returns(shadowHostNode)
+  //     doc.elementFromPoint.returns(shadowHostNode)
 
-      expect(elementFromPoint(doc, 1, 2)).to.equal(shadowHostNode)
-    })
-  })
+  //     expect(elementFromPoint(doc, 1, 2)).to.equal(shadowHostNode)
+  //   })
+  // })
 })

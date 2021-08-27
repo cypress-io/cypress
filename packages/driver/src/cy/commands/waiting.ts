@@ -4,7 +4,7 @@ import { waitForRoute } from '../net-stubbing/wait-for-route'
 import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
 import ordinal from 'ordinal'
 
-import * as $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 
 const getNumRequests = (state, alias) => {
   const requests = state('aliasRequests') || {}

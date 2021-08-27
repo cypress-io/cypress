@@ -2,8 +2,8 @@
 
 import _ from 'lodash'
 
-import * as $utils from './utils'
-import * as $errUtils from './error_utils'
+import $utils from './utils'
+import $errUtils from './error_utils'
 
 const _reset = () => {
   return {
@@ -110,7 +110,7 @@ const validateAndSetCallback = (props, values, cmd, log, option) => {
   values[option] = value
 }
 
-export const validate = (props, cmd, log) => {
+const validate = (props, cmd, log) => {
   const values = {}
 
   if (!_.isPlainObject(props)) {
@@ -194,24 +194,33 @@ export const validate = (props, cmd, log) => {
   return values
 }
 
-export function reset () {
+function reset () {
   _defaults = _reset()
 }
 
-export function getConfig () {
+function getConfig () {
   return _.cloneDeep(_.omit(_defaults, 'onBeforeScreenshot', 'onAfterScreenshot'))
 }
 
-export function onBeforeScreenshot ($el) {
+function onBeforeScreenshot ($el) {
   return _defaults.onBeforeScreenshot($el)
 }
 
-export function onAfterScreenshot ($el, results) {
+function onAfterScreenshot ($el, results) {
   return _defaults.onAfterScreenshot($el, results)
 }
 
-export function defaults (props) {
+function defaults (props) {
   const values = validate(props, 'Cypress.Screenshot.defaults')
 
   return _.extend(_defaults, values)
+}
+
+export default {
+  reset,
+  validate,
+  getConfig,
+  onBeforeScreenshot,
+  onAfterScreenshot,
+  defaults,
 }

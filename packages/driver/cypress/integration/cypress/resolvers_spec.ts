@@ -127,6 +127,7 @@ describe('src/cypress/resolvers', function () {
       // .slice(0, 1)
       .forEach(({ name, currentWindow, accessedObject, accessedProp, expected }) => {
         it(name, function () {
+          
           const isWindow = cy.stub(Cypress.dom, 'isWindow')
           const isJquery = cy.stub(Cypress.dom, 'isJquery')
           const state = cy.stub(Cypress, 'state')

@@ -3990,7 +3990,7 @@ describe('mouse state', () => {
     })
 
     describe('mouseout', () => {
-      it('can move mouse from a div to another div', () => {
+      it.only('can move mouse from a div to another div', () => {
         const coordsChrome = {
           clientX: 492,
           clientY: 9,

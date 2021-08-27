@@ -1,6 +1,6 @@
 // @ts-nocheck
 import _ from 'lodash'
-import * as utils from './utils'
+import utils from './utils'
 
 export class $Command {
   constructor (obj = {}) {

@@ -4,10 +4,10 @@ import $ from 'jquery'
 import bytes from 'bytes'
 import Promise from 'bluebird'
 
-import * as $Screenshot from '../../cypress/screenshot'
-import * as $dom from '../../dom'
-import * as $errUtils from '../../cypress/error_utils'
-import * as $utils from '../../cypress/utils'
+import $Screenshot from '../../cypress/screenshot'
+import $dom from '../../dom'
+import $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
 
 const getViewportHeight = (state) => {
   // TODO this doesn't seem correct
