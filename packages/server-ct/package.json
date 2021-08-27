@@ -12,7 +12,6 @@
     "test-unit": "mocha -r @packages/ts/register test/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
-    "@packages/types": "0.0.0-development",
     "bluebird": "3.5.3",
     "chalk": "2.4.2",
     "chokidar": "3.2.2",
@@ -26,6 +25,7 @@
   },
   "devDependencies": {
     "@packages/resolve-dist": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
     "chai": "^4.2.0",
     "expect": "^26.6.2",
     "mocha": "^8.1.3"
