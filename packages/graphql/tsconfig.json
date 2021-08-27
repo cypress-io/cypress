@@ -9,11 +9,12 @@
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "allowJs": false,
+    "allowJs": true,
+    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"
   },
   "files": [
-    "./../ts/index.d.ts"
+    "../../cli/types/index.d.ts"
   ],
 }
