@@ -5,7 +5,13 @@
     "src/**/*.ts"
   ],
   "compilerOptions": {
-    "importHelpers": true
+    "importHelpers": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "allowJs": false,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error"
   },
   "files": [
     "./../ts/index.d.ts"
