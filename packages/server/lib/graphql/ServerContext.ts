@@ -1,10 +1,10 @@
 import { ServerActions } from './ServerActions'
 import { LocalProject, BaseContext, AuthenticatedUser, DashboardProject, Viewer } from '@packages/graphql'
+import type { OpenProjectLaunchOptions } from '@packages/types'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
 import type { LaunchArgs } from '../open_project'
-import type { OpenProjectLaunchOptions } from '../project-base'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)
