@@ -4,8 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "yarn build",
+    "build-prod": "tsc",
     "clean": "rm -f src/*.js src/**/*.js"
   },
   "dependencies": {},
