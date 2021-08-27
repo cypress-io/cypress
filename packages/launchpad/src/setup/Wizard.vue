@@ -8,11 +8,26 @@
     <div class="mx-5">
       <template v-if="wizard.step === 'welcome'">
         <div class="max-w-4xl mx-auto text-center">
-          <TestingTypeCard 
+          <template
             v-for="testingType of wizard.testingTypes"
             :key="testingType.id"
-            :testingType="testingType"
-          />
+          >
+
+            <template v-if="testingType.id === 'component'">
+              <div v-if="app.activeProject?.hasSetupComponentTesting">
+                You already set up component testing!
+              </div>
+              <TestingTypeCard v-else :testingType="testingType" />
+            </template>
+
+            <template v-if="testingType.id === 'e2e'">
+              <div v-if="app.activeProject?.hasSetupE2ETesting">
+                You already set up e2e testing!
+              </div>
+              <TestingTypeCard v-else :testingType="testingType" />
+            </template>
+
+          </template>
         </div>
       </template> 
       <template v-else-if="wizard.testingType === 'component'">
