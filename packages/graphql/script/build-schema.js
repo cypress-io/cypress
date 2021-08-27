@@ -4,4 +4,5 @@ process.env.GRAPHQL_CODEGEN_EXIT = 'true'
 // TODO: we should be upgrading ts-node or moving to Thorsten's work soon
 // and then this can be removed
 process.env.TS_NODE_CACHE = 'false'
-import '../src/schema'
+require('@packages/ts/register')
+require('../src/schema')

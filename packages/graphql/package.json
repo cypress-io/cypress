@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "ts-node script/build-schema.ts",
+    "build": "node script/build-schema.js",
     "types": "tsc --noEmit",
     "build-prod": "yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
