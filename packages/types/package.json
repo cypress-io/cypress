@@ -2,7 +2,7 @@
   "name": "@packages/types",
   "version": "0.0.0-development",
   "private": true,
-  "browser": "src/index.ts",
+  "main": "src/index.ts",
   "scripts": {},
   "dependencies": {},
   "devDependencies": {},
