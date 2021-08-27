@@ -530,7 +530,7 @@ namespace CypressDomTests {
   Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
   Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
-  Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getWindowByElement(el) // $ExpectType Window & typeof globalThis
   Cypress.dom.getReasonIsHidden(el) // $ExpectType string
   Cypress.dom.getFirstScrollableParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
   Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>

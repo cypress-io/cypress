@@ -1,11 +1,14 @@
 const $jquery = require('./jquery')
 const $document = require('./document')
+const jquery = require('./jquery')
 
 /**
- * @param {HTMLElement} el
+ * @param {JQuery<HTMLElement> | HTMLElement} $el
  * @returns {Window & typeof globalThis}
  */
-const getWindowByElement = function (el) {
+const getWindowByElement = function ($el) {
+  const el = jquery.isJquery($el) ? $el[0] : $el
+
   if (isWindow(el)) {
     return el
   }

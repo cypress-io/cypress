@@ -493,7 +493,7 @@ declare namespace Cypress {
       getElements(element: JQuery): JQuery | HTMLElement[]
       getContainsSelector(text: string, filter?: string): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
-      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getWindowByElement(element: JQuery | HTMLElement): Window & typeof globalThis
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
