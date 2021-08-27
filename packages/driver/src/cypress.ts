@@ -68,7 +68,6 @@ export class $Cypress {
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
 
-    // debugger
     _.extend(this.$, $)
 
     this.setConfig(config)
