@@ -5,7 +5,6 @@
     "src/**/*.ts"
   ],
   "compilerOptions": {
-    "importHelpers": true,
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
