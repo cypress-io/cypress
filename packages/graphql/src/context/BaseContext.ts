@@ -1,5 +1,4 @@
-import type { LaunchArgs } from '@packages/server/lib/open_project'
-import type { OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
+import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import type { BaseActions } from '../actions/BaseActions'
 import { App, Wizard, NavigationMenu, LocalProject, Viewer, DashboardProject } from '../entities'
 

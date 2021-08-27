@@ -1,10 +1,12 @@
 import axios from 'axios'
-import type { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser, FullConfig, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import { BaseActions, BaseContext, DashboardProject, LocalProject, Viewer, Wizard } from '../../src'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
 
 interface TestContextInjectionOptions {
   wizard?: Wizard
+  launchArgs?: LaunchArgs
+  launchOptions?: OpenProjectLaunchOptions
 }
 
 export class TestActions extends BaseActions {
@@ -44,6 +46,14 @@ export class TestActions extends BaseActions {
     return []
   }
 
+  async launchOpenProject () {}
+  async initializeOpenProject () {}
+  resolveOpenProjectConfig (): FullConfig {
+    return {
+      resolved: {},
+    }
+  }
+
   async getBrowsers () {
     const browser: FoundBrowser = {
       displayName: 'chrome',
@@ -67,8 +77,19 @@ export class TestContext extends BaseContext {
   readonly actions: BaseActions
   viewer = null
 
-  constructor ({ wizard }: TestContextInjectionOptions = {}) {
-    super()
+  constructor ({ wizard, launchArgs, launchOptions }: TestContextInjectionOptions = {}) {
+    super(launchArgs || {
+      config: {},
+      cwd: '/current/working/dir',
+      _: ['/current/working/dir'],
+      projectRoot: '/project/root',
+      invokedFromCli: false,
+      browser: null,
+      testingType: 'e2e',
+      project: '/project/root',
+      os: 'linux',
+    }, launchOptions || {})
+
     this.actions = new TestActions(this)
     if (wizard) {
       this.wizard = wizard

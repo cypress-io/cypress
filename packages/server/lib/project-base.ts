@@ -34,7 +34,7 @@ import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
 import type { ProjectContract } from '@packages/graphql'
-import type { LaunchArgs } from './open_project'
+import type { OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -51,28 +51,7 @@ export interface Cfg extends ReceivedCypressOptions {
     firstOpened?: number
     lastOpened?: number
   }
-  resolved: config.ResolvedConfigurationOptions
-}
-
-type WebSocketOptionsCallback = (...args: any[]) => any
-
-export interface OpenProjectLaunchOptions {
-  args?: LaunchArgs
-
-  configFile?: string | boolean
-  browsers?: Cypress.Browser[]
-
-  // Callback to reload the Desktop GUI when cypress.json is changed.
-  onSettingsChanged?: false | (() => void)
-
-  // Optional callbacks used for triggering events via the web socket
-  onReloadBrowser?: WebSocketOptionsCallback
-  onFocusTests?: WebSocketOptionsCallback
-  onSpecChanged?: WebSocketOptionsCallback
-  onSavedStateChanged?: WebSocketOptionsCallback
-  onChange?: WebSocketOptionsCallback
-
-  [key: string]: any
+  resolved: ResolvedConfigurationOptions
 }
 
 const localCwd = cwd()

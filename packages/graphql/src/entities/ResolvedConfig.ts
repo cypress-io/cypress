@@ -1,7 +1,7 @@
 import { enumType } from 'nexus'
 import { nxs, NxsResult } from 'nexus-decorators'
 import Debug from 'debug'
-import type { ResolvedConfigurationOptions, ResolvedFromConfig } from '@packages/server/lib/config'
+import type { ResolvedConfigurationOptions, ResolvedFromConfig } from '@packages/types'
 
 const debug = Debug('cypress:graphql:resolved-config')
 

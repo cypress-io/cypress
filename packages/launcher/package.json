@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "cross-env": "6.0.3",

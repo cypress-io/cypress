@@ -1,6 +1,6 @@
 import { log } from './log'
 import * as cp from 'child_process'
-import type { Browser, FoundBrowser } from './types'
+import type { Browser, FoundBrowser } from '@packages/types'
 
 // Chrome started exposing CDP 1.3 in 64
 const MIN_CHROME_VERSION = 64
