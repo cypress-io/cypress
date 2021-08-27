@@ -2,7 +2,7 @@
 'use strict'
 
 const path = require('path')
-const os = require('os')
+const platformString = process.platform
 
 const snapshotCacheBaseDir = path.resolve(__dirname, './cache')
 
@@ -12,14 +12,50 @@ const appEntryFile = require.resolve('../server/index.js')
 // TODO(thlorenz): this is most likely different when creating prod artifacts
 const cypressAppSnapshotDir = (() => {
   const electronPackageDir = path.join(projectBaseDir, 'packages/electron')
-  const cypressAppDir = path.join(
-    electronPackageDir,
-    'dist/Cypress/Cypress.app',
-  )
+
+  let cypressApp
+  let electronPath
+
+  switch (platformString) {
+    case 'darwin': {
+      cypressApp = 'dist/Cypress/Cypress.app'
+      electronPath = 'Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/'
+      break
+    }
+    case 'win32':
+    case 'cygwin': {
+      cypressApp = 'dist/Cypress'
+      electronPath = ''
+      break
+    }
+
+    // TODO(thlorenz): verify Linux location
+    case 'linux':
+      cypressApp = 'dist/Cypress'
+      electronPath = ''
+      break
+
+    // TODO(thlorenz): verify BSD location
+    case 'openbsd':
+    case 'netbsd': {
+      cypressApp = 'dist/Cypress'
+      electronPath = ''
+      break
+    }
+
+    case 'sunos':
+      // TODO: Do we support sunos???
+      // eslint-disable-next-line no-fallthrough
+    default: {
+      throw new Error(`Unable to determine Cypress App location for '${platformString}' platform.`)
+    }
+  }
+
+  const cypressAppDir = path.join(electronPackageDir, cypressApp)
 
   return path.join(
     cypressAppDir,
-    'Contents/Frameworks/Electron Framework.framework/Versions/A/Resources/',
+    electronPath,
   )
 })()
 
@@ -78,7 +114,6 @@ module.exports = function createConfig (env) {
    */
   const nodeModulesOnly = env === 'dev'
 
-  const platformString = os.platform()
   const snapshotCacheDir =
     env === 'dev'
       ? path.join(snapshotCacheBaseDir, `dev-${platformString}`)
