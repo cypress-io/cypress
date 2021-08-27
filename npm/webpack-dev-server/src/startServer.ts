@@ -54,6 +54,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
   }
 
   if (webpackDevServerFacts.isV3()) {
+    debug('using webpack-dev-server v3')
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
       // @ts-expect-error ignore webpack-dev-server v3 type errors
@@ -67,6 +68,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
   }
 
   if (webpackDevServerFacts.isV4()) {
+    debug('using webpack-dev-server v4')
     webpackDevServerConfig = {
       host: 'localhost',
       port: 'auto',
