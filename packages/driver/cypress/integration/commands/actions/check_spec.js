@@ -523,6 +523,18 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.get(':checkbox:first').check().should('have.class', 'checked')
       })
+
+      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+        cy.get('[name=dogs]').check(['husky', 'poodle', 'on']).then(($chk) => {
+          expect($chk.length).to.eq(4)
+        })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(' cannot be checked because the element is missing `value` attribute but `cy.check()` was passed with values')
+
+          done()
+        })
+      })
     })
 
     describe('.log', () => {
@@ -1073,6 +1085,18 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked')
+      })
+
+      it('throws when cmd recieves values but subject has no value attribute', function (done) {
+        cy.get('[name=dogs]').uncheck(['husky', 'poodle', 'on']).then(($chk) => {
+          expect($chk.length).to.eq(4)
+        })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include(' cannot be unchecked because the element is missing `value` attribute but `cy.uncheck()` was passed with values')
+
+          done()
+        })
       })
     })
 

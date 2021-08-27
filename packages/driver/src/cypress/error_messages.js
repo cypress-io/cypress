@@ -180,6 +180,10 @@ export default {
       message: `${cmd('{{cmd}}')} can only be called on \`:checkbox\`{{phrase}}. Your subject {{word}} a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/{{cmd}}',
     },
+    element_missing_value_attribute: {
+      message: `{{node}} cannot be {{phrase}} because the element is missing \`value\` attribute but ${cmd('{{cmd}}')} was passed with values`,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   clear: {
