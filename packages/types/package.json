@@ -12,5 +12,8 @@
   "devDependencies": {
     "typescript": "^4.2.3"
   },
+  "files": [
+    "src/*"
+  ],
   "types": "src/index.ts"
 }
