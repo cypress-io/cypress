@@ -9,7 +9,6 @@
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "allowJs": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"
