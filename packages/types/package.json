@@ -2,7 +2,7 @@
   "name": "@packages/types",
   "version": "0.0.0-development",
   "private": true,
-  "main": "src/index.ts",
+  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "clean": "rm -f src/*.js src/**/*.js"
