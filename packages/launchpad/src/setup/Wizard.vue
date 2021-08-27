@@ -6,7 +6,15 @@
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
-      <TestingType v-if="wizard.step === 'welcome'" :gql="wizard" />
+      <template v-if="wizard.step === 'welcome'">
+        <div class="max-w-4xl mx-auto text-center">
+          <TestingTypeCard 
+            v-for="testingType of wizard.testingTypes"
+            :key="testingType.id"
+            :testingType="testingType"
+          />
+        </div>
+      </template> 
       <template v-else-if="wizard.testingType === 'component'">
         <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
         <InstallDependencies v-else-if="wizard.step === 'installDependencies'" :gql="wizard" />
@@ -25,7 +33,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import Auth from './Auth.vue'
-import TestingType from "./TestingType.vue";
+import TestingTypeCard from "./TestingTypeCard.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
@@ -33,7 +41,7 @@ import OpenBrowser from "./OpenBrowser.vue";
 import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
 import { 
-  RootDocument, 
+  WizardQueryDocument, 
   InitializeOpenProjectDocument,
   LaunchOpenProjectDocument
 } from '../generated/graphql'
@@ -41,9 +49,13 @@ import { useMutation, useQuery } from "@urql/vue";
 import Button from '../components/button/Button.vue'
 
 gql`
-query Root {
+query WizardQuery {
   app {
     isFirstOpen
+    activeProject {
+      hasSetupComponentTesting
+      hasSetupE2ETesting
+    }
     ...ProjectRoot
   }
   wizard {
@@ -51,6 +63,9 @@ query Root {
     title
     description
     testingType
+    testingTypes {
+      ...TestingTypeCard
+    }
     ...TestingType
     ...ConfigFile
     ...InstallDependencies
@@ -79,7 +94,7 @@ mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
 }
 `
 
-const result = useQuery({ query: RootDocument })
+const result = useQuery({ query: WizardQueryDocument })
 
 const loading = result.fetching
 const wizard = computed(() => result.data.value?.wizard)
