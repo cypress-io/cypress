@@ -2,7 +2,8 @@
   "extends": "../ts/tsconfig.json",
   "include": [
     "src/*.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "script/*.ts",
   ],
   "compilerOptions": {
     "importHelpers": true,
