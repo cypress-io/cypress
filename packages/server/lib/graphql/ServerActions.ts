@@ -107,7 +107,9 @@ export class ServerActions extends BaseActions {
   }
 
   async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {
-    return openProject.create(args.projectRoot, args, options)
+    await openProject.create(args.projectRoot, args, options)
+
+    return
   }
 
   async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
