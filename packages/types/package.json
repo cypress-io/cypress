@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "build-prod": "yarn build",
     "clean": "rm -f src/*.js src/**/*.js"
   },
   "dependencies": {},
