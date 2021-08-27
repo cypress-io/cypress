@@ -2,6 +2,7 @@
 'use strict'
 
 const path = require('path')
+const os = require('os')
 
 const snapshotCacheBaseDir = path.resolve(__dirname, './cache')
 
@@ -77,10 +78,11 @@ module.exports = function createConfig (env) {
    */
   const nodeModulesOnly = env === 'dev'
 
+  const platformString = os.platform()
   const snapshotCacheDir =
     env === 'dev'
-      ? path.join(snapshotCacheBaseDir, 'dev')
-      : path.join(snapshotCacheBaseDir, 'prod')
+      ? path.join(snapshotCacheBaseDir, `dev-${platformString}`)
+      : path.join(snapshotCacheBaseDir, `prod-${platformString}`)
 
   const snapshotEntryFile = path.join(snapshotCacheDir, 'snapshot-entry.js')
   const metaFile = path.join(snapshotCacheDir, 'esbuild-meta.json')
