@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import browsers from '@packages/server/lib/browsers'
-import { LaunchArgs, openProject } from '@packages/server/lib/open_project'
+import type { LaunchArgs } from '@packages/types'
+import { openProject } from '@packages/server/lib/open_project'
 import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
