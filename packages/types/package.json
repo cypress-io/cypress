@@ -3,8 +3,13 @@
   "version": "0.0.0-development",
   "private": true,
   "main": "src/index.ts",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -f src/*.js src/**/*.js"
+  },
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  },
   "types": "src/index.ts"
 }

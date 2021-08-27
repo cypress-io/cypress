@@ -36,6 +36,7 @@ export const graphqlSchema = makeSchema({
       return content
     }
 
-    return `/* eslint-disable */\n${content}`
+    // TODO(tim): fix in nexus to prevent the regex
+    return `/* eslint-disable */\n${content.replace(/\.js"/g, '"')}`
   },
 })
