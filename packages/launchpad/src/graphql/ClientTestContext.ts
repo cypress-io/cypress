@@ -1,9 +1,22 @@
 import { BaseActions, BaseContext, DashboardProject, LocalProject } from '@packages/graphql'
 import type { FullConfig } from '@packages/server/lib/config'
+import { browsers, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
     super(ctx)
+  }
+
+  async initializeOpenProject () {
+    return
+  }
+
+  async launchOpenProject () {
+    return
+  }
+
+  resolveOpenProjectConfig () {
+    return null
   }
 
   async installDependencies () {
@@ -43,7 +56,23 @@ export class ClientTestActions extends BaseActions {
 
 const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
 
+const TEST_LAUNCH_ARGS: LaunchArgs = {
+  config: {},
+  cwd: '/dev/null',
+  browser: browsers[0],
+  project: '/dev/null',
+  projectRoot: '/dev/null',
+  invokedFromCli: true,
+  testingType: 'e2e',
+  os: 'darwin',
+  _: [''],
+}
+
 export class ClientTestContext extends BaseContext {
+  constructor (_launchArgs?: LaunchArgs, _launchOptions?: OpenProjectLaunchOptions) {
+    super(_launchArgs ?? TEST_LAUNCH_ARGS, _launchOptions ?? {})
+  }
+
   readonly actions = new ClientTestActions(this)
   readonly projects = []
 

@@ -12,7 +12,7 @@
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"
   },
-  "files": [
-    "../ts/index.d.ts"
-  ],
+  // "files": [
+  //   "../ts/index.d.ts"
+  // ],
 }

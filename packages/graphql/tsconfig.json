@@ -3,18 +3,18 @@
   "include": [
     "src/*.ts",
     "src/**/*.ts",
-    "script/*.ts",
+  ],
+  "exclude": [
+    "test",
+    "script"
   ],
   "compilerOptions": {
     "importHelpers": true,
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "types": []
   },
-  "files": [
-    "../../cli/types/index.d.ts"
-  ],
 }

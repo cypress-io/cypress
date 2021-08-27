@@ -9,7 +9,7 @@
     "types": "tsc --noEmit",
     "build-prod": "yarn build && tsc",
     "clean-deps": "rm -rf node_modules",
-    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js || echo 'cleaned'",
+    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
@@ -21,7 +21,7 @@
     "graphql": "^15.5.1",
     "graphql-scalars": "^1.10.0",
     "nexus": "^1.1.0",
-    "nexus-decorators": "^0.2.0"
+    "nexus-decorators": "0.2.3"
   },
   "devDependencies": {
     "@packages/types": "0.0.0-development",

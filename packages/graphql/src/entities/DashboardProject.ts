@@ -16,9 +16,15 @@ export class DashboardProject extends Project {
   }
 
   @nxs.field.list.nonNull.type(() => RunGroup)
-  async runs (): Promise<NxsResult<'Project', 'run'>> {
+  async runs (): Promise<NxsResult<'DashboardProject', 'runs'>> {
+    const projectId = await this.projectId()
+
+    if (!projectId) {
+      return null
+    }
+
     const result = await this.context.actions.getRuns({
-      projectId: await this.projectId(),
+      projectId,
       authToken: this.authToken,
     })
 
@@ -26,9 +32,15 @@ export class DashboardProject extends Project {
   }
 
   @nxs.field.list.nonNull.string()
-  async recordKeys (): Promise<NxsResult<'Project', 'recordKeys'>> {
+  async recordKeys (): Promise<NxsResult<'DashboardProject', 'recordKeys'>> {
+    const projectId = await this.projectId()
+
+    if (!projectId) {
+      return null
+    }
+
     const result = await this.context.actions.getRecordKeys({
-      projectId: await this.projectId(),
+      projectId,
       authToken: this.authToken,
     })
 

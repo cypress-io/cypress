@@ -8,6 +8,7 @@
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { DashboardProject } from "./../entities/DashboardProject"
+import type { Project } from "./../entities/Project"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { LocalProject } from "./../entities/LocalProject"
 import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
@@ -89,6 +90,7 @@ export interface NexusGenObjects {
   Mutation: {};
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
+  Project: Project;
   Query: Query;
   ResolvedBooleanOption: ResolvedBooleanOption;
   ResolvedConfig: ResolvedConfig;
@@ -173,6 +175,12 @@ export interface NexusGenFieldTypes {
   NavigationMenu: { // field return type
     items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
     selected: NexusGenEnums['NavItem']; // NavItem!
+  }
+  Project: { // field return type
+    id: string; // ID!
+    projectId: string | null; // String
+    projectRoot: string; // String!
+    title: string; // String!
   }
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
@@ -378,6 +386,12 @@ export interface NexusGenFieldTypeNames {
   NavigationMenu: { // field return type name
     items: 'NavigationItem'
     selected: 'NavItem'
+  }
+  Project: { // field return type name
+    id: 'ID'
+    projectId: 'String'
+    projectRoot: 'String'
+    title: 'String'
   }
   Query: { // field return type name
     app: 'App'
