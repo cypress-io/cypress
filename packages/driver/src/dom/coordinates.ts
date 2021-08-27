@@ -3,7 +3,7 @@ import $window from './window'
 import $elements from './elements'
 
 const getElementAtPointFromViewport = (doc, x, y) => {
-  // return $elements.elementFromPoint(doc, x, y)
+  return $elements.elementFromPoint(doc, x, y)
 }
 
 const isAutIframe = (win) => {

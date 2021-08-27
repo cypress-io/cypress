@@ -2,17 +2,17 @@
 
 import _ from 'lodash'
 
-import * as $jquery from './jquery'
-import * as $document from './document'
-import * as $elements from './elements'
-import * as $coordinates from './coordinates'
+import $jquery from './jquery'
+import $document from './document'
+import $elements from './elements'
+import $coordinates from './coordinates'
 import * as $transform from './transform'
 
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
 
-export const isVisible = (el) => {
+const isVisible = (el) => {
   return !isHidden(el, 'isVisible()')
 }
 
@@ -21,7 +21,7 @@ export const isVisible = (el) => {
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
-export const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
   if (!$elements.isElement(el)) {
     throw new Error(`\`Cypress.dom.${methodName}\` failed because it requires a DOM element. The subject received was: \`${el}\``)
   }
@@ -366,7 +366,7 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   return parentHasNoOffsetWidthOrHeightAndOverflowHidden($elements.getParent($el))
 }
 
-export const parentHasDisplayNone = function ($el) {
+const parentHasDisplayNone = function ($el) {
   // if we have no $el or we've walked all the way up to document
   // then return false
   if (!$el.length || $document.isDocument($el)) {
@@ -428,7 +428,7 @@ const parentHasOpacityZero = function ($el) {
 }
 
 /* eslint-disable no-cond-assign */
-export const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
+const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el
@@ -527,3 +527,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   return `This element \`${node}\` is not visible.`
 }
 /* eslint-enable no-cond-assign */
+
+export default {
+  isVisible, isHidden, getReasonIsHidden, parentHasDisplayNone
+}

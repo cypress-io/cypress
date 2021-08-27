@@ -5,7 +5,7 @@ import capitalize from 'underscore.string/capitalize'
 import minimatch from 'minimatch'
 
 import $errUtils from './error_utils'
-import * as $XHR from './xml_http_request'
+import $XHR from './xml_http_request'
 import { makeContentWindowListener } from './events'
 
 const regularResourcesRe = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/

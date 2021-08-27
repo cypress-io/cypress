@@ -533,7 +533,7 @@ const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
 
 const isW3CRendered = (el) => {
   // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
-  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+  return !($visibility.parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
 }
 
 const isW3CFocusable = (el) => {
@@ -1336,7 +1336,8 @@ const hasContenteditableAttr = (el: HTMLElement) => {
   return attr !== undefined && attr !== null && attr !== 'false'
 }
 
-export {
+export default {
+  isW3CRendered,
   elementFromPoint,
   isElement,
   isUndefinedOrHTMLBodyDoc,
