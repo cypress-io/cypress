@@ -1,0 +1,19 @@
+{
+  "extends": "../ts/tsconfig.json",
+  "include": [
+    "src/*.ts",
+    "src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "importHelpers": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error"
+  },
+  "files": [
+    "../ts/index.d.ts"
+  ],
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@packages/types",
+  "version": "0.0.0-development",
+  "private": true,
+  "browser": "src/index.ts",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {},
+  "types": "src/index.ts"
+}

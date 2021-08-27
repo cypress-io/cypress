@@ -12,6 +12,8 @@ import type {
   Browser,
   DetectedBrowser,
   FoundBrowser,
+} from '@packages/types'
+import type {
   NotDetectedAtPathError,
   NotInstalledError, PathData,
 } from './types'

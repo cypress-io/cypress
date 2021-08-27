@@ -4,7 +4,8 @@ import path from 'path'
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
-import { openProject, LaunchArgs, LaunchOpts } from '@packages/server/lib/open_project'
+import { openProject } from '@packages/server/lib/open_project'
+import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -21,8 +22,6 @@ import browsers from '@packages/server/lib/browsers'
 import * as config from '@packages/server/lib/config'
 
 import { getId } from '@packages/server/lib/project_static'
-import type { FoundBrowser } from '@packages/launcher'
-import type { OpenProjectLaunchOptions } from '../project-base'
 import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
 
 interface RecordKey {
@@ -107,14 +106,16 @@ export class ServerActions extends BaseActions {
   }
 
   async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {
-    return openProject.create(args.projectRoot, args, options)
+    await openProject.create(args.projectRoot, args, options)
+
+    return
   }
 
   async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
     return openProject.launch(browser, spec, options)
   }
 
-  resolveOpenProjectConfig () {
+  resolveOpenProjectConfig (): FullConfig | null {
     return openProject.getConfig() ?? null
   }
 }
