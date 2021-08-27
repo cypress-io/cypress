@@ -2,7 +2,8 @@ import _ from 'lodash'
 import * as $document from './document'
 import * as $elements from './elements'
 
-import debugFn from 'debug'
+// import debugFn from 'debug'
+const debugFn = (() => { })
 
 const debug = debugFn('cypress:driver:selection')
 

@@ -495,6 +495,7 @@ export const create = (specWindow, Cypress, config) => {
   // generate the mocha + Mocha globals
   // on the specWindow, and get the new
   // _mocha instance
+
   const _mocha = createMocha(specWindow)
 
   const _runner = getRunner(_mocha)

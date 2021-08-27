@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import * as $Command from '../../cypress/command'
+import { $Command } from '../../cypress/command'
 import * as $dom from '../../dom'
 import * as $elements from '../../dom/elements'
 import * as $errUtils from '../../cypress/error_utils'

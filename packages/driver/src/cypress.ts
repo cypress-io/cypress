@@ -34,7 +34,7 @@ import * as $utils from './cypress/utils'
 
 import * as $errUtils from './cypress/error_utils'
 import * as $scriptUtils from './cypress/script_utils'
-import * as browserInfo from './cypress/browser'
+import browserInfo from './cypress/browser'
 import * as resolvers from './cypress/resolvers'
 import debugFn from 'debug'
 
@@ -68,6 +68,7 @@ export class $Cypress {
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
 
+    // debugger
     _.extend(this.$, $)
 
     this.setConfig(config)
@@ -216,7 +217,7 @@ export class $Cypress {
     this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
-    // this.Commands = $Commands.create(this, this.cy, this.state, this.config)
+    this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
     this.events.proxyTo(this.cy)
 
@@ -659,24 +660,24 @@ $Cypress.prototype.Log = $Log
 $Cypress.prototype.LocalStorage = $LocalStorage
 $Cypress.prototype.Mocha = $Mocha
 $Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
-// $Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
-// $Cypress.prototype.Mouse = $Mouse
-// $Cypress.prototype.Runner = $Runner
-// $Cypress.prototype.Server = $Server
-// $Cypress.prototype.Screenshot = $Screenshot
-// $Cypress.prototype.SelectorPlayground = $SelectorPlayground
-// $Cypress.prototype.utils = $utils
-// $Cypress.prototype._ = _
-// $Cypress.prototype.Blob = blobUtil
-// $Cypress.prototype.Promise = Promise
-// $Cypress.prototype.minimatch = minimatch
-// $Cypress.prototype.sinon = sinon
-// $Cypress.prototype.lolex = fakeTimers
+$Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
+$Cypress.prototype.Mouse = $Mouse
+$Cypress.prototype.Runner = $Runner
+$Cypress.prototype.Server = $Server
+$Cypress.prototype.Screenshot = $Screenshot
+$Cypress.prototype.SelectorPlayground = $SelectorPlayground
+$Cypress.prototype.utils = $utils
+$Cypress.prototype._ = _
+$Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Promise = Promise
+$Cypress.prototype.minimatch = minimatch
+$Cypress.prototype.sinon = sinon
+$Cypress.prototype.lolex = fakeTimers
 
-// // // attaching these so they are accessible
-// // // via the runner + integration spec helper
-// $Cypress.$ = $
-// $Cypress.utils = $utils
-// export default $Cypress
+// // attaching these so they are accessible
+// // via the runner + integration spec helper
+$Cypress.$ = $
+$Cypress.utils = $utils
+export default $Cypress
 
 export * from './cypress/utils'

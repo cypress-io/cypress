@@ -4,11 +4,11 @@ import _ from 'lodash'
 
 import * as $errUtils from './error_utils'
 
-import * as allCommands from '../cy/commands'
+import { allCommands } from '../cy/commands'
 import { addCommand } from '../cy/net-stubbing'
 
 const builtInCommands = [
-  ..._.toArray(allCommands).map((c) => c.default),
+  ..._.toArray(allCommands).map((c) => c.default || c),
   addCommand,
 ]
 

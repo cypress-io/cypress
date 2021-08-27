@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 
-import * as $Chainer from '../../cypress/chainer'
+import { $Chainer } from '../../cypress/chainer'
 import * as $errUtils from '../../cypress/error_utils'
 
 const command = function (ctx, name, ...args) {

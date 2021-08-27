@@ -52,56 +52,32 @@ import * as Window from './window'
 
 import * as Xhr from './xhr'
 
-export { Actions }
-
-export { Agents }
-
-export { Aliasing }
-
-export { Angular }
-
-export { Asserting }
-
-export { Clock }
-
-export { Commands }
-
-export { Connectors }
-
-export { Cookies }
-
-export { Debugging }
-
-export { Exec }
-
-export { Files }
-
-export { Fixtures }
-
-export { LocalStorage }
-
-export { Location }
-
-export { Misc }
-
-export { Popups }
-
-export { Navigation }
-
-export { Querying }
-
-export { Request }
-
-export { Sessions }
-
-export { Screenshot }
-
-export { Task }
-
-export { Traversals }
-
-export { Waiting }
-
-export { Window }
-
-export { Xhr }
+export const allCommands = {
+  ...Actions,
+  Agents,
+  Aliasing,
+  Angular,
+  Asserting,
+  Clock,
+  Commands,
+  Connectors,
+  Cookies,
+  Debugging,
+  Exec,
+  Files,
+  Fixtures,
+  LocalStorage,
+  Location,
+  Misc,
+  Popups,
+  Navigation,
+  Querying,
+  Request,
+  Sessions,
+  Screenshot,
+  Task,
+  Traversals,
+  Waiting,
+  Window,
+  Xhr,
+}
