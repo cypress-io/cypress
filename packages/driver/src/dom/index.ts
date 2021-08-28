@@ -1,17 +1,19 @@
-const $jquery = require('./jquery')
-const $window = require('./window')
-const $document = require('./document')
-const $elements = require('./elements')
-const $visibility = require('./visibility')
-const $coordinates = require('./coordinates')
+import $jquery from './jquery'
+import $window from './window'
+import $document from './document'
+import $elements from './elements'
+import $coordinates from './coordinates'
+import $selection from './selection'
+import $visibility from './visibility'
 
 const { isWindow, getWindowByElement } = $window
 const { isDocument, getDocumentFromElement } = $document
 const { wrap, unwrap, isJquery, query } = $jquery
-const { isVisible, isHidden, getReasonIsHidden } = $visibility
-const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, findShadowRoots, isWithinShadowRoot, getHostContenteditable } = $elements
+
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
-const { getSelectionBounds } = require('./selection')
+const { getHostContenteditable, getSelectionBounds } = $selection
+const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, findShadowRoots, isWithinShadowRoot } = $elements
+const { isVisible, isHidden, getReasonIsHidden } = $visibility
 
 const isDom = (obj) => {
   return isElement(obj) || isWindow(obj) || isDocument(obj)
@@ -22,7 +24,7 @@ const isDom = (obj) => {
 // our users. They can use them for debugging
 // purposes or for overriding. Everything else
 // can be tucked away behind these interfaces.
-module.exports = {
+export default {
   wrap,
   query,
   unwrap,
