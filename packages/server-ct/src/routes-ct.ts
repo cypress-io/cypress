@@ -22,6 +22,7 @@ export interface InitializeRoutes {
   networkProxy: NetworkProxy
   getRemoteState: () => any
   onError: (...args: unknown[]) => any
+  testingType: 'component' | 'e2e'
 }
 
 export const createRoutes = ({
