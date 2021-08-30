@@ -1,5 +1,5 @@
 <template>
-  <template v-if="!loading && wizard">
+  <template v-if="wizard && app">
     <Auth />
     <Button @click="launchCt">Launch CT in Chrome</Button>
     <Button @click="launchE2E">Launch E2E in Chrome</Button>
@@ -7,28 +7,11 @@
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
       <template v-if="wizard.step === 'welcome'">
-        <div class="max-w-4xl mx-auto text-center">
-          <template
-            v-for="testingType of wizard.testingTypes"
-            :key="testingType.id"
-          >
-
-            <template v-if="testingType.id === 'component'">
-              <div v-if="app.activeProject?.hasSetupComponentTesting">
-                You already set up component testing!
-              </div>
-              <TestingTypeCard v-else :testingType="testingType" />
-            </template>
-
-            <template v-if="testingType.id === 'e2e'">
-              <div v-if="app.activeProject?.hasSetupE2ETesting">
-                You already set up e2e testing!
-              </div>
-              <TestingTypeCard v-else :testingType="testingType" />
-            </template>
-
-          </template>
-        </div>
+        <TestingTypeCards 
+          :gql="query" 
+          @launchCt="launchCt"
+          @launchE2E="launchE2E"
+        />
       </template> 
       <template v-else-if="wizard.testingType === 'component'">
         <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
@@ -42,13 +25,13 @@
         </WizardLayout>
       </template>
     </div>
-  </template>
+  </template> 
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
 import Auth from './Auth.vue'
-import TestingTypeCard from "./TestingTypeCard.vue";
+import TestingTypeCards from "./TestingTypeCards.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
@@ -56,38 +39,12 @@ import OpenBrowser from "./OpenBrowser.vue";
 import WizardLayout from './WizardLayout.vue'
 import { gql } from '@urql/core'
 import { 
-  WizardQueryDocument, 
   InitializeOpenProjectDocument,
-  LaunchOpenProjectDocument
+  LaunchOpenProjectDocument,
+  WizardFragment,
 } from '../generated/graphql'
-import { useMutation, useQuery } from "@urql/vue";
+import { useMutation } from "@urql/vue";
 import Button from '../components/button/Button.vue'
-
-gql`
-query WizardQuery {
-  app {
-    isFirstOpen
-    activeProject {
-      hasSetupComponentTesting
-      hasSetupE2ETesting
-    }
-    ...ProjectRoot
-  }
-  wizard {
-    step
-    title
-    description
-    testingType
-    testingTypes {
-      ...TestingTypeCard
-    }
-    ...TestingType
-    ...ConfigFile
-    ...InstallDependencies
-    ...EnvironmentSetup
-  }
-}
-`
 
 gql`
 mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
@@ -109,11 +66,36 @@ mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
 }
 `
 
-const result = useQuery({ query: WizardQueryDocument })
+gql`
+fragment Wizard on Query {
+  ...TestingTypeCards
+  app {
+    isFirstOpen
+    activeProject {
+      hasSetupComponentTesting
+      hasSetupE2ETesting
+    }
+    ...ProjectRoot
+  }
+  wizard {
+    step
+    title
+    description
+    testingType
+    ...TestingType
+    ...ConfigFile
+    ...InstallDependencies
+    ...EnvironmentSetup
+  }
+}
+`
 
-const loading = result.fetching
-const wizard = computed(() => result.data.value?.wizard)
-const app = computed(() => result.data.value?.app!)
+const props = defineProps<{
+  query: WizardFragment
+}>()
+
+const app = computed(() => props.query?.app)
+const wizard = computed(() => props.query?.wizard)
 
 const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 const launchOpenProject = useMutation(LaunchOpenProjectDocument)

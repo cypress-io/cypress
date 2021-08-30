@@ -327,9 +327,10 @@ enum TestingTypeEnum {
 }
 
 type TestingTypeInfo {
-  description: String
+  description: String!
   id: TestingTypeEnum!
-  title: String
+  isSetup: Boolean!
+  title: String!
 }
 
 """Namespace for information related to the viewer"""

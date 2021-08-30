@@ -26,7 +26,7 @@ export class LocalProject extends Project {
     let config: ReturnType<LocalProject['resolvedConfig']>
 
     if (!(config = this.resolvedConfig())) {
-      return
+      return false
     }
 
     // default is {}
@@ -41,7 +41,7 @@ export class LocalProject extends Project {
     let config: ReturnType<LocalProject['resolvedConfig']>
 
     if (!(config = this.resolvedConfig())) {
-      return
+      return false
     }
 
     // default is {}

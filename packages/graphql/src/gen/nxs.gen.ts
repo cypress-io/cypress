@@ -282,9 +282,10 @@ export interface NexusGenFieldTypes {
     totalSkipped: number | null; // Int
   }
   TestingTypeInfo: { // field return type
-    description: string | null; // String
+    description: string; // String!
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    title: string | null; // String
+    isSetup: boolean; // Boolean!
+    title: string; // String!
   }
   Viewer: { // field return type
     authToken: string; // String!
@@ -493,6 +494,7 @@ export interface NexusGenFieldTypeNames {
   TestingTypeInfo: { // field return type name
     description: 'String'
     id: 'TestingTypeEnum'
+    isSetup: 'Boolean'
     title: 'String'
   }
   Viewer: { // field return type name

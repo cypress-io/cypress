@@ -65,8 +65,8 @@ export const TestingTypeNames: Record<TestingType, string> = {
 }
 
 export const TestingTypeDescriptions: Record<TestingType, string> = {
-  component: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
-  e2e: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
+  component: 'Click here to configure Component Testing with your choice of framework and dev server.',
+  e2e: 'Click here to configure end-to-end testing with Cypress.',
 }
 
 export const NAV_ITEM = [
