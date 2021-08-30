@@ -5,6 +5,7 @@
       :id="ct.id"
       :title="ct.title"
       description="LAUNCH"
+      role="launch-component-testing"
       @click="emit('launchCt')"
     />
 
@@ -13,6 +14,7 @@
       :id="ct.id"
       :title="ct.title"
       :description="ct.description"
+      role="setup-component-testing"
       @click="selectTestingType('component')"
     />
 
@@ -21,6 +23,7 @@
       :id="e2e.id"
       :title="e2e.title"
       description="LAUNCH"
+      role="launch-e2e-testing"
       @click="emit('launchE2E')"
     />
 
@@ -29,6 +32,7 @@
       :id="e2e.id"
       :title="e2e.title"
       :description="e2e.description"
+      role="setup-e2e-testing"
       @click="selectTestingType('e2e')"
     />
   </div>
@@ -38,34 +42,30 @@
 import { gql } from "@urql/core";
 import { useMutation } from "@urql/vue";
 import { computed } from "vue";
-import { TestingTypeCardsFragment, TestingTypeEnum, TestingTypeSelectDocument } from "../generated/graphql";
+import { 
+  TestingTypeAppQueryFragment, 
+  TestingTypeWizardQueryFragment, 
+  TestingTypeEnum,
+  TestingTypeSelectDocument 
+} from "../generated/graphql";
 import TestingTypeCard from "./TestingTypeCard.vue";
 
 gql`
-fragment TestingTypeCards on Query {
-  app {
-    activeProject {
-      hasSetupComponentTesting
-      hasSetupE2ETesting
-    }
-  }
-  
-  wizard {
-    testingType
-    testingTypes {
-      id
-      title
-      description
-    }
+fragment TestingTypeCardsApp on App {
+  activeProject {
+    hasSetupComponentTesting
+    hasSetupE2ETesting
   }
 }
 `
-
+  
 gql`
-fragment SetupTestingTypeCard on TestingTypeInfo {
-  id
-  title
-  description
+fragment TestingTypeCardsWizard on Wizard {
+  testingTypes {
+    id
+    title
+    description
+  }
 }
 `
 
@@ -83,7 +83,10 @@ mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
 const mutation = useMutation(TestingTypeSelectDocument)
 
 const props = defineProps<{
-  gql: TestingTypeCardsFragment
+  gql: {
+    // app: TestingTypeAppFragment
+    // wizard: TestingTypeWizardFragment
+  }
 }>()
 
 const emit = defineEmits<{

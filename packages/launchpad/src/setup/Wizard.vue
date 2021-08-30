@@ -68,8 +68,8 @@ mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
 
 gql`
 fragment Wizard on Query {
-  ...TestingTypeCards
   app {
+    ...TestingTypeCardsApp
     isFirstOpen
     activeProject {
       hasSetupComponentTesting
@@ -80,6 +80,7 @@ fragment Wizard on Query {
   wizard {
     step
     title
+    ...TestingTypeCardsWizard
     description
     testingType
     ...TestingType

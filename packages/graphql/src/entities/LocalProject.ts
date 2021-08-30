@@ -20,7 +20,7 @@ export class LocalProject extends Project {
   @nxs.field.nonNull.boolean({
     description: `Whether the user has configured component testing. Based on the existance of a 'component' key in their cypress.json`,
   })
-  hasSetupComponentTesting (): NxsResult<'LocalProject', 'hasSetupComponentTesting'> {
+  get hasSetupComponentTesting (): NxsResult<'LocalProject', 'hasSetupComponentTesting'> {
     // default is {}
     // assume if 1 or more key has been configured, CT has been setup
     let config: ReturnType<LocalProject['resolvedConfig']>
@@ -37,7 +37,7 @@ export class LocalProject extends Project {
   @nxs.field.nonNull.boolean({
     description: `Whether the user has configured e2e testing or not, based on the existance of a 'component' key in their cypress.json`,
   })
-  hasSetupE2ETesting (): NxsResult<'LocalProject', 'hasSetupE2ETesting'> {
+  get hasSetupE2ETesting (): NxsResult<'LocalProject', 'hasSetupE2ETesting'> {
     let config: ReturnType<LocalProject['resolvedConfig']>
 
     if (!(config = this.resolvedConfig())) {

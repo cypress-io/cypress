@@ -1,6 +1,7 @@
 <template>
   <button
     class="block h-45 border border-gray-200 m-5 p-2 rounded md:h-100 md:w-2/5 md:p-9 md:inline-block"
+    :role="role"
   >
     <img
       :src="icon"
@@ -24,6 +25,7 @@ const props = defineProps<{
   id: TestingTypeEnum
   title: string
   description: string
+  role: string
 }>()
 
 const icon = TestingTypeIcons[props.id]

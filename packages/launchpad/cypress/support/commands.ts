@@ -30,7 +30,7 @@ Cypress.Commands.add(
     options.global.plugins.push({
       install (app) {
         app.use(urql, testApolloClient({
-          context: new ClientTestContext(),
+          context: ctx,
         }))
       },
     })
@@ -39,9 +39,20 @@ Cypress.Commands.add(
   },
 )
 
-function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
-  const ctx = new ClientTestContext()
+const ctx = new ClientTestContext({
+  config: {},
+  cwd: '/dev/null',
+  // @ts-ignore
+  browser: null,
+  project: '/dev/null',
+  projectRoot: '/dev/null',
+  invokedFromCli: true,
+  testingType: 'e2e',
+  os: 'darwin',
+  _: [''],
+}, {})
 
+function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
   return mount(defineComponent({
     name: `mountFragment`,
     setup () {
@@ -85,8 +96,6 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
 }
 
 function mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T[], options: MountFragmentConfig<T>): Cypress.Chainable<ClientTestContext> {
-  const ctx = new ClientTestContext()
-
   return mount(defineComponent({
     name: `mountFragmentList`,
     setup () {

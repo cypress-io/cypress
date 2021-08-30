@@ -31,6 +31,27 @@ export class ClientTestActions extends BaseActions {
     return []
   }
 
+  resolveOpenProjectConfig (): FullConfig {
+    // @ts-ignore
+    return {
+      resolved: {
+        e2e: {
+          from: 'default',
+          value: {},
+        },
+        component: {
+          from: 'config',
+          value: {
+            viewportHeight: 100,
+          },
+        },
+      },
+    }
+  }
+
+  async initializeOpenProject () {}
+  async launchOpenProject () {}
+
   addProject () {
     return createTestProject('/some/new/project', this.ctx)
   }
