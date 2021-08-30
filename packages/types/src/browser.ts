@@ -48,7 +48,7 @@ export type Browser = {
 export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary'> & {
   path: string
   version: string
-  majorVersion?: string
+  majorVersion?: string | null
   /** is this a user-supplied browser? */
   custom?: boolean
   unsupportedVersion?: boolean

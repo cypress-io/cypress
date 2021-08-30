@@ -18,22 +18,22 @@ export class RunCommit {
   }
 
   @nxs.field.nonNull.string()
-  get branch (): NxsResult<'Run', 'branch'> {
+  get branch (): NxsResult<'RunCommit', 'branch'> {
     return this.config.branch
   }
 
   @nxs.field.nonNull.string()
-  get message (): NxsResult<'Run', 'message'> {
+  get message (): NxsResult<'RunCommit', 'message'> {
     return this.config.message
   }
 
   @nxs.field.nonNull.string()
-  get sha (): NxsResult<'Run', 'sha'> {
+  get sha (): NxsResult<'RunCommit', 'sha'> {
     return this.config.sha
   }
 
   @nxs.field.nonNull.string()
-  get url (): NxsResult<'Run', 'url'> {
+  get url (): NxsResult<'RunCommit', 'url'> {
     return this.config.url
   }
 }

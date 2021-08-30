@@ -1,9 +1,9 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import { TestingTypeEnum, TestingType as _TestingType, TestingTypeNames, TestingTypeDescriptions } from '../constants'
+import { TestingTypeEnum, TestingType, TestingTypeNames, TestingTypeDescriptions } from '../constants'
 
 @nxs.objectType()
 export class TestingTypeInfo {
-  constructor (private _id: _TestingType, private _isSetup: boolean) {}
+  constructor (private _id: TestingType) {}
 
   @nxs.field.nonNull.type(() => TestingTypeEnum)
   get id (): NxsResult<'TestingTypeInfo', 'id'> {
@@ -18,10 +18,5 @@ export class TestingTypeInfo {
   @nxs.field.nonNull.string()
   get description (): NxsResult<'TestingTypeInfo', 'description'> {
     return TestingTypeDescriptions[this.id]
-  }
-
-  @nxs.field.nonNull.boolean()
-  get isSetup (): NxsResult<'TestingTypeInfo', 'isSetup'> {
-    return this._isSetup ?? false
   }
 }

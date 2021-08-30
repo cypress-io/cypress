@@ -113,7 +113,7 @@ export const NAV_ITEM_INFO: Record<NavItem, NavItemDetails> = {
     displayName: 'Settings',
     iconPath: 'clarity/settings-line',
   },
-}
+} as const
 
 export type WizardStep = typeof WIZARD_STEP[number]
 
