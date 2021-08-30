@@ -7,9 +7,6 @@ module.exports = (on, config) => {
         output: {
           publicPath: '/',
         },
-        devServer: {
-          publicPath: '/',
-        },
       },
       options,
     })
