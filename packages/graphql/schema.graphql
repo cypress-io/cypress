@@ -329,7 +329,6 @@ enum TestingTypeEnum {
 type TestingTypeInfo {
   description: String!
   id: TestingTypeEnum!
-  isSetup: Boolean!
   title: String!
 }
 
