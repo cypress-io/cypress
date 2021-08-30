@@ -340,17 +340,17 @@ export class ResolvedConfig {
     return this.resolvedConfig.testFiles ? new ResolvedStringOption(this.resolvedConfig.testFiles) : null
   }
 
-  @nxs.field.type((): NxsResult<'ResolvedConfig', 'nxs'> => ResolvedStringOption)
+  @nxs.field.type(() => ResolvedStringOption)
   get userAgent (): NxsResult<'ResolvedConfig', 'userAgent'> {
     return this.resolvedConfig.userAgent ? new ResolvedStringOption(this.resolvedConfig.userAgent) : null
   }
 
-  @nxs.field.type((): NxsResult<'ResolvedConfig', 'nxs'> => ResolvedStringOption)
+  @nxs.field.type(() => ResolvedStringOption)
   get supportFolder (): NxsResult<'ResolvedConfig', 'supportFolder'> {
     return this.resolvedConfig.supportFolder ? new ResolvedStringOption(this.resolvedConfig.supportFolder) : null
   }
 
-  @nxs.field.type((): NxsResult<'ResolvedConfig', 'nxs'> => ResolvedBooleanOption)
+  @nxs.field.type(() => ResolvedBooleanOption)
   get experimentalFetchPolyfill (): NxsResult<'ResolvedConfig', 'experimentalFetchPolyfill'> {
     return this.resolvedConfig.experimentalFetchPolyfill ? new ResolvedBooleanOption(this.resolvedConfig.experimentalFetchPolyfill) : null
   }

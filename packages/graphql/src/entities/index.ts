@@ -2,6 +2,8 @@ export * from './App'
 
 export * from './DashboardProject'
 
+export * from './Project'
+
 export * from './Mutation'
 
 export * from './NavigationMenu'

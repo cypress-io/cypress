@@ -1,4 +1,4 @@
-/// <reference types="cypress" />
+/// <reference path="../../../cli/types/cypress.d.ts" />
 
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 

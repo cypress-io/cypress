@@ -34,47 +34,47 @@ export class RunGroup {
   constructor (private config: RunGroupConfig) {}
 
   @nxs.field.nonNull.type(() => RunGroupStatusEnum)
-  get status (): NxsResult<'Run', 'status'> {
+  get status (): NxsResult<'RunGroup', 'status'> {
     return this.config.status
   }
 
   @nxs.field.nonNull.string()
-  get createdAt (): NxsResult<'Run', 'createdAt'> {
+  get createdAt (): NxsResult<'RunGroup', 'createdAt'> {
     return this.config.createdAt
   }
 
   @nxs.field.nonNull.string()
-  get completedAt (): NxsResult<'Run', 'completedAt'> {
+  get completedAt (): NxsResult<'RunGroup', 'completedAt'> {
     return this.config.completedAt
   }
 
   @nxs.field.int()
-  get totalPassed (): NxsResult<'Run', 'totalPassed'> {
+  get totalPassed (): NxsResult<'RunGroup', 'totalPassed'> {
     return this.config.totalPassed ?? null
   }
 
   @nxs.field.int()
-  get totalFailed (): NxsResult<'Run', 'totalFailed'> {
+  get totalFailed (): NxsResult<'RunGroup', 'totalFailed'> {
     return this.config.totalFailed ?? null
   }
 
   @nxs.field.int()
-  get totalPending (): NxsResult<'Run', 'totalPending'> {
+  get totalPending (): NxsResult<'RunGroup', 'totalPending'> {
     return this.config.totalPending ?? null
   }
 
   @nxs.field.int()
-  get totalSkipped (): NxsResult<'Run', 'totalSkipped'> {
+  get totalSkipped (): NxsResult<'RunGroup', 'totalSkipped'> {
     return this.config.totalSkipped ?? null
   }
 
   @nxs.field.int()
-  get totalDuration (): NxsResult<'Run', 'totalDuration'> {
+  get totalDuration (): NxsResult<'RunGroup', 'totalDuration'> {
     return this.config.totalDuration ?? null
   }
 
   @nxs.field.nonNull.type(() => RunCommit)
-  get commit (): NxsResult<'Run', 'commit'> {
+  get commit (): NxsResult<'RunGroup', 'commit'> {
     return new RunCommit(this.config.commit)
   }
 }

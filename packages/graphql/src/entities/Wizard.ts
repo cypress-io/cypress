@@ -53,7 +53,7 @@ export class Wizard {
   @nxs.field.list.nonNull.type(() => WizardNpmPackage, {
     description: 'A list of packages to install, null if we have not chosen both a framework and bundler',
   })
-  get packagesToInstall (): NxsResult<'WizardFrontendFramework', 'packagesToInstall'> {
+  get packagesToInstall (): NxsResult<'Wizard', 'packagesToInstall'> {
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
     }
@@ -127,7 +127,7 @@ export class Wizard {
       })
     },
   })
-  sampleCode (args: NxsArgs<'Wizard', 'sampleCode'>): NxsResult<'Wizard', 'configFile'> {
+  sampleCode (args: NxsArgs<'Wizard', 'sampleCode'>): NxsResult<'Wizard', 'sampleCode'> {
     if (!this.framework || !this.bundler) {
       return null
     }
