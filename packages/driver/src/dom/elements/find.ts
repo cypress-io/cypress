@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import * as $document from '../document'
+import $document from '../document'
 import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
