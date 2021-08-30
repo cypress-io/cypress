@@ -3,8 +3,8 @@
     class="block h-45 border border-gray-200 m-5 p-2 rounded md:h-100 md:w-2/5 md:p-9 md:inline-block"
     :role="role"
   >
-    <img
-      :src="icon"
+    <component 
+      :is="icon" 
       class="float-left m-5 md:mx-auto md:mb-10 md:float-none"
     />
     <p class="text-indigo-700 text-left mt-3 md:text-center">
