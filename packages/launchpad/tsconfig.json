@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.vue"],
+  "include": ["src/**/*.vue", "src/**/*.tsx", "cypress/**/*.ts"],
   "compilerOptions": {
     /* Basic Options */
     "target": "esnext",
@@ -8,7 +8,6 @@
      * Allow javascript files to be compiled.
      * Override this in modules that need JS
      */
-    "allowJs": true,
     "noEmit": true,
     "jsx": "preserve",
     "preserveWatchOutput": true,
@@ -35,7 +34,7 @@
      * TODO: Look into changing this in the future
      */
     /* Additional Checks */
-    // "skipLibCheck": true,
+    "skipLibCheck": false,
     /* Report errors on unused locals. */
     // "noEmit": true,
     "noUnusedLocals": false,
@@ -49,7 +48,7 @@
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [] /* List of folders to include type definitions from. */
-    "types": ["chrome", "./vue-shims", "./vite-env", "vite-plugin-icons", "@intlify/vite-plugin-vue-i18n/client"], /* Type declaration files to be included in compilation. */
+    "types": ["chrome", "./vue-shims", "./vite-env", "vite-plugin-icons", "@intlify/vite-plugin-vue-i18n/client", "@testing-library/cypress"], /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,

@@ -9,6 +9,7 @@
     "noImplicitAny": true,
     "experimentalDecorators": true,
     "allowJs": true,
+    "types": [],
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"
   },
