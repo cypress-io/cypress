@@ -129,22 +129,6 @@ const insertSubstring = (curText, newText, [start, end]) => {
   return curText.substring(0, start) + newText + curText.substring(end)
 }
 
-const getHostContenteditable = function (el: HTMLElement) {
-  let curEl = el
-
-  while (curEl.parentElement && !$elements.hasContenteditableAttr(curEl)) {
-    curEl = curEl.parentElement
-  }
-
-  // if there's no host contenteditable, we must be in designMode
-  // so act as if the documentElement (html element) is the host contenteditable
-  if (!$elements.hasContenteditableAttr(curEl)) {
-    return $document.getDocumentFromElement(el).documentElement
-  }
-
-  return curEl
-}
-
 const _getSelectionByEl = function (el) {
   const doc = $document.getDocumentFromElement(el)
 
@@ -753,7 +737,6 @@ export default {
   moveSelectionToEnd,
   moveSelectionToStart,
   getCaretPosition,
-  getHostContenteditable,
   moveCursorLeft,
   moveCursorRight,
   moveCursorUp,

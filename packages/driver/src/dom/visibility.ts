@@ -1,47 +1,50 @@
 // @ts-nocheck
 
 import _ from 'lodash'
-
 import $jquery from './jquery'
 import $document from './document'
 import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
 
+const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isFocusable, stringify: stringifyElement } = $elements
+
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'scroll', 'auto']
 
-const isVisible = (el) => {
+export const isVisible = (el) => {
   return !isHidden(el, 'isVisible()')
 }
+
+const { wrap } = $jquery
 
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
-const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
-  if (!$elements.isElement(el)) {
+export const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+  if (!isElement(el)) {
     throw new Error(`\`Cypress.dom.${methodName}\` failed because it requires a DOM element. The subject received was: \`${el}\``)
   }
 
   const $el = $jquery.wrap(el)
 
   // the body and html are always visible
-  if ($elements.isBody(el) || $elements.isHTML(el)) {
+  if (isBody(el) || isHTML(el)) {
     return false // is visible
   }
 
   // an option is considered visible if its parent select is visible
-  if ($elements.isOption(el) || $elements.isOptgroup(el)) {
+  if (isOption(el) || isOptgroup(el)) {
     // they could have just set to hide the option
     if (elHasDisplayNone($el)) {
       return true
     }
 
     // if its parent select is visible, then it's not hidden
-    const $select = $elements.getFirstParentWithTagName($el, 'select')
+    const $select = getFirstParentWithTagName($el, 'select')
 
     // check $select.length here first
     // they may have not put the option into a select el,
@@ -206,22 +209,28 @@ const canClipContent = function ($el, $ancestor) {
   // even if ancestors' overflow is clippable, if the element's offset parent
   // is a parent of the ancestor, the ancestor will not clip the element
   // unless the element is position relative
-  if (!elHasPositionRelative($el) && $elements.isAncestor($ancestor, $offsetParent)) {
+  if (!elHasPositionRelative($el) && isAncestor($ancestor, $offsetParent)) {
     return false
   }
 
   // even if ancestors' overflow is clippable, if the element's offset parent
   // is a child of the ancestor, the ancestor will not clip the element
   // unless the ancestor has position absolute
-  if (elHasPositionAbsolute($offsetParent) && $elements.isChild($ancestor, $offsetParent)) {
+  if (elHasPositionAbsolute($offsetParent) && isChild($ancestor, $offsetParent)) {
     return false
   }
 
   return true
 }
 
-const elOrAncestorIsFixedOrSticky = function ($el) {
-  return !!$elements.getFirstFixedOrStickyPositionParent($el)
+export const isW3CRendered = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+  return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
+}
+
+export const isW3CFocusable = (el) => {
+  // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
 const elAtCenterPoint = function ($el) {
@@ -241,7 +250,7 @@ const elDescendentsHavePositionFixedOrAbsolute = function ($parent, $child) {
   // create an array of all elements between $parent and $child
   // including child but excluding parent
   // and check if these have position fixed|absolute
-  const parents = $elements.getAllParents($child[0], $parent)
+  const parents = getAllParents($child[0], $parent)
   const $els = $jquery.wrap(parents).add($child)
 
   return _.some($els.get(), (el) => {
@@ -265,7 +274,7 @@ const elIsNotElementFromPoint = function ($el) {
   // if the element at point is not a descendent
   // of our $el then we know it's being covered or its
   // not visible
-  if ($elements.isDescendent($el, $elAtPoint)) {
+  if (isDescendent($el, $elAtPoint)) {
     return false
   }
 
@@ -274,7 +283,7 @@ const elIsNotElementFromPoint = function ($el) {
   // will cause elAtCenterPoint to fall through to parent
   if (
     ($el.css('pointer-events') === 'none' || $el.parent().css('pointer-events') === 'none') &&
-    ($elAtPoint && $elements.isAncestor($el, $elAtPoint))
+    ($elAtPoint && isAncestor($el, $elAtPoint))
   ) {
     return false
   }
@@ -282,11 +291,11 @@ const elIsNotElementFromPoint = function ($el) {
   return true
 }
 
-const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $elements.getParent($el)) {
+const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = getParent($el)) {
   // no ancestor, not out of bounds!
   // if we've reached the top parent, which is not a normal DOM el
   // then we're in bounds all the way up, return false
-  if ($elements.isUndefinedOrHTMLBodyDoc($ancestor)) {
+  if (isUndefinedOrHTMLBodyDoc($ancestor)) {
     return false
   }
 
@@ -313,7 +322,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $elements.
     }
   }
 
-  return elIsOutOfBoundsOfAncestorsOverflow($el, $elements.getParent($ancestor))
+  return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
 }
 
 const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
@@ -324,13 +333,13 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
   // is effectively hidden
   // -----UNLESS------
   // the parent or a descendent has position: absolute|fixed
-  const $parent = $elements.getParent($el)
+  const $parent = getParent($el)
 
   // stop if we've reached the body or html
   // in case there is no body
   // or if parent is the document which can
   // happen if we already have an <html> element
-  if ($elements.isUndefinedOrHTMLBodyDoc($parent)) {
+  if (isUndefinedOrHTMLBodyDoc($parent)) {
     return false
   }
 
@@ -353,7 +362,7 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   // if we've walked all the way up to body or html then return false
-  if ($elements.isUndefinedOrHTMLBodyDoc($el)) {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
     return false
   }
 
@@ -363,7 +372,7 @@ const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   }
 
   // continue walking
-  return parentHasNoOffsetWidthOrHeightAndOverflowHidden($elements.getParent($el))
+  return parentHasNoOffsetWidthOrHeightAndOverflowHidden(getParent($el))
 }
 
 const parentHasDisplayNone = function ($el) {
@@ -379,7 +388,7 @@ const parentHasDisplayNone = function ($el) {
   }
 
   // continue walking
-  return parentHasDisplayNone($elements.getParent($el))
+  return parentHasDisplayNone(getParent($el))
 }
 
 const parentHasVisibilityHidden = function ($el) {
@@ -394,7 +403,7 @@ const parentHasVisibilityHidden = function ($el) {
   }
 
   // continue walking
-  return parentHasVisibilityHidden($elements.getParent($el))
+  return parentHasVisibilityHidden(getParent($el))
 }
 
 const parentHasVisibilityCollapse = function ($el) {
@@ -409,7 +418,7 @@ const parentHasVisibilityCollapse = function ($el) {
   }
 
   // continue walking
-  return parentHasVisibilityCollapse($elements.getParent($el))
+  return parentHasVisibilityCollapse(getParent($el))
 }
 
 const parentHasOpacityZero = function ($el) {
@@ -428,12 +437,12 @@ const parentHasOpacityZero = function ($el) {
 }
 
 /* eslint-disable no-cond-assign */
-const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
+export const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el
 
-  const node = $elements.stringify($el, 'short')
+  const node = stringifyElement($el, 'short')
   let width = elOffsetWidth($el)
   let height = elOffsetHeight($el)
   let $parent
@@ -444,25 +453,25 @@ const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
     return `This element \`${node}\` is not visible because it has CSS property: \`display: none\``
   }
 
-  if ($parent = parentHasDisplayNone($elements.getParent($el))) {
-    parentNode = $elements.stringify($parent, 'short')
+  if ($parent = parentHasDisplayNone(getParent($el))) {
+    parentNode = stringifyElement($parent, 'short')
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`display: none\``
   }
 
-  if ($parent = parentHasVisibilityHidden($elements.getParent($el))) {
-    parentNode = $elements.stringify($parent, 'short')
+  if ($parent = parentHasVisibilityHidden(getParent($el))) {
+    parentNode = stringifyElement($parent, 'short')
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`visibility: hidden\``
   }
 
-  if ($parent = parentHasVisibilityCollapse($elements.getParent($el))) {
-    parentNode = $elements.stringify($parent, 'short')
+  if ($parent = parentHasVisibilityCollapse(getParent($el))) {
+    parentNode = stringifyElement($parent, 'short')
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`visibility: collapse\``
   }
 
-  if ($elements.isDetached($el)) {
+  if (isDetached($el)) {
     return `This element \`${node}\` is not visible because it is detached from the DOM`
   }
 
@@ -479,7 +488,7 @@ const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
   }
 
   if (($parent = parentHasOpacityZero($el.parent())) && options.checkOpacity) {
-    parentNode = $elements.stringify($parent, 'short')
+    parentNode = stringifyElement($parent, 'short')
 
     return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`opacity: 0\``
   }
@@ -498,8 +507,8 @@ const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
     return `This element \`${node}\` is not visible because it is rotated and its backface is hidden.`
   }
 
-  if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($elements.getParent($el))) {
-    parentNode = $elements.stringify($parent, 'short')
+  if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden(getParent($el))) {
+    parentNode = stringifyElement($parent, 'short')
     width = elOffsetWidth($parent)
     height = elOffsetHeight($parent)
 
@@ -510,7 +519,7 @@ const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
   if (elOrAncestorIsFixedOrSticky($el)) {
     if (elIsNotElementFromPoint($el)) {
       // show the long element here
-      const covered = $elements.stringify(elAtCenterPoint($el))
+      const covered = stringifyElement(elAtCenterPoint($el))
 
       if (covered) {
         return `This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`${covered}\``
@@ -529,5 +538,5 @@ const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
 /* eslint-enable no-cond-assign */
 
 export default {
-  isVisible, isHidden, getReasonIsHidden, parentHasDisplayNone
+  isVisible, isHidden, getReasonIsHidden, parentHasDisplayNone,
 }

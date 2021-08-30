@@ -9,12 +9,10 @@ import $visibility from './visibility'
 const { isWindow, getWindowByElement } = $window
 const { isDocument, getDocumentFromElement } = $document
 const { wrap, unwrap, isJquery, query } = $jquery
-
-debugger;
+const { isVisible, isHidden, getReasonIsHidden } = $visibility
+const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, findShadowRoots, isWithinShadowRoot, getHostContenteditable } = $elements
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
-const { getHostContenteditable, getSelectionBounds } = $selection
-const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, findShadowRoots, isWithinShadowRoot } = $elements
-const { isVisible, isHidden, getReasonIsHidden, } = $visibility
+const { getSelectionBounds } = $selection
 
 const isDom = (obj) => {
   return isElement(obj) || isWindow(obj) || isDocument(obj)
