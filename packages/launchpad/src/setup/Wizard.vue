@@ -67,26 +67,34 @@ mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
 `
 
 gql`
+fragment WizardApp on App {
+  isFirstOpen
+  activeProject {
+    hasSetupComponentTesting
+    hasSetupE2ETesting
+  }
+  ...ProjectRoot
+  ...TestingTypeCardsApp
+}
+
+fragment WizardWizard on Wizard {
+  step
+  title
+  ...TestingTypeCardsWizard
+  description
+  testingType
+  ...TestingType
+  ...ConfigFile
+  ...InstallDependencies
+  ...EnvironmentSetup
+}
+
 fragment Wizard on Query {
   app {
-    ...TestingTypeCardsApp
-    isFirstOpen
-    activeProject {
-      hasSetupComponentTesting
-      hasSetupE2ETesting
-    }
-    ...ProjectRoot
+    ...WizardApp
   }
   wizard {
-    step
-    title
-    ...TestingTypeCardsWizard
-    description
-    testingType
-    ...TestingType
-    ...ConfigFile
-    ...InstallDependencies
-    ...EnvironmentSetup
+    ...WizardWizard
   }
 }
 `
