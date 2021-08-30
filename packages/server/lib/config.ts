@@ -3,6 +3,7 @@ import R from 'ramda'
 import path from 'path'
 import Promise from 'bluebird'
 import deepDiff from 'return-deep-diff'
+import type { ResolvedConfigurationOptions, ResolvedFromConfig, ResolvedConfigurationOptionSource } from '@packages/types'
 
 import errors from './errors'
 import scaffold from './scaffold'
@@ -18,20 +19,6 @@ const debug = Debug('cypress:server:config')
 
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars } from './util/config'
-
-export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
-
-export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
-
-export type ResolvedFromConfig = {
-  from: ResolvedConfigurationOptionSource
-  // TODO: Generic somehow with better type safety
-  value: any
-}
-
-export type ResolvedConfigurationOptions = Partial<{
-  [x in keyof Cypress.ResolvedConfigOptions]: ResolvedFromConfig
-}>
 
 export const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 

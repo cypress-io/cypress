@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser } from '@packages/types'
 // @ts-ignore
 import errors from '../errors'
 // @ts-ignore

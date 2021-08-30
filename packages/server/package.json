@@ -144,6 +144,7 @@
     "@packages/socket": "0.0.0-development",
     "@packages/static": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
     "@types/http-proxy": "1.17.4",

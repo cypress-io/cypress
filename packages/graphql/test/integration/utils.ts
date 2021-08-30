@@ -1,9 +1,7 @@
 import axios from 'axios'
-import type { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser, FullConfig, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import { BaseActions, BaseContext, DashboardProject, LocalProject, Viewer, Wizard } from '../../src'
 import { startGraphQLServer, closeGraphQLServer, setServerContext } from '../../src/server'
-import type { LaunchArgs } from '@packages/server/lib/open_project'
-import type { Cfg, OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
 
 interface TestContextInjectionOptions {
   wizard?: Wizard
@@ -23,9 +21,8 @@ export class TestActions extends BaseActions {
   installDependencies () {}
   createConfigFile () {}
 
-  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {}
   async launchOpenProject () {}
-  resolveOpenProjectConfig (): Cfg {
+  resolveOpenProjectConfig (): FullConfig {
     return {
       projectRoot: '/root/path',
       resolved: {},
@@ -57,6 +54,8 @@ export class TestActions extends BaseActions {
   async getRecordKeys () {
     return []
   }
+
+  async initializeOpenProject () {}
 
   async getBrowsers () {
     const browser: FoundBrowser = {

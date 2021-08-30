@@ -31,7 +31,7 @@ const savedState = require('../saved_state')
 import { ServerContext } from '../graphql/ServerContext'
 import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
-import type { LaunchArgs } from '../open_project'
+import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
 import type { BrowserContract } from '@packages/graphql/src/contracts/BrowserContract'
 

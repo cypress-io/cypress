@@ -1,3 +1,3 @@
-import type { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser } from '@packages/types'
 
 export type BrowserContract = FoundBrowser
