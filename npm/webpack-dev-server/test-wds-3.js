@@ -29,7 +29,7 @@ const main = async () => {
     process.exit(exitCode)
   }
 
-  pkg.devDependencies['webpack-dev-server'] = '^3.11.0'
+  pkg.devDependencies['webpack-dev-server'] = '3.11.0'
   // eslint-disable-next-line no-console
   console.log('[@cypress/webpack-dev-server]: updating package.json...')
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))
