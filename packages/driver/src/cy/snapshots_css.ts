@@ -1,10 +1,9 @@
-import path from 'path'
-import url from 'url'
 import _ from 'lodash'
 import md5 from 'md5'
-
-import LimitedMap from '../util/limited_map'
+import path from 'path'
+import url from 'url'
 import $utils from '../cypress/utils'
+import LimitedMap from '../util/limited_map'
 
 const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
 const screenStylesheetRe = /(screen|all)/
@@ -90,123 +89,125 @@ const getInlineCssContents = (stylesheet, $$) => {
   })
 }
 
-export const create = ($$, state) => {
-  const cssIdToContentsMap = new WeakMap()
-  const cssHashedContentsToIdMap = new LimitedMap()
-  const cssHrefToIdMap = new LimitedMap()
-  const cssHrefToModifiedMap = new LimitedMap()
-  let newWindow = false
+export default {
+  create: ($$, state) => {
+    const cssIdToContentsMap = new WeakMap()
+    const cssHashedContentsToIdMap = new LimitedMap()
+    const cssHrefToIdMap = new LimitedMap()
+    const cssHrefToModifiedMap = new LimitedMap()
+    let newWindow = false
 
-  //// we invalidate the cache when css is modified by javascript
-  const onCssModified = (href) => {
-    cssHrefToModifiedMap.set(href, { modified: true })
-  }
-
-  //// the lifecycle of a stylesheet is the lifecycle of the window
-  //// so track this to know when to re-evaluate the cache in case
-  //// of css being modified by javascript
-  const onBeforeWindowLoad = () => {
-    newWindow = true
-  }
-
-  const getStyleId = (href, stylesheet) => {
-    const hrefModified = cssHrefToModifiedMap.get(href) || {}
-    const existing = cssHrefToIdMap.get(href)
-
-    //// if we've loaded a new window and the css was invalidated due to javascript
-    //// we need to re-evaluate since this time around javascript might not change the css
-    if (existing && !hrefModified.modified && !(newWindow && hrefModified.modifiedLast)) {
-      return existing
+    //// we invalidate the cache when css is modified by javascript
+    const onCssModified = (href) => {
+      cssHrefToModifiedMap.set(href, { modified: true })
     }
 
-    const cssContents = getExternalCssContents(href, stylesheet)
-
-    if (cssContents == null) {
-      return
+    //// the lifecycle of a stylesheet is the lifecycle of the window
+    //// so track this to know when to re-evaluate the cache in case
+    //// of css being modified by javascript
+    const onBeforeWindowLoad = () => {
+      newWindow = true
     }
 
-    const hashedCssContents = md5(cssContents)
-    //// if we already have these css contents stored, don't store them again
-    const existingId = cssHashedContentsToIdMap.get(hashedCssContents)
+    const getStyleId = (href, stylesheet) => {
+      const hrefModified = cssHrefToModifiedMap.get(href) || {}
+      const existing = cssHrefToIdMap.get(href)
 
-    //// id just needs to be a new object reference
-    //// we add the href for debuggability
-    const id = existingId || { hrefId: href }
-
-    cssHrefToIdMap.set(href, id)
-
-    //// if we already have these css contents stored, don't store them again
-    if (!existingId) {
-      cssHashedContentsToIdMap.set(hashedCssContents, id)
-      cssIdToContentsMap.set(id, cssContents)
-    }
-
-    if (hrefModified.modified) {
-      hrefModified.modifiedLast = true
-    } else if (newWindow) {
-      hrefModified.modifiedLast = false
-    }
-
-    hrefModified.modified = false
-    cssHrefToModifiedMap.set(href, hrefModified)
-
-    return id
-  }
-
-  const getStyleIdsFor = (doc, $$, stylesheets, location) => {
-    let styles = $$(location).find('link[rel=\'stylesheet\'],style')
-
-    styles = _.filter(styles, isScreenStylesheet)
-
-    return _.map(styles, (stylesheet) => {
-      //// in cases where we can get the CSS as a string, make the paths
-      //// absolute so that when they're restored by appending them to the page
-      //// in <style> tags, background images and fonts still properly load
-      const href = stylesheet.href
-
-      //// if there's an href, it's a link tag
-      //// return the CSS rules as a string, or, if cross-domain,
-      //// a reference to the stylesheet's href
-      if (href) {
-        return getStyleId(href, stylesheets[href]) || { href }
+      //// if we've loaded a new window and the css was invalidated due to javascript
+      //// we need to re-evaluate since this time around javascript might not change the css
+      if (existing && !hrefModified.modified && !(newWindow && hrefModified.modifiedLast)) {
+        return existing
       }
 
-      //// otherwise, it's a style tag, and we can just grab its content
-      const cssContents = getInlineCssContents(stylesheet, $$)
+      const cssContents = getExternalCssContents(href, stylesheet)
 
-      return makePathsAbsoluteToDoc(cssContents, doc)
-    })
-  }
-
-  const getStyleIds = () => {
-    const doc = state('document')
-    const stylesheets = getDocumentStylesheets(doc)
-
-    const styleIds = {
-      headStyleIds: getStyleIdsFor(doc, $$, stylesheets, 'head'),
-      bodyStyleIds: getStyleIdsFor(doc, $$, stylesheets, 'body'),
-    }
-
-    //// after getting the all the styles on the page, it's no longer a new window
-    newWindow = false
-
-    return styleIds
-  }
-
-  const getStylesByIds = (ids) => {
-    return _.map(ids, (idOrCss) => {
-      if (_.isString(idOrCss)) {
-        return idOrCss
+      if (cssContents == null) {
+        return
       }
 
-      return cssIdToContentsMap.get(idOrCss) || { href: idOrCss.href }
-    })
-  }
+      const hashedCssContents = md5(cssContents)
+      //// if we already have these css contents stored, don't store them again
+      const existingId = cssHashedContentsToIdMap.get(hashedCssContents)
 
-  return {
-    getStyleIds,
-    getStylesByIds,
-    onCssModified,
-    onBeforeWindowLoad,
-  }
+      //// id just needs to be a new object reference
+      //// we add the href for debuggability
+      const id = existingId || { hrefId: href }
+
+      cssHrefToIdMap.set(href, id)
+
+      //// if we already have these css contents stored, don't store them again
+      if (!existingId) {
+        cssHashedContentsToIdMap.set(hashedCssContents, id)
+        cssIdToContentsMap.set(id, cssContents)
+      }
+
+      if (hrefModified.modified) {
+        hrefModified.modifiedLast = true
+      } else if (newWindow) {
+        hrefModified.modifiedLast = false
+      }
+
+      hrefModified.modified = false
+      cssHrefToModifiedMap.set(href, hrefModified)
+
+      return id
+    }
+
+    const getStyleIdsFor = (doc, $$, stylesheets, location) => {
+      let styles = $$(location).find('link[rel=\'stylesheet\'],style')
+
+      styles = _.filter(styles, isScreenStylesheet)
+
+      return _.map(styles, (stylesheet) => {
+        //// in cases where we can get the CSS as a string, make the paths
+        //// absolute so that when they're restored by appending them to the page
+        //// in <style> tags, background images and fonts still properly load
+        const href = stylesheet.href
+
+        //// if there's an href, it's a link tag
+        //// return the CSS rules as a string, or, if cross-domain,
+        //// a reference to the stylesheet's href
+        if (href) {
+          return getStyleId(href, stylesheets[href]) || { href }
+        }
+
+        //// otherwise, it's a style tag, and we can just grab its content
+        const cssContents = getInlineCssContents(stylesheet, $$)
+
+        return makePathsAbsoluteToDoc(cssContents, doc)
+      })
+    }
+
+    const getStyleIds = () => {
+      const doc = state('document')
+      const stylesheets = getDocumentStylesheets(doc)
+
+      const styleIds = {
+        headStyleIds: getStyleIdsFor(doc, $$, stylesheets, 'head'),
+        bodyStyleIds: getStyleIdsFor(doc, $$, stylesheets, 'body'),
+      }
+
+      //// after getting the all the styles on the page, it's no longer a new window
+      newWindow = false
+
+      return styleIds
+    }
+
+    const getStylesByIds = (ids) => {
+      return _.map(ids, (idOrCss) => {
+        if (_.isString(idOrCss)) {
+          return idOrCss
+        }
+
+        return cssIdToContentsMap.get(idOrCss) || { href: idOrCss.href }
+      })
+    }
+
+    return {
+      getStyleIds,
+      getStylesByIds,
+      onCssModified,
+      onBeforeWindowLoad,
+    }
+  },
 }
