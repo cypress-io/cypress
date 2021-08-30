@@ -123,7 +123,7 @@ const setTopOnError = function (Cypress, cy) {
 // TODO: refactor the 'create' method below into this class
 class $Cy {}
 
-const create = function (specWindow, Cypress, Cookies, state, config, log) {
+const create = function (specWindow, Cypress, Cookies, state, config, autoRun = true) {
   let cy = new $Cy()
   const commandFns = {}
 
@@ -274,6 +274,13 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     return Cypress.action('cy:command:enqueued', obj)
   }
+
+  // this is utilized for multidomain, where the secondary domain enqueues
+  // its own commands and proxy versions are added to the queue on the
+  // primary domain via this event
+  Cypress.on('enqueue:command', (attrs) => {
+    enqueue(attrs)
+  })
 
   const getCommandsUntilFirstParentOrValidSubject = function (command, memo = []) {
     if (!command) {
@@ -757,7 +764,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
             warnMixingPromisesAndCommands()
           }
 
-          queue.run()
+          // the queue is only auto-run in the primary domain. in a
+          // secondary domain, we wait until the primary domain tells
+          // us to run the queue
+          if (autoRun) {
+            queue.run()
+          }
         }
 
         return chain

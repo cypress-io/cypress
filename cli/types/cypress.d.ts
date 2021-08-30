@@ -262,7 +262,7 @@ declare namespace Cypress {
      * Currently executing test runnable instance.
      */
     currentTest: {
-      title: string,
+      title: string
       titlePath: string[]
     }
 
@@ -5545,6 +5545,7 @@ declare namespace Cypress {
   }
 
   interface LogConfig extends Timeoutable {
+    id: number
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** The scope of the log entry. If child, will appear nested below parents, prefixed with '-' */

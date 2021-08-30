@@ -196,12 +196,8 @@ class $Cypress {
   // or parsed. we have not received any custom commands
   // at this point
   onSpecWindow (specWindow, scripts) {
-    const logFn = (...args) => {
-      return this.log.apply(this, args)
-    }
-
     // create cy and expose globally
-    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn)
+    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config)
     window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
@@ -467,6 +463,9 @@ class $Cypress {
       case 'cy:command:end':
         return this.emit('command:end', ...args)
 
+      case 'cy:skipped:command:end':
+        return this.emit('skipped:command:end', ...args)
+
       case 'cy:command:retry':
         return this.emit('command:retry', ...args)
 
@@ -478,6 +477,9 @@ class $Cypress {
 
       case 'cy:command:queue:end':
         return this.emit('command:queue:end')
+
+      case 'cy:enqueue:command':
+        return this.emit('enqueue:command', ...args)
 
       case 'cy:url:changed':
         return this.emit('url:changed', args[0])
@@ -546,6 +548,21 @@ class $Cypress {
 
       case 'runner:cross:domain:bridge:ready':
         return this.emit('cross:domain:bridge:ready')
+
+      case 'runner:cross:domain:window:load':
+        return this.emit('cross:domain:window:load')
+
+      case 'runner:cross:domain:ran:domain:fn':
+        return this.emit('cross:domain:ran:domain:fn')
+
+      case 'runner:cross:domain:queue:finished':
+        return this.emit('cross:domain:queue:finished')
+
+      case 'runner:cross:domain:command:enqueued':
+        return this.emit('cross:domain:command:enqueued', ...args)
+
+      case 'runner:cross:domain:command:update':
+        return this.emit('cross:domain:command:update', ...args)
 
       case 'cy:cross:domain:message':
         return this.emit('cross:domain:message', ...args)

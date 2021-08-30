@@ -63,7 +63,7 @@ const commandRunningFailed = (Cypress, state, err) => {
 export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
   const queue = createQueue()
 
-  const { get, slice, at, reset, clear, stop } = queue
+  const { add, get, slice, at, reset, clear, stop } = queue
 
   const logs = (filter) => {
     let logs = _.flatten(_.invokeMap(queue.get(), 'get', 'logs'))
@@ -81,10 +81,6 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
 
   const names = () => {
     return _.invokeMap(queue.get(), 'get', 'name')
-  }
-
-  const add = (command) => {
-    queue.add(command)
   }
 
   const insert = (index: number, command: Command) => {
@@ -170,7 +166,7 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
       }
 
       if (!(!enqueuedCmd || !$utils.isPromiseLike(ret))) {
-        return $errUtils.throwErrByPath(
+        $errUtils.throwErrByPath(
           'miscellaneous.command_returned_promise_and_commands', {
             args: {
               current: command.get('name'),
@@ -188,7 +184,7 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
         // if we got a return value and we enqueued
         // a new command and we didn't return cy
         // or an undefined value then throw
-        return $errUtils.throwErrByPath(
+        $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
             args: {
               current: command.get('name'),
@@ -243,8 +239,28 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
     })
   }
 
-  const run = () => {
+  const run = (autoRun = true) => {
+    let pause = false
+
     const next = () => {
+      // when running in a secondary domain (SD), the primary domain (PD)
+      // has proxy commands that represent the real commands run in the SD.
+      // for everything to sync up properly, the PD controls the running of
+      // the queue by running each proxy command which in turns communicates
+      // to its real command, telling it to run. this means in the SD, we
+      // need to pause the queue and wait for the signal to run the next
+      // command. this is done here by inserting this promise into the queue
+      // and resolving once state('next') is called (said signal)
+      if (!autoRun && pause) {
+        return new Promise((resolve) => {
+          state('next', () => {
+            state('next', null)
+            pause = false
+            resolve(next())
+          })
+        })
+      }
+
       // bail if we've been told to abort in case
       // an old command continues to run after
       if (queue.stopped) {
@@ -256,8 +272,7 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
 
       const command = at(index) as Command
 
-      // if the command should be skipped
-      // just bail and increment index
+      // if the command should be skipped, just bail and increment index
       // and set the subject
       if (command && command.get('skip')) {
         // must set prev + next since other
@@ -269,6 +284,12 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
 
         state('index', index + 1)
         state('subject', command.get('subject'))
+
+        Cypress.action('cy:skipped:command:end', command)
+
+        if (!autoRun) {
+          pause = true
+        }
 
         return next()
       }
@@ -322,6 +343,10 @@ export const create = (state, timeouts, stability, cleanup, fail, isCy) => {
         Cypress.action('cy:command:end', command)
 
         fn = state('onPaused')
+
+        if (!autoRun) {
+          pause = true
+        }
 
         if (fn) {
           return new Bluebird((resolve) => {

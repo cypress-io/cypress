@@ -338,7 +338,9 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     debug('waiting for window:load')
 
     return new Promise((resolve) => {
-      return cy.once('window:load', (e) => {
+      const onWindowLoad = (e) => {
+        cy.off('cross:domain:window:load', onCrossDomainWindowLoad)
+
         // this prevents a log occurring when we navigate to about:blank inbetween tests
         if (!state('duringUserTestExecution')) return
 
@@ -351,8 +353,19 @@ const stabilityChanged = (Cypress, state, config, stable) => {
           options._log.set('message', '--page loaded--').snapshot().end()
         }
 
-        return resolve()
-      })
+        resolve()
+      }
+
+      const onCrossDomainWindowLoad = () => {
+        cy.off('window:load', onWindowLoad)
+
+        options._log.set('message', '--page loaded--').snapshot().end()
+
+        resolve()
+      }
+
+      cy.once('window:load', onWindowLoad)
+      cy.once('cross:domain:window:load', onCrossDomainWindowLoad)
     })
   }
 

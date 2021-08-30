@@ -317,13 +317,23 @@ export const eventManager = {
       // currently used for tests, can be removed later
       if (event.data && event.data.actual) return
 
-      switch (event.data) {
+      switch (event.data.event) {
         case 'cross:domain:window:before:load':
           this.crossDomainDriverWindow = event.source
 
           return
+        case 'cross:domain:window:load':
+          return Cypress.action('runner:cross:domain:window:load')
         case 'cross:domain:bridge:ready':
           return Cypress.action('runner:cross:domain:bridge:ready')
+        case 'cross:domain:ran:domain:fn':
+          return Cypress.action('runner:cross:domain:ran:domain:fn')
+        case 'cross:domain:queue:finished':
+          return Cypress.action('runner:cross:domain:queue:finished')
+        case 'cross:domain:command:enqueued':
+          return Cypress.action('runner:cross:domain:command:enqueued', event.data.data)
+        case 'cross:domain:command:update':
+          return Cypress.action('runner:cross:domain:command:update', event.data.data)
         default:
           // eslint-disable-next-line no-console
           console.log('Unexpected postMessage:', event.data)
@@ -517,8 +527,8 @@ export const eventManager = {
       }
     })
 
-    Cypress.on('cross:domain:message', (message, data) => {
-      this.crossDomainDriverWindow.postMessage({ message, data }, '*')
+    Cypress.on('cross:domain:message', (data) => {
+      this.crossDomainDriverWindow.postMessage(data, '*')
     })
   },
 

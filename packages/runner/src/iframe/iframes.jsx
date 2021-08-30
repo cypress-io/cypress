@@ -167,9 +167,14 @@ export default class Iframes extends Component {
   }
 
   _addCrossDomainIframe = (domain) => {
+    const id = `Cypress (${domain})`
+
+    // if it already exists, don't add another one
+    if (document.getElementById(id)) return
+
     this._addIframe({
+      id,
       $container: $(this.refs.container),
-      id: `Cypress (${domain})`,
       src: `http://${domain}/${this.props.config.namespace}/multidomain-iframes/${encodeURIComponent(domain)}`,
     })
   }
