@@ -181,7 +181,7 @@ type Query {
   viewer: Viewer
 
   """Metadata about the wizard, null if we arent showing the wizard"""
-  wizard: Wizard
+  wizard: Wizard!
 }
 
 type ResolvedBooleanOption {
@@ -387,7 +387,7 @@ type Wizard {
   The testing type we are setting in the wizard, null if this has not been chosen
   """
   testingType: TestingTypeEnum
-  testingTypes: [TestingTypeInfo!]
+  testingTypes: [TestingTypeInfo!]!
 
   """The title of the page, given the current step of the wizard"""
   title: String

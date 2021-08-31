@@ -188,7 +188,7 @@ export interface NexusGenFieldTypes {
     app: NexusGenRootTypes['App']; // App!
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
-    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizard: NexusGenRootTypes['Wizard']; // Wizard!
   }
   ResolvedBooleanOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
@@ -313,7 +313,7 @@ export interface NexusGenFieldTypes {
     sampleCode: string | null; // String
     step: NexusGenEnums['WizardStep']; // WizardStep!
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
-    testingTypes: NexusGenRootTypes['TestingTypeInfo'][] | null; // [TestingTypeInfo!]
+    testingTypes: NexusGenRootTypes['TestingTypeInfo'][]; // [TestingTypeInfo!]!
     title: string | null; // String
   }
   WizardBundler: { // field return type

@@ -43,10 +43,10 @@ import { gql } from "@urql/core";
 import { useMutation } from "@urql/vue";
 import { computed } from "vue";
 import { 
-  TestingTypeAppQueryFragment, 
-  TestingTypeWizardQueryFragment, 
   TestingTypeEnum,
-  TestingTypeSelectDocument 
+  TestingTypeCardsWizardFragment,
+  TestingTypeCardsAppFragment,
+  TestingTypeSelectDocument
 } from "../generated/graphql";
 import TestingTypeCard from "./TestingTypeCard.vue";
 
@@ -84,8 +84,8 @@ const mutation = useMutation(TestingTypeSelectDocument)
 
 const props = defineProps<{
   gql: {
-    // app: TestingTypeAppFragment
-    // wizard: TestingTypeWizardFragment
+    app: TestingTypeCardsAppFragment
+    wizard: TestingTypeCardsWizardFragment
   }
 }>()
 
@@ -95,13 +95,9 @@ const emit = defineEmits<{
 }>()
 
 const ct = computed(() => {
-  const type = props.gql?.wizard?.testingTypes?.find(x => x.id === 'component')
-  if (!type) {
-    throw Error('Did not get testingType from API')
-  }
 
   return {
-    ...type,
+    ...props.gql.wizard.testingTypes.find(x => x.id === 'component')!,
     isSetup: props.gql?.app?.activeProject?.hasSetupComponentTesting ?? false
   }
 })
@@ -111,13 +107,8 @@ const selectTestingType = (testingType: TestingTypeEnum) => {
 };
 
 const e2e = computed(() => {
-  const type = props.gql?.wizard?.testingTypes?.find(x => x.id === 'e2e')
-  if (!type) {
-    throw Error('Did not get testingType from API')
-  }
-
   return {
-    ...type,
+    ...props.gql.wizard.testingTypes.find(x => x.id === 'e2e')!,
     isSetup: props.gql?.app?.activeProject?.hasSetupE2ETesting ?? false
   }
 })
