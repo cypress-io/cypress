@@ -386,7 +386,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - run: yarn workspace @packages/launchpad build && yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
+      - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
