@@ -118,7 +118,10 @@ describe('#startDevServer', () => {
 
     return new Promise((res) => {
       devServerEvents.on('dev-server:compile:error', (err: string) => {
-        expect(err).to.contain('./test/fixtures/compilation-fails.spec.js 1:5')
+        if (webpackDevServerFacts.isV3()) {
+          expect(err).to.contain('./test/fixtures/compilation-fails.spec.js 1:5')
+        }
+
         expect(err).to.contain('Module parse failed: Unexpected token (1:5)')
         expect(err).to.contain('You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders')
         expect(err).to.contain('> this is an invalid spec file')
@@ -128,7 +131,7 @@ describe('#startDevServer', () => {
     })
   })
 
-  it('touches browser.js when a spec file is added', async function () {
+  it('touches browser.js when a spec file is added and recompile', async function () {
     const devServerEvents = new EventEmitter()
     const { close } = await startDevServer({
       webpackConfig,
@@ -140,19 +143,27 @@ describe('#startDevServer', () => {
     })
 
     const newSpec: Cypress.Cypress['spec'] = {
-      name: './some-newly-created-spec.js',
-      relative: './some-newly-created-spec.js',
-      absolute: '/some-newly-created-spec.js',
+      name: `${root}/test/fixtures/bar.spec.js`,
+      relative: `${root}/test/fixtures/bar.spec.js`,
+      absolute: `${root}/test/fixtures/bar.spec.js`,
     }
 
     const oldmtime = fs.statSync('./dist/browser.js').mtimeMs
 
-    return new Promise((res) => {
-      devServerEvents.emit('dev-server:specs:changed', [newSpec])
-      const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
+    let firstCompile = true
 
-      expect(oldmtime).to.not.equal(updatedmtime)
-      close(() => res())
+    return new Promise((res) => {
+      devServerEvents.on('dev-server:compile:success', () => {
+        if (firstCompile) {
+          firstCompile = false
+          devServerEvents.emit('dev-server:specs:changed', [newSpec])
+          const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
+
+          expect(oldmtime).to.not.equal(updatedmtime)
+        } else {
+          close(() => res())
+        }
+      })
     })
   })
 })
