@@ -16,6 +16,8 @@ describe('TestingTypeCards', () => {
         return [app, wizard]
       },
       render: (gqlVal) => {
+        // @ts-ignore - type is inferred as Frag1 | Frag2,
+        // but in practice is { frag1: ..., frag2: ... }
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {

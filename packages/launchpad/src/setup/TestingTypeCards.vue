@@ -95,7 +95,6 @@ const emit = defineEmits<{
 }>()
 
 const ct = computed(() => {
-
   return {
     ...props.gql.wizard.testingTypes.find(x => x.id === 'component')!,
     isSetup: props.gql?.app?.activeProject?.hasSetupComponentTesting ?? false
