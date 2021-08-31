@@ -67,6 +67,7 @@ export const eventManager = {
     }
 
     ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
+      debugger
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
       ws.on('automation:disconnected', action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
@@ -78,6 +79,7 @@ export const eventManager = {
     })
 
     ws.on('automation:push:message', (msg, data = {}) => {
+      debugger
       if (!Cypress) return
 
       switch (msg) {

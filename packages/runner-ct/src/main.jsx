@@ -65,6 +65,8 @@ const Runner = {
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
+      debugger
+
       const container = (
         <Container
           config={config}

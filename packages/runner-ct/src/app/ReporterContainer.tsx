@@ -9,6 +9,7 @@ import { ReporterHeader } from './ReporterHeader'
 import { NoSpec } from './NoSpec'
 
 import styles from './RunnerCt.module.scss'
+import { DebuggerStatement } from 'jscodeshift'
 
 interface ReporterContainerProps {
   state: State
@@ -28,6 +29,8 @@ export const ReporterContainer = namedObserver('ReporterContainer',
         </div>
       )
     }
+
+    debugger
 
     return (
       <Reporter

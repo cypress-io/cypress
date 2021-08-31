@@ -52,7 +52,7 @@ export default defineConfig({
       extendRoute (route, parent) {
         const ret = {
           ...route,
-          path: `/__vite__${route.path}`,
+          path: `/__${route.path}`,
         }
 
         return ret

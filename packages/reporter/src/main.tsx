@@ -77,6 +77,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   }
 
   render () {
+    debugger
     const {
       appState,
       className,

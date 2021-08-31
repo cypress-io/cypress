@@ -178,7 +178,7 @@ module.exports = {
   open (browser, options = {}, automation) {
     return kill(true)
     .then(() => {
-      let browserLauncher; let url
+      let browserLauncher; let url;
 
       _.defaults(options, {
         onBrowserOpen () {},
