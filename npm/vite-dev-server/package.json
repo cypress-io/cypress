@@ -34,7 +34,8 @@
   "files": [
     "dist",
     "client",
-    "index.html"
+    "index.html",
+    "index.d.ts"
   ],
   "license": "MIT",
   "repository": {

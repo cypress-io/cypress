@@ -137,6 +137,17 @@ const closeProject = (project) => {
   ])
 }
 
+const updateProjectStatus = (project) => {
+  return ipc.getProjectStatus(project.clientDetails())
+  .then((projectDetails) => {
+    project.update(projectDetails)
+  })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch((err) => {
+    project.setApiError(err)
+  })
+}
+
 const openProject = (project) => {
   specsStore.loading(true)
 
@@ -212,9 +223,9 @@ const openProject = (project) => {
     project.setLoading(false)
     getSpecs(setProjectError)
 
-    projectPollingId = setInterval(updateProjectStatus, 10000)
+    projectPollingId = setInterval(() => updateProjectStatus(project), 10000)
 
-    return updateProjectStatus()
+    return updateProjectStatus(project)
   })
   .catch(setProjectError)
 }
@@ -255,6 +266,7 @@ const getRecordKeys = () => {
 
 export default {
   loadProjects,
+  updateProjectStatus,
   openProject,
   reopenProject,
   closeProject,

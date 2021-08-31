@@ -1,3 +1,17 @@
+# [@cypress/vite-dev-server-v2.0.7](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.6...@cypress/vite-dev-server-v2.0.7) (2021-08-12)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** chain update all specs when changing child  ([#17693](https://github.com/cypress-io/cypress/issues/17693)) ([66e8896](https://github.com/cypress-io/cypress/commit/66e8896b66207e9ce2d1a5dd9f66f73fe58a1e7e)), closes [#17691](https://github.com/cypress-io/cypress/issues/17691)
+
+# [@cypress/vite-dev-server-v2.0.6](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.5...@cypress/vite-dev-server-v2.0.6) (2021-08-10)
+
+
+### Bug Fixes
+
+* prevent vite from crashing where there are no support files or s… ([#17641](https://github.com/cypress-io/cypress/issues/17641)) ([1d2b053](https://github.com/cypress-io/cypress/commit/1d2b053322eb36935928122e4552563a7f98f35d)), closes [#17624](https://github.com/cypress-io/cypress/issues/17624) [#17373](https://github.com/cypress-io/cypress/issues/17373)
+
 # [@cypress/vite-dev-server-v2.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.4...@cypress/vite-dev-server-v2.0.5) (2021-08-04)
 
 

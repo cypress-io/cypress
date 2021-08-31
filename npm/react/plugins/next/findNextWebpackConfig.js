@@ -14,9 +14,9 @@ async function getNextWebpackConfig (config) {
       // is not in the next-server folder anymore.
       // @ts-ignore
       loadConfig = require('next/dist/server/config').default
+    } else {
+      throw e
     }
-
-    throw e
   }
   const nextConfig = await loadConfig('development', config.projectRoot)
   const nextWebpackConfig = await getNextJsBaseWebpackConfig(

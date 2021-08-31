@@ -288,4 +288,10 @@ export default class Project {
   serialize () {
     return _.pick(this, cacheProps)
   }
+
+  getTestGroup (numGroups) {
+    const numKey = this.orgId && this.orgId.length ? this.orgId.charCodeAt(0) : 0
+
+    return numKey % numGroups
+  }
 }

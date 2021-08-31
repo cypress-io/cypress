@@ -6,18 +6,11 @@ import { makeCypressPlugin } from './makeCypressPlugin'
 
 const debug = Debug('cypress:vite-dev-server:start')
 
-interface Options {
-  specs: Cypress.Cypress['spec'][]
-  config: Record<string, string>
-  devServerEvents: EventEmitter
-  [key: string]: unknown
-}
-
 export interface StartDevServerOptions {
   /**
    * the Cypress options object
    */
-  options: Options
+  options: Cypress.DevServerOptions
   /**
    * By default, vite will use your vite.config file to
    * Start the server. If you need additional plugins or
@@ -59,8 +52,13 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
 
-  if ((options.specs && options.specs.length) || supportFile) {
-    finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
+  // pre-optimizea all the specs
+  if ((options.specs && options.specs.length)) {
+    finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    // only optimize a supportFile is it is not false or undefined
+    if (supportFile) {
+      finalConfig.optimizeDeps.entries.push(supportFile)
+    }
   }
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)

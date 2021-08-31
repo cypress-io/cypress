@@ -35,4 +35,8 @@ module.exports = {
       })
     },
   },
+  reporter: '../../node_modules/cypress-multi-reporters/index.js',
+  reporterOptions: {
+    configFile: '../../mocha-reporter-config.json',
+  },
 }
