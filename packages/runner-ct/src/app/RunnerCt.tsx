@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import * as React from 'react'
 import { useScreenshotHandler } from './useScreenshotHandler'
-import { NavItem } from '@cypress/design-system'
+// import { NavItem } from '@cypress/design-system'
 import SplitPane from 'react-split-pane'
 
 // Need to register these once per app. Depending which components are consumed
@@ -14,7 +14,7 @@ library.add(fas)
 library.add(fab)
 
 import State from '../lib/state'
-import { eventManager as EventManager, namedObserver, SpecList } from '@packages/runner-shared'
+import { eventManager as EventManager, namedObserver } from '@packages/runner-shared'
 import styles from '@packages/runner-shared/src/styles.module.scss'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { animationFrameDebounce } from '../lib/debounce'
@@ -49,7 +49,7 @@ export const AUT_IFRAME_MARGIN = {
   Y: 16,
 }
 
-const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): NavItem[] => [
+const buildNavItems = (eventManager: typeof EventManager, toggleIsSetListOpen: () => boolean): any[] => [
   {
     id: 'file-explorer-nav',
     title: 'File Explorer',
@@ -223,15 +223,20 @@ const RunnerCt = namedObserver('RunnerCt',
                 </p>
               </NoSpec>
             ) : (
-              <SpecList
-                searchRef={searchRef}
-                className={cs(styles.specsList, {
-                  'display-none': hideSpecsListIfNecessary(state),
-                })}
-                specs={props.state.specs}
-                selectedFile={state.spec ? state.spec.relative : undefined}
-                onFileClick={runSpec}
-              />
+              <ul>
+                <li>
+                  {props.state.specs[0]}
+                </li>
+              </ul>
+              // <SpecList
+              //   searchRef={searchRef}
+              //   className={cs(styles.specsList, {
+              //     'display-none': hideSpecsListIfNecessary(state),
+              //   })}
+              //   specs={props.state.specs}
+              //   selectedFile={state.spec ? state.spec.relative : undefined}
+              //   onFileClick={runSpec}
+              // />
             )
           }
 

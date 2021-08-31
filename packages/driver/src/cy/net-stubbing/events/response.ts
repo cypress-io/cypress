@@ -1,7 +1,8 @@
 import _ from 'lodash'
 
+import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import {
-  CyHttpMessages,
+
   SERIALIZABLE_RES_PROPS,
 } from '@packages/net-stubbing/lib/types'
 import {

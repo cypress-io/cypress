@@ -13,11 +13,7 @@ export default defineConfig({
       events: require.resolve('rollup-plugin-node-builtins/src/es6/events.js'),
       process: require.resolve('process-es6'),
       path: require.resolve('rollup-plugin-node-builtins/src/es6/path.js'),
-      // 'mocha/lib/pending': require.resolve('mocha/lib/pending.js'),
       mocha: require.resolve('mocha/mocha.js'),
     },
-  },
-  optimizeDeps: {
-    // include: ['mocha/lib/pending.js'],
   },
 })

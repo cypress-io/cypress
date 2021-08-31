@@ -534,8 +534,8 @@ export const eventManager = {
     // need to stop cypress always
     Cypress.stop()
 
-    studioRecorder.setInactive()
-    selectorPlaygroundModel.setOpen(false)
+    // studioRecorder.setInactive()
+    // selectorPlaygroundModel.setOpen(false)
 
     return this._restart()
     .then(() => {

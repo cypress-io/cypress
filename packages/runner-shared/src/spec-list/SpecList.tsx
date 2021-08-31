@@ -18,7 +18,7 @@ export interface SpecListProps {
   onFileClick: (path: string) => void
 }
 
-const fuzzyTransform = <T, >(node: T, indexes: number[]) => ({
+const fuzzyTransform = <T, any>(node: T, indexes: number[]) => ({
   ...node,
   indexes,
 })

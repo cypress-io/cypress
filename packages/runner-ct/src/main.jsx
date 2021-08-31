@@ -82,3 +82,4 @@ const Runner = {
 }
 
 window.Runner = Runner
+export { Runner }

@@ -1,0 +1,5 @@
+{
+  "extends": [
+    "vue-global-api"
+  ]
+}

@@ -32,7 +32,7 @@ import $CommandQueue from './command_queue'
 import $VideoRecorder from '../cy/video-recorder'
 import $TestConfigOverrides from '../cy/testConfigOverrides'
 import debugFn from 'debug'
-import { registerFetch } from 'unfetch'
+import registerFetch from 'unfetch'
 
 const debugErrors = debugFn('cypress:driver:errors')
 

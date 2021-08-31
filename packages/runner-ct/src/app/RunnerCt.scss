@@ -1,6 +1,7 @@
+
 @use "../variables.scss" as *;
-@import "../runner-ct-variables.scss";
-@import "../../../reporter/src/lib/variables.scss";
+// @import "../runner-ct-variables.scss";
+// @import "../../../reporter/src/lib/variables.scss";
 
 /**
  * Styles that cannot be transformed by scoped modules should live here. Examples are:

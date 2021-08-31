@@ -1,2 +1,4 @@
 import './main.scss'
-import './main'
+import { Reporter } from './main'
+
+export { Reporter }

@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import type { ErrorRequestHandler, Express } from 'express'
-import type httpProxy from 'http-proxy'
+import httpProxy from 'http-proxy'
 import send from 'send'
 import type { NetworkProxy } from '@packages/proxy'
 import { handle, serve, serveChunk } from './runner-ct'
@@ -33,6 +33,18 @@ export const createRoutes = ({
   getCurrentBrowser,
   getSpec,
 }: InitializeRoutes) => {
+  // yarn build <- /dist
+  // yarn dev <- localhost:3333
+
+  const myProxy = httpProxy.createProxyServer({
+    target: 'http://localhost:3333/',
+  })
+
+  app.get('/__vite__/*', (req, res) => {
+    myProxy.web(req, res, {}, (e) => {
+    })
+  })
+
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {

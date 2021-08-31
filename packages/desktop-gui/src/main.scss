@@ -4,5 +4,5 @@
 @import '../../ui-components/src/file-opener/file-opener';
 @import 'styles/components/*.scss';
 @import '!(styles)*/**/!(main)*.scss';
-@import '~@reach/dialog/styles.css';
+@import '@reach/dialog/styles.css';
 @import '../../ui-components/src/dropdown';

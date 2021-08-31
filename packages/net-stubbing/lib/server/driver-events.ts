@@ -5,18 +5,21 @@ import type {
   GetFixtureFn,
   BackendRoute,
 } from './types'
-import {
-  PLAIN_FIELDS,
+import type {
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
   NetEvent,
+} from '../types'
+import {
+  PLAIN_FIELDS,
+
 } from '../types'
 import {
   getAllStringMatcherFields,
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
-import { InterceptedRequest } from './intercepted-request'
+import type { InterceptedRequest } from './intercepted-request'
 import type CyServer from '@packages/server'
 import type { BackendStaticResponse } from '../internal-types'
 

@@ -37,6 +37,8 @@ export const serve = (req, res, options: ServeOptions) => {
 
   // base64 before embedding so user-supplied contents can't break out of <script>
   // https://github.com/cypress-io/cypress/issues/4952
+
+  console.log(JSON.stringify(config))
   const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
 
   const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')

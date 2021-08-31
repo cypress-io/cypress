@@ -1,16 +1,35 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
-import { UIPlugin } from '../plugins/UIPlugin'
-import { automation, BaseStore, RunMode } from '@packages/runner-shared'
-import {
-  DEFAULT_REPORTER_WIDTH,
-  LEFT_NAV_WIDTH,
-  DEFAULT_LIST_WIDTH,
-  AUT_IFRAME_MARGIN,
-  PLUGIN_BAR_HEIGHT,
-  HEADER_HEIGHT,
-  DEFAULT_PLUGINS_HEIGHT,
-} from '../app/RunnerCt'
+import type { UIPlugin } from '../plugins/UIPlugin'
+import { automation } from '@packages/runner-shared'
+import type { RunMode } from '@packages/runner-shared'
+import { BaseStore } from '@packages/runner-shared'
+// import {
+//   DEFAULT_REPORTER_WIDTH,
+//   LEFT_NAV_WIDTH,
+//   DEFAULT_LIST_WIDTH,
+//   AUT_IFRAME_MARGIN,
+//   PLUGIN_BAR_HEIGHT,
+//   HEADER_HEIGHT,
+//   DEFAULT_PLUGINS_HEIGHT,
+// } from '../app/RunnerCt'
+
+export const DEFAULT_PLUGINS_HEIGHT = 300
+
+export const PLUGIN_BAR_HEIGHT = 40
+
+export const LEFT_NAV_WIDTH = 48
+
+export const DEFAULT_REPORTER_WIDTH = 355
+
+export const DEFAULT_LIST_WIDTH = 300
+
+export const HEADER_HEIGHT = 40
+
+export const AUT_IFRAME_MARGIN = {
+  X: 8,
+  Y: 16,
+}
 
 interface Defaults {
   messageTitle: string | null

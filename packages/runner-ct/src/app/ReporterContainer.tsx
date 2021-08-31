@@ -1,6 +1,6 @@
 import * as React from 'react'
 import cs from 'classnames'
-import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
+import type { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import { Reporter } from '@packages/reporter/src/main'
 
 import { errorMessages, namedObserver, eventManager as EventManager } from '@packages/runner-shared'

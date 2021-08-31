@@ -86,6 +86,7 @@
   "files": [
     "patches"
   ],
+  "module": "./index.ts",
   "workspaces": {
     "nohoist": [
       "*"

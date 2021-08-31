@@ -1,6 +1,6 @@
 import React from 'react'
 import { namedObserver } from '../mobx'
-const ansiToHtml = require('ansi-to-html')
+import ansiToHtml from 'ansi-to-html'
 
 const convert = new ansiToHtml({
   fg: '#000',
