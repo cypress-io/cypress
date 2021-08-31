@@ -7,12 +7,14 @@
   "compilerOptions": {
     "strict": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "allowJs": true,
+    "types": [],
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error"
   },
-  "files": [
-    "../ts/index.d.ts"
-  ],
+  // "files": [
+  //   "../ts/index.d.ts"
+  // ],
 }

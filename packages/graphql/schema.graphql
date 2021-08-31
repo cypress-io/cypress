@@ -158,6 +158,16 @@ enum PluginsState {
   uninitialized
 }
 
+"""A Cypress project is a container"""
+type Project {
+  id: ID!
+
+  """Used to associate project with Cypress cloud"""
+  projectId: String
+  projectRoot: String!
+  title: String!
+}
+
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
   app: App!

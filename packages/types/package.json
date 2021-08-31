@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
+  "browser": "src/index.ts",
   "scripts": {
     "build-prod": "tsc",
     "clean": "rm -f src/*.js src/**/*.js"

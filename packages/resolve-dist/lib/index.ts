@@ -19,7 +19,8 @@ export const getPathToIndex = (pkg: 'runner' | 'runner-ct') => {
 }
 
 export const getPathToDesktopIndex = (pkg: 'desktop-gui' | 'launchpad') => {
-  if (pkg === 'launchpad') return `http://localhost:3001`
+  // TODO: check if there's a better approach to fix here
+  if (pkg === 'launchpad' && !process.env.CI) return `http://localhost:3001`
 
   return `file://${path.join(__dirname, '..', '..', pkg, 'dist', 'index.html')}`
 }
