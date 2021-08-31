@@ -841,6 +841,12 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
     let test = getTest()
 
+    if (test) {
+      if (!suiteHasTest(hook.parent, test.id)) {
+        return
+      }
+    }
+
     // https://github.com/cypress-io/cypress/issues/9162
     // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
     // But it caused tests to hang when there's a failure in before().
@@ -862,6 +868,11 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
     hook.id = test.id
     hook.ctx.currentTest = test
+
+    // make sure we set this test as the current now
+    // else its possible that our TEST_AFTER_RUN_EVENT
+    // will never fire if this failed in a before hook
+    setTest(test)
 
     return Cypress.action('runner:hook:start', wrap(hook))
   })
@@ -1336,18 +1347,13 @@ const create = (specWindow, mocha, Cypress, cy, state) => {
       // move to the next runnable - this will be our async seam
       const _next = args[0]
 
-      const test = getTest() || getTestFromRunnable(runnable)
+      const test = getTestFromRunnable(runnable)
 
       // if there's no test, this is likely a rouge before/after hook
       // that should not have run, so skip this runnable
       if (!test || _runner.stopped) {
         return _next()
       }
-
-      // make sure we set this test as the current now
-      // else its possible that our TEST_AFTER_RUN_EVENT
-      // will never fire if this failed in a before hook
-      setTest(test)
 
       // first time seeing a retried test
       // that hasn't already replaced our test
