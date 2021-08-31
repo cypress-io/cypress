@@ -3,12 +3,12 @@ import { executeExchange } from '@urql/exchange-execute'
 import { graphqlSchema } from '@packages/graphql'
 import type { ClientTestContext } from '../../src/graphql/ClientTestContext'
 
-interface TestApolloClientConfig {
+interface TestUrqlClientConfig {
   context: ClientTestContext
   rootValue?: any
 }
 
-export function testApolloClient (config: TestApolloClientConfig): Client {
+export function testUrqlClient (config: TestUrqlClientConfig): Client {
   return createClient({
     url: '/graphql',
     exchanges: [
