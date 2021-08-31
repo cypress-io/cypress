@@ -33,6 +33,7 @@ import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
+import type { BrowserContract } from '@packages/graphql/src/contracts/BrowserContract'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -497,9 +498,27 @@ module.exports = {
 
     // TODO: Figure out how we want to cleanup & juggle the config, so it's not jammed
     // into the projects
+    startGraphQLServer()
+
     const serverContext = setServerContext(new ServerContext(options, {}))
 
-    startGraphQLServer()
+    await serverContext.app.cacheBrowsers()
+    await serverContext.actions.initializeOpenProject({
+      ...options,
+      config: {
+        browsers: serverContext.app.browserCache!.map((x): BrowserContract => {
+          return {
+            name: x.name,
+            family: x.family,
+            majorVersion: x.majorVersion,
+            channel: x.channel,
+            displayName: x.displayName,
+            path: x.path,
+            version: x.version,
+          }
+        }),
+      },
+    }, {})
 
     if (options.projectRoot) {
       serverContext.actions.addProject(options.projectRoot)

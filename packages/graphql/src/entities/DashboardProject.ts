@@ -20,7 +20,7 @@ export class DashboardProject extends Project {
     const projectId = await this.projectId()
 
     if (!projectId) {
-      return null
+      throw Error('projectId required to fetch runs')
     }
 
     const result = await this.context.actions.getRuns({
@@ -36,7 +36,7 @@ export class DashboardProject extends Project {
     const projectId = await this.projectId()
 
     if (!projectId) {
-      return null
+      throw Error('projectId required to fetch runs')
     }
 
     const result = await this.context.actions.getRecordKeys({

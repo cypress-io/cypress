@@ -15,10 +15,6 @@ export class ClientTestActions extends BaseActions {
     return
   }
 
-  resolveOpenProjectConfig () {
-    return null
-  }
-
   async installDependencies () {
     return
   }
@@ -42,6 +38,24 @@ export class ClientTestActions extends BaseActions {
   }
   async getBrowsers () {
     return []
+  }
+
+  resolveOpenProjectConfig (): FullConfig {
+    // @ts-ignore
+    return {
+      resolved: {
+        e2e: {
+          from: 'default',
+          value: {},
+        },
+        component: {
+          from: 'config',
+          value: {
+            viewportHeight: 100,
+          },
+        },
+      },
+    }
   }
 
   addProject () {

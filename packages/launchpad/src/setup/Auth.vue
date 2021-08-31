@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { gql } from "@urql/core"
 import { useMutation, useQuery } from "@urql/vue"
 import { 
@@ -80,8 +80,4 @@ const result = useQuery({
 })
 
 const data = computed(() => result.data)
-
-watch(result, (val) => {
-  console.log(val.data.value?.viewer)
-})
 </script>

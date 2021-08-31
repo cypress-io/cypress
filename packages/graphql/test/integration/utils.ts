@@ -7,6 +7,7 @@ interface TestContextInjectionOptions {
   wizard?: Wizard
   launchArgs?: LaunchArgs
   launchOptions?: OpenProjectLaunchOptions
+  Actions?: typeof TestActions
 }
 
 export class TestActions extends BaseActions {
@@ -19,6 +20,14 @@ export class TestActions extends BaseActions {
 
   installDependencies () {}
   createConfigFile () {}
+
+  async launchOpenProject () {}
+  resolveOpenProjectConfig (): FullConfig {
+    return {
+      projectRoot: '/root/path',
+      resolved: {},
+    }
+  }
 
   addProject (projectRoot: string) {
     return new LocalProject(projectRoot, this.ctx)
@@ -46,13 +55,7 @@ export class TestActions extends BaseActions {
     return []
   }
 
-  async launchOpenProject () {}
   async initializeOpenProject () {}
-  resolveOpenProjectConfig (): FullConfig {
-    return {
-      resolved: {},
-    }
-  }
 
   async getBrowsers () {
     const browser: FoundBrowser = {
@@ -77,7 +80,7 @@ export class TestContext extends BaseContext {
   readonly actions: BaseActions
   viewer = null
 
-  constructor ({ wizard, launchArgs, launchOptions }: TestContextInjectionOptions = {}) {
+  constructor ({ wizard, launchArgs, launchOptions, Actions }: TestContextInjectionOptions = {}) {
     super(launchArgs || {
       config: {},
       cwd: '/current/working/dir',
@@ -90,7 +93,7 @@ export class TestContext extends BaseContext {
       os: 'linux',
     }, launchOptions || {})
 
-    this.actions = new TestActions(this)
+    this.actions = Actions ? new Actions(this) : new TestActions(this)
     if (wizard) {
       this.wizard = wizard
     }

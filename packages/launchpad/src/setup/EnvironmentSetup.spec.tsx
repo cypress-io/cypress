@@ -66,7 +66,7 @@ describe('<EnvironmentSetup />', () => {
         </div>
       ),
     }).then((ctx) => {
-      cy.contains('a bundler').click()
+      cy.contains('Pick a bundler').click()
       cy.contains('Vite').click()
       cy.contains('Vite').should('exist')
       cy.contains('Vue.js').click()

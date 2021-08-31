@@ -144,6 +144,8 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   LocalProject: { // field return type
+    hasSetupComponentTesting: boolean; // Boolean!
+    hasSetupE2ETesting: boolean; // Boolean!
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -186,7 +188,7 @@ export interface NexusGenFieldTypes {
     app: NexusGenRootTypes['App']; // App!
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     viewer: NexusGenRootTypes['Viewer'] | null; // Viewer
-    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizard: NexusGenRootTypes['Wizard']; // Wizard!
   }
   ResolvedBooleanOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
@@ -198,9 +200,11 @@ export interface NexusGenFieldTypes {
     baseUrl: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     blockHosts: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     chromeWebSecurity: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    component: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     componentFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     defaultCommandTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     downloadsFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    e2e: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     env: NexusGenRootTypes['ResolvedJsonOption'] | null; // ResolvedJsonOption
     execTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     experimentalFetchPolyfill: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
@@ -286,9 +290,9 @@ export interface NexusGenFieldTypes {
     totalSkipped: number | null; // Int
   }
   TestingTypeInfo: { // field return type
-    description: string | null; // String
+    description: string; // String!
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    title: string | null; // String
+    title: string; // String!
   }
   Viewer: { // field return type
     authToken: string; // String!
@@ -309,7 +313,7 @@ export interface NexusGenFieldTypes {
     sampleCode: string | null; // String
     step: NexusGenEnums['WizardStep']; // WizardStep!
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
-    testingTypes: NexusGenRootTypes['TestingTypeInfo'][] | null; // [TestingTypeInfo!]
+    testingTypes: NexusGenRootTypes['TestingTypeInfo'][]; // [TestingTypeInfo!]!
     title: string | null; // String
   }
   WizardBundler: { // field return type
@@ -355,6 +359,8 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   LocalProject: { // field return type name
+    hasSetupComponentTesting: 'Boolean'
+    hasSetupE2ETesting: 'Boolean'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
@@ -409,9 +415,11 @@ export interface NexusGenFieldTypeNames {
     baseUrl: 'ResolvedStringOption'
     blockHosts: 'ResolvedStringOption'
     chromeWebSecurity: 'ResolvedBooleanOption'
+    component: 'ResolvedConfig'
     componentFolder: 'ResolvedStringOption'
     defaultCommandTimeout: 'ResolvedNumberOption'
     downloadsFolder: 'ResolvedStringOption'
+    e2e: 'ResolvedConfig'
     env: 'ResolvedJsonOption'
     execTimeout: 'ResolvedNumberOption'
     experimentalFetchPolyfill: 'ResolvedBooleanOption'

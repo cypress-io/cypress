@@ -9,24 +9,24 @@ export class Project implements ProjectContract {
   constructor (private _projectRoot: string, protected ctx: BaseContext) {}
 
   @nxs.field.nonNull.id()
-  id (): NxsResult<'Project', 'id'> {
+  id (): NxsResult<'LocalProject', 'id'> {
     return this.projectRoot
   }
 
   @nxs.field.nonNull.string()
-  title (): NxsResult<'Project', 'title'> {
+  title (): NxsResult<'LocalProject', 'title'> {
     return 'Title'
   }
 
   @nxs.field.string({
     description: 'Used to associate project with Cypress cloud',
   })
-  async projectId (): Promise<NxsResult<'Project', 'projectId'>> {
+  async projectId (): Promise<NxsResult<'LocalProject', 'projectId'>> {
     return await this.ctx.actions.getProjectId(this.projectRoot)
   }
 
   @nxs.field.nonNull.string()
-  get projectRoot (): NxsResult<'Project', 'projectRoot'> {
+  get projectRoot (): NxsResult<'LocalProject', 'projectRoot'> {
     return this._projectRoot
   }
 }

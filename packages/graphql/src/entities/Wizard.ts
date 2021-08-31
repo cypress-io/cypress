@@ -99,7 +99,7 @@ export class Wizard {
     return this.chosenTestingType
   }
 
-  @nxs.field.list.nonNull.type(() => TestingTypeInfo)
+  @nxs.field.nonNull.list.nonNull.type(() => TestingTypeInfo)
   testingTypes (): NxsResult<'Wizard', 'testingTypes'> {
     return TESTING_TYPES.map((t) => new TestingTypeInfo(t))
   }
