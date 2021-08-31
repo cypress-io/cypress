@@ -63,7 +63,6 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       noInfo: false,
     }
 
-    // @ts-expect-error ignore webpack-dev-server v3 type errors
     return new WebpackDevServer(compiler, webpackDevServerConfig)
   }
 
@@ -79,7 +78,6 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       hot: false,
     }
 
-    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
     return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
