@@ -1,5 +1,5 @@
-import { Interception, Route } from '@packages/net-stubbing/lib/types'
-import { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
+import type { Interception, Route } from '@packages/net-stubbing/lib/types'
+import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
 import * as $errUtils from './error_utils'
 import Debug from 'debug'
 

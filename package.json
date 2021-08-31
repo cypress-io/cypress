@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "8.3.0",
+  "version": "8.3.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -77,7 +77,7 @@
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/github-commit-status-check": "1.5.0",
     "@cypress/questions-remain": "1.0.1",
-    "@cypress/request": "2.88.5",
+    "@cypress/request": "2.88.6",
     "@cypress/request-promise": "4.2.6",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@percy/cli": "1.0.0-beta.48",

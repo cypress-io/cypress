@@ -1,4 +1,4 @@
-import net from 'net'
+import type net from 'net'
 
 /**
  * `allowDestroy` adds a `destroy` method to a `net.Server`. `destroy(cb)`
