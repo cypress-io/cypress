@@ -256,9 +256,6 @@ export default (Commands, Cypress, cy) => {
               })
 
               options.$el[0].selectedIndex = selectedIndex
-              options.$el[0].selectedOptions = _.map(optionEls, ($el) => {
-                return $el.get()
-              })
             }
 
             const input = new Event('input', {

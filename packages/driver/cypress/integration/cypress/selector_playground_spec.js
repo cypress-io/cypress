@@ -82,11 +82,10 @@ describe('src/cypress/selector_playground', () => {
   })
 
   context('.getSelector', () => {
-    it.only('uses defaults.selectorPriority', () => {
+    it('uses defaults.selectorPriority', () => {
       const $div = $('<div data-cy=\'main button 123\' data-foo-bar-baz=\'quux\' data-test=\'qwerty\' data-foo=\'bar\' />')
 
       Cypress.$('body').append($div)
-      debugger
 
       expect(SelectorPlayground.getSelector($div)).to.eq('[data-cy="main button 123"]')
 

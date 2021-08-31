@@ -52,7 +52,7 @@ describe('src/cy/commands/actions/click', () => {
     cy.visit('/fixtures/dom.html')
   })
 
-  context.only('#click', () => {
+  context('#click', () => {
     it('receives native click event', (done) => {
       const $btn = cy.$$('#button')
 
@@ -1368,7 +1368,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it.only('scrolls the window past a fixed position element when being covered', () => {
+      it('scrolls the window past a fixed position element when being covered', () => {
         const spy = cy.spy().as('mousedown')
 
         $('<button>button covered</button>')

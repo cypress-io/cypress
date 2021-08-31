@@ -60,12 +60,11 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
-    it.only('can handle options with same value selected by text', () => {
+    it('can handle options with same value selected by text', () => {
       cy.get('select[name=startrek-same]').select('Uhura').then(($select) => {
         expect($select.val()).to.equal('same')
         expect($select.find('option:selected')).to.have.text('Uhura')
         expect($select[0].selectedIndex).to.equal(2)
-        expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
       })
     })
 
@@ -74,7 +73,6 @@ describe('src/cy/commands/actions/select', () => {
         expect($select.val()).to.equal('same')
         expect($select.find('option:selected')).to.have.text('Uhura')
         expect($select[0].selectedIndex).to.equal(2)
-        expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
       })
     })
 
