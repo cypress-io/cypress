@@ -1958,7 +1958,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/title
      */
-    title(options?: Partial<Loggable>): Chainable<string>
+    title(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Trigger an event on a DOM element.

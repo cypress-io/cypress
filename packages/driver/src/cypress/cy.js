@@ -151,7 +151,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const jquery = $jQuery.create(state)
   const location = $Location.create(state)
   const focused = $Focused.create(state)
-  const keyboard = $Keyboard.create(Cypress, state)
+  const keyboard = $Keyboard.create(state)
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create(Cypress)
 
