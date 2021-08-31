@@ -1,13 +1,13 @@
+import $ from 'jquery'
 // @ts-nocheck
 import _ from 'lodash'
-import $ from 'jquery'
-
 import $dom from '../dom'
-import * as $SnapshotsCss from './snapshots_css'
+import $SnapshotsCss from './snapshots_css'
 
-export const HIGHLIGHT_ATTR = 'data-cypress-el'
+const HIGHLIGHT_ATTR = 'data-cypress-el'
 
 export default {
+  HIGHLIGHT_ATTR,
   create: ($$, state) => {
     const snapshotsCss = $SnapshotsCss.create($$, state)
     const snapshotsMap = new WeakMap()
