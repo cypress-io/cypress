@@ -63,7 +63,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       noInfo: false,
     }
 
-    return new WebpackDevServer(compiler, webpackDevServerConfig)
+    return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
   if (webpackDevServerFacts.isV4()) {
