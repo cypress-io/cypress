@@ -13,7 +13,7 @@ import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
-import { AutomationMiddleware } from './automation'
+import type { AutomationMiddleware } from './automation'
 
 const debug = Debug('cypress:server:open_project')
 
