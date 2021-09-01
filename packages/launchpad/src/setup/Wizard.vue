@@ -1,6 +1,6 @@
 <template>
   <template v-if="wizard && app">
-    <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
+    <h1 class="text-3xl pt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
       <TestingTypeCards 
