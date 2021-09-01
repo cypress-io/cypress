@@ -4,6 +4,7 @@
   </div>
 
   <div v-else class="bg-white h-full">
+    <HeaderBar :gql="query.data.value.app" />
     <Wizard :query="query.data.value" />
   </div>
 </template>
@@ -12,6 +13,7 @@
 import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import Wizard from "./setup/Wizard.vue"
+import HeaderBar from './layouts/HeaderBar.vue'
 import { AppQueryDocument } from './generated/graphql'
 
 gql`
