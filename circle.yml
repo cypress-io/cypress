@@ -304,7 +304,7 @@ commands:
             apt-get install -f -y && \
             rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
-            echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+            command "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
 
   run-driver-integration-tests:
     parameters:
