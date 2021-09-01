@@ -40,6 +40,7 @@
     "@testing-library/cypress": "8.0.0",
     "@urql/core": "2.1.5",
     "@urql/exchange-execute": "^1.0.4",
+    "@urql/exchange-graphcache": "4.3.3",
     "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
