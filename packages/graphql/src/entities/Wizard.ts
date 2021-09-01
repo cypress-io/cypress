@@ -150,12 +150,15 @@ export class Wizard {
       })
     }
 
-    return wizardGetConfigCode({
-      type: 'e2e',
-      lang: args.lang,
-    })
-  }
+    if (this.chosenTestingType === 'e2e') {
+      return wizardGetConfigCode({
+        type: 'e2e',
+        lang: args.lang,
+      })
+    }
 
+    return null
+  }
   // Internal Setters:
 
   setTestingType (testingType: TestingType | null): Wizard {
