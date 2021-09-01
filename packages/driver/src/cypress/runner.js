@@ -841,17 +841,18 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
     let test = getTest()
 
-    if (test) {
+    if (test && test.state !== 'pending') {
+      // if the current test isn't within the hook's suite
+      // then don't run the hook https://github.com/cypress-io/cypress/issues/17705
       if (!suiteHasTest(hook.parent, test.id)) {
         return
       }
-    }
+    } else {
+      // https://github.com/cypress-io/cypress/issues/9162
+      // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
+      // But it caused tests to hang when there's a failure in before().
+      // That's why getTest() is revived and checks if the state is 'pending'.
 
-    // https://github.com/cypress-io/cypress/issues/9162
-    // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
-    // But it caused tests to hang when there's a failure in before().
-    // That's why getTest() is revived and checks if the state is 'pending'.
-    if (!test || test.state === 'pending') {
       // set the hook's id from the test because
       // hooks do not have their own id, their
       // commands need to grouped with the test
