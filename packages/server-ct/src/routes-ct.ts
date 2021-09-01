@@ -1,14 +1,14 @@
 import Debug from 'debug'
-import { ErrorRequestHandler, Express } from 'express'
-import httpProxy from 'http-proxy'
+import type { ErrorRequestHandler, Express } from 'express'
+import type httpProxy from 'http-proxy'
 import send from 'send'
-import { NetworkProxy } from '@packages/proxy'
+import type { NetworkProxy } from '@packages/proxy'
 import { handle, serve, serveChunk } from './runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
-import { SpecsStore } from '@packages/server/lib/specs-store'
-import { Cfg } from '@packages/server/lib/project-base'
+import type { SpecsStore } from '@packages/server/lib/specs-store'
+import type { Cfg } from '@packages/server/lib/project-base'
 import { getPathToDist } from '@packages/resolve-dist'
-import { Browser } from '@packages/server/lib/browsers/types'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
 const debug = Debug('cypress:server:routes')
 

@@ -4,7 +4,7 @@ import Debug from 'debug'
 import Bluebird from 'bluebird'
 import chokidar from 'chokidar'
 import pluralize from 'pluralize'
-import { ProjectBase, OpenProjectLaunchOptions } from './project-base'
+import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import specsUtil from './util/specs'
 import preprocessor from './plugins/preprocessor'
@@ -12,34 +12,10 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
-import { AutomationMiddleware } from './automation'
+import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import { closeGraphQLServer } from '@packages/graphql/src/server'
 
 const debug = Debug('cypress:server:open_project')
-
-export interface LaunchOpts {
-  browser?: FoundBrowser
-  url?: string
-  automationMiddleware?: AutomationMiddleware
-  onBrowserClose?: (...args: unknown[]) => void
-  onError?: (err: Error) => void
-}
-
-export interface LaunchArgs {
-  _: [string] // Cypress App binary location
-  config: Record<string, unknown>
-  cwd: string
-  browser: Browser
-  configFile?: string
-  project: string // projectRoot
-  projectRoot: string // same as above
-  testingType: Cypress.TestingType
-  invokedFromCli: boolean
-  os: PlatformName
-
-  onFocusTests?: () => any
-}
 
 export class OpenProject {
   openProject: ProjectBase<any> | null = null

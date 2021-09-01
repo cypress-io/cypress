@@ -1,3 +1,6 @@
+/**
+ * @type {import('@cypress/vite-dev-server')}
+ */
 const { startDevServer } = require('@cypress/vite-dev-server')
 
 /// <reference types="cypress" />
@@ -25,6 +28,12 @@ module.exports = (on, config) => {
     on('dev-server:start', async (options) => {
       return startDevServer({
         options,
+        viteConfig: {
+          // TODO(tim): Figure out why this isn't being picked up
+          optimizeDeps: {
+            include: ['@headlessui/vue'],
+          },
+        },
       })
     })
   }

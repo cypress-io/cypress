@@ -20,8 +20,8 @@
 import { defineComponent, PropType } from "vue";
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { TestingTypeIcons } from "../utils/icons";
 import { TestingTypeSelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
+import { TestingTypeIcons } from "../utils/icons";
 
 gql`
 mutation TestingTypeSelect($testingType: TestingTypeEnum!) {

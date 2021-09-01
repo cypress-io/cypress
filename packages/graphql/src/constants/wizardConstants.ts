@@ -65,8 +65,8 @@ export const TestingTypeNames: Record<TestingType, string> = {
 }
 
 export const TestingTypeDescriptions: Record<TestingType, string> = {
-  component: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
-  e2e: 'Aenean lacinia bibendum nulla sed consectetur. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Aenean lacinia bibendum nulla sed consectetur.',
+  component: 'Click here to configure Component Testing with your choice of framework and dev server.',
+  e2e: 'Click here to configure end-to-end testing with Cypress.',
 }
 
 export const NAV_ITEM = [
@@ -113,7 +113,7 @@ export const NAV_ITEM_INFO: Record<NavItem, NavItemDetails> = {
     displayName: 'Settings',
     iconPath: 'clarity/settings-line',
   },
-}
+} as const
 
 export type WizardStep = typeof WIZARD_STEP[number]
 
@@ -135,7 +135,7 @@ export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
   selectFramework: 'Confirm the front-end framework and bundler fused in your project.',
   installDependencies: 'We need to install the following packages in order for component testing to work.',
   createConfig: 'Cypress will now create the following config file in the local directory for this project.',
-  setupComplete: '<em>cypress.config.js</em> file was successfully added to your project. Let’s open your browser and start testing some components!',
+  setupComplete: 'Setup complete! Let’s open your browser and start writing some tests!',
 }
 
 export const WIZARD_ALT_DESCRIPTIONS = {

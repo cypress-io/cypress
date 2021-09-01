@@ -39,13 +39,13 @@ query ProjectSettings { # ($projectId: String!)
       ...ProjectId
       cloudProject {
         id
+        recordKeys {
+          id
+          key
+          lastUsedAt
+        }
       }
     }
-  }
-  cloudViewer {
-    id
-    fullName
-    recordKeys
   }
 }
 `

@@ -1,5 +1,4 @@
-import type { LaunchArgs } from '@packages/server/lib/open_project'
-import type { OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
+import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import type { GraphQLResolveInfo } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
 import { App, Wizard, NavigationMenu, Project } from '../entities'

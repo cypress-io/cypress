@@ -38,7 +38,7 @@
 
       <transition leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
         <ListboxOptions class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-          <ListboxOption as="ul" v-for="option in options" :key="get(option, itemKey)" :value="option" v-slot="{ active, selected }">
+          <ListboxOption as="ul" v-for="option in options" :key="get(option, itemKey ?? '')" :value="option" v-slot="{ active, selected }">
               <li class="cursor-default block truncate select-none relative py-2 pl-3 pr-9" :class="[{
                 'font-medium': selected,
                 'bg-gray-50': active,
@@ -52,7 +52,7 @@
                   'pr-4': $slots['item-suffix'],
                 }">
                   <slot name="item-body" :selected="selected" :active="active" :value="option">
-                    {{ get(option, itemValue) }}
+                    {{ get(option, itemValue || '') }}
                   </slot>
                 </span>
 

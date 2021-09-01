@@ -5,7 +5,8 @@ import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
-import type { Browser, FoundBrowser, PathData } from '../types'
+import type { PathData } from '../types'
+import type { Browser, FoundBrowser } from '@packages/types'
 import { utils } from '../utils'
 
 function formFullAppPath (name: string) {

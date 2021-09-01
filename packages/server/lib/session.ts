@@ -1,4 +1,4 @@
-import { CyCookie } from './browsers/cdp_automation'
+import type { CyCookie } from './browsers/cdp_automation'
 
 interface SessionData {
   cookies: CyCookie[]

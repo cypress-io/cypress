@@ -3,7 +3,7 @@ import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
 
-import {
+import type {
   RequestMiddleware,
 } from '@packages/proxy'
 import {
@@ -19,7 +19,7 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
-import { BackendRoute } from '../types'
+import type { BackendRoute } from '../types'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 

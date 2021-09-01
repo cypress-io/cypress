@@ -1,12 +1,18 @@
 <template>
-  <template v-if="!loading && wizard">
-    <Auth :gql="auth" />
+  <template v-if="wizard && app">
+    <Auth />
     <Button @click="launchCt">Launch CT in Chrome</Button>
     <Button @click="launchE2E">Launch E2E in Chrome</Button>
     <h1 class="text-3xl mt-12 text-center">{{ wizard.title }}</h1>
     <p class="text-center text-gray-400 my-2 mx-10" v-html="wizard.description" />
     <div class="mx-5">
-      <TestingType v-if="wizard.step === 'welcome'" :gql="wizard" />
+      <template v-if="wizard.step === 'welcome'">
+        <TestingTypeCards 
+          :gql="query" 
+          @launchCt="launchCt"
+          @launchE2E="launchE2E"
+        />
+      </template> 
       <template v-else-if="wizard.testingType === 'component'">
         <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
         <InstallDependencies v-else-if="wizard.step === 'installDependencies'" :gql="wizard" />
@@ -19,13 +25,13 @@
         </WizardLayout>
       </template>
     </div>
-  </template>
+  </template> 
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
 import Auth from './Auth.vue'
-import TestingType from "./TestingType.vue";
+import TestingTypeCards from "./TestingTypeCards.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
@@ -35,30 +41,11 @@ import { gql } from '@urql/core'
 import { 
   WizardDocument, 
   InitializeOpenProjectDocument,
-  LaunchOpenProjectDocument
+  LaunchOpenProjectDocument,
+  WizardFragment,
 } from '../generated/graphql'
-import { useMutation, useQuery } from "@urql/vue";
+import { useMutation } from "@urql/vue";
 import Button from '../components/button/Button.vue'
-
-gql`
-query Wizard {
-  app {
-    isFirstOpen
-    ...ProjectRoot
-  }
-  wizard {
-    step
-    title
-    description
-    testingType
-    ...TestingType
-    ...ConfigFile
-    ...InstallDependencies
-    ...EnvironmentSetup
-  }
-  ...Auth
-}
-`
 
 gql`
 mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
@@ -80,12 +67,45 @@ mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
 }
 `
 
-const result = useQuery({ query: WizardDocument })
+gql`
+fragment WizardApp on App {
+  isFirstOpen
+  activeProject {
+    hasSetupComponentTesting
+    hasSetupE2ETesting
+  }
+  ...ProjectRoot
+  ...TestingTypeCardsApp
+}
 
-const loading = result.fetching
-const wizard = computed(() => result.data.value?.wizard)
-const app = computed(() => result.data.value?.app!)
-const auth = computed(() => result.data.value)
+fragment WizardWizard on Wizard {
+  step
+  title
+  ...TestingTypeCardsWizard
+  description
+  testingType
+  ...TestingType
+  ...ConfigFile
+  ...InstallDependencies
+  ...EnvironmentSetup
+}
+
+fragment Wizard on Query {
+  app {
+    ...WizardApp
+  }
+  wizard {
+    ...WizardWizard
+  }
+}
+`
+
+const props = defineProps<{
+  query: WizardFragment
+}>()
+
+const app = computed(() => props.query?.app)
+const wizard = computed(() => props.query?.wizard)
 
 const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 const launchOpenProject = useMutation(LaunchOpenProjectDocument)

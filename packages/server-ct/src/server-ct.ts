@@ -2,8 +2,8 @@ import Bluebird from 'bluebird'
 import httpsProxy from '@packages/https-proxy'
 import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
-import { SocketCt } from './socket-ct'
-import { Cfg } from '@packages/server/lib/project-base'
+import type { SocketCt } from './socket-ct'
+import type { Cfg } from '@packages/server/lib/project-base'
 
 type WarningErr = Record<string, any>
 

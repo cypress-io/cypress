@@ -1,4 +1,3 @@
-// import type { GraphQLResolveInfo } from 'graphql'
 import { nxs, NxsQueryResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'

@@ -1,3 +1,5 @@
+// For use with Apollo Extension for VSCode:
+// https://www.apollographql.com/docs/devtools/editor-plugins/
 module.exports = {
   client: {
     service: {

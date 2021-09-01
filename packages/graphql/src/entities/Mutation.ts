@@ -177,7 +177,7 @@ export const mutation = mutationType({
           version: chrome.version,
         }
 
-        const spec: Cypress.Cypress['spec'] = {
+        const spec: any = { // Cypress.Cypress['spec'] = {
           name: '',
           absolute: '',
           relative: '',

@@ -1,9 +1,7 @@
 import type { BaseContext } from '../context/BaseContext'
-import type { FoundBrowser } from '@packages/launcher'
-import type { Project } from '../entities'
-import type { LaunchArgs, LaunchOpts, OpenProject } from '@packages/server/lib/open_project'
-import type { Cfg, OpenProjectLaunchOptions } from '@packages/server/lib/project-base'
+import type { FoundBrowser, OpenProjectLaunchOptions, LaunchOpts, LaunchArgs, FullConfig } from '@packages/types'
 import type { BrowserContract } from '../contracts/BrowserContract'
+import type { Project } from '../entities/Project'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -28,7 +26,11 @@ export abstract class BaseActions {
 
   abstract getBrowsers (): Promise<FoundBrowser[]>
 
-  abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions): Promise<OpenProject | null>
-  abstract launchOpenProject (browser: BrowserContract, spec: Cypress.Cypress['spec'], options: LaunchOpts): Promise<void>
-  abstract resolveOpenProjectConfig (): Cfg | null
+  abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions): Promise<void>
+  abstract launchOpenProject (
+    browser: BrowserContract,
+    spec: any, // Cypress.Cypress['spec'],
+    options: LaunchOpts
+  ): Promise<void>
+  abstract resolveOpenProjectConfig (): FullConfig | null
 }

@@ -1,5 +1,5 @@
-import { FoundBrowser } from '@packages/launcher'
-import { EventEmitter } from 'events'
+import type { FoundBrowser } from '@packages/types'
+import type { EventEmitter } from 'events'
 
 export type Browser = FoundBrowser & {
   majorVersion: number

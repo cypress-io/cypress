@@ -1,13 +1,12 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project } from '@packages/graphql'
 
+import type { GraphQLResolveInfo } from 'graphql'
 import { ServerActions } from './ServerActions'
+import type { OpenProjectLaunchOptions, LaunchArgs } from '@packages/types'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
-import type { LaunchArgs } from '../open_project'
-import type { OpenProjectLaunchOptions } from '../project-base'
-import { GraphQLResolveInfo } from 'graphql'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)

@@ -1,7 +1,7 @@
 import { enumType } from 'nexus'
 import { nxs, NxsResult } from 'nexus-decorators'
 import Debug from 'debug'
-import type { ResolvedConfigurationOptions, ResolvedFromConfig } from '@packages/server/lib/config'
+import type { ResolvedConfigurationOptions, ResolvedFromConfig } from '@packages/types'
 
 const debug = Debug('cypress:graphql:resolved-config')
 
@@ -113,8 +113,33 @@ export class ResolvedJsonOption extends ResolvedOptionBase {
   description: 'Resolve config for a project',
 })
 export class ResolvedConfig {
-  constructor (private resolvedConfig: ResolvedConfigurationOptions) {
-    debug('Created new ResolvedConfig %o', resolvedConfig)
+  resolvedConfig: ResolvedConfigurationOptions
+
+  constructor (_resolvedConfig: ResolvedConfigurationOptions) {
+    debug('Created new ResolvedConfig %o', _resolvedConfig)
+    this.resolvedConfig = _resolvedConfig
+  }
+
+  @nxs.field.type(() => ResolvedConfig)
+  get component (): NxsResult<'ResolvedConfig', 'e2e'> {
+    const runnerSpecificConfig = this.resolvedConfig.component?.value ?? null
+
+    if (!runnerSpecificConfig) {
+      return null
+    }
+
+    return new ResolvedConfig(runnerSpecificConfig)
+  }
+
+  @nxs.field.type(() => ResolvedConfig)
+  get e2e (): NxsResult<'ResolvedConfig', 'e2e'> {
+    const runnerSpecificConfig = this.resolvedConfig.e2e?.value ?? null
+
+    if (!runnerSpecificConfig) {
+      return null
+    }
+
+    return new ResolvedConfig(runnerSpecificConfig)
   }
 
   @nxs.field.type(() => ResolvedStringOption)

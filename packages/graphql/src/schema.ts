@@ -20,15 +20,17 @@ process.cwd ??= () => ''
 
 const isCodegen = Boolean(process.env.GRAPHQL_CODEGEN)
 
+const types = [entities, constants, remoteSchemaTypes, customScalars, dirname ? null : testingTypes]
+
 export const graphqlSchema = makeSchema({
-  types: [entities, constants, remoteSchemaTypes, customScalars, dirname ? null : testingTypes],
+  types,
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN_EXIT),
   sourceTypes: isCodegen ? {
     modules: [
       {
         alias: 'cloudGen',
-        module: path.join(dirname, 'generated/cloud-source-types.gen.ts'),
+        module: path.join(dirname, 'gen/cloud-source-types.gen.ts'),
       },
     ],
   } : undefined,
@@ -46,7 +48,8 @@ export const graphqlSchema = makeSchema({
       return content
     }
 
-    return `/* eslint-disable */\n${content}`
+    // TODO(tim): fix in nexus to prevent the regex
+    return `/* eslint-disable */\n${content.replace(/\.js"/g, '"')}`
   },
   features: {
     abstractTypeRuntimeChecks: false,

@@ -4,7 +4,7 @@
  * Do not make changes to this file directly
  */
 
-import type * as cloudGen from "./../generated/cloud-source-types.gen"
+import type * as cloudGen from "./cloud-source-types.gen"
 import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
@@ -82,6 +82,8 @@ export interface NexusGenObjects {
   App: App;
   Browser: Browser;
   CloudOrganization: cloudGen.CloudOrganization;
+  CloudOrganizationConnection: cloudGen.CloudOrganizationConnection;
+  CloudOrganizationEdge: cloudGen.CloudOrganizationEdge;
   CloudProject: cloudGen.CloudProject;
   CloudProjectConnection: cloudGen.CloudProjectConnection;
   CloudProjectEdge: cloudGen.CloudProjectEdge;
@@ -97,6 +99,8 @@ export interface NexusGenObjects {
   PageInfo: cloudGen.PageInfo;
   Project: Project;
   Query: Query;
+  RelayConnectionKnex: cloudGen.RelayConnectionKnex;
+  RelayEdgeKnex: cloudGen.RelayEdgeKnex;
   ResolvedBooleanOption: ResolvedBooleanOption;
   ResolvedConfig: ResolvedConfig;
   ResolvedJsonOption: ResolvedJsonOption;
@@ -111,7 +115,6 @@ export interface NexusGenObjects {
 }
 
 export interface NexusGenInterfaces {
-  CloudEdge: cloudGen.CloudEdge;
   Node: cloudGen.Node;
   ResolvedOptionBase: ResolvedOptionBase;
 }
@@ -142,21 +145,39 @@ export interface NexusGenFieldTypes {
   CloudOrganization: { // field return type
     id: string; // ID!
     name: string | null; // String
+    projects: NexusGenRootTypes['CloudProjectConnection'] | null; // CloudProjectConnection
+  }
+  CloudOrganizationConnection: { // field return type
+    edges: NexusGenRootTypes['CloudOrganizationEdge'][]; // [CloudOrganizationEdge!]!
+    nodes: NexusGenRootTypes['CloudOrganization'][]; // [CloudOrganization!]!
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  CloudOrganizationEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['CloudOrganization']; // CloudOrganization!
   }
   CloudProject: { // field return type
     id: string; // ID!
+    latestRun: NexusGenRootTypes['CloudRun'] | null; // CloudRun
     organization: NexusGenRootTypes['CloudOrganization'] | null; // CloudOrganization
+    recordKeys: NexusGenRootTypes['CloudRecordKey'][] | null; // [CloudRecordKey!]
     runs: NexusGenRootTypes['CloudRunConnection'] | null; // CloudRunConnection
     slug: string; // String!
   }
   CloudProjectConnection: { // field return type
-    todo: boolean | null; // Boolean
+    edges: NexusGenRootTypes['CloudProjectEdge'][]; // [CloudProjectEdge!]!
+    nodes: NexusGenRootTypes['CloudProject'][]; // [CloudProject!]!
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   CloudProjectEdge: { // field return type
-    todo: boolean | null; // Boolean
+    cursor: string; // String!
+    node: NexusGenRootTypes['CloudProject']; // CloudProject!
   }
   CloudRecordKey: { // field return type
+    createdAt: string | null; // String
     id: string; // ID!
+    key: string | null; // String
+    lastUsedAt: string | null; // String
   }
   CloudRun: { // field return type
     commitInfo: NexusGenRootTypes['CloudRunCommitInfo'] | null; // CloudRunCommitInfo
@@ -183,19 +204,20 @@ export interface NexusGenFieldTypes {
     url: string | null; // String
   }
   CloudRunConnection: { // field return type
-    edges: Array<NexusGenRootTypes['CloudRunEdge'] | null> | null; // [CloudRunEdge]
-    nodes: Array<NexusGenRootTypes['CloudRun'] | null> | null; // [CloudRun]
+    edges: NexusGenRootTypes['CloudRunEdge'][]; // [CloudRunEdge!]!
+    nodes: NexusGenRootTypes['CloudRun'][]; // [CloudRun!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   CloudRunEdge: { // field return type
-    cursor: string | null; // String
-    node: NexusGenRootTypes['CloudRun'] | null; // CloudRun
+    cursor: string; // String!
+    node: NexusGenRootTypes['CloudRun']; // CloudRun!
   }
   CloudUser: { // field return type
     email: string | null; // String
     fullName: string | null; // String
     id: string; // ID!
-    recordKeys: string[] | null; // [String!]
+    organizations: NexusGenRootTypes['CloudOrganizationConnection'] | null; // CloudOrganizationConnection
+    userIsViewer: boolean; // Boolean!
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
@@ -231,6 +253,8 @@ export interface NexusGenFieldTypes {
   }
   Project: { // field return type
     cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
+    hasSetupComponentTesting: boolean; // Boolean!
+    hasSetupE2ETesting: boolean; // Boolean!
     id: string; // ID!
     projectId: string | null; // String
     projectRoot: string; // String!
@@ -240,11 +264,17 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     app: NexusGenRootTypes['App']; // App!
     cloudNode: NexusGenRootTypes['Node'] | null; // Node
-    cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
-    cloudProjectsByIds: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
+    cloudProjectBySlug: NexusGenRootTypes['CloudProject'] | null; // CloudProject
+    cloudProjectsBySlugs: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
     cloudViewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+  }
+  RelayConnectionKnex: { // field return type
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  RelayEdgeKnex: { // field return type
+    cursor: string; // String!
   }
   ResolvedBooleanOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
@@ -256,9 +286,11 @@ export interface NexusGenFieldTypes {
     baseUrl: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     blockHosts: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     chromeWebSecurity: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
+    component: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     componentFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     defaultCommandTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     downloadsFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    e2e: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
     env: NexusGenRootTypes['ResolvedJsonOption'] | null; // ResolvedJsonOption
     execTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     experimentalFetchPolyfill: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
@@ -322,9 +354,9 @@ export interface NexusGenFieldTypes {
     value: string | null; // String
   }
   TestingTypeInfo: { // field return type
-    description: string | null; // String
+    description: string; // String!
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    title: string | null; // String
+    title: string; // String!
   }
   Wizard: { // field return type
     allBundlers: NexusGenRootTypes['WizardBundler'][]; // [WizardBundler!]!
@@ -338,7 +370,7 @@ export interface NexusGenFieldTypes {
     sampleCode: string | null; // String
     step: NexusGenEnums['WizardStep']; // WizardStep!
     testingType: NexusGenEnums['TestingTypeEnum'] | null; // TestingTypeEnum
-    testingTypes: NexusGenRootTypes['TestingTypeInfo'][] | null; // [TestingTypeInfo!]
+    testingTypes: NexusGenRootTypes['TestingTypeInfo'][]; // [TestingTypeInfo!]!
     title: string | null; // String
   }
   WizardBundler: { // field return type
@@ -356,9 +388,6 @@ export interface NexusGenFieldTypes {
   WizardNpmPackage: { // field return type
     description: string; // String!
     name: string; // String!
-  }
-  CloudEdge: { // field return type
-    node: NexusGenRootTypes['Node']; // Node!
   }
   Node: { // field return type
     id: string; // ID!
@@ -388,21 +417,39 @@ export interface NexusGenFieldTypeNames {
   CloudOrganization: { // field return type name
     id: 'ID'
     name: 'String'
+    projects: 'CloudProjectConnection'
+  }
+  CloudOrganizationConnection: { // field return type name
+    edges: 'CloudOrganizationEdge'
+    nodes: 'CloudOrganization'
+    pageInfo: 'PageInfo'
+  }
+  CloudOrganizationEdge: { // field return type name
+    cursor: 'String'
+    node: 'CloudOrganization'
   }
   CloudProject: { // field return type name
     id: 'ID'
+    latestRun: 'CloudRun'
     organization: 'CloudOrganization'
+    recordKeys: 'CloudRecordKey'
     runs: 'CloudRunConnection'
     slug: 'String'
   }
   CloudProjectConnection: { // field return type name
-    todo: 'Boolean'
+    edges: 'CloudProjectEdge'
+    nodes: 'CloudProject'
+    pageInfo: 'PageInfo'
   }
   CloudProjectEdge: { // field return type name
-    todo: 'Boolean'
+    cursor: 'String'
+    node: 'CloudProject'
   }
   CloudRecordKey: { // field return type name
+    createdAt: 'String'
     id: 'ID'
+    key: 'String'
+    lastUsedAt: 'String'
   }
   CloudRun: { // field return type name
     commitInfo: 'CloudRunCommitInfo'
@@ -441,7 +488,8 @@ export interface NexusGenFieldTypeNames {
     email: 'String'
     fullName: 'String'
     id: 'ID'
-    recordKeys: 'String'
+    organizations: 'CloudOrganizationConnection'
+    userIsViewer: 'Boolean'
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
@@ -477,6 +525,8 @@ export interface NexusGenFieldTypeNames {
   }
   Project: { // field return type name
     cloudProject: 'CloudProject'
+    hasSetupComponentTesting: 'Boolean'
+    hasSetupE2ETesting: 'Boolean'
     id: 'ID'
     projectId: 'String'
     projectRoot: 'String'
@@ -486,11 +536,17 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     app: 'App'
     cloudNode: 'Node'
-    cloudProject: 'CloudProject'
-    cloudProjectsByIds: 'CloudProject'
+    cloudProjectBySlug: 'CloudProject'
+    cloudProjectsBySlugs: 'CloudProject'
     cloudViewer: 'CloudUser'
     navigationMenu: 'NavigationMenu'
     wizard: 'Wizard'
+  }
+  RelayConnectionKnex: { // field return type name
+    pageInfo: 'PageInfo'
+  }
+  RelayEdgeKnex: { // field return type name
+    cursor: 'String'
   }
   ResolvedBooleanOption: { // field return type name
     from: 'ResolvedConfigOption'
@@ -502,9 +558,11 @@ export interface NexusGenFieldTypeNames {
     baseUrl: 'ResolvedStringOption'
     blockHosts: 'ResolvedStringOption'
     chromeWebSecurity: 'ResolvedBooleanOption'
+    component: 'ResolvedConfig'
     componentFolder: 'ResolvedStringOption'
     defaultCommandTimeout: 'ResolvedNumberOption'
     downloadsFolder: 'ResolvedStringOption'
+    e2e: 'ResolvedConfig'
     env: 'ResolvedJsonOption'
     execTimeout: 'ResolvedNumberOption'
     experimentalFetchPolyfill: 'ResolvedBooleanOption'
@@ -603,9 +661,6 @@ export interface NexusGenFieldTypeNames {
     description: 'String'
     name: 'String'
   }
-  CloudEdge: { // field return type name
-    node: 'Node'
-  }
   Node: { // field return type name
     id: 'ID'
   }
@@ -616,17 +671,35 @@ export interface NexusGenFieldTypeNames {
 }
 
 export interface NexusGenArgTypes {
-  CloudProject: {
-    runs: { // args
-      after?: number | null; // Int
-      before?: number | null; // Int
+  CloudOrganization: {
+    projects: { // args
+      after?: string | null; // String
+      before?: string | null; // String
       first?: number | null; // Int
       last?: number | null; // Int
+    }
+  }
+  CloudProject: {
+    runs: { // args
+      after?: string | null; // String
+      before?: string | null; // String
+      cypressVersion: string; // String!
+      first?: number | null; // Int
+      last?: number | null; // Int
+      status: NexusGenEnums['CloudRunStatus']; // CloudRunStatus!
     }
   }
   CloudRunCommitInfo: {
     message: { // args
       truncate?: number | null; // Int
+    }
+  }
+  CloudUser: {
+    organizations: { // args
+      after?: string | null; // String
+      before?: string | null; // String
+      first?: number | null; // Int
+      last?: number | null; // Int
     }
   }
   Mutation: {
@@ -663,11 +736,11 @@ export interface NexusGenArgTypes {
     cloudNode: { // args
       id: string; // ID!
     }
-    cloudProject: { // args
+    cloudProjectBySlug: { // args
       slug: string; // String!
     }
-    cloudProjectsByIds: { // args
-      ids: string[]; // [ID!]!
+    cloudProjectsBySlugs: { // args
+      slugs: string[]; // [String!]!
     }
   }
   Wizard: {

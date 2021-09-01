@@ -22,6 +22,19 @@ import { createI18n } from '../../src/locales/i18n'
 Cypress.Commands.add(
   'mount',
   <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    const context = new ClientTestContext({
+      config: {},
+      cwd: '/dev/null',
+      // @ts-ignore
+      browser: null,
+      project: '/dev/null',
+      projectRoot: '/dev/null',
+      invokedFromCli: true,
+      testingType: 'e2e',
+      os: 'darwin',
+      _: [''],
+    }, {})
+
     options.global = options.global || {}
     options.global.stubs = options.global.stubs || {}
     options.global.stubs.transition = false
@@ -30,7 +43,7 @@ Cypress.Commands.add(
     options.global.plugins.push({
       install (app) {
         app.use(urql, testUrqlClient({
-          context: new ClientTestContext(),
+          context,
         }))
       },
     })
@@ -40,7 +53,18 @@ Cypress.Commands.add(
 )
 
 function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
-  const ctx = new ClientTestContext()
+  const context = new ClientTestContext({
+    config: {},
+    cwd: '/dev/null',
+    // @ts-ignore
+    browser: null,
+    project: '/dev/null',
+    projectRoot: '/dev/null',
+    invokedFromCli: true,
+    testingType: 'e2e',
+    os: 'darwin',
+    _: [''],
+  }, {})
 
   return mount(defineComponent({
     name: `mountFragment`,
@@ -74,18 +98,29 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
         {
           install (app) {
             app.use(urql, testUrqlClient({
-              context: ctx,
-              rootValue: options.type(ctx),
+              context,
+              rootValue: options.type(context),
             }))
           },
         },
       ],
     },
-  }).then(() => ctx)
+  }).then(() => context)
 }
 
 function mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T[], options: MountFragmentConfig<T>): Cypress.Chainable<ClientTestContext> {
-  const ctx = new ClientTestContext()
+  const context = new ClientTestContext({
+    config: {},
+    cwd: '/dev/null',
+    // @ts-ignore
+    browser: null,
+    project: '/dev/null',
+    projectRoot: '/dev/null',
+    invokedFromCli: true,
+    testingType: 'e2e',
+    os: 'darwin',
+    _: [''],
+  }, {})
 
   return mount(defineComponent({
     name: `mountFragmentList`,
@@ -136,14 +171,14 @@ function mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result
         {
           install (app) {
             app.use(urql, testUrqlClient({
-              context: ctx,
-              rootValue: options.type(ctx),
+              context,
+              rootValue: options.type(context),
             }))
           },
         },
       ],
     },
-  }).then(() => ctx)
+  }).then(() => context)
 }
 
 Cypress.Commands.add('mountFragment', mountFragment)

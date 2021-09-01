@@ -3,8 +3,8 @@ import path from 'path'
 
 import type { ServerContext } from './ServerContext'
 import { BaseActions, Project } from '@packages/graphql'
-// import { RunGroup } from '@packages/graphql/src/entities/run'
-import { openProject, LaunchArgs, LaunchOpts } from '../open_project'
+import { openProject } from '@packages/server/lib/open_project'
+import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
 
 // @ts-ignore
 import user from '../user'
@@ -18,9 +18,7 @@ import browsers from '../browsers'
 import * as config from '../config'
 
 import { getId } from '../project_static'
-import { FoundBrowser } from '@packages/launcher'
-import { OpenProjectLaunchOptions } from '../project-base'
-import { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
+import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
 
 /**
  *
@@ -87,14 +85,20 @@ export class ServerActions extends BaseActions {
   }
 
   async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {
-    return openProject.create(args.projectRoot, args, options)
+    try {
+      await openProject.create(args.projectRoot, args, options)
+    } catch {
+      //
+    }
+
+    return
   }
 
   async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
     return openProject.launch(browser, spec, options)
   }
 
-  resolveOpenProjectConfig () {
+  resolveOpenProjectConfig (): FullConfig | null {
     return openProject.getConfig() ?? null
   }
 }

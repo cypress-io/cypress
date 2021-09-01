@@ -17,7 +17,7 @@ generates:
   # remote schema cloud.graphql schema into Nexus. This ensures we have proper type checking
   # when we're using cy.mountFragment in component tests
   ###
-  ../graphql/src/generated/cloud-source-types.gen.ts:
+  ../graphql/src/gen/cloud-source-types.gen.ts:
     schema: '../graphql/schemas/cloud.graphql'
     plugins:
       - add:

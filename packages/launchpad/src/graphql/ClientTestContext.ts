@@ -1,9 +1,18 @@
 import { BaseActions, BaseContext, Project } from '@packages/graphql'
 import type { FullConfig } from '@packages/server/lib/config'
+import { browsers, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
     super(ctx)
+  }
+
+  async initializeOpenProject () {
+    return
+  }
+
+  async launchOpenProject () {
+    return
   }
 
   async installDependencies () {
@@ -16,18 +25,6 @@ export class ClientTestActions extends BaseActions {
 
   async authenticate () {}
   async createConfigFile () {}
-
-  async initializeOpenProject () {
-    return null
-  }
-
-  async launchOpenProject () {
-
-  }
-
-  resolveOpenProjectConfig () {
-    return null
-  }
 
   async logout () {}
   async getProjectId () {
@@ -43,6 +40,24 @@ export class ClientTestActions extends BaseActions {
     return []
   }
 
+  resolveOpenProjectConfig (): FullConfig {
+    // @ts-ignore
+    return {
+      resolved: {
+        e2e: {
+          from: 'default',
+          value: {},
+        },
+        component: {
+          from: 'config',
+          value: {
+            viewportHeight: 100,
+          },
+        },
+      },
+    }
+  }
+
   addProject () {
     return createTestProject('/some/new/project', this.ctx)
   }
@@ -55,7 +70,23 @@ export class ClientTestActions extends BaseActions {
 
 const createTestProject = (projectRoot: string, ctx: BaseContext) => new Project(projectRoot, ctx)
 
+const TEST_LAUNCH_ARGS: LaunchArgs = {
+  config: {},
+  cwd: '/current/working/dir',
+  _: ['/current/working/dir'],
+  projectRoot: '/project/root',
+  invokedFromCli: false,
+  browser: browsers[0],
+  testingType: 'e2e',
+  project: '/project/root',
+  os: 'linux',
+}
+
 export class ClientTestContext extends BaseContext {
+  constructor (_launchArgs?: LaunchArgs, _launchOptions?: OpenProjectLaunchOptions) {
+    super(_launchArgs ?? TEST_LAUNCH_ARGS, _launchOptions ?? {})
+  }
+
   readonly actions = new ClientTestActions(this)
   readonly projects = []
 
@@ -63,11 +94,11 @@ export class ClientTestContext extends BaseContext {
   localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
 
-  delegateToRemoteQuery() {
+  delegateToRemoteQuery () {
     return null
   }
 
-  delegateToRemoteQueryBatched() {
+  delegateToRemoteQueryBatched () {
     return null
   }
 
