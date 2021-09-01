@@ -36,13 +36,17 @@ export class Wizard {
   private chosenBundler: Bundler | null
   private chosenFramework: FrontendFramework | null
   private chosenManualInstall: boolean
-  private history: WizardStep[] = ['welcome']
+  private _history: WizardStep[] = ['welcome']
 
   constructor (private _ctx: BaseContext) {
     this.chosenTestingType = null
     this.chosenBundler = null
     this.chosenFramework = null
     this.chosenManualInstall = false
+  }
+
+  get history (): WizardStep[] {
+    return this._history
   }
 
   @nxs.field.type(() => WizardFrontendFramework)
@@ -186,8 +190,14 @@ export class Wizard {
     return this
   }
 
-  @nxs.field.nonNull.boolean()
+  @nxs.field.nonNull.boolean({
+    description: 'Given the current state, returns whether the user progress to the next step of the wizard',
+  })
   canNavigateForward (): NxsResult<'Wizard', 'canNavigateForward'> {
+    if (this.currentStep === 'setupComplete') {
+      return false
+    }
+
     if (this.currentStep === 'selectFramework' && !this.chosenBundler && !this.chosenFramework) {
       return false
     }
@@ -197,12 +207,12 @@ export class Wizard {
   }
 
   navigate (direction: WizardNavigateDirection): Wizard {
-    debug(`history is ${this.history.join(',')}`)
+    debug(`_history is ${this._history.join(',')}`)
 
     if (direction === 'back') {
-      this.history.pop()
+      this._history.pop()
 
-      const previous = this.history[this.history.length - 1]
+      const previous = this._history[this._history.length - 1]
 
       if (previous) {
         debug(`navigating back from ${previous} to %s`, previous)
@@ -219,24 +229,24 @@ export class Wizard {
     return this.navigateForward()
   }
 
-  private get shouldLaunchCt (): boolean {
+  get shouldLaunchCt (): boolean {
     return this.chosenTestingType === 'component' && this._ctx.activeProject!.hasSetupComponentTesting
   }
 
-  private get shouldLaunchE2E (): boolean {
+  get shouldLaunchE2E (): boolean {
     return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting
   }
 
-  private get shouldSetupCt (): boolean {
+  get shouldSetupCt (): boolean {
     return this.chosenTestingType === 'component' && this._ctx.activeProject!.hasSetupComponentTesting === false
   }
 
-  private get shouldSetupE2E (): boolean {
+  get shouldSetupE2E (): boolean {
     return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting === false
   }
 
   private navigateToStep (step: WizardStep): void {
-    this.history.push(step)
+    this._history.push(step)
     this.currentStep = step
   }
 

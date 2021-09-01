@@ -22,7 +22,7 @@ describe('LocalProject', () => {
 
       const project = new LocalProject('/foo/bar/', new TestContext({ Actions: MyActions }))
 
-      expect(project.hasSetupE2ETesting()).to.eq(false)
+      expect(project.hasSetupE2ETesting).to.eq(false)
     })
 
     it('returns true when resolved e2e key has one override', () => {
@@ -44,7 +44,7 @@ describe('LocalProject', () => {
 
       const project = new LocalProject('/foo/bar/', new TestContext({ Actions: MyActions }))
 
-      expect(project.hasSetupE2ETesting()).to.eq(true)
+      expect(project.hasSetupE2ETesting).to.eq(true)
     })
   })
 
@@ -66,7 +66,7 @@ describe('LocalProject', () => {
 
       const project = new LocalProject('/foo/bar/', new TestContext({ Actions: MyActions }))
 
-      expect(project.hasSetupComponentTesting()).to.eq(false)
+      expect(project.hasSetupComponentTesting).to.eq(false)
     })
 
     it('returns true when resolved component key has one override', () => {
@@ -88,7 +88,7 @@ describe('LocalProject', () => {
 
       const project = new LocalProject('/foo/bar/', new TestContext({ Actions: MyActions }))
 
-      expect(project.hasSetupComponentTesting()).to.eq(true)
+      expect(project.hasSetupComponentTesting).to.eq(true)
     })
   })
 })
