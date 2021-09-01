@@ -19,6 +19,7 @@
       :backFn="backFn" 
       :altFn="altFn" 
       :next="nextLabel" 
+      :showNext="showNext"
       :back="backLabel" 
       :alt="alt" 
     />
@@ -50,14 +51,18 @@ mutation WizardLayoutNavigate($direction: WizardNavigateDirection!) {
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const props = withDefaults(
+  defineProps<{
     next?: string
     back?: string
     alt?: string
-    canNavigateForward?: boolean
+    showNext?: boolean
+    canNavigateForward: boolean
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
-}>()
+  }>(), {
+  showNext: true
+})
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
 const backLabel = computed(() => props.back || t('setupPage.step.back'))

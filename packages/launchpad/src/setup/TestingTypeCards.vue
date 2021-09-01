@@ -6,7 +6,7 @@
       :title="ct.title"
       description="LAUNCH"
       role="launch-component-testing"
-      @click="emit('launchCt')"
+      @click="ctNextStep"
     />
 
     <TestingTypeCard
@@ -15,7 +15,7 @@
       :title="ct.title"
       :description="ct.description"
       role="setup-component-testing"
-      @click="selectTestingType('component')"
+      @click="ctNextStep"
     />
 
     <TestingTypeCard
@@ -24,7 +24,7 @@
       :title="e2e.title"
       description="LAUNCH"
       role="launch-e2e-testing"
-      @click="emit('launchE2E')"
+      @click="e2eNextStep"
     />
 
     <TestingTypeCard
@@ -33,7 +33,7 @@
       :title="e2e.title"
       :description="e2e.description"
       role="setup-e2e-testing"
-      @click="selectTestingType('e2e')"
+      @click="e2eNextStep"
     />
   </div>
 </template>
@@ -46,7 +46,8 @@ import {
   TestingTypeEnum,
   TestingTypeCardsWizardFragment,
   TestingTypeCardsAppFragment,
-  TestingTypeSelectDocument
+  TestingTypeSelectDocument,
+  TestingTypeCardsNavigateForwardDocument
 } from "../generated/graphql";
 import TestingTypeCard from "./TestingTypeCard.vue";
 
@@ -80,18 +81,23 @@ mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
 }
 `
 
+gql`
+mutation TestingTypeCardsNavigateForward {
+  wizardNavigate(direction: forward) {
+    step
+  }
+}
+`
+
+
 const mutation = useMutation(TestingTypeSelectDocument)
+const navigateForwardMutation = useMutation(TestingTypeCardsNavigateForwardDocument)
 
 const props = defineProps<{
   gql: {
     app: TestingTypeCardsAppFragment
     wizard: TestingTypeCardsWizardFragment
   }
-}>()
-
-const emit = defineEmits<{
-  (event: 'launchCt'): void
-  (event: 'launchE2E'): void
 }>()
 
 const ct = computed(() => {
@@ -102,8 +108,18 @@ const ct = computed(() => {
 })
 
 const selectTestingType = (testingType: TestingTypeEnum) => {
-  mutation.executeMutation({ testingType });
-};
+  return mutation.executeMutation({ testingType })
+}
+
+const ctNextStep = async () => {
+  await selectTestingType('component')
+  navigateForwardMutation.executeMutation({})
+}
+
+const e2eNextStep = async () => {
+  await selectTestingType('e2e')
+  navigateForwardMutation.executeMutation({})
+}
 
 const e2e = computed(() => {
   return {

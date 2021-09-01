@@ -10,7 +10,7 @@
       rounded-b
     "
   >
-    <Button @click="nextFn" :disabled="!canNavigateForward">{{ next }}</Button>
+    <Button v-if="showNext" @click="nextFn" :disabled="!canNavigateForward">{{ next }}</Button>
     <Button @click="backFn" variant="outline">{{ back }}</Button>
     <div class="flex-grow" />
     <div v-if="altFn && alt" class="flex items-center px-3">
@@ -20,52 +20,30 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+<script lang="ts" setup>
+import { ref } from "vue";
 import Button from "../components/button/Button.vue";
 import Switch from "../components/switch/Switch.vue";
 
-export default defineComponent({
-  components: { Button, Switch },
-  props: {
-    next: {
-      type: String,
-      required: true,
-    },
-    nextFn: {
-      type: Function as PropType<() => void>,
-      required: true
-    },
-    back: {
-      type: String,
-      required: true,
-    },
-    backFn: {
-      type: Function as PropType<() => void>,
-      required: true
-    },
-    alt: {
-      type: String,
-      default: undefined,
-    },
-    altFn: {
-      type: Function as PropType<(value: boolean) => void>,
-      default: undefined,
-    },
-    canNavigateForward: {
-      type: Boolean,
-      default: true
-    }
-  },
-  setup(props) {
-    const altValue = ref(false);
+const props = withDefaults(
+  defineProps<{
+  next: string
+  back: string
+  nextFn: () => void
+  backFn: () => void
+  alt?: string
+  altFn?: (value: boolean) => void
+  canNavigateForward: boolean
+  showNext: boolean
+}>(), {
+  showNext: true 
+})
 
-    const handleAlt = () => {
-      altValue.value = !altValue.value
-      props.altFn?.(altValue.value);
-    };
+const altValue = ref(false);
 
-    return { altValue, handleAlt };
-  },
-});
+const handleAlt = () => {
+  altValue.value = !altValue.value
+  props.altFn?.(altValue.value);
+}
+
 </script>

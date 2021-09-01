@@ -1,4 +1,5 @@
 import { nxs, NxsArgs, NxsResult } from 'nexus-decorators'
+import Debug from 'debug'
 import {
   BUNDLER,
   FrontendFramework,
@@ -17,11 +18,14 @@ import {
   WizardCodeLanguageEnum,
   WizardNavigateDirection,
 } from '../constants/wizardConstants'
+import type { BaseContext } from '../context/BaseContext'
 import { wizardGetConfigCode } from '../util/wizardGetConfigCode'
 import { TestingTypeInfo } from './TestingTypeInfo'
 import { WizardBundler } from './WizardBundler'
 import { WizardFrontendFramework } from './WizardFrontendFramework'
 import { WizardNpmPackage } from './WizardNpmPackage'
+
+const debug = Debug('cypress:graphql:wizard')
 
 @nxs.objectType({
   description: 'The Wizard is a container for any state associated with initial onboarding to Cypress',
@@ -32,8 +36,9 @@ export class Wizard {
   private chosenBundler: Bundler | null
   private chosenFramework: FrontendFramework | null
   private chosenManualInstall: boolean
+  private history: WizardStep[] = ['welcome']
 
-  constructor () {
+  constructor (private _ctx: BaseContext) {
     this.chosenTestingType = null
     this.chosenBundler = null
     this.chosenFramework = null
@@ -128,13 +133,21 @@ export class Wizard {
     },
   })
   sampleCode (args: NxsArgs<'Wizard', 'sampleCode'>): NxsResult<'Wizard', 'sampleCode'> {
-    if (!this.framework || !this.bundler) {
-      return null
+    if (this.chosenTestingType === 'component') {
+      if (!this.framework || !this.bundler) {
+        return null
+      }
+
+      return wizardGetConfigCode({
+        type: 'component',
+        framework: this.framework,
+        bundler: this.bundler,
+        lang: args.lang,
+      })
     }
 
     return wizardGetConfigCode({
-      framework: this.framework,
-      bundler: this.bundler,
+      type: 'e2e',
       lang: args.lang,
     })
   }
@@ -143,7 +156,6 @@ export class Wizard {
 
   setTestingType (testingType: TestingType | null): Wizard {
     this.chosenTestingType = testingType
-    this.currentStep = 'selectFramework'
 
     return this
   }
@@ -185,8 +197,19 @@ export class Wizard {
   }
 
   navigate (direction: WizardNavigateDirection): Wizard {
+    debug(`history is ${this.history.join(',')}`)
+
     if (direction === 'back') {
-      return this.navigateBack()
+      this.history.pop()
+
+      const previous = this.history[this.history.length - 1]
+
+      if (previous) {
+        debug(`navigating back from ${previous} to %s`, previous)
+        this.currentStep = previous
+      }
+
+      return this
     }
 
     if (!this.canNavigateForward()) {
@@ -196,23 +219,64 @@ export class Wizard {
     return this.navigateForward()
   }
 
-  private navigateBack (): Wizard {
-    const idx = WIZARD_STEP.indexOf(this.currentStep)
+  private get shouldLaunchCt (): boolean {
+    return this.chosenTestingType === 'component' && this._ctx.activeProject!.hasSetupComponentTesting
+  }
 
-    if (idx !== 0) {
-      const i = idx - 1
+  private get shouldLaunchE2E (): boolean {
+    return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting
+  }
 
-      this.currentStep = WIZARD_STEP[i]!
-    }
+  private get shouldSetupCt (): boolean {
+    return this.chosenTestingType === 'component' && this._ctx.activeProject!.hasSetupComponentTesting === false
+  }
 
-    return this
+  private get shouldSetupE2E (): boolean {
+    return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting === false
+  }
+
+  private navigateToStep (step: WizardStep): void {
+    this.history.push(step)
+    this.currentStep = step
   }
 
   private navigateForward (): Wizard {
-    const idx = WIZARD_STEP.indexOf(this.currentStep)
+    debug(`currentStep: %s chosenTestingType %s shouldLaunchCt: %s shouldLaunchE2E: %s shouldSetupCt %s shouldSetupE2E %s`, this.currentStep, this.chosenTestingType, this.shouldLaunchCt, this.shouldLaunchE2E, this.shouldSetupCt, this.shouldSetupE2E)
 
-    if (idx !== WIZARD_STEP.length - 1) {
-      this.currentStep = WIZARD_STEP[idx + 1]!
+    if (this.currentStep === 'welcome' && (this.shouldLaunchCt || this.shouldLaunchE2E)) {
+      this.navigateToStep('setupComplete')
+
+      return this
+    }
+
+    if (this.currentStep === 'welcome' && this.shouldSetupCt) {
+      this.navigateToStep('selectFramework')
+
+      return this
+    }
+
+    if (this.currentStep === 'welcome' && this.shouldSetupE2E) {
+      this.navigateToStep('createConfig')
+
+      return this
+    }
+
+    if (this.currentStep === 'selectFramework') {
+      this.navigateToStep('installDependencies')
+
+      return this
+    }
+
+    if (this.currentStep === 'installDependencies') {
+      this.navigateToStep('createConfig')
+
+      return this
+    }
+
+    if (this.currentStep === 'createConfig') {
+      this.navigateToStep('setupComplete')
+
+      return this
     }
 
     return this
