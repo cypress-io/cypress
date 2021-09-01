@@ -1,8 +1,8 @@
 import Debug from 'debug'
-import * as socketIo from '@packages/socket'
+import type * as socketIo from '@packages/socket'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { SocketBase } from '@packages/server/lib/socket-base'
-import { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
+import type { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
 
 const debug = Debug('cypress:server-ct:socket-ct')
 

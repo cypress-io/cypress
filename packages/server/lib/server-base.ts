@@ -7,28 +7,28 @@ import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
-import { AddressInfo } from 'net'
+import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
-import httpsProxy from '@packages/https-proxy'
+import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { SocketCt } from '@packages/server-ct'
+import type { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
-import { SocketE2E } from './socket-e2e'
+import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import { SpecsStore } from './specs-store'
-import { InitializeRoutes } from '../../server-ct/src/routes-ct'
-import { Cfg } from './project-base'
-import { Browser } from '@packages/server/lib/browsers/types'
+import type { SpecsStore } from './specs-store'
+import type { InitializeRoutes } from '../../server-ct/src/routes-ct'
+import type { Cfg } from './project-base'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -221,6 +221,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         onError,
         getSpec,
         getCurrentBrowser,
+        testingType,
       })
 
       return this.createServer(app, config, onWarning)

@@ -8,7 +8,10 @@ module.exports = (Commands, Cypress, cy) => {
     url (options = {}) {
       const userOptions = options
 
-      options = _.defaults({}, userOptions, { log: true })
+      options = _.defaults({}, userOptions, {
+        log: true,
+        decode: false,
+      })
 
       if (options.log !== false) {
         options._log = Cypress.log({
@@ -23,6 +26,10 @@ module.exports = (Commands, Cypress, cy) => {
 
       const resolveHref = () => {
         return Promise.try(getHref).then((href) => {
+          if (options.decode) {
+            href = decodeURI(href)
+          }
+
           return cy.verifyUpcomingAssertions(href, options, {
             onRetry: resolveHref,
           })

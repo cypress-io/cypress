@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import webpack from 'webpack'
 import WebpackDevServer from 'webpack-dev-server'
-import webpackDevServerPkg from 'webpack-dev-server/package.json'
 import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackConfig'
+import { webpackDevServerFacts } from './webpackDevServerFacts'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
   /* this is the Cypress options object */
@@ -53,25 +53,35 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     hot: false,
   }
 
-  if (webpackDevServerPkg.version.match(/3\./)) {
+  if (webpackDevServerFacts.isV3()) {
+    debug('using webpack-dev-server v3')
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
+      // @ts-expect-error ignore webpack-dev-server v3 type errors
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
     }
-  } else if (webpackDevServerPkg.version.match(/4\./)) {
+
+    // @ts-expect-error ignore webpack-dev-server v3 type errors
+    return new WebpackDevServer(compiler, webpackDevServerConfig)
+  }
+
+  if (webpackDevServerFacts.isV4()) {
+    debug('using webpack-dev-server v4')
     webpackDevServerConfig = {
+      host: 'localhost',
+      port: 'auto',
       ...userWebpackConfig?.devServer,
       devMiddleware: {
         publicPath: devServerPublicPathRoute,
       },
       hot: false,
     }
-  } else {
-    throw Error(`@cypress/webpack-dev-server only supports webpack-dev-server v3 and v4. Found: ${webpackDevServerPkg.version}.`)
+
+    // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
+    return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
-  // @ts-ignore types for webpack v5 are incorrect?
-  return new WebpackDevServer(compiler, webpackDevServerConfig)
+  throw webpackDevServerFacts.unsupported()
 }
