@@ -14,7 +14,7 @@ describe('<ButtonBar />', () => {
   })
 
   it('should trigger the next function', () => {
-    cy.mount(() => <ButtonBar next="Next Step" back="Back" nextFn={nextFn} backFn={backFn} />)
+    cy.mount(() => <ButtonBar next="Next Step" back="Back" nextFn={nextFn} backFn={backFn} canNavigateForward={true} />)
     cy.contains('Next Step')
     .click()
     .then(() => {
