@@ -21,7 +21,7 @@ query AppQuery {
   ...Wizard
   app {
     activeProject {
-      __typename
+      title
     }
   }
 }

@@ -33,7 +33,7 @@ const props = withDefaults(
   backFn: () => void
   alt?: string
   altFn?: (value: boolean) => void
-  canNavigateForward: boolean
+  canNavigateForward?: boolean
   showNext: boolean
 }>(), {
   showNext: true 
