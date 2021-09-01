@@ -2,7 +2,7 @@
   "name": "@packages/runner",
   "version": "0.0.0-development",
   "private": true,
-  "main": "src/index.js",
+  "browser": "src/index.js",
   "scripts": {
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
