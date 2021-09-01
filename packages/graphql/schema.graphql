@@ -362,6 +362,10 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
   bundler: WizardBundler
+
+  """
+  Given the current state, returns whether the user progress to the next step of the wizard
+  """
   canNavigateForward: Boolean!
 
   """The title of the page, given the current step of the wizard"""

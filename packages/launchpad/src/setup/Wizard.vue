@@ -23,6 +23,7 @@
       <OpenBrowser 
         v-if="wizard.step === 'setupComplete'" 
         :app="app"
+        :wizard="wizard"
       />
     </div>
   </template> 
