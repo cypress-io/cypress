@@ -7,9 +7,19 @@
         v-if="wizard.step === 'welcome'"
         :gql="query" 
       />
-      <EnvironmentSetup v-if="wizard.step === 'selectFramework'" :gql="wizard" />
-      <InstallDependencies v-if="wizard.step === 'installDependencies'" :gql="wizard" />
-      <ConfigFile v-if="wizard.step === 'createConfig'" :wizard="wizard" :app="app" />
+      <EnvironmentSetup 
+        v-if="wizard.step === 'selectFramework'" 
+        :gql="wizard" 
+      />
+      <InstallDependencies 
+        v-if="wizard.step === 'installDependencies'" 
+        :gql="wizard" 
+      />
+      <ConfigFile 
+        v-if="wizard.step === 'createConfig'" 
+        :wizard="wizard" 
+        :app="app" 
+      />
       <OpenBrowser 
         v-if="wizard.step === 'setupComplete'" 
         :app="app"
@@ -31,26 +41,6 @@ import type {
 } from '../generated/graphql'
 
 gql`
-mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
-  initializeOpenProject (testingType: $testingType) {
-    projects {
-      __typename # don't really care about result at this point
-    }
-  }
-}
-`
-
-gql`
-mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
-  launchOpenProject (testingType: $testingType) {
-    projects {
-      __typename # don't really care about result at this point
-    }
-  }
-}
-`
-
-gql`
 fragment WizardApp on App {
   isFirstOpen
   activeProject {
@@ -59,7 +49,8 @@ fragment WizardApp on App {
   }
   ...ProjectRoot
   ...TestingTypeCardsApp
-  ...OpenBrowser
+  ...OpenBrowserApp
+
 }
 
 fragment WizardWizard on Wizard {
@@ -72,6 +63,7 @@ fragment WizardWizard on Wizard {
   ...ConfigFile
   ...InstallDependencies
   ...EnvironmentSetup
+  ...OpenBrowserWizard
 }
 
 fragment Wizard on Query {
