@@ -646,8 +646,7 @@ describe('same session name, different options, multiple tests', () => {
   })
 })
 
-// NOTE: flake. unskip when we fix it
-describe.skip('consoleProps', () => {
+describe('consoleProps', () => {
   let log = null
 
   beforeEach(() => {
