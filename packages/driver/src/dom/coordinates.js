@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const $jquery = require('./jquery')
 const $window = require('./window')
 const $elements = require('./elements')
 
@@ -22,12 +23,12 @@ const getFirstValidSizedRect = (el) => {
 }
 
 /**
- * @param {JQuery<HTMLElement>} $el
+ * @param {JQuery<HTMLElement> | HTMLElement} $el
  */
 const getElementPositioning = ($el) => {
   let autFrame
 
-  const el = $el[0]
+  const el = $jquery.isJquery($el) ? $el[0] : $el
 
   const win = $window.getWindowByElement(el)
 
