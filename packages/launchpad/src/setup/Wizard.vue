@@ -42,37 +42,28 @@ import type {
 } from '../generated/graphql'
 
 gql`
-fragment WizardApp on App {
-  isFirstOpen
-  activeProject {
-    hasSetupComponentTesting
-    hasSetupE2ETesting
-  }
-  ...ProjectRoot
-  ...TestingTypeCardsApp
-  ...OpenBrowserApp
-
-}
-
-fragment WizardWizard on Wizard {
-  step
-  title
-  ...TestingTypeCardsWizard
-  description
-  testingType
-  ...TestingType
-  ...ConfigFile
-  ...InstallDependencies
-  ...EnvironmentSetup
-  ...OpenBrowserWizard
-}
-
 fragment Wizard on Query {
+  ...TestingTypeCards
   app {
-    ...WizardApp
+    isFirstOpen
+    activeProject {
+      hasSetupComponentTesting
+      hasSetupE2ETesting
+    }
+    ...ProjectRoot
+    ...OpenBrowserApp
   }
+
   wizard {
-    ...WizardWizard
+    step
+    title
+    description
+    testingType
+    ...TestingType
+    ...ConfigFile
+    ...InstallDependencies
+    ...EnvironmentSetup
+    ...OpenBrowserWizard
   }
 }
 `

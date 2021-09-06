@@ -44,28 +44,26 @@ import { useMutation } from "@urql/vue";
 import { computed } from "vue";
 import { 
   TestingTypeEnum,
-  TestingTypeCardsWizardFragment,
-  TestingTypeCardsAppFragment,
   TestingTypeSelectDocument,
   TestingTypeCardsNavigateForwardDocument
 } from "../generated/graphql";
 import TestingTypeCard from "./TestingTypeCard.vue";
 
 gql`
-fragment TestingTypeCardsApp on App {
-  activeProject {
-    hasSetupComponentTesting
-    hasSetupE2ETesting
+fragment TestingTypeCards on Query {
+  app {
+    activeProject {
+      hasSetupComponentTesting
+      hasSetupE2ETesting
+    }
   }
-}
-`
-  
-gql`
-fragment TestingTypeCardsWizard on Wizard {
-  testingTypes {
-    id
-    title
-    description
+
+  wizard {
+    testingTypes {
+      id
+      title
+      description
+    }
   }
 }
 `
