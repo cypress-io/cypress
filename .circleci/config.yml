@@ -19,7 +19,7 @@ defaults: &defaults
       default: cy-doc
     is-mac:
       type: boolean
-      default: false
+      default: true
     arch:
       type: enum
       default: 'linux'
@@ -99,7 +99,7 @@ commands:
     parameters:
       dont-move:
         type: boolean
-        default: false
+        default: true
     steps:
       - run: node scripts/circle-cache.js --action prepare
       - unless:
@@ -112,7 +112,6 @@ commands:
                   mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
-
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
@@ -153,7 +152,7 @@ commands:
     parameters:
       is-mac:
         type: boolean
-        default: false
+        default: true
       arch:
         type: enum
         enum: ['linux', 'darwin']
@@ -238,7 +237,6 @@ commands:
           command: |
             . ./scripts/load-nvm.sh
             yarn check-node-version
-
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
@@ -284,7 +282,6 @@ commands:
             echo "before nvm alias default"
             nvm alias default
             node --version
-
   install-chrome:
     description: Install Google Chrome
     parameters:
@@ -306,7 +303,6 @@ commands:
             command -v "`google-chrome-<<parameters.channel>>`"
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
-
   run-driver-integration-tests:
     parameters:
       browser:
@@ -330,7 +326,6 @@ commands:
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
-
             if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -339,7 +334,6 @@ commands:
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
-
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
@@ -361,13 +355,12 @@ commands:
       percy:
         description: enable percy
         type: boolean
-        default: false
+        default: true
     steps:
       - restore_cached_workspace
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
-
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
@@ -389,7 +382,7 @@ commands:
       percy:
         description: enable percy
         type: boolean
-        default: false
+        default: true
     steps:
       - restore_cached_workspace
       - run:
@@ -451,7 +444,6 @@ commands:
             node scripts/add-install-comment.js \
               --npm npm-package-url.json \
               --binary binary-url.json
-
   verify-mocha-results:
     description: Double-check that Mocha tests ran as expected.
     parameters:
@@ -477,7 +469,6 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $(node ./scripts/get-next-version) || true)
-
   test-binary-against-rwa:
     description: |
       Takes the built binary and NPM package, clones the RWA repo
@@ -952,7 +943,7 @@ jobs:
 
   cli-visual-tests:
     <<: *defaults
-    parallelism: 8
+    parallelism: 4
     steps:
       - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
@@ -973,7 +964,6 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
-
   unit-tests:
     <<: *defaults
     resource_class: medium
@@ -1075,7 +1065,7 @@ jobs:
   server-e2e-tests-chrome:
     <<: *defaults
     resource_class: medium
-    parallelism: 8
+    parallelism: 4
     steps:
       - run-e2e-tests:
           browser: chrome
@@ -1083,7 +1073,7 @@ jobs:
   server-e2e-tests-electron:
     <<: *defaults
     resource_class: medium
-    parallelism: 8
+    parallelism: 4
     steps:
       - run-e2e-tests:
           browser: electron
@@ -1091,7 +1081,7 @@ jobs:
   server-e2e-tests-firefox:
     <<: *defaults
     resource_class: medium
-    parallelism: 8
+    parallelism: 4
     steps:
       - run-e2e-tests:
           browser: firefox
@@ -1146,7 +1136,7 @@ jobs:
   driver-integration-tests-chrome:
     <<: *defaults
     resource_class: medium
-    parallelism: 5
+    parallelism: 4
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -1154,7 +1144,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
-    parallelism: 5
+    parallelism: 4
     steps:
       - run-driver-integration-tests:
           browser: chrome:beta
@@ -1163,7 +1153,7 @@ jobs:
   driver-integration-tests-firefox:
     <<: *defaults
     resource_class: medium
-    parallelism: 5
+    parallelism: 4
     steps:
       - run-driver-integration-tests:
           browser: firefox
@@ -1171,7 +1161,7 @@ jobs:
   driver-integration-tests-electron:
     <<: *defaults
     resource_class: medium
-    parallelism: 5
+    parallelism: 4
     steps:
       - run-driver-integration-tests:
           browser: electron
@@ -1405,7 +1395,7 @@ jobs:
 
   npm-react:
     <<: *defaults
-    parallelism: 8
+    parallelism: 4
     resource_class: medium
     steps:
       - restore_cached_workspace
@@ -1701,7 +1691,6 @@ jobs:
           command: |
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
-
   # testing scaffolding examples and running them
   # against example.cypress.io
   test-cypress-scaffold:
@@ -1741,7 +1730,6 @@ jobs:
           command: |
             echo '{}' > cypress.json
             npx cypress run
-
   test-full-typescript-project:
     parameters:
       executor:
