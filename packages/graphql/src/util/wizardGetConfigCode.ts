@@ -2,18 +2,46 @@ import { FRAMEWORK_CONFIG_FILE, WizardCodeLanguage } from '../constants/wizardCo
 import type { WizardBundler } from '../entities/WizardBundler'
 import type { WizardFrontendFramework } from '../entities/WizardFrontendFramework'
 
-interface GetCodeOpts {
+interface GetCodeOptsE2E {
+  type: 'e2e'
+  lang: WizardCodeLanguage
+}
+
+interface GetCodeOptsCt {
+  type: 'component'
   framework: WizardFrontendFramework
   bundler: WizardBundler
   lang: WizardCodeLanguage
 }
+
+type GetCodeOpts = GetCodeOptsCt | GetCodeOptsE2E
 
 const LanguageNames: Record<WizardCodeLanguage, string> = {
   js: 'JavaScript',
   ts: 'TypeScript',
 }
 
+export const wizardGetConfigCodeE2E = (opts: GetCodeOptsE2E): string | null => {
+  return `{
+  e2e: {
+    viewportHeight: 660,
+    viewportWidth: 1000,
+}`
+}
+
 export const wizardGetConfigCode = (opts: GetCodeOpts): string | null => {
+  if (opts.type === 'component') {
+    return wizardGetConfigCodeCt(opts)
+  }
+
+  if (opts.type === 'e2e') {
+    return wizardGetConfigCodeE2E(opts)
+  }
+
+  return null
+}
+
+export const wizardGetConfigCodeCt = (opts: GetCodeOptsCt): string | null => {
   const { framework, bundler, lang } = opts
 
   const comments = `Component testing, ${LanguageNames[opts.lang]}, ${framework.name}, ${bundler.name}`

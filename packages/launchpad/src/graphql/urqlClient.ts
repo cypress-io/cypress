@@ -2,10 +2,11 @@ import {
   Client,
   createClient,
   dedupExchange,
-  cacheExchange,
   errorExchange,
+  cacheExchange,
   fetchExchange,
 } from '@urql/core'
+// import { cacheExchange } from '@urql/exchange-graphcache'
 
 import { initGraphQLIPC } from './graphqlIpc'
 

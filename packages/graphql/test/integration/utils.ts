@@ -13,7 +13,7 @@ interface TestContextInjectionOptions {
 export class TestActions extends BaseActions {
   ctx: BaseContext
 
-  constructor (_ctx: BaseContext) {
+  constructor (_ctx: BaseContext, private cfg?: FullConfig) {
     super(_ctx)
     this.ctx = _ctx
   }
@@ -23,6 +23,10 @@ export class TestActions extends BaseActions {
 
   async launchOpenProject () {}
   resolveOpenProjectConfig (): FullConfig {
+    if (this.cfg) {
+      return this.cfg
+    }
+
     return {
       projectRoot: '/root/path',
       resolved: {},

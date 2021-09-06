@@ -1,23 +1,16 @@
+import { Query } from '@packages/graphql'
 import {
-  TestingTypeCardsAppFragmentDoc,
-  TestingTypeCardsWizardFragmentDoc,
+  TestingTypeCardsFragmentDoc,
 } from '../generated/graphql'
 import TestingTypeCards from './TestingTypeCards.vue'
 
 describe('TestingTypeCards', () => {
   it('renders correct label depending if testingType has been configured', () => {
-    cy.mountFragmentList([
-      TestingTypeCardsAppFragmentDoc,
-      TestingTypeCardsWizardFragmentDoc,
-    ], {
+    cy.mountFragment(TestingTypeCardsFragmentDoc, {
       type: (ctx) => {
-        const { app, wizard } = ctx
-
-        return [app, wizard]
+        return new Query()
       },
       render: (gqlVal) => {
-        // @ts-ignore - type is inferred as Frag1 | Frag2,
-        // but in practice is { frag1: ..., frag2: ... }
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
