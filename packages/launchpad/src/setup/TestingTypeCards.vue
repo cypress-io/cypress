@@ -45,7 +45,8 @@ import { computed } from "vue";
 import { 
   TestingTypeEnum,
   TestingTypeSelectDocument,
-  TestingTypeCardsNavigateForwardDocument
+  TestingTypeCardsNavigateForwardDocument,
+TestingTypeCardsFragment
 } from "../generated/graphql";
 import TestingTypeCard from "./TestingTypeCard.vue";
 
@@ -92,10 +93,7 @@ const mutation = useMutation(TestingTypeSelectDocument)
 const navigateForwardMutation = useMutation(TestingTypeCardsNavigateForwardDocument)
 
 const props = defineProps<{
-  gql: {
-    app: TestingTypeCardsAppFragment
-    wizard: TestingTypeCardsWizardFragment
-  }
+  gql: TestingTypeCardsFragment
 }>()
 
 const ct = computed(() => {
