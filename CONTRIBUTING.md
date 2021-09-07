@@ -290,7 +290,6 @@ Here is a list of the core packages in this repository with a short description,
  | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
  | [server-ct](./packages/server-ct)     | `@packages/server-ct`   | Some Component Testing specific overrides. Mostly extends functionality from `@packages/server` |
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
- | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
 
 Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
