@@ -18,7 +18,7 @@ const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
-const openProject = require('../open_project')
+const { openProject } = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -480,6 +480,9 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
+  /**
+   * @param options {open_project.LaunchArgs}
+   */
   start (options, bus) {
     // curry left options
     return ipc.on('request', _.partial(this.handleEvent, options, bus))

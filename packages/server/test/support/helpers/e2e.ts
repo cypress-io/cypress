@@ -534,8 +534,9 @@ const e2e = {
           return spec
         }
 
-        // TODO would not work for component tests
-        return path.join(options.project, 'cypress', 'integration', spec)
+        const specDir = options.testingType === 'component' ? 'component' : 'integration'
+
+        return path.join(options.project, 'cypress', specDir, spec)
       })
 
       // normalize the path to the spec
@@ -552,7 +553,7 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
-      `--testingType=e2e`,
+      `--testingType=${options.testingType || 'e2e'}`,
     ]
 
     if (options.testingType === 'component') {

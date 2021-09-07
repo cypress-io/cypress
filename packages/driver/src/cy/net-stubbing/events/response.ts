@@ -10,7 +10,7 @@ import {
   STATIC_RESPONSE_KEYS,
 } from '../static-response-utils'
 import * as $errUtils from '../../../cypress/error_utils'
-import { HandlerFn, HandlerResult } from '.'
+import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody, stringifyJsonBody } from './utils'
 

@@ -3,7 +3,7 @@ import la from 'lazy-ass'
 import check from 'check-more-types'
 import Debug from 'debug'
 
-import { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
+import type { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
@@ -25,6 +25,7 @@ export const createRoutes = ({
   getSpec,
   getCurrentBrowser,
   onError,
+  testingType,
 }: InitializeRoutes) => {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
@@ -169,7 +170,8 @@ export const createRoutes = ({
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runner.serve(req, res, {
-      config,
+      // testingType should be passed below to send `testingType` to the client
+      config: { ...config, testingType },
       getSpec,
       getCurrentBrowser,
       getRemoteState,
