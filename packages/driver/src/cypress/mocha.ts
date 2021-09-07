@@ -1,15 +1,18 @@
 /* eslint-disable prefer-rest-params */
-
-const _ = require('lodash')
-const $errUtils = require('./error_utils')
-const { getTestFromRunnable } = require('./utils')
-const $stackUtils = require('./stack_utils')
+// @ts-nocheck
+import _ from 'lodash'
+import $errUtils from './error_utils'
+import $utils from './utils'
+import $stackUtils from './stack_utils'
 
 // in the browser mocha is coming back
 // as window
-const mocha = require('mocha')
+import * as mocha from 'mocha'
+
+const { getTestFromRunnable } = $utils
 
 const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
+
 const { Test, Runner, Runnable, Hook, Suite } = Mocha
 
 const runnerRun = Runner.prototype.run
@@ -494,6 +497,7 @@ const create = (specWindow, Cypress, config) => {
   // generate the mocha + Mocha globals
   // on the specWindow, and get the new
   // _mocha instance
+
   const _mocha = createMocha(specWindow)
 
   const _runner = getRunner(_mocha)
@@ -525,8 +529,7 @@ const create = (specWindow, Cypress, config) => {
   }
 }
 
-module.exports = {
-  restore,
-
+export default {
   create,
+  restore,
 }

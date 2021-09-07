@@ -1,6 +1,6 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
-const $errUtils = require('../cypress/error_utils')
+import $errUtils from '../cypress/error_utils'
 
 const aliasRe = /^@.+/
 const aliasDisplayRe = /^([@]+)/
@@ -20,7 +20,7 @@ const getXhrTypeByAlias = (alias) => {
   return 'response'
 }
 
-const validateAlias = (alias) => {
+const validateAlias = (alias: string) => {
   if (!_.isString(alias)) {
     $errUtils.throwErrByPath('as.invalid_type')
   }
@@ -34,111 +34,111 @@ const validateAlias = (alias) => {
     })
   }
 
-  if (_.isBlank(alias)) {
+  if (_.isEmpty(alias)) {
     $errUtils.throwErrByPath('as.empty_string')
   }
 
   if (reserved.includes(alias)) {
     return $errUtils.throwErrByPath('as.reserved_word', { args: { alias } })
   }
+
+  return null
 }
 
-const create = (cy) => {
-  const addAlias = (ctx, aliasObj) => {
-    const { alias, subject } = aliasObj
+export default {
+  create: (cy) => {
+    const addAlias = (ctx, aliasObj) => {
+      const { alias, subject } = aliasObj
 
-    const aliases = cy.state('aliases') || {}
+      const aliases = cy.state('aliases') || {}
 
-    aliases[alias] = aliasObj
-    cy.state('aliases', aliases)
+      aliases[alias] = aliasObj
+      cy.state('aliases', aliases)
 
-    const remoteSubject = cy.getRemotejQueryInstance(subject)
+      const remoteSubject = cy.getRemotejQueryInstance(subject)
 
-    ctx[alias] = remoteSubject ?? subject
-  }
-
-  const getNextAlias = () => {
-    const next = cy.state('current').get('next')
-
-    if (next && (next.get('name') === 'as')) {
-      return next.get('args')[0]
-    }
-  }
-
-  const getAlias = (name, cmd, log) => {
-    const aliases = cy.state('aliases') || {}
-
-    // bail if the name doesnt reference an alias
-    if (!aliasRe.test(name)) {
-      return
+      ctx[alias] = remoteSubject ?? subject
     }
 
-    const alias = aliases[name.slice(1)]
+    const getNextAlias = () => {
+      const next = cy.state('current').get('next')
 
-    // slice off the '@'
-    if (!alias) {
-      aliasNotFoundFor(name, cmd, log)
+      if (next && (next.get('name') === 'as')) {
+        return next.get('args')[0]
+      }
     }
 
-    return alias
-  }
+    const getAlias = (name, cmd, log) => {
+      const aliases = cy.state('aliases') || {}
 
-  const getAvailableAliases = () => {
-    const aliases = cy.state('aliases')
+      // bail if the name doesnt reference an alias
+      if (!aliasRe.test(name)) {
+        return
+      }
 
-    if (!aliases) {
-      return []
+      const alias = aliases[name.slice(1)]
+
+      // slice off the '@'
+      if (!alias) {
+        aliasNotFoundFor(name, cmd, log)
+      }
+
+      return alias
     }
 
-    return _.keys(aliases)
-  }
+    const getAvailableAliases = () => {
+      const aliases = cy.state('aliases')
 
-  const aliasNotFoundFor = (name, cmd, log) => {
-    let displayName
-    const availableAliases = getAvailableAliases()
+      if (!aliases) {
+        return []
+      }
 
-    // throw a very specific error if our alias isnt in the right
-    // format, but its word is found in the availableAliases
-    if (!aliasRe.test(name) && availableAliases.includes(name)) {
+      return _.keys(aliases)
+    }
+
+    const aliasNotFoundFor = (name, cmd, log) => {
+      let displayName
+      const availableAliases = getAvailableAliases()
+
+      // throw a very specific error if our alias isnt in the right
+      // format, but its word is found in the availableAliases
+      if (!aliasRe.test(name) && availableAliases.includes(name)) {
+        displayName = aliasDisplayName(name)
+        $errUtils.throwErrByPath('alias.invalid', {
+          onFail: log,
+          args: { name, displayName },
+        })
+      }
+
+      cmd = cmd ?? ((log && log.get('name')) || cy.state('current').get('name'))
       displayName = aliasDisplayName(name)
-      $errUtils.throwErrByPath('alias.invalid', {
+
+      const errPath = availableAliases.length
+        ? 'alias.not_registered_with_available'
+        : 'alias.not_registered_without_available'
+
+      return $errUtils.throwErrByPath(errPath, {
         onFail: log,
-        args: { name, displayName },
+        args: { cmd, displayName, availableAliases: availableAliases.join(', ') },
       })
     }
 
-    cmd = cmd ?? ((log && log.get('name')) || cy.state('current').get('name'))
-    displayName = aliasDisplayName(name)
+    return {
+      getAlias,
 
-    const errPath = availableAliases.length
-      ? 'alias.not_registered_with_available'
-      : 'alias.not_registered_without_available'
+      addAlias,
 
-    return $errUtils.throwErrByPath(errPath, {
-      onFail: log,
-      args: { cmd, displayName, availableAliases: availableAliases.join(', ') },
-    })
-  }
+      // these are public because its expected other commands
+      // know about them and are expected to call them
+      getNextAlias,
 
-  return {
-    getAlias,
+      validateAlias,
 
-    addAlias,
+      aliasNotFoundFor,
 
-    // these are public because its expected other commands
-    // know about them and are expected to call them
-    getNextAlias,
+      getXhrTypeByAlias,
 
-    validateAlias,
-
-    aliasNotFoundFor,
-
-    getXhrTypeByAlias,
-
-    getAvailableAliases,
-  }
-}
-
-module.exports = {
-  create,
+      getAvailableAliases,
+    }
+  },
 }

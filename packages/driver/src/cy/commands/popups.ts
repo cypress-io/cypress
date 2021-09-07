@@ -31,7 +31,7 @@ const windowConfirmed = (Cypress, str, ret) => {
   })
 }
 
-module.exports = (Commands, Cypress) => {
+export default (Commands, Cypress) => {
   Cypress.on('window:alert', (str) => {
     windowAlert(Cypress, str)
   })

@@ -1,8 +1,8 @@
-const _ = require('lodash')
-const uniqueSelector = require('@cypress/unique-selector').default
+import _ from 'lodash'
+import uniqueSelector from '@cypress/unique-selector'
 
-const $utils = require('./utils')
-const $errUtils = require('./error_utils')
+import $utils from './utils'
+import $errUtils from './error_utils'
 
 const SELECTOR_PRIORITIES = 'data-cy data-test data-testid id class tag attributes nth-child'.split(' ')
 
@@ -15,7 +15,7 @@ const reset = () => {
 
 let defaults = reset()
 
-module.exports = {
+export default {
   reset () {
     defaults = reset()
   },

@@ -1,12 +1,12 @@
 /* globals Cypress */
-const _ = require('lodash')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
-const $stackUtils = require('../../cypress/stack_utils')
-const $Server = require('../../cypress/server')
-const $Location = require('../../cypress/location')
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+import $stackUtils from '../../cypress/stack_utils'
+import $Server from '../../cypress/server'
+import { $Location } from '../../cypress/location'
 
 let server = null
 
@@ -318,7 +318,7 @@ const defaults = {
   onResponse: undefined,
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   reset()
 
   // if our page is going away due to

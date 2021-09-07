@@ -1,14 +1,11 @@
-const _ = require('lodash')
+import _ from 'lodash'
+import $jquery from './jquery'
+import $document from './document'
+import $elements from './elements'
+import $coordinates from './coordinates'
+import * as $transform from './transform'
 
-const $jquery = require('./jquery')
-const $document = require('./document')
-const $coordinates = require('./coordinates')
-const $transform = require('./transform')
-const { isDetached } = require('./elements/detached')
-const { isElement, isBody, isHTML, isOption, isOptgroup } = require('./elements/elementHelpers')
-const { getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc } = require('./elements/find')
-const { elOrAncestorIsFixedOrSticky, isFocusable } = require('./elements/complexElements')
-const { stringify: stringifyElement } = require('./elements/utils')
+const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
 
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
@@ -234,6 +231,7 @@ export const isW3CFocusable = (el) => {
   return isFocusable(wrap(el)) && isW3CRendered(el)
 }
 
+// @ts-ignore
 const elAtCenterPoint = function ($el) {
   const doc = $document.getDocumentFromElement($el.get(0))
   const elProps = $coordinates.getElementPositioning($el)
@@ -537,3 +535,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   return `This element \`${node}\` is not visible.`
 }
 /* eslint-enable no-cond-assign */
+
+export default {
+  isVisible, isHidden, getReasonIsHidden, isW3CFocusable, isW3CRendered,
+}

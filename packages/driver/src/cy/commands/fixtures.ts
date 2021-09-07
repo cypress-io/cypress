@@ -1,13 +1,15 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+import Promise from 'bluebird'
+
+import $errUtils from '../../cypress/error_utils'
 
 const clone = (obj) => {
   return JSON.parse(JSON.stringify(obj))
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   // this is called at the beginning of run, so clear the cache
   let cache = {}
 

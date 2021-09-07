@@ -1,8 +1,8 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
-const $dom = require('../../dom')
-const $elements = require('../../dom/elements')
-const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
+import $dom from '../../dom'
+import $elements from '../../dom/elements'
+import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
@@ -87,7 +87,7 @@ const autoShadowTraversals = {
   },
 }
 
-module.exports = (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy) => {
   _.each(traversals, (traversal) => {
     Commands.add(traversal, { prevSubject: ['element', 'document'] }, (subject, arg1, arg2, options) => {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {

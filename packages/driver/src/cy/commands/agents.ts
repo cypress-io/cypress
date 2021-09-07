@@ -1,10 +1,12 @@
-const _ = require('lodash')
-const sinon = require('sinon')
+// @ts-nocheck
 
-const Promise = require('bluebird')
+import _ from 'lodash'
+import sinon from 'sinon'
 
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
+import Promise from 'bluebird'
+
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
 
 let counts = null
 
@@ -129,7 +131,7 @@ const reset = () => {
   return null
 }
 
-module.exports = function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state) {
   // reset initially on a new run because we could be
   // re-running from the UI or from a spec file change
   reset()

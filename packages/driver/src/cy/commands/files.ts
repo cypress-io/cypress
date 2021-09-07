@@ -1,9 +1,10 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $errUtils = require('../../cypress/error_utils')
+import $errUtils from '../../cypress/error_utils'
 
-module.exports = (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy) => {
   Commands.addAll({
     readFile (file, encoding, options = {}) {
       let userOptions = options

@@ -1,13 +1,15 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $dom = require('../../dom')
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+import Promise from 'bluebird'
+
+import $dom from '../../dom'
+import $errUtils from '../../cypress/error_utils'
 
 const reExistence = /exist/
 const reHaveLength = /length/
 
-module.exports = function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
@@ -25,7 +27,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
   const shouldFn = function (subject, chainers, ...args) {
     if (_.isFunction(chainers)) {
-      return shouldFnWithCallback.apply(this, arguments) // eslint-disable-line prefer-rest-params
+      return shouldFnWithCallback.apply(this, [subject, chainers, ...args]) // eslint-disable-line prefer-rest-params
     }
 
     let exp = cy.expect(subject).to

@@ -1,17 +1,17 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-module.exports = (Commands, Cypress, cy) => {
+import $errUtils from '../../cypress/error_utils'
+const { throwErrByPath } = $errUtils
+
+export default (Commands, Cypress, cy) => {
   Commands.addAll({
     url (options = {}) {
       const userOptions = options
 
-      options = _.defaults({}, userOptions, {
-        log: true,
-        decode: false,
-      })
+      options = _.defaults({}, userOptions, { log: true })
 
       if (options.log !== false) {
         options._log = Cypress.log({
@@ -93,7 +93,7 @@ module.exports = (Commands, Cypress, cy) => {
         return _.isString(key)
           // use existential here because we only want to throw
           // on null or undefined values (and not empty strings)
-          ? location[key] ?? $errUtils.throwErrByPath('location.invalid_key', { args: { key } })
+          ? location[key] ?? throwErrByPath('location.invalid_key', { args: { key } })
           : location
       }
 

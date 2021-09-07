@@ -1,3 +1,4 @@
+// @ts-nocheck
 // TODO:
 // 1. test these method implementations using encoded characters
 // look at the spec to figure out whether we SHOULD be decoding them
@@ -6,9 +7,9 @@
 // 2. there is a bug when handling about:blank which borks it and
 // turns it into about://blank
 
-const _ = require('lodash')
-const UrlParse = require('url-parse')
-const cors = require('@packages/network/lib/cors')
+import _ from 'lodash'
+import UrlParse from 'url-parse'
+import * as cors from '@packages/network/lib/cors'
 
 const reHttp = /^https?:\/\//
 const reWww = /^www/
@@ -16,7 +17,7 @@ const reFile = /^file:\/\//
 const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 const reQueryParam = /\?[^/]+/
 
-class $Location {
+export class $Location {
   constructor (remote) {
     this.remote = new UrlParse(remote)
   }
@@ -251,5 +252,3 @@ class $Location {
     return location.getObject()
   }
 }
-
-module.exports = $Location

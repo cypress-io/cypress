@@ -1,12 +1,14 @@
-const _ = require('lodash')
+// @ts-nocheck
 
-const $Clock = require('../../cypress/clock')
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+
+import * as $Clock from '../../cypress/clock'
+import $errUtils from '../../cypress/error_utils'
 
 // create a global clock
 let clock = null
 
-module.exports = function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state) {
   const reset = () => {
     if (clock) {
       clock.restore({ log: false })

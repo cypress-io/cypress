@@ -1,5 +1,7 @@
-const _ = require('lodash')
-const { handleInvalidEventTarget, handleInvalidAnchorTarget } = require('./top_attr_guards')
+// @ts-nocheck
+
+import _ from 'lodash'
+import { handleInvalidEventTarget, handleInvalidAnchorTarget } from './top_attr_guards'
 
 const HISTORY_ATTRS = 'pushState replaceState'.split(' ')
 
@@ -40,7 +42,7 @@ const eventHasReturnValue = (e) => {
   return true
 }
 
-module.exports = {
+export default {
   bindTo (contentWindow, callbacks = {}) {
     if (listenersAdded) {
       return
@@ -110,4 +112,5 @@ module.exports = {
     contentWindow.alert = callbacks.onAlert
     contentWindow.confirm = callbacks.onConfirm
   },
+
 }

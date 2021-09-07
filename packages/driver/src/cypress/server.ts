@@ -1,10 +1,12 @@
-const _ = require('lodash')
-const capitalize = require('underscore.string/capitalize')
-const minimatch = require('minimatch')
+// @ts-nocheck
 
-const $errUtils = require('./error_utils')
-const $XHR = require('./xml_http_request')
-const { makeContentWindowListener } = require('./events')
+import _ from 'lodash'
+import capitalize from 'underscore.string/capitalize'
+import minimatch from 'minimatch'
+
+import $errUtils from './error_utils'
+import $XHR from './xml_http_request'
+import { makeContentWindowListener } from './events'
 
 const regularResourcesRe = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
 const needsDashRe = /([a-z][A-Z])/g
@@ -662,8 +664,7 @@ const create = (options = {}) => {
   return server
 }
 
-module.exports = {
-  defaults,
-
+export default {
   create,
+  defaults,
 }

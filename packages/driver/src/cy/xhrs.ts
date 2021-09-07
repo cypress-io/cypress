@@ -1,7 +1,7 @@
 /* globals cy */
-const _ = require('lodash')
+import _ from 'lodash'
 
-const $errUtils = require('../cypress/error_utils')
+import $errUtils from '../cypress/error_utils'
 
 const validAliasApiRe = /^(\d+|all)$/
 
@@ -25,86 +25,85 @@ const xhrNotWaitedOnByIndex = (state, alias, index, prop) => {
   }
 }
 
-const create = (state) => {
-  return {
-    getIndexedXhrByAlias (alias, index) {
-      let prop
-      let str
+export default {
+  create: (state) => {
+    return {
+      getIndexedXhrByAlias (alias, index) {
+        let prop
+        let str
 
-      if (_.indexOf(alias, '.') === -1) {
-        str = alias
-        prop = null
-      } else {
-        const allParts = _.split(alias, '.')
+        if (_.indexOf(alias, '.') === -1) {
+          str = alias
+          prop = null
+        } else {
+          const allParts = _.split(alias, '.')
 
-        str = _.join(_.dropRight(allParts, 1), '.')
-        prop = _.last(allParts)
-      }
-
-      if (prop) {
-        if (prop === 'request') {
-          return xhrNotWaitedOnByIndex(state, str, index, 'requests')
+          str = _.join(_.dropRight(allParts, 1), '.')
+          prop = _.last(allParts)
         }
 
-        if (prop !== 'response') {
-          $errUtils.throwErrByPath('wait.alias_invalid', {
-            args: { prop, str },
+        if (prop) {
+          if (prop === 'request') {
+            return xhrNotWaitedOnByIndex(state, str, index, 'requests')
+          }
+
+          if (prop !== 'response') {
+            $errUtils.throwErrByPath('wait.alias_invalid', {
+              args: { prop, str },
+            })
+          }
+        }
+
+        return xhrNotWaitedOnByIndex(state, str, index, 'responses')
+      },
+
+      getRequestsByAlias (alias) {
+        let prop
+
+        if (_.indexOf(alias, '.') === -1 || _.keys(cy.state('aliases')).includes(alias)) {
+          prop = null
+        } else {
+          // potentially valid prop
+          const allParts = _.split(alias, '.')
+
+          alias = _.join(_.dropRight(allParts, 1), '.')
+          prop = _.last(allParts)
+        }
+
+        if (prop && !validAliasApiRe.test(prop)) {
+          $errUtils.throwErrByPath('get.alias_invalid', {
+            args: { prop },
           })
         }
-      }
 
-      return xhrNotWaitedOnByIndex(state, str, index, 'responses')
-    },
+        if (prop === '0') {
+          $errUtils.throwErrByPath('get.alias_zero', {
+            args: { alias },
+          })
+        }
 
-    getRequestsByAlias (alias) {
-      let prop
+        // return an array of xhrs
+        const matching = _
+        .chain(state('responses'))
+        .filter({ alias })
+        .map('xhr')
+        .value()
 
-      if (_.indexOf(alias, '.') === -1 || _.keys(cy.state('aliases')).includes(alias)) {
-        prop = null
-      } else {
-        // potentially valid prop
-        const allParts = _.split(alias, '.')
+        // return the whole array if prop is all
+        if (prop === 'all') {
+          return matching
+        }
 
-        alias = _.join(_.dropRight(allParts, 1), '.')
-        prop = _.last(allParts)
-      }
+        // else if prop its a digit and we need to return
+        // the 1-based response from the array
+        if (prop) {
+          return matching[_.toNumber(prop) - 1]
+        }
 
-      if (prop && !validAliasApiRe.test(prop)) {
-        $errUtils.throwErrByPath('get.alias_invalid', {
-          args: { prop },
-        })
-      }
+        // else return the last matching response
+        return _.last(matching)
+      },
+    }
+  },
 
-      if (prop === '0') {
-        $errUtils.throwErrByPath('get.alias_zero', {
-          args: { alias },
-        })
-      }
-
-      // return an array of xhrs
-      const matching = _
-      .chain(state('responses'))
-      .filter({ alias })
-      .map('xhr')
-      .value()
-
-      // return the whole array if prop is all
-      if (prop === 'all') {
-        return matching
-      }
-
-      // else if prop its a digit and we need to return
-      // the 1-based response from the array
-      if (prop) {
-        return matching[_.toNumber(prop) - 1]
-      }
-
-      // else return the last matching response
-      return _.last(matching)
-    },
-  }
-}
-
-module.exports = {
-  create,
 }

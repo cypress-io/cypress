@@ -1,11 +1,12 @@
-const _ = require('lodash')
+import _ from 'lodash'
+import { clean, count, isBlank, toBoolean } from 'underscore.string'
 
 // only export exactly what we need, nothing more!
 _.mixin({
-  clean: require('underscore.string/clean'),
-  count: require('underscore.string/count'),
-  isBlank: require('underscore.string/isBlank'),
-  toBoolean: require('underscore.string/toBoolean'),
+  clean,
+  count,
+  isBlank,
+  toBoolean,
 })
 
 export default _

@@ -1,19 +1,7 @@
-const $jquery = require('./jquery')
-const $document = require('./document')
+// @ts-nocheck
 
-/**
- * @param {HTMLElement} el
- * @returns {Window & typeof globalThis}
- */
-const getWindowByElement = function (el) {
-  if (isWindow(el)) {
-    return el
-  }
-
-  const doc = $document.getDocumentFromElement(el)
-
-  return getWindowByDocument(doc)
-}
+import $jquery from './jquery'
+import $document from './document'
 
 const getWindowByDocument = (doc) => {
   // parentWindow for IE
@@ -32,10 +20,22 @@ const isWindow = function (obj) {
   }
 }
 
-module.exports = {
-  getWindowByElement,
+/**
+ * @param {HTMLElement} el
+ * @returns {Window & typeof globalThis}
+ */
+const getWindowByElement = function (el) {
+  if (isWindow(el)) {
+    return el
+  }
 
+  const doc = $document.getDocumentFromElement(el)
+
+  return getWindowByDocument(doc)
+}
+
+export default {
   getWindowByDocument,
-
+  getWindowByElement,
   isWindow,
 }

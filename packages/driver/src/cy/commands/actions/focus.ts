@@ -1,11 +1,11 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
-const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
-const $elements = require('../../../dom/elements')
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $elements from '../../../dom/elements'
 
-module.exports = (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy) => {
   return Commands.addAll({ prevSubject: ['element', 'window'] }, {
     focus (subject, options = {}) {
       const userOptions = options

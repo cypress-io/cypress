@@ -1,6 +1,7 @@
-const _ = require('lodash')
-const $utils = require('./utils')
-const $errUtils = require('./error_utils')
+// @ts-nocheck
+import _ from 'lodash'
+import $utils from './utils'
+import $errUtils from './error_utils'
 
 const _isBrowser = (browser, matcher, errPrefix) => {
   let isMatch
@@ -61,7 +62,7 @@ const isBrowser = (config, obj = '', errPrefix = '`Cypress.isBrowser()`') => {
   .value()
 }
 
-module.exports = (config) => {
+export default (config) => {
   return {
     browser: config.browser,
     isBrowser: _.partial(isBrowser, config),

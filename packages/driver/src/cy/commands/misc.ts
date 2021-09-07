@@ -1,11 +1,12 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $Command = require('../../cypress/command')
-const $dom = require('../../dom')
-const $errUtils = require('../../cypress/error_utils')
+import $Command from '../../cypress/command'
+import $dom from '../../dom'
+import $errUtils from '../../cypress/error_utils'
 
-module.exports = (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'optional' }, {
     end () {
       return null

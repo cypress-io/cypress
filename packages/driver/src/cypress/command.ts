@@ -1,7 +1,8 @@
-const _ = require('lodash')
-const utils = require('./utils')
+// @ts-nocheck
+import _ from 'lodash'
+import utils from './utils'
 
-class $Command {
+export class $Command {
   constructor (obj = {}) {
     this.reset()
 
@@ -142,4 +143,4 @@ _.each(['pick'], (method) => {
   }
 })
 
-module.exports = $Command
+export default $Command

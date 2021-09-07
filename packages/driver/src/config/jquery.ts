@@ -1,9 +1,10 @@
-const $ = require('jquery')
-const _ = require('lodash')
+// @ts-nocheck
 
-require('jquery.scrollto')
+import $ from 'jquery'
+import _ from 'lodash'
 
-const $dom = require('../dom')
+import { scrollTo } from './jquery.scrollto'
+import $dom from '../dom'
 
 // force jquery to have the same visible
 // and hidden logic as cypress
@@ -53,6 +54,8 @@ $.find.matchesSelector = function (elem, expr) {
     },
   })
 }
+
+$.fn.scrollTo = scrollTo
 
 // see difference between 'filters' and 'pseudos'
 // https://api.jquery.com/filter/ and https://api.jquery.com/category/selectors/

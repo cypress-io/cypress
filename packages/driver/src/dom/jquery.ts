@@ -1,5 +1,6 @@
-const $ = require('jquery')
-const _ = require('lodash')
+// @ts-nocheck
+import $ from 'jquery'
+import _ from 'lodash'
 
 // wrap the object in jquery
 const wrap = (obj) => {
@@ -38,14 +39,9 @@ const isJquery = (obj) => {
   return !!hasJqueryProperty && typeof _.get(obj, 'constructor.prototype.jquery') === 'string'
 }
 
-// doing a little jiggle wiggle here
-// to avoid circular dependencies
-module.exports = {
-  wrap,
-
-  query,
-
-  unwrap,
-
+export default {
   isJquery,
+  unwrap,
+  query,
+  wrap,
 }

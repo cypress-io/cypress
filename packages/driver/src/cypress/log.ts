@@ -1,12 +1,14 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const clone = require('clone')
+// @ts-nocheck
 
-const $Snapshots = require('../cy/snapshots')
-const $Events = require('./events')
-const $dom = require('../dom')
-const $utils = require('./utils')
-const $errUtils = require('./error_utils')
+import _ from 'lodash'
+import $ from 'jquery'
+import clone from 'clone'
+
+import $Snapshots from '../cy/snapshots'
+import * as $Events from './events'
+import $dom from '../dom'
+import $utils from './utils'
+import $errUtils from './error_utils'
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
@@ -502,134 +504,7 @@ const Log = function (cy, state, config, obj) {
   }
 }
 
-const create = function (Cypress, cy, state, config) {
-  counter = 0
-  const logs = {}
-
-  // give us the ability to change the delay for firing
-  // the change event, or default it to 4
-  if (delay == null) {
-    delay = setDelay(config('logAttrsDelay'))
-  }
-
-  const trigger = function (log, event) {
-    // bail if we never fired our initial log event
-    if (!log._hasInitiallyLogged) {
-      return
-    }
-
-    // bail if we've reset the logs due to a Cypress.abort
-    if (!logs[log.get('id')]) {
-      return
-    }
-
-    const attrs = log.toJSON()
-
-    // only trigger this event if our last stored
-    // emitted attrs do not match the current toJSON
-    if (!_.isEqual(log._emittedAttrs, attrs)) {
-      log._emittedAttrs = attrs
-
-      log.emit(event, attrs)
-
-      return Cypress.action(event, attrs, log)
-    }
-  }
-
-  const triggerLog = function (log) {
-    log._hasInitiallyLogged = true
-
-    return trigger(log, 'command:log:added')
-  }
-
-  const addToLogs = function (log) {
-    const id = log.get('id')
-
-    logs[id] = true
-  }
-
-  const logFn = function (options = {}) {
-    if (!_.isObject(options)) {
-      $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
-    }
-
-    const log = Log(cy, state, config, options)
-
-    // add event emitter interface
-    $Events.extend(log)
-
-    const triggerStateChanged = () => {
-      return trigger(log, 'command:log:changed')
-    }
-
-    // only fire the log:state:changed event
-    // as fast as every 4ms
-    log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
-
-    log.set(options)
-
-    // if snapshot was passed
-    // in, go ahead and snapshot
-    if (log.get('snapshot')) {
-      log.snapshot()
-    }
-
-    // if end was passed in
-    // go ahead and end
-    if (log.get('end')) {
-      log.end({ silent: true })
-    }
-
-    if (log.get('error')) {
-      log.error(log.get('error'), { silent: true })
-    }
-
-    log.wrapConsoleProps()
-
-    const onBeforeLog = state('onBeforeLog')
-
-    // dont trigger log if this function
-    // explicitly returns false
-    if (_.isFunction(onBeforeLog)) {
-      if (onBeforeLog.call(cy, log) === false) {
-        return
-      }
-    }
-
-    // set the log on the command
-    const current = state('current')
-
-    if (current) {
-      current.log(log)
-    }
-
-    addToLogs(log)
-
-    if (options.sessionInfo) {
-      Cypress.emit('session:add', log.toJSON())
-    }
-
-    if (options.emitOnly) {
-      return
-    }
-
-    triggerLog(log)
-
-    // if not current state then the log is being run
-    // with no command reference, so just end the log
-    if (!current) {
-      log.end({ silent: true })
-    }
-
-    return log
-  }
-
-  logFn._logs = logs
-
-  return logFn
-}
-
-module.exports = {
+export default {
   reduceMemory,
 
   toSerializedJSON,
@@ -644,5 +519,130 @@ module.exports = {
 
   setCounter,
 
-  create,
+  create (Cypress, cy, state, config) {
+    counter = 0
+    const logs = {}
+
+    // give us the ability to change the delay for firing
+    // the change event, or default it to 4
+    if (delay == null) {
+      delay = setDelay(config('logAttrsDelay'))
+    }
+
+    const trigger = function (log, event) {
+    // bail if we never fired our initial log event
+      if (!log._hasInitiallyLogged) {
+        return
+      }
+
+      // bail if we've reset the logs due to a Cypress.abort
+      if (!logs[log.get('id')]) {
+        return
+      }
+
+      const attrs = log.toJSON()
+
+      // only trigger this event if our last stored
+      // emitted attrs do not match the current toJSON
+      if (!_.isEqual(log._emittedAttrs, attrs)) {
+        log._emittedAttrs = attrs
+
+        log.emit(event, attrs)
+
+        return Cypress.action(event, attrs, log)
+      }
+    }
+
+    const triggerLog = function (log) {
+      log._hasInitiallyLogged = true
+
+      return trigger(log, 'command:log:added')
+    }
+
+    const addToLogs = function (log) {
+      const id = log.get('id')
+
+      logs[id] = true
+    }
+
+    const logFn = function (options = {}) {
+      if (!_.isObject(options)) {
+        $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
+      }
+
+      const log = Log(cy, state, config, options)
+
+      // add event emitter interface
+      $Events.extend(log)
+
+      const triggerStateChanged = () => {
+        return trigger(log, 'command:log:changed')
+      }
+
+      // only fire the log:state:changed event
+      // as fast as every 4ms
+      log.fireChangeEvent = _.debounce(triggerStateChanged, 4)
+
+      log.set(options)
+
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot')) {
+        log.snapshot()
+      }
+
+      // if end was passed in
+      // go ahead and end
+      if (log.get('end')) {
+        log.end({ silent: true })
+      }
+
+      if (log.get('error')) {
+        log.error(log.get('error'), { silent: true })
+      }
+
+      log.wrapConsoleProps()
+
+      const onBeforeLog = state('onBeforeLog')
+
+      // dont trigger log if this function
+      // explicitly returns false
+      if (_.isFunction(onBeforeLog)) {
+        if (onBeforeLog.call(cy, log) === false) {
+          return
+        }
+      }
+
+      // set the log on the command
+      const current = state('current')
+
+      if (current) {
+        current.log(log)
+      }
+
+      addToLogs(log)
+
+      if (options.sessionInfo) {
+        Cypress.emit('session:add', log.toJSON())
+      }
+
+      if (options.emitOnly) {
+        return
+      }
+
+      triggerLog(log)
+
+      // if not current state then the log is being run
+      // with no command reference, so just end the log
+      if (!current) {
+        log.end({ silent: true })
+      }
+
+      return log
+    }
+
+    logFn._logs = logs
+
+    return logFn
+  },
 }

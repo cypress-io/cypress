@@ -1,6 +1,6 @@
-const $errUtils = require('../../../cypress/error_utils')
+import $errUtils from '../../../cypress/error_utils'
 
-module.exports = (Commands) => {
+export default (Commands) => {
   return Commands.addAll({ prevSubject: 'element' }, {
     hover () {
       return $errUtils.throwErrByPath('hover.not_implemented')

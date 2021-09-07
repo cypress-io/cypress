@@ -1,14 +1,14 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
-const $elements = require('../../../dom/elements')
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $elements from '../../../dom/elements'
 
 const newLineRe = /\n/g
 
-module.exports = (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrText, options = {}) {
       const userOptions = options
@@ -256,9 +256,6 @@ module.exports = (Commands, Cypress, cy) => {
               })
 
               options.$el[0].selectedIndex = selectedIndex
-              options.$el[0].selectedOptions = _.map(optionEls, ($el) => {
-                return $el.get()
-              })
             }
 
             const input = new Event('input', {

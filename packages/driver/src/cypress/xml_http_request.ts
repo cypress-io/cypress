@@ -1,4 +1,6 @@
-const $errUtils = require('./error_utils')
+// @ts-nocheck
+
+import $errUtils from './error_utils'
 
 const isCypressHeaderRe = /^X-Cypress-/i
 
@@ -31,7 +33,7 @@ class XMLHttpRequest {
   }
 
   _setDuration (timeStart) {
-    this.duration = (new Date) - timeStart
+    this.duration = (Date.now()) - timeStart
   }
 
   _setStatus () {
@@ -163,10 +165,8 @@ Object.defineProperties(XMLHttpRequest.prototype, {
   },
 })
 
-const create = (xhr) => {
-  return new XMLHttpRequest(xhr)
-}
-
-module.exports = {
-  create,
+export default {
+  create: (xhr) => {
+    return new XMLHttpRequest(xhr)
+  },
 }

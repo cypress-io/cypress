@@ -1,7 +1,9 @@
-const _ = require('lodash')
+// @ts-nocheck
 
-const $Chainer = require('../../cypress/chainer')
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+
+import { $Chainer } from '../../cypress/chainer'
+import $errUtils from '../../cypress/error_utils'
 
 const command = function (ctx, name, ...args) {
   if (!ctx[name]) {
@@ -15,7 +17,7 @@ const command = function (ctx, name, ...args) {
   return ctx[name].apply(ctx, args)
 }
 
-module.exports = function (Commands, Cypress, cy) {
+export default function (Commands, Cypress, cy) {
   Commands.addChainer({
     // userInvocationStack has to be passed in here, but can be ignored
     command (chainer, userInvocationStack, args) {

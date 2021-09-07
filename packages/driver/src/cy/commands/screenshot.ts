@@ -1,13 +1,13 @@
 /* global Cypress, cy */
-const _ = require('lodash')
-const $ = require('jquery')
-const bytes = require('bytes')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import $ from 'jquery'
+import bytes from 'bytes'
+import Promise from 'bluebird'
 
-const $Screenshot = require('../../cypress/screenshot')
-const $dom = require('../../dom')
-const $errUtils = require('../../cypress/error_utils')
-const $utils = require('../../cypress/utils')
+import $Screenshot from '../../cypress/screenshot'
+import $dom from '../../dom'
+import $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
 
 const getViewportHeight = (state) => {
   // TODO this doesn't seem correct
@@ -391,7 +391,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
   .finally(after)
 }
 
-module.exports = function (Commands, Cypress, cy, state, config) {
+export default function (Commands, Cypress, cy, state, config) {
   // failure screenshot when not interactive
   Cypress.on('runnable:after:run:async', (test, runnable) => {
     const screenshotConfig = $Screenshot.getConfig()

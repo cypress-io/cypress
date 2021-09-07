@@ -1,7 +1,8 @@
-require('setimmediate')
+import 'setimmediate'
 
-require('./config/bluebird')
-require('./config/jquery')
-require('./config/lodash')
+import './config/bluebird'
+import './config/jquery'
+import './config/lodash'
+import $Cypress from './cypress'
 
-module.exports = require('./cypress')
+export default $Cypress

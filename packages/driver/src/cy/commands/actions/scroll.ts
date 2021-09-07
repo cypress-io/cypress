@@ -1,10 +1,10 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import $ from 'jquery'
+import Promise from 'bluebird'
 
-const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
 
 const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)
@@ -28,7 +28,7 @@ const isNaNOrInfinity = (item) => {
   return _.isNaN(num) || !_.isFinite(num)
 }
 
-module.exports = (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
     scrollIntoView (subject, options = {}) {
       const userOptions = options

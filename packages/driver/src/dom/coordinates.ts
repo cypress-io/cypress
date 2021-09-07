@@ -1,7 +1,7 @@
-const _ = require('lodash')
-const $jquery = require('./jquery')
-const $window = require('./window')
-const $elements = require('./elements')
+import _ from 'lodash'
+import $window from './window'
+import $elements from './elements'
+import $jquery from './jquery'
 
 const getElementAtPointFromViewport = (doc, x, y) => {
   return $elements.elementFromPoint(doc, x, y)
@@ -325,7 +325,7 @@ const calculations = {
   getBottomRightCoordinates,
 }
 
-module.exports = {
+export default {
   getCoordsByPosition,
 
   getElementPositioning,

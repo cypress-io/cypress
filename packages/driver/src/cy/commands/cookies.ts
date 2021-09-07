@@ -1,9 +1,11 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
-const $Location = require('../../cypress/location')
+import _ from 'lodash'
+import Promise from 'bluebird'
+
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS
 // https://github.com/cypress-io/cypress/issues/363
@@ -78,7 +80,7 @@ function cookieValidatesSecurePrefix (options) {
   return options.secure === false
 }
 
-module.exports = function (Commands, Cypress, cy, state, config) {
+export default function (Commands, Cypress, cy, state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))

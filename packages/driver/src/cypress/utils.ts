@@ -1,11 +1,13 @@
-const _ = require('lodash')
-const capitalize = require('underscore.string/capitalize')
-const methods = require('methods')
-const dayjs = require('dayjs')
-const $ = require('jquery')
+// @ts-nocheck
+import _ from 'lodash'
+import capitalize from 'underscore.string/capitalize'
+import methods from 'methods'
+import dayjs from 'dayjs'
+import $ from 'jquery'
 
-const $jquery = require('../dom/jquery')
-const $Location = require('./location')
+import $dom from '../dom'
+import $jquery from '../dom/jquery'
+import { $Location } from './location'
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
@@ -46,7 +48,7 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   return [fn, _.constant(type)]
 })
 
-module.exports = {
+export default {
   warning (msg) {
     // eslint-disable-next-line no-console
     return console.warn(`Cypress Warning: ${msg}`)
@@ -158,8 +160,6 @@ module.exports = {
   },
 
   stringifyActual (value) {
-    const $dom = require('../dom')
-
     if ($dom.isDom(value)) {
       return $dom.stringify(value, 'short')
     }

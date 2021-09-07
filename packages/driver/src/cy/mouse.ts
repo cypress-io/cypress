@@ -1,10 +1,13 @@
-const $ = require('jquery')
-const _ = require('lodash')
-const $dom = require('../dom')
-const $elements = require('../dom/elements')
-const $Keyboard = require('./keyboard')
-const $selection = require('../dom/selection')
-const debug = require('debug')('cypress:driver:mouse')
+// @ts-nocheck
+import $ from 'jquery'
+import _ from 'lodash'
+import $dom from '../dom'
+import $elements from '../dom/elements'
+import $Keyboard from './keyboard'
+import $selection from '../dom/selection'
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:mouse')
 
 /**
  * @typedef Coords
@@ -756,6 +759,6 @@ const toCoordsEventOptions = (x, y, win) => {
   }
 }
 
-module.exports = {
+export default {
   create,
 }

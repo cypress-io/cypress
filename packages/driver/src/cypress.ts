@@ -1,38 +1,45 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const blobUtil = require('blob-util')
-const minimatch = require('minimatch')
-const Promise = require('bluebird')
-const sinon = require('sinon')
-const fakeTimers = require('@sinonjs/fake-timers')
+// @ts-nocheck
 
-const $dom = require('./dom')
-const $errorMessages = require('./cypress/error_messages').default
-const $Chainer = require('./cypress/chainer')
-const $Command = require('./cypress/command')
-const $Commands = require('./cypress/commands')
-const $Cookies = require('./cypress/cookies')
-const $Cy = require('./cypress/cy')
-const $Events = require('./cypress/events')
-const $Keyboard = require('./cy/keyboard')
-const $SetterGetter = require('./cypress/setter_getter')
-const $Log = require('./cypress/log')
-const $Location = require('./cypress/location')
-const $LocalStorage = require('./cypress/local_storage')
-const { ProxyLogging } = require('./cypress/proxy-logging')
-const $Mocha = require('./cypress/mocha')
-const $Mouse = require('./cy/mouse')
-const $Runner = require('./cypress/runner')
-const $Downloads = require('./cypress/downloads')
-const $Server = require('./cypress/server')
-const $Screenshot = require('./cypress/screenshot')
-const $SelectorPlayground = require('./cypress/selector_playground')
-const $utils = require('./cypress/utils')
-const $errUtils = require('./cypress/error_utils')
-const $scriptUtils = require('./cypress/script_utils')
-const browserInfo = require('./cypress/browser')
-const resolvers = require('./cypress/resolvers')
-const debug = require('debug')('cypress:driver:cypress')
+import _ from 'lodash'
+import $ from 'jquery'
+import * as blobUtil from 'blob-util'
+import minimatch from 'minimatch'
+import Promise from 'bluebird'
+import sinon from 'sinon'
+import fakeTimers from '@sinonjs/fake-timers'
+import debugFn from 'debug'
+
+import browserInfo from './cypress/browser'
+import $scriptUtils from './cypress/script_utils'
+
+import $Commands from './cypress/commands'
+import $Cy from './cypress/cy'
+import $dom from './dom'
+import $Downloads from './cypress/downloads'
+import $errorMessages from './cypress/error_messages'
+import $errUtils from './cypress/error_utils'
+import $Log from './cypress/log'
+import $LocalStorage from './cypress/local_storage'
+import $Mocha from './cypress/mocha'
+import $Mouse from './cy/mouse'
+import $Runner from './cypress/runner'
+import $Screenshot from './cypress/screenshot'
+import $SelectorPlayground from './cypress/selector_playground'
+import $Server from './cypress/server'
+import $SetterGetter from './cypress/setter_getter'
+import $utils from './cypress/utils'
+
+import { $Chainer } from './cypress/chainer'
+import { $Cookies } from './cypress/cookies'
+import { $Command } from './cypress/command'
+import { $Location } from './cypress/location'
+import ProxyLogging from './cypress/proxy-logging'
+
+import * as $Events from './cypress/events'
+import $Keyboard from './cy/keyboard'
+import * as resolvers from './cypress/resolvers'
+
+const debug = debugFn('cypress:driver:cypress')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -636,9 +643,9 @@ class $Cypress {
   }
 }
 
-// attach to $Cypress to access
-// all of the constructors
-// to enable users to monkeypatch
+// // attach to $Cypress to access
+// // all of the constructors
+// // to enable users to monkeypatch
 $Cypress.prototype.$Cypress = $Cypress
 $Cypress.prototype.Cy = $Cy
 $Cypress.prototype.Chainer = $Chainer
@@ -667,9 +674,8 @@ $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon
 $Cypress.prototype.lolex = fakeTimers
 
-// attaching these so they are accessible
-// via the runner + integration spec helper
+// // attaching these so they are accessible
+// // via the runner + integration spec helper
 $Cypress.$ = $
 $Cypress.utils = $utils
-
-module.exports = $Cypress
+export default $Cypress

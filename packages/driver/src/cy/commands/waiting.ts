@@ -1,10 +1,10 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
-const { waitForRoute } = require('../net-stubbing/wait-for-route')
-const { isDynamicAliasingPossible } = require('../net-stubbing/aliasing')
-const ordinal = require('ordinal')
+import _ from 'lodash'
+import Promise from 'bluebird'
+import { waitForRoute } from '../net-stubbing/wait-for-route'
+import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
+import ordinal from 'ordinal'
 
-const $errUtils = require('../../cypress/error_utils')
+import $errUtils from '../../cypress/error_utils'
 
 const getNumRequests = (state, alias) => {
   const requests = state('aliasRequests') || {}
@@ -24,7 +24,7 @@ const throwErr = (arg) => {
   $errUtils.throwErrByPath('wait.invalid_1st_arg', { args: { arg } })
 }
 
-module.exports = (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state) => {
   const waitNumber = (subject, ms, options) => {
     // increase the timeout by the delta
     cy.timeout(ms, true, 'wait')

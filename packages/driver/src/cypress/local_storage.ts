@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 const specialKeywords = /(debug)/
 
@@ -70,6 +70,8 @@ const $LocalStorage = {
     if (_.isString(key)) {
       return new RegExp(`^${key}$`)
     }
+
+    return null
   },
 
   // if item matches by string or regex
@@ -78,11 +80,11 @@ const $LocalStorage = {
     for (let key of keys) {
       const re = this._normalizeRegExpOrString(key)
 
-      if (re.test(item)) {
+      if (re?.test(item)) {
         return fn(item)
       }
     }
   },
 }
 
-module.exports = $LocalStorage
+export default $LocalStorage

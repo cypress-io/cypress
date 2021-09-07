@@ -1,9 +1,11 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $dom = require('../../../dom')
-const $errUtils = require('../../../cypress/error_utils')
-const $actionability = require('../../actionability')
+import _ from 'lodash'
+import Promise from 'bluebird'
+
+import $dom from '../../../dom'
+import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
 
 const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'
@@ -36,7 +38,7 @@ const dispatch = (target, appWindow, eventName, options) => {
   return target.dispatchEvent(event)
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   return Commands.addAll({ prevSubject: ['element', 'window', 'document'] }, {
     trigger (subject, eventName, positionOrX, y, userOptions = {}) {
       let position

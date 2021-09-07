@@ -1,12 +1,14 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+import $ from 'jquery'
+import Promise from 'bluebird'
+
+import $errUtils from '../../cypress/error_utils'
 
 const ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-module.exports = (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state) => {
   const findByNgBinding = (binding, options) => {
     const selector = '.ng-binding'
 

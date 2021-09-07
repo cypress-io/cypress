@@ -1,7 +1,8 @@
-const _ = require('lodash')
-const $stackUtils = require('./stack_utils')
+// @ts-nocheck
+import _ from 'lodash'
+import $stackUtils from './stack_utils'
 
-class $Chainer {
+export class $Chainer {
   constructor (userInvocationStack, specWindow) {
     this.userInvocationStack = userInvocationStack
     this.specWindow = specWindow
@@ -52,5 +53,3 @@ class $Chainer {
     return chain
   }
 }
-
-module.exports = $Chainer

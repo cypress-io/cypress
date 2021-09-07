@@ -1,17 +1,18 @@
+// @ts-nocheck
 /* eslint-disable prefer-rest-params */
 // tests in driver/cypress/integration/commands/assertions_spec.js
 
-const _ = require('lodash')
-const $ = require('jquery')
-const chai = require('chai')
-const sinonChai = require('@cypress/sinon-chai')
+import _ from 'lodash'
+import $ from 'jquery'
+import chai from 'chai'
+import sinonChai from '@cypress/sinon-chai'
 
-const $dom = require('../dom')
-const $utils = require('../cypress/utils')
-const $errUtils = require('../cypress/error_utils')
-const $stackUtils = require('../cypress/stack_utils')
-const $chaiJquery = require('../cypress/chai_jquery')
-const chaiInspect = require('./chai/inspect')
+import $dom from '../dom'
+import $utils from '../cypress/utils'
+import $errUtils from '../cypress/error_utils'
+import $stackUtils from '../cypress/stack_utils'
+import $chaiJquery from '../cypress/chai_jquery'
+import * as chaiInspect from './chai/inspect'
 
 // all words between single quotes
 const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
@@ -37,6 +38,13 @@ let containProto = null
 let existProto = null
 let getMessage = null
 let chaiUtils = null
+let create = null
+let replaceArgMessages = null
+let removeOrKeepSingleQuotesBetweenStars = null
+let setSpecWindowGlobals = null
+let restoreAsserts = null
+let overrideExpect = null
+let overrideChaiAsserts = null
 
 chai.use(sinonChai)
 
@@ -104,7 +112,7 @@ chai.use((chai, u) => {
 
   // remove any single quotes between our **,
   // except escaped quotes, empty strings and number strings.
-  const removeOrKeepSingleQuotesBetweenStars = (message) => {
+  removeOrKeepSingleQuotesBetweenStars = (message) => {
     // remove any single quotes between our **, preserving escaped quotes
     // and if an empty string, put the quotes back
     return message.replace(allBetweenFourStars, (match) => {
@@ -135,7 +143,7 @@ chai.use((chai, u) => {
     return message.replace(imageMarkdown, '``$&``')
   }
 
-  const replaceArgMessages = (args, str) => {
+  replaceArgMessages = (args, str) => {
     return _.reduce(args, (memo, value, index) => {
       if (_.isString(value)) {
         value = value
@@ -156,7 +164,7 @@ chai.use((chai, u) => {
     , [])
   }
 
-  const restoreAsserts = function () {
+  restoreAsserts = function () {
     chai.util.inspect = _inspect
     chai.util.getMessage = getMessage
     chai.util.objDisplay = objDisplay
@@ -204,7 +212,7 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (specWindow, state, assertFn) {
+  overrideChaiAsserts = function (specWindow, state, assertFn) {
     chai.Assertion.prototype.assert = createPatchedAssert(specWindow, state, assertFn)
 
     const _origGetmessage = function (obj, args) {
@@ -475,7 +483,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const overrideExpect = (specWindow, state) => {
+  overrideExpect = (specWindow, state) => {
     // only override assertions for this specific
     // expect function instance so we do not affect
     // the outside world
@@ -509,7 +517,7 @@ chai.use((chai, u) => {
     return fn
   }
 
-  const setSpecWindowGlobals = function (specWindow, state) {
+  setSpecWindowGlobals = function (specWindow, state) {
     const expect = overrideExpect(specWindow, state)
     const assert = overrideAssert(specWindow, state)
 
@@ -524,7 +532,7 @@ chai.use((chai, u) => {
     }
   }
 
-  const create = function (specWindow, state, assertFn) {
+  create = function (specWindow, state, assertFn) {
     restoreAsserts()
 
     overrideChaiInspect()
@@ -533,20 +541,14 @@ chai.use((chai, u) => {
 
     return setSpecWindowGlobals(specWindow, state)
   }
-
-  module.exports = {
-    replaceArgMessages,
-
-    removeOrKeepSingleQuotesBetweenStars,
-
-    setSpecWindowGlobals,
-
-    restoreAsserts,
-
-    overrideExpect,
-
-    overrideChaiAsserts,
-
-    create,
-  }
 })
+
+export default {
+  create,
+  replaceArgMessages,
+  removeOrKeepSingleQuotesBetweenStars,
+  setSpecWindowGlobals,
+  restoreAsserts,
+  overrideExpect,
+  overrideChaiAsserts,
+}

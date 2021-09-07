@@ -1,11 +1,13 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const Promise = require('bluebird')
-const debug = require('debug')('cypress:driver:actionability')
+// @ts-nocheck
+import _ from 'lodash'
+import $ from 'jquery'
+import Promise from 'bluebird'
 
-const $dom = require('../dom')
-const $elements = require('../dom/elements')
-const $errUtils = require('../cypress/error_utils')
+import debugFn from 'debug'
+import $dom from '../dom'
+import $elements from '../dom/elements'
+import $errUtils from '../cypress/error_utils'
+const debug = debugFn('cypress:driver:actionability')
 
 const delay = 50
 
@@ -452,7 +454,7 @@ const verify = function (cy, $el, options, callbacks) {
   })
 }
 
-module.exports = {
+export default {
   delay,
   verify,
   dispatchPrimedChangeEvents,

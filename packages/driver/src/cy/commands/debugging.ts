@@ -1,6 +1,8 @@
-const _ = require('lodash')
+// @ts-nocheck
 
-const $utils = require('../../cypress/utils')
+import _ from 'lodash'
+
+import $utils from '../../cypress/utils'
 
 const resume = (state, resumeAll = true) => {
   const onResume = state('onResume')
@@ -32,7 +34,7 @@ const getNextQueuedCommand = (state, queue) => {
   return search(state('index'))
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   Cypress.on('resume:next', () => {
     return resume(state, false)
   })

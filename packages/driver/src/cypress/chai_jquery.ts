@@ -1,7 +1,8 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const $dom = require('../dom')
-const $elements = require('../dom/elements')
+// @ts-nocheck
+import _ from 'lodash'
+import $ from 'jquery'
+import $dom from '../dom'
+import $elements from '../dom/elements'
 
 const selectors = {
   visible: 'visible',
@@ -32,7 +33,7 @@ const maybeCastNumberToString = (num) => {
   return _.isFinite(num) ? `${num}` : num
 }
 
-const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
+export const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   const { inspect, flag } = chaiUtils
 
   const assertDom = (ctx, method, ...args) => {
@@ -341,4 +342,4 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 }
 
-module.exports = $chaiJquery
+export default $chaiJquery

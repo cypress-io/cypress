@@ -1,15 +1,17 @@
+// @ts-nocheck
 /* global cy, Cypress */
-const _ = require('lodash')
-const whatIsCircular = require('@cypress/what-is-circular')
-const UrlParse = require('url-parse')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import whatIsCircular from '@cypress/what-is-circular'
+import UrlParse from 'url-parse'
+import Promise from 'bluebird'
 
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
-const $Log = require('../../cypress/log')
-const $Location = require('../../cypress/location')
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+import $Log from '../../cypress/log'
+import { $Location } from '../../cypress/location'
 
-const debug = require('debug')('cypress:driver:navigation')
+import debugFn from 'debug'
+const debug = debugFn('cypress:driver:navigation')
 
 let id = null
 let previousDomainVisited = null
@@ -397,7 +399,7 @@ const normalizeTimeoutOptions = (options) => {
   .value()
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   reset()
 
   Cypress.on('test:before:run:async', () => {

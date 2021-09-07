@@ -1,10 +1,10 @@
-const _ = require('lodash')
-const $ = require('jquery')
-const Promise = require('bluebird')
-const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
-const $actionability = require('../../actionability')
+import _ from 'lodash'
+import $ from 'jquery'
+import Promise from 'bluebird'
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
 
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
@@ -33,7 +33,7 @@ const formatMouseEvents = (events) => {
   })
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   const { mouse, keyboard } = cy.devices
 
   const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {

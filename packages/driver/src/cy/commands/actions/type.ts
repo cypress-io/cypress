@@ -1,16 +1,18 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $dom = require('../../../dom')
-const $elements = require('../../../dom/elements')
-const $selection = require('../../../dom/selection')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
-const $actionability = require('../../actionability')
-const $Keyboard = require('../../../cy/keyboard')
-const debug = require('debug')('cypress:driver:command:type')
+import $dom from '../../../dom'
+import $elements from '../../../dom/elements'
+import $selection from '../../../dom/selection'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
+import $Keyboard from '../../../cy/keyboard'
+import debugFn from 'debug'
+const debug = debugFn('cypress:driver:command:type')
 
-module.exports = function (Commands, Cypress, cy, state, config) {
+export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {

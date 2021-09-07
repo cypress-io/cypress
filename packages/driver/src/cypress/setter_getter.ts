@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 const reset = (state = {}) => {
   // perf loop
@@ -10,57 +10,55 @@ const reset = (state = {}) => {
 }
 
 // a basic object setter / getter class
-const create = (state = {}) => {
-  const get = (key) => {
-    if (key) {
-      return state[key]
+export default {
+  create: (state = {}) => {
+    const get = (key?) => {
+      if (key) {
+        return state[key]
+      }
+
+      return state
     }
 
-    return state
-  }
+    const set = (key, value?) => {
+      let obj
+      let ret
 
-  const set = (key, value) => {
-    let obj
-    let ret
+      if (_.isObject(key)) {
+        obj = key
+        ret = obj
+      } else {
+        obj = {}
+        obj[key] = value
+        ret = value
+      }
 
-    if (_.isObject(key)) {
-      obj = key
-      ret = obj
-    } else {
-      obj = {}
-      obj[key] = value
-      ret = value
+      _.extend(state, obj)
+
+      return ret
     }
 
-    _.extend(state, obj)
+    // return the getter / setter function interface
+    const SetterGetter = function (key, value) {
+      switch (arguments.length) {
+        case 0:
+          return get()
+        case 1:
+          if (_.isString(key)) {
+            return get(key)
+          }
 
-    return ret
-  }
+          return set(key)
 
-  // return the getter / setter function interface
-  const SetterGetter = function (key, value) {
-    switch (arguments.length) {
-      case 0:
-        return get()
-      case 1:
-        if (_.isString(key)) {
-          return get(key)
-        }
-
-        return set(key)
-
-      default:
-        return set(key, value)
+        default:
+          return set(key, value)
+      }
     }
-  }
 
-  SetterGetter.reset = () => {
-    return reset(state)
-  }
+    SetterGetter.reset = () => {
+      return reset(state)
+    }
 
-  return SetterGetter
-}
-
-module.exports = {
-  create,
+    return SetterGetter
+  },
 }

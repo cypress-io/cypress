@@ -1,8 +1,9 @@
-const _ = require('lodash')
+// @ts-nocheck
 
-const $dom = require('../../dom')
+import _ from 'lodash'
+import $dom from '../../dom'
 
-module.exports = function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state) {
   Commands.addAll({ type: 'utility', prevSubject: true }, {
     as (subject, str) {
       const ctx = this

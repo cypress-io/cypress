@@ -1,10 +1,11 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
-const $elements = require('../../../dom/elements')
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $elements from '../../../dom/elements'
 
 const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {}) => {
   // we're not handling conversion of values to strings
@@ -159,7 +160,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
   })
 }
 
-module.exports = function (Commands, Cypress, cy) {
+export default function (Commands, Cypress, cy) {
   return Commands.addAll({ prevSubject: 'element' }, {
     check (subject, values, options) {
       return checkOrUncheck.call(this, Cypress, cy, 'check', subject, values, options)

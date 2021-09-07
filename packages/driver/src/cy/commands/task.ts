@@ -1,11 +1,11 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
-const $stackUtils = require('../../cypress/stack_utils')
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+import $stackUtils from '../../cypress/stack_utils'
 
-module.exports = (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy) => {
   Commands.addAll({
     task (task, arg, options = {}) {
       const userOptions = options

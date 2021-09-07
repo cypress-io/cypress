@@ -1,9 +1,11 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+// @ts-nocheck
 
-const $dom = require('../../dom')
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
+import _ from 'lodash'
+import Promise from 'bluebird'
+
+import $dom from '../../dom'
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
 
 const returnFalseIfThenable = (key, ...args) => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
@@ -42,7 +44,7 @@ const getFormattedElement = ($el) => {
   return $el
 }
 
-module.exports = function (Commands, Cypress, cy, state) {
+export default function (Commands, Cypress, cy, state) {
   // thens can return more "thenables" which are not resolved
   // until they're 'really' resolved, so naturally this API
   // supports nesting promises

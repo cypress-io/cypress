@@ -1,8 +1,12 @@
-const _ = require('lodash')
-const { SourceMapConsumer } = require('source-map')
-const Promise = require('bluebird')
+// @ts-nocheck
+import _ from 'lodash'
+import { SourceMapConsumer } from 'source-map'
+import Promise from 'bluebird'
 
-const $utils = require('./utils')
+// @ts-ignore
+import mappingsWasm from 'source-map/lib/mappings.wasm'
+
+import $utils from './utils'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
@@ -13,7 +17,7 @@ const initializeSourceMapConsumer = (file, sourceMap) => {
   if (!sourceMap) return Promise.resolve(null)
 
   SourceMapConsumer.initialize({
-    'lib/mappings.wasm': require('source-map/lib/mappings.wasm'),
+    'lib/mappings.wasm': mappingsWasm,
   })
 
   return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
@@ -86,9 +90,9 @@ const base64toJs = (base64) => {
   }
 }
 
-module.exports = {
-  extractSourceMap,
-  getSourceContents,
+export default {
   getSourcePosition,
+  getSourceContents,
+  extractSourceMap,
   initializeSourceMapConsumer,
 }

@@ -1,4 +1,6 @@
-const _ = require('lodash')
+// @ts-nocheck
+
+import _ from 'lodash'
 
 // IE doesn't support Array.from or Map.prototype.keys
 const getMapKeys = (map) => {
@@ -33,4 +35,4 @@ class LimitedMap extends Map {
   }
 }
 
-module.exports = LimitedMap
+export default LimitedMap

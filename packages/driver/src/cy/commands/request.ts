@@ -1,10 +1,10 @@
-const _ = require('lodash')
-const whatIsCircular = require('@cypress/what-is-circular')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import whatIsCircular from '@cypress/what-is-circular'
+import Promise from 'bluebird'
 
-const $utils = require('../../cypress/utils')
-const $errUtils = require('../../cypress/error_utils')
-const $Location = require('../../cypress/location')
+import $utils from '../../cypress/utils'
+import $errUtils from '../../cypress/error_utils'
+import { $Location } from '../../cypress/location'
 
 const isOptional = (memo, val, key) => {
   if (_.isNull(val)) {
@@ -58,7 +58,7 @@ const needsFormSpecified = (options = {}) => {
   return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({
     // allow our signature to be similar to cy.route
     // METHOD / URL / BODY

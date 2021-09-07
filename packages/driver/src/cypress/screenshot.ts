@@ -1,9 +1,11 @@
-const _ = require('lodash')
+// @ts-nocheck
 
-const $utils = require('./utils')
-const $errUtils = require('./error_utils')
+import _ from 'lodash'
 
-const reset = () => {
+import $utils from './utils'
+import $errUtils from './error_utils'
+
+const _reset = () => {
   return {
     capture: 'fullPage',
     scale: false,
@@ -15,7 +17,7 @@ const reset = () => {
   }
 }
 
-let defaults = reset()
+let _defaults = _reset()
 
 const validCaptures = ['fullPage', 'viewport', 'runner']
 
@@ -192,28 +194,33 @@ const validate = (props, cmd, log) => {
   return values
 }
 
-module.exports = {
-  reset () {
-    defaults = reset()
-  },
+function reset () {
+  _defaults = _reset()
+}
 
-  getConfig () {
-    return _.cloneDeep(_.omit(defaults, 'onBeforeScreenshot', 'onAfterScreenshot'))
-  },
+function getConfig () {
+  return _.cloneDeep(_.omit(_defaults, 'onBeforeScreenshot', 'onAfterScreenshot'))
+}
 
-  onBeforeScreenshot ($el) {
-    return defaults.onBeforeScreenshot($el)
-  },
+function onBeforeScreenshot ($el) {
+  return _defaults.onBeforeScreenshot($el)
+}
 
-  onAfterScreenshot ($el, results) {
-    return defaults.onAfterScreenshot($el, results)
-  },
+function onAfterScreenshot ($el, results) {
+  return _defaults.onAfterScreenshot($el, results)
+}
 
-  defaults (props) {
-    const values = validate(props, 'Cypress.Screenshot.defaults')
+function defaults (props) {
+  const values = validate(props, 'Cypress.Screenshot.defaults')
 
-    return _.extend(defaults, values)
-  },
+  return _.extend(_defaults, values)
+}
 
+export default {
+  reset,
   validate,
+  getConfig,
+  onBeforeScreenshot,
+  onAfterScreenshot,
+  defaults,
 }

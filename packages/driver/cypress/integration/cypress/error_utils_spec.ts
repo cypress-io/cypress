@@ -1,10 +1,12 @@
-const { allowTsModuleStubbing } = require('../../support/helpers')
+// @ts-nocheck
+
+import { allowTsModuleStubbing } from '../../support/helpers'
 
 allowTsModuleStubbing()
 
-const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
-const $errUtils = require('@packages/driver/src/cypress/error_utils')
-const $errorMessages = require('@packages/driver/src/cypress/error_messages').default
+import $stackUtils from '@packages/driver/src/cypress/stack_utils'
+import $errUtils from '@packages/driver/src/cypress/error_utils'
+import $errorMessages from '@packages/driver/src/cypress/error_messages'
 
 describe('driver/src/cypress/error_utils', () => {
   context('.modifyErrMsg', () => {

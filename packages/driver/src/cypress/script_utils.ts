@@ -1,8 +1,10 @@
-const _ = require('lodash')
-const Bluebird = require('bluebird')
+// @ts-nocheck
 
-const $networkUtils = require('./network_utils')
-const $sourceMapUtils = require('./source_map_utils')
+import _ from 'lodash'
+import Bluebird from 'bluebird'
+
+import $networkUtils from './network_utils'
+import $sourceMapUtils from './source_map_utils'
 
 const fetchScript = (scriptWindow, script) => {
   return $networkUtils.fetch(script.relativeUrl, scriptWindow)
@@ -36,19 +38,17 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 }
 
 // Supports either scripts as objects or as async import functions
-const runScripts = (specWindow, scripts) => {
-  // if scripts contains at least one promise
-  if (scripts.length && typeof scripts[0] === 'function') {
-    // chain the loading promises
-    // NOTE: since in evalScripts, scripts are evaluated in order,
-    // we chose to respect this constraint here too.
-    // indeed _.each goes through the array in order
-    return Bluebird.each(scripts, (script) => script())
-  }
+export default {
+  runScripts: (specWindow, scripts) => {
+    // if scripts contains at least one promise
+    if (scripts.length && typeof scripts[0] === 'function') {
+      // chain the loading promises
+      // NOTE: since in evalScripts, scripts are evaluated in order,
+      // we chose to respect this constraint here too.
+      // indeed _.each goes through the array in order
+      return Bluebird.each(scripts, (script) => script())
+    }
 
-  return runScriptsFromUrls(specWindow, scripts)
-}
-
-module.exports = {
-  runScripts,
+    return runScriptsFromUrls(specWindow, scripts)
+  },
 }

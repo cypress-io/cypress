@@ -1,7 +1,7 @@
-const _ = require('lodash')
-const { stripIndent } = require('common-tags')
-const capitalize = require('underscore.string/capitalize')
-const $stackUtils = require('./stack_utils')
+import _ from 'lodash'
+import { stripIndent } from 'common-tags'
+import capitalize from 'underscore.string/capitalize'
+import $stackUtils from './stack_utils'
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -33,7 +33,7 @@ const formatRedirects = (redirects = [], listIndentSize) => {
   })
 }
 
-const formatProp = (memo, field) => {
+const formatProp = (memo, field): string[] => {
   const { key, value } = field
 
   if (value != null) {
@@ -75,7 +75,7 @@ const getRedirects = (obj, phrase, listIndentSize) => {
   ].join('\n')
 }
 
-const getHttpProps = (fields = []) => {
+const getHttpProps = (fields: { value: string, key: string }[] = []) => {
   return _
   .chain(fields)
   .reduce(formatProp, [])
@@ -1796,7 +1796,9 @@ export default {
       const t = obj.parentTitle
 
       if (t) {
-        msg += `the remaining tests in the current suite: \`${_.truncate(t, 20)}\``
+        msg += `the remaining tests in the current suite: \`${_.truncate(t, {
+          length: 30,
+        })}\``
       } else {
         msg += 'all of the remaining tests.'
       }

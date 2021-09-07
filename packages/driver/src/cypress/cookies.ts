@@ -1,7 +1,9 @@
-const _ = require('lodash')
-const Cookies = require('js-cookie')
+// @ts-nocheck
 
-const $errUtils = require('./error_utils')
+import _ from 'lodash'
+import Cookies from 'js-cookie'
+
+import $errUtils from './error_utils'
 
 let isDebugging = false
 let isDebuggingVerbose = false
@@ -18,7 +20,7 @@ const warnOnWhitelistRenamed = (obj, type) => {
   }
 }
 
-const $Cookies = (namespace, domain) => {
+export const $Cookies = (namespace, domain) => {
   const isNamespaced = (name) => {
     return _.startsWith(name, namespace)
   }
@@ -153,5 +155,3 @@ $Cookies.create = (namespace, domain) => {
   // set the $Cookies function onto the Cypress instance
   return $Cookies(namespace, domain)
 }
-
-module.exports = $Cookies

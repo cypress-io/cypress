@@ -1,5 +1,7 @@
-const _ = require('lodash')
-const fakeTimers = require('@sinonjs/fake-timers')
+// @ts-nocheck
+
+import _ from 'lodash'
+import fakeTimers from '@sinonjs/fake-timers'
 
 const install = (win, now, methods) => {
   return fakeTimers.withGlobal(win).install({
@@ -8,7 +10,7 @@ const install = (win, now, methods) => {
   })
 }
 
-const create = (win, now, methods) => {
+export const create = (win, now, methods) => {
   let clock = install(win, now, methods)
 
   const tick = (ms) => {
@@ -56,8 +58,4 @@ const create = (win, now, methods) => {
     details,
 
   }
-}
-
-module.exports = {
-  create,
 }

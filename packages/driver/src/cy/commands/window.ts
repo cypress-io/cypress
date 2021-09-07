@@ -1,7 +1,7 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $errUtils = require('../../cypress/error_utils')
+import $errUtils from '../../cypress/error_utils'
 
 const viewports = {
   'macbook-16': '1536x960',
@@ -33,7 +33,7 @@ const validOrientations = ['landscape', 'portrait']
 // refresh would cause viewport to hang
 let currentViewport = null
 
-module.exports = (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state) => {
   const defaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
 
   // currentViewport could already be set due to previous runs

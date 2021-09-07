@@ -1,12 +1,12 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
-const $errUtils = require('../../../cypress/error_utils')
-const $actionability = require('../../actionability')
+import $dom from '../../../dom'
+import $utils from '../../../cypress/utils'
+import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
 
-module.exports = (Commands, Cypress, cy) => {
+export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     submit (subject, options = {}) {
       const userOptions = options

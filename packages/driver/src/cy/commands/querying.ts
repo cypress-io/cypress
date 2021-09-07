@@ -1,14 +1,14 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const $Command = require('../../cypress/command')
-const $dom = require('../../dom')
-const $elements = require('../../dom/elements')
-const $errUtils = require('../../cypress/error_utils')
-const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
-const { getAliasedRequests, isDynamicAliasingPossible } = require('../net-stubbing/aliasing')
+import { $Command } from '../../cypress/command'
+import $dom from '../../dom'
+import $elements from '../../dom/elements'
+import $errUtils from '../../cypress/error_utils'
+import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
+import { getAliasedRequests, isDynamicAliasingPossible } from '../net-stubbing/aliasing'
 
-module.exports = (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
     focused (options = {}) {
       const userOptions = options

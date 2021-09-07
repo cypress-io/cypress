@@ -1,12 +1,14 @@
+// @ts-nocheck
+
 // See: ./errorScenarios.md for details about error messages and stack traces
 
-const _ = require('lodash')
-const chai = require('chai')
+import _ from 'lodash'
+import chai from 'chai'
 
-const $dom = require('../dom')
-const $utils = require('./utils')
-const $stackUtils = require('./stack_utils')
-const $errorMessages = require('./error_messages')
+import $dom from '../dom'
+import $utils from './utils'
+import $stackUtils from './stack_utils'
+import $errorMessages from './error_messages'
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -119,6 +121,43 @@ const stackWithReplacedProps = (err, props) => {
   return originalStack.replace(originalName, `${name}: ${message}`)
 }
 
+const getUserInvocationStack = (err, state) => {
+  const current = state('current')
+
+  const currentAssertionCommand = current?.get('currentAssertionCommand')
+  const withInvocationStack = currentAssertionCommand || current
+  // user assertion errors (expect().to, etc) get their invocation stack
+  // attached to the error thrown from chai
+  // command errors and command assertion errors (default assertion or cy.should)
+  // have the invocation stack attached to the current command
+  // prefer err.userInvocation stack if it's been set
+  let userInvocationStack = getUserInvocationStackFromError(err) || state('currentAssertionUserInvocationStack')
+
+  // if there is no user invocation stack from an assertion or it is the default
+  // assertion, meaning it came from a command (e.g. cy.get), prefer the
+  // command's user invocation stack so the code frame points to the command.
+  // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+  // points to the `cy.should`, but the error came from inside the callback,
+  // so we need to prefer that.
+  if (
+    !userInvocationStack
+    || err.isDefaultAssertionErr
+    || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+  ) {
+    userInvocationStack = withInvocationStack?.get('userInvocationStack')
+  }
+
+  if (!userInvocationStack) return
+
+  if (
+    isCypressErr(err)
+    || isAssertionErr(err)
+    || isChaiValidationErr(err)
+  ) {
+    return userInvocationStack
+  }
+}
+
 const modifyErrMsg = (err, newErrMsg, cb) => {
   err.stack = $stackUtils.normalizedStack(err)
 
@@ -210,7 +249,7 @@ const warnByPath = (errPath, options = {}) => {
   $utils.warning(err)
 }
 
-class InternalCypressError extends Error {
+export class InternalCypressError extends Error {
   constructor (message) {
     super(message)
 
@@ -222,7 +261,7 @@ class InternalCypressError extends Error {
   }
 }
 
-class CypressError extends Error {
+export class CypressError extends Error {
   constructor (message) {
     super(message)
 
@@ -291,7 +330,7 @@ const docsUrlByParents = (msgPath) => {
     return // reached root
   }
 
-  const obj = _.get($errorMessages.default, msgPath)
+  const obj = _.get($errorMessages, msgPath)
 
   if (obj.hasOwnProperty('docsUrl')) {
     return obj.docsUrl
@@ -301,7 +340,7 @@ const docsUrlByParents = (msgPath) => {
 }
 
 const errByPath = (msgPath, args) => {
-  let msgValue = _.get($errorMessages.default, msgPath)
+  let msgValue = _.get($errorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -499,7 +538,7 @@ const logError = (Cypress, handlerType, err, handled = false) => {
   })
 }
 
-export {
+export default {
   appendErrMsg,
   createUncaughtException,
   cypressErr,
@@ -507,6 +546,7 @@ export {
   enhanceStack,
   errByPath,
   errorFromUncaughtEvent,
+  getUserInvocationStack,
   getUserInvocationStackFromError,
   isAssertionErr,
   isChaiValidationErr,
