@@ -530,7 +530,7 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include(' cannot be checked because the element is missing `value` attribute but `cy.check()` was passed with values')
+          expect(err.message).to.include(' cannot be checked/unchecked because it has no \`value\` attribute')
 
           done()
         })
@@ -1093,7 +1093,7 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include(' cannot be unchecked because the element is missing `value` attribute but `cy.uncheck()` was passed with values')
+          expect(err.message).to.include(' cannot be checked/unchecked because it has no \`value\` attribute')
 
           done()
         })

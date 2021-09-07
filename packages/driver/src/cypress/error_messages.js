@@ -181,7 +181,7 @@ export default {
       docsUrl: 'https://on.cypress.io/{{cmd}}',
     },
     element_missing_value_attribute: {
-      message: `{{node}} cannot be {{phrase}} because the element is missing \`value\` attribute but ${cmd('{{cmd}}')} was passed with values`,
+      message: `{{node}} cannot be checked/unchecked because it has no \`value\` attribute and ${cmd('{{cmd}}')} was supplied a value argument`,
       docsUrl: 'https://on.cypress.io/{{cmd}}',
     },
   },

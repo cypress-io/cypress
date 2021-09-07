@@ -52,12 +52,6 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
     return (values.length === 0) || values.includes(value)
   }
 
-  // does our el have a value non-default
-  // attribute?
-  const elHasValueAttr = ($el) => {
-    return !!($el.attr('value'))
-  }
-
   // blow up if any member of the subject
   // isnt a checkbox or radio
   const checkOrUncheckEl = (el) => {
@@ -71,14 +65,6 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
       $errUtils.throwErrByPath('check_uncheck.invalid_element', {
         onFail: options._log,
         args: { node, word, phrase, cmd: type },
-      })
-    }
-
-    // warn cmd requires all subjects to have value when args passed to cmd
-    if (!elHasValueAttr($el) && (values.length > 0)) {
-      $errUtils.throwErrByPath('check_uncheck.element_missing_value_attribute', {
-        onFail: options._log,
-        args: { node, phrase: `${type}ed`, cmd: type },
       })
     }
 
@@ -109,6 +95,14 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
       })
 
       options._log.snapshot('before', { next: 'after' })
+
+      // warn cmd requires all subjects to have value when args passed to cmd
+      if (!($el.attr('value')) && (values.length > 0)) {
+        $errUtils.throwErrByPath('check_uncheck.element_missing_value_attribute', {
+          onFail: options._log,
+          args: { node, cmd: type },
+        })
+      }
 
       // if the checkbox was already checked
       // then notify the user of this note
