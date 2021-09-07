@@ -1,5 +1,5 @@
 import { getNativeProp, tryCallNativeMethod } from './nativeProps'
-import * as $document from '../document'
+import $document from '../document'
 import { getTagName, isElement } from './elementHelpers'
 import type { HTMLContentEditableElement } from './types'
 
