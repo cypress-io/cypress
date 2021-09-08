@@ -811,14 +811,6 @@ describe('lib/gui/events', () => {
         return sinon.stub(ProjectBase.prototype, 'close').withArgs({ sync: true }).resolves()
       })
 
-      it('is noop and returns null when no project is open', function () {
-        expect(openProject.getProject()).to.be.null
-
-        return this.handleEvent('close:project').then((assert) => {
-          return assert.sendCalledWith(null)
-        })
-      })
-
       it('closes down open project and returns null', function () {
         sinon.stub(ProjectBase.prototype, 'getConfig').resolves({})
         sinon.stub(ProjectBase.prototype, 'open').resolves()

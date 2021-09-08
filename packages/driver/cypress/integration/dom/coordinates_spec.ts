@@ -57,6 +57,46 @@ describe('src/dom/coordinates', () => {
       Object.defineProperty(win, 'scrollY', scrollY)
       Object.defineProperty(win, 'scrollX', scrollX)
     })
+
+    it('accepts a native element as an argument', function () {
+      const setupGlobalOverrides = () => {
+        const win = Cypress.dom.getWindowByElement(this.$button.get(0))
+
+        const scrollY = Object.getOwnPropertyDescriptor(win, 'scrollY')!
+        const scrollX = Object.getOwnPropertyDescriptor(win, 'scrollX')!
+
+        Object.defineProperty(win, 'scrollY', {
+          value: 10,
+        })
+
+        Object.defineProperty(win, 'scrollX', {
+          value: 20,
+        })
+
+        return () => {
+          Object.defineProperty(win, 'scrollY', scrollY)
+          Object.defineProperty(win, 'scrollX', scrollX)
+        }
+      }
+
+      const teardownGlobalOverrides = setupGlobalOverrides()
+
+      try {
+        cy.stub(this.$button.get(0), 'getClientRects').returns([{
+          top: 10,
+          left: 10,
+          width: 100,
+          height: 100,
+        }])
+
+        const { fromElViewport } = Cypress.dom.getElementPositioning(this.$button.get(0))
+
+        expect(fromElViewport.top).to.eq(10)
+        expect(fromElViewport.left).to.eq(10)
+      } finally {
+        teardownGlobalOverrides()
+      }
+    })
   })
 
   context('.getCoordsByPosition', () => {
