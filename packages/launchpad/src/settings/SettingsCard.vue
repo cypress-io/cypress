@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 min-w-650px mx-auto my-0">
-    <Disclosure as="div" class="border-1 border-gray-300 rounded" v-slot="{ open }">
+    <Disclosure as="section" class="border-1 border-gray-300 rounded" v-slot="{ open }">
       <DisclosureButton data-testid="settings-card-header" class="settings-card-header bg-cool-gray-100 py-4 pl-6 pr-3 select-none cursor-pointer grid gap-4">
         <span class="grid self-center h-full">
           <Icon :icon="icon" class="self-center text-indigo-600 text-xl"/>
