@@ -2488,6 +2488,47 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  interface PEMCert {
+    /**
+     * Path to the certificate file, relative to project root.
+     */
+    cert: string
+    /**
+     * Path to the private key file, relative to project root.
+     */
+    key: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface PFXCert {
+    /**
+     * Path to the certificate container, relative to project root.
+     */
+    pfx: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface ClientCertificate {
+    /**
+     * URL to match requests against. Wildcards following [minimatch](https://github.com/isaacs/minimatch) rules are supported.
+     */
+    url: string
+    /**
+     * Paths to one or more CA files to validate certs against, relative to project root. 
+     */
+    ca?: string[]
+    /**
+     * A PEM format certificate/private key pair or PFX certificate container
+     */
+    certs: PEMCert[] | PFXCert[]
+  }
+
   interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
@@ -2793,6 +2834,11 @@ declare namespace Cypress {
      * The Cypress version being used.
      */
     version: string
+
+    /**
+     * An array of objects defining the certificates
+     */
+    clientCertificate: ClientCertificate[]
 
     // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
