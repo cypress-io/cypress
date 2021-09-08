@@ -1,4 +1,4 @@
-interface CRADevServerOptions {
+interface CypressCRADevServerConfig {
   /**
    * Location of the weppack.config Cypress should use
    */
@@ -9,18 +9,18 @@ interface CRADevServerOptions {
  * Sets up a Cypress component testing environment for your Create React App environment
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
- * @param options additional options object (create an empty object to see how to use it)
+ * @param devServerConfig additional config object (create an empty object to see how to use it)
  */
-declare function legacySetupCRADevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options?: CRADevServerOptions): void
+declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: CypressCRADevServerConfig): void
 
-declare namespace legacySetupCRADevServer {
+declare namespace legacyDevServer {
   /**
    * Sets up a Cypress component testing environment for your Create React App environment
-   * @param devServerConfig comes from the `setupDevServer()` function first argument
-   * @param options additional options object (create an empty object to see how to use it)
+   * @param cypressDevServerConfig comes from the `setupDevServer()` function first argument
+   * @param devServerConfig additional config object (create an empty object to see how to use it)
    * @returns the resolved dev server object that cypress can use to start testing
    */
-  export function setupCRADevServer(devServerConfig: Cypress.DevServerConfig, options?: CRADevServerOptions): Cypress.ResolvedDevServerConfig
+  export function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressCRADevServerConfig): Cypress.ResolvedDevServerConfig
 }
 
-export = legacySetupCRADevServer;
+export = legacyDevServer;

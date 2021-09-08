@@ -1,4 +1,4 @@
-interface SetupWebpackDevServerOptions {
+interface CypressWebpackDevServerConfig {
   /**
    * Location of the weppack.config Cypress should use
    */
@@ -9,18 +9,18 @@ interface SetupWebpackDevServerOptions {
  * Setup a webpack dev server with the proper configuration for babel transpilation
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
- * @param options additional options object (create an empty object to see how to use it)
+ * @param devServerConfig additional config object (create an empty object to see how to use it)
  */
-declare function legacySetupWebpackDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options?: SetupWebpackDevServerOptions): void
+declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, devServerConfig?: CypressWebpackDevServerConfig): void
 
-declare namespace legacySetupWebpackDevServer {
+declare namespace legacyDevServer {
   /**
    * Sets up a webpack dev server with the proper configuration for babel transpilation
-   * @param devServerConfig comes from the `setupDevServer()` function first argument
-   * @param options  additional options object (create an empty object to see how to use it)
+   * @param cypressDevServerConfig comes from the `setupDevServer()` function first argument
+   * @param devServerConfig additional config object (create an empty object to see how to use it)
    * @returns the resolved dev server object that cypress can use to start testing
    */
-  export function setupWebpackDevServer(devServerConfig: Cypress.DevServerConfig, options?: SetupWebpackDevServerOptions): Cypress.ResolvedDevServerConfig
+  export function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressWebpackDevServerConfig): Cypress.ResolvedDevServerConfig
 }
 
-export = legacySetupWebpackDevServer;
+export = legacyDevServer;

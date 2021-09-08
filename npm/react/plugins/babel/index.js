@@ -1,20 +1,20 @@
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const getBabelWebpackConfig = require('./getBabelWebpackConfig')
-const { getLegacySetupDevServer } = require('../utils/legacy-setup-dev-server')
+const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
-function setupBabelDevServer (devServerConfig, options) {
+function devServer (cypressDevServerConfig, devServerConfig) {
   return startDevServer({
-    options: devServerConfig,
-    webpackConfig: getBabelWebpackConfig(devServerConfig.config, options),
+    options: cypressDevServerConfig,
+    webpackConfig: getBabelWebpackConfig(cypressDevServerConfig.config, devServerConfig),
   })
 }
 
 // Legacy signature
-module.exports = getLegacySetupDevServer(setupBabelDevServer, (config) => {
+module.exports = getLegacyDevServer(devServer, (config) => {
   config.env.reactDevtools = true
 
   return config
 })
 
 // New signature
-module.exports.setupBabelDevServer = setupBabelDevServer
+module.exports.devServer = devServer

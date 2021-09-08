@@ -1,16 +1,16 @@
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const { createWebpackDevConfig } = require('@craco/craco')
-const { getLegacySetupDevServer } = require('../utils/legacy-setup-dev-server')
+const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
-function setupCracoDevServer (devServerConfig, cracoConfig) {
+function devServer (cypressDevServerConfig, cracoConfig) {
   return startDevServer({
-    options: devServerConfig,
+    options: cypressDevServerConfig,
     webpackConfig: createWebpackDevConfig(cracoConfig),
   })
 }
 
 // Legacy signature
-module.exports = getLegacySetupDevServer(setupCracoDevServer, (config) => {
+module.exports = getLegacyDevServer(devServer, (config) => {
   config.env.reactDevtools = true
 
   return config
@@ -18,6 +18,6 @@ module.exports = getLegacySetupDevServer(setupCracoDevServer, (config) => {
 
 // New signature
 // - Note that this also includes a change to the second argument!
-module.exports.setupCracoDevServer = (devServerConfig, { cracoConfig }) => {
-  return setupCracoDevServer(devServerConfig, cracoConfig)
+module.exports.devServer = (cypressDevServerConfig, { cracoConfig }) => {
+  return devServer(cypressDevServerConfig, cracoConfig)
 }
