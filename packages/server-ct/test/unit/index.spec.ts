@@ -28,7 +28,22 @@ describe('index.spec', () => {
 
   it('registers update check', async () => {
     await Index.start('/path/to/project', {
-      browser: 'chrome',
+      _: [process.cwd()],
+      testingType: 'component',
+      os: 'linux',
+      invokedFromCli: true,
+      cwd: process.cwd(),
+      browser: {
+        name: 'chrome',
+        displayName: 'chrome',
+        family: 'chromium',
+        channel: '',
+        binary: '/',
+        versionRegex: new RegExp(''),
+      },
+      config: {},
+      project: '',
+      projectRoot: '',
     })
 
     expect(stub_setInterval.callCount).eq(1)

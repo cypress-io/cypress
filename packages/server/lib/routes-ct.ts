@@ -1,14 +1,54 @@
 import Debug from 'debug'
+import _ from 'lodash'
 import type { ErrorRequestHandler, Express } from 'express'
 import type httpProxy from 'http-proxy'
 import send from 'send'
 import type { NetworkProxy } from '@packages/proxy'
-import { handle, serve, serveChunk } from './runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import type { SpecsStore } from '@packages/server/lib/specs-store'
 import type { Cfg } from '@packages/server/lib/project-base'
-import { getPathToDist } from '@packages/resolve-dist'
+import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
 import type { Browser } from '@packages/server/lib/browsers/types'
+import { runner } from './controllers/runner'
+
+interface ServeOptions {
+  config: Cfg
+  getCurrentBrowser: () => Browser
+  specsStore: SpecsStore
+}
+
+export const serve = (req, res, options: ServeOptions) => {
+  const config = {
+    ...options.config,
+    browser: options.getCurrentBrowser(),
+    specs: options.specsStore.specFiles,
+  } as Cfg
+
+  // TODO: move the component file watchers in here
+  // and update them in memory when they change and serve
+  // them straight to the HTML on load
+
+  debug('serving runner index.html with config %o',
+    _.pick(config, 'version', 'platform', 'arch', 'projectName'))
+
+  // base64 before embedding so user-supplied contents can't break out of <script>
+  // https://github.com/cypress-io/cypress/issues/4952
+  const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')
+
+  return res.render(runnerPath, {
+    base64Config,
+    projectName: config.projectName,
+  })
+}
+
+const serveChunk = (req, res, options) => {
+  let { config } = options
+  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(config.clientRoute, ''))
+
+  return send(req, pathToFile).pipe(res)
+}
 
 const debug = Debug('cypress:server:routes')
 
@@ -33,8 +73,9 @@ export const createRoutes = ({
   networkProxy,
   getCurrentBrowser,
   getSpec,
+  testingType,
 }: InitializeRoutes) => {
-  app.get('/__cypress/runner/*', handle)
+  app.get('/__cypress/runner/*', (req, res) => runner.handle(testingType, req, res))
 
   app.get('/__cypress/static/*', (req, res) => {
     const pathToFile = getPathToDist('static', req.params[0])

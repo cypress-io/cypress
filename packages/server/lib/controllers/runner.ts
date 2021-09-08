@@ -7,7 +7,7 @@ import path from 'path'
 import Debug from 'debug'
 import pkg from '@packages/root'
 import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
-import type { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
+import type { InitializeRoutes } from '../routes-ct'
 import type { PlatformName } from '@packages/launcher'
 
 const debug = Debug('cypress:server:runner')
@@ -67,7 +67,7 @@ export const runner = {
   },
 
   handle (testingType, req, res) {
-    const pathToFile = getPathToDist('runner', req.params[0])
+    const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
