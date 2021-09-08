@@ -1352,6 +1352,9 @@ export default {
         // move to the next runnable - this will be our async seam
         const _next = args[0]
 
+        // don't use getTest() here since hook runnables without tests should be skipped.
+        // getTest() can be defined when a hook doesn't belong to the test.
+        // see where we set currentTest in `_runner.on('hook'`
         const test = getTestFromRunnable(runnable)
 
         // if there's no test, this is likely a rouge before/after hook

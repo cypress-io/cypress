@@ -33,6 +33,14 @@ describe('suite 1.0', () => {
     incrState('b1.0.1')
   })
 
+  beforeEach(() => {
+    incrState('be1.0')
+  })
+
+  afterEach(() => {
+    incrState('ae1.0')
+  })
+
   it('test 1.0.1', () => {
     incrState('t1.0.1')
     cy.visit(urls[0])
@@ -113,6 +121,10 @@ after(() => {
     expect(state).deep.eq({
       // visit in sibling tests
       'b1.0.1': 3,
+      // 2 extra runs bc visits
+      'be1.0': 5,
+      // no extra runs bc afterEach
+      'ae1.0': 3,
       't1.0.1': 2,
       't1.0.2': 1,
       't1.0.3': 2,
