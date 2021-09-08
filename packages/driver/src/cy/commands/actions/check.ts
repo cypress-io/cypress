@@ -57,9 +57,9 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
   // isnt a checkbox or radio
   const checkOrUncheckEl = (el) => {
     const $el = $dom.wrap(el)
+    const node = $dom.stringify($el)
 
     if (!isAcceptableElement($el)) {
-      const node = $dom.stringify($el)
       const word = $utils.plural(options.$el, 'contains', 'is')
       const phrase = type === 'check' ? ' and `:radio`' : ''
 
@@ -96,6 +96,14 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
       })
 
       options._log.snapshot('before', { next: 'after' })
+
+      // warn cmd requires all subjects to have value when args passed to cmd
+      if (!($el.attr('value')) && (values.length > 0)) {
+        $errUtils.throwErrByPath('check_uncheck.element_missing_value_attribute', {
+          onFail: options._log,
+          args: { node, cmd: type },
+        })
+      }
 
       // if the checkbox was already checked
       // then notify the user of this note
