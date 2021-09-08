@@ -1,5 +1,5 @@
 import $window from '../window'
-import * as $document from '../document'
+import $document from '../document'
 import $ from 'jquery'
 import $jquery from '../jquery'
 

@@ -1,5 +1,5 @@
 const { $ } = Cypress
-const $SnapshotsCss = require('../../../src/cy/snapshots_css')
+const $SnapshotsCss = require('../../../src/cy/snapshots_css').default
 
 const normalizeStyles = (styles) => {
   return styles
