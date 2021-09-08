@@ -2,19 +2,37 @@ import path from 'path'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import Debug from 'debug'
+import type httpProxy from 'http-proxy'
+import type { Express } from 'express'
 
-import type { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
 import reporter from './controllers/reporter'
-import runner from './controllers/runner'
+import { runner } from './controllers/runner'
 import xhrs from './controllers/xhrs'
 import client from './controllers/client'
 import files from './controllers/files'
 import staticCtrl from './controllers/static'
+import type { SpecsStore } from './specs-store'
+import type { Browser } from './browsers/types'
+import type { NetworkProxy } from '@packages/proxy'
+import type { Cfg } from './project-base'
 
 const debug = Debug('cypress:server:routes')
+
+export interface InitializeRoutes {
+  app: Express
+  specsStore: SpecsStore
+  config: Cfg
+  getSpec: () => Cypress.Cypress['spec'] | null
+  getCurrentBrowser: () => Browser
+  nodeProxy: httpProxy
+  networkProxy: NetworkProxy
+  getRemoteState: () => any
+  onError: (...args: unknown[]) => any
+  testingType: Cypress.Cypress['testingType']
+}
 
 export const createRoutes = ({
   app,
@@ -45,7 +63,7 @@ export const createRoutes = ({
   })
 
   app.get('/__cypress/runner/*', (req, res) => {
-    runner.handle(req, res)
+    runner.handle(testingType, req, res)
   })
 
   app.get('/__cypress/automation/getLocalStorage', (req, res) => {
@@ -170,8 +188,8 @@ export const createRoutes = ({
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runner.serve(req, res, {
-      // testingType should be passed below to send `testingType` to the client
-      config: { ...config, testingType },
+      config,
+      testingType,
       getSpec,
       getCurrentBrowser,
       getRemoteState,

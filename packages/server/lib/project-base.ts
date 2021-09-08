@@ -6,7 +6,7 @@ import path from 'path'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { ServerCt } from '@packages/server-ct'
+import { ServerCt } from './server-ct'
 import { SocketE2E } from './socket-e2e'
 import { SocketCt } from './socket-ct'
 import api from './api'
@@ -31,7 +31,6 @@ import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
-import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
@@ -40,8 +39,8 @@ import type { LaunchArgs } from './open_project'
 // and are required when creating a project.
 // TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env'>>
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -220,7 +219,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
+      createRoutes: createE2ERoutes, //  : createCTRoutes,
       specsStore,
     })
 

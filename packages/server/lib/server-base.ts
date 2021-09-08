@@ -29,6 +29,17 @@ import type { SpecsStore } from './specs-store'
 import type { InitializeRoutes } from '../../server-ct/src/routes-ct'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
+import type { ParsedHost } from '@packages/network/lib/cors'
+
+type RemoteState = Partial<{
+  auth: string
+  props: ParsedHost
+  origin: string
+  strategy: 'file' | 'http'
+  visiting: boolean
+  domainName: string
+  fileServer: string
+}>
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -117,13 +128,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
 
-  protected _remoteAuth: unknown
-  protected _remoteProps: unknown
-  protected _remoteOrigin: unknown
-  protected _remoteStrategy: unknown
-  protected _remoteVisitingUrl: unknown
-  protected _remoteDomainName: unknown
-  protected _remoteFileServer: unknown
+  protected _remoteAuth?: string
+  protected _remoteProps?: RemoteState['props']
+  protected _remoteOrigin?: string
+  protected _remoteStrategy?: RemoteState['strategy']
+  protected _remoteVisitingUrl?: boolean
+  protected _remoteDomainName?: string
+  protected _remoteFileServer?: string
 
   constructor () {
     this.isListening = false
@@ -199,7 +210,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       clientCertificates.loadClientCertificateConfig(config)
 
-      const getRemoteState = () => {
+      const getRemoteState = (): RemoteState => {
         return this._getRemoteState()
       }
 
@@ -395,7 +406,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _getRemoteState () {
+  _getRemoteState (): RemoteState {
     // {
     //   origin: "http://localhost:2020"
     //   fileServer:
@@ -415,7 +426,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     //   }
     // }
 
-    const props = _.extend({}, {
+    const props: RemoteState = {
       auth: this._remoteAuth,
       props: this._remoteProps,
       origin: this._remoteOrigin,
@@ -423,14 +434,14 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       visiting: this._remoteVisitingUrl,
       domainName: this._remoteDomainName,
       fileServer: this._remoteFileServer,
-    })
+    }
 
     debug('Getting remote state: %o', props)
 
     return props
   }
 
-  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
+  _onDomainSet (fullyQualifiedUrl, options: { auth?: string } = {}) {
     const l = (type, val) => {
       return debug('Setting', type, val)
     }
@@ -448,7 +459,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._remoteStrategy = 'file'
       this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
       this._remoteDomainName = DEFAULT_DOMAIN_NAME
-      this._remoteProps = null
+      this._remoteProps = undefined
 
       l('remoteOrigin', this._remoteOrigin)
       l('remoteStrategy', this._remoteStrategy)
@@ -460,7 +471,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this._remoteStrategy = 'http'
 
-      this._remoteFileServer = null
+      this._remoteFileServer = undefined
 
       // set an object with port, tld, and domain properties
       // as the remoteHostAndPort

@@ -1,26 +1,32 @@
-const _ = require('lodash')
-const send = require('send')
-const os = require('os')
-const { fs } = require('../util/fs')
-const path = require('path')
-const debug = require('debug')('cypress:server:runner')
-const pkg = require('@packages/root')
-/**
- * @type {import('@packages/resolve-dist')}
- */
-const { getPathToDist, getPathToIndex } = require('@packages/resolve-dist')
+import _ from 'lodash'
+import type { Response } from 'express'
+import send from 'send'
+import os from 'os'
+import { fs } from '../util/fs'
+import path from 'path'
+import Debug from 'debug'
+import pkg from '@packages/root'
+import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
+import type { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
+import type { PlatformName } from '@packages/launcher'
+
+const debug = Debug('cypress:server:runner')
 
 const PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, '..', 'html', 'non_proxied_error.html')
 
-const _serveNonProxiedError = (res) => {
+const _serveNonProxiedError = (res: Response) => {
   return fs.readFile(PATH_TO_NON_PROXIED_ERROR)
   .then((html) => {
     return res.type('html').end(html)
   })
 }
 
-module.exports = {
-  serve (req, res, options = {}) {
+interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore'> {
+  testingType: Cypress.TestingType
+}
+
+export const runner = {
+  serve (req, res, options: ServeOptions) {
     if (req.proxiedUrl.startsWith('/')) {
       debug('request was not proxied via Cypress, erroring %o', _.pick(req, 'proxiedUrl'))
 
@@ -30,11 +36,15 @@ module.exports = {
     let { config, getRemoteState, getCurrentBrowser, getSpec, specsStore } = options
 
     config = _.clone(config)
+    // @ts-expect-error. TODO: Figure out a better way to represent the shape of the config
+    // at any given point, rather than just arbitrarily modifying it.
+    config.testingType = options.testingType
+
     config.remote = getRemoteState()
     config.version = pkg.version
-    config.platform = os.platform()
+    config.platform = os.platform() as PlatformName
     config.arch = os.arch()
-    config.spec = getSpec()
+    config.spec = getSpec() ?? undefined
     config.specs = specsStore.specFiles
     config.browser = getCurrentBrowser()
 
@@ -56,7 +66,7 @@ module.exports = {
     })
   },
 
-  handle (req, res) {
+  handle (testingType, req, res) {
     const pathToFile = getPathToDist('runner', req.params[0])
 
     return send(req, pathToFile)
