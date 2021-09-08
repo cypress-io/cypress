@@ -2520,7 +2520,7 @@ declare namespace Cypress {
      */
     url: string
     /**
-     * Paths to one or more CA files to validate certs against, relative to project root. 
+     * Paths to one or more CA files to validate certs against, relative to project root.
      */
     ca?: string[]
     /**
@@ -2791,6 +2791,11 @@ declare namespace Cypress {
      * @default {}
      */
     e2e: Omit<ResolvedConfigOptions, TestingType>
+
+    /**
+     * An array of objects defining the certificates
+     */
+    clientCertificate: ClientCertificate[]
   }
 
   /**
@@ -2834,11 +2839,6 @@ declare namespace Cypress {
      * The Cypress version being used.
      */
     version: string
-
-    /**
-     * An array of objects defining the certificates
-     */
-    clientCertificate: ClientCertificate[]
 
     // Internal or Unlisted at server/lib/config_options
     autoOpen: boolean
