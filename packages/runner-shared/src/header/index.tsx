@@ -4,8 +4,7 @@ import { action, computed, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, createRef } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import { $ } from '@packages/driver'
-
+import $ from 'jquery'
 import { ViewportInfo } from '../viewport-info'
 import { SelectorPlayground } from '../selector-playground/SelectorPlayground'
 import { selectorPlaygroundModel } from '../selector-playground'
@@ -48,21 +47,21 @@ interface HeaderBaseProps {
   }
 }
 
-type CtHeaderProps = StateCT & HeaderBaseProps
+type CtHeaderProps = StateCT & HeaderBaseProps;
 
-type E2EHeaderProps = StateE2E & HeaderBaseProps
+type E2EHeaderProps = StateE2E & HeaderBaseProps;
 
-type HeaderProps = CtHeaderProps | E2EHeaderProps
+type HeaderProps = CtHeaderProps | E2EHeaderProps;
 
 @observer
 export class Header extends Component<HeaderProps> {
-  @observable showingViewportMenu = false
-  @observable urlInput = ''
-  @observable previousSelectorPlaygroundOpen: boolean = false
-  @observable previousRecorderIsOpen: boolean = false
+  @observable showingViewportMenu = false;
+  @observable urlInput = '';
+  @observable previousSelectorPlaygroundOpen: boolean = false;
+  @observable previousRecorderIsOpen: boolean = false;
 
-  urlInputRef = createRef<HTMLInputElement>()
-  headerRef = createRef<HTMLHeadElement>()
+  urlInputRef = createRef<HTMLInputElement>();
+  headerRef = createRef<HTMLHeadElement>();
 
   get studioForm () {
     if (this.props.runner !== 'e2e') {
@@ -73,36 +72,47 @@ export class Header extends Component<HeaderProps> {
       <form
         className={cs('url-container', {
           loading: this.props.runner === 'e2e' && this.props.state.isLoadingUrl,
-          highlighted: this.props.runner === 'e2e' && this.props.state.highlightUrl,
+          highlighted:
+            this.props.runner === 'e2e' && this.props.state.highlightUrl,
           'menu-open': this._studioNeedsUrl,
         })}
         onSubmit={this._visitUrlInput}
       >
         <input
           ref={this.urlInputRef}
-          type='text'
+          type="text"
           className={cs('url', { 'input-active': this._studioNeedsUrl })}
           value={this._studioNeedsUrl ? this.urlInput : this.props.state.url}
           readOnly={!this._studioNeedsUrl}
           onChange={this._onUrlInput}
           onClick={this._openUrl}
         />
-        <div className='popup-menu url-menu'>
+        <div className="popup-menu url-menu">
           <p>
             <strong>Please enter a valid URL to visit.</strong>
           </p>
-          <div className='menu-buttons'>
-            <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
-            <button type='submit' className='btn-submit' disabled={!this.urlInput}>
+          <div className="menu-buttons">
+            <button
+              type="button"
+              className="btn-cancel"
+              onClick={this._cancelStudio}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn-submit"
+              disabled={!this.urlInput}
+            >
               {`Go `}
-              <i className='fas fa-arrow-right' />
+              <i className="fas fa-arrow-right" />
             </button>
           </div>
         </div>
-        <span className='loading-container'>
+        <span className="loading-container">
           ...loading
           {' '}
-          <i className='fas fa-spinner fa-pulse' />
+          <i className="fas fa-spinner fa-pulse" />
         </span>
       </form>
     )
@@ -117,26 +127,39 @@ export class Header extends Component<HeaderProps> {
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
           'showing-studio': studioRecorder.isOpen,
-          'display-none': this.props.runner === 'component' && this.props.state.screenshotting,
+          'display-none':
+            this.props.runner === 'component' && this.props.state.screenshotting,
         })}
       >
-        <div className='sel-url-wrap'>
+        <div className="sel-url-wrap">
           <Tooltip
-            title='Open Selector Playground'
-            visible={selectorPlaygroundModel.isOpen || studioRecorder.isOpen ? false : null}
-            wrapperClassName='selector-playground-toggle-tooltip-wrapper'
-            className='cy-tooltip'
+            title="Open Selector Playground"
+            visible={
+              selectorPlaygroundModel.isOpen || studioRecorder.isOpen
+                ? false
+                : null
+            }
+            wrapperClassName="selector-playground-toggle-tooltip-wrapper"
+            className="cy-tooltip"
           >
             <button
-              aria-label='Open Selector Playground'
-              className='header-button selector-playground-toggle'
-              disabled={this.props.state.isLoading || state.isRunning || studioRecorder.isOpen}
+              aria-label="Open Selector Playground"
+              className="header-button selector-playground-toggle"
+              disabled={
+                this.props.state.isLoading ||
+                state.isRunning ||
+                studioRecorder.isOpen
+              }
               onClick={this._togglePlaygroundOpen}
             >
-              <i aria-hidden="true" className='fas fa-crosshairs' />
+              <i aria-hidden="true" className="fas fa-crosshairs" />
             </button>
           </Tooltip>
-          <div className={cs('menu-cover', { 'menu-cover-display': this._studioNeedsUrl })} />
+          <div
+            className={cs('menu-cover', {
+              'menu-cover-display': this._studioNeedsUrl,
+            })}
+          />
           {this.studioForm}
         </div>
 
@@ -145,7 +168,9 @@ export class Header extends Component<HeaderProps> {
           width={state.width}
           height={state.height}
           config={config}
-          displayScale={this.props.runner === 'e2e' ? state.displayScale : undefined}
+          displayScale={
+            this.props.runner === 'e2e' ? state.displayScale : undefined
+          }
           defaults={{
             width: state.defaults.width,
             height: state.defaults.height,
@@ -157,8 +182,9 @@ export class Header extends Component<HeaderProps> {
           model={selectorPlaygroundModel}
           eventManager={eventManager}
         />
-        {this.props.runner === 'e2e' &&
-          <Studio model={studioRecorder} hasUrl={!!this.props.state.url} />}
+        {this.props.runner === 'e2e' && (
+          <Studio model={studioRecorder} hasUrl={!!this.props.state.url} />
+        )}
       </header>
     )
   }
@@ -167,11 +193,15 @@ export class Header extends Component<HeaderProps> {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     this.previousRecorderIsOpen = studioRecorder.isOpen
 
-    this.urlInput = this.props.config.baseUrl ? `${this.props.config.baseUrl}/` : ''
+    this.urlInput = this.props.config.baseUrl
+      ? `${this.props.config.baseUrl}/`
+      : ''
   }
 
   @action componentDidUpdate () {
-    if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
+    if (
+      selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen
+    ) {
       this._updateWindowDimensions()
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     }
@@ -188,11 +218,11 @@ export class Header extends Component<HeaderProps> {
 
   _togglePlaygroundOpen = () => {
     selectorPlaygroundModel.toggleOpen()
-  }
+  };
 
   @action _toggleViewportMenu = () => {
     this.showingViewportMenu = !this.showingViewportMenu
-  }
+  };
 
   _updateWindowDimensions = () => {
     if (!this.headerRef.current) {
@@ -202,7 +232,7 @@ export class Header extends Component<HeaderProps> {
     this.props.state.updateWindowDimensions({
       headerHeight: $(this.headerRef.current).outerHeight(),
     })
-  }
+  };
 
   _openUrl = () => {
     if (this._studioNeedsUrl || this.props.runner !== 'e2e') {
@@ -210,7 +240,7 @@ export class Header extends Component<HeaderProps> {
     }
 
     window.open(this.props.state.url)
-  }
+  };
 
   @computed get _studioNeedsUrl () {
     if (this.props.runner !== 'e2e') {
@@ -220,11 +250,12 @@ export class Header extends Component<HeaderProps> {
     return studioRecorder.needsUrl && !this.props.state.url
   }
 
-  @action _onUrlInput = (e) => { // : React.FormEvent<HTMLInputElement>) => {
+  @action _onUrlInput = (e) => {
+    // : React.FormEvent<HTMLInputElement>) => {
     if (!this._studioNeedsUrl) return
 
     this.urlInput = e.target.value
-  }
+  };
 
   @action _visitUrlInput = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -234,9 +265,9 @@ export class Header extends Component<HeaderProps> {
     studioRecorder.visitUrl(this.urlInput)
 
     this.urlInput = ''
-  }
+  };
 
   _cancelStudio = () => {
     eventManager.emit('studio:cancel')
-  }
+  };
 }

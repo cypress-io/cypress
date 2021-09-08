@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import $jquery from '../jquery'
 import $ from 'jquery'
-import * as $document from '../document'
+import $document from '../document'
 import $window from '../window'
 import { getHostContenteditable, isContentEditable, isDesignModeDocumentElement } from './contentEditable'
 import { isInputType } from './input'

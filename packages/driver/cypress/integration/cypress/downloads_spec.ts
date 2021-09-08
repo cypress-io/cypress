@@ -1,4 +1,4 @@
-import { create } from '../../../src/cypress/downloads'
+import $Downloads from '../../../src/cypress/downloads'
 
 describe('src/cypress/downloads', () => {
   let log
@@ -17,7 +17,7 @@ describe('src/cypress/downloads', () => {
     snapshot = cy.stub().returns({ end })
     log = cy.stub().returns({ snapshot })
 
-    downloads = create({ log })
+    downloads = $Downloads.create({ log })
   })
 
   context('#start', () => {
