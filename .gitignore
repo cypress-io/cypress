@@ -343,3 +343,11 @@ $RECYCLE.BIN/
 
 # Circle cache artifacts
 globbed_node_modules
+
+# Vite
+.vite-ssg-dist
+.vite-ssg-temp
+dist
+dist-ssr
+components.d.ts
+auto-imports.d.ts
