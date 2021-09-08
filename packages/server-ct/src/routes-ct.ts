@@ -22,6 +22,7 @@ export interface InitializeRoutes {
   networkProxy: NetworkProxy
   getRemoteState: () => any
   onError: (...args: unknown[]) => any
+  testingType: Cypress.Cypress['testingType']
 }
 
 export const createRoutes = ({

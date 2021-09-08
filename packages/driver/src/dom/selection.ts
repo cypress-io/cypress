@@ -1,8 +1,10 @@
 import _ from 'lodash'
-import * as $document from './document'
-import * as $elements from './elements'
+import $document from './document'
+import $elements from './elements'
 
-const debug = require('debug')('cypress:driver:selection')
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:selection')
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -726,7 +728,7 @@ const interceptSelect = function () {
 //     el = el.firstChild
 //   return el
 
-export {
+export default {
   getSelectionBounds,
   deleteRightOfCursor,
   deleteLeftOfCursor,
