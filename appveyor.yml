@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - develop
+    - issue-17944-remove-source-files
     - windows-code-signing
     - /win*/
 

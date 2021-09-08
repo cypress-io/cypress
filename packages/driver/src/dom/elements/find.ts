@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import * as $document from '../document'
+import $document from '../document'
 import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
-import { normalizeWhitespaces } from './utils'
-import $utils from '../../cypress/utils'
+import { normalizeWhitespaces, escapeQuotes } from './utils'
 
 /**
  * Find Parents relative to an initial element
@@ -223,7 +222,7 @@ export const getContainsSelector = (text, filter = '', options: {
 } = {}) => {
   const $expr = $.expr[':']
 
-  const escapedText = $utils.escapeQuotes(text)
+  const escapedText = escapeQuotes(text)
 
   // they may have written the filter as
   // comma separated dom els, so we want to search all

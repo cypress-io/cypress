@@ -2060,7 +2060,7 @@ declare namespace Cypress {
      * @alias cy.location('href')
      * @see https://on.cypress.io/url
      */
-    url(options?: Partial<Loggable & Timeoutable>): Chainable<string>
+    url(options?: Partial<UrlOptions>): Chainable<string>
 
     /**
      * Control the size and orientation of the screen for your application.
@@ -3171,6 +3171,18 @@ declare namespace Cypress {
      * @default 'Event'
      */
     eventConstructor: string
+  }
+
+  /**
+   * Options to change the default behavior of .url()
+   */
+  interface UrlOptions extends Loggable, Timeoutable {
+    /**
+     * Whether the url is decoded
+     *
+     * @default false
+     */
+    decode: boolean
   }
 
   /** Options to change the default behavior of .writeFile */
