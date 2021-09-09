@@ -26,7 +26,7 @@ import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import type { SpecsStore } from './specs-store'
-import type { InitializeRoutes } from './routes'
+import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import type { ParsedHost } from '@packages/network/lib/cors'
@@ -222,7 +222,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.createHosts(config.hosts)
 
-      const routes = createRoutes({
+      const options: InitializeRoutes = {
         config,
         specsStore,
         getRemoteState,
@@ -232,9 +232,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         getSpec,
         getCurrentBrowser,
         testingType,
-      })
+      }
 
-      app.use(routes)
+      const commonRouter = createCommonRoutes(options)
+      const runnerSpecificRouter = createRoutes(options)
+
+      app.use(commonRouter)
+      app.use(runnerSpecificRouter)
 
       return this.createServer(app, config, onWarning)
     })

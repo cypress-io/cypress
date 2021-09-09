@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
-import xhrs from './controllers/xhrs'
 import { getPathToDist } from '@packages/resolve-dist'
 import { runner } from './controllers/runner'
 import { staticCtrl } from './controllers/static'
@@ -60,10 +59,6 @@ export const createRoutes = ({
   if (!clientRoute) {
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
-
-  routesCt.all('/__cypress/xhrs/*', (req, res, next) => {
-    xhrs.handle(req, res, config, next)
-  })
 
   routesCt.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)

@@ -9,7 +9,6 @@ import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
 import reporter from './controllers/reporter'
 import { runner } from './controllers/runner'
-import xhrs from './controllers/xhrs'
 import client from './controllers/client'
 import files from './controllers/files'
 import { staticCtrl } from './controllers/static'
@@ -131,10 +130,6 @@ export const createRoutes = ({
   // routing for the dynamic iframe html
   routesE2E.get('/__cypress/iframes/*', (req, res) => {
     return iframesController.e2e({ config, getRemoteState, getSpec }, req, res)
-  })
-
-  routesE2E.all('/__cypress/xhrs/*', (req, res, next) => {
-    xhrs.handle(req, res, config, next)
   })
 
   routesE2E.get('/__cypress/source-maps/:id.map', (req, res) => {
