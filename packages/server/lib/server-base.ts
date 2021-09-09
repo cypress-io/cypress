@@ -234,13 +234,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         testingType,
       }
 
-      const commonRouter = createCommonRoutes(options)
       const runnerSpecificRouter = testingType === 'e2e'
         ? createRoutesE2E(options)
         : createRoutesCT(options)
 
-      app.use(commonRouter)
       app.use(runnerSpecificRouter)
+      app.use(createCommonRoutes(options))
 
       return this.createServer(app, config, onWarning)
     })

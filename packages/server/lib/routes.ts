@@ -26,25 +26,26 @@ export interface InitializeRoutes {
 export const createCommonRoutes = ({
   config,
   networkProxy,
-  nodeProxy,
   testingType,
+  getSpec,
+  getRemoteState,
 }: InitializeRoutes) => {
   const router = Router()
 
-  router.get('/__cypress/iframes/*', (req, res) => {
-    iframesController.component({ config, nodeProxy }, req, res)
+  router.get('/__cypress/runner/*', (req, res) => {
+    runner.handle(testingType, req, res)
   })
 
   router.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
 
-  router.get('/__cypress/runner/*', (req, res) => {
-    runner.handle(testingType, req, res)
-  })
-
   router.get('/__cypress/static/*', (req, res) => {
     staticCtrl.handle(req, res)
+  })
+
+  router.get('/__cypress/iframes/*', (req, res) => {
+    iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
   })
 
   router.all('*', (req, res) => {
