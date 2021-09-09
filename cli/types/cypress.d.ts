@@ -2795,7 +2795,7 @@ declare namespace Cypress {
     /**
      * An array of objects defining the certificates
      */
-    clientCertificate: ClientCertificate[]
+    clientCertificates: ClientCertificate[]
   }
 
   /**
