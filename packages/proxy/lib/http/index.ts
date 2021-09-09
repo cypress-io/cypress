@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import type CyServer from '@packages/server'
+import type { RemoteState } from '@packages/server/lib/server-base'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
@@ -55,7 +56,7 @@ export type ServerCtx = Readonly<{
   config: CyServer.Config
   shouldCorrelatePreRequests?: () => boolean
   getFileServerToken: () => string
-  getRemoteState: CyServer.getRemoteState
+  getRemoteState: () => RemoteState
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -193,7 +194,7 @@ export class Http {
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
-  getRemoteState: () => any
+  getRemoteState: () => RemoteState
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()

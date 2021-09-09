@@ -33,15 +33,20 @@ import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import type { ParsedHost } from '@packages/network/lib/cors'
 
-export type RemoteState = Partial<{
-  auth: string
-  props: ParsedHost
-  origin: string
-  strategy: 'file' | 'http'
-  visiting: boolean
-  domainName: string
-  fileServer: string
-}>
+interface RemoteAuth {
+  username: string
+  password: string
+}
+
+export type RemoteState = {
+  auth?: RemoteAuth
+  props?: ParsedHost
+  origin?: string
+  strategy?: 'file' | 'http'
+  visiting?: boolean
+  domainName?: string
+  fileServer?: string
+}
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -129,7 +134,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
 
-  protected _remoteAuth?: string
+  protected _remoteAuth?: RemoteAuth
   protected _remoteProps?: RemoteState['props']
   protected _remoteOrigin?: string
   protected _remoteStrategy?: RemoteState['strategy']
@@ -447,7 +452,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return props
   }
 
-  _onDomainSet (fullyQualifiedUrl, options: { auth?: string } = {}) {
+  _onDomainSet (fullyQualifiedUrl, options: { auth?: RemoteAuth } = {}) {
     const l = (type, val) => {
       return debug('Setting', type, val)
     }
