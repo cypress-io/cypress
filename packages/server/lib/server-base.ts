@@ -44,7 +44,7 @@ export type RemoteState = {
   origin?: string
   strategy?: 'file' | 'http'
   visiting?: boolean
-  domainName?: string
+  domainName: string
   fileServer?: string
 }
 
@@ -139,7 +139,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _remoteOrigin?: string
   protected _remoteStrategy?: RemoteState['strategy']
   protected _remoteVisitingUrl?: boolean
-  protected _remoteDomainName?: string
+  protected _remoteDomainName: string = ''
   protected _remoteFileServer?: string
 
   constructor () {

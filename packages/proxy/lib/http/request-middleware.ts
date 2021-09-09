@@ -160,8 +160,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   if (strategy === 'file' && origin && requestOptions.url.startsWith(origin)) {
     this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
 
-    // this is null in Component Testing.
-    // TODO: Find out of this can be null, update types and validation to reflect this
+    // TODO: Find out of this can be null at this point
+    // update types and validation to reflect this
     if (fileServer) {
       requestOptions.url = requestOptions.url.replace(origin, fileServer)
     }
