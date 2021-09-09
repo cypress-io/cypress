@@ -1,15 +1,16 @@
-import Debug from 'debug'
 import _ from 'lodash'
-import type { ErrorRequestHandler, Express } from 'express'
-import type httpProxy from 'http-proxy'
+import Debug from 'debug'
+import type { ErrorRequestHandler } from 'express'
 import send from 'send'
-import type { NetworkProxy } from '@packages/proxy'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import type { SpecsStore } from '@packages/server/lib/specs-store'
 import type { Cfg } from '@packages/server/lib/project-base'
 import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { runner } from './controllers/runner'
+import type { InitializeRoutes } from './routes'
+
+const debug = Debug('cypress:server:routes-ct')
 
 interface ServeOptions {
   config: Cfg
@@ -48,21 +49,6 @@ const serveChunk = (req, res, options) => {
   let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(config.clientRoute, ''))
 
   return send(req, pathToFile).pipe(res)
-}
-
-const debug = Debug('cypress:server:routes')
-
-export interface InitializeRoutes {
-  app: Express
-  specsStore: SpecsStore
-  config: Cfg
-  getSpec: () => Cypress.Cypress['spec'] | null
-  getCurrentBrowser: () => Browser
-  nodeProxy: httpProxy
-  networkProxy: NetworkProxy
-  getRemoteState: () => any
-  onError: (...args: unknown[]) => any
-  testingType: Cypress.Cypress['testingType']
 }
 
 export const createRoutes = ({

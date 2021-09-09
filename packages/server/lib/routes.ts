@@ -45,6 +45,10 @@ export const createRoutes = ({
   onError,
   testingType,
 }: InitializeRoutes) => {
+  app.get('/__cypress/runner/*', (req, res) => {
+    runner.handle(testingType, req, res)
+  })
+
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
@@ -60,10 +64,6 @@ export const createRoutes = ({
 
   app.get('/__cypress/reporter/*', (req, res) => {
     reporter.handle(req, res)
-  })
-
-  app.get('/__cypress/runner/*', (req, res) => {
-    runner.handle(testingType, req, res)
   })
 
   app.get('/__cypress/automation/getLocalStorage', (req, res) => {
