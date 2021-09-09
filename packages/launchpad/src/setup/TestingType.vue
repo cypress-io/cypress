@@ -20,11 +20,11 @@
 import { defineComponent, PropType } from "vue";
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { TestingTypeSelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
+import { TestingType_SelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
 import { TestingTypeIcons } from "../utils/icons";
 
 gql`
-mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
+mutation TestingType_Select($testingType: TestingTypeEnum!) {
   wizardSetTestingType(type: $testingType) {
     step
     testingType
@@ -47,7 +47,7 @@ fragment TestingType on Wizard {
 export default defineComponent({
   props: {
     gql: {
-      type: Object as PropType<TestingTypeFragment>,
+      type: Object as PropType<TestingType_SelectDocument>,
       required: true,
     }
   },

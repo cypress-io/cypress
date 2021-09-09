@@ -257,12 +257,3 @@ type Query {
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 }
-
-type RelayConnectionKnex {
-  """PageInfo result for the connection"""
-  pageInfo: PageInfo!
-}
-
-type RelayEdgeKnex {
-  cursor: String!
-}

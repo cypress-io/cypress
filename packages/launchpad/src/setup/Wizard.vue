@@ -22,8 +22,7 @@
       />
       <OpenBrowser 
         v-if="wizard.step === 'setupComplete'" 
-        :app="app"
-        :wizard="wizard"
+        :gql="data"
       />
     </div>
   </template> 
@@ -51,7 +50,6 @@ fragment Wizard on Query {
       hasSetupE2ETesting
     }
     ...ProjectRoot
-    ...OpenBrowserApp
   }
 
   wizard {
@@ -63,8 +61,8 @@ fragment Wizard on Query {
     ...ConfigFile
     ...InstallDependencies
     ...EnvironmentSetup
-    ...OpenBrowserWizard
   }
+  ...OpenBrowser
 }
 `
 
@@ -74,4 +72,5 @@ const props = defineProps<{
 
 const app = computed(() => props.query?.app)
 const wizard = computed(() => props.query?.wizard)
+const data = computed(() => props.query)
 </script>

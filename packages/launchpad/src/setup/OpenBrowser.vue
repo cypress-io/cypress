@@ -19,23 +19,22 @@
 import { gql } from "@urql/core"
 import Button from "../components/button/Button.vue"
 import WizardLayout from "./WizardLayout.vue";
-import { InitializeOpenProjectDocument, LaunchOpenProjectDocument, OpenBrowserWizardFragment, OpenBrowserAppFragment } from "../generated/graphql"
+import { InitializeOpenProjectDocument, LaunchOpenProjectDocument, OpenBrowserFragment } from "../generated/graphql"
 import { useMutation } from "@urql/vue";
 
 gql`
-fragment OpenBrowserApp on App {
-  browsers {
-    displayName
-    version
-    majorVersion
-    name
+fragment OpenBrowser on Query {
+  app {
+    browsers {
+      displayName
+      version
+      majorVersion
+      name
+    }
   }
-}
-`
-
-gql`
-fragment OpenBrowserWizard on Wizard {
-  testingType
+  wizard {
+    testingType
+  }
 }
 `
 
@@ -64,16 +63,15 @@ const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 const launchOpenProject = useMutation(LaunchOpenProjectDocument)
 
 const props = defineProps<{
-  app: OpenBrowserAppFragment
-  wizard: OpenBrowserWizardFragment 
+  gql: OpenBrowserFragment
 }>()
 
 const launch = async () => {
-  if (!props.wizard.testingType) {
+  if (!props.gql.wizard?.testingType) {
     return
   }
   
-  await initializeOpenProject.executeMutation({ testingType: props.wizard.testingType })
-  await launchOpenProject.executeMutation({ testingType: props.wizard.testingType })
+  await initializeOpenProject.executeMutation({ testingType: props.gql.wizard.testingType })
+  await launchOpenProject.executeMutation({ testingType: props.gql.wizard.testingType })
 }
 </script>
