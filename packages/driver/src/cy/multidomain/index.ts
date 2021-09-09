@@ -1,9 +1,11 @@
 import Bluebird from 'bluebird'
-import * as $Log from '../../cypress/log'
+import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   Commands.addAll({
+    // this is a stop-gap command temporarily in use until looking ahead for
+    // switchToDomain, etc is implemented
     anticipateMultidomain () {
       state('anticipateMultidomain', true)
 
@@ -17,6 +19,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       })
     },
 
+    // this isn't fully implemented, but in place to be able to test out
+    // the other parts of multidomain
     switchToDomain (domain, fn) {
       Cypress.log({
         name: 'switchToDomain',
