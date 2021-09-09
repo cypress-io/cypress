@@ -8,7 +8,9 @@ import type { Cfg } from '@packages/server/lib/project-base'
 import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import { runner } from './controllers/runner'
+import { staticCtrl } from './controllers/static'
 import type { InitializeRoutes } from './routes'
+import { iframesController } from './controllers/iframes'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -64,30 +66,11 @@ export const createRoutes = ({
   app.get('/__cypress/runner/*', (req, res) => runner.handle(testingType, req, res))
 
   app.get('/__cypress/static/*', (req, res) => {
-    const pathToFile = getPathToDist('static', req.params[0])
-
-    return send(req, pathToFile)
-    .pipe(res)
+    staticCtrl.handle(req, res)
   })
 
   app.get('/__cypress/iframes/*', (req, res) => {
-    // always proxy to the index.html file
-    // attach header data for webservers
-    // to properly intercept and serve assets from the correct src root
-    // TODO: define a contract for dev-server plugins to configure this behavior
-    req.headers.__cypress_spec_path = req.params[0]
-    req.url = `${config.devServerPublicPathRoute}/index.html`
-
-    // user the node proxy here instead of the network proxy
-    // to avoid the user accidentally intercepting and modifying
-    // our internal index.html handler
-
-    nodeProxy.web(req, res, {}, (e) => {
-      if (e) {
-        // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
-      }
-    })
+    iframesController.component({ config, nodeProxy }, req, res)
   })
 
   // user app code + spec code

@@ -13,11 +13,12 @@ import { runner } from './controllers/runner'
 import xhrs from './controllers/xhrs'
 import client from './controllers/client'
 import files from './controllers/files'
-import staticCtrl from './controllers/static'
+import { staticCtrl } from './controllers/static'
 import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
+import { iframesController } from './controllers/iframes'
 
 const debug = Debug('cypress:server:routes')
 
@@ -145,17 +146,7 @@ export const createRoutes = ({
 
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
-    const extraOptions = {
-      specFilter: getSpec()?.specFilter,
-      specType: 'integration',
-    }
-
-    debug('handling iframe for project spec %o', {
-      spec: getSpec(),
-      extraOptions,
-    })
-
-    files.handleIframe(req, res, config, getRemoteState, extraOptions)
+    return iframesController.e2e({ config, getRemoteState, getSpec }, req, res)
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {
