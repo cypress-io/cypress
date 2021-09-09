@@ -1,7 +1,7 @@
 import { get } from 'lodash'
-import { CyHttpMessages } from '@packages/net-stubbing/lib/types'
+import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 import * as $errUtils from '../../../cypress/error_utils'
-import { HandlerFn } from '.'
+import type { HandlerFn } from '.'
 
 export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cypress, frame, userHandler, { getRequest, getRoute }) => {
   const request = getRequest(frame.subscription.routeId, frame.requestId)

@@ -3,7 +3,7 @@ import la from 'lazy-ass'
 import check from 'check-more-types'
 import Debug from 'debug'
 
-import { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
+import type { InitializeRoutes } from '@packages/server-ct/src/routes-ct'
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'

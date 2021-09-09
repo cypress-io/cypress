@@ -1,4 +1,4 @@
-import { NotInstalledError, NotDetectedAtPathError } from './types'
+import type { NotInstalledError, NotDetectedAtPathError } from './types'
 
 export const notInstalledErr = (name: string, message?: string) => {
   const err = new Error(

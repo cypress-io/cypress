@@ -3,7 +3,7 @@ import { action, computed, observable } from 'mobx'
 
 import Err from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
-import { TimeoutID } from '../lib/types'
+import type { TimeoutID } from '../lib/types'
 
 const LONG_RUNNING_THRESHOLD = 1000
 

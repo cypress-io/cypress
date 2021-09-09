@@ -1,11 +1,11 @@
-import fse from 'fs-extra'
+import * as fse from 'fs-extra'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
 import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
-import { Browser, FoundBrowser, PathData } from '../types'
+import type { Browser, FoundBrowser, PathData } from '../types'
 import { utils } from '../utils'
 
 function formFullAppPath (name: string) {
