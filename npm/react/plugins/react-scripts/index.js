@@ -24,3 +24,7 @@ module.exports = getLegacyDevServer(devServer, (config) => {
 
 // New signature
 module.exports.devServer = devServer
+
+module.exports.defineDevServerConfig = function (config) {
+  return config
+}
