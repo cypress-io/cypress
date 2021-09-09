@@ -3,12 +3,15 @@
  * @param on comes from the argument of the `pluginsFile` function
  * @param config comes from the argument of the `pluginsFile` function
  */
-declare function setupNextDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): void
-/**
- * Sets up a Cypress component testing environment for your NextJs application
- * @param options comes from the `setupDevServer()` function first argument
- * @returns the resolved dev server object that cypress can use to start testing
- */
-declare function setupNextDevServer(options: Cypress.DevServerOptions): Cypress.ResolvedDevServerConfig
+declare function legacyDevServer(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): void
 
-export = setupNextDevServer;
+declare namespace legacyDevServer {
+  /**
+   * Sets up a Cypress component testing environment for your NextJs application
+   * @param cypressDevServerConfig comes from the `setupDevServer()` function first argument
+   * @returns the resolved dev server object that cypress can use to start testing
+   */
+  function devServer(cypressDevServerConfig: Cypress.DevServerConfig): Cypress.ResolvedDevServerConfig
+}
+
+export = legacyDevServer;

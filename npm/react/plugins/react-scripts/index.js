@@ -1,22 +1,30 @@
-const returnSetupDevServerFunction = require('../utils/return-setupdevserver-function')
 const { startDevServer } = require('@cypress/webpack-dev-server')
 const findReactScriptsWebpackConfig = require('./findReactScriptsWebpackConfig')
+const { getLegacyDevServer } = require('../utils/legacy-setup-dev-server')
 
-function startReactScriptsDevServer (options, {
+function devServer (cypressDevServerConfig, {
   webpackConfigPath,
 } = {
   webpackConfigPath: 'react-scripts/config/webpack.config',
 }) {
   return startDevServer({
-    options,
-    webpackConfig: findReactScriptsWebpackConfig(options.config, {
+    options: cypressDevServerConfig,
+    webpackConfig: findReactScriptsWebpackConfig(cypressDevServerConfig.config, {
       webpackConfigPath,
     }),
   })
 }
 
-module.exports = returnSetupDevServerFunction(startReactScriptsDevServer, (config) => {
+// Legacy signature
+module.exports = getLegacyDevServer(devServer, (config) => {
   config.env.reactDevtools = true
 
   return config
 })
+
+// New signature
+module.exports.devServer = devServer
+
+module.exports.defineDevServerConfig = function (devServerConfig) {
+  return devServerConfig
+}
