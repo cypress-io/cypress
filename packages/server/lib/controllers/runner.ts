@@ -73,8 +73,8 @@ export const runner = {
     //   "strategy": "file"
     // }
     // TODO: Figure out correct typing.
-
     if (options.testingType === 'e2e') {
+      // @ts-ignore
       config.remote = getRemoteState()
     }
 
