@@ -1,5 +1,5 @@
-const { registerFetch } = require('unfetch')
-const $selection = require('../dom/selection')
+import { registerFetch } from 'unfetch'
+import $selection from '../dom/selection'
 
 export const create = (state, config, focused, snapshots) => {
   const wrapNativeMethods = function (contentWindow) {
