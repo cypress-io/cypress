@@ -14,7 +14,7 @@ import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import type { SocketCt } from '@packages/server-ct'
+import type { SocketCt } from './socket-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
@@ -26,9 +26,27 @@ import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import type { SpecsStore } from './specs-store'
-import type { InitializeRoutes } from '../../server-ct/src/routes-ct'
+import { InitializeRoutes, createCommonRoutes } from './routes'
+import { createRoutesE2E } from './routes-e2e'
+import { createRoutesCT } from './routes-ct'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
+import type { ParsedHost } from '@packages/network/lib/cors'
+
+interface RemoteAuth {
+  username: string
+  password: string
+}
+
+export type RemoteState = {
+  auth?: RemoteAuth
+  props?: ParsedHost
+  origin?: string
+  strategy?: 'file' | 'http'
+  visiting?: boolean
+  domainName: string
+  fileServer?: string
+}
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -100,7 +118,6 @@ export interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
-  createRoutes: (args: InitializeRoutes) => any
 }
 
 export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -117,13 +134,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
 
-  protected _remoteAuth: unknown
-  protected _remoteProps: unknown
-  protected _remoteOrigin: unknown
-  protected _remoteStrategy: unknown
-  protected _remoteVisitingUrl: unknown
-  protected _remoteDomainName: unknown
-  protected _remoteFileServer: unknown
+  protected _remoteAuth?: RemoteAuth
+  protected _remoteProps?: RemoteState['props']
+  protected _remoteOrigin?: string
+  protected _remoteStrategy?: RemoteState['strategy']
+  protected _remoteVisitingUrl?: boolean
+  protected _remoteDomainName: string = ''
+  protected _remoteFileServer?: string
 
   constructor () {
     this.isListening = false
@@ -174,7 +191,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning,
     shouldCorrelatePreRequests,
     specsStore,
-    createRoutes,
     testingType,
     SocketCtor,
   }: OpenServerOptions) {
@@ -199,7 +215,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       clientCertificates.loadClientCertificateConfig(config)
 
-      const getRemoteState = () => {
+      const getRemoteState = (): RemoteState => {
         return this._getRemoteState()
       }
 
@@ -211,8 +227,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.createHosts(config.hosts)
 
-      createRoutes({
-        app,
+      const options: InitializeRoutes = {
         config,
         specsStore,
         getRemoteState,
@@ -222,7 +237,14 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         getSpec,
         getCurrentBrowser,
         testingType,
-      })
+      }
+
+      const runnerSpecificRouter = testingType === 'e2e'
+        ? createRoutesE2E(options)
+        : createRoutesCT(options)
+
+      app.use(runnerSpecificRouter)
+      app.use(createCommonRoutes(options))
 
       return this.createServer(app, config, onWarning)
     })
@@ -395,7 +417,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _getRemoteState () {
+  _getRemoteState (): RemoteState {
     // {
     //   origin: "http://localhost:2020"
     //   fileServer:
@@ -415,7 +437,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     //   }
     // }
 
-    const props = _.extend({}, {
+    const props: RemoteState = {
       auth: this._remoteAuth,
       props: this._remoteProps,
       origin: this._remoteOrigin,
@@ -423,14 +445,14 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       visiting: this._remoteVisitingUrl,
       domainName: this._remoteDomainName,
       fileServer: this._remoteFileServer,
-    })
+    }
 
     debug('Getting remote state: %o', props)
 
     return props
   }
 
-  _onDomainSet (fullyQualifiedUrl, options: Record<string, unknown> = {}) {
+  _onDomainSet (fullyQualifiedUrl, options: { auth?: RemoteAuth } = {}) {
     const l = (type, val) => {
       return debug('Setting', type, val)
     }
@@ -448,7 +470,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this._remoteStrategy = 'file'
       this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
       this._remoteDomainName = DEFAULT_DOMAIN_NAME
-      this._remoteProps = null
+      this._remoteProps = undefined
 
       l('remoteOrigin', this._remoteOrigin)
       l('remoteStrategy', this._remoteStrategy)
@@ -460,7 +482,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this._remoteStrategy = 'http'
 
-      this._remoteFileServer = null
+      this._remoteFileServer = undefined
 
       // set an object with port, tld, and domain properties
       // as the remoteHostAndPort

@@ -288,7 +288,6 @@ Here is a list of the core packages in this repository with a short description,
  | [runner-ct](./packages/runner-ct)           | `@packages/runner-ct`      | The runner for component testing |
  | [runner-shared](./packages/runner-shared)           | `@packages/runner-shared`      | The shared components between the `runner` and the `runner-ct` packages |
  | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
- | [server-ct](./packages/server-ct)     | `@packages/server-ct`   | Some Component Testing specific overrides. Mostly extends functionality from `@packages/server` |
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
 

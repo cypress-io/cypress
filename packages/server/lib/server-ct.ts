@@ -2,10 +2,9 @@ import Bluebird from 'bluebird'
 import httpsProxy from '@packages/https-proxy'
 import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
-import type { SocketCt } from './socket-ct'
+import type { SocketCt } from '@packages/server/lib/socket-ct'
 import type { Cfg } from '@packages/server/lib/project-base'
-
-type WarningErr = Record<string, any>
+import type { WarningErr } from './server-base'
 
 export class ServerCt extends ServerBase<SocketCt> {
   open (config: Cfg, options: OpenServerOptions) {
