@@ -36,7 +36,7 @@ const getDefaultPreprocessor = function (config) {
 }
 
 let plugins
-let setupDevServerFunction
+let devServerFunction
 
 const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
@@ -88,8 +88,8 @@ const load = (ipc, config, pluginsFile) => {
   .try(() => {
     debug('run plugins function')
 
-    if (setupDevServerFunction) {
-      register('dev-server:start', setupDevServerFunction)
+    if (devServerFunction) {
+      register('dev-server:start', devServerFunction)
     }
 
     if (plugins) {
@@ -212,11 +212,11 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
     plugins = getPluginsFunction(pluginsObject, testingType)
 
     if (testingType === 'component' && pluginsObject.component) {
-      setupDevServerFunction = pluginsObject.component.setupDevServer
+      devServerFunction = pluginsObject.component.devServer
     }
 
     debug('plugins %o', plugins)
-    debug('setupDevServerFunction %o', setupDevServerFunction)
+    debug('devServerFunction %o', devServerFunction)
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
@@ -224,7 +224,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
     return
   }
 
-  if (typeof plugins !== 'function' && !setupDevServerFunction) {
+  if (typeof plugins !== 'function' && !devServerFunction) {
     debug('not a function')
     ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
 

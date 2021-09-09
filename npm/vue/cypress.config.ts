@@ -11,7 +11,7 @@ export default defineConfig({
   experimentalFetchPolyfill: true,
   component: {
     testFiles: '**/*spec.{js,ts,tsx}',
-    setupDevServer (options) {
+    devServer (options) {
       if (!webpackConfig.resolve) {
         webpackConfig.resolve = {}
       }

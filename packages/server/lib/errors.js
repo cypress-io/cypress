@@ -1003,9 +1003,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     // TODO: update with vetted cypress language
     case 'CT_NO_DEV_START_FUNCTION':
       return stripIndent`\
-            To run component-testing, cypress needs the \`setupDevServer\` function to be implemented. 
+            To run component-testing, cypress needs the \`devServer\` function to be implemented. 
     
-            Add a \`setupDevServer()\` in the component object of the ${arg1} file.
+            Add a \`devServer()\` in the component object of the ${arg1} file.
 
             Learn how to set up component testing:
     

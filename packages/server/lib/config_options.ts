@@ -226,7 +226,7 @@ export const options = [
     validation: v.isFunction,
     onlyInOverride: true,
   }, {
-    name: 'setupDevServer',
+    name: 'devServer',
     defaultvalue: null,
     validation: v.isFunction,
     onlyInOverride: 'component',

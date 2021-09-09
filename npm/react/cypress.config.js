@@ -75,7 +75,7 @@ module.exports = defineConfig({
     env: {
       reactDevtools: true,
     },
-    setupDevServer (options) {
+    devServer (options) {
       return startDevServer({ options, webpackConfig, disableLazyCompilation: false })
     },
   },

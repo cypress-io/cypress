@@ -96,7 +96,7 @@ const init = (config, options) => {
 
     if (/\.json$/.test(options.configFile) || options.configFile === false) {
       childArguments.push('--file', pluginsFile)
-    } else if (config[testingType] && (config[testingType].setupNodeEvents || (testingType === 'component' && config.component.setupDevServer))) {
+    } else if (config[testingType] && (config[testingType].setupNodeEvents || (testingType === 'component' && config.component.devServer))) {
       childArguments.push(
         '--testingType', testingType,
         '--file', options.configFile,

@@ -272,12 +272,12 @@ describe('lib/config', () => {
           })
         })
 
-        describe('setupDevServer', function () {
-          it('allows setupDevServer in component', function () {
+        describe('devServer', function () {
+          it('allows devServer in component', function () {
             this.setup({
               viewportWidth: 1024,
               component: {
-                setupDevServer () {
+                devServer () {
                   // noop
                 },
               },
@@ -285,13 +285,13 @@ describe('lib/config', () => {
 
             return config.get(this.projectRoot, { testingType: 'component' })
             .then((obj) => {
-              expect(obj.component.setupDevServer).to.be.a('function')
+              expect(obj.component.devServer).to.be.a('function')
             })
           })
 
-          it('disallows setupDevServer in root', function () {
+          it('disallows devServer in root', function () {
             this.setup({
-              setupDevServer () {
+              devServer () {
                 // noop
               },
             })
@@ -299,10 +299,10 @@ describe('lib/config', () => {
             return this.expectValidationFails('\`component\`')
           })
 
-          it('disallows setupDevServer in e2e', function () {
+          it('disallows devServer in e2e', function () {
             this.setup({
               e2e: {
-                setupDevServer () {
+                devServer () {
                   // noop
                 },
               },

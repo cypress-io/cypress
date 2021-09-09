@@ -24,7 +24,7 @@ module.exports = {
     reactDevtools: true,
   },
   component: {
-    setupDevServer (options) {
+    devServer (options) {
       const { default: webpackConfig } = require(path.resolve(__dirname, 'webpack.config.ts'))
 
       injectStylesInlineForPercyInPlace(webpackConfig)

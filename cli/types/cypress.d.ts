@@ -2496,7 +2496,7 @@ declare namespace Cypress {
      * Return the setup of your server
      * @param options the dev server options to pass directly to the dev-server
      */
-    setupDevServer(options: DevServerOptions): Promise<ResolvedDevServerConfig> | ResolvedDevServerConfig
+    devServer(options: DevServerOptions): Promise<ResolvedDevServerConfig> | ResolvedDevServerConfig
   }
 
   interface ResolvedConfigOptions {
@@ -2861,8 +2861,8 @@ declare namespace Cypress {
    * Config model of cypress. To be used in `cypress.config.js`
    */
   type ConfigOptions = Omit<ConfigOptionsMergedWithTestingTypes, 'pluginsFile' | 'supportFile' | 'supportFolder'>
-    // make setupDevServer required in component
-    & {component?: {setupDevServer: TestingTypeConfigComponent['setupDevServer'] }}
+    // make devServer required in component
+    & {component?: {devServer: TestingTypeConfigComponent['devServer'] }}
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**

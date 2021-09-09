@@ -12,7 +12,7 @@ export default defineConfig({
   component: {
     componentFolder: 'src',
     testFiles: '**/*cy-spec.ts',
-    setupDevServer (options) {
+    devServer (options) {
       return startDevServer({
         options,
         webpackConfig,
