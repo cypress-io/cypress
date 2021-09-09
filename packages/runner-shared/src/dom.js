@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import retargetEvents from 'react-shadow-dom-retarget-events'
 
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import { selectorPlaygroundHighlight } from './selector-playground/highlight'
 import { studioAssertionsMenu } from './studio/assertions-menu'
 // The '!' tells webpack to disable normal loaders, and keep loaders with `enforce: 'pre'` and `enforce: 'post'`
@@ -9,6 +9,7 @@ import { studioAssertionsMenu } from './studio/assertions-menu'
 import selectorPlaygroundCSS from '!./selector-playground/selector-playground.scss'
 import studioAssertionsMenuCSS from '!./studio/assertions-menu.scss'
 
+const $ = $Cypress.$
 const styles = (styleString) => {
   return styleString.replace(/\s*\n\s*/g, '')
 }
@@ -290,7 +291,7 @@ function dimensionsMatchPreviousLayer (obj, container) {
   }
 
   return obj.width === previousLayer.offsetWidth &&
-  obj.height === previousLayer.offsetHeight
+    obj.height === previousLayer.offsetHeight
 }
 
 function getDimensionsFor (dimensions, attr, dimension) {

@@ -1,4 +1,4 @@
-const $jquery = require('./jquery')
+import $jquery from './jquery'
 
 const docNode = window.Node.DOCUMENT_NODE
 const docFragmentNode = window.Node.DOCUMENT_FRAGMENT_NODE
@@ -37,10 +37,8 @@ const getDocumentFromElement = (el: Node): Document => {
   return el.ownerDocument as Document
 }
 
-export {
+export default {
   isDocument,
-
   hasActiveWindow,
-
   getDocumentFromElement,
 }

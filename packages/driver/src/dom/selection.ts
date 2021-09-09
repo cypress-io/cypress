@@ -1,8 +1,10 @@
 import _ from 'lodash'
-import * as $document from './document'
-import * as $elements from './elements'
+import $document from './document'
+import $elements from './elements'
 
-const debug = require('debug')('cypress:driver:selection')
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:selection')
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -125,22 +127,6 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
 
 const insertSubstring = (curText, newText, [start, end]) => {
   return curText.substring(0, start) + newText + curText.substring(end)
-}
-
-const getHostContenteditable = function (el: HTMLElement) {
-  let curEl = el
-
-  while (curEl.parentElement && !$elements.hasContenteditableAttr(curEl)) {
-    curEl = curEl.parentElement
-  }
-
-  // if there's no host contenteditable, we must be in designMode
-  // so act as if the documentElement (html element) is the host contenteditable
-  if (!$elements.hasContenteditableAttr(curEl)) {
-    return $document.getDocumentFromElement(el).documentElement
-  }
-
-  return curEl
 }
 
 const _getSelectionByEl = function (el) {
@@ -742,7 +728,7 @@ const interceptSelect = function () {
 //     el = el.firstChild
 //   return el
 
-export {
+export default {
   getSelectionBounds,
   deleteRightOfCursor,
   deleteLeftOfCursor,
@@ -751,7 +737,6 @@ export {
   moveSelectionToEnd,
   moveSelectionToStart,
   getCaretPosition,
-  getHostContenteditable,
   moveCursorLeft,
   moveCursorRight,
   moveCursorUp,

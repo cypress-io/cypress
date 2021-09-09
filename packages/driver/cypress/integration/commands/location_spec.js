@@ -30,6 +30,15 @@ describe('src/cy/commands/location', () => {
       cy.url().should('include', '/baz.html')
     })
 
+    // https://github.com/cypress-io/cypress/issues/17399
+    it('url decode option', () => {
+      // encodeURI() is used below because we cannot visit the site without it.
+      // For the curious, 사랑 means "love" in Korean.
+      cy.visit(encodeURI('/custom-headers?x=사랑'))
+
+      cy.url({ decode: true }).should('contain', '사랑')
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
