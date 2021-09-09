@@ -25,7 +25,7 @@
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
     "react": "17.0.2",
-    "vite": "^2.4.4",
+    "vite": "2.4.4",
     "vue": "3.2.0"
   },
   "peerDependencies": {

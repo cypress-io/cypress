@@ -54,7 +54,7 @@
     "javascript-time-ago": "2.3.8",
     "prismjs": "1.24.0",
     "rollup-plugin-polyfill-node": "^0.7.0",
-    "vite": "^2.4.4",
+    "vite": "2.4.4",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-purge-icons": "0.7.0",
