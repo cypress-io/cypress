@@ -9,7 +9,7 @@ declare namespace legacyDevServer {
   /**
    * Type helper to make writing `CypressCRADevServerConfig` easier
    */
-  function defineDevServerConfig(craDevServerConfig: CypressCRADevServerConfig): CypressCRADevServerConfig
+  function defineDevServerConfig(devServerConfig: CypressCRADevServerConfig): CypressCRADevServerConfig
 
   /**
    * Sets up a Cypress component testing environment for your Create React App environment

@@ -9,7 +9,7 @@ declare namespace legacyDevServer {
   /**
    * Type helper to make writing `CypressWebpackDevServerConfig` easier
    */
-  function defineDevServerConfig(webpackDevServerConfig: CypressWebpackDevServerConfig): CypressWebpackDevServerConfig
+  function defineDevServerConfig(devServerConfig: CypressWebpackDevServerConfig): CypressWebpackDevServerConfig
 
   /**
    * Sets up a webpack dev server with the proper configuration for babel transpilation
