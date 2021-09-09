@@ -2,7 +2,7 @@ import path from 'path'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import Debug from 'debug'
-import type { ErrorRequestHandler } from 'express'
+import { ErrorRequestHandler, Router } from 'express'
 
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
@@ -19,7 +19,6 @@ import type { InitializeRoutes } from './routes'
 const debug = Debug('cypress:server:routes')
 
 export const createRoutes = ({
-  app,
   config,
   specsStore,
   getRemoteState,
@@ -29,28 +28,30 @@ export const createRoutes = ({
   onError,
   testingType,
 }: InitializeRoutes) => {
-  app.get('/__cypress/runner/*', (req, res) => {
+  const routesE2E = Router()
+
+  routesE2E.get('/__cypress/runner/*', (req, res) => {
     runner.handle(testingType, req, res)
   })
 
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
-  app.get('/__cypress/tests', (req, res, next) => {
+  routesE2E.get('/__cypress/tests', (req, res, next) => {
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
 
     specController.handle(test, req, res, config, next, onError)
   })
 
-  app.get('/__cypress/socket.io.js', (req, res) => {
+  routesE2E.get('/__cypress/socket.io.js', (req, res) => {
     client.handle(req, res)
   })
 
-  app.get('/__cypress/reporter/*', (req, res) => {
+  routesE2E.get('/__cypress/reporter/*', (req, res) => {
     reporter.handle(req, res)
   })
 
-  app.get('/__cypress/automation/getLocalStorage', (req, res) => {
+  routesE2E.get('/__cypress/automation/getLocalStorage', (req, res) => {
     // gathers and sends localStorage and sessionStorage via postMessage to the Cypress frame
     // detect existence of local/session storage with JSON.stringify(...).length since localStorage.length may not be accurate
     res.send(`<html><body><script>(${(function () {
@@ -77,7 +78,7 @@ export const createRoutes = ({
   })
 
   /* eslint-disable no-undef */
-  app.get('/__cypress/automation/setLocalStorage', (req, res) => {
+  routesE2E.get('/__cypress/automation/setLocalStorage', (req, res) => {
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true
@@ -118,37 +119,37 @@ export const createRoutes = ({
   })
   /* eslint-enable no-undef */
 
-  app.get('/__cypress/static/*', (req, res) => {
+  routesE2E.get('/__cypress/static/*', (req, res) => {
     staticCtrl.handle(req, res)
   })
 
   // routing for /files JSON endpoint
-  app.get('/__cypress/files', (req, res) => {
+  routesE2E.get('/__cypress/files', (req, res) => {
     files.handleFiles(req, res, config)
   })
 
   // routing for the dynamic iframe html
-  app.get('/__cypress/iframes/*', (req, res) => {
+  routesE2E.get('/__cypress/iframes/*', (req, res) => {
     return iframesController.e2e({ config, getRemoteState, getSpec }, req, res)
   })
 
-  app.all('/__cypress/xhrs/*', (req, res, next) => {
+  routesE2E.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
 
-  app.get('/__cypress/source-maps/:id.map', (req, res) => {
+  routesE2E.get('/__cypress/source-maps/:id.map', (req, res) => {
     networkProxy.handleSourceMapRequest(req, res)
   })
 
   // special fallback - serve local files from the project's root folder
-  app.get('/__root/*', (req, res) => {
+  routesE2E.get('/__root/*', (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
 
     res.sendFile(file, { etag: false })
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
-  app.get('/__cypress/bundled/*', (req, res) => {
+  routesE2E.get('/__cypress/bundled/*', (req, res) => {
     const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
 
     debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
@@ -158,7 +159,7 @@ export const createRoutes = ({
 
   la(check.unemptyString(config.clientRoute), 'missing client route in config', config)
 
-  app.get(`${config.clientRoute}`, (req, res) => {
+  routesE2E.get(`${config.clientRoute}`, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runner.serve(req, res, 'runner', {
@@ -171,7 +172,7 @@ export const createRoutes = ({
     })
   })
 
-  app.all('*', (req, res) => {
+  routesE2E.all('*', (req, res) => {
     networkProxy.handleHttpRequest(req, res)
   })
 
@@ -188,5 +189,7 @@ export const createRoutes = ({
     res.sendStatus(500)
   }
 
-  app.use(errorHandlingMiddleware)
+  routesE2E.use(errorHandlingMiddleware)
+
+  return routesE2E
 }

@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import type { ErrorRequestHandler } from 'express'
+import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
 import xhrs from './controllers/xhrs'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -18,7 +18,6 @@ const serveChunk = (req, res, options) => {
 }
 
 export const createRoutes = ({
-  app,
   config,
   specsStore,
   nodeProxy,
@@ -28,19 +27,23 @@ export const createRoutes = ({
   getSpec,
   getRemoteState,
 }: InitializeRoutes) => {
-  app.get('/__cypress/runner/*', (req, res) => runner.handle(testingType, req, res))
+  const routesCt = Router()
 
-  app.get('/__cypress/static/*', (req, res) => {
+  routesCt.get('/__cypress/runner/*', (req, res) => {
+    runner.handle(testingType, req, res)
+  })
+
+  routesCt.get('/__cypress/static/*', (req, res) => {
     staticCtrl.handle(req, res)
   })
 
-  app.get('/__cypress/iframes/*', (req, res) => {
+  routesCt.get('/__cypress/iframes/*', (req, res) => {
     iframesController.component({ config, nodeProxy }, req, res)
   })
 
   // user app code + spec code
   // default mounted to /__cypress/src/*
-  app.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+  routesCt.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
@@ -58,11 +61,11 @@ export const createRoutes = ({
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
 
-  app.all('/__cypress/xhrs/*', (req, res, next) => {
+  routesCt.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
   })
 
-  app.get(clientRoute, (req, res) => {
+  routesCt.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runner.serve(req, res, 'runner-ct', {
@@ -73,28 +76,19 @@ export const createRoutes = ({
       getRemoteState,
       specsStore,
     })
-
-    // serve(req, res, {
-    //   config,
-    //   getCurrentBrowser,
-    //   specsStore,
-    // })
   })
 
   // enables runner-ct to make a dynamic import
-  app.get(`${clientRoute}ctChunk-*`, (req, res) => {
+  routesCt.get([
+    `${clientRoute}ctChunk-*`,
+    `${clientRoute}vendors~ctChunk-*`,
+  ], (req, res) => {
     debug('Serving Cypress front-end chunk by requested URL:', req.url)
 
     serveChunk(req, res, { config })
   })
 
-  app.get(`${clientRoute}vendors~ctChunk-*`, (req, res) => {
-    debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
-
-    serveChunk(req, res, { config })
-  })
-
-  app.all('*', (req, res) => {
+  routesCt.all('*', (req, res) => {
     networkProxy.handleHttpRequest(req, res)
   })
 
@@ -111,5 +105,7 @@ export const createRoutes = ({
     res.sendStatus(500)
   }
 
-  app.use(errorHandlingMiddleware)
+  routesCt.use(errorHandlingMiddleware)
+
+  return routesCt
 }

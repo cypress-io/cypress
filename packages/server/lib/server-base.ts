@@ -222,8 +222,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.createHosts(config.hosts)
 
-      createRoutes({
-        app,
+      const routes = createRoutes({
         config,
         specsStore,
         getRemoteState,
@@ -234,6 +233,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         getCurrentBrowser,
         testingType,
       })
+
+      app.use(routes)
 
       return this.createServer(app, config, onWarning)
     })
