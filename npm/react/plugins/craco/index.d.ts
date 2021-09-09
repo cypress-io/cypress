@@ -1,5 +1,5 @@
 declare namespace legacyDevServer {
-  export interface CypressCracoDevServerConfig {
+  interface CypressCracoDevServerConfig {
     /**
      * The object exported of your craco.config.js file
      */
@@ -9,7 +9,7 @@ declare namespace legacyDevServer {
   /**
    * Type helper to make writing `CypressCracoDevServerConfig` easier
    */
-  export function defineDevServerConfig(cracoDevServerConfig: CypressCracoDevServerConfig): CypressCracoDevServerConfig
+  function defineDevServerConfig(cracoDevServerConfig: CypressCracoDevServerConfig): CypressCracoDevServerConfig
 
   /**
    * Sets up a dev server for using Cypress compoennt testing with CRACO (https://github.com/gsoft-inc/craco)
@@ -17,7 +17,7 @@ declare namespace legacyDevServer {
    * @param devServerConfig additional config object (create an empty object to see how to use it)
    * @returns the resolved dev server object that cypress can use to start testing
    */
-  export function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig: CypressCracoDevServerConfig): Cypress.ResolvedDevServerConfig
+  function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig: CypressCracoDevServerConfig): Cypress.ResolvedDevServerConfig
 }
 
 /**

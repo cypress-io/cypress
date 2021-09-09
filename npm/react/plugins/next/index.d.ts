@@ -11,7 +11,7 @@ declare namespace legacyDevServer {
    * @param cypressDevServerConfig comes from the `setupDevServer()` function first argument
    * @returns the resolved dev server object that cypress can use to start testing
    */
-  export function devServer(cypressDevServerConfig: Cypress.DevServerConfig): Cypress.ResolvedDevServerConfig
+  function devServer(cypressDevServerConfig: Cypress.DevServerConfig): Cypress.ResolvedDevServerConfig
 }
 
 export = legacyDevServer;

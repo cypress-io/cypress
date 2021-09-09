@@ -1,5 +1,5 @@
 declare namespace legacyDevServer {
-  export interface CypressWebpackDevServerConfig {
+  interface CypressWebpackDevServerConfig {
     /**
      * Location of the weppack.config Cypress should use
      */
@@ -9,7 +9,7 @@ declare namespace legacyDevServer {
   /**
    * Type helper to make writing `CypressWebpackDevServerConfig` easier
    */
-  export function defineDevServerConfig(webpackDevServerConfig: CypressWebpackDevServerConfig): CypressWebpackDevServerConfig
+  function defineDevServerConfig(webpackDevServerConfig: CypressWebpackDevServerConfig): CypressWebpackDevServerConfig
 
   /**
    * Sets up a webpack dev server with the proper configuration for babel transpilation
@@ -17,7 +17,7 @@ declare namespace legacyDevServer {
    * @param devServerConfig additional config object (create an empty object to see how to use it)
    * @returns the resolved dev server object that cypress can use to start testing
    */
-  export function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressWebpackDevServerConfig): Cypress.ResolvedDevServerConfig
+  function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressWebpackDevServerConfig): Cypress.ResolvedDevServerConfig
 }
 
 /**

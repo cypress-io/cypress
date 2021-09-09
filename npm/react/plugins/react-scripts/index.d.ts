@@ -9,7 +9,7 @@ declare namespace legacyDevServer {
   /**
    * Type helper to make writing `CypressCRADevServerConfig` easier
    */
-  export function defineDevServerConfig(craDevServerConfig: CypressCRADevServerConfig): CypressCRADevServerConfig
+  function defineDevServerConfig(craDevServerConfig: CypressCRADevServerConfig): CypressCRADevServerConfig
 
   /**
    * Sets up a Cypress component testing environment for your Create React App environment
@@ -17,7 +17,7 @@ declare namespace legacyDevServer {
    * @param devServerConfig additional config object (create an empty object to see how to use it)
    * @returns the resolved dev server object that cypress can use to start testing
    */
-  export function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressCRADevServerConfig): Cypress.ResolvedDevServerConfig
+  function devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressCRADevServerConfig): Cypress.ResolvedDevServerConfig
 }
 
 /**
