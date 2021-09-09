@@ -1016,7 +1016,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`
         \`pluginsFile\` cannot be set in a \`${arg1}\` file. 
         
-        \`pluginsFile\` is deprecated and will error in cypress 9.0, prefer using the \`setupNodeEvents\` function instead.
+        \`pluginsFile\` is deprecated and will error in a future version of Cypress, prefer using the \`setupNodeEvents\` function instead.
 
         https://on.cypress.io/setupNodeEvents
         `
