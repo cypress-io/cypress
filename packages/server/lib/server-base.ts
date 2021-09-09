@@ -31,7 +31,7 @@ import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import type { ParsedHost } from '@packages/network/lib/cors'
 
-type RemoteState = Partial<{
+export type RemoteState = Partial<{
   auth: string
   props: ParsedHost
   origin: string

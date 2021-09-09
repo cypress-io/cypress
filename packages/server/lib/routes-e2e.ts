@@ -2,7 +2,7 @@ import path from 'path'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import Debug from 'debug'
-import { ErrorRequestHandler, Router } from 'express'
+import { Router } from 'express'
 
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
@@ -11,8 +11,6 @@ import reporter from './controllers/reporter'
 import { runner } from './controllers/runner'
 import client from './controllers/client'
 import files from './controllers/files'
-import { staticCtrl } from './controllers/static'
-import { iframesController } from './controllers/iframes'
 import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes')
@@ -28,10 +26,6 @@ export const createRoutes = ({
   testingType,
 }: InitializeRoutes) => {
   const routesE2E = Router()
-
-  routesE2E.get('/__cypress/runner/*', (req, res) => {
-    runner.handle(testingType, req, res)
-  })
 
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
@@ -118,18 +112,9 @@ export const createRoutes = ({
   })
   /* eslint-enable no-undef */
 
-  routesE2E.get('/__cypress/static/*', (req, res) => {
-    staticCtrl.handle(req, res)
-  })
-
   // routing for /files JSON endpoint
   routesE2E.get('/__cypress/files', (req, res) => {
     files.handleFiles(req, res, config)
-  })
-
-  // routing for the dynamic iframe html
-  routesE2E.get('/__cypress/iframes/*', (req, res) => {
-    return iframesController.e2e({ config, getRemoteState, getSpec }, req, res)
   })
 
   routesE2E.get('/__cypress/source-maps/:id.map', (req, res) => {
@@ -166,25 +151,6 @@ export const createRoutes = ({
       specsStore,
     })
   })
-
-  routesE2E.all('*', (req, res) => {
-    networkProxy.handleHttpRequest(req, res)
-  })
-
-  // when we experience uncaught errors
-  // during routing just log them out to
-  // the console and send 500 status
-  // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
-    console.log(err.stack) // eslint-disable-line no-console
-
-    res.set('x-cypress-error', err.message)
-    res.set('x-cypress-stack', JSON.stringify(err.stack))
-
-    res.sendStatus(500)
-  }
-
-  routesE2E.use(errorHandlingMiddleware)
 
   return routesE2E
 }

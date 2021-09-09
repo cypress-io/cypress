@@ -1,11 +1,9 @@
 import Debug from 'debug'
-import { ErrorRequestHandler, Router } from 'express'
+import { Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import { runner } from './controllers/runner'
-import { staticCtrl } from './controllers/static'
 import type { InitializeRoutes } from './routes'
-import { iframesController } from './controllers/iframes'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -20,25 +18,12 @@ export const createRoutes = ({
   config,
   specsStore,
   nodeProxy,
-  networkProxy,
   getCurrentBrowser,
   testingType,
   getSpec,
   getRemoteState,
 }: InitializeRoutes) => {
   const routesCt = Router()
-
-  routesCt.get('/__cypress/runner/*', (req, res) => {
-    runner.handle(testingType, req, res)
-  })
-
-  routesCt.get('/__cypress/static/*', (req, res) => {
-    staticCtrl.handle(req, res)
-  })
-
-  routesCt.get('/__cypress/iframes/*', (req, res) => {
-    iframesController.component({ config, nodeProxy }, req, res)
-  })
 
   // user app code + spec code
   // default mounted to /__cypress/src/*
@@ -82,25 +67,6 @@ export const createRoutes = ({
 
     serveChunk(req, res, { config })
   })
-
-  routesCt.all('*', (req, res) => {
-    networkProxy.handleHttpRequest(req, res)
-  })
-
-  // when we experience uncaught errors
-  // during routing just log them out to
-  // the console and send 500 status
-  // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
-    console.log(err.stack) // eslint-disable-line no-console
-
-    res.set('x-cypress-error', err.message)
-    res.set('x-cypress-stack', JSON.stringify(err.stack))
-
-    res.sendStatus(500)
-  }
-
-  routesCt.use(errorHandlingMiddleware)
 
   return routesCt
 }
