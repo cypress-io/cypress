@@ -2818,7 +2818,7 @@ declare namespace Cypress {
     socketIoCookie: string
     socketIoRoute: string
     spec: Cypress['spec']
-    specs: Cypress['spec'][]
+    specs: Array<Cypress['spec']>
     xhrRoute: string
     xhrUrl: string
   }
