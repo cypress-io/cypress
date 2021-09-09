@@ -8,11 +8,11 @@ const debug = debugModule('cypress:network:cors')
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
-type ParsedHost = {
-  port?: string
-  tld?: string
-  domain?: string
-}
+export type ParsedHost = Partial<{
+  port: string
+  tld: string
+  domain: string
+}>
 
 export function getSuperDomain (url) {
   const parsed = parseUrlIntoDomainTldPort(url)

@@ -265,7 +265,7 @@ describe('Server', () => {
               visiting: false,
               domainName: 'localhost',
               fileServer: this.fileServer,
-              props: null,
+              props: undefined,
             })
           })
         })
@@ -589,7 +589,7 @@ describe('Server', () => {
               strategy: 'http',
               visiting: false,
               domainName: 'go.com',
-              fileServer: null,
+              fileServer: undefined,
               props: {
                 domain: 'go',
                 tld: 'com',
@@ -898,7 +898,7 @@ describe('Server', () => {
             strategy: 'http',
             visiting: false,
             domainName: 'google.com',
-            fileServer: null,
+            fileServer: undefined,
             props: {
               domain: 'google',
               tld: 'com',
@@ -974,7 +974,7 @@ describe('Server', () => {
             strategy: 'http',
             visiting: false,
             domainName: 'google.com',
-            fileServer: null,
+            fileServer: undefined,
             props: {
               domain: 'google',
               tld: 'com',
@@ -1010,7 +1010,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         })
       })
@@ -1056,7 +1056,7 @@ describe('Server', () => {
             strategy: 'http',
             visiting: false,
             domainName: 'google.com',
-            fileServer: null,
+            fileServer: undefined,
             props: {
               domain: 'google',
               tld: 'com',
@@ -1096,7 +1096,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         }).then(() => {
           return this.server._onResolveUrl('http://www.google.com/', {}, this.automationRequest)
@@ -1129,7 +1129,7 @@ describe('Server', () => {
               strategy: 'http',
               visiting: false,
               domainName: 'google.com',
-              fileServer: null,
+              fileServer: undefined,
               props: {
                 domain: 'google',
                 tld: 'com',
@@ -1173,7 +1173,7 @@ describe('Server', () => {
             strategy: 'http',
             visiting: false,
             domainName: 'foobar.com',
-            fileServer: null,
+            fileServer: undefined,
             props: {
               domain: 'foobar',
               tld: 'com',
@@ -1213,7 +1213,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         }).then(() => {
           return this.server._onResolveUrl('https://www.foobar.com:8443/', {}, this.automationRequest)
@@ -1245,7 +1245,7 @@ describe('Server', () => {
               origin: 'https://www.foobar.com:8443',
               strategy: 'http',
               visiting: false,
-              fileServer: null,
+              fileServer: undefined,
               domainName: 'foobar.com',
               props: {
                 domain: 'foobar',
@@ -1298,7 +1298,7 @@ describe('Server', () => {
             strategy: 'http',
             visiting: false,
             domainName: 's3.amazonaws.com',
-            fileServer: null,
+            fileServer: undefined,
             props: {
               domain: '',
               tld: 's3.amazonaws.com',
@@ -1338,7 +1338,7 @@ describe('Server', () => {
             visiting: false,
             domainName: 'localhost',
             fileServer: this.fileServer,
-            props: null,
+            props: undefined,
           })
         }).then(() => {
           return this.server._onResolveUrl(s3StaticHtmlUrl, {}, this.automationRequest)
@@ -1376,7 +1376,7 @@ describe('Server', () => {
               origin: 'https://s3.amazonaws.com',
               strategy: 'http',
               visiting: false,
-              fileServer: null,
+              fileServer: undefined,
               domainName: 's3.amazonaws.com',
               props: {
                 domain: '',

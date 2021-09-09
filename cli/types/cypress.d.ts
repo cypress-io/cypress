@@ -2810,19 +2810,15 @@ declare namespace Cypress {
     projectName: string
     projectRoot: string
     proxyUrl: string
+    remote: string
     report: boolean
     reporterRoute: string
     reporterUrl: string
     socketId: null | string
     socketIoCookie: string
     socketIoRoute: string
-    spec: {
-      absolute: string
-      name: string
-      relative: string
-      specFilter: null | string
-      specType: 'integration' | 'component'
-    }
+    spec: Cypress['spec']
+    specs: Array<Cypress['spec']>
     xhrRoute: string
     xhrUrl: string
   }

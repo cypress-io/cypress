@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type CyServer from '@packages/server'
+import type { RemoteState } from '@packages/server/lib/server-base'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
@@ -126,7 +126,7 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   this.next()
 }
 
-function reqNeedsBasicAuthHeaders (req, { auth, origin }: CyServer.RemoteState) {
+function reqNeedsBasicAuthHeaders (req, { auth, origin }: RemoteState) {
   //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
@@ -157,10 +157,14 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
   const { strategy, origin, fileServer } = this.getRemoteState()
 
-  if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
+  if (strategy === 'file' && origin && requestOptions.url.startsWith(origin)) {
     this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
 
-    requestOptions.url = requestOptions.url.replace(origin, fileServer)
+    // TODO: Find out of this can be null at this point
+    // update types and validation to reflect this
+    if (fileServer) {
+      requestOptions.url = requestOptions.url.replace(origin, fileServer)
+    }
   }
 
   if (requestBodyBuffered) {
