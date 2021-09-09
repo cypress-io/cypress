@@ -1034,8 +1034,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     // TODO: update with vetted cypress language
     case 'DEPRECATED_CYPRESS_JSON':
       return stripIndent`
-          In cypress 9.0, \`cypress.json\` will not be supported anymore.
-          please see the docs to migrate it to \`cypress.config.js\`
+          \`cypress.json\` will not be supported in a future version of Cypress.
+          
+          Please see the docs to migrate it to \`cypress.config.js\`
 
           Learn more: https://on.cypress.io/migrate-configjs
           `
