@@ -65,9 +65,9 @@ const start = async (projectRoot: string, args: LaunchArgs) => {
   })
 }
 
-const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox'] as const
+export const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox'] as const
 
-const returnDefaultBrowser = (
+export const returnDefaultBrowser = (
   browsersByPriority: typeof browsersForCtInteractive,
   installedBrowsers: any[],
 ) => {
