@@ -1,10 +1,76 @@
-const serverCt = require('@packages/server-ct')
-const { getBrowsers } = require('../browsers/utils')
-const errors = require('../errors')
+import chalk from 'chalk'
+import human from 'human-interval'
+import _ from 'lodash'
+import Debug from 'debug'
 
-const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox']
+import browserUtils from '../browsers/utils'
+import browsers from '../browsers'
+import { LaunchArgs, openProject } from '../open_project'
+import * as Updater from '../updater'
+import * as errors from '../errors'
 
-const returnDefaultBrowser = (browsersByPriority, installedBrowsers) => {
+const debug = Debug('cypress:server:interactive-ct')
+
+const registerCheckForUpdates = () => {
+  const checkForUpdates = (initialLaunch: boolean) => {
+    Updater.check({
+      initialLaunch,
+      testingType: 'component',
+      onNewVersion: _.noop,
+      onNoNewVersion: _.noop,
+    })
+  }
+
+  setInterval(() => checkForUpdates(false), human('60 minutes'))
+  checkForUpdates(true)
+}
+
+const start = async (projectRoot: string, args: LaunchArgs) => {
+  if (process.env['CYPRESS_INTERNAL_ENV'] === 'production') {
+    registerCheckForUpdates()
+  }
+
+  debug('start server-ct on ', projectRoot)
+
+  // add chrome as a default browser if none has been specified
+  return browsers.ensureAndGetByNameOrPath(args.browser)
+  .then((browser: Cypress.Browser) => {
+    const spec = {
+      name: 'All Specs',
+      absolute: '__all',
+      relative: '__all',
+      specType: 'component',
+    } as const
+
+    const options = {
+      browsers: [browser],
+    }
+
+    debug('create project')
+
+    return openProject.create(projectRoot, args, options)
+    .then(() => {
+      debug('launch project')
+
+      return openProject.launch(browser, spec, {
+        onBrowserClose: () => {
+          // eslint-disable-next-line no-console
+          console.log(chalk.blue('BROWSER EXITED SAFELY'))
+          // eslint-disable-next-line no-console
+          console.log(chalk.blue('COMPONENT TESTING STOPPED'))
+          process.exit()
+        },
+      })
+    })
+  })
+}
+
+export const browsersForCtInteractive = ['chrome', 'chromium', 'edge', 'electron', 'firefox'] as const
+
+export const returnDefaultBrowser = (
+  browsersByPriority: typeof browsersForCtInteractive,
+  installedBrowsers: any[],
+) => {
   const browserMap = installedBrowsers.reduce((acc, curr) => {
     acc[curr.name] = true
 
@@ -16,14 +82,16 @@ const returnDefaultBrowser = (browsersByPriority, installedBrowsers) => {
       return browser
     }
   }
+
+  return undefined
 }
 
-const run = async (options) => {
-  const installedBrowsers = await getBrowsers()
+export const run = async (options: LaunchArgs) => {
+  const installedBrowsers = await browserUtils.getBrowsers()
 
   options.browser = options.browser || returnDefaultBrowser(browsersForCtInteractive, installedBrowsers)
 
-  return serverCt.start(options.projectRoot, options).catch((e) => {
+  return start(options.projectRoot, options).catch((e: Error) => {
     // Usually this kind of error management is doen inside cypress.js start
     // But here we bypassed this since we don't use the window of the gui
     // Handle errors here to avoid multiple errors appearing.
@@ -31,10 +99,4 @@ const run = async (options) => {
       process.exit(1)
     })
   })
-}
-
-module.exports = {
-  run,
-  returnDefaultBrowser,
-  browsersForCtInteractive,
 }
