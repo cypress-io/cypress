@@ -1,6 +1,6 @@
 import type { Interception, Route } from '@packages/net-stubbing/lib/types'
 import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
-import * as $errUtils from './error_utils'
+import $errUtils from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
@@ -229,7 +229,7 @@ type UnmatchedXhrLog = {
   stack?: string
 }
 
-export class ProxyLogging {
+export default class ProxyLogging {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []

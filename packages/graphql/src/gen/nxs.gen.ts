@@ -99,8 +99,6 @@ export interface NexusGenObjects {
   PageInfo: cloudGen.PageInfo;
   Project: Project;
   Query: Query;
-  RelayConnectionKnex: cloudGen.RelayConnectionKnex;
-  RelayEdgeKnex: cloudGen.RelayEdgeKnex;
   ResolvedBooleanOption: ResolvedBooleanOption;
   ResolvedConfig: ResolvedConfig;
   ResolvedJsonOption: ResolvedJsonOption;
@@ -269,12 +267,6 @@ export interface NexusGenFieldTypes {
     cloudViewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
-  }
-  RelayConnectionKnex: { // field return type
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-  }
-  RelayEdgeKnex: { // field return type
-    cursor: string; // String!
   }
   ResolvedBooleanOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
@@ -541,12 +533,6 @@ export interface NexusGenFieldTypeNames {
     cloudViewer: 'CloudUser'
     navigationMenu: 'NavigationMenu'
     wizard: 'Wizard'
-  }
-  RelayConnectionKnex: { // field return type name
-    pageInfo: 'PageInfo'
-  }
-  RelayEdgeKnex: { // field return type name
-    cursor: 'String'
   }
   ResolvedBooleanOption: { // field return type name
     from: 'ResolvedConfigOption'

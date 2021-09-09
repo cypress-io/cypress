@@ -33,7 +33,6 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import type { ProjectContract } from '@packages/graphql'
 import type { OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -63,18 +62,18 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export type Server = ServerE2E | ServerCt
 
-export class ProjectBase<TServer extends Server> extends EE implements ProjectContract {
+export class ProjectBase<TServer extends Server> extends EE {
   // id is sha256 of projectRoot
   public id: string
 
   protected watchers: Watchers
-  public options: OpenProjectLaunchOptions
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
 
   public browser: any
+  public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   public isOpen: boolean = false

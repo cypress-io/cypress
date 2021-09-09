@@ -35,7 +35,7 @@ export abstract class BaseContext {
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
 
-  wizard = new Wizard()
+  wizard = new Wizard(this)
   navigationMenu = new NavigationMenu()
   app = new App(this)
 

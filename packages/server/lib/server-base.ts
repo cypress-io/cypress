@@ -220,6 +220,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       onError,
       getSpec,
       getCurrentBrowser,
+      testingType,
     })
 
     return this.createServer(app, config, onWarning)

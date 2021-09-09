@@ -6,8 +6,9 @@ import { initGraphql, makeRequest, TestContext } from './utils'
 describe('Wizard', () => {
   describe('sampleCode', () => {
     it('returns null when bundler is set but framework is null', async () => {
-      const wizard = new Wizard()
+      const wizard = new Wizard(new TestContext())
 
+      wizard.setTestingType('component')
       wizard.setBundler('webpack')
 
       const context = new TestContext({ wizard })
@@ -25,8 +26,9 @@ describe('Wizard', () => {
     })
 
     it('returns null when framework is set but bundler is null', async () => {
-      const wizard = new Wizard()
+      const wizard = new Wizard(new TestContext())
 
+      wizard.setTestingType('component')
       wizard.setFramework('react')
 
       const context = new TestContext({ wizard })
@@ -44,8 +46,9 @@ describe('Wizard', () => {
     })
 
     it('returns sampleCode when framework and bundler is set', async () => {
-      const wizard = new Wizard()
+      const wizard = new Wizard(new TestContext())
 
+      wizard.setTestingType('component')
       wizard.setFramework('cra')
       wizard.setBundler('webpack')
 
