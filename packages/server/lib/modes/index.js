@@ -1,3 +1,5 @@
+const interactiveCt = require('./interactive-ct')
+
 module.exports = (mode, options) => {
   if (mode === 'record') {
     return require('./record').run(options)
@@ -20,6 +22,6 @@ module.exports = (mode, options) => {
   }
 
   if (mode === 'interactive' && options.testingType === 'component') {
-    return require('./interactive-ct').run(options)
+    return interactiveCt.run(options)
   }
 }
