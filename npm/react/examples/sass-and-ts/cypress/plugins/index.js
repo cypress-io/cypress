@@ -1,6 +1,6 @@
 // @ts-check
 
-// load Webpack file setupDevServer that comes with this plugin
+// load Webpack file devServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install
 const devServer = require('@cypress/react/plugins/load-webpack')
 

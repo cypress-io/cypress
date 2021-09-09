@@ -17,7 +17,7 @@ declare namespace legacyDevServer {
 
   /**
    * Sets up a webpack dev server with the proper configuration for babel transpilation
-   * @param cypressDevServerConfig comes from the `setupDevServer()` function first argument
+   * @param cypressDevServerConfig comes from the `devServer()` function first argument
    * @param devServerConfig additional config object (create an empty object to see how to use it)
    * @returns the resolved dev server object that cypress can use to start testing
    */

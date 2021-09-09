@@ -9,10 +9,10 @@
 In order to reuse next's webpack configuration and all the custom configuration defined in `next.config.js` connect special plugin in [plugin file](./cypress/plugins/index.js)
 
 ```js
-const setupDevServer = require('@cypress/react/plugins/next')
+const devServer = require('@cypress/react/plugins/next')
 
 module.exports = (on, config) => {
-  setupDevServer(on, config)
+  devServer(on, config)
 
   return config
 }

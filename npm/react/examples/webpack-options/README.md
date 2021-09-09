@@ -1,6 +1,6 @@
 # example: webpack-options
 
-> The Webpack setupDevServer in [cypress/plugins/index.js](cypress/plugins/index.js) adds the Babel React preset to the list of default Webpack plugins. This allows Cypress to transpile JSX code in [cypress/component/Test.cy-spec.js](cypress/component/Test.cy-spec.js) file.
+> The Webpack devServer in [cypress/plugins/index.js](cypress/plugins/index.js) adds the Babel React preset to the list of default Webpack plugins. This allows Cypress to transpile JSX code in [cypress/component/Test.cy-spec.js](cypress/component/Test.cy-spec.js) file.
 
 ## Usage
 
