@@ -13,7 +13,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
+const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version testingType'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -118,7 +118,7 @@ const JSONOrCoerce = (str) => {
   }
 
   // nupe :-(
-  return coerceUtil(str)
+  return coerceUtil.coerce(str)
 }
 
 const sanitizeAndConvertNestedArgs = (str, argname) => {
@@ -177,8 +177,6 @@ module.exports = {
       'exec-path': 'execPath',
       'exit-with-code': 'exitWithCode',
       'inspect-brk': 'inspectBrk',
-      'get-key': 'getKey',
-      'new-key': 'generateKey',
       'output-path': 'outputPath',
       'proxy-source': 'proxySource',
       'reporter-options': 'reporterOptions',
@@ -215,7 +213,7 @@ module.exports = {
       cwd: process.cwd(),
       testingType: 'e2e',
     })
-    .mapValues(coerceUtil)
+    .mapValues(coerceUtil.coerce)
     .value()
 
     debug('argv parsed: %o', options)

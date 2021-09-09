@@ -11,7 +11,7 @@
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
-    "test": "yarn test-unit && yarn test-e2e",
+    "test": "node ./test-webpack-5.js",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
@@ -29,7 +29,7 @@
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.8.3",
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
-    "@types/webpack": "4.41.12",
+    "@types/webpack": "^4.41.12",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-loader": "^8.0.2",
@@ -58,13 +58,13 @@
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
     "ts-node": "8.10.1",
-    "webpack": "^4.18.1"
+    "webpack": "^4.41.12"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.2",
-    "webpack": "^4.18.1"
+    "webpack": "^4 || ^5"
   },
   "files": [
     "dist"

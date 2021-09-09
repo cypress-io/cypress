@@ -1,8 +1,8 @@
 import Debug from 'debug'
-import * as socketIo from '@packages/socket'
+import type * as socketIo from '@packages/socket'
 import devServer from '@packages/server/lib/plugins/dev-server'
 import { SocketBase } from '@packages/server/lib/socket-base'
-import { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
+import type { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
 
 const debug = Debug('cypress:server-ct:socket-ct')
 
@@ -16,8 +16,8 @@ export class SocketCt extends SocketBase {
 
     // should we use this option at all for component testing 😕?
     if (config.watchForFileChanges) {
-      devServer.emitter.on('dev-server:compile:success', () => {
-        this.toRunner('runner:restart')
+      devServer.emitter.on('dev-server:compile:success', ({ specFile }) => {
+        this.toRunner('dev-server:compile:success', { specFile })
       })
     }
   }
@@ -32,9 +32,5 @@ export class SocketCt extends SocketBase {
         debug('do onSocketConnection')
       },
     })
-  }
-
-  sendSpecList (specs) {
-    this.toRunner('component:specs:changed', specs)
   }
 }

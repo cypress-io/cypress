@@ -26,7 +26,7 @@
     "@cypress/get-windows-proxy": "1.6.2",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
-    "@cypress/request": "2.88.5",
+    "@cypress/request": "2.88.6",
     "@cypress/request-promise": "4.2.6",
     "@cypress/webpack-batteries-included-preprocessor": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
@@ -115,8 +115,9 @@
     "trash": "5.2.0",
     "tree-kill": "1.2.2",
     "ts-node": "8.5.4",
+    "tslib": "2.3.0",
     "underscore.string": "3.3.5",
-    "url-parse": "1.5.1",
+    "url-parse": "1.5.2",
     "uuid": "8.3.2",
     "which": "2.0.2",
     "widest-line": "3.1.0",
@@ -138,6 +139,7 @@
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
+    "@packages/resolve-dist": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/static": "0.0.0-development",
@@ -183,9 +185,9 @@
     "supertest-session": "4.0.0",
     "through2": "2.0.5",
     "ts-loader": "7.0.4",
-    "tsconfig-paths": "3.9.0",
+    "tsconfig-paths": "3.10.1",
     "webpack": "4.43.0",
-    "ws": "5.2.2",
+    "ws": "5.2.3",
     "xvfb": "cypress-io/node-xvfb#22e3783c31d81ebe64d8c0df491ea00cdc74726a",
     "xvfb-maybe": "0.2.1"
   },
@@ -203,6 +205,7 @@
     ]
   },
   "optionalDependencies": {
+    "fsevents": "^2",
     "registry-js": "1.15.0"
   }
 }

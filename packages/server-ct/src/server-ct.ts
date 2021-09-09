@@ -1,57 +1,18 @@
 import Bluebird from 'bluebird'
-import Debug from 'debug'
-import httpProxy from 'http-proxy'
 import httpsProxy from '@packages/https-proxy'
-import logger from '@packages/server/lib/logger'
-import { ServerBase } from '@packages/server/lib/server-base'
+import { OpenServerOptions, ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
-import { createRoutes } from './routes-ct'
-import { SocketCt } from './socket-ct'
+import type { SocketCt } from './socket-ct'
+import type { Cfg } from '@packages/server/lib/project-base'
 
 type WarningErr = Record<string, any>
 
-const debug = Debug('cypress:server-ct:server')
-
 export class ServerCt extends ServerBase<SocketCt> {
-  open (config, specsStore, project, onError, onWarning) {
-    debug('server open')
-
-    return Bluebird.try(() => {
-      if (!config.baseUrl) {
-        throw new Error('ServerCt#open called without config.baseUrl.')
-      }
-
-      const app = this.createExpressApp(config)
-
-      logger.setSettings(config)
-
-      this._nodeProxy = httpProxy.createProxyServer({
-        target: config.baseUrl,
-      })
-
-      this._socket = new SocketCt(config)
-
-      const getRemoteState = () => {
-        return this._getRemoteState()
-      }
-
-      this.createNetworkProxy(config, getRemoteState)
-
-      createRoutes({
-        app,
-        config,
-        specsStore,
-        nodeProxy: this.nodeProxy,
-        networkProxy: this.networkProxy,
-        onError,
-        project,
-      })
-
-      return this.createServer(app, config, project, this.request, onWarning)
-    })
+  open (config: Cfg, options: OpenServerOptions) {
+    return super.open(config, { ...options, testingType: 'component' })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
+  createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, baseUrl, socketIoRoute } = config
 
@@ -84,9 +45,5 @@ export class ServerCt extends ServerBase<SocketCt> {
         })
       })
     })
-  }
-
-  sendSpecList (specs) {
-    return this.socket.sendSpecList(specs)
   }
 }

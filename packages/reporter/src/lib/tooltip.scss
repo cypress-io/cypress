@@ -2,7 +2,7 @@ $cy-tooltip-class: 'cy-tooltip';
 @import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 
 .cy-tooltip {
-  font-family: $muli;
+  font-family: $font-sans;
   word-wrap: break-word;
   background-color: #242424;
 
@@ -15,5 +15,9 @@ $cy-tooltip-class: 'cy-tooltip';
     border: 1px solid black;
     box-shadow: 0 0.5px 0 1px rgb(95, 95, 95);
     font-family: monospace, monospace;
+  }
+
+  code {
+    font-size: .8em;
   }
 }

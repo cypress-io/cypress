@@ -1,3 +1,31 @@
+# [@cypress/vue-v3.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.2...@cypress/vue-v3.0.3) (2021-07-31)
+
+
+### Bug Fixes
+
+* vue 3 types, beta suffix & component name ([#17508](https://github.com/cypress-io/cypress/issues/17508)) ([b4733a6](https://github.com/cypress-io/cypress/commit/b4733a6179577b0447af9bcdcf417713d5fb38b9))
+
+# [@cypress/vue-v3.0.0-beta.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-beta.3...@cypress/vue-v3.0.0-beta.4) (2021-07-27)
+
+
+### Bug Fixes
+
+* do not register CT specific event in e2e mode ([5836203](https://github.com/cypress-io/cypress/commit/58362037fd231c6fdc587e422fc139bf7546ac2d))
+
+# [@cypress/vue-v3.0.0-beta.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-beta.2...@cypress/vue-v3.0.0-beta.3) (2021-06-24)
+
+
+### Bug Fixes
+
+* bumps deps for npm/vue ([#17096](https://github.com/cypress-io/cypress/issues/17096)) ([96af8bf](https://github.com/cypress-io/cypress/commit/96af8bf29d69537af0c10c69b33a0a889edcaa37))
+
+# [@cypress/vue-v3.0.0-beta.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.0-beta.1...@cypress/vue-v3.0.0-beta.2) (2021-06-17)
+
+
+### Bug Fixes
+
+* add latest channel to properly release npm packages ([#16994](https://github.com/cypress-io/cypress/issues/16994)) ([ac16efc](https://github.com/cypress-io/cypress/commit/ac16efca80f33e12153b0c2bd0fc3f04983ed305))
+
 # [@cypress/vue-v3.0.0-beta.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v2.2.3...@cypress/vue-v3.0.0-beta.1) (2021-05-31)
 
 

@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 
+const $Command = require('../../cypress/command')
 const $dom = require('../../dom')
 const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
@@ -465,6 +466,12 @@ module.exports = (Commands, Cypress, cy, state) => {
         filter = ''
       }
 
+      // https://github.com/cypress-io/cypress/issues/1119
+      if (text === 0) {
+        // text can be 0 but should not be falsy
+        text = '0'
+      }
+
       if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
         $errUtils.throwErrByPath('contains.regex_conflict')
       }
@@ -629,11 +636,11 @@ module.exports = (Commands, Cypress, cy, state) => {
       // commands inside within() callback and commands chained to it.
       const restoreCmdIndex = state('index') + 1
 
-      cy.queue.splice(restoreCmdIndex, 0, {
+      cy.queue.insert(restoreCmdIndex, $Command.create({
         args: [subject],
         name: 'within-restore',
         fn: (subject) => subject,
-      })
+      }))
 
       state('index', restoreCmdIndex)
 

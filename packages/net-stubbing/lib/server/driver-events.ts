@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import {
+import type {
   NetStubbingState,
   GetFixtureFn,
   BackendRoute,
@@ -17,11 +17,12 @@ import {
   setResponseFromFixture,
 } from './util'
 import { InterceptedRequest } from './intercepted-request'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
+import type { BackendStaticResponse } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute) {
+async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute<BackendStaticResponse>) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -72,7 +73,7 @@ async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtu
 
   await setResponseFromFixture(getFixture, options.staticResponse)
 
-  _sendStaticResponse(request, options.staticResponse)
+  await _sendStaticResponse(request, options.staticResponse)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -105,23 +106,23 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
   return ret
 }
 
-type OnNetEventOpts = {
+type OnNetStubbingEventOpts = {
   eventName: string
   state: NetStubbingState
   socket: CyServer.Socket
   getFixture: GetFixtureFn
   args: any[]
-  frame: NetEvent.ToServer.AddRoute | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
+  frame: NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
 }
 
-export async function onNetEvent (opts: OnNetEventOpts): Promise<any> {
+export async function onNetStubbingEvent (opts: OnNetStubbingEventOpts): Promise<any> {
   const { state, getFixture, args, eventName, frame } = opts
 
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
     case 'route:added':
-      return onRouteAdded(state, getFixture, <NetEvent.ToServer.AddRoute>frame)
+      return onRouteAdded(state, getFixture, <NetEvent.ToServer.AddRoute<BackendStaticResponse>>frame)
     case 'subscribe':
       return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
     case 'event:handler:resolved':

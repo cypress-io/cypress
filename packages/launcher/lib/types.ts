@@ -1,5 +1,5 @@
-import { ChildProcess } from 'child_process'
-import * as Bluebird from 'bluebird'
+import type { ChildProcess } from 'child_process'
+import type Bluebird from 'bluebird'
 
 // TODO: Clean up this file
 
@@ -43,6 +43,8 @@ export type Browser = {
   warning?: string
   /** optional info that will be shown in the GUI */
   info?: string
+  /** if set, the majorVersion must be >= this to be run in Cypress */
+  minSupportedVersion?: number
 }
 
 /**
@@ -54,6 +56,7 @@ export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary'> & {
   majorVersion?: string
   /** is this a user-supplied browser? */
   custom?: boolean
+  unsupportedVersion?: boolean
 }
 
 /**

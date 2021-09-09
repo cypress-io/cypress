@@ -2,6 +2,14 @@ const { $ } = Cypress
 
 let isActuallyInteractive
 
+isActuallyInteractive = Cypress.config('isInteractive')
+if (!isActuallyInteractive) {
+  // we want to only enable retries in runMode
+  // and because we set `isInteractive` above
+  // we have to set retries here
+  Cypress.config('retries', 2)
+}
+
 beforeEach(() => {
   isActuallyInteractive = Cypress.config('isInteractive')
 

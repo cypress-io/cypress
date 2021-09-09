@@ -9,17 +9,18 @@ import {
   BackendStaticResponse,
 } from '../types'
 import { Readable, PassThrough } from 'stream'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn } from './types'
+import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
-import { CypressIncomingRequest } from '@packages/proxy'
-import { InterceptedRequest } from './intercepted-request'
+import type { CypressIncomingRequest } from '@packages/proxy'
+import type { InterceptedRequest } from './intercepted-request'
+import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-import { CyHttpMessages } from '../external-types'
+import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
@@ -29,7 +30,7 @@ export function emit (socket: CyServer.Socket, eventName: string, data: object) 
     debug('sending event to driver %o', { eventName, data: _.chain(data).cloneDeep().omit('res.body').value() })
   }
 
-  socket.toDriver('net:event', eventName, data)
+  socket.toDriver('net:stubbing:event', eventName, data)
 }
 
 export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<any>) {
@@ -77,24 +78,6 @@ function _getFakeClientResponse (opts: {
   _.merge(clientResponse, opts)
 
   return clientResponse
-}
-
-const caseInsensitiveGet = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return obj[key]
-    }
-  }
-}
-
-const caseInsensitiveHas = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return true
-    }
-  }
-
-  return false
 }
 
 export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
@@ -170,7 +153,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
  * @param backendRequest BackendRequest object.
  * @param staticResponse BackendStaticResponse object.
  */
-export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'res' | 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
+export async function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'res' | 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
   const { onError, onResponse } = backendRequest
 
   if (staticResponse.forceNetworkError) {
@@ -190,12 +173,12 @@ export function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 're
     body,
   })
 
-  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
+  const bodyStream = await getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
 
   onResponse!(incomingRes, bodyStream)
 }
 
-export function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Readable {
+export async function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Promise<Readable> {
   const { delay, throttleKbps } = options
   const pt = new PassThrough()
 
@@ -220,9 +203,17 @@ export function getBodyStream (body: Buffer | string | Readable | undefined, opt
     return writable.end()
   }
 
-  delay ? setTimeout(sendBody, delay) : sendBody()
+  delay ? await wait(sendBody, delay) : sendBody()
 
   return pt
+}
+
+function wait (fn, ms) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(fn())
+    }, ms)
+  })
 }
 
 export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
@@ -230,6 +221,19 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
     // a header was deleted from `after` but was present in `before`, delete it in `before` too
     !after.headers[k] && delete before.headers[k]
   }
+}
+
+export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
+  // lodash merge converts Buffer into Array (by design)
+  // https://github.com/lodash/lodash/issues/2964
+  // @see https://github.com/cypress-io/cypress/issues/15898
+  _.mergeWith(before, after, (_a, b) => {
+    if (b instanceof Buffer) {
+      return b
+    }
+
+    return undefined
+  })
 }
 
 type BodyEncoding = 'utf8' | 'binary' | null
@@ -241,7 +245,8 @@ export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncod
 
   // a simple heuristic for detecting UTF8 encoded requests
   if (req.headers && req.headers['content-type']) {
-    const contentType = req.headers['content-type'].toLowerCase()
+    const contentTypeHeader = req.headers['content-type'] as string
+    const contentType = contentTypeHeader.toLowerCase()
 
     if (contentType.includes('charset=utf-8') || contentType.includes('charset="utf-8"')) {
       return 'utf8'

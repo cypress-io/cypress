@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { FoundBrowser } from '@packages/launcher'
+import type { FoundBrowser } from '@packages/launcher'
 // @ts-ignore
 import errors from '../errors'
 // @ts-ignore
@@ -36,6 +36,10 @@ const getBrowserPath = (browser) => {
     getAppDataPath(browser),
     `${browser.name}-${browser.channel}`,
   )
+}
+
+const getMajorVersion = (version) => {
+  return parseFloat(version.split('.')[0]) || version
 }
 
 const defaultLaunchOptions: {
@@ -193,6 +197,8 @@ export = {
 
   getBrowserPath,
 
+  getMajorVersion,
+
   getProfileDir,
 
   getExtensionDir,
@@ -244,7 +250,7 @@ export = {
       const version = process.versions.chrome || ''
 
       if (version) {
-        majorVersion = parseFloat(version.split('.')[0])
+        majorVersion = getMajorVersion(version)
       }
 
       const electronBrowser: FoundBrowser = {

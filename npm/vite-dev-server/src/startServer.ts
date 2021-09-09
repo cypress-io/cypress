@@ -6,18 +6,11 @@ import { makeCypressPlugin } from './makeCypressPlugin'
 
 const debug = Debug('cypress:vite-dev-server:start')
 
-interface Options {
-  specs: Cypress.Cypress['spec'][]
-  config: Record<string, string>
-  devServerEvents: EventEmitter
-  [key: string]: unknown
-}
-
-export interface StartDevServer {
+export interface StartDevServerOptions {
   /**
    * the Cypress options object
    */
-  options: Options
+  options: Cypress.DevServerOptions
   /**
    * By default, vite will use your vite.config file to
    * Start the server. If you need additional plugins or
@@ -27,7 +20,7 @@ export interface StartDevServer {
   viteConfig?: UserConfig
 }
 
-const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Promise<InlineConfig> => {
+const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
   const { projectRoot, supportFile } = options.config
 
   const requiredOptions: InlineConfig = {
@@ -37,7 +30,7 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
 
   const finalConfig: InlineConfig = { ...viteConfig, ...requiredOptions }
 
-  finalConfig.plugins = [...(viteConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
+  finalConfig.plugins = [...(finalConfig.plugins || []), makeCypressPlugin(projectRoot, supportFile, options.devServerEvents, options.specs)]
 
   // This alias is necessary to avoid a "prefixIdentifiers" issue from slots mounting
   // only cjs compiler-core accepts using prefixIdentifiers in slots which vue test utils use.
@@ -59,14 +52,21 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServer): Pro
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
 
-  finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative), supportFile]
+  // pre-optimizea all the specs
+  if ((options.specs && options.specs.length)) {
+    finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    // only optimize a supportFile is it is not false or undefined
+    if (supportFile) {
+      finalConfig.optimizeDeps.entries.push(supportFile)
+    }
+  }
 
   debug(`the resolved server config is ${JSON.stringify(finalConfig, null, 2)}`)
 
   return finalConfig
 }
 
-export async function start (devServerOptions: StartDevServer): Promise<ViteDevServer> {
+export async function start (devServerOptions: StartDevServerOptions): Promise<ViteDevServer> {
   if (!devServerOptions.viteConfig) {
     debug('User did not pass in any Vite dev server configuration')
     devServerOptions.viteConfig = {}

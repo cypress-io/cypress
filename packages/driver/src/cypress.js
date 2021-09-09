@@ -7,19 +7,19 @@ const sinon = require('sinon')
 const fakeTimers = require('@sinonjs/fake-timers')
 
 const $dom = require('./dom')
-const $errorMessages = require('./cypress/error_messages')
+const $errorMessages = require('./cypress/error_messages').default
 const $Chainer = require('./cypress/chainer')
 const $Command = require('./cypress/command')
 const $Commands = require('./cypress/commands')
 const $Cookies = require('./cypress/cookies')
 const $Cy = require('./cypress/cy')
 const $Events = require('./cypress/events')
-const $FirefoxForcedGc = require('./util/firefox_forced_gc')
 const $Keyboard = require('./cy/keyboard')
 const $SetterGetter = require('./cypress/setter_getter')
 const $Log = require('./cypress/log')
 const $Location = require('./cypress/location')
 const $LocalStorage = require('./cypress/local_storage')
+const { ProxyLogging } = require('./cypress/proxy-logging')
 const $Mocha = require('./cypress/mocha')
 const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
@@ -137,7 +137,6 @@ class $Cypress {
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
-    this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 
@@ -153,6 +152,8 @@ class $Cypress {
     }
 
     this.Cookies = $Cookies.create(config.namespace, d)
+
+    this.ProxyLogging = new ProxyLogging(this)
 
     return this.action('cypress:config', config)
   }
@@ -213,8 +214,6 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
-    $FirefoxForcedGc.install(this)
-
     $scriptUtils.runScripts(specWindow, scripts)
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
@@ -229,6 +228,19 @@ class $Cypress {
           this._onInitialize = resolve
         }
       }))
+    })
+    .then(() => {
+      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
+      // this is critical for headless mode since otherwise the browser never gains focus
+      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
+        window.addEventListener('blur', () => {
+          this.backend('firefox:window:focus')
+        })
+
+        if (!document.hasFocus()) {
+          return this.backend('firefox:window:focus')
+        }
+      }
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
@@ -443,6 +455,9 @@ class $Cypress {
       case 'cy:visit:failed':
         return this.emit('visit:failed', args[0])
 
+      case 'cy:visit:blank':
+        return this.emitThen('visit:blank', args[0])
+
       case 'cy:viewport:changed':
         return this.emit('viewport:changed', ...args)
 
@@ -594,6 +609,26 @@ class $Cypress {
 
   addUtilityCommand () {
     return throwPrivateCommandInterface('addUtilityCommand')
+  }
+
+  get currentTest () {
+    const r = this.cy.state('runnable')
+
+    if (!r) {
+      return null
+    }
+
+    // if we're in a hook, ctx.currentTest is defined
+    // if we're in test body, r is the currentTest
+    /**
+     * @type {Mocha.Test}
+     */
+    const currentTestRunnable = r.ctx.currentTest || r
+
+    return {
+      title: currentTestRunnable.title,
+      titlePath: currentTestRunnable.titlePath(),
+    }
   }
 
   static create (config) {

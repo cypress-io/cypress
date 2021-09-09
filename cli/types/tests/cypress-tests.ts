@@ -257,6 +257,15 @@ describe('then', () => {
       $p // $ExpectType JQuery<HTMLParagraphElement>
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/16669
+  it('any as default', () => {
+    cy.get('body')
+    .then(() => ({} as any))
+    .then(v => {
+      v // $ExpectType any
+    })
+  })
 })
 
 cy.wait(['@foo', '@bar'])
@@ -464,8 +473,8 @@ namespace CypressContainsTests {
   cy.contains('#app')
   cy.contains('my text to find')
   cy.contains('#app', 'my text to find')
-  cy.contains('#app', 'my text to find', {log: false, timeout: 100})
-  cy.contains('my text to find', {log: false, timeout: 100})
+  cy.contains('#app', 'my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
+  cy.contains('my text to find', { log: false, timeout: 100, matchCase: false, includeShadowDom: true })
 }
 
 // https://github.com/cypress-io/cypress/pull/5574
@@ -592,17 +601,19 @@ namespace CypressTestConfigOverridesTests {
     browser: [{name: 'firefox'}, {name: 'chrome'}]
   }, () => {})
   it('test', {
-    browser: 'firefox'
+    browser: 'firefox',
+    keystrokeDelay: 0
   }, () => {})
   it('test', {
-    browser: {foo: 'bar'} // $ExpectError
+    browser: {foo: 'bar'}, // $ExpectError
   }, () => {})
-
   it('test', {
-    retries: null
+    retries: null,
+    keystrokeDelay: 0
   }, () => { })
   it('test', {
-    retries: 3
+    retries: 3,
+    keystrokeDelay: false, // $ExpectError
   }, () => { })
   it('test', {
     retries: {
@@ -631,14 +642,16 @@ namespace CypressTestConfigOverridesTests {
   // set config on a per-suite basis
   describe('suite', {
     browser: {family: 'firefox'},
-    baseUrl: 'www.example.com'
+    baseUrl: 'www.example.com',
+    keystrokeDelay: 0
   }, () => {})
 
   context('suite', {}, () => {})
 
   describe('suite', {
     browser: {family: 'firefox'},
-    baseUrl: 'www.example.com'
+    baseUrl: 'www.example.com',
+    keystrokeDelay: false // $ExpectError
     foo: 'foo' // $ExpectError
   }, () => {})
 
@@ -670,5 +683,42 @@ namespace CypressTaskTests {
   cy.task('foo') // $ExpectType Chainable<unknown>
   cy.task('foo').then((val) => {
     val // $ExpectType unknown
+  })
+}
+
+namespace CypressSessionsTests {
+  Cypress.config('experimentalSessionSupport') // $ExpectType boolean
+  cy.session('user')
+  cy.session('user', () => {})
+  cy.session({ name: 'bob' }, () => {})
+  cy.session('user', () => {}, {})
+  cy.session('user', () => {}, {
+    validate: () => {}
+  })
+
+  cy.session() // $ExpectError
+  cy.session(null) // $ExpectError
+  cy.session('user', () => {}, {
+    validate: { foo: true } // $ExpectError
+  })
+}
+namespace CypressCurrentTest {
+  Cypress.currentTest.title // $ExpectType string
+  Cypress.currentTest.titlePath // $ExpectType string[]
+  Cypress.currentTest() // $ExpectError
+}
+
+namespace CypressKeyboardTests {
+  Cypress.Keyboard.defaults({
+    keystrokeDelay: 0
+  })
+  Cypress.Keyboard.defaults({
+    keystrokeDelay: 500
+  })
+  Cypress.Keyboard.defaults({
+    keystrokeDelay: false // $ExpectError
+  })
+  Cypress.Keyboard.defaults({
+    delay: 500 // $ExpectError
   })
 }

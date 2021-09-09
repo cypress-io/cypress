@@ -22,6 +22,7 @@
     "@cypress/react": "0.0.0-development",
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
+    "@fontsource/fira-sans": "4.3.0",
     "@fontsource/poppins": "4.3.0",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "0.0.0-development",
@@ -34,7 +35,6 @@
     "cypress-multi-reporters": "1.4.0",
     "cypress-real-events": "1.4.0",
     "dayjs": "^1.9.3",
-    "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "gravatar": "1.8.0",
     "human-interval": "1.0.0",
     "lodash": "4.17.21",
@@ -57,7 +57,6 @@
   },
   "files": [
     "dist",
-    "lib",
     "!lib/**/*_spec.jsx"
   ]
 }

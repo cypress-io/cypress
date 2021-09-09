@@ -1,22 +1,23 @@
 import { debug as debugFn } from 'debug'
-import { Server } from 'http'
-import { start as createDevServer, StartDevServer } from './startServer'
+import { start as createDevServer, StartDevServerOptions } from './startServer'
 const debug = debugFn('cypress:vite-dev-server:vite')
 
-export { StartDevServer }
+export { StartDevServerOptions }
+
+type DoneCallback = () => unknown
 
 export interface ResolvedDevServerConfig {
   port: number
-  server: Server
+  close: (done?: DoneCallback) => void
 }
 
-export async function startDevServer (startDevServerArgs: StartDevServer): Promise<ResolvedDevServerConfig> {
+export async function startDevServer (startDevServerArgs: StartDevServerOptions): Promise<ResolvedDevServerConfig> {
   const viteDevServer = await createDevServer(startDevServerArgs)
 
   const app = await viteDevServer.listen()
-  const port = app.config.server.port
+  const port = app.config.server.port!
 
   debug('Component testing vite server started on port', port)
 
-  return { port, server: app.httpServer }
+  return { port, close: app.httpServer!.close }
 }

@@ -60,10 +60,10 @@
     "to-string-loader": "1.1.6",
     "ts-loader": "8.1.0",
     "ts-node": "9.1.1",
-    "tslib": "2.2.0",
+    "tslib": "^2.2.0",
     "tslint": "5.20.1",
     "typescript": "4.2.4",
-    "webpack-dev-server": "3.11.2",
+    "webpack-dev-server": "4.0.0",
     "zone.js": "0.11.4"
   },
   "peerDependencies": {

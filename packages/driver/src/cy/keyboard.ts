@@ -2,14 +2,15 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import dayjs from 'dayjs'
-import $errUtils from '../cypress/error_utils'
+import * as $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
-import { HTMLTextLikeElement } from '../dom/elements'
+import type { HTMLTextLikeElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
+import $utils from '../cypress/utils'
 import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
@@ -688,11 +689,7 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  private SUPPORTS_BEFOREINPUT_EVENT
-
-  constructor (private Cypress, private state: State) {
-    this.SUPPORTS_BEFOREINPUT_EVENT = Cypress.isBrowser({ family: 'chromium' })
-  }
+  constructor (private state: State) {}
 
   type (opts: typeOptions) {
     const options = _.defaults({}, opts, {
@@ -840,9 +837,14 @@ export class Keyboard {
 
     return Promise
     .each(typeKeyFns, (fn) => {
+      if (options.delay) {
+        return Promise
+        .try(fn)
+        .delay(options.delay)
+      }
+
       return Promise
       .try(fn)
-      .delay(options.delay)
     })
     .then(() => {
       if (options.release !== false) {
@@ -1168,7 +1170,6 @@ export class Keyboard {
         this.fireSimulatedEvent(elToType, 'keypress', key, options)
       ) {
         if (
-          !this.SUPPORTS_BEFOREINPUT_EVENT ||
           shouldIgnoreEvent('beforeinput', key.events) ||
           this.fireSimulatedEvent(elToType, 'beforeinput', key, options)
         ) {
@@ -1311,14 +1312,60 @@ export class Keyboard {
   }
 }
 
-const create = (Cypress, state) => {
-  return new Keyboard(Cypress, state)
+const create = (state) => {
+  return new Keyboard(state)
+}
+
+let _defaults
+
+const reset = () => {
+  _defaults = {
+    keystrokeDelay: 10,
+  }
+}
+
+reset()
+
+const getConfig = () => {
+  return _.clone(_defaults)
+}
+
+const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
+  if (!_.isPlainObject(props)) {
+    $errUtils.throwErrByPath('keyboard.invalid_arg', {
+      args: { arg: $utils.stringify(props) },
+    })
+  }
+
+  if (!('keystrokeDelay' in props)) {
+    return getConfig()
+  }
+
+  if (!_.isNumber(props.keystrokeDelay) || props.keystrokeDelay! < 0) {
+    $errUtils.throwErrByPath('keyboard.invalid_delay', {
+      args: {
+        cmd: 'Cypress.Keyboard.defaults',
+        docsPath: 'keyboard-api',
+        option: 'keystrokeDelay',
+        delay: $utils.stringify(props.keystrokeDelay),
+      },
+    })
+  }
+
+  _.extend(_defaults, {
+    keystrokeDelay: props.keystrokeDelay,
+  })
+
+  return getConfig()
 }
 
 export {
   create,
+  defaults,
+  getConfig,
   getKeymap,
   modifiersToString,
+  reset,
   toModifiersEventOptions,
   fromModifierEventOptions,
 }

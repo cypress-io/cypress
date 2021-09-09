@@ -1,3 +1,24 @@
+# [@cypress/react-v5.9.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.3...@cypress/react-v5.9.4) (2021-08-10)
+
+
+### Bug Fixes
+
+* do not throw when alt path is found in next ([#17658](https://github.com/cypress-io/cypress/issues/17658)) ([ee7e203](https://github.com/cypress-io/cypress/commit/ee7e203fa059efeac45c7a18526e563643e76d77)), closes [#17476](https://github.com/cypress-io/cypress/issues/17476)
+
+# [@cypress/react-v5.9.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.2...@cypress/react-v5.9.3) (2021-08-03)
+
+
+### Bug Fixes
+
+* plugin for next 11.0.2 moved webpack-config ([#17529](https://github.com/cypress-io/cypress/issues/17529)) ([130c086](https://github.com/cypress-io/cypress/commit/130c0864e786ae5172f2c70fdc86664dcaf93083)), closes [#17519](https://github.com/cypress-io/cypress/issues/17519) [#17476](https://github.com/cypress-io/cypress/issues/17476)
+
+# [@cypress/react-v5.9.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.1...@cypress/react-v5.9.2) (2021-07-20)
+
+
+### Bug Fixes
+
+* improve React `mountHook` type ([#17241](https://github.com/cypress-io/cypress/issues/17241)) ([e40969a](https://github.com/cypress-io/cypress/commit/e40969abe39424585fd2075b17e4e7d189f53c3a))
+
 # [@cypress/react-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.0...@cypress/react-v5.9.1) (2021-06-04)
 
 

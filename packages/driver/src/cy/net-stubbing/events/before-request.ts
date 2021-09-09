@@ -1,21 +1,20 @@
 import _ from 'lodash'
 
 import {
-  Route,
   Interception,
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
-import { parseJsonBody } from './utils'
+import { parseJsonBody, stringifyJsonBody } from './utils'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
-import $errUtils from '../../../cypress/error_utils'
-import { HandlerFn, HandlerResult } from '.'
+import * as $errUtils from '../../../cypress/error_utils'
+import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import { NetEvent } from '@packages/net-stubbing/lib/types'
+import type { NetEvent } from '@packages/net-stubbing/lib/types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:net-stubbing:events:before-request')
@@ -24,57 +23,15 @@ type Result = HandlerResult<CyHttpMessages.IncomingRequest>
 
 const validEvents = ['before:response', 'response', 'after:response']
 
-const getDisplayUrl = (url: string) => {
-  if (url.startsWith(window.location.origin)) {
-    return url.slice(window.location.origin.length)
-  }
-
-  return url
-}
-
 export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypress, frame, userHandler, { getRoute, getRequest, emitNetEvent, sendStaticResponse }) => {
-  function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
-    const message = _.compact([
-      request.request.method,
-      request.response && request.response.statusCode,
-      getDisplayUrl(request.request.url),
-      request.state,
-    ]).join(' ')
-
-    const displayName = route.handler ? (_.isFunction(route.handler) ? 'req fn' : 'req stub') : 'req'
-
-    return Cypress.log({
-      name: 'xhr',
-      displayName,
-      alias: route.alias,
-      aliasType: 'route',
-      type: 'parent',
-      event: true,
-      method: request.request.method,
-      timeout: undefined,
-      consoleProps: () => {
-        return {
-          Alias: route.alias,
-          Method: request.request.method,
-          URL: request.request.url,
-          Matched: route.options,
-          Handler: route.handler,
-        }
-      },
-      renderProps: () => {
-        return {
-          indicator: request.state === 'Complete' ? 'successful' : 'pending',
-          message,
-        }
-      },
-    })
-  }
-
   const { data: req, requestId, subscription } = frame
   const { routeId } = subscription
   const route = getRoute(routeId)
 
-  parseJsonBody(req)
+  const bodyParsed = parseJsonBody(req)
+
+  req.responseTimeout = Cypress.config('responseTimeout')
+  const reqClone = _.cloneDeep(req)
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
@@ -94,33 +51,119 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
   }
 
-  const getCanonicalRequest = (): Interception => {
-    const existingRequest = getRequest(routeId, requestId)
+  const getCanonicalInterception = (): Interception => {
+    const existingInterception = getRequest(routeId, requestId)
 
-    if (existingRequest) {
-      existingRequest.request = req
+    if (existingInterception) {
+      existingInterception.request = req
 
-      return existingRequest
+      return existingInterception
     }
 
     return {
       id: requestId,
+      browserRequestId: frame.browserRequestId,
       routeId,
       request: req,
       state: 'Received',
       requestWaited: false,
       responseWaited: false,
       subscriptions: [],
+      setLogFlag: () => {
+        throw new Error('default setLogFlag reached')
+      },
     }
   }
 
-  const request: Interception = getCanonicalRequest()
+  const request: Interception = getCanonicalInterception()
 
   let resolved = false
   let handlerCompleted = false
 
+  const createQueryObject = () => {
+    try {
+      if (/^(?:[a-z]+:)?\/\//i.test(req.url) === false) {
+        const { protocol, hostname, port } = window.location
+
+        req.url = `${protocol}//${hostname}${port ? `:${port}` : ''}${req.url}`
+      }
+
+      const url = new URL(req.url)
+      const urlSearchParams = new URLSearchParams(url.search)
+      const result = {}
+
+      for (let pair of urlSearchParams.entries()) {
+        result[pair[0]] = pair[1]
+      }
+
+      return result
+    } catch { // avoid when url is "".
+      return {}
+    }
+  }
+
+  const updateUrlParams = (paramsObj) => {
+    const url = new URL(req.url)
+    const urlSearchParams = new URLSearchParams(paramsObj)
+
+    url.search = urlSearchParams.toString()
+    req.url = url.toString()
+  }
+
+  const createQueryProxy = (obj) => {
+    return new Proxy(obj, {
+      set (target, key, value) {
+        target[key] = value
+
+        updateUrlParams(target)
+
+        return true
+      },
+
+      deleteProperty (target, key) {
+        delete target[key]
+
+        updateUrlParams(target)
+
+        return true
+      },
+
+      defineProperty () {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.defineproperty_is_not_allowed')
+
+        return false
+      },
+
+      setPrototypeOf () {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.setprototypeof_is_not_allowed')
+
+        return false
+      },
+    })
+  }
+
+  let queryObj = createQueryObject()
+  let queryProxy = createQueryProxy(queryObj)
+
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
+    get query () {
+      return queryProxy
+    },
+    set query (userQuery) {
+      updateUrlParams(userQuery)
+      queryProxy = createQueryProxy(userQuery)
+    },
+    get url () {
+      return req.url
+    },
+    set url (userUrl) {
+      req.url = userUrl
+
+      // reset query variables
+      queryObj = createQueryObject()
+      queryProxy = createQueryProxy(queryObj)
+    },
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
@@ -161,8 +204,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
       subscribe('response:callback', responseHandler)
 
-      userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
-
       return finish(true)
     },
     reply (responseHandler?, maybeBody?, maybeHeaders?) {
@@ -192,6 +233,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
+        request.setLogFlag('stubbed')
+
         sendStaticResponse(requestId, responseHandler)
 
         return updateRequest(req)
@@ -208,7 +251,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     destroy () {
       userReq.reply({
         forceNetworkError: true,
-      }) // TODO: this misnomer is a holdover from XHR, should be numRequests
+      })
     },
   }
 
@@ -219,7 +262,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       request.request = _.cloneDeep(req)
 
       request.state = 'Intercepted'
-      request.log && request.log.fireChangeEvent()
     }
   }
 
@@ -239,8 +281,12 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     updateRequest(req)
 
-    if (_.isObject(req.body)) {
-      req.body = JSON.stringify(req.body)
+    if (bodyParsed) {
+      stringifyJsonBody(req)
+    }
+
+    if (!_.isEqual(req, reqClone)) {
+      request.setLogFlag('reqModified')
     }
 
     resolve({
@@ -255,9 +301,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  if (!request.log) {
-    request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
-  }
+  request.setLogFlag = Cypress.ProxyLogging.logInterception(request, route).setFlag
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

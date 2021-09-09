@@ -41,8 +41,6 @@ const unavailableErr = () => {
   return $errUtils.throwErrByPath('server.unavailable')
 }
 
-const getDisplayName = (route) => _.isNil(route?.response) ? 'xhr' : 'xhr stub'
-
 const stripOrigin = (url) => {
   const location = $Location.create(url)
 
@@ -109,10 +107,12 @@ const startXhrServer = (cy, state, config) => {
         rl.set('numResponses', numResponses + 1)
       }
 
+      const isStubbed = route && !_.isNil(route.response)
+
       const log = logs[xhr.id] = Cypress.log({
         message: '',
         name: 'xhr',
-        displayName: getDisplayName(route),
+        displayName: 'xhr',
         alias,
         aliasType: 'route',
         type: 'parent',
@@ -126,7 +126,7 @@ const startXhrServer = (cy, state, config) => {
             'Matched URL': route?.url,
             Status: xhr.statusMessage,
             Duration: xhr.duration,
-            Stubbed: _.isNil(route?.response) ? 'No' : 'Yes',
+            Stubbed: isStubbed ? 'Yes' : 'No',
             Request: xhr.request,
             Response: xhr.response,
             XHR: xhr._getXhr(),
@@ -172,9 +172,19 @@ const startXhrServer = (cy, state, config) => {
           return {
             indicator,
             message: `${xhr.method} ${status} ${stripOrigin(xhr.url)}`,
+            interceptions: route ? [
+              {
+                command: 'route',
+                type: isStubbed ? 'stub' : 'spy',
+                alias,
+              },
+            ] : [],
+            wentToOrigin: !isStubbed,
           }
         },
       })
+
+      Cypress.ProxyLogging.addXhrLog({ xhr, route, log, stack })
 
       return log.snapshot('request')
     },
@@ -185,7 +195,14 @@ const startXhrServer = (cy, state, config) => {
       const log = logs[xhr.id]
 
       if (log) {
-        return log.snapshot('response').end()
+        // the xhr log can already have a snapshot if it's been correlated with a proxy request (not xhr stubbed), so check first
+        const hasResponseSnapshot = log.get('snapshots')?.find((v) => v.name === 'response')
+
+        if (!hasResponseSnapshot) {
+          log.snapshot('response')
+        }
+
+        log.end()
       }
     },
 

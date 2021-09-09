@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
-const { normalizedStack } = require('./stack_utils')
+const $stackUtils = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -101,7 +101,7 @@ const cyStripIndent = (str, indentSize) => {
   }).join('\n')
 }
 
-module.exports = {
+export default {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',
   },
@@ -668,6 +668,24 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/{{cmd}}',
     },
   },
+
+  keyboard: {
+    invalid_arg: {
+      message: `${cmd('Cypress.Keyboard.defaults')} must be called with an object. You passed: \`{{arg}}\``,
+      docsUrl: 'https://on.cypress.io/keyboard-api',
+    },
+    invalid_delay ({ cmd: command, option, delay, docsPath }) {
+      return {
+        message: `${cmd(command)} \`${option}\` option must be 0 (zero) or a positive number. You passed: \`${delay}\``,
+        docsUrl: `https://on.cypress.io/${docsPath}`,
+      }
+    },
+    invalid_per_test_delay: {
+      message: `The test configuration \`keystrokeDelay\` option must be 0 (zero) or a positive number. You passed: \`{{delay}}\``,
+      docsUrl: 'https://on.cypress.io/test-configuration',
+    },
+  },
+
   location: {
     invalid_key: {
       message: 'Location object does not have key: `{{key}}`',
@@ -917,7 +935,7 @@ module.exports = {
     reached_redirection_limit ({ href, limit }) {
       return stripIndent`\
         The application redirected to \`${href}\` more than ${limit} times. Please check if it's an intended behavior.
-        
+
         If so, increase \`redirectionLimit\` value in configuration.`
     },
   },
@@ -934,7 +952,7 @@ module.exports = {
       extra_arguments: ({ argsLength, overload }) => {
         return cyStripIndent(`\
           The ${cmd('intercept', overload.join(', '))} signature accepts a maximum of ${overload.length} arguments, but ${argsLength} arguments were passed.
-          
+
           Please refer to the docs for all accepted signatures for ${cmd('intercept')}.`, 10)
       },
       invalid_handler: ({ handler }) => {
@@ -977,19 +995,21 @@ module.exports = {
       unknown_event: ({ validEvents, eventName }) => {
         return cyStripIndent(`\
           An invalid event name was passed as the first parameter to \`req.on()\`.
-          
+
           Valid event names are: ${format(validEvents)}
-          
+
           You passed: ${format(eventName)}`, 10)
       },
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
+      defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
+      setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
     },
     request_error: {
       network_error: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but a network error occurred while making the request:
 
-          ${normalizedStack(innerErr)}
+          ${$stackUtils.normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
@@ -999,7 +1019,7 @@ module.exports = {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
 
-          ${normalizedStack(innerErr)}
+          ${$stackUtils.normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
@@ -1418,6 +1438,59 @@ module.exports = {
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
     whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
+  },
+
+  sessions: {
+    validate_callback_false: {
+      message: 'Your `cy.session` **validate** callback {{reason}}',
+    },
+    experimentNotEnabled: {
+      message: 'experimentalSessionSupport is not enabled. You must enable the experimentalSessionSupport flag in order to use Cypress session commands',
+      docsUrl: 'https://on.cypress.io/session',
+    },
+    session: {
+      duplicateId: {
+        message: stripIndent`
+        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgId: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid argument. The first argument \`id\` must be an string or serializable object.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptions: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid argument. The optional third argument \`options\` must be an object.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptionUnexpected: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid option: **{{key}}**
+        Available options are: \`validate\`
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      wrongArgOptionInvalid: {
+        message: stripIndent`
+        ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      not_found: {
+        message: stripIndent`
+        No session is defined with the name
+          **{{id}}**
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\`
+        `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+    },
   },
 
   setCookie: {
@@ -1910,7 +1983,7 @@ module.exports = {
         ${cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 
         To visit a local file, you can pass in the relative path to the file from the \`projectRoot\` (Note: if the configuration value \`baseUrl\` is set, the supplied path will be resolved from the \`baseUrl\` instead of \`projectRoot\`)`,
-      docsUrl: ['https://docs.cypress.io/api/commands/visit.html', '/https://docs.cypress.io/api/cypress-api/config.html'],
+      docsUrl: 'https://on.cypress.io/visit',
     },
   },
 
@@ -1929,6 +2002,10 @@ module.exports = {
     },
     invalid_arguments: {
       message: `${cmd('wait')} was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.`,
+      docsUrl: 'https://on.cypress.io/wait',
+    },
+    invalid_arguments_function: {
+      message: `${cmd('wait')} was passed invalid arguments. You cannot pass a function. If you would like to wait on the result of a ${cmd('wait')}, use ${cmd('then')}.`,
       docsUrl: 'https://on.cypress.io/wait',
     },
     timed_out: {

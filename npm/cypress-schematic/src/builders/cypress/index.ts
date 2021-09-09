@@ -11,7 +11,7 @@ import { dirname, join } from 'path'
 import { open, run } from 'cypress'
 import { from, noop, Observable, of } from 'rxjs'
 import { catchError, concatMap, first, map, switchMap, tap } from 'rxjs/operators'
-import { CypressBuilderOptions } from './cypress-builder-options'
+import { CypressBuilderOptions } from './cypressBuilderOptions'
 
 type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
   Partial<CypressCommandLine.CypressOpenOptions>;

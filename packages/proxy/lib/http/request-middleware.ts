@@ -1,9 +1,9 @@
 import _ from 'lodash'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
-import { HttpMiddleware } from './'
+import type { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -19,11 +19,59 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
+const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
+  if (!this.shouldCorrelatePreRequests()) {
+    return this.next()
+  }
+
+  if (this.req.headers['x-cypress-resolving-url']) {
+    this.debug('skipping prerequest for resolve:url')
+    delete this.req.headers['x-cypress-resolving-url']
+    const requestId = `cy.visit-${Date.now()}`
+
+    this.req.browserPreRequest = {
+      requestId,
+      method: this.req.method,
+      url: this.req.proxiedUrl,
+      // @ts-ignore
+      headers: this.req.headers,
+      resourceType: 'document',
+      originalResourceType: 'document',
+    }
+
+    this.res.on('close', () => {
+      this.socket.toDriver('request:event', 'response:received', {
+        requestId,
+        headers: this.res.getHeaders(),
+        status: this.res.statusCode,
+      })
+    })
+
+    return this.next()
+  }
+
+  this.debug('waiting for prerequest')
+  this.getPreRequest(((browserPreRequest) => {
+    this.req.browserPreRequest = browserPreRequest
+    this.next()
+  }))
+}
+
+const SendToDriver: RequestMiddleware = function () {
+  const { browserPreRequest } = this.req
+
+  if (browserPreRequest) {
+    this.socket.toDriver('request:event', 'incoming:request', browserPreRequest)
+  }
+
+  this.next()
+}
+
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const buffer = this.buffers.take(this.req.proxiedUrl)
 
   if (buffer) {
-    debug('got a buffer %o', _.pick(buffer, 'url'))
+    this.debug('ending request with buffered response')
     this.res.wantsInjection = 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
@@ -52,10 +100,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 
     if (matches) {
       this.res.set('x-cypress-matched-blocked-host', matches)
-      debug('blocking request %o', {
-        url: this.req.proxiedUrl,
-        matches,
-      })
+      this.debug('blocking request %o', { matches })
 
       this.res.status(503).end()
 
@@ -127,7 +172,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   req.on('error', this.onError)
   req.on('response', (incomingRes) => this.onResponse(incomingRes, req))
   this.req.on('aborted', () => {
-    debug('request aborted')
+    this.debug('request aborted')
     req.abort()
   })
 
@@ -142,6 +187,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   MaybeEndRequestWithBufferedResponse,
+  CorrelateBrowserPreRequest,
+  SendToDriver,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,
   EndRequestsToBlockedHosts,

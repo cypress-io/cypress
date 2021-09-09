@@ -843,7 +843,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-        This usually indicates there was a problem opening the Chrome browser.
+        This usually indicates there was a problem opening the ${arg3} browser.
 
         The CDP port requested was ${chalk.yellow(arg1)}.
 
@@ -865,7 +865,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${arg1.stack}`
     case 'CDP_RETRYING_CONNECTION':
-      return `Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
+      return `Failed to connect to ${arg2}, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
       return stripIndent`\
         Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
@@ -941,6 +941,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalRunEvents\` configuration option was removed in Cypress version \`6.7.0\`. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
+    case 'FIREFOX_GC_INTERVAL_REMOVED':
+      return stripIndent`\
+        The \`firefoxGcInterval\` configuration option was removed in Cypress version \`8.0.0\`. It was introduced to work around a bug in Firefox 79 and below.
+
+        Since Cypress no longer supports Firefox 85 and below in Cypress 8, this option was removed.
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
@@ -965,6 +972,23 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${chalk.yellow(arg2)}
       `
+    case 'CT_NO_DEV_START_EVENT':
+      return stripIndent`\
+        To run component-testing, cypress needs the \`dev-server:start\` event. 
+
+        Implement it by adding a \`on('dev-server:start', () => startDevServer())\` call in your pluginsFile.
+        ${arg1 ?
+        stripIndent`\
+        You can find the \'pluginsFile\' at the following path:
+
+        ${arg1}
+        ` : ''}
+        Learn how to set up component testing:
+
+        https://on.cypress.io/component-testing
+        `
+    case 'UNSUPPORTED_BROWSER_VERSION':
+      return arg1
     default:
   }
 }

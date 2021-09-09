@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import {
+import type {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
   Subscription,
@@ -12,6 +12,8 @@ export type FixtureOpts = {
 }
 
 export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
+
+export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer>
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -57,20 +59,22 @@ export declare namespace NetEvent {
 
   export namespace ToDriver {
     export interface Event<D> extends Http {
+      /**
+       * If set, this is the browser's internal identifier for this request.
+       */
+      browserRequestId?: string
       subscription: Subscription
       eventId: string
       data: D
     }
 
-    export interface Request extends Event<CyHttpMessages.IncomingRequest> {}
-
     export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
   }
 
   export namespace ToServer {
-    export interface AddRoute {
+    export interface AddRoute<StaticResponse> {
       routeMatcher: AnnotatedRouteMatcherOptions
-      staticResponse?: BackendStaticResponse
+      staticResponse?: StaticResponse
       hasInterceptor: boolean
       routeId: string
     }

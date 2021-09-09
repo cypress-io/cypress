@@ -14,6 +14,7 @@ import {
   NetEvent,
   StringMatcher,
   NumberMatcher,
+  BackendStaticResponseWithArrayBuffer,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,
@@ -24,9 +25,10 @@ import {
   getRouteMatcherLogConfig,
 } from './route-matcher-log'
 import { registerEvents } from './events'
-import $errUtils from '../../cypress/error_utils'
+import * as $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 import isValidDomain from 'is-valid-domain'
+import isValidHostname from 'is-valid-hostname'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
@@ -130,7 +132,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  if (_.isString(routeMatcher.hostname) && !isValidDomain(routeMatcher.hostname, { allowUnicode: true })) {
+  if (_.isString(routeMatcher.hostname) && !(isValidHostname(routeMatcher.hostname) || isValidDomain(routeMatcher.hostname, { allowUnicode: true }))) {
     return err('`hostname` must be a valid host name or domain name.')
   }
 
@@ -212,7 +214,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_middleware_handler', { args: { handler } })
     }
 
-    const frame: NetEvent.ToServer.AddRoute = {
+    const frame: NetEvent.ToServer.AddRoute<BackendStaticResponseWithArrayBuffer> = {
       routeId,
       hasInterceptor,
       routeMatcher,

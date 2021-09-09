@@ -11,11 +11,11 @@ import { launch } from '@packages/launcher'
 
 import appData from '../util/app_data'
 import { fs } from '../util/fs'
-import { CdpAutomation } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
-import { Browser } from './types'
+import type { Browser } from './types'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -177,12 +177,6 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
   .return()
 }
 
-const getRemoteDebuggingPort = async () => {
-  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  return port || utils.getPort()
-}
-
 /**
  * Merge the different `--load-extension` arguments into one.
  *
@@ -252,13 +246,13 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError) {
+const _connectToChromeRemoteInterface = function (port, onError, browserDisplayName) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
   debug('connecting to Chrome remote interface at random port %d', port)
 
-  return protocol.getWsTargetFor(port)
+  return protocol.getWsTargetFor(port, browserDisplayName)
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
@@ -279,9 +273,7 @@ const _maybeRecordVideo = async function (client, options) {
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', {
-    format: 'jpeg',
-  })
+  await client.send('Page.startScreencast', screencastOpts)
 
   return client
 }
@@ -338,7 +330,7 @@ const _handleDownloads = async function (client, dir, automation) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    CdpAutomation(client.send),
+    new CdpAutomation(client.send, client.on, automation),
   )
 }
 
@@ -432,9 +424,13 @@ export = {
     if (isHeadless) {
       args.push('--headless')
 
-      // set default headless size to 1920x1080
+      // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
-      args.push('--window-size=1920,1080')
+      args.push('--window-size=1280,720')
+
+      // set default headless DPR to 1
+      // https://github.com/cypress-io/cypress/issues/17375
+      args.push('--force-device-scale-factor=1')
     }
 
     // force ipv4
@@ -451,7 +447,7 @@ export = {
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
     const [port, preferences] = await Bluebird.all([
-      getRemoteDebuggingPort(),
+      protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
 
@@ -504,7 +500,7 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
+    const criClient = await this._connectToChromeRemoteInterface(port, options.onError, browser.displayName)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
