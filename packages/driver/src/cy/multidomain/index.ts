@@ -1,19 +1,32 @@
 import Bluebird from 'bluebird'
-import * as $Log from '../../cypress/log'
+import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
+
+const readiedDomains = {}
 
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   Commands.addAll({
     anticipateMultidomain () {
+      const domain = '127.0.0.1:3501'
+
       state('anticipateMultidomain', true)
 
       return new Bluebird((resolve) => {
+        // the spec bridge iframe only loads once, and that's when it sends
+        // 'cross:domain:bridge:ready', so if we've already readied it,
+        // there's no need to wait
+        if (readiedDomains[domain]) {
+          return resolve()
+        }
+
         // @ts-ignore
         Cypress.once('cross:domain:bridge:ready', () => {
+          readiedDomains[domain] = true
+
           resolve()
         })
 
-        Cypress.action('cy:expect:domain', '127.0.0.1:3501')
+        Cypress.action('cy:expect:domain', domain)
       })
     },
 

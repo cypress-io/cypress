@@ -1,6 +1,4 @@
-// NOTE: skipping for now since these are a bit flaky and can't run
-// more than one test at a time
-describe.skip('multidomain', () => {
+describe('multidomain', () => {
   const expectTextMessage = (expected, done) => {
     const onMessage = (event) => {
       if (event.data && event.data.actual !== undefined) {

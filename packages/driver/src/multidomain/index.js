@@ -58,26 +58,19 @@ const onBeforeAppWindowLoad = (autWindow) => {
 
   $Commands.create(Cypress, cy, state, config)
 
-  autWindow.addEventListener('load', () => {
-    postMessage('cross:domain:window:load')
-  })
-
-  Cypress.on('command:enqueued', (commandAttrs) => {
+  const onCommandEnqueued = (commandAttrs) => {
     const { id, name } = commandAttrs
 
     // it's not strictly necessary to send the name, but it can be useful
     // for debugging purposes
     postMessage('cross:domain:command:enqueued', { id, name })
-  })
+  }
 
   const onCommandEnd = (command) => {
     const id = command.get('id')
 
     postMessage('cross:domain:command:update', { id, end: true })
   }
-
-  Cypress.on('command:end', onCommandEnd)
-  Cypress.on('skipped:command:end', onCommandEnd)
 
   const onLogAdded = (attrs) => {
     postMessage('cross:domain:command:update', {
@@ -91,6 +84,9 @@ const onBeforeAppWindowLoad = (autWindow) => {
     })
   }
 
+  Cypress.on('command:enqueued', onCommandEnqueued)
+  Cypress.on('command:end', onCommandEnd)
+  Cypress.on('skipped:command:end', onCommandEnd)
   Cypress.on('log:added', onLogAdded)
   Cypress.on('log:changed', onLogChanged)
 
@@ -119,8 +115,7 @@ const onBeforeAppWindowLoad = (autWindow) => {
     })
   }
 
-  // incoming messages from the primary domain
-  window.addEventListener('message', (event) => {
+  const onMessage = (event) => {
     if (!event.data) return
 
     switch (event.data.message) {
@@ -132,7 +127,10 @@ const onBeforeAppWindowLoad = (autWindow) => {
         // eslint-disable-next-line no-console
         console.log('Unknown message received in', window.location.origin, ':', event.data)
     }
-  }, false)
+  }
+
+  // incoming messages from the primary domain
+  window.addEventListener('message', onMessage, false)
 
   autWindow.Cypress = Cypress
   autWindow.cy = cy
@@ -160,7 +158,18 @@ const onBeforeAppWindowLoad = (autWindow) => {
       // doesn't trigger a confirmation dialog
       return undefined
     },
+    onLoad () {
+      postMessage('cross:domain:window:load')
+    },
     onUnload (e) {
+      window.removeEventListener('message', onMessage)
+
+      Cypress.off('command:enqueued', onCommandEnqueued)
+      Cypress.off('command:end', onCommandEnd)
+      Cypress.off('skipped:command:end', onCommandEnd)
+      Cypress.off('log:added', onLogAdded)
+      Cypress.off('log:changed', onLogChanged)
+
       return Cypress.action('app:window:unload', e)
     },
     // TODO: this currently only works on hashchange, but needs work
