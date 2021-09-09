@@ -6,9 +6,10 @@ import { fs } from '../util/fs'
 import path from 'path'
 import Debug from 'debug'
 import pkg from '@packages/root'
-import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
-import type { InitializeRoutes } from '../routes-ct'
+import { getPathToDist, getPathToIndex, RunnerPkg } from '@packages/resolve-dist'
+import type { InitializeRoutes } from '../routes'
 import type { PlatformName } from '@packages/launcher'
+import type { Cfg } from '../project-base'
 
 const debug = Debug('cypress:server:runner')
 
@@ -23,6 +24,19 @@ const _serveNonProxiedError = (res: Response) => {
 
 interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore'> {
   testingType: Cypress.TestingType
+}
+
+export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) => {
+  // base64 before embedding so user-supplied contents can't break out of <script>
+  // https://github.com/cypress-io/cypress/issues/4952
+  const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex(runnerPkg)
+
+  return res.render(runnerPath, {
+    base64Config,
+    projectName: config.projectName,
+  })
 }
 
 export const runner = {
@@ -54,16 +68,7 @@ export const runner = {
     // log the env object's keys without values to avoid leaking sensitive info
     debug('env object has the following keys: %s', _.keys(config.env).join(', '))
 
-    // base64 before embedding so user-supplied contents can't break out of <script>
-    // https://github.com/cypress-io/cypress/issues/4952
-    const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
-
-    const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner')
-
-    return res.render(runnerPath, {
-      base64Config,
-      projectName: config.projectName,
-    })
+    return serveRunner('runner', config, res)
   },
 
   handle (testingType, req, res) {

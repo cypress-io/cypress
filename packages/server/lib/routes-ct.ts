@@ -2,12 +2,12 @@ import _ from 'lodash'
 import Debug from 'debug'
 import type { ErrorRequestHandler } from 'express'
 import send from 'send'
-import xhrs from '@packages/server/lib/controllers/xhrs'
+import xhrs from './controllers/xhrs'
 import type { SpecsStore } from '@packages/server/lib/specs-store'
 import type { Cfg } from '@packages/server/lib/project-base'
-import { getPathToDist, getPathToIndex } from '@packages/resolve-dist'
+import { getPathToDist } from '@packages/resolve-dist'
 import type { Browser } from '@packages/server/lib/browsers/types'
-import { runner } from './controllers/runner'
+import { runner, serveRunner } from './controllers/runner'
 import { staticCtrl } from './controllers/static'
 import type { InitializeRoutes } from './routes'
 import { iframesController } from './controllers/iframes'
@@ -34,16 +34,7 @@ export const serve = (req, res, options: ServeOptions) => {
   debug('serving runner index.html with config %o',
     _.pick(config, 'version', 'platform', 'arch', 'projectName'))
 
-  // base64 before embedding so user-supplied contents can't break out of <script>
-  // https://github.com/cypress-io/cypress/issues/4952
-  const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
-
-  const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || getPathToIndex('runner-ct')
-
-  return res.render(runnerPath, {
-    base64Config,
-    projectName: config.projectName,
-  })
+  return serveRunner('runner-ct', config, res)
 }
 
 const serveChunk = (req, res, options) => {
@@ -60,7 +51,6 @@ export const createRoutes = ({
   nodeProxy,
   networkProxy,
   getCurrentBrowser,
-  getSpec,
   testingType,
 }: InitializeRoutes) => {
   app.get('/__cypress/runner/*', (req, res) => runner.handle(testingType, req, res))
