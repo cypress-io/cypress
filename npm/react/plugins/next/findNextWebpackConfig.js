@@ -2,7 +2,7 @@
 /// <reference types="next" />
 const debug = require('debug')('@cypress/react')
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config').default
-const { findPagesDir } = require('./findPagesDir')
+const { findPagesDir } = require('../../dist/findPagesDir')
 
 async function getNextWebpackConfig (config) {
   let loadConfig

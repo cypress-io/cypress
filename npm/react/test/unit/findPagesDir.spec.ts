@@ -1,6 +1,6 @@
-const { expect } = require('chai')
-const path = require('path')
-const { findPagesDir } = require('../../plugins/next/findPagesDir')
+import { expect } from 'chai'
+import * as path from 'path'
+import { findPagesDir } from '../../plugins/next/findPagesDir'
 
 describe('Next.js findPagesDir', () => {
   it('should find the correct pagesDir', () => {

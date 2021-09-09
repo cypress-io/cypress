@@ -1,8 +1,7 @@
-const path = require('path')
-const fs = require('fs')
+import * as fs from 'fs'
+import * as path from 'path'
 
-/** @type {(file: string) => boolean} */
-const existsSync = (file) => {
+const existsSync = (file: string) => {
   try {
     fs.accessSync(file, fs.constants.F_OK)
 
@@ -16,10 +15,8 @@ const existsSync = (file) => {
  * Next allows the `pages` directory to be located at either
  * `${projectRoot}/pages` or `${projectRoot}/src/pages`.
  * If neither is found, return projectRoot
- * @param {string} projectRoot
- * @returns string
  */
-function findPagesDir (projectRoot) {
+export function findPagesDir (projectRoot: string) {
   // prioritize ./pages over ./src/pages
   let pagesDir = path.join(projectRoot, 'pages')
 
@@ -34,5 +31,3 @@ function findPagesDir (projectRoot) {
 
   return projectRoot
 }
-
-module.exports.findPagesDir = findPagesDir
