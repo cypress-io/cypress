@@ -180,6 +180,10 @@ export default {
       message: `${cmd('{{cmd}}')} can only be called on \`:checkbox\`{{phrase}}. Your subject {{word}} a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/{{cmd}}',
     },
+    element_missing_value_attribute: {
+      message: `{{node}} cannot be checked/unchecked because it has no \`value\` attribute and ${cmd('{{cmd}}')} was supplied a value argument`,
+      docsUrl: 'https://on.cypress.io/{{cmd}}',
+    },
   },
 
   clear: {
