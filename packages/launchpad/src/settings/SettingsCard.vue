@@ -6,7 +6,7 @@
       class="border-1 border-gray-300 rounded">
       <DisclosureButton 
         data-testid="settings-card-header" 
-        class="settings-card-header bg-cool-gray-100 py-4 pl-6 pr-3 select-none cursor-pointer grid gap-4">
+        class="settings-card-header w-full bg-cool-gray-100 py-4 pl-6 pr-3 select-none cursor-pointer grid gap-4">
         <span class="grid self-center h-full">
           <Icon :icon="icon" class="self-center text-indigo-600 text-xl"/>
         </span>
@@ -51,7 +51,6 @@
 
 <style lang="scss" scoped>
 .settings-card-header {
-  width: 100%;
   grid-template-columns: auto auto 1fr auto;
 }
 </style>
