@@ -14,7 +14,7 @@ const serveChunk = (req, res, options) => {
   return send(req, pathToFile).pipe(res)
 }
 
-export const createRoutes = ({
+export const createRoutesCT = ({
   config,
   specsStore,
   nodeProxy,

@@ -27,6 +27,8 @@ import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import type { SpecsStore } from './specs-store'
 import { InitializeRoutes, createCommonRoutes } from './routes'
+import { createRoutesE2E } from './routes-e2e'
+import { createRoutesCT } from './routes-ct'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
 import type { ParsedHost } from '@packages/network/lib/cors'
@@ -111,7 +113,6 @@ export interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
-  createRoutes: (args: InitializeRoutes) => any
 }
 
 export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -185,7 +186,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning,
     shouldCorrelatePreRequests,
     specsStore,
-    createRoutes,
     testingType,
     SocketCtor,
   }: OpenServerOptions) {
@@ -235,7 +235,9 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
 
       const commonRouter = createCommonRoutes(options)
-      const runnerSpecificRouter = createRoutes(options)
+      const runnerSpecificRouter = testingType === 'e2e'
+        ? createRoutesE2E(options)
+        : createRoutesCT(options)
 
       app.use(commonRouter)
       app.use(runnerSpecificRouter)

@@ -15,7 +15,7 @@ import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes')
 
-export const createRoutes = ({
+export const createRoutesE2E = ({
   config,
   specsStore,
   getRemoteState,

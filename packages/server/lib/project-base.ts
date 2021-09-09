@@ -30,10 +30,8 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { createRoutes as createE2ERoutes } from './routes-e2e'
 import { checkSupportFile } from './project_utils'
 import type { LaunchArgs } from './open_project'
-import { createRoutes as createRoutesCT } from './routes-ct'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -220,7 +218,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createRoutesCT,
       specsStore,
     })
 
