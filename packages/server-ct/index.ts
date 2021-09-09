@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import browsers from '@packages/server/lib/browsers'
-import openProject from '@packages/server/lib/open_project'
 import * as random from '@packages/server/lib/util/random'
+import { LaunchArgs, openProject } from '@packages/server/lib/open_project'
 import chalk from 'chalk'
 import human from 'human-interval'
 import _ from 'lodash'
@@ -30,7 +30,7 @@ const registerCheckForUpdates = () => {
 }
 
 // Partial because there are probably other options that are not included in this type.
-export const start = async (projectRoot: string, args: Record<string, any>) => {
+export const start = async (projectRoot: string, args: LaunchArgs) => {
   if (process.env['CYPRESS_INTERNAL_ENV'] === 'production') {
     registerCheckForUpdates()
   }
@@ -45,7 +45,7 @@ export const start = async (projectRoot: string, args: Record<string, any>) => {
       absolute: '__all',
       relative: '__all',
       specType: 'component',
-    }
+    } as const
 
     /**
      * store warnings in this var

@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - issue-17773-slow-browser-detection
+        - issue-17944-remove-source-files
 
 defaults: &defaults
   parallelism: 1
@@ -42,6 +42,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
+        - issue-17944-remove-source-files
   requires:
     - create-build-artifacts
 
@@ -303,6 +304,7 @@ commands:
             dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
             apt-get install -f -y && \
             rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
+            which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
 
@@ -1487,7 +1489,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-17773-slow-browser-detection" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-17944-remove-source-files" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2122,6 +2124,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - build
     - test-kitchensink:
@@ -2133,6 +2136,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - build
     - create-build-artifacts:
@@ -2182,6 +2186,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2189,6 +2194,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2197,6 +2203,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - create-build-artifacts
 
@@ -2221,6 +2228,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - create-build-artifacts
 
@@ -2292,6 +2300,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - darwin-create-build-artifacts
 
@@ -2303,6 +2312,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - issue-17944-remove-source-files
         requires:
           - darwin-create-build-artifacts
 

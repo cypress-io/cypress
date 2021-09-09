@@ -1,11 +1,11 @@
 import $ from 'jquery'
 import _ from 'lodash'
 import $jquery from '../jquery'
-import $utils from '../../cypress/utils'
 import $window from '../window'
-import * as $document from '../document'
+import $document from '../document'
 
 const whitespaces = /\s+/g
+const quotesRe = /('|")/g
 
 // When multiple space characters are considered as a single whitespace in all tags except <pre>.
 export const normalizeWhitespaces = (elem) => {
@@ -27,6 +27,26 @@ export const isSame = function ($el1, $el2) {
 
 export const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
+}
+
+export function escapeQuotes (text) {
+  // convert to str and escape any single
+  // or double quotes
+  return (`${text}`).replace(quotesRe, '\\$1')
+}
+
+export function switchCase (value, casesObj, defaultKey = 'default') {
+  if (_.has(casesObj, value)) {
+    return _.result(casesObj, value)
+  }
+
+  if (_.has(casesObj, defaultKey)) {
+    return _.result(casesObj, defaultKey)
+  }
+
+  const keys = _.keys(casesObj)
+
+  throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
 }
 
 export const stringify = (el, form = 'long') => {
@@ -92,7 +112,7 @@ export const stringify = (el, form = 'long') => {
     return `<${str}>`
   }
 
-  return $utils.switchCase(form, {
+  return switchCase(form, {
     long,
     short,
   })

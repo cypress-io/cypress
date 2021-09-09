@@ -65,7 +65,6 @@
     "webpack-dev-middleware": "*"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ]
 }

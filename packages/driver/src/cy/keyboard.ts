@@ -2,14 +2,14 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import dayjs from 'dayjs'
-import * as $errUtils from '../cypress/error_utils'
+import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
-import * as $dom from '../dom'
-import * as $document from '../dom/document'
-import * as $elements from '../dom/elements'
+import $dom from '../dom'
+import $document from '../dom/document'
+import $elements from '../dom/elements'
 // eslint-disable-next-line no-duplicate-imports
 import type { HTMLTextLikeElement } from '../dom/elements'
-import * as $selection from '../dom/selection'
+import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
 
@@ -1359,7 +1359,7 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
   return getConfig()
 }
 
-export {
+export default {
   create,
   defaults,
   getConfig,
