@@ -178,7 +178,7 @@ export const createRoutes = ({
   app.get(`${config.clientRoute}`, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runner.serve(req, res, {
+    runner.serve(req, res, 'runner', {
       config,
       testingType,
       getSpec,

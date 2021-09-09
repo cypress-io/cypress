@@ -22,7 +22,7 @@ const _serveNonProxiedError = (res: Response) => {
   })
 }
 
-interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore'> {
+export interface ServeOptions extends Pick<InitializeRoutes, 'getSpec' | 'config' | 'getCurrentBrowser' | 'getRemoteState' | 'specsStore'> {
   testingType: Cypress.TestingType
 }
 
@@ -40,7 +40,7 @@ export const serveRunner = (runnerPkg: RunnerPkg, config: Cfg, res: Response) =>
 }
 
 export const runner = {
-  serve (req, res, options: ServeOptions) {
+  serve (req, res, runnerPkg: RunnerPkg, options: ServeOptions) {
     if (req.proxiedUrl.startsWith('/')) {
       debug('request was not proxied via Cypress, erroring %o', _.pick(req, 'proxiedUrl'))
 
@@ -54,7 +54,30 @@ export const runner = {
     // at any given point, rather than just arbitrarily modifying it.
     config.testingType = options.testingType
 
-    config.remote = getRemoteState()
+    // TODO #1: bug. Passing `remote.domainName` breaks CT for unknown reasons.
+    // If you pass a remote object with a domainName key, we get cross-origin
+    // iframe access errors.
+    // repro:
+    // {
+    //    "domainName": "localhost"
+    // }
+    // TODO: Find out what the problem.
+
+    // TODO #2: types.
+    // `config.remote` is typed as string, but `getRemoteState`
+    // returns
+    // {
+    //   "domainName": "localhost",
+    //   "fileServer": "http://localhost:undefined",
+    //   "origin": "http://localhost:55322",
+    //   "strategy": "file"
+    // }
+    // TODO: Figure out correct typing.
+
+    if (options.testingType === 'e2e') {
+      config.remote = getRemoteState()
+    }
+
     config.version = pkg.version
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
@@ -68,7 +91,7 @@ export const runner = {
     // log the env object's keys without values to avoid leaking sensitive info
     debug('env object has the following keys: %s', _.keys(config.env).join(', '))
 
-    return serveRunner('runner', config, res)
+    return serveRunner(runnerPkg, config, res)
   },
 
   handle (testingType, req, res) {

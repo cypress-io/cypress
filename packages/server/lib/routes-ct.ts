@@ -1,41 +1,14 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import type { ErrorRequestHandler } from 'express'
 import send from 'send'
 import xhrs from './controllers/xhrs'
-import type { SpecsStore } from '@packages/server/lib/specs-store'
-import type { Cfg } from '@packages/server/lib/project-base'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { Browser } from '@packages/server/lib/browsers/types'
-import { runner, serveRunner } from './controllers/runner'
+import { runner } from './controllers/runner'
 import { staticCtrl } from './controllers/static'
 import type { InitializeRoutes } from './routes'
 import { iframesController } from './controllers/iframes'
 
 const debug = Debug('cypress:server:routes-ct')
-
-interface ServeOptions {
-  config: Cfg
-  getCurrentBrowser: () => Browser
-  specsStore: SpecsStore
-}
-
-export const serve = (req, res, options: ServeOptions) => {
-  const config = {
-    ...options.config,
-    browser: options.getCurrentBrowser(),
-    specs: options.specsStore.specFiles,
-  } as Cfg
-
-  // TODO: move the component file watchers in here
-  // and update them in memory when they change and serve
-  // them straight to the HTML on load
-
-  debug('serving runner index.html with config %o',
-    _.pick(config, 'version', 'platform', 'arch', 'projectName'))
-
-  return serveRunner('runner-ct', config, res)
-}
 
 const serveChunk = (req, res, options) => {
   let { config } = options
@@ -52,6 +25,8 @@ export const createRoutes = ({
   networkProxy,
   getCurrentBrowser,
   testingType,
+  getSpec,
+  getRemoteState,
 }: InitializeRoutes) => {
   app.get('/__cypress/runner/*', (req, res) => runner.handle(testingType, req, res))
 
@@ -90,11 +65,20 @@ export const createRoutes = ({
   app.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    serve(req, res, {
+    runner.serve(req, res, 'runner-ct', {
       config,
+      testingType,
+      getSpec,
       getCurrentBrowser,
+      getRemoteState,
       specsStore,
     })
+
+    // serve(req, res, {
+    //   config,
+    //   getCurrentBrowser,
+    //   specsStore,
+    // })
   })
 
   // enables runner-ct to make a dynamic import
