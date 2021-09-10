@@ -31,7 +31,7 @@ import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
-import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
+import { createRoutes as createCTRoutes } from './routes-ct'
 import { checkSupportFile } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
