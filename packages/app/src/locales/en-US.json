@@ -1,0 +1,119 @@
+{
+  "links": {
+    "learnMore": "Learn more."
+  },
+  "components": {
+    "modal": {
+      "dismiss": "Dismiss"
+    },
+    "select": {
+      "placeholder": "Choose an option..."
+    }
+  },
+  "clipboard": {
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "file": {
+    "edit": "Edit"
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "setupPage": {
+    "projectSetup": {
+      "frameworkLabel": "Front-end Framework",
+      "frameworkPlaceholder": "Pick a framework",
+      "bundlerLabel": "Bundler",
+      "bundlerPlaceholder": "Pick a bundler"
+    },
+    "install": {
+      "startButton": "Install",
+      "confirmManualInstall": "I've installed them"
+    },
+    "step": {
+      "next": "Next Step",
+      "back": "Back"
+    }
+  },
+  "globalPage": {
+    "empty": {
+      "title": "Welcome to Cypress!",
+      "helper": "Add your first project below to start testing with Cypress.",
+      "dropText": "Drag your project here or {0}",
+      "browseManually": "browse manually."
+    },
+    "searchPlaceholder": "Search Projects",
+    "newProjectButton": "New Project"
+  },
+  "welcomeGuide": {
+    "header": {
+      "title": "Cypress",
+      "description": "A powerful open-source testing platform for developers and engineering teams all around the world."
+    },
+    "projectListHeader": "Recently Viewed Projects",
+    "linkHeader": "Quick Access",
+    "confirmWelcomeGuide": "Show the welcome guide when opening Cypress."
+  },
+  "settingsPage": {
+    "config": {
+      "title": "Resolved Configuration",
+      "description": "Since the options in the {0} can be set dynamically by your development environment, please refer to the legend below to understand how the configuration options are resolved.",
+      "legend": {
+        "env": {
+          "label": "env",
+          "description": "Set from environment variables"
+        },
+        "default": {
+          "label": "default",
+          "description": "Default values"
+        },
+        "dynamic": {
+          "label": "dynamic",
+          "description": "Set by the {0} function"
+        },
+        "cli": {
+          "label": "cli",
+          "description": "Set from CLI arguments"
+        },
+        "config": {
+          "label": "config",
+          "description": "Set from {0}"
+        }
+      }
+    },
+    "proxy": {
+      "title": "Proxy Settings",
+      "description": "Cypress auto-detected the following proxy settings from your operating system.",
+      "bypassList": "Proxy Bypass List",
+      "proxyServer": "Proxy Server"
+    },
+    "editor": {
+      "title": "External Editor",
+      "description": "External editor to use for editing code opened when using Cypress.",
+      "noEditorSelectedPlaceholder": "Choose your editor..."
+    },
+    "projectId": {
+      "title": "Project ID",
+      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
+    },
+    "recordKey": {
+      "title": "Record Key",
+      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
+      "manageKeys": "Manage Keys"
+    },
+    "project": {
+      "title": "Project Settings",
+      "description": "Settings for this project."
+    },
+    "experiments": {
+      "title": "Experiments",
+      "description": "If you'd like to try out new features that we're working on, you can enable beta features for your project by turning on the experimental features you'd like to try. {0}"
+    },
+    "device": {
+      "title": "Device Settings",
+      "description": "Settings for this device."
+    }
+  }
+}
