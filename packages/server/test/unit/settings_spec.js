@@ -3,19 +3,28 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
+const { CYPRESS_CONFIG_FILES } = require(`${root}/lib/configFiles`)
+const { clearCypressJsonCache } = require('../cache_helper')
 
 const projectRoot = process.cwd()
 
 describe('lib/settings', () => {
   context('with no configFile option', () => {
     beforeEach(function () {
-      this.setup = (obj = {}) => {
-        return fs.writeJsonAsync('cypress.json', obj)
+      this.setup = (obj = {}, file = CYPRESS_CONFIG_FILES[0]) => {
+        if (file === 'cypress.json') {
+          return fs.writeJsonAsync(file, obj)
+        }
+
+        return fs.outputFileAsync(file, obj)
       }
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.json')
+      return CYPRESS_CONFIG_FILES.reduce((previousPromise, currentFile) => {
+        return previousPromise.then(() => fs.removeAsync(currentFile))
+      }, Promise.resolve())
+      .then(clearCypressJsonCache)
     })
 
     context('nested cypress object', () => {
@@ -24,7 +33,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', foo: 'bar' })
 
           return fs.readJsonAsync('cypress.json')
         }).then((obj) => {
@@ -97,30 +106,46 @@ describe('lib/settings', () => {
     })
 
     context('.read', () => {
+      it('fails if both a cypress.config.js and cypress.json are added', function () {
+        return Promise.all([
+          fs.outputFileAsync('cypress.json', ''),
+          fs.outputFileAsync('cypress.config.js', ''),
+        ]).then(() => {
+          return settings.read(projectRoot)
+        })
+        .then(() => {
+          throw Error('should throw when 2 files are created')
+        })
+        .catch((err) => {
+          expect(err.type).to.eq('CONFIG_FILES_LANGUAGE_CONFLICT')
+
+          expect(err.message).to.include(projectRoot)
+        })
+      })
+
+      it('promises cypress.config.js', function () {
+        return this.setup(`
+          module.exports = {
+            commmon_setting: true,
+          }
+          `,
+        'cypress.config.js')
+        .then(() => {
+          return settings.read(projectRoot, { testingType: 'component' })
+        }).then((obj) => {
+          expect(obj).to.deep.eq({
+            commmon_setting: true,
+            configFile: 'cypress.config.js',
+          })
+        })
+      })
+
       it('promises cypress.json', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
-        })
-      })
-
-      it('promises cypress.json and merges CT specific properties for via testingType: component', function () {
-        return this.setup({ a: 'b', component: { a: 'c' } })
-        .then(() => {
-          return settings.read(projectRoot, { testingType: 'component' })
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' } })
-        })
-      })
-
-      it('promises cypress.json and merges e2e specific properties', function () {
-        return this.setup({ a: 'b', e2e: { a: 'c' } })
-        .then(() => {
-          return settings.read(projectRoot)
-        }).then((obj) => {
-          expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' } })
+          expect(obj).to.deep.eq({ foo: 'bar', configFile: 'cypress.json' })
         })
       })
 
@@ -129,7 +154,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ defaultCommandTimeout: 30000, foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', defaultCommandTimeout: 30000, foo: 'bar' })
         })
       })
 
@@ -138,7 +163,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ supportFile: 'foo', foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', supportFile: 'foo', foo: 'bar' })
         })
       })
 
@@ -147,7 +172,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', pageLoadTimeout: 30000, foo: 'bar' })
         })
       })
 
@@ -156,7 +181,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.read(projectRoot)
         }).then((obj) => {
-          expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
+          expect(obj).to.deep.eq({ configFile: 'cypress.json', pageLoadTimeout: 30000, foo: 'bar' })
         })
       })
     })
@@ -166,7 +191,7 @@ describe('lib/settings', () => {
         return this.setup().then(() => {
           return settings.write(projectRoot, { foo: 'bar' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ foo: 'bar' })
+          expect(obj).to.deep.eq({ foo: 'bar', configFile: 'cypress.json' })
         })
       })
 
@@ -175,7 +200,7 @@ describe('lib/settings', () => {
         .then(() => {
           return settings.write(projectRoot, { projectId: 'abc123' })
         }).then((obj) => {
-          expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
+          expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true, configFile: 'cypress.json' })
         })
       })
     })
@@ -222,6 +247,8 @@ describe('lib/settings', () => {
       this.options = {
         configFile: 'my-test-config-file.json',
       }
+
+      return fs.ensureDirAsync(this.projectRoot)
     })
 
     afterEach(function () {
@@ -240,7 +267,7 @@ describe('lib/settings', () => {
       .then(() => {
         return fs.readJsonAsync(path.join(this.projectRoot, this.options.configFile))
         .then((json) => {
-          expect(json).to.deep.equal({ foo: 'bar' })
+          expect(json).to.deep.equal({ foo: 'bar', configFile: 'my-test-config-file.json' })
         })
       })
     })
@@ -250,7 +277,7 @@ describe('lib/settings', () => {
       .then(() => {
         return settings.read(this.projectRoot, this.options)
         .then((settings) => {
-          expect(settings).to.deep.equal({ foo: 'bar' })
+          expect(settings).to.deep.equal({ foo: 'bar', configFile: 'my-test-config-file.json' })
         })
       })
     })
