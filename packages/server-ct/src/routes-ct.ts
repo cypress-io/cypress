@@ -21,6 +21,7 @@ export interface InitializeRoutes {
   nodeProxy: httpProxy
   networkProxy: NetworkProxy
   getRemoteState: () => any
+  testingType: Cypress.TestingType
   onError: (...args: unknown[]) => any
 }
 
