@@ -113,7 +113,7 @@ describe('lib/settings', () => {
           return settings.read(projectRoot)
         })
         .then(() => {
-          throw Error('should throw wehn 2 files are created')
+          throw Error('should throw when 2 files are created')
         })
         .catch((err) => {
           expect(err.type).to.eq('CONFIG_FILES_LANGUAGE_CONFLICT')
