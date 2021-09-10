@@ -7,7 +7,7 @@ import path from 'path'
 import Debug from 'debug'
 import pkg from '@packages/root'
 import { getPathToDist, getPathToIndex, RunnerPkg } from '@packages/resolve-dist'
-import type { InitializeRoutes } from '../routes-ct'
+import type { InitializeRoutes } from '../routes'
 import type { PlatformName } from '@packages/launcher'
 import type { Cfg } from '../project-base'
 
@@ -50,8 +50,8 @@ export const runner = {
     let { config, getRemoteState, getCurrentBrowser, getSpec, specsStore } = options
 
     config = _.clone(config)
-    // @ts-expect-error. TODO: Figure out a better way to represent the shape of the config
     // at any given point, rather than just arbitrarily modifying it.
+    // @ts-ignore
     config.testingType = options.testingType
 
     // TODO #1: bug. Passing `remote.domainName` breaks CT for unknown reasons.

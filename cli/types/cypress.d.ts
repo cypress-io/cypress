@@ -31,9 +31,9 @@ declare namespace Cypress {
     strategy: 'file' | 'http'
     origin: string
     fileServer: string
+    props: Record<string, any>
     visiting: string
   }
-
 
   interface Backend {
     /**
