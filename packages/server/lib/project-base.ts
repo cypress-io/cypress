@@ -519,6 +519,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const obj = {
       onChange: () => {
+        debug('settings changed')
         // dont fire change events if we generated
         // a project id less than 1 second ago
         if (this.generatedProjectIdTimestamp &&
@@ -526,6 +527,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
           return
         }
 
+        debug('updating the project re-running')
         // call our callback function
         // when settings change!
         onSettingsChanged()

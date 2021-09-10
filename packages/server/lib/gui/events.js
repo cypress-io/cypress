@@ -322,7 +322,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           onError,
           onWarning,
         })
-      }).call('getConfig')
+      }).then((project) => {
+        return project.getConfig()
+      })
       .then(send)
       .catch(sendErr)
 

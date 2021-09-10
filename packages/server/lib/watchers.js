@@ -19,7 +19,7 @@ class Watchers {
         result.push(this._remove(filePath))
       }
 
-      return result
+      return Promise.all(result)
     })()
   }
 
@@ -67,20 +67,21 @@ class Watchers {
 
   _add (filePath, watcher) {
     this._remove(filePath)
-
-    this.watchers[filePath] = watcher
+    .then(() => {
+      this.watchers[filePath] = watcher
+    })
   }
 
   _remove (filePath) {
     let watcher
 
     if (!(watcher = this.watchers[filePath])) {
-      return
+      return Promise.resolve()
     }
 
-    watcher.close()
-
-    return delete this.watchers[filePath]
+    return watcher.close().then(() => {
+      delete this.watchers[filePath]
+    })
   }
 }
 
