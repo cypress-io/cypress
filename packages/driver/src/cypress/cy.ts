@@ -221,6 +221,7 @@ export default {
           // doesnt trigger a confirmation dialog
           return undefined
         },
+        onLoad () {},
         onUnload (e) {
           return Cypress.action('app:window:unload', e)
         },
