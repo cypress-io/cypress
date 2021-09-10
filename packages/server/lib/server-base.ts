@@ -7,27 +7,28 @@ import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
-import { AddressInfo } from 'net'
+import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
-import httpsProxy from '@packages/https-proxy'
+import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, cors, httpUtils, uri } from '@packages/network'
+import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { SocketCt } from '@packages/server-ct'
+import type { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
-import { SocketE2E } from './socket-e2e'
+import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
-import { RunnerType, SpecsStore } from './specs-store'
-import { InitializeRoutes } from '../../server-ct/src/routes-ct'
-import { ProjectBase } from './project-base'
+import type { SpecsStore } from './specs-store'
+import type { InitializeRoutes } from '../../server-ct/src/routes-ct'
+import type { Cfg } from './project-base'
+import type { Browser } from '@packages/server/lib/browsers/types'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -91,12 +92,13 @@ const notSSE = (req, res) => {
 export type WarningErr = Record<string, any>
 
 export interface OpenServerOptions {
-  project: ProjectBase<any>
   SocketCtor: typeof SocketE2E | typeof SocketCt
   specsStore: SpecsStore
-  projectType: 'ct' | 'e2e'
+  testingType: Cypress.TestingType
   onError: any
   onWarning: any
+  getCurrentBrowser: () => Browser
+  getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
   createRoutes: (args: InitializeRoutes) => any
 }
@@ -161,20 +163,19 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   abstract createServer (
     app: Express,
-    config: Record<string, any>,
-    project: ProjectBase<any>,
-    request: unknown,
+    config: Cfg,
     onWarning: unknown,
   ): Bluebird<[number, WarningErr?]>
 
-  open (config: Record<string, any> = {}, {
-    project,
+  open (config: Cfg, {
+    getSpec,
+    getCurrentBrowser,
     onError,
     onWarning,
     shouldCorrelatePreRequests,
     specsStore,
     createRoutes,
-    projectType,
+    testingType,
     SocketCtor,
   }: OpenServerOptions) {
     debug('server open')
@@ -182,7 +183,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     la(_.isPlainObject(config), 'expected plain config object', config)
 
     return Bluebird.try(() => {
-      if (!config.baseUrl && projectType === 'ct') {
+      if (!config.baseUrl && testingType === 'component') {
         throw new Error('ServerCt#open called without config.baseUrl.')
       }
 
@@ -190,12 +191,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       logger.setSettings(config)
 
-      // TODO: Can we just pass config.baseUrl regardless of project type?
       this._nodeProxy = httpProxy.createProxyServer({
-        target: projectType === 'ct' ? config.baseUrl : undefined,
+        target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
       })
 
       this._socket = new SocketCtor(config) as TSocket
+
+      clientCertificates.loadClientCertificateConfig(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()
@@ -217,10 +219,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         nodeProxy: this.nodeProxy,
         networkProxy: this._networkProxy!,
         onError,
-        project,
+        getSpec,
+        getCurrentBrowser,
+        testingType,
       })
 
-      return this.createServer(app, config, project, this.request, onWarning)
+      return this.createServer(app, config, onWarning)
     })
   }
 
@@ -301,6 +305,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
       this.networkProxy.reset()
@@ -314,7 +319,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts = {}) {
+  createHosts (hosts: string[] | null = []) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
@@ -322,6 +327,10 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
     this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  }
+
+  emitRequestEvent (eventName, data) {
+    this.socket.toDriver('request:event', eventName, data)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -601,7 +610,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.httpsProxy.connect(req, socket, head)
   }
 
-  sendSpecList (specs: Cypress.Cypress['spec'][], projectType: RunnerType) {
-    return this.socket.sendSpecList(specs, projectType)
+  sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
+    return this.socket.sendSpecList(specs, testingType)
   }
 }

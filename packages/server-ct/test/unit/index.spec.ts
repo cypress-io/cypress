@@ -1,5 +1,5 @@
 const Updater = require('@packages/server/lib/updater')
-import openProject from '@packages/server/lib/open_project'
+import { openProject } from '@packages/server/lib/open_project'
 import browsers from '@packages/server/lib/browsers'
 import sinon from 'sinon'
 import { expect } from 'chai'
@@ -35,7 +35,7 @@ describe('index.spec', () => {
     expect(stub_setInterval.firstCall.args[1]).eq(1000 * 60 * 60)
     expect(Updater.check.callCount).eq(1)
     expect(Updater.check.firstCall.args[0]).includes({
-      testingType: 'ct',
+      testingType: 'component',
       initialLaunch: true,
     })
   })

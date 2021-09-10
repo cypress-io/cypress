@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import { action, when, autorun } from 'mobx'
 import React, { useRef, useEffect } from 'react'
-import { default as $Cypress } from '@packages/driver'
+import $Cypress from '@packages/driver'
 import {
   SnapshotControls,
   ScriptError,
@@ -91,7 +91,7 @@ export const Iframes = namedObserver('Iframes', ({
     const $container = $Cypress.$(containerRef.current).empty()
     const $autIframe: JQuery<HTMLIFrameElement> = autIframe.current.create().appendTo($container)
 
-    autIframe.current.showBlankContents()
+    autIframe.current.showInitialBlankContents()
 
     // In mount mode we need to render something right from spec file
     // So load application tests to the aut frame

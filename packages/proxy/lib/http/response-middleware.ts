@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import charset from 'charset'
-import { CookieOptions } from 'express'
+import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils } from '@packages/network'
-import { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
+import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
-import { HttpMiddleware } from '.'
+import type { HttpMiddleware } from '.'
 import iconv from 'iconv-lite'
-import { IncomingMessage, IncomingHttpHeaders } from 'http'
+import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
@@ -228,6 +228,14 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
+  const isRenderedHTML = reqWillRenderHtml(this.req)
+
+  if (isRenderedHTML) {
+    const origin = new URL(this.req.proxiedUrl).origin
+
+    this.getRenderedHTMLOrigins()[origin] = true
+  }
+
   const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
@@ -242,7 +250,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return 'full'
     }
 
-    if (!reqWillRenderHtml(this.req)) {
+    if (!isRenderedHTML) {
       return false
     }
 

@@ -853,35 +853,134 @@ describe('lib/config', () => {
         })
       })
 
-      context('firefoxGcInterval', () => {
-        it('passes if a number', function () {
-          this.setup({ firefoxGcInterval: 1 })
+      function pemCertificate () {
+        return {
+          clientCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  cert: 'certs/cert.crt',
+                  key: 'certs/cert.key',
+                  passphrase: 'certs/cert.key.pass',
+                },
+              ],
+            },
+          ],
+        }
+      }
+
+      function pfxCertificate () {
+        return {
+          clientCertificates: [
+            {
+              url: 'https://somewhere.com/*',
+              ca: ['certs/ca.crt'],
+              certs: [
+                {
+                  pfx: 'certs/cert.pfx',
+                  passphrase: 'certs/cerpfx.pass',
+                },
+              ],
+            },
+          ],
+        }
+      }
+
+      context('clientCertificates', () => {
+        it('accepts valid PEM config', function () {
+          this.setup(pemCertificate())
 
           return this.expectValidationPasses()
         })
 
-        it('passes if null', function () {
-          this.setup({ firefoxGcInterval: null })
+        it('accepts valid PFX config', function () {
+          this.setup(pfxCertificate())
 
           return this.expectValidationPasses()
         })
 
-        it('passes if correctly shaped object', function () {
-          this.setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
+        it('detects invalid config with no url', function () {
+          let cfg = pemCertificate()
 
-          return this.expectValidationPasses()
+          cfg.clientCertificates[0].url = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].url` to be a URL matcher')
         })
 
-        it('fails if string', function () {
-          this.setup({ firefoxGcInterval: 'foo' })
+        it('detects invalid config with no certs', function () {
+          let cfg = pemCertificate()
 
-          return this.expectValidationFails('a positive number or null or an object')
+          cfg.clientCertificates[0].certs = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs` to be an array of certs')
         })
 
-        it('fails if invalid object', function () {
-          this.setup({ firefoxGcInterval: { foo: 'bar' } })
+        it('detects invalid config with no cert', function () {
+          let cfg = pemCertificate()
 
-          return this.expectValidationFails('a positive number or null or an object')
+          cfg.clientCertificates[0].certs[0].cert = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` must have either PEM or PFX defined')
+        })
+
+        it('detects invalid config with PEM and PFX certs', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].pfx = 'a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0]` has both PEM and PFX defined')
+        })
+
+        it('detects invalid PEM config with no key', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = null
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a key filepath')
+        })
+
+        it('detects PEM cert absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].cert` to be a relative filepath')
+        })
+
+        it('detects PEM key absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].key = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].key` to be a relative filepath')
+        })
+
+        it('detects PFX absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].certs[0].cert = undefined
+          cfg.clientCertificates[0].certs[0].pfx = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].certs[0].pfx` to be a relative filepath')
+        })
+
+        it('detects CA absolute path', function () {
+          let cfg = pemCertificate()
+
+          cfg.clientCertificates[0].ca[0] = '/home/files/a_file'
+          this.setup(cfg)
+
+          return this.expectValidationFails('`clientCertificates[0].ca[0]` to be a relative filepath')
         })
       })
     })
@@ -1302,6 +1401,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
     })
 
+    it('warns if firefoxGcInterval is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('firefoxGcInterval', true, {
+        firefoxGcInterval: true,
+      })
+
+      expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
@@ -1321,6 +1430,7 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
+            clientCertificates: { value: [], from: 'default' },
             component: { from: 'default', value: {} },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
@@ -1331,9 +1441,9 @@ describe('lib/config', () => {
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
-            firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
             ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
@@ -1373,7 +1483,7 @@ describe('lib/config', () => {
       })
 
       it('sets config, envFile and env', () => {
-        sinon.stub(config, 'getProcessEnvVars').returns({
+        sinon.stub(configUtil, 'getProcessEnvVars').returns({
           quux: 'quux',
           RECORD_KEY: 'foobarbazquux',
           PROJECT_ID: 'projectId123',
@@ -1406,6 +1516,7 @@ describe('lib/config', () => {
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
             component: { from: 'default', value: {} },
+            clientCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
@@ -1414,6 +1525,7 @@ describe('lib/config', () => {
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalSessionSupport: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             env: {
               foo: {
@@ -1438,7 +1550,6 @@ describe('lib/config', () => {
               },
             },
             fileServerFolder: { value: '', from: 'default' },
-            firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
             ignoreTestFiles: { value: '*.hot-update.js', from: 'default' },
@@ -1571,7 +1682,7 @@ describe('lib/config', () => {
 
   context('_.defaultsDeep', () => {
     it('merges arrays', () => {
-    // sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      // sanity checks to confirm how Lodash merges arrays in defaultsDeep
       const diffs = {
         list: [1],
       }
@@ -1774,7 +1885,7 @@ describe('lib/config', () => {
 
   context('.parseEnv', () => {
     it('merges together env from config, env from file, env from process, and env from CLI', () => {
-      sinon.stub(config, 'getProcessEnvVars').returns({
+      sinon.stub(configUtil, 'getProcessEnvVars').returns({
         version: '0.12.1',
         user: 'bob',
       })
@@ -1821,7 +1932,7 @@ describe('lib/config', () => {
 
         obj[`${key}version`] = '0.12.0'
 
-        expect(config.getProcessEnvVars(obj)).to.deep.eq({
+        expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
           host: 'http://localhost:8888',
           version: '0.12.0',
         })
@@ -1836,7 +1947,7 @@ describe('lib/config', () => {
         CYPRESS_PROJECT_ID: 'abc123',
       }
 
-      expect(config.getProcessEnvVars(obj)).to.deep.eq({
+      expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
         FOO: 'bar',
         PROJECT_ID: 'abc123',
         CRASH_REPORTS: 0,

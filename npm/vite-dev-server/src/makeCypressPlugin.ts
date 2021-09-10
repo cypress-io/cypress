@@ -21,15 +21,30 @@ const INIT_FILEPATH = resolve(__dirname, '../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
+function getSpecsPathsSet (specs: Spec[]) {
+  return new Set<string>(
+    specs.map((spec) => spec.absolute),
+  )
+}
+
+interface Spec{
+  absolute: string
+  relative: string
+}
+
 export const makeCypressPlugin = (
   projectRoot: string,
-  supportFilePath: string,
-  devServerEvents: EventEmitter,
-  specs: {absolute: string, relative: string}[],
+  supportFilePath: string | false,
+  devServerEvents: NodeJS.EventEmitter,
+  specs: Spec[],
 ): Plugin => {
   let base = '/'
 
-  const specsPathsSet = new Set<string>(specs.map((spec) => spec.absolute))
+  let specsPathsSet = getSpecsPathsSet(specs)
+
+  devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
+    specsPathsSet = getSpecsPathsSet(specs)
+  })
 
   const posixSupportFilePath = supportFilePath ? convertPathToPosix(resolve(projectRoot, supportFilePath)) : undefined
 
@@ -78,8 +93,10 @@ export const makeCypressPlugin = (
       let moduleImporters = server.moduleGraph.fileToModulesMap.get(file)
       let iterationNumber = 0
 
+      const exploredFiles = new Set<string>()
+
       // until we reached a point where the current module is imported by no other
-      while (moduleImporters && moduleImporters.size) {
+      while (moduleImporters?.size) {
         if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
           debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
 
@@ -88,16 +105,27 @@ export const makeCypressPlugin = (
 
         // as soon as we find one of the specs, we trigger the re-run of tests
         for (const mod of moduleImporters.values()) {
-          if (specsPathsSet.has(mod.file)) {
-            debug('handleHotUpdate - compile success')
+          debug('handleHotUpdate - mod.file', mod.file)
+          if (mod.file === supportFilePath) {
+            debug('handleHotUpdate - support compile success')
             devServerEvents.emit('dev-server:compile:success')
 
+            // if we update support we know we have to re-run it all
+            // no need to ckeck further
             return []
+          }
+
+          if (mod.file && specsPathsSet.has(mod.file)) {
+            debug('handleHotUpdate - spec compile success', mod.file)
+            devServerEvents.emit('dev-server:compile:success', { specFile: mod.file })
+            // if we find one spec, does not mean we are done yet,
+            // there could be other spec files to re-run
+            // see https://github.com/cypress-io/cypress/issues/17691
           }
         }
 
         // get all the modules that import the current one
-        moduleImporters = getImporters(moduleImporters)
+        moduleImporters = getImporters(moduleImporters, exploredFiles)
         iterationNumber += 1
       }
 
@@ -106,11 +134,22 @@ export const makeCypressPlugin = (
   }
 }
 
-function getImporters (modules: Set<ModuleNode>): Set<ModuleNode> {
+/**
+ * Gets all the modules that import the set of modules passed in parameters
+ * @param modules the set of module whose dependents to return
+ * @param alreadyExploredFiles set of files that have already been looked at and should be avoided in case of circular dependency
+ * @returns a set of ModuleMode that import directly the current modules
+ */
+function getImporters (modules: Set<ModuleNode>, alreadyExploredFiles: Set<string>): Set<ModuleNode> {
   const allImporters = new Set<ModuleNode>()
 
   modules.forEach((m) => {
-    m.importers.forEach((imp) => allImporters.add(imp))
+    if (m.file && !alreadyExploredFiles.has(m.file)) {
+      alreadyExploredFiles.add(m.file)
+      m.importers.forEach((imp) => {
+        allImporters.add(imp)
+      })
+    }
   })
 
   return allImporters

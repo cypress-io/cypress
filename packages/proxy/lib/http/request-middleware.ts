@@ -1,9 +1,9 @@
 import _ from 'lodash'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
-import { HttpMiddleware } from './'
+import type { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -27,6 +27,25 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   if (this.req.headers['x-cypress-resolving-url']) {
     this.debug('skipping prerequest for resolve:url')
     delete this.req.headers['x-cypress-resolving-url']
+    const requestId = `cy.visit-${Date.now()}`
+
+    this.req.browserPreRequest = {
+      requestId,
+      method: this.req.method,
+      url: this.req.proxiedUrl,
+      // @ts-ignore
+      headers: this.req.headers,
+      resourceType: 'document',
+      originalResourceType: 'document',
+    }
+
+    this.res.on('close', () => {
+      this.socket.toDriver('request:event', 'response:received', {
+        requestId,
+        headers: this.res.getHeaders(),
+        status: this.res.statusCode,
+      })
+    })
 
     return this.next()
   }
@@ -42,7 +61,7 @@ const SendToDriver: RequestMiddleware = function () {
   const { browserPreRequest } = this.req
 
   if (browserPreRequest) {
-    this.socket.toDriver('proxy:incoming:request', browserPreRequest)
+    this.socket.toDriver('request:event', 'incoming:request', browserPreRequest)
   }
 
   this.next()
@@ -167,9 +186,9 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 
 export default {
   LogRequest,
+  MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,
   SendToDriver,
-  MaybeEndRequestWithBufferedResponse,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,
   EndRequestsToBlockedHosts,

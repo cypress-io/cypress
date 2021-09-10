@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "yarn test-unit",
-    "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.* --exit"
+    "test-unit": "mocha --config test/.mocharc.json src/*.spec.* src/**/*.spec.* --exit"
   },
   "dependencies": {},
   "devDependencies": {
@@ -14,6 +14,7 @@
     "@packages/driver": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
+    "@popperjs/core": "2.9.2",
     "ansi-to-html": "0.6.14",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
@@ -27,6 +28,8 @@
     "nanoid": "3.1.20",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "react-popper": "2.2.5",
+    "react-shadow-dom-retarget-events": "1.0.11",
     "sinon": "7.5.0",
     "sinon-chai": "3.3.0"
   }

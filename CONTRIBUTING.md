@@ -278,25 +278,35 @@ Here is a list of the core packages in this repository with a short description,
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
  | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
  | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
+ | [net-stubbing](./packages/net-stubbing) | `@packages/net-stubbing` | Contains server side code for Cypress' network stubbing features.         |
+ | [network](./packages/networ )         | `@packages/network`     | Various utilities related to networking.                                     |
+ | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
  | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
  | [runner](./packages/runner)           | `@packages/runner`      | The runner is the minimal "chrome" around the user's application under test. |
+ | [runner-ct](./packages/runner-ct)           | `@packages/runner-ct`      | The runner for component testing |
+ | [runner-shared](./packages/runner-shared)           | `@packages/runner-shared`      | The shared components between the `runner` and the `runner-ct` packages |
  | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
+ | [server-ct](./packages/server-ct)     | `@packages/server-ct`   | Some Component Testing specific overrides. Mostly extends functionality from `@packages/server` |
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
- | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
- 
+
 Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
 
 Here is a list of the npm packages in this repository:
 
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
- | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.                                      |
- | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.                                         |
- | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue.                                           |
- | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.                    |
+ | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
+ | [create-cypress-tests](./npm/create-cypress-tests)     | `@cypress/create-cypress-tests`    | Tooling to scaffold Cypress configuration and demo test files. |
+ | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
+ | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
+ | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.             |
+ | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
+ | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
+ | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
+ | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue.               |
 
 We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate package the work is required in. For public packages, we use their qualified package name: For example, issues relating to the  webpack preprocessor are tagged under [`npm: @cypress/webpack-preprocessor`](https://github.com/cypress-io/cypress/labels/npm%3A%20%40cypress%2Fwebpack-preprocessor) label and issues related to the `driver` package are tagged with the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label.
 

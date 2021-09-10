@@ -1,12 +1,14 @@
 import _ from 'lodash'
-import { $ } from '@packages/driver'
-import { blankContents } from '../blank-contents'
+import $Cypress from '@packages/driver'
+import * as blankContents from '../blank-contents'
 import { visitFailure } from '../visit-failure'
 import { selectorPlaygroundModel } from '../selector-playground'
 import { eventManager } from '../event-manager'
 import { dom } from '../dom'
 import { logger } from '../logger'
 import { studioRecorder } from '../studio'
+
+const $ = $Cypress.$
 
 export class AutIframe {
   constructor (config) {
@@ -23,8 +25,16 @@ export class AutIframe {
     return this.$iframe
   }
 
-  showBlankContents () {
-    this._showContents(blankContents())
+  showInitialBlankContents () {
+    this._showContents(blankContents.initial())
+  }
+
+  showSessionBlankContents () {
+    this._showContents(blankContents.session())
+  }
+
+  showSessionLifecycleBlankContents () {
+    this._showContents(blankContents.sessionLifecycle())
   }
 
   showVisitFailure = (props) => {
@@ -57,6 +67,27 @@ export class AutIframe {
     if (!Cypress) return
 
     return Cypress.cy.detachDom(this._contents())
+  }
+
+  visitBlank = ({ type } = { type: null }) => {
+    return new Promise((resolve) => {
+      this.$iframe[0].src = 'about:blank'
+
+      this.$iframe.one('load', () => {
+        switch (type) {
+          case 'session':
+            this.showSessionBlankContents()
+            break
+          case 'session-lifecycle':
+            this.showSessionLifecycleBlankContents()
+            break
+          default:
+            this.showInitialBlankContents()
+        }
+
+        resolve()
+      })
+    })
   }
 
   restoreDom = (snapshot) => {

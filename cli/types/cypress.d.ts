@@ -64,6 +64,22 @@ declare namespace Cypress {
     path: string
     isHeaded: boolean
     isHeadless: boolean
+    /**
+     * Informational text to accompany this browser. Shown in desktop-gui.
+     */
+    info?: string
+    /**
+     * Warning text to accompany this browser. Shown in desktop-gui.
+     */
+    warning?: string
+    /**
+     * The minimum majorVersion of this browser supported by Cypress.
+     */
+    minSupportedVersion?: number
+    /**
+     * If `true`, this browser is too old to be supported by Cypress.
+     */
+    unsupportedVersion?: boolean
   }
 
   interface LocalStorage {
@@ -243,6 +259,14 @@ declare namespace Cypress {
     spec: Spec
 
     /**
+     * Currently executing test runnable instance.
+     */
+    currentTest: {
+      title: string,
+      titlePath: string[]
+    }
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
@@ -340,15 +364,6 @@ declare namespace Cypress {
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
      */
     env(object: ObjectLike): void
-
-    /**
-     * Firefox only: Get the current number of tests that will run between forced garbage collections.
-     *
-     * Returns undefined if not in Firefox, returns a null or 0 if forced GC is disabled.
-     *
-     * @see https://on.cypress.io/firefox-gc-issue
-     */
-    getFirefoxGcInterval(): number | null | undefined
 
     /**
      * @returns the number of test retries currently enabled for the run
@@ -548,6 +563,10 @@ declare namespace Cypress {
      * @private
      */
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
+  }
+
+  interface SessionOptions {
+    validate?: () => false|void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
@@ -945,6 +964,15 @@ declare namespace Cypress {
      */
     debug(options?: Partial<Loggable>): Chainable<Subject>
 
+   /**
+     * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
+     *
+     * Only available if the `experimentalSessionSupport` config option is enabled.
+     *
+     * @see https://on.cypress.io/session
+     */
+    session(id: string|object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
+
     /**
      * Get the window.document of the page that is currently active.
      *
@@ -954,7 +982,7 @@ declare namespace Cypress {
      *      .its('contentType')
      *      .should('eq', 'text/html')
      */
-    document(options?: Partial<Loggable>): Chainable<Document>
+    document(options?: Partial<Loggable & Timeoutable>): Chainable<Document>
 
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
@@ -1654,7 +1682,7 @@ declare namespace Cypress {
      *    .shadow()
      *    .find('.my-button')
      *    .click()
-     * @see https://on.cypress.io/experimental
+     * @see https://on.cypress.io/shadow
      */
     shadow(): Chainable<Subject>
 
@@ -1838,6 +1866,12 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S extends string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
     then<S extends HTMLElement>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<JQuery<S>>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
@@ -1850,7 +1884,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
-    then<S extends object | any[] | string | number | boolean>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    then<S extends any[] | object>(fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command / promise.
      *
@@ -1924,7 +1958,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/title
      */
-    title(options?: Partial<Loggable>): Chainable<string>
+    title(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Trigger an event on a DOM element.
@@ -2026,7 +2060,7 @@ declare namespace Cypress {
      * @alias cy.location('href')
      * @see https://on.cypress.io/url
      */
-    url(options?: Partial<Loggable & Timeoutable>): Chainable<string>
+    url(options?: Partial<UrlOptions>): Chainable<string>
 
     /**
      * Control the size and orientation of the screen for your application.
@@ -2454,6 +2488,47 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  interface PEMCert {
+    /**
+     * Path to the certificate file, relative to project root.
+     */
+    cert: string
+    /**
+     * Path to the private key file, relative to project root.
+     */
+    key: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface PFXCert {
+    /**
+     * Path to the certificate container, relative to project root.
+     */
+    pfx: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface ClientCertificate {
+    /**
+     * URL to match requests against. Wildcards following [minimatch](https://github.com/isaacs/minimatch) rules are supported.
+     */
+    url: string
+    /**
+     * Paths to one or more CA files to validate certs against, relative to project root.
+     */
+    ca?: string[]
+    /**
+     * A PEM format certificate/private key pair or PFX certificate container
+     */
+    certs: PEMCert[] | PFXCert[]
+  }
+
   interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
@@ -2641,12 +2716,10 @@ declare namespace Cypress {
      */
     scrollBehavior: scrollBehaviorOptions
     /**
-     * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
-     * If a number is supplied, it will apply to `run` mode and `open` mode.
-     * Set the interval to `null` or 0 to disable forced garbage collections.
-     * @default { runMode: 1, openMode: null }
+     * Enable experimental session support. See https://on.cypress.io/session
+     * @default false
      */
-    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+    experimentalSessionSupport: boolean
     /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
@@ -2679,16 +2752,50 @@ declare namespace Cypress {
     includeShadowDom: boolean
 
     /**
+     * The list of hosts to be blocked
+     */
+    blockHosts: null | string | string[]
+    /**
+     * Path to folder containing component test files.
+     */
+    componentFolder: false | string
+    /**
+     * A unique ID for the project used for recording
+     */
+    projectId: null | string
+    /**
+     * Path to the support folder.
+     */
+    supportFolder: string
+    /**
+     * Glob pattern to determine what test files to load.
+     */
+    testFiles: string | string[]
+    /**
+     * The user agent the browser sends in all request headers.
+     */
+    userAgent: null | string
+    /**
+     * Polyfills `window.fetch` to enable Network spying and stubbing
+     */
+    experimentalFetchPolyfill: boolean
+
+    /**
      * Override default config options for Component Testing runner.
      * @default {}
      */
-    component: ResolvedConfigOptions
+    component: Omit<ResolvedConfigOptions, TestingType>
 
     /**
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: ResolvedConfigOptions
+    e2e: Omit<ResolvedConfigOptions, TestingType>
+
+    /**
+     * An array of objects defining the certificates
+     */
+    clientCertificates: ClientCertificate[]
   }
 
   /**
@@ -2702,10 +2809,6 @@ declare namespace Cypress {
      */
     arch: string
     /**
-     * The list of hosts to be blocked
-     */
-    blockHosts: null | string | string[]
-    /**
      * The browser Cypress is running on.
      */
     browser: Browser
@@ -2713,10 +2816,6 @@ declare namespace Cypress {
      * Available browsers found on your system.
      */
     browsers: Browser[]
-    /**
-     * Path to folder containing component test files.
-     */
-    componentFolder: string
     /**
      * Hosts mappings to IP addresses.
      */
@@ -2737,22 +2836,6 @@ declare namespace Cypress {
      */
     platform: 'linux' | 'darwin' | 'win32'
     /**
-     * A unique ID for the project used for recording
-     */
-    projectId: null | string
-    /**
-     * Path to the support folder.
-     */
-    supportFolder: string
-    /**
-     * Glob pattern to determine what test files to load.
-     */
-    testFiles: string
-    /**
-     * The user agent the browser sends in all request headers.
-     */
-    userAgent: null | string
-    /**
      * The Cypress version being used.
      */
     version: string
@@ -2763,6 +2846,7 @@ declare namespace Cypress {
     clientRoute: string
     configFile: string
     cypressEnv: string
+    devServerPublicPathRoute: string
     isNewProject: boolean
     isTextTerminal: boolean
     morgan: boolean
@@ -2797,7 +2881,8 @@ declare namespace Cypress {
   /**
    * All configuration items are optional.
    */
-  type ConfigOptions = Partial<ResolvedConfigOptions>
+  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
+  type ConfigOptions = CoreConfigOptions & {e2e?: CoreConfigOptions, component?: CoreConfigOptions }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
@@ -3132,6 +3217,18 @@ declare namespace Cypress {
      * @default 'Event'
      */
     eventConstructor: string
+  }
+
+  /**
+   * Options to change the default behavior of .url()
+   */
+  interface UrlOptions extends Loggable, Timeoutable {
+    /**
+     * Whether the url is decoded
+     *
+     * @default false
+     */
+    decode: boolean
   }
 
   /** Options to change the default behavior of .writeFile */
@@ -5496,6 +5593,7 @@ declare namespace Cypress {
 
   interface Log {
     end(): Log
+    error(error: Error): Log
     finish(): void
     get<K extends keyof LogConfig>(attr: K): LogConfig[K]
     get(): LogConfig

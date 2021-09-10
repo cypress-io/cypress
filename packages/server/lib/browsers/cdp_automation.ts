@@ -2,11 +2,11 @@
 
 import _ from 'lodash'
 import Bluebird from 'bluebird'
-import cdp from 'devtools-protocol'
+import type { Protocol } from 'devtools-protocol'
 import { cors } from '@packages/network'
 import debugModule from 'debug'
-import { Automation } from '../automation'
-import { ResourceType, BrowserPreRequest } from '@packages/proxy'
+import type { Automation } from '../automation'
+import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -19,7 +19,12 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
 // https://developer.chrome.com/extensions/cookies#method-getAll
 type CyCookieFilter = chrome.cookies.GetAllDetails
 
-function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
+export const screencastOpts: Protocol.Page.StartScreencastRequest = {
+  format: 'jpeg',
+  everyNthFrame: Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5),
+}
+
+function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
   return str ? ({
     'no_restriction': 'None',
     'lax': 'Lax',
@@ -27,7 +32,7 @@ function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.
   })[str] : str as any
 }
 
-function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
+function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
   if (_.isUndefined(str)) {
     return str
   }
@@ -62,10 +67,26 @@ export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
   return true
 }
 
-const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
+// without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
+export function isHostOnlyCookie (cookie) {
+  if (cookie.domain[0] === '.') return false
+
+  const parsedDomain = cors.parseDomain(cookie.domain)
+
+  // make every cookie non-hostOnly
+  // unless it's a top-level domain (localhost, ...) or IP address
+  return parsedDomain && parsedDomain.tld !== cookie.domain
+}
+
+const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
   if (cookie.expires === -1) {
     // @ts-ignore
     delete cookie.expires
+  }
+
+  if (isHostOnlyCookie(cookie)) {
+    // @ts-ignore
+    cookie.hostOnly = true
   }
 
   // @ts-ignore
@@ -80,16 +101,16 @@ const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
   return cookie
 }
 
-const normalizeGetCookies = (cookies: cdp.Network.Cookie[]) => {
+const normalizeGetCookies = (cookies: Protocol.Network.Cookie[]) => {
   return _.map(cookies, normalizeGetCookieProps)
 }
 
-const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest => {
+const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
   // this logic forms a SetCookie request that will be received by Chrome
   // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
   // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
 
-  const setCookieRequest: cdp.Network.SetCookieRequest = _({
+  const setCookieRequest: Protocol.Network.SetCookieRequest = _({
     domain: cookie.domain,
     path: cookie.path,
     secure: cookie.secure,
@@ -108,15 +129,13 @@ const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest
   .value()
 
   // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
-  if (!cookie.hostOnly && cookie.domain[0] !== '.') {
-    const parsedDomain = cors.parseDomain(cookie.domain)
+  if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
+    setCookieRequest.domain = `.${cookie.domain}`
+  }
 
-    // normally, a non-hostOnly cookie should be prefixed with a .
-    // so if it's not a top-level domain (localhost, ...) or IP address
-    // prefix it with a . so it becomes a non-hostOnly cookie
-    if (parsedDomain && parsedDomain.tld !== cookie.domain) {
-      setCookieRequest.domain = `.${cookie.domain}`
-    }
+  if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
+    // @ts-ignore
+    delete cookie.hostOnly
   }
 
   if (setCookieRequest.name.startsWith('__Host-')) {
@@ -156,6 +175,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 export class CdpAutomation {
   constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
+    onFn('Network.responseReceived', this.onResponseReceived)
     sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
@@ -163,7 +183,8 @@ export class CdpAutomation {
     })
   }
 
-  private onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
+    debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
@@ -175,16 +196,27 @@ export class CdpAutomation {
       requestId: params.requestId,
       method: params.request.method,
       url,
+      headers: params.request.headers,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
     }
 
-    this.automation.onBrowserPreRequest(browserPreRequest)
+    this.automation.onBrowserPreRequest?.(browserPreRequest)
+  }
+
+  private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
+    const browserResponseReceived: BrowserResponseReceived = {
+      requestId: params.requestId,
+      status: params.response.status,
+      headers: params.response.headers,
+    }
+
+    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {
     return this.sendDebuggerCommandFn('Network.getAllCookies')
-    .then((result: cdp.Network.GetAllCookiesResponse) => {
+    .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
         const matches = _cookieMatches(cookie, filter)
@@ -200,7 +232,7 @@ export class CdpAutomation {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
-    .then((result: cdp.Network.GetCookiesResponse) => {
+    .then((result: Protocol.Network.GetCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {
         return !(url.startsWith('http:') && cookie.secure)
@@ -231,7 +263,7 @@ export class CdpAutomation {
         setCookie = normalizeSetCookieProps(data)
 
         return this.sendDebuggerCommandFn('Network.setCookie', setCookie)
-        .then((result: cdp.Network.SetCookieResponse) => {
+        .then((result: Protocol.Network.SetCookieResponse) => {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie
@@ -240,6 +272,15 @@ export class CdpAutomation {
 
           return this.getCookie(data)
         })
+
+      case 'set:cookies':
+        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+
+        return this.sendDebuggerCommandFn('Network.clearBrowserCookies')
+        .then(() => {
+          return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+        })
+
       case 'clear:cookie':
         return this.getCookie(data)
         // tap, so we can resolve with the value of the removed cookie
@@ -252,6 +293,21 @@ export class CdpAutomation {
 
           return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
         })
+
+      case 'clear:cookies':
+        return Bluebird.mapSeries(data as CyCookieFilter[], async (cookie) => {
+          // resolve with the value of the removed cookie
+          // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+          // that matches the cookie domain that is really stored
+          const cookieToBeCleared = await this.getCookie(cookie)
+
+          if (!cookieToBeCleared) return
+
+          await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+
+          return cookieToBeCleared
+        })
+
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':

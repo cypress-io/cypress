@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import { concatStream, httpUtils } from '@packages/network'
 import Debug from 'debug'
-import { Readable } from 'stream'
+import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 
-import {
+import type {
   ResponseMiddleware,
 } from '@packages/proxy'
 import {
@@ -79,7 +79,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
 
   mergeChanges(request.res as any, modifiedRes)
 
-  const bodyStream = getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
+  const bodyStream = await getBodyStream(modifiedRes.body, _.pick(modifiedRes, ['throttleKbps', 'delay']) as any)
 
   return request.continueResponse!(bodyStream)
 }

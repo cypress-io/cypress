@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import {
+import type {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
   Subscription,
@@ -59,12 +59,14 @@ export declare namespace NetEvent {
 
   export namespace ToDriver {
     export interface Event<D> extends Http {
+      /**
+       * If set, this is the browser's internal identifier for this request.
+       */
+      browserRequestId?: string
       subscription: Subscription
       eventId: string
       data: D
     }
-
-    export interface Request extends Event<CyHttpMessages.IncomingRequest> {}
 
     export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
   }
