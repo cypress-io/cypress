@@ -1,77 +1,11 @@
-# Launchpad
+## App
 
-Launchpad is next-gen Vue application that is rendered by Electron. This acts as the visual user interface you see when running: `cypress open`.
+This is the front-end for the Cypress App.
 
-It replaces the original electron app, `desktop-gui`.
+## Development
 
-**Launchpad has the following responsibilities:**
-
-- Allow users to log in through the Dashboard Service
-- Onboarding for new users (configure Component Testing dev server, install dependencies, etc)
-- Select testing mode (E2E, Component, Node.js)
-
-It is using the following technologies:
-
-- [Vue 3](https://v3.vuejs.org/guide/introduction.html) for the UI framework
-  - code is written with the [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html) 
-  - uses the new [`<script setup>`](https://v3.vuejs.org/api/sfc-script-setup.html#basic-syntax) syntax for beter TypeScript support
-- [Vite](https://vitejs.dev/) for the dev server
-- TypeScript
-- [Urql](https://formidable.com/open-source/urql/) for the GraphQL client
-
-Cypress' entire back-end is powered by the `@packages/server` package. Launchpad interfaces with it via a GraphQL layer, found in `@packages/graphql`.
-
-[Here is a short tutorial](https://github.com/lmiller1990/vue-3-urql-example) building a simple app using the same technologies we are using for launchpad. There are a lot of moving pieces; understanding how everything works will help you contribute to Launchpad.
-
-## Building
-
-### For development
-
-```bash
-## from repo root
-yarn workspace @packages/launchpad build
-```
-
-## Developing
-
-For the best development experience, you will want to use VS Code with the [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) extension. This will give you type completion inside `vue` files.
-
-You probably want to start Vite in watch mode:
-
-```bash
-## from repo root
-yarn workspace @packages/launchpad watch
-```
-
-The start the application:
-
-```bash
-## from repo root
-yarn workspace @packages/launchpad dev
-```
-
-This also starts the GraphQL Server. You can access it on `http://localhost:52159/graphql`.
-
-![graphql](../graphql/gql.png)
-
-If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run`, you might need to reopen your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
-
-## Testing
-
-### In Cypress
-
-This project is tested with Cypress itself. It acts exactly like any other Cypress project. It has more component tests than E2E, as we are using Launchpad to dogfood Component Testing.
-
-Component Tests:
-
-```bash
-## from repo root
-yarn workspace @packages/launchpad cypress:open:ct
-```
-
-E2E tests:
-
-```bash
-## from repo root
-yarn workspace @packages/launchpad cypress:open
-```
+1. Use existing project to get a server (for example `cd packages/runner-ct && yarn cypress:open`)
+2. It will open in a new browser on port 8080
+3. Do `yarn start`. It will start the front-end for the new Cypress app 
+4. To back to the browser opened in step 2
+5. Visit http://localhost:8080/__vite__/ for the new front-end powered by Vite (currently running the RunnerCt)
