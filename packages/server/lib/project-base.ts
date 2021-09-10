@@ -282,7 +282,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     ])
 
     await Promise.all([
-      checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
+      checkSupportFile({
+        projectRoot: this.projectRoot,
+        configFile: cfg.configFile,
+        supportFile: cfg.supportFile,
+      }),
       this.watchPluginsFile(cfg, this.options),
     ])
 
@@ -826,7 +830,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    errors.throw('NO_PROJECT_ID', settings.configFile(this.projectRoot, this.options), this.projectRoot)
   }
 
   async verifyExistence () {

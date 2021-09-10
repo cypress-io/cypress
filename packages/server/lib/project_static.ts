@@ -135,8 +135,9 @@ export function remove (path) {
 
 export async function add (path, options) {
   // don't cache a project if a non-default configFile is set
+  // because the cache key is the path
   // https://git.io/JeGyF
-  if (settings.configFile(options) !== 'cypress.json') {
+  if (settings.configFile(path, options) !== 'cypress.json') {
     return Promise.resolve({ path })
   }
 
