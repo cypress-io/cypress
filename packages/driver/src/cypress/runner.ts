@@ -844,11 +844,18 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
     let test = getTest()
 
-    // https://github.com/cypress-io/cypress/issues/9162
-    // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
-    // But it caused tests to hang when there's a failure in before().
-    // That's why getTest() is revived and checks if the state is 'pending'.
-    if (!test || test.state === 'pending') {
+    if (test && test.state !== 'pending') {
+      // if the current test isn't within the hook's suite
+      // then don't run the hook https://github.com/cypress-io/cypress/issues/17705
+      if (!suiteHasTest(hook.parent, test.id)) {
+        return
+      }
+    } else {
+      // https://github.com/cypress-io/cypress/issues/9162
+      // In https://github.com/cypress-io/cypress/issues/8113, getTest() call was removed to handle skip() properly.
+      // But it caused tests to hang when there's a failure in before().
+      // That's why getTest() is revived and checks if the state is 'pending'.
+
       // set the hook's id from the test because
       // hooks do not have their own id, their
       // commands need to grouped with the test
@@ -1345,7 +1352,10 @@ export default {
         // move to the next runnable - this will be our async seam
         const _next = args[0]
 
-        const test = getTest() || getTestFromRunnable(runnable)
+        // don't use getTest() here since hook runnables without tests should be skipped.
+        // getTest() can be defined when a hook doesn't belong to the test.
+        // see where we set currentTest in `_runner.on('hook'`
+        const test = getTestFromRunnable(runnable)
 
         // if there's no test, this is likely a rouge before/after hook
         // that should not have run, so skip this runnable

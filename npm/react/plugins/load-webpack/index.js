@@ -16,7 +16,7 @@ function normalizeWebpackPath (config, webpackConfigPath) {
  * **Important:** `webpackFilename` path is relative to the project root (cypress.json location)
  * @type {(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions, options: { webpackFilename: string  }) => Cypress.PluginConfigOptions}
  */
-function injectWebpackDevServer (on, config, { webpackFilename }) {
+function webpackDevServer (on, config, { webpackFilename }) {
   const webpackConfig = tryLoadWebpackConfig(normalizeWebpackPath(config, webpackFilename))
 
   if (!webpackConfig) {
@@ -32,4 +32,4 @@ function injectWebpackDevServer (on, config, { webpackFilename }) {
   return config
 }
 
-module.exports = injectWebpackDevServer
+module.exports = webpackDevServer
