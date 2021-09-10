@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
+import { configFileFormatted } from '../lib/config-file-formatted'
 
 import ipc from '../lib/ipc'
 
@@ -89,6 +90,9 @@ const NodeVersion = observer(({ project }) => {
         <div className='well text-muted'>
           This Node.js version is used to:
           <ul>
+            {isJSONFile(project.configFile)
+              ? undefined
+              : <li>Execute code in {configFileFormatted(project.configFile)}.</li>}
             <li>Build files in the {formatIntegrationFolder()} folder.</li>
             <li>Build files in the <code>cypress/support</code> folder.</li>
             <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
@@ -98,5 +102,9 @@ const NodeVersion = observer(({ project }) => {
     </div>
   )
 })
+
+function isJSONFile (filePath) {
+  return /\.json$/.test(filePath)
+}
 
 export default NodeVersion

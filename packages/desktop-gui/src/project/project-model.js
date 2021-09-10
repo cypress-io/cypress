@@ -42,6 +42,7 @@ export default class Project {
   // persisted with api
   @observable id
   @observable name
+  @observable configFile
   @observable public
   @observable lastBuildStatus
   @observable lastBuildCreatedAt
@@ -274,7 +275,7 @@ export default class Project {
   }
 
   getConfigValue (key) {
-    if (!this.resolvedConfig) return
+    if (!this.resolvedConfig || !this.resolvedConfig[key]) return
 
     return toJS(this.resolvedConfig[key]).value
   }
