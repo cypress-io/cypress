@@ -503,24 +503,25 @@ module.exports = {
     const serverContext = setServerContext(new ServerContext(options, {}))
 
     await serverContext.app.cacheBrowsers()
-    await serverContext.actions.initializeOpenProject({
-      ...options,
-      config: {
-        browsers: serverContext.app.browserCache!.map((x): BrowserContract => {
-          return {
-            name: x.name,
-            family: x.family,
-            majorVersion: x.majorVersion,
-            channel: x.channel,
-            displayName: x.displayName,
-            path: x.path,
-            version: x.version,
-          }
-        }),
-      },
-    }, {})
 
     if (options.projectRoot) {
+      await serverContext.actions.initializeOpenProject({
+        ...options,
+        config: {
+          browsers: serverContext.app.browserCache!.map((x): BrowserContract => {
+            return {
+              name: x.name,
+              family: x.family,
+              majorVersion: x.majorVersion,
+              channel: x.channel,
+              displayName: x.displayName,
+              path: x.path,
+              version: x.version,
+            }
+          }),
+        },
+      }, {})
+
       serverContext.actions.addProject(options.projectRoot)
     }
 
