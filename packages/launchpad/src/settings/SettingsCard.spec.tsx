@@ -25,5 +25,18 @@ describe('<SettingsCard />', () => {
     .get(contentSelector).should('be.visible')
     .get(headerSelector).click()
     .get(contentSelector).should('not.exist')
+
+    // expected aria and keyboard behavior with space and enter keys:
+    cy.get(headerSelector).should('be.focused')
+    .get('body').type(' ')
+    .get(contentSelector).should('be.visible')
+    .get(headerSelector).should('have.attr', 'aria-expanded', 'true')
+    .get('body').type(' ')
+    .get(contentSelector).should('not.exist')
+    .get(headerSelector).should('have.attr', 'aria-expanded', 'false')
+    .get('body').type('{enter}')
+    .get(contentSelector).should('be.visible')
+    .get('body').type('{enter}')
+    .get(contentSelector).should('not.exist')
   })
 })
