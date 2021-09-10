@@ -1,0 +1,23 @@
+overwrite: true
+schema: '../graphql/schema.graphql'
+generates:
+  src/generated/graphql.ts:
+    documents: 'src/**/*.vue'
+    config:
+      immutableTypes: true
+      useTypeImports: true
+      preResolveTypes: true
+      onlyOperationTypes: true
+      avoidOptionals: true
+      enumsAsTypes: true
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typed-document-node'
+  ../graphql/src/testing/testUnionType.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'script/codegen-mount.js'

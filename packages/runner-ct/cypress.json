@@ -2,7 +2,7 @@
   "testFiles": "**/*spec.{ts,tsx}",
   "video": true,
   "env": {
-    "reactDevtools": true
+    "reactDevtools": false
   },
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
