@@ -8,6 +8,10 @@ import $Listeners from '../cy/listeners'
 import $Snapshots from '../cy/snapshots'
 import { create as createOverrides } from '../cy/overrides'
 
+const postMessage = (event, data) => {
+  top.postMessage({ event, data }, '*')
+}
+
 const onBeforeAppWindowLoad = (autWindow) => {
   const specWindow = {
     Error,
@@ -26,10 +30,10 @@ const onBeforeAppWindowLoad = (autWindow) => {
       version: '90.0.4430.212',
     },
   })
-  const log = (...args) => {
-    return Cypress.log.apply(Cypress, args)
-  }
-  const cy = $Cy.create(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, log)
+  const cy = $Cy.create(specWindow, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
+
+  window.Cypress = Cypress
+  window.cy = cy
 
   Cypress.log = $Log.create(Cypress, cy, Cypress.state, Cypress.config)
   Cypress.runner = {
@@ -54,13 +58,79 @@ const onBeforeAppWindowLoad = (autWindow) => {
 
   $Commands.create(Cypress, cy, state, config)
 
-  window.addEventListener('message', (event) => {
-    if (event.data && event.data.message === 'run:in:domain') {
-      const stringifiedTestFn = event.data.data
+  const onCommandEnqueued = (commandAttrs) => {
+    const { id, name } = commandAttrs
 
-      autWindow.eval(`(${stringifiedTestFn})()`)
+    // it's not strictly necessary to send the name, but it can be useful
+    // for debugging purposes
+    postMessage('cross:domain:command:enqueued', { id, name })
+  }
+
+  const onCommandEnd = (command) => {
+    const id = command.get('id')
+
+    postMessage('cross:domain:command:update', { id, end: true })
+  }
+
+  const onLogAdded = (attrs) => {
+    postMessage('cross:domain:command:update', {
+      logAdded: $Log.toSerializedJSON(attrs),
+    })
+  }
+
+  const onLogChanged = (attrs) => {
+    postMessage('cross:domain:command:update', {
+      logChanged: $Log.toSerializedJSON(attrs),
+    })
+  }
+
+  Cypress.on('command:enqueued', onCommandEnqueued)
+  Cypress.on('command:end', onCommandEnd)
+  Cypress.on('skipped:command:end', onCommandEnd)
+  Cypress.on('log:added', onLogAdded)
+  Cypress.on('log:changed', onLogChanged)
+
+  const run = (data) => {
+    // syncs up the log number with the primary domain
+    $Log.setCounter(data.logCounter)
+
+    // TODO: await this if it's a promise, or do whatever cy.then does
+    window.eval(`(${data.fn})()`)
+
+    postMessage('cross:domain:ran:domain:fn')
+  }
+
+  const runCommand = () => {
+    const next = state('next')
+
+    if (next) {
+      return next()
     }
-  }, false)
+
+    // if there's no state('next') for running the next command,
+    // the queue hasn't started yet, so run it
+    cy.queue.run(false)
+    .then(() => {
+      postMessage('cross:domain:queue:finished')
+    })
+  }
+
+  const onMessage = (event) => {
+    if (!event.data) return
+
+    switch (event.data.message) {
+      case 'run:domain:fn':
+        return run(event.data)
+      case 'run:command':
+        return runCommand()
+      default:
+        // eslint-disable-next-line no-console
+        console.log('Unknown message received in', window.location.origin, ':', event.data)
+    }
+  }
+
+  // incoming messages from the primary domain
+  window.addEventListener('message', onMessage, false)
 
   autWindow.Cypress = Cypress
   autWindow.cy = cy
@@ -88,7 +158,18 @@ const onBeforeAppWindowLoad = (autWindow) => {
       // doesn't trigger a confirmation dialog
       return undefined
     },
+    onLoad () {
+      postMessage('cross:domain:window:load')
+    },
     onUnload (e) {
+      window.removeEventListener('message', onMessage)
+
+      Cypress.off('command:enqueued', onCommandEnqueued)
+      Cypress.off('command:end', onCommandEnd)
+      Cypress.off('skipped:command:end', onCommandEnd)
+      Cypress.off('log:added', onLogAdded)
+      Cypress.off('log:changed', onLogChanged)
+
       return Cypress.action('app:window:unload', e)
     },
     // TODO: this currently only works on hashchange, but needs work
@@ -111,9 +192,9 @@ const onBeforeAppWindowLoad = (autWindow) => {
     },
   })
 
-  top.postMessage('cross:domain:window:before:load', '*')
+  postMessage('cross:domain:window:before:load')
 }
 
 window.__onBeforeAppWindowLoad = onBeforeAppWindowLoad
 
-top.postMessage('cross:domain:bridge:ready', '*')
+postMessage('cross:domain:bridge:ready')

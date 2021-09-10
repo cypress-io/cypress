@@ -65,6 +65,10 @@ export default {
       callbacks.onBeforeUnload(e)
     })
 
+    addListener(contentWindow, 'load', (e) => {
+      callbacks.onLoad(e)
+    })
+
     addListener(contentWindow, 'unload', (e) => {
       // when we unload we need to remove all of the event listeners
       removeAllListeners()

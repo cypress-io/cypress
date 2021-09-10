@@ -6,7 +6,10 @@ export class $Chainer {
   constructor (userInvocationStack, specWindow) {
     this.userInvocationStack = userInvocationStack
     this.specWindow = specWindow
-    this.chainerId = _.uniqueId('chainer')
+    // the id prefix needs to be unique per domain, so there are not
+    // collisions when chainers created in a secondary domain are passed
+    // to the primary domain for the command log, etc.
+    this.chainerId = _.uniqueId(`ch-${window.location.origin}-`)
     this.firstCall = true
   }
 

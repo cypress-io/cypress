@@ -124,7 +124,7 @@ const setTopOnError = function (Cypress, cy) {
 class $Cy {}
 
 export default {
-  create (specWindow, Cypress, Cookies, state, config, log) {
+  create (specWindow, Cypress, Cookies, state, config, autoRun = true) {
     let cy = new $Cy()
     const commandFns = {}
 
@@ -221,6 +221,7 @@ export default {
           // doesnt trigger a confirmation dialog
           return undefined
         },
+        onLoad () {},
         onUnload (e) {
           return Cypress.action('app:window:unload', e)
         },
@@ -275,6 +276,13 @@ export default {
 
       return Cypress.action('cy:command:enqueued', obj)
     }
+
+    // this is utilized for multidomain, where the secondary domain enqueues
+    // its own commands and proxy versions are added to the queue on the
+    // primary domain via this event
+    Cypress.on('enqueue:command', (attrs) => {
+      enqueue(attrs)
+    })
 
     const getCommandsUntilFirstParentOrValidSubject = function (command, memo = []) {
       if (!command) {
@@ -758,7 +766,9 @@ export default {
               warnMixingPromisesAndCommands()
             }
 
-            queue.run()
+            if (autoRun) {
+              queue.run()
+            }
           }
 
           return chain
