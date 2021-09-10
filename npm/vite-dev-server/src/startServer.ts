@@ -8,9 +8,9 @@ const debug = Debug('cypress:vite-dev-server:start')
 
 export interface StartDevServerOptions {
   /**
-   * the Cypress options object
+   * the Cypress dev server configuration object
    */
-  options: Cypress.DevServerOptions
+  options: Cypress.DevServerConfig
   /**
    * By default, vite will use your vite.config file to
    * Start the server. If you need additional plugins or
