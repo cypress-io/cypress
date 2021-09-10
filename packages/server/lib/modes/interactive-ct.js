@@ -5,9 +5,9 @@ const Debug = require('debug')
 
 const { getBrowsers } = require('../browsers/utils')
 const errors = require('../errors')
-const browsers = require('./browsers')
-const { openProject } = require('./open_project')
-const Updater = require('@packages/server/lib/updater')
+const browsers = require('../browsers')
+const { openProject } = require('../open_project')
+const Updater = require('../updater')
 
 const debug = Debug('cypress:server:interactive-ct')
 
