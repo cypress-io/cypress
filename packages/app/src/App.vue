@@ -2,12 +2,14 @@
 import { onMounted, ref } from 'vue'
 import { renderRunner } from './runner/renderRunner'
 
-renderRunner()
 const target = ref(null)
 
 onMounted(async () => {
   const config = await (await fetch('/__/api')).json()
-  window.Runner.start(target.value, config.base64Config)
+  renderRunner(() => {
+    // @ts-ignore - yes it does
+    window.Runner.start(target.value, config.base64Config)
+  })
 })
 </script>
 
