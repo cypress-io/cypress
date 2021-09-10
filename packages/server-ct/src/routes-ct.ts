@@ -1,9 +1,9 @@
 import Debug from 'debug'
 import type { ErrorRequestHandler, Express } from 'express'
-import type httpProxy from 'http-proxy'
+import httpProxy from 'http-proxy'
 import send from 'send'
 import type { NetworkProxy } from '@packages/proxy'
-import { handle, serve, serveChunk } from './runner-ct'
+import { handle, serve, makeServeConfig, serveChunk } from './runner-ct'
 import xhrs from '@packages/server/lib/controllers/xhrs'
 import type { SpecsStore } from '@packages/server/lib/specs-store'
 import type { Cfg } from '@packages/server/lib/project-base'
@@ -22,7 +22,6 @@ export interface InitializeRoutes {
   networkProxy: NetworkProxy
   getRemoteState: () => any
   onError: (...args: unknown[]) => any
-  testingType: Cypress.Cypress['testingType']
 }
 
 export const createRoutes = ({
@@ -34,6 +33,30 @@ export const createRoutes = ({
   getCurrentBrowser,
   getSpec,
 }: InitializeRoutes) => {
+  // If development
+  const myProxy = httpProxy.createProxyServer({
+    target: 'http://localhost:3333/',
+  })
+
+  // TODO If prod, serve the build app files from app/dist
+
+  app.get('/__/api', (req, res) => {
+    const options = makeServeConfig({
+      config,
+      getCurrentBrowser,
+      specsStore,
+    })
+
+    res.json(options)
+  })
+
+  // TODO: can namespace this onto a "unified" route like __app-unified__
+  // make sure to update the generated routes inside of vite.config.ts
+  app.get('/__vite__/*', (req, res) => {
+    myProxy.web(req, res, {}, (e) => {
+    })
+  })
+
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {

@@ -1,4 +1,4 @@
-import { RunGroup } from '../../../graphql/src/entities/run'
+import { RunGroup } from '@packages/graphql/src/entities/run'
 import { RunFragmentDoc } from '../generated/graphql'
 import RunCard from './RunCard.vue'
 
