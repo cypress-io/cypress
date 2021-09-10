@@ -1,5 +1,5 @@
 <template>
-  <Listbox as="div" v-model="modelValue">
+  <Listbox as="div" v-model="localValue">
     <template #="{ open }">
     <ListboxLabel class="block text-sm font-medium text-gray-700">
       <template v-if="label"> {{ label }} </template>
@@ -38,11 +38,12 @@
 
       <transition leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
         <ListboxOptions class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-          <ListboxOption as="ul" v-for="option in options" :key="get(option, itemKey ?? '')" :value="option" v-slot="{ active, selected }">
+          <ListboxOption as="ul" v-for="option in options" :key="get(option, itemKey ?? '')" :value="option" :disabled="option.disabled" v-slot="{ active, selected }">
               <li class="cursor-default block truncate select-none relative py-2 pl-3 pr-9" :class="[{
                 'font-medium': selected,
                 'bg-gray-50': active,
-                'text-gray-900': !active
+                'text-gray-900': !active,
+                'text-opacity-40': option.disabled
               }]">
                 <span class="absolute inset-y-0 flex items-center">
                   <slot name="item-prefix" :selected="selected" :active="active" :value="option"></slot>
@@ -81,7 +82,7 @@ import IconCheck from 'virtual:vite-icons/mdi/check'
 import IconCaret from 'virtual:vite-icons/mdi/caret'
 import Icon from '../icon/Icon.vue'
 import { get } from 'lodash'
-import { useI18n } from '../../composables'
+import { useI18n, useModelWrapper } from '../../composables'
 
 const { t } = useI18n()
 
@@ -89,7 +90,7 @@ interface Option {
   [key: string]: any
 }
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   options: Option[],
   modelValue?: Option // Current object being selected
   placeholder?: string
@@ -103,5 +104,7 @@ withDefaults(defineProps<{
   itemKey: 'key'
 })
 
-defineEmits(['update:modelValue'])
+const emits = defineEmits(['update:modelValue'])
+const localValue = useModelWrapper(props, emits, 'modelValue')
+
 </script>

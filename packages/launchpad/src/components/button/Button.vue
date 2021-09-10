@@ -34,6 +34,7 @@ const VariantClassesTable = {
   primary: "border-indigo-600 bg-indigo-600 text-white",
   outline: "border-gray-200 text-indigo-600 bg-white",
   link: "border-transparent text-indigo-600",
+  text: 'border-0'
 }
 
 const SizeClassesTable = {
@@ -53,7 +54,7 @@ const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: "xs" | "sm" | "md" | "lg" | "xl"
-  variant?: "primary" | "outline" | "link" | "underline"
+  variant?: "primary" | "outline" | "link" | "underline" | "text"
   prefixIconClass?: string
   suffixIconClass?: string
 }>()
