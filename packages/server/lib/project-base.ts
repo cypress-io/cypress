@@ -30,8 +30,6 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { createRoutes as createE2ERoutes } from './routes-e2e'
-import { createRoutes as createCTRoutes } from './routes-ct'
 import { checkSupportFile } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
@@ -219,7 +217,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
       specsStore,
     })
 
