@@ -3,6 +3,8 @@ require('../spec_helper')
 const path = require('path')
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
+const { CYPRESS_CONFIG_FILES } = require(`${root}/lib/configFiles`)
+
 const { clearCypressJsonCache } = require('../cache_helper')
 
 const projectRoot = process.cwd()
@@ -20,9 +22,9 @@ describe('lib/settings', () => {
     })
 
     afterEach(() => {
-      return fs.removeAsync('cypress.json')
-      .then(() => fs.removeAsync('cypress.config.js'))
-      .then(() => fs.removeAsync('cypress.config.ts'))
+      return CYPRESS_CONFIG_FILES.reduce((previousPromise, currentFile) => {
+        return previousPromise.then(() => fs.removeAsync(currentFile))
+      }, Promise.resolve())
       .then(clearCypressJsonCache)
     })
 
