@@ -6,7 +6,7 @@ const ipc = util.wrapIpc(process)
 
 require('./suppress_warnings').suppress()
 
-const { file, projectRoot, loadErrorCode } = require('minimist')(process.argv.slice(2))
+const { file, projectRoot } = require('minimist')(process.argv.slice(2))
 
 run(ipc, file, projectRoot)
 
@@ -58,15 +58,13 @@ function run (ipc, requiredFile, projectRoot) {
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
-        ipc.send('load:error', loadErrorCode, requiredFile, cleanMessage)
+        ipc.send('load:error', err.name, requiredFile, cleanMessage)
       } else {
-        debug('failed to load file:%s\n%s: %s', requiredFile, err.code, err.message)
+        const realErrorCode = err.code || err.name
 
-        if (err.code === 'ENOENT' || err.code === 'MODULE_NOT_FOUND') {
-          ipc.send('load:error', err.code, requiredFile, err)
-        }
+        debug('failed to load file:%s\n%s: %s', requiredFile, realErrorCode, err.message)
 
-        ipc.send('load:error', loadErrorCode, requiredFile, err.message)
+        ipc.send('load:error', realErrorCode, requiredFile, err.message)
       }
     }
   })

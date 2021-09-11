@@ -511,7 +511,9 @@ describe('lib/cypress', () => {
         return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
-      }).catch({ code: 'ENOENT' }, () => {})
+      }).catch((err) => {
+        expect(err.code).to.equal('ENOENT')
+      })
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {

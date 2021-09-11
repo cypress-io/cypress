@@ -47,7 +47,7 @@ export default async function requireAsync (filePath: string, options: RequireAs
       .value()
     }
 
-    const childArguments = ['--projectRoot', options.projectRoot, '--file', filePath, '--loadErrorCode', options.loadErrorCode]
+    const childArguments = ['--projectRoot', options.projectRoot, '--file', filePath]
 
     debug('fork child process', path.join(__dirname, 'require_async_child.js'), childArguments, childOptions)
     requireProcess = cp.fork(path.join(__dirname, 'require_async_child.js'), childArguments, childOptions)
@@ -69,7 +69,17 @@ export default async function requireAsync (filePath: string, options: RequireAs
       debug('load:error %s, rejecting', type)
       killChildProcess()
 
-      reject(errors.get(type, ...args))
+      const err = errors.get(type, ...args)
+
+      // if it's a non-cypress error, restore the initial error
+      if (!(err.message?.length)) {
+        err.isCypressErr = false
+        err.details = args[1]
+        err.code = type
+        err.name = type
+      }
+
+      reject(err)
     })
 
     debug('trigger the load of the file')
