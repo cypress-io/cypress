@@ -7,10 +7,10 @@ Use the plugin:
 
 // import your craco.config.js
 const cracoConfig = require('../../craco.config.js')
-const injectDevServer = require('@cypress/react/plugins/craco')
+const devServer = require('@cypress/react/plugins/craco')
 
 module.exports = (on, config) => {
-  injectDevServer(on, config, cracoConfig)
+  devServer(on, config, cracoConfig)
 
   return config
 }
