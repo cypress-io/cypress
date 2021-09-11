@@ -71,22 +71,21 @@ describe('lib/watchers', () => {
 
   context('#close', () => {
     it('removes each watched property', function () {
-      const watched1 = { close: sinon.spy() }
+      const watched1 = { close: sinon.fake.resolves() }
+      const watched2 = { close: sinon.fake.resolves() }
 
-      this.watchers._add('/one', watched1)
+      return this.watchers._add('/one', watched1).then(() => {
+        return this.watchers._add('/two', watched2)
+      }).then(() => {
+        expect(_.keys(this.watchers.watchers)).to.have.members(['/one', '/two'])
 
-      const watched2 = { close: sinon.spy() }
+        return this.watchers.close()
+      }).then(() => {
+        expect(watched1.close).to.be.calledOnce
+        expect(watched2.close).to.be.calledOnce
 
-      this.watchers._add('/two', watched2)
-
-      expect(_.keys(this.watchers.watchers)).to.have.length(2)
-
-      this.watchers.close()
-
-      expect(watched1.close).to.be.calledOnce
-      expect(watched2.close).to.be.calledOnce
-
-      expect(_.keys(this.watchers.watchers)).to.have.length(0)
+        expect(_.keys(this.watchers.watchers)).to.have.length(0)
+      })
     })
   })
 })
