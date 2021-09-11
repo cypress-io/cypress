@@ -8,6 +8,7 @@ import { openProject } from '../../../lib/open_project'
 import { ProjectBase } from '../../../lib/project-base'
 import * as dialog from '../../../lib/gui/dialog'
 import * as specWriter from '../../../lib/util/spec_writer'
+import { fs } from '../../../lib/util/fs'
 
 describe('gui/files', () => {
   context('.showDialogAndCreateSpec', () => {
@@ -34,6 +35,7 @@ describe('gui/files', () => {
 
       sinon.stub(ProjectBase.prototype, 'open').resolves()
       sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
+      sinon.stub(fs, 'readdirSync').returns(['cypress.json'] as any)
 
       this.showSaveDialog = sinon.stub(dialog, 'showSaveDialog').resolves(this.selectedPath)
       this.createFile = sinon.stub(specWriter, 'createFile').resolves({})
