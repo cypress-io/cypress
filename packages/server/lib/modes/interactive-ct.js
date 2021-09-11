@@ -1,4 +1,3 @@
-const chalk = require('chalk')
 const human = require('human-interval')
 const _ = require('lodash')
 const Debug = require('debug')
@@ -57,9 +56,8 @@ const start = async (projectRoot, args) => {
 
       return openProject.launch(browser, spec, {
         onBrowserClose: () => {
-          /* eslint-disable no-console */
-          console.log(chalk.blue('BROWSER EXITED SAFELY'))
-          console.log(chalk.blue('COMPONENT TESTING STOPPED'))
+          debug('BROWSER EXITED SAFELY')
+          debug('COMPONENT TESTING STOPPED')
           process.exit()
         },
       })
