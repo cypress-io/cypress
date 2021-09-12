@@ -29,7 +29,6 @@ const api = require('../api')
 const savedState = require('../saved_state')
 
 import { ServerContext } from '../graphql/ServerContext'
-import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
@@ -527,35 +526,6 @@ module.exports = {
 
     // find and cache browsers.
     // browsers are needed for when we initialize the project's configuration.
-    await serverContext.app.cacheBrowsers()
-
-    ipc.on('graphql', async (evt, { id, params, variables }) => {
-      try {
-        const result = await execute({
-          schema: graphqlSchema,
-          document: parse(params.text),
-          operationName: params.name,
-          variableValues: variables,
-          contextValue: serverContext,
-        })
-
-        evt.sender.send('graphql:response', {
-          id,
-          result,
-        })
-      } catch (e) {
-        evt.sender.send('graphql:response', {
-          id,
-          result: {
-            data: null,
-            errors: [{
-              name: e.name,
-              message: e.message,
-              stack: e.stack,
-            }],
-          },
-        })
-      }
-    })
+    return serverContext.app.cacheBrowsers()
   },
 }
