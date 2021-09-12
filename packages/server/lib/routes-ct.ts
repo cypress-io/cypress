@@ -4,11 +4,11 @@ import type httpProxy from 'http-proxy'
 import send from 'send'
 import type { NetworkProxy } from '@packages/proxy'
 import { handle, serve, serveChunk } from './runner-ct'
-import xhrs from '@packages/server/lib/controllers/xhrs'
-import type { SpecsStore } from '@packages/server/lib/specs-store'
-import type { Cfg } from '@packages/server/lib/project-base'
+import xhrs from './controllers/xhrs'
+import type { SpecsStore } from './specs-store'
+import type { Cfg } from './project-base'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { Browser } from '@packages/server/lib/browsers/types'
+import type { Browser } from './browsers/types'
 
 const debug = Debug('cypress:server:routes')
 
@@ -32,7 +32,6 @@ export const createRoutes = ({
   nodeProxy,
   networkProxy,
   getCurrentBrowser,
-  getSpec,
 }: InitializeRoutes) => {
   app.get('/__cypress/runner/*', handle)
 
