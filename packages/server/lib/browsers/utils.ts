@@ -38,8 +38,8 @@ const getBrowserPath = (browser) => {
   )
 }
 
-const getMajorVersion = (version) => {
-  return parseFloat(version.split('.')[0]) || version
+const getMajorVersion = (version: string) => {
+  return (parseFloat(version.split('.')[0]) || version).toString()
 }
 
 const defaultLaunchOptions: {
@@ -182,6 +182,23 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
+const getElectronBrowser = () => {
+  const version = process.versions.chrome || ''
+
+  const electronBrowser: FoundBrowser = {
+    name: 'electron',
+    channel: 'stable',
+    family: 'chromium',
+    displayName: 'Electron',
+    version,
+    path: '',
+    majorVersion: getMajorVersion(version),
+    info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+  }
+
+  return electronBrowser
+}
+
 export = {
   extendLaunchOptionsFromPlugins,
 
@@ -240,8 +257,6 @@ export = {
 
     return launcher.detect()
     .then((browsers: FoundBrowser[] = []) => {
-      let majorVersion
-
       debug('found browsers %o', { browsers })
 
       if (!process.versions.electron) {
@@ -250,23 +265,7 @@ export = {
         return browsers
       }
 
-      // @ts-ignore
-      const version = process.versions.chrome || ''
-
-      if (version) {
-        majorVersion = getMajorVersion(version)
-      }
-
-      const electronBrowser: FoundBrowser = {
-        name: 'electron',
-        channel: 'stable',
-        family: 'chromium',
-        displayName: 'Electron',
-        version,
-        path: '',
-        majorVersion,
-        info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
-      }
+      const electronBrowser = getElectronBrowser()
 
       // the internal version of Electron, which won't be detected by `launcher`
       debug('adding Electron browser %o', electronBrowser)
@@ -274,4 +273,6 @@ export = {
       return browsers.concat(electronBrowser)
     })
   },
+
+  getElectronBrowser,
 }
