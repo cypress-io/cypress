@@ -7,12 +7,7 @@ import {
   fetchExchange,
 } from '@urql/core'
 
-import { initGraphQLIPC } from './graphqlIpc'
-
 export function makeUrqlClient (): Client {
-  initGraphQLIPC()
-
-  // TODO: investigate creating ipcExchange
   return createClient({
     url: 'http://localhost:52159/graphql',
     exchanges: [
