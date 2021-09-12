@@ -1,15 +1,7 @@
-<<<<<<< HEAD
-const human = require('human-interval')
-const _ = require('lodash')
-const Debug = require('debug')
-=======
-import chalk from 'chalk'
-import human from 'human-interval'
-import _ from 'lodash'
 import Debug from 'debug'
->>>>>>> a79d4d3e17 (improve type definitions)
-
+import _ from 'lodash'
 import browserUtils from '../browsers/utils'
+import human from 'human-interval'
 import browsers from '../browsers'
 import { LaunchArgs, openProject } from '../open_project'
 import * as Updater from '../updater'
@@ -60,15 +52,8 @@ const start = async (projectRoot: string, args: LaunchArgs) => {
 
       return openProject.launch(browser, spec, {
         onBrowserClose: () => {
-<<<<<<< HEAD
           debug('BROWSER EXITED SAFELY')
           debug('COMPONENT TESTING STOPPED')
-=======
-          // eslint-disable-next-line no-console
-          console.log(chalk.blue('BROWSER EXITED SAFELY'))
-          // eslint-disable-next-line no-console
-          console.log(chalk.blue('COMPONENT TESTING STOPPED'))
->>>>>>> a79d4d3e17 (improve type definitions)
           process.exit()
         },
       })
