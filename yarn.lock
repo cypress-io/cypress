@@ -8025,14 +8025,12 @@
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-1.3.2.tgz#93e25bf9ee75fe0fd80b594bc4feb0e862111b5a"
   integrity sha512-YATxVxgRqNH6nHEIsvg6k2Boc1JHI9ZbH5iWFFv/MTkchz3b1ieGDa5T0a9RznNdI0KhVbdbWSN+KWWrQZRxTw==
 
-"@types/mini-css-extract-plugin@1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@types/mini-css-extract-plugin/-/mini-css-extract-plugin-1.4.2.tgz#79b562f6977d8d692190d81c4ba890826a0761e1"
-  integrity sha512-jAE5X6kO8+0ByUqzqUaOz9z/dilUKOBNcmNXAETJM9Ak9VopBqWZo+ISqILJnxh6/E/Ci6i2xAUydq2w6vE69g==
+"@types/mini-css-extract-plugin@1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@types/mini-css-extract-plugin/-/mini-css-extract-plugin-1.2.3.tgz#199037f2f3e11fa0fa3e7606d762a6cd56a22785"
+  integrity sha512-kWuO6PeoOqlxaP+6NCSfM7x+NowqXwLnS03w/G6gYYhOviIx5bC3jeOhp5zloqe75pNJuBxfuJPKN+ABc4Xklw==
   dependencies:
-    "@types/node" "*"
-    tapable "^2.2.0"
-    webpack "^5"
+    "@types/webpack" "^4"
 
 "@types/minimatch@*":
   version "3.0.4"
@@ -8420,6 +8418,17 @@
     "@types/connect" "*"
     tapable "^2.1.1"
     webpack "^5.38.1"
+
+"@types/webpack-dev-server@3.11.6":
+  version "3.11.6"
+  resolved "https://registry.yarnpkg.com/@types/webpack-dev-server/-/webpack-dev-server-3.11.6.tgz#d8888cfd2f0630203e13d3ed7833a4d11b8a34dc"
+  integrity sha512-XCph0RiiqFGetukCTC3KVnY1jwLcZ84illFRMbyFzCcWl90B/76ew0tSqF46oBhnLC4obNDG7dMO0JfTN0MgMQ==
+  dependencies:
+    "@types/connect-history-api-fallback" "*"
+    "@types/express" "*"
+    "@types/serve-static" "*"
+    "@types/webpack" "^4"
+    http-proxy-middleware "^1.0.0"
 
 "@types/webpack-dev-server@^4.0.0":
   version "4.0.3"
