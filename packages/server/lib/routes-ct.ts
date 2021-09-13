@@ -1,70 +1,32 @@
 import Debug from 'debug'
-import type { ErrorRequestHandler, Express } from 'express'
-import type httpProxy from 'http-proxy'
+import { Request, Response, Router } from 'express'
 import send from 'send'
-import type { NetworkProxy } from '@packages/proxy'
-import { handle, serve, serveChunk } from './runner-ct'
-import xhrs from './controllers/xhrs'
-import type { SpecsStore } from './specs-store'
-import type { Cfg } from './project-base'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { Browser } from './browsers/types'
+import { runner } from './controllers/runner'
+import type { InitializeRoutes } from './routes'
 
-const debug = Debug('cypress:server:routes')
+const debug = Debug('cypress:server:routes-ct')
 
-export interface InitializeRoutes {
-  app: Express
-  specsStore: SpecsStore
-  config: Cfg
-  getSpec: () => Cypress.Cypress['spec'] | null
-  getCurrentBrowser: () => Browser
-  nodeProxy: httpProxy
-  networkProxy: NetworkProxy
-  getRemoteState: () => any
-  onError: (...args: unknown[]) => any
-  testingType: Cypress.Cypress['testingType']
+const serveChunk = (req: Request, res: Response, clientRoute: string) => {
+  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(clientRoute, ''))
+
+  return send(req, pathToFile).pipe(res)
 }
 
-export const createRoutes = ({
-  app,
+export const createRoutesCT = ({
   config,
   specsStore,
   nodeProxy,
-  networkProxy,
   getCurrentBrowser,
+  testingType,
+  getSpec,
+  getRemoteState,
 }: InitializeRoutes) => {
-  app.get('/__cypress/runner/*', handle)
-
-  app.get('/__cypress/static/*', (req, res) => {
-    const pathToFile = getPathToDist('static', req.params[0])
-
-    return send(req, pathToFile)
-    .pipe(res)
-  })
-
-  app.get('/__cypress/iframes/*', (req, res) => {
-    // always proxy to the index.html file
-    // attach header data for webservers
-    // to properly intercept and serve assets from the correct src root
-    // TODO: define a contract for dev-server plugins to configure this behavior
-    req.headers.__cypress_spec_path = req.params[0]
-    req.url = `${config.devServerPublicPathRoute}/index.html`
-
-    // user the node proxy here instead of the network proxy
-    // to avoid the user accidentally intercepting and modifying
-    // our internal index.html handler
-
-    nodeProxy.web(req, res, {}, (e) => {
-      if (e) {
-        // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
-      }
-    })
-  })
+  const routesCt = Router()
 
   // user app code + spec code
   // default mounted to /__cypress/src/*
-  app.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
+  routesCt.get(`${config.devServerPublicPathRoute}*`, (req, res) => {
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
@@ -82,49 +44,28 @@ export const createRoutes = ({
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
 
-  app.all('/__cypress/xhrs/*', (req, res, next) => {
-    xhrs.handle(req, res, config, next)
-  })
-
-  app.get(clientRoute, (req, res) => {
+  routesCt.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    serve(req, res, {
+    runner.serve(req, res, 'runner-ct', {
       config,
+      testingType,
+      getSpec,
       getCurrentBrowser,
+      getRemoteState,
       specsStore,
     })
   })
 
   // enables runner-ct to make a dynamic import
-  app.get(`${clientRoute}ctChunk-*`, (req, res) => {
+  routesCt.get([
+    `${clientRoute}ctChunk-*`,
+    `${clientRoute}vendors~ctChunk-*`,
+  ], (req, res) => {
     debug('Serving Cypress front-end chunk by requested URL:', req.url)
 
-    serveChunk(req, res, { config })
+    serveChunk(req, res, clientRoute)
   })
 
-  app.get(`${clientRoute}vendors~ctChunk-*`, (req, res) => {
-    debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
-
-    serveChunk(req, res, { config })
-  })
-
-  app.all('*', (req, res) => {
-    networkProxy.handleHttpRequest(req, res)
-  })
-
-  // when we experience uncaught errors
-  // during routing just log them out to
-  // the console and send 500 status
-  // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
-    console.log(err.stack) // eslint-disable-line no-console
-
-    res.set('x-cypress-error', err.message)
-    res.set('x-cypress-stack', JSON.stringify(err.stack))
-
-    res.sendStatus(500)
-  }
-
-  app.use(errorHandlingMiddleware)
+  return routesCt
 }
