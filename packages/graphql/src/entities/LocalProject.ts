@@ -9,12 +9,16 @@ export class LocalProject extends Project {
   _ctPluginsInitialized: boolean = false
   _e2ePluginsInitialized: boolean = false
 
-  @nxs.field.nonNull.boolean()
+  @nxs.field.nonNull.boolean({
+    description: 'Whether the user configured this project to use Component Testing',
+  })
   get isFirstTimeCT (): NxsResult<'LocalProject', 'isFirstTimeCT'> {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
   }
 
-  @nxs.field.nonNull.boolean()
+  @nxs.field.nonNull.boolean({
+    description: 'Whether the user configured this project to use e2e Testing',
+  })
   get isFirstTimeE2E (): NxsResult<'LocalProject', 'isFirstTimeE2E'> {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'e2e')
   }

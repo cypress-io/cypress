@@ -242,11 +242,6 @@ export class Wizard {
     return this.navigateForward()
   }
 
-  get shouldSetupE2E (): boolean {
-    return true
-    // return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting === false
-  }
-
   private navigateToStep (step: WizardStep): void {
     this._history.push(step)
     this.currentStep = step
