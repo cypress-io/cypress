@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="launch" v-if="displayBrowsers">
+  <form @submit.prevent="$emit('launch')" v-if="displayBrowsers">
     <div class="flex gap-6 py-16 justify-center flex-wrap">
       <div
         v-for="browser of displayBrowsers"
@@ -35,7 +35,6 @@
     <div class="mb-14">
       <div class="flex justify-center items-center mb-4">
         <Button
-          @click="launch"
           type="submit"
           class="mr-2 py-2 px-6 inline"
           v-if="launchText"
@@ -92,7 +91,7 @@ const props = defineProps<{
   variant?: "advanced" | "basic"
 }>()
 
-const emit = defineEmits(['navigated-back'])
+const emit = defineEmits(['navigated-back', 'launch'])
 
 const defaultBrowserDisplayNames = ['Electron', 'Chrome', 'Firefox', 'Edge']
 
@@ -189,5 +188,7 @@ const showExpandButton = computed(() => {
   return !isBrowserListExpanded.value &&
     Boolean(props.gql.browsers.find(browser => !defaultBrowserDisplayNames.includes(browser.displayName)))
 })
+
+
 
 </script>

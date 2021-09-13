@@ -12,6 +12,7 @@
             v-model:variant="openBrowserVariant"
             :gql="query.data.value.app"
             @navigated-back="backFn"
+            @launch="launch"
           />
         </template>
       </div>
