@@ -4,7 +4,7 @@ import devServer from '@packages/server/lib/plugins/dev-server'
 import { SocketBase } from '@packages/server/lib/socket-base'
 import type { DestroyableHttpServer } from '@packages/server/lib/util/server_destroy'
 
-const debug = Debug('cypress:server-ct:socket-ct')
+const debug = Debug('cypress:server:socket-ct')
 
 export class SocketCt extends SocketBase {
   constructor (config: Record<string, any>) {
