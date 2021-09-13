@@ -676,8 +676,10 @@ export class ProjectBase<TServer extends Server> extends EE {
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
-    // @ts-ignore
-    theCfg.browsers = browsers
+    if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      // @ts-ignore
+      theCfg.browsers = browsers
+    }
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {
