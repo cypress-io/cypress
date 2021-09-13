@@ -16,7 +16,7 @@
     "test-component": "yarn cy:run",
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env",
     "transpile": "tsc",
-    "transpile-plugins": "yarn transpile plugins/**/*.ts --outDir dist",
+    "transpile-plugins": "yarn transpile --project ./plugins",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
