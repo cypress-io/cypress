@@ -7,10 +7,6 @@ import human from 'human-interval'
 import _ from 'lodash'
 import Debug from 'debug'
 
-export * from './src/server-ct'
-
-export * from './src/socket-ct'
-
 const debug = Debug('cypress:server-ct:index')
 
 const Updater = require('@packages/server/lib/updater')
