@@ -1,5 +1,11 @@
 <template>
-  <WizardLayout :canNavigateForward="false" :showNext="false">
+  <WizardLayout
+    :canNavigateForward="false"
+    :showNext="isAdvancedPicker"
+    :next="launchText"
+    :nextFn="launch"
+    :backFn="() => isAdvancedPicker = false"
+  >
     <div class="text-center">
       <img src="../images/success.svg" class="mx-auto my-10" />
       <h1 class="text-3xl">Choose a Browser</h1>
@@ -38,11 +44,7 @@
           </div>
         </div>
         <div class="mb-14">
-          <Button
-            @click="launch"
-            type="submit"
-            class="mx-auto py-2 px-6"
-          >Launch {{ selectedBrowserFamily.displayName }}</Button>
+          <Button @click="launch" type="submit" class="mx-auto py-2 px-6">{{ launchText }}</Button>
           <Button
             variant="text"
             type="button"
@@ -61,6 +63,8 @@
             item-value="optionName"
             v-model="selectedBrowserFamily"
           ></Select>
+
+          {{selectedBrowserFamily}}
 
           <Select
             label="Browser Version"
@@ -189,7 +193,7 @@ const selectedBrowserVersions = computed(() => {
       ...browser,
       optionName: `${browser.displayName} (v${browser.version})`
     }
-  }).sort((a, b) => b.version - a.version)
+  })
 })
 
 const allBrowserFamilies = computed(() => {
@@ -208,14 +212,15 @@ const allBrowserFamilies = computed(() => {
   return [...dedupedFamilies, ...unavailableBrowsers]
 })
 
+const launchText = computed(() => `Launch ${selectedBrowserFamily.value.displayName}`)
+
 const selectedBrowserFamily = ref(mainBrowserDefaults[0])
 const selectedBrowserVersion = ref(null)
 const isAdvancedPicker = ref(false)
 
-watch(selectedBrowserFamily, (newVal) => {
-  const {name} = newVal;
-  console.log(name)
-})
+// watch(selectedBrowserFamily, () => {
+//   selectedBrowserVersion.value = selectedBrowserVersions[0]
+// })
 
 const getBroswerDetails = (browserDefault) => {
   const stableVersion = props.app.browsers
