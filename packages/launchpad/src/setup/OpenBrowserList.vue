@@ -1,21 +1,21 @@
 <template>
-  <form @submit.prevent="launch" v-if="variant === 'basic'">
-    <div class="flex gap-6 py-16 justify-center">
+  <form @submit.prevent="launch" v-if="displayBrowsers">
+    <div class="flex gap-6 py-16 justify-center flex-wrap">
       <div
         v-for="browser of displayBrowsers"
         class="text-center w-160px py-6 block border-1"
         :class="{
-          'border-indigo-600 ring-3 ring-indigo-100': selectedBrowserFamily.name === browser.name,
-          'border-gray-200': selectedBrowserFamily.name !== browser.name,
+          'border-indigo-600 ring-3 ring-indigo-100': selectedBrowser.displayName === browser.displayName,
+          'border-gray-200': selectedBrowser.displayName !== browser.displayName,
           'filter grayscale bg-gray-100': browser.disabled
         }"
       >
         <input
           type="radio"
-          name="selectedBrowserFamily"
-          :id="browser.name"
+          name="selectedBrowser"
+          :id="browser.displayName"
           :value="browser"
-          v-model="selectedBrowserFamily"
+          v-model="selectedBrowser"
           :disabled="browser.disabled ? 'disabled' : null"
           :key="browser.displayName"
           class="absolute opacity-0"
@@ -23,9 +23,9 @@
             'filter grayscale': browser.disabled
           }"
         />
-        <label :for="browser.name">
+        <label :for="browser.displayName">
           <div class="text-center">
-            <img :src="browser.icon" alt class="w-16 mb-2 inline" />
+            <img :src="browser.icon" alt class="w-14 mb-2 inline" />
           </div>
           <div class="text-indigo-600 text-xl">{{ browser.displayName }}</div>
           <div class="text-gray-600">{{ browser.displayVersion }}</div>
@@ -33,35 +33,22 @@
       </div>
     </div>
     <div class="mb-14">
-      <div class="flex justify-center mb-4">
-      <Button @click="launch" type="submit" class="mr-2 py-2 px-6 inline">{{ launchText }}</Button>
-      <Button @click="goBack" type="submit" class="ml-2 py-2 px-6 inline" variant="outline">Back</Button>
+      <div class="flex justify-center items-center mb-4">
+        <Button
+          @click="launch"
+          type="submit"
+          class="mr-2 py-2 px-6 inline"
+          v-if="launchText"
+        >{{ launchText }}</Button>
+        <Button @click="goBack" type="submit" class="ml-2 py-2 px-6 inline" variant="outline">Back</Button>
       </div>
       <Button
+        v-if="showExpandButton"
         variant="text"
         type="button"
         class="mx-auto text-indigo-600"
-        @click="$emit('update:variant', 'advanced')"
+        @click="expandBrowserList"
       >Choose a different browser</Button>
-    </div>
-  </form>
-  <form v-else>
-    Advanced Picker
-    <div class="my-12 text-left">
-      <Select
-        label="Browser Family"
-        :options="allBrowserFamilies"
-        item-key="name"
-        item-value="optionName"
-        v-model="selectedBrowserFamily"
-      ></Select>
-      <Select
-        label="Browser Version"
-        :options="selectedBrowserVersions"
-        item-key="name"
-        item-value="optionName"
-        v-model="selectedBrowserVersion"
-      ></Select>
     </div>
   </form>
 </template>
@@ -71,15 +58,22 @@ import { gql } from "@urql/core";
 import type { OpenBrowserListFragment } from "../generated/graphql"
 import Button from "../components/button/Button.vue"
 import Select from "../components/input/Select.vue"
-import { computed, ref, watch, defineEmits } from "vue"
+import { computed, ref, defineEmits } from "vue"
 import _clone from "lodash/clone"
 
 import chromeIcon from "../../../../node_modules/browser-logos/src/chrome/chrome.svg?url"
-import webkitIcon from "../../../../node_modules/browser-logos/src/webkit/webkit.svg?url"
 import firefoxIcon from "../../../../node_modules/browser-logos/src/firefox/firefox.svg?url"
 import edgeIcon from "../../../../node_modules/browser-logos/src/edge/edge.svg?url"
 import electronIcon from "../../../../node_modules/browser-logos/src/electron/electron.svg?url"
-
+import canaryIcon from "../../../../node_modules/browser-logos/src/chrome-canary/chrome-canary.svg?url"
+import chromeBetaIcon from "../../../../node_modules/browser-logos/src/chrome-beta/chrome-beta.svg?url"
+import chromiumIcon from "../../../../node_modules/browser-logos/src/chromium/chromium.svg?url"
+import edgeBetaIcon from "../../../../node_modules/browser-logos/src/edge-beta/edge-beta.png"
+import edgeCanaryIcon from "../../../../node_modules/browser-logos/src/chrome-canary/chrome-canary.svg?url"
+import edgeDevIcon from "../../../../node_modules/browser-logos/src/edge-dev/edge-dev.png"
+import firefoxNightlyIcon from "../../../../node_modules/browser-logos/src/firefox-nightly/firefox-nightly.svg?url"
+import firefoxDeveloperEditionIcon from "../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url"
+import { browsers } from "@packages/types";
 
 gql`fragment OpenBrowserList on App {
   browsers {
@@ -98,94 +92,102 @@ const props = defineProps<{
   variant?: "advanced" | "basic"
 }>()
 
-const emit = defineEmits(['navigated-back', 'update:variant'])
+const emit = defineEmits(['navigated-back'])
 
-const mainBrowserDefaults = [{
-  name: 'electron',
+const defaultBrowserDisplayNames = ['Electron', 'Chrome', 'Firefox', 'Edge']
+
+const allBrowsers = [{
   displayName: 'Electron',
-  icon: electronIcon
+  icon: electronIcon,
 }, {
-  name: 'chrome',
   displayName: 'Chrome',
-  icon: chromeIcon
+  icon: chromeIcon,
 }, {
-  name: 'webkit',
-  displayName: 'Safari',
-  icon: webkitIcon
-}, {
-  name: 'firefox',
   displayName: 'Firefox',
-  icon: firefoxIcon
+  icon: firefoxIcon,
 }, {
-  name: 'edge',
   displayName: 'Edge',
-  icon: edgeIcon
+  icon: edgeIcon,
+}, {
+  displayName: 'Chromium',
+  icon: chromiumIcon
+}, {
+  displayName: 'Canary',
+  icon: canaryIcon
+}, {
+  displayName: 'Chrome Beta',
+  icon: chromeBetaIcon
+}, {
+  displayName: 'Firefox Nightly',
+  icon: firefoxNightlyIcon
+},
+{
+  displayName: 'Firefox Developer Edition',
+  icon: firefoxDeveloperEditionIcon
+},
+{
+  displayName: 'Edge Canary',
+  icon: edgeCanaryIcon
+},
+{
+  displayName: 'Edge Beta',
+  icon: edgeBetaIcon
+}, {
+  displayName: 'Edge Dev',
+  icon: edgeDevIcon
 }]
 
-const displayBrowsers = computed(() => mainBrowserDefaults.map(getBroswerDetails))
+const getBroswerDetails = (browser) => {
+  const targetBrowser = props.gql.browsers
+    .find(browserInList => browserInList.displayName === browser.displayName)
 
-const selectedBrowserVersions = computed(() => {
-  return props.gql.browsers.filter((browser) => {
-    return browser.name === selectedBrowserFamily.value.name
-  }).map((browser) => {
+  if (targetBrowser) {
+    return {
+      displayName: targetBrowser.displayName,
+      optionName: targetBrowser.displayName,
+      displayVersion: `v${targetBrowser.majorVersion}.x`,
+      icon: browser.icon,
+    }
+  } else if (defaultBrowserDisplayNames.includes(browser.displayName)) {
     return {
       ...browser,
-      optionName: `${browser.displayName} (v${browser.version})`
-    }
-  })
-})
-
-const allBrowserFamilies = computed(() => {
-  const dedupedFamilies = props.gql.browsers.reduce((acc, curr) => {
-    if (!acc.find(item => item.name === curr.name)) {
-      const currentCopy = _clone(curr)
-      currentCopy.optionName = currentCopy.displayName
-      return [...acc, currentCopy]
-    } else {
-      return acc
-    }
-  }, [])
-
-  const unavailableBrowsers = displayBrowsers.value.filter(browser => browser.disabled)
-
-  return [...dedupedFamilies, ...unavailableBrowsers]
-})
-
-const launchText = computed(() => `Launch ${selectedBrowserFamily.value.displayName}`)
-
-const selectedBrowserFamily = ref(mainBrowserDefaults[0])
-const selectedBrowserVersion = ref(null)
-const isAdvancedPicker = ref(false)
-
-// watch(selectedBrowserFamily, () => {
-//   selectedBrowserVersion.value = selectedBrowserVersions[0]
-// })
-
-const getBroswerDetails = (browserDefault) => {
-  const stableVersion = props.gql.browsers
-    .find(browser => browser.name === browserDefault.name && browser.channel === 'stable')
-  if (stableVersion) {
-    return {
-      name: browserDefault.name,
-      displayName: stableVersion.displayName,
-      optionName: stableVersion.displayName,
-      displayVersion: `v${stableVersion.majorVersion}.x`,
-      icon: browserDefault.icon
+      disabled: true,
+      displayVersion: 'Not Detected'
     }
   } else {
-    return {
-      name: browserDefault.name,
-      displayName: browserDefault.displayName,
-      optionName: `${browserDefault.displayName} (Not Detected)`,
-      displayVersion: 'Not Detected',
-      icon: browserDefault.icon,
-      disabled: true
-    }
+    return
   }
+}
+
+const isDefaultOrDetected = (browser) => {
+  return defaultBrowserDisplayNames.includes(browser.displayName) || props.gql.browsers
+    .find(browserInList => browserInList.displayName === browser.displayName)
+}
+
+const isBrowserListExpanded = ref(false)
+
+const displayBrowsers = computed(() => {
+  const browserGroup = isBrowserListExpanded.value ? allBrowsers : allBrowsers.filter(browser => defaultBrowserDisplayNames.includes(browser.displayName))
+  return browserGroup.filter(isDefaultOrDetected).map(getBroswerDetails)
+})
+
+
+const selectedBrowser = ref(displayBrowsers.value[0])
+
+
+const expandBrowserList = () => {
+  isBrowserListExpanded.value = true
 }
 
 const goBack = () => {
   emit('navigated-back')
 }
+
+
+const launchText = computed(() => selectedBrowser.value ? `Launch ${selectedBrowser.value.displayName}` : '')
+const showExpandButton = computed(() => {
+  return !isBrowserListExpanded.value &&
+    Boolean(props.gql.browsers.find(browser => !defaultBrowserDisplayNames.includes(browser.displayName)))
+})
 
 </script>

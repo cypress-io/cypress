@@ -27,24 +27,6 @@
       "majorVersion": "80"
     },
     {
-        "name": "chrome",
-        "displayName": "Canary",
-        "family": "chromium",
-        "channel": "canary",
-        "version": "81.0.3333.3",
-        "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
-        "majorVersion": "80"
-      },
-    {
-      "name": "edge",
-      "displayName": "Edge",
-      "family": "chromium",
-      "channel": "stable",
-      "version": "79.0.309.71",
-      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-      "majorVersion": "79"
-    },
-    {
       "name": "edge",
       "displayName": "Edge Beta",
       "family": "chromium",
@@ -108,14 +90,5 @@
       "version": "69.0.3",
       "path": "/Applications/Firefox Nightly/Contents/MacOS/Firefox Nightly",
       "majorVersion": "69"
-    },
-    {
-      "name": "custom",
-      "displayName": "Custom",
-      "channel": "dev",
-      "family": "custom",
-      "version": "4.3.2",
-      "path": "/Applications/Custom/Contents/MacOS/Custom",
-      "majorVersion": "4"
     }
   ]

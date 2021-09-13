@@ -58,7 +58,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
-  BrowserFamily: "chromium" | "custom" | "firefox"
+  BrowserFamily: "chromium" | "firefox"
   FrontendFramework: "cra" | "nextjs" | "nuxtjs" | "react" | "vue" | "vuecli"
   NavItem: "learn" | "projectSetup" | "runs" | "settings"
   PluginsState: "error" | "initialized" | "initializing" | "uninitialized"

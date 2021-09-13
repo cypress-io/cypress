@@ -8,9 +8,6 @@
       <div class="text-center">
         <div v-if="query.fetching.value || !query.data.value">Loading browsers...</div>
         <template v-else>
-          <img src="../images/success.svg" class="mx-auto my-10" />
-          <h1 class="text-3xl">Choose a Browser</h1>
-          <p>Choose your preferred browser for testing your components.</p>
           <OpenBrowserList
             v-model:variant="openBrowserVariant"
             :gql="query.data.value.app"

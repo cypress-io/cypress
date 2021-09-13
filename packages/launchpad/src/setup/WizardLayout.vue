@@ -5,6 +5,7 @@
     </div>
 
     <ButtonBar
+      v-if="!noContainer"
       :nextFn="nextFn"
       :canNavigateForward="canNavigateForward"
       :backFn="backFn"

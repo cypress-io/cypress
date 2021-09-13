@@ -30,7 +30,6 @@ type Browser {
 
 enum BrowserFamily {
   chromium
-  custom
   firefox
 }
 

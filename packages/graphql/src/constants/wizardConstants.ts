@@ -129,7 +129,7 @@ export const WIZARD_TITLES: Record<WizardStep, string | null> = {
   initializePlugins: 'Initializing Config...',
   installDependencies: 'Install Dev Dependencies',
   createConfig: 'Cypress.config',
-  setupComplete: 'Setup Finished',
+  setupComplete: 'Choose a Browser',
 }
 
 export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
@@ -138,7 +138,7 @@ export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
   installDependencies: 'We need to install the following packages in order for component testing to work.',
   createConfig: 'Cypress will now create the following config file in the local directory for this project.',
   initializePlugins: 'Please wait while we load your project and find browsers installed on your system.',
-  setupComplete: 'Setup complete! Let’s open your browser and start writing some tests!',
+  setupComplete: 'Choose your preferred browser for testing your components.',
 }
 
 export const WIZARD_ALT_DESCRIPTIONS = {

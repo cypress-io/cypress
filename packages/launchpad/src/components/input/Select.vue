@@ -1,5 +1,5 @@
 <template>
-  <Listbox as="div" v-model="modelValue">
+  <Listbox as="div" v-model="modelValue" @update:model-value="$emit('update:modelValue', $event)">
     <template #="{ open }">
     <ListboxLabel class="block text-sm font-medium text-gray-700">
       <template v-if="label"> {{ label }} </template>
@@ -103,10 +103,6 @@ const props = withDefaults(defineProps<{
   label: '',
   itemValue: 'value',
   itemKey: 'key'
-})
-
-watch(props.modelValue, (newVal) => {
-  emit('update:modelValue', newVal)
 })
 
 const emit = defineEmits(['update:modelValue'])
