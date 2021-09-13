@@ -71,6 +71,10 @@ const renameSupportFolder = (obj) => {
 }
 
 module.exports = {
+  isComponentTesting (options = {}) {
+    return options.testingType === 'component'
+  },
+
   _pathToFile (projectRoot, file) {
     return path.isAbsolute(file) ? file : path.join(projectRoot, file)
   },
@@ -217,8 +221,15 @@ module.exports = {
       return Promise.reject(err)
     })
     .then((configObject = {}) => {
-      debug('resolved configObject', configObject)
+      if (this.isComponentTesting(options) && 'component' in configObject) {
+        configObject = { ...configObject, ...configObject.component }
+      }
 
+      if (!this.isComponentTesting(options) && 'e2e' in configObject) {
+        configObject = { ...configObject, ...configObject.e2e }
+      }
+
+      debug('resolved configObject', configObject)
       const changed = this._applyRewriteRules(configObject)
 
       // if our object is unchanged
