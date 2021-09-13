@@ -2,7 +2,9 @@ import path from 'path'
 
 let fs: typeof import('fs-extra')
 
-type FoldersWithDist = 'static' | 'runner' | 'runner-ct' | 'driver'
+export type RunnerPkg = 'runner' | 'runner-ct'
+
+type FoldersWithDist = 'static' | 'driver' | RunnerPkg
 
 const getRunnerContents = (filename) => {
   fs ??= require('fs-extra') as typeof import('fs-extra')
@@ -22,7 +24,7 @@ export const getRunnerMultidomainInjectionContents = () => {
   return getRunnerContents('injection_multidomain.js')
 }
 
-export const getPathToIndex = (pkg: 'runner' | 'runner-ct') => {
+export const getPathToIndex = (pkg: RunnerPkg) => {
   return getPathToDist(pkg, 'index.html')
 }
 
