@@ -1,7 +1,7 @@
 import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
-import { CypressWantsInjection } from '../../types'
+import type { CypressWantsInjection } from '../../types'
 
 export type SecurityOpts = {
   isHtml?: boolean

@@ -108,7 +108,10 @@ const countLogsByTests = function (tests = {}) {
   .value()
 }
 
-// TODO: fix this
+const getCounter = () => {
+  return counter
+}
+
 const setCounter = (num) => {
   return counter = num
 }
@@ -516,6 +519,8 @@ export default {
   getSnapshotProps,
 
   countLogsByTests,
+
+  getCounter,
 
   setCounter,
 

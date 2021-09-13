@@ -6,6 +6,14 @@ export class $Command {
   constructor (obj = {}) {
     this.reset()
 
+    // if the command came from a secondary domain, it already has an id
+    if (!obj.id) {
+      // the id prefix needs to be unique per domain, so there are not
+      // collisions when commands created in a secondary domain are passed
+      // to the primary domain for the command log, etc.
+      obj.id = _.uniqueId(`cmd-${window.location.origin}-`)
+    }
+
     this.set(obj)
   }
 
