@@ -6,7 +6,8 @@ import path from 'path'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { ServerCt, SocketCt } from '@packages/server-ct'
+import { ServerCt } from './server-ct'
+import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import api from './api'
 import { Automation } from './automation'
@@ -29,17 +30,15 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { createRoutes as createE2ERoutes } from './routes'
-import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
+import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
 // and are required when creating a project.
-// TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents'>>
+  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>>
+  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env'>>// TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -52,8 +51,11 @@ export interface Cfg extends ReceivedCypressOptions {
 
 type WebSocketOptionsCallback = (...args: any[]) => any
 
-interface Options {
+export interface OpenProjectLaunchOptions {
+  args?: LaunchArgs
+
   configFile?: string | boolean
+  browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
   onSettingsChanged?: false | (() => void)
@@ -63,6 +65,7 @@ interface Options {
   onFocusTests?: WebSocketOptionsCallback
   onSpecChanged?: WebSocketOptionsCallback
   onSavedStateChanged?: WebSocketOptionsCallback
+  onChange?: WebSocketOptionsCallback
 
   [key: string]: any
 }
@@ -76,13 +79,13 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected watchers: Watchers
-  protected options: Options
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
 
   public browser: any
+  public options: OpenProjectLaunchOptions
   public testingType: Cypress.TestingType
   public spec: Cypress.Cypress['spec'] | null
   private generatedProjectIdTimestamp: any
@@ -95,7 +98,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }: {
     projectRoot: string
     testingType: Cypress.TestingType
-    options: Options
+    options: OpenProjectLaunchOptions
   }) {
     super()
 
@@ -214,7 +217,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
       specsStore,
     })
 
@@ -559,7 +561,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return Reporter.create(reporter, reporterOptions, projectRoot)
   }
 
-  startWebsockets (options: Options, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
+  startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
@@ -850,7 +852,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // For testing
   // Do not use this method outside of testing
   // pass all your options when you create a new instance!
-  __setOptions (options: Options) {
+  __setOptions (options: OpenProjectLaunchOptions) {
     this.options = options
   }
 

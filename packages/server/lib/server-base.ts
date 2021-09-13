@@ -14,7 +14,7 @@ import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import type { SocketCt } from '@packages/server-ct'
+import type { SocketCt } from './socket-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
@@ -26,9 +26,11 @@ import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 import { createInitialWorkers } from '@packages/rewriter'
 import type { SpecsStore } from './specs-store'
-import type { InitializeRoutes } from '../../server-ct/src/routes-ct'
 import type { Cfg } from './project-base'
 import type { Browser } from '@packages/server/lib/browsers/types'
+import { InitializeRoutes, createCommonRoutes } from './routes'
+import { createRoutesE2E } from './routes-e2e'
+import { createRoutesCT } from './routes-ct'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -100,7 +102,6 @@ export interface OpenServerOptions {
   getCurrentBrowser: () => Browser
   getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
-  createRoutes: (args: InitializeRoutes) => any
 }
 
 export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
@@ -174,7 +175,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     onWarning,
     shouldCorrelatePreRequests,
     specsStore,
-    createRoutes,
     testingType,
     SocketCtor,
   }: OpenServerOptions) {
@@ -211,8 +211,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.createHosts(config.hosts)
 
-      createRoutes({
-        app,
+      const routeOptions: InitializeRoutes = {
         config,
         specsStore,
         getRemoteState,
@@ -221,7 +220,15 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         onError,
         getSpec,
         getCurrentBrowser,
-      })
+        testingType,
+      }
+
+      const runnerSpecificRouter = testingType === 'e2e'
+        ? createRoutesE2E(routeOptions)
+        : createRoutesCT(routeOptions)
+
+      app.use(runnerSpecificRouter)
+      app.use(createCommonRoutes(routeOptions))
 
       return this.createServer(app, config, onWarning)
     })
@@ -394,7 +401,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _getRemoteState () {
+  _getRemoteState (): Cypress.RemoteState {
     // {
     //   origin: "http://localhost:2020"
     //   fileServer:
@@ -422,7 +429,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       visiting: this._remoteVisitingUrl,
       domainName: this._remoteDomainName,
       fileServer: this._remoteFileServer,
-    })
+    }) as Cypress.RemoteState
 
     debug('Getting remote state: %o', props)
 
