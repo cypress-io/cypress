@@ -5,15 +5,14 @@
     v-html="props.gql.wizard.description" 
   />
   <div class="mx-5">
-    <!-- <EnvironmentSetup 
-      v-if="wizard.step === 'selectFramework'" 
-      :gql="wizard" 
+    <EnvironmentSetup 
+      v-if="props.gql.wizard.step === 'selectFramework'" 
+      :gql="props.gql.wizard" 
     />
     <InstallDependencies 
-      v-if="wizard.step === 'installDependencies'" 
-      :gql="wizard" 
+      v-if="props.gql.wizard.step === 'installDependencies'" 
+      :gql="props.gql.wizard" 
     />
-    -->
     <ConfigFile 
       v-if="props.gql.wizard.step === 'createConfig'" 
       :gql="props.gql"
@@ -27,16 +26,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
-import TestingTypeCards from "./TestingTypeCards.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@urql/core'
-import type { 
-  WizardFragment,
-} from '../generated/graphql'
+import type { WizardFragment } from '../generated/graphql'
 import InitializeConfig from './InitializeConfig.vue'
 
 gql`
@@ -46,42 +41,15 @@ fragment Wizard on Query {
     description
     step
     testingType
+
+    ...EnvironmentSetup
+    ...InstallDependencies
   }
   ...ConfigFile
   ...InitializeConfig
 }`
 
-// gql`
-// fragment Wizard on Query {
-//   ...TestingTypeCards
-//   app {
-//     isFirstOpen
-//     activeProject {
-//       hasSetupComponentTesting
-//       hasSetupE2ETesting
-//     }
-//     ...ProjectRoot
-//     ...OpenBrowserApp
-//   }
-
-//   wizard {
-//     step
-//     title
-//     description
-//     testingType
-//     ...TestingType
-//     ...ConfigFile
-//     ...InstallDependencies
-//     ...EnvironmentSetup
-//     ...OpenBrowserWizard
-//   }
-// }
-// `
-
 const props = defineProps<{
   gql: WizardFragment
 }>()
-
-// const app = computed(() => props.query?.app)
-// const wizard = computed(() => props.query?.wizard)
 </script>
