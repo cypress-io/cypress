@@ -5,7 +5,7 @@
 
   <div v-else class="bg-white h-full">
     <div v-if="app?.isInGlobalMode">
-      <GlobalPage />
+      <EmptyGlobal />
     </div>
     <template v-else>
       <HeaderBar :gql="app" />
@@ -20,7 +20,7 @@ import { gql, useQuery } from '@urql/vue'
 import Wizard from "./setup/Wizard.vue"
 import HeaderBar from './layouts/HeaderBar.vue'
 import { AppQueryDocument } from './generated/graphql'
-import GlobalPage from './global/GlobalPage.vue'
+import EmptyGlobal from './global/GlobalEmpty.vue'
 
 gql`
 query AppQuery {
