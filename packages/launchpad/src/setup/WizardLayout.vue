@@ -1,28 +1,21 @@
 <template>
-  <div
-    class="      
-      max-w-3xl
-      min-h-70
-      mx-auto
-      border-1 border-gray-200
-      rounded
-      m-10
-      flex flex-col
-    "
-  >
+  <div :class="noContainer ? wrapperClasses['no-container'] : wrapperClasses.default">
     <div class="flex-grow">
-      <slot />
+      <slot :backFn="backFn" />
     </div>
-    <ButtonBar 
-      :nextFn="nextFn" 
+
+    <ButtonBar
+      :nextFn="nextFn"
       :canNavigateForward="canNavigateForward"
-      :backFn="backFn" 
-      :altFn="altFn" 
-      :next="nextLabel" 
+      :backFn="backFn"
+      :altFn="altFn"
+      :next="nextLabel"
       :showNext="showNext"
-      :back="backLabel" 
-      :alt="alt" 
-    />
+      :back="backLabel"
+      :alt="alt"
+    >
+      <slot name="button-bar"></slot>
+    </ButtonBar>
   </div>
 </template>
 
@@ -58,6 +51,7 @@ const props = withDefaults(
     alt?: string
     showNext?: boolean
     canNavigateForward?: boolean
+    noContainer?: boolean
     altFn?: (val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
   }>(), {
@@ -77,4 +71,10 @@ async function nextFn() {
 function backFn() {
   navigate.executeMutation({ direction: 'back' })
 }
+
+const wrapperClasses = {
+  'default': "max-w-3xl min-h-70 mx-auto border-1 border-gray-200 rounded m-10 flex flex-col",
+  'no-container': ''
+}
+
 </script>
