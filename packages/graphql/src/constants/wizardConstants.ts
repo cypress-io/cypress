@@ -137,7 +137,7 @@ export const WIZARD_DESCRIPTIONS: Record<WizardStep, string | null> = {
   selectFramework: 'Confirm the front-end framework and bundler fused in your project.',
   installDependencies: 'We need to install the following packages in order for component testing to work.',
   createConfig: 'Cypress will now create the following config file in the local directory for this project.',
-  initializePlugins: 'Please wait while we load your project and finding browsers installed on your system.',
+  initializePlugins: 'Please wait while we load your project and find browsers installed on your system.',
   setupComplete: 'Setup complete! Let’s open your browser and start writing some tests!',
 }
 
