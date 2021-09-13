@@ -1,4 +1,4 @@
-export const BROWSER_FAMILY = ['chromium', 'firefox'] as const
+export const BROWSER_FAMILY = ['chromium', 'firefox', 'custom'] as const
 
 type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
 
