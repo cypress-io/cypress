@@ -24,14 +24,6 @@
       "command": "yarn cypress:run --project ../project"
     },
     {
-      "name": "cypress open (CT)",
-      "focus": true,
-      "onlySingle": true,
-      "execute": true,
-      "cwd": "[cwd]/packages/server-ct",
-      "command": "yarn cypress:open"
-    },
-    {
       "name": "packages/server test-e2e",
       "focus": true,
       "onlySingle": true,
