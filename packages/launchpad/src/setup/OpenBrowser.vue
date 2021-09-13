@@ -1,14 +1,30 @@
 <template>
-  <WizardLayout :canNavigateForward="false" :showNext="false">
-    <div v-if="query.fetching.value || !query.data.value">
-      Loading browsers...
-    </div>
-    <template v-else>
-      <img src="../images/success.svg" class="mx-auto my-10"/>
-      <div class="flex justify-center">
-        <h1 class="text-3xl">TODO: launch in selected browser. Right now they all launch chrome.</h1>
-        <OpenBrowserList :gql="query.data.value.app" />
+  <WizardLayout
+    :canNavigateForward="false"
+    :showNext="false"
+    :no-container="openBrowserVariant === 'basic'"
+  >
+    <template #="{ backFn }">
+      <div class="text-center">
+        <div v-if="query.fetching.value || !query.data.value">Loading browsers...</div>
+        <template v-else>
+          <img src="../images/success.svg" class="mx-auto my-10" />
+          <h1 class="text-3xl">Choose a Browser</h1>
+          <p>Choose your preferred browser for testing your components.</p>
+          <OpenBrowserList
+            v-model:variant="openBrowserVariant"
+            :gql="query.data.value.app"
+            @navigated-back="backFn"
+          />
+        </template>
       </div>
+    </template>
+    <template v-slot:button-bar>
+      <Button
+        v-if="openBrowserVariant === 'advanced'"
+        @click="setOpenBrowserVariant('basic')"
+        variant="outline"
+      >Back</Button>
     </template>
   </WizardLayout>
 </template>
@@ -18,6 +34,7 @@ import { useMutation, gql, useQuery } from "@urql/vue";
 import OpenBrowserList from "./OpenBrowserList.vue"
 import WizardLayout from "./WizardLayout.vue";
 import { OpenBrowserDocument, LaunchOpenProjectDocument } from "../generated/graphql"
+import { ref } from "vue"
 
 gql`
 query OpenBrowser {
@@ -45,4 +62,15 @@ const launchOpenProject = useMutation(LaunchOpenProjectDocument)
 const launch = () => {
   launchOpenProject.executeMutation({})
 }
+
+const goBack = () => {
+  console.log('go back')
+}
+
+const setOpenBrowserVariant = (newVariant) => {
+  openBrowserVariant.value = newVariant
+}
+
+const openBrowserVariant = ref('basic')
+
 </script>
