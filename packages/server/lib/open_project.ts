@@ -365,7 +365,7 @@ export class OpenProject {
     return this.closeOpenProjectAndBrowsers()
   }
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions) {
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: any) {
     debug('open_project create %s', path)
 
     _.defaults(options, {
@@ -398,7 +398,7 @@ export class OpenProject {
     })
 
     try {
-      await this.openProject.initializeConfig()
+      await this.openProject.initializeConfig(browsers)
       await this.openProject.open()
     } catch (err) {
       if (err.isCypressErr && err.portInUse) {

@@ -2,12 +2,13 @@ import { nxs, NxsResult } from 'nexus-decorators'
 import type { BaseContext } from '../context/BaseContext'
 import { LocalProject } from './LocalProject'
 import { Browser } from './Browser'
+import type { FoundBrowser } from '@packages/types'
 
 @nxs.objectType({
   description: 'Namespace for information related to the app',
 })
 export class App {
-  private _browserCache?: Browser[]
+  private _browsers: FoundBrowser[] = []
 
   constructor (private ctx: BaseContext) {}
 
@@ -36,26 +37,11 @@ export class App {
   @nxs.field.nonNull.list.nonNull.type(() => Browser, {
     description: 'Browsers found that are compatible with Cypress',
   })
-  async browsers (): Promise<NxsResult<'App', 'browsers'>> {
-    if (this.browserCache) {
-      return this.browserCache
-    }
-
-    const cache = await this.cacheBrowsers()
-
-    return cache
+  get browsers (): NxsResult<'App', 'browsers'> {
+    return this._browsers.map((x) => new Browser(x))
   }
 
-  async cacheBrowsers (): Promise<Browser[]> {
-    const found = await this.ctx.actions.getBrowsers()
-    const browsers = found.map((x) => new Browser(x))
-
-    this._browserCache = browsers
-
-    return browsers
-  }
-
-  get browserCache (): Browser[] | null {
-    return this._browserCache ? this._browserCache : null
+  setBrowsers (browsers: FoundBrowser[]): void {
+    this._browsers = browsers
   }
 }

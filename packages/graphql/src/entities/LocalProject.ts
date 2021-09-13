@@ -6,6 +6,19 @@ import { ResolvedConfig } from './ResolvedConfig'
   description: 'A Cypress project is a container',
 })
 export class LocalProject extends Project {
+  _ctPluginsInitialized: boolean = false
+  _e2ePluginsInitialized: boolean = false
+
+  @nxs.field.nonNull.boolean()
+  get isFirstTimeCT (): NxsResult<'LocalProject', 'isFirstTimeCT'> {
+    return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
+  }
+
+  @nxs.field.nonNull.boolean()
+  get isFirstTimeE2E (): NxsResult<'LocalProject', 'isFirstTimeE2E'> {
+    return this.ctx.actions.isFirstTime(this.projectRoot, 'e2e')
+  }
+
   @nxs.field.type(() => ResolvedConfig)
   resolvedConfig (): NxsResult<'LocalProject', 'resolvedConfig'> {
     const cfg = this.ctx.actions.resolveOpenProjectConfig()
@@ -17,35 +30,19 @@ export class LocalProject extends Project {
     return new ResolvedConfig(cfg.resolved)
   }
 
-  @nxs.field.nonNull.boolean({
-    description: `Whether the user has configured component testing. Based on the existance of a 'component' key in their cypress.json`,
-  })
-  get hasSetupComponentTesting (): NxsResult<'LocalProject', 'hasSetupComponentTesting'> {
-    // default is {}
-    // assume if 1 or more key has been configured, CT has been setup
-    let config: ReturnType<LocalProject['resolvedConfig']>
-
-    if (!(config = this.resolvedConfig())) {
-      return false
-    }
-
-    // default is {}
-    // assume if 1 or more key has been configured, CT has been setup
-    return Object.keys(config.resolvedConfig.component?.value).length > 0 ?? false
+  setE2EPluginsInitialized (init: boolean): void {
+    this._e2ePluginsInitialized = init
   }
 
-  @nxs.field.nonNull.boolean({
-    description: `Whether the user has configured e2e testing or not, based on the existance of a 'component' key in their cypress.json`,
-  })
-  get hasSetupE2ETesting (): NxsResult<'LocalProject', 'hasSetupE2ETesting'> {
-    let config: ReturnType<LocalProject['resolvedConfig']>
+  get e2ePluginsInitialized (): boolean {
+    return this._e2ePluginsInitialized
+  }
 
-    if (!(config = this.resolvedConfig())) {
-      return false
-    }
+  setCtPluginsInitialized (init: boolean): void {
+    this._ctPluginsInitialized = init
+  }
 
-    // default is {}
-    // assume if 1 or more key has been configured, E2E has been setup
-    return Object.keys(config.resolvedConfig.e2e?.value).length > 0 ?? false
+  get ctPluginsInitialized (): boolean {
+    return this._ctPluginsInitialized
   }
 }

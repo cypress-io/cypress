@@ -104,7 +104,7 @@ export class Wizard {
   @nxs.field.type(() => TestingTypeEnum, {
     description: 'The testing type we are setting in the wizard, null if this has not been chosen',
   })
-  testingType (): NxsResult<'Wizard', 'testingType'> {
+  get testingType (): NxsResult<'Wizard', 'testingType'> {
     return this.chosenTestingType
   }
 
@@ -205,6 +205,16 @@ export class Wizard {
       return false
     }
 
+    if (this.currentStep === 'initializePlugins') {
+      if (this.testingType === 'component' && !this._ctx.activeProject?.ctPluginsInitialized) {
+        return false
+      }
+
+      if (this.testingType === 'e2e' && !this._ctx.activeProject?.e2ePluginsInitialized) {
+        return false
+      }
+    }
+
     // TODO: add constraints here to determine if we can move forward
     return true
   }
@@ -232,20 +242,9 @@ export class Wizard {
     return this.navigateForward()
   }
 
-  get shouldLaunchCt (): boolean {
-    return this.chosenTestingType === 'component' && this._ctx.activeProject!.hasSetupComponentTesting
-  }
-
-  get shouldLaunchE2E (): boolean {
-    return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting
-  }
-
-  get shouldSetupCt (): boolean {
-    return this.chosenTestingType === 'component' && this._ctx.activeProject!.hasSetupComponentTesting === false
-  }
-
   get shouldSetupE2E (): boolean {
-    return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting === false
+    return true
+    // return this.chosenTestingType === 'e2e' && this._ctx.activeProject!.hasSetupE2ETesting === false
   }
 
   private navigateToStep (step: WizardStep): void {
@@ -254,22 +253,28 @@ export class Wizard {
   }
 
   private navigateForward (): Wizard {
-    debug(`currentStep: %s chosenTestingType %s shouldLaunchCt: %s shouldLaunchE2E: %s shouldSetupCt %s shouldSetupE2E %s`, this.currentStep, this.chosenTestingType, this.shouldLaunchCt, this.shouldLaunchE2E, this.shouldSetupCt, this.shouldSetupE2E)
-
-    if (this.currentStep === 'welcome' && (this.shouldLaunchCt || this.shouldLaunchE2E)) {
+    if (this.currentStep === 'initializePlugins') {
       this.navigateToStep('setupComplete')
 
       return this
     }
 
-    if (this.currentStep === 'welcome' && this.shouldSetupCt) {
-      this.navigateToStep('selectFramework')
+    if (this.currentStep === 'welcome' && this.testingType === 'component') {
+      if (this._ctx.activeProject?.isFirstTimeCT) {
+        this.navigateToStep('selectFramework')
+      } else {
+        this.navigateToStep('initializePlugins')
+      }
 
       return this
     }
 
-    if (this.currentStep === 'welcome' && this.shouldSetupE2E) {
-      this.navigateToStep('createConfig')
+    if (this.currentStep === 'welcome' && this.testingType === 'e2e') {
+      if (this._ctx.activeProject?.isFirstTimeE2E) {
+        this.navigateToStep('createConfig')
+      } else {
+        this.navigateToStep('initializePlugins')
+      }
 
       return this
     }
@@ -287,7 +292,7 @@ export class Wizard {
     }
 
     if (this.currentStep === 'createConfig') {
-      this.navigateToStep('setupComplete')
+      this.navigateToStep('initializePlugins')
 
       return this
     }

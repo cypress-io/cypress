@@ -32,7 +32,6 @@ import { ServerContext } from '../graphql/ServerContext'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
-import type { BrowserContract } from '@packages/graphql/src/contracts/BrowserContract'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -501,31 +500,25 @@ module.exports = {
 
     const serverContext = setServerContext(new ServerContext(options, {}))
 
-    await serverContext.app.cacheBrowsers()
-
     if (options.projectRoot) {
-      await serverContext.actions.initializeOpenProject({
-        ...options,
-        config: {
-          browsers: serverContext.app.browserCache!.map((x): BrowserContract => {
-            return {
-              name: x.name,
-              family: x.family,
-              majorVersion: x.majorVersion,
-              channel: x.channel,
-              displayName: x.displayName,
-              path: x.path,
-              version: x.version,
-            }
-          }),
-        },
-      }, {})
+      // await serverContext.actions.initializeOpenProject({
+      //   ...options,
+      //   config: {
+      //     browsers: serverContext.app.browserCache!.map((x): BrowserContract => {
+      //       return {
+      //         name: x.name,
+      //         family: x.family,
+      //         majorVersion: x.majorVersion,
+      //         channel: x.channel,
+      //         displayName: x.displayName,
+      //         path: x.path,
+      //         version: x.version,
+      //       }
+      //     }),
+      //   },
+      // }, {})
 
       serverContext.actions.addProject(options.projectRoot)
     }
-
-    // find and cache browsers.
-    // browsers are needed for when we initialize the project's configuration.
-    return serverContext.app.cacheBrowsers()
   },
 }

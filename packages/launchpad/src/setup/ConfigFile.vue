@@ -4,7 +4,7 @@
     alt="Create file manually" 
     :altFn="altFn"
     :nextFn="createConfig"
-    :canNavigateForward="wizard.canNavigateForward"
+    :canNavigateForward="props.gql.wizard.canNavigateForward"
   >
     <nav
       class="
@@ -56,21 +56,20 @@ import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "../components/button/CopyButton.vue";
 import { languages } from "../utils/configFile";
-import { ConfigFileFragment, ProjectRootFragment, AppCreateConfigFileDocument } from "../generated/graphql";
+import { ConfigFileFragment, AppCreateConfigFileDocument } from "../generated/graphql";
 import { useMutation } from "@urql/vue";
 
 gql`
-fragment ConfigFile on Wizard {
-  canNavigateForward
-  sampleCodeJs: sampleCode(lang: js)
-  sampleCodeTs: sampleCode(lang: ts)
-}
-`
-
-gql`
-fragment ProjectRoot on App {
-  activeProject {
-    projectRoot
+fragment ConfigFile on Query {
+  app {
+    activeProject {
+      projectRoot
+    }
+  }
+  wizard {
+    canNavigateForward
+    sampleCodeJs: sampleCode(lang: js)
+    sampleCodeTs: sampleCode(lang: ts)
   }
 }
 `
@@ -86,8 +85,7 @@ mutation appCreateConfigFile($code: String!, $configFilename: String!) {
 `
 
 const props = defineProps<{
-  wizard: ConfigFileFragment 
-  app: ProjectRootFragment
+  gql: ConfigFileFragment 
 }>()
 
 
@@ -112,13 +110,13 @@ const createConfigFile = useMutation(AppCreateConfigFileDocument)
 
 const code = computed(() => {
   if (language.value === 'js') {
-    return props.wizard.sampleCodeJs
+    return props.gql.wizard.sampleCodeJs
   }
-  return props.wizard.sampleCodeTs
+  return props.gql.wizard.sampleCodeTs
 })
 
 const createConfig = async () => {
-  if (!props.app?.activeProject?.projectRoot) {
+  if (!props.gql.app?.activeProject?.projectRoot) {
     throw Error(`Cannot find the active project's projectRoot. This should never happen.`)
   }
 

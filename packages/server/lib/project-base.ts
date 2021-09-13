@@ -33,7 +33,7 @@ import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
 import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
 import { checkSupportFile } from './project_utils'
-import type { OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -672,12 +672,11 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.automation
   }
 
-  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
+  async initializeConfig (browsers: FoundBrowser[]): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
-    if (!theCfg.browsers || theCfg.browsers.length === 0) {
-      theCfg.browsers = browsers
-    }
+    // @ts-ignore
+    theCfg.browsers = browsers
 
     if (theCfg.browsers) {
       theCfg.browsers = theCfg.browsers?.map((browser) => {

@@ -1,7 +1,17 @@
 <template>
   <div class="max-w-4xl mx-auto text-center">
+    {{ props.gql.app }}
     <TestingTypeCard
-      v-if="ct.isSetup"
+      v-if="props.gql.app.activeProject?.isFirstTimeCT"
+      :id="ct.id"
+      :title="ct.title"
+      :description="ct.description"
+      role="setup-component-testing"
+      @click="ctNextStep" 
+    />
+
+    <TestingTypeCard
+      v-else
       :id="ct.id"
       :title="ct.title"
       description="LAUNCH"
@@ -10,16 +20,16 @@
     />
 
     <TestingTypeCard
-      v-else
-      :id="ct.id"
-      :title="ct.title"
-      :description="ct.description"
-      role="setup-component-testing"
-      @click="ctNextStep"
+      v-if="props.gql.app.activeProject?.isFirstTimeE2E"
+      :id="e2e.id"
+      :title="e2e.title"
+      :description="e2e.description"
+      role="setup-e2e-testing"
+      @click="e2eNextStep"
     />
 
     <TestingTypeCard
-      v-if="e2e.isSetup"
+      v-else
       :id="e2e.id"
       :title="e2e.title"
       description="LAUNCH"
@@ -27,14 +37,6 @@
       @click="e2eNextStep"
     />
 
-    <TestingTypeCard
-      v-else
-      :id="e2e.id"
-      :title="e2e.title"
-      :description="e2e.description"
-      role="setup-e2e-testing"
-      @click="e2eNextStep"
-    />
   </div>
 </template>
 
@@ -46,7 +48,7 @@ import {
   TestingTypeEnum,
   TestingTypeSelectDocument,
   TestingTypeCardsNavigateForwardDocument,
-TestingTypeCardsFragment
+  TestingTypeCardsFragment
 } from "../generated/graphql";
 import TestingTypeCard from "./TestingTypeCard.vue";
 
@@ -54,8 +56,8 @@ gql`
 fragment TestingTypeCards on Query {
   app {
     activeProject {
-      hasSetupComponentTesting
-      hasSetupE2ETesting
+     	isFirstTimeCT
+      isFirstTimeE2E
     }
   }
 
@@ -97,10 +99,7 @@ const props = defineProps<{
 }>()
 
 const ct = computed(() => {
-  return {
-    ...props.gql.wizard.testingTypes.find(x => x.id === 'component')!,
-    isSetup: props.gql?.app?.activeProject?.hasSetupComponentTesting ?? false
-  }
+  return props.gql.wizard.testingTypes.find(x => x.id === 'component')!
 })
 
 const selectTestingType = (testingType: TestingTypeEnum) => {
@@ -118,9 +117,6 @@ const e2eNextStep = async () => {
 }
 
 const e2e = computed(() => {
-  return {
-    ...props.gql.wizard.testingTypes.find(x => x.id === 'e2e')!,
-    isSetup: props.gql?.app?.activeProject?.hasSetupE2ETesting ?? false
-  }
+  return props.gql.wizard.testingTypes.find(x => x.id === 'e2e')!
 })
 </script>

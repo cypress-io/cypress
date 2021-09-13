@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
 import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
@@ -23,6 +24,8 @@ import * as config from '@packages/server/lib/config'
 
 import { getId } from '@packages/server/lib/project_static'
 import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
+
+const debug = Debug('cypress:server:graphql')
 
 interface RecordKey {
   id: string
@@ -105,17 +108,34 @@ export class ServerActions extends BaseActions {
     fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
   }
 
-  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions) {
-    await openProject.create(args.projectRoot, args, options)
+  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: any) {
+    await openProject.create(args.projectRoot, args, options, browsers)
+    if (args.testingType === 'e2e') {
+      this.ctx.activeProject!.setE2EPluginsInitialized(true)
+    }
+
+    if (args.testingType === 'component') {
+      this.ctx.activeProject!.setCtPluginsInitialized(true)
+    }
 
     return
   }
 
   async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
+    debug('launching with browser %o', browser)
+
     return openProject.launch(browser, spec, options)
   }
 
   resolveOpenProjectConfig (): FullConfig | null {
     return openProject.getConfig() ?? null
+  }
+
+  isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean {
+    const config = JSON.parse(fs.readFileSync(path.join(projectRoot, 'cypress.json'), 'utf-8'))
+    const type = testingType === 'e2e' ? 'e2e' : 'component'
+    const overrides = config[type] || {}
+
+    return Object.keys(overrides).length === 0
   }
 }
