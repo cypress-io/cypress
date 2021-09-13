@@ -673,7 +673,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.automation
   }
 
-  async initializeConfig (browsers: FoundBrowser[]): Promise<Cfg> {
+  async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     // @ts-ignore
