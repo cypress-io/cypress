@@ -108,7 +108,7 @@ export class ServerActions extends BaseActions {
     fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
   }
 
-  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: any) {
+  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
     await openProject.create(args.projectRoot, args, options, browsers)
     if (args.testingType === 'e2e') {
       this.ctx.activeProject!.setE2EPluginsInitialized(true)
