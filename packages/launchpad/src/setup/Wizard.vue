@@ -1,9 +1,5 @@
 <template>
-  <h1 class="text-3xl pt-12 text-center">{{ props.gql.wizard.title }}</h1>
-  <p 
-    class="text-center text-gray-400 my-2 mx-10" 
-    v-html="props.gql.wizard.description" 
-  />
+  <WizardHeader :gql="props.gql.wizard" />
   <div class="mx-5">
     <EnvironmentSetup 
       v-if="props.gql.wizard.step === 'selectFramework'" 
@@ -29,6 +25,7 @@
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
 import ConfigFile from "./ConfigFile.vue";
+import WizardHeader from "./WizardHeader.vue";
 import OpenBrowser from "./OpenBrowser.vue";
 import { gql } from '@urql/core'
 import type { WizardFragment } from '../generated/graphql'

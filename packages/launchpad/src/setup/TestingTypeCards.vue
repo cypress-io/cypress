@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto text-center">
+  <div class="max-w-4xl mx-5 mx-auto text-center">
     <TestingTypeCard
       :id="ct.id"
       :title="ct.title"
