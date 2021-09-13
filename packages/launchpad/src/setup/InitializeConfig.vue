@@ -1,6 +1,11 @@
 <template>
   <WizardLayout :canNavigateForward="canNavigateForward">
-    Loading...
+    <div class="flex flex-col items-center mx-auto my-10">
+      <img src="../images/success.svg" class="my-2"/>
+      <span class="my-2">
+        Loading...
+      </span>
+    </div>
   </WizardLayout>
 </template>
 

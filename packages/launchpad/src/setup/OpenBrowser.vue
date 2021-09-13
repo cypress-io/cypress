@@ -41,16 +41,6 @@ query OpenBrowser {
 
 const query = useQuery({ query: OpenBrowserDocument })
 
-// gql`
-// mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
-//   initializeOpenProject (testingType: $testingType) {
-//     projects {
-//       __typename # don't really care about result at this point
-//     }
-//   }
-// }
-// `
-
 gql`
 mutation LaunchOpenProject  {
   launchOpenProject {

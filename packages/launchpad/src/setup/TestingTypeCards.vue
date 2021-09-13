@@ -1,39 +1,18 @@
 <template>
   <div class="max-w-4xl mx-auto text-center">
-    {{ props.gql.app }}
     <TestingTypeCard
-      v-if="props.gql.app.activeProject?.isFirstTimeCT"
       :id="ct.id"
       :title="ct.title"
-      :description="ct.description"
-      role="setup-component-testing"
+      :description="firstTimeCT ? ct.description : 'LAUNCH'"
+      :role="firstTimeCT ? 'setup-component-testing' : 'launch-component-testing'"
       @click="ctNextStep" 
     />
 
     <TestingTypeCard
-      v-else
-      :id="ct.id"
-      :title="ct.title"
-      description="LAUNCH"
-      role="launch-component-testing"
-      @click="ctNextStep"
-    />
-
-    <TestingTypeCard
-      v-if="props.gql.app.activeProject?.isFirstTimeE2E"
       :id="e2e.id"
       :title="e2e.title"
-      :description="e2e.description"
-      role="setup-e2e-testing"
-      @click="e2eNextStep"
-    />
-
-    <TestingTypeCard
-      v-else
-      :id="e2e.id"
-      :title="e2e.title"
-      description="LAUNCH"
-      role="launch-e2e-testing"
+      :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
+      :role="firstTimeE2E ? 'setup-e2e-testing' : 'launch-e2e-testing'"
       @click="e2eNextStep"
     />
 
@@ -90,7 +69,6 @@ mutation TestingTypeCardsNavigateForward {
 }
 `
 
-
 const mutation = useMutation(TestingTypeSelectDocument)
 const navigateForwardMutation = useMutation(TestingTypeCardsNavigateForwardDocument)
 
@@ -101,6 +79,9 @@ const props = defineProps<{
 const ct = computed(() => {
   return props.gql.wizard.testingTypes.find(x => x.id === 'component')!
 })
+
+const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
+const firstTimeE2E = computed(() => props.gql.app.activeProject?.isFirstTimeE2E)
 
 const selectTestingType = (testingType: TestingTypeEnum) => {
   return mutation.executeMutation({ testingType })
