@@ -6,6 +6,7 @@ import type { AddressInfo } from 'net'
 
 import { graphqlSchema } from './schema'
 import type { BaseContext } from './context/BaseContext'
+import { Query } from './entities/Query'
 
 const debug = Debug('cypress:server:graphql')
 
@@ -56,6 +57,7 @@ export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }
       schema: graphqlSchema,
       graphiql: true,
       context: serverContext,
+      rootValue: new Query(),
     }
   }))
 

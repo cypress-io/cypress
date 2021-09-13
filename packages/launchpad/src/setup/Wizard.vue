@@ -5,7 +5,7 @@
     <div class="mx-5">
       <TestingTypeCards 
         v-if="wizard.step === 'welcome'"
-        :gql="query" 
+        :gql="data"
       />
       <EnvironmentSetup 
         v-if="wizard.step === 'selectFramework'" 
@@ -17,8 +17,7 @@
       />
       <ConfigFile 
         v-if="wizard.step === 'createConfig'" 
-        :wizard="wizard" 
-        :app="app" 
+        :gql="data"
       />
       <OpenBrowser 
         v-if="wizard.step === 'setupComplete'" 
@@ -29,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import TestingTypeCards from "./TestingTypeCards.vue";
 import EnvironmentSetup from "./EnvironmentSetup.vue";
 import InstallDependencies from "./InstallDependencies.vue";
@@ -46,10 +45,10 @@ fragment Wizard on Query {
   app {
     isFirstOpen
     activeProject {
-      hasSetupComponentTesting
+      id
       hasSetupE2ETesting
+      hasSetupComponentTesting
     }
-    ...ProjectRoot
   }
 
   wizard {
@@ -58,19 +57,19 @@ fragment Wizard on Query {
     description
     testingType
     ...TestingType
-    ...ConfigFile
     ...InstallDependencies
     ...EnvironmentSetup
   }
+  ...ConfigFile
   ...OpenBrowser
 }
 `
 
 const props = defineProps<{
-  query: WizardFragment
+  gql: WizardFragment
 }>()
 
-const app = computed(() => props.query?.app)
-const wizard = computed(() => props.query?.wizard)
-const data = computed(() => props.query)
+const app = computed(() => props.gql?.app)
+const wizard = computed(() => props.gql?.wizard)
+const data = computed(() => props.gql)
 </script>

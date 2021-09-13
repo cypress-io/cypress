@@ -9,6 +9,11 @@ export class Browser implements BrowserContract {
   constructor (private config: BrowserContract) {}
 
   @nxs.field.nonNull.string()
+  get id (): NxsResult<'Browser', 'id'> {
+    return `${this.config.name}-${this.config.version}`
+  }
+
+  @nxs.field.nonNull.string()
   get name (): NxsResult<'Browser', 'name'> {
     return this.config.name
   }

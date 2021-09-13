@@ -2,7 +2,7 @@ import {
   Client,
   createClient,
   dedupExchange,
-  // errorExchange,
+  errorExchange,
   fetchExchange,
 } from '@urql/core'
 import { cacheExchange as graphCacheExchange } from '@urql/exchange-graphcache'
@@ -12,16 +12,12 @@ import { urqlSchema } from '../generated/urql-introspection'
 
 export function makeCacheExchange () {
   return graphCacheExchange({
-    // @ts-expect-error
+    // @ts-ignore
     schema: urqlSchema,
     keys: {
-      Query: () => {
-        return null
-      },
-      NavigationMenu: (data) => {
-        // debugger
-        return data.__typename
-      },
+      NavigationMenu: (data) => data.__typename,
+      App: (data) => data.__typename,
+      Wizard: (data) => data.__typename,
     },
   })
 }
@@ -35,12 +31,12 @@ export function makeUrqlClient (): Client {
     requestPolicy: 'cache-and-network',
     exchanges: [
       dedupExchange,
-      // errorExchange({
-      //   onError (error) {
-      //     // eslint-disable-next-line
-      //     console.error(error)
-      //   },
-      // }),
+      errorExchange({
+        onError (error) {
+          // eslint-disable-next-line
+          console.error(error)
+        },
+      }),
       makeCacheExchange(),
       fetchExchange,
     ],

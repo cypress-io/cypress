@@ -25,7 +25,7 @@ import {
 import Button from '../components/button/Button.vue'
 
 const props = defineProps<{
-  gql: AuthFragment | undefined
+  gql: AuthFragment
 }>()
 
 gql`

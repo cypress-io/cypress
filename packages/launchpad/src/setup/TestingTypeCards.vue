@@ -54,6 +54,7 @@ gql`
 fragment TestingTypeCards on Query {
   app {
     activeProject {
+      id
       hasSetupComponentTesting
       hasSetupE2ETesting
     }
@@ -88,7 +89,6 @@ mutation TestingTypeCardsNavigateForward {
 }
 `
 
-
 const mutation = useMutation(TestingTypeSelectDocument)
 const navigateForwardMutation = useMutation(TestingTypeCardsNavigateForwardDocument)
 
@@ -98,7 +98,7 @@ const props = defineProps<{
 
 const ct = computed(() => {
   return {
-    ...props.gql.wizard.testingTypes.find(x => x.id === 'component')!,
+    ...props.gql.wizard!.testingTypes.find(x => x.id === 'component')!,
     isSetup: props.gql?.app?.activeProject?.hasSetupComponentTesting ?? false
   }
 })
@@ -119,7 +119,7 @@ const e2eNextStep = async () => {
 
 const e2e = computed(() => {
   return {
-    ...props.gql.wizard.testingTypes.find(x => x.id === 'e2e')!,
+    ...props.gql.wizard!.testingTypes.find(x => x.id === 'e2e')!,
     isSetup: props.gql?.app?.activeProject?.hasSetupE2ETesting ?? false
   }
 })

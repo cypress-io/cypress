@@ -16,9 +16,9 @@ export const remoteSchemaExecutor: Executor<BaseContext> = async ({ document, va
 
   // TODO(tim): remove / change to debug
   // eslint-disable-next-line
-  console.log(`Executing query ${query} against remote`)
+  // console.log(`Executing query ${query} against remote`)
 
-  const fetchResult = await fetch('http://localhost:3000/test-runner-graphql', {
+  const fetchResult = await fetch('https://dashboard.cypress.io/test-runner-graphql', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -36,6 +36,7 @@ gql`
 query ProjectSettings { # ($projectId: String!)
   app {
     activeProject {
+      id
       ...ProjectId
       cloudProject {
         id

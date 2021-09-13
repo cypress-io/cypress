@@ -106,6 +106,7 @@
     "@types/sinon-chai": "3.2.3",
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "@typescript-eslint/parser": "4.18.0",
+    "@urql/introspection": "^0.3.0",
     "ansi-styles": "3.2.1",
     "arg": "4.1.2",
     "ascii-table": "0.0.9",

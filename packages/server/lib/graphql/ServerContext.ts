@@ -44,8 +44,4 @@ export class ServerContext extends BaseContext {
   delegateToRemoteQueryBatched () {
     return null
   }
-
-  batchedCloudExecuteMethod () {
-    return null
-  }
 }

@@ -5,7 +5,7 @@ import { JSONResolver, DateTimeResolver } from 'graphql-scalars'
 import * as entities from './entities'
 import * as constants from './constants'
 import * as testingTypes from './testing/testUnionType'
-import { remoteSchemaTypes } from './stitching/remoteSchema'
+import { remoteSchema } from './stitching/remoteSchema'
 
 const customScalars = [
   asNexusMethod(JSONResolver, 'json'),
@@ -20,7 +20,7 @@ process.cwd ??= () => ''
 
 const isCodegen = Boolean(process.env.GRAPHQL_CODEGEN)
 
-const types = [entities, constants, remoteSchemaTypes, customScalars, dirname ? null : testingTypes]
+const types = [entities, constants, customScalars, dirname ? null : testingTypes]
 
 export const graphqlSchema = makeSchema({
   types,
@@ -42,6 +42,12 @@ export const graphqlSchema = makeSchema({
   contextType: {
     module: path.join(dirname, './context/BaseContext.ts'),
     export: 'BaseContext',
+  },
+  mergeSchema: {
+    schema: remoteSchema,
+    skipFields: {
+      Mutation: ['test'],
+    },
   },
   formatTypegen (content, type) {
     if (type === 'schema') {

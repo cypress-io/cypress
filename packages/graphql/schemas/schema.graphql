@@ -22,6 +22,7 @@ type Browser {
   channel: String!
   displayName: String!
   family: BrowserFamily!
+  id: String!
   majorVersion: String
   name: String!
   path: String!
@@ -264,9 +265,6 @@ type Mutation {
 
   """Navigates backward in the wizard"""
   wizardNavigate(direction: WizardNavigateDirection!): Wizard
-
-  """Navigates forward in the wizard"""
-  wizardNavigateForward: Wizard
 
   """Sets the frontend bundler we want to use for the project"""
   wizardSetBundler(bundler: SupportedBundlers!): Wizard

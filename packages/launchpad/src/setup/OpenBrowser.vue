@@ -4,7 +4,7 @@
     <div class="flex justify-center">
       <h1 class="text-3xl">TODO: launch in selected browser. Right now they all launch chrome.</h1>
       <Button
-        v-for="browser of props.app.browsers"
+        v-for="browser of props.gql.app.browsers"
         :key="browser.version"
         class="m-2"
         @click="launch"
@@ -26,6 +26,7 @@ gql`
 fragment OpenBrowser on Query {
   app {
     browsers {
+      id
       displayName
       version
       majorVersion

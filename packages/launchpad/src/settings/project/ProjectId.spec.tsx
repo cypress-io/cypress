@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { ProjectIdFragmentDoc } from '../../generated/graphql-test-test'
+import { ProjectIdFragmentDoc } from '../../generated/graphql-test'
 import ProjectId from './ProjectId.vue'
 
 describe('<ProjectId />', () => {

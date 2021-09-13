@@ -40,12 +40,6 @@ export const mutation = mutationType({
       resolve: (root, args, ctx) => ctx.wizard.setManualInstall(args.isManual),
     })
 
-    t.field('wizardNavigateForward', {
-      type: 'Wizard',
-      description: 'Navigates forward in the wizard',
-      resolve: (_, __, ctx) => ctx.wizard.navigate('forward'),
-    })
-
     t.field('wizardNavigate', {
       type: 'Wizard',
       args: {

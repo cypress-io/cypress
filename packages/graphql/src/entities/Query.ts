@@ -1,4 +1,5 @@
-import { nxs, NxsQueryResult } from 'nexus-decorators'
+import type { GraphQLResolveInfo } from 'graphql'
+import { nxs, NxsCtx, NxsQueryResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'
 import { NavigationMenu } from './NavigationMenu'
@@ -25,5 +26,9 @@ export class Query {
   })
   navigationMenu (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'navigationMenu'> {
     return ctx.navigationMenu
+  }
+
+  cloudViewer (args: unknown, ctx: NxsCtx, info: GraphQLResolveInfo): NxsQueryResult<'cloudViewer'> {
+    return ctx.delegateToRemoteQuery(info) as any
   }
 }

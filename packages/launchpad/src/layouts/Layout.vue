@@ -70,6 +70,7 @@ gql`
 query Layout {
   app {
     activeProject {
+      id
       title
     }
   }

@@ -6,10 +6,10 @@
 
 import type * as cloudGen from "./cloud-source-types.gen"
 import type { BaseContext } from "./../context/BaseContext"
+import type { Query } from "./../entities/Query"
 import type { App } from "./../entities/App"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
-import type { Query } from "./../entities/Query"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
@@ -135,6 +135,7 @@ export interface NexusGenFieldTypes {
     channel: string; // String!
     displayName: string; // String!
     family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
+    id: string; // String!
     majorVersion: string | null; // String
     name: string; // String!
     path: string; // String!
@@ -226,7 +227,6 @@ export interface NexusGenFieldTypes {
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
     wizardInstallDependencies: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardNavigate: NexusGenRootTypes['Wizard'] | null; // Wizard
-    wizardNavigateForward: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetBundler: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetFramework: NexusGenRootTypes['Wizard'] | null; // Wizard
     wizardSetManualInstall: NexusGenRootTypes['Wizard'] | null; // Wizard
@@ -401,6 +401,7 @@ export interface NexusGenFieldTypeNames {
     channel: 'String'
     displayName: 'String'
     family: 'BrowserFamily'
+    id: 'String'
     majorVersion: 'String'
     name: 'String'
     path: 'String'
@@ -492,7 +493,6 @@ export interface NexusGenFieldTypeNames {
     navigationMenuSetItem: 'NavigationMenu'
     wizardInstallDependencies: 'Wizard'
     wizardNavigate: 'Wizard'
-    wizardNavigateForward: 'Wizard'
     wizardSetBundler: 'Wizard'
     wizardSetFramework: 'Wizard'
     wizardSetManualInstall: 'Wizard'

@@ -105,8 +105,4 @@ export class ClientTestContext extends BaseContext {
   batchedCloudExecute () {
     return null
   }
-
-  batchedCloudExecuteMethod () {
-    return null
-  }
 }

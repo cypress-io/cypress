@@ -31,7 +31,7 @@ function runServer () {
     child.removeAllListeners()
   }
 
-  child = childProcess.fork(path.join(__dirname, 'start.js'), ['--devWatch'], {
+  child = childProcess.fork(path.join(__dirname, 'start.js'), ['--devWatch', ...process.argv], {
     stdio: 'inherit',
   })
 
