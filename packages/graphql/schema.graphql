@@ -67,7 +67,11 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 """A Cypress project is a container"""
 type LocalProject {
   id: ID!
+
+  """Whether the user configured this project to use Component Testing"""
   isFirstTimeCT: Boolean!
+
+  """Whether the user configured this project to use e2e Testing"""
   isFirstTimeE2E: Boolean!
 
   """Used to associate project with Cypress cloud"""
