@@ -66,6 +66,14 @@ export class ClientTestActions extends BaseActions {
     // @ts-ignore
     return {} as FullConfig
   }
+
+  isFirstTime (projectRoot: string, testingType: Cypress.TestingType) {
+    if (testingType === 'component') {
+      return false
+    }
+
+    return true
+  }
 }
 
 const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
