@@ -8,6 +8,7 @@ import { graphqlSchema } from './schema'
 import type { BaseContext } from './context/BaseContext'
 
 const debug = Debug('cypress:server:graphql')
+const GRAPHQL_PORT = process.env.CYPRESS_INTERNAL_GQL_PORT || 51259
 
 let app: ReturnType<typeof express>
 let server: Server
@@ -40,7 +41,7 @@ export function setServerContext (ctx: BaseContext) {
   return ctx
 }
 
-export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }): Promise<{
+export function startGraphQLServer ({ port }: { port: number } = { port: GRAPHQL_PORT }): Promise<{
   server: Server
   app: Express.Application
   endpoint: string

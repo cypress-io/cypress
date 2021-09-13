@@ -158,6 +158,14 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
     options.webPreferences.partition = options.partition
   }
 
+  // When we're E2E testing the launchpad or app, we want to stand up a real Cy server.
+  // It's best to do this without rendering the launchpad, so we won't visually render the electron window.
+  // TODO(jess): Is it better to stub the electron window? The server is pretty coupled to it.
+  if (process.env.CYPRESS_INTERNAL_ENV === 'development' && process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+    options.frame = false
+    options.show = false
+  }
+
   const win = newBrowserWindow(options)
 
   win.on('blur', function (...args) {
