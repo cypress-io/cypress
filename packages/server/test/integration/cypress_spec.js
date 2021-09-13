@@ -1797,13 +1797,10 @@ describe('lib/cypress', () => {
       })
 
       it('reads config from a custom config file', function () {
-        sinon.stub(fs, 'readJsonAsync')
-        fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
+        fs.outputJSON(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
           port: 2020,
         })
-
-        fs.readJsonAsync.callThrough()
 
         return cypress.start([
           `--config-file=${this.filename}`,
