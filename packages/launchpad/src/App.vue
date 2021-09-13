@@ -4,8 +4,13 @@
   </div>
 
   <div v-else class="bg-white h-full">
-    <HeaderBar :gql="query.data.value.app" />
-    <Wizard :query="query.data.value" />
+    <div v-if="app?.isInGlobalMode">
+      <GlobalPage />
+    </div>
+    <template v-else>
+      <HeaderBar :gql="app" />
+      <Wizard :query="query.data.value" />
+    </template>
   </div>
 </template>
 
@@ -15,6 +20,7 @@ import { gql, useQuery } from '@urql/vue'
 import Wizard from "./setup/Wizard.vue"
 import HeaderBar from './layouts/HeaderBar.vue'
 import { AppQueryDocument } from './generated/graphql'
+import GlobalPage from './global/GlobalPage.vue'
 
 gql`
 query AppQuery {
@@ -23,6 +29,7 @@ query AppQuery {
     activeProject {
       title
     }
+    isInGlobalMode
   }
 }
 `
@@ -39,7 +46,6 @@ const query = useQuery({
 
 
 let interval: number
-
 const poll = () => {
   try {
     if (backendInitialized.value) {
@@ -54,7 +60,9 @@ const poll = () => {
 
 interval = window.setInterval(poll, 200)
 
-const backendInitialized = computed(() => !!query.data?.value?.app?.activeProject)
+const app = computed(() => query.data?.value?.app) 
+
+const backendInitialized = computed(() => !!app)
 </script>
 
 <style lang="scss">
