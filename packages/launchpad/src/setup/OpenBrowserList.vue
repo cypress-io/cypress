@@ -28,7 +28,7 @@
           <div class="text-center">
             <img :src="browser.icon" alt class="w-40px h-40px inline" />
           </div>
-          <div class="radio-label-text text-indigo-600 text-lg pt-2">{{ browser.displayName }}</div>
+          <div class="text-indigo-600 text-lg pt-2">{{ browser.displayName }}</div>
           <div class="text-gray-400 text-xs">{{ browser.displayVersion }}</div>
         </label>
       </div>
