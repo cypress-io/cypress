@@ -78,6 +78,7 @@ class Watchers {
     }
 
     delete this.watchers[filePath]
+
     return watcher.close()
   }
 }
