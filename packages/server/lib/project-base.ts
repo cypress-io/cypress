@@ -183,6 +183,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     let cfg = this.getConfig()
 
+    const originalConfigFile = cfg.configFile
+
     process.chdir(this.projectRoot)
 
     // TODO: we currently always scaffold the plugins file
@@ -286,6 +288,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       }),
       this.watchPluginsFile(cfg, this.options),
     ])
+
+    // restore the relative path of the config file
+    cfg.configFile = originalConfigFile
+      ? originalConfigFile
+      : cfg.configFile
 
     if (cfg.isTextTerminal) {
       return
