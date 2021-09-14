@@ -3,41 +3,43 @@
     <div class="flex gap-6 py-16 justify-center flex-wrap">
       <div
         v-for="browser of displayBrowsers"
-        class="text-center w-160px py-6 block border-1"
+        class="text-center w-160px pt-6 pb-4 block border-1 rounded relative"
         :class="{
-          'border-indigo-600 ring-3 ring-indigo-100': selectedBrowser.displayName === browser.displayName,
+          'border-indigo-300 ring-2 ring-indigo-50': selectedBrowser.displayName === browser.displayName,
           'border-gray-200': selectedBrowser.displayName !== browser.displayName,
-          'filter grayscale bg-gray-100': browser.disabled
+          'filter grayscale bg-gray-100': browser.disabled,
+          'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && selectedBrowser.displayName !== browser.displayName
         }"
       >
         <input
           type="radio"
+          v-model="selectedBrowser"
           name="selectedBrowser"
           :id="browser.displayName"
           :value="browser"
-          v-model="selectedBrowser"
-          :disabled="browser.disabled ? 'disabled' : null"
+          :disabled="browser.disabled"
           :key="browser.displayName"
           class="absolute opacity-0"
           :class="{
             'filter grayscale': browser.disabled
           }"
         />
-        <label :for="browser.displayName">
+        <label :for="browser.displayName" class="radio-label">
           <div class="text-center">
-            <img :src="browser.icon" alt class="w-14 mb-2 inline" />
+            <img :src="browser.icon" alt class="w-40px h-40px inline" />
           </div>
-          <div class="text-indigo-600 text-xl">{{ browser.displayName }}</div>
-          <div class="text-gray-600">{{ browser.displayVersion }}</div>
+          <div class="radio-label-text text-indigo-600 text-lg pt-2">{{ browser.displayName }}</div>
+          <div class="text-gray-400 text-sm">{{ browser.displayVersion }}</div>
         </label>
       </div>
     </div>
     <div class="mb-14">
       <div class="flex justify-center items-center mb-4">
         <Button
+          v-if="launchText"
           type="submit"
           class="mr-2 py-2 px-6 inline"
-          v-if="launchText"
+          :suffix-icon="openInNew"
         >{{ launchText }}</Button>
         <Button @click="goBack" type="submit" class="ml-2 py-2 px-6 inline" variant="outline">Back</Button>
       </div>
@@ -59,6 +61,8 @@ import Button from "../components/button/Button.vue"
 import Select from "../components/input/Select.vue"
 import { computed, ref, defineEmits } from "vue"
 import _clone from "lodash/clone"
+import openInNew from 'virtual:vite-icons/mdi/open-in-new'
+
 
 import chromeIcon from "../../../../node_modules/browser-logos/src/chrome/chrome.svg?url"
 import firefoxIcon from "../../../../node_modules/browser-logos/src/firefox/firefox.svg?url"
@@ -119,19 +123,16 @@ const allBrowsers = [{
 }, {
   displayName: 'Firefox Nightly',
   icon: firefoxNightlyIcon
-},
-{
+},{
   displayName: 'Firefox Developer Edition',
   icon: firefoxDeveloperEditionIcon
-},
-{
+},{
   displayName: 'Edge Canary',
   icon: edgeCanaryIcon
-},
-{
+},{
   displayName: 'Edge Beta',
   icon: edgeBetaIcon
-}, {
+},{
   displayName: 'Edge Dev',
   icon: edgeDevIcon
 }]
@@ -158,21 +159,23 @@ const getBroswerDetails = (browser) => {
   }
 }
 
+const isDefaultBrowser = (browser) => {
+  return defaultBrowserDisplayNames.includes(browser.displayName)
+}
+
 const isDefaultOrDetected = (browser) => {
-  return defaultBrowserDisplayNames.includes(browser.displayName) || props.gql.browsers
+  return isDefaultBrowser(browser) || props.gql.browsers
     .find(browserInList => browserInList.displayName === browser.displayName)
 }
 
 const isBrowserListExpanded = ref(false)
 
 const displayBrowsers = computed(() => {
-  const browserGroup = isBrowserListExpanded.value ? allBrowsers : allBrowsers.filter(browser => defaultBrowserDisplayNames.includes(browser.displayName))
+  const browserGroup = isBrowserListExpanded.value ? allBrowsers : allBrowsers.filter(isDefaultBrowser)
   return browserGroup.filter(isDefaultOrDetected).map(getBroswerDetails)
 })
 
-
 const selectedBrowser = ref(displayBrowsers.value[0])
-
 
 const expandBrowserList = () => {
   isBrowserListExpanded.value = true
@@ -182,13 +185,24 @@ const goBack = () => {
   emit('navigated-back')
 }
 
-
 const launchText = computed(() => selectedBrowser.value ? `Launch ${selectedBrowser.value.displayName}` : '')
+
 const showExpandButton = computed(() => {
   return !isBrowserListExpanded.value &&
-    Boolean(props.gql.browsers.find(browser => !defaultBrowserDisplayNames.includes(browser.displayName)))
+    Boolean(props.gql.browsers.find(browser => !isDefaultBrowser(browser)))
 })
 
-
-
 </script>
+
+<style scoped>
+
+/* Make whole card clickable */
+.radio-label::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+  height: 100%;
+  width: 100%;
+}
+</style>
