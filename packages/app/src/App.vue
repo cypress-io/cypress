@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import Foo from './components/Foo.vue'
 import { renderRunner } from './runner/renderRunner'
+import { gql, useQuery } from '@urql/vue'
+import { AppDocument } from './generated/graphql'
+
+gql`
+query App {
+  app {
+    ...Foo
+  }
+}
+`
+
+const query = useQuery({ query: AppDocument })
 
 const target = ref(null)
 
@@ -14,5 +27,6 @@ onMounted(async () => {
 </script>
 
 <template>
+    <Foo v-if="query.data.value" :gql="query.data.value.app" />
   <div id="target" ref="target"></div>
 </template>
