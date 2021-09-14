@@ -1,6 +1,8 @@
+import Debug from 'debug'
 import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
-import type { BrowserContract } from '../contracts/BrowserContract'
+
+const debug = Debug('cypress:graphql:mutation')
 
 export const mutation = mutationType({
   definition (t) {
@@ -10,7 +12,9 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Sets the current testing type we want to use',
       args: { type: nonNull(TestingTypeEnum) },
-      resolve: (root, args, ctx) => ctx.wizard.setTestingType(args.type),
+      resolve: (root, args, ctx) => {
+        return ctx.wizard.setTestingType(args.type)
+      },
     })
 
     t.field('wizardSetFramework', {
@@ -119,71 +123,73 @@ export const mutation = mutationType({
     })
 
     t.field('initializeOpenProject', {
-      type: 'App',
-      args: {
-        testingType: nonNull(TestingTypeEnum),
-      },
+      type: 'Wizard',
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
-        const browsers = ctx.app.browserCache
-
-        if (!browsers?.length) {
-          throw Error(`Need to call App#cacheBrowsers before opening a project.`)
+        if (!ctx.app.activeProject) {
+          throw Error('No active project found. Cannot open a browser without an active project')
         }
 
+        if (!ctx.wizard.testingType) {
+          throw Error('Must set testingType before initializing a project')
+        }
+
+        // do not re-initialize plugins and dev-server.
+        if (ctx.wizard.testingType === 'component' && ctx.app.activeProject.ctPluginsInitialized) {
+          debug('CT already initialized. Returning.')
+
+          return ctx.wizard
+        }
+
+        if (ctx.wizard.testingType === 'e2e' && ctx.app.activeProject.e2ePluginsInitialized) {
+          debug('E2E already initialized. Returning.')
+
+          return ctx.wizard
+        }
+
+        /**
+         * Several things happen as part of initializing the open project.
+         * 1. Detect browsers (needed for plugins)
+         * 2. Run plugins (in cypress.config.js, setupNode or setupDevServer)
+         * 3. Open various servers, web sockets, etc.
+         */
+        debug('Detecting browsers...')
+        const browsers = await ctx.actions.getBrowsers()
+
+        debug('Found browsers: %o', browsers)
+        ctx.app.setBrowsers(browsers)
+
+        debug('initialize open_project for testingType %s', ctx.wizard.testingType)
         await ctx.actions.initializeOpenProject({
           ...ctx.launchArgs,
-          testingType: args.testingType,
-          config: {
-            browsers: browsers.map((x): BrowserContract => {
-              return {
-                name: x.name,
-                family: x.family,
-                majorVersion: x.majorVersion,
-                channel: x.channel,
-                displayName: x.displayName,
-                path: x.path,
-                version: x.version,
-              }
-            }),
-          },
-        }, ctx.launchOptions)
+          testingType: ctx.wizard.testingType,
+        }, ctx.launchOptions, browsers)
 
-        return ctx.app
+        debug('finishing initializing project')
+        ctx.wizard.navigate('forward')
+
+        return ctx.wizard
       },
     })
 
     t.field('launchOpenProject', {
       type: 'App',
       description: 'Launches project from open_project global singleton',
-      args: {
-        testingType: nonNull(TestingTypeEnum),
-      },
       async resolve (_root, args, ctx) {
-        if (!ctx.app.browserCache?.length) {
-          throw Error(`Need to call App#cacheBrowsers before opening a project.`)
+        const browser = ctx.app.browsers.find((x) => x.name === 'chrome')
+
+        if (!browser) {
+          throw Error(`Could not find chrome browser`)
         }
 
-        const chrome = ctx.app.browserCache.find((x) => x.name === 'chrome')!
-
-        const browser: BrowserContract = {
-          name: chrome.name,
-          family: chrome.family,
-          majorVersion: chrome.majorVersion,
-          channel: chrome.channel,
-          displayName: chrome.displayName,
-          path: chrome.path,
-          version: chrome.version,
-        }
-
-        const spec: any = { // Cypress.Cypress['spec'] = {
+        const spec: Cypress.Spec = {
           name: '',
           absolute: '',
           relative: '',
-          specType: args.testingType === 'e2e' ? 'integration' : 'component',
+          specType: ctx.wizard.testingType === 'e2e' ? 'integration' : 'component',
         }
 
-        await ctx.actions.launchOpenProject(browser, spec, {})
+        await ctx.actions.launchOpenProject(browser.config, spec, {})
 
         return ctx.app
       },

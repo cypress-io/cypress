@@ -1,11 +1,11 @@
 <template>
-  <WizardLayout :canNavigateForward="gql.canNavigateForward">
+  <WizardLayout :canNavigateForward="props.gql.canNavigateForward">
     <div class="m-5">
       <SelectFramework
         :name="t('setupPage.projectSetup.frameworkLabel')"
         @select="setFEFramework"
         :options="frameworks ?? []"
-        :value="gql.framework?.id ?? undefined"
+        :value="props.gql.framework?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
       />
       <SelectFramework
@@ -13,15 +13,15 @@
         :disabled="bundlers.length === 1"
         @select="setFEBundler"
         :options="bundlers || []"
-        :value="gql.bundler?.id ?? undefined"
+        :value="props.gql.bundler?.id ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
       />
     </div>
   </WizardLayout>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, ref, computed } from "vue";
+<script lang="ts" setup>
+import { computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import SelectFramework from "../components/select/SelectFramework.vue";
 import { gql } from '@urql/core'
@@ -72,39 +72,23 @@ fragment EnvironmentSetup on Wizard {
 }
 `
 
-export default defineComponent({
-  components: { WizardLayout, SelectFramework },
-  props: {
-    gql: {
-      type: Object as PropType<EnvironmentSetupFragment>,
-      required: true
-    }
-  },
-  setup (props) {
-    const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
-    const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
+const props = defineProps<{
+  gql: EnvironmentSetupFragment
+}>()
 
-    const disabledBundlerSelect = ref(false);
+const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
+const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
 
-    const setFEBundler = (bundler: SupportedBundlers) => {
-      setBundler.executeMutation({ bundler })
-    };
+const setFEBundler = (bundler: SupportedBundlers) => {
+  setBundler.executeMutation({ bundler })
+};
 
-    const setFEFramework = (framework: FrontendFramework) => {
-      setFramework.executeMutation({ framework })
-    };
+const setFEFramework = (framework: FrontendFramework) => {
+  setFramework.executeMutation({ framework })
+};
 
-    const { t } = useI18n()
+const { t } = useI18n()
 
-    return {
-      bundlers: computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers),
-      frameworks: computed(() => props.gql.frameworks ?? []),
-      gql: computed(() => props.gql),
-      setFEFramework,
-      setFEBundler,
-      disabledBundlerSelect,
-      t
-    };
-  },
-});
+const bundlers = computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers)
+const frameworks = computed(() => props.gql.frameworks ?? [])
 </script>

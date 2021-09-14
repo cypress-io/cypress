@@ -3,7 +3,7 @@ import express from 'express'
 import Debug from 'debug'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
-
+import cors from 'cors'
 import { graphqlSchema } from './schema'
 import type { BaseContext } from './context/BaseContext'
 
@@ -46,6 +46,8 @@ export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }
   endpoint: string
 }> {
   app = express()
+
+  app.use(cors())
 
   app.use('/graphql', graphqlHTTP(() => {
     if (!serverContext) {

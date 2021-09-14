@@ -15,6 +15,7 @@
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
+    "cors": "2.8.5",
     "dedent": "^0.7.0",
     "express": "4.17.1",
     "express-graphql": "^0.12.0",

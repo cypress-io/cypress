@@ -75,6 +75,10 @@ export class TestActions extends BaseActions {
     return [browser]
   }
 
+  isFirstTime (projectRoot: string, testingType: Cypress.TestingType) {
+    return false
+  }
+
   async initializeConfig () {}
 }
 

@@ -69,7 +69,7 @@ export interface NexusGenEnums {
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
   WizardNavigateDirection: "back" | "forward"
-  WizardStep: "createConfig" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
+  WizardStep: "createConfig" | "initializePlugins" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
 }
 
 export interface NexusGenScalars {
@@ -123,6 +123,7 @@ export interface NexusGenFieldTypes {
   App: { // field return type
     activeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
     browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
+    healthCheck: string; // String!
     isFirstOpen: boolean; // Boolean!
     isInGlobalMode: boolean; // Boolean!
     projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
@@ -145,9 +146,9 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   LocalProject: { // field return type
-    hasSetupComponentTesting: boolean; // Boolean!
-    hasSetupE2ETesting: boolean; // Boolean!
     id: string; // ID!
+    isFirstTimeCT: boolean; // Boolean!
+    isFirstTimeE2E: boolean; // Boolean!
     projectId: string | null; // String
     projectRoot: string; // String!
     resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
@@ -155,7 +156,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
-    initializeOpenProject: NexusGenRootTypes['App'] | null; // App
+    initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
@@ -339,6 +340,7 @@ export interface NexusGenFieldTypeNames {
   App: { // field return type name
     activeProject: 'LocalProject'
     browsers: 'Browser'
+    healthCheck: 'String'
     isFirstOpen: 'Boolean'
     isInGlobalMode: 'Boolean'
     projects: 'LocalProject'
@@ -361,9 +363,9 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   LocalProject: { // field return type name
-    hasSetupComponentTesting: 'Boolean'
-    hasSetupE2ETesting: 'Boolean'
     id: 'ID'
+    isFirstTimeCT: 'Boolean'
+    isFirstTimeE2E: 'Boolean'
     projectId: 'String'
     projectRoot: 'String'
     resolvedConfig: 'ResolvedConfig'
@@ -371,7 +373,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
-    initializeOpenProject: 'App'
+    initializeOpenProject: 'Wizard'
     launchOpenProject: 'App'
     login: 'Viewer'
     logout: 'Viewer'
@@ -556,12 +558,6 @@ export interface NexusGenArgTypes {
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
-    }
-    initializeOpenProject: { // args
-      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    }
-    launchOpenProject: { // args
-      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     }
     navigationMenuSetItem: { // args
       type: NexusGenEnums['NavItem']; // NavItem!

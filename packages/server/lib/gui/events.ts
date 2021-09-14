@@ -29,11 +29,9 @@ const api = require('../api')
 const savedState = require('../saved_state')
 
 import { ServerContext } from '../graphql/ServerContext'
-import { graphqlSchema, parse, execute } from '@packages/graphql'
 import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
-import type { BrowserContract } from '@packages/graphql/src/contracts/BrowserContract'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -502,60 +500,8 @@ module.exports = {
 
     const serverContext = setServerContext(new ServerContext(options, {}))
 
-    await serverContext.app.cacheBrowsers()
-
     if (options.projectRoot) {
-      await serverContext.actions.initializeOpenProject({
-        ...options,
-        config: {
-          browsers: serverContext.app.browserCache!.map((x): BrowserContract => {
-            return {
-              name: x.name,
-              family: x.family,
-              majorVersion: x.majorVersion,
-              channel: x.channel,
-              displayName: x.displayName,
-              path: x.path,
-              version: x.version,
-            }
-          }),
-        },
-      }, {})
-
       serverContext.actions.addProject(options.projectRoot)
     }
-
-    // find and cache browsers.
-    // browsers are needed for when we initialize the project's configuration.
-    await serverContext.app.cacheBrowsers()
-
-    ipc.on('graphql', async (evt, { id, params, variables }) => {
-      try {
-        const result = await execute({
-          schema: graphqlSchema,
-          document: parse(params.text),
-          operationName: params.name,
-          variableValues: variables,
-          contextValue: serverContext,
-        })
-
-        evt.sender.send('graphql:response', {
-          id,
-          result,
-        })
-      } catch (e) {
-        evt.sender.send('graphql:response', {
-          id,
-          result: {
-            data: null,
-            errors: [{
-              name: e.name,
-              message: e.message,
-              stack: e.stack,
-            }],
-          },
-        })
-      }
-    })
   },
 }

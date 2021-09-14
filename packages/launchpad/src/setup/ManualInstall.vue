@@ -25,8 +25,8 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from "vue";
+<script lang="ts" setup>
+import { computed } from "vue";
 import CopyButton from "../components/button/CopyButton.vue";
 import { gql } from '@urql/core'
 import type { ManualInstallFragment } from "../generated/graphql";
@@ -40,26 +40,21 @@ fragment ManualInstall on Wizard {
 }
 `
 
-export default defineComponent({
-  props: {
-    gql: {
-      type: Object as PropType<ManualInstallFragment>,
-      required: true
-    }
-  },
-  setup(props) {
-    const dependenciesCode = computed(
-      () =>
-        "yarn add -D \\\n" +
-        (props.gql.packagesToInstall ?? [])
-          .map((pack) => `                    ${pack.name} \\`)
-          .join("\n")
-    );
-    return {
-      dependenciesCode,
-      projectTitle: 'TODO: project title in gql',
-    };
-  },
-  components: { CopyButton },
-});
+const props = defineProps<{
+  gql: ManualInstallFragment
+}>()
+
+defineEmits<{
+  (event: 'back'): void
+}>()
+
+
+const dependenciesCode = computed(
+  () =>
+    "yarn add -D \\\n" +
+    (props.gql.packagesToInstall ?? [])
+      .map((pack) => `                    ${pack.name} \\`)
+      .join("\n")
+);
+const projectTitle = 'TODO: project title in gql'
 </script>

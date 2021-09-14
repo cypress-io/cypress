@@ -7,7 +7,8 @@ import { createHmac } from 'crypto'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { ServerCt, SocketCt } from '@packages/server-ct'
+import { ServerCt } from './server-ct'
+import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import api from './api'
 import { Automation } from './automation'
@@ -31,9 +32,9 @@ import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { createRoutes as createE2ERoutes } from './routes'
-import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
+import { createRoutes as createCTRoutes } from './routes-ct'
 import { checkSupportFile } from './project_utils'
-import type { OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -672,10 +673,12 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.automation
   }
 
-  async initializeConfig ({ browsers }: { browsers: any[] } = { browsers: [] }): Promise<Cfg> {
+  async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
+      // @ts-ignore - we don't know if the browser is headed or headless at this point.
+      // this is handled in open_project#launch.
       theCfg.browsers = browsers
     }
 
