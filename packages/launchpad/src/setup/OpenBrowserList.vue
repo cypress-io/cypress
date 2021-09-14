@@ -47,7 +47,7 @@
           type="button"
           class="ml-2 py-2 px-6 inline"
           variant="outline"
-        >Back</Button>
+        >{{t('setupPage.step.back')}}</Button>
       </div>
     </div>
   </form>
@@ -55,6 +55,7 @@
 
 <script lang="ts" setup>
 import { gql } from "@urql/core";
+import { useI18n } from '../composables'
 import type { OpenBrowserListFragment } from "../generated/graphql"
 import Button from "../components/button/Button.vue"
 import Select from "../components/input/Select.vue"
@@ -75,7 +76,6 @@ import edgeCanaryIcon from "../../../../node_modules/browser-logos/src/edge-cana
 import edgeDevIcon from "../../../../node_modules/browser-logos/src/edge-dev/edge-dev.png"
 import firefoxNightlyIcon from "../../../../node_modules/browser-logos/src/firefox-nightly/firefox-nightly.svg?url"
 import firefoxDeveloperEditionIcon from "../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url"
-import { browsers, FoundBrowser } from "@packages/types";
 
 gql`fragment OpenBrowserList on App {
   browsers {
@@ -91,12 +91,11 @@ gql`fragment OpenBrowserList on App {
 
 const props = defineProps<{
   gql: OpenBrowserListFragment,
-  variant?: "advanced" | "basic"
 }>()
 
-const emit = defineEmits(['navigated-back', 'launch'])
+defineEmits(['navigated-back', 'launch'])
 
-const defaultBrowserDisplayNames = ['Electron', 'Chrome', 'Firefox', 'Edge']
+const { t } = useI18n()
 
 const allBrowsers = [{
   displayName: 'Electron',
@@ -144,17 +143,13 @@ const getBroswerDetails = (browser) => {
     }
 }
 
-const isDefaultBrowser = (browser) => {
-  return defaultBrowserDisplayNames.includes(browser.displayName)
-}
-
-const isDefaultOrDetected = (browser) => {
-  return isDefaultBrowser(browser) || props.gql.browsers
+const isDetected = (browser) => {
+  return props.gql.browsers
     .find(browserInList => browserInList.displayName === browser.displayName)
 }
 
 const displayBrowsers = computed(() => {
-  const foundValidBrowsers = allBrowsers.filter(isDefaultOrDetected).reduce((acc, curr) => {
+  const foundValidBrowsers = allBrowsers.filter(isDetected).reduce((acc, curr) => {
     const matchingFoundBrowsers = props.gql.browsers.filter(foundBrowser => {
       return foundBrowser.displayName === curr.displayName
     })
@@ -169,7 +164,7 @@ const displayBrowsers = computed(() => {
 
 const selectedBrowser = ref(displayBrowsers.value[0])
 
-const launchText = computed(() => selectedBrowser.value ? `Launch ${selectedBrowser.value.displayName}` : '')
+const launchText = computed(() => selectedBrowser.value ? `${t('setupPage.openBrowser.launch')} ${selectedBrowser.value.displayName}` : '')
 
 
 </script>

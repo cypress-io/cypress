@@ -35,6 +35,9 @@
     "step": {
       "next": "Next Step",
       "back": "Back"
+    },
+    "openBrowser": {
+      "launch": "Launch"
     }
   },
   "globalPage": {
