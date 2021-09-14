@@ -48,6 +48,26 @@ let lastMountedReactDom: (typeof ReactDOM) | undefined
  * @param rerenderKey If specified, use the provided key rather than generating a new one
  */
 const _mount = (type: 'mount' | 'rerender', jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string): globalThis.Cypress.Chainable<MountReturn> => {
+  if ((window as any).__CYPRESS__IS__PREVIEW) {
+    const el = document.getElementById(ROOT_ID)
+    const reactDomToUse = options.ReactDom || ReactDOM
+    const props = {
+      key: '',
+    }
+    const reactComponent = React.createElement(
+      options.strict ? React.StrictMode : React.Fragment,
+      props,
+      jsx,
+    )
+    // since we always surround the component with a fragment
+    // let's get back the original component
+
+    reactDomToUse.render(reactComponent, el)
+
+    // @ts-ignore
+    return
+  }
+
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
@@ -323,4 +343,6 @@ export declare namespace Cypress {
 // it is required to unmount component in beforeEach hook in order to provide a clean state inside test
 // because `mount` can be called after some preparation that can side effect unmount
 // @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
-setupHooks(preMountCleanup)
+if (!(window as any).__CYPRESS__IS__PREVIEW) {
+  setupHooks(preMountCleanup)
+}

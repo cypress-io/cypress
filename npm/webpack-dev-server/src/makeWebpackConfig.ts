@@ -1,6 +1,7 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import * as webpack from 'webpack'
+import * as fs from 'fs'
 import { merge } from 'webpack-merge'
 import makeDefaultWebpackConfig from './webpack.config'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from './plugin'
@@ -27,7 +28,7 @@ const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
 export async function makeWebpackConfig (userWebpackConfig: webpack.Configuration, options: MakeWebpackConfigOptions): Promise<webpack.Configuration> {
-  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, template } = options
+  const { projectRoot, devServerPublicPathRoute, files, supportFile, devServerEvents, template, preview } = options
 
   debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
@@ -53,6 +54,7 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
         projectRoot,
         devServerEvents,
         supportFile,
+        preview,
       }),
     ],
   }
@@ -78,11 +80,39 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     })
   }
 
+  // This should be moved into @cypress/react
+  let htmlHeadSnippet = ''
+  const storybookPreviewHeadPath = path.resolve(options.projectRoot, '.storybook', 'preview-head.html')
+  const cypressPreviewHeadPath = path.resolve(options.projectRoot, 'cypress', 'support', 'preview-head.html')
+
+  if (fs.existsSync(cypressPreviewHeadPath)) {
+    console.log('Found preview-head.html at: ', cypressPreviewHeadPath)
+    htmlHeadSnippet = fs.readFileSync(cypressPreviewHeadPath).toString('utf-8')
+  } else if (fs.existsSync(storybookPreviewHeadPath)) {
+    console.log('Found preview-head.html at: ', storybookPreviewHeadPath)
+    htmlHeadSnippet = fs.readFileSync(storybookPreviewHeadPath).toString('utf-8')
+  }
+
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
-    makeDefaultWebpackConfig(template),
+    makeDefaultWebpackConfig(template, htmlHeadSnippet),
     dynamicWebpackConfig,
   )
+
+  // // @ts-ignore
+  // const babelRule = mergedConfig.module.rules
+  //   // @ts-ignore
+  //   .find((rule) => !!rule.oneOf)
+  // // @ts-ignore
+  //   .oneOf.find(
+  // // @ts-ignore
+  //     (loaderConfig) =>
+  //       typeof loaderConfig.loader === "string" &&
+  //       loaderConfig.loader.includes("babel-loader") &&
+  //       !!loaderConfig.include
+  //   );
+  // babelRule.include.push(path.resolve(__dirname));
+  // console.log(babelRule.include)
 
   mergedConfig.entry = entry
 

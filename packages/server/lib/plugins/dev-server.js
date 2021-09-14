@@ -12,6 +12,10 @@ plugins.registerHandler((ipc) => {
     ipc.send('dev-server:specs:changed', specs)
   })
 
+  baseEmitter.on('dev-server:previews:added', (previews) => {
+    ipc.send('dev-server:previews:added', previews)
+  })
+
   ipc.on('dev-server:compile:error', (error) => {
     baseEmitter.emit('dev-server:compile:error', error)
   })
@@ -41,6 +45,10 @@ const API = {
 
   updateSpecs (specs) {
     return baseEmitter.emit('dev-server:specs:changed', specs)
+  },
+
+  updatePreviews (previews) {
+    return baseEmitter.emit('dev-server:previews:added', previews)
   },
 
   close () {

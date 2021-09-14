@@ -1,5 +1,4 @@
 import Debug from 'debug'
-import type { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
 import type { NetworkProxy } from '@packages/proxy'
@@ -10,6 +9,12 @@ import type { SpecsStore } from './specs-store'
 import type { Cfg } from './project-base'
 import { getPathToDist } from '@packages/resolve-dist'
 import type { Browser } from './browsers/types'
+
+import express, { ErrorRequestHandler, Express } from 'express'
+import glob from 'glob'
+import fs from 'fs'
+import * as path from 'path'
+import devServer from '@packages/server/lib/plugins/dev-server'
 
 const debug = Debug('cypress:server:routes')
 
@@ -49,6 +54,46 @@ export const createRoutes = ({
     })
 
     res.json(options)
+  })
+
+  app.get('/__/getStories', (req, res) => {
+    const { projectRoot } = req.query
+    const globPattern = '**/*.stories.{ts,js,tsx,jsx}'
+
+    glob(
+      globPattern,
+      {
+        cwd: projectRoot as string,
+        ignore: ['node_modules/**/*'],
+      },
+      (err, files) => {
+        if (err) {
+          // TODO: handle glob error
+        }
+
+        debug(`Found stories: ${files.join('\n')}`)
+        const normalized = files.map((file) => {
+          return {
+            absolute: path.join(projectRoot as string, file),
+            relative: file,
+            name: path.basename(file),
+            specType: 'component-preview',
+          }
+        })
+
+        devServer.updatePreviews(normalized)
+        res.json({ files: normalized, globPattern })
+      },
+    )
+  })
+
+  app.post('/__/createSpecFromStory', express.json(), (req, res) => {
+    const { spec, absolute } = req.body
+
+    debug(`Writing file ${absolute} with content: ${spec}`)
+    fs.writeFileSync(absolute, spec)
+
+    return res.json({ hello: 'world' })
   })
 
   // TODO: can namespace this onto a "unified" route like __app-unified__

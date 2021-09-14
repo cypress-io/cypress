@@ -6,7 +6,7 @@ import { webpackDevServerFacts } from './webpackDevServerFacts'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
   /* this is the Cypress dev server configuration object */
-  options: Cypress.DevServerConfig
+  options: Cypress.DevServerConfig & { preview?: { files: Cypress.Cypress['spec'][], loaderFn: string } }
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
   /* base html template to render in AUT */
@@ -30,6 +30,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
     isOpenMode: !isTextTerminal,
+    preview: options.preview,
     ...userOptions,
   })
 

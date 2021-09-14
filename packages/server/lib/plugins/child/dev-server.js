@@ -8,6 +8,10 @@ const wrap = (ipc, invoke, ids, [options]) => {
     devServerEvents.emit('dev-server:specs:changed', specs)
   })
 
+  ipc.on('dev-server:previews:added', (preview) => {
+    devServerEvents.emit('dev-server:previews:added', preview)
+  })
+
   devServerEvents.on('dev-server:compile:error', (error) => {
     ipc.send('dev-server:compile:error', error)
   })

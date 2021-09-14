@@ -34,7 +34,7 @@ export const options = [
     validation: v.isBoolean,
   }, {
     name: 'clientRoute',
-    defaultValue: '/__/',
+    defaultValue: '/__vite__/',
     isInternal: true,
   }, {
     name: 'clientCertificates',

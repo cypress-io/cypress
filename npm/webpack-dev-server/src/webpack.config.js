@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
  * @param {string} [template] - base template to use
  * @returns {import('webpack').Configuration}
  */
-module.exports = function makeDefaultConfig (template) {
+module.exports = function makeDefaultConfig (template, htmlHeadSnippet) {
   return {
     mode: 'development',
     optimization: {
@@ -19,6 +19,9 @@ module.exports = function makeDefaultConfig (template) {
     },
     plugins: [new HtmlWebpackPlugin({
       template: template || path.resolve(__dirname, '..', 'index-template.html'),
+      templateParameters: {
+        htmlHeadSnippet,
+      },
     })],
   }
 }

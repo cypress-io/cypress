@@ -14,6 +14,7 @@ export interface CypressCTOptionsPluginOptions {
   projectRoot: string
   supportFile: string
   devServerEvents?: EventEmitter
+  preview?: { files: Cypress.Cypress['spec'][], loaderFn: string }
 }
 
 export type CypressCTOptionsPluginOptionsWithEmitter = CypressCTOptionsPluginOptions & {
@@ -39,6 +40,7 @@ export const normalizeError = (error: Error | string) => {
 
 export default class CypressCTOptionsPlugin {
   private files: Cypress.Cypress['spec'][] = []
+  private preview: { files: Cypress.Cypress['spec'][], loaderFn: string } | undefined
   private supportFile: string
   private errorEmitted = false
 
@@ -50,6 +52,7 @@ export default class CypressCTOptionsPlugin {
     this.supportFile = options.supportFile
     this.projectRoot = options.projectRoot
     this.devServerEvents = options.devServerEvents
+    this.preview = options.preview
   }
 
   private pluginFunc = (context: CypressCTWebpackContext) => {
@@ -57,6 +60,7 @@ export default class CypressCTOptionsPlugin {
       files: this.files,
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
+      preview: this.preview,
     }
   };
 
@@ -105,6 +109,16 @@ export default class CypressCTOptionsPlugin {
       if (_.isEqual(specs, this.files)) return
 
       this.files = specs
+      const inputFileSystem = compilation.inputFileSystem
+      const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
+
+      utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
+    })
+
+    this.devServerEvents.on('dev-server:previews:added', (files) => {
+      if (!this.preview) return
+
+      this.preview.files = files
       const inputFileSystem = compilation.inputFileSystem
       const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
 

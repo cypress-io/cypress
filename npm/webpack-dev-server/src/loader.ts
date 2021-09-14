@@ -20,6 +20,7 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
     shouldLoad: () => document.location.pathname.includes("${encodeURI(file.absolute)}"),
     load: () => import("${file.absolute}" ${magicComments}),
     chunkName: "${chunkName}",
+    file: ${JSON.stringify(file)}
   }`
 }
 
@@ -50,13 +51,23 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 
 // Runs the tests inside the iframe
 export default function loader (this: CypressCTWebpackContext) {
-  const { files, projectRoot, supportFile } = this._cypress
+  const { files, projectRoot, supportFile, preview } = this._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
 
+  const previewFiles = preview ? preview.files : []
+
   return `
   var loadSupportFile = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
-  var allTheSpecs = ${buildSpecs(projectRoot, files)};
+  var allTheSpecs = ${buildSpecs(projectRoot, [...files, ...previewFiles])};
+
+  ${preview ? `
+  var preview = require('${preview.loaderFn}');
+  if (preview.shouldPreview()){
+    preview.init(allTheSpecs, loadSupportFile)
+    return;
+  }
+  ` : ``}
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
