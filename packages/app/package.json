@@ -18,13 +18,7 @@
     "watch": "concurrently \"yarn start\" \"yarn codegen --watch\"",
     "codegen": "echo 'need codegen eventually' # graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
-  "dependencies": {
-    "@iconify/json": "1.1.368",
-    "@iconify/vue": "3.0.0-beta.1",
-    "bluebird": "3.5.3",
-    "classnames": "2.3.1",
-    "vue": "3.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@cypress/vue": "0.0.0-development",
     "@graphql-codegen/add": "^2.0.2",
