@@ -2,7 +2,7 @@ import '@testing-library/cypress/add-commands'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
-import { testUrqlClient } from '@packages/frontend-shared'
+import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, defineComponent, h } from 'vue'
 
 import { ClientTestContext } from '../../src/graphql/ClientTestContext'
