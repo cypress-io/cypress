@@ -382,6 +382,20 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-launchpad-component-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - restore_cached_workspace
+      - run: yarn workspace @packages/launchpad cypress:run:ct --browser <<parameters.browser>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: ./packages/launchpad/cypress/videos
+      - store-npm-logs
+
   run-launchpad-integration-tests:
     parameters:
       browser:
@@ -389,7 +403,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
+      - run: yarn workspace @packages/launchpad cypress:run:e2e --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
