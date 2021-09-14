@@ -83,7 +83,6 @@ import IconCaret from 'virtual:vite-icons/mdi/caret'
 import Icon from '../icon/Icon.vue'
 import { get } from 'lodash'
 import { useI18n } from '../../composables'
-import { watch } from 'vue'
 
 const { t } = useI18n()
 
