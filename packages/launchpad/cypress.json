@@ -17,5 +17,8 @@
   },
   "component": {
     "componentFolder": "src"
+  },
+  "e2e": {
+    "supportFile": false
   }
 }

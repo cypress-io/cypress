@@ -30,6 +30,9 @@ describe('App', () => {
   describe('browsers', () => {
     it('assigns a new user', async () => {
       const context = new TestContext()
+
+      context.app.setBrowsers(await context.actions.getBrowsers())
+
       const { endpoint } = await initGraphql(context)
 
       const result = await makeRequest(endpoint, `

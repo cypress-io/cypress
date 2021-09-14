@@ -27,7 +27,7 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import { defineProps, computed, defineComponent, useAttrs } from "vue"
+import { computed, defineComponent, useAttrs } from "vue"
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from "vue"
 
 const VariantClassesTable = {
