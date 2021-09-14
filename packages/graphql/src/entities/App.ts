@@ -12,6 +12,13 @@ export class App {
 
   constructor (private ctx: BaseContext) {}
 
+  @nxs.field.nonNull.string({
+    description: 'See if the GraphQL server is alive',
+  })
+  get healthCheck (): NxsResult<'App', 'healthCheck'> {
+    return 'OK'
+  }
+
   @nxs.field.nonNull.boolean({
     description: 'Whether this is the first open of the application or not',
   })

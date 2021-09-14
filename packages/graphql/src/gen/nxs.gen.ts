@@ -123,6 +123,7 @@ export interface NexusGenFieldTypes {
   App: { // field return type
     activeProject: NexusGenRootTypes['LocalProject'] | null; // LocalProject
     browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
+    healthCheck: string; // String!
     isFirstOpen: boolean; // Boolean!
     projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
   }
@@ -338,6 +339,7 @@ export interface NexusGenFieldTypeNames {
   App: { // field return type name
     activeProject: 'LocalProject'
     browsers: 'Browser'
+    healthCheck: 'String'
     isFirstOpen: 'Boolean'
     projects: 'LocalProject'
   }

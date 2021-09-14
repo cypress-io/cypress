@@ -16,7 +16,7 @@
     "postinstall": "yarn codegen && echo '@packages/launchpad needs: yarn build'",
     "start": "vite --port 3333 --base /__vite__/",
     "watch": "concurrently \"yarn start\" \"yarn codegen --watch\"",
-    "codegen": "echo 'need codegen eventually' # graphql-codegen --config ${PWD}/graphql-codegen.yml"
+    "codegen": "graphql-codegen --config ${PWD}/graphql-codegen.yml"
   },
   "dependencies": {},
   "devDependencies": {
