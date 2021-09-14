@@ -5,7 +5,7 @@
         v-for="browser of displayBrowsers"
         class="text-center w-160px pt-6 pb-4 block border-1 rounded relative"
         :class="{
-          'border-indigo-300 ring-2 ring-indigo-50': selectedBrowser.displayName === browser.displayName,
+          'border-indigo-300 ring-2 ring-indigo-50': selectedBrowser.displayName === browser.displayName && selectedBrowser.version === browser.version,
           'border-gray-200': selectedBrowser.displayName !== browser.displayName,
           'filter grayscale bg-gray-100': browser.disabled,
           'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && selectedBrowser.displayName !== browser.displayName
@@ -15,21 +15,21 @@
           type="radio"
           v-model="selectedBrowser"
           name="selectedBrowser"
-          :id="browser.displayName"
+          :id="browser.displayName + browser.version"
           :value="browser"
           :disabled="browser.disabled"
-          :key="browser.displayName"
+          :key="browser.displayName + browser.version"
           class="absolute opacity-0"
           :class="{
             'filter grayscale': browser.disabled
           }"
         />
-        <label :for="browser.displayName" class="radio-label">
+        <label :for="browser.displayName + browser.version" class="radio-label">
           <div class="text-center">
             <img :src="browser.icon" alt class="w-40px h-40px inline" />
           </div>
           <div class="radio-label-text text-indigo-600 text-lg pt-2">{{ browser.displayName }}</div>
-          <div class="text-gray-400 text-sm">{{ browser.displayVersion }}</div>
+          <div class="text-gray-400 text-xs">{{ browser.displayVersion }}</div>
         </label>
       </div>
     </div>
@@ -40,16 +40,15 @@
           type="submit"
           class="mr-2 py-2 px-6 inline"
           :suffix-icon="openInNew"
+          data-testid="launch-button"
         >{{ launchText }}</Button>
-        <Button @click="goBack" type="submit" class="ml-2 py-2 px-6 inline" variant="outline">Back</Button>
+        <Button
+          @click="$emit('navigated-back')"
+          type="button"
+          class="ml-2 py-2 px-6 inline"
+          variant="outline"
+        >Back</Button>
       </div>
-      <Button
-        v-if="showExpandButton"
-        variant="text"
-        type="button"
-        class="mx-auto text-indigo-600"
-        @click="expandBrowserList"
-      >Choose a different browser</Button>
     </div>
   </form>
 </template>
@@ -72,11 +71,11 @@ import canaryIcon from "../../../../node_modules/browser-logos/src/chrome-canary
 import chromeBetaIcon from "../../../../node_modules/browser-logos/src/chrome-beta/chrome-beta.svg?url"
 import chromiumIcon from "../../../../node_modules/browser-logos/src/chromium/chromium.svg?url"
 import edgeBetaIcon from "../../../../node_modules/browser-logos/src/edge-beta/edge-beta.png"
-import edgeCanaryIcon from "../../../../node_modules/browser-logos/src/chrome-canary/chrome-canary.svg?url"
+import edgeCanaryIcon from "../../../../node_modules/browser-logos/src/edge-canary/edge-canary.png"
 import edgeDevIcon from "../../../../node_modules/browser-logos/src/edge-dev/edge-dev.png"
 import firefoxNightlyIcon from "../../../../node_modules/browser-logos/src/firefox-nightly/firefox-nightly.svg?url"
 import firefoxDeveloperEditionIcon from "../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url"
-import { browsers } from "@packages/types";
+import { browsers, FoundBrowser } from "@packages/types";
 
 gql`fragment OpenBrowserList on App {
   browsers {
@@ -123,40 +122,26 @@ const allBrowsers = [{
 }, {
   displayName: 'Firefox Nightly',
   icon: firefoxNightlyIcon
-},{
+}, {
   displayName: 'Firefox Developer Edition',
   icon: firefoxDeveloperEditionIcon
-},{
+}, {
   displayName: 'Edge Canary',
   icon: edgeCanaryIcon
-},{
+}, {
   displayName: 'Edge Beta',
   icon: edgeBetaIcon
-},{
+}, {
   displayName: 'Edge Dev',
   icon: edgeDevIcon
 }]
 
 const getBroswerDetails = (browser) => {
-  const targetBrowser = props.gql.browsers
-    .find(browserInList => browserInList.displayName === browser.displayName)
-
-  if (targetBrowser) {
-    return {
-      displayName: targetBrowser.displayName,
-      optionName: targetBrowser.displayName,
-      displayVersion: `v${targetBrowser.majorVersion}.x`,
-      icon: browser.icon,
-    }
-  } else if (defaultBrowserDisplayNames.includes(browser.displayName)) {
     return {
       ...browser,
-      disabled: true,
-      displayVersion: 'Not Detected'
+      displayVersion: `v${browser.version}`,
+      icon: allBrowsers.find(item => item.displayName === browser.displayName)?.icon,
     }
-  } else {
-    return
-  }
 }
 
 const isDefaultBrowser = (browser) => {
@@ -171,37 +156,33 @@ const isDefaultOrDetected = (browser) => {
 const isBrowserListExpanded = ref(false)
 
 const displayBrowsers = computed(() => {
-  const browserGroup = isBrowserListExpanded.value ? allBrowsers : allBrowsers.filter(isDefaultBrowser)
-  return browserGroup.filter(isDefaultOrDetected).map(getBroswerDetails)
+  const foundValidBrowsers = allBrowsers.filter(isDefaultOrDetected).reduce((acc, curr) => {
+    const matchingFoundBrowsers = props.gql.browsers.filter(foundBrowser => {
+      return foundBrowser.displayName === curr.displayName
+    })
+    matchingFoundBrowsers.forEach(browser => {
+      acc.push(getBroswerDetails(browser))
+    })
+    return acc
+  }, [])
+
+  return foundValidBrowsers
 })
 
 const selectedBrowser = ref(displayBrowsers.value[0])
 
-const expandBrowserList = () => {
-  isBrowserListExpanded.value = true
-}
-
-const goBack = () => {
-  emit('navigated-back')
-}
-
 const launchText = computed(() => selectedBrowser.value ? `Launch ${selectedBrowser.value.displayName}` : '')
 
-const showExpandButton = computed(() => {
-  return !isBrowserListExpanded.value &&
-    Boolean(props.gql.browsers.find(browser => !isDefaultBrowser(browser)))
-})
 
 </script>
 
 <style scoped>
-
 /* Make whole card clickable */
 .radio-label::before {
   position: absolute;
   top: 0;
   left: 0;
-  content: '';
+  content: "";
   height: 100%;
   width: 100%;
 }

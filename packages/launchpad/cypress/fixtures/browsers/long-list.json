@@ -9,13 +9,13 @@
       "majorVersion": "78"
     },
     {
-      "name": "chromium",
-      "displayName": "Chromium",
+      "name": "chrome",
+      "displayName": "Chrome",
       "family": "chromium",
       "channel": "stable",
-      "version": "74.0.3729.0",
-      "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
-      "majorVersion": "74"
+      "version": "88.0.3904.00",
+      "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "majorVersion": "88"
     },
     {
       "name": "chrome",
@@ -25,6 +25,24 @@
       "version": "80.0.3977.4",
       "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
       "majorVersion": "80"
+    },
+    {
+      "name": "chromium",
+      "displayName": "Chromium",
+      "family": "chromium",
+      "channel": "stable",
+      "version": "74.0.3729.0",
+      "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
+      "majorVersion": "74"
+    },
+    {
+      "name": "chromium",
+      "displayName": "Chromium",
+      "family": "chromium",
+      "channel": "stable",
+      "version": "85.0.3729.0",
+      "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
+      "majorVersion": "85"
     },
     {
       "name": "edge",
@@ -71,6 +89,16 @@
       "version": "69.0.1",
       "path": "/Applications/Firefox/Contents/MacOS/Firefox",
       "majorVersion": "69",
+      "unsupportedVersion": true
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox",
+      "family": "firefox",
+      "channel": "stable",
+      "version": "75.0.1",
+      "path": "/Applications/Firefox/Contents/MacOS/Firefox",
+      "majorVersion": "75",
       "unsupportedVersion": true
     },
     {

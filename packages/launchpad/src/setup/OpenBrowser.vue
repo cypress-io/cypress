@@ -2,7 +2,7 @@
   <WizardLayout
     :canNavigateForward="false"
     :showNext="false"
-    :no-container="openBrowserVariant === 'basic'"
+    no-container
   >
     <template #="{ backFn }">
       <div class="text-center">
@@ -16,13 +16,6 @@
           />
         </template>
       </div>
-    </template>
-    <template v-slot:button-bar>
-      <Button
-        v-if="openBrowserVariant === 'advanced'"
-        @click="setOpenBrowserVariant('basic')"
-        variant="outline"
-      >Back</Button>
     </template>
   </WizardLayout>
 </template>
@@ -60,15 +53,5 @@ const launchOpenProject = useMutation(LaunchOpenProjectDocument)
 const launch = () => {
   launchOpenProject.executeMutation({})
 }
-
-const goBack = () => {
-  console.log('go back')
-}
-
-const setOpenBrowserVariant = (newVariant) => {
-  openBrowserVariant.value = newVariant
-}
-
-const openBrowserVariant = ref('basic')
 
 </script>

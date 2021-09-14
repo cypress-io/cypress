@@ -185,6 +185,10 @@ Cypress.Commands.add('mountFragment', mountFragment)
 
 Cypress.Commands.add('mountFragmentList', mountFragmentList)
 
+Cypress.Commands.add('vue', () => {
+  return cy.wrap(Cypress.vueWrapper)
+})
+
 type GetRootType<T> = T extends TypedDocumentNode<infer U, any>
   ? U extends { __typename?: infer V }
     ? V extends keyof TestSourceTypeLookup
