@@ -15,7 +15,7 @@ function jsCode (obj) {
 
 }`
 
-  return `module.export = ${objJSON}
+  return `module.exports = ${objJSON}
 `
 }
 
