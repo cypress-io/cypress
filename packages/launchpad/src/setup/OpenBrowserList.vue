@@ -153,8 +153,6 @@ const isDefaultOrDetected = (browser) => {
     .find(browserInList => browserInList.displayName === browser.displayName)
 }
 
-const isBrowserListExpanded = ref(false)
-
 const displayBrowsers = computed(() => {
   const foundValidBrowsers = allBrowsers.filter(isDefaultOrDetected).reduce((acc, curr) => {
     const matchingFoundBrowsers = props.gql.browsers.filter(foundBrowser => {
