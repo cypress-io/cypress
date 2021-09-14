@@ -126,18 +126,22 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
+        if (!ctx.app.activeProject) {
+          throw Error('No active project found. Cannot open a browser without an active project')
+        }
+
         if (!ctx.wizard.testingType) {
           throw Error('Must set testingType before initializing a project')
         }
 
         // do not re-initialize plugins and dev-server.
-        if (ctx.wizard.testingType === 'component' && ctx.app.activeProject!.ctPluginsInitialized) {
+        if (ctx.wizard.testingType === 'component' && ctx.app.activeProject.ctPluginsInitialized) {
           debug('CT already initialized. Returning.')
 
           return ctx.wizard
         }
 
-        if (ctx.wizard.testingType === 'e2e' && ctx.app.activeProject!.e2ePluginsInitialized) {
+        if (ctx.wizard.testingType === 'e2e' && ctx.app.activeProject.e2ePluginsInitialized) {
           debug('E2E already initialized. Returning.')
 
           return ctx.wizard
@@ -172,7 +176,11 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Launches project from open_project global singleton',
       async resolve (_root, args, ctx) {
-        const browser = ctx.app.browsers.find((x) => x.name === 'chrome')!
+        const browser = ctx.app.browsers.find((x) => x.name === 'chrome')
+
+        if (!browser) {
+          throw Error(`Could not find chrome browser`)
+        }
 
         const spec: Cypress.Spec = {
           name: '',
