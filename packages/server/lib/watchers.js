@@ -77,9 +77,8 @@ class Watchers {
       return Promise.resolve()
     }
 
-    return watcher.close().then(() => {
-      delete this.watchers[filePath]
-    })
+    delete this.watchers[filePath]
+    return watcher.close()
   }
 }
 
