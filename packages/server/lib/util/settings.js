@@ -4,7 +4,7 @@ const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
 const { fs } = require('./fs')
-const requireAsync = require('./require_async').default
+const requireAsync = require('./require_async').requireAsync
 const { CYPRESS_CONFIG_FILES } = require('../configFiles')
 const debug = require('debug')('cypress:server:settings')
 
@@ -124,7 +124,9 @@ module.exports = {
   },
 
   configFile (projectRoot, options = {}) {
-    return options.configFile
+    if (options.configFile !== undefined) {
+      return options.configFile
+    }
 
     const ls = fs.readdirSync(projectRoot)
 
@@ -140,7 +142,7 @@ module.exports = {
       return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
     }
 
-    // Default is to create a new `cypress.config.js` file if one does not exist.
+    // Default is to create a new `cypress.json` file if one does not exist.
     return CYPRESS_CONFIG_FILES[0]
   },
 
@@ -174,18 +176,18 @@ module.exports = {
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
       debug('no module error')
-      // cypress.config.js does not exist, completely new project
+      // cypress.json does not exist, completely new project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
-    }).catch({ code: 'EACCES' }, () => {
+    }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
       debug('no access error')
 
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
-        debug('throwing error')
+        debug('throwing cypress error')
         throw err
       }
 
