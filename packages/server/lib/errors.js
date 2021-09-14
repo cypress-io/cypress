@@ -988,14 +988,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         https://on.cypress.io/component-testing
         `
 
-    // TODO: update with vetted cypress language
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
-          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+          We've found the following Cypress config files: \`${arg2}\`, \`${arg3}\` at the locations below:
 
           ${arg1}
 
-          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          JSON configuration files will be deprecated in a future release. Please fully migrate to a cypress.config.js file and re-run your command.
           `
 
     case 'UNSUPPORTED_BROWSER_VERSION':
