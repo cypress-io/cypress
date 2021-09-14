@@ -12,7 +12,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
-import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
 import { closeGraphQLServer } from '@packages/graphql/src/server'
 
 const debug = Debug('cypress:server:open_project')
@@ -365,7 +365,7 @@ export class OpenProject {
     return this.closeOpenProjectAndBrowsers()
   }
 
-  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions) {
+  async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
     debug('open_project create %s', path)
 
     _.defaults(options, {
@@ -398,7 +398,7 @@ export class OpenProject {
     })
 
     try {
-      await this.openProject.initializeConfig()
+      await this.openProject.initializeConfig(browsers)
       await this.openProject.open()
     } catch (err) {
       if (err.isCypressErr && err.portInUse) {

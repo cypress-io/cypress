@@ -15,7 +15,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from "vue"
 import Icon from '../components/icon/Icon.vue'
 import type { HTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
