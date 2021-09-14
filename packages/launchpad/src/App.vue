@@ -12,7 +12,6 @@ import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import Main from './Main.vue'
 import { AppQueryDocument } from './generated/graphql'
-import EmptyGlobal from './global/GlobalEmpty.vue'
 
 gql`
 query AppQuery {
