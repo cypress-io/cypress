@@ -10,8 +10,6 @@
   "dependencies": {},
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
-    "@packages/graphql": "0.0.0-development",
-    "@packages/types": "0.0.0-development",
     "@testing-library/cypress": "8.0.0",
     "@urql/core": "2.1.5",
     "@urql/exchange-execute": "^1.0.4",
