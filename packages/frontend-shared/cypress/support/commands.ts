@@ -27,6 +27,7 @@ Cypress.Commands.add(
       cwd: '/dev/null',
       // @ts-ignore
       browser: null,
+      global: false,
       project: '/dev/null',
       projectRoot: '/dev/null',
       invokedFromCli: true,
@@ -58,6 +59,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
     cwd: '/dev/null',
     // @ts-ignore
     browser: null,
+    global: false,
     project: '/dev/null',
     projectRoot: '/dev/null',
     invokedFromCli: true,
@@ -114,6 +116,7 @@ function mountFragmentList<Result, Variables, T extends TypedDocumentNode<Result
     cwd: '/dev/null',
     // @ts-ignore
     browser: null,
+    global: false,
     project: '/dev/null',
     projectRoot: '/dev/null',
     invokedFromCli: true,
