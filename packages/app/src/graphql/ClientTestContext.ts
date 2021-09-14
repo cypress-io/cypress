@@ -66,6 +66,10 @@ export class ClientTestActions extends BaseActions {
     // @ts-ignore
     return {} as FullConfig
   }
+
+  isFirstTime () {
+    return true
+  }
 }
 
 const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
