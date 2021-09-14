@@ -1,25 +1,3 @@
-import {
-  Client,
-  createClient,
-  dedupExchange,
-  errorExchange,
-  cacheExchange,
-  fetchExchange,
-} from '@urql/core'
+import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 
-export function makeUrqlClient (): Client {
-  return createClient({
-    url: 'http://localhost:52159/graphql',
-    exchanges: [
-      dedupExchange,
-      cacheExchange,
-      errorExchange({
-        onError (error) {
-          // eslint-disable-next-line
-          console.error(error)
-        },
-      }),
-      fetchExchange,
-    ],
-  })
-}
+export { makeUrqlClient }
