@@ -5,9 +5,9 @@ import { print, FragmentDefinitionNode } from 'graphql'
 import { testUrqlClient } from './testUrqlClient'
 import { Component, computed, defineComponent, h } from 'vue'
 
-import { ClientTestContext } from '../../src/graphql/ClientTestContext'
+import { ClientTestContext } from '../../../src/graphql/ClientTestContext'
 import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUnionType'
-import { createI18n } from '../../src/locales/i18n'
+import { createI18n } from '../../../src/locales/i18n'
 
 /**
  * This variable is mimicing ipc provided by electron.

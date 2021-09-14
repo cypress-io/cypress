@@ -22,5 +22,5 @@ export const getPathToDesktopIndex = (pkg: 'desktop-gui' | 'launchpad') => {
   // TODO: check if there's a better approach to fix here
   if (pkg === 'launchpad' && !process.env.CI) return `http://localhost:3001`
 
-  return `file://${path.join(__dirname, '..', '..', pkg, 'dist', 'index.html')}`
+  return `file://${path.join(__dirname, '..', '..', 'launchpad', 'dist', 'index.html')}`
 }
