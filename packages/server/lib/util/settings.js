@@ -124,13 +124,7 @@ module.exports = {
   },
 
   configFile (projectRoot, options = {}) {
-    if (options.configFile === false) {
-      return false
-    }
-
-    if (options.configFile) {
-      return options.configFile
-    }
+    return options.configFile
 
     const ls = fs.readdirSync(projectRoot)
 
