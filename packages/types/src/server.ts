@@ -14,7 +14,7 @@ export interface LaunchArgs {
   cwd: string
   browser: Browser
   configFile?: string
-  global?: boolean
+  global: boolean
   project: string // projectRoot
   projectRoot: string // same as above
   testingType: Cypress.TestingType

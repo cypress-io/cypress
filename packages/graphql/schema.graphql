@@ -14,7 +14,7 @@ type App {
   isFirstOpen: Boolean!
 
   """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean
+  isInGlobalMode: Boolean!
 
   """All known projects for the app"""
   projects: [LocalProject!]!
