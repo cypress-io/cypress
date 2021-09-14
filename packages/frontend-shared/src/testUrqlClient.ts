@@ -1,8 +1,7 @@
 import { Client, createClient, dedupExchange, errorExchange, cacheExchange } from '@urql/core'
-// import { cacheExchange } from '@urql/exchange-graphcache'
 import { executeExchange } from '@urql/exchange-execute'
 import { graphqlSchema } from '@packages/graphql'
-import type { ClientTestContext } from '../../src/graphql/ClientTestContext'
+import type { ClientTestContext } from './ClientTestContext'
 
 interface TestUrqlClientConfig {
   context: ClientTestContext
