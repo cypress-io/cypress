@@ -110,12 +110,16 @@ export class ServerActions extends BaseActions {
 
   async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
     await openProject.create(args.projectRoot, args, options, browsers)
+    if (!this.ctx.activeProject) {
+      throw Error('Cannot initialize project without an active project')
+    }
+
     if (args.testingType === 'e2e') {
-      this.ctx.activeProject!.setE2EPluginsInitialized(true)
+      this.ctx.activeProject.setE2EPluginsInitialized(true)
     }
 
     if (args.testingType === 'component') {
-      this.ctx.activeProject!.setCtPluginsInitialized(true)
+      this.ctx.activeProject.setCtPluginsInitialized(true)
     }
 
     return
@@ -132,10 +136,22 @@ export class ServerActions extends BaseActions {
   }
 
   isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean {
-    const config = JSON.parse(fs.readFileSync(path.join(projectRoot, 'cypress.json'), 'utf-8'))
-    const type = testingType === 'e2e' ? 'e2e' : 'component'
-    const overrides = config[type] || {}
+    try {
+      const config = JSON.parse(fs.readFileSync(path.join(projectRoot, 'cypress.json'), 'utf-8'))
+      const type = testingType === 'e2e' ? 'e2e' : 'component'
+      const overrides = config[type] || {}
 
-    return Object.keys(overrides).length === 0
+      return Object.keys(overrides).length === 0
+    } catch (e) {
+      const err = e as Error
+
+      // if they do not have a cypress.json, it's definitely their first time using Cypress.
+      if (err.name === 'ENOENT') {
+        return true
+      }
+
+      // unexpected error
+      throw Error(e)
+    }
   }
 }

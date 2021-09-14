@@ -10,6 +10,9 @@ type App {
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]!
 
+  """See if the GraphQL server is alive"""
+  healthCheck: String!
+
   """Whether this is the first open of the application or not"""
   isFirstOpen: Boolean!
 
