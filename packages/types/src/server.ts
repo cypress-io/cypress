@@ -15,7 +15,7 @@ export interface LaunchArgs {
   browser: Browser
   configFile?: string
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
-  global?: boolean 
+  global?: boolean
   project: string // projectRoot
   projectRoot: string // same as above
   testingType: Cypress.TestingType
