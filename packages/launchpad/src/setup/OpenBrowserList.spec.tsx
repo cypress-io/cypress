@@ -1,6 +1,6 @@
 import { OpenBrowserListFragmentDoc } from '../generated/graphql'
 import OpenBrowserList from './OpenBrowserList.vue'
-import longBrowserList from '../../cypress/fixtures/browsers/long-list.json'
+import { longBrowsersList } from '../../cypress/fixtures/browsers/long-browsers-list'
 
 const launchButtonSelector = 'button[data-testid=launch-button]'
 
@@ -9,14 +9,14 @@ describe('<OpenBrowserList />', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       type: (ctx) => {
-        ctx.app.setBrowsers(longBrowserList)
+        ctx.app.setBrowsers(Array.from(longBrowsersList))
 
         return ctx.app
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })
 
-    longBrowserList.forEach((browser) => {
+    longBrowsersList.forEach((browser) => {
       cy.contains('label', browser.displayName).should('be.visible')
     })
 
