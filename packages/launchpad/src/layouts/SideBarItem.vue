@@ -15,8 +15,6 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from "@urql/vue"
-import { defineProps, computed } from "vue"
 import Icon from '../components/icon/Icon.vue'
 import type { HTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 import type { SideBarItemFragment } from '../generated/graphql'

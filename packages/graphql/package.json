@@ -5,11 +5,8 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "node script/build-schema.js",
-    "watch": "node script/watch-schema.js",
     "types": "tsc --noEmit",
-    "sync": "./script/sync-remote-graphql.js",
-    "build-prod": "yarn build && tsc",
+    "build-prod": "yarn gulp nexusCodegen && tsc",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",

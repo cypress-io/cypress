@@ -26,11 +26,13 @@ export abstract class BaseActions {
 
   abstract getBrowsers (): Promise<FoundBrowser[]>
 
-  abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions): Promise<void>
+  abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: any): Promise<void>
   abstract launchOpenProject (
     browser: BrowserContract,
     spec: any, // Cypress.Cypress['spec'],
     options: LaunchOpts
   ): Promise<void>
   abstract resolveOpenProjectConfig (): FullConfig | null
+
+  abstract isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean
 }

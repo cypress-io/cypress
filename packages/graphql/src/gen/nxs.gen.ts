@@ -8,16 +8,16 @@ import type * as cloudGen from "./cloud-source-types.gen"
 import type { BaseContext } from "./../context/BaseContext"
 import type { Query } from "./../entities/Query"
 import type { App } from "./../entities/App"
+import type { Browser } from "./../entities/Browser"
+import type { NavigationItem } from "./../entities/NavigationItem"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
+import type { Project } from "./../entities/Project"
 import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Wizard } from "./../entities/Wizard"
 import type { WizardBundler } from "./../entities/WizardBundler"
 import type { WizardFrontendFramework } from "./../entities/WizardFrontendFramework"
 import type { WizardNpmPackage } from "./../entities/WizardNpmPackage"
-import type { Project } from "./../entities/Project"
-import type { Browser } from "./../entities/Browser"
-import type { NavigationItem } from "./../entities/NavigationItem"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -64,7 +64,7 @@ export interface NexusGenEnums {
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
   WizardNavigateDirection: "back" | "forward"
-  WizardStep: "createConfig" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
+  WizardStep: "createConfig" | "initializePlugins" | "installDependencies" | "selectFramework" | "setupComplete" | "welcome"
 }
 
 export interface NexusGenScalars {
@@ -128,7 +128,9 @@ export interface NexusGenFieldTypes {
   App: { // field return type
     activeProject: NexusGenRootTypes['Project'] | null; // Project
     browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
+    healthCheck: string; // String!
     isFirstOpen: boolean; // Boolean!
+    isInGlobalMode: boolean; // Boolean!
     projects: NexusGenRootTypes['Project'][]; // [Project!]!
   }
   Browser: { // field return type
@@ -173,10 +175,10 @@ export interface NexusGenFieldTypes {
     node: NexusGenRootTypes['CloudProject']; // CloudProject!
   }
   CloudRecordKey: { // field return type
-    createdAt: string | null; // String
+    createdAt: NexusGenScalars['DateTime'] | null; // DateTime
     id: string; // ID!
     key: string | null; // String
-    lastUsedAt: string | null; // String
+    lastUsedAt: NexusGenScalars['DateTime'] | null; // DateTime
   }
   CloudRun: { // field return type
     commitInfo: NexusGenRootTypes['CloudRunCommitInfo'] | null; // CloudRunCommitInfo
@@ -220,7 +222,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
-    initializeOpenProject: NexusGenRootTypes['App'] | null; // App
+    initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
     login: NexusGenRootTypes['Query'] | null; // Query
     logout: NexusGenRootTypes['Query'] | null; // Query
@@ -251,9 +253,9 @@ export interface NexusGenFieldTypes {
   }
   Project: { // field return type
     cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
-    hasSetupComponentTesting: boolean; // Boolean!
-    hasSetupE2ETesting: boolean; // Boolean!
     id: string; // ID!
+    isFirstTimeCT: boolean; // Boolean!
+    isFirstTimeE2E: boolean; // Boolean!
     projectId: string | null; // String
     projectRoot: string; // String!
     resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
@@ -394,7 +396,9 @@ export interface NexusGenFieldTypeNames {
   App: { // field return type name
     activeProject: 'Project'
     browsers: 'Browser'
+    healthCheck: 'String'
     isFirstOpen: 'Boolean'
+    isInGlobalMode: 'Boolean'
     projects: 'Project'
   }
   Browser: { // field return type name
@@ -439,10 +443,10 @@ export interface NexusGenFieldTypeNames {
     node: 'CloudProject'
   }
   CloudRecordKey: { // field return type name
-    createdAt: 'String'
+    createdAt: 'DateTime'
     id: 'ID'
     key: 'String'
-    lastUsedAt: 'String'
+    lastUsedAt: 'DateTime'
   }
   CloudRun: { // field return type name
     commitInfo: 'CloudRunCommitInfo'
@@ -486,7 +490,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
-    initializeOpenProject: 'App'
+    initializeOpenProject: 'Wizard'
     launchOpenProject: 'App'
     login: 'Query'
     logout: 'Query'
@@ -517,9 +521,9 @@ export interface NexusGenFieldTypeNames {
   }
   Project: { // field return type name
     cloudProject: 'CloudProject'
-    hasSetupComponentTesting: 'Boolean'
-    hasSetupE2ETesting: 'Boolean'
     id: 'ID'
+    isFirstTimeCT: 'Boolean'
+    isFirstTimeE2E: 'Boolean'
     projectId: 'String'
     projectRoot: 'String'
     resolvedConfig: 'ResolvedConfig'
@@ -692,12 +696,6 @@ export interface NexusGenArgTypes {
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
-    }
-    initializeOpenProject: { // args
-      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
-    }
-    launchOpenProject: { // args
-      testingType: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
     }
     navigationMenuSetItem: { // args
       type: NexusGenEnums['NavItem']; // NavItem!

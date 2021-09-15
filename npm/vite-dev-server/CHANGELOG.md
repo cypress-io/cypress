@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.8...@cypress/vite-dev-server-v2.1.0) (2021-09-10)
+
+
+### Features
+
+* allow usage of @react/plugins with cypress.config.js ([#17738](https://github.com/cypress-io/cypress/issues/17738)) ([da4b1e0](https://github.com/cypress-io/cypress/commit/da4b1e06ce33945aabddda0e6e175dc0e1b488a5))
+
 # [@cypress/vite-dev-server-v2.0.8](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v2.0.7...@cypress/vite-dev-server-v2.0.8) (2021-08-30)
 
 

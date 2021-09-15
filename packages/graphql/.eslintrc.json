@@ -16,6 +16,7 @@
         "./src/entities/**/*.ts"
       ],
       "rules": {
+        "no-useless-constructor": "off",
         "@typescript-eslint/explicit-function-return-type": [
           "error"
         ],

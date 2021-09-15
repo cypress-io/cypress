@@ -61,16 +61,15 @@ import { useMutation } from "@urql/vue";
 
 gql`
 fragment ConfigFile on Query {
+  app {
+    activeProject {
+      projectRoot
+    }
+  }
   wizard {
     canNavigateForward
     sampleCodeJs: sampleCode(lang: js)
     sampleCodeTs: sampleCode(lang: ts)
-  }
-  app {
-    activeProject {
-      id
-      projectRoot
-    }
   }
 }
 `

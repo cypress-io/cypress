@@ -1,47 +1,37 @@
 <template>
-  <WizardLayout :canNavigateForward="false" :showNext="false">
-    <img src="../images/success.svg" class="mx-auto my-10"/>
-    <div class="flex justify-center">
-      <h1 class="text-3xl">TODO: launch in selected browser. Right now they all launch chrome.</h1>
-      <Button
-        v-for="browser of props.gql.app.browsers"
-        :key="browser.version"
-        class="m-2"
-        @click="launch"
-      >
-        {{ `${browser.displayName} v${browser.version}.x` }}
-      </Button>
+  <WizardLayout no-container :canNavigateForward="false" :showNext="false" #={backFn}>
+    <div v-if="!query.data.value">
+      Loading browsers...
     </div>
+    <OpenBrowserList
+      v-else
+      variant=""
+      :gql="query.data.value.app"
+      @navigated-back="backFn"
+      @launch="launch"
+    />
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
-import { gql } from "@urql/core"
-import Button from "../components/button/Button.vue"
+import { useMutation, gql, useQuery } from "@urql/vue";
+import OpenBrowserList from "./OpenBrowserList.vue"
 import WizardLayout from "./WizardLayout.vue";
-import { InitializeOpenProjectDocument, LaunchOpenProjectDocument, OpenBrowserFragment } from "../generated/graphql"
-import { useMutation } from "@urql/vue";
+import { OpenBrowserDocument, LaunchOpenProjectDocument } from "../generated/graphql"
 
 gql`
-fragment OpenBrowser on Query {
+query OpenBrowser {
   app {
-    browsers {
-      id
-      displayName
-      version
-      majorVersion
-      name
-    }
-  }
-  wizard {
-    testingType
+    ...OpenBrowserList
   }
 }
 `
 
+const query = useQuery({ query: OpenBrowserDocument })
+
 gql`
-mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
-  initializeOpenProject (testingType: $testingType) {
+mutation LaunchOpenProject  {
+  launchOpenProject {
     projects {
       __typename # don't really care about result at this point
     }
@@ -49,30 +39,10 @@ mutation InitializeOpenProject ($testingType: TestingTypeEnum!) {
 }
 `
 
-gql`
-mutation LaunchOpenProject ($testingType: TestingTypeEnum!) {
-  launchOpenProject (testingType: $testingType) {
-    projects {
-      __typename # don't really care about result at this point
-    }
-  }
-}
-`
-
-
-const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 const launchOpenProject = useMutation(LaunchOpenProjectDocument)
 
-const props = defineProps<{
-  gql: OpenBrowserFragment
-}>()
-
-const launch = async () => {
-  if (!props.gql.wizard?.testingType) {
-    return
-  }
-  
-  await initializeOpenProject.executeMutation({ testingType: props.gql.wizard.testingType })
-  await launchOpenProject.executeMutation({ testingType: props.gql.wizard.testingType })
+const launch = () => {
+  launchOpenProject.executeMutation({})
 }
+
 </script>

@@ -8,6 +8,9 @@ import { ResolvedConfig } from './ResolvedConfig'
   description: 'A Cypress project is a container',
 })
 export class Project implements ProjectContract {
+  _ctPluginsInitialized: boolean = false
+  _e2ePluginsInitialized: boolean = false
+
   constructor (private _projectRoot: string, protected ctx: BaseContext) {}
 
   @nxs.field.nonNull.id()
@@ -56,34 +59,32 @@ export class Project implements ProjectContract {
   }
 
   @nxs.field.nonNull.boolean({
-    description: `Whether the user has configured component testing. Based on the existance of a 'component' key in their cypress.json`,
+    description: 'Whether the user configured this project to use Component Testing',
   })
-  get hasSetupComponentTesting (): NxsResult<'Project', 'hasSetupComponentTesting'> {
-    // default is {}
-    // assume if 1 or more key has been configured, CT has been setup
-    let config: ReturnType<Project['resolvedConfig']>
-
-    if (!(config = this.resolvedConfig())) {
-      return false
-    }
-
-    // default is {}
-    // assume if 1 or more key has been configured, CT has been setup
-    return Object.keys(config.resolvedConfig.component?.value).length > 0 ?? false
+  get isFirstTimeCT (): NxsResult<'LocalProject', 'isFirstTimeCT'> {
+    return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
   }
 
   @nxs.field.nonNull.boolean({
-    description: `Whether the user has configured e2e testing or not, based on the existance of a 'component' key in their cypress.json`,
+    description: 'Whether the user configured this project to use e2e Testing',
   })
-  get hasSetupE2ETesting (): NxsResult<'Project', 'hasSetupE2ETesting'> {
-    let config: ReturnType<Project['resolvedConfig']>
+  get isFirstTimeE2E (): NxsResult<'LocalProject', 'isFirstTimeE2E'> {
+    return this.ctx.actions.isFirstTime(this.projectRoot, 'e2e')
+  }
 
-    if (!(config = this.resolvedConfig())) {
-      return false
-    }
+  setE2EPluginsInitialized (init: boolean): void {
+    this._e2ePluginsInitialized = init
+  }
 
-    // default is {}
-    // assume if 1 or more key has been configured, E2E has been setup
-    return Object.keys(config.resolvedConfig.e2e?.value).length > 0 ?? false
+  get e2ePluginsInitialized (): boolean {
+    return this._e2ePluginsInitialized
+  }
+
+  setCtPluginsInitialized (init: boolean): void {
+    this._ctPluginsInitialized = init
+  }
+
+  get ctPluginsInitialized (): boolean {
+    return this._ctPluginsInitialized
   }
 }

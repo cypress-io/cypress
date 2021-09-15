@@ -1,27 +1,70 @@
 import gulp from 'gulp'
-import path from 'path'
-import fs from 'fs'
-import { minifyIntrospectionQuery } from '@urql/introspection'
-import { buildSchema, introspectionFromSchema } from 'graphql'
+import { autobarrelWatcher } from './tasks/gulpAutobarrel'
+import { startCypressWatch } from './tasks/gulpCypress'
+import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, printUrqlSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
+import { makePathMap } from './utils/makePathMap'
 
-const projectRoot = path.join(__dirname, '../..')
-
-const APP_SCHEMA = path.join(projectRoot, 'packages/graphql/schemas/schema.graphql')
-
-async function printUrqlSchema () {
-  const schemaContents = await fs.promises.readFile(APP_SCHEMA, 'utf8')
-
-  await fs.promises.writeFile(
-    path.join(projectRoot, 'packages/launchpad/src/generated/urql-introspection.ts'),
-    `/* eslint-disable */\nexport const urqlSchema = ${JSON.stringify(minifyIntrospectionQuery(introspectionFromSchema(buildSchema(schemaContents))), null, 2)} as const`,
-  )
-}
-
-gulp.task(printUrqlSchema)
-
-gulp.task('dev',
+gulp.task(
+  'dev',
   gulp.series(
-  // Watch the
+    // Autobarrel watcher
+    autobarrelWatcher,
 
-    printUrqlSchema,
-  ))
+    // Fetch the latest "remote" schema from the Cypress cloud
+    syncRemoteGraphQL,
+
+    gulp.parallel(
+      // Clean the vite apps
+      viteCleanApp,
+      viteCleanLaunchpad,
+    ),
+    // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
+    nexusCodegenWatch,
+
+    // ... and generate the correct GraphQL types for the frontend
+    graphqlCodegenWatch,
+
+    // Now that we have the codegen, we can start the frontend(s)
+    gulp.parallel(
+      viteApp,
+      viteLaunchpad,
+    ),
+
+    // And we're finally ready for electron, watching for changes in /graphql to auto-restart the server
+    startCypressWatch,
+  ),
+)
+
+gulp.task('buildProd', gulp.series(
+  nexusCodegen,
+  graphqlCodegen,
+))
+
+gulp.task(
+  'postinstall',
+  gulp.series(
+    gulp.parallel(
+      // Clean the vite apps
+      viteCleanApp,
+      viteCleanLaunchpad,
+    ),
+    'buildProd',
+  ),
+)
+
+// gulp.task(
+//   'devLegacy', // Tim: TODO
+// )
+
+// gulp.task(
+//   'debug', // Tim: TODO
+// )
+
+gulp.task(syncRemoteGraphQL)
+gulp.task(printUrqlSchema)
+gulp.task(makePathMap)
+gulp.task(nexusCodegen)
+gulp.task(nexusCodegenWatch)
+gulp.task(graphqlCodegen)
+gulp.task(graphqlCodegenWatch)

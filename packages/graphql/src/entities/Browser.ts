@@ -6,7 +6,7 @@ import type { BrowserContract } from '../contracts/BrowserContract'
   description: 'Container representing a browser',
 })
 export class Browser implements BrowserContract {
-  constructor (private config: BrowserContract) {}
+  constructor (private _config: BrowserContract) {}
 
   @nxs.field.nonNull.string()
   get id (): NxsResult<'Browser', 'id'> {
@@ -15,36 +15,40 @@ export class Browser implements BrowserContract {
 
   @nxs.field.nonNull.string()
   get name (): NxsResult<'Browser', 'name'> {
-    return this.config.name
+    return this._config.name
   }
 
   @nxs.field.nonNull.type(() => BrowserFamilyEnum)
   get family (): NxsResult<'Browser', 'family'> {
-    return this.config.family
+    return this._config.family
   }
 
   @nxs.field.nonNull.string()
   get channel (): NxsResult<'Browser', 'channel'> {
-    return this.config.channel
+    return this._config.channel
   }
 
   @nxs.field.nonNull.string()
   get displayName (): NxsResult<'Browser', 'displayName'> {
-    return this.config.displayName
+    return this._config.displayName
   }
 
   @nxs.field.nonNull.string()
   get path (): NxsResult<'Browser', 'path'> {
-    return this.config.path
+    return this._config.path
   }
 
   @nxs.field.nonNull.string()
   get version (): NxsResult<'Browser', 'version'> {
-    return this.config.version
+    return this._config.version
   }
 
   @nxs.field.string()
   get majorVersion (): NxsResult<'Browser', 'majorVersion'> {
-    return this.config.majorVersion?.toString() ?? null
+    return this._config.majorVersion?.toString() ?? null
+  }
+
+  get config (): BrowserContract {
+    return this._config
   }
 }

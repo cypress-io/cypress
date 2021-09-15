@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "plugin:@cypress/dev/tests"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "plugins": [
+    "cypress"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "./src/entities/**/*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [
+          "error"
+        ]
+      }
+    }
+  ]
+}

@@ -76,14 +76,14 @@ type CloudProjectEdge {
 }
 
 type CloudRecordKey implements Node {
-  createdAt: String
+  createdAt: DateTime
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
 
   """The Record Key"""
   key: String
-  lastUsedAt: String
+  lastUsedAt: DateTime
 }
 
 """A Recorded run of the Test Runner, typically to the cloud"""
