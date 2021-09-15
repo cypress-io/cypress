@@ -26,6 +26,16 @@ export class App {
     return true
   }
 
+  @nxs.field.nonNull.boolean({
+    description: 'Whether the app is in global mode or not',
+  })
+  get isInGlobalMode (): NxsResult<'App', 'isInGlobalMode'> {
+    const hasGlobalModeArg = this.ctx.launchArgs.global ?? false
+    const isMissingActiveProject = !this.ctx.activeProject
+
+    return hasGlobalModeArg || isMissingActiveProject
+  }
+
   @nxs.field.type(() => LocalProject, {
     description: 'Active project',
   })

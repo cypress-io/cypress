@@ -33,7 +33,6 @@ const query = useQuery({
 
 
 let interval: number
-
 const poll = () => {
   try {
     if (backendInitialized.value) {

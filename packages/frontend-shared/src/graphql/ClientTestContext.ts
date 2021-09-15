@@ -82,6 +82,7 @@ const TEST_LAUNCH_ARGS: LaunchArgs = {
   config: {},
   cwd: '/dev/null',
   browser: browsers[0],
+  global: false,
   project: '/dev/null',
   projectRoot: '/dev/null',
   invokedFromCli: true,

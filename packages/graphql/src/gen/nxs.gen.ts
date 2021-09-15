@@ -125,6 +125,7 @@ export interface NexusGenFieldTypes {
     browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
     healthCheck: string; // String!
     isFirstOpen: boolean; // Boolean!
+    isInGlobalMode: boolean; // Boolean!
     projects: NexusGenRootTypes['LocalProject'][]; // [LocalProject!]!
   }
   Browser: { // field return type
@@ -341,6 +342,7 @@ export interface NexusGenFieldTypeNames {
     browsers: 'Browser'
     healthCheck: 'String'
     isFirstOpen: 'Boolean'
+    isInGlobalMode: 'Boolean'
     projects: 'LocalProject'
   }
   Browser: { // field return type name
