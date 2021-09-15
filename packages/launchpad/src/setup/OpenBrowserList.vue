@@ -77,17 +77,19 @@ import edgeDevIcon from "../../../../node_modules/browser-logos/src/edge-dev/edg
 import firefoxNightlyIcon from "../../../../node_modules/browser-logos/src/firefox-nightly/firefox-nightly.svg?url"
 import firefoxDeveloperEditionIcon from "../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url"
 
-gql`fragment OpenBrowserList on App {
+gql`
+fragment OpenBrowserList on App {
   browsers {
-      name
-      family
-      channel
-      displayName
-      path
-      version
-      majorVersion
+    name
+    family
+    channel
+    displayName
+    path
+    version
+    majorVersion
   }
-}`
+}
+`
 
 const props = defineProps<{
   gql: OpenBrowserListFragment,
@@ -135,12 +137,12 @@ const allBrowsers = [{
   icon: edgeDevIcon
 }]
 
-const getBroswerDetails = (browser) => {
-    return {
-      ...browser,
-      displayVersion: `v${browser.version}`,
-      icon: allBrowsers.find(item => item.displayName === browser.displayName)?.icon,
-    }
+const getBroswerDetails = (browser: OpenBrowserListFragment['browsers'][number]) => {
+  return {
+    ...browser,
+    displayVersion: `v${browser.version}`,
+    icon: allBrowsers.find(item => item.displayName === browser.displayName)?.icon ?? '',
+  }
 }
 
 const isDetected = (browser) => {
@@ -148,6 +150,7 @@ const isDetected = (browser) => {
     .find(browserInList => browserInList.displayName === browser.displayName)
 }
 
+// TODO(tim): move a lot of this to GraphQL
 const displayBrowsers = computed(() => {
   const foundValidBrowsers = allBrowsers.filter(isDetected).reduce((acc, curr) => {
     const matchingFoundBrowsers = props.gql.browsers.filter(foundBrowser => {
@@ -157,7 +160,8 @@ const displayBrowsers = computed(() => {
       acc.push(getBroswerDetails(browser))
     })
     return acc
-  }, [])
+  // TODO: fix up these types w/ GraphQL
+  }, [] as Array<OpenBrowserListFragment['browsers'][number] & {displayVersion: string, icon: string, disabled?: boolean}>)
 
   return foundValidBrowsers
 })
@@ -165,8 +169,6 @@ const displayBrowsers = computed(() => {
 const selectedBrowser = ref(displayBrowsers.value[0])
 
 const launchText = computed(() => selectedBrowser.value ? `${t('setupPage.openBrowser.launch')} ${selectedBrowser.value.displayName}` : '')
-
-
 </script>
 
 <style scoped>

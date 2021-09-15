@@ -16,12 +16,12 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : ''
 // for vite
 process.cwd ??= () => ''
 
-const isCodegen = Boolean(process.env.GRAPHQL_CODEGEN)
+const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
 export const graphqlSchema = makeSchema({
   types: [entities, constants, customScalars, dirname ? null : testingTypes],
   shouldGenerateArtifacts: isCodegen,
-  shouldExitAfterGenerateArtifacts: Boolean(process.env.GRAPHQL_CODEGEN_EXIT),
+  shouldExitAfterGenerateArtifacts: isCodegen,
   // for vite
   outputs: isCodegen ? {
     typegen: path.join(dirname, 'gen/nxs.gen.ts'),

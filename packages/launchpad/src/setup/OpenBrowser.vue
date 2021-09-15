@@ -1,15 +1,15 @@
 <template>
   <WizardLayout no-container :canNavigateForward="false" :showNext="false" #={backFn}>
-    <div v-if="query.fetching.value">
+    <div v-if="!query.data.value">
       Loading browsers...
     </div>
-       <OpenBrowserList
-           v-else
-           variant=""
-            :gql="query.data.value.app"
-            @navigated-back="backFn"
-            @launch="launch"
-          />
+    <OpenBrowserList
+      v-else
+      variant=""
+      :gql="query.data.value.app"
+      @navigated-back="backFn"
+      @launch="launch"
+    />
   </WizardLayout>
 </template>
 
@@ -18,7 +18,6 @@ import { useMutation, gql, useQuery } from "@urql/vue";
 import OpenBrowserList from "./OpenBrowserList.vue"
 import WizardLayout from "./WizardLayout.vue";
 import { OpenBrowserDocument, LaunchOpenProjectDocument } from "../generated/graphql"
-import { ref } from "vue"
 
 gql`
 query OpenBrowser {

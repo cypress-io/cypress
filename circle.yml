@@ -389,6 +389,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
+      - run: yarn gulp graphqlCodegen
       - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
@@ -1001,6 +1002,8 @@ jobs:
       - run: yarn test-scripts
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
+      # Get the codegen output
+      - run: yarn gulp buildProd
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package

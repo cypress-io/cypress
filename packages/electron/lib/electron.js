@@ -156,7 +156,7 @@ module.exports = {
         return process.exit(code)
       })
 
-      if (process.argv.includes('--devWatch')) {
+      if (process.env.CYPRESS_INTERNAL_DEV_WATCH) {
         spawned.on('exit', () => {
           process.exit(0)
         })
