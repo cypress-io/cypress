@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "types": "vue-tsc --noEmit",
-    "build-prod": "cross-env NODE_ENV=production yarn build",
+    "build-prod": "cross-env NODE_ENV=production vite build",
     "clean": "rm -rf dist && rm -rf ./node_modules/.vite && echo 'cleaned'",
     "clean-deps": "rm -rf node_modules",
     "test": "echo 'ok'",
