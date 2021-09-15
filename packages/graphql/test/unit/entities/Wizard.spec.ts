@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { LocalProject, Wizard } from '../../../src'
+import { Project, Wizard } from '../../../src'
 import { TestActions, TestContext } from '../../integration/utils'
 
 const createActionsWithResolvedConfig = () => {
@@ -18,7 +18,7 @@ describe('Wizard', () => {
       it('progresses through wizard steps', () => {
         const Actions = createActionsWithResolvedConfig()
         const ctx = new TestContext({ Actions })
-        const project = new LocalProject('/', ctx)
+        const project = new Project('/', ctx)
 
         ctx.localProjects = [project]
         const wizard = new Wizard(ctx)

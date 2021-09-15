@@ -3,6 +3,7 @@
 
 export * from './App'
 export * from './Browser'
+export * from './LocalProject'
 export * from './Mutation'
 export * from './NavigationItem'
 export * from './NavigationMenu'
