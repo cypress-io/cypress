@@ -13,6 +13,7 @@
     "binary-upload": "node ./scripts/binary.js upload",
     "binary-zip": "node ./scripts/binary.js zip",
     "build": "lerna run build --stream --no-bail --ignore create-cypress-tests && lerna run build --stream --scope create-cypress-tests",
+    "prebuild-prod": "yarn gulp buildProd",
     "build-prod": "lerna run build-prod --stream --ignore create-cypress-tests && lerna run build-prod --stream --scope create-cypress-tests",
     "bump": "node ./scripts/binary.js bump",
     "check-node-version": "node scripts/check-node-version.js",
