@@ -1,0 +1,38 @@
+overwrite: true
+schema: './packages/graphql/schema.graphql'
+generates:
+  './packages/app/src/generated/graphql.ts':
+    documents: './packages/app/src/**/*.vue'
+    config:
+      immutableTypes: true
+      useTypeImports: true
+      preResolveTypes: true
+      onlyOperationTypes: true
+      avoidOptionals: true
+      enumsAsTypes: true
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript':
+      - 'typescript-operations'
+      - 'typed-document-node'
+  './packages/launchpad/src/generated/graphql.ts':
+    documents: './packages/launchpad/src/**/*.vue'
+    config:
+      immutableTypes: true
+      useTypeImports: true
+      preResolveTypes: true
+      onlyOperationTypes: true
+      avoidOptionals: true
+      enumsAsTypes: true
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript':
+      - 'typescript-operations'
+      - 'typed-document-node'
+  './packages/graphql/src/testing/testUnionType.ts':
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'packages/graphql/script/codegen-mount.js'

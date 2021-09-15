@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "error",
+    "types": []
+  },
+  "include": ["**/*"]
+}

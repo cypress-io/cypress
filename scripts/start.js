@@ -1,4 +1,3 @@
-process.env.GRAPHQL_CODEGEN = 'true'
 require('@packages/server')
 
 if (process.argv.includes('--devWatch')) {
