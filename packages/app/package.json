@@ -37,7 +37,7 @@
     "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",
-    "@vue/compiler-sfc": "^3.2.11",
+    "@vue/compiler-sfc": "3.2.0",
     "@vueuse/core": "5.2.0",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
