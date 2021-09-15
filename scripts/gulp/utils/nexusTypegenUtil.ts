@@ -50,10 +50,7 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
     dfd.resolve({})
   })
 
-  out.on('error', (e) => {
-    console.error(e)
-    dfd.reject()
-  })
+  out.on('error', dfd.reject)
 
   return dfd.promise
 }

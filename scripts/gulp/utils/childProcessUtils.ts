@@ -96,9 +96,7 @@ export async function spawned (
         resolve(cp)
       })
 
-      cp.once('error', () => {
-        reject(cp)
-      })
+      cp.once('error', reject)
     } else {
       cp.stdout?.once('data', () => {
         spawningApps.delete(prefix)
