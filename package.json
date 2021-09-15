@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "8.3.1",
+  "version": "8.4.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -177,7 +177,7 @@
     "lint-staged": "11.0.0",
     "listr2": "3.8.3",
     "lodash": "4.17.21",
-    "make-empty-github-commit": "1.2.0",
+    "make-empty-github-commit": "cypress-io/make-empty-github-commit#4a592aedb776ba2f4cc88979055315a53eec42ee",
     "minimist": "1.2.5",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",

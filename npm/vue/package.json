@@ -30,7 +30,7 @@
     "@rollup/plugin-node-resolve": "^11.1.1",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
-    "@vue/compiler-sfc": "3.2.0",
+    "@vue/compiler-sfc": "3.2.6",
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
     "babel-plugin-istanbul": "^6.0.0",
