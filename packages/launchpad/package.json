@@ -11,7 +11,7 @@
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "dev": "echo 'run yarn dev from the root' && exit 1",
+    "dev": "yarn gulp dev --project ${PWD}",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
@@ -45,7 +45,7 @@
     "vite-plugin-purge-icons": "0.7.0",
     "vite-plugin-windicss": "1.2.4",
     "vite-svg-loader": "2.1.1",
-    "vue": "3.2.0",
+    "vue": "3.2.6",
     "vue-i18n": "9.2.0-beta.1",
     "vue-prism-component": "2.0.0",
     "vue-prism-editor": "^2.0.0-alpha.2",
