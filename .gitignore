@@ -55,6 +55,7 @@ packages/server/test/support/fixtures/server/libs
 
 # graphql, auto-generated
 /packages/launchpad/src/generated
+/packages/app/src/generated
 
 # from npm/create-cypress-tests
 /npm/create-cypress-tests/initial-template
