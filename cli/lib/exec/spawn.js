@@ -161,7 +161,10 @@ module.exports = {
           })
         } else {
           debug('spawning Cypress with executable: %s', executable)
-          args.unshift(startScriptPath)
+          if (startScriptPath) {
+            args.unshift(startScriptPath)
+          }
+
           child = cp.spawn(executable, args, stdioOptions)
         }
 
