@@ -8,7 +8,7 @@ import Debug from 'debug'
 import pkg from '@packages/root'
 import { getPathToDist, getPathToIndex, RunnerPkg } from '@packages/resolve-dist'
 import type { InitializeRoutes } from '../routes'
-import type { PlatformName } from '@packages/launcher'
+import type { PlatformName } from '@packages/types'
 import type { Cfg } from '../project-base'
 
 const debug = Debug('cypress:server:runner')
