@@ -20,6 +20,7 @@ export class AutIframe {
     this.$iframe = $('<iframe>', {
       id: `Your App: '${this.config.projectName}'`,
       class: 'aut-iframe',
+      allow: 'camera;microphone',
     })
 
     return this.$iframe
