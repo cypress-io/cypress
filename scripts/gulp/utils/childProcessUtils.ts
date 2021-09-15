@@ -90,10 +90,14 @@ export async function spawned (
 
   // runningApps.set(prefix, [cp, [prefix, command, opts], cleanup])
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (waitForExit) {
       cp.once('exit', () => {
         resolve(cp)
+      })
+
+      cp.once('error', () => {
+        reject(cp)
       })
     } else {
       cp.stdout?.once('data', () => {
