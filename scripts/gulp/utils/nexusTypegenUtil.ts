@@ -29,7 +29,7 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
     cwd: cfg.cwd,
     env: {
       ...process.env,
-      CYPRESS_NEXUS_CODEGEN: 'true',
+      CYPRESS_INTERNAL_NEXUS_CODEGEN: 'true',
     },
   })
 
