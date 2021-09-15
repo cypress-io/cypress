@@ -93,7 +93,7 @@ export const createRoutes = ({
     debug(`Writing file ${absolute} with content: ${spec}`)
     fs.writeFileSync(absolute, spec)
 
-    return res.json({ hello: 'world' })
+    return res.json({ spec, absolute })
   })
 
   // TODO: can namespace this onto a "unified" route like __app-unified__

@@ -53,17 +53,18 @@ export async function init (
 function composeStoriesFromModule (storyModule: any, preview: SpecImport) {
   const composed = composeStories(storyModule)
   const specText = generateSpecFromStories(storyModule, composed)
-  const specName = preview.file.absolute.replace('stories.tsx', 'spec.tsx')
+  const specName = preview.file.absolute.replace('stories.tsx', 'spec.tsx');
 
-  parent
-  .fetch('/__/createSpecFromStory', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ spec: specText, absolute: specName }),
-  })
-  .then((res) => {
-    window.location.href = `/__cypress/iframes/${specName}?type=preview`
-  })
+  // parent
+  // .fetch('/__/createSpecFromStory', {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ spec: specText, absolute: specName }),
+  // })
+  // .then((res) => {
+  //   window.location.href = `/__cypress/iframes/${specName}?type=preview`
+  // })
+  (parent as any).__CYPRESS_APP_BUS.getStorySource(specText, specName)
 }
 
 function generateSpecFromStories (

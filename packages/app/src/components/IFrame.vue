@@ -2,8 +2,8 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  spec: {
-    type: Object,
+  specPath: {
+    type: String,
     required: true,
   },
   cypressConfig: {
@@ -14,7 +14,7 @@ const props = defineProps({
 
 const specUrl = computed(() => {
   const { namespace } = props.cypressConfig;
-  return `/${namespace}/iframes/${props.spec.absolute}?type=preview`;
+  return `/${namespace}/iframes/${props.specPath}?type=preview`;
 });
 </script>
 

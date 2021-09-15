@@ -4,7 +4,7 @@
   "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && yarn rollup -c rollup.config.js",
+    "build": "rimraf dist && yarn transpile-plugins && yarn rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct",
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
@@ -14,6 +14,7 @@
     "test": "yarn cy:run",
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env",
     "transpile": "tsc",
+    "transpile-plugins": "yarn transpile --project ./plugins",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
