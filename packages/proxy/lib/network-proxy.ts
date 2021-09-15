@@ -1,5 +1,5 @@
 import { Http, ServerCtx } from './http'
-import { BrowserPreRequest } from './types'
+import type { BrowserPreRequest } from './types'
 
 export class NetworkProxy {
   http: Http

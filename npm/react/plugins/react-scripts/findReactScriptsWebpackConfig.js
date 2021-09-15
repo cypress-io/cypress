@@ -20,7 +20,7 @@ module.exports = function findReactScriptsWebpackConfig (config, {
   }
 
   // because for react-scripts user doesn't have direct access to webpack webpackConfig
-  // we must implicitly inject everything required to run tests
+  // we must implicitly setup everything required to run tests
   addCypressToWebpackEslintRulesInPlace(webpackConfig)
 
   getTranspileFolders(config).forEach((cypressFolder) => {

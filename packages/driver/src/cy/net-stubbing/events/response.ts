@@ -9,8 +9,8 @@ import {
   parseStaticResponseShorthand,
   STATIC_RESPONSE_KEYS,
 } from '../static-response-utils'
-import * as $errUtils from '../../../cypress/error_utils'
-import { HandlerFn, HandlerResult } from '.'
+import $errUtils from '../../../cypress/error_utils'
+import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import { parseJsonBody, stringifyJsonBody } from './utils'
 

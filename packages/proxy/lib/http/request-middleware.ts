@@ -1,9 +1,8 @@
 import _ from 'lodash'
-import CyServer from '@packages/server'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
-import { HttpMiddleware } from './'
+import type { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -126,7 +125,7 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   this.next()
 }
 
-function reqNeedsBasicAuthHeaders (req, { auth, origin }: CyServer.RemoteState) {
+function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
   //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
   return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }

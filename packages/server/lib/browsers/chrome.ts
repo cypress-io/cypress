@@ -15,7 +15,7 @@ import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
-import { Browser } from './types'
+import type { Browser } from './types'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -375,6 +375,7 @@ export = {
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
+    await fs.chmod(extensionBg, 0o0644)
     await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest

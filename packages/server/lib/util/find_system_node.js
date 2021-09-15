@@ -79,5 +79,6 @@ function findNodePathAndVersion () {
 }
 
 module.exports = {
+  findNodeInFullPath,
   findNodePathAndVersion,
 }

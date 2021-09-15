@@ -1,10 +1,10 @@
-import webpack from 'webpack'
 import path from 'path'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
+import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
 import { startDevServer } from '../'
 
@@ -48,11 +48,11 @@ const requestSpecFile = (port: number) => {
 
 const root = path.join(__dirname, '..')
 
-const webpackConfig: webpack.Configuration = {
-  output: {
-    path: root,
-    publicPath: root,
-  },
+const webpackConfig = {
+  devServer: webpackDevServerFacts.isV3()
+    ? { contentBase: root }
+    : { static: { directory: root } },
+
 }
 
 const specs: Cypress.Cypress['spec'][] = [
