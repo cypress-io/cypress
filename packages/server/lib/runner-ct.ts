@@ -53,10 +53,3 @@ export const serve = (req, res, options: ServeOptions) => {
 
   return res.render(runnerPath, config)
 }
-
-export const serveChunk = (req, res, options) => {
-  let { config } = options
-  let pathToFile = getPathToDist('runner-ct', req.originalUrl.replace(config.clientRoute, ''))
-
-  return send(req, pathToFile).pipe(res)
-}
