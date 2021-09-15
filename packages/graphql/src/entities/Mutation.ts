@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { mutationType, nonNull } from 'nexus'
+import { mutationType, nonNull, stringArg } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
 
 const debug = Debug('cypress:graphql:mutation')
@@ -190,6 +190,19 @@ export const mutation = mutationType({
         }
 
         await ctx.actions.launchOpenProject(browser.config, spec, {})
+
+        return ctx.app
+      },
+    })
+
+    t.field('addProject', {
+      type: 'App',
+      description: 'Add project to projects array and cache it',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      async resolve (_root, args, ctx) {
+        ctx.actions.addProject(args.path)
 
         return ctx.app
       },

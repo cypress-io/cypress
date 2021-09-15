@@ -7,6 +7,7 @@ import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/
 import { RunGroup } from '@packages/graphql/src/entities/run'
 import { openProject } from '@packages/server/lib/open_project'
 import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
+import { insertProject } from '@packages/server/lib/cache'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -56,6 +57,7 @@ export class ServerActions extends BaseActions {
     const localProject = new LocalProject(projectRoot, this.ctx)
 
     this.ctx.localProjects.push(localProject)
+    insertProject(projectRoot)
 
     return localProject
   }

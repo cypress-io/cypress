@@ -155,6 +155,7 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   Mutation: { // field return type
+    addProject: NexusGenRootTypes['App'] | null; // App
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
@@ -372,6 +373,7 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   Mutation: { // field return type name
+    addProject: 'App'
     appCreateConfigFile: 'App'
     initializeOpenProject: 'Wizard'
     launchOpenProject: 'App'
@@ -555,6 +557,9 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    addProject: { // args
+      path: string; // String!
+    }
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!
