@@ -397,6 +397,7 @@ module.exports = {
       debug('opening Cypress')
       require('./exec/open')
       .start(util.parseOpts(opts))
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 

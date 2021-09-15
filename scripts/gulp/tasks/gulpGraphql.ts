@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import path from 'path'
 import pDefer from 'p-defer'
 import chalk from 'chalk'

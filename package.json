@@ -32,7 +32,7 @@
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "cypress:verify": "cypress verify --dev",
     "dev": "yarn gulp dev",
-    "dev:watch": "yarn gulp dev:watch",
+    "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",

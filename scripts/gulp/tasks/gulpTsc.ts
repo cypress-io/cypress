@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import glob from 'glob'
 import childProcess from 'child_process'
 import util from 'util'

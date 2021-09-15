@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { spawn, execSync } from 'child_process'
 import chalk from 'chalk'
 import pDefer from 'p-defer'

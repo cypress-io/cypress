@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { exec, ExecOptions, spawn, SpawnOptions } from 'child_process'
 import through2 from 'through2'
 import util from 'util'

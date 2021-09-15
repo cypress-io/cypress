@@ -6,9 +6,10 @@ import pDefer from 'p-defer'
 import { monorepoPaths } from '../monorepoPaths'
 
 /**
- *
+ * Starts cypress, but watches the GraphQL files & restarts the server
+ * when any of those change
  */
-export function startElectronWatch () {
+export function startCypressWatch () {
   const watcher = chokidar.watch('src/**/*.{js,ts}', {
     cwd: monorepoPaths.pkgGraphql,
     ignored: /\.gen\.ts/,
@@ -19,16 +20,29 @@ export function startElectronWatch () {
   let isClosing = false
   let isRestarting = false
 
-  function runServer () {
+  const argv = process.argv.slice(3)
+  const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
+
+  function openServer () {
     if (child) {
       child.removeAllListeners()
     }
 
-    child = childProcess.fork(path.join(__dirname, '../..', 'start.js'), ['--devWatch', ...process.argv], {
+    if (!argv.includes('--project') && !argv.includes('--global')) {
+      argv.push('--global')
+    }
+
+    if (!argv.includes('--dev')) {
+      argv.push('--dev')
+    }
+
+    child = childProcess.fork(pathToCli, ['open', ...argv], {
       stdio: 'inherit',
+      execArgv: [],
       env: {
         ...process.env,
         LAUNCHPAD: '1',
+        CYPRESS_INTERNAL_DEV_WATCH: 'true',
       },
     })
 
@@ -60,13 +74,13 @@ export function startElectronWatch () {
 
     await dfd.promise
     isRestarting = false
-    runServer()
+    openServer()
   }
 
   watcher.on('add', restartServer)
   watcher.on('change', restartServer)
 
-  runServer()
+  openServer()
 
   process.on('beforeExit', () => {
     isClosing = true

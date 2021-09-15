@@ -1,6 +1,6 @@
 import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
-import { startElectronWatch } from './tasks/gulpElectron'
+import { startCypressWatch } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch } from './tasks/gulpGraphql'
 import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
@@ -33,7 +33,7 @@ gulp.task(
     ),
 
     // And we're finally ready for electron, watching for changes in /graphql to auto-restart the server
-    startElectronWatch,
+    startCypressWatch,
   ),
 )
 

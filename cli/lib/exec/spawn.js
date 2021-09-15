@@ -102,13 +102,12 @@ module.exports = {
         const electronArgs = []
         const node11WindowsFix = isPlatform('win32')
 
+        let forkScriptPath
+
         if (options.dev) {
           // if we're in dev then reset
           // the launch cmd to be 'npm run dev'
-          executable = 'node'
-          electronArgs.unshift(
-            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
-          )
+          forkScriptPath = path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
 
           debug('in dev mode the args became %o', args)
         }
@@ -141,9 +140,7 @@ module.exports = {
 
         if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
           // Since we are running electron as node, we need to add an entry point file.
-          const serverEntryPoint = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
-
-          args = [serverEntryPoint, ...args]
+          forkScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
         } else {
           // Start arguments with "--" so Electron knows these are OUR
           // arguments and does not try to sanitize them. Otherwise on Windows
@@ -152,9 +149,15 @@ module.exports = {
           args = [...electronArgs, '--', ...args]
         }
 
-        debug('spawning Cypress with executable: %s', executable)
+        debug('spawning Cypress as fork: %s', forkScriptPath)
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
-        const child = cp.spawn(executable, args, stdioOptions)
+        const child = cp.fork(forkScriptPath, args, stdioOptions)
+
+        if (process.env.CYPRESS_INTERNAL_DEV_WATCH) {
+          process.on('message', (msg) => {
+            child.send(msg)
+          })
+        }
 
         function resolveOn (event) {
           return function (code, signal) {

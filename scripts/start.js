@@ -1,6 +1,6 @@
 require('@packages/server')
 
-if (process.argv.includes('--devWatch')) {
+if (process.env.CYPRESS_INTERNAL_DEV_WATCH) {
   process.on('message', (msg) => {
     if (msg === 'close') {
       process.exit(0)
