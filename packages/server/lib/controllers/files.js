@@ -32,7 +32,7 @@ module.exports = {
 
     return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
-      return this.getJavascripts(config)
+      return this.getSupportFile(config)
       .then((js) => {
         const allFilesToSend = js.concat(specs)
 
@@ -142,14 +142,13 @@ module.exports = {
     return test
   },
 
-  getJavascripts (config) {
-    const { projectRoot, supportFile, javascripts } = config
+  getSupportFile (config) {
+    const { projectRoot, supportFile } = config
 
-    // automatically add in support scripts and any javascripts
-    let files = [].concat(javascripts)
+    let files = []
 
     if (supportFile !== false) {
-      files = [supportFile].concat(files)
+      files = [supportFile]
     }
 
     // TODO: there shouldn't be any reason

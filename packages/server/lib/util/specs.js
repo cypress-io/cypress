@@ -69,22 +69,14 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   const supportFilePath = searchOptions.supportFile || []
 
-  // map all of the javascripts to the project root
   // TODO: think about moving this into config
-  // and mapping each of the javascripts into an
-  // absolute path
-  const javascriptsPaths = _.map(searchOptions.javascripts, (js) => {
-    return path.join(searchOptions.projectRoot, js)
-  })
-
-  // ignore fixtures + javascripts
+  // ignore fixtures
   const options = {
     sort: true,
     absolute: true,
     nodir: true,
     cwd: searchFolderPath,
     ignore: _.compact(_.flatten([
-      javascriptsPaths,
       supportFilePath,
       fixturesFolderPath,
     ])),
@@ -183,7 +175,7 @@ function findSpecsOfType (searchOptions, specPattern) {
  * with one of TEST_TYPES values.
  */
 const find = (config, specPattern) => {
-  const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
+  const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'testFiles', 'ignoreTestFiles']
 
   const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
