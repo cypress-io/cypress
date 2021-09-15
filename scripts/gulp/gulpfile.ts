@@ -37,6 +37,11 @@ gulp.task(
   ),
 )
 
+gulp.task('buildProd', gulp.series(
+  nexusCodegen,
+  graphqlCodegen,
+))
+
 gulp.task(
   'postinstall',
   gulp.series(
@@ -45,8 +50,7 @@ gulp.task(
       viteCleanApp,
       viteCleanLaunchpad,
     ),
-    nexusCodegen,
-    graphqlCodegen,
+    'buildProd',
   ),
 )
 

@@ -1002,6 +1002,8 @@ jobs:
       - run: yarn test-scripts
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
+      # Get the codegen output
+      - run: yarn gulp buildProd
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
