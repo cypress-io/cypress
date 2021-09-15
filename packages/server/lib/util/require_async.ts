@@ -74,7 +74,7 @@ export async function requireAsync (filePath: string, options: RequireAsyncOptio
       // if it's a non-cypress error, restore the initial error
       if (!(err.message?.length)) {
         err.isCypressErr = false
-        err.details = args[1]
+        err.message = args[1]
         err.code = type
         err.name = type
       }
