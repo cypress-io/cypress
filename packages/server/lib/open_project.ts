@@ -6,7 +6,7 @@ import chokidar from 'chokidar'
 import pluralize from 'pluralize'
 import { ProjectBase, OpenProjectLaunchOptions } from './project-base'
 import browsers from './browsers'
-import specsUtil from './util/specs'
+import { find } from './util/specs'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
@@ -16,6 +16,11 @@ import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
 import type { AutomationMiddleware } from './automation'
 
 const debug = Debug('cypress:server:open_project')
+
+interface FoundSpecs {
+  integration: Cypress.Spec[]
+  component?: Cypress.Spec[]
+}
 
 interface LaunchOpts {
   browser?: FoundBrowser
@@ -230,9 +235,9 @@ export class OpenProject {
     return this.relaunchBrowser()
   }
 
-  getSpecs (cfg) {
-    return specsUtil.find(cfg)
-    .then((specs: Cypress.Cypress['spec'][] = []) => {
+  getSpecs (cfg): Bluebird<FoundSpecs> {
+    return find(cfg)
+    .then((specs: Cypress.Spec[] = []) => {
       // TODO merge logic with "run.js"
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -266,14 +271,18 @@ export class OpenProject {
   }
 
   getSpecChanges (options: OpenProjectLaunchOptions = {}) {
-    let currentSpecs: Cypress.Cypress['spec'][]
+    let currentSpecs: FoundSpecs
 
     _.defaults(options, {
       onChange: () => { },
       onError: () => { },
     })
 
-    const sendIfChanged = (specs = []) => {
+    const sendIfChanged = (specs: FoundSpecs | undefined) => {
+      if (!specs) {
+        return
+      }
+
       // dont do anything if the specs haven't changed
       if (_.isEqual(specs, currentSpecs)) {
         return
@@ -332,9 +341,9 @@ export class OpenProject {
       }
     }
 
-    const get = () => {
+    const get = (): Bluebird<FoundSpecs | undefined> => {
       if (!this.openProject) {
-        return
+        return Bluebird.resolve(undefined)
       }
 
       const cfg = this.openProject.getConfig()

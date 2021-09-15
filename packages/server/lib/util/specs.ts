@@ -1,38 +1,47 @@
-const _ = require('lodash')
-const R = require('ramda')
-const la = require('lazy-ass')
-const path = require('path')
-const check = require('check-more-types')
-const debug = require('debug')('cypress:server:specs')
-const minimatch = require('minimatch')
-const Bluebird = require('bluebird')
-const pluralize = require('pluralize')
-const glob = require('./glob')
-const Table = require('cli-table3')
+import _ from 'lodash'
+import R from 'ramda'
+import la from 'lazy-ass'
+import path from 'path'
+import check from 'check-more-types'
+import Debug from 'debug'
+import minimatch from 'minimatch'
+import Bluebird from 'bluebird'
+import pluralize from 'pluralize'
+import glob from './glob'
+import Table from 'cli-table3'
+import type { Cfg } from '../project-base'
+
+const debug = Debug('cypress:server:specs')
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
-/**
- * Enums to help keep track of what types of spec files we find.
- * By default, every spec file is assumed to be integration.
-*/
-const SPEC_TYPES = {
-  INTEGRATION: 'integration',
-}
+export const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'testFiles', 'ignoreTestFiles'] as const
 
-const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
+export const getPatternRelativeToProjectRoot = (specPattern: string, projectRoot: string) => {
   return _.map(specPattern, (p) => {
     return path.relative(projectRoot, p)
   })
+}
+
+export type CommonSearchOptions = Pick<Cfg, 'fixturesFolder' | 'supportFile' | 'projectRoot' | 'testFiles' | 'ignoreTestFiles'>
+
+type SpecPath = Pick<Cypress.Spec, 'absolute' | 'name' | 'relative'>
+
+export interface FindSpecsOfType extends CommonSearchOptions {
+  searchFolder: string | undefined
 }
 
 /**
  * Finds all spec files that pass the config for given type. Note that "searchOptions" is
  * a subset of the project's "config" object
  */
-function findSpecsOfType (searchOptions, specPattern) {
-  let fixturesFolderPath
+export function findSpecsOfType (
+  searchOptions: FindSpecsOfType,
+  specPattern?: string,
+): Bluebird<SpecPath[]> {
+  let fixturesFolderPath: string = ''
 
+  // @ts-ignore - types are wrong
   la(check.maybe.strings(specPattern), 'invalid spec pattern', specPattern)
 
   const searchFolderPath = searchOptions.searchFolder
@@ -50,12 +59,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     debug('there is no spec pattern')
   }
 
-  // support files are not automatically
-  // ignored because only _fixtures are hard
-  // coded. the rest is simply whatever is in
-  // the javascripts array
-
-  if (check.unemptyString(searchOptions.fixturesFolder)) {
+  if (typeof searchOptions.fixturesFolder === 'string' && searchOptions.fixturesFolder.length > 0) {
     // users should be allowed to set the fixtures folder
     // the same as the specs folder
     if (searchOptions.fixturesFolder !== searchFolderPath) {
@@ -69,14 +73,6 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   const supportFilePath = searchOptions.supportFile || []
 
-  // map all of the javascripts to the project root
-  // TODO: think about moving this into config
-  // and mapping each of the javascripts into an
-  // absolute path
-  const javascriptsPaths = _.map(searchOptions.javascripts, (js) => {
-    return path.join(searchOptions.projectRoot, js)
-  })
-
   // ignore fixtures + javascripts
   const options = {
     sort: true,
@@ -84,7 +80,6 @@ function findSpecsOfType (searchOptions, specPattern) {
     nodir: true,
     cwd: searchFolderPath,
     ignore: _.compact(_.flatten([
-      javascriptsPaths,
       supportFilePath,
       fixturesFolderPath,
     ])),
@@ -97,14 +92,14 @@ function findSpecsOfType (searchOptions, specPattern) {
   // relativePathFromProjectRoot       = cypress/integration/foo.js
 
   const relativePathFromSearchFolder = (file) => {
-    return path.relative(searchFolderPath, file).replace(/\\/g, '/')
+    return path.relative(searchFolderPath || '', file).replace(/\\/g, '/')
   }
 
   const relativePathFromProjectRoot = (file) => {
     return path.relative(searchOptions.projectRoot, file).replace(/\\/g, '/')
   }
 
-  const setNameParts = (file) => {
+  const setNameParts = (file: string): SpecPath => {
     debug('found spec file %s', file)
 
     if (!path.isAbsolute(file)) {
@@ -118,7 +113,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     }
   }
 
-  const ignorePatterns = [].concat(searchOptions.ignoreTestFiles)
+  const ignorePatterns = ([] as string[]).concat(searchOptions.ignoreTestFiles || [])
 
   // a function which returns true if the file does NOT match
   // all of our ignored patterns
@@ -144,7 +139,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     // check to see if the file matches
     // any of the spec patterns array
     return _
-    .chain([])
+    .chain([] as string[])
     .concat(specPattern)
     .some(matchesPattern)
     .value()
@@ -155,12 +150,12 @@ function findSpecsOfType (searchOptions, specPattern) {
   debug('glob options %o', options)
 
   // ensure we handle either a single string or a list of strings the same way
-  const testFilesPatterns = [].concat(searchOptions.testFiles)
+  const testFilesPatterns = ([] as string[]).concat(searchOptions.testFiles || [])
 
   /**
    * Finds matching files for the given pattern, filters out specs to be ignored.
    */
-  const findOnePattern = (pattern) => {
+  const findOnePattern = (pattern: string): SpecPath[] => {
     return glob(pattern, options)
     .tap(debug)
 
@@ -169,7 +164,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     .filter(doesNotMatchAllIgnoredPatterns)
     .filter(matchesSpecPattern)
     .map(setNameParts)
-    .tap((files) => {
+    .tap((files: SpecPath[]) => {
       return debug('found %s: %o', pluralize('spec file', files.length, true), files)
     })
   }
@@ -182,9 +177,7 @@ function findSpecsOfType (searchOptions, specPattern) {
  * Resolves with an array of objects. Each object has a "testType" property
  * with one of TEST_TYPES values.
  */
-const find = (config, specPattern) => {
-  const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
-
+export const find = (config: Cfg, specPattern?: string) => {
   const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
   debug('componentTesting %o', componentTestingEnabled)
@@ -192,22 +185,25 @@ const find = (config, specPattern) => {
     debug('component folder %o', config.componentFolder)
     // component tests are new beasts, and they change how we mount the
     // code into the test frame.
-    SPEC_TYPES.COMPONENT = 'component'
   }
 
   /**
    * Sets "testType: integration|component" on each object in a list
   */
-  const setTestType = (testType) => R.map(R.set(R.lensProp('specType'), testType))
+  const setTestType = (testType: Cypress.CypressSpecType) => R.map(R.set(R.lensProp('specType'), testType))
 
   const findIntegrationSpecs = () => {
-    const searchOptions = _.pick(config, commonSearchOptions)
+    const searchOptions: FindSpecsOfType = {
+      ..._.pick<CommonSearchOptions>(config, commonSearchOptions),
+      projectRoot: config.projectRoot,
+      searchFolder: '',
+    }
 
     // ? should we always use config.resolved instead of config?
     searchOptions.searchFolder = config.integrationFolder
 
     return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.INTEGRATION))
+    .then(setTestType('integration'))
   }
 
   const findComponentSpecs = () => {
@@ -216,12 +212,16 @@ const find = (config, specPattern) => {
       return []
     }
 
-    const searchOptions = _.pick(config, commonSearchOptions)
+    const searchOptions: FindSpecsOfType = {
+      ..._.pick<CommonSearchOptions>(config, commonSearchOptions),
+      projectRoot: config.projectRoot,
+      searchFolder: '',
+    }
 
     searchOptions.searchFolder = config.componentFolder
 
     return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.COMPONENT))
+    .then(setTestType('component'))
   }
 
   const printFoundSpecs = (foundSpecs) => {
@@ -230,6 +230,7 @@ const find = (config, specPattern) => {
     })
 
     foundSpecs.forEach((spec) => {
+      // @ts-ignore - types are wrong
       table.push([spec.relative, spec.specType])
     })
 
@@ -246,13 +247,4 @@ const find = (config, specPattern) => {
       printFoundSpecs(foundSpecs)
     }
   })
-}
-
-module.exports = {
-  find,
-  findSpecsOfType,
-
-  getPatternRelativeToProjectRoot,
-
-  TEST_TYPES: SPEC_TYPES,
 }
