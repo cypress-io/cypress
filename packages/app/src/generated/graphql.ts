@@ -85,6 +85,11 @@ export type RunGroupStatus =
   | 'timedOut'
   | 'unclaimed';
 
+
+export type SpecType =
+  | 'component'
+  | 'integration';
+
 /** The bundlers that we can use with Cypress */
 export type SupportedBundlers =
   | 'vite'

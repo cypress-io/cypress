@@ -1,6 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { Project } from './Project'
 import { ResolvedConfig } from './ResolvedConfig'
+import { Spec } from './Spec'
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
@@ -32,6 +33,12 @@ export class LocalProject extends Project {
     }
 
     return new ResolvedConfig(cfg.resolved)
+  }
+
+  @nxs.field.nonNull.list.nonNull.type(() => Spec)
+  specs (): NxsResult<'LocalProject', 'specs'> {
+    // console.log(this.resolvedConfig())
+    return []
   }
 
   setE2EPluginsInitialized (init: boolean): void {

@@ -14,6 +14,8 @@ export * from './ResolvedConfig'
 
 export * from './Query'
 
+export * from './Spec'
+
 export * from './TestingTypeInfo'
 
 export * from './Viewer'
