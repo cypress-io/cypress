@@ -20,13 +20,13 @@ export class ServerContext extends BaseContext {
         : null
     })
 
-    this.localProjects = this._getLocalProjectsFromCache()
+    this._getLocalProjectsFromCache()
   }
 
-  _getLocalProjectsFromCache () {
-    const projectRoots = getProjectRoots()
+  async _getLocalProjectsFromCache () {
+    const projectRoots = await getProjectRoots()
 
-    return projectRoots.map((root) => new LocalProject(root, this))
+    this.localProjects = projectRoots.map((root) => new LocalProject(root, this))
   }
 
   localProjects: LocalProject[] = []

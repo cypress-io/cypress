@@ -88,7 +88,7 @@ type LocalProject {
 }
 
 type Mutation {
-  """Save project to cache"""
+  """Add project to projects array and cache it"""
   addProject(path: String!): App
 
   """Create a Cypress config file for a new project"""
