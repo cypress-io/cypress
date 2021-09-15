@@ -4,7 +4,7 @@ import Foo from './Foo.vue'
 import { AppDocument } from './generated/graphql'
 import { computed, onMounted, ref } from 'vue'
 import { renderRunner } from './runner/renderRunner'
-import Preview from './components/Preview.vue'
+import Walkthrough from './components/Walkthrough.vue'
 
 function decodeBase64Unicode(str) {
   return decodeURIComponent(atob(str).split('').map((char) => {
@@ -30,14 +30,18 @@ const query = useQuery({ query: AppDocument })
 onMounted(async () => {
   const config = await (await fetch('/__/api')).json()
   rawCypressConfig.value = config.base64Config;
+  // renderRunner(() => {
+  //   // @ts-ignore - yes it does
+  //   window.Runner.start(target.value, rawCypressConfig.value)
+  // })
 })
 
-function closePreview() {
-  console.log('Closing Preview')
+async function closePreview(newSpecs) {
   showPreview.value = false
+  const config = await (await fetch('/__/api')).json()
   renderRunner(() => {
     // @ts-ignore - yes it does
-    window.Runner.start(target.value, rawCypressConfig.value)
+    window.Runner.start(target.value, config.base64Config)
   })
 }
 </script>
@@ -45,5 +49,5 @@ function closePreview() {
 <template>
   <Foo v-if="query.data.value" :gql="query.data.value.app" />
   <div id="target" ref="target"></div>
-  <Preview v-if="cypressConfig && showPreview" :cypressConfig="cypressConfig" @closePreview="closePreview"/>
+  <Walkthrough v-if="cypressConfig && showPreview" :cypressConfig="cypressConfig" @closePreview="closePreview"/>
 </template>

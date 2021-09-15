@@ -7,20 +7,23 @@ export const Status = {
   ERROR: "ERROR"
 }
 
-export function useGetStorySource() {
+export function useGetStorySource(config: any) {
+  const {projectRoot} = config;
   const status = ref(Status.IDLE);
-  const specTxt = ref('');
-  const specPath = ref('');
+  const newSpecFile = ref();
+  const newSpecContent = ref('');
+  const newSpecs = ref({})
   function getStorySource(spec: string, absolute: string) {
     status.value = Status.LOADING
     return fetch('/__/createSpecFromStory', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ spec, absolute }),
-    }).then(res => res.json()).then(({spec, absolute}) => {
+      body: JSON.stringify({ spec, absolute, projectRoot }),
+    }).then(res => res.json()).then(({file, spec}) => {
       status.value = Status.SUCCESS;
-      specTxt.value = spec;
-      specPath.value = absolute;
+      newSpecFile.value = file;
+      newSpecContent.value = spec;
+      newSpecs.value = {...newSpecs.value, [file.absolute]: file}
     }).catch(e => {
       status.value = Status.ERROR;
       throw new Error(e)
@@ -28,5 +31,5 @@ export function useGetStorySource() {
   }
   (window as any).__CYPRESS_APP_BUS = {getStorySource};
 
-  return {status, specTxt, specPath}
+  return {status, newSpecFile, newSpecContent, newSpecs}
 }

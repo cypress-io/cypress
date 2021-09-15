@@ -56,6 +56,16 @@ export const createRoutes = ({
     res.json(options)
   })
 
+  const normalizeFile = (file: string, projectRoot: string, specType: string) => {
+    const absolute = path.resolve(projectRoot, file)
+    return {
+      absolute,
+      relative: path.relative(projectRoot, absolute),
+      name: path.basename(file),
+      specType
+    }
+  }
+
   app.get('/__/getStories', (req, res) => {
     const { projectRoot } = req.query
     const globPattern = '**/*.stories.{ts,js,tsx,jsx}'
@@ -72,14 +82,7 @@ export const createRoutes = ({
         }
 
         debug(`Found stories: ${files.join('\n')}`)
-        const normalized = files.map((file) => {
-          return {
-            absolute: path.join(projectRoot as string, file),
-            relative: file,
-            name: path.basename(file),
-            specType: 'component-preview',
-          }
-        })
+        const normalized = files.map((file) => normalizeFile(file, projectRoot as string, 'component-preview'))
 
         devServer.updatePreviews(normalized)
         res.json({ files: normalized, globPattern })
@@ -88,12 +91,12 @@ export const createRoutes = ({
   })
 
   app.post('/__/createSpecFromStory', express.json(), (req, res) => {
-    const { spec, absolute } = req.body
+    const { spec, absolute, projectRoot } = req.body
 
     debug(`Writing file ${absolute} with content: ${spec}`)
     fs.writeFileSync(absolute, spec)
 
-    return res.json({ spec, absolute })
+    return res.json({ file: normalizeFile(absolute, projectRoot, 'component'), spec })
   })
 
   // TODO: can namespace this onto a "unified" route like __app-unified__

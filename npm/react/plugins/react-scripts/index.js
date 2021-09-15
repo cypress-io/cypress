@@ -28,7 +28,7 @@ function devServer (cypressDevServerConfig, {
 
 // Legacy signature
 module.exports = getLegacyDevServer(devServer, (config) => {
-  config.env.reactDevtools = true
+  // config.env.reactDevtools = true
 
   return config
 })

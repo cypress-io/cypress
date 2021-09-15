@@ -16,6 +16,11 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['closePreview'])
+function closePreview() {
+  emit('closePreview', newSpecs.value);
+}
+
 const stories = ref([] as Spec[]);
 onMounted(async () => {
   const { componentFolder } = props.cypressConfig;
@@ -28,10 +33,9 @@ onMounted(async () => {
 const selectedStory = ref("");
 function onStorySelect() {
   status.value = "IDLE";
-  console.log({ selectedStory: selectedStory.value });
 }
 
-const { status, specTxt, specPath } = useGetStorySource();
+const { status, newSpecFile, newSpecContent, newSpecs } = useGetStorySource(props.cypressConfig);
 </script>
 
 <template>
@@ -87,10 +91,10 @@ const { status, specTxt, specPath } = useGetStorySource();
           :cypress-config="props.cypressConfig"
         ></Iframe>
         <ul v-if="status === 'SUCCESS'" class="pl-8 list-disc">
-          <li>Spec Created: {{ specPath }}</li>
+          <li>Spec Created: {{ newSpecFile.absolute }}</li>
           <li>
             Spec Content:
-            <pre>{{ specTxt }}</pre>
+            <pre>{{ newSpecContent }}</pre>
           </li>
         </ul>
       </div>
@@ -104,12 +108,45 @@ const { status, specTxt, specPath } = useGetStorySource();
           whatever they need to in order to get their component rendering
           properly.
         </p>
-        <Iframe
-          class="p-8 border-dotted border-gray-700 border"
-          v-if="specPath && status === 'SUCCESS'"
-          :spec-path="specPath"
-          :cypress-config="props.cypressConfig"
-        ></Iframe>
+        <div class="flex pt-4">
+          <Iframe
+            class="p-8 border-dotted border-gray-700 border"
+            v-if="newSpecFile && status === 'SUCCESS'"
+            :spec-path="newSpecFile.absolute"
+            :cypress-config="props.cypressConfig"
+          ></Iframe>
+          <ul class="list-disc pl-8">
+            <li>
+              Import existing preview head such that their link/style tags work
+            </li>
+            <li>
+              Give helpful tips and links to documentation for debugging if
+              their component doesn't look right
+            </li>
+            <li>
+              Give helpful tips and links to documentation for debugging if
+              their component doesn't look right
+              <ul class="list-square pl-8">
+                <li>Try importing you 'preview.js' into 'cypress/support/index.js'</li>
+                <li>If you have any global story decorators, make sure to configure them via:
+                  <pre>
+import { setGlobalConfig } from '@storybook/testing-react';
+import * as globalStorybookConfig from './.storybook/preview'; // path of your preview.js file
+setGlobalConfig(globalStorybookConfig);
+                  </pre>
+                </li>
+                <li>If you have any errors, read our documentaion <a href="some-link">Cypress Docs</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="status === 'SUCCESS'" class="p-4">
+      <h1 class="text-xl">Step 4: Tweak <code>cypress.config.js</code> if necessary, send them back to Runner</h1>
+      <div class="p-4">
+        <button class="bg-gray-200 p-2 rounded-md" @click="closePreview">Back to Test Runner</button>
       </div>
     </div>
   </div>
