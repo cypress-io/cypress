@@ -4,6 +4,7 @@
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
+    "prebinary-build": "yarn gulp buildProd",
     "binary-build": "node ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
