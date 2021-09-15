@@ -16,7 +16,7 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : ''
 // for vite
 process.cwd ??= () => ''
 
-const isCodegen = Boolean(process.env.CYPRESS_NEXUS_CODEGEN)
+const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
 export const graphqlSchema = makeSchema({
   types: [entities, constants, customScalars, dirname ? null : testingTypes],
