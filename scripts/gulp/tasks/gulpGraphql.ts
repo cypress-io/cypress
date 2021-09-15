@@ -33,6 +33,7 @@ export async function nexusCodegenWatch () {
 export async function graphqlCodegen () {
   return spawned('gql-codegen', 'yarn graphql-codegen --config graphql-codegen.yml', {
     cwd: monorepoPaths.root,
+    waitForExit: true,
   })
 }
 

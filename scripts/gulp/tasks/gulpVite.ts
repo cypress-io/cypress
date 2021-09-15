@@ -19,18 +19,6 @@ export function viteLaunchpad () {
   })
 }
 
-export function viteBuildApp () {
-  return spawned('vite:build-app', `yarn vite build`, {
-    cwd: monorepoPaths.pkgApp,
-  })
-}
-
-export function viteBuildLaunchpad () {
-  return spawned('vite:build-launchpad', `yarn vite build`, {
-    cwd: monorepoPaths.pkgLaunchpad,
-  })
-}
-
 export function viteCleanApp () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgApp,

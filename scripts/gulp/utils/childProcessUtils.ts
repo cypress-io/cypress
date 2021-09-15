@@ -30,15 +30,21 @@ export type AllSpawnableApps =
   | `vite:build-${string}`
   | 'gql-codegen'
 
+interface SpawnedOptions extends SpawnOptions {
+  waitForExit?: boolean
+}
+
 export async function spawned (
   prefix: AllSpawnableApps,
   command: string,
-  opts: SpawnOptions = {},
+  opts: SpawnedOptions = {},
   tapThrough: {
     tapOut?: through2.TransformFunction
     tapErr?: through2.TransformFunction
   } = {},
 ) {
+  const { waitForExit, ...spawnOpts } = opts
+
   spawningApps.add(prefix)
   const [executable, ...rest] = command.split(' ')
   const cp = spawn(executable, rest, {
@@ -48,7 +54,7 @@ export async function spawned (
       NODE_ENV: 'development',
       ...process.env,
     },
-    ...opts,
+    ...spawnOpts,
   })
   const tapOut = tapThrough.tapOut || null
   const tapErr = tapThrough.tapErr || null
@@ -85,10 +91,16 @@ export async function spawned (
   // runningApps.set(prefix, [cp, [prefix, command, opts], cleanup])
 
   return new Promise((resolve) => {
-    cp.stdout?.once('data', () => {
-      spawningApps.delete(prefix)
-      resolve(cp)
-    })
+    if (waitForExit) {
+      cp.once('exit', () => {
+        resolve(cp)
+      })
+    } else {
+      cp.stdout?.once('data', () => {
+        spawningApps.delete(prefix)
+        resolve(cp)
+      })
+    }
   })
 }
 
