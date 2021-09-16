@@ -66,6 +66,13 @@ function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
     enforce: 'pre',
     use: [
       {
+        loader: require.resolve('css-modules-typescript-loader'),
+        options: {
+          modules: true,
+          mode: process.env.CI ? 'verify' : 'emit',
+        },
+      },
+      {
         loader: require.resolve('css-loader'),
         options: {
           // sourceMap: true,

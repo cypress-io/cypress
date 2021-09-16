@@ -74,7 +74,7 @@
     "@types/jquery": "3.3.31",
     "@types/lodash": "4.14.168",
     "@types/minimatch": "3.0.3",
-    "@types/mocha": "5.2.7",
+    "@types/mocha": "8.0.3",
     "@types/sinon": "7.5.1",
     "@types/sinon-chai": "3.2.5",
     "chai": "3.5.0",

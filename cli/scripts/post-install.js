@@ -5,6 +5,7 @@
 
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')
+const fs = require('fs')
 const { join } = require('path')
 const resolvePkg = require('resolve-pkg')
 
@@ -72,3 +73,23 @@ shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)
 // copy experimental network stubbing type definitions
 // so users can import: `import 'cypress/types/net-stubbing'`
 shell.cp(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.ts')
+
+// https://github.com/cypress-io/cypress/issues/18069
+// To avoid type clashes, some files should be commented out entirely by patch-package
+// and uncommented here.
+
+const filesToUncomment = [
+  'mocha/index.d.ts',
+  'jquery/JQuery.d.ts',
+  'jquery/legacy.d.ts',
+  'jquery/misc.d.ts',
+]
+
+filesToUncomment.forEach((file) => {
+  const filePath = join(__dirname, '../types', file)
+  const str = fs.readFileSync(filePath).toString()
+
+  const result = str.split('\n').map((line) => line.substring(3)).join('\n')
+
+  fs.writeFileSync(filePath, result)
+})

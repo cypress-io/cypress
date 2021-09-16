@@ -169,7 +169,7 @@
     "mock-fs": "4.9.0",
     "odiff-bin": "2.1.0",
     "parse-github-repo-url": "1.4.1",
-    "patch-package": "6.2.2",
+    "patch-package": "6.4.7",
     "plist": "3.0.1",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
