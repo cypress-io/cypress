@@ -14,7 +14,7 @@ import type { NavigationItem } from "./../entities/NavigationItem"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { Project } from "./../entities/Project"
 import type { Query } from "./../entities/Query"
-import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
+import type { ResolvedOptionBase, NonNullResolvedStringOption, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
 import type { Spec } from "./../entities/Spec"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Viewer } from "./../entities/Viewer"
@@ -92,6 +92,7 @@ export interface NexusGenObjects {
   Mutation: {};
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
+  NonNullResolvedStringOption: NonNullResolvedStringOption;
   Project: Project;
   Query: Query;
   ResolvedBooleanOption: ResolvedBooleanOption;
@@ -184,6 +185,11 @@ export interface NexusGenFieldTypes {
     items: Array<NexusGenRootTypes['NavigationItem'] | null>; // [NavigationItem]!
     selected: NexusGenEnums['NavItem']; // NavItem!
   }
+  NonNullResolvedStringOption: { // field return type
+    from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
+    type: NexusGenEnums['ResolvedType']; // ResolvedType!
+    value: string; // String!
+  }
   Project: { // field return type
     id: string; // ID!
     projectId: string | null; // String
@@ -222,7 +228,7 @@ export interface NexusGenFieldTypes {
     fixturesFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     ignoreTestFiles: NexusGenRootTypes['ResolvedStringListOption'] | null; // ResolvedStringListOption
     includeShadowDom: NexusGenRootTypes['ResolvedBooleanOption'] | null; // ResolvedBooleanOption
-    integrationFolder: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
+    integrationFolder: NexusGenRootTypes['NonNullResolvedStringOption'] | null; // NonNullResolvedStringOption
     nodeVersion: NexusGenRootTypes['ResolvedStringOption'] | null; // ResolvedStringOption
     numTestsKeptInMemory: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
     pageLoadTimeout: NexusGenRootTypes['ResolvedNumberOption'] | null; // ResolvedNumberOption
@@ -408,6 +414,11 @@ export interface NexusGenFieldTypeNames {
     items: 'NavigationItem'
     selected: 'NavItem'
   }
+  NonNullResolvedStringOption: { // field return type name
+    from: 'ResolvedConfigOption'
+    type: 'ResolvedType'
+    value: 'String'
+  }
   Project: { // field return type name
     id: 'ID'
     projectId: 'String'
@@ -446,7 +457,7 @@ export interface NexusGenFieldTypeNames {
     fixturesFolder: 'ResolvedStringOption'
     ignoreTestFiles: 'ResolvedStringListOption'
     includeShadowDom: 'ResolvedBooleanOption'
-    integrationFolder: 'ResolvedStringOption'
+    integrationFolder: 'NonNullResolvedStringOption'
     nodeVersion: 'ResolvedStringOption'
     numTestsKeptInMemory: 'ResolvedNumberOption'
     pageLoadTimeout: 'ResolvedNumberOption'

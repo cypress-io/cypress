@@ -28,6 +28,25 @@ const getPatternRelativeToProjectRoot = (specPattern: string, projectRoot: strin
     return path.relative(projectRoot, p)
   })
 }
+export interface CommonSearchOptions {
+  projectRoot: Cypress.RuntimeConfigOptions['projectRoot']
+  fixturesFolder: Cypress.ResolvedConfigOptions['fixturesFolder']
+  supportFile: Cypress.ResolvedConfigOptions['supportFile']
+  testFiles: Cypress.ResolvedConfigOptions['testFiles']
+  ignoreTestFiles: Cypress.ResolvedConfigOptions['ignoreTestFiles']
+}
+
+type FindSpecs = {
+  componentFolder: Cypress.ResolvedConfigOptions['componentFolder']
+  integrationFolder: Cypress.ResolvedConfigOptions['integrationFolder']
+} & CommonSearchOptions
+
+export interface FoundSpec {
+  name: string
+  relative: string
+  absolute: string
+  specType: Cypress.CypressSpecType
+}
 
 /**
  * Finds all spec files that pass the config for given type. Note that "commonSearchOptions" is
@@ -205,25 +224,12 @@ const printFoundSpecs = (foundSpecs: Cypress.Spec[]) => {
   console.error(table.toString())
 }
 
-export interface CommonSearchOptions {
-  projectRoot: Cypress.RuntimeConfigOptions['projectRoot']
-  fixturesFolder: Cypress.ResolvedConfigOptions['fixturesFolder']
-  supportFile: Cypress.ResolvedConfigOptions['supportFile']
-  testFiles: Cypress.ResolvedConfigOptions['testFiles']
-  ignoreTestFiles: Cypress.ResolvedConfigOptions['ignoreTestFiles']
-}
-
-type FindSpecs = {
-  componentFolder: Cypress.ResolvedConfigOptions['componentFolder']
-  integrationFolder: Cypress.ResolvedConfigOptions['integrationFolder']
-} & CommonSearchOptions
-
 /**
  * First, finds all integration specs, then finds all component specs.
  * Resolves with an array of objects. Each object has a "testType" property
  * with one of TEST_TYPES values.
  */
-const findSpecs = (payload: FindSpecs, specPattern?: string) => {
+const findSpecs = (payload: FindSpecs, specPattern?: string): Bluebird<FoundSpec[]> => {
   const { componentFolder, integrationFolder, ...commonSearchOptions } = payload
 
   return Bluebird.all([

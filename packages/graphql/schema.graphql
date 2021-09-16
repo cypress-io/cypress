@@ -155,6 +155,12 @@ type NavigationMenu {
   selected: NavItem!
 }
 
+type NonNullResolvedStringOption {
+  from: ResolvedConfigOption
+  type: ResolvedType!
+  value: String!
+}
+
 enum PluginsState {
   error
   initialized
@@ -216,7 +222,7 @@ type ResolvedConfig {
   fixturesFolder: ResolvedStringOption
   ignoreTestFiles: ResolvedStringListOption
   includeShadowDom: ResolvedBooleanOption
-  integrationFolder: ResolvedStringOption
+  integrationFolder: NonNullResolvedStringOption
   nodeVersion: ResolvedStringOption
   numTestsKeptInMemory: ResolvedNumberOption
   pageLoadTimeout: ResolvedNumberOption

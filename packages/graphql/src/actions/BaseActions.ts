@@ -3,6 +3,7 @@ import type { RunGroup } from '../entities/run'
 import type { FoundBrowser, OpenProjectLaunchOptions, FullConfig, LaunchOpts, LaunchArgs } from '@packages/types'
 import type { LocalProject } from '../entities'
 import type { BrowserContract } from '../contracts/BrowserContract'
+import type { FindSpecs } from '@packages/server/lib/util/specs'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -39,5 +40,5 @@ export abstract class BaseActions {
 
   abstract isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean
 
-  abstract getSpecs (): Promise<any>
+  abstract getSpecs (options: FindSpecs): Promise<any>
 }

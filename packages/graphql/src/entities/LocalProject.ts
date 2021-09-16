@@ -1,7 +1,10 @@
+import Debug from 'debug'
 import { nxs, NxsResult } from 'nexus-decorators'
 import { Project } from './Project'
 import { ResolvedConfig } from './ResolvedConfig'
 import { Spec } from './Spec'
+
+const debug = Debug('cypress:graphql:local-project')
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
@@ -17,12 +20,23 @@ export class LocalProject extends Project {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
   }
 
-   @nxs.field.nonNull.list.nonNull.type(() => Spec)
-  specs (): NxsResult<'LocalProject', 'specs'> {
-    // console.log(this.resolvedConfig())
-    return []
-  }
+  @nxs.field.nonNull.list.nonNull.type(() => Spec)
+  async specs (): Promise<NxsResult<'LocalProject', 'specs'>> {
+    const config = this.resolvedConfig()
+    const specs = await this.ctx.actions.getSpecs({
+      projectRoot: this.projectRoot,
+      fixturesFolder: config?.fixturesFolder?.value ?? false,
+      supportFile: config?.supportFile?.value ?? false,
+      testFiles: config?.testFiles?.value ?? [],
+      ignoreTestFiles: config?.ignoreTestFiles?.value as string[] ?? [],
+      componentFolder: config?.componentFolder?.value ?? false,
+      integrationFolder: config?.integrationFolder?.value ?? '',
+    })
 
+    debug('found specs %o', specs)
+
+    return specs.map((spec) => new Spec(spec))
+  }
 
   @nxs.field.nonNull.boolean({
     description: 'Whether the user configured this project to use e2e Testing',
