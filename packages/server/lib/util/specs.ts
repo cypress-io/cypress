@@ -172,11 +172,6 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
 }
 
 const setTestType = (testType: Cypress.CypressSpecType) => R.map(R.set(R.lensProp('specType'), testType))
-/**
- * First, finds all integration specs, then finds all component specs.
- * Resolves with an array of objects. Each object has a "testType" property
- * with one of TEST_TYPES values.
- */
 
 const findIntegrationSpecs = (searchFolder: string | undefined, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
   if (!searchFolder) {
