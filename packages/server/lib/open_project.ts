@@ -16,6 +16,7 @@ import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
 import type { AutomationMiddleware } from './automation'
 import { fs } from './util/fs'
 import path from 'path'
+import os from 'os'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -44,7 +45,7 @@ export interface LaunchArgs {
 
 // @see https://github.com/cypress-io/cypress/issues/18094
 async function win32BitWarning (onWarning) {
-  // if (process.platform !== 'win32' || process.arch !== 'ia32') return
+  if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
 
   // adapted from https://github.com/feross/arch/blob/master/index.js
   let useEnv = false
@@ -61,7 +62,7 @@ async function win32BitWarning (onWarning) {
   let hasX64 = false
 
   try {
-    hasX64 = !!fs.statSync(path.join(sysRoot, 'sysnative'))
+    hasX64 = !!(await fs.stat(path.join(sysRoot, 'sysnative')))
   } catch (err) {
     // pass
   }

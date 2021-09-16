@@ -1,6 +1,7 @@
 require('../spec_helper')
 
 const path = require('path')
+const os = require('os')
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
 const ProjectBase = require(`${root}lib/project-base`).ProjectBase
@@ -35,6 +36,18 @@ describe('lib/open_project', () => {
     sinon.stub(preprocessor, 'removeFile')
 
     return openProject.create('/project/root', {}, {})
+  })
+
+  context('#create', () => {
+    // @see https://github.com/cypress-io/cypress/issues/18094
+    it('warns on win 32bit', async () => {
+      sinon.stub(os, 'platform').returns('win32')
+      sinon.stub(os, 'arch').returns('ia32')
+      const onWarning = sinon.stub()
+
+      await openProject.create('/root', {}, { onWarning })
+      expect(onWarning.getCall(0).args[0].message).to.include('You are currently running a 32-bit build')
+    })
   })
 
   context('#launch', () => {
