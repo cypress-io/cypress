@@ -199,6 +199,7 @@
     "semantic-release": "17.2.3",
     "semantic-release-monorepo": "7.0.3",
     "semver": "7.3.2",
+    "serve": "12.0.1",
     "shelljs": "0.8.3",
     "shx": "0.3.3",
     "sinon": "7.3.2",

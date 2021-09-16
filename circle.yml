@@ -390,12 +390,28 @@ commands:
     steps:
       - restore_cached_workspace
       - run: yarn gulp graphqlCodegen
-      - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
+      - run: yarn workspace @packages/launchpad cypress:run:e2e --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: ./packages/launchpad/cypress/videos
       - store-npm-logs
+
+  run-launchpad-component-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - restore_cached_workspace
+      - run: yarn gulp graphqlCodegen
+      - run: yarn workspace @packages/launchpad cypress:run:ct --browser <<parameters.browser>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: ./packages/launchpad/cypress/videos
+      - store-npm-logs
+
 
   run-runner-ct-integration-tests:
     parameters:
@@ -1150,6 +1166,13 @@ jobs:
       - run-runner-ct-integration-tests:
           browser: chrome
           percy: true
+
+  run-launchpad-component-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-launchpad-component-tests:
+          browser: chrome
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
@@ -2049,7 +2072,9 @@ linux-workflow: &linux-workflow
     - run-launchpad-integration-tests-chrome:
         requires:
           - build
-
+    - run-launchpad-component-tests-chrome:
+        requires:
+          - build
     - desktop-gui-integration-tests-2x:
         requires:
           - build

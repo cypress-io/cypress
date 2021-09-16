@@ -1,6 +1,6 @@
 {
   "projectId": "ypt4pf",
-  "baseUrl": "http://localhost:5555",
+  "baseUrl": "http://localhost:5000",
   "viewportWidth": 800,
   "viewportHeight": 850,
   "fixturesFolder": false,
@@ -16,6 +16,8 @@
     "configFile": "../../mocha-reporter-config.json"
   },
   "component": {
+    "supportFile": "cypress/component/support/index.ts",
+    "pluginsFile": "cypress/component/plugins/index.js",
     "componentFolder": "src"
   },
   "e2e": {

@@ -1,36 +1,41 @@
 import { exec, ExecOptions, spawn, SpawnOptions } from 'child_process'
 import through2 from 'through2'
+import pDefer from 'p-defer'
 import util from 'util'
 
-// import psTree from 'ps-tree'
-// import psNode from 'ps-node'
-// import util from 'util'
-
 import { prefixStream } from './prefixStream'
-
-const spawningApps = new Set()
-// const killAsync = util.promisify(psNode.kill)
-// const psTreeAsync = util.promisify(psTree)
-// const runningApps = new Map<
-//   AllSpawnableApps,
-//   [ChildProcess, ArgsFor<typeof spawned>, Function]
-// >()
-
-export async function allReady () {
-  while (spawningApps.size > 0) {
-    await new Promise((ready) => setTimeout(ready, 100))
-  }
-
-  return true
-}
 
 export type AllSpawnableApps =
   | `vite-${string}`
   | `vite:build-${string}`
+  | `vite:serve-${string}`
   | 'gql-codegen'
 
 interface SpawnedOptions extends SpawnOptions {
   waitForExit?: boolean
+}
+
+export async function spawnUntilMatch (
+  prefix: AllSpawnableApps,
+  command: string,
+  match: string | RegExp,
+  opts: SpawnOptions = {},
+) {
+  const dfd = pDefer()
+  let ready = false
+
+  spawned(prefix, command, opts, {
+    tapOut (chunk, enc, cb) {
+      if (!ready && String(chunk).match(match)) {
+        ready = true
+        setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
+      }
+
+      cb(null, chunk)
+    },
+  })
+
+  return dfd.promise
 }
 
 export async function spawned (
@@ -44,7 +49,6 @@ export async function spawned (
 ) {
   const { waitForExit, ...spawnOpts } = opts
 
-  spawningApps.add(prefix)
   const [executable, ...rest] = command.split(' ')
   const cp = spawn(executable, rest, {
     stdio: 'pipe',
@@ -82,13 +86,6 @@ export async function spawned (
   prefixedStdout?.pipe(process.stdout)
   prefixedStderr?.pipe(process.stderr)
 
-  // const cleanup = () => {
-  //   prefixedStdout?.unpipe(process.stdout)
-  //   prefixedStderr?.unpipe(process.stderr)
-  // }
-
-  // runningApps.set(prefix, [cp, [prefix, command, opts], cleanup])
-
   return new Promise((resolve, reject) => {
     if (waitForExit) {
       cp.once('exit', () => {
@@ -98,7 +95,6 @@ export async function spawned (
       cp.once('error', reject)
     } else {
       cp.stdout?.once('data', () => {
-        spawningApps.delete(prefix)
         resolve(cp)
       })
     }

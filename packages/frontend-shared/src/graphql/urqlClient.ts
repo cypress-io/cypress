@@ -6,10 +6,11 @@ import {
   cacheExchange,
   fetchExchange,
 } from '@urql/core'
+import { GRAPHQL_URL } from '../utils/env'
 
 export function makeUrqlClient (): Client {
   return createClient({
-    url: 'http://localhost:52159/graphql',
+    url: GRAPHQL_URL,
     exchanges: [
       dedupExchange,
       cacheExchange,

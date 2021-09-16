@@ -1,9 +1,24 @@
+/**
+ * More information about our build process lives inside of the
+ * CONTRIBUTING.md
+ *
+ * @summary Build pipeline for all new commands
+ * @docs https://gulpjs.com
+ * @usage `yarn gulp myTaskName` from the workspace root directory
+ */
+
 import gulp from 'gulp'
+import { monorepoPaths } from './monorepoPaths'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
-import { startCypressWatch } from './tasks/gulpCypress'
+import { startCypress, startCypressWatch, startCypressForTest, runCypressAgainstDist } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteBuildApp, viteBuildLaunchpad, viteWatchBuildLaunchpadForTest, viteBuildLaunchpadForTest, viteServeLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
+
+/**------------------------------------------------------------------------
+ *                      Local Development Workflow
+ *  * `yarn dev` is your primary command for getting work done
+ *------------------------------------------------------------------------**/
 
 gulp.task(
   'dev',
@@ -11,16 +26,15 @@ gulp.task(
     // Autobarrel watcher
     autobarrelWatcher,
 
-    // Fetch the latest "remote" schema from the Cypress cloud
-    // TODO: with stitching bracnh
-    // fetchCloudSchema,
+    // Fetch the latest "remote" schema from the Cypress cloud TODO: with
+    // stitching branch fetchCloudSchema,
 
     gulp.parallel(
-      // Clean the vite apps
       viteCleanApp,
       viteCleanLaunchpad,
     ),
-    // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
+    // Codegen for our GraphQL Server so we have the latest schema to build
+    // the frontend codegen correctly
     nexusCodegenWatch,
 
     // ... and generate the correct GraphQL types for the frontend
@@ -32,35 +46,105 @@ gulp.task(
       viteLaunchpad,
     ),
 
-    // And we're finally ready for electron, watching for changes in /graphql to auto-restart the server
+    // And we're finally ready for electron, watching for changes in
+    // /graphql to auto-restart the server
     startCypressWatch,
   ),
 )
 
+/**------------------------------------------------------------------------
+ *                            Static Builds
+ *  Tasks that aren't watched. Usually composed together with other tasks.
+ *------------------------------------------------------------------------**/
+
 gulp.task('buildProd', gulp.series(
+  gulp.parallel(
+    viteCleanApp,
+    viteCleanLaunchpad,
+  ),
+
   nexusCodegen,
   graphqlCodegen,
+
+  // Build the frontend(s) for production.
+  gulp.parallel(
+    viteBuildApp,
+    viteBuildLaunchpad,
+  ),
 ))
 
 gulp.task(
   'postinstall',
   gulp.series(
-    gulp.parallel(
-      // Clean the vite apps
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
     'buildProd',
   ),
 )
 
-// gulp.task(
-//   'devLegacy', // Tim: TODO
-// )
+/**------------------------------------------------------------------------
+ *                         Launchpad Testing
+ * This task builds and hosts the launchpad as if it was a static website.
+ * In production, this app would be served over the file:// protocol via
+ * the Electron app. However, when e2e testing the launchpad, we'll want to
+ * visit it using cy.visit within our integration suites.
+ *
+ * * cypressOpenLaunchpad is for local dev and watches.
+ * * cypressRunLaunchpad is meant to be run in CI and does not watch.
+ *------------------------------------------------------------------------**/
 
-// gulp.task(
-//   'debug', // Tim: TODO
-// )
+gulp.task('cypressRunLaunchpad', gulp.series(
+  // 1. Build the Cypress App itself
+  'buildProd',
+
+  // 2. Build the Launchpad under test.
+  viteBuildLaunchpadForTest,
+
+  // 3. Host the Launchpad on a static server for cy.visit.
+  gulp.parallel(viteServeLaunchpadForTest),
+
+  // 4. Start the TEST Cypress App, such that its ports and other globals
+  //    don't conflict with the real Cypress App.
+  startCypressForTest,
+
+  // 5. Start the REAL Cypress App, which will execute the integration specs.
+  async () => {
+    process.argv.push('--project', monorepoPaths.pkgLaunchpad)
+
+    return runCypressAgainstDist()
+  },
+))
+
+// Open Cypress in production mode.
+// Rebuild the Launchpad app between changes.
+gulp.task('cypressOpenLaunchpad', gulp.series(
+  // 1. Build the Cypress App itself
+  'buildProd',
+
+  // 2. Build + watch Launchpad under test.
+  //    This watches for changes and is not the same things as statically
+  //    building the app for production.
+  viteWatchBuildLaunchpadForTest,
+
+  // 3. Host the Launchpad on a static server for cy.visit.
+  gulp.parallel(viteServeLaunchpadForTest),
+
+  // 4. Start the TEST Cypress App , such that its ports and other globals
+  //    don't conflict with the real Cypress App.
+  startCypressForTest,
+
+  // 5. Start the REAL Cypress App, which will launch in open mode.
+  async () => {
+    process.argv.push('--project', monorepoPaths.pkgLaunchpad)
+    process.env.CYPRESS_INTERNAL_ENV = 'production'
+
+    return startCypress()
+  },
+))
+
+/**------------------------------------------------------------------------
+ *                             Graphql Workflow
+ * Graphql tasks that are generally composed and not run on their own
+ * during development.
+ *------------------------------------------------------------------------**/
 
 gulp.task(makePathMap)
 gulp.task(nexusCodegen)
