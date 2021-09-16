@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build-prod": "yarn gulp nexusCodegen && tsc || echo 'built, with errors'",
+    "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
