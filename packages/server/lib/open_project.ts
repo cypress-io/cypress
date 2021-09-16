@@ -260,7 +260,7 @@ export class OpenProject {
 
       // assumes all specs are integration specs
       return {
-        integration: specs,
+        integration: specs.filter((x) => x.specType === 'integration'),
       }
     })
   }

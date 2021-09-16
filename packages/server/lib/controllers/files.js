@@ -67,7 +67,6 @@ module.exports = {
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
-    const specTypeFilter = _.get(extraOptions, 'specType', 'integration')
 
     debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
@@ -91,11 +90,9 @@ module.exports = {
         }))
         .filter(specFilterFn)
         .filter((foundSpec) => {
-          if (componentTestingEnabled) {
-            return foundSpec.specType === specTypeFilter
-          }
-
-          return true
+          return componentTestingEnabled
+            ? foundSpec.specType === 'component'
+            : foundSpec.specType === 'integration'
         }).then(R.tap((specs) => {
           return debug('filtered __all specs %o', specs)
         })).map((spec) => {

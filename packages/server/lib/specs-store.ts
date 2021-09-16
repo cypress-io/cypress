@@ -1,7 +1,7 @@
 import type Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
-import { findSpecsOfType } from './util/specs'
+import specsUtil from './util/specs'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
@@ -59,7 +59,7 @@ export class SpecsStore {
     searchOptions.searchFolder = this.specDirectory
     searchOptions.testFiles = this.testFiles
 
-    return findSpecsOfType(searchOptions)
+    return specsUtil.findSpecsOfType(searchOptions)
   }
 
   watch (options: SpecsWatcherOptions) {

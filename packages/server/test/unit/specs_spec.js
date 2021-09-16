@@ -7,7 +7,7 @@ const specsUtil = require(`${root}lib/util/specs`)
 const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
 const debug = require('debug')('test')
 
-describe('lib/util/specs', () => {
+xdescribe('lib/util/specs', () => {
   beforeEach(function () {
     FixturesHelper.scaffold()
 
