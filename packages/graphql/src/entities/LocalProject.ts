@@ -1,6 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { Project } from './Project'
 import { ResolvedConfig } from './ResolvedConfig'
+import { Spec } from './Spec'
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
@@ -15,6 +16,13 @@ export class LocalProject extends Project {
   get isFirstTimeCT (): NxsResult<'LocalProject', 'isFirstTimeCT'> {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
   }
+
+   @nxs.field.nonNull.list.nonNull.type(() => Spec)
+  specs (): NxsResult<'LocalProject', 'specs'> {
+    // console.log(this.resolvedConfig())
+    return []
+  }
+
 
   @nxs.field.nonNull.boolean({
     description: 'Whether the user configured this project to use e2e Testing',

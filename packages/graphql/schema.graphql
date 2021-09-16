@@ -84,6 +84,7 @@ type LocalProject {
   projectId: String
   projectRoot: String!
   resolvedConfig: ResolvedConfig
+  specs: [Spec!]!
   title: String!
 }
 
@@ -326,6 +327,21 @@ enum RunGroupStatus {
   running
   timedOut
   unclaimed
+}
+
+"""
+A spec file associated with a project and testing type via the testFiles glob
+"""
+type Spec {
+  absolute: String!
+  name: String!
+  relative: String!
+  specType: SpecType!
+}
+
+enum SpecType {
+  component
+  integration
 }
 
 """The bundlers that we can use with Cypress"""

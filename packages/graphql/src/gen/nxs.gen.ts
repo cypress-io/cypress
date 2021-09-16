@@ -15,6 +15,7 @@ import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { Project } from "./../entities/Project"
 import type { Query } from "./../entities/Query"
 import type { ResolvedOptionBase, ResolvedStringOption, ResolvedStringListOption, ResolvedNumberOption, ResolvedBooleanOption, ResolvedJsonOption, ResolvedConfig } from "./../entities/ResolvedConfig"
+import type { Spec } from "./../entities/Spec"
 import type { TestingTypeInfo } from "./../entities/TestingTypeInfo"
 import type { Viewer } from "./../entities/Viewer"
 import type { Wizard } from "./../entities/Wizard"
@@ -65,6 +66,7 @@ export interface NexusGenEnums {
   ResolvedConfigOption: "config" | "default" | "env" | "plugin" | "runtime"
   ResolvedType: "array" | "boolean" | "json" | "number" | "string"
   RunGroupStatus: "cancelled" | "errored" | "failed" | "noTests" | "passed" | "running" | "timedOut" | "unclaimed"
+  SpecType: "component" | "integration"
   SupportedBundlers: "vite" | "webpack"
   TestingTypeEnum: "component" | "e2e"
   WizardCodeLanguage: "js" | "ts"
@@ -101,6 +103,7 @@ export interface NexusGenObjects {
   ResolvedStringOption: ResolvedStringOption;
   RunCommit: RunCommit;
   RunGroup: RunGroup;
+  Spec: Spec;
   TestingTypeInfo: TestingTypeInfo;
   Viewer: Viewer;
   Wizard: Wizard;
@@ -152,6 +155,7 @@ export interface NexusGenFieldTypes {
     projectId: string | null; // String
     projectRoot: string; // String!
     resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
+    specs: NexusGenRootTypes['Spec'][]; // [Spec!]!
     title: string; // String!
   }
   Mutation: { // field return type
@@ -291,6 +295,12 @@ export interface NexusGenFieldTypes {
     totalPending: number | null; // Int
     totalSkipped: number | null; // Int
   }
+  Spec: { // field return type
+    absolute: string; // String!
+    name: string; // String!
+    relative: string; // String!
+    specType: NexusGenEnums['SpecType']; // SpecType!
+  }
   TestingTypeInfo: { // field return type
     description: string; // String!
     id: NexusGenEnums['TestingTypeEnum']; // TestingTypeEnum!
@@ -369,6 +379,7 @@ export interface NexusGenFieldTypeNames {
     projectId: 'String'
     projectRoot: 'String'
     resolvedConfig: 'ResolvedConfig'
+    specs: 'Spec'
     title: 'String'
   }
   Mutation: { // field return type name
@@ -507,6 +518,12 @@ export interface NexusGenFieldTypeNames {
     totalPassed: 'Int'
     totalPending: 'Int'
     totalSkipped: 'Int'
+  }
+  Spec: { // field return type name
+    absolute: 'String'
+    name: 'String'
+    relative: 'String'
+    specType: 'SpecType'
   }
   TestingTypeInfo: { // field return type name
     description: 'String'
