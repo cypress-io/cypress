@@ -38,4 +38,6 @@ export abstract class BaseActions {
   abstract resolveOpenProjectConfig (): FullConfig | null
 
   abstract isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean
+
+  abstract getSpecs (): Promise<any>
 }

@@ -154,4 +154,7 @@ export class ServerActions extends BaseActions {
       throw Error(e)
     }
   }
+
+  async getSpecs () {
+  }
 }
