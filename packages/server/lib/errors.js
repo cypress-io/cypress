@@ -1050,6 +1050,9 @@ const clone = function (err, options = {}) {
 
   if (options.html) {
     obj.message = ansi_up.ansi_to_html(err.message)
+    // revert back the distorted characters
+    .replace(/\&\#x27;/g, '\'')
+    .replace(/\&quot\;/g, '"')
   } else {
     obj.message = err.message
   }
