@@ -1,5 +1,7 @@
 import Debug from 'debug'
 import { nxs, NxsResult } from 'nexus-decorators'
+import { SpecTypeEnum } from '../constants/specConstants'
+import type { NexusGenArgTypes } from '../gen'
 import { Project } from './Project'
 import { ResolvedConfig } from './ResolvedConfig'
 import { Spec } from './Spec'
@@ -20,8 +22,12 @@ export class LocalProject extends Project {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
   }
 
-  @nxs.field.nonNull.list.nonNull.type(() => Spec)
-  async specs (): Promise<NxsResult<'LocalProject', 'specs'>> {
+  @nxs.field.nonNull.list.nonNull.type(() => Spec, {
+    args: {
+      filterBy: SpecTypeEnum,
+    },
+  })
+  async specs ({ filterBy }: NexusGenArgTypes['LocalProject']['specs']): Promise<NxsResult<'LocalProject', 'specs'>> {
     const config = this.resolvedConfig()
     const specs = await this.ctx.actions.getSpecs({
       projectRoot: this.projectRoot,
@@ -33,9 +39,29 @@ export class LocalProject extends Project {
       integrationFolder: config?.integrationFolder?.value ?? '',
     })
 
-    debug('found specs %o', specs)
+    debug('found specs %o, filtering by %s', specs, filterBy)
 
-    return specs.map((spec) => new Spec(spec))
+    if (!filterBy) {
+      return specs.map((spec) => new Spec(spec))
+    }
+
+    if (filterBy === 'component') {
+      return specs.reduce<Spec[]>((acc, spec) => {
+        if (spec.specType === 'component') {
+          return acc.concat(new Spec(spec))
+        }
+
+        return acc
+      }, [])
+    }
+
+    return specs.reduce<Spec[]>((acc, spec) => {
+      if (spec.specType === 'integration') {
+        return acc.concat(new Spec(spec))
+      }
+
+      return acc
+    }, [])
   }
 
   @nxs.field.nonNull.boolean({

@@ -582,6 +582,11 @@ export interface NexusGenFieldTypeNames {
 }
 
 export interface NexusGenArgTypes {
+  LocalProject: {
+    specs: { // args
+      filterBy?: NexusGenEnums['SpecType'] | null; // SpecType
+    }
+  }
   Mutation: {
     appCreateConfigFile: { // args
       code: string; // String!

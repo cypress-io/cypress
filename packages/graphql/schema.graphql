@@ -84,7 +84,7 @@ type LocalProject {
   projectId: String
   projectRoot: String!
   resolvedConfig: ResolvedConfig
-  specs: [Spec!]!
+  specs(filterBy: SpecType): [Spec!]!
   title: String!
 }
 

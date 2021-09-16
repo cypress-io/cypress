@@ -1,3 +1,5 @@
-export interface SpecContract extends Pick<Cypress.Spec, 'relative' | 'absolute' | 'name'> {
+import type { FoundSpec } from '@packages/server/lib/util/specs'
+
+export interface SpecContract extends FoundSpec {
   specType: Cypress.CypressSpecType
 }
