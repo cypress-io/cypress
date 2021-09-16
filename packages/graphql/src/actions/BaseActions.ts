@@ -20,6 +20,7 @@ export abstract class BaseActions {
   abstract createConfigFile (code: string, configFilename: string): void
 
   abstract addProject (projectRoot: string): LocalProject
+  abstract loadProjects (): void
 
   abstract getProjectId (projectRoot: string): Promise<string | null>
   abstract authenticate (): Promise<void>

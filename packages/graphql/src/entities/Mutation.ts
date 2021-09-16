@@ -207,5 +207,15 @@ export const mutation = mutationType({
         return ctx.app
       },
     })
+
+    t.field('loadProjects', {
+      type: 'App',
+      description: 'load saved projects into context',
+      async resolve (_root, args, ctx) {
+        await ctx.actions.loadProjects()
+
+        return ctx.app
+      },
+    })
   },
 })

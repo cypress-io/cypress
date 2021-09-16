@@ -159,6 +159,7 @@ export interface NexusGenFieldTypes {
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
+    loadProjects: NexusGenRootTypes['App'] | null; // App
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
@@ -377,6 +378,7 @@ export interface NexusGenFieldTypeNames {
     appCreateConfigFile: 'App'
     initializeOpenProject: 'Wizard'
     launchOpenProject: 'App'
+    loadProjects: 'App'
     login: 'Viewer'
     logout: 'Viewer'
     navigationMenuSetItem: 'NavigationMenu'

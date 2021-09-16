@@ -102,6 +102,9 @@ type Mutation {
   """Launches project from open_project global singleton"""
   launchOpenProject: App
 
+  """load saved projects into context"""
+  loadProjects: App
+
   """Auth with Cypress Cloud"""
   login: Viewer
 
