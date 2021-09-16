@@ -84,7 +84,7 @@ module.exports = {
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.find(config)
+        return specsUtil.default.find(config)
         .then(R.tap((specs) => {
           return debug('found __all specs %o', specs)
         }))
