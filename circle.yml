@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - issue-17944-remove-source-files
+        - fix-test-other-projects
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +42,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
-        - issue-17944-remove-source-files
+        - fix-test-other-projects
   requires:
     - create-build-artifacts
 
@@ -1481,7 +1481,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-17944-remove-source-files" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "fix-test-other-projects" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2073,6 +2073,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
+        context: test-runner:npm-release
         requires:
           - build
           - npm-eslint-plugin-dev
@@ -2116,7 +2117,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - build
     - test-kitchensink:
@@ -2128,7 +2129,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - build
     - create-build-artifacts:
@@ -2178,7 +2179,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2186,7 +2187,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2195,7 +2196,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - create-build-artifacts
 
@@ -2220,7 +2221,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - create-build-artifacts
 
@@ -2292,7 +2293,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - darwin-create-build-artifacts
 
@@ -2304,7 +2305,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - issue-17944-remove-source-files
+              - fix-test-other-projects
         requires:
           - darwin-create-build-artifacts
 
