@@ -1,14 +1,15 @@
-const _ = require('lodash')
-const R = require('ramda')
-const la = require('lazy-ass')
-const path = require('path')
-const check = require('check-more-types')
-const debug = require('debug')('cypress:server:specs')
-const minimatch = require('minimatch')
-const Bluebird = require('bluebird')
-const pluralize = require('pluralize')
-const glob = require('./glob')
-const Table = require('cli-table3')
+import _ from 'lodash'
+import R from 'ramda'
+import la from 'lazy-ass'
+import path from 'path'
+import check from 'check-more-types'
+import Debug from 'debug'
+const debug = Debug('cypress:server:specs')
+import minimatch from 'minimatch'
+import Bluebird from 'bluebird'
+import pluralize from 'pluralize'
+import glob from './glob'
+import Table from 'cli-table3'
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
@@ -18,6 +19,7 @@ const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 */
 const SPEC_TYPES = {
   INTEGRATION: 'integration',
+  COMPONENT: 'component',
 }
 
 const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
@@ -169,6 +171,45 @@ function findSpecsOfType (searchOptions, specPattern) {
   return Bluebird.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
+const setTestType = (testType) => R.map(R.set(R.lensProp('specType'), testType))
+
+const findIntegrationSpecs = (config, commonSearchOptions, specPattern) => {
+  const searchOptions = _.pick(config, commonSearchOptions)
+
+  // ? should we always use config.resolved instead of config?
+  searchOptions.searchFolder = config.integrationFolder
+
+  return findSpecsOfType(searchOptions, specPattern)
+  .then(setTestType(SPEC_TYPES.INTEGRATION))
+}
+
+const findComponentSpecs = (config, commonSearchOptions, specPattern) => {
+  // ? should we always use config.resolved instead of config?
+  if (!config.componentFolder) {
+    return []
+  }
+
+  const searchOptions = _.pick(config, commonSearchOptions)
+
+  searchOptions.searchFolder = config.componentFolder
+
+  return findSpecsOfType(searchOptions, specPattern)
+  .then(setTestType(SPEC_TYPES.COMPONENT))
+}
+
+const printFoundSpecs = (foundSpecs) => {
+  const table = new Table({
+    head: ['relative', 'specType'],
+  })
+
+  foundSpecs.forEach((spec) => {
+    table.push([spec.relative, spec.specType])
+  })
+
+  /* eslint-disable no-console */
+  console.error(table.toString())
+}
+
 /**
  * First, finds all integration specs, then finds all component specs.
  * Resolves with an array of objects. Each object has a "testType" property
@@ -184,55 +225,15 @@ const find = (config, specPattern) => {
     debug('component folder %o', config.componentFolder)
     // component tests are new beasts, and they change how we mount the
     // code into the test frame.
-    SPEC_TYPES.COMPONENT = 'component'
   }
 
   /**
    * Sets "testType: integration|component" on each object in a list
   */
-  const setTestType = (testType) => R.map(R.set(R.lensProp('specType'), testType))
-
-  const findIntegrationSpecs = () => {
-    const searchOptions = _.pick(config, commonSearchOptions)
-
-    // ? should we always use config.resolved instead of config?
-    searchOptions.searchFolder = config.integrationFolder
-
-    return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.INTEGRATION))
-  }
-
-  const findComponentSpecs = () => {
-    // ? should we always use config.resolved instead of config?
-    if (!config.componentFolder) {
-      return []
-    }
-
-    const searchOptions = _.pick(config, commonSearchOptions)
-
-    searchOptions.searchFolder = config.componentFolder
-
-    return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(SPEC_TYPES.COMPONENT))
-  }
-
-  const printFoundSpecs = (foundSpecs) => {
-    const table = new Table({
-      head: ['relative', 'specType'],
-    })
-
-    foundSpecs.forEach((spec) => {
-      table.push([spec.relative, spec.specType])
-    })
-
-    /* eslint-disable no-console */
-    console.error(table.toString())
-  }
-
   return Bluebird.resolve(
     componentTestingEnabled ?
-      findComponentSpecs() :
-      findIntegrationSpecs(),
+      findComponentSpecs(config, commonSearchOptions, specPattern) :
+      findIntegrationSpecs(config, commonSearchOptions, specPattern),
   ).tap((foundSpecs) => {
     if (debug.enabled) {
       printFoundSpecs(foundSpecs)
@@ -240,7 +241,7 @@ const find = (config, specPattern) => {
   })
 }
 
-module.exports = {
+export {
   find,
   findSpecsOfType,
 
