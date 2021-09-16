@@ -32,9 +32,10 @@ const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
  * Finds all spec files that pass the config for given type. Note that "searchOptions" is
  * a subset of the project's "config" object
  */
-function findSpecsOfType (searchOptions, specPattern) {
+function findSpecsOfType (searchOptions, specPattern?: string) {
   let fixturesFolderPath
 
+  // @ts-ignore - types are wrong
   la(check.maybe.strings(specPattern), 'invalid spec pattern', specPattern)
 
   const searchFolderPath = searchOptions.searchFolder
@@ -138,7 +139,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     // check to see if the file matches
     // any of the spec patterns array
     return _
-    .chain([])
+    .chain<string>([])
     .concat(specPattern)
     .some(matchesPattern)
     .value()
@@ -203,6 +204,7 @@ const printFoundSpecs = (foundSpecs) => {
   })
 
   foundSpecs.forEach((spec) => {
+    // @ts-ignore - types are wrong
     table.push([spec.relative, spec.specType])
   })
 
@@ -215,7 +217,7 @@ const printFoundSpecs = (foundSpecs) => {
  * Resolves with an array of objects. Each object has a "testType" property
  * with one of TEST_TYPES values.
  */
-const find = (config, specPattern) => {
+const find = (config, specPattern?: string) => {
   const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'testFiles', 'ignoreTestFiles']
 
   return Bluebird.all([
