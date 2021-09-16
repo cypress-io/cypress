@@ -220,13 +220,6 @@ const find = (config, specPattern) => {
 
   const componentTestingEnabled = _.get(config, 'resolved.testingType.value', 'e2e') === 'component'
 
-  debug('componentTesting %o', componentTestingEnabled)
-  if (componentTestingEnabled) {
-    debug('component folder %o', config.componentFolder)
-    // component tests are new beasts, and they change how we mount the
-    // code into the test frame.
-  }
-
   /**
    * Sets "testType: integration|component" on each object in a list
   */
@@ -241,7 +234,7 @@ const find = (config, specPattern) => {
   })
 }
 
-export {
+export default {
   find,
   findSpecsOfType,
 
