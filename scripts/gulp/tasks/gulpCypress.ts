@@ -70,7 +70,7 @@ export async function startCypressForTest () {
 
 export async function runCypressAgainstDist () {
   return spawnCypressWithMode('run', {
-    CYPRESS_INTERNAL_ENV: 'production',
+    CYPRESS_INTERNAL_ENV: 'staging',
     CYPRESS_INTERNAL_GQL_PORT: gqlPort,
   })
 }

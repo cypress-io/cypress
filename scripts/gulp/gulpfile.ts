@@ -106,10 +106,22 @@ gulp.task('cypressRunLaunchpad', gulp.series(
   startCypressForTest,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
-  async () => {
+  async function cypressRunReal () {
     process.argv.push('--project', monorepoPaths.pkgLaunchpad)
+    // return runCypressAgainstDist()
+    const child = await runCypressAgainstDist()
 
-    return runCypressAgainstDist()
+    child.on('exit', (code) => {
+      console.log({ code })
+    })
+
+    child.on('error', (err) => {
+      console.error({ err })
+    })
+
+    child.on('disconnect', () => {
+      console.error('disconnect')
+    })
   },
 ))
 
@@ -136,7 +148,7 @@ gulp.task('cypressOpenLaunchpad', gulp.series(
     process.argv.push('--project', monorepoPaths.pkgLaunchpad)
     process.env.CYPRESS_INTERNAL_ENV = 'production'
 
-    return startCypress()
+    return await startCypress()
   },
 ))
 

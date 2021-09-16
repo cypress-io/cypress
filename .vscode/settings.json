@@ -21,16 +21,5 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "cSpell.words": [
-    "autobarrel",
-    "Autobarrel",
-    "codegen",
-    "Codegen",
-    "getenv",
-    "Spawnable",
-    "vite",
-    "Vite",
-    "VITE"
-  ]
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
