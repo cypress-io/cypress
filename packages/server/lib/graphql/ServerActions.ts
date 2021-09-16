@@ -23,7 +23,7 @@ import browsers from '@packages/server/lib/browsers'
 import * as config from '@packages/server/lib/config'
 import specUtils from '@packages/server/lib/util/specs'
 /* eslint-disable no-duplicate-imports */
-import type { FindSpecs } from '@packages/server/lib/util/specs'
+import type { FindSpecs } from '@packages/types'
 
 import { getId } from '@packages/server/lib/project_static'
 import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'

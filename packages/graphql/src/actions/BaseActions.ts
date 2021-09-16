@@ -1,9 +1,8 @@
 import type { BaseContext } from '../context/BaseContext'
 import type { RunGroup } from '../entities/run'
-import type { FoundBrowser, OpenProjectLaunchOptions, FullConfig, LaunchOpts, LaunchArgs } from '@packages/types'
+import type { FoundBrowser, OpenProjectLaunchOptions, FullConfig, LaunchOpts, LaunchArgs, FindSpecs } from '@packages/types'
 import type { LocalProject } from '../entities'
 import type { BrowserContract } from '../contracts/BrowserContract'
-import type { FindSpecs } from '@packages/server/lib/util/specs'
 import type { SpecContract } from '../contracts/SpecContract'
 import type { GitInfo } from '@packages/server/lib/util/git'
 
