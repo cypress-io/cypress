@@ -83,6 +83,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
+  private _isServerOpen: boolean = false
 
   public browser: any
   public options: OpenProjectLaunchOptions
@@ -222,6 +223,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       specsStore,
     })
 
+    this._isServerOpen = true
+
     // if we didnt have a cfg.port
     // then get the port once we
     // open the server
@@ -351,13 +354,17 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+    if (this._isServerOpen) {
+      const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
 
-    await Promise.all([
-      this.server?.close(),
-      this.watchers?.close(),
-      closePreprocessor?.(),
-    ])
+      await Promise.all([
+        this.server?.close(),
+        this.watchers?.close(),
+        closePreprocessor?.(),
+      ])
+
+      this._isServerOpen = false
+    }
 
     process.chdir(localCwd)
 
