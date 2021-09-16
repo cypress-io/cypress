@@ -990,7 +990,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
     case 'CONFIG_FILES_LANGUAGE_CONFLICT':
       return stripIndent`
-          We've found the following Cypress config files: \`${arg2}\`, \`${arg3}\` at the locations below:
+          We've found the following Cypress config files: \`${arg2}\`, \`${arg3}\` at the location below:
 
           ${arg1}
 
