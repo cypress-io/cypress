@@ -994,7 +994,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
           ${arg1}
 
-          JSON configuration files will be deprecated in a future release. Please fully migrate to a cypress.config.js file and re-run your command.
+          The JSON configuration file will be deprecated in a future release. Please fully migrate to a cypress.config.js file and re-run your command.
           `
 
     case 'UNSUPPORTED_BROWSER_VERSION':
