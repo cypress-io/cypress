@@ -6,6 +6,7 @@
       :description="firstTimeCT ? ct.description : 'LAUNCH'"
       :role="firstTimeCT ? 'setup-component-testing' : 'launch-component-testing'"
       @click="ctNextStep" 
+      v-if="ct"
     />
 
     <TestingTypeCard
@@ -14,6 +15,7 @@
       :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
       :role="firstTimeE2E ? 'setup-e2e-testing' : 'launch-e2e-testing'"
       @click="e2eNextStep"
+      v-if="e2e"
     />
 
   </div>
@@ -77,7 +79,7 @@ const props = defineProps<{
 }>()
 
 const ct = computed(() => {
-  return props.gql.wizard.testingTypes.find(x => x.id === 'component')!
+  return props.gql.wizard.testingTypes.find(x => x.id === 'component')
 })
 
 const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
@@ -98,6 +100,6 @@ const e2eNextStep = async () => {
 }
 
 const e2e = computed(() => {
-  return props.gql.wizard.testingTypes.find(x => x.id === 'e2e')!
+  return props.gql.wizard.testingTypes.find(x => x.id === 'e2e')
 })
 </script>

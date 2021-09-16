@@ -14,7 +14,7 @@ export class Query {
     return ctx.app
   }
 
-  @nxs.field.type(() => Wizard, {
+  @nxs.field.nonNull.type(() => Wizard, {
     description: 'Metadata about the wizard, null if we arent showing the wizard',
   })
   wizard (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'wizard'> {

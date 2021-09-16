@@ -88,7 +88,7 @@ type CloudProject implements Node {
   recordKeys: [CloudRecordKey!]
 
   """A connection field type"""
-  runs(after: String, before: String, cypressVersion: String!, first: Int, last: Int, status: CloudRunStatus!): CloudRunConnection
+  runs(after: String, before: String, cypressVersion: String, first: Int, last: Int, status: CloudRunStatus): CloudRunConnection
 
   """Unique identifier for a Project"""
   slug: String!
@@ -345,17 +345,17 @@ type PageInfo {
   endCursor: String
 
   """
-  Used to indicate whether more edges exist following the set defined by the clients arguments. 
-  If the client is paginating with first/after, then the server must return true if further edges 
-  exist, otherwise false. If the client is paginating with last/before, then the client may return 
+  Used to indicate whether more edges exist following the set defined by the clients arguments.
+  If the client is paginating with first/after, then the server must return true if further edges
+  exist, otherwise false. If the client is paginating with last/before, then the client may return
   true if edges further from before exist, if it can do so efficiently, otherwise may return false.
   """
   hasNextPage: Boolean!
 
   """
-  Used to indicate whether more edges exist prior to the set defined by the clients arguments. 
-  If the client is paginating with last/before, then the server must return true if prior edges exist, 
-  otherwise false. If the client is paginating with first/after, then the client may return true if 
+  Used to indicate whether more edges exist prior to the set defined by the clients arguments.
+  If the client is paginating with last/before, then the server must return true if prior edges exist,
+  otherwise false. If the client is paginating with first/after, then the client may return true if
   edges prior to after exist, if it can do so efficiently, otherwise may return false.
   """
   hasPreviousPage: Boolean!
@@ -417,7 +417,7 @@ type Query {
   navigationMenu: NavigationMenu
 
   """Metadata about the wizard, null if we arent showing the wizard"""
-  wizard: Wizard
+  wizard: Wizard!
 }
 
 type ResolvedBooleanOption implements ResolvedOptionBase {

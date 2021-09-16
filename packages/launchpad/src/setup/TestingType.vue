@@ -30,6 +30,7 @@ mutation TestingType_Select($testingType: TestingTypeEnum!) {
     testingType
     title
     description
+    ...TestingType
   }
 }
 `
@@ -47,12 +48,12 @@ fragment TestingType on Wizard {
 export default defineComponent({
   props: {
     gql: {
-      type: Object as PropType<TestingType_SelectDocument>,
+      type: Object as PropType<TestingTypeFragment>,
       required: true,
     }
   },
   setup(props) {
-    const mutation = useMutation(TestingTypeSelectDocument)
+    const mutation = useMutation(TestingType_SelectDocument)
 
     const selectTestingType = (testingType: TestingTypeEnum) => {
       mutation.executeMutation({ testingType });

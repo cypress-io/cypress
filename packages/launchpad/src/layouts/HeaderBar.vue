@@ -2,7 +2,7 @@
   <div class="bg-gray-100 flex items-center p-2 mb-8 justify-between">
     <div class="flex items-center">
       <img src="../images/cypress_s.png" class="p-2" />
-      Projects > {{ props.gql.activeProject?.title }}
+      Projects > {{ props.gql.app.activeProject?.title }}
     </div>
     <div>
       <Auth :gql="props.gql" />

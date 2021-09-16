@@ -1,5 +1,6 @@
+import { delegateToSchema } from '@graphql-tools/delegate'
 import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
-import type { GraphQLResolveInfo } from 'graphql'
+import type { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
 import { App, Wizard, NavigationMenu, Project } from '../entities'
 import type { NexusGenObjects } from '../gen/nxs.gen'
@@ -19,6 +20,7 @@ export interface AuthenticatedUser {
  */
 export abstract class BaseContext {
   protected _authenticatedUser: AuthenticatedUser | null = null
+  protected abstract _remoteSchema: GraphQLSchema
 
   get authenticatedUser () {
     return this._authenticatedUser ?? null
@@ -35,13 +37,27 @@ export abstract class BaseContext {
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
 
+  app = new App(this)
   wizard = new Wizard(this)
   navigationMenu = new NavigationMenu()
-  app = new App(this)
-
-  abstract delegateToRemoteQuery(info: GraphQLResolveInfo): NexusGenObjects['Query'] | null
 
   abstract delegateToRemoteQueryBatched(info: GraphQLResolveInfo): NexusGenObjects['Query'] | null
+
+  delegateToRemoteQuery (info: GraphQLResolveInfo, rootValue = {}): NexusGenObjects['Query'] | null {
+    try {
+      return delegateToSchema({
+        schema: this._remoteSchema,
+        info,
+        context: this,
+        rootValue,
+      }) as any
+    } catch (e) {
+      // eslint-disable-next-line
+      console.error(e)
+    }
+
+    return null as any
+  }
 
   get activeProject () {
     return this.app.activeProject

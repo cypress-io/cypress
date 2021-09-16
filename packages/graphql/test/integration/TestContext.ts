@@ -1,6 +1,7 @@
 import { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import { BaseActions, BaseContext } from '../../src'
 import { Project, Wizard } from '../../src/entities'
+import { remoteSchema } from '../../src/stitching/remoteSchema'
 import { TestActions } from './TestActions'
 
 interface TestContextInjectionOptions {
@@ -11,6 +12,8 @@ interface TestContextInjectionOptions {
 }
 
 export class TestContext extends BaseContext {
+  _remoteSchema = remoteSchema
+
   localProjects: Project[] = []
   readonly actions: BaseActions
   viewer = null
@@ -23,6 +26,7 @@ export class TestContext extends BaseContext {
       projectRoot: '/project/root',
       invokedFromCli: false,
       browser: null,
+      global: false,
       testingType: 'e2e',
       project: '/project/root',
       os: 'linux',
@@ -32,5 +36,9 @@ export class TestContext extends BaseContext {
     if (wizard) {
       this.wizard = wizard
     }
+  }
+
+  delegateToRemoteQueryBatched () {
+    return {} as any
   }
 }

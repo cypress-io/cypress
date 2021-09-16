@@ -37,6 +37,7 @@ gulp.task(
 )
 
 gulp.task('buildProd', gulp.series(
+  syncRemoteGraphQL,
   nexusCodegen,
   graphqlCodegen,
 ))

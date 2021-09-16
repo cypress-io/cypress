@@ -280,7 +280,7 @@ export interface NexusGenFieldTypes {
     cloudProjectsBySlugs: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
     cloudViewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
-    wizard: NexusGenRootTypes['Wizard'] | null; // Wizard
+    wizard: NexusGenRootTypes['Wizard']; // Wizard!
   }
   ResolvedBooleanOption: { // field return type
     from: NexusGenEnums['ResolvedConfigOption'] | null; // ResolvedConfigOption
@@ -695,10 +695,10 @@ export interface NexusGenArgTypes {
     runs: { // args
       after?: string | null; // String
       before?: string | null; // String
-      cypressVersion: string; // String!
+      cypressVersion?: string | null; // String
       first?: number | null; // Int
       last?: number | null; // Int
-      status: NexusGenEnums['CloudRunStatus']; // CloudRunStatus!
+      status?: NexusGenEnums['CloudRunStatus'] | null; // CloudRunStatus
     }
   }
   CloudRunCommitInfo: {

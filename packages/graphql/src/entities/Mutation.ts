@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
+import { Query } from './Query'
 
 const debug = Debug('cypress:graphql:mutation')
 

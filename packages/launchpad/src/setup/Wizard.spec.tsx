@@ -9,7 +9,7 @@ describe('Wizard', () => {
         return new Query()
       },
       render: (gqlVal) => {
-        return <Wizard query={gqlVal} />
+        return <Wizard gql={gqlVal} />
       },
     })
   })

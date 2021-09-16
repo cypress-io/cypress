@@ -16,8 +16,9 @@
 
 <script lang="ts" setup>
 import Icon from '../components/icon/Icon.vue'
-import type { HTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+import { HTMLAttributes, FunctionalComponent, SVGAttributes, computed } from 'vue'
 import type { SideBarItemFragment } from '../generated/graphql'
+import { gql } from '@urql/core'
 
 interface Props extends HTMLAttributes {
   icon: FunctionalComponent<SVGAttributes>

@@ -1,7 +1,5 @@
-import { delegateToSchema } from '@graphql-tools/delegate'
 import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project } from '@packages/graphql'
 
-import type { GraphQLResolveInfo } from 'graphql'
 import { ServerActions } from './ServerActions'
 import type { OpenProjectLaunchOptions, LaunchArgs } from '@packages/types'
 
@@ -10,6 +8,7 @@ import user from '@packages/server/lib/user'
 
 export class ServerContext extends BaseContext {
   readonly actions = new ServerActions(this)
+  protected _remoteSchema = remoteSchemaWrapped
 
   constructor (args: LaunchArgs, options: OpenProjectLaunchOptions) {
     super(args, options)
@@ -25,21 +24,6 @@ export class ServerContext extends BaseContext {
   }
 
   localProjects: Project[] = []
-
-  delegateToRemoteQuery (info: GraphQLResolveInfo) {
-    try {
-      return delegateToSchema({
-        schema: remoteSchemaWrapped,
-        info,
-        context: this,
-      }) as any
-    } catch (e) {
-      // eslint-disable-next-line
-      console.error(e)
-    }
-
-    return null as any
-  }
 
   delegateToRemoteQueryBatched () {
     return null
