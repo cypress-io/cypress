@@ -61,14 +61,14 @@ export class Project implements ProjectContract {
   @nxs.field.nonNull.boolean({
     description: 'Whether the user configured this project to use Component Testing',
   })
-  get isFirstTimeCT (): NxsResult<'LocalProject', 'isFirstTimeCT'> {
+  get isFirstTimeCT (): NxsResult<'Project', 'isFirstTimeCT'> {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'component')
   }
 
   @nxs.field.nonNull.boolean({
     description: 'Whether the user configured this project to use e2e Testing',
   })
-  get isFirstTimeE2E (): NxsResult<'LocalProject', 'isFirstTimeE2E'> {
+  get isFirstTimeE2E (): NxsResult<'Project', 'isFirstTimeE2E'> {
     return this.ctx.actions.isFirstTime(this.projectRoot, 'e2e')
   }
 

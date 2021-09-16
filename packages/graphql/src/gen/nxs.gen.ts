@@ -9,7 +9,6 @@ import type { BaseContext } from "./../context/BaseContext"
 import type { Query } from "./../entities/Query"
 import type { App } from "./../entities/App"
 import type { Browser } from "./../entities/Browser"
-import type { LocalProject } from "./../entities/LocalProject"
 import type { NavigationItem } from "./../entities/NavigationItem"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
 import type { Project } from "./../entities/Project"
@@ -94,7 +93,6 @@ export interface NexusGenObjects {
   CloudRunConnection: cloudGen.CloudRunConnection;
   CloudRunEdge: cloudGen.CloudRunEdge;
   CloudUser: cloudGen.CloudUser;
-  LocalProject: LocalProject;
   Mutation: {};
   NavigationItem: NavigationItem;
   NavigationMenu: NavigationMenu;
@@ -221,16 +219,6 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     organizations: NexusGenRootTypes['CloudOrganizationConnection'] | null; // CloudOrganizationConnection
     userIsViewer: boolean; // Boolean!
-  }
-  LocalProject: { // field return type
-    cloudProject: NexusGenRootTypes['CloudProject'] | null; // CloudProject
-    id: string; // ID!
-    isFirstTimeCT: boolean; // Boolean!
-    isFirstTimeE2E: boolean; // Boolean!
-    projectId: string | null; // String
-    projectRoot: string; // String!
-    resolvedConfig: NexusGenRootTypes['ResolvedConfig'] | null; // ResolvedConfig
-    title: string; // String!
   }
   Mutation: { // field return type
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
@@ -499,16 +487,6 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     organizations: 'CloudOrganizationConnection'
     userIsViewer: 'Boolean'
-  }
-  LocalProject: { // field return type name
-    cloudProject: 'CloudProject'
-    id: 'ID'
-    isFirstTimeCT: 'Boolean'
-    isFirstTimeE2E: 'Boolean'
-    projectId: 'String'
-    projectRoot: 'String'
-    resolvedConfig: 'ResolvedConfig'
-    title: 'String'
   }
   Mutation: { // field return type name
     appCreateConfigFile: 'App'
