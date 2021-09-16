@@ -1,6 +1,7 @@
 [
   {
     "id": "pol9712jdha0wef082h98ha-8f98h3",
+    "configFile": "cypress.json",
     "path": "/Users/Jane/Projects/My-Fake-Project",
     "name": "My-Fake-Project",
     "lastBuildStatus": "passed",
@@ -18,6 +19,7 @@
   },
   {
     "id": "9a89712jdha0wef082h98ha-8f98h3",
+    "configFile": "cypress.json",
     "path": "/Users/Jane/Projects/My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress",
     "name": "My-Long-Named-Fake-Project-To-Start-Testing-All-The-Things-In-Cypress",
     "lastBuildStatus": "failed",
@@ -33,6 +35,7 @@
   },
   {
     "id": "d789712jdha0wef082h98ha-8f98h3",
+    "configFile": "cypress.json",
     "path": "/Users/Jane/Projects/project1",
     "name": "Client Work",
     "lastBuildStatus": "noTests",
@@ -48,6 +51,7 @@
   },
   {
     "id": "2289712jdha0wef082h98ha-8f98h3",
+    "configFile": "cypress.json",
     "path": "/Users/Jane/Projects/project2",
     "name": "project2",
     "lastBuildStatus": "running",
@@ -62,6 +66,7 @@
     "state": "VALID"
   },
   {
+    "configFile": "cypress.json",
     "path": "/Users/Jane/Projects/project3"
   }
 ]
