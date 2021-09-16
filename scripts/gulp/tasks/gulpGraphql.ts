@@ -85,7 +85,7 @@ export async function graphqlCodegenWatch () {
 const ENV_MAP = {
   development: 'http://localhost:3000',
   staging: 'https://dashboard-staging.cypress.io',
-  production: 'https://dashboard-staging.cypress.io',
+  production: 'https://dashboard.cypress.io',
 }
 
 export async function syncRemoteGraphQL () {

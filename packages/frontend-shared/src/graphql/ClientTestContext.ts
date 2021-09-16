@@ -1,4 +1,5 @@
 import { BaseActions, BaseContext, Project } from '@packages/graphql'
+import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
 import type { FullConfig } from '@packages/server/lib/config'
 import { browsers, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 
@@ -92,6 +93,7 @@ const TEST_LAUNCH_ARGS: LaunchArgs = {
 }
 
 export class ClientTestContext extends BaseContext {
+  _remoteSchema = remoteSchema
   constructor (_launchArgs?: LaunchArgs, _launchOptions?: OpenProjectLaunchOptions) {
     super(_launchArgs ?? TEST_LAUNCH_ARGS, _launchOptions ?? {})
   }

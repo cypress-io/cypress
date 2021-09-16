@@ -934,6 +934,16 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
+  check-ts:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          name: Check TS Types
+          command: yarn gulp checkTs
+
+
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
@@ -1981,6 +1991,9 @@ linux-workflow: &linux-workflow
     - build:
         requires:
           - node_modules_install
+    - check-ts:
+        requires:
+          - build
     - lint:
         name: Linux lint
         requires:
@@ -2104,6 +2117,7 @@ linux-workflow: &linux-workflow
     - npm-release:
         requires:
           - build
+          - check-ts
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react

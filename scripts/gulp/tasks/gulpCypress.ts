@@ -10,8 +10,11 @@ import { monorepoPaths } from '../monorepoPaths'
  * when any of those change
  */
 export function startCypressWatch () {
-  const watcher = chokidar.watch('src/**/*.{js,ts}', {
-    cwd: monorepoPaths.pkgGraphql,
+  const watcher = chokidar.watch([
+    'packages/graphql/src/**/*.{js,ts}',
+    'packages/server/lib/graphql/**/*.{js,ts}',
+  ], {
+    cwd: monorepoPaths.root,
     ignored: /\.gen\.ts/,
     ignoreInitial: true,
   })

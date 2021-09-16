@@ -5,8 +5,8 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "types": "tsc --noEmit",
-    "build-prod": "yarn gulp nexusCodegen && tsc",
+    "build-prod": "yarn gulp nexusCodegen && tsc || echo 'built, with errors'",
+    "check-ts": "tsc --noEmit",
     "clean-deps": "rm -rf node_modules",
     "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
@@ -23,6 +23,7 @@
     "dedent": "^0.7.0",
     "express": "4.17.1",
     "express-graphql": "^0.12.0",
+    "getenv": "^1.0.0",
     "graphql": "^15.5.1",
     "graphql-scalars": "^1.10.0",
     "nexus": "^1.2.0-next.15",

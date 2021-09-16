@@ -1,4 +1,4 @@
-import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project } from '@packages/graphql'
+import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project, execute, parse } from '@packages/graphql'
 
 import { ServerActions } from './ServerActions'
 import type { OpenProjectLaunchOptions, LaunchArgs } from '@packages/types'
@@ -20,6 +20,17 @@ export class ServerContext extends BaseContext {
       if (cachedUser.authToken) {
         this._authenticatedUser = cachedUser
       }
+
+      Promise.resolve(execute({
+        schema: this._remoteSchema,
+        document: parse(`{ cloudViewer { id } }`),
+        contextValue: this,
+      })).then((result) => {
+        if (!result.data?.cloudViewer) {
+          this._authenticatedUser = null
+          user.logOut()
+        }
+      })
     })
   }
 

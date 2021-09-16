@@ -2,8 +2,10 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, printUrqlSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
+import { checkTs } from './tasks/gulpTsc'
 import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
+import { setGulpGlobal } from './gulpConstants'
 
 gulp.task(
   'dev',
@@ -36,6 +38,20 @@ gulp.task(
   ),
 )
 
+gulp.task(
+  'debug',
+  async function setupDebug () {
+    setGulpGlobal('debug', '--inspect')
+  },
+)
+
+gulp.task(
+  'debugBrk',
+  async function setupDebugBrk () {
+    setGulpGlobal('debug', '--inspect-brk')
+  },
+)
+
 gulp.task('buildProd', gulp.series(
   syncRemoteGraphQL,
   nexusCodegen,
@@ -62,6 +78,7 @@ gulp.task(
 //   'debug', // Tim: TODO
 // )
 
+gulp.task(checkTs)
 gulp.task(syncRemoteGraphQL)
 gulp.task(printUrqlSchema)
 gulp.task(makePathMap)

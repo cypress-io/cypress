@@ -1,4 +1,4 @@
-import { FooFragmentDoc } from './generated/graphql'
+import { FooFragmentDoc } from './generated/graphql-test'
 import Foo from './Foo.vue'
 
 describe('Foo', () => {

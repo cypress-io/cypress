@@ -6,7 +6,7 @@ describe('<Input/>', () => {
     const value = ref('')
     const textToType = 'My wonderful input text'
 
-    cy.mount(() => <Input vModel={value.value}/>)
+    cy.mount(() => <Input modelValue={value.value}/>)
     cy.get('input').type(textToType, { delay: 0 })
 
     cy.should(() => {
