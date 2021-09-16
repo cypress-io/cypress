@@ -676,7 +676,7 @@ describe('lib/modes/run', () => {
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
       sinon.spy(errors, 'warning')
 
-      sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil.default, 'find').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
@@ -758,7 +758,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil.default, 'find').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
