@@ -1137,10 +1137,6 @@ describe('lib/config', () => {
       })
     })
 
-    it('javascripts=[]', function () {
-      return this.defaults('javascripts', [])
-    })
-
     it('viewportWidth=1000', function () {
       return this.defaults('viewportWidth', 1000)
     })
