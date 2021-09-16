@@ -15,7 +15,7 @@ module.exports = {
   handleFiles (req, res, config) {
     debug('handle files')
 
-    return specsUtil.find(config)
+    return specsUtil.default.find(config)
     .then((files) => {
       return res.json({
         integration: files,

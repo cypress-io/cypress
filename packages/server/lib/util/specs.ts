@@ -215,21 +215,21 @@ const printFoundSpecs = (foundSpecs) => {
  * Resolves with an array of objects. Each object has a "testType" property
  * with one of TEST_TYPES values.
  */
-const find = async (config, specPattern) => {
+const find = (config, specPattern) => {
   const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'testFiles', 'ignoreTestFiles']
 
-  const [ct, e2e] = await Bluebird.all([
+  return Bluebird.all([
     findComponentSpecs(config, commonSearchOptions, specPattern),
     findIntegrationSpecs(config, commonSearchOptions, specPattern),
-  ])
+  ]).then(([ct, e2e]) => {
+    const foundSpecs = [...ct, ...e2e]
 
-  const foundSpecs = [...ct, ...e2e]
+    if (debug.enabled) {
+      printFoundSpecs(foundSpecs)
+    }
 
-  if (debug.enabled) {
-    printFoundSpecs(foundSpecs)
-  }
-
-  return foundSpecs
+    return foundSpecs
+  })
 }
 
 export default {

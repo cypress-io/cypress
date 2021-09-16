@@ -1472,7 +1472,7 @@ module.exports = {
   },
 
   findSpecs (config, specPattern) {
-    return specsUtil
+    return specsUtil.default
     .find(config, specPattern)
     .tap((specs = []) => {
       if (debug.enabled) {
@@ -1549,7 +1549,7 @@ module.exports = {
         .spread((sys = {}, browser = {}, specs = []) => {
           // return only what is return to the specPattern
           if (specPattern) {
-            specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            specPattern = specsUtil.defaut.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
 
           if (!specs.length) {
