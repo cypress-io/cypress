@@ -1549,7 +1549,7 @@ module.exports = {
         .spread((sys = {}, browser = {}, specs = []) => {
           // return only what is return to the specPattern
           if (specPattern) {
-            specPattern = specsUtil.defaut.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
 
           if (!specs.length) {
