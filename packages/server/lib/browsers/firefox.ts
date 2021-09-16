@@ -291,6 +291,7 @@ const defaultPreferences = {
   // and auto-accept the permissions prompt
   'media.getusermedia.browser.enabled': true,
   'media.navigator.permission.disabled': true,
+  'media.navigator.streams.fake': true,
 
   'dom.min_background_timeout_value': 4,
   'dom.timeout.enable_budget_timer_throttling': false,
