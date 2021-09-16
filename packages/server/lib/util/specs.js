@@ -245,6 +245,4 @@ module.exports = {
   findSpecsOfType,
 
   getPatternRelativeToProjectRoot,
-
-  TEST_TYPES: SPEC_TYPES,
 }
