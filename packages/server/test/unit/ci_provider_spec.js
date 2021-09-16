@@ -514,7 +514,7 @@ describe('lib/util/ci_provider', () => {
       DRONE_PULL_REQUEST: 'dronePullRequest',
 
       DRONE_COMMIT_SHA: 'droneCommitSha',
-      DRONE_COMMIT_BRANCH: 'droneCommitBranch',
+      DRONE_SOURCE_BRANCH: 'droneCommitBranch',
       DRONE_COMMIT_MESSAGE: 'droneCommitMessage',
       DRONE_COMMIT_AUTHOR: 'droneCommitAuthor',
       DRONE_COMMIT_AUTHOR_EMAIL: 'droneCommitAuthorEmail',
