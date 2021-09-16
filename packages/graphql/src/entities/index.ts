@@ -4,6 +4,7 @@
 export * from './App'
 export * from './Browser'
 export * from './DashboardProject'
+export * from './GitInfo'
 export * from './LocalProject'
 export * from './Mutation'
 export * from './NavigationItem'

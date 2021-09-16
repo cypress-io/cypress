@@ -42,13 +42,13 @@ export class LocalProject extends Project {
     debug('found specs %o, filtering by %s', specs, filterBy)
 
     if (!filterBy) {
-      return specs.map((spec) => new Spec(spec))
+      return specs.map((spec) => new Spec(spec, this.ctx))
     }
 
     if (filterBy === 'component') {
       return specs.reduce<Spec[]>((acc, spec) => {
         if (spec.specType === 'component') {
-          return acc.concat(new Spec(spec))
+          return acc.concat(new Spec(spec, this.ctx))
         }
 
         return acc
@@ -57,7 +57,7 @@ export class LocalProject extends Project {
 
     return specs.reduce<Spec[]>((acc, spec) => {
       if (spec.specType === 'integration') {
-        return acc.concat(new Spec(spec))
+        return acc.concat(new Spec(spec, this.ctx))
       }
 
       return acc

@@ -9,6 +9,7 @@ import type { BaseContext } from "./../context/BaseContext"
 import type { App } from "./../entities/App"
 import type { Browser } from "./../entities/Browser"
 import type { DashboardProject } from "./../entities/DashboardProject"
+import type { GitInfo } from "./../entities/GitInfo"
 import type { LocalProject } from "./../entities/LocalProject"
 import type { NavigationItem } from "./../entities/NavigationItem"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
@@ -88,6 +89,7 @@ export interface NexusGenObjects {
   App: App;
   Browser: Browser;
   DashboardProject: DashboardProject;
+  GitInfo: GitInfo;
   LocalProject: LocalProject;
   Mutation: {};
   NavigationItem: NavigationItem;
@@ -148,6 +150,11 @@ export interface NexusGenFieldTypes {
     recordKeys: string[] | null; // [String!]
     runs: NexusGenRootTypes['RunGroup'][] | null; // [RunGroup!]
     title: string; // String!
+  }
+  GitInfo: { // field return type
+    author: string | null; // String
+    lastModifiedHumanReadable: string | null; // String
+    lastModifiedTimestamp: string | null; // String
   }
   LocalProject: { // field return type
     id: string; // ID!
@@ -303,6 +310,7 @@ export interface NexusGenFieldTypes {
   }
   Spec: { // field return type
     absolute: string; // String!
+    gitInfo: NexusGenRootTypes['GitInfo'] | null; // GitInfo
     name: string; // String!
     relative: string; // String!
     specType: NexusGenEnums['SpecType']; // SpecType!
@@ -377,6 +385,11 @@ export interface NexusGenFieldTypeNames {
     recordKeys: 'String'
     runs: 'RunGroup'
     title: 'String'
+  }
+  GitInfo: { // field return type name
+    author: 'String'
+    lastModifiedHumanReadable: 'String'
+    lastModifiedTimestamp: 'String'
   }
   LocalProject: { // field return type name
     id: 'ID'
@@ -532,6 +545,7 @@ export interface NexusGenFieldTypeNames {
   }
   Spec: { // field return type name
     absolute: 'String'
+    gitInfo: 'GitInfo'
     name: 'String'
     relative: 'String'
     specType: 'SpecType'

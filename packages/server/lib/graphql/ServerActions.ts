@@ -3,7 +3,7 @@ import path from 'path'
 import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
+import { AuthenticatedUser, BaseActions, LocalProject, SpecContract, Viewer } from '@packages/graphql'
 import { RunGroup } from '@packages/graphql/src/entities/run'
 import { openProject } from '@packages/server/lib/open_project'
 import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
@@ -27,6 +27,7 @@ import type { FindSpecs } from '@packages/server/lib/util/specs'
 
 import { getId } from '@packages/server/lib/project_static'
 import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
+import { getGitInfo } from '../util/git'
 
 const debug = Debug('cypress:server:graphql')
 
@@ -158,7 +159,11 @@ export class ServerActions extends BaseActions {
     }
   }
 
-  async getSpecs (options: FindSpecs): Promise<any> {
+  getSpecs (options: FindSpecs): Promise<SpecContract[]> {
     return specUtils.findSpecs(options)
+  }
+
+  getGitInfo (file: string) {
+    return getGitInfo(file)
   }
 }
