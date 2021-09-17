@@ -2,6 +2,9 @@
 
 // @ts-check
 
+const tmpdir = require('os').tmpdir()
+const path = require('path')
+
 const { createConfig } = require('./config')
 const env = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'prod' : 'dev'
 
@@ -20,7 +23,7 @@ if (isDev) {
       supportTS: true,
       initTranspileCache: () => {
         return DirtSimpleFileCache.initSync(projectBaseDir, {
-          cacheDir: '/tmp/cypress-cache/',
+          cacheDir: path.join(tmpdir, 'cypress-cache/'),
           keepInMemoryCache: true,
         })
       },
