@@ -82,6 +82,7 @@ fragment OpenBrowserList on App {
     id
     name
     family
+    disabled
     channel
     displayName
     path

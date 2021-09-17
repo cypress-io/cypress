@@ -392,7 +392,11 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - run: CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>> --record --parallel
+      - run: 
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>> --record --parallel
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
