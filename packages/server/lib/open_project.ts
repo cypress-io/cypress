@@ -44,7 +44,7 @@ export interface LaunchArgs {
 }
 
 // @see https://github.com/cypress-io/cypress/issues/18094
-async function win32BitWarning (onWarning) {
+async function win32BitWarning (onWarning: (error: Error) => void) {
   if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
 
   // adapted from https://github.com/feross/arch/blob/master/index.js
