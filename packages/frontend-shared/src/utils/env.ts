@@ -3,6 +3,6 @@
 
 // Unsure how to get import.meta.env working
 // https://vitejs.dev/guide/env-and-mode.html#intellisense
-export const GRAPHQL_PORT: number = import.meta.env.VITE_CYPRESS_INTERNAL_GQL_PORT || 51259
+export const GRAPHQL_PORT = import.meta.env.VITE_CYPRESS_INTERNAL_GQL_PORT || `${51259}`
 
 export const GRAPHQL_URL = `http://localhost:${GRAPHQL_PORT}/graphql`
