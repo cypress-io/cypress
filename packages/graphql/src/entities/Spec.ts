@@ -1,14 +1,14 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { SpecTypeEnum } from '../constants/specConstants'
-import type { BaseContext } from '../context'
 import type { SpecContract } from '../contracts/SpecContract'
+import type { GitInfo as GetGitInfo } from '@packages/server/lib/util/git'
 import { GitInfo } from './GitInfo'
 
 @nxs.objectType({
   description: 'A spec file associated with a project and testing type via the testFiles glob',
 })
 export class Spec implements SpecContract {
-  constructor (private _config: SpecContract, private ctx: BaseContext) {}
+  constructor (private _config: SpecContract, private _gitInfo?: GetGitInfo) {}
 
   @nxs.field.nonNull.type(() => SpecTypeEnum)
   get specType (): NxsResult<'Spec', 'specType'> {
@@ -32,6 +32,10 @@ export class Spec implements SpecContract {
 
   @nxs.field.type(() => GitInfo)
   get gitInfo (): NxsResult<'Spec', 'gitInfo'> {
-    return new GitInfo(this._config.absolute, this.ctx)
+    if (!this._gitInfo) {
+      return null
+    }
+
+    return new GitInfo(this._gitInfo)
   }
 }

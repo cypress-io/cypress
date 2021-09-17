@@ -41,14 +41,16 @@ export class LocalProject extends Project {
 
     debug('found specs %o, filtering by %s', specs, filterBy)
 
+    const gitinfo = this.ctx.actions.getGitInfo(specs.map((x) => x.absolute))
+
     if (!filterBy) {
-      return specs.map((spec) => new Spec(spec, this.ctx))
+      return specs.map((spec) => new Spec(spec, gitinfo.get(spec.absolute)))
     }
 
     if (filterBy === 'component') {
       return specs.reduce<Spec[]>((acc, spec) => {
         if (spec.specType === 'component') {
-          return acc.concat(new Spec(spec, this.ctx))
+          return acc.concat(new Spec(spec, gitinfo.get(spec.absolute)))
         }
 
         return acc
@@ -57,7 +59,7 @@ export class LocalProject extends Project {
 
     return specs.reduce<Spec[]>((acc, spec) => {
       if (spec.specType === 'integration') {
-        return acc.concat(new Spec(spec, this.ctx))
+        return acc.concat(new Spec(spec, gitinfo.get(spec.absolute)))
       }
 
       return acc

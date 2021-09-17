@@ -42,5 +42,5 @@ export abstract class BaseActions {
   abstract isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean
 
   abstract getSpecs (options: FindSpecs): Promise<SpecContract[]>
-  abstract getGitInfo (file: string): GitInfo | null
+  abstract getGitInfo (file: string[]): Map<string, GitInfo>
 }

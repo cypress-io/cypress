@@ -1,16 +1,11 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import type { BaseContext } from '../context'
 import type { GitInfo as GetGitInfo } from '@packages/server/lib/util/git'
 
 @nxs.objectType({
   description: 'Git info about a file',
 })
-export class GitInfo implements GetGitInfo {
-  private config: GetGitInfo | null
-
-  constructor (file: string, ctx: BaseContext) {
-    this.config = ctx.actions.getGitInfo(file)
-  }
+export class GitInfo {
+  constructor (private config: GetGitInfo | null) {}
 
   @nxs.field.string({
     description: 'author of the file',
