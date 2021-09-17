@@ -386,8 +386,6 @@ commands:
       - store-npm-logs
 
   run-launchpad-integration-tests:
-    context: test-runner:launchpad-tests
-    parallelism: 3
     parameters:
       browser:
         description: browser shortname to target
@@ -1165,7 +1163,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 3
     steps:
       - run-launchpad-integration-tests:
           browser: chrome
@@ -2062,6 +2060,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
 
