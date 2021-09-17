@@ -1,7 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import { SpecTypeEnum } from '../constants/specConstants'
 import type { SpecContract } from '../contracts/SpecContract'
-import type { GitInfo as GetGitInfo } from '@packages/server/lib/util/git'
+import type { GitInfo as GetGitInfo } from '@packages/types'
 import { GitInfo } from './GitInfo'
 
 @nxs.objectType({

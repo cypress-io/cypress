@@ -2,14 +2,9 @@ import execa from 'execa'
 import path from 'path'
 import os from 'os'
 import Debug from 'debug'
+import type { GitInfo } from '@packages/types'
 
 const debug = Debug('cypress:server:git')
-
-export interface GitInfo {
-  author: string | null
-  lastModifiedTimestamp: string | null
-  lastModifiedHumanReadable: string | null
-}
 
 // matches <timestamp> <when> <author>
 // $ git log -1 --pretty=format:%ci %ar %an <file>

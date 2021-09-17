@@ -1,5 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
-import type { GitInfo as GetGitInfo } from '@packages/server/lib/util/git'
+import type { GitInfo as GetGitInfo } from '@packages/types'
 
 @nxs.objectType({
   description: 'Git info about a file',
