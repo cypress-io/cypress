@@ -41,7 +41,7 @@ export class LocalProject extends Project {
 
     debug('found specs %o, filtering by %s', specs, filterBy)
 
-    const gitinfo = this.ctx.actions.getGitInfo(specs.map((x) => x.absolute))
+    const gitinfo = await this.ctx.actions.getGitInfo(specs.map((x) => x.absolute))
 
     if (!filterBy) {
       return specs.map((spec) => new Spec(spec, gitinfo.get(spec.absolute)))

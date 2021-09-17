@@ -16,14 +16,14 @@ export interface GitInfo {
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
 const regexp = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s(.*)/
 
-export const getGitInfo = (absolutePaths: string[]): Map<string, GitInfo> => {
+export const getGitInfo = async (absolutePaths: string[]): Promise<Map<string, GitInfo>> => {
   try {
     const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
     const cmd = os.platform() === 'win32'
       ? `FOR %x in (${paths}) DO (git log -1 --pretty='format:%ci %ar %an' %x)`
       : `for name in {${paths}}; do echo $(git log -1 --pretty='format:%ci %ar %an' $name); done`
 
-    const result = execa.sync(cmd, { shell: true })
+    const result = await execa(cmd, { shell: true })
     const stdout = result.stdout.split('\n')
 
     if (stdout.length !== absolutePaths.length) {
