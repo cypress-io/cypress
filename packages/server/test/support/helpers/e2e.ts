@@ -324,6 +324,8 @@ const localItFn = function (title, opts = {}) {
 
   const options = _.defaults({}, opts, DEFAULT_OPTIONS)
 
+  options.snapshot = false
+
   if (!title) {
     throw new Error('e2e.it(...) must be passed a title as the first argument')
   }
