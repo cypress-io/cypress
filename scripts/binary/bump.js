@@ -299,10 +299,7 @@ Testing new Cypress version ${version}
       const specificBranchOptions = {
         owner,
         repo,
-        token: {
-          appId: process.env.GH_APP_ID,
-          privateKey: process.env.GH_PRIVATE_KEY,
-        },
+        token: creds.githubToken,
         message,
         branch: version,
       }
