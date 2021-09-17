@@ -44,7 +44,6 @@ export default class CypressCTOptionsPlugin {
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
-  private refreshCompile: boolean = false
 
   constructor (options: CypressCTOptionsPluginOptionsWithEmitter) {
     this.files = options.files
@@ -83,13 +82,6 @@ export default class CypressCTOptionsPlugin {
           // compilation succeed but assets haven't emitted to the output yet
           this.devServerEvents.emit('dev-server:compile:error', null)
         }
-      },
-    )
-
-    compiler.hooks.done.tap(
-      'CypressCTOptionsPlugin',
-      () => {
-        this.refreshCompile = true
       },
     )
   }
@@ -132,7 +124,7 @@ export default class CypressCTOptionsPlugin {
       (module) => {
         // only run refreshes after first compile is done
         // if there was no compilation errors
-        if (this.refreshCompile && !compilation.errors.length) {
+        if (!compilation.errors.length) {
           this.sendSuccessEventIfSpecRecursively(module)
         }
       },
