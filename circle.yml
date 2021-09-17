@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - fix-test-other-projects
+        - tgriesser/chore/fix-release
 
 defaults: &defaults
   parallelism: 1
@@ -43,6 +44,7 @@ onlyMainBranches: &onlyMainBranches
       only:
         - develop
         - fix-test-other-projects
+        - tgriesser/chore/fix-release
   requires:
     - create-build-artifacts
 
@@ -2118,6 +2120,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - build
     - test-kitchensink:
@@ -2130,6 +2133,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - build
     - create-build-artifacts:
@@ -2180,6 +2184,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2188,6 +2193,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2197,6 +2203,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2222,6 +2229,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2294,6 +2302,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2306,6 +2315,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - fix-test-other-projects
+              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 
