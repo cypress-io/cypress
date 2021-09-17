@@ -127,14 +127,16 @@ export default class CypressCTOptionsPlugin {
       (context) => this.pluginFunc(context as CypressCTWebpackContext),
     )
 
-    compilation.hooks.succeedModule.tap(
+    compilation.hooks.finishRebuildingModule.tap(
       'CypressCTOptionsPlugin',
       (module) => {
         // only run refreshes after first compile is done
-        if (this.refreshCompile) {
+        // if there was no compilation errors
+        if (this.refreshCompile && !compilation.errors.length) {
           this.sendSuccessEventIfSpecRecursively(module)
         }
       },
+
     )
   };
 
