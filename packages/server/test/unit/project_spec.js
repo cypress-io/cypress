@@ -534,6 +534,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
       this.project._server = { close () {} }
+      this.project._isServerOpen = true
 
       sinon.stub(this.project, 'getConfig').returns(this.config)
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
