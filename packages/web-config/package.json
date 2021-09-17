@@ -1,6 +1,11 @@
 {
   "name": "@packages/web-config",
   "version": "0.0.0-development",
+  "scripts": {
+    "build-prod": "tooling_build-typescript",
+    "clean": "tooling_clean-typescript",
+    "clean-deps": "rm -rf node_modules"
+  },
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/helper-define-map": "7.8.3",
@@ -11,6 +16,7 @@
     "@babel/preset-react": "7.9.4",
     "@babel/preset-typescript": "7.9.0",
     "@babel/register": "7.9.0",
+    "@scripts/tooling": "0.0.0-development",
     "@types/jsdom": "12.2.4",
     "@types/mock-require": "2.0.0",
     "@types/webpack": "4.41.0",
