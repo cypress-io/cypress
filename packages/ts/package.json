@@ -19,7 +19,10 @@
     "glob": "^7.1.7"
   },
   "files": [
-    "register.js",
-    "hook-require.js"
+    "build-ts.js",
+    "config.js",
+    "hook-require.js",
+    "index.js",
+    "register.js"
   ]
 }
