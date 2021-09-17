@@ -52,7 +52,7 @@ platform:
 
 # Install scripts. (runs after repo cloning)
 install:
-  - node -p 'JSON.stringify(process.env, null, 2)'
+  - node -p "JSON.stringify(process.env, null, 2)"
   # it is not a given that AppVeyor has the exact version of Node we need predownloaded
   # see https://www.appveyor.com/docs/lang/nodejs-iojs/#installing-any-version-of-nodejs-or-iojs
   - ps: Update-NodeJsInstallation $env:nodejs_version $env:platform
@@ -79,7 +79,7 @@ install:
 
 # Post-install test scripts.
 test_script:
-  - node -p 'JSON.stringify(process.env, null, 2)'
+  - node -p "JSON.stringify(process.env, null, 2)"
   # Output useful info for debugging.
   # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
   - node --version
