@@ -89,7 +89,7 @@ type LocalProject {
 
 type Mutation {
   """Add project to projects array and cache it"""
-  addProject(path: String!): App
+  addProject(path: String!): App!
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
@@ -103,7 +103,7 @@ type Mutation {
   launchOpenProject: App
 
   """load saved projects into context"""
-  loadProjects: App
+  loadProjects: App!
 
   """Auth with Cypress Cloud"""
   login: Viewer

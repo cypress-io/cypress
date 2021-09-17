@@ -195,7 +195,7 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('addProject', {
+    t.nonNull.field('addProject', {
       type: 'App',
       description: 'Add project to projects array and cache it',
       args: {
@@ -208,7 +208,7 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('loadProjects', {
+    t.nonNull.field('loadProjects', {
       type: 'App',
       description: 'load saved projects into context',
       async resolve (_root, args, ctx) {

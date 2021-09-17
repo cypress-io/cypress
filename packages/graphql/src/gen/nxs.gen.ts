@@ -155,11 +155,11 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   Mutation: { // field return type
-    addProject: NexusGenRootTypes['App'] | null; // App
+    addProject: NexusGenRootTypes['App']; // App!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
-    loadProjects: NexusGenRootTypes['App'] | null; // App
+    loadProjects: NexusGenRootTypes['App']; // App!
     login: NexusGenRootTypes['Viewer'] | null; // Viewer
     logout: NexusGenRootTypes['Viewer'] | null; // Viewer
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu

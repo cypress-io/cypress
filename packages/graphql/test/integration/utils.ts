@@ -37,6 +37,10 @@ export class TestActions extends BaseActions {
     return new LocalProject(projectRoot, this.ctx)
   }
 
+  loadProjects () {
+    return []
+  }
+
   async authenticate () {
     this.ctx.viewer = new Viewer(this.ctx, {
       authToken: 'test-auth-token',
