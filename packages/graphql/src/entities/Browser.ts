@@ -10,7 +10,7 @@ export class Browser implements BrowserContract {
 
   @nxs.field.nonNull.string()
   get id (): NxsResult<'Browser', 'id'> {
-    return `${this.config.name}-${this.config.version}`
+    return `${this.config.name}-${this.config.version}-${this.config.displayName}`
   }
 
   @nxs.field.nonNull.string()
@@ -46,6 +46,11 @@ export class Browser implements BrowserContract {
   @nxs.field.string()
   get majorVersion (): NxsResult<'Browser', 'majorVersion'> {
     return this._config.majorVersion?.toString() ?? null
+  }
+
+  @nxs.field.nonNull.boolean()
+  get disabled (): NxsResult<'Browser', 'disabled'> {
+    return false
   }
 
   get config (): BrowserContract {

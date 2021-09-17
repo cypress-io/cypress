@@ -135,6 +135,7 @@ export interface NexusGenFieldTypes {
   }
   Browser: { // field return type
     channel: string; // String!
+    disabled: boolean; // Boolean!
     displayName: string; // String!
     family: NexusGenEnums['BrowserFamily']; // BrowserFamily!
     id: string; // String!
@@ -403,6 +404,7 @@ export interface NexusGenFieldTypeNames {
   }
   Browser: { // field return type name
     channel: 'String'
+    disabled: 'Boolean'
     displayName: 'String'
     family: 'BrowserFamily'
     id: 'String'

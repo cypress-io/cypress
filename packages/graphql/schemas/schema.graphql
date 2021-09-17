@@ -26,6 +26,7 @@ type App {
 """Container representing a browser"""
 type Browser {
   channel: String!
+  disabled: Boolean!
   displayName: String!
   family: BrowserFamily!
   id: String!

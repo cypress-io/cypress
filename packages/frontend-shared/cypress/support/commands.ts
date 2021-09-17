@@ -68,6 +68,8 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
     _: [''],
   }, {})
 
+  let hasMounted = false
+
   return mount(defineComponent({
     name: `mountFragment`,
     setup () {
@@ -98,6 +100,20 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
       }
     },
     render: (props) => {
+      if (props.gql && !hasMounted) {
+        hasMounted = true
+        Cypress.log({
+          displayName: 'gql',
+          message: (source.definitions[0] as FragmentDefinitionNode).name.value,
+          consoleProps () {
+            return {
+              gql: props.gql,
+              source: print(source),
+            }
+          },
+        }).end()
+      }
+
       return props.gql ? options.render(props.gql) : h('div')
     },
   }), {
