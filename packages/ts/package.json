@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "dirt-simple-file-cache": "^0.4.0",
-    "packherd": "^0.5.0"
+    "packherd": "^0.9.0"
   },
   "devDependencies": {
     "debug": "^4.3.1",
