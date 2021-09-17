@@ -354,17 +354,19 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
-    if (this._isServerOpen) {
-      const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
-
-      await Promise.all([
-        this.server?.close(),
-        this.watchers?.close(),
-        closePreprocessor?.(),
-      ])
-
-      this._isServerOpen = false
+    if (!this._isServerOpen) {
+      return
     }
+
+    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+
+    await Promise.all([
+      this.server?.close(),
+      this.watchers?.close(),
+      closePreprocessor?.(),
+    ])
+
+    this._isServerOpen = false
 
     process.chdir(localCwd)
 
