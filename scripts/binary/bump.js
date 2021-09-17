@@ -250,7 +250,7 @@ Testing new Cypress version ${version}
         owner,
         repo,
         message,
-        token: creds.githubToken,
+        token: process.env.GH_TOKEN,
       }
 
       const createGithubCommitStatusCheck = function ({ sha }) {
