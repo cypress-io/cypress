@@ -15,7 +15,7 @@ module.exports = {
   handleFiles (req, res, config) {
     debug('handle files')
 
-    return specsUtil.find(config)
+    return specsUtil.default.findSpecs(config)
     .then((files) => {
       return res.json({
         integration: files,
@@ -67,7 +67,6 @@ module.exports = {
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
-    const specTypeFilter = _.get(extraOptions, 'specType', 'integration')
 
     debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
@@ -85,17 +84,15 @@ module.exports = {
       if (spec === '__all') {
         debug('returning all specs')
 
-        return specsUtil.find(config)
+        return specsUtil.default.findSpecs(config)
         .then(R.tap((specs) => {
           return debug('found __all specs %o', specs)
         }))
         .filter(specFilterFn)
         .filter((foundSpec) => {
-          if (componentTestingEnabled) {
-            return foundSpec.specType === specTypeFilter
-          }
-
-          return true
+          return componentTestingEnabled
+            ? foundSpec.specType === 'component'
+            : foundSpec.specType === 'integration'
         }).then(R.tap((specs) => {
           return debug('filtered __all specs %o', specs)
         })).map((spec) => {
