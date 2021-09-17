@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
-    "clean": "rm lib/*.js",
+    "clean": "rm -f lib/*.js",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
