@@ -6,7 +6,8 @@ describe('<RunResults />', () => {
     cy.mountFragment(RunCardFragmentDoc, {
       type: (ctx) => ({
         // TODO: move this into a test mock layer
-        id: 'id1',
+        __typename: 'CloudRun' as const,
+        id: 'CloudRun:1',
         totalDuration: 1000,
         totalPassed: 5,
         totalFailed: 0,

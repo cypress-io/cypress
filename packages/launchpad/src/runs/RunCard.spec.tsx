@@ -6,6 +6,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
     cy.mountFragment(RunCardFragmentDoc, {
       type: (ctx) => {
         return {
+          __typename: 'CloudRun' as const,
           createdAt: new Date().toString(),
           completedAt: new Date().toString(),
           status: 'PASSED' as const,

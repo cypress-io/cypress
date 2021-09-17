@@ -11,6 +11,7 @@ describe('<ConfigFile />', () => {
   beforeEach(() => {
     cy.mountFragment(ConfigFileFragmentDoc, {
       type: (ctx) => {
+        ctx.wizard.setTestingType('component')
         ctx.wizard.setFramework('cra')
         ctx.wizard.setBundler('webpack')
 
@@ -18,7 +19,9 @@ describe('<ConfigFile />', () => {
       },
       render: (gql) => {
         return (
-          <ConfigFile gql={gql} />
+          <div>
+            <ConfigFile gql={gql} />
+          </div>
         )
       },
     })

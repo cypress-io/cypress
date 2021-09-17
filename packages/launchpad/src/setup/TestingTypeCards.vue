@@ -37,7 +37,8 @@ gql`
 fragment TestingTypeCards on Query {
   app {
     activeProject {
-     	isFirstTimeCT
+      id
+      isFirstTimeCT
       isFirstTimeE2E
     }
   }

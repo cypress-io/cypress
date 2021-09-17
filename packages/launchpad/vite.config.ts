@@ -30,7 +30,9 @@ export default defineConfig({
     VueSvgLoader(),
   ],
   define: {
-    'process.env': {},
+    'process.env': {
+      CYPRESS_INTERNAL_ENV: 'development',
+    },
     'setImmediate': {},
   },
 })

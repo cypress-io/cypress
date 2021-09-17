@@ -6,6 +6,7 @@ describe('<RunsPage />', () => {
     cy.mountFragment(RunsPageFragmentDoc, {
       type: (ctx) => {
         return ({
+          __typename: 'CloudProject' as const,
           id: '',
           slug: '',
         })

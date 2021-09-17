@@ -16,9 +16,14 @@
     {
       "files": "**/*.vue",
       "rules": {
-        "no-restricted-imports": ["error", {
-          "patterns": ["@packages/graphql/*"]
-        }]
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "@packages/graphql/*"
+            ]
+          }
+        ]
       }
     },
     {

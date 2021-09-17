@@ -9,11 +9,12 @@ describe('<RunIcon />', { viewportWidth: 80, viewportHeight: 200 }, () => {
       },
       render: (gqlList) => (
         <div class="p-3 flex flex-col align-middle justify-center w-screen">
-          <RunIcon gql={gqlList[0]} />
-          <hr/>
-          <RunIcon gql={gqlList[1]} />
-          <hr/>
-          <RunIcon gql={gqlList[2]} />
+          {gqlList.map((gql) => {
+            <>
+              <RunIcon gql={gql} />
+              <hr/>
+            </>
+          })}
         </div>
       ),
     })

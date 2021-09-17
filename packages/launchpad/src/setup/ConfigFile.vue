@@ -56,13 +56,14 @@ import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "../components/button/CopyButton.vue";
 import { languages } from "../utils/configFile";
-import { ConfigFileFragment, AppCreateConfigFileDocument } from "../generated/graphql";
+import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from "../generated/graphql";
 import { useMutation } from "@urql/vue";
 
 gql`
 fragment ConfigFile on Query {
   app {
     activeProject {
+      id
       projectRoot
     }
   }
@@ -75,7 +76,7 @@ fragment ConfigFile on Query {
 `
 
 gql`
-mutation appCreateConfigFile($code: String!, $configFilename: String!) {
+mutation ConfigFile_appCreateConfigFile($code: String!, $configFilename: String!) {
   appCreateConfigFile(code: $code, configFilename: $configFilename) {
     activeProject {
       id
@@ -88,7 +89,6 @@ mutation appCreateConfigFile($code: String!, $configFilename: String!) {
 const props = defineProps<{
   gql: ConfigFileFragment 
 }>()
-
 
 const manualInstall = ref(false);
 
@@ -107,7 +107,7 @@ import("prismjs/components/prism-typescript").then(() => {
 });
 
 
-const createConfigFile = useMutation(AppCreateConfigFileDocument)
+const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
 
 const code = computed(() => {
   if (language.value === 'js') {
