@@ -117,7 +117,10 @@ const allBrowsersIcons = {
 const selectedBrowser = ref(props.gql.browsers[0])
 
 const setSelected = (browserId: string) => {
-  selectedBrowser.value = props.gql.browsers.find(b => b.id === browserId)
+  const selected = props.gql.browsers.find(b => b.id === browserId)
+  if (selected) {
+    selectedBrowser.value = selected
+  }
 }
 
 const launchText = computed(() => selectedBrowser.value ? `${t('setupPage.openBrowser.launch')} ${selectedBrowser.value.displayName}` : '')
