@@ -163,7 +163,7 @@ export class ServerActions extends BaseActions {
     return specUtils.findSpecs(options)
   }
 
-  getGitInfo (file: string) {
-    return getGitInfo(file)
+  getGitInfo (files: string[]) {
+    return getGitInfo(files)
   }
 }
