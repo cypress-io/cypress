@@ -3,7 +3,7 @@ require('../spec_helper')
 const R = require('ramda')
 const path = require('path')
 const config = require(`${root}lib/config`)
-const specsUtil = require(`${root}lib/util/specs`)
+const specsUtil = require(`${root}lib/util/specs`).default
 const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
 const debug = require('debug')('test')
 
@@ -23,7 +23,7 @@ describe('lib/util/specs', () => {
     return FixturesHelper.remove()
   })
 
-  context('.find', () => {
+  context('.findSpecs', () => {
     const checkFoundSpec = function (foundSpec) {
       if (!path.isAbsolute(foundSpec.absolute)) {
         throw new Error(`path to found spec should be absolute ${JSON.stringify(foundSpec)}`)
@@ -32,7 +32,7 @@ describe('lib/util/specs', () => {
 
     it('returns absolute filenames', function () {
       return specsUtil
-      .find(this.config)
+      .findSpecs(this.config)
       .then((R.forEach(checkFoundSpec)))
     })
 
@@ -40,7 +40,7 @@ describe('lib/util/specs', () => {
       this.config.fixturesFolder = false
 
       const fn = () => {
-        return specsUtil.find(this.config)
+        return specsUtil.findSpecs(this.config)
       }
 
       expect(fn).not.to.throw()
@@ -49,7 +49,7 @@ describe('lib/util/specs', () => {
     it('by default, returns all files as long as they have a name and extension', () => {
       return config.get(FixturesHelper.projectPath('various-file-types'))
       .then((cfg) => {
-        return specsUtil.find(cfg)
+        return specsUtil.findSpecs(cfg)
       }).then((files) => {
         expect(files.length).to.equal(3)
         expect(files[0].name).to.equal('coffee_spec.coffee')
@@ -59,12 +59,12 @@ describe('lib/util/specs', () => {
       })
     })
 
-    it('finds component tests if testingType === component', () => {
+    it('finds integration and component tests and assigns correct specType', () => {
       return config.get(FixturesHelper.projectPath('component-tests'))
       .then((cfg) => {
         cfg.resolved.testingType = { value: 'component' }
 
-        return specsUtil.find(cfg)
+        return specsUtil.findSpecs(cfg)
       }).then(R.project(['relative', 'specType']))
       .then((files) => {
         expect(files).to.deep.equal([
@@ -76,15 +76,6 @@ describe('lib/util/specs', () => {
             relative: 'cypress/component-tests/foo.spec.js',
             specType: 'component',
           },
-        ])
-      })
-    })
-
-    it('finds integration tests if component testing is disabled', () => {
-      return config.get(FixturesHelper.projectPath('component-tests'))
-      .then((cfg) => specsUtil.find(cfg)).then(R.project(['relative', 'specType']))
-      .then((files) => {
-        expect(files).to.deep.equal([
           {
             relative: 'cypress/integration/integration-spec.js',
             specType: 'integration',
@@ -98,7 +89,7 @@ describe('lib/util/specs', () => {
       .then((cfg) => {
         cfg.testFiles = '**/*.coffee'
 
-        return specsUtil.find(cfg)
+        return specsUtil.findSpecs(cfg)
       }).then((files) => {
         expect(files.length).to.equal(1)
 
@@ -111,7 +102,7 @@ describe('lib/util/specs', () => {
       .then((cfg) => {
         cfg.testFiles = '{coffee_*.coffee,js_spec.js}'
 
-        return specsUtil.find(cfg)
+        return specsUtil.findSpecs(cfg)
       }).then((files) => {
         debug('found spec files %o', files)
         expect(files.length).to.equal(2)
@@ -126,7 +117,7 @@ describe('lib/util/specs', () => {
       .then((cfg) => {
         cfg.testFiles = ['coffee_*.coffee', 'js_spec.js']
 
-        return specsUtil.find(cfg)
+        return specsUtil.findSpecs(cfg)
       }).then((files) => {
         debug('found spec files %o', files)
         expect(files.length).to.equal(2)
@@ -143,7 +134,7 @@ describe('lib/util/specs', () => {
           path.join(cfg.projectRoot, 'cypress', 'integration', 'js_spec.js'),
         ]
 
-        return specsUtil.find(cfg, specPattern)
+        return specsUtil.findSpecs(cfg, specPattern)
       }).then((files) => {
         expect(files.length).to.equal(1)
 
@@ -160,7 +151,7 @@ describe('lib/util/specs', () => {
           path.join(cfg.projectRoot, 'cypress', 'integration', 'ts*'),
         ]
 
-        return specsUtil.find(cfg, specPattern)
+        return specsUtil.findSpecs(cfg, specPattern)
       }).then((files) => {
         expect(files.length).to.equal(2)
         expect(files[0].name).to.equal('js_spec.js')
@@ -172,7 +163,7 @@ describe('lib/util/specs', () => {
     it('properly handles directories with names including \'.\'', () => {
       return config.get(FixturesHelper.projectPath('odd-directory-name'))
       .then((cfg) => {
-        return specsUtil.find(cfg)
+        return specsUtil.findSpecs(cfg)
       }).then((files) => {
         expect(files.length).to.equal(1)
 

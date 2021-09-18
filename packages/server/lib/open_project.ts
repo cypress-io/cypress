@@ -25,6 +25,11 @@ interface LaunchOpts {
   onError?: (err: Error) => void
 }
 
+interface SpecsByType {
+  component: Cypress.Spec[]
+  integration: Cypress.Spec[]
+}
+
 export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
@@ -69,17 +74,11 @@ export class OpenProject {
     return this.openProject!.getConfig()
   }
 
-  getRecordKeys () {
-    return this.tryToCall('getRecordKeys')
-  }
+  getRecordKeys = this.tryToCall('getRecordKeys')
 
-  getRuns () {
-    return this.tryToCall('getRuns')
-  }
+  getRuns = this.tryToCall('getRuns')
 
-  requestAccess () {
-    return this.tryToCall('requestAccess')
-  }
+  requestAccess = this.tryToCall('requestAccess')
 
   getProject () {
     return this.openProject
@@ -231,8 +230,8 @@ export class OpenProject {
   }
 
   getSpecs (cfg) {
-    return specsUtil.find(cfg)
-    .then((specs: Cypress.Cypress['spec'][] = []) => {
+    return specsUtil.findSpecs(cfg)
+    .then((specs: Cypress.Spec[] = []) => {
       // TODO merge logic with "run.js"
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -260,20 +259,21 @@ export class OpenProject {
 
       // assumes all specs are integration specs
       return {
-        integration: specs,
+        integration: specs.filter((x) => x.specType === 'integration'),
+        component: [],
       }
     })
   }
 
   getSpecChanges (options: OpenProjectLaunchOptions = {}) {
-    let currentSpecs: Cypress.Cypress['spec'][]
+    let currentSpecs: SpecsByType
 
     _.defaults(options, {
       onChange: () => { },
       onError: () => { },
     })
 
-    const sendIfChanged = (specs = []) => {
+    const sendIfChanged = (specs: SpecsByType = { component: [], integration: [] }) => {
       // dont do anything if the specs haven't changed
       if (_.isEqual(specs, currentSpecs)) {
         return
@@ -332,9 +332,12 @@ export class OpenProject {
       }
     }
 
-    const get = () => {
+    const get = (): Bluebird<SpecsByType> => {
       if (!this.openProject) {
-        return
+        return Bluebird.resolve({
+          component: [],
+          integration: [],
+        })
       }
 
       const cfg = this.openProject.getConfig()
