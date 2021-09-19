@@ -4,6 +4,7 @@
 /// <reference path="../../cli/types/lodash/index.d.ts" />
 /// <reference path="../../cli/types/sinon/index.d.ts" />
 /// <reference path="../../cli/types/jquery/index.d.ts" />
+/// <reference path="../../cli/types/mocha/index.d.ts" />
 
 /// <reference path="../../cli/types/cypress-npm-api.d.ts" />
 
