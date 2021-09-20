@@ -62,7 +62,7 @@ export class ClientTestActions extends BaseActions {
     return createTestProject('/some/new/project', this.ctx)
   }
 
-  loadProjects () {
+  async loadProjects () {
     this.addProject()
 
     return this.ctx.app.projects
