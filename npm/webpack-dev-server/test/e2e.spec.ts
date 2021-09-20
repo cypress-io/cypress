@@ -8,12 +8,12 @@ import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
 import { startDevServer } from '../'
 
-const requestSpecFile = (port: number) => {
+const requestFile = (port: number, path: string) => {
   return new Promise((res) => {
     const opts = {
       host: 'localhost',
       port,
-      path: '/test/fixtures/foo.spec.js',
+      path,
     }
 
     const callback = (response: EventEmitter) => {
@@ -54,6 +54,7 @@ const config = {
   supportFile: '',
   isTextTerminal: true,
   devServerPublicPathRoute: root,
+  component: {},
 } as any as Cypress.ResolvedConfigOptions & Cypress.RuntimeConfigOptions
 
 describe('#startDevServer', () => {
@@ -67,7 +68,7 @@ describe('#startDevServer', () => {
       },
     })
 
-    const response = await requestSpecFile(port as number)
+    const response = await requestFile(port as number, '/test/fixtures/foo.spec.js')
 
     expect(response).to.eq('const foo = () => {}\n')
 
@@ -152,6 +153,25 @@ describe('#startDevServer', () => {
       const updatedmtime = fs.statSync('./dist/browser.js').mtimeMs
 
       expect(oldmtime).to.not.equal(updatedmtime)
+      close(() => res())
+    })
+  })
+
+  it('serves index.html with previewHead', async () => {
+    const { port, close } = await startDevServer({
+      webpackConfig,
+      options: {
+        config: { ...config, component: { previewHeadPath: 'test/fixtures/preview-head.html' } as any },
+        specs,
+        devServerEvents: new EventEmitter(),
+      },
+    })
+
+    const response = await requestFile(port as number, root)
+
+    expect(response).to.contain('<link rel="stylesheet" href="my-stylesheet">')
+
+    return new Promise((res) => {
       close(() => res())
     })
   })

@@ -1,9 +1,13 @@
 import { debug as debugFn } from 'debug'
+import * as fs from 'fs'
 import * as path from 'path'
+import { promisify } from 'util'
 import * as webpack from 'webpack'
 import { merge } from 'webpack-merge'
 import makeDefaultWebpackConfig from './webpack.config'
 import CypressCTOptionsPlugin, { CypressCTOptionsPluginOptionsWithEmitter } from './plugin'
+
+const readFile = promisify(fs.readFile)
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -21,6 +25,7 @@ interface MakeWebpackConfigOptions extends CypressCTOptionsPluginOptionsWithEmit
   devServerPublicPathRoute: string
   isOpenMode: boolean
   template?: string
+  previewHeadPath?: string
 }
 
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
@@ -78,9 +83,10 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
     })
   }
 
+  const previewHead = await getPreviewHeadContent(projectRoot, options.previewHeadPath)
   const mergedConfig = merge<webpack.Configuration>(
     userWebpackConfig,
-    makeDefaultWebpackConfig(template),
+    makeDefaultWebpackConfig(template, previewHead),
     dynamicWebpackConfig,
   )
 
@@ -96,4 +102,24 @@ export async function makeWebpackConfig (userWebpackConfig: webpack.Configuratio
   }
 
   return mergedConfig
+}
+
+async function getPreviewHeadContent (projectRoot: string, previewHeadPath?: string): Promise<string> {
+  if (!previewHeadPath) {
+    return ''
+  }
+
+  const absolutePreviewHead = path.resolve(projectRoot, previewHeadPath)
+
+  try {
+    const previewHead = await readFile(absolutePreviewHead, 'utf-8')
+
+    debug(`PreviewHead File ${absolutePreviewHead}`)
+
+    return previewHead
+  } catch (_) {
+    console.warn(`[@cypress/webpack-dev-server]: Issue with provided "previewHeadPath". Searched for "${absolutePreviewHead}" and couldn't find it. Continuing without it...`)
+
+    return ''
+  }
 }

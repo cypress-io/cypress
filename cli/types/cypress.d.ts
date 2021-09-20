@@ -2809,6 +2809,13 @@ declare namespace Cypress {
      * An array of objects defining the certificates
      */
     clientCertificates: ClientCertificate[]
+
+    /**
+     * Path to html file that contains elements that will be added to the head of the index.html.
+     * Useful for adding stylesheets, fonts or global scripts.
+     * Only used for component testing.
+     */
+    previewHeadPath: string | undefined
   }
 
   /**

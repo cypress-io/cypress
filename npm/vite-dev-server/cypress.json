@@ -3,5 +3,8 @@
   "video": false,
   "fixturesFolder": false,
   "testFiles": "**/*.spec.*",
-  "componentFolder": "cypress/components"
+  "componentFolder": "cypress/components",
+  "component": {
+    "previewHeadPath": "cypress/preview-head.html"
+  }
 }

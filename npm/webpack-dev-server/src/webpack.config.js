@@ -2,10 +2,11 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 /**
- * @param {string} [template] - base template to use
+ * @param {string | undefined} [template] - base template to use
+ * @param {string} [previewHead] - base template to use
  * @returns {import('webpack').Configuration}
  */
-module.exports = function makeDefaultConfig (template) {
+module.exports = function makeDefaultConfig (template, previewHead) {
   return {
     mode: 'development',
     optimization: {
@@ -19,6 +20,9 @@ module.exports = function makeDefaultConfig (template) {
     },
     plugins: [new HtmlWebpackPlugin({
       template: template || path.resolve(__dirname, '..', 'index-template.html'),
+      templateParameters: {
+        previewHead,
+      },
     })],
   }
 }

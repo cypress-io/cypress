@@ -37,6 +37,7 @@ export const makeCypressPlugin = (
   supportFilePath: string | false,
   devServerEvents: NodeJS.EventEmitter,
   specs: Spec[],
+  previewHeadPath?: string,
 ): Plugin => {
   let base = '/'
 
@@ -66,24 +67,29 @@ export const makeCypressPlugin = (
     configResolved (config) {
       base = config.base
     },
-    transformIndexHtml () {
+    async transformIndexHtml (indexHtml) {
       debug('transformIndexHtml with base', base)
+      const indexHtmlWithPreviewHead = indexHtml.replace('__PREVIEW_HEAD__', await getPreviewHeadContent(projectRoot, previewHeadPath))
 
-      return [
+      return {
+        html: indexHtmlWithPreviewHead,
         // load the script at the end of the body
         // script has to be loaded when the vite client is connected
-        {
-          tag: 'script',
-          injectTo: 'body',
-          attrs: { type: 'module' },
-          children: `import(${JSON.stringify(`${base}@fs/${INIT_FILEPATH}`)})`,
-        },
-      ]
+        tags: [
+          {
+            tag: 'script',
+            injectTo: 'body',
+            attrs: { type: 'module' },
+            children: `import(${JSON.stringify(`${base}@fs/${INIT_FILEPATH}`)})`,
+          },
+        ],
+      }
     },
     configureServer: async (server: ViteDevServer) => {
       const indexHtml = await read(resolve(__dirname, '..', 'index.html'), { encoding: 'utf8' })
+      const indexHtmlWithPreviewHead = indexHtml.replace('<% previewHead %>', await getPreviewHeadContent(projectRoot, previewHeadPath))
 
-      const transformedIndexHtml = await server.transformIndexHtml(base, indexHtml)
+      const transformedIndexHtml = await server.transformIndexHtml(base, indexHtmlWithPreviewHead)
 
       server.middlewares.use(`${base}index.html`, (req, res) => res.end(transformedIndexHtml))
     },
@@ -153,4 +159,24 @@ function getImporters (modules: Set<ModuleNode>, alreadyExploredFiles: Set<strin
   })
 
   return allImporters
+}
+
+async function getPreviewHeadContent (projectRoot: string, previewHeadPath?: string): Promise<string> {
+  if (!previewHeadPath) {
+    return ''
+  }
+
+  const absolutePreviewHead = resolve(projectRoot, previewHeadPath)
+
+  try {
+    const previewHead = await read(absolutePreviewHead, 'utf-8')
+
+    debug(`PreviewHead File ${absolutePreviewHead}`)
+
+    return previewHead
+  } catch (_) {
+    console.warn(`[cypress:vite-dev-server:plugin]: Issue with provided "previewHeadPath". Searched for "${absolutePreviewHead}" and couldn't find it. Continuing without it...`)
+
+    return ''
+  }
 }

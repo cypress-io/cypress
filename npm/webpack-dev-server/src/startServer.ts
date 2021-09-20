@@ -30,6 +30,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     devServerEvents: options.devServerEvents,
     supportFile: options.config.supportFile as string,
     isOpenMode: !isTextTerminal,
+    previewHeadPath: options.config.previewHeadPath,
     ...userOptions,
   })
 
