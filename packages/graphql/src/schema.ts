@@ -14,13 +14,14 @@ const customScalars = [
 
 // for vite
 const dirname = typeof __dirname !== 'undefined' ? __dirname : ''
+const isVite = !dirname
 
 // for vite
 process.cwd ??= () => ''
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
-const types = [entities, constants, customScalars, dirname ? null : testingTypes]
+const types = [entities, constants, customScalars, isVite ? testingTypes : null]
 
 export const graphqlSchema = makeSchema({
   types,

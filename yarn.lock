@@ -19867,6 +19867,11 @@ eyes@0.1.x:
   resolved "https://registry.yarnpkg.com/eyes/-/eyes-0.1.8.tgz#62cf120234c683785d902348a800ef3e0cc20bc0"
   integrity sha1-Ys8SAjTGg3hdkCNIqADvPgzCC8A=
 
+fake-uuid@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/fake-uuid/-/fake-uuid-1.0.0.tgz#7d570548f188ea5e5f4cf0d742a8b2d19b468412"
+  integrity sha512-EK0o9XKlJNhW01NkMRb+9mxXe6b9vxu/jXc3XRxbCwZpFPcT3ZcEsRG8cu0IgpIU8iiRmaYBLJBMViPZVOwnmQ==
+
 fancy-log@^1.3.2, fancy-log@^1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/fancy-log/-/fancy-log-1.3.3.tgz#dbc19154f558690150a23953a0adbd035be45fc7"
@@ -21999,6 +22004,11 @@ graphql-config@^3.3.0:
     cosmiconfig-toml-loader "1.0.0"
     minimatch "3.0.4"
     string-env-interpolation "1.0.1"
+
+graphql-relay@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/graphql-relay/-/graphql-relay-0.9.0.tgz#d96f19d38b742a390acf10056ddd136034b3e1b4"
+  integrity sha512-yNJLCqcjz0XpzpmmckRJCSK8a2ZLwTurwrQ09UyGftONh52PbrGpK1UO4yspvj0c7pC+jkN4ZUqVXG3LRrWkXQ==
 
 graphql-request@^3.3.0:
   version "3.4.0"

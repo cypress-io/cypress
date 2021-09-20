@@ -18,9 +18,12 @@ export const CYPRESS_INTERNAL_DEBUG_PORT_CODEGEN = getenv.int('CYPRESS_INTERNAL_
 
 interface GulpGlobalVals {
   debug?: Maybe<'--inspect' | '--inspect-brk'>
+  shouldWatch?: boolean
 }
 
-const globalVals: GulpGlobalVals = {}
+const globalVals: GulpGlobalVals = {
+  shouldWatch: true,
+}
 
 export function setGulpGlobal<K extends keyof GulpGlobalVals> (k: K, v: GulpGlobalVals[K]) {
   globalVals[k] = v

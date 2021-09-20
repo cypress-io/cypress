@@ -11,14 +11,17 @@ import { getGulpGlobal } from '../gulpConstants'
  * when any of those change
  */
 export function startCypressWatch () {
-  const watcher = chokidar.watch([
+  const shouldWatch = getGulpGlobal('shouldWatch')
+
+  const watcher = shouldWatch ? chokidar.watch([
     'packages/graphql/src/**/*.{js,ts}',
     'packages/server/lib/graphql/**/*.{js,ts}',
   ], {
     cwd: monorepoPaths.root,
     ignored: /\.gen\.ts/,
     ignoreInitial: true,
-  })
+  }) : null
+
   let child: ChildProcess | null = null
 
   let isClosing = false
@@ -52,7 +55,7 @@ export function startCypressWatch () {
       env: {
         ...process.env,
         LAUNCHPAD: '1',
-        CYPRESS_INTERNAL_DEV_WATCH: 'true',
+        CYPRESS_INTERNAL_DEV_WATCH: shouldWatch ? 'true' : undefined,
       },
     })
 
@@ -87,8 +90,10 @@ export function startCypressWatch () {
     openServer()
   }
 
-  watcher.on('add', restartServer)
-  watcher.on('change', restartServer)
+  if (shouldWatch) {
+    watcher?.on('add', restartServer)
+    watcher?.on('change', restartServer)
+  }
 
   openServer()
 

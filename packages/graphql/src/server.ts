@@ -50,7 +50,7 @@ export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }
 
   app.use(cors())
 
-  app.use('/graphql', graphqlHTTP(() => {
+  app.use('/graphql', graphqlHTTP((req) => {
     if (!serverContext) {
       throw new Error(`setServerContext has not been called`)
     }

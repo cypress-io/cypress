@@ -26,5 +26,4 @@ const props = defineProps<{
 
 // TODO: figure out how/if we can get number tests passed / num tests to run
 const progress = typeof props.gql.status === 'number' ? props.gql.status : 0
-
 </script>

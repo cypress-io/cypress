@@ -4,6 +4,8 @@
     "packages/graphql/src/**/*"
   ],
   "ignore": [
-    "packages/graphql/src/stitching"
+    "packages/graphql/src/stitching",
+    "packages/graphql/src/testing",
+    "packages/graphql/src/gen"
   ]
 }

@@ -18,6 +18,7 @@
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel",
+    "check-ts": "yarn gulp checkTs",
     "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "precypress:open": "yarn ensure-deps",

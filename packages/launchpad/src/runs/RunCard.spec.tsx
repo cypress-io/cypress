@@ -5,26 +5,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
   it('playground', () => {
     cy.mountFragment(RunCardFragmentDoc, {
       type: (ctx) => {
-        return {
-          __typename: 'CloudRun' as const,
-          createdAt: new Date().toString(),
-          completedAt: new Date().toString(),
-          status: 'PASSED' as const,
-          id: '1',
-          commit: {
-            message: 'Updating the hover state for the button component',
-            authorName: 'Ryan',
-            authorEmail: 'ryan@cypress.io',
-            branch: 'develop',
-            sha: 'shashasha',
-            url: 'https://github.com',
-          },
-          totalDuration: 1000,
-          totalPassed: 5,
-          totalFailed: 0,
-          totalSkipped: 0,
-          totalPending: 4,
-        }
+        return ctx.stubData.CloudRunStubs.allPassing
       },
       render: (gqlVal) => {
         return (

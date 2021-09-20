@@ -1,7 +1,10 @@
 import { BaseActions, BaseContext, Project } from '@packages/graphql'
-import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
+import { remoteTestSchema } from '@packages/graphql/src/testing/remoteTestSchema'
 import type { FullConfig } from '@packages/server/lib/config'
 import { browsers, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+
+// eslint-disable-next-line no-duplicate-imports
+import * as stubData from '@packages/graphql/src/testing/remoteTestSchema'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
@@ -93,7 +96,7 @@ const TEST_LAUNCH_ARGS: LaunchArgs = {
 }
 
 export class ClientTestContext extends BaseContext {
-  _remoteSchema = remoteSchema
+  _remoteSchema = remoteTestSchema
   constructor (_launchArgs?: LaunchArgs, _launchOptions?: OpenProjectLaunchOptions) {
     super(_launchArgs ?? TEST_LAUNCH_ARGS, _launchOptions ?? {})
   }
@@ -104,4 +107,6 @@ export class ClientTestContext extends BaseContext {
   // localProjects: Project[] = [this.testProject]
   localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
+
+  stubData = stubData
 }

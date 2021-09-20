@@ -6,6 +6,11 @@ documentFilters: &documentFilters
   preResolveTypes: true
   onlyOperationTypes: true
   avoidOptionals: true
+  strictScalars: true
+  scalars: 
+    Date: string
+    DateTime: string
+    JSON: any
 
 vueOperations: &vueOperations
   schema: './packages/graphql/schemas/schema.graphql'
@@ -47,7 +52,8 @@ generates:
     plugins:
       - add:
           content: '/* eslint-disable */'
-      - 'typescript'
+      - 'typescript':
+          nonOptionalTypename: true
       - 'packages/graphql/script/codegen-type-map.js'
 
   ###

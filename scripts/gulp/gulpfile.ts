@@ -39,6 +39,16 @@ gulp.task(
 )
 
 gulp.task(
+  'devNoWatch',
+  gulp.series(
+    async function setupDevNoWatch () {
+      setGulpGlobal('shouldWatch', false)
+    },
+    'dev',
+  ),
+)
+
+gulp.task(
   'debug',
   gulp.series(
     async function setupDebug () {
