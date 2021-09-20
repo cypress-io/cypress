@@ -4,7 +4,7 @@
       <RunCard
         v-for="run of props.gql.runs.nodes" 
         :gql="run"
-        :key="run.createdAt"
+        :key="run.id"
       />
     </div>
   </main>

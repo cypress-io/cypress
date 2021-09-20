@@ -59,7 +59,7 @@ const runInfo = [{
 	icon: IconBranch
 },
 {
-	text: new Date(run.value.createdAt).toLocaleTimeString()
+	text: run.value.createdAt ? new Date(run.value.createdAt).toLocaleTimeString() : null
 }].filter(o => Boolean(o.text))
 
 </script>
