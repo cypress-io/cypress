@@ -48,6 +48,7 @@ generates:
       - add:
           content: '/* eslint-disable */'
       - 'typescript'
+      - 'packages/graphql/script/codegen-type-map.js'
 
   ###
   # All of the GraphQL Query/Mutation documents we import for use in the .vue
