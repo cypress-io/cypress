@@ -1026,14 +1026,25 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('sets err on log when caused by code errors', function (done) {
-        cy.on('fail', (err) => {
+        done = _.once(done)
+        cy.once('fail', (err) => {
+          // suppress failure
+        })
+
+        cy.on('log:changed', () => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('request')
-          expect(lastLog.get('error').message).contain('foo is not defined')
+          if (!lastLog || lastLog.get('name') !== 'request') return
 
-          done()
+          try {
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('error').message).contain('foo is not defined')
+
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion failure', err)
+          }
         })
 
         cy.window().then((win) => {
@@ -1047,17 +1058,27 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('causes errors caused by onreadystatechange callback function', function (done) {
+        done = _.once(done)
         const e = new Error('onreadystatechange caused this error')
 
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
+          // suppress failure
+        })
+
+        cy.on('log:changed', () => {
           const { lastLog } = this
 
-          expect(this.logs.length).to.eq(1)
-          expect(lastLog.get('name')).to.eq('request')
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).to.include(e.message)
+          if (!lastLog || lastLog.get('name') !== 'request') return
 
-          done()
+          try {
+            expect(this.logs.length).to.eq(1)
+            expect(lastLog.get('name')).to.eq('request')
+            expect(e.message).to.include(lastLog.get('error').message)
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion failure', err)
+          }
         })
 
         cy
@@ -2563,7 +2584,9 @@ describe('src/cy/commands/xhr', () => {
 
         xhr.open('GET', '/timeout?ms=999')
         xhr.send()
-        xhr.abort()
+
+        // allow the request time to make it out of the browser so proxy logging has a chance to see it
+        requestAnimationFrame(() => xhr.abort())
 
         cy.wrap(null).should(() => {
           expect(log.get('state')).to.eq('failed')
