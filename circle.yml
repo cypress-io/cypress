@@ -118,6 +118,9 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
+          name: Build all codegen
+          command: yarn gulp buildProd
+      - run:
           name: Build packages
           command: yarn build
       - prepare-modules-cache # So we don't throw these in the workspace cache
@@ -389,8 +392,11 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - run: yarn gulp graphqlCodegen
-      - run: yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>>
+      - run: 
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>> --record --parallel
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -934,6 +940,16 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
+  check-ts:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          name: Check TS Types
+          command: yarn gulp checkTs
+
+
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
   percy-finalize:
@@ -1002,8 +1018,6 @@ jobs:
       - run: yarn test-scripts
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
-      # Get the codegen output
-      - run: yarn gulp buildProd
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
@@ -1153,7 +1167,7 @@ jobs:
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 3
     steps:
       - run-launchpad-integration-tests:
           browser: chrome
@@ -1981,6 +1995,9 @@ linux-workflow: &linux-workflow
     - build:
         requires:
           - node_modules_install
+    - check-ts:
+        requires:
+          - build
     - lint:
         name: Linux lint
         requires:
@@ -2047,6 +2064,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
 
@@ -2105,6 +2123,7 @@ linux-workflow: &linux-workflow
         context: test-runner:npm-release
         requires:
           - build
+          - check-ts
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
           - npm-react

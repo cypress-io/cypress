@@ -8,7 +8,7 @@ import { NavigationItem } from './NavigationItem'
 export class NavigationMenu {
   private _selected: NavItem = 'projectSetup'
 
-  @nxs.field.nonNull.list.type(() => NavigationItem)
+  @nxs.field.nonNull.list.nonNull.type(() => NavigationItem)
   get items (): NxsResult<'NavigationMenu', 'items'> {
     return NAV_ITEM.map((item) => new NavigationItem(this, item))
   }

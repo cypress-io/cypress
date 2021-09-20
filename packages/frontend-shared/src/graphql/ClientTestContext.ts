@@ -1,6 +1,10 @@
-import { BaseActions, BaseContext, DashboardProject, LocalProject } from '@packages/graphql'
+import { BaseActions, BaseContext, Project } from '@packages/graphql'
+import { remoteTestSchema } from '@packages/graphql/src/testing/remoteTestSchema'
 import type { FullConfig } from '@packages/server/lib/config'
 import { browsers, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+
+// eslint-disable-next-line no-duplicate-imports
+import * as stubData from '@packages/graphql/src/testing/remoteTestSchema'
 
 export class ClientTestActions extends BaseActions {
   constructor (protected ctx: ClientTestContext) {
@@ -76,22 +80,23 @@ export class ClientTestActions extends BaseActions {
   }
 }
 
-const createTestProject = (projectRoot: string, ctx: BaseContext) => new LocalProject(projectRoot, ctx)
+const createTestProject = (projectRoot: string, ctx: BaseContext) => new Project(projectRoot, ctx)
 
 const TEST_LAUNCH_ARGS: LaunchArgs = {
   config: {},
-  cwd: '/dev/null',
+  cwd: '/current/working/dir',
+  _: ['/current/working/dir'],
+  projectRoot: '/project/root',
+  invokedFromCli: false,
   browser: browsers[0],
   global: false,
-  project: '/dev/null',
-  projectRoot: '/dev/null',
-  invokedFromCli: true,
+  project: '/project/root',
   testingType: 'e2e',
-  os: 'darwin',
-  _: [''],
+  os: 'linux',
 }
 
 export class ClientTestContext extends BaseContext {
+  _remoteSchema = remoteTestSchema
   constructor (_launchArgs?: LaunchArgs, _launchOptions?: OpenProjectLaunchOptions) {
     super(_launchArgs ?? TEST_LAUNCH_ARGS, _launchOptions ?? {})
   }
@@ -100,7 +105,8 @@ export class ClientTestContext extends BaseContext {
   readonly projects = []
 
   // localProjects: Project[] = [this.testProject]
-  dashboardProjects: DashboardProject[] = []
-  localProjects: LocalProject[] = [createTestProject('/new/project', this)]
+  localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
+
+  stubData = stubData
 }

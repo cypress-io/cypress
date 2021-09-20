@@ -1,9 +1,10 @@
 <template>
-  <form @submit.prevent="$emit('launch')" v-if="displayBrowsers">
+  <form @submit.prevent="$emit('launch')" v-if="props.gql.browsers">
     <div class="flex gap-6 py-16 justify-center flex-wrap">
       <div
-        v-for="browser of displayBrowsers"
+        v-for="browser of props.gql.browsers"
         class="text-center w-160px pt-6 pb-4 block border-1 rounded relative"
+        :key="browser.id"
         :class="{
           'border-indigo-300 ring-2 ring-indigo-50': selectedBrowser.displayName === browser.displayName && selectedBrowser.version === browser.version,
           'border-gray-200': selectedBrowser.displayName !== browser.displayName,
@@ -13,23 +14,22 @@
       >
         <input
           type="radio"
-          v-model="selectedBrowser"
-          name="selectedBrowser"
-          :id="browser.displayName + browser.version"
-          :value="browser"
+          :id="browser.id"
+          :value="browser.id"
           :disabled="browser.disabled"
-          :key="browser.displayName + browser.version"
+          :key="browser.id"
           class="absolute opacity-0"
           :class="{
             'filter grayscale': browser.disabled
           }"
+          @click="setSelected(browser.id)"
         />
-        <label :for="browser.displayName + browser.version" class="radio-label">
+        <label :for="browser.id" class="radio-label">
           <div class="text-center">
-            <img :src="browser.icon" alt class="w-40px h-40px inline" />
+            <img :src="allBrowsersIcons[browser.displayName]" alt class="w-40px h-40px inline" />
           </div>
           <div class="text-indigo-600 text-lg pt-2">{{ browser.displayName }}</div>
-          <div class="text-gray-400 text-xs">{{ browser.displayVersion }}</div>
+          <div class="text-gray-400 text-xs">{{ browser.majorVersion }}</div>
         </label>
       </div>
     </div>
@@ -58,7 +58,6 @@ import { gql } from "@urql/core";
 import { useI18n } from '../composables'
 import type { OpenBrowserListFragment } from "../generated/graphql"
 import Button from "../components/button/Button.vue"
-import Select from "../components/input/Select.vue"
 import { computed, ref, defineEmits } from "vue"
 import _clone from "lodash/clone"
 import openInNew from 'virtual:vite-icons/mdi/open-in-new'
@@ -80,8 +79,10 @@ import firefoxDeveloperEditionIcon from "../../../../node_modules/browser-logos/
 gql`
 fragment OpenBrowserList on App {
   browsers {
+    id
     name
     family
+    disabled
     channel
     displayName
     path
@@ -99,74 +100,29 @@ defineEmits(['navigated-back', 'launch'])
 
 const { t } = useI18n()
 
-const allBrowsers = [{
-  displayName: 'Electron',
-  icon: electronIcon,
-}, {
-  displayName: 'Chrome',
-  icon: chromeIcon,
-}, {
-  displayName: 'Firefox',
-  icon: firefoxIcon,
-}, {
-  displayName: 'Edge',
-  icon: edgeIcon,
-}, {
-  displayName: 'Chromium',
-  icon: chromiumIcon
-}, {
-  displayName: 'Canary',
-  icon: canaryIcon
-}, {
-  displayName: 'Chrome Beta',
-  icon: chromeBetaIcon
-}, {
-  displayName: 'Firefox Nightly',
-  icon: firefoxNightlyIcon
-}, {
-  displayName: 'Firefox Developer Edition',
-  icon: firefoxDeveloperEditionIcon
-}, {
-  displayName: 'Edge Canary',
-  icon: edgeCanaryIcon
-}, {
-  displayName: 'Edge Beta',
-  icon: edgeBetaIcon
-}, {
-  displayName: 'Edge Dev',
-  icon: edgeDevIcon
-}]
+const allBrowsersIcons = {
+  'Electron': electronIcon,
+  'Chrome': chromeIcon,
+  'Firefox': firefoxIcon,
+  'Edge': edgeIcon,
+  'Chromium': chromiumIcon,
+  'Canary': canaryIcon,
+  'Chrome Beta': chromeBetaIcon,
+  'Firefox Nightly': firefoxNightlyIcon,
+  'Firefox Developer Edition': firefoxDeveloperEditionIcon,
+  'Edge Canary': edgeCanaryIcon,
+  'Edge Beta': edgeBetaIcon,
+  'Edge Dev': edgeDevIcon,
+}
 
-const getBroswerDetails = (browser: OpenBrowserListFragment['browsers'][number]) => {
-  return {
-    ...browser,
-    displayVersion: `v${browser.version}`,
-    icon: allBrowsers.find(item => item.displayName === browser.displayName)?.icon ?? '',
+const selectedBrowser = ref(props.gql.browsers[0])
+
+const setSelected = (browserId: string) => {
+  const selected = props.gql.browsers.find(b => b.id === browserId)
+  if (selected) {
+    selectedBrowser.value = selected
   }
 }
-
-const isDetected = (browser) => {
-  return props.gql.browsers
-    .find(browserInList => browserInList.displayName === browser.displayName)
-}
-
-// TODO(tim): move a lot of this to GraphQL
-const displayBrowsers = computed(() => {
-  const foundValidBrowsers = allBrowsers.filter(isDetected).reduce((acc, curr) => {
-    const matchingFoundBrowsers = props.gql.browsers.filter(foundBrowser => {
-      return foundBrowser.displayName === curr.displayName
-    })
-    matchingFoundBrowsers.forEach(browser => {
-      acc.push(getBroswerDetails(browser))
-    })
-    return acc
-  // TODO: fix up these types w/ GraphQL
-  }, [] as Array<OpenBrowserListFragment['browsers'][number] & {displayVersion: string, icon: string, disabled?: boolean}>)
-
-  return foundValidBrowsers
-})
-
-const selectedBrowser = ref(displayBrowsers.value[0])
 
 const launchText = computed(() => selectedBrowser.value ? `${t('setupPage.openBrowser.launch')} ${selectedBrowser.value.displayName}` : '')
 </script>

@@ -6,6 +6,7 @@ describe('<Input/>', () => {
     const value = ref('')
     const textToType = 'My wonderful input text'
 
+    // @ts-ignore = vModel is v-model in vue
     cy.mount(() => <Input vModel={value.value}/>)
     cy.get('input').type(textToType, { delay: 0 })
 

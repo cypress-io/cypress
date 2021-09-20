@@ -1,9 +1,11 @@
 import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch } from './tasks/gulpCypress'
-import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch } from './tasks/gulpGraphql'
+import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, printUrqlSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
+import { checkTs } from './tasks/gulpTsc'
 import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
+import { setGulpGlobal } from './gulpConstants'
 
 gulp.task(
   'dev',
@@ -12,8 +14,7 @@ gulp.task(
     autobarrelWatcher,
 
     // Fetch the latest "remote" schema from the Cypress cloud
-    // TODO: with stitching bracnh
-    // fetchCloudSchema,
+    syncRemoteGraphQL,
 
     gulp.parallel(
       // Clean the vite apps
@@ -37,7 +38,38 @@ gulp.task(
   ),
 )
 
+gulp.task(
+  'devNoWatch',
+  gulp.series(
+    async function setupDevNoWatch () {
+      setGulpGlobal('shouldWatch', false)
+    },
+    'dev',
+  ),
+)
+
+gulp.task(
+  'debug',
+  gulp.series(
+    async function setupDebug () {
+      setGulpGlobal('debug', '--inspect')
+    },
+    'dev',
+  ),
+)
+
+gulp.task(
+  'debugBrk',
+  gulp.series(
+    async function setupDebugBrk () {
+      setGulpGlobal('debug', '--inspect-brk')
+    },
+    'dev',
+  ),
+)
+
 gulp.task('buildProd', gulp.series(
+  syncRemoteGraphQL,
   nexusCodegen,
   graphqlCodegen,
 ))
@@ -62,6 +94,9 @@ gulp.task(
 //   'debug', // Tim: TODO
 // )
 
+gulp.task(checkTs)
+gulp.task(syncRemoteGraphQL)
+gulp.task(printUrqlSchema)
 gulp.task(makePathMap)
 gulp.task(nexusCodegen)
 gulp.task(nexusCodegenWatch)

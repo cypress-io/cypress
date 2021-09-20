@@ -1,7 +1,7 @@
 import { Query } from '@packages/graphql'
 import {
   TestingTypeCardsFragmentDoc,
-} from '../generated/graphql'
+} from '../generated/graphql-test'
 import TestingTypeCards from './TestingTypeCards.vue'
 
 describe('TestingTypeCards', () => {

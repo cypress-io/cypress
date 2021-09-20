@@ -1,8 +1,7 @@
 import type { BaseContext } from '../context/BaseContext'
-import type { RunGroup } from '../entities/run'
-import type { FoundBrowser, OpenProjectLaunchOptions, FullConfig, LaunchOpts, LaunchArgs } from '@packages/types'
-import type { LocalProject } from '../entities'
+import type { FoundBrowser, OpenProjectLaunchOptions, LaunchOpts, LaunchArgs, FullConfig } from '@packages/types'
 import type { BrowserContract } from '../contracts/BrowserContract'
+import type { Project } from '../entities/Project'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -19,14 +18,12 @@ export abstract class BaseActions {
 
   abstract createConfigFile (code: string, configFilename: string): void
 
-  abstract addProject (projectRoot: string): LocalProject
+  abstract addProject (projectRoot: string): Project
 
   abstract getProjectId (projectRoot: string): Promise<string | null>
   abstract authenticate (): Promise<void>
   abstract logout (): Promise<void>
 
-  abstract getRuns (payload: { projectId: string, authToken: string }): Promise<RunGroup[]>
-  abstract getRecordKeys (payload: { projectId: string, authToken: string }): Promise<string[]>
   abstract getBrowsers (): Promise<FoundBrowser[]>
 
   abstract initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: any): Promise<void>

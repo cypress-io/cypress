@@ -1,13 +1,19 @@
+import { RecordKeyFragmentDoc } from '../../generated/graphql-test'
 import RecordKey from './RecordKey.vue'
 
 describe('<RecordKey />', () => {
   beforeEach(() => {
     cy.viewport(800, 600)
-    cy.mount(() => (
-      <div class="py-4 px-8">
-        <RecordKey recordKey="aaa-bbb-ccc-ddd" />
-      </div>
-    ))
+    cy.mountFragment(RecordKeyFragmentDoc, {
+      type: (ctx) => {
+        return ctx.stubData.CloudRecordKeyStubs.e2eProject
+      },
+      render: (gql) => (
+        <div class="py-4 px-8">
+          <RecordKey gql={gql} />
+        </div>
+      ),
+    })
   })
 
   it('renders the record key view with the correct title', () => {

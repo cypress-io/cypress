@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import { mutationType, nonNull } from 'nexus'
 import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
+import { Query } from './Query'
 
 const debug = Debug('cypress:graphql:mutation')
 
@@ -41,12 +42,6 @@ export const mutation = mutationType({
         isManual: nonNull('Boolean'),
       },
       resolve: (root, args, ctx) => ctx.wizard.setManualInstall(args.isManual),
-    })
-
-    t.field('wizardNavigateForward', {
-      type: 'Wizard',
-      description: 'Navigates forward in the wizard',
-      resolve: (_, __, ctx) => ctx.wizard.navigate('forward'),
     })
 
     t.field('wizardNavigate', {
@@ -98,27 +93,27 @@ export const mutation = mutationType({
     })
 
     t.field('login', {
-      type: 'Viewer',
+      type: 'Query',
       description: 'Auth with Cypress Cloud',
       async resolve (_root, args, ctx) {
         // already authenticated this session - just return
-        if (ctx.viewer) {
-          return ctx.viewer
+        if (ctx.authenticatedUser) {
+          return new Query()
         }
 
         await ctx.actions.authenticate()
 
-        return ctx.viewer
+        return new Query()
       },
     })
 
     t.field('logout', {
-      type: 'Viewer',
+      type: 'Query',
       description: 'Log out of Cypress Cloud',
       async resolve (_root, args, ctx) {
         await ctx.actions.logout()
 
-        return ctx.viewer
+        return new Query()
       },
     })
 

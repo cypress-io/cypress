@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "types": "vue-tsc --noEmit",
+    "check-ts": "vue-tsc --noEmit",
     "build-prod": "cross-env NODE_ENV=production vite build",
     "clean": "rm -rf dist && rm -rf ./node_modules/.vite && echo 'cleaned'",
     "clean-deps": "rm -rf node_modules",
@@ -24,8 +24,7 @@
     "@iconify/vue": "3.0.0-beta.1",
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
     "@testing-library/cypress": "8.0.0",
-    "@urql/core": "2.1.5",
-    "@urql/exchange-execute": "^1.0.4",
+    "@urql/core": "2.3.1",
     "@urql/vue": "0.4.3",
     "@vitejs/plugin-vue": "1.2.4",
     "@vitejs/plugin-vue-jsx": "1.1.6",

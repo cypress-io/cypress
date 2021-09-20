@@ -10,4 +10,6 @@ export { graphqlSchema } from './schema'
 
 export * from './contracts'
 
-export { execute, parse } from 'graphql'
+export { execute, parse, print } from 'graphql'
+
+export { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'

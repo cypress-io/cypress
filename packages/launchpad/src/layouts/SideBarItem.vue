@@ -16,12 +16,25 @@
 
 <script lang="ts" setup>
 import Icon from '../components/icon/Icon.vue'
-import type { HTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+import { HTMLAttributes, FunctionalComponent, SVGAttributes, computed } from 'vue'
+import type { SideBarItemFragment } from '../generated/graphql'
+import { gql } from '@urql/core'
 
 interface Props extends HTMLAttributes {
   icon: FunctionalComponent<SVGAttributes>
-  active?: boolean
+  gql: SideBarItemFragment
 }
 
-defineProps<Props>()
+gql`
+fragment SideBarItem on NavigationItem {
+  id
+  name
+  selected
+  iconPath
+}
+`
+
+const props = defineProps<Props>()
+
+const active = computed(() => props.gql.selected)
 </script>
