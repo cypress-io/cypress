@@ -3127,7 +3127,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
   })
 
-  context('waiting and aliasing', function () {
+  context('waiting and aliasing', { defaultCommandTimeout: 10000 }, function () {
     const testFailWaiting = (cb) => testFail(cb, 'https://on.cypress.io/wait')
 
     it('can wait on a single response using "alias"', function () {
