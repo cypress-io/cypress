@@ -230,15 +230,15 @@ describe('Proxy Logging', () => {
           }
         })
 
-        cy.intercept('/foo', { forceNetworkError: true }).as('alias')
+        cy.intercept('/foo*', { forceNetworkError: true }).as('alias')
         .then(() => {
-          return fetch('/foo')
+          return fetch(`/foo?${Date.now()}`)
           .catch(() => {})
         })
         .wrap(logs)
         .should((logs) => {
           // retries...
-          expect(logs).to.have.length.greaterThan(2)
+          expect(logs).to.have.length.greaterThan(0)
 
           for (const log of logs) {
             expect(log.err).to.include({ name: 'Error' })
