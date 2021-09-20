@@ -230,9 +230,9 @@ describe('Proxy Logging', () => {
           }
         })
 
-        cy.intercept('/foo*', { forceNetworkError: true }).as('alias')
+        cy.intercept('/foo', { forceNetworkError: true }).as('alias')
         .then(() => {
-          return fetch(`/foo?${Date.now()}`)
+          return fetch('/foo')
           .catch(() => {})
         })
         .wrap(logs)
