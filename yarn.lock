@@ -41357,6 +41357,11 @@ vue-tsc@^0.3.0:
   dependencies:
     vscode-vue-languageservice "^0.27.0"
 
+vue3-file-selector@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/vue3-file-selector/-/vue3-file-selector-1.0.1.tgz#bcae2f5ab44c406c1d72a60885990883051b688b"
+  integrity sha512-popFgEvLrkRFo9MWs8mzlb4HH+Mg2+5DhJF7MzKmUrE9179rtVt4Wf7/w+0FvhDRVELQ6f8Z9BhF+SDSUSpRVw==
+
 vue@3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.2.6.tgz#c71445078751f458648fd8fb3a2da975507d03d2"
