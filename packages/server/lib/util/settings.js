@@ -128,7 +128,8 @@ module.exports = {
       return options.configFile
     }
 
-    const ls = fs.readdirSync(projectRoot)
+    // this protection is mainly for a test in 7_record_spec.js
+    const ls = projectRoot ? fs.readdirSync(projectRoot) : []
 
     const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => ls.includes(file))
 
