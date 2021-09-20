@@ -3,36 +3,26 @@ import path from 'path'
 import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
-import { AuthenticatedUser, BaseActions, LocalProject, Viewer } from '@packages/graphql'
-import { RunGroup } from '@packages/graphql/src/entities/run'
+import { BaseActions, Project } from '@packages/graphql'
 import { openProject } from '@packages/server/lib/open_project'
 import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
 import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
 
 // @ts-ignore
-import user from '@packages/server/lib/user'
+import user from '../user'
 
 // @ts-ignore
-import auth from '@packages/server/lib/gui/auth'
+import auth from '../gui/auth'
 
 // @ts-ignore
-import api from '@packages/server/lib/api'
+import browsers from '../browsers'
 
-// @ts-ignore
-import browsers from '@packages/server/lib/browsers'
+import * as config from '../config'
 
-import * as config from '@packages/server/lib/config'
-
-import { getId } from '@packages/server/lib/project_static'
+import { getId } from '../project_static'
 import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
 
 const debug = Debug('cypress:server:graphql')
-
-interface RecordKey {
-  id: string
-  createdAt: string
-  lastUsedAt: string
-}
 
 /**
  *
@@ -54,7 +44,7 @@ export class ServerActions extends BaseActions {
       return found
     }
 
-    const localProject = new LocalProject(projectRoot, this.ctx)
+    const localProject = new Project(projectRoot, this.ctx)
 
     this.ctx.localProjects.push(localProject)
     insertProject(projectRoot)
@@ -77,27 +67,16 @@ export class ServerActions extends BaseActions {
   }
 
   async authenticate () {
-    const config: AuthenticatedUser = await auth.start(() => {}, 'launchpad')
-    const viewer = new Viewer(this.ctx, config)
-
-    this.ctx.viewer = viewer
+    this.ctx.setAuthenticatedUser(await auth.start(() => {}, 'launchpad'))
   }
 
   async logout () {
-    await user.logOut()
-    this.ctx.viewer = null
-  }
-
-  async getRuns ({ projectId, authToken }: { projectId: string, authToken: string }): Promise<RunGroup[]> {
-    const runs = await api.getProjectRuns(projectId, authToken)
-
-    return runs.map((run) => new RunGroup(run))
-  }
-
-  async getRecordKeys ({ projectId, authToken }: { projectId: string, authToken: string }): Promise<string[]> {
-    const keys: RecordKey[] = await api.getProjectRecordKeys(projectId, authToken)
-
-    return keys.map((x) => x.id)
+    try {
+      await user.logOut()
+    } catch {
+      //
+    }
+    this.ctx.setAuthenticatedUser(null)
   }
 
   async getProjectId (projectRoot: string) {

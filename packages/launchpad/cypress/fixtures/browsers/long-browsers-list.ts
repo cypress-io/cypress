@@ -1,5 +1,15 @@
 export const longBrowsersList = [
   {
+    "name": "electron",
+    "displayName": "Electron",
+    "family": "chromium",
+    "channel": "stable",
+    "version": "73.0.3683.121",
+    "path": "",
+    "majorVersion": "73",
+    "info": "Info about electron browser"
+  },
+  {
     "name": "chrome",
     "displayName": "Chrome",
     "family": "chromium",
@@ -70,16 +80,6 @@ export const longBrowsersList = [
     "version": "80.0.309.71",
     "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
     "majorVersion": "79"
-  },
-  {
-    "name": "electron",
-    "displayName": "Electron",
-    "family": "chromium",
-    "channel": "stable",
-    "version": "73.0.3683.121",
-    "path": "",
-    "majorVersion": "73",
-    "info": "Info about electron browser"
   },
   {
     "name": "firefox",

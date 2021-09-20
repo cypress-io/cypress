@@ -4,8 +4,9 @@
   "description": "Launches Vite Dev Server for Component Testing",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "build-prod": "tsc",
+    "build": "tsc || echo 'built, with type errors'",
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
     "test": "yarn cy:run",

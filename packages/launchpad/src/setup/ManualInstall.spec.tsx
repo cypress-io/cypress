@@ -1,4 +1,4 @@
-import { ManualInstallFragmentDoc } from '../generated/graphql'
+import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
 
 describe('<ManualInstall />', () => {

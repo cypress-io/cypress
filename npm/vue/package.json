@@ -53,7 +53,7 @@
     "vue-loader": "16.1.2",
     "vue-router": "^4.0.0",
     "vue-style-loader": "4.1.2",
-    "vue-tsc": "0.2.2",
+    "vue-tsc": "^0.3.0",
     "vuex": "^4.0.0",
     "webpack": "4.42.0"
   },

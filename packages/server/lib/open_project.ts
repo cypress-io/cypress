@@ -17,6 +17,11 @@ import { closeGraphQLServer } from '@packages/graphql/src/server'
 
 const debug = Debug('cypress:server:open_project')
 
+interface SpecsByType {
+  component: Cypress.Spec[]
+  integration: Cypress.Spec[]
+}
+
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
   relaunchBrowser: ((...args: unknown[]) => void) | null = null
@@ -208,8 +213,8 @@ export class OpenProject {
   }
 
   getSpecs (cfg) {
-    return specsUtil.find(cfg)
-    .then((specs: Cypress.Cypress['spec'][] = []) => {
+    return specsUtil.findSpecs(cfg)
+    .then((specs: Cypress.Spec[] = []) => {
       // TODO merge logic with "run.js"
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -237,20 +242,21 @@ export class OpenProject {
 
       // assumes all specs are integration specs
       return {
-        integration: specs,
+        integration: specs.filter((x) => x.specType === 'integration'),
+        component: [],
       }
     })
   }
 
   getSpecChanges (options: OpenProjectLaunchOptions = {}) {
-    let currentSpecs: Cypress.Cypress['spec'][]
+    let currentSpecs: SpecsByType
 
     _.defaults(options, {
       onChange: () => { },
       onError: () => { },
     })
 
-    const sendIfChanged = (specs = []) => {
+    const sendIfChanged = (specs: SpecsByType = { component: [], integration: [] }) => {
       // dont do anything if the specs haven't changed
       if (_.isEqual(specs, currentSpecs)) {
         return
@@ -309,9 +315,12 @@ export class OpenProject {
       }
     }
 
-    const get = () => {
+    const get = (): Bluebird<SpecsByType> => {
       if (!this.openProject) {
-        return
+        return Bluebird.resolve({
+          component: [],
+          integration: [],
+        })
       }
 
       const cfg = this.openProject.getConfig()

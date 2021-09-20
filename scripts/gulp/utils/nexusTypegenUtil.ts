@@ -3,6 +3,11 @@ import chalk from 'chalk'
 import pDefer from 'p-defer'
 import chokidar from 'chokidar'
 import _ from 'lodash'
+import path from 'path'
+import fs from 'fs-extra'
+
+import { printUrqlSchema } from '../tasks/gulpGraphql'
+import { monorepoPaths } from '../monorepoPaths'
 
 interface NexusTypegenCfg {
   cwd: string
@@ -21,6 +26,8 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
   const dfd = pDefer()
 
   if (cfg.outputPath) {
+    await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
+    execSync(`touch ${path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-source-types.gen.ts')}`)
     execSync(`touch ${cfg.outputPath}`)
   }
 
@@ -51,7 +58,9 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
 
   out.on('error', dfd.reject)
 
-  return dfd.promise
+  return dfd.promise.then(() => {
+    return printUrqlSchema()
+  })
 }
 
 let debounced: Record<string, Function> = {}

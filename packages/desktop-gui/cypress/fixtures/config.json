@@ -132,7 +132,6 @@
   "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
   "isHeadless": false,
   "isNewProject": false,
-  "javascripts": [],
   "morgan": true,
   "namespace": "__cypress",
   "numTestsKeptInMemory": 50,

@@ -9,6 +9,7 @@
   ],
   "compilerOptions": {
     "types": ["mocha", "node"],
-    "importHelpers": true
+    "importHelpers": true,
+    "resolveJsonModule": true
   }
 }

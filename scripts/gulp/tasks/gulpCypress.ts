@@ -4,17 +4,24 @@ import childProcess, { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 
 import { monorepoPaths } from '../monorepoPaths'
+import { getGulpGlobal } from '../gulpConstants'
 
 /**
  * Starts cypress, but watches the GraphQL files & restarts the server
  * when any of those change
  */
 export function startCypressWatch () {
-  const watcher = chokidar.watch('src/**/*.{js,ts}', {
-    cwd: monorepoPaths.pkgGraphql,
+  const shouldWatch = getGulpGlobal('shouldWatch')
+
+  const watcher = shouldWatch ? chokidar.watch([
+    'packages/graphql/src/**/*.{js,ts}',
+    'packages/server/lib/graphql/**/*.{js,ts}',
+  ], {
+    cwd: monorepoPaths.root,
     ignored: /\.gen\.ts/,
     ignoreInitial: true,
-  })
+  }) : null
+
   let child: ChildProcess | null = null
 
   let isClosing = false
@@ -36,13 +43,19 @@ export function startCypressWatch () {
       argv.push('--dev')
     }
 
+    const debugFlag = getGulpGlobal('debug')
+
+    if (debugFlag) {
+      process.env.CYPRESS_INTERNAL_DEV_DEBUG = debugFlag
+    }
+
     child = childProcess.fork(pathToCli, ['open', ...argv], {
       stdio: 'inherit',
       execArgv: [],
       env: {
         ...process.env,
         LAUNCHPAD: '1',
-        CYPRESS_INTERNAL_DEV_WATCH: 'true',
+        CYPRESS_INTERNAL_DEV_WATCH: shouldWatch ? 'true' : undefined,
       },
     })
 
@@ -77,8 +90,10 @@ export function startCypressWatch () {
     openServer()
   }
 
-  watcher.on('add', restartServer)
-  watcher.on('change', restartServer)
+  if (shouldWatch) {
+    watcher?.on('add', restartServer)
+    watcher?.on('change', restartServer)
+  }
 
   openServer()
 

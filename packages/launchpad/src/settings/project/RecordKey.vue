@@ -6,9 +6,9 @@
         <a href="https://docs.cypress.io" target="_blank">{{ t('links.learnMore') }}</a>
       </i18n-t>
     </template>
-    <div class="inline-flex justify-start gap-10px">
+    <div class="inline-flex justify-start gap-10px" v-if="props.gql.key">
       <Input
-        v-model="recordKey"
+        v-model="props.gql.key"
         class="font-mono"
         inputClasses="text-sm"
         disabled
@@ -48,6 +48,7 @@
 import { ref } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import { useI18n } from '../../composables'
+import type { RecordKeyFragment } from '../../generated/graphql'
 import ProjectSettingsSection from '../SettingsSection.vue'
 import Icon from '../../components/icon/Icon.vue'
 import Button from '../../components/button/Button.vue'
@@ -56,12 +57,20 @@ import IconKey from 'virtual:vite-icons/foundation/key'
 import IconEyeOpen from 'virtual:vite-icons/mdi/eye-outline'
 import IconEyeClosed from 'virtual:vite-icons/mdi/eye-off-outline'
 import IconDashedSquare from 'virtual:vite-icons/si-glyph/square-dashed-2'
+import { gql } from '@urql/core'
+
+gql`
+fragment RecordKey on CloudRecordKey {
+  id
+  key
+}
+`
 
 const props = defineProps<{
-  recordKey: string
+  gql: RecordKeyFragment
 }>()
 
-const clipboard = useClipboard({ source: ref(props.recordKey) })
+const clipboard = useClipboard({ source: ref(props.gql.key ?? '') })
 const openManageKeys = () => { }
 const showRecordKey = ref(false)
 const { t } = useI18n()

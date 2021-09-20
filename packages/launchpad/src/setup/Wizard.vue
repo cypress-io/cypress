@@ -1,5 +1,5 @@
 <template>
-  <WizardHeader :gql="props.gql.wizard" />
+  <WizardHeader :gql="props.gql.wizard" v-if="props.gql.wizard" />
   <div class="mx-5">
     <EnvironmentSetup 
       v-if="props.gql.wizard.step === 'selectFramework'" 
@@ -38,7 +38,6 @@ fragment Wizard on Query {
     description
     step
     testingType
-
     ...EnvironmentSetup
     ...InstallDependencies
   }

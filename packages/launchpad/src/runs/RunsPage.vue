@@ -1,50 +1,31 @@
 <template>
-	<main class="min-w-650px max-w-800px">
-		<div v-if="fetching">
-			Loading, please wait a bit.
-		</div>
-
-		<div v-else-if="data?.viewer">
-			<RunCard 
-				v-for="run of runs" 
-				:gql="run"
-				:key="run.createdAt"
-			/>
-		</div>
-
-		<div v-else>
-			<Auth />
-		</div>
-	</main>
+  <main class="min-w-650px max-w-800px">
+    <div v-if="props.gql.runs?.nodes">
+      <RunCard
+        v-for="run of props.gql.runs.nodes" 
+        :gql="run"
+        :key="run.id"
+      />
+    </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import { useQuery } from '@urql/vue'
-import { computed } from 'vue'
 import RunCard from './RunCard.vue'
-import Auth from '../setup/Auth.vue'
-import { RunPageRootDocument } from '../generated/graphql'
+import type { RunsPageFragment } from '../generated/graphql'
 
 gql`
-query RunPageRoot {
-	viewer {
-		...Authenticate
-		getProjectByProjectId(projectId: "ypt4pf") {
-			runs {
-				...Run
-			}
-		}
-	}
+fragment RunsPage on CloudProject {
+  runs(first: 10) {
+    nodes {
+      ...RunCard
+    }
+  }
 }
 `
 
-const { data, fetching } = useQuery({ 
-  query: RunPageRootDocument, 
-  context: {
-		additionalTypenames: ['Viewer']
-  }
-})
-
-const runs =  computed(() => data?.value?.viewer?.getProjectByProjectId?.runs || [])
+const props = defineProps<{
+  gql: RunsPageFragment
+}>()
 </script>

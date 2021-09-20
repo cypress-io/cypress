@@ -20,16 +20,17 @@
 import { defineComponent, PropType } from "vue";
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { TestingTypeSelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
+import { TestingType_SelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
 import { TestingTypeIcons } from "../utils/icons";
 
 gql`
-mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
+mutation TestingType_Select($testingType: TestingTypeEnum!) {
   wizardSetTestingType(type: $testingType) {
     step
     testingType
     title
     description
+    ...TestingType
   }
 }
 `
@@ -52,7 +53,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const mutation = useMutation(TestingTypeSelectDocument)
+    const mutation = useMutation(TestingType_SelectDocument)
 
     const selectTestingType = (testingType: TestingTypeEnum) => {
       mutation.executeMutation({ testingType });

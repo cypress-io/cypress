@@ -1,7 +1,7 @@
 import { nxs, NxsResult } from 'nexus-decorators'
 import type { core } from 'nexus'
 import type { BaseContext } from '../context/BaseContext'
-import { LocalProject } from './LocalProject'
+import { Project } from './Project'
 import { Browser } from './Browser'
 import type { FoundBrowser } from '@packages/types'
 
@@ -40,7 +40,7 @@ export class App {
     return hasGlobalModeArg || isMissingActiveProject
   }
 
-  @nxs.field.type(() => LocalProject, {
+  @nxs.field.type(() => Project, {
     description: 'Active project',
   })
   get activeProject (): NxsResult<'App', 'activeProject'> {
@@ -48,7 +48,7 @@ export class App {
     return this.ctx.localProjects[0]!
   }
 
-  @nxs.field.nonNull.list.nonNull.type(() => LocalProject, {
+  @nxs.field.nonNull.list.nonNull.type(() => Project, {
     description: 'All known projects for the app',
   })
   get projects (): core.MaybePromise<NxsResult<'App', 'projects'>> {
