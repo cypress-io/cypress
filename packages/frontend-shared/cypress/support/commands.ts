@@ -8,6 +8,7 @@ import { Component, computed, defineComponent, h } from 'vue'
 import { ClientTestContext } from '../../src/graphql/ClientTestContext'
 import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUnionType'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
+import 'cypress-file-upload'
 
 /**
  * This variable is mimicing ipc provided by electron.

@@ -24,6 +24,7 @@
         </div>
       </dropzone>
     </file-selector>
+    <div data-testid="upload-name" class="hidden">{{uploadName}}</div>
   </main>
 </template>
 
@@ -35,7 +36,10 @@ import { ref, watch, onMounted } from 'vue'
 
 const { t } = useI18n()
 const files = ref([])
-const selectProject = (file) => { console.log(file) }
+const uploadName = ref('')
+
+
+const selectProject = (file) => { uploadName.value = file.name}
 
 watch(files, (newVal) => {
   const uploadLength = newVal.length;
@@ -44,7 +48,7 @@ watch(files, (newVal) => {
 })
 
 onMounted(() => {
-  // force the manual upload to only allow directories
+  // TODO: remove this when vue3-file-selector supports setting this attribute
   document.querySelector('input[type=file]')?.setAttribute('webkitdirectory', 'webkitdirectory')
 })
 

@@ -37,6 +37,7 @@
     "classnames": "2.3.1",
     "concurrently": "^6.2.0",
     "cross-env": "6.0.3",
+    "cypress-file-upload": "^5.0.8",
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "javascript-time-ago": "2.3.8",
