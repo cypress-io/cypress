@@ -4,6 +4,7 @@ import * as cp from 'child_process'
 import * as inspector from 'inspector'
 import * as util from '../plugins/util'
 import * as errors from '../errors'
+import { fs } from '../util/fs'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:require_async')
@@ -34,6 +35,10 @@ export async function requireAsync (filePath: string, options: RequireAsyncOptio
     if (requireProcess) {
       debug('kill existing config process')
       killChildProcess()
+    }
+
+    if (/\.json$/.test(filePath)) {
+      fs.readJson(path.resolve(options.projectRoot, filePath)).then((result) => resolve(result)).catch(reject)
     }
 
     const childOptions: ChildOptions = {
