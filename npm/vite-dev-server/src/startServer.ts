@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { createServer, ViteDevServer, InlineConfig, UserConfig } from 'vite'
+import { createServer, ViteDevServer, InlineConfig } from 'vite'
 import { dirname, resolve } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'
@@ -17,7 +17,7 @@ export interface StartDevServerOptions {
    * to override some options, you can do so using this.
    * @optional
    */
-  viteConfig?: Omit<UserConfig, 'base' | 'root'>
+  viteConfig?: Omit<InlineConfig, 'base' | 'root'>
 }
 
 const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOptions): Promise<InlineConfig> => {
