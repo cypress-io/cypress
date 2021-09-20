@@ -54,12 +54,18 @@ describe('e2e config', () => {
     const project = Fixtures.projectPath('config-with-empty-cypress-config')
 
     return e2e.exec(this, {
-      config: {
-        configFile: 'cypress.config.js',
-      },
       project,
     }).then(() => {
       expect(fs.existsSync(path.resolve(project, 'cypress.json'))).to.be.false
+    })
+  })
+
+  it('crashes when there is a cypress.config.js and there is a cypress.json', function () {
+    const project = Fixtures.projectPath('config-with-json-and-empty-cypress-config')
+
+    return e2e.exec(this, {
+      project,
+      expectedExitCode: 1,
     })
   })
 })
