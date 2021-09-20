@@ -6,6 +6,9 @@ import _ from 'lodash'
 import semver from 'semver'
 import fs, { PathLike } from 'fs'
 import path from 'path'
+import Debug from 'debug'
+
+const debug = Debug('cypress:webpack-dev-server:plugin')
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
@@ -41,6 +44,7 @@ export default class CypressCTOptionsPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string
   private errorEmitted = false
+  private refreshCompile = false
 
   private readonly projectRoot: string
   private readonly devServerEvents: EventEmitter
@@ -64,6 +68,7 @@ export default class CypressCTOptionsPlugin {
     compiler.hooks.afterCompile.tap(
       'CypressCTOptionsPlugin',
       (compilation) => {
+        debug('afterCompile')
         const stats = compilation.getStats()
 
         if (stats.hasErrors()) {
@@ -82,6 +87,14 @@ export default class CypressCTOptionsPlugin {
           // compilation succeed but assets haven't emitted to the output yet
           this.devServerEvents.emit('dev-server:compile:error', null)
         }
+      },
+    )
+
+    compiler.hooks.done.tap(
+      'CypressCTOptionsPlugin',
+      () => {
+        debug('refreshCompile')
+        this.refreshCompile = true
       },
     )
   }
@@ -110,25 +123,34 @@ export default class CypressCTOptionsPlugin {
         (context) => this.pluginFunc(context as CypressCTWebpackContext),
       )
 
-      return
+      compilation.hooks.finishRebuildingModule.tap(
+        'CypressCTOptionsPlugin',
+        (module) => {
+          debug('finishRebuildingModule')
+          // only run refreshes after first compile is done
+          // if there was no compilation errors
+          if (!compilation.errors.length) {
+            this.sendSuccessEventIfSpecRecursively(module)
+          }
+        },
+      )
+    } else {
+      compilation.hooks.succeedModule.tap(
+        'CypressCTOptionsPlugin',
+        (module) => {
+          // only run refreshes after first compile is done
+          if (this.refreshCompile) {
+            debug('succeedModule')
+            this.sendSuccessEventIfSpecRecursively(module)
+          }
+        },
+      )
     }
 
     // Webpack 4
     compilation.hooks.normalModuleLoader.tap(
       'CypressCTOptionsPlugin',
       (context) => this.pluginFunc(context as CypressCTWebpackContext),
-    )
-
-    compilation.hooks.finishRebuildingModule.tap(
-      'CypressCTOptionsPlugin',
-      (module) => {
-        // only run refreshes after first compile is done
-        // if there was no compilation errors
-        if (!compilation.errors.length) {
-          this.sendSuccessEventIfSpecRecursively(module)
-        }
-      },
-
     )
   };
 

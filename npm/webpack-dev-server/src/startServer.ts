@@ -50,10 +50,11 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
   debug('starting webpack dev server')
   let webpackDevServerConfig: WebpackDevServer.Configuration = {
     ...userWebpackConfig?.devServer,
-    hot: false,
+    hot: true,
   }
 
   if (webpackDevServerFacts.isV3()) {
+    //
     debug('using webpack-dev-server v3')
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
@@ -72,11 +73,10 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     webpackDevServerConfig = {
       host: 'localhost',
       port: 'auto',
-      ...userWebpackConfig?.devServer,
+      ...webpackDevServerConfig,
       devMiddleware: {
         publicPath: devServerPublicPathRoute,
       },
-      hot: false,
     }
 
     // @ts-expect-error Webpack types are clashing between Webpack and WebpackDevServer
