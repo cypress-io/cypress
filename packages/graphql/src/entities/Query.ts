@@ -28,7 +28,7 @@ export class Query {
     return ctx.navigationMenu
   }
 
-  cloudViewer (args: unknown, ctx: NxsCtx, info: GraphQLResolveInfo): NxsQueryResult<'cloudViewer'> {
-    return ctx.delegateToRemoteQuery(info) as any
+  cloudViewer (args: unknown, ctx: NxsCtx, info: GraphQLResolveInfo): Promise<NxsQueryResult<'cloudViewer'> | null> {
+    return ctx.delegateToRemoteQuery<'CloudUser'>(info)
   }
 }

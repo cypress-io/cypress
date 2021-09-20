@@ -40,16 +40,22 @@ gulp.task(
 
 gulp.task(
   'debug',
-  async function setupDebug () {
-    setGulpGlobal('debug', '--inspect')
-  },
+  gulp.series(
+    async function setupDebug () {
+      setGulpGlobal('debug', '--inspect')
+    },
+    'dev',
+  ),
 )
 
 gulp.task(
   'debugBrk',
-  async function setupDebugBrk () {
-    setGulpGlobal('debug', '--inspect-brk')
-  },
+  gulp.series(
+    async function setupDebugBrk () {
+      setGulpGlobal('debug', '--inspect-brk')
+    },
+    'dev',
+  ),
 )
 
 gulp.task('buildProd', gulp.series(

@@ -54,8 +54,15 @@ export class Project implements ProjectContract {
   }
 
   @nxs.field.type(() => 'CloudProject')
-  cloudProject (args: unknown, ctx: NxsCtx, info: GraphQLResolveInfo): NxsResult<'Project', 'cloudProject'> {
-    return this.ctx.delegateToRemoteQuery(info) as any
+  async cloudProject (args: unknown, ctx: NxsCtx, info: GraphQLResolveInfo): Promise<NxsResult<'Project', 'cloudProject'>> {
+    // TODO: Tim: fix this, we shouldn't be awaiting projectId here
+    const projId = await this.projectId()
+
+    if (projId) {
+      return this.ctx.cloudProjectsBySlug(projId, info) as any
+    }
+
+    return null
   }
 
   @nxs.field.nonNull.boolean({

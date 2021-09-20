@@ -1,14 +1,36 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
+import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
 import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import type { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
 import { App, Wizard, NavigationMenu, Project } from '../entities'
 import type { NexusGenObjects } from '../gen/nxs.gen'
+import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
+import type { NxsQueryResult } from 'nexus-decorators'
 
 export interface AuthenticatedUser {
   name?: string
   email?: string
   authToken?: string
+}
+
+type PotentialFields = Exclude<keyof CloudQuery, '__typename'>
+
+interface FieldArgMapping {
+  cloudProjectsBySlugs: string
+}
+
+type KnownBatchFields = PotentialFields & keyof FieldArgMapping
+
+const FieldConfig: Record<KnownBatchFields, string> = {
+  cloudProjectsBySlugs: 'slugs',
+}
+
+export interface DelegateToRemoteQueryBatchedConfig<F extends KnownBatchFields> {
+  fieldName: F
+  info: GraphQLResolveInfo
+  rootValue?: object
+  key?: FieldArgMapping[F]
 }
 
 /**
@@ -41,22 +63,46 @@ export abstract class BaseContext {
   wizard = new Wizard(this)
   navigationMenu = new NavigationMenu()
 
-  abstract delegateToRemoteQueryBatched(info: GraphQLResolveInfo): NexusGenObjects['Query'] | null
+  cloudProjectsBySlug (slug: string, info: GraphQLResolveInfo) {
+    return this.delegateToRemoteQueryBatched({
+      info,
+      key: slug,
+      fieldName: 'cloudProjectsBySlugs',
+    })
+  }
 
-  delegateToRemoteQuery (info: GraphQLResolveInfo, rootValue = {}): NexusGenObjects['Query'] | null {
+  delegateToRemoteQueryBatched<T extends KnownBatchFields> (config: DelegateToRemoteQueryBatchedConfig<T>): NxsQueryResult<T> | null {
+    try {
+      return batchDelegateToSchema({
+        schema: this._remoteSchema,
+        info: config.info,
+        context: this,
+        rootValue: config.rootValue ?? {},
+        operation: 'query',
+        fieldName: config.fieldName,
+        key: config.key,
+        argsFromKeys: (keys) => ({ [FieldConfig[config.fieldName]]: keys }),
+      })
+    } catch (e) {
+      this.logError(e)
+
+      return null
+    }
+  }
+
+  async delegateToRemoteQuery <T extends keyof NexusGenObjects> (info: GraphQLResolveInfo, rootValue = {}): Promise<NexusGenObjects[T] | null> {
     try {
       return delegateToSchema({
         schema: this._remoteSchema,
         info,
         context: this,
         rootValue,
-      }) as any
+      })
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e)
-    }
+      this.logError(e)
 
-    return null as any
+      return null
+    }
   }
 
   get activeProject () {
@@ -69,6 +115,12 @@ export abstract class BaseContext {
 
   get launchOptions () {
     return this._launchOptions
+  }
+
+  logError (e: unknown) {
+    // TODO(tim): handle this consistently
+    // eslint-disable-next-line no-console
+    console.error(e)
   }
 
   isFirstOpen = false

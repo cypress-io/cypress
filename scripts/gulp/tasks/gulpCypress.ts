@@ -4,6 +4,7 @@ import childProcess, { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 
 import { monorepoPaths } from '../monorepoPaths'
+import { getGulpGlobal } from '../gulpConstants'
 
 /**
  * Starts cypress, but watches the GraphQL files & restarts the server
@@ -37,6 +38,12 @@ export function startCypressWatch () {
 
     if (!argv.includes('--dev')) {
       argv.push('--dev')
+    }
+
+    const debugFlag = getGulpGlobal('debug')
+
+    if (debugFlag) {
+      process.env.CYPRESS_INTERNAL_DEV_DEBUG = debugFlag
     }
 
     child = childProcess.fork(pathToCli, ['open', ...argv], {

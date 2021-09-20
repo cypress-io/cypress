@@ -13,7 +13,7 @@ export class ServerContext extends BaseContext {
   constructor (args: LaunchArgs, options: OpenProjectLaunchOptions) {
     super(args, options)
 
-    // TIM(review): This should be injected, we should avoid async feching
+    // TODO(tim): This should be injected, we should avoid async feching
     // in constructors like this
     user.get().then((cachedUser: AuthenticatedUser) => {
       // cache returns empty object if user is undefined
@@ -21,6 +21,7 @@ export class ServerContext extends BaseContext {
         this._authenticatedUser = cachedUser
       }
 
+      // TODO(tim): This is a huge hack. We need to cleanup the whole user auth layer
       Promise.resolve(execute({
         schema: this._remoteSchema,
         document: parse(`{ cloudViewer { id } }`),
@@ -35,8 +36,4 @@ export class ServerContext extends BaseContext {
   }
 
   localProjects: Project[] = []
-
-  delegateToRemoteQueryBatched () {
-    return null
-  }
 }

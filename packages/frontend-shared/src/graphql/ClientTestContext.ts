@@ -104,16 +104,4 @@ export class ClientTestContext extends BaseContext {
   // localProjects: Project[] = [this.testProject]
   localProjects: Project[] = [createTestProject('/new/project', this)]
   viewer = null
-
-  delegateToRemoteQuery () {
-    return null
-  }
-
-  delegateToRemoteQueryBatched () {
-    return null
-  }
-
-  batchedCloudExecute () {
-    return null
-  }
 }

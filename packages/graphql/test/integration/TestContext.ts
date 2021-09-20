@@ -37,8 +37,4 @@ export class TestContext extends BaseContext {
       this.wizard = wizard
     }
   }
-
-  delegateToRemoteQueryBatched () {
-    return {} as any
-  }
 }
