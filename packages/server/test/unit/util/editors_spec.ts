@@ -7,7 +7,6 @@ import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 
 import shellUtil from '../../../lib/util/shell.js'
-import * as envEditors from '../../../lib/util/env-editors'
 import savedState from '../../../lib/saved_state'
 
 import { getUserEditor, setUserEditor } from '../../../lib/util/editors'
@@ -25,6 +24,26 @@ const setPlatform = (platform) => {
 describe('lib/util/editors', () => {
   let stateMock
 
+  function getEditors () {
+    return [
+      {
+        id: 'sublimetext',
+        binary: 'subl',
+        name: 'Sublime Text',
+      },
+      {
+        id: 'code',
+        binary: 'code',
+        name: 'Visual Studio Code',
+      },
+      {
+        id: 'vim',
+        binary: 'vim',
+        name: 'Vim',
+      },
+    ]
+  }
+
   beforeEach(() => {
     stateMock = {
       get: sinon.stub().returns({}),
@@ -38,20 +57,6 @@ describe('lib/util/editors', () => {
     let platform
 
     beforeEach(() => {
-      sinon.stub(envEditors, 'getEnvEditors').returns([{
-        id: 'sublimetext',
-        binary: 'subl',
-        name: 'Sublime Text',
-      }, {
-        id: 'code',
-        binary: 'code',
-        name: 'Visual Studio Code',
-      }, {
-        id: 'vim',
-        binary: 'vim',
-        name: 'Vim',
-      }])
-
       sinon.stub(shellUtil, 'commandExists').callsFake((command) => {
         const exists = ['code', 'subl', 'vim'].includes(command)
 
@@ -68,10 +73,17 @@ describe('lib/util/editors', () => {
     })
 
     it('returns a list of editors on the user\'s system with an "On Computer" option prepended and an "Other" option appended', () => {
-      return getUserEditor().then(({ availableEditors }) => {
+      return getUserEditor(false, getEditors).then(({ availableEditors }) => {
         const names = _.map(availableEditors, 'name')
 
-        expect(names).to.eql(['Finder', 'Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
+        expect(names).to.eql([
+          'Finder',
+          'Sublime Text',
+          'Visual Studio Code',
+          'Vim',
+          'Other',
+        ])
+
         expect(availableEditors[0]).to.eql({
           id: 'computer',
           name: 'Finder',
@@ -96,13 +108,13 @@ describe('lib/util/editors', () => {
         },
       })
 
-      return getUserEditor().then(({ availableEditors }) => {
+      return getUserEditor(false, getEditors).then(({ availableEditors }) => {
         expect(availableEditors[4].openerId).to.equal('/path/to/editor')
       })
     })
 
     it('computer option is Finder on MacOS', () => {
-      return getUserEditor().then(({ availableEditors }) => {
+      return getUserEditor(false, getEditors).then(({ availableEditors }) => {
         expect(availableEditors[0].name).to.equal('Finder')
       })
     })
@@ -110,7 +122,7 @@ describe('lib/util/editors', () => {
     it('computer option is File System on Linux', () => {
       setPlatform('linux')
 
-      return getUserEditor().then(({ availableEditors }) => {
+      return getUserEditor(false, getEditors).then(({ availableEditors }) => {
         expect(availableEditors[0].name).to.equal('File System')
       })
     })
@@ -118,7 +130,7 @@ describe('lib/util/editors', () => {
     it('computer option is File Explorer on Windows', () => {
       setPlatform('win32')
 
-      return getUserEditor().then(({ availableEditors }) => {
+      return getUserEditor(false, getEditors).then(({ availableEditors }) => {
         expect(availableEditors[0].name).to.equal('File Explorer')
       })
     })
@@ -126,7 +138,7 @@ describe('lib/util/editors', () => {
     it('computer option defaults to File System', () => {
       setPlatform('unknown')
 
-      return getUserEditor().then(({ availableEditors }) => {
+      return getUserEditor(false, getEditors).then(({ availableEditors }) => {
         expect(availableEditors[0].name).to.equal('File System')
       })
     })
@@ -142,10 +154,12 @@ describe('lib/util/editors', () => {
           },
         })
 
-        return getUserEditor(true).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.have.length(5)
-          expect(preferredOpener).to.equal(preferredOpener)
-        })
+        return getUserEditor(true, getEditors).then(
+          ({ availableEditors, preferredOpener }) => {
+            expect(availableEditors).to.have.length(5)
+            expect(preferredOpener).to.equal(preferredOpener)
+          },
+        )
       })
     })
 
@@ -160,24 +174,30 @@ describe('lib/util/editors', () => {
           },
         })
 
-        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.be.undefined
-          expect(preferredOpener).to.equal(preferredOpener)
-        })
+        return getUserEditor(false, getEditors).then(
+          ({ availableEditors, preferredOpener }) => {
+            expect(availableEditors).to.be.undefined
+            expect(preferredOpener).to.equal(preferredOpener)
+          },
+        )
       })
 
       it('returns available editors if preferred opener has not been saved', () => {
-        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.have.length(5)
-          expect(preferredOpener).to.be.undefined
-        })
+        return getUserEditor(false, getEditors).then(
+          ({ availableEditors, preferredOpener }) => {
+            expect(availableEditors).to.have.length(5)
+            expect(preferredOpener).to.be.undefined
+          },
+        )
       })
 
       it('is default', () => {
-        return getUserEditor().then(({ availableEditors, preferredOpener }) => {
-          expect(availableEditors).to.have.length(5)
-          expect(preferredOpener).to.be.undefined
-        })
+        return getUserEditor(false, getEditors).then(
+          ({ availableEditors, preferredOpener }) => {
+            expect(availableEditors).to.have.length(5)
+            expect(preferredOpener).to.be.undefined
+          },
+        )
       })
     })
   })

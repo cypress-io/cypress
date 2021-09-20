@@ -59,16 +59,22 @@ const computerOpener = (): CyEditor => {
   }
 }
 
-const getUserEditors = (): Bluebird<CyEditor[]> => {
-  return Bluebird.filter(getEnvEditors(), (editor) => {
-    debug('check if user has editor %s with binary %s', editor.name, editor.binary)
+const getUserEditors = (
+  getEditors: typeof getEnvEditors = getEnvEditors,
+): Bluebird<CyEditor[]> => {
+  return Bluebird.filter(getEditors(process.platform), (editor) => {
+    debug(
+      'check if user has editor %s with binary %s',
+      editor.name,
+      editor.binary,
+    )
 
     return shell.commandExists(editor.binary)
-  })
-  .then((editors: Editor[] = []) => {
+  }).then((editors: Editor[] = []) => {
     debug('user has the following editors: %o', editors)
 
-    return savedState.create()
+    return savedState
+    .create()
     .then((state) => {
       return state.get('preferredOpener')
     })
@@ -78,15 +84,21 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
       const cyEditors = _.map(editors, createEditor)
 
       // @ts-ignore
-      return [computerOpener()].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
+      return [computerOpener()]
+      .concat(cyEditors)
+      .concat([getOtherEditor(preferredOpener)])
     })
   })
 }
 
-export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsResult> => {
+export const getUserEditor = (
+  alwaysIncludeEditors = false,
+  getEditors: typeof getEnvEditors = getEnvEditors,
+): Bluebird<EditorsResult> => {
   debug('get user editor')
 
-  return savedState.create()
+  return savedState
+  .create()
   .then((state) => state.get())
   .then((state) => {
     const preferredOpener = state.preferredOpener
@@ -98,7 +110,7 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
       }
     }
 
-    return getUserEditors().then((availableEditors) => {
+    return getUserEditors(getEditors).then((availableEditors) => {
       debug('return available editors: %o', availableEditors)
 
       return { availableEditors, preferredOpener }
@@ -109,8 +121,7 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
 export const setUserEditor = (editor) => {
   debug('set user editor: %o', editor)
 
-  return savedState.create()
-  .then((state) => {
+  return savedState.create().then((state) => {
     state.set('preferredOpener', editor)
   })
 }
