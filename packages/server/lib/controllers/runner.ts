@@ -69,7 +69,7 @@ export const runner = {
     config.version = pkg.version
     config.platform = os.platform() as PlatformName
     config.arch = os.arch()
-    config.spec = getSpec() ?? undefined
+    config.spec = getSpec() ?? null
     config.specs = specsStore.specFiles
     config.browser = getCurrentBrowser()
 
