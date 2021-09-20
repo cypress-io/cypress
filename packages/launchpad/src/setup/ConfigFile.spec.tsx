@@ -15,7 +15,7 @@ describe('<ConfigFile />', () => {
         ctx.wizard.setFramework('cra')
         ctx.wizard.setBundler('webpack')
 
-        return new Query()
+        return new Query(ctx)
       },
       render: (gql) => {
         return (

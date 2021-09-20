@@ -59,7 +59,7 @@ export function startGraphQLServer ({ port }: { port: number } = { port: 52159 }
       schema: graphqlSchema,
       graphiql: true,
       context: serverContext,
-      rootValue: new Query(),
+      rootValue: new Query(serverContext),
     }
   }))
 

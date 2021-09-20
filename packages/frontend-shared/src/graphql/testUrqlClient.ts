@@ -1,6 +1,6 @@
 import { Client, createClient, dedupExchange, errorExchange } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
-import { graphqlSchema } from '@packages/graphql'
+import { graphqlSchema, Query } from '@packages/graphql'
 import type { ClientTestContext } from '../../src/graphql/ClientTestContext'
 import { makeCacheExchange } from './urqlClient'
 
@@ -22,6 +22,7 @@ export function testUrqlClient (config: TestUrqlClientConfig): Client {
       }),
       makeCacheExchange(),
       executeExchange({
+        rootValue: new Query(config.context),
         schema: graphqlSchema,
         ...config,
       }),

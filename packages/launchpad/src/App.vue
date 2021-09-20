@@ -15,9 +15,7 @@ import { AppQueryDocument } from './generated/graphql'
 
 gql`
 query AppQuery {
-  app {
-    __typename
-  }
+  __typename
 }
 `
 
@@ -51,7 +49,7 @@ const poll = () => {
 
 interval = window.setInterval(poll, 200)
 
-const backendInitialized = computed(() => !!query.data?.value?.app)
+const backendInitialized = computed(() => !!query.data?.value)
 </script>
 
 <style lang="scss">

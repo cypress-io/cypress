@@ -9,9 +9,7 @@ const target = ref(null)
 
 gql`
 query App {
-  app {
-    ...Foo
-  }
+  ...Foo
 }
 `
 
@@ -27,6 +25,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Foo v-if="query.data.value" :gql="query.data.value.app" />
+  <Foo v-if="query.data.value" :gql="query.data.value" />
   <div id="target" ref="target"></div>
 </template>

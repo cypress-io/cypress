@@ -6,7 +6,7 @@ describe('Wizard', () => {
   it('works', () => {
     cy.mountFragment(WizardFragmentDoc, {
       type: (ctx) => {
-        return new Query()
+        return new Query(ctx)
       },
       render: (gqlVal) => {
         return <Wizard gql={gqlVal} />

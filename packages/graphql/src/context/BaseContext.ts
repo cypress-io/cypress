@@ -1,9 +1,9 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
-import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+import type { FoundBrowser, LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import type { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard, NavigationMenu, Project } from '../entities'
+import { Wizard, NavigationMenu, Project } from '../entities'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
 import type { NxsQueryResult } from 'nexus-decorators'
@@ -43,6 +43,15 @@ export interface DelegateToRemoteQueryBatchedConfig<F extends KnownBatchFields> 
 export abstract class BaseContext {
   protected _authenticatedUser: AuthenticatedUser | null = null
   protected abstract _remoteSchema: GraphQLSchema
+  private _browsers: FoundBrowser[] = []
+
+  get browsers () {
+    return this._browsers
+  }
+
+  setBrowsers (browsers: FoundBrowser[]): void {
+    this._browsers = browsers
+  }
 
   get authenticatedUser () {
     return this._authenticatedUser ?? null
@@ -59,7 +68,6 @@ export abstract class BaseContext {
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
 
-  app = new App(this)
   wizard = new Wizard(this)
   navigationMenu = new NavigationMenu()
 
@@ -106,7 +114,7 @@ export abstract class BaseContext {
   }
 
   get activeProject () {
-    return this.app.activeProject
+    return this.localProjects[0]
   }
 
   get launchArgs () {
@@ -122,6 +130,4 @@ export abstract class BaseContext {
     // eslint-disable-next-line no-console
     console.error(e)
   }
-
-  isFirstOpen = false
 }

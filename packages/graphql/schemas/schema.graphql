@@ -2,27 +2,6 @@
 ### Do not make changes to this file directly
 
 
-"""Namespace for information related to the app"""
-type App {
-  """Active project"""
-  activeProject: Project
-
-  """Browsers found that are compatible with Cypress"""
-  browsers: [Browser!]!
-
-  """See if the GraphQL server is alive"""
-  healthCheck: String!
-
-  """Whether this is the first open of the application or not"""
-  isFirstOpen: Boolean!
-
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
-
-  """All known projects for the app"""
-  projects: [Project!]!
-}
-
 """Container representing a browser"""
 type Browser {
   channel: String!
@@ -248,7 +227,7 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 
 type Mutation {
   """Create a Cypress config file for a new project"""
-  appCreateConfigFile(code: String!, configFilename: String!): App
+  appCreateConfigFile(code: String!, configFilename: String!): Query
 
   """
   Initializes open_project global singleton to manager current project state
@@ -256,7 +235,7 @@ type Mutation {
   initializeOpenProject: Wizard
 
   """Launches project from open_project global singleton"""
-  launchOpenProject: App
+  launchOpenProject: Query
 
   """Auth with Cypress Cloud"""
   login: Query
@@ -376,7 +355,11 @@ type Project {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
-  app: App!
+  """Active project"""
+  activeProject: Project
+
+  """Browsers found that are compatible with Cypress"""
+  browsers: [Browser!]!
 
   """Returns an object conforming to the Relay spec"""
   cloudNode(
@@ -396,8 +379,17 @@ type Query {
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
+  """See if the GraphQL server is alive"""
+  healthCheck: String!
+
+  """Whether the app is in global mode or not"""
+  isInGlobalMode: Boolean!
+
   """Metadata about the nagivation menu"""
   navigationMenu: NavigationMenu
+
+  """All known projects for the app"""
+  projects: [Project!]!
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!

@@ -1,13 +1,13 @@
 <template>
   <main class="divide-y divide-gray-200 children:pt-7 children:pb-7">
-    <template v-if="app?.activeProject">
+    <template v-if="data?.activeProject">
       <ProjectId 
         class="pt-0"
-        :gql="app.activeProject"
+        :gql="data?.activeProject"
       />
-      <template v-if="app.activeProject.cloudProject">
+      <template v-if="data?.activeProject.cloudProject">
         <RecordKey 
-          v-for="key of app.activeProject.cloudProject.recordKeys"
+          v-for="key of data?.activeProject.cloudProject.recordKeys"
           :gql="key"
         />
       </template>
@@ -33,24 +33,22 @@ import { ProjectSettingsDocument } from '../../generated/graphql'
 
 gql`
 query ProjectSettings {
-  app {
-    activeProject {
+  activeProject {
+    id
+    ...ProjectId
+    cloudProject {
       id
-      ...ProjectId
-      cloudProject {
-        id
-        recordKeys {
-          ...RecordKey
-        }
+      recordKeys {
+        ...RecordKey
       }
     }
   }
 }
 `
 
-const { data } = useQuery({ 
+const resp = useQuery({ 
   query: ProjectSettingsDocument, 
 })
 
-const app = computed(() => data.value?.app)
+const data = computed(() => resp.data.value)
 </script>

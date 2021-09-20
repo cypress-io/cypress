@@ -7,7 +7,6 @@
 import type * as cloudGen from "./cloud-source-types.gen"
 import type { BaseContext } from "./../context/BaseContext"
 import type { Query } from "./../entities/Query"
-import type { App } from "./../entities/App"
 import type { Browser } from "./../entities/Browser"
 import type { NavigationItem } from "./../entities/NavigationItem"
 import type { NavigationMenu } from "./../entities/NavigationMenu"
@@ -79,7 +78,6 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  App: App;
   Browser: Browser;
   CloudOrganization: cloudGen.CloudOrganization;
   CloudOrganizationConnection: cloudGen.CloudOrganizationConnection;
@@ -125,14 +123,6 @@ export type NexusGenRootTypes = NexusGenInterfaces & NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
-  App: { // field return type
-    activeProject: NexusGenRootTypes['Project'] | null; // Project
-    browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
-    healthCheck: string; // String!
-    isFirstOpen: boolean; // Boolean!
-    isInGlobalMode: boolean; // Boolean!
-    projects: NexusGenRootTypes['Project'][]; // [Project!]!
-  }
   Browser: { // field return type
     channel: string; // String!
     disabled: boolean; // Boolean!
@@ -222,9 +212,9 @@ export interface NexusGenFieldTypes {
     userIsViewer: boolean; // Boolean!
   }
   Mutation: { // field return type
-    appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
+    appCreateConfigFile: NexusGenRootTypes['Query'] | null; // Query
     initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
-    launchOpenProject: NexusGenRootTypes['App'] | null; // App
+    launchOpenProject: NexusGenRootTypes['Query'] | null; // Query
     login: NexusGenRootTypes['Query'] | null; // Query
     logout: NexusGenRootTypes['Query'] | null; // Query
     navigationMenuSetItem: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
@@ -263,12 +253,16 @@ export interface NexusGenFieldTypes {
     title: string; // String!
   }
   Query: { // field return type
-    app: NexusGenRootTypes['App']; // App!
+    activeProject: NexusGenRootTypes['Project'] | null; // Project
+    browsers: NexusGenRootTypes['Browser'][]; // [Browser!]!
     cloudNode: NexusGenRootTypes['Node'] | null; // Node
     cloudProjectBySlug: NexusGenRootTypes['CloudProject'] | null; // CloudProject
     cloudProjectsBySlugs: Array<NexusGenRootTypes['CloudProject'] | null> | null; // [CloudProject]
     cloudViewer: NexusGenRootTypes['CloudUser'] | null; // CloudUser
+    healthCheck: string; // String!
+    isInGlobalMode: boolean; // Boolean!
     navigationMenu: NexusGenRootTypes['NavigationMenu'] | null; // NavigationMenu
+    projects: NexusGenRootTypes['Project'][]; // [Project!]!
     wizard: NexusGenRootTypes['Wizard']; // Wizard!
   }
   ResolvedBooleanOption: { // field return type
@@ -394,14 +388,6 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
-  App: { // field return type name
-    activeProject: 'Project'
-    browsers: 'Browser'
-    healthCheck: 'String'
-    isFirstOpen: 'Boolean'
-    isInGlobalMode: 'Boolean'
-    projects: 'Project'
-  }
   Browser: { // field return type name
     channel: 'String'
     disabled: 'Boolean'
@@ -491,9 +477,9 @@ export interface NexusGenFieldTypeNames {
     userIsViewer: 'Boolean'
   }
   Mutation: { // field return type name
-    appCreateConfigFile: 'App'
+    appCreateConfigFile: 'Query'
     initializeOpenProject: 'Wizard'
-    launchOpenProject: 'App'
+    launchOpenProject: 'Query'
     login: 'Query'
     logout: 'Query'
     navigationMenuSetItem: 'NavigationMenu'
@@ -532,12 +518,16 @@ export interface NexusGenFieldTypeNames {
     title: 'String'
   }
   Query: { // field return type name
-    app: 'App'
+    activeProject: 'Project'
+    browsers: 'Browser'
     cloudNode: 'Node'
     cloudProjectBySlug: 'CloudProject'
     cloudProjectsBySlugs: 'CloudProject'
     cloudViewer: 'CloudUser'
+    healthCheck: 'String'
+    isInGlobalMode: 'Boolean'
     navigationMenu: 'NavigationMenu'
+    projects: 'Project'
     wizard: 'Wizard'
   }
   ResolvedBooleanOption: { // field return type name

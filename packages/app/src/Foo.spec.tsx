@@ -1,12 +1,11 @@
 import { FooFragmentDoc } from './generated/graphql-test'
 import Foo from './Foo.vue'
+import { Query } from '@packages/graphql'
 
 describe('Foo', () => {
   it('renders something', () => {
     cy.mountFragment(FooFragmentDoc, {
-      type: (ctx) => {
-        return ctx.app
-      },
+      type: (ctx) => new Query(ctx),
       render: (gqlVal) => {
         return <Foo gql={gqlVal} />
       },

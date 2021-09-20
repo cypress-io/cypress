@@ -68,11 +68,9 @@ import IconRunsLine from 'virtual:vite-icons/clarity/bullet-list-line'
 
 gql`
 query Layout {
-  app {
-    activeProject {
-      id
-      title
-    }
+  activeProject {
+    id
+    title
   }
   navigationMenu {
     selected
@@ -115,7 +113,7 @@ export default defineComponent({
 
     const setMenuItem = useMutation(NavigationMenuSetItemDocument)
 
-    const projectTitle = computed(() => result.data.value?.app.activeProject?.title);
+    const projectTitle = computed(() => result.data.value?.activeProject?.title);
 
     const handleSelect = (type: NavItem) => {
       setMenuItem.executeMutation({ type })

@@ -68,7 +68,7 @@ export const mutation = mutationType({
     })
 
     t.field('appCreateConfigFile', {
-      type: 'App',
+      type: 'Query',
       args: {
         code: nonNull('String'),
         configFilename: nonNull('String'),
@@ -81,7 +81,7 @@ export const mutation = mutationType({
 
         ctx.actions.createConfigFile(args.code, args.configFilename)
 
-        return ctx.app
+        return new Query(ctx)
       },
     })
 
@@ -98,12 +98,12 @@ export const mutation = mutationType({
       async resolve (_root, args, ctx) {
         // already authenticated this session - just return
         if (ctx.authenticatedUser) {
-          return new Query()
+          return new Query(ctx)
         }
 
         await ctx.actions.authenticate()
 
-        return new Query()
+        return new Query(ctx)
       },
     })
 
@@ -113,7 +113,7 @@ export const mutation = mutationType({
       async resolve (_root, args, ctx) {
         await ctx.actions.logout()
 
-        return new Query()
+        return new Query(ctx)
       },
     })
 
@@ -121,7 +121,7 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
-        if (!ctx.app.activeProject) {
+        if (!ctx.activeProject) {
           throw Error('No active project found. Cannot open a browser without an active project')
         }
 
@@ -130,13 +130,13 @@ export const mutation = mutationType({
         }
 
         // do not re-initialize plugins and dev-server.
-        if (ctx.wizard.testingType === 'component' && ctx.app.activeProject.ctPluginsInitialized) {
+        if (ctx.wizard.testingType === 'component' && ctx.activeProject.ctPluginsInitialized) {
           debug('CT already initialized. Returning.')
 
           return ctx.wizard
         }
 
-        if (ctx.wizard.testingType === 'e2e' && ctx.app.activeProject.e2ePluginsInitialized) {
+        if (ctx.wizard.testingType === 'e2e' && ctx.activeProject.e2ePluginsInitialized) {
           debug('E2E already initialized. Returning.')
 
           return ctx.wizard
@@ -152,7 +152,7 @@ export const mutation = mutationType({
         const browsers = await ctx.actions.getBrowsers()
 
         debug('Found browsers: %o', browsers)
-        ctx.app.setBrowsers(browsers)
+        ctx.setBrowsers(browsers)
 
         debug('initialize open_project for testingType %s', ctx.wizard.testingType)
         await ctx.actions.initializeOpenProject({
@@ -168,10 +168,10 @@ export const mutation = mutationType({
     })
 
     t.field('launchOpenProject', {
-      type: 'App',
+      type: 'Query',
       description: 'Launches project from open_project global singleton',
       async resolve (_root, args, ctx) {
-        const browser = ctx.app.browsers.find((x) => x.name === 'chrome')
+        const browser = ctx.browsers.find((x) => x.name === 'chrome')
 
         if (!browser) {
           throw Error(`Could not find chrome browser`)
@@ -184,9 +184,9 @@ export const mutation = mutationType({
           specType: ctx.wizard.testingType === 'e2e' ? 'integration' : 'component',
         }
 
-        await ctx.actions.launchOpenProject(browser.config, spec, {})
+        await ctx.actions.launchOpenProject(browser, spec, {})
 
-        return ctx.app
+        return new Query(ctx)
       },
     })
   },

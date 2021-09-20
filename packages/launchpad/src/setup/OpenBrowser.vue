@@ -6,7 +6,7 @@
     <OpenBrowserList
       v-else
       variant=""
-      :gql="query.data.value.app"
+      :gql="query.data.value"
       @navigated-back="backFn"
       @launch="launch"
     />
@@ -21,9 +21,7 @@ import { OpenBrowserDocument, LaunchOpenProjectDocument } from "../generated/gra
 
 gql`
 query OpenBrowser {
-  app {
-    ...OpenBrowserList
-  }
+  ...OpenBrowserList
 }
 `
 

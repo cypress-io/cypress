@@ -35,14 +35,11 @@ import TestingTypeCard from "./TestingTypeCard.vue";
 
 gql`
 fragment TestingTypeCards on Query {
-  app {
-    activeProject {
-      id
-      isFirstTimeCT
-      isFirstTimeE2E
-    }
+  activeProject {
+    id
+    isFirstTimeCT
+    isFirstTimeE2E
   }
-
   wizard {
     testingTypes {
       id
@@ -83,8 +80,8 @@ const ct = computed(() => {
   return props.gql.wizard.testingTypes.find(x => x.id === 'component')
 })
 
-const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
-const firstTimeE2E = computed(() => props.gql.app.activeProject?.isFirstTimeE2E)
+const firstTimeCT = computed(() => props.gql.activeProject?.isFirstTimeCT)
+const firstTimeE2E = computed(() => props.gql.activeProject?.isFirstTimeE2E)
 
 const selectTestingType = (testingType: TestingTypeEnum) => {
   return mutation.executeMutation({ testingType })

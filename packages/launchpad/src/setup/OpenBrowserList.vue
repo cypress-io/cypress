@@ -77,7 +77,7 @@ import firefoxNightlyIcon from "../../../../node_modules/browser-logos/src/firef
 import firefoxDeveloperEditionIcon from "../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url"
 
 gql`
-fragment OpenBrowserList on App {
+fragment OpenBrowserList on Query {
   browsers {
     id
     name

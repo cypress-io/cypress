@@ -1,6 +1,6 @@
 <template>
   <template v-if="query.data.value">
-    <template v-if="query.data.value.app.isInGlobalMode">
+    <template v-if="query.data.value.isInGlobalMode">
       <GlobalEmpty />
     </template>
 
@@ -32,14 +32,10 @@ gql`
 query MainQuery {
   ...TestingTypeCards
   ...Wizard
-
   wizard {
     ...WizardHeader
   }
-
-  app {
-    isInGlobalMode
-  }
+  isInGlobalMode
   ...HeaderBar
 }
 `

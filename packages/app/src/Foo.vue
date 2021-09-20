@@ -7,7 +7,7 @@ import { gql } from '@urql/vue'
 import type { FooFragment } from './generated/graphql'
 
 gql`
-fragment Foo on App {
+fragment Foo on Query {
   healthCheck
 }
 `
