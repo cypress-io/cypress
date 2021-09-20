@@ -46,7 +46,7 @@ describe('lib/open_project', () => {
       const onWarning = sinon.stub()
 
       await openProject.create('/root', {}, { onWarning })
-      expect(onWarning.getCall(0).args[0].message).to.include('You are currently running a 32-bit build')
+      expect(onWarning.getCall(0).args[0].message).to.include('You are running a 32-bit build')
     })
   })
 
