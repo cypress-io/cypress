@@ -50,6 +50,7 @@
     "content-type": "1.0.4",
     "cookie-parser": "1.4.5",
     "data-uri-to-buffer": "2.0.1",
+    "dataloader": "2.0.0",
     "dayjs": "^1.9.3",
     "debug": "4.3.2",
     "dependency-tree": "8.1.0",

@@ -3,3 +3,4 @@
 
 export * from './BrowserContract'
 export * from './ProjectContract'
+export * from './SpecContract'

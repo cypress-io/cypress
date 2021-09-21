@@ -1,7 +1,8 @@
 import type { BaseContext } from '../context/BaseContext'
-import type { FoundBrowser, OpenProjectLaunchOptions, LaunchOpts, LaunchArgs, FullConfig } from '@packages/types'
+import type { FindSpecs, FoundBrowser, OpenProjectLaunchOptions, LaunchOpts, LaunchArgs, FullConfig, GitInfo } from '@packages/types'
 import type { BrowserContract } from '../contracts/BrowserContract'
 import type { Project } from '../entities/Project'
+import type { SpecContract } from '../contracts'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -36,4 +37,6 @@ export abstract class BaseActions {
   abstract resolveOpenProjectConfig (): FullConfig | null
 
   abstract isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean
+  abstract getSpecs (options: FindSpecs): Promise<SpecContract[]>
+  abstract getGitInfo (file: string[]): Promise<Map<string, GitInfo>>
 }

@@ -3,10 +3,13 @@ import path from 'path'
 import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
-import { BaseActions, Project } from '@packages/graphql'
+import { Project } from '@packages/graphql/src/entities/Project'
+import type { SpecContract } from '@packages/graphql'
+import { BaseActions } from '@packages/graphql'
 import { openProject } from '@packages/server/lib/open_project'
-import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
+import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig, FindSpecs } from '@packages/types'
 import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
+import specUtils from '@packages/server/lib/util/specs'
 
 // @ts-ignore
 import user from '../user'
@@ -21,6 +24,7 @@ import * as config from '../config'
 
 import { getId } from '../project_static'
 import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
+import { getGitInfo } from '../util/git'
 
 const debug = Debug('cypress:server:graphql')
 
@@ -148,5 +152,13 @@ export class ServerActions extends BaseActions {
       // unexpected error
       throw Error(e)
     }
+  }
+
+  getSpecs (options: FindSpecs): Promise<SpecContract[]> {
+    return specUtils.findSpecs(options)
+  }
+
+  getGitInfo (files: string[]) {
+    return getGitInfo(files)
   }
 }

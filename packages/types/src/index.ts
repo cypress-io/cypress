@@ -14,4 +14,8 @@ export {
   RESOLVED_FROM,
 } from './config'
 
+export * from './git'
+
 export * from './server'
+
+export * from './specs'

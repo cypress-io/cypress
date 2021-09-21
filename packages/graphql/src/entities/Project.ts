@@ -1,8 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
+import { intArg, nonNull, stringArg } from 'nexus'
 import { nxs, NxsCtx, NxsResult } from 'nexus-decorators'
+import { SpecTypeEnum } from '../constants'
 import type { BaseContext } from '../context/BaseContext'
 import type { ProjectContract } from '../contracts/ProjectContract'
+import type { NexusGenArgTypes } from '../gen/nxs.gen'
 import { ResolvedConfig } from './ResolvedConfig'
+import { SpecConnection } from './SpecConnection'
 
 @nxs.objectType({
   description: 'A Cypress project is a container',
@@ -35,6 +39,35 @@ export class Project implements ProjectContract {
 
       return null
     }
+  }
+
+  /**
+   * todo(lachlan): decorator to enforce all
+   * connections conform to Relay connection spec
+   * first/last/before/after
+   */
+  @nxs.field.type(() => SpecConnection, {
+    args: {
+      specType: SpecTypeEnum,
+      first: nonNull(intArg()),
+      last: intArg(),
+      before: stringArg(),
+      after: stringArg()
+    }
+  })
+  async specs (args: NexusGenArgTypes['Project']['specs']): Promise<NxsResult<'Project', 'specs'>> {
+    const config = this.resolvedConfig()
+    const specs = await this.ctx.actions.getSpecs({
+      projectRoot: this.projectRoot,
+      fixturesFolder: config?.fixturesFolder?.value ?? false,
+      supportFile: config?.supportFile?.value ?? false,
+      testFiles: config?.testFiles?.value ?? [],
+      ignoreTestFiles: config?.ignoreTestFiles?.value as string[] ?? [],
+      componentFolder: config?.componentFolder?.value ?? false,
+      integrationFolder: config?.integrationFolder?.value ?? '',
+    })
+
+    return new SpecConnection(args, specs)
   }
 
   @nxs.field.nonNull.string()

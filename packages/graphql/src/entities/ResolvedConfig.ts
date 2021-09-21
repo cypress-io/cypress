@@ -19,18 +19,28 @@ const ResolvedTypeEnum = enumType({
   members: RESOLVED_TYPE,
 })
 
-@nxs.interfaceType()
+@nxs.objectType()
 export abstract class ResolvedOptionBase {
   constructor (protected resolveFromConfig: ResolvedFromConfig) {}
 
-  @nxs.field.nonNull.type(() => ResolvedTypeEnum)
-  get type (): ResolvedType {
-    throw new Error('Abstract')
-  }
+  abstract get type (): ResolvedType
 
   @nxs.field.type(() => ResolvedConfigOptionEnum)
   get from (): ResolvedFromConfig['from'] {
     return this.resolveFromConfig.from
+  }
+}
+
+@nxs.objectType()
+export class NonNullResolvedStringOption extends ResolvedOptionBase {
+  @nxs.field.nonNull.type(() => ResolvedTypeEnum)
+  get type (): ResolvedType {
+    return 'string'
+  }
+
+  @nxs.field.nonNull.string()
+  get value (): NxsResult<'NonNullResolvedStringOption', 'value'> {
+    return this.resolveFromConfig.value
   }
 }
 
@@ -217,9 +227,9 @@ export class ResolvedConfig {
     return this.resolvedConfig.fixturesFolder ? new ResolvedStringOption(this.resolvedConfig.fixturesFolder) : null
   }
 
-  @nxs.field.type(() => ResolvedStringOption)
+  @nxs.field.type(() => NonNullResolvedStringOption)
   get integrationFolder (): NxsResult<'ResolvedConfig', 'integrationFolder'> {
-    return this.resolvedConfig.integrationFolder ? new ResolvedStringOption(this.resolvedConfig.integrationFolder) : null
+    return this.resolvedConfig.integrationFolder ? new NonNullResolvedStringOption(this.resolvedConfig.integrationFolder) : null
   }
 
   @nxs.field.type(() => ResolvedStringOption)

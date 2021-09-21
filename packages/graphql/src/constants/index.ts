@@ -3,4 +3,5 @@
 
 export * from './browserConstants'
 export * from './projectConstants'
+export * from './specConstants'
 export * from './wizardConstants'

@@ -9,6 +9,7 @@ import Bluebird from 'bluebird'
 import pluralize from 'pluralize'
 import glob from './glob'
 import Table from 'cli-table3'
+import type { FindSpecs, CommonSearchOptions } from '@packages/types'
 
 const debug = Debug('cypress:server:specs')
 
@@ -204,19 +205,6 @@ const printFoundSpecs = (foundSpecs: Cypress.Spec[]) => {
   /* eslint-disable no-console */
   console.error(table.toString())
 }
-
-export interface CommonSearchOptions {
-  projectRoot: Cypress.RuntimeConfigOptions['projectRoot']
-  fixturesFolder: Cypress.ResolvedConfigOptions['fixturesFolder']
-  supportFile: Cypress.ResolvedConfigOptions['supportFile']
-  testFiles: Cypress.ResolvedConfigOptions['testFiles']
-  ignoreTestFiles: Cypress.ResolvedConfigOptions['ignoreTestFiles']
-}
-
-type FindSpecs = {
-  componentFolder: Cypress.ResolvedConfigOptions['componentFolder']
-  integrationFolder: Cypress.ResolvedConfigOptions['integrationFolder']
-} & CommonSearchOptions
 
 /**
  * First, finds all integration specs, then finds all component specs.
