@@ -18,10 +18,10 @@ const getViewportWidth = (state) => {
   return Math.min(state('viewportWidth'), window.innerWidth)
 }
 
-const automateScreenshot = (state, options = {}) => {
+const automateScreenshot = (state, options: TakeScreenshotOptions = {}) => {
   const { runnable, timeout } = options
 
-  const titles = []
+  const titles: string[] = []
 
   // if this a hook then push both the current test title
   // and our own hook title
@@ -150,7 +150,7 @@ const takeFullPageScreenshot = (state, automationOptions) => {
 
   const resetScrollOverrides = scrollOverrides(win, doc)
 
-  const docHeight = $(doc).height()
+  const docHeight = $(doc).height() as number
   const viewportHeight = getViewportHeight(state)
   const numScreenshots = Math.ceil(docHeight / viewportHeight)
 
@@ -279,7 +279,18 @@ const getBlackout = ({ capture, blackout }) => {
   return isAppOnly({ capture }) ? blackout : []
 }
 
-const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
+// TODO: anys should be removed.
+type TakeScreenshotOptions = {
+  name?: string
+  subject?: any
+  simple?: boolean
+  testFailure?: boolean
+  runnable?: any
+  log?: any
+  timeout?: number
+}
+
+const takeScreenshot = (Cypress, state, screenshotConfig, options: TakeScreenshotOptions = {}) => {
   const {
     capture,
     padding,
@@ -294,7 +305,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
 
   const startTime = new Date()
 
-  const send = (event, props, resolve) => {
+  // TODO: is this ok to make `resolve` undefined?
+  const send = (event, props, resolve?) => {
     Cypress.action(`cy:${event}`, props, resolve)
   }
 
@@ -323,6 +335,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(true)
       }
+
+      return null
     })
     .then(() => {
       return sendAsync('before:screenshot', getOptions(true))
@@ -336,6 +350,8 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
       if (disableTimersAndAnimations) {
         return cy.pauseTimers(false)
       }
+
+      return null
     })
   }
 
@@ -424,7 +440,8 @@ export default function (Commands, Cypress, cy, state, config) {
   })
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window', 'document'] }, {
-    screenshot (subject, name, options = {}) {
+    // TODO: any -> Partial<Loggable & Timeoutable & ScreenshotOptions>
+    screenshot (subject, name, options: any = {}) {
       let userOptions = options
 
       if (_.isObject(name)) {

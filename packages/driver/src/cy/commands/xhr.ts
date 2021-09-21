@@ -5,10 +5,10 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
-import $Server from '../../cypress/server'
+import $Server, { Server } from '../../cypress/server'
 import { $Location } from '../../cypress/location'
 
-let server = null
+let server: Server | null = null
 
 const tryDecodeUri = (uri) => {
   try {
@@ -85,6 +85,21 @@ const setResponse = (state, xhr) => {
   return state('responses', responses)
 }
 
+type XHRConsoleProps = {
+  Alias: string
+  Method: string
+  URL: string
+  'Matched URL': string
+  Status: string
+  Duration: number
+  Stubbed: 'Yes' | 'No'
+  Request: object
+  Response: object
+  XHR: object
+  Note?: string
+  groups?: () => Array<object>
+}
+
 const startXhrServer = (cy, state, config) => {
   const logs = {}
 
@@ -119,7 +134,7 @@ const startXhrServer = (cy, state, config) => {
         event: true,
         timeout: 0,
         consoleProps: () => {
-          const consoleObj = {
+          const consoleObj: XHRConsoleProps = {
             Alias: alias,
             Method: xhr.method,
             URL: xhr.url,

@@ -24,6 +24,12 @@ const throwErr = (arg) => {
   $errUtils.throwErrByPath('wait.invalid_1st_arg', { args: { arg } })
 }
 
+type Alias = {
+  name: string
+  cardinal: number
+  ordinal: number
+}
+
 export default (Commands, Cypress, cy, state) => {
   const waitNumber = (subject, ms, options) => {
     // increase the timeout by the delta
@@ -83,7 +89,7 @@ export default (Commands, Cypress, cy, state) => {
         return xhr
       }
 
-      const args = [alias, type, index, num, options]
+      const args: [any, any, any, any, any] = [alias, type, index, num, options]
 
       return cy.retry(() => {
         return checkForXhr.apply(window, args)
@@ -147,7 +153,7 @@ export default (Commands, Cypress, cy, state) => {
       // because wait can reference an array of aliases
       if (log) {
         const referencesAlias = log.get('referencesAlias') || []
-        const aliases = [].concat(referencesAlias)
+        const aliases: Array<Alias> = [].concat(referencesAlias)
 
         if (str) {
           aliases.push({

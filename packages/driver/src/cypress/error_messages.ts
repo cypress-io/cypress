@@ -78,7 +78,7 @@ const getRedirects = (obj, phrase, listIndentSize) => {
 const getHttpProps = (fields: { value: string, key: string }[] = []) => {
   return _
   .chain(fields)
-  .reduce(formatProp, [])
+  .reduce<string[]>(formatProp, [])
   .join('\n')
   .value()
 }

@@ -10,3 +10,12 @@ _.mixin({
 })
 
 export default _
+
+declare module 'lodash' {
+  interface LoDashStatic {
+    clean: typeof clean
+    count: typeof count
+    isBlank: typeof isBlank
+    toBoolean: typeof toBoolean
+  }
+}

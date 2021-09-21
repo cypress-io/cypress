@@ -6,7 +6,12 @@ import $errUtils from './error_utils'
 
 const SELECTOR_PRIORITIES = 'data-cy data-test data-testid id class tag attributes nth-child'.split(' ')
 
-const reset = () => {
+type Defaults = {
+  onElement: Cypress.SelectorPlaygroundDefaultsOptions['onElement'] | null
+  selectorPriority: Cypress.SelectorPlaygroundDefaultsOptions['selectorPriority']
+}
+
+const reset = (): Defaults => {
   return {
     onElement: null,
     selectorPriority: SELECTOR_PRIORITIES,

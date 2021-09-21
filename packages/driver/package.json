@@ -28,6 +28,7 @@
     "@types/common-tags": "^1.8.0",
     "@types/lodash": "^4.14.168",
     "@types/mocha": "^8.0.3",
+    "@types/underscore.string": "0.0.38",
     "angular": "1.8.0",
     "basic-auth": "2.0.1",
     "blob-util": "2.0.2",

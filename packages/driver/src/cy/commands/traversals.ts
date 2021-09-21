@@ -87,6 +87,13 @@ const autoShadowTraversals = {
   },
 }
 
+type EachConsoleProps = {
+  Selector: string
+  'Applied To': any
+  Yielded?: any
+  Elements?: number | undefined
+}
+
 export default (Commands, Cypress, cy) => {
   _.each(traversals, (traversal) => {
     Commands.add(traversal, { prevSubject: ['element', 'document'] }, (subject, arg1, arg2, options) => {
@@ -110,7 +117,7 @@ export default (Commands, Cypress, cy) => {
         return args.join(', ')
       }
 
-      const consoleProps = {
+      const consoleProps: EachConsoleProps = {
         Selector: getSelector(),
         'Applied To': $dom.getElements(subject),
       }
@@ -166,7 +173,7 @@ export default (Commands, Cypress, cy) => {
           // normalize the selector since jQuery won't have it
           // or completely borks it
           $el.selector = getSelector()
-        } catch (e) {
+        } catch (e: any) {
           e.onFail = () => {
             return options._log.error(e)
           }

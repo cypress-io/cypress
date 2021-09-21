@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import type $Cypress from '../..'
 
 /**
  * Fix property reads and writes that could potentially help the AUT to break out of its iframe.
@@ -9,7 +8,7 @@ import type $Cypress from '../..'
  * @param accessedProp the property name being accessed (Symbol/number properties are not intercepted)
  * @param value the right-hand side of an assignment operation (accessedObject.accessedProp = value)
  */
-export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {
+export function resolveWindowReference (this: Cypress.Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {
   const { dom, state } = this
 
   const getTargetValue = () => {

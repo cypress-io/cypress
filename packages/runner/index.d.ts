@@ -7,3 +7,4 @@
 /// <reference path="../../cli/types/cypress-type-helpers.d.ts" />
 
 /// <reference path="../ts/index.d.ts" />
+/// <reference path="../driver/types/internal-types.d.ts" />

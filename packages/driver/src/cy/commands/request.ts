@@ -50,12 +50,18 @@ const whichAreOptional = (val, key) => {
   return (val === null) && OPTIONAL_OPTS.includes(key)
 }
 
-const needsFormSpecified = (options = {}) => {
+const needsFormSpecified = (options: any = {}) => {
   const { body, json, headers } = options
 
   // json isn't true, and we have an object body and the user
   // specified that the content-type header is x-www-form-urlencoded
   return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
+}
+
+interface BackendError {
+  backend: boolean
+  message?: string
+  stack?: any
 }
 
 export default (Commands, Cypress, cy, state, config) => {
@@ -64,7 +70,7 @@ export default (Commands, Cypress, cy, state, config) => {
     // METHOD / URL / BODY
     // or object literal with all expanded options
     request (...args) {
-      const o = {}
+      const o: any = {}
       const userOptions = o
 
       if (_.isObject(args[0])) {
@@ -297,7 +303,11 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // reset content-type
           if (requestOpts.headers) {
-            delete requestOpts.headers[Object.keys(requestOpts).find((key) => key.toLowerCase() === 'content-type')]
+            const contentTypeKey = Object.keys(requestOpts).find((key) => key.toLowerCase() === 'content-type')
+
+            if (contentTypeKey) {
+              delete requestOpts.headers[contentTypeKey]
+            }
           } else {
             requestOpts.headers = {}
           }
@@ -308,7 +318,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // socket.io ignores FormData.
           // So, we need to encode the data into base64 string format.
-          const formBody = []
+          const formBody: string[] = []
 
           requestOpts.body.forEach((value, key) => {
             // HTTP line break style is \r\n.
@@ -373,7 +383,7 @@ export default (Commands, Cypress, cy, state, config) => {
             timeout: options.timeout,
           },
         })
-      }).catch({ backend: true }, (err) => {
+      }).catch<void, BackendError>({ backend: true }, (err: BackendError) => {
         $errUtils.throwErrByPath('request.loading_failed', {
           onFail: options._log,
           args: {
