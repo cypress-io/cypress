@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import Main from './Main.vue'
 import { AppQueryDocument } from './generated/graphql'
@@ -28,9 +28,13 @@ query AppQuery {
  */
 const query = useQuery({ 
   query: AppQueryDocument,
-  requestPolicy: 'network-only'
+  requestPolicy: 'cache-and-network'
 })
 
+
+watch(query.data, () => {
+  console.log(query.data.value)
+})
 
 let interval: number
 const poll = () => {

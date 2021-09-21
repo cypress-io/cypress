@@ -39,7 +39,7 @@ import { useI18n } from '../../composables'
 import type { ProjectIdFragment } from '../../generated/graphql'
 
 gql`
-fragment ProjectId on LocalProject {
+fragment ProjectId on Project {
   projectId
 }
 `

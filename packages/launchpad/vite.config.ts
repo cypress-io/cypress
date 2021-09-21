@@ -11,6 +11,7 @@ import VueSvgLoader from 'vite-svg-loader'
 
 export default defineConfig({
   base: './',
+  mode: 'development',
   build: {
     minify: false,
   },
@@ -29,6 +30,9 @@ export default defineConfig({
     VueSvgLoader(),
   ],
   define: {
-    'process.env': {},
+    'process.env': {
+      CYPRESS_INTERNAL_ENV: 'development',
+    },
+    'setImmediate': {},
   },
 })

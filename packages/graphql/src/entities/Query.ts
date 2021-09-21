@@ -1,8 +1,8 @@
-import { nxs, NxsQueryResult } from 'nexus-decorators'
+import type { GraphQLResolveInfo } from 'graphql'
+import { nxs, NxsCtx, NxsQueryResult } from 'nexus-decorators'
 import type { NexusGenTypes } from '../gen/nxs.gen'
 import { App } from './App'
 import { NavigationMenu } from './NavigationMenu'
-import { Viewer } from './Viewer'
 import { Wizard } from './Wizard'
 
 @nxs.objectType({
@@ -12,13 +12,6 @@ export class Query {
   @nxs.field.nonNull.type(() => App)
   app (_: unknown, ctx: NexusGen['context']): NxsQueryResult<'app'> {
     return ctx.app
-  }
-
-  @nxs.field.type(() => Viewer, {
-    description: 'Namespace for data accessible from Cypress Cloud for authenticated users',
-  })
-  viewer (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'viewer'> {
-    return ctx.viewer ?? null
   }
 
   @nxs.field.nonNull.type(() => Wizard, {
@@ -33,5 +26,9 @@ export class Query {
   })
   navigationMenu (args: unknown, ctx: NexusGenTypes['context']): NxsQueryResult<'navigationMenu'> {
     return ctx.navigationMenu
+  }
+
+  cloudViewer (args: unknown, ctx: NxsCtx, info: GraphQLResolveInfo): Promise<NxsQueryResult<'cloudViewer'> | null> {
+    return ctx.delegateToRemoteQuery<'CloudUser'>(info)
   }
 }

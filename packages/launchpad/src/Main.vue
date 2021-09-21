@@ -5,7 +5,7 @@
     </template>
 
     <template v-else>
-      <HeaderBar :gql="query.data.value.app" />
+      <HeaderBar :gql="query.data.value" />
       <template v-if="query.data.value?.wizard.step === 'welcome'">
         <WizardHeader :gql="query.data.value.wizard" />
         <TestingTypeCards :gql="query.data.value" />
@@ -39,8 +39,8 @@ query MainQuery {
 
   app {
     isInGlobalMode
-    ...HeaderBar
   }
+  ...HeaderBar
 }
 `
 

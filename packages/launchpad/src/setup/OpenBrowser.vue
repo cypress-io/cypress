@@ -33,6 +33,7 @@ gql`
 mutation LaunchOpenProject  {
   launchOpenProject {
     projects {
+      id
       __typename # don't really care about result at this point
     }
   }

@@ -7,9 +7,8 @@ describe('<Checkbox />', () => {
 
     cy.mount(() => (<Checkbox
       label="Welcome guide settings"
-      description="The description"
       id="welcome-opt-out"
-      vModel={value}
+      modelValue={value.value}
     >
       <span class="text-gray-800 font-light">Show the welcome guide when opening Cypress.</span>
     </Checkbox>))

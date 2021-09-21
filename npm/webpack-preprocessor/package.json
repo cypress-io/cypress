@@ -5,7 +5,7 @@
   "private": false,
   "main": "dist",
   "scripts": {
-    "build": "shx rm -rf dist && tsc",
+    "build": "shx rm -rf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
     "secure": "nsp check",
@@ -16,7 +16,7 @@
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
-    "types": "tsc --noEmit",
+    "check-ts": "tsc --noEmit",
     "watch": "yarn build --watch"
   },
   "dependencies": {

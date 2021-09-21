@@ -1,4 +1,4 @@
-import { OpenBrowserListFragmentDoc } from '../generated/graphql'
+import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '../../cypress/fixtures/browsers/long-browsers-list'
 
