@@ -93,11 +93,14 @@ export async function syncRemoteGraphQL () {
     throw new Error(`Expected --env to be one of ${Object.keys(ENV_MAP).join(', ')}`)
   }
 
-  const body = await rp.get(`${ENV_MAP[CYPRESS_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
+  try {
+    const body = await rp.get(`${ENV_MAP[CYPRESS_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
 
-  // TODO(tim): fix
-  await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'schemas/cloud.graphql'), body)
-  await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-introspection.gen.json'), JSON.stringify(introspectionFromSchema(buildSchema(body)), null, 2))
+    // TODO(tim): fix
+    await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
+    await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'schemas/cloud.graphql'), body)
+    await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-introspection.gen.json'), JSON.stringify(introspectionFromSchema(buildSchema(body)), null, 2))
+  } catch {}
 }
 
 export async function printUrqlSchema () {
