@@ -35,7 +35,7 @@ export class App {
   })
   get isInGlobalMode (): NxsResult<'App', 'isInGlobalMode'> {
     const hasGlobalModeArg = this.ctx.launchArgs.global ?? false
-    const isMissingActiveProject = !this.ctx.activeProject
+    const isMissingActiveProject = !this.ctx.project.activeProject
 
     return hasGlobalModeArg || isMissingActiveProject
   }
@@ -45,7 +45,7 @@ export class App {
   })
   get activeProject (): NxsResult<'App', 'activeProject'> {
     // TODO: Figure out how to model project and dashboard project relationship
-    return this.ctx.localProjects[0]!
+    return this.ctx.project.activeProject
   }
 
   @nxs.field.nonNull.list.nonNull.type(() => Project, {
@@ -55,10 +55,10 @@ export class App {
     if (!this._hasRetrievedProjectsFromCache) {
       this._hasRetrievedProjectsFromCache = true
 
-      return this.ctx.actions.loadProjects()
+      return this.ctx.project.loadProjects()
     }
 
-    return this.ctx.localProjects
+    return this.ctx.project.localProjects
   }
 
   @nxs.field.nonNull.list.nonNull.type(() => Browser, {

@@ -1,7 +1,9 @@
-import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project, execute, parse } from '@packages/graphql'
+import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, execute, parse } from '@packages/graphql'
 
 import { ServerActions } from './ServerActions'
+import { ProjectSource } from './ProjectSource'
 import type { OpenProjectLaunchOptions, LaunchArgs } from '@packages/types'
+import { lazy } from '../util/lazyDecorator'
 
 // @ts-ignore
 import user from '@packages/server/lib/user'
@@ -35,5 +37,8 @@ export class ServerContext extends BaseContext {
     })
   }
 
-  localProjects: Project[] = []
+  @lazy
+  get project () {
+    return new ProjectSource(this)
+  }
 }

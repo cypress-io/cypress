@@ -3,10 +3,11 @@ import path from 'path'
 import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
-import { BaseActions, Project } from '@packages/graphql'
+import { BaseActions } from '@packages/graphql'
 import { openProject } from '@packages/server/lib/open_project'
 import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
-import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
+import { ProjectActions } from './ProjectActions'
+import { lazy } from '../util/lazyDecorator'
 
 // @ts-ignore
 import user from '../user'
@@ -32,38 +33,13 @@ export class ServerActions extends BaseActions {
     super(ctx)
   }
 
+  @lazy
+  get project () {
+    return new ProjectActions(this.ctx)
+  }
+
   installDependencies () {
     //
-  }
-
-  addProject (projectRoot: string) {
-    // no need to re-add
-    const found = this.ctx.localProjects.find((x) => x.projectRoot === projectRoot)
-
-    if (found) {
-      return found
-    }
-
-    const localProject = new Project(projectRoot, this.ctx)
-
-    this.ctx.localProjects.push(localProject)
-    insertProject(projectRoot)
-
-    return localProject
-  }
-
-  async loadProjects () {
-    const cachedProjects = await this._loadProjectsFromCache()
-
-    cachedProjects.forEach((projectRoot) => {
-      this.addProject(projectRoot)
-    })
-
-    return this.ctx.app.projects
-  }
-
-  async _loadProjectsFromCache () {
-    return await getProjectRoots()
   }
 
   async authenticate () {

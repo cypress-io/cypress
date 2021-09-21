@@ -1,7 +1,7 @@
 import type { BaseContext } from '../context/BaseContext'
 import type { FoundBrowser, OpenProjectLaunchOptions, LaunchOpts, LaunchArgs, FullConfig } from '@packages/types'
 import type { BrowserContract } from '../contracts/BrowserContract'
-import type { Project } from '../entities/Project'
+import type { IProjectActions } from './IProjectActions'
 
 /**
  * Acts as the contract for all actions, inherited by:
@@ -13,13 +13,11 @@ import type { Project } from '../entities/Project'
  */
 export abstract class BaseActions {
   constructor (protected ctx: BaseContext) {}
+  abstract get project(): IProjectActions
 
   abstract installDependencies (): void
 
   abstract createConfigFile (code: string, configFilename: string): void
-
-  abstract loadProjects (): Promise<Project[]>
-  abstract addProject (projectRoot: string): Project
 
   abstract getProjectId (projectRoot: string): Promise<string | null>
   abstract authenticate (): Promise<void>

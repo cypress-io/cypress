@@ -3,10 +3,11 @@ import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
 import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import type { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard, NavigationMenu, Project } from '../entities'
+import { App, Wizard, NavigationMenu } from '../entities'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
 import type { NxsQueryResult } from 'nexus-decorators'
+import type { IProjectSource } from '../sources'
 
 export interface AuthenticatedUser {
   name?: string
@@ -55,7 +56,6 @@ export abstract class BaseContext {
   }
 
   abstract readonly actions: BaseActions
-  abstract localProjects: Project[]
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
 
@@ -105,10 +105,6 @@ export abstract class BaseContext {
     }
   }
 
-  get activeProject () {
-    return this.app.activeProject
-  }
-
   get launchArgs () {
     return this._launchArgs
   }
@@ -116,6 +112,8 @@ export abstract class BaseContext {
   get launchOptions () {
     return this._launchOptions
   }
+
+  abstract get project(): IProjectSource
 
   logError (e: unknown) {
     // TODO(tim): handle this consistently

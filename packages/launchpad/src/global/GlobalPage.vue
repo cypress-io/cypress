@@ -1,5 +1,5 @@
 <template>
-  <template v-if="projects.length">
+  <template v-if="props.gql?.projects?.length">
     <!-- Welcome Guide can fetch its own information for if it should render -->
     <WelcomeGuide />
 
@@ -9,7 +9,7 @@
         <GlobalPageHeader v-model="match" />
       </div>
 
-      <GlobalProjectCard v-for="project, idx in filteredProjects" :key="idx" :project="project" />
+      <GlobalProjectCard v-for="project in props.gql.projects" :key="project.id" :project="project" />
     </div>
   </template>
 
@@ -20,11 +20,27 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Ref } from 'vue'
+import { gql } from "@urql/core";
 import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
+import type { GlobalPageFragment } from "../generated/graphql"
 
+gql`
+fragment GlobalPage on App {
+  projects {
+    id
+    title
+  }
+}
+`
+
+const props = defineProps<{
+  gql: GlobalPageFragment,
+}>()
+
+console.log(props.gql.projects[0].id)
 type Project = {
   name: string,
   lastRunStatus: 'passed' | 'failed' | 'pending'

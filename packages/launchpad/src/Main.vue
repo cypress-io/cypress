@@ -1,7 +1,7 @@
 <template>
   <template v-if="query.data.value">
     <template v-if="query.data.value.app.isInGlobalMode">
-      <GlobalEmpty />
+      <GlobalPage :gql="query.data.value.app"/>
     </template>
 
     <template v-else>
@@ -26,7 +26,7 @@ import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import WizardHeader from './setup/WizardHeader.vue'
 import HeaderBar from './layouts/HeaderBar.vue'
-import GlobalEmpty from './global/GlobalEmpty.vue'
+import GlobalPage from './global/GlobalPage.vue'
 
 gql`
 query MainQuery {
@@ -39,6 +39,7 @@ query MainQuery {
 
   app {
     isInGlobalMode
+    ...GlobalPage
   }
   ...HeaderBar
 }

@@ -75,7 +75,7 @@ export const mutation = mutationType({
       },
       description: 'Create a Cypress config file for a new project',
       resolve: (root, args, ctx) => {
-        if (!ctx.activeProject) {
+        if (!ctx.project.activeProject) {
           throw Error('Cannot write config file without an active project')
         }
 
@@ -197,7 +197,7 @@ export const mutation = mutationType({
         path: nonNull(stringArg()),
       },
       async resolve (_root, args, ctx) {
-        ctx.actions.addProject(args.path)
+        ctx.actions.project.addProject(args.path)
 
         return ctx.app
       },
