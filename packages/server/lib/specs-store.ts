@@ -1,7 +1,9 @@
 import type Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
-import { findSpecsOfType } from './util/specs'
+import specsUtil from './util/specs'
+/* eslint-disable no-duplicate-imports */
+import type { CommonSearchOptions } from './util/specs'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
@@ -9,8 +11,6 @@ type SpecFiles = SpecFile[]
 interface SpecsWatcherOptions {
   onSpecsChanged: (specFiles: SpecFiles) => void
 }
-
-const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', 'testFiles', 'ignoreTestFiles']
 
 // TODO: shouldn't this be on the trailing edge, not leading?
 const debounce = (fn) => _.debounce(fn, 250, { leading: true })
@@ -54,12 +54,17 @@ export class SpecsStore {
   }
 
   getSpecFiles (): Bluebird<SpecFiles> {
-    const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
+    const searchOptions: CommonSearchOptions = {
+      projectRoot: this.cypressConfig.projectRoot,
+      fixturesFolder: this.cypressConfig.fixturesFolder,
+      supportFile: this.cypressConfig.supportFile,
+      testFiles: this.cypressConfig.testFiles,
+      ignoreTestFiles: this.cypressConfig.ignoreTestFiles,
+    }
 
-    searchOptions.searchFolder = this.specDirectory
     searchOptions.testFiles = this.testFiles
 
-    return findSpecsOfType(searchOptions)
+    return specsUtil.findSpecsOfType(this.specDirectory, searchOptions)
   }
 
   watch (options: SpecsWatcherOptions) {
