@@ -70,7 +70,7 @@ const renameSupportFolder = (obj) => {
 }
 
 module.exports = {
-  isComponentTesting (options = {}) {
+  isComponentTesting (options) {
     return options.testingType === 'component'
   },
 
@@ -126,7 +126,7 @@ module.exports = {
     return options.configFile
   },
 
-  id (projectRoot, options = {}) {
+  id (projectRoot, options) {
     const file = this.pathToConfigFile(projectRoot, options)
 
     return fs.readJsonAsync(file)
@@ -143,7 +143,7 @@ module.exports = {
    * @param {object} options
    * @returns
    */
-  exists (projectRoot, options = {}) {
+  exists (projectRoot, options) {
     const file = this.pathToConfigFile(projectRoot, options)
 
     debug('find out if "%s" exists', file)
@@ -175,7 +175,7 @@ module.exports = {
     })
   },
 
-  read (projectRoot, options = {}) {
+  read (projectRoot, options) {
     if (options.configFile === false) {
       return Promise.resolve({})
     }
@@ -267,7 +267,7 @@ module.exports = {
     })
   },
 
-  pathToConfigFile (projectRoot, options = {}) {
+  pathToConfigFile (projectRoot, options) {
     const configFile = this.configFile(options)
 
     return configFile && this._pathToFile(projectRoot, configFile)
