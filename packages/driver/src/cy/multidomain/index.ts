@@ -2,8 +2,6 @@ import Bluebird from 'bluebird'
 import $Log from '../../cypress/log'
 import { createDeferred } from '../../util/deferred'
 
-const readiedDomains = {}
-
 export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   Commands.addAll({
     // this is a stop-gap command temporarily in use until looking ahead for
@@ -14,17 +12,8 @@ export function addCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy,
       state('anticipateMultidomain', true)
 
       return new Bluebird((resolve) => {
-        // the spec bridge iframe only loads once, and that's when it sends
-        // 'cross:domain:bridge:ready', so if we've already readied it,
-        // there's no need to wait
-        if (readiedDomains[domain]) {
-          return resolve()
-        }
-
         // @ts-ignore
         Cypress.once('cross:domain:bridge:ready', () => {
-          readiedDomains[domain] = true
-
           resolve()
         })
 

@@ -623,6 +623,10 @@ export const eventManager = {
     ws.emit('spec:changed', specFile)
   },
 
+  notifyCrossDomainBridgeReady () {
+    Cypress.emit('cross:domain:bridge:ready')
+  },
+
   focusTests () {
     ws.emit('focus:tests')
   },
