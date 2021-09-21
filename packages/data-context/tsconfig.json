@@ -12,6 +12,7 @@
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
+    "noUnusedLocals": false,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
     "types": []
