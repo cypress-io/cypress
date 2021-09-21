@@ -123,15 +123,6 @@ export type WizardStep =
   | 'setupComplete'
   | 'welcome';
 
-export type AppQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type AppQuery = { readonly __typename?: 'Query', readonly app: (
-    { readonly __typename?: 'App' }
-    & FooFragment
-  ) };
-
 export type FooFragment = { readonly __typename?: 'App', readonly healthCheck: string };
 
 export const FooFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"Foo"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"App"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthCheck"}}]}}]} as unknown as DocumentNode<FooFragment, unknown>;
-export const AppDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"App"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"app"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"Foo"}}]}}]}},...FooFragmentDoc.definitions]} as unknown as DocumentNode<AppQuery, AppQueryVariables>;
