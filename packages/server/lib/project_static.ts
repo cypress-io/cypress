@@ -139,7 +139,7 @@ export async function add (path, options) {
   // because the cache key is the path and there could
   // be more than one config file in the path
   // https://git.io/JeGyF
-  const configFileRelativePath = await settings.configFile(path, options)
+  const configFileRelativePath = await settings.resolveConfigFileRelativePath(path, options)
 
   if (!CYPRESS_CONFIG_FILES.includes(configFileRelativePath)) {
     return Promise.resolve({ path })

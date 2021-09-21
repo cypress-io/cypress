@@ -855,7 +855,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', (await settings.configFile(this.projectRoot, this.options)), this.projectRoot)
+    errors.throw('NO_PROJECT_ID', (await settings.resolveConfigFileRelativePath(this.projectRoot, this.options)), this.projectRoot)
   }
 
   async verifyExistence () {

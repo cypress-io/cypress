@@ -123,7 +123,7 @@ module.exports = {
     }, _.cloneDeep(obj))
   },
 
-  configFile (projectRoot, options = {}) {
+  resolveConfigFileRelativePath (projectRoot, options = {}) {
     if (options.configFile !== undefined) {
       return Promise.resolve(options.configFile)
     }
@@ -294,7 +294,7 @@ module.exports = {
   },
 
   pathToConfigFile (projectRoot, options = {}) {
-    return this.configFile(projectRoot, options).then((configFile) => {
+    return this.resolveConfigFileRelativePath(projectRoot, options).then((configFile) => {
       return configFile && this._pathToFile(projectRoot, configFile)
     })
   },

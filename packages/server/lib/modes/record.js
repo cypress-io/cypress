@@ -444,7 +444,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return settings.configFile(options.projectRoot, options).then((configFileRelativePath) => {
+        return settings.resolveConfigFileRelativePath(options.projectRoot, options).then((configFileRelativePath) => {
           errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, configFileRelativePath)
         })
       case 412:

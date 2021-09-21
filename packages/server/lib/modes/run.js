@@ -1522,7 +1522,7 @@ module.exports = {
 
       return createAndOpenProject(socketId, options)
       .then(({ project, projectId, config }) => {
-        return settings.configFile(projectRoot, options).then((configFileRelativePath) => {
+        return settings.resolveConfigFileRelativePath(projectRoot, options).then((configFileRelativePath) => {
           debug('project created and opened with config %o', config)
 
           // if we have a project id and a key but record hasnt been given
