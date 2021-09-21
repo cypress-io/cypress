@@ -13,6 +13,8 @@ const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 
 describe('lib/scaffold', () => {
   beforeEach(() => {
+    sinon.stub(fs, 'readdir').resolves(['cypress.json'])
+
     return Fixtures.scaffold()
   })
 
