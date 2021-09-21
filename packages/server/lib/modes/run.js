@@ -1522,124 +1522,122 @@ module.exports = {
 
       return createAndOpenProject(socketId, options)
       .then(({ project, projectId, config }) => {
-        return settings.resolveConfigFileRelativePath(projectRoot, options).then((configFileRelativePath) => {
-          debug('project created and opened with config %o', config)
+        debug('project created and opened with config %o', config)
 
-          // if we have a project id and a key but record hasnt been given
-          recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-          recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
+        // if we have a project id and a key but record hasnt been given
+        recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
+        recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
-          if (record) {
-            recordMode.throwIfNoProjectId(projectId, configFileRelativePath)
-            recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
-            recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
+        if (record) {
+          recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
+          recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
+          recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
+        }
+
+        // user code might have modified list of allowed browsers
+        // but be defensive about it
+        const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
+
+        // all these operations are independent and should be run in parallel to
+        // speed the initial booting time
+        return Promise.all([
+          system.info(),
+          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
+          this.findSpecs(config, specPattern),
+          trashAssets(config),
+        ])
+        .spread((sys = {}, browser = {}, specs = []) => {
+          // return only what is return to the specPattern
+          if (specPattern) {
+            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
 
-          // user code might have modified list of allowed browsers
-          // but be defensive about it
-          const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
+          specs = specs.filter((spec) => {
+            return options.testingType === 'component'
+              ? spec.specType === 'component'
+              : spec.specType === 'integration'
+          })
 
-          // all these operations are independent and should be run in parallel to
-          // speed the initial booting time
-          return Promise.all([
-            system.info(),
-            browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
-            this.findSpecs(config, specPattern),
-            trashAssets(config),
-          ])
-          .spread((sys = {}, browser = {}, specs = []) => {
-          // return only what is return to the specPattern
-            if (specPattern) {
-              specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
-            }
-
-            specs = specs.filter((spec) => {
-              return options.testingType === 'component'
-                ? spec.specType === 'component'
-                : spec.specType === 'integration'
-            })
-
-            if (!specs.length) {
+          if (!specs.length) {
             // did we use the spec pattern?
-              if (specPattern) {
-                errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
-              } else {
+            if (specPattern) {
+              errors.throw('NO_SPECS_FOUND', projectRoot, specPattern)
+            } else {
               // else we looked in the integration folder
-                errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
-              }
+              errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
             }
+          }
 
-            if (browser.unsupportedVersion && browser.warning) {
-              errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
-            }
+          if (browser.unsupportedVersion && browser.warning) {
+            errors.throw('UNSUPPORTED_BROWSER_VERSION', browser.warning)
+          }
 
-            if (browser.family === 'chromium') {
-              chromePolicyCheck.run(onWarning)
-            }
+          if (browser.family === 'chromium') {
+            chromePolicyCheck.run(onWarning)
+          }
 
-            const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
-              return this.runSpecs({
-                beforeSpecRun,
-                afterSpecRun,
-                projectRoot,
-                specPattern,
-                socketId,
-                parallel,
-                onError,
-                browser,
-                project,
-                runUrl,
-                group,
-                config,
-                specs,
-                sys,
-                tag,
-                videosFolder: config.videosFolder,
-                video: config.video,
-                videoCompression: config.videoCompression,
-                videoUploadOnPasses: config.videoUploadOnPasses,
-                exit: options.exit,
-                headed: options.headed,
-                quiet: options.quiet,
-                outputPath: options.outputPath,
-                testingType: options.testingType,
-              })
-              .tap((runSpecs) => {
-                if (!options.quiet) {
-                  renderSummaryTable(runUrl)(runSpecs)
-                }
-              })
-            }
-
-            if (record) {
-              const { projectName } = config
-
-              return recordMode.createRunAndRecordSpecs({
-                tag,
-                key,
-                sys,
-                specs,
-                group,
-                config,
-                browser,
-                parallel,
-                ciBuildId,
-                testingType,
-                project,
-                projectId,
-                projectRoot,
-                projectName,
-                specPattern,
-                runAllSpecs,
-                onError,
-                quiet: options.quiet,
-              })
-            }
-
-            // not recording, can't be parallel
-            return runAllSpecs({
-              parallel: false,
+          const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
+            return this.runSpecs({
+              beforeSpecRun,
+              afterSpecRun,
+              projectRoot,
+              specPattern,
+              socketId,
+              parallel,
+              onError,
+              browser,
+              project,
+              runUrl,
+              group,
+              config,
+              specs,
+              sys,
+              tag,
+              videosFolder: config.videosFolder,
+              video: config.video,
+              videoCompression: config.videoCompression,
+              videoUploadOnPasses: config.videoUploadOnPasses,
+              exit: options.exit,
+              headed: options.headed,
+              quiet: options.quiet,
+              outputPath: options.outputPath,
+              testingType: options.testingType,
             })
+            .tap((runSpecs) => {
+              if (!options.quiet) {
+                renderSummaryTable(runUrl)(runSpecs)
+              }
+            })
+          }
+
+          if (record) {
+            const { projectName } = config
+
+            return recordMode.createRunAndRecordSpecs({
+              tag,
+              key,
+              sys,
+              specs,
+              group,
+              config,
+              browser,
+              parallel,
+              ciBuildId,
+              testingType,
+              project,
+              projectId,
+              projectRoot,
+              projectName,
+              specPattern,
+              runAllSpecs,
+              onError,
+              quiet: options.quiet,
+            })
+          }
+
+          // not recording, can't be parallel
+          return runAllSpecs({
+            parallel: false,
           })
         })
       })

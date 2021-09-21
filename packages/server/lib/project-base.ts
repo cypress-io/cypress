@@ -32,6 +32,7 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile } from './project_utils'
 import type { LaunchArgs } from './open_project'
+import { CYPRESS_CONFIG_FILES } from './configFiles'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -285,7 +286,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     await Promise.all([
       checkSupportFile({
-        projectRoot: this.projectRoot,
         configFile: cfg.configFile,
         supportFile: cfg.supportFile,
       }),
@@ -423,7 +423,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
-      configFile: await settings.pathToConfigFile(this.projectRoot, options),
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
@@ -556,9 +556,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     if (configFile !== false) {
-      settings.pathToConfigFile(projectRoot, { configFile }).then((settingsFilePath) => {
-        this.watchers.watchTree(settingsFilePath, obj)
-      })
+      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
@@ -576,7 +574,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err) {
+    } catch (err: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
       // only include the message if this is the standard MODULE_NOT_FOUND
@@ -704,7 +702,34 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
+  private async getConfigFilePathOption (): Promise<string> {
+    return fs.readdir(this.projectRoot)
+    .then((filesInProjectDir) => {
+      const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => filesInProjectDir.includes(file))
+
+      // if we only found one default file, it is the one
+      if (foundConfigFiles.length === 1) {
+        return foundConfigFiles[0]
+      }
+
+      // if we found more than one, throw a language conflict
+      if (foundConfigFiles.length > 1) {
+        return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, ...foundConfigFiles)
+      }
+
+      // Default is to create a new `cypress.json` file if one does not exist.
+
+      return CYPRESS_CONFIG_FILES[0]
+    })
+  }
+
   async initializeConfig (): Promise<Cfg> {
+    // default the configFile to either cypress.json or cypress.config.js
+    if (this.options.configFile === undefined
+      || this.options.configFile === null) {
+      this.options.configFile = await this.getConfigFilePathOption()
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (theCfg.browsers) {
@@ -855,7 +880,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    errors.throw('NO_PROJECT_ID', (await settings.resolveConfigFileRelativePath(this.projectRoot, this.options)), this.projectRoot)
+    errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
   }
 
   async verifyExistence () {

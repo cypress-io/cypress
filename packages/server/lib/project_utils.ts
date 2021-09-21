@@ -115,11 +115,9 @@ export const getSpecUrl = ({
 }
 
 export const checkSupportFile = async ({
-  projectRoot,
   supportFile,
   configFile,
 }: {
-  projectRoot: string
   supportFile?: string | boolean
   configFile?: string | boolean
 }) => {
@@ -127,7 +125,7 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      const configFileRelativePath = await settings.resolveConfigFileRelativePath(projectRoot, { configFile })
+      const configFileRelativePath = settings.configFile({ configFile })
 
       errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, configFileRelativePath)
     }
