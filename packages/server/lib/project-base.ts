@@ -423,7 +423,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const modifiedCfg = await plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      configFile: await settings.pathToConfigFile(this.projectRoot, options),
       testingType: options.testingType,
       onError: (err: Error) => this._onError(err, options),
       onWarning: options.onWarning,
@@ -556,7 +556,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     if (configFile !== false) {
-      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
+      settings.pathToConfigFile(projectRoot, { configFile }).then((settingsFilePath) => {
+        this.watchers.watchTree(settingsFilePath, obj)
+      })
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
