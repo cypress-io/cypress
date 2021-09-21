@@ -172,7 +172,11 @@ export default class Iframes extends Component {
     const id = `Cypress (${domain})`
 
     // if it already exists, don't add another one
-    if (document.getElementById(id)) return
+    if (document.getElementById(id)) {
+      this.props.eventManager.notifyCrossDomainBridgeReady()
+
+      return
+    }
 
     this._addIframe({
       id,
