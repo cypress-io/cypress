@@ -1,0 +1,19 @@
+{
+  "extends": "../ts/tsconfig.json",
+  "include": ["src"],
+  "exclude": [
+    "test",
+    "script"
+  ],
+  "compilerOptions": {
+    "importHelpers": true,
+    "strict": true,
+    "allowJs": false,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error",
+    "types": []
+  }
+}
