@@ -20,7 +20,7 @@ describe('http/error-middleware', function () {
       'UnpipeResponse',
       'DestroyResponse',
     ])
-  })
+  }) 
 
   context('AbortRequest', function () {
     it('destroys outgoingReq if it exists', function () {
