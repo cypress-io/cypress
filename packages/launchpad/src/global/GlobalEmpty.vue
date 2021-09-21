@@ -1,9 +1,9 @@
 <template>
-  <main class="text-center">
+  <main class="text-center" ref="projectUpload">
     <h1 class="text-2rem mb-2">{{ t('globalPage.empty.title') }}</h1>
     <p class="text-lg font-light text-gray-600 mb-6">{{ t('globalPage.empty.helper') }}</p>
-    <file-selector v-model="files" v-slot="{ openDialog }" allow-multiple>
-      <dropzone v-slot="{ hovered }" @click="openDialog">
+    <FileSelector v-model="files" v-slot="{ openDialog }" allow-multiple >
+      <Dropzone v-slot="{ hovered }" @click="openDialog">
         <div
           class="min-w-220px relative block w-full border-2 bg-gray-50 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 text-center"
           :class="{ 'border-blue-200': hovered }"
@@ -22,8 +22,8 @@
             {{ t('globalPage.empty.browseManually') }}</button>
           </i18n-t>
         </div>
-      </dropzone>
-    </file-selector>
+      </Dropzone>
+    </FileSelector>
     <div data-testid="upload-name" class="hidden">{{uploadName}}</div>
   </main>
 </template>
@@ -35,9 +35,9 @@ import { FileSelector, Dropzone } from 'vue3-file-selector'
 import { ref, watch, onMounted } from 'vue'
 
 const { t } = useI18n()
-const files = ref([])
+const files = ref<File[]>([])
 const uploadName = ref('')
-
+const projectUpload = ref<HTMLDivElement>()
 
 const selectProject = (file: File) => { uploadName.value = file.name}
 
@@ -49,7 +49,7 @@ watch(files, (newVal) => {
 
 onMounted(() => {
   // TODO: remove this when vue3-file-selector supports setting this attribute
-  document.querySelector('input[type=file]')?.setAttribute('webkitdirectory', 'webkitdirectory')
+  projectUpload.value?.querySelector('input[type=file]')?.setAttribute('webkitdirectory', 'webkitdirectory')
 })
 
 
