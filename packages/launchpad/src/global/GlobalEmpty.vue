@@ -2,20 +2,39 @@
   <main class="text-center">
     <h1 class="text-2rem mb-2">{{ t('globalPage.empty.title') }}</h1>
     <p class="text-lg font-light text-gray-600 mb-6">{{ t('globalPage.empty.helper') }}</p>
-    <button
-      type="button"
-      @click="selectProject"
-      class="min-w-220px relative block w-full border-2 bg-gray-50 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 text-center"
-    >
-      <IconPlaceholder
-        class="-mb-8px mx-auto max-w-65px h-full relative justify-center w-full text-indigo-600"
-      />
-      <span class="mt-13px block text-lg font-medium text-gray-700 font-light">
-        <i18n-t keypath="globalPage.empty.dropText">
-          <a class="font-normal" @click="selectProject">{{ t('globalPage.empty.browseManually') }}</a>
-        </i18n-t>
-      </span>
-    </button>
+    <FileSelector v-model="files" v-slot="{ openDialog }" allow-multiple >
+      <Dropzone v-slot="{ hovered }" @click="openDialog">
+        <div
+          class="min-w-220px relative block w-full border-2 bg-gray-50 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400"
+          :class="{ 'border-blue-200': hovered }"
+        >
+          <IconPlaceholder
+            class="mx-auto max-w-65px h-full reålative justify-center w-full text-primary"
+          />
+          <i18n-t keypath="globalPage.empty.dropText">
+            <button
+              class="text-primary hover:underline"
+            >
+            <!-- 
+              This button allows keyboard users to fire a click event with the Enter or Space keys, 
+              which will be handled by the dropzone's existing click handler.
+             -->
+            {{ t('globalPage.empty.browseManually') }}</button>
+          </i18n-t>
+        </div>
+      </Dropzone>
+    </FileSelector>
+    <div data-testid="upload-name" class="hidden">{{uploadName}}</div>    
+    <div>
+      <div class="text-primary">primary</div>
+      <div class="text-secondary">secondary</div>
+      <div class="text-warning-light">warning-light</div>
+      <div class="text-warning">warning</div>
+      <div class="text-success">success</div>
+      <div class="text-error">error</div>
+      <div class="text-confirm">confirm</div>
+      <div class="body-text">confirm</div>
+    </div>
   </main>
 </template>
 
