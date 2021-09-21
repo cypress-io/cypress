@@ -30,9 +30,8 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
+import { checkSupportFile, getConfigFilePathOption } from './project_utils'
 import type { LaunchArgs } from './open_project'
-import { CYPRESS_CONFIG_FILES } from './configFiles'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -895,25 +894,4 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   __setConfig (cfg: Cfg) {
     this._cfg = cfg
   }
-}
-
-export function getConfigFilePathOption (projectRoot: string): Promise<string> {
-  return fs.readdir(projectRoot)
-  .then((filesInProjectDir) => {
-    const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => filesInProjectDir.includes(file))
-
-    // if we only found one default file, it is the one
-    if (foundConfigFiles.length === 1) {
-      return foundConfigFiles[0]
-    }
-
-    // if we found more than one, throw a language conflict
-    if (foundConfigFiles.length > 1) {
-      return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-    }
-
-    // Default is to create a new `cypress.json` file if one does not exist.
-
-    return CYPRESS_CONFIG_FILES[0]
-  })
 }

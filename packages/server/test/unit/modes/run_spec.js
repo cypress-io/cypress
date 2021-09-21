@@ -660,6 +660,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
+      sinon.stub(fs, 'readdir').resolves(['cypress.json'])
       sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)

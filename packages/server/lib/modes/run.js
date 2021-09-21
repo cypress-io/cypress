@@ -12,6 +12,7 @@ const logSymbols = require('log-symbols')
 const recordMode = require('./record')
 const errors = require('../errors')
 const ProjectStatic = require('../project_static')
+const { getConfigFilePathOption } = require('../project_utils')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -613,7 +614,7 @@ function initConfigFilePath (options, projectRoot) {
   // default the configFile to either cypress.json or cypress.config.js
   if (options.configFile === undefined
     || options.configFile === null) {
-    return ProjectStatic.getConfigFilePathOption(projectRoot)
+    return getConfigFilePathOption(projectRoot)
     .then((configFile) => {
       options.configFile = configFile
 
