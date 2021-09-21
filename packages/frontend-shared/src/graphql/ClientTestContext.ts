@@ -66,6 +66,12 @@ export class ClientTestActions extends BaseActions {
     return createTestProject('/some/new/project', this.ctx)
   }
 
+  async loadProjects () {
+    this.addProject()
+
+    return this.ctx.app.projects
+  }
+
   async initializeConfig () {
     // @ts-ignore
     return {} as FullConfig

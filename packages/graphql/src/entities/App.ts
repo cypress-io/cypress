@@ -1,4 +1,5 @@
 import { nxs, NxsResult } from 'nexus-decorators'
+import type { core } from 'nexus'
 import type { BaseContext } from '../context/BaseContext'
 import { Project } from './Project'
 import { Browser } from './Browser'
@@ -9,8 +10,11 @@ import type { FoundBrowser } from '@packages/types'
 })
 export class App {
   private _browsers: FoundBrowser[] = []
+  private _hasRetrievedProjectsFromCache;
 
-  constructor (private ctx: BaseContext) {}
+  constructor (private ctx: BaseContext) {
+    this._hasRetrievedProjectsFromCache = false
+  }
 
   @nxs.field.nonNull.string({
     description: 'See if the GraphQL server is alive',
@@ -47,7 +51,13 @@ export class App {
   @nxs.field.nonNull.list.nonNull.type(() => Project, {
     description: 'All known projects for the app',
   })
-  get projects (): NxsResult<'App', 'projects'> {
+  get projects (): core.MaybePromise<NxsResult<'App', 'projects'>> {
+    if (!this._hasRetrievedProjectsFromCache) {
+      this._hasRetrievedProjectsFromCache = true
+
+      return this.ctx.actions.loadProjects()
+    }
+
     return this.ctx.localProjects
   }
 

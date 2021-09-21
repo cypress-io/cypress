@@ -6,6 +6,7 @@ import type { ServerContext } from './ServerContext'
 import { BaseActions, Project } from '@packages/graphql'
 import { openProject } from '@packages/server/lib/open_project'
 import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
+import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
 
 // @ts-ignore
 import user from '../user'
@@ -46,8 +47,23 @@ export class ServerActions extends BaseActions {
     const localProject = new Project(projectRoot, this.ctx)
 
     this.ctx.localProjects.push(localProject)
+    insertProject(projectRoot)
 
     return localProject
+  }
+
+  async loadProjects () {
+    const cachedProjects = await this._loadProjectsFromCache()
+
+    cachedProjects.forEach((projectRoot) => {
+      this.addProject(projectRoot)
+    })
+
+    return this.ctx.app.projects
+  }
+
+  async _loadProjectsFromCache () {
+    return await getProjectRoots()
   }
 
   async authenticate () {

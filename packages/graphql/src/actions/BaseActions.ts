@@ -18,6 +18,7 @@ export abstract class BaseActions {
 
   abstract createConfigFile (code: string, configFilename: string): void
 
+  abstract loadProjects (): Promise<Project[]>
   abstract addProject (projectRoot: string): Project
 
   abstract getProjectId (projectRoot: string): Promise<string | null>

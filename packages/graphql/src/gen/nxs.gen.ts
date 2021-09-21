@@ -222,6 +222,7 @@ export interface NexusGenFieldTypes {
     userIsViewer: boolean; // Boolean!
   }
   Mutation: { // field return type
+    addProject: NexusGenRootTypes['App']; // App!
     appCreateConfigFile: NexusGenRootTypes['App'] | null; // App
     initializeOpenProject: NexusGenRootTypes['Wizard'] | null; // Wizard
     launchOpenProject: NexusGenRootTypes['App'] | null; // App
@@ -491,6 +492,7 @@ export interface NexusGenFieldTypeNames {
     userIsViewer: 'Boolean'
   }
   Mutation: { // field return type name
+    addProject: 'App'
     appCreateConfigFile: 'App'
     initializeOpenProject: 'Wizard'
     launchOpenProject: 'App'
@@ -695,6 +697,9 @@ export interface NexusGenArgTypes {
     }
   }
   Mutation: {
+    addProject: { // args
+      path: string; // String!
+    }
     appCreateConfigFile: { // args
       code: string; // String!
       configFilename: string; // String!

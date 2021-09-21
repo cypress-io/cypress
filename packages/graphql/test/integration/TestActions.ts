@@ -2,6 +2,18 @@ import type { FoundBrowser } from '@packages/launcher'
 import { BaseActions, BaseContext, Project } from '../../src'
 
 export class TestActions extends BaseActions {
+  async loadProjects (): Promise<Project[]> {
+    return []
+  }
+
+  isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean {
+    if (testingType === 'component') {
+      return false
+    }
+
+    return true
+  }
+
   ctx: BaseContext
 
   constructor (_ctx: BaseContext) {
