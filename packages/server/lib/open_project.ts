@@ -14,6 +14,9 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
 import type { AutomationMiddleware } from './automation'
+import { fs } from './util/fs'
+import path from 'path'
+import os from 'os'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -43,6 +46,33 @@ export interface LaunchArgs {
   os: PlatformName
 
   onFocusTests?: () => any
+}
+
+// @see https://github.com/cypress-io/cypress/issues/18094
+async function win32BitWarning (onWarning: (error: Error) => void) {
+  if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
+
+  // adapted from https://github.com/feross/arch/blob/master/index.js
+  let useEnv = false
+
+  try {
+    useEnv = !!(process.env.SYSTEMROOT && await fs.stat(process.env.SYSTEMROOT))
+  } catch (err) {
+    // pass
+  }
+
+  const sysRoot = useEnv ? process.env.SYSTEMROOT! : 'C:\\Windows'
+
+  // If %SystemRoot%\SysNative exists, we are in a WOW64 FS Redirected application.
+  let hasX64 = false
+
+  try {
+    hasX64 = !!(await fs.stat(path.join(sysRoot, 'sysnative')))
+  } catch (err) {
+    // pass
+  }
+
+  onWarning(errors.get('WIN32_DEPRECATION', hasX64))
 }
 
 export class OpenProject {
@@ -420,6 +450,8 @@ export class OpenProject {
         testingType: args.testingType,
       },
     })
+
+    await win32BitWarning(options.onWarning)
 
     try {
       await this.openProject.initializeConfig()
