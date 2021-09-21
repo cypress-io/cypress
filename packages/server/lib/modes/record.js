@@ -444,7 +444,9 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, settings.configFile(options.projectRoot, options))
+        return settings.configFile(options.projectRoot, options).then((configFileRelativePath) => {
+          errors.throw('DASHBOARD_PROJECT_NOT_FOUND', projectId, configFileRelativePath)
+        })
       case 412:
         return errors.throw('DASHBOARD_INVALID_RUN_REQUEST', err.error)
       case 422: {

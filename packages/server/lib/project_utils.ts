@@ -127,7 +127,9 @@ export const checkSupportFile = async ({
     const found = await fs.pathExists(supportFile)
 
     if (!found) {
-      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, settings.configFile(projectRoot, { configFile }))
+      const configFileRelativePath = await settings.configFile(projectRoot, { configFile })
+
+      errors.throw('SUPPORT_FILE_NOT_FOUND', supportFile, configFileRelativePath)
     }
   }
 

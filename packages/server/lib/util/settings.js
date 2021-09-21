@@ -125,35 +125,38 @@ module.exports = {
 
   configFile (projectRoot, options = {}) {
     if (options.configFile !== undefined) {
-      return options.configFile
+      return Promise.resolve(options.configFile)
     }
 
-    // this protection is mainly for a test in 7_record_spec.js
-    const ls = projectRoot ? fs.readdirSync(projectRoot) : []
+    return fs.readdir(projectRoot).then((filesInProjectDir) => {
+      const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => filesInProjectDir.includes(file))
 
-    const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => ls.includes(file))
+      // if we only found one default file, it is the one
+      if (foundConfigFiles.length === 1) {
+        options.configFile = foundConfigFiles[0]
 
-    // if we only found one default file, it is the one
-    if (foundConfigFiles.length === 1) {
-      return foundConfigFiles[0]
-    }
+        return foundConfigFiles[0]
+      }
 
-    // if we found more than one, throw a language conflict
-    if (foundConfigFiles.length > 1) {
-      return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
-    }
+      // if we found more than one, throw a language conflict
+      if (foundConfigFiles.length > 1) {
+        return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+      }
 
-    // Default is to create a new `cypress.json` file if one does not exist.
-    return CYPRESS_CONFIG_FILES[0]
+      // Default is to create a new `cypress.json` file if one does not exist.
+      options.configFile = CYPRESS_CONFIG_FILES[0]
+
+      return CYPRESS_CONFIG_FILES[0]
+    })
   },
 
   id (projectRoot, options = {}) {
-    const file = this.pathToConfigFile(projectRoot, options)
-
-    return fs.readJsonAsync(file)
-    .get('projectId')
-    .catch(() => {
-      return null
+    return this.pathToConfigFile(projectRoot, options).then((file) => {
+      return fs.readJsonAsync(file)
+      .get('projectId')
+      .catch(() => {
+        return null
+      })
     })
   },
 
@@ -165,34 +168,34 @@ module.exports = {
    * @returns
    */
   exists (projectRoot, options = {}) {
-    const file = this.pathToConfigFile(projectRoot, options)
+    return this.pathToConfigFile(projectRoot, options).then((file) => {
+      debug('find out if "%s" exists', file)
 
-    debug('find out if "%s" exists', file)
-
-    // first check if cypress.json exists
-    return maybeVerifyConfigFile(file)
-    .then(() => {
+      // first check if cypress.json exists
+      return maybeVerifyConfigFile(file)
+      .then(() => {
       // if it does also check that the projectRoot
       // directory is writable
-      return fs.accessAsync(projectRoot, fs.W_OK)
-    }).catch({ code: 'ENOENT' }, () => {
-      debug('no module error')
-      // cypress.json does not exist, completely new project
-      log('cannot find file %s', file)
+        return fs.accessAsync(projectRoot, fs.W_OK)
+      }).catch({ code: 'ENOENT' }, () => {
+        debug('no module error')
+        // cypress.json does not exist, completely new project
+        log('cannot find file %s', file)
 
-      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(projectRoot, options), projectRoot)
-    }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
-      debug('no access error')
+        return this._err('CONFIG_FILE_NOT_FOUND', file, projectRoot)
+      }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
+        debug('no access error')
 
-      // we cannot write due to folder permissions
-      return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
-    }).catch((err) => {
-      if (errors.isCypressErr(err)) {
-        debug('throwing cypress error')
-        throw err
-      }
+        // we cannot write due to folder permissions
+        return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
+      }).catch((err) => {
+        if (errors.isCypressErr(err)) {
+          debug('throwing cypress error')
+          throw err
+        }
 
-      return this._logReadErr(file, err)
+        return this._logReadErr(file, err)
+      })
     })
   },
 
@@ -201,60 +204,61 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    const file = this.pathToConfigFile(projectRoot, options)
+    return this.pathToConfigFile(projectRoot, options)
+    .then((file) => {
+      return requireAsync(file,
+        {
+          projectRoot,
+          loadErrorCode: 'CONFIG_FILE_ERROR',
+        })
+      .catch((err) => {
+        if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
+          debug('file not found', file)
 
-    return requireAsync(file,
-      {
-        projectRoot,
-        loadErrorCode: 'CONFIG_FILE_ERROR',
+          return this._write(file, {})
+        }
+
+        return Promise.reject(err)
       })
-    .catch((err) => {
-      if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-        debug('file not found', file)
+      .then((configObject = {}) => {
+        if (this.isComponentTesting(options) && 'component' in configObject) {
+          configObject = { ...configObject, ...configObject.component }
+        }
 
-        return this._write(file, {})
-      }
+        if (!this.isComponentTesting(options) && 'e2e' in configObject) {
+          configObject = { ...configObject, ...configObject.e2e }
+        }
 
-      return Promise.reject(err)
-    })
-    .then((configObject = {}) => {
-      if (this.isComponentTesting(options) && 'component' in configObject) {
-        configObject = { ...configObject, ...configObject.component }
-      }
+        debug('resolved configObject', configObject)
+        const changed = this._applyRewriteRules(configObject)
 
-      if (!this.isComponentTesting(options) && 'e2e' in configObject) {
-        configObject = { ...configObject, ...configObject.e2e }
-      }
+        // if our object is unchanged
+        // then just return it
+        if (_.isEqual(configObject, changed)) {
+          configObject.configFile = path.relative(projectRoot, file)
 
-      debug('resolved configObject', configObject)
-      const changed = this._applyRewriteRules(configObject)
+          return configObject
+        }
 
-      // if our object is unchanged
-      // then just return it
-      if (_.isEqual(configObject, changed)) {
-        configObject.configFile = path.relative(projectRoot, file)
-
-        return configObject
-      }
-
-      // else write the new reduced obj
-      return this._write(file, changed)
-      .then((config) => {
+        // else write the new reduced obj
+        return this._write(file, changed)
+        .then((config) => {
         // when configfile is written, update the value of the configfile
         // with the value found.
         // NOTE: it does not have to be cypress.json.
         // it could be ./e2e/custom-config.json or cypress.config.js
-        config.configFile = path.relative(projectRoot, file)
+          config.configFile = path.relative(projectRoot, file)
 
-        return config
+          return config
+        })
+      }).catch((err) => {
+        debug('an error occured when reading config', err)
+        if (errors.isCypressErr(err)) {
+          throw err
+        }
+
+        return this._logReadErr(file, err)
       })
-    }).catch((err) => {
-      debug('an error occured when reading config', err)
-      if (errors.isCypressErr(err)) {
-        throw err
-      }
-
-      return this._logReadErr(file, err)
     })
   },
 
@@ -279,26 +283,20 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    debug('write a file')
-
     return this.read(projectRoot, options)
     .then((settings) => {
       _.extend(settings, obj)
 
-      const file = this.pathToConfigFile(projectRoot, options)
-
-      return this._write(file, settings)
+      return this.pathToConfigFile(projectRoot, options).then((file) => {
+        return this._write(file, settings)
+      })
     })
   },
 
-  remove (projectRoot, options = {}) {
-    return fs.unlinkSync(this.pathToConfigFile(projectRoot, options))
-  },
-
   pathToConfigFile (projectRoot, options = {}) {
-    const configFile = this.configFile(projectRoot, options)
-
-    return configFile && this._pathToFile(projectRoot, configFile)
+    return this.configFile(projectRoot, options).then((configFile) => {
+      return configFile && this._pathToFile(projectRoot, configFile)
+    })
   },
 
   pathToCypressEnvJson (projectRoot) {
