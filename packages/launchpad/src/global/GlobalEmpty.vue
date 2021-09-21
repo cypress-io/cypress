@@ -39,7 +39,7 @@ const files = ref([])
 const uploadName = ref('')
 
 
-const selectProject = (file) => { uploadName.value = file.name}
+const selectProject = (file: File) => { uploadName.value = file.name}
 
 watch(files, (newVal) => {
   const uploadLength = newVal.length;
