@@ -999,6 +999,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
+    case 'WIN32_DEPRECATION':
+      return stripIndent`\
+        You are running a 32-bit build of Cypress. Cypress will remove Windows 32-bit support in a future release.
+
+        ${arg1 ? 'Try installing Node.js 64-bit and reinstalling Cypress to use the 64-bit build.'
+        : 'Consider upgrading to a 64-bit OS to continue using Cypress in future releases.'}
+
+        For more information, see: https://on.cypress.io/win32-removal
+        `
     default:
   }
 }

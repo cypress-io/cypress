@@ -1143,6 +1143,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
