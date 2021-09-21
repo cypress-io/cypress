@@ -702,32 +702,11 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     return this.automation
   }
 
-  private async getConfigFilePathOption (): Promise<string> {
-    return fs.readdir(this.projectRoot)
-    .then((filesInProjectDir) => {
-      const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => filesInProjectDir.includes(file))
-
-      // if we only found one default file, it is the one
-      if (foundConfigFiles.length === 1) {
-        return foundConfigFiles[0]
-      }
-
-      // if we found more than one, throw a language conflict
-      if (foundConfigFiles.length > 1) {
-        return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, ...foundConfigFiles)
-      }
-
-      // Default is to create a new `cypress.json` file if one does not exist.
-
-      return CYPRESS_CONFIG_FILES[0]
-    })
-  }
-
   async initializeConfig (): Promise<Cfg> {
     // default the configFile to either cypress.json or cypress.config.js
     if (this.options.configFile === undefined
       || this.options.configFile === null) {
-      this.options.configFile = await this.getConfigFilePathOption()
+      this.options.configFile = await getConfigFilePathOption(this.projectRoot)
     }
 
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
@@ -916,4 +895,25 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   __setConfig (cfg: Cfg) {
     this._cfg = cfg
   }
+}
+
+export function getConfigFilePathOption (projectRoot: string): Promise<string> {
+  return fs.readdir(projectRoot)
+  .then((filesInProjectDir) => {
+    const foundConfigFiles = CYPRESS_CONFIG_FILES.filter((file) => filesInProjectDir.includes(file))
+
+    // if we only found one default file, it is the one
+    if (foundConfigFiles.length === 1) {
+      return foundConfigFiles[0]
+    }
+
+    // if we found more than one, throw a language conflict
+    if (foundConfigFiles.length > 1) {
+      return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+    }
+
+    // Default is to create a new `cypress.json` file if one does not exist.
+
+    return CYPRESS_CONFIG_FILES[0]
+  })
 }

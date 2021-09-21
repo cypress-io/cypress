@@ -8,8 +8,10 @@ import cache from './cache'
 import user from './user'
 import keys from './util/keys'
 import settings from './util/settings'
-import { ProjectBase } from './project-base'
+import { ProjectBase, getConfigFilePathOption } from './project-base'
 import { CYPRESS_CONFIG_FILES } from './configFiles'
+
+export { getConfigFilePathOption }
 
 const debug = Debug('cypress:server:project_static')
 
