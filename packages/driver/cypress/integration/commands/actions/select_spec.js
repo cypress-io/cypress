@@ -94,6 +94,12 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('can select an array of indexes', () => {
+      cy.get('select[name=movies]').select([1, 5]).then(($select) => {
+        expect($select.val()).to.deep.eq(['thc', 'twbb'])
+      })
+    })
+
     it('can select an array of same value and index', () => {
       cy.get('select[name=movies]').select(['thc', 1]).then(($select) => {
         expect($select.val()).to.deep.eq(['thc'])
