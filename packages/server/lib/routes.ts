@@ -2,7 +2,6 @@ import type httpProxy from 'http-proxy'
 import { ErrorRequestHandler, Router } from 'express'
 
 import type { SpecsStore } from './specs-store'
-import { staticCtrl } from './controllers/static'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
@@ -38,10 +37,6 @@ export const createCommonRoutes = ({
 
   router.all('/__cypress/xhrs/*', (req, res, next) => {
     xhrs.handle(req, res, config, next)
-  })
-
-  router.get('/__cypress/static/*', (req, res) => {
-    staticCtrl.handle(req, res)
   })
 
   router.get('/__cypress/iframes/*', (req, res) => {
