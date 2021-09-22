@@ -615,7 +615,7 @@ const ensureConfigFileExists = async (projectRoot, options) => {
   }
 
   if (options.configFile === undefined) {
-    throw errors.get('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
+    throw errors.get('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
   }
 
   const absoluteConfigFilePath = path.isAbsolute(options.configFile)
@@ -624,6 +624,10 @@ const ensureConfigFileExists = async (projectRoot, options) => {
 
   return fs.access(absoluteConfigFilePath, fs.W_OK)
   .catch((err) => {
+    if (err.code === 'ENOENT') {
+      throw errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot)
+    }
+
     if (['EACCES', 'EPERM'].includes(err.code)) {
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }
@@ -646,10 +650,10 @@ const createAndOpenProject = async function (socketId, options) {
       project,
       project.getConfig(),
       getProjectId(project, projectId),
-    ]).then((results) => ({
-      project: results[0],
-      config: results[1],
-      projectId: results[2],
+    ]).then(([project, config, projectId]) => ({
+      project,
+      config,
+      projectId,
     }))
   })
 }

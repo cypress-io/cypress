@@ -694,6 +694,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters`
+      // TODO: reword with cypress vocabulary
+    case 'NO_DEFAULT_CONFIG_FILE_FOUND':
+      return stripIndent`\
+        Could not find a Cypress configuration file, exiting.
+
+        We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
