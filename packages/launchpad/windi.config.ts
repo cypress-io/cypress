@@ -25,14 +25,15 @@ export default defineConfig({
       },
       colors: {
         primary: colors.indigo[500],
-        'secondary-light': colors.jade[300],
         secondary: colors.indigo[50],
         error: colors.red[400],
         'warning-light': colors.orange[400],
         warning: colors.orange[500],
         success: colors.jade[400],
+        'success-light': colors.jade[300],
         confirm: colors.jade[500],
         caution: colors.red[500],
+        'body-gray': colors.gray[600],
       },
     },
   },
@@ -43,6 +44,6 @@ export default defineConfig({
     exclude: ['node_modules/**/*', '.git/**/*'],
   },
   shortcuts: {
-    'body-text': 'text-gray-600',
+    'tet-text': 'text-gray-600',
   },
 })

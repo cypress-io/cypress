@@ -24,16 +24,33 @@
       </Dropzone>
     </FileSelector>
     <div data-testid="upload-name" class="hidden">{{ uploadName }}</div>
+    <div class="flex gap-6">
     <div>
       <div class="text-primary">primary</div>
-      <div class="text-secondary">secondary</div>
-      <div class="text-warning-light">warning-light</div>
+      <div class="text-secondary bg-body-gray">secondary</div>
       <div class="text-warning">warning</div>
+      <div class="text-warning-light">warning-light</div>
       <div class="text-success">success</div>
+      <div class="text-success-light">success-light</div>
       <div class="text-error">error</div>
+      <div class="text-caution">caution</div>
       <div class="text-confirm">confirm</div>
-      <div class="body-text">confirm</div>
+      <div class="text-body-gray">body-gray</div>
     </div>
+      <div class="flex flex-col gap-4">
+      <button class="block pa-2 bg-primary text-white">primary</button>
+      <button class="block pa-2 bg-secondary text-primary">secondary</button>
+      <button class="block pa-2 bg-warning">warning</button>
+      <button class="block pa-2 bg-warning-light">warning-light</button>
+      <button class="block pa-2 bg-success text-white">success</button>
+      <button class="block pa-2 bg-success-light">success-light</button>
+      <button class="block pa-2 bg-error text-white">error</button>
+      <button class="block pa-2 bg-caution text-white">caution</button>
+      <button class="block pa-2 bg-confirm text-white">confirm</button>
+      <button class="block pa-2 bg-body-gray text-white">body-gray</button>
+    </div>
+    </div>
+
   </main>
 </template>
 
