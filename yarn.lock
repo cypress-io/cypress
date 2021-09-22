@@ -16747,6 +16747,11 @@ cypress-expect@2.0.0:
     arg "4.1.3"
     debug "4.2.0"
 
+cypress-file-upload@^5.0.8:
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-5.0.8.tgz#d8824cbeaab798e44be8009769f9a6c9daa1b4a1"
+  integrity sha512-+8VzNabRk3zG6x8f8BWArF/xA/W0VK4IZNx3MV0jFWrJS/qKn8eHfa5nU73P9fOQAgwHFJx7zjg4lwOnljMO8g==
+
 cypress-image-snapshot@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/cypress-image-snapshot/-/cypress-image-snapshot-3.1.1.tgz#cb7242d8086e0d4cbb7f333f927f71cdb5ff9971"
@@ -41371,6 +41376,11 @@ vue-tsc@^0.3.0:
   integrity sha512-zaDRZBxwRIz1XjhNP92FqugG71st6BUMnA2EwPeXrAyzbEYVRz6TezNFceYl3QYqqN8CtaxbqUhaQEDj/ntoCA==
   dependencies:
     vscode-vue-languageservice "^0.27.0"
+
+vue3-file-selector@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/vue3-file-selector/-/vue3-file-selector-1.0.1.tgz#bcae2f5ab44c406c1d72a60885990883051b688b"
+  integrity sha512-popFgEvLrkRFo9MWs8mzlb4HH+Mg2+5DhJF7MzKmUrE9179rtVt4Wf7/w+0FvhDRVELQ6f8Z9BhF+SDSUSpRVw==
 
 vue@3.2.6:
   version "3.2.6"

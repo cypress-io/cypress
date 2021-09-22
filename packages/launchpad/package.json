@@ -36,6 +36,7 @@
     "classnames": "2.3.1",
     "concurrently": "^6.2.0",
     "cross-env": "6.0.3",
+    "cypress-file-upload": "^5.0.8",
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
     "javascript-time-ago": "2.3.8",
@@ -52,6 +53,7 @@
     "vue-prism-component": "2.0.0",
     "vue-prism-editor": "^2.0.0-alpha.2",
     "vue-tsc": "^0.3.0",
+    "vue3-file-selector": "^1.0.1",
     "windicss": "3.1.4",
     "wonka": "^4.0.15"
   },
