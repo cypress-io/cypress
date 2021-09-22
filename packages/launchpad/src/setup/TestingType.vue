@@ -27,6 +27,7 @@ gql`
 mutation TestingType_Select($testingType: TestingTypeEnum!) {
   wizardSetTestingType(type: $testingType) {
     step
+    canNavigateForward
     testingType
     title
     description

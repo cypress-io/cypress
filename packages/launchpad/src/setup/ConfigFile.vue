@@ -68,10 +68,16 @@ fragment ConfigFile on Query {
     }
   }
   wizard {
-    canNavigateForward
-    sampleCodeJs: sampleCode(lang: js)
-    sampleCodeTs: sampleCode(lang: ts)
+    ...SampleCode
   }
+}
+`
+
+gql`
+fragment SampleCode on Wizard {
+  canNavigateForward
+  sampleCodeJs: sampleCode(lang: js)
+  sampleCodeTs: sampleCode(lang: ts)
 }
 `
 

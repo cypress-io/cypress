@@ -56,10 +56,7 @@ fragment TestingTypeCards on Query {
 gql`
 mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
   wizardSetTestingType(type: $testingType) {
-    step
     testingType
-    title
-    description
   }
 }
 `
@@ -68,6 +65,9 @@ gql`
 mutation TestingTypeCardsNavigateForward {
   wizardNavigate(direction: forward) {
     step
+    canNavigateForward
+    title
+    description
   }
 }
 `

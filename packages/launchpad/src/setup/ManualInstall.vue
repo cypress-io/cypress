@@ -34,6 +34,7 @@ import type { ManualInstallFragment } from "../generated/graphql";
 gql`
 fragment ManualInstall on Wizard {
   packagesToInstall {
+    id
     name
     description
   }

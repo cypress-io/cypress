@@ -612,6 +612,9 @@ enum WizardNavigateDirection {
 type WizardNpmPackage {
   description: String!
 
+  """id"""
+  id: String!
+
   """The package name that you would npm install"""
   name: String!
 }

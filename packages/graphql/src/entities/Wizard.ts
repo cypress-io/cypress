@@ -201,7 +201,7 @@ export class Wizard {
       return false
     }
 
-    if (this.currentStep === 'selectFramework' && !this.chosenBundler && !this.chosenFramework) {
+    if (this.currentStep === 'selectFramework' && (!this.chosenBundler || !this.chosenFramework)) {
       return false
     }
 

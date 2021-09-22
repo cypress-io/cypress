@@ -20,6 +20,7 @@ import type { PackagesListFragment } from "../generated/graphql";
 gql`
 fragment PackagesList on Wizard {
   packagesToInstall {
+    id
     name
     description
   }
