@@ -6,6 +6,7 @@ import { checkTs } from './tasks/gulpTsc'
 import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
 import { setGulpGlobal } from './gulpConstants'
+import { makePackage } from './tasks/gulpMakePackage'
 
 gulp.task(
   'dev',
@@ -94,6 +95,7 @@ gulp.task(
 //   'debug', // Tim: TODO
 // )
 
+gulp.task(makePackage)
 gulp.task(checkTs)
 gulp.task(syncRemoteGraphQL)
 gulp.task(printUrqlSchema)

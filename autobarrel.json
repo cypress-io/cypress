@@ -1,7 +1,8 @@
 {
   "prefix": "/* eslint-disable padding-line-between-statements */",
   "paths": [
-    "packages/graphql/src/**/*"
+    "packages/graphql/src/**/*",
+    "packages/data-context/src/**/*"
   ],
   "ignore": [
     "packages/graphql/src/stitching",
