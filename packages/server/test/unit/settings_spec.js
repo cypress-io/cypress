@@ -190,13 +190,6 @@ describe('lib/settings', () => {
       }
     })
 
-    it('.exists passes', function () {
-      return settings.exists(this.projectRoot, this.options)
-      .then((exists) => {
-        expect(exists).to.equal(undefined)
-      })
-    })
-
     it('.write does not create a file', function () {
       return settings.write(this.projectRoot, {}, this.options)
       .then(() => {
@@ -226,13 +219,6 @@ describe('lib/settings', () => {
 
     afterEach(function () {
       return fs.removeAsync(`${this.projectRoot}${this.options.configFile}`)
-    })
-
-    it('.exists fails when configFile doesn\'t exist', function () {
-      return settings.exists(this.projectRoot, this.options)
-      .catch((error) => {
-        expect(error.type).to.equal('CONFIG_FILE_NOT_FOUND')
-      })
     })
 
     it('.write creates configFile', function () {
