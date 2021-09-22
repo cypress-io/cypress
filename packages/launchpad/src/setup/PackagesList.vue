@@ -1,19 +1,18 @@
 <template>
   <div
     :key="pkg.name"
-    v-for="(pkg, index) in packagesToInstall ?? []"
+    v-for="(pkg, index) in props.gql.packagesToInstall ?? []"
     class="flex text-left"
     :class="index > 0 ? 'border-t border-t-gray-200' : undefined"
   >
     <div class="p-5">
       <h2 class="text-indigo-600 font-normal">{{ pkg.name }}</h2>
-      <p class="text-gray-400 text-sm" v-html="pkg.description"/>
+      <p class="text-gray-400 text-sm" v-html="pkg.description" />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, computed } from "vue";
+<script lang="ts" setup>
 import { gql } from '@urql/core'
 import type { PackagesListFragment } from "../generated/graphql";
 
@@ -27,17 +26,7 @@ fragment PackagesList on Wizard {
 }
 `
 
-export default defineComponent({
-  props: {
-    gql: {
-      type: Object as PropType<PackagesListFragment>,
-      required: true
-    }
-  },
-  setup(props) {
-    return { 
-      packagesToInstall: computed(() => props.gql.packagesToInstall)
-    };
-  },
-});
+const props = defineProps<{
+  gql: PackagesListFragment
+}>()
 </script>
