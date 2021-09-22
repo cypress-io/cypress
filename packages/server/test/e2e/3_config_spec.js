@@ -50,7 +50,7 @@ describe('e2e config', () => {
 
   it('supports custom configFile in JavaScript', function () {
     return e2e.exec(this, {
-      project: Fixtures.projectPath('custom-file-config-js'),
+      project: Fixtures.projectPath('config-with-custom-file-js'),
       configFile: 'cypress.config.custom.js',
     })
   })
