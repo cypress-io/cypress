@@ -272,8 +272,12 @@ export class Wizard {
     if (this.currentStep === 'welcome' && this.testingType === 'component') {
       if (this._ctx.activeProject?.isFirstTimeCT) {
         this.navigateToStep('selectFramework')
-      } else {
+      } else if (!this._ctx.activeProject?.ctPluginsInitialized) {
+        // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
+      } else {
+        // not first time, have already initialized plugins - just move to open browser screen
+        this.navigateToStep('setupComplete')
       }
 
       return this
@@ -282,8 +286,12 @@ export class Wizard {
     if (this.currentStep === 'welcome' && this.testingType === 'e2e') {
       if (this._ctx.activeProject?.isFirstTimeE2E) {
         this.navigateToStep('createConfig')
-      } else {
+      } else if (!this._ctx.activeProject?.e2ePluginsInitialized) {
+        // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
+      } else {
+        // not first time, have already initialized plugins - just move to open browser screen
+        this.navigateToStep('setupComplete')
       }
 
       return this
