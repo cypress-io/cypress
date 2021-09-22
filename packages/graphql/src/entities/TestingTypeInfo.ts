@@ -1,22 +1,25 @@
-import { nxs, NxsResult } from 'nexus-decorators'
-import { TestingTypeEnum, TestingType, TestingTypeNames, TestingTypeDescriptions } from '../constants'
+import { objectType } from 'nexus'
+import { TestingTypeDescriptions, TestingTypeEnum, TestingTypeNames } from '../constants'
 
-@nxs.objectType()
-export class TestingTypeInfo {
-  constructor (private _id: TestingType) {}
+export const TestingTypeInfo = objectType({
+  name: 'TestingTypeInfo',
+  node: (source) => source,
+  definition (t) {
+    t.nonNull.field('type', {
+      type: TestingTypeEnum,
+      resolve: (source) => source,
+    })
 
-  @nxs.field.nonNull.type(() => TestingTypeEnum)
-  get id (): NxsResult<'TestingTypeInfo', 'id'> {
-    return this._id
-  }
+    t.nonNull.string('description', {
+      resolve: (source) => TestingTypeDescriptions[source],
+    })
 
-  @nxs.field.nonNull.string()
-  get title (): NxsResult<'TestingTypeInfo', 'title'> {
-    return TestingTypeNames[this.id]
-  }
-
-  @nxs.field.nonNull.string()
-  get description (): NxsResult<'TestingTypeInfo', 'description'> {
-    return TestingTypeDescriptions[this.id]
-  }
-}
+    t.nonNull.string('title', {
+      resolve: (source) => TestingTypeNames[source],
+    })
+  },
+  sourceType: {
+    module: '@packages/graphql/src/constants',
+    export: 'TestingType',
+  },
+})

@@ -1,16 +1,7 @@
 import type { BaseContext } from '../context/BaseContext'
 import type { FoundBrowser, OpenProjectLaunchOptions, LaunchOpts, LaunchArgs, FullConfig } from '@packages/types'
 import type { BrowserContract } from '../contracts/BrowserContract'
-import type { Project } from '../entities/Project'
 
-/**
- * Acts as the contract for all actions, inherited by:
- *  - ServerActions
- *  - ClientTestActions
- *
- * By having a "base actions" class, we can reuse this code on the client
- * and make the client-only test doubles work as realistically as possible
- */
 export abstract class BaseActions {
   constructor (protected ctx: BaseContext) {}
 

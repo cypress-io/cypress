@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import { mutationType, nonNull, stringArg } from 'nexus'
-import { BundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
-import { Query } from './Query'
+import { SupportedBundlerEnum, FrontendFrameworkEnum, NavItemEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../constants'
 
 const debug = Debug('cypress:graphql:mutation')
 
@@ -14,7 +13,7 @@ export const mutation = mutationType({
       description: 'Sets the current testing type we want to use',
       args: { type: nonNull(TestingTypeEnum) },
       resolve: (root, args, ctx) => {
-        return ctx.wizard.setTestingType(args.type)
+        return ctx.actions.wizard.setTestingType(args.type)
       },
     })
 
@@ -30,7 +29,7 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Sets the frontend bundler we want to use for the project',
       args: {
-        bundler: nonNull(BundlerEnum),
+        bundler: nonNull(SupportedBundlerEnum),
       },
       resolve: (root, args, ctx) => ctx.wizard.setBundler(args.bundler),
     })
@@ -98,12 +97,12 @@ export const mutation = mutationType({
       async resolve (_root, args, ctx) {
         // already authenticated this session - just return
         if (ctx.authenticatedUser) {
-          return new Query()
+          return {}
         }
 
         await ctx.actions.authenticate()
 
-        return new Query()
+        return {}
       },
     })
 
@@ -113,7 +112,7 @@ export const mutation = mutationType({
       async resolve (_root, args, ctx) {
         await ctx.actions.logout()
 
-        return new Query()
+        return {}
       },
     })
 

@@ -7,7 +7,7 @@ export const BUNDLER = ['webpack', 'vite'] as const
 
 export type Bundler = typeof BUNDLER[number]
 
-export const BundlerEnum = enumType({
+export const SupportedBundlerEnum = enumType({
   name: 'SupportedBundlers',
   description: 'The bundlers that we can use with Cypress',
   members: BUNDLER,

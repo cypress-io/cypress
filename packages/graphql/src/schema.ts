@@ -1,4 +1,4 @@
-import { makeSchema, asNexusMethod } from 'nexus'
+import { makeSchema, asNexusMethod, connectionPlugin } from 'nexus'
 import path from 'path'
 import { JSONResolver, DateTimeResolver } from 'graphql-scalars'
 
@@ -6,6 +6,7 @@ import * as entities from './entities'
 import * as constants from './constants'
 import * as testingTypes from './testing/testUnionType'
 import { remoteSchema } from './stitching/remoteSchema'
+import { nodePlugin } from './plugins/nexusNodePlugin'
 
 const customScalars = [
   asNexusMethod(JSONResolver, 'json'),
@@ -50,6 +51,10 @@ export const graphqlSchema = makeSchema({
       Mutation: ['test'],
     },
   },
+  plugins: [
+    connectionPlugin(),
+    nodePlugin,
+  ],
   formatTypegen (content, type) {
     if (type === 'schema') {
       return content

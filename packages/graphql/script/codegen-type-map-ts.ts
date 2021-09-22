@@ -17,9 +17,8 @@ const plugin: CodegenPlugin<any> = {
 
     return [
       `import type { GraphQLResolveInfo } from 'graphql'`,
-      `import type { NxsCtx } from 'nexus-decorators'`,
       'export type MaybeResolver<T> = {',
-      `  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: NxsCtx, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)`,
+      `  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: object, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)`,
       '}',
       '',
       `export interface CodegenTypeMap {`,

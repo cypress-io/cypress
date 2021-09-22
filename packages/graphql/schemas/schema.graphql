@@ -13,9 +13,6 @@ type App {
   """See if the GraphQL server is alive"""
   healthCheck: String!
 
-  """Whether this is the first open of the application or not"""
-  isFirstOpen: Boolean!
-
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
@@ -360,8 +357,10 @@ enum PluginsState {
 }
 
 """A Cypress project is a container"""
-type Project {
+type Project implements Node {
   cloudProject: CloudProject
+
+  """Relay style Node ID field for the Project field"""
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
@@ -373,7 +372,6 @@ type Project {
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
-  resolvedConfig: ResolvedConfig
   title: String!
 }
 
@@ -406,114 +404,6 @@ type Query {
   wizard: Wizard!
 }
 
-type ResolvedBooleanOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: Boolean
-}
-
-"""Resolve config for a project"""
-type ResolvedConfig {
-  animationDistanceThreshold: ResolvedNumberOption
-  baseUrl: ResolvedStringOption
-  blockHosts: ResolvedStringOption
-  chromeWebSecurity: ResolvedBooleanOption
-  component: ResolvedConfig
-  componentFolder: ResolvedStringOption
-  defaultCommandTimeout: ResolvedNumberOption
-  downloadsFolder: ResolvedStringOption
-  e2e: ResolvedConfig
-  env: ResolvedJsonOption
-  execTimeout: ResolvedNumberOption
-  experimentalFetchPolyfill: ResolvedBooleanOption
-  experimentalInteractiveRunEvents: ResolvedBooleanOption
-  experimentalSessionSupport: ResolvedBooleanOption
-  experimentalSourceRewriting: ResolvedBooleanOption
-  experimentalStudio: ResolvedBooleanOption
-  fileServerFolder: ResolvedStringOption
-  fixturesFolder: ResolvedStringOption
-  ignoreTestFiles: ResolvedStringListOption
-  includeShadowDom: ResolvedBooleanOption
-  integrationFolder: ResolvedStringOption
-  nodeVersion: ResolvedStringOption
-  numTestsKeptInMemory: ResolvedNumberOption
-  pageLoadTimeout: ResolvedNumberOption
-  pluginsFile: ResolvedStringOption
-  port: ResolvedNumberOption
-  projectId: ResolvedStringOption
-  redirectionLimit: ResolvedNumberOption
-  reporter: ResolvedStringOption
-  requestTimeout: ResolvedNumberOption
-  resolvedNodePath: ResolvedStringOption
-  resolvedNodeVersion: ResolvedStringOption
-  retries: ResolvedNumberOption
-  screenshotOnRunFailure: ResolvedBooleanOption
-  screenshotsFolder: ResolvedStringOption
-  scrollBehavior: ResolvedStringOption
-  supportFile: ResolvedStringOption
-  supportFolder: ResolvedStringOption
-  taskTimeout: ResolvedNumberOption
-  testFiles: ResolvedStringOption
-  trashAssetsBeforeRuns: ResolvedBooleanOption
-  userAgent: ResolvedStringOption
-  video: ResolvedBooleanOption
-  videoCompression: ResolvedNumberOption
-  videoUploadOnPasses: ResolvedBooleanOption
-  videosFolder: ResolvedStringOption
-  viewportHeight: ResolvedNumberOption
-  viewportWidth: ResolvedNumberOption
-  waitForAnimations: ResolvedBooleanOption
-  watchForFileChanges: ResolvedBooleanOption
-}
-
-enum ResolvedConfigOption {
-  config
-  default
-  env
-  plugin
-  runtime
-}
-
-"""
-An JSON object represented as a string via JSON.stringify. Useful for representing complex types like `env`
-"""
-type ResolvedJsonOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: String
-}
-
-type ResolvedNumberOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: String
-}
-
-interface ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-}
-
-type ResolvedStringListOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: [String]
-}
-
-type ResolvedStringOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: String
-}
-
-enum ResolvedType {
-  array
-  boolean
-  json
-  number
-  string
-}
-
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
@@ -525,10 +415,13 @@ enum TestingTypeEnum {
   e2e
 }
 
-type TestingTypeInfo {
+type TestingTypeInfo implements Node {
   description: String!
-  id: TestingTypeEnum!
+
+  """Relay style Node ID field for the TestingTypeInfo field"""
+  id: ID!
   title: String!
+  type: TestingTypeEnum!
 }
 
 """
@@ -574,8 +467,9 @@ type Wizard {
 }
 
 """Wizard bundler"""
-type WizardBundler {
-  id: SupportedBundlers!
+type WizardBundler implements Node {
+  """Relay style Node ID field for the WizardBundler field"""
+  id: ID!
 
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
@@ -589,9 +483,9 @@ enum WizardCodeLanguage {
 }
 
 """A frontend framework that we can setup within the app"""
-type WizardFrontendFramework {
-  """The name of the framework"""
-  id: FrontendFramework!
+type WizardFrontendFramework implements Node {
+  """Relay style Node ID field for the WizardFrontendFramework field"""
+  id: ID!
 
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!
@@ -601,6 +495,9 @@ type WizardFrontendFramework {
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
+
+  """The name of the framework"""
+  type: FrontendFramework!
 }
 
 enum WizardNavigateDirection {

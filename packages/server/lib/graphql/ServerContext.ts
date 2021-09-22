@@ -1,4 +1,4 @@
-import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, Project, execute, parse } from '@packages/graphql'
+import { remoteSchemaWrapped, BaseContext, AuthenticatedUser, execute, parse } from '@packages/graphql'
 
 import { ServerActions } from './ServerActions'
 import type { OpenProjectLaunchOptions, LaunchArgs } from '@packages/types'

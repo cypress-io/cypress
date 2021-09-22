@@ -1,12 +1,12 @@
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
 import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
-import type { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
+import type { GraphQLResolveInfo } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
-import { App, Wizard, NavigationMenu, Project } from '../entities'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
 import type { NxsQueryResult } from 'nexus-decorators'
+import { coreDataShape } from './coreDataShape'
 
 export interface AuthenticatedUser {
   name?: string
@@ -33,6 +33,8 @@ export interface DelegateToRemoteQueryBatchedConfig<F extends KnownBatchFields> 
   key?: FieldArgMapping[F]
 }
 
+type ArrVal<T> = T extends Array<infer U> ? U : never
+
 /**
  * The "Base Context" is the class type that we will use to encapsulate the server state.
  * It will be implemented by ServerContext (real state) and TestContext (client state).
@@ -40,9 +42,24 @@ export interface DelegateToRemoteQueryBatchedConfig<F extends KnownBatchFields> 
  * This allows us to re-use the entire GraphQL server definition client side for testing,
  * without the need to endlessly mock things.
  */
-export abstract class BaseContext {
+export class BaseContext {
   protected _authenticatedUser: AuthenticatedUser | null = null
-  protected abstract _remoteSchema: GraphQLSchema
+
+  get coreData () {
+    return coreDataShape
+  }
+
+  makeId<T extends EntityName> (typeName: T, nodeString: string) {
+    return Buffer.from(`${typeName}:${nodeString}`).toString('base64')
+  }
+
+  assertNonNull<T> (val: T | null | undefined): T {
+    if (val == null) {
+      throw new Error(`Expected val to be non-null. This should never happen`)
+    }
+
+    return val as T
+  }
 
   get authenticatedUser () {
     return this._authenticatedUser ?? null
@@ -54,16 +71,20 @@ export abstract class BaseContext {
     return this
   }
 
-  abstract readonly actions: BaseActions
-  abstract localProjects: Project[]
+  readonly actions: BaseActions
+  localProjects: Project[]
 
   constructor (private _launchArgs: LaunchArgs, private _launchOptions: OpenProjectLaunchOptions) {}
 
-  app = new App(this)
-  wizard = new Wizard(this)
-  navigationMenu = new NavigationMenu()
+  get app () {
+    return this.coreData.app
+  }
 
-  cloudProjectsBySlug (slug: string, info: GraphQLResolveInfo) {
+  get wizard () {
+    return this.coreData.wizard
+  }
+
+  cloudProjectBySlug (slug: string, info: GraphQLResolveInfo) {
     return this.delegateToRemoteQueryBatched({
       info,
       key: slug,
@@ -71,7 +92,7 @@ export abstract class BaseContext {
     })
   }
 
-  delegateToRemoteQueryBatched<T extends KnownBatchFields> (config: DelegateToRemoteQueryBatchedConfig<T>): NxsQueryResult<T> | null {
+  delegateToRemoteQueryBatched<T extends KnownBatchFields> (config: DelegateToRemoteQueryBatchedConfig<T>): ArrVal<NxsQueryResult<T>> | null {
     try {
       return batchDelegateToSchema({
         schema: this._remoteSchema,
@@ -122,6 +143,4 @@ export abstract class BaseContext {
     // eslint-disable-next-line no-console
     console.error(e)
   }
-
-  isFirstOpen = false
 }
