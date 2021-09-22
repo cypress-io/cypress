@@ -1,14 +1,8 @@
 import { defineConfig } from 'windicss/helpers'
-import Colors from 'windicss/colors'
-import { map, reduce, kebabCase } from 'lodash'
+
 import InteractionVariants from '@windicss/plugin-interaction-variants'
-
-const safelist = reduce(Colors, (acc, variants, colorName) => {
-  const name = kebabCase(colorName)
-
-  return `${acc}
-    ${map(variants, (_: string, k: string) => `before:bg-${name}-${k} before:text-${name}-${k} bg-${name}-${k} text-${name}-${k}`).join(' ')}`
-}, '')
+import { IconDuotoneColorsPlugin } from './icon-color-plugins'
+import { safelist } from './safelist'
 
 export default defineConfig({
   // This adds !important to all utility classes. https://csswizardry.com/2016/05/the-importance-of-important/
@@ -29,6 +23,7 @@ export default defineConfig({
   },
   plugins: [
     InteractionVariants,
+    IconDuotoneColorsPlugin,
   ],
   extract: {
     // accepts globs and file paths relative to project root

@@ -12,13 +12,23 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-// em {
-//   @apply text-purple-400 not-italic;
-// }
+.icon-invert {
+  .icon-light[stroke] {
+    @apply stroke-gray-500;
+  }
 
-// a {
-//   @apply text-indigo-600 hover:underline;
-// }
+  .icon-dark[stroke] {
+    @apply stroke-light-900;
+  }
+
+  .icon-light[fill] {
+    @apply fill-gray-500;
+  }
+
+  .icon-dark[fill] {
+    @apply stroke-light-900;
+  }
+}
 
 /**
  * Utilities
