@@ -223,6 +223,10 @@ class ProxyRequest {
     let resBody
 
     if (this.xhr) {
+      if (!consoleProps['Response Headers']) consoleProps['Response Headers'] = this.xhr.responseHeaders
+
+      if (!consoleProps['Response Status Code']) consoleProps['Response Status Code'] = this.xhr.xhr.status
+
       consoleProps['Response Body'] = this.xhr.xhr.response
     } else if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
       consoleProps['Response Body'] = resBody
@@ -328,22 +332,14 @@ export default class ProxyLogging {
 
     proxyRequest.responseReceived = responseReceived
 
-    const finish = () => {
-      proxyRequest.updateConsoleProps()
+    proxyRequest.updateConsoleProps()
 
-      // @ts-ignore
-      const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
+    // @ts-ignore
+    const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
 
-      if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
+    if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
 
-      proxyRequest.log?.end()
-    }
-
-    if (proxyRequest.xhr) {
-      return proxyRequest.xhr.xhr.addEventListener('load', finish)
-    }
-
-    finish()
+    proxyRequest.log?.end()
   }
 
   private updateRequestWithError (error: RequestError): void {
