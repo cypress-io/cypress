@@ -9,7 +9,6 @@ import user from './user'
 import keys from './util/keys'
 import settings from './util/settings'
 import { ProjectBase } from './project-base'
-import { CYPRESS_CONFIG_FILES } from './configFiles'
 
 const debug = Debug('cypress:server:project_static')
 
@@ -135,13 +134,9 @@ export function remove (path) {
 }
 
 export async function add (path, options) {
-  // Don't cache a project if a non-default configFile is set
-  // because the cache key is the path and there could
-  // be more than one config file in the path
+  // don't cache a project if a non-default configFile is set
   // https://git.io/JeGyF
-  const configFileRelativePath = settings.configFile(options)
-
-  if (!CYPRESS_CONFIG_FILES.includes(configFileRelativePath)) {
+  if (settings.configFile(options) !== 'cypress.json') {
     return Promise.resolve({ path })
   }
 

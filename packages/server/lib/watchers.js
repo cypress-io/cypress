@@ -19,7 +19,7 @@ class Watchers {
         result.push(this._remove(filePath))
       }
 
-      return Promise.all(result)
+      return result
     })()
   }
 
@@ -34,6 +34,8 @@ class Watchers {
 
     const w = chokidar.watch(filePath, options)
 
+    this._add(filePath, w)
+
     if (_.isFunction(options.onChange)) {
       w.on('change', options.onChange)
     }
@@ -46,7 +48,7 @@ class Watchers {
       w.on('error', options.onError)
     }
 
-    return this._add(filePath, w)
+    return this
   }
 
   watchTree (filePath, options = {}) {
@@ -58,28 +60,27 @@ class Watchers {
       },
     })
 
-    return Promise.all(files.map((file) => {
+    return _.each(files, (file) => {
       return this.watch(file, options)
-    }))
+    })
   }
 
   _add (filePath, watcher) {
-    return this._remove(filePath)
-    .then(() => {
-      this.watchers[filePath] = watcher
-    })
+    this._remove(filePath)
+
+    this.watchers[filePath] = watcher
   }
 
   _remove (filePath) {
     let watcher
 
     if (!(watcher = this.watchers[filePath])) {
-      return Promise.resolve()
+      return
     }
 
-    delete this.watchers[filePath]
+    watcher.close()
 
-    return watcher.close()
+    return delete this.watchers[filePath]
   }
 }
 

@@ -30,7 +30,7 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile, getConfigFilePathOption } from './project_utils'
+import { checkSupportFile } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -184,8 +184,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     let cfg = this.getConfig()
 
-    const originalConfigFile = cfg.configFile
-
     process.chdir(this.projectRoot)
 
     // TODO: we currently always scaffold the plugins file
@@ -284,17 +282,9 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     ])
 
     await Promise.all([
-      checkSupportFile({
-        configFile: cfg.configFile,
-        supportFile: cfg.supportFile,
-      }),
+      checkSupportFile({ configFile: cfg.configFile, supportFile: cfg.supportFile }),
       this.watchPluginsFile(cfg, this.options),
     ])
-
-    // restore the relative path of the config file
-    cfg.configFile = originalConfigFile
-      ? originalConfigFile
-      : cfg.configFile
 
     if (cfg.isTextTerminal) {
       return
@@ -539,7 +529,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     const obj = {
       onChange: () => {
-        debug('settings changed')
         // dont fire change events if we generated
         // a project id less than 1 second ago
         if (this.generatedProjectIdTimestamp &&
@@ -547,7 +536,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
           return
         }
 
-        debug('updating the project re-running')
         // call our callback function
         // when settings change!
         onSettingsChanged()
@@ -702,12 +690,6 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
-    // default the configFile to either cypress.json or cypress.config.js
-    if (this.options.configFile === undefined
-      || this.options.configFile === null) {
-      this.options.configFile = await getConfigFilePathOption(this.projectRoot)
-    }
-
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (theCfg.browsers) {

@@ -3,8 +3,8 @@ const Promise = require('bluebird')
 const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
-const { fs } = require('./fs')
-const requireAsync = require('./require_async').requireAsync
+const { fs } = require('../util/fs')
+const { requireAsync } = require('./require_async')
 const debug = require('debug')('cypress:server:settings')
 
 function jsCode (obj) {
@@ -70,10 +70,6 @@ const renameSupportFolder = (obj) => {
 }
 
 module.exports = {
-  isComponentTesting (options) {
-    return options.testingType === 'component'
-  },
-
   _pathToFile (projectRoot, file) {
     return path.isAbsolute(file) ? file : path.join(projectRoot, file)
   },
@@ -122,11 +118,15 @@ module.exports = {
     }, _.cloneDeep(obj))
   },
 
-  configFile (options = {}) {
-    return options.configFile
+  isComponentTesting (options = {}) {
+    return options.testingType === 'component'
   },
 
-  id (projectRoot, options) {
+  configFile (options = {}) {
+    return options.configFile === false ? false : (options.configFile || 'cypress.json')
+  },
+
+  id (projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
 
     return fs.readJsonAsync(file)
@@ -135,7 +135,6 @@ module.exports = {
       return null
     })
   },
-
   /**
    * Ensures the project at this root has a config file
    * that is readable and writable by the node process
@@ -143,31 +142,25 @@ module.exports = {
    * @param {object} options
    * @returns
    */
-  exists (projectRoot, options) {
+  exists (projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
-
-    debug('find out if "%s" exists', file)
 
     // first check if cypress.json exists
     return maybeVerifyConfigFile(file)
     .then(() => {
-    // if it does also check that the projectRoot
-    // directory is writable
+      // if it does also check that the projectRoot
+      // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
-      debug('no module error')
       // cypress.json does not exist, completely new project
       log('cannot find file %s', file)
 
-      return this._err('CONFIG_FILE_NOT_FOUND', file, projectRoot)
+      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
     }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
-      debug('no access error')
-
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
-        debug('throwing cypress error')
         throw err
       }
 
@@ -175,7 +168,7 @@ module.exports = {
     })
   },
 
-  read (projectRoot, options) {
+  read (projectRoot, options = {}) {
     if (options.configFile === false) {
       return Promise.resolve({})
     }
@@ -261,13 +254,14 @@ module.exports = {
     return this.read(projectRoot, options)
     .then((settings) => {
       _.extend(settings, obj)
-      const filePath = this.pathToConfigFile(projectRoot, options)
 
-      return this._write(filePath, settings)
+      const file = this.pathToConfigFile(projectRoot, options)
+
+      return this._write(file, settings)
     })
   },
 
-  pathToConfigFile (projectRoot, options) {
+  pathToConfigFile (projectRoot, options = {}) {
     const configFile = this.configFile(options)
 
     return configFile && this._pathToFile(projectRoot, configFile)

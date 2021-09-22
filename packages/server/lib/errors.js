@@ -987,16 +987,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/component-testing
         `
-
-    case 'CONFIG_FILES_LANGUAGE_CONFLICT':
-      return stripIndent`
-          We've found the following Cypress config files: \`${arg2}\`, \`${arg3}\` at the location below:
-
-          ${arg1}
-
-          The JSON configuration file will be deprecated in a future release. Please fully migrate to a cypress.config.js file and re-run your command.
-          `
-
     case 'UNSUPPORTED_BROWSER_VERSION':
       return arg1
     case 'WIN32_DEPRECATION':
@@ -1060,6 +1050,8 @@ const clone = function (err, options = {}) {
   if (options.html) {
     obj.message = ansi_up.ansi_to_html(err.message)
     // revert back the distorted characters
+    // in case there is an error in a child_process
+    // that contains quotes
     .replace(/\&\#x27;/g, '\'')
     .replace(/\&quot\;/g, '"')
   } else {

@@ -12,7 +12,6 @@ const logSymbols = require('log-symbols')
 const recordMode = require('./record')
 const errors = require('../errors')
 const ProjectStatic = require('../project_static')
-const { getConfigFilePathOption } = require('../project_utils')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -610,26 +609,10 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-function initConfigFilePath (options, projectRoot) {
-  // default the configFile to either cypress.json or cypress.config.js
-  if (options.configFile === undefined
-    || options.configFile === null) {
-    return getConfigFilePathOption(projectRoot)
-    .then((configFile) => {
-      options.configFile = configFile
-
-      return options
-    })
-  }
-
-  return Promise.resolve(options)
-}
-
 const createAndOpenProject = function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return initConfigFilePath(options, projectRoot)
-  .then((options) => ProjectStatic.ensureExists(projectRoot, options)
+  return ProjectStatic.ensureExists(projectRoot, options)
   .then(() => {
     // open this project without
     // adding it to the global cache
@@ -642,7 +625,7 @@ const createAndOpenProject = function (socketId, options) {
       config: project.getConfig(),
       projectId: getProjectId(project, projectId),
     })
-  }))
+  })
 }
 
 const removeOldProfiles = (browser) => {
