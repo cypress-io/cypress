@@ -11,7 +11,6 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectUtils = require('../project_utils')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -609,39 +608,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-const ensureConfigFileExists = async (projectRoot, options) => {
-  if (options.configFile === undefined) {
-    options.configFile = await ProjectUtils.getDefaultConfigFilePath(projectRoot, false)
-  }
-
-  if (options.configFile === undefined) {
-    throw errors.get('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
-  }
-
-  const absoluteConfigFilePath = path.isAbsolute(options.configFile)
-    ? options.configFile
-    : path.join(projectRoot, options.configFile)
-
-  return fs.access(absoluteConfigFilePath, fs.W_OK)
-  .catch((err) => {
-    if (err.code === 'ENOENT') {
-      throw errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot)
-    }
-
-    if (['EACCES', 'EPERM'].includes(err.code)) {
-      return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
-    }
-
-    throw err
-  })
-}
-
 const createAndOpenProject = async function (socketId, options) {
   const { projectRoot, projectId } = options
-
-  // ensure config file exists before opening the project
-  // to avoid creating the missing config file in run mode
-  await ensureConfigFileExists(projectRoot, options)
 
   return openProjectCreate(projectRoot, socketId, options)
   .then((open_project) => open_project.getProject())

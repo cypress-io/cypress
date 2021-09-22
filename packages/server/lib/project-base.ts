@@ -684,7 +684,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined
   || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.isTextTerminal)
     }
 
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)

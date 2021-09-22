@@ -110,8 +110,16 @@ module.exports = {
     const file = this.pathToConfigFile(projectRoot, options)
 
     return fs.readJsonAsync(file)
-    .catch({ code: 'ENOENT' }, () => {
-      return this._write(file, {})
+    .catch((err) => {
+      if (err.code === 'ENOENT') {
+        if (options.isTextTerminal) {
+          throw errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot)
+        }
+
+        return this._write(file, {})
+      }
+
+      throw err
     }).then((json = {}) => {
       if (this.isComponentTesting(options) && 'component' in json) {
         json = { ...json, ...json.component }

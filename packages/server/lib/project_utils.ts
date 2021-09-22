@@ -153,5 +153,5 @@ export async function getDefaultConfigFilePath (projectRoot: string, returnDefau
     return CYPRESS_CONFIG_FILES[0]
   }
 
-  return undefined
+  throw errors.get('NO_DEFAULT_CONFIG_FILE_FOUND', projectRoot)
 }
