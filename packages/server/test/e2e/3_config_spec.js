@@ -47,4 +47,11 @@ describe('e2e config', () => {
       project: Fixtures.projectPath('shadow-dom-global-inclusion'),
     })
   })
+
+  it('supports custom configFile in JavaScript', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('custom-file-config-js'),
+      configFile: 'cypress.config.custom.js',
+    })
+  })
 })
