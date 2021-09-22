@@ -3,11 +3,21 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
+const proxyquire = require('proxyquire')
+
 const savedState = require(`${root}../lib/saved_state`)
 const menu = require(`${root}../lib/gui/menu`)
 const Events = require(`${root}../lib/gui/events`)
-const Windows = require(`${root}../lib/gui/windows`)
-const interactiveMode = require(`${root}../lib/modes/interactive-e2e`)
+const RealWindows = require(`${root}../lib/gui/windows`)
+
+const Windows = Object.assign(
+  {},
+  RealWindows,
+  // Replacing readonly exports for the functions we want to override via sinon
+  { open: () => {}, trackState: () => {} },
+)
+const interactiveMode = proxyquire('../../../lib/modes/interactive-e2e',
+  { '../gui/windows': Windows })
 
 describe('gui/interactive', () => {
   context('.isMac', () => {
