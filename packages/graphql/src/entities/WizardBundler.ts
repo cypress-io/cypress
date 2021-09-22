@@ -30,22 +30,18 @@ export const WizardBundler = objectType({
 // })
 // export class WizardBundler {
 //   constructor (private wizard: Wizard, private bundler: Bundler) {}
-
 //   @nxs.field.nonNull.type(() => BundlerEnum)
 //   get id (): NxsResult<'WizardBundler', 'id'> {
 //     return this.bundler
 //   }
-
 //   @nxs.field.nonNull.string()
 //   get name (): NxsResult<'WizardBundler', 'name'> {
 //     return BundlerDisplayNames[this.bundler]
 //   }
-
 //   @nxs.field.nonNull.string()
 //   get package (): NxsResult<'WizardBundler', 'package'> {
 //     return BundlerPackageNames[this.bundler]
 //   }
-
 //   @nxs.field.boolean({
 //     description: 'Whether this is the selected framework bundler',
 //   })

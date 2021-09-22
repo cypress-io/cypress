@@ -5,8 +5,8 @@ import { print, FragmentDefinitionNode } from 'graphql'
 import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, watch, defineComponent, h } from 'vue'
 
-import { ClientTestContext } from '../../src/graphql/ClientTestContext'
-// import type { TestSourceTypeLookup } from '../../src/graphql/testUnionType'
+import { ClientTestContext } from '@packages/frontend-shared/src/graphql/ClientTestContext'
+import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import 'cypress-file-upload'
 
@@ -145,8 +145,8 @@ Cypress.Commands.add('mountFragmentList', (source, options) => {
 
 type GetRootType<T> = T extends TypedDocumentNode<infer U, any>
   ? U extends { __typename?: infer V }
-    ? V extends keyof TestSourceTypeLookup
-      ? TestSourceTypeLookup[V]
+    ? V extends keyof CodegenTypeMap
+      ? CodegenTypeMap[V]
       : never
     : never
   : never

@@ -16,12 +16,11 @@ import type {
   CloudRunCommitInfo,
   CodegenTypeMap,
   CloudProject,
-  Query,
   QueryCloudNodeArgs,
   QueryCloudProjectBySlugArgs,
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
-} from '@packages/graphql/src/gen/cloud-source-types'
+} from '../generated/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
 type ConfigFor<T> = Omit<T, 'id' | '__typename'>

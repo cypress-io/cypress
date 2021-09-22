@@ -6,11 +6,6 @@ documentFilters: &documentFilters
   preResolveTypes: true
   onlyOperationTypes: true
   avoidOptionals: true
-  strictScalars: true
-  scalars: 
-    Date: string
-    DateTime: string
-    JSON: any
 
 vueOperations: &vueOperations
   schema: './packages/graphql/schemas/schema.graphql'
@@ -41,20 +36,40 @@ overwrite: true
 config:
   enumsAsTypes: true
   declarationKind: 'interface'
+  strictScalars: true
+  scalars: 
+    Date: string
+    DateTime: string
+    JSON: any  
 generates:
   ###
-  # Generates types for us to infer the correct "source types" when we merge the 
-  # remote schema cloud.graphql schema into Nexus. This ensures we have proper type checking
-  # when we're using cy.mountFragment in component tests
+  # Generates types for us to infer the correct "source types" when we mock out on the frontend
+  # This ensures we have proper type checking when we're using cy.mountFragment in component tests
   ###
-  './packages/frontend-shared/src/gen/cloud-source-types.gen.ts':
+  './packages/frontend-shared/src/generated/test-graphql-types.gen.ts':
+    schema: 'packages/graphql/schemas/schema.graphql'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript':
+          nonOptionalTypename: true
+      - 'packages/frontend-shared/script/codegen-type-map.js'
+
+  './packages/frontend-shared/src/generated/test-cloud-graphql-types.gen.ts':
     schema: 'packages/graphql/schemas/cloud.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
       - 'typescript':
           nonOptionalTypename: true
-      - 'packages/graphql/script/codegen-type-map.js'
+      - 'packages/frontend-shared/script/codegen-type-map.js'
+
+  './packages/graphql/src/gen/cloud-source-types.gen.ts':
+    schema: 'packages/graphql/schemas/cloud.graphql'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript'
 
   ###
   # All of the GraphQL Query/Mutation documents we import for use in the .vue
@@ -80,15 +95,3 @@ generates:
   './packages/app/src/generated/graphql-test.ts':
     documents: './packages/app/src/**/*.vue'
     <<: *vueTesting
-
-  ###
-  # A Custom GraphQL Code generator (codegen-mount.js), producing a GraphQL type which represents the "union"
-  # of all possible output types. This is exposed as `testFragmentMember` / `testFragmentMemberList`
-  # fields, and are used in testing components, so we can generate a type that fulfills a fragment
-  ###
-  './packages/graphql/src/testing/testUnionType.ts':
-    schema: './packages/graphql/schemas/schema.graphql'
-    plugins:
-      - add:
-          content: '/* eslint-disable */'
-      - 'packages/graphql/script/codegen-mount.js'
