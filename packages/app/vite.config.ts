@@ -36,5 +36,6 @@ export default defineConfig({
   ],
   define: {
     'process.env': {},
+    'setImmediate': {},
   },
 })
