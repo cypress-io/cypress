@@ -72,6 +72,18 @@ function addIconUtilityClasses (theme) {
 
     // Output is an object where each new class is a key
     // And the selectors and values affected are values
+    /**
+     * {
+     *  `.icon-light-green-500`: {
+     *    '> *[stroke].icon-light': {
+     *      stroke: resolvedColor
+     *    },
+     *    '> *[fill].icon-light': {
+     *      fill: resolvedColor
+     *    }
+     *  }
+     * }
+     */
     return { ...acc, ...additionalClasses }
   }, {
 

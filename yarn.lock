@@ -9840,17 +9840,6 @@
     semver "^6.1.0"
     strip-ansi "^6.0.0"
 
-"@vue/compiler-core@3.2.11":
-  version "3.2.11"
-  resolved "https://registry.yarnpkg.com/@vue/compiler-core/-/compiler-core-3.2.11.tgz#10af3777dba303ee7aae668029f131cb90391bee"
-  integrity sha512-bcbsLx5XyQg8WDDEGwmpX0BfEfv82wIs9fWFelpyVhNRGMaABvUTalYINyfhVT+jOqNaD4JBhJiVKd/8TmsHWg==
-  dependencies:
-    "@babel/parser" "^7.15.0"
-    "@babel/types" "^7.15.0"
-    "@vue/shared" "3.2.11"
-    estree-walker "^2.0.2"
-    source-map "^0.6.1"
-
 "@vue/compiler-core@3.2.12":
   version "3.2.12"
   resolved "https://registry.yarnpkg.com/@vue/compiler-core/-/compiler-core-3.2.12.tgz#23998d6986a45e1ab0424130cc0ad00e33da1101"
@@ -10058,11 +10047,6 @@
     "@vue/runtime-core" "3.2.6"
     "@vue/shared" "3.2.6"
     csstype "^2.6.8"
-
-"@vue/shared@3.2.11":
-  version "3.2.11"
-  resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.2.11.tgz#01899f54949caf1ac241de397bd17069632574de"
-  integrity sha512-ovfXAsSsCvV9JVceWjkqC/7OF5HbgLOtCWjCIosmPGG8lxbPuavhIxRH1dTx4Dg9xLgRTNLvI3pVxG4ItQZekg==
 
 "@vue/shared@3.2.12":
   version "3.2.12"

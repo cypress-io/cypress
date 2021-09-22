@@ -13,7 +13,8 @@ export const safelist = reduce(Colors, (acc, variants, colorName) => {
     const classes = `before:bg-${name}
     before:text-${name}
     bg-${name}
-    text-${name}`
+    text-${name}
+    `
 
     if (isObject(variants)) {
       // weighted colors

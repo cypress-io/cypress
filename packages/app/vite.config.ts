@@ -25,22 +25,25 @@ export default defineConfig({
     Pages({
       extensions: ['vue'],
     }),
+    PurgeIcons(),
+    VueI18n({
+      include: path.resolve(__dirname, './src/locales/**'),
+    }),
     Icons({
       customCollections: {
         // ~icons/cy/book-x16
         cy: FileSystemIconLoader('./src/assets/icons'),
       },
     }),
-    PurgeIcons(),
-    VueI18n({
-      include: path.resolve(__dirname, './src/locales/**'),
-    }),
     Components({
+      // <i-cy-book-x16/>
       resolvers: IconsResolver({
         customCollections: ['cy'],
       }),
     }),
-    WindiCSS(),
+    WindiCSS({
+      configFiles: [require.resolve('./.windicss/windi.config')],
+    }),
     VueSvgLoader(),
   ],
   define: {
