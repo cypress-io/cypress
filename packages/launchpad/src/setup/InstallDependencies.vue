@@ -3,22 +3,22 @@
     :next="nextButtonName" 
     alt="Install manually" 
     :altFn="altFn"
-    :canNavigateForward="gql.canNavigateForward"
+    :canNavigateForward="props.gql.canNavigateForward"
   >
     <PackagesList
       v-if="!manualInstall" 
-      :gql="gql" 
+      :gql="props.gql" 
     />
     <ManualInstall 
       v-else 
       @back="manualInstall = false" 
-      :gql="gql || []" 
+      :gql="props.gql" 
     />
   </WizardLayout>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from "vue";
+<script lang="ts" setup>
+import { computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
@@ -44,36 +44,21 @@ mutation InstallDependenciesManualInstall($isManual: Boolean!) {
 }
 `
 
+const props = defineProps<{
+  gql: InstallDependenciesFragment
+}>()
 
-export default defineComponent({
-  components: {
-    WizardLayout,
-    PackagesList,
-    ManualInstall,
-  },
-  props: {
-    gql: {
-      type: Object as PropType<InstallDependenciesFragment>,
-      required: true
-    }
-  },
-  setup(props) {
-    const { t } = useI18n()
-    const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
-    const nextButtonName = computed(() =>
-      props.gql.isManualInstall ?
-        t('setupPage.install.confirmManualInstall') :
-        t('setupPage.install.startButton')
-    );
+const { t } = useI18n()
+const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
+const nextButtonName = computed(() =>
+  props.gql.isManualInstall ?
+    t('setupPage.install.confirmManualInstall') :
+    t('setupPage.install.startButton')
+);
 
-    return { 
-      manualInstall: computed(() => props.gql.isManualInstall),
-      nextButtonName, 
-      gql: computed(() => props.gql),
-      altFn (val: boolean) {
-        toggleManual.executeMutation({ isManual: val })
-      }
-    };
-  },
-});
+const manualInstall = computed(() => props.gql.isManualInstall)
+
+const altFn = (val: boolean) => {
+  toggleManual.executeMutation({ isManual: val })
+}
 </script>

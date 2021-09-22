@@ -1,7 +1,7 @@
 <template>
   <div class="text-left relative">
     <label class="text-gray-800 text-sm my-3 block" :class="disabledClass">{{
-      name
+      props.name
     }}</label>
     <button
       class="
@@ -19,13 +19,13 @@
       "
       :class="disabledClass 
         + (isOpen ? ' border-indigo-600' : ' border-gray-200') 
-        + (disabled ? ' bg-gray-300 text-gray-600' : '')"
+        + (props.disabled ? ' bg-gray-300 text-gray-600' : '')"
       @click="
-        if (!disabled) {
+        if (!props.disabled) {
           isOpen = !isOpen;
         }
       "
-      :disabled="disabled"
+      :disabled="props.disabled"
       v-click-outside="() => (isOpen = false)"
     >
       <template v-if="selectedOptionObject">
@@ -44,7 +44,7 @@
         </span>
       </template>
       <span v-else class="text-gray-400">
-        {{ placeholder }}
+        {{ props.placeholder }}
       </span>
       <span class="flex-grow"></span>
       <i-fa-angle-down />
@@ -64,7 +64,7 @@
       style="margin-top: -3px"
     >
       <li
-        v-for="opt in options"
+        v-for="opt in props.options"
         :key="opt.id"
         @click="selectOption(opt)"
         focus="1"
@@ -85,9 +85,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, ref } from "vue";
-import { ClickOutside } from '../../directives/ClickOutside'
+<script lang="ts" setup>
+import { computed, ref } from "vue";
+import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
 export interface Option {
@@ -96,53 +96,30 @@ export interface Option {
   id: string;
 }
 
-export default defineComponent({
-  emits: { select: Object },
-  directives: { ClickOutside },
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    value: {
-      type: String,
-      default: undefined,
-    },
-    placeholder: {
-      type: String,
-      default: undefined,
-    },
-    options: {
-      type: Array as PropType<ReadonlyArray<Option>>,
-      required: true,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  setup(props, { emit }) {
-    const isOpen = ref(false);
+const emit = defineEmits<{
+  (event: 'select', id: string)
+}>()
 
-    const selectedOptionObject = computed(() => {
-      return props.options.find((opt) => opt.id === props.value);
-    });
+const props = withDefaults(defineProps<{
+  name: string
+  value?: string
+  placeholder?: string
+  options: Readonly<Option[]>
+  disabled?: boolean
+}>(), {
+  disabled: false
+})
 
-    const selectOption = (opt: Option) => {
-      emit("select", opt.id);
-    };
+const isOpen = ref(false);
 
-    const disabledClass = computed(() =>
-      props.disabled ? "opacity-50" : undefined
-    );
-
-    return {
-      isOpen,
-      selectedOptionObject,
-      selectOption,
-      disabledClass,
-      FrameworkBundlerLogos
-    };
-  },
+const selectedOptionObject = computed(() => {
+  return props.options.find((opt) => opt.id === props.value);
 });
+
+const selectOption = (opt: Option) => {
+  emit("select", opt.id);
+};
+
+const disabledClass = computed(() => props.disabled ? "opacity-50" : undefined)
+
 </script>
