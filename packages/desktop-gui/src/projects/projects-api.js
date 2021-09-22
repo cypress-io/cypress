@@ -160,7 +160,8 @@ const openProject = (project) => {
     project.update({
       id: config.projectId,
       name: config.projectName,
-      ..._.pick(config, ['configFile', 'resolvedNodeVersion', 'resolvedNodePath']),
+      configFile: config.configFile,
+      ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
     })
 
     project.setOnBoardingConfig(config)

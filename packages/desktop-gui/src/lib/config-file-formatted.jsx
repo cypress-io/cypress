@@ -6,10 +6,8 @@ const configFileFormatted = (configFile) => {
     return <><code>cypress.json</code> file (currently disabled by <code>--config-file false</code>)</>
   }
 
-  if (isUndefined(configFile) || ['cypress.json', 'cypress.config.js'].includes(configFile)) {
-    // allow error to happen before the project is open and the config file is resolved
-    // by setting up a default to cypress.json
-    return <><code>{configFile || 'cypress.json'}</code> file</>
+  if (isUndefined(configFile) || configFile === 'cypress.json') {
+    return <><code>cypress.json</code> file</>
   }
 
   return <>custom config file <code>{configFile}</code></>

@@ -69,7 +69,6 @@ class ProjectsStore {
   }
 
   @action setError = (err = {}) => {
-    this.setLoading(false)
     this.error = err
   }
 

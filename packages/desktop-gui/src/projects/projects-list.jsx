@@ -29,9 +29,7 @@ class ProjectsList extends Component {
   }
 
   render () {
-    if (!projectsStore.isLoading
-      && !projectsStore.projects.length
-      && !projectsStore.error) return null
+    if (!projectsStore.isLoading && !projectsStore.projects.length) return null
 
     return (
       <div className='projects-list'>
