@@ -60,7 +60,7 @@ export async function _getProject (clientProject, authToken) {
     debug('got project from api')
 
     return _mergeDetails(clientProject, project)
-  } catch (err) {
+  } catch (err: any) {
     debug('failed to get project from api', err.statusCode)
     switch (err.statusCode) {
       case 404:
@@ -155,11 +155,6 @@ export async function add (path, options) {
 
 export function getId (path) {
   return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: {} }).getProjectId()
-}
-
-export function ensureExists (path, options) {
-  // is there a configFile? is the root writable?
-  return settings.exists(path, options)
 }
 
 export async function writeProjectId (id: string, projectRoot: string) {

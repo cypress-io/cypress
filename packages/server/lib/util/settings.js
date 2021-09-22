@@ -2,7 +2,6 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
 const errors = require('../errors')
-const log = require('../log')
 const { fs } = require('../util/fs')
 
 // TODO:
@@ -14,14 +13,6 @@ const { fs } = require('../util/fs')
 const flattenCypress = (obj) => {
   return obj.cypress ? obj.cypress : undefined
 }
-
-const maybeVerifyConfigFile = Promise.method((configFile) => {
-  if (configFile === false) {
-    return
-  }
-
-  return fs.statAsync(configFile)
-})
 
 const renameVisitToPageLoad = (obj) => {
   const v = obj.visitTimeout
@@ -98,7 +89,7 @@ module.exports = {
   },
 
   configFile (options = {}) {
-    return options.configFile === false ? false : (options.configFile || 'cypress.json')
+    return options.configFile
   },
 
   id (projectRoot, options = {}) {
@@ -108,32 +99,6 @@ module.exports = {
     .get('projectId')
     .catch(() => {
       return null
-    })
-  },
-
-  exists (projectRoot, options = {}) {
-    const file = this.pathToConfigFile(projectRoot, options)
-
-    // first check if cypress.json exists
-    return maybeVerifyConfigFile(file)
-    .then(() => {
-      // if it does also check that the projectRoot
-      // directory is writable
-      return fs.accessAsync(projectRoot, fs.W_OK)
-    }).catch({ code: 'ENOENT' }, () => {
-      // cypress.json does not exist, we missing project
-      log('cannot find file %s', file)
-
-      return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
-    }).catch({ code: 'EACCES' }, { code: 'EPERM' }, () => {
-      // we cannot write due to folder permissions
-      return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
-    }).catch((err) => {
-      if (errors.isCypressErr(err)) {
-        throw err
-      }
-
-      return this._logReadErr(file, err)
     })
   },
 

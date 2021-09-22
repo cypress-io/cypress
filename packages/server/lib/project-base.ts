@@ -30,7 +30,7 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -552,7 +552,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err) {
+    } catch (err: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
       // only include the message if this is the standard MODULE_NOT_FOUND
@@ -681,6 +681,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    // set default for "configFile" if undefined
+    if (this.options.configFile === undefined
+  || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot)
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (theCfg.browsers) {

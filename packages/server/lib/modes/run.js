@@ -11,7 +11,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectStatic = require('../project_static')
+const ProjectUtils = require('../project_utils')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -609,22 +609,48 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-const createAndOpenProject = function (socketId, options) {
+const ensureConfigFileExists = async (projectRoot, options) => {
+  if (options.configFile === undefined) {
+    options.configFile = await ProjectUtils.getDefaultConfigFilePath(projectRoot, false)
+  }
+
+  if (options.configFile === undefined) {
+    throw errors.get('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
+  }
+
+  const absoluteConfigFilePath = path.isAbsolute(options.configFile)
+    ? options.configFile
+    : path.join(projectRoot, options.configFile)
+
+  return fs.access(absoluteConfigFilePath, fs.W_OK)
+  .catch((err) => {
+    if (['EACCES', 'EPERM'].includes(err.code)) {
+      return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
+    }
+
+    throw err
+  })
+}
+
+const createAndOpenProject = async function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return ProjectStatic.ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
-  .call('getProject')
+  // ensure config file exists before opening the project
+  // to avoid creating the missing config file in run mode
+  await ensureConfigFileExists(projectRoot, options)
+
+  return openProjectCreate(projectRoot, socketId, options)
+  .then((open_project) => open_project.getProject())
   .then((project) => {
-    return Promise.props({
+    return Promise.all([
       project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
+      project.getConfig(),
+      getProjectId(project, projectId),
+    ]).then((results) => ({
+      project: results[0],
+      config: results[1],
+      projectId: results[2],
+    }))
   })
 }
 
