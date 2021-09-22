@@ -42,7 +42,7 @@
     </nav>
     <div v-if="tsInstalled" class="relative">
       <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
-      <CopyButton v-if="manualInstall && code" :text="code" />
+      <CopyButton v-if="manualCreate && code" :text="code" />
     </div>
   </WizardLayout>
 </template>
@@ -96,16 +96,16 @@ const props = defineProps<{
   gql: ConfigFileFragment 
 }>()
 
-const manualInstall = ref(false);
+const manualCreate = ref(false);
 
 const altFn = (val: boolean) => {
-  manualInstall.value = val
+  manualCreate.value = val
 }
 
 const tsInstalled = ref(false);
 const language = ref<"js" | "ts">("ts");
 const nextButtonName = computed(() =>
-  manualInstall.value ? "I've added this file" : "Create File"
+  manualCreate.value ? "I've added this file" : "Create File"
 );
 
 import("prismjs/components/prism-typescript").then(() => {
@@ -122,7 +122,7 @@ const code = computed(() => {
 })
 
 const createConfig = async () => {
-  if (manualInstall.value) {
+  if (manualCreate.value) {
     return
   }
 
