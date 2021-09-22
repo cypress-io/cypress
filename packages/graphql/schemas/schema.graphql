@@ -544,6 +544,9 @@ type Wizard {
   """
   canNavigateForward: Boolean!
 
+  """Whether the plugins for the selected testing type has been initialized"""
+  chosenTestingTypePluginsInitialized: Boolean
+
   """The title of the page, given the current step of the wizard"""
   description: String
   framework: WizardFrontendFramework

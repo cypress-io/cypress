@@ -65,6 +65,7 @@ gql`
 mutation TestingTypeCardsNavigateForward {
   wizardNavigate(direction: forward) {
     step
+    chosenTestingTypePluginsInitialized
     canNavigateForward
     title
     description
