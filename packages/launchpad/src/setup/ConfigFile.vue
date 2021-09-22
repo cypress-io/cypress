@@ -112,7 +112,6 @@ import("prismjs/components/prism-typescript").then(() => {
   tsInstalled.value = true;
 });
 
-
 const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
 
 const code = computed(() => {
@@ -123,6 +122,10 @@ const code = computed(() => {
 })
 
 const createConfig = async () => {
+  if (manualInstall.value) {
+    return
+  }
+
   if (!props.gql.app?.activeProject?.projectRoot) {
     throw Error(`Cannot find the active project's projectRoot. This should never happen.`)
   }
