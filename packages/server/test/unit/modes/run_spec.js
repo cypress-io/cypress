@@ -24,12 +24,7 @@ const ProjectStatic = require(`${root}../lib/project_static`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
-    this.projectInstance = new ProjectBase({
-      projectRoot: '/_test-output/path/to/project-e2e',
-      testingType: 'e2e',
-    })
-
-    sinon.stub(fs, 'readdir').resolves(['cypress.json'])
+    this.projectInstance = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
   })
 
   context('.getProjectId', () => {

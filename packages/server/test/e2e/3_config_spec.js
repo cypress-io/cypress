@@ -1,5 +1,3 @@
-const fs = require('fs')
-const path = require('path')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 
@@ -47,25 +45,6 @@ describe('e2e config', () => {
   it('supports global shadow dom inclusion', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('shadow-dom-global-inclusion'),
-    })
-  })
-
-  it('does not create a cypress.json when `module.exports = {}` is the only thing in cypress.config.js', function () {
-    const project = Fixtures.projectPath('config-with-empty-cypress-config')
-
-    return e2e.exec(this, {
-      project,
-    }).then(() => {
-      expect(fs.existsSync(path.resolve(project, 'cypress.json'))).to.be.false
-    })
-  })
-
-  it('crashes when there is a cypress.config.js and there is a cypress.json', function () {
-    const project = Fixtures.projectPath('config-with-json-and-empty-cypress-config')
-
-    return e2e.exec(this, {
-      project,
-      expectedExitCode: 1,
     })
   })
 })

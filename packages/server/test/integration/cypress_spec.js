@@ -511,9 +511,7 @@ describe('lib/cypress', () => {
         return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
-      }).catch((err) => {
-        expect(err.code).to.equal('ENOENT')
-      })
+      }).catch({ code: 'ENOENT' }, () => {})
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
@@ -1797,10 +1795,13 @@ describe('lib/cypress', () => {
       })
 
       it('reads config from a custom config file', function () {
-        fs.outputJSON(path.join(this.pristinePath, this.filename), {
+        sinon.stub(fs, 'readJsonAsync')
+        fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
           env: { foo: 'bar' },
           port: 2020,
         })
+
+        fs.readJsonAsync.callThrough()
 
         return cypress.start([
           `--config-file=${this.filename}`,
