@@ -17,16 +17,10 @@
 </template>
 
 <script lang="ts" setup>
-// import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, UsersIcon } from '@heroicons/vue/outline'
-// bi:bookmark-star
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import { defineProps } from 'vue'
 import BookmarkIcon from 'virtual:vite-icons/bi/bookmark-star'
 
-const log = (navigate) => {
-  navigate;
-  debugger
-}
 const navigation = [
   { name: 'Foo', icon: BookmarkIcon, href: '/foo', current: true },
   { name: 'Bar', icon: BookmarkIcon, href: '/bar', count: 3, current: false },
