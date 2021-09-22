@@ -1,7 +1,7 @@
 import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch } from './tasks/gulpCypress'
-import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, printUrqlSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
+import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
 import { checkTs } from './tasks/gulpTsc'
 import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
@@ -98,7 +98,7 @@ gulp.task(
 gulp.task(makePackage)
 gulp.task(checkTs)
 gulp.task(syncRemoteGraphQL)
-gulp.task(printUrqlSchema)
+gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)
 gulp.task(nexusCodegen)
 gulp.task(nexusCodegenWatch)

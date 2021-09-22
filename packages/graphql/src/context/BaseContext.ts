@@ -5,8 +5,8 @@ import type { GraphQLResolveInfo } from 'graphql'
 import type { BaseActions } from '../actions/BaseActions'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
-import type { NxsQueryResult } from 'nexus-decorators'
 import { coreDataShape } from './coreDataShape'
+import { remoteSchemaWrapped } from '..'
 
 export interface AuthenticatedUser {
   name?: string
@@ -92,10 +92,10 @@ export class BaseContext {
     })
   }
 
-  delegateToRemoteQueryBatched<T extends KnownBatchFields> (config: DelegateToRemoteQueryBatchedConfig<T>): ArrVal<NxsQueryResult<T>> | null {
+  delegateToRemoteQueryBatched<T extends KnownBatchFields> (config: DelegateToRemoteQueryBatchedConfig<T>): ArrVal<CloudQuery[T]> | null {
     try {
       return batchDelegateToSchema({
-        schema: this._remoteSchema,
+        schema: remoteSchemaWrapped,
         info: config.info,
         context: this,
         rootValue: config.rootValue ?? {},
@@ -114,7 +114,7 @@ export class BaseContext {
   async delegateToRemoteQuery <T extends keyof NexusGenObjects> (info: GraphQLResolveInfo, rootValue = {}): Promise<NexusGenObjects[T] | null> {
     try {
       return delegateToSchema({
-        schema: this._remoteSchema,
+        schema: remoteSchemaWrapped,
         info,
         context: this,
         rootValue,

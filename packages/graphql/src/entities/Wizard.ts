@@ -27,6 +27,28 @@ export const Wizard = objectType({
 
     t.nonNull.boolean('canNavigateForward', {
       description: 'Given the current state, returns whether the user progress to the next step of the wizard',
+      resolve: (source, args, ctx) => {
+        if (source.currentStep === 'setupComplete') {
+          return false
+        }
+
+        if (source.currentStep === 'selectFramework' && !source.chosenBundler && !source.chosenFramework) {
+          return false
+        }
+
+        if (source.currentStep === 'initializePlugins') {
+          if (source.testingType === 'component' && !ctx.activeProject?.ctPluginsInitialized) {
+            return false
+          }
+
+          if (source.testingType === 'e2e' && !ctx.activeProject?.e2ePluginsInitialized) {
+            return false
+          }
+        }
+
+        // TODO: add constraints here to determine if we can move forward
+        return true
+      },
     })
 
     t.string('description', {
@@ -44,6 +66,7 @@ export const Wizard = objectType({
 
     t.nonNull.boolean('isManualInstall', {
       description: 'Whether we have chosen manual install or not',
+      resolve: (source) => source.chosenManualInstall,
     })
 
     t.list.nonNull.field('packagesToInstall', {
@@ -70,8 +93,16 @@ export const Wizard = objectType({
       description: 'The testing type we are setting in the wizard, null if this has not been chosen',
     })
 
-    t.nonNull.list.nonNull.field('testingTypes', { type: TestingTypeInfo })
+    t.nonNull.list.nonNull.field('testingTypes', {
+      type: TestingTypeInfo,
+    })
+
     t.string('title', { description: 'The title of the page, given the current step of the wizard' })
+  },
+  asNexusMethod: 'wizard',
+  sourceType: {
+    module: '@packages/graphql/src/context/coreDataShape',
+    export: 'WizardDataShape',
   },
 })
 
@@ -227,25 +258,7 @@ export const Wizard = objectType({
 //     description: 'Given the current state, returns whether the user progress to the next step of the wizard',
 //   })
 //   canNavigateForward (): NxsResult<'Wizard', 'canNavigateForward'> {
-//     if (this.currentStep === 'setupComplete') {
-//       return false
-//     }
 
-//     if (this.currentStep === 'selectFramework' && !this.chosenBundler && !this.chosenFramework) {
-//       return false
-//     }
-
-//     if (this.currentStep === 'initializePlugins') {
-//       if (this.testingType === 'component' && !this._ctx.activeProject?.ctPluginsInitialized) {
-//         return false
-//       }
-
-//       if (this.testingType === 'e2e' && !this._ctx.activeProject?.e2ePluginsInitialized) {
-//         return false
-//       }
-//     }
-//     // TODO: add constraints here to determine if we can move forward
-//     return true
 //   }
 //   navigate (direction: WizardNavigateDirection): Wizard {
 //     debug(`_history is ${this._history.join(',')}`)

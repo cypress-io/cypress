@@ -1,4 +1,3 @@
-import { Query } from '@packages/graphql'
 import {
   TestingTypeCardsFragmentDoc,
 } from '../generated/graphql-test'
@@ -7,9 +6,6 @@ import TestingTypeCards from './TestingTypeCards.vue'
 describe('TestingTypeCards', () => {
   it('renders correct label depending if testingType has been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
-      type: (ctx) => {
-        return new Query()
-      },
       render: (gqlVal) => {
         return <TestingTypeCards gql={gqlVal} />
       },

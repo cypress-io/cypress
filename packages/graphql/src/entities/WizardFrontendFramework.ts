@@ -5,7 +5,7 @@ import { objectType } from 'nexus'
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
   description: 'A frontend framework that we can setup within the app',
-  node: 'id',
+  node: 'type',
   definition (t) {
     t.nonNull.field('type', {
       type: FrontendFrameworkEnum,

@@ -3,9 +3,6 @@ import { print, graphql } from 'graphql'
 import { wrapSchema } from '@graphql-tools/wrap'
 
 import { remoteSchema } from '../stitching/remoteSchema'
-import { CloudRunQuery } from './testStubCloudTypes'
-
-export * from './testStubCloudTypes'
 
 const testExecutor: Executor<StubContext> = async ({ document, context }) => {
   const result = await graphql({

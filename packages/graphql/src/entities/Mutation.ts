@@ -8,8 +8,7 @@ export const mutation = mutationType({
   definition (t) {
     // TODO(tim): in nexus, support for t.wizard(...)
 
-    t.field('wizardSetTestingType', {
-      type: 'Wizard',
+    t.wizard('wizardSetTestingType', {
       description: 'Sets the current testing type we want to use',
       args: { type: nonNull(TestingTypeEnum) },
       resolve: (root, args, ctx) => {
@@ -17,16 +16,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('wizardSetFramework', {
-      type: 'Wizard',
+    t.wizard('wizardSetFramework', {
       description: 'Sets the frontend framework we want to use for the project',
       args: { framework: nonNull(FrontendFrameworkEnum) },
       resolve: (_, args, ctx) => ctx.wizard.setFramework(args.framework),
     })
 
     // TODO: Move these 3 to a single wizardUpdate(input: WizardUpdateInput!)
-    t.field('wizardSetBundler', {
-      type: 'Wizard',
+    t.wizard('wizardSetBundler', {
       description: 'Sets the frontend bundler we want to use for the project',
       args: {
         bundler: nonNull(SupportedBundlerEnum),
@@ -34,8 +31,7 @@ export const mutation = mutationType({
       resolve: (root, args, ctx) => ctx.wizard.setBundler(args.bundler),
     })
 
-    t.field('wizardSetManualInstall', {
-      type: 'Wizard',
+    t.wizard('wizardSetManualInstall', {
       description: 'Sets the frontend bundler we want to use for the project',
       args: {
         isManual: nonNull('Boolean'),
@@ -43,8 +39,7 @@ export const mutation = mutationType({
       resolve: (root, args, ctx) => ctx.wizard.setManualInstall(args.isManual),
     })
 
-    t.field('wizardNavigate', {
-      type: 'Wizard',
+    t.wizard('wizardNavigate', {
       args: {
         direction: nonNull(WizardNavigateDirectionEnum),
       },
@@ -52,8 +47,7 @@ export const mutation = mutationType({
       resolve: (_, args, ctx) => ctx.wizard.navigate(args.direction),
     })
 
-    t.field('wizardInstallDependencies', {
-      type: 'Wizard',
+    t.wizard('wizardInstallDependencies', {
       description: 'Installs the dependencies for the component testing step',
       resolve: (root, args, ctx) => ctx.wizard,
     })

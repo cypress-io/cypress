@@ -1,43 +1,29 @@
 import { objectType } from 'nexus'
-import { NavItemEnum } from '../constants'
+import { NavItemEnum, NAV_ITEM_INFO } from '../constants'
 
 export const NavigationItem = objectType({
   name: 'NavigationItem',
   description: 'Container describing a single nav item',
   definition (t) {
-    t.nonNull.string('iconPath')
-    t.nonNull.field('id', { type: NavItemEnum })
-    t.nonNull.string('name')
-    t.nonNull.boolean('selected')
+    t.nonNull.field('id', {
+      type: NavItemEnum,
+      resolve: (source) => source,
+    })
+
+    t.nonNull.string('iconPath', {
+      resolve: (source) => NAV_ITEM_INFO[source].iconPath,
+    })
+
+    t.nonNull.string('name', {
+      resolve: (source) => NAV_ITEM_INFO[source].displayName,
+    })
+
+    t.nonNull.boolean('selected', {
+      resolve: (source, args, ctx) => ctx.app.navItem === source,
+    })
+  },
+  sourceType: {
+    module: '@packages/graphql/src/constants',
+    export: 'NavItem',
   },
 })
-
-// @nxs.objectType({
-//   description: 'Container describing a single nav item',
-// })
-// export class NavigationItem {
-//   constructor (
-//     private navigation: NavigationMenu,
-//     private navItemName: NavItem,
-//   ) {}
-
-//   @nxs.field.nonNull.type(() => NavItemEnum)
-//   get id (): NxsResult<'NavigationItem', 'id'> {
-//     return this.navItemName
-//   }
-
-//   @nxs.field.nonNull.boolean()
-//   get selected (): NxsResult<'NavigationItem', 'selected'> {
-//     return this.navigation.selected === this.id
-//   }
-
-//   @nxs.field.nonNull.string()
-//   get iconPath (): NxsResult<'NavigationItem', 'iconPath'> {
-//     return NAV_ITEM_INFO[this.navItemName].iconPath
-//   }
-
-//   @nxs.field.nonNull.string()
-//   get name (): NxsResult<'NavigationItem', 'name'> {
-//     return NAV_ITEM_INFO[this.navItemName].displayName
-//   }
-// }

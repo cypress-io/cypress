@@ -1,14 +1,15 @@
 import type { FoundBrowser } from '@packages/types'
-import { Bundler, BUNDLER, FrontendFramework, WizardStep } from '..'
+import { Bundler, BUNDLER, FrontendFramework, NavItem, WizardStep } from '..'
 
-interface AppDataShape {
+export interface AppDataShape {
+  navItem: NavItem
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: unknown[]
   activeProject: unknown
   isInGlobalMode: boolean
 }
 
-interface WizardDataShape {
+export interface WizardDataShape {
   history: WizardStep[]
   currentStep: WizardStep
   chosenBundler: Bundler | null
@@ -25,6 +26,7 @@ interface CoreDataShape {
 // All state for the app should live here for now
 export const coreDataShape: CoreDataShape = {
   app: {
+    navItem: 'settings',
     browsers: null,
     projects: [],
     activeProject: null,

@@ -6,7 +6,7 @@ import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlCl
 import { Component, computed, watch, defineComponent, h } from 'vue'
 
 import { ClientTestContext } from '../../src/graphql/ClientTestContext'
-import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUnionType'
+// import type { TestSourceTypeLookup } from '../../src/graphql/testUnionType'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import 'cypress-file-upload'
 
@@ -128,7 +128,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
           install (app) {
             app.use(urql, testUrqlClient({
               context,
-              rootValue: options.type(context),
+              rootValue: options.type?.(context) ?? {},
             }))
           },
         },
@@ -154,7 +154,7 @@ type GetRootType<T> = T extends TypedDocumentNode<infer U, any>
 type MountFragmentConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
   render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
-  type: (ctx: ClientTestContext) => GetRootType<T>
+  type?: (ctx: ClientTestContext) => GetRootType<T>
   expectError?: boolean
 } & CyMountOptions<unknown>
 

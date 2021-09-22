@@ -21,9 +21,7 @@ import type {
   QueryCloudProjectBySlugArgs,
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
-} from '../gen/cloud-source-types.gen'
-import { base64Encode } from '../util/relayConnectionUtils'
-import type { NxsCtx } from 'nexus-decorators'
+} from '@packages/graphql/src/gen/cloud-source-types'
 import type { GraphQLResolveInfo } from 'graphql'
 
 type ConfigFor<T> = Omit<T, 'id' | '__typename'>
@@ -43,7 +41,7 @@ function testNodeId <T extends CloudTypesWithId> (type: T) {
 
   return {
     __typename: type,
-    id: base64Encode(`${type}:${nodeIdx[type]}`),
+    id: btoa(`${type}:${nodeIdx[type]}`),
   } as const
 }
 
@@ -174,7 +172,7 @@ export const CloudProjectStubs = {
 } as const
 
 type MaybeResolver<T> = {
-  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: NxsCtx, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
+  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: object, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
 }
 
 export const CloudRunQuery: MaybeResolver<Query> = {

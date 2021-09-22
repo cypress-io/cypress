@@ -21,12 +21,14 @@ type App {
 }
 
 """Container representing a browser"""
-type Browser {
+type Browser implements Node {
   channel: String!
   disabled: Boolean!
   displayName: String!
   family: BrowserFamily!
-  id: String!
+
+  """Relay style Node ID field for the Browser field"""
+  id: ID!
   majorVersion: String
   name: String!
   path: String!
@@ -356,8 +358,9 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress project is a container"""
+"""A Cypress Project is represented by a cypress.json file"""
 type Project implements Node {
+  """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject
 
   """Relay style Node ID field for the Project field"""
@@ -506,8 +509,11 @@ enum WizardNavigateDirection {
 }
 
 """Details about an NPM Package listed during the wizard install"""
-type WizardNpmPackage {
+type WizardNpmPackage implements Node {
   description: String!
+
+  """Relay style Node ID field for the WizardNpmPackage field"""
+  id: ID!
 
   """The package name that you would npm install"""
   name: String!
