@@ -222,6 +222,10 @@ describe('lib/settings', () => {
       this.options = {
         configFile: 'my-test-config-file.json',
       }
+
+      this.optionsJs = {
+        configFile: 'my-test-config-file.js',
+      }
     })
 
     afterEach(function () {
@@ -251,6 +255,16 @@ describe('lib/settings', () => {
         return settings.read(this.projectRoot, this.options)
         .then((settings) => {
           expect(settings).to.deep.equal({ foo: 'bar' })
+        })
+      })
+    })
+
+    it('.read returns from configFile when its a JavaScript file', function () {
+      return fs.writeFile(path.join(this.projectRoot, this.optionsJs.configFile), `module.exports = { baz: 'lurman' }`)
+      .then(() => {
+        return settings.read(this.projectRoot, this.optionsJs)
+        .then((settings) => {
+          expect(settings).to.deep.equal({ baz: 'lurman' })
         })
       })
     })

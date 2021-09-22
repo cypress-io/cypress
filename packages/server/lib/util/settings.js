@@ -204,20 +204,12 @@ module.exports = {
       // if our object is unchanged
       // then just return it
       if (_.isEqual(configObject, changed)) {
-        configObject.configFile = path.relative(projectRoot, file)
-
         return configObject
       }
 
       // else write the new reduced obj
       return this._write(file, changed)
       .then((config) => {
-        // when configfile is written, update the value of the configfile
-        // with the value found.
-        // NOTE: it does not have to be cypress.json.
-        // it could be ./e2e/custom-config.json or cypress.config.js
-        config.configFile = path.relative(projectRoot, file)
-
         return config
       })
     }).catch((err) => {
