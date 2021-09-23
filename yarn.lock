@@ -7944,6 +7944,13 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
+"@types/jquery.scrollto@1.4.29":
+  version "1.4.29"
+  resolved "https://registry.yarnpkg.com/@types/jquery.scrollto/-/jquery.scrollto-1.4.29.tgz#a3cdbe757249c08740dc4c36d83bf3c041e315cc"
+  integrity sha512-4AGdSgD6BDFcz53My+gtmsqbQFl72V7bc5YqhUw9jZTpx1w9ZiQqdvFyRU/DXSuBDG+pif8FL3geaKM7ZDGngw==
+  dependencies:
+    "@types/jquery" "*"
+
 "@types/jquery@*", "@types/jquery@3.3.31":
   version "3.3.31"
   resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.3.31.tgz#27c706e4bf488474e1cb54a71d8303f37c93451b"

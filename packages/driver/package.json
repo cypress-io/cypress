@@ -26,6 +26,7 @@
     "@sinonjs/fake-timers": "7.0.2",
     "@types/chalk": "^2.2.0",
     "@types/common-tags": "^1.8.0",
+    "@types/jquery.scrollto": "1.4.29",
     "@types/lodash": "^4.14.168",
     "@types/mocha": "^8.0.3",
     "@types/underscore.string": "0.0.38",

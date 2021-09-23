@@ -10,7 +10,8 @@ const newLineRe = /\n/g
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    select (subject, valueOrTextOrIndex, options = {}) {
+    // TODO: any -> Partial<Cypress.SelectOptions>
+    select (subject, valueOrTextOrIndex, options: any = {}) {
       if (
         !_.isNumber(valueOrTextOrIndex)
         && !_.isString(valueOrTextOrIndex)
@@ -37,7 +38,7 @@ export default (Commands, Cypress, cy) => {
         force: false,
       })
 
-      const consoleProps = {}
+      const consoleProps: Record<string, any> = {}
 
       if (options.log) {
         // figure out the options which actually change the behavior of clicks
@@ -110,8 +111,8 @@ export default (Commands, Cypress, cy) => {
           $errUtils.throwErrByPath('select.disabled', { args: { node } })
         }
 
-        const values = []
-        const optionEls = []
+        const values: string[] = []
+        const optionEls: JQuery<any>[] = []
         const optionsObjects = options.$el.find('option').map((index, el) => {
           // push the value in values array if its
           // found within the valueOrText
@@ -268,7 +269,7 @@ export default (Commands, Cypress, cy) => {
               let selectedIndex = 0
 
               _.each(optionEls, ($el) => {
-                const index = _.findIndex(optionsObjects, (optionObject) => {
+                const index = _.findIndex(optionsObjects, (optionObject: any) => {
                   return $el.text() === optionObject.originalText
                 })
 

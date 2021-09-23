@@ -8,6 +8,8 @@
  * @version 2.1.3
  */
 
+/// <reference types="jquery.scrollto" />
+
 /** eslint-disable */
 import $ from 'jquery'
 
@@ -109,7 +111,7 @@ export function scrollTo (target, duration, settings) {
       let max = $scrollTo.max(elem, axis)
 
       if (toff) { // jQuery / DOMElement
-        attr[key] = toff[pos] + (win ? 0 : prev - $elem.offset()[pos])
+        attr[key] = toff[pos] + (win ? 0 : prev - $elem.offset()![pos])
 
         // If it's a dom element, reduce the margin
         if (settings.margin) {
@@ -192,18 +194,25 @@ function both (val) {
   return isFunction(val) || $.isPlainObject(val) ? val : { top: val, left: val }
 }
 
+// TODO: find the type of _last in the JQuery code.
+interface Tween extends JQuery.Tween<JQuery.Node> {
+  _last: any
+}
+
 // Add special hooks so that window scroll properties can be animated
 $.Tween.propHooks.scrollLeft =
 $.Tween.propHooks.scrollTop = {
   get (t) {
     return $(t.elem)[t.prop]()
   },
-  set (t) {
+  set (t: Tween) {
     let curr = this.get(t)
 
     // If interrupt is true and user scrolled, stop animating
     if (t.options.interrupt && t._last && t._last !== curr) {
-      return $(t.elem).stop()
+      $(t.elem).stop()
+
+      return
     }
 
     let next = Math.round(t.now)
