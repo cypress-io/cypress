@@ -6,21 +6,21 @@ const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const R = require('ramda')
 const pkg = require('@packages/root')
-const { fs } = require(`${root}../lib/util/fs`)
-const user = require(`${root}../lib/user`)
-const errors = require(`${root}../lib/errors`)
-const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
-const browsers = require(`${root}../lib/browsers`)
-const Reporter = require(`${root}../lib/reporter`)
-const runMode = require(`${root}../lib/modes/run`)
-const { openProject } = require(`${root}../lib/open_project`)
-const videoCapture = require(`${root}../lib/video_capture`)
-const env = require(`${root}../lib/util/env`)
-const random = require(`${root}../lib/util/random`)
-const system = require(`${root}../lib/util/system`)
-const specsUtil = require(`${root}../lib/util/specs`)
-const { experimental } = require(`${root}../lib/experiments`)
-const ProjectStatic = require(`${root}../lib/project_static`)
+const { fs } = require('../../../lib/util/fs')
+const user = require('../../../lib/user')
+const errors = require('../../../lib/errors')
+const ProjectBase = require('../../../lib/project-base').ProjectBase
+const browsers = require('../../../lib/browsers')
+const Reporter = require('../../../lib/reporter')
+const runMode = require('../../../lib/modes/run')
+const { openProject } = require('../../../lib/open_project')
+const videoCapture = require('../../../lib/video_capture')
+const env = require('../../../lib/util/env')
+const random = require('../../../lib/util/random')
+const system = require('../../../lib/util/system')
+const specsUtil = require('../../../lib/util/specs')
+const { experimental } = require('../../../lib/experiments')
+const ProjectStatic = require('../../../lib/project_static')
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
@@ -29,28 +29,28 @@ describe('lib/modes/run', () => {
 
   context('.getProjectId', () => {
     it('resolves if id', () => {
-      return runMode.getProjectId('project', 'id123')
-      .then((ret) => {
+      return runMode.getProjectId('project', 'id123').then((ret) => {
         expect(ret).to.eq('id123')
       })
     })
 
     it('resolves if CYPRESS_PROJECT_ID set', () => {
-      sinon.stub(env, 'get').withArgs('CYPRESS_PROJECT_ID').returns('envId123')
+      sinon
+      .stub(env, 'get')
+      .withArgs('CYPRESS_PROJECT_ID')
+      .returns('envId123')
 
-      return runMode.getProjectId('project')
-      .then((ret) => {
+      return runMode.getProjectId('project').then((ret) => {
         expect(ret).to.eq('envId123')
       })
     })
 
     it('is null when no projectId', () => {
       const project = {
-        getProjectId: sinon.stub().rejects(new Error),
+        getProjectId: sinon.stub().rejects(new Error()),
       }
 
-      return runMode.getProjectId(project)
-      .then((ret) => {
+      return runMode.getProjectId(project).then((ret) => {
         expect(ret).to.be.null
       })
     })
@@ -75,16 +75,20 @@ describe('lib/modes/run', () => {
     })
 
     it('calls openProject.create with projectRoot + options', () => {
-      expect(openProject.create).to.be.calledWithMatch('/_test-output/path/to/project/foo', {
-        port: 8080,
-        projectRoot: '/_test-output/path/to/project/foo',
-        env: { foo: 'bar' },
-      }, {
-        morgan: false,
-        socketId: 1234,
-        report: true,
-        isTextTerminal: true,
-      })
+      expect(openProject.create).to.be.calledWithMatch(
+        '/_test-output/path/to/project/foo',
+        {
+          port: 8080,
+          projectRoot: '/_test-output/path/to/project/foo',
+          env: { foo: 'bar' },
+        },
+        {
+          morgan: false,
+          socketId: 1234,
+          report: true,
+          isTextTerminal: true,
+        },
+      )
     })
 
     it('calls options.onError with error message onError', () => {
@@ -159,7 +163,9 @@ describe('lib/modes/run', () => {
       expect(errors.log).to.be.calledOnce
 
       expect(onError).to.be.called
-      expect(onError.lastCall.args[0].message).to.include('We detected that the Chromium Renderer process just crashed.')
+      expect(onError.lastCall.args[0].message).to.include(
+        'We detected that the Chromium Renderer process just crashed.',
+      )
     })
   })
 
@@ -231,29 +237,25 @@ describe('lib/modes/run', () => {
     })
 
     it('calls video process with name, cname and videoCompression', () => {
-      return runMode.postProcessRecording('foo', 'foo-compress', 32, true)
-      .then(() => {
+      return runMode.postProcessRecording('foo', 'foo-compress', 32, true).then(() => {
         expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32)
       })
     })
 
     it('does not call video process when videoCompression is false', () => {
-      return runMode.postProcessRecording('foo', 'foo-compress', false, true)
-      .then(() => {
+      return runMode.postProcessRecording('foo', 'foo-compress', false, true).then(() => {
         expect(videoCapture.process).not.to.be.called
       })
     })
 
     it('calls video process if we have been told to upload videos', () => {
-      return runMode.postProcessRecording('foo', 'foo-compress', 32, true)
-      .then(() => {
+      return runMode.postProcessRecording('foo', 'foo-compress', 32, true).then(() => {
         expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32)
       })
     })
 
     it('does not call video process if there are no failing tests and we have set not to upload video on passing', () => {
-      return runMode.postProcessRecording('foo', 'foo-compress', 32, false)
-      .then(() => {
+      return runMode.postProcessRecording('foo', 'foo-compress', 32, false).then(() => {
         expect(videoCapture.process).not.to.be.called
       })
     })
@@ -271,8 +273,7 @@ describe('lib/modes/run', () => {
 
       const onError = sinon.spy()
 
-      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError })
-      .then(() => {
+      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError }).then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
         expect(runMode.launchBrowser.firstCall.args[0]).not.property('writeVideoFrame')
@@ -281,7 +282,9 @@ describe('lib/modes/run', () => {
         expect(errors.get).to.be.calledWith('TESTS_DID_NOT_START_FAILED')
 
         expect(onError).to.be.called
-        expect(onError.lastCall.args[0].message).to.include('The browser never connected. Something is wrong. The tests cannot run. Aborting...')
+        expect(onError.lastCall.args[0].message).to.include(
+          'The browser never connected. Something is wrong. The tests cannot run. Aborting...',
+        )
       })
     })
   })
@@ -303,8 +306,7 @@ describe('lib/modes/run', () => {
     it('calls removeListener if socketId matches id', function () {
       this.projectStub.on.yields(1234)
 
-      return runMode.waitForSocketConnection(this.projectStub, 1234)
-      .then(() => {
+      return runMode.waitForSocketConnection(this.projectStub, 1234).then(() => {
         expect(this.projectStub.removeListener).to.be.calledWith('socket:connected')
       })
     })
@@ -315,8 +317,7 @@ describe('lib/modes/run', () => {
           return this.projectInstance.emit('socket:connected', 1234)
         })
 
-        return runMode.waitForSocketConnection(this.projectInstance, 1234)
-        .then((ret) => {
+        return runMode.waitForSocketConnection(this.projectInstance, 1234).then((ret) => {
           expect(ret).to.be.undefined
         })
       })
@@ -331,7 +332,8 @@ describe('lib/modes/run', () => {
         .timeout(50)
         .then(() => {
           throw new Error('should time out and not resolve')
-        }).catch(Promise.TimeoutError, (err) => {})
+        })
+        .catch(Promise.TimeoutError, (err) => {})
       })
 
       it('actually removes the listener', function () {
@@ -371,7 +373,7 @@ describe('lib/modes/run', () => {
     })
 
     it('end event resolves with obj, displays stats, displays screenshots, sets video timestamps', function () {
-      const startedVideoCapture = new Date
+      const startedVideoCapture = new Date()
       const screenshots = [{}, {}, {}]
       const endVideoCapture = sinon.stub().resolves()
       const results = {
@@ -393,7 +395,8 @@ describe('lib/modes/run', () => {
 
       this.setupProjectEnd(results)
 
-      return runMode.waitForTestsToFinishRunning({
+      return runMode
+      .waitForTestsToFinishRunning({
         project: this.projectInstance,
         videoName: 'foo.mp4',
         compressedVideoName: 'foo-compressed.mp4',
@@ -443,7 +446,7 @@ describe('lib/modes/run', () => {
       sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       const err = new Error('foo')
-      const startedVideoCapture = new Date
+      const startedVideoCapture = new Date()
       const wallClock = new Date()
       const screenshots = [{}, {}, {}]
       const endVideoCapture = sinon.stub().resolves()
@@ -457,7 +460,8 @@ describe('lib/modes/run', () => {
         runMode.exitEarly(err)
       })
 
-      return runMode.waitForTestsToFinishRunning({
+      return runMode
+      .waitForTestsToFinishRunning({
         project: this.projectInstance,
         videoName: 'foo.mp4',
         compressedVideoName: 'foo-compressed.mp4',
@@ -554,7 +558,8 @@ describe('lib/modes/run', () => {
       sinon.spy(videoCapture, 'process')
       const endVideoCapture = sinon.stub().resolves()
 
-      return runMode.waitForTestsToFinishRunning({
+      return runMode
+      .waitForTestsToFinishRunning({
         project: this.projectInstance,
         videoName: 'foo.mp4',
         compressedVideoName: 'foo-compressed.mp4',
@@ -573,7 +578,8 @@ describe('lib/modes/run', () => {
     it('does not delay when not capturing a video', () => {
       sinon.stub(runMode, 'listenForProjectEnd').resolves({})
 
-      return runMode.waitForTestsToFinishRunning({
+      return runMode
+      .waitForTestsToFinishRunning({
         startedVideoCapture: null,
       })
       .then(() => {
@@ -591,7 +597,8 @@ describe('lib/modes/run', () => {
       })
 
       it('does not process or upload video', function () {
-        return runMode.waitForTestsToFinishRunning({
+        return runMode
+        .waitForTestsToFinishRunning({
           project: this.projectInstance,
           startedVideoCapture: new Date(),
           videoName: 'foo.mp4',
@@ -605,7 +612,8 @@ describe('lib/modes/run', () => {
       })
 
       it('nulls out video value from results', function () {
-        return runMode.waitForTestsToFinishRunning({
+        return runMode
+        .waitForTestsToFinishRunning({
           project: this.projectInstance,
           startedVideoCapture: new Date(),
           videoName: 'foo.mp4',
@@ -624,8 +632,7 @@ describe('lib/modes/run', () => {
         return this.projectInstance.emit('end', { foo: 'bar' })
       })
 
-      return runMode.listenForProjectEnd(this.projectInstance)
-      .then((obj) => {
+      return runMode.listenForProjectEnd(this.projectInstance).then((obj) => {
         expect(obj).to.deep.eq({
           foo: 'bar',
         })
@@ -658,7 +665,11 @@ describe('lib/modes/run', () => {
         },
       }
 
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon
+      .stub(electron.app, 'on')
+      .withArgs('ready')
+      .yieldsAsync()
+
       sinon.stub(user, 'ensureAuthToken')
       sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
@@ -687,8 +698,7 @@ describe('lib/modes/run', () => {
     })
 
     it('shows no warnings for default browser', () => {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(errors.warning).to.not.be.called
       })
     })
@@ -698,8 +708,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      return expect(runMode.run({ browser: 'opera' }))
-      .to.be.rejectedWith(/invalid browser family in/)
+      return expect(runMode.run({ browser: 'opera' })).to.be.rejectedWith(/invalid browser family in/)
     })
 
     it('throws an error if unsupportedVersion', () => {
@@ -707,20 +716,17 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      return expect(runMode.run())
-      .to.be.rejectedWith('blah blah')
+      return expect(runMode.run()).to.be.rejectedWith('blah blah')
     })
 
     it('shows no warnings for chrome browser', () => {
-      return runMode.run({ browser: 'chrome' })
-      .then(() => {
+      return runMode.run({ browser: 'chrome' }).then(() => {
         expect(errors.warning).to.not.be.called
       })
     })
 
     it('names video file with spec name', () => {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(videoCapture.start).to.be.calledWith('videos/foo_spec.js.mp4')
 
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
@@ -736,7 +742,11 @@ describe('lib/modes/run', () => {
         proxyUrl: 'http://localhost:12345',
       })
 
-      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon
+      .stub(electron.app, 'on')
+      .withArgs('ready')
+      .yieldsAsync()
+
       sinon.stub(user, 'ensureAuthToken')
       sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
@@ -770,15 +780,13 @@ describe('lib/modes/run', () => {
     })
 
     it('no longer ensures user session', () => {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(user.ensureAuthToken).not.to.be.called
       })
     })
 
     it('resolves with object and totalFailed', () => {
-      return runMode.run()
-      .then((results) => {
+      return runMode.run().then((results) => {
         expect(results).to.have.property('totalFailed', 10)
       })
     })
@@ -786,15 +794,13 @@ describe('lib/modes/run', () => {
     it('passes projectRoot + options to openProject', () => {
       const opts = { projectRoot: '/path/to/project', foo: 'bar' }
 
-      return runMode.run(opts)
-      .then(() => {
+      return runMode.run(opts).then(() => {
         expect(openProject.create).to.be.calledWithMatch(opts.projectRoot, opts)
       })
     })
 
     it('passes project + id to waitForBrowserToConnect', function () {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(runMode.waitForBrowserToConnect).to.be.calledWithMatch({
           project: this.projectInstance,
           socketId: 1234,
@@ -803,8 +809,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes project to waitForTestsToFinishRunning', function () {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
           project: this.projectInstance,
         })
@@ -816,8 +821,7 @@ describe('lib/modes/run', () => {
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 
-      return runMode.run({ headed: true })
-      .then(() => {
+      return runMode.run({ headed: true }).then(() => {
         expect(openProject.launch).to.be.calledWithMatch(
           browser,
           {
@@ -833,8 +837,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes sys to runSpecs', () => {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(runMode.runSpecs).to.be.calledWithMatch({
           sys: {
             osName: 'osFoo',
@@ -845,8 +848,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes browser to runSpecs', () => {
-      return runMode.run()
-      .then(() => {
+      return runMode.run().then(() => {
         expect(runMode.runSpecs).to.be.calledWithMatch({
           browser: {
             name: 'fooBrowser',
