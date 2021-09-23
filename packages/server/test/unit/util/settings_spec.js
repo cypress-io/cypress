@@ -5,6 +5,9 @@ const { fs } = require('../../../lib/util/fs')
 const settings = require(`../../../lib/util/settings`)
 
 const projectRoot = process.cwd()
+const defaultOptions = {
+  configFile: 'cypress.json',
+}
 
 describe('lib/util/settings', () => {
   context('with no configFile option', () => {
@@ -22,7 +25,7 @@ describe('lib/util/settings', () => {
       it('flattens object on read', function () {
         return this.setup({ cypress: { foo: 'bar' } })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
 
@@ -89,7 +92,7 @@ describe('lib/util/settings', () => {
           projectId: 'id-123',
         })
         .then(() => {
-          return settings.id(this.projectRoot)
+          return settings.id(this.projectRoot, defaultOptions)
         }).then((id) => {
           expect(id).to.equal('id-123')
         })
@@ -100,7 +103,7 @@ describe('lib/util/settings', () => {
       it('promises cypress.json', function () {
         return this.setup({ foo: 'bar' })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
@@ -109,7 +112,7 @@ describe('lib/util/settings', () => {
       it('promises cypress.json and merges CT specific properties for via testingType: component', function () {
         return this.setup({ a: 'b', component: { a: 'c' } })
         .then(() => {
-          return settings.read(projectRoot, { testingType: 'component' })
+          return settings.read(projectRoot, { ...defaultOptions, testingType: 'component' })
         }).then((obj) => {
           expect(obj).to.deep.eq({ a: 'c', component: { a: 'c' } })
         })
@@ -118,7 +121,7 @@ describe('lib/util/settings', () => {
       it('promises cypress.json and merges e2e specific properties', function () {
         return this.setup({ a: 'b', e2e: { a: 'c' } })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ a: 'c', e2e: { a: 'c' } })
         })
@@ -127,7 +130,7 @@ describe('lib/util/settings', () => {
       it('renames commandTimeout -> defaultCommandTimeout', function () {
         return this.setup({ commandTimeout: 30000, foo: 'bar' })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ defaultCommandTimeout: 30000, foo: 'bar' })
         })
@@ -136,7 +139,7 @@ describe('lib/util/settings', () => {
       it('renames supportFolder -> supportFile', function () {
         return this.setup({ supportFolder: 'foo', foo: 'bar' })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ supportFile: 'foo', foo: 'bar' })
         })
@@ -145,7 +148,7 @@ describe('lib/util/settings', () => {
       it('renames visitTimeout -> pageLoadTimeout', function () {
         return this.setup({ visitTimeout: 30000, foo: 'bar' })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
         })
@@ -154,7 +157,7 @@ describe('lib/util/settings', () => {
       it('renames visitTimeout -> pageLoadTimeout on nested cypress obj', function () {
         return this.setup({ cypress: { visitTimeout: 30000, foo: 'bar' } })
         .then(() => {
-          return settings.read(projectRoot)
+          return settings.read(projectRoot, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
         })
@@ -164,7 +167,7 @@ describe('lib/util/settings', () => {
     context('.write', () => {
       it('promises cypress.json updates', function () {
         return this.setup().then(() => {
-          return settings.write(projectRoot, { foo: 'bar' })
+          return settings.write(projectRoot, { foo: 'bar' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
@@ -173,7 +176,7 @@ describe('lib/util/settings', () => {
       it('only writes over conflicting keys', function () {
         return this.setup({ projectId: '12345', autoOpen: true })
         .then(() => {
-          return settings.write(projectRoot, { projectId: 'abc123' })
+          return settings.write(projectRoot, { projectId: 'abc123' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
         })
