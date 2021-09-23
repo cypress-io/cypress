@@ -12,7 +12,10 @@ export const graphqlSchema = makeSchema({
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: isCodegen,
   outputs: {
-    typegen: path.join(__dirname, 'gen/nxs.gen.ts'),
+    typegen: {
+      outputPath: path.join(__dirname, 'gen/nxs.gen.ts'),
+      declareInputs: true,
+    },
     schema: path.join(__dirname, '..', 'schemas', 'schema.graphql'),
   },
   contextType: {

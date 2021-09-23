@@ -10,6 +10,8 @@ import { cached } from './util/cached'
 import { WizardDataSource } from './sources'
 import type { ProjectApiShape } from './actions'
 import { makeLoaders } from './data/loaders'
+import { BrowserDataSource } from './sources/BrowserDataSource'
+import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 
 export interface DataContextConfig {
   launchArgs: LaunchArgs
@@ -32,7 +34,7 @@ export class DataContext {
     this._coreData = config.coreData ?? makeCoreData()
   }
 
-  loaders = makeLoaders()
+  loaders = makeLoaders(this)
 
   get launchArgs () {
     return this.config.launchArgs
@@ -44,6 +46,11 @@ export class DataContext {
 
   get user () {
     return this.coreData.user
+  }
+
+  @cached
+  get browser () {
+    return new BrowserDataSource(this)
   }
 
   /**
@@ -93,9 +100,15 @@ export class DataContext {
     }
   }
 
-  // TODO(tim): change string to Node type
-  makeId<T extends string> (typeName: T, nodeString: string) {
+  makeId<T extends NexusGenAbstractTypeMembers['Node']> (typeName: T, nodeString: string) {
     return Buffer.from(`${typeName}:${nodeString}`).toString('base64')
+  }
+
+  // TODO(tim): type check
+  fromId (str: string): string[] {
+    const result = Buffer.from(str, 'base64').toString('utf-8')
+
+    return result.split(':')
   }
 
   debug = debugLib('cypress:data-context')

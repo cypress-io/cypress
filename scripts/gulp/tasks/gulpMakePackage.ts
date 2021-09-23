@@ -57,6 +57,7 @@ export async function makePackage () {
           description: results.description,
           'main': 'index.js',
           'browser': 'src/index.ts',
+          'types': 'src/index.ts',
           scripts: {
             'build-prod': 'tsc || echo \'built, with errors\'',
             'check-ts': 'tsc --noEmit',

@@ -14,7 +14,6 @@ export interface ProjectShape {
 }
 
 export interface ActiveProjectShape extends ProjectShape {
-  projectRoot: string
   ctPluginsInitialized: Maybe<boolean>
   e2ePluginsInitialized: Maybe<boolean>
   isFirstTimeCT: Maybe<boolean>

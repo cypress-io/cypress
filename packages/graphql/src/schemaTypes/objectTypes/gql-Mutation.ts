@@ -1,4 +1,4 @@
-import { mutationType, nonNull, stringArg } from 'nexus'
+import { arg, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
@@ -114,7 +114,7 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
-
+        return ctx.wizardData
       },
     })
 
@@ -122,22 +122,7 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Launches project from open_project global singleton',
       async resolve (_root, args, ctx) {
-        const browser = ctx.app.browsers.find((x) => x.name === 'chrome')
-
-        if (!browser) {
-          throw Error(`Could not find chrome browser`)
-        }
-
-        const spec: Cypress.Spec = {
-          name: '',
-          absolute: '',
-          relative: '',
-          specType: ctx.wizard.testingType === 'e2e' ? 'integration' : 'component',
-        }
-
-        await ctx.actions.launchOpenProject(browser.config, spec, {})
-
-        // ctx.actions.project.launchProject()
+        await ctx.actions.project.launchProject()
 
         return ctx.appData
       },

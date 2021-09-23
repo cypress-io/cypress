@@ -14,14 +14,16 @@ export const Project = objectType({
     t.field('cloudProject', {
       type: 'CloudProject',
       description: 'The remote associated project from Cypress Cloud',
-      resolve: (source, args, ctx, info) => {
-        return source.projectId ? cloudProjectBySlug(source.projectId, ctx, info) : null
+      resolve: async (source, args, ctx, info) => {
+        const projectId = await ctx.project.projectId(source.projectRoot)
+
+        return projectId ? cloudProjectBySlug(projectId, ctx, info) : null
       },
     })
 
     t.string('projectId', {
       description: 'Used to associate project with Cypress cloud',
-      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot),
+      resolve: (source, args, ctx) => ctx.project.projectId(source.projectRoot).then((val) => val ?? null),
     })
 
     t.nonNull.string('projectRoot')

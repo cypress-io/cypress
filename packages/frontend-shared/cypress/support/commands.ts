@@ -2,16 +2,13 @@ import '@testing-library/cypress/add-commands'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
-import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
+import { ClientTestContext, testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, watch, defineComponent, h } from 'vue'
+import * as stubData from '../../src/graphql/testStubCloudTypes'
 
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import 'cypress-file-upload'
-
-interface ClientTestContext {
-  //
-}
 
 /**
  * This variable is mimicing ipc provided by electron.
@@ -34,7 +31,9 @@ Cypress.Commands.add(
     options.global.plugins.push({
       install (app) {
         app.use(urql, testUrqlClient({
-          context: {},
+          context: {
+            stubData,
+          },
         }))
       },
     })
@@ -45,7 +44,9 @@ Cypress.Commands.add(
 
 function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
   let hasMounted = false
-  const context = {}
+  const context = {
+    stubData,
+  }
 
   return mount(defineComponent({
     name: `mountFragment`,
@@ -103,7 +104,9 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
         {
           install (app) {
             app.use(urql, testUrqlClient({
-              context,
+              context: {
+                stubData,
+              },
               rootValue: options.type?.(context) ?? {},
             }))
           },

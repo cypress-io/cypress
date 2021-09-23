@@ -29,43 +29,8 @@ export class ServerActions {
     //
   }
 
-  addProject (projectRoot: string) {
-    // no need to re-add
-    const found = this.ctx.localProjects.find((x) => x.projectRoot === projectRoot)
-
-    if (found) {
-      return found
-    }
-
-    const localProject = new Project(projectRoot, this.ctx)
-
-    this.ctx.localProjects.push(localProject)
-    insertProject(projectRoot)
-
-    return localProject
-  }
-
   async _loadProjectsFromCache () {
     return await getProjectRoots()
-  }
-
-  async authenticate () {
-    this.ctx.setAuthenticatedUser(await auth.start(() => {}, 'launchpad'))
-  }
-
-  async logout () {
-    try {
-      await user.logOut()
-    } catch {
-      //
-    }
-    this.ctx.setAuthenticatedUser(null)
-  }
-
-  async getProjectId (projectRoot: string) {
-    const projectId: string = await getId(projectRoot)
-
-    return projectId ?? null
   }
 
   getBrowsers (): Promise<FoundBrowser[]> {
@@ -84,27 +49,6 @@ export class ServerActions {
     }
 
     fs.writeFileSync(path.resolve(project.projectRoot, configFilename), code)
-  }
-
-  async initializeOpenProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-    await openProject.create(args.projectRoot, args, options, browsers)
-    if (!this.ctx.activeProject) {
-      throw Error('Cannot initialize project without an active project')
-    }
-
-    if (args.testingType === 'e2e') {
-      this.ctx.activeProject.setE2EPluginsInitialized(true)
-    }
-
-    if (args.testingType === 'component') {
-      this.ctx.activeProject.setCtPluginsInitialized(true)
-    }
-
-    return
-  }
-
-  async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
-
   }
 
   resolveOpenProjectConfig (): FullConfig | null {

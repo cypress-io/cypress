@@ -26,6 +26,7 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
+import * as config from '../config'
 import auth from './auth'
 import user from '../user'
 
@@ -499,7 +500,7 @@ module.exports = {
     // into the projects
     startGraphQLServer()
 
-    const serverContext = setDataContext(makeDataContext({
+    const ctx = makeDataContext({
       launchArgs: options,
       userApi: {
         logIn () {
@@ -515,7 +516,7 @@ module.exports = {
       },
       projectApi: {
         getConfig (projectRoot: string) {
-          return
+          return config.get(projectRoot)
         },
         launchProject () {
           //
@@ -525,6 +526,8 @@ module.exports = {
         },
       },
       // coreData options, {}
-    }))
+    })
+
+    setDataContext(ctx)
   },
 }

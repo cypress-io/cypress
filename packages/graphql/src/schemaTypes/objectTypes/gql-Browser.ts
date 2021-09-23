@@ -4,7 +4,7 @@ import { BrowserFamilyEnum } from '../enumTypes/gql-BrowserFamilyEnum'
 export const Browser = objectType({
   name: 'Browser',
   description: 'Container representing a browser',
-  node: (obj) => `${obj.name}-${obj.version}-${obj.displayName}`,
+  node: (obj, args, ctx) => ctx.browser.idForBrowser(obj),
   definition (t) {
     t.nonNull.string('channel')
     t.nonNull.boolean('disabled', {
