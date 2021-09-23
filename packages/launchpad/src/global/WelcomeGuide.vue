@@ -30,18 +30,18 @@
             class="mb-2"
             :header="t('welcomeGuide.projectListHeader')"
             :items="projects.slice(0, 3)"
-            @click="chooseProject"
+            @itemSelected="chooseProject"
           >
-            <template #="{ item }">
+            <template #default="{ item }">
               {{ item.path }}
             </template>
           </WelcomeGuideLinks>
           <WelcomeGuideLinks
             :header="t('welcomeGuide.linkHeader')"
             :items="links"
-            @click="openLink"
+            @itemSelected="openLink"
           >
-            <template #="{ item }">
+            <template #default="{ item }">
               {{ item.description }}
             </template>
           </WelcomeGuideLinks>

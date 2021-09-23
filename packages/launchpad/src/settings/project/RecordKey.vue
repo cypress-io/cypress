@@ -16,7 +16,7 @@
       class="inline-flex justify-start gap-10px"
     >
       <Input
-        v-model="props.gql.key"
+        :value="props.gql.key"
         class="font-mono"
         input-classes="text-sm"
         disabled

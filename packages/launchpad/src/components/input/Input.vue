@@ -55,7 +55,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, useSlots, useAttrs, InputHTMLAttributes, FunctionalComponent, SVGAttributes  } from 'vue'
+import { computed, useSlots, useAttrs, InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 import _ from 'lodash'
 import IconSearch from 'virtual:vite-icons/mdi/magnify'
 import { useModelWrapper } from '../../composables'
@@ -76,6 +76,11 @@ const props = withDefaults(defineProps<{
 }>(), {
   type: 'text',
   modelValue: '',
+  inputClasses: undefined,
+  prefixIcon: undefined,
+  prefixIconClasses: undefined,
+  suffixIcon: undefined,
+  suffixIconClasses: undefined,
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -83,11 +88,11 @@ const emits = defineEmits(['update:modelValue'])
 const localValue = useModelWrapper(props, emits, 'modelValue')
 
 const hasPrefix = computed(() => {
-  return slots.prefix || props.prefixIcon || props.type === 'search'
+  return !!(slots.prefix || props.prefixIcon || props.type === 'search')
 })
 
 const hasSuffix = computed(() => {
-  return slots.suffix || props.suffixIcon
+  return !!(slots.suffix || props.suffixIcon)
 })
 
 const _inputClasses = computed(() => {

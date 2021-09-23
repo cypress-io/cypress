@@ -3,7 +3,7 @@
     <div class="flex-1 min-w-0">
       <button
         class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
-        @click="$emit('click', project)"
+        @click="emit('projectSelected', project)"
       >
         <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">
           {{ project.name }}
@@ -47,11 +47,22 @@ const icons = {
   },
 }
 
+// TOOD: use graphql types here
+interface Project {
+ name: string
+ lastRun: number
+ lastRunStatus: string
+}
+
 // TODO: I want to use an enum here for 'lastRunStatus'
 // but I'm struggling to get the types within the tests
 // When GQL exists, I'll be able to pull in the shared types.
 const props = defineProps<{
-  project: { name: string, lastRun: number, lastRunStatus: string }
+  project: Project
+}>()
+
+const emit = defineEmits<{
+  (event: 'projectSelected', project: Project): void
 }>()
 
 const iconForStatus = computed(() => icons[props.project.lastRunStatus])

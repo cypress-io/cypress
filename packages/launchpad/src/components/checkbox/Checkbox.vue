@@ -3,7 +3,7 @@
     <div class="flex items-center h-5">
       <input
         :id="id"
-        v-model="modelValue"
+        :value="modelValue"
         :aria-describedby="`${id}-description`"
         :name="id"
         type="checkbox"
@@ -20,6 +20,7 @@
           'checked:border-jade-300 checked:bg-jade-600 checked:text-jade-600': state === 'success',
           'checked:border-red-300 checked:bg-red-600 checked:text-red-600': state === 'danger'
         }"
+        @update:modelValue="emit('update:modelValue', !!$event.target.value)"
       >
     </div>
     <div class="ml-2 text-16px leading-normal">
@@ -46,6 +47,10 @@ withDefaults(defineProps<{
   label?: string
 }>(), {
   state: 'default',
+  label: undefined,
 })
 
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+}>()
 </script>

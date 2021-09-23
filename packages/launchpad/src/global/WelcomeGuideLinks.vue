@@ -11,7 +11,7 @@
       <Button
         class="text-left text-16px truncate w-full children:truncate children:leading-normal"
         variant="link"
-        @click="$emit('click', item)"
+        @click="emit('itemSelected', item)"
       >
         <slot :item="item" />
         <template #prefix>
@@ -26,6 +26,10 @@
 
 <script lang="ts" setup>
 import Button from '../components/button/Button.vue'
+
+const emit = defineEmits<{
+  (event: 'itemSelected', item: Record<string, string>): void
+}>()
 
 defineProps<{
   items: Record<string, string>[]

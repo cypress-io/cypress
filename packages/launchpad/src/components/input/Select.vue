@@ -1,8 +1,8 @@
 <template>
   <Listbox
-    v-model="modelValue"
+    :value="modelValue"
     as="div"
-    @update:model-value="emit('update:modelValue', $event)"
+    @update:modelValue="emit('update:modelValue', $event)"
   >
     <template #default="{ open }">
       <ListboxLabel class="block text-sm font-medium text-gray-700">
@@ -153,7 +153,7 @@ interface Option {
   [key: string]: any
 }
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   options: Option[],
   modelValue?: Option // Current object being selected
   placeholder?: string
@@ -164,6 +164,7 @@ const props = withDefaults(defineProps<{
   placeholder: '',
   label: '',
   itemValue: 'value',
+  modelValue: undefined,
   itemKey: 'key',
 })
 

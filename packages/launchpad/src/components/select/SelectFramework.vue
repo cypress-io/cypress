@@ -116,6 +116,8 @@ const props = withDefaults(defineProps<{
   disabled?: boolean
 }>(), {
   disabled: false,
+  value: undefined,
+  placeholder: undefined,
 })
 
 const isOpen = ref(false)

@@ -37,20 +37,20 @@ import { ref } from 'vue'
 import Button from '../components/button/Button.vue'
 import Switch from '../components/switch/Switch.vue'
 
-const props = withDefaults(
-  defineProps<{
-    next: string
-    back: string
-    nextFn:() => void
-    backFn: () => void
-    alt?: string
-    altFn?: (value: boolean) => void
-    canNavigateForward?: boolean
-    showNext: boolean
-  }>(), {
-    showNext: true,
-  },
-)
+const props = withDefaults(defineProps<{
+  next: string
+  back: string
+  nextFn: () => void
+  backFn: () => void
+  alt?: string
+  altFn?: (value: boolean) => void
+  canNavigateForward?: boolean
+  showNext: boolean
+}>(), {
+  showNext: true,
+  alt: undefined,
+  altFn: undefined,
+})
 
 const altValue = ref(false)
 
@@ -58,5 +58,4 @@ const handleAlt = () => {
   altValue.value = !altValue.value
   props.altFn?.(altValue.value)
 }
-
 </script>
