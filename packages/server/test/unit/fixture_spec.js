@@ -19,7 +19,7 @@ describe('lib/fixture', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath, { configFile: 'cypress.json' }).then((cfg) => {
+    return config.get(this.todosPath).then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
   })
@@ -169,7 +169,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     it('can load a fixture with no extension when a same-named folder also exists', () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      return config.get(projectPath, { configFile: 'cypress.json' })
+      return config.get(projectPath)
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((fixture) => {

@@ -13,7 +13,7 @@ describe('lib/util/specs', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath, { configFile: 'cypress.json' })
+    return config.get(this.todosPath)
     .then((cfg) => {
       this.config = cfg
     })

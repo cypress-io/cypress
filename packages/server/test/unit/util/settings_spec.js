@@ -10,7 +10,7 @@ const defaultOptions = {
 }
 
 describe('lib/util/settings', () => {
-  context('with no configFile option', () => {
+  context('with default configFile option', () => {
     beforeEach(function () {
       this.setup = (obj = {}) => {
         return fs.writeJsonAsync('cypress.json', obj)
@@ -211,7 +211,21 @@ describe('lib/util/settings', () => {
     })
   })
 
-  describe('pathToConfigFile', () => {
+  context('with js files', () => {
+    it('.read returns from configFile when its a JavaScript file', function () {
+      return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
+      .then(() => {
+        return settings.read(this.projectRoot, { configFile: 'cypress.custom.js' })
+        .then((settings) => {
+          expect(settings).to.deep.equal({ baz: 'lurman' })
+        }).then(() => {
+          return fs.remove(path.join(this.projectRoot, 'cypress.custom.js'))
+        })
+      })
+    })
+  })
+
+  describe('.pathToConfigFile', () => {
     it('supports relative path', () => {
       const path = settings.pathToConfigFile('/users/tony/cypress', {
         configFile: 'e2e/config.json',

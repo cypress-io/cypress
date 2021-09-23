@@ -131,7 +131,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine')
 
-      return config.get(pristinePath, { configFile: 'cypress.json' }).then((cfg) => {
+      return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -214,7 +214,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine')
 
-      return config.get(pristinePath, { configFile: 'cypress.json' }).then((cfg) => {
+      return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
         ({ integrationFolder: this.integrationFolder } = this.cfg)
       })
@@ -325,7 +325,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine')
 
-      return config.get(pristinePath, { configFile: 'cypress.json' }).then((cfg) => {
+      return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
         ({ supportFolder: this.supportFolder } = this.cfg)
       })
@@ -402,7 +402,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine')
 
-      return config.get(pristinePath, { configFile: 'cypress.json' }).then((cfg) => {
+      return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
         ({ pluginsFile: this.pluginsFile } = this.cfg)
         this.pluginsFolder = path.dirname(this.pluginsFile)
@@ -458,7 +458,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const pristinePath = Fixtures.projectPath('pristine')
 
-      return config.get(pristinePath, { configFile: 'cypress.json' }).then((cfg) => {
+      return config.get(pristinePath).then((cfg) => {
         this.cfg = cfg;
         ({ fixturesFolder: this.fixturesFolder } = this.cfg)
       })
@@ -533,7 +533,7 @@ describe('lib/scaffold', () => {
     beforeEach(function () {
       const todosPath = Fixtures.projectPath('todos')
 
-      return config.get(todosPath, { configFile: 'cypress.json' }).then((cfg) => {
+      return config.get(todosPath).then((cfg) => {
         this.cfg = cfg
         this.cfg.pluginsFile = path.join(this.cfg.projectRoot, 'cypress/plugins/index.js')
       })
