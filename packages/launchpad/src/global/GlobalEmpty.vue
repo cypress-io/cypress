@@ -9,7 +9,7 @@
           :class="{ 'border-blue-200': hovered }"
         >
           <IconPlaceholder
-            class="mx-auto max-w-65px h-full reålative justify-center w-full text-primary"
+            class="mx-auto max-w-65px h-full relative justify-center w-full text-primary"
           />
           <i18n-t keypath="globalPage.empty.dropText">
             <button class="text-primary hover:underline">
