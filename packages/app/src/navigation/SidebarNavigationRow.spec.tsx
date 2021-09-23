@@ -1,8 +1,8 @@
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import BookIcon from '~icons/cy/book_x16'
-import SettingsIcon from 'virtual:vite-icons/mdi/settings'
-import HeartIcon from 'virtual:vite-icons/mdi/heart'
-import BookmarkIcon from 'virtual:vite-icons/bi/bookmark-star'
+import SettingsIcon from '~icons/mdi/settings'
+import HeartIcon from '~icons/mdi/heart'
+import BookmarkIcon from '~icons/bi/bookmark-star'
 
 describe('SidebarNavigationRow', () => {
   it('renders something', () => {
