@@ -169,7 +169,7 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    return this.read(projectRoot)
+    return this.read(projectRoot, options)
     .then((settings) => {
       _.extend(settings, obj)
 
@@ -177,10 +177,6 @@ module.exports = {
 
       return this._write(file, settings)
     })
-  },
-
-  remove (projectRoot, options = {}) {
-    return fs.unlinkSync(this.pathToConfigFile(projectRoot, options))
   },
 
   pathToConfigFile (projectRoot, options = {}) {
