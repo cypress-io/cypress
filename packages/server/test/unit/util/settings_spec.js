@@ -213,6 +213,8 @@ describe('lib/util/settings', () => {
 
   context('with js files', () => {
     it('.read returns from configFile when its a JavaScript file', function () {
+      this.projectRoot = path.join(projectRoot, '_test-output/path/to/project/')
+
       return fs.writeFile(path.join(this.projectRoot, 'cypress.custom.js'), `module.exports = { baz: 'lurman' }`)
       .then(() => {
         return settings.read(this.projectRoot, { configFile: 'cypress.custom.js' })
