@@ -148,7 +148,7 @@ export default (Commands, Cypress, cy) => {
         }
 
         _.each(optionEls, ($el) => {
-          if ($el.prop('disabled')) {
+          if (!options.force && $el.prop('disabled')) {
             node = $dom.stringify($el)
 
             $errUtils.throwErrByPath('select.option_disabled', {
@@ -158,7 +158,7 @@ export default (Commands, Cypress, cy) => {
         })
 
         _.each(optionEls, ($el) => {
-          if ($el.closest('optgroup').prop('disabled')) {
+          if (!options.force && $el.closest('optgroup').prop('disabled')) {
             node = $dom.stringify($el)
 
             $errUtils.throwErrByPath('select.optgroup_disabled', {
