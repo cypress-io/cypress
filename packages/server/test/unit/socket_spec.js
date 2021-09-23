@@ -26,7 +26,7 @@ describe('lib/socket', () => {
     this.todosPath = Fixtures.projectPath('todos')
     this.server = new ServerE2E(this.todosPath)
 
-    return config.get(this.todosPath)
+    return config.get(this.todosPath, { configFile: 'cypress.json' })
     .then((cfg) => {
       this.cfg = cfg
     })
