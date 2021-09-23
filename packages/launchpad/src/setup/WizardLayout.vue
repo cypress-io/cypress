@@ -30,6 +30,8 @@ import { useI18n } from "../composables"
 
 gql`
 fragment WizardLayout on Wizard {
+  title
+  description
   step
   canNavigateForward
 }

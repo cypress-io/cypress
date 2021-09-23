@@ -3,7 +3,7 @@
     <div class="flex flex-col items-center mx-auto my-10">
       <img src="../images/success.svg" class="my-2"/>
       <span class="my-2">
-        Loading...
+        {{ props.gql.chosenTestingTypePluginsInitialized ? 'Project initialized.' : 'Initializing...' }}
       </span>
     </div>
   </WizardLayout>
@@ -16,18 +16,17 @@ import { useMutation, gql } from "@urql/vue";
 import { InitializeConfigFragment, InitializeOpenProjectDocument } from "../generated/graphql"
 
 gql`
-fragment InitializeConfig on Query {
-  wizard {
-    canNavigateForward
-  }
+fragment InitializeConfig on Wizard {
+  canNavigateForward
+  chosenTestingTypePluginsInitialized
+  step
 }
 `
 
 gql`
 mutation InitializeOpenProject {
   initializeOpenProject {
-    step
-    canNavigateForward
+    ...InitializeConfig
   }
 }
 `
@@ -38,7 +37,7 @@ const props = defineProps<{
 
 const initializeOpenProject = useMutation(InitializeOpenProjectDocument)
 
-const canNavigateForward = computed(() => props.gql.wizard.canNavigateForward ?? false)
+const canNavigateForward = computed(() => props.gql.canNavigateForward ?? false)
 
 onMounted(async () => {
   await initializeOpenProject.executeMutation({})
