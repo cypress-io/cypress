@@ -1,19 +1,22 @@
 {
   "name": "@cypress/react",
   "version": "0.0.0-development",
-  "description": "Unit test React components using Cypress",
+  "description": "Test React components using Cypress",
   "main": "dist/cypress-react.cjs.js",
   "scripts": {
-    "build": "rimraf dist && yarn rollup -c rollup.config.js",
+    "build": "rimraf dist && yarn transpile-plugins && yarn rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct",
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
-    "test": "yarn cy:run",
+    "test": "yarn test-unit && yarn test-component",
+    "test-unit": "mocha -r @packages/ts/register test/**/*.spec.*",
+    "test-component": "yarn cy:run",
     "test-ci": "node ../../scripts/run-ct-examples.js --examplesList=./examples.env",
     "transpile": "tsc",
+    "transpile-plugins": "yarn transpile --project ./plugins",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "dependencies": {
@@ -118,6 +121,7 @@
     "url": "https://github.com/cypress-io/cypress.git"
   },
   "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/react/#readme",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact&template=1-bug-report.md&title=",
   "keywords": [
     "react",
@@ -125,6 +129,28 @@
     "cypress-io",
     "test",
     "testing"
+  ],
+  "contributors": [
+    {
+      "name": "Dmitriy Kovalenko",
+      "social": "@dmtrKovalenko"
+    },
+    {
+      "name": "Brian Mann",
+      "social": "@brian-mann"
+    },
+    {
+      "name": "Barthélémy Ledoux",
+      "social": "@elevatebart"
+    },
+    {
+      "name": "Lachlan Miller",
+      "social": "@lmiller1990"
+    },
+    {
+      "name": "Jessica Sachs",
+      "social": "@JessicaSachs"
+    }
   ],
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",

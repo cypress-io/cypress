@@ -73,13 +73,14 @@ export const getSpecUrl = ({
   projectRoot,
 }: {
   absoluteSpecPath?: string
-  browserUrl: string
+  browserUrl?: string
   integrationFolder: string
   componentFolder: string
   projectRoot: string
-  specType: 'integration' | 'component'
+  specType?: 'integration' | 'component'
 }) => {
   specType ??= 'integration'
+  browserUrl ??= ''
 
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
 

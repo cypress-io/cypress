@@ -20,7 +20,7 @@
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
-    "@cypress/request": "^2.88.5",
+    "@cypress/request": "^2.88.6",
     "@cypress/xvfb": "^1.2.4",
     "@types/node": "^14.14.31",
     "@types/sinonjs__fake-timers": "^6.0.2",
@@ -54,6 +54,7 @@
     "minimist": "^1.2.5",
     "ospath": "^1.2.2",
     "pretty-bytes": "^5.6.0",
+    "proxy-from-env": "1.0.0",
     "ramda": "~0.27.1",
     "request-progress": "^3.0.0",
     "supports-color": "^8.1.1",

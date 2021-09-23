@@ -14,7 +14,7 @@ const errors = require('../errors')
 const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
-const openProject = require('../open_project')
+const { openProject } = require('../open_project')
 const videoCapture = require('../video_capture')
 const { fs } = require('../util/fs')
 const runEvents = require('../plugins/run_events')
@@ -1472,8 +1472,8 @@ module.exports = {
   },
 
   findSpecs (config, specPattern) {
-    return specsUtil
-    .find(config, specPattern)
+    return specsUtil.default
+    .findSpecs(config, specPattern)
     .tap((specs = []) => {
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -1549,8 +1549,14 @@ module.exports = {
         .spread((sys = {}, browser = {}, specs = []) => {
           // return only what is return to the specPattern
           if (specPattern) {
-            specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+            specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)
           }
+
+          specs = specs.filter((spec) => {
+            return options.testingType === 'component'
+              ? spec.specType === 'component'
+              : spec.specType === 'integration'
+          })
 
           if (!specs.length) {
             // did we use the spec pattern?
@@ -1568,12 +1574,6 @@ module.exports = {
 
           if (browser.family === 'chromium') {
             chromePolicyCheck.run(onWarning)
-          }
-
-          if (options.testingType === 'component') {
-            specs = specs.filter((spec) => {
-              return spec.specType === 'component'
-            })
           }
 
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {

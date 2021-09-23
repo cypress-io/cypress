@@ -42,7 +42,7 @@ const browsers = require(`${root}lib/browsers`)
 const videoCapture = require(`${root}lib/video_capture`)
 const browserUtils = require(`${root}lib/browsers/utils`)
 const chromeBrowser = require(`${root}lib/browsers/chrome`)
-const openProject = require(`${root}lib/open_project`)
+const { openProject } = require(`${root}lib/open_project`)
 const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
@@ -511,7 +511,11 @@ describe('lib/cypress', () => {
         return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
-      }).catch({ code: 'ENOENT' }, () => {})
+      }).catch((err) => {
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      })
     })
 
     it('scaffolds out fixtures + files if they do not exist', function () {
@@ -1795,29 +1799,26 @@ describe('lib/cypress', () => {
       })
 
       it('reads config from a custom config file', function () {
-        sinon.stub(fs, 'readJsonAsync')
-        fs.readJsonAsync.withArgs(path.join(this.pristinePath, this.filename)).resolves({
+        return fs.writeJson(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
           port: 2020,
-        })
-
-        fs.readJsonAsync.callThrough()
-
-        return cypress.start([
-          `--config-file=${this.filename}`,
-        ])
-        .then(() => {
-          const options = Events.start.firstCall.args[0]
-
-          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
         }).then(() => {
-          expect(this.open).to.be.called
+          cypress.start([
+          `--config-file=${this.filename}`,
+          ])
+          .then(() => {
+            const options = Events.start.firstCall.args[0]
 
-          const cfg = this.open.getCall(0).args[0]
+            return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+          }).then(() => {
+            expect(this.open).to.be.called
 
-          expect(cfg.env.foo).to.equal('bar')
+            const cfg = this.open.getCall(0).args[0]
 
-          expect(cfg.port).to.equal(2020)
+            expect(cfg.env.foo).to.equal('bar')
+
+            expect(cfg.port).to.equal(2020)
+          })
         })
       })
 

@@ -22,6 +22,19 @@ declare namespace Cypress {
     password: string
   }
 
+  interface RemoteState {
+    auth?: {
+      username: string
+      password: string
+    }
+    domainName: string
+    strategy: 'file' | 'http'
+    origin: string
+    fileServer: string
+    props: Record<string, any>
+    visiting: string
+  }
+
   interface Backend {
     /**
      * Firefox only: Force Cypress to run garbage collection routines.
@@ -982,7 +995,7 @@ declare namespace Cypress {
      *      .its('contentType')
      *      .should('eq', 'text/html')
      */
-    document(options?: Partial<Loggable>): Chainable<Document>
+    document(options?: Partial<Loggable & Timeoutable>): Chainable<Document>
 
     /**
      * Iterate through an array like structure (arrays or objects with a length property).
@@ -1958,7 +1971,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/title
      */
-    title(options?: Partial<Loggable>): Chainable<string>
+    title(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
      * Trigger an event on a DOM element.
@@ -2060,7 +2073,7 @@ declare namespace Cypress {
      * @alias cy.location('href')
      * @see https://on.cypress.io/url
      */
-    url(options?: Partial<Loggable & Timeoutable>): Chainable<string>
+    url(options?: Partial<UrlOptions>): Chainable<string>
 
     /**
      * Control the size and orientation of the screen for your application.
@@ -2488,6 +2501,47 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  interface PEMCert {
+    /**
+     * Path to the certificate file, relative to project root.
+     */
+    cert: string
+    /**
+     * Path to the private key file, relative to project root.
+     */
+    key: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface PFXCert {
+    /**
+     * Path to the certificate container, relative to project root.
+     */
+    pfx: string
+    /**
+     * Path to a text file containing the passphrase, relative to project root.
+     */
+    passphrase?: string
+  }
+
+  interface ClientCertificate {
+    /**
+     * URL to match requests against. Wildcards following [minimatch](https://github.com/isaacs/minimatch) rules are supported.
+     */
+    url: string
+    /**
+     * Paths to one or more CA files to validate certs against, relative to project root.
+     */
+    ca?: string[]
+    /**
+     * A PEM format certificate/private key pair or PFX certificate container
+     */
+    certs: PEMCert[] | PFXCert[]
+  }
+
   interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
@@ -2750,6 +2804,11 @@ declare namespace Cypress {
      * @default {}
      */
     e2e: Omit<ResolvedConfigOptions, TestingType>
+
+    /**
+     * An array of objects defining the certificates
+     */
+    clientCertificates: ClientCertificate[]
   }
 
   /**
@@ -2810,19 +2869,15 @@ declare namespace Cypress {
     projectName: string
     projectRoot: string
     proxyUrl: string
+    remote: RemoteState
     report: boolean
     reporterRoute: string
     reporterUrl: string
     socketId: null | string
     socketIoCookie: string
     socketIoRoute: string
-    spec: {
-      absolute: string
-      name: string
-      relative: string
-      specFilter: null | string
-      specType: 'integration' | 'component'
-    }
+    spec: Cypress['spec'] | null
+    specs: Array<Cypress['spec']>
     xhrRoute: string
     xhrUrl: string
   }
@@ -3171,6 +3226,18 @@ declare namespace Cypress {
      * @default 'Event'
      */
     eventConstructor: string
+  }
+
+  /**
+   * Options to change the default behavior of .url()
+   */
+  interface UrlOptions extends Loggable, Timeoutable {
+    /**
+     * Whether the url is decoded
+     *
+     * @default false
+     */
+    decode: boolean
   }
 
   /** Options to change the default behavior of .writeFile */
@@ -5263,7 +5330,7 @@ declare namespace Cypress {
     tag?: string
   }
 
-  interface DevServerOptions {
+  interface DevServerConfig {
     specs: Spec[]
     config: ResolvedConfigOptions & RuntimeConfigOptions
     devServerEvents: NodeJS.EventEmitter
@@ -5282,7 +5349,7 @@ declare namespace Cypress {
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
-    (action: 'dev-server:start', fn: (file: DevServerOptions) => Promise<ResolvedDevServerConfig>): void
+    (action: 'dev-server:start', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
   }
 

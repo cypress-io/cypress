@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - tgriesser/fix/mac-build
+        - tgriesser/chore/fix-release
 
 defaults: &defaults
   parallelism: 1
@@ -42,6 +42,7 @@ onlyMainBranches: &onlyMainBranches
     branches:
       only:
         - develop
+        - tgriesser/chore/fix-release
   requires:
     - create-build-artifacts
 
@@ -49,7 +50,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
     # by default, we use "small" to save on CI costs. bump on a per-job basis if needed.
     resource_class: small
     environment:
@@ -58,7 +59,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node14.16.0-chrome90-ff88
+      - image: cypress/browsers:node14.17.0-chrome91-ff89
         user: node
     environment:
       PLATFORM: linux
@@ -303,6 +304,7 @@ commands:
             dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
             apt-get install -f -y && \
             rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
+            which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
             echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
             echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
 
@@ -373,6 +375,7 @@ commands:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -407,6 +410,7 @@ commands:
             else
               echo "skipping percy screenshots uploading"
             fi
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1030,18 +1034,6 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
-  server-ct-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server-ct
-      - verify-mocha-results:
-          expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
-
   server-integration-tests:
     <<: *defaults
     resource_class: medium
@@ -1126,6 +1118,7 @@ jobs:
 
   runner-integration-tests-electron:
     <<: *defaults
+    resource_class: medium
     parallelism: 2
     steps:
       - run-runner-integration-tests:
@@ -1150,6 +1143,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1488,7 +1482,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/chore/fix-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2080,6 +2074,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
+        context: test-runner:npm-release
         requires:
           - build
           - npm-eslint-plugin-dev
@@ -2123,6 +2118,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - build
     - test-kitchensink:
@@ -2134,6 +2130,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - build
     - create-build-artifacts:
@@ -2183,6 +2180,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2190,6 +2188,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2198,6 +2197,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2222,6 +2222,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2293,6 +2294,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2304,6 +2306,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 

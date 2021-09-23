@@ -13,7 +13,7 @@ const ProjectBase = require(`${root}../lib/project-base`).ProjectBase
 const browsers = require(`${root}../lib/browsers`)
 const Reporter = require(`${root}../lib/reporter`)
 const runMode = require(`${root}../lib/modes/run`)
-const openProject = require(`${root}../lib/open_project`)
+const { openProject } = require(`${root}../lib/open_project`)
 const videoCapture = require(`${root}../lib/video_capture`)
 const env = require(`${root}../lib/util/env`)
 const random = require(`${root}../lib/util/random`)
@@ -676,11 +676,12 @@ describe('lib/modes/run', () => {
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
       sinon.spy(errors, 'warning')
 
-      sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil.default, 'findSpecs').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
           absolute: '/path/to/spec.js',
+          specType: 'integration',
         },
       ])
     })
@@ -758,11 +759,12 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-      sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil.default, 'findSpecs').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
           absolute: '/path/to/spec.js',
+          specType: 'integration',
         },
       ])
     })

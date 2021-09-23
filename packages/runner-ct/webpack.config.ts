@@ -2,10 +2,12 @@ process.env.NO_LIVERELOAD = '1'
 
 import _ from 'lodash'
 import path from 'path'
-import webpack from 'webpack'
-import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import type webpack from 'webpack'
+import { getCommonConfig, HtmlWebpackPlugin, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import cyIcons from '@cypress/icons'
 
 const commonConfig = getCommonConfig()
+const CopyWebpackPlugin = getCopyWebpackPlugin()
 
 // @ts-ignore
 const babelLoader = _.find(commonConfig.module.rules, (rule) => {
@@ -78,6 +80,9 @@ config.plugins = [
     template: path.resolve(__dirname, './static/index.html'),
     inject: false,
   }),
+  new CopyWebpackPlugin([{
+    from: cyIcons.getPathToFavicon('favicon.ico'),
+  }]),
 ]
 
 config.resolve = {

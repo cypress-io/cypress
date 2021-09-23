@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import $Location from '../../cypress/location'
-import * as $errUtils from '../../cypress/error_utils'
+import { $Location } from '../../cypress/location'
+import $errUtils from '../../cypress/error_utils'
 import stringifyStable from 'json-stable-stringify'
-import * as $stackUtils from '../../cypress/stack_utils'
+import $stackUtils from '../../cypress/stack_utils'
 import Bluebird from 'bluebird'
 const currentTestRegisteredSessions = new Map()
 
@@ -686,7 +686,12 @@ export default function (Commands, Cypress, cy) {
         }
 
         cy.state('onCommandFailed', (err, queue, next) => {
-          const index = _.findIndex(queue.commands, (v: any) => _commandToResume && v.attributes.chainerId === _commandToResume.chainerId)
+          const index = _.findIndex(queue.get(), (command: any) => {
+            return (
+              _commandToResume
+              && command.attributes.chainerId === _commandToResume.chainerId
+            )
+          })
 
           // attach codeframe and cleanse the stack trace since we will not hit the cy.fail callback
           // if this is the first time validate fails
@@ -698,7 +703,7 @@ export default function (Commands, Cypress, cy) {
 
           err = $errUtils.enhanceStack({
             err,
-            userInvocationStack: $stackUtils.getUserInvocationStack(err, Cypress.state),
+            userInvocationStack: $errUtils.getUserInvocationStack(err, Cypress.state),
             projectRoot: Cypress.config('projectRoot'),
           })
 

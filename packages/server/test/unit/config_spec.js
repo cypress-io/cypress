@@ -1137,10 +1137,6 @@ describe('lib/config', () => {
       })
     })
 
-    it('javascripts=[]', function () {
-      return this.defaults('javascripts', [])
-    })
-
     it('viewportWidth=1000', function () {
       return this.defaults('viewportWidth', 1000)
     })
@@ -1483,7 +1479,7 @@ describe('lib/config', () => {
       })
 
       it('sets config, envFile and env', () => {
-        sinon.stub(config, 'getProcessEnvVars').returns({
+        sinon.stub(configUtil, 'getProcessEnvVars').returns({
           quux: 'quux',
           RECORD_KEY: 'foobarbazquux',
           PROJECT_ID: 'projectId123',
@@ -1885,7 +1881,7 @@ describe('lib/config', () => {
 
   context('.parseEnv', () => {
     it('merges together env from config, env from file, env from process, and env from CLI', () => {
-      sinon.stub(config, 'getProcessEnvVars').returns({
+      sinon.stub(configUtil, 'getProcessEnvVars').returns({
         version: '0.12.1',
         user: 'bob',
       })
@@ -1932,7 +1928,7 @@ describe('lib/config', () => {
 
         obj[`${key}version`] = '0.12.0'
 
-        expect(config.getProcessEnvVars(obj)).to.deep.eq({
+        expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
           host: 'http://localhost:8888',
           version: '0.12.0',
         })
@@ -1947,7 +1943,7 @@ describe('lib/config', () => {
         CYPRESS_PROJECT_ID: 'abc123',
       }
 
-      expect(config.getProcessEnvVars(obj)).to.deep.eq({
+      expect(configUtil.getProcessEnvVars(obj)).to.deep.eq({
         FOO: 'bar',
         PROJECT_ID: 'abc123',
         CRASH_REPORTS: 0,

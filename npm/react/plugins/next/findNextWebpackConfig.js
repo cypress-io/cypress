@@ -2,6 +2,7 @@
 /// <reference types="next" />
 const debug = require('debug')('@cypress/react')
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config').default
+const { findPagesDir } = require('../../dist/next/findPagesDir')
 
 async function getNextWebpackConfig (config) {
   let loadConfig
@@ -14,9 +15,9 @@ async function getNextWebpackConfig (config) {
       // is not in the next-server folder anymore.
       // @ts-ignore
       loadConfig = require('next/dist/server/config').default
+    } else {
+      throw e
     }
-
-    throw e
   }
   const nextConfig = await loadConfig('development', config.projectRoot)
   const nextWebpackConfig = await getNextJsBaseWebpackConfig(
@@ -26,7 +27,7 @@ async function getNextWebpackConfig (config) {
       config: nextConfig,
       dev: true,
       isServer: false,
-      pagesDir: config.projectRoot,
+      pagesDir: findPagesDir(config.projectRoot),
       entrypoints: {},
       rewrites: { fallback: [], afterFiles: [], beforeFiles: [] },
     },

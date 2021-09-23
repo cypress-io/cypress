@@ -2,11 +2,11 @@
 
 import _ from 'lodash'
 import Bluebird from 'bluebird'
-import cdp from 'devtools-protocol'
+import type { Protocol } from 'devtools-protocol'
 import { cors } from '@packages/network'
 import debugModule from 'debug'
-import { Automation } from '../automation'
-import { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { Automation } from '../automation'
+import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -19,7 +19,12 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
 // https://developer.chrome.com/extensions/cookies#method-getAll
 type CyCookieFilter = chrome.cookies.GetAllDetails
 
-function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
+export const screencastOpts: Protocol.Page.StartScreencastRequest = {
+  format: 'jpeg',
+  everyNthFrame: Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5),
+}
+
+function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
   return str ? ({
     'no_restriction': 'None',
     'lax': 'Lax',
@@ -27,7 +32,7 @@ function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.
   })[str] : str as any
 }
 
-function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
+function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
   if (_.isUndefined(str)) {
     return str
   }
@@ -73,7 +78,7 @@ export function isHostOnlyCookie (cookie) {
   return parsedDomain && parsedDomain.tld !== cookie.domain
 }
 
-const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
+const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
   if (cookie.expires === -1) {
     // @ts-ignore
     delete cookie.expires
@@ -96,16 +101,16 @@ const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
   return cookie
 }
 
-const normalizeGetCookies = (cookies: cdp.Network.Cookie[]) => {
+const normalizeGetCookies = (cookies: Protocol.Network.Cookie[]) => {
   return _.map(cookies, normalizeGetCookieProps)
 }
 
-const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest => {
+const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
   // this logic forms a SetCookie request that will be received by Chrome
   // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
   // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
 
-  const setCookieRequest: cdp.Network.SetCookieRequest = _({
+  const setCookieRequest: Protocol.Network.SetCookieRequest = _({
     domain: cookie.domain,
     path: cookie.path,
     secure: cookie.secure,
@@ -178,7 +183,7 @@ export class CdpAutomation {
     })
   }
 
-  private onNetworkRequestWillBeSent = (params: cdp.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
     let url = params.request.url
 
@@ -199,7 +204,7 @@ export class CdpAutomation {
     this.automation.onBrowserPreRequest?.(browserPreRequest)
   }
 
-  private onResponseReceived = (params: cdp.Network.ResponseReceivedEvent) => {
+  private onResponseReceived = (params: Protocol.Network.ResponseReceivedEvent) => {
     const browserResponseReceived: BrowserResponseReceived = {
       requestId: params.requestId,
       status: params.response.status,
@@ -211,7 +216,7 @@ export class CdpAutomation {
 
   private getAllCookies = (filter: CyCookieFilter) => {
     return this.sendDebuggerCommandFn('Network.getAllCookies')
-    .then((result: cdp.Network.GetAllCookiesResponse) => {
+    .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
         const matches = _cookieMatches(cookie, filter)
@@ -227,7 +232,7 @@ export class CdpAutomation {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
-    .then((result: cdp.Network.GetCookiesResponse) => {
+    .then((result: Protocol.Network.GetCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {
         return !(url.startsWith('http:') && cookie.secure)
@@ -258,7 +263,7 @@ export class CdpAutomation {
         setCookie = normalizeSetCookieProps(data)
 
         return this.sendDebuggerCommandFn('Network.setCookie', setCookie)
-        .then((result: cdp.Network.SetCookieResponse) => {
+        .then((result: Protocol.Network.SetCookieResponse) => {
           if (!result.success) {
             // i wish CDP provided some more detail here, but this is really it in v1.3
             // @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-setCookie

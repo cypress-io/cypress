@@ -497,6 +497,11 @@ namespace CypressLocationTests {
   cy.location('pathname') // $ExpectType Chainable<string>
 }
 
+// https://github.com/cypress-io/cypress/issues/17399
+namespace CypressUrlTests {
+  cy.url({decode: true}).should('contain', '사랑')
+}
+
 namespace CypressBrowserTests {
   Cypress.isBrowser('chrome')// $ExpectType boolean
   Cypress.isBrowser('firefox')// $ExpectType boolean

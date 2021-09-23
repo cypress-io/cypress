@@ -13,7 +13,7 @@ const cache = require(`${root}lib/cache`)
 const config = require(`${root}lib/config`)
 const scaffold = require(`${root}lib/scaffold`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const { ProjectBase } = require(`${root}lib/project-base`)
 const {
   getOrgs,
   paths,
@@ -253,6 +253,33 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         ])
 
         expect(cfg).ok
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/17614
+    it('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
+      config.get.restore()
+      sinon.stub(config, 'get').returns({
+        integrationFolder,
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: true,
+      })
+
+      await this.project.initializeConfig()
+      .then(() => {
+        const cfg = this.project.getConfig()
+
+        expect(cfg.chromeWebSecurity).eq(true)
+        expect(cfg.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+          },
+        ])
       })
     })
   })
@@ -505,8 +532,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
       this.project._server = { close () {} }
+      this.project._isServerOpen = true
 
       sinon.stub(this.project, 'getConfig').returns(this.config)
+
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
@@ -686,12 +715,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
       this.watch = sinon.stub(this.project.watchers, 'watch')
+      this.watchTree = sinon.stub(this.project.watchers, 'watchTree')
     })
 
     it('watches cypress.json and cypress.env.json', function () {
       this.project.watchSettings({ onSettingsChanged () {} }, {})
-      expect(this.watch).to.be.calledTwice
-      expect(this.watch).to.be.calledWith('/path/to/cypress.json')
+      expect(this.watch).to.be.calledOnce
+      expect(this.watchTree).to.be.calledOnce
+      expect(this.watchTree).to.be.calledWith('/path/to/cypress.json')
 
       expect(this.watch).to.be.calledWith('/path/to/cypress.env.json')
     })

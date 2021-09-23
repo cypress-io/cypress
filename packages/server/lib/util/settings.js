@@ -4,6 +4,19 @@ const path = require('path')
 const errors = require('../errors')
 const log = require('../log')
 const { fs } = require('../util/fs')
+const { requireAsync } = require('./require_async')
+const debug = require('debug')('cypress:server:settings')
+
+function jsCode (obj) {
+  const objJSON = obj && !_.isEmpty(obj)
+    ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
+    : `{
+
+}`
+
+  return `module.exports = ${objJSON}
+`
+}
 
 // TODO:
 // think about adding another PSemaphore
@@ -78,7 +91,19 @@ module.exports = {
   },
 
   _write (file, obj = {}) {
-    return fs.outputJsonAsync(file, obj, { spaces: 2 })
+    if (/\.json$/.test(file)) {
+      debug('writing json file')
+
+      return fs.outputJsonAsync(file, obj, { spaces: 2 })
+      .return(obj)
+      .catch((err) => {
+        return this._logWriteErr(file, err)
+      })
+    }
+
+    debug('writing javascript file')
+
+    return fs.writeFileAsync(file, jsCode(obj))
     .return(obj)
     .catch((err) => {
       return this._logWriteErr(file, err)
@@ -110,7 +135,13 @@ module.exports = {
       return null
     })
   },
-
+  /**
+   * Ensures the project at this root has a config file
+   * that is readable and writable by the node process
+   * @param {string} projectRoot root of the project
+   * @param {object} options
+   * @returns
+   */
   exists (projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
 
@@ -121,7 +152,7 @@ module.exports = {
       // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
     }).catch({ code: 'ENOENT' }, () => {
-      // cypress.json does not exist, we missing project
+      // cypress.json does not exist, completely new project
       log('cannot find file %s', file)
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
@@ -144,29 +175,45 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
-    .catch({ code: 'ENOENT' }, () => {
-      return this._write(file, {})
-    }).then((json = {}) => {
-      if (this.isComponentTesting(options) && 'component' in json) {
-        json = { ...json, ...json.component }
+    return requireAsync(file,
+      {
+        projectRoot,
+        loadErrorCode: 'CONFIG_FILE_ERROR',
+      })
+    .catch((err) => {
+      if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
+        debug('file not found', file)
+
+        return this._write(file, {})
       }
 
-      if (!this.isComponentTesting(options) && 'e2e' in json) {
-        json = { ...json, ...json.e2e }
+      return Promise.reject(err)
+    })
+    .then((configObject = {}) => {
+      if (this.isComponentTesting(options) && 'component' in configObject) {
+        configObject = { ...configObject, ...configObject.component }
       }
 
-      const changed = this._applyRewriteRules(json)
+      if (!this.isComponentTesting(options) && 'e2e' in configObject) {
+        configObject = { ...configObject, ...configObject.e2e }
+      }
+
+      debug('resolved configObject', configObject)
+      const changed = this._applyRewriteRules(configObject)
 
       // if our object is unchanged
       // then just return it
-      if (_.isEqual(json, changed)) {
-        return json
+      if (_.isEqual(configObject, changed)) {
+        return configObject
       }
 
       // else write the new reduced obj
       return this._write(file, changed)
+      .then((config) => {
+        return config
+      })
     }).catch((err) => {
+      debug('an error occured when reading config', err)
       if (errors.isCypressErr(err)) {
         throw err
       }
@@ -196,7 +243,7 @@ module.exports = {
       return Promise.resolve({})
     }
 
-    return this.read(projectRoot)
+    return this.read(projectRoot, options)
     .then((settings) => {
       _.extend(settings, obj)
 
@@ -204,10 +251,6 @@ module.exports = {
 
       return this._write(file, settings)
     })
-  },
-
-  remove (projectRoot, options = {}) {
-    return fs.unlinkSync(this.pathToConfigFile(projectRoot, options))
   },
 
   pathToConfigFile (projectRoot, options = {}) {

@@ -1,5 +1,5 @@
 import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
-import { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
@@ -1638,12 +1638,10 @@ describe('network stubbing', { retries: 2 }, function () {
         delay: 5000,
       }).as('create')
 
-      cy.window().then((win) => {
-        win.eval(
-          `fetch("/post-only", {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-          });`,
-        )
+      cy.then(() => {
+        fetch('/post-only', {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        })
       })
 
       cy.wait('@create', { timeout: 500 })
@@ -2123,6 +2121,61 @@ describe('network stubbing', { retries: 2 }, function () {
 
             cy.get('#request').click()
             cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
+
+          it('works with reply', () => {
+            cy.intercept({
+              method: 'POST',
+              times: 1,
+              url: '/post-only',
+            },
+            (req) => {
+              req.reply('stubbed data')
+            }).as('interceptor')
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'stubbed data')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'client')
+          })
+
+          it('works with reply and fallthrough', () => {
+            let times = 0
+
+            cy.intercept({
+              method: 'POST',
+              times: 3,
+              url: '/post-only',
+            },
+            (req) => {
+              req.reply(`${req.body === 'foo' ? 'foo' : 'nothing'} stubbed data ${times++}`)
+            })
+
+            cy.intercept({
+              method: 'POST',
+              times: 2,
+              url: '/post-only',
+            },
+            (req) => {
+              req.body = 'foo'
+            })
+
+            cy.visit('fixtures/request.html')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'foo stubbed data 0')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'foo stubbed data 1')
+
+            cy.get('#request').click()
+            cy.get('#result').should('contain', 'nothing stubbed data 2')
 
             cy.get('#request').click()
             cy.get('#result').should('contain', 'client')
@@ -2628,6 +2681,31 @@ describe('network stubbing', { retries: 2 }, function () {
       .wait('@get')
     })
 
+    // https://github.com/cypress-io/cypress/issues/17084
+    it('does not overwrite the json-related content-type header', () => {
+      cy.intercept('/json-content-type', (req) => {
+        req.on('response', (res) => {
+          res.send({
+            statusCode: 500,
+            headers: {
+              'content-type': 'application/problem+json',
+              'access-control-allow-origin': '*',
+            },
+            body: {
+              status: 500,
+              title: 'Internal Server Error',
+            },
+          })
+        })
+      })
+      .then(() => {
+        return fetch('/json-content-type')
+        .then((res) => {
+          expect(res.headers.get('content-type')).to.eq('application/problem+json')
+        })
+      })
+    })
+
     context('body parsing', function () {
       [
         'application/json',
@@ -3049,7 +3127,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
   })
 
-  context('waiting and aliasing', function () {
+  context('waiting and aliasing', { defaultCommandTimeout: 10000 }, function () {
     const testFailWaiting = (cb) => testFail(cb, 'https://on.cypress.io/wait')
 
     it('can wait on a single response using "alias"', function () {

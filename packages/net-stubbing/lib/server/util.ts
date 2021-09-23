@@ -9,17 +9,18 @@ import {
   BackendStaticResponse,
 } from '../types'
 import { Readable, PassThrough } from 'stream'
-import CyServer from '@packages/server'
+import type CyServer from '@packages/server'
 import { Socket } from 'net'
-import { GetFixtureFn } from './types'
+import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import MimeTypes from 'mime-types'
-import { CypressIncomingRequest } from '@packages/proxy'
-import { InterceptedRequest } from './intercepted-request'
+import type { CypressIncomingRequest } from '@packages/proxy'
+import type { InterceptedRequest } from './intercepted-request'
+import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-import { CyHttpMessages } from '../external-types'
+import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
@@ -77,24 +78,6 @@ function _getFakeClientResponse (opts: {
   _.merge(clientResponse, opts)
 
   return clientResponse
-}
-
-const caseInsensitiveGet = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return obj[key]
-    }
-  }
-}
-
-const caseInsensitiveHas = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return true
-    }
-  }
-
-  return false
 }
 
 export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
