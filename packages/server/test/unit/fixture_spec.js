@@ -19,7 +19,7 @@ describe('lib/fixture', () => {
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
-    return config.get(this.todosPath).then((cfg) => {
+    return config.get(this.todosPath, { configFile: 'cypress.json' }).then((cfg) => {
       ({ fixturesFolder: this.fixturesFolder } = cfg)
     })
   })
