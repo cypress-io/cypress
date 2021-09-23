@@ -47,7 +47,7 @@ export const getFs = () => {
   return recurse({ root: mockfs.getMockRoot() }, -1).root
 }
 
-export function stubable (mdl: NodeModule) {
+export function stubable (mdl: NodeModule['exports']): NodeModule['exports'] {
   const x = {}
 
   for (const key of Object.keys(mdl)) {
