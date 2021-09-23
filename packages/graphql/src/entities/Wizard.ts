@@ -201,7 +201,7 @@ export class Wizard {
       return false
     }
 
-    if (this.currentStep === 'selectFramework' && !this.chosenBundler && !this.chosenFramework) {
+    if (this.currentStep === 'selectFramework' && (!this.chosenBundler || !this.chosenFramework)) {
       return false
     }
 
@@ -217,6 +217,21 @@ export class Wizard {
 
     // TODO: add constraints here to determine if we can move forward
     return true
+  }
+
+  @nxs.field.boolean({
+    description: 'Whether the plugins for the selected testing type has been initialized',
+  })
+  chosenTestingTypePluginsInitialized (): NxsResult<'Wizard', 'chosenTestingTypePluginsInitialized'> {
+    if (this.chosenTestingType === 'component' && this._ctx.activeProject?.ctPluginsInitialized) {
+      return true
+    }
+
+    if (this.chosenTestingType === 'e2e' && this._ctx.activeProject?.e2ePluginsInitialized) {
+      return true
+    }
+
+    return false
   }
 
   navigate (direction: WizardNavigateDirection): Wizard {
@@ -257,8 +272,12 @@ export class Wizard {
     if (this.currentStep === 'welcome' && this.testingType === 'component') {
       if (this._ctx.activeProject?.isFirstTimeCT) {
         this.navigateToStep('selectFramework')
-      } else {
+      } else if (!this._ctx.activeProject?.ctPluginsInitialized) {
+        // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
+      } else {
+        // not first time, have already initialized plugins - just move to open browser screen
+        this.navigateToStep('setupComplete')
       }
 
       return this
@@ -267,8 +286,12 @@ export class Wizard {
     if (this.currentStep === 'welcome' && this.testingType === 'e2e') {
       if (this._ctx.activeProject?.isFirstTimeE2E) {
         this.navigateToStep('createConfig')
-      } else {
+      } else if (!this._ctx.activeProject?.e2ePluginsInitialized) {
+        // not first time, and we haven't initialized plugins - initialize them
         this.navigateToStep('initializePlugins')
+      } else {
+        // not first time, have already initialized plugins - just move to open browser screen
+        this.navigateToStep('setupComplete')
       }
 
       return this
@@ -287,7 +310,21 @@ export class Wizard {
     }
 
     if (this.currentStep === 'createConfig') {
-      this.navigateToStep('initializePlugins')
+      if (this.chosenTestingType === 'component') {
+        if (this._ctx.activeProject?.ctPluginsInitialized) {
+          this.navigateToStep('setupComplete')
+        } else {
+          this.navigateToStep('initializePlugins')
+        }
+      }
+
+      if (this.chosenTestingType === 'e2e') {
+        if (this._ctx.activeProject?.e2ePluginsInitialized) {
+          this.navigateToStep('setupComplete')
+        } else {
+          this.navigateToStep('initializePlugins')
+        }
+      }
 
       return this
     }

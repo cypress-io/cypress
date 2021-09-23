@@ -14,10 +14,6 @@
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
-    "@graphql-tools/batch-delegate": "^8.0.12",
-    "@graphql-tools/delegate": "^8.1.1",
-    "@graphql-tools/utils": "^8.1.2",
-    "@graphql-tools/wrap": "^8.0.13",
     "cors": "2.8.5",
     "cross-fetch": "^3.1.4",
     "dedent": "^0.7.0",

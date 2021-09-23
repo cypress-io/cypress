@@ -34,6 +34,7 @@ query MainQuery {
   ...Wizard
 
   wizard {
+    canNavigateForward
     ...WizardHeader
   }
 

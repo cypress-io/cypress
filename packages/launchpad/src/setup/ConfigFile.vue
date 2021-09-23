@@ -42,7 +42,7 @@
     </nav>
     <div v-if="tsInstalled" class="relative">
       <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
-      <CopyButton v-if="manualInstall && code" :text="code" />
+      <CopyButton v-if="manualCreate && code" :text="code" />
     </div>
   </WizardLayout>
 </template>
@@ -68,10 +68,16 @@ fragment ConfigFile on Query {
     }
   }
   wizard {
-    canNavigateForward
-    sampleCodeJs: sampleCode(lang: js)
-    sampleCodeTs: sampleCode(lang: ts)
+    ...SampleCode
   }
+}
+`
+
+gql`
+fragment SampleCode on Wizard {
+  canNavigateForward
+  sampleCodeJs: sampleCode(lang: js)
+  sampleCodeTs: sampleCode(lang: ts)
 }
 `
 
@@ -90,22 +96,21 @@ const props = defineProps<{
   gql: ConfigFileFragment 
 }>()
 
-const manualInstall = ref(false);
+const manualCreate = ref(false);
 
 const altFn = (val: boolean) => {
-  manualInstall.value = val
+  manualCreate.value = val
 }
 
 const tsInstalled = ref(false);
 const language = ref<"js" | "ts">("ts");
 const nextButtonName = computed(() =>
-  manualInstall.value ? "I've added this file" : "Create File"
+  manualCreate.value ? "I've added this file" : "Create File"
 );
 
 import("prismjs/components/prism-typescript").then(() => {
   tsInstalled.value = true;
 });
-
 
 const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
 
@@ -117,6 +122,10 @@ const code = computed(() => {
 })
 
 const createConfig = async () => {
+  if (manualCreate.value) {
+    return
+  }
+
   if (!props.gql.app?.activeProject?.projectRoot) {
     throw Error(`Cannot find the active project's projectRoot. This should never happen.`)
   }

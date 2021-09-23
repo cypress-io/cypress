@@ -69,6 +69,9 @@ fragment EnvironmentSetup on Wizard {
     id
     name
   }
+
+  ...InstallDependencies
+  ...SampleCode
 }
 `
 

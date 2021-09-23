@@ -544,6 +544,9 @@ type Wizard {
   """
   canNavigateForward: Boolean!
 
+  """Whether the plugins for the selected testing type has been initialized"""
+  chosenTestingTypePluginsInitialized: Boolean
+
   """The title of the page, given the current step of the wizard"""
   description: String
   framework: WizardFrontendFramework
@@ -611,6 +614,9 @@ enum WizardNavigateDirection {
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage {
   description: String!
+
+  """id"""
+  id: String!
 
   """The package name that you would npm install"""
   name: String!
