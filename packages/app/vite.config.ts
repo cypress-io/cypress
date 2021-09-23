@@ -42,7 +42,7 @@ export default defineConfig({
       }),
     }),
     WindiCSS({
-      configFiles: [require.resolve('./.windicss/windi.config')],
+      configFiles: [path.resolve('./.windicss/windi.config')],
     }),
     VueSvgLoader(),
   ],
