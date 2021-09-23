@@ -6,8 +6,15 @@ import 'sinon-chai'
 import { dialog } from 'electron'
 import * as path from 'path'
 
-import { show, showSaveDialog } from '../../../lib/gui/dialog'
-import * as windows from '../../../lib/gui/windows'
+import * as win from '../../../lib/gui/windows'
+
+import { stubable } from '../../specUtils'
+import proxyquire from 'proxyquire'
+const windows = stubable(win)
+const { show, showSaveDialog } = proxyquire(
+  '../../../lib/gui/dialog',
+  { './windows': windows },
+)
 
 describe('gui/dialog', () => {
   context('.show', () => {
