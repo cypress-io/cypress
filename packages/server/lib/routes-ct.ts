@@ -2,7 +2,6 @@ import Debug from 'debug'
 import { Request, Response, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { runner } from './controllers/runner'
 import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes-ct')
@@ -15,12 +14,7 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 
 export const createRoutesCT = ({
   config,
-  specsStore,
   nodeProxy,
-  getCurrentBrowser,
-  testingType,
-  getSpec,
-  getRemoteState,
 }: InitializeRoutes) => {
   const routesCt = Router()
 
@@ -43,19 +37,6 @@ export const createRoutesCT = ({
   if (!clientRoute) {
     throw Error(`clientRoute is required. Received ${clientRoute}`)
   }
-
-  routesCt.get(clientRoute, (req, res) => {
-    debug('Serving Cypress front-end by requested URL:', req.url)
-
-    runner.serve(req, res, 'runner-ct', {
-      config,
-      testingType,
-      getSpec,
-      getCurrentBrowser,
-      getRemoteState,
-      specsStore,
-    })
-  })
 
   // enables runner-ct to make a dynamic import
   routesCt.get([
