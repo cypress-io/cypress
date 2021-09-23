@@ -53,7 +53,7 @@ describe('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    return settings.read(this.todosPath).then((obj = {}) => {
+    return settings.read(this.todosPath, { configFile: 'cypress.json' }).then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
       return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
@@ -149,7 +149,8 @@ describe('lib/project-base', () => {
     const integrationFolder = 'foo/bar/baz'
 
     beforeEach(function () {
-      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder, browsers: [] })
+      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar', configFile: 'cypress.json' })
+      .resolves({ baz: 'quux', integrationFolder, browsers: [] })
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
@@ -963,7 +964,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('inserts path into cache', function () {
-      return add(this.pristinePath, {})
+      return add(this.pristinePath, { configFile: 'cypress.json' })
       .then(() => cache.read()).then((json) => {
         expect(json.PROJECTS).to.deep.eq([this.pristinePath])
       })
@@ -973,7 +974,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('returns object containing path and id', function () {
         sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
 
-        return add(this.pristinePath, {})
+        return add(this.pristinePath, { configFile: 'cypress.json' })
         .then((project) => {
           expect(project.id).to.equal('id-123')
 
@@ -986,7 +987,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('returns object containing just the path', function () {
         sinon.stub(settings, 'read').rejects()
 
-        return add(this.pristinePath, {})
+        return add(this.pristinePath, { configFile: 'cypress.json' })
         .then((project) => {
           expect(project.id).to.be.undefined
 
