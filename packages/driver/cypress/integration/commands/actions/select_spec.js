@@ -123,18 +123,6 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-maps').select('de_train')
     })
 
-    it('can select disabled select with force', () => {
-      cy.get('select[name=disabled]').select('foo', { force: true })
-    })
-
-    it('can select disabled optgroup with force', () => {
-      cy.get('select[name=optgroup-disabled]').select('foo', { force: true })
-    })
-
-    it('can select disabled option with force', () => {
-      cy.get('select[name=opt-disabled]').select('bar', { force: true })
-    })
-
     it('can forcibly click even when being covered by another element', (done) => {
       const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
@@ -180,6 +168,15 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('select[name=disabled]')
       .select('bar', { force: true })
       .invoke('val').should('eq', 'bar')
+    })
+
+    it('can forcibly click when optgroup is disabled', () => {
+      cy.get('select[name=optgroup-disabled]').select('foo', { force: true })
+    })
+
+    it('can forcibly click when option is disabled', () => {
+      cy.get('select[name=opt-disabled]').select('foo')
+      cy.get('select[name=opt-disabled]').select('bar', { force: true })
     })
 
     it('retries until <option> can be selected', () => {
