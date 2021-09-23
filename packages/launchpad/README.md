@@ -48,10 +48,6 @@ This starts Vite in watch mode. It also starts the GraphQL Server. You can acces
 
 If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run`, you might need to reopen your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
 
-## Design tokens
-
-
-
 ## Testing
 
 ### In Cypress
@@ -70,4 +66,13 @@ E2E tests:
 ```bash
 ## from repo root
 yarn workspace @packages/launchpad cypress:open
+```
+
+## Utility class usage
+
+Windi CSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
+
+```bash
+## from launchpad directory
+yarn windi
 ```
