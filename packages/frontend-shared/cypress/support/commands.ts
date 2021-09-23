@@ -5,17 +5,20 @@ import { print, FragmentDefinitionNode } from 'graphql'
 import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, watch, defineComponent, h } from 'vue'
 
-import { ClientTestContext } from '@packages/frontend-shared/src/graphql/ClientTestContext'
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import 'cypress-file-upload'
+
+interface ClientTestContext {
+  //
+}
 
 /**
  * This variable is mimicing ipc provided by electron.
  * It has to be loaded run before initializing GraphQL
  * because graphql uses it.
  */
-;(window as any).ipc = {
+(window as any).ipc = {
   on: () => {},
   send: () => {},
 }
@@ -23,20 +26,6 @@ import 'cypress-file-upload'
 Cypress.Commands.add(
   'mount',
   <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
-    const context = new ClientTestContext({
-      config: {},
-      cwd: '/dev/null',
-      // @ts-ignore
-      browser: null,
-      global: false,
-      project: '/dev/null',
-      projectRoot: '/dev/null',
-      invokedFromCli: true,
-      testingType: 'e2e',
-      os: 'darwin',
-      _: [''],
-    }, {})
-
     options.global = options.global || {}
     options.global.stubs = options.global.stubs || {}
     options.global.stubs.transition = false
@@ -45,7 +34,7 @@ Cypress.Commands.add(
     options.global.plugins.push({
       install (app) {
         app.use(urql, testUrqlClient({
-          context,
+          context: {},
         }))
       },
     })
@@ -55,21 +44,8 @@ Cypress.Commands.add(
 )
 
 function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
-  const context = new ClientTestContext({
-    config: {},
-    cwd: '/dev/null',
-    // @ts-ignore
-    browser: null,
-    global: false,
-    project: '/dev/null',
-    projectRoot: '/dev/null',
-    invokedFromCli: true,
-    testingType: 'e2e',
-    os: 'darwin',
-    _: [''],
-  }, {})
-
   let hasMounted = false
+  const context = {}
 
   return mount(defineComponent({
     name: `mountFragment`,

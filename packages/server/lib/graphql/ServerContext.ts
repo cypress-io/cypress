@@ -6,7 +6,7 @@ import type { OpenProjectLaunchOptions, LaunchArgs } from '@packages/types'
 // @ts-ignore
 import user from '@packages/server/lib/user'
 
-export class ServerContext extends BaseContext {
+export class ServerContext {
   readonly actions = new ServerActions(this)
   protected _remoteSchema = remoteSchemaWrapped
 

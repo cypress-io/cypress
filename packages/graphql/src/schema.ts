@@ -1,31 +1,23 @@
-import { makeSchema, asNexusMethod, connectionPlugin } from 'nexus'
 import path from 'path'
-import { JSONResolver, DateTimeResolver } from 'graphql-scalars'
+import { makeSchema, connectionPlugin } from 'nexus'
 
-import * as entities from './entities'
-import * as constants from './constants'
+import * as schemaTypes from './schemaTypes/'
 import { remoteSchema } from './stitching/remoteSchema'
 import { nodePlugin } from './plugins/nexusNodePlugin'
-
-const customScalars = [
-  asNexusMethod(JSONResolver, 'json'),
-  asNexusMethod(DateTimeResolver, 'dateTime'),
-]
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
 export const graphqlSchema = makeSchema({
-  types: [entities, constants, customScalars],
+  types: schemaTypes,
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: isCodegen,
-  // for vite
-  outputs: isCodegen ? {
+  outputs: {
     typegen: path.join(__dirname, 'gen/nxs.gen.ts'),
     schema: path.join(__dirname, '..', 'schemas', 'schema.graphql'),
-  } : false,
+  },
   contextType: {
-    module: path.join(__dirname, './context/BaseContext.ts'),
-    export: 'BaseContext',
+    module: '@packages/data-context',
+    export: 'DataContext',
   },
   mergeSchema: {
     schema: remoteSchema,

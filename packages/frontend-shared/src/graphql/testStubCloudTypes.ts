@@ -16,6 +16,7 @@ import type {
   CloudRunCommitInfo,
   CodegenTypeMap,
   CloudProject,
+  Query,
   QueryCloudNodeArgs,
   QueryCloudProjectBySlugArgs,
   QueryCloudProjectsBySlugsArgs,

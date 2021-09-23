@@ -9,7 +9,7 @@ import { setGulpGlobal } from './gulpConstants'
 import { makePackage } from './tasks/gulpMakePackage'
 
 gulp.task(
-  'dev',
+  'codegen',
   gulp.series(
     // Autobarrel watcher
     autobarrelWatcher,
@@ -17,16 +17,24 @@ gulp.task(
     // Fetch the latest "remote" schema from the Cypress cloud
     syncRemoteGraphQL,
 
-    gulp.parallel(
-      // Clean the vite apps
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
     // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
     nexusCodegenWatch,
 
     // ... and generate the correct GraphQL types for the frontend
     graphqlCodegenWatch,
+  ),
+)
+
+gulp.task(
+  'dev',
+  gulp.series(
+    'codegen',
+
+    gulp.parallel(
+      // Clean the vite apps
+      viteCleanApp,
+      viteCleanLaunchpad,
+    ),
 
     // Now that we have the codegen, we can start the frontend(s)
     gulp.parallel(

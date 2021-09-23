@@ -23,7 +23,7 @@ export const nodePlugin = plugin({
         resolveFn = (root, args, ctx) => {
           return ctx.makeId(
             def.typeName as $ValidatedByGraphQL,
-            ctx.assertNonNull(root[node]),
+            assertNonNull(root[node]),
           )
         }
       } else {
@@ -38,3 +38,11 @@ export const nodePlugin = plugin({
     }
   },
 })
+
+function assertNonNull<T> (val: T | null | undefined): T {
+  if (val == null) {
+    throw new Error(`Expected val to be non-null. This should never happen`)
+  }
+
+  return val as T
+}

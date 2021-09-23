@@ -12,9 +12,14 @@
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@packages/types": "0.0.0-development",
+    "dataloader": "^2.0.0"
+  },
   "devDependencies": {
+    "@packages/data-context": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "mocha": "7.0.1"
-  }
+  },
+  "types": "src/index.ts"
 }

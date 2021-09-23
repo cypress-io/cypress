@@ -4,7 +4,7 @@ describe('<ProjectSettings />', () => {
   beforeEach(() => {
     cy.mount(() => (
       <div class="py-4 px-8">
-        <ProjectSettings/>
+        <ProjectSettings />
       </div>
     ))
   })

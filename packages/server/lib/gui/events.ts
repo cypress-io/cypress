@@ -8,12 +8,10 @@ const stripAnsi = require('strip-ansi')
 const dialog = require('./dialog')
 const pkg = require('./package')
 const logs = require('./logs')
-const auth = require('./auth')
 const Windows = require('./windows')
 const { openExternal } = require('./links')
 const files = require('./files')
 const open = require('../util/open')
-const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
@@ -28,10 +26,13 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
-import { ServerContext } from '../graphql/ServerContext'
-import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
+import auth from './auth'
+import user from '../user'
+
+import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
+import { makeDataContext } from '@packages/data-context'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -498,10 +499,32 @@ module.exports = {
     // into the projects
     startGraphQLServer()
 
-    const serverContext = setServerContext(new ServerContext(options, {}))
-
-    if (options.projectRoot) {
-      serverContext.actions.addProject(options.projectRoot)
-    }
+    const serverContext = setDataContext(makeDataContext({
+      launchArgs: options,
+      userApi: {
+        logIn () {
+          return auth.start(() => {}, 'launchpad')
+        },
+        logOut () {
+          return user.logOut()
+        },
+        refreshUser () {
+          // TODO(tim)
+          return user.getSafely()
+        },
+      },
+      projectApi: {
+        getConfig (projectRoot: string) {
+          return
+        },
+        launchProject () {
+          //
+        },
+        insertProject () {
+          //
+        },
+      },
+      // coreData options, {}
+    }))
   },
 }

@@ -8,7 +8,7 @@ type App {
   activeProject: Project
 
   """Browsers found that are compatible with Cypress"""
-  browsers: [Browser!]!
+  browsers: [Browser!]
 
   """See if the GraphQL server is alive"""
   healthCheck: String!
@@ -299,11 +299,14 @@ enum NavItem {
 }
 
 """Container describing a single nav item"""
-type NavigationItem {
+type NavigationItem implements Node {
   iconPath: String!
-  id: NavItem!
+
+  """Relay style Node ID field for the NavigationItem field"""
+  id: ID!
   name: String!
   selected: Boolean!
+  type: NavItem!
 }
 
 """Container for state associated with the side navigation menu"""
@@ -441,7 +444,7 @@ type Wizard {
   canNavigateForward: Boolean!
 
   """Whether the plugins for the selected testing type has been initialized"""
-  chosenTestingTypePluginsInitialized: Boolean
+  chosenTestingTypePluginsInitialized: Boolean!
 
   """The title of the page, given the current step of the wizard"""
   description: String
@@ -479,7 +482,11 @@ type WizardBundler implements Node {
 
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
+
+  """Display name of the bundler"""
   name: String!
+
+  """Package to install associated with the bundler"""
   package: String!
 }
 
@@ -515,13 +522,8 @@ enum WizardNavigateDirection {
 type WizardNpmPackage implements Node {
   description: String!
 
-<<<<<<< HEAD
   """Relay style Node ID field for the WizardNpmPackage field"""
   id: ID!
-=======
-  """id"""
-  id: String!
->>>>>>> unified-desktop-gui
 
   """The package name that you would npm install"""
   name: String!

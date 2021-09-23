@@ -114,7 +114,7 @@ export async function generateFrontendSchema () {
   const URQL_INTROSPECTION_PATH = path.join(monorepoPaths.pkgFrontendShared, 'src/generated/urql-introspection.gen.ts')
 
   await fs.ensureDir(path.dirname(URQL_INTROSPECTION_PATH))
-  await fs.writeFile(path.join(monorepoPaths.pkgFrontendShared, 'src/generated/schema-for-tests.gen.json'), introspectionFromSchema(extendedSchema))
+  await fs.writeFile(path.join(monorepoPaths.pkgFrontendShared, 'src/generated/schema-for-tests.gen.json'), JSON.stringify(introspectionFromSchema(extendedSchema), null, 2))
 
   await fs.promises.writeFile(
     URQL_INTROSPECTION_PATH,

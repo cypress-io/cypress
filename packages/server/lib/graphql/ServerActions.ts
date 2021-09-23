@@ -1,9 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import Debug from 'debug'
 
 import type { ServerContext } from './ServerContext'
-import { BaseActions, Project } from '@packages/graphql'
 import { openProject } from '@packages/server/lib/open_project'
 import type { LaunchArgs, LaunchOpts, FoundBrowser, OpenProjectLaunchOptions, FullConfig } from '@packages/types'
 import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
@@ -20,17 +18,12 @@ import browsers from '../browsers'
 import * as config from '../config'
 
 import { getId } from '../project_static'
-import type { BrowserContract } from '../../../graphql/src/contracts/BrowserContract'
-
-const debug = Debug('cypress:server:graphql')
 
 /**
  *
  */
-export class ServerActions extends BaseActions {
-  constructor (protected ctx: ServerContext) {
-    super(ctx)
-  }
+export class ServerActions {
+  constructor (protected ctx: ServerContext) {}
 
   installDependencies () {
     //
@@ -50,16 +43,6 @@ export class ServerActions extends BaseActions {
     insertProject(projectRoot)
 
     return localProject
-  }
-
-  async loadProjects () {
-    const cachedProjects = await this._loadProjectsFromCache()
-
-    cachedProjects.forEach((projectRoot) => {
-      this.addProject(projectRoot)
-    })
-
-    return this.ctx.app.projects
   }
 
   async _loadProjectsFromCache () {
@@ -121,32 +104,10 @@ export class ServerActions extends BaseActions {
   }
 
   async launchOpenProject (browser: BrowserContract, spec: any, options: LaunchOpts): Promise<void> {
-    debug('launching with browser %o', browser)
 
-    return openProject.launch(browser, spec, options)
   }
 
   resolveOpenProjectConfig (): FullConfig | null {
     return openProject.getConfig() ?? null
-  }
-
-  isFirstTime (projectRoot: string, testingType: Cypress.TestingType): boolean {
-    try {
-      const config = JSON.parse(fs.readFileSync(path.join(projectRoot, 'cypress.json'), 'utf-8'))
-      const type = testingType === 'e2e' ? 'e2e' : 'component'
-      const overrides = config[type] || {}
-
-      return Object.keys(overrides).length === 0
-    } catch (e) {
-      const err = e as Error
-
-      // if they do not have a cypress.json, it's definitely their first time using Cypress.
-      if (err.name === 'ENOENT') {
-        return true
-      }
-
-      // unexpected error
-      throw Error(e)
-    }
   }
 }
