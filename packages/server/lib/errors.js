@@ -490,7 +490,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}`
     case 'ERROR_READING_FILE':
       filePath = `\`${arg1}\``
-      err = `\`${arg2}\``
+      err = `\`${arg2.type || arg2.code || arg2.name}: ${arg2.message}\``
 
       return stripIndent`\
         Error reading from: ${chalk.blue(filePath)}
@@ -1055,6 +1055,11 @@ const clone = function (err, options = {}) {
 
   if (options.html) {
     obj.message = ansi_up.ansi_to_html(err.message)
+    // revert back the distorted characters
+    // in case there is an error in a child_process
+    // that contains quotes
+    .replace(/\&\#x27;/g, '\'')
+    .replace(/\&quot\;/g, '"')
   } else {
     obj.message = err.message
   }

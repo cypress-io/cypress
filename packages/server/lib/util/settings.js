@@ -3,6 +3,19 @@ const Promise = require('bluebird')
 const path = require('path')
 const errors = require('../errors')
 const { fs } = require('../util/fs')
+const { requireAsync } = require('./require_async')
+const debug = require('debug')('cypress:server:settings')
+
+function jsCode (obj) {
+  const objJSON = obj && !_.isEmpty(obj)
+    ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
+    : `{
+
+}`
+
+  return `module.exports = ${objJSON}
+`
+}
 
 // TODO:
 // think about adding another PSemaphore
@@ -69,7 +82,19 @@ module.exports = {
   },
 
   _write (file, obj = {}) {
-    return fs.outputJsonAsync(file, obj, { spaces: 2 })
+    if (/\.json$/.test(file)) {
+      debug('writing json file')
+
+      return fs.outputJsonAsync(file, obj, { spaces: 2 })
+      .return(obj)
+      .catch((err) => {
+        return this._logWriteErr(file, err)
+      })
+    }
+
+    debug('writing javascript file')
+
+    return fs.writeFileAsync(file, jsCode(obj))
     .return(obj)
     .catch((err) => {
       return this._logWriteErr(file, err)
@@ -109,9 +134,13 @@ module.exports = {
 
     const file = this.pathToConfigFile(projectRoot, options)
 
-    return fs.readJsonAsync(file)
+    return requireAsync(file,
+      {
+        projectRoot,
+        loadErrorCode: 'CONFIG_FILE_ERROR',
+      })
     .catch((err) => {
-      if (err.code === 'ENOENT') {
+      if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
         if (options.isTextTerminal) {
           throw errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot)
         }
@@ -119,27 +148,33 @@ module.exports = {
         return this._write(file, {})
       }
 
-      throw err
-    }).then((json = {}) => {
-      if (this.isComponentTesting(options) && 'component' in json) {
-        json = { ...json, ...json.component }
+      return Promise.reject(err)
+    })
+    .then((configObject = {}) => {
+      if (this.isComponentTesting(options) && 'component' in configObject) {
+        configObject = { ...configObject, ...configObject.component }
       }
 
-      if (!this.isComponentTesting(options) && 'e2e' in json) {
-        json = { ...json, ...json.e2e }
+      if (!this.isComponentTesting(options) && 'e2e' in configObject) {
+        configObject = { ...configObject, ...configObject.e2e }
       }
 
-      const changed = this._applyRewriteRules(json)
+      debug('resolved configObject', configObject)
+      const changed = this._applyRewriteRules(configObject)
 
       // if our object is unchanged
       // then just return it
-      if (_.isEqual(json, changed)) {
-        return json
+      if (_.isEqual(configObject, changed)) {
+        return configObject
       }
 
       // else write the new reduced obj
       return this._write(file, changed)
+      .then((config) => {
+        return config
+      })
     }).catch((err) => {
+      debug('an error occured when reading config', err)
       if (errors.isCypressErr(err)) {
         throw err
       }

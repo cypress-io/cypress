@@ -83,6 +83,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
+  private _isServerOpen: boolean = false
 
   public browser: any
   public options: OpenProjectLaunchOptions
@@ -220,6 +221,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       specsStore,
     })
 
+    this._isServerOpen = true
+
     // if we didnt have a cfg.port
     // then get the port once we
     // open the server
@@ -340,6 +343,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
+    if (!this._isServerOpen) {
+      return
+    }
+
     const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
 
     await Promise.all([
@@ -347,6 +354,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.watchers?.close(),
       closePreprocessor?.(),
     ])
+
+    this._isServerOpen = false
 
     process.chdir(localCwd)
 
@@ -534,7 +543,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     if (configFile !== false) {
-      this.watchers.watch(settings.pathToConfigFile(projectRoot, { configFile }), obj)
+      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
