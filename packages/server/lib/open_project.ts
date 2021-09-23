@@ -37,7 +37,7 @@ export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
-  browser?: Browser
+  browser?: Browser['name']
   configFile?: string
   project: string // projectRoot
   projectRoot: string // same as above
