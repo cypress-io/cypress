@@ -1,13 +1,14 @@
 <template>
   <main class="divide-y divide-gray-200 children:pt-7 children:pb-7">
     <template v-if="app?.activeProject">
-      <ProjectId 
+      <ProjectId
         class="pt-0"
         :gql="app.activeProject"
       />
       <template v-if="app.activeProject.cloudProject">
-        <RecordKey 
+        <RecordKey
           v-for="key of app.activeProject.cloudProject.recordKeys"
+          :key="key.id"
           :gql="key"
         />
       </template>
@@ -48,8 +49,8 @@ query ProjectSettings {
 }
 `
 
-const { data } = useQuery({ 
-  query: ProjectSettingsDocument, 
+const { data } = useQuery({
+  query: ProjectSettingsDocument,
 })
 
 const app = computed(() => data.value?.app)

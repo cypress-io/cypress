@@ -2,13 +2,16 @@
   <div v-if="!backendInitialized">
     Loading...
   </div>
-  <div v-else class="bg-white h-full">
+  <div
+    v-else
+    class="bg-white h-full"
+  >
     <Main />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import Main from './Main.vue'
 import { AppQueryDocument } from './generated/graphql'
@@ -26,14 +29,9 @@ query AppQuery {
  * server and current project has been initialized.
  * We poll until those conditions are met, then render the app
  */
-const query = useQuery({ 
+const query = useQuery({
   query: AppQueryDocument,
-  requestPolicy: 'cache-and-network'
-})
-
-
-watch(query.data, () => {
-  console.log(query.data.value)
+  requestPolicy: 'cache-and-network',
 })
 
 let interval: number

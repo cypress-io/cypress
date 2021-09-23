@@ -9,7 +9,11 @@
         <GlobalPageHeader v-model="match" />
       </div>
 
-      <GlobalProjectCard v-for="project, idx in filteredProjects" :key="idx" :project="project" />
+      <GlobalProjectCard
+        v-for="project, idx in filteredProjects"
+        :key="idx"
+        :project="project"
+      />
     </div>
   </template>
 
@@ -18,8 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import type { Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
 import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
@@ -34,7 +37,7 @@ type Project = {
 const testProject: Project = {
   name: 'Project Name',
   lastRunStatus: 'passed',
-  lastRun: Date.now() - 1000 * 60 * 60 * 24 * 255 // 255 days ago
+  lastRun: Date.now() - 1000 * 60 * 60 * 24 * 255, // 255 days ago
 }
 
 // I don't know why this isn't type checking correctly
@@ -45,57 +48,57 @@ const projects: Ref<Project[]> = ref([
   {
     name: 'Project Name 2',
     lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 100 // 100 days ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 100, // 100 days ago
   },
   {
     name: 'Fifty Days Ago',
     lastRunStatus: 'pending',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 50 // 50 days ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 50, // 50 days ago
   },
   {
     name: 'Ten Days ago',
     lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 10 // 10 days ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 10, // 10 days ago
   },
   {
     name: 'Five days',
     lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 5 // 5 days ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 5, // 5 days ago
   },
   {
     name: 'Project Name 6',
     lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1, // 1 day ago
   },
   {
     name: 'Project Name 6',
     lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1, // 1 day ago
   },
   {
     name: 'Project Name 6',
     lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1, // 1 day ago
   },
   {
     name: 'Project Name 6',
     lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1, // 1 day ago
   },
   {
     name: 'Project Name 7',
     lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0 // today
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0, // today
   },
   {
     name: 'Project Name 8',
     lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0 // yesterday
+    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0, // yesterday
   },
 ])
 
 const filteredProjects = computed(() => {
-  return projects.value.filter(p => p.name.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return projects.value.filter((p) => p.name.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
 })
 
 const match = ref('')

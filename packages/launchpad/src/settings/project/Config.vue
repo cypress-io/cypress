@@ -1,9 +1,14 @@
 <template>
   <SettingsSection>
-    <template #title>{{ t('settingsPage.config.title') }}</template>
+    <template #title>
+      {{ t('settingsPage.config.title') }}
+    </template>
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
-        <a href="https://docs.cypress.io" target="_blank">cypress.config.js</a>
+        <a
+          href="https://docs.cypress.io"
+          target="_blank"
+        >cypress.config.js</a>
       </i18n-t>
     </template>
     <div class="flex w-full select-none">

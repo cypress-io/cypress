@@ -1,4 +1,10 @@
 {
+  "globals": {
+    "defineProps": "readonly",
+    "defineEmits": "readonly",
+    "defineExpose": "readonly",
+    "withDefaults": "readonly"
+  },
   "plugins": [
     "cypress",
     "@cypress/dev"
@@ -6,9 +12,13 @@
   "extends": [
     "plugin:@cypress/dev/general",
     "plugin:@cypress/dev/tests",
-    "../reporter/src/.eslintrc.json"
+    "../reporter/src/.eslintrc.json",
+    "plugin:vue/vue3-recommended"
   ],
-  "parser": "@typescript-eslint/parser",
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
   "env": {
     "cypress/globals": true
   },

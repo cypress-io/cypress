@@ -1,7 +1,13 @@
 <template>
-  <div class="p-0 m-0 border-0" :class="$attrs.class">
+  <div
+    class="p-0 m-0 border-0"
+    :class="$attrs.class"
+  >
     <div class="relative rounded-md">
-      <div v-if="hasPrefix" class="absolute inset-y-0 left-0 pl-4 flex items-center">
+      <div
+        v-if="hasPrefix"
+        class="absolute inset-y-0 left-0 pl-4 flex items-center"
+      >
         <span class="text-gray-500 flex items-center justify-center">
           <slot name="prefix">
             <Icon
@@ -9,22 +15,32 @@
               class="pointer-events-none"
               :icon="prefixIcon"
               :class="prefixIconClasses"
-            ></Icon>
-            <Icon v-else-if="type === 'search'" :icon="IconSearch" />
+            />
+            <Icon
+              v-else-if="type === 'search'"
+              :icon="IconSearch"
+            />
           </slot>
         </span>
       </div>
       <input
-        :type="type"
         v-model="localValue"
+        :type="type"
         :class="_inputClasses"
         class="placeholder-gray-400 disabled:bg-gray-100 disabled:text-gray-400 leading-tight focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 py-2 border-gray-300 rounded-md"
         v-bind="inputAttrs"
-      />
-      <div v-if="hasSuffix" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+      >
+      <div
+        v-if="hasSuffix"
+        class="absolute inset-y-0 right-0 pr-3 flex items-center"
+      >
         <span class="text-gray-500 flex items-center justify-center">
           <slot name="suffix">
-            <Icon :icon="suffixIcon" class="pointer-events-none" :class="suffixIconClasses"></Icon>
+            <Icon
+              :icon="suffixIcon"
+              class="pointer-events-none"
+              :class="suffixIconClasses"
+            />
           </slot>
         </span>
       </div>
@@ -34,15 +50,14 @@
 
 <script lang="ts">
 export default {
-  inheritAttrs: false
+  inheritAttrs: false,
 }
 </script>
 
 <script lang="ts" setup>
+import { computed, useSlots, useAttrs, InputHTMLAttributes, FunctionalComponent, SVGAttributes  } from 'vue'
 import _ from 'lodash'
 import IconSearch from 'virtual:vite-icons/mdi/magnify'
-import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
-import { computed, useSlots, useAttrs } from 'vue'
 import { useModelWrapper } from '../../composables'
 
 const slots = useSlots()
@@ -60,7 +75,7 @@ const props = withDefaults(defineProps<{
   modelValue?: string
 }>(), {
   type: 'text',
-  modelValue: ''
+  modelValue: '',
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -75,10 +90,12 @@ const hasSuffix = computed(() => {
   return slots.suffix || props.suffixIcon
 })
 
-const _inputClasses = computed(() => ([
-  props.inputClasses,
-  hasPrefix ? 'pl-10' : 'pl-4',
-  hasSuffix ? 'pr-6' : 'pr-0'
-]))
+const _inputClasses = computed(() => {
+  return ([
+    props.inputClasses,
+    hasPrefix.value ? 'pl-10' : 'pl-4',
+    hasSuffix.value ? 'pr-6' : 'pr-0',
+  ])
+})
 
 </script>

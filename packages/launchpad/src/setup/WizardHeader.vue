@@ -1,8 +1,10 @@
 <template>
-  <h1 class="text-3xl pt-12 text-center">{{ props.gql.title }}</h1>
-  <p 
-    class="text-center text-gray-400 my-2 mx-10" 
-    v-html="props.gql.description" 
+  <h1 class="text-3xl pt-12 text-center">
+    {{ props.gql.title }}
+  </h1>
+  <p
+    class="text-center text-gray-400 my-2 mx-10"
+    v-html="props.gql.description"
   />
 </template>
 
