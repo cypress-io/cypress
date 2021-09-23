@@ -169,7 +169,7 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
     it('can load a fixture with no extension when a same-named folder also exists', () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
-      return config.get(projectPath)
+      return config.get(projectPath, { configFile: 'cypress.json' })
       .then((cfg) => {
         return fixture.get(cfg.fixturesFolder, 'foo')
         .then((fixture) => {
