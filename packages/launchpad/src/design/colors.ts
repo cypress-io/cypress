@@ -1,4 +1,4 @@
-export const customColors = {
+const colors = {
   jade: {
     50: '#E0F6FA',
     100: '#C2F1DE',
@@ -25,6 +25,19 @@ export const customColors = {
     900: '#4F0018',
     1000: '#490018',
   },
+  orange: {
+    50: '#F5F4D7',
+    100: '#F3ECB3',
+    200: '#F1E08F',
+    300: '#EDBB4A',
+    400: '#DB7903',
+    500: '#BD5800',
+    600: '#963F00',
+    700: '#702C00',
+    800: '#521F00',
+    900: '#411800',
+    1000: '#391500',
+  },
   indigo: {
     50: '#F0F1FF',
     100: '#DADDFE',
@@ -32,6 +45,7 @@ export const customColors = {
     300: '#9AA2FC',
     400: '#6470F3',
     500: '#4956E3',
+    DEFAULT: '#4956E3',
     600: '#3A46CC',
     700: '#2F3AB0',
     800: '#252E8F',
@@ -129,5 +143,48 @@ export const customColors = {
     900: '#490435',
     1000: '#420333',
   },
+}
 
+export const customColors = {
+  ...colors,
+  primary: {
+    ...colors.indigo,
+    DEFAULT: colors.indigo[500],
+  },
+  secondary: {
+    ...colors.indigo,
+    DEFAULT: colors.indigo[50],
+  },
+  error: {
+    ...colors.red,
+    DEFAULT: colors.red[400],
+  },
+  caution: {
+    ...colors.red,
+    DEFAULT: colors.red[500],
+  },
+  warning: {
+    ...colors.orange,
+    DEFAULT: colors.orange[500],
+  },
+  'warning-light': {
+    ...colors.orange,
+    DEFAULT: colors.orange[400],
+  },
+  success: {
+    ...colors.jade,
+    DEFAULT: colors.jade[400],
+  },
+  'success-light': {
+    ...colors.jade,
+    DEFAULT: colors.jade[300],
+  },
+  confirm: {
+    ...colors.jade,
+    DEFAULT: colors.jade[500],
+  },
+  'body-gray': {
+    ...colors.gray,
+    DEFAULT: colors.gray[600],
+  },
 }
