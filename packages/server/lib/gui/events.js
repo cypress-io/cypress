@@ -325,14 +325,16 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         })
       }).call('getConfig')
       .then((config) => {
-        if (path.isAbsolute(config.configFile)) {
+        if (config.configFile && path.isAbsolute(config.configFile)) {
           config.configFile = path.relative(arg, config.configFile)
         }
 
         // those two values make no sense to display in
         // the GUI
-        config.resolved.configFile = undefined
-        config.resolved.testingType = undefined
+        if (config.resolved) {
+          config.resolved.configFile = undefined
+          config.resolved.testingType = undefined
+        }
 
         return config
       })
