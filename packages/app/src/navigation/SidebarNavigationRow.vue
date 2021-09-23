@@ -26,12 +26,16 @@
       rounded-lg
       children:group-focus:text-indigo-300
       children:group-hover:text-indigo-300">
-      <component v-if="icon" :is="icon"
-      :class="[active ? 'text-green-300' : 'text-gray-500']"
-      class="min-w-24px group-focus:text-indigo-300" />
+      <component 
+        v-if="icon" 
+        :is="icon"
+        :class="[active ? 'icon-dark-green-300 icon-light-green-800' : 'icon-dark-gray-500 icon-light-gray-800']"
+        class="min-w-24px min-h-24px group-hover:icon-dark-indigo-300 group-hover:icon-light-indigo-900 group-focus:icon-dark-indigo-300 group-focus:icon-light-indigo-900" 
+      />
       <span 
-      :class="[active ? 'text-green-300' : 'text-gray-500']"
-      class="truncate group-focus:text-white">
+        :class="[active ? 'text-green-300' : 'text-gray-500']" 
+        class="truncate"
+      >
         <slot></slot>
       </span>
     </span>

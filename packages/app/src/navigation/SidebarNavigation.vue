@@ -1,8 +1,12 @@
-<!-- This example requires Tailwind CSS v2.0+ -->
 <template>
   <div class="flex-1 flex flex-col min-h-0 bg-gray-800">
     <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
       <div class="flex items-center flex-shrink-0 px-4">
+        <i-cy-book-mark_x24
+          class="icon-dark-gray-300
+          icon-light-gray-800
+          w-24px
+          h-24px"/>
         <i-bi-bookmark-star class="text-white w-18px h-18px"/>
       </div>
       <nav class="mt-5 flex-1 px-2 bg-gray-800 space-y-1" aria-label="Sidebar">
@@ -19,13 +23,12 @@
 <script lang="ts" setup>
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import { defineProps } from 'vue'
-import ListIcon from 'virtual:vite-icons/mdi/view-list'
-import CodeIcon from 'virtual:vite-icons/mdi/code-array'
-import SettingsIcon from 'virtual:vite-icons/mdi/cog'
+import SpecsIcon from '~icons/cy/test-results_x24'
+import CodeIcon from '~icons/cy/code-editor_x24'
+import SettingsIcon from '~icons/cy/settings_x24'
 
-// const random = Math.random()
 const navigation = [
-  { name: 'Specs', icon: ListIcon, href: '/' },
+  { name: 'Specs', icon: SpecsIcon, href: '/' },
   { name: 'Runs', icon: CodeIcon, href: '/runs' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' }
 ]
@@ -33,5 +36,4 @@ const navigation = [
 defineProps<{
   expanded?: boolean
 }>()
-
 </script>
