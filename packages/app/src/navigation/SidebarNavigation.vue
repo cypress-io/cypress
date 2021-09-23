@@ -7,6 +7,7 @@
           icon-light-gray-800
           w-24px
           h-24px"/>
+        <i-bi-bookmark-star class="text-white w-18px h-18px"/>
       </div>
       <nav class="mt-5 flex-1 px-2 bg-gray-800 space-y-1" aria-label="Sidebar">
         <router-link custom v-slot="{ href, isActive }" v-for="item in navigation" :key="item.name" :to="item.href">
@@ -26,7 +27,6 @@ import SpecsIcon from '~icons/cy/test-results_x24'
 import CodeIcon from '~icons/cy/code-editor_x24'
 import SettingsIcon from '~icons/cy/settings_x24'
 
-// const random = Math.random()
 const navigation = [
   { name: 'Specs', icon: SpecsIcon, href: '/' },
   { name: 'Runs', icon: CodeIcon, href: '/runs' },
@@ -36,5 +36,4 @@ const navigation = [
 defineProps<{
   expanded?: boolean
 }>()
-
 </script>

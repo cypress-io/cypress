@@ -8,6 +8,13 @@ export class WizardNpmPackage {
   constructor (private pkg: NpmPackages) {}
 
   @nxs.field.nonNull.string({
+    description: 'id',
+  })
+  id (): NxsResult<'WizardNpmPackage', 'id'> {
+    return this.pkg
+  }
+
+  @nxs.field.nonNull.string({
     description: 'The package name that you would npm install',
   })
   name (): NxsResult<'WizardNpmPackage', 'name'> {

@@ -1,5 +1,4 @@
 import { defineConfig } from 'windicss/helpers'
-
 import InteractionVariants from '@windicss/plugin-interaction-variants'
 import { IconDuotoneColorsPlugin } from './icon-color-plugins'
 import { safelist } from './safelist'
