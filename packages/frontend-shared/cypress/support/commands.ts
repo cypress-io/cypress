@@ -4,7 +4,6 @@ import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
 import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, watch, defineComponent, h } from 'vue'
-
 import { ClientTestContext } from '../../src/graphql/ClientTestContext'
 import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUnionType'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'

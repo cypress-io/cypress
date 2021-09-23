@@ -8,6 +8,8 @@ import Components from 'vite-plugin-components'
 import ViteIcons, { ViteIconsResolver } from 'vite-plugin-icons'
 import VueI18n from '@intlify/vite-plugin-vue-i18n'
 import VueSvgLoader from 'vite-svg-loader'
+import Layouts from 'vite-plugin-vue-layouts'
+import Pages from 'vite-plugin-pages'
 
 export default defineConfig({
   base: './',
@@ -17,6 +19,10 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
+    Layouts(),
+    Pages({
+      extensions: ['vue'],
+    }),
     ViteIcons(),
     PurgeIcons(),
     VueI18n({
@@ -30,5 +36,6 @@ export default defineConfig({
   ],
   define: {
     'process.env': {},
+    'setImmediate': {},
   },
 })
