@@ -144,7 +144,7 @@ module.exports = {
       })
     .catch((err) => {
       if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
-        if (options.isTextTerminal) {
+        if (options.args?.runProject) {
           throw errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot)
         }
 

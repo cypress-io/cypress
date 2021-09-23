@@ -499,7 +499,7 @@ describe('lib/cypress', () => {
         ])
       }).each(ensureDoesNotExist)
       .then(() => {
-        this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.pristinePath)
+        this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
       })
     })
 
