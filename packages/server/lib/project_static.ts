@@ -9,6 +9,7 @@ import user from './user'
 import keys from './util/keys'
 import settings from './util/settings'
 import { ProjectBase } from './project-base'
+import { getDefaultConfigFilePath } from './project_utils'
 
 const debug = Debug('cypress:server:project_static')
 
@@ -153,8 +154,10 @@ export async function add (path, options) {
   }
 }
 
-export function getId (path) {
-  return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: {} }).getProjectId()
+export async function getId (path) {
+  const configFile = await getDefaultConfigFilePath(path)
+
+  return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: { configFile } }).getProjectId()
 }
 
 export async function writeProjectId (id: string, projectRoot: string) {
