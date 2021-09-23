@@ -56,7 +56,7 @@ describe('lib/screenshots', () => {
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
 
-    return config.get(this.todosPath).then((config1) => {
+    return config.get(this.todosPath, { configFile: 'cypress.json' }).then((config1) => {
       this.config = config1
     })
   })
