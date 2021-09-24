@@ -54,7 +54,7 @@ async function win32BitWarning (onWarning: (error: Error) => void) {
 
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
-  relaunchBrowser: ((...args: unknown[]) => void) | null = null
+  relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
   specsWatcher: chokidar.FSWatcher | null = null
   componentSpecsWatcher: chokidar.FSWatcher | null = null
 
@@ -203,7 +203,7 @@ export class OpenProject {
 
       afterSpec()
       .catch((err) => {
-        this.openProject!.options.onError(err)
+        this.openProject?.options.onError(err)
       })
 
       if (onBrowserClose) {
@@ -406,6 +406,8 @@ export class OpenProject {
         if (this.relaunchBrowser) {
           return this.relaunchBrowser()
         }
+
+        return
       },
     })
 

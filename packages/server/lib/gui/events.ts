@@ -35,7 +35,9 @@ import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCal
 import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
 import { makeDataContext } from '@packages/data-context'
-import { getBrowsers } from '../browsers/utils'
+import browserUtils from '../browsers/utils'
+
+const { getBrowsers } = browserUtils
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -127,11 +129,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'log:in':
-      return user.logIn(arg)
-      .then(send)
-      .catch(sendErr)
-
     case 'log:out':
       return user.logOut()
       .then(send)
@@ -167,6 +164,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       })
 
       return openProject.launch(arg.browser, fullSpec, {
+        // TODO: Tim see why this
         projectRoot: options.projectRoot,
         onBrowserOpen () {
           return send({ browserOpened: true })
@@ -405,7 +403,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'new:project:banner:closed':
       return openProject.getProject()
-      .saveState({ showedNewProjectBanner: true })
+      ?.saveState({ showedNewProjectBanner: true })
       .then(sendNull)
 
     case 'has:opened:cypress':
@@ -427,14 +425,14 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'remove:scaffolded:files':
       return openProject.getProject()
-      .removeScaffoldedFiles()
+      ?.removeScaffoldedFiles()
       .then(sendNull)
 
     case 'set:prompt:shown':
       return openProject.getProject()
-      .saveState({
+      ?.saveState({
         promptsShown: {
-          ...openProject.getProject().state.promptsShown,
+          ...(openProject.getProject()?.state?.promptsShown ?? {}),
           [arg]: Date.now(),
         },
       })
