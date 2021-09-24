@@ -41,7 +41,7 @@ export const Project = objectType({
     t.nonNull.boolean('isFirstTimeE2E', {
       description: 'Whether the user configured this project to use e2e Testing',
       resolve: (source, args, ctx) => {
-        return ctx.project.isFirstTimeAccessing(source.projectRoot, 'component')
+        return ctx.project.isFirstTimeAccessing(source.projectRoot, 'e2e')
       },
     })
   },

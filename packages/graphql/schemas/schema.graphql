@@ -498,6 +498,9 @@ type WizardBundler implements Node {
 
   """Package to install associated with the bundler"""
   package: String!
+
+  """The name of the framework"""
+  type: SupportedBundlers!
 }
 
 enum WizardCodeLanguage {
@@ -537,6 +540,7 @@ type WizardNpmPackage implements Node {
 
   """The package name that you would npm install"""
   name: String!
+  package: String!
 }
 
 enum WizardStep {

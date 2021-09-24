@@ -10,5 +10,6 @@ export const WizardNpmPackage = objectType({
     })
 
     t.nonNull.string('description')
+    t.nonNull.string('package')
   },
 })

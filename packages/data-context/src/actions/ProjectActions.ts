@@ -23,13 +23,13 @@ export class ProjectActions {
     return this.ctx._apis.projectApi
   }
 
-  setActiveProject (projectRoot: string) {
+  async setActiveProject (projectRoot: string) {
     this.ctx.coreData.app.activeProject = {
       projectRoot,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
-      isFirstTimeCT: false,
-      isFirstTimeE2E: false,
+      isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
+      isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
     }
 
     return this
@@ -50,14 +50,14 @@ export class ProjectActions {
     //
   }
 
-  addProject (projectRoot: string) {
+  async addProject (projectRoot: string) {
     const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
       this.ctx.coreData.app.projects.push({ projectRoot })
     }
 
-    this.setActiveProject(projectRoot)
+    await this.setActiveProject(projectRoot)
   }
 
   async launchProject () {

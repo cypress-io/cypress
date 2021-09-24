@@ -79,18 +79,18 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
-import type { EnvironmentSetupFragment, FrontendFrameworkEnum } from "../../generated/graphql";
+import type { EnvironmentSetupFragment, SupportedBundlers } from "../../generated/graphql";
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
 const emit = defineEmits<{
-  (event: 'select', type: FrontendFrameworkEnum)
+  (event: 'select', type: SupportedBundlers)
 }>()
 
 const props = withDefaults(defineProps<{
   name: string
   value?: string
   placeholder?: string
-  options: EnvironmentSetupFragment['frameworks']
+  options: EnvironmentSetupFragment['allBundlers']
   disabled?: boolean
 }>(), {
   disabled: false
@@ -102,7 +102,7 @@ const selectedOptionObject = computed(() => {
   return props.options.find((opt) => opt.type === props.value);
 });
 
-const selectOption = (opt: FrontendFrameworkEnum) => {
+const selectOption = (opt: SupportedBundlers) => {
   emit("select", opt);
 };
 
