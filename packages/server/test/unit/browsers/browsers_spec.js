@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
-const browsers = require(`${root}../lib/browsers`)
-const utils = require(`${root}../lib/browsers/utils`)
+const browsers = require('../../../lib/browsers')
+const utils = require('../../../lib/browsers/utils')
 const snapshot = require('snap-shot-it')
 
 const normalizeBrowsers = (message) => {
