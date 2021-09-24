@@ -1,9 +1,8 @@
 export * from './constants'
 
-export {
-  AllPackages,
-  AllPackageTypes,
-} from './constants'
+import type { AllPackageTypes, AllPackages } from './constants'
+
+export { AllPackages, AllPackageTypes }
 
 export * from './browser'
 
