@@ -11,6 +11,14 @@ export const App = objectType({
       description: 'Active project',
     })
 
+    t.field('selectedBrowser', {
+      type: Browser,
+      description: 'The currently selected browser for the application',
+      resolve: (source, args, ctx) => {
+        return ctx.wizardData.chosenBrowser
+      },
+    })
+
     t.list.nonNull.field('browsers', {
       type: Browser,
       description: 'Browsers found that are compatible with Cypress',

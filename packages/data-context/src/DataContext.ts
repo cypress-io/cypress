@@ -1,6 +1,6 @@
 import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
 import debugLib from 'debug'
-
+import fsExtra from 'fs-extra'
 import type { AuthApiShape } from './actions/AuthActions'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
@@ -8,7 +8,7 @@ import { AppDataSource } from './sources/AppDataSource'
 import { ProjectDataSource } from './sources/ProjectDataSource'
 import { cached } from './util/cached'
 import { WizardDataSource } from './sources'
-import type { ProjectApiShape } from './actions'
+import type { AppApiShape, ProjectApiShape } from './actions'
 import { makeLoaders } from './data/loaders'
 import { BrowserDataSource } from './sources/BrowserDataSource'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
@@ -23,12 +23,15 @@ export interface DataContextConfig {
   /**
    * Injected from the server
    */
-  userApi: AuthApiShape
+  appApi: AppApiShape
+  authApi: AuthApiShape
   projectApi: ProjectApiShape
 }
 
 export class DataContext {
   private _coreData: CoreDataShape
+
+  fs = fsExtra
 
   constructor (private config: DataContextConfig) {
     this._coreData = config.coreData ?? makeCoreData()
@@ -40,12 +43,20 @@ export class DataContext {
     return this.config.launchArgs
   }
 
+  get launchOptions () {
+    return this.config.launchOptions
+  }
+
   get coreData () {
     return this._coreData
   }
 
   get user () {
     return this.coreData.user
+  }
+
+  get browserList () {
+    return this.coreData.app.browsers
   }
 
   @cached
@@ -95,7 +106,8 @@ export class DataContext {
 
   get _apis () {
     return {
-      userApi: this.config.userApi,
+      appApi: this.config.appApi,
+      authApi: this.config.authApi,
       projectApi: this.config.projectApi,
     }
   }
@@ -105,10 +117,16 @@ export class DataContext {
   }
 
   // TODO(tim): type check
-  fromId (str: string): string[] {
+  fromId (str: string, accepted: NexusGenAbstractTypeMembers['Node']): string {
     const result = Buffer.from(str, 'base64').toString('utf-8')
 
-    return result.split(':')
+    const [type, val] = result.split(':') as [string, string]
+
+    if (type !== accepted) {
+      throw new Error(`Expecting node with type ${accepted} saw ${type}`)
+    }
+
+    return val
   }
 
   debug = debugLib('cypress:data-context')

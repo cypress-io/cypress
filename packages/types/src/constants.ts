@@ -128,12 +128,14 @@ export const WIZARD_STEPS = [
   },
 ] as const
 
-// type AllPackages = FrontendFramework['package'] | Bundler['package']
+export type AllPackages = FrontendFramework['package'] | Bundler['package']
 
-// export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
-//   '@cypress/vue': 'Allows Cypress to mount each Vue component using <em>cy.mount()</em>',
-//   '@cypress/react': 'Allows Cypress to mount each React component using <em>cy.mount()</em>',
-//   '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
-//   '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
-//   '@cypress/storybook': 'Allows Cypress to automatically read and test each of your stories',
-// } as const
+export type AllPackageTypes = FrontendFramework['type'] | Bundler['type']
+
+export const PACKAGES_DESCRIPTIONS: Record<AllPackages, string> = {
+  '@cypress/vue': 'Allows Cypress to mount each Vue component using <em>cy.mount()</em>',
+  '@cypress/react': 'Allows Cypress to mount each React component using <em>cy.mount()</em>',
+  '@cypress/webpack-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
+  '@cypress/vite-dev-server': 'Allows Cypress to use your existing build configuration in order to bundle and run your tests',
+  // '@cypress/storybook': 'Allows Cypress to automatically read and test each of your stories',
+} as const

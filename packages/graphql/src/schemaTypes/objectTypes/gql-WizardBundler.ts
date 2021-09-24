@@ -7,7 +7,7 @@ export const WizardBundler = objectType({
   definition (t) {
     t.boolean('isSelected', {
       description: 'Whether this is the selected framework bundler',
-      resolve: (source, args, ctx) => ctx.wizardData.chosenBundler === source,
+      resolve: (source, args, ctx) => ctx.wizardData.chosenBundler === source.name,
     })
 
     t.nonNull.string('name', {

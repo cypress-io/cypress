@@ -18,6 +18,7 @@ export const Wizard = objectType({
 
     t.field('bundler', {
       type: WizardBundler,
+      resolve: (source, args, ctx) => ctx.wizard.chosenBundler ?? null,
     })
 
     t.nonNull.boolean('chosenTestingTypePluginsInitialized', {
@@ -34,11 +35,12 @@ export const Wizard = objectType({
 
     t.string('description', {
       description: 'The title of the page, given the current step of the wizard',
+      resolve: (source, args, ctx) => ctx.wizard.description ?? null,
     })
 
     t.field('framework', {
       type: WizardFrontendFramework,
-      resolve: (source) => FRONTEND_FRAMEWORKS.find((f) => f.type === source.chosenFramework) ?? null,
+      resolve: (source, args, ctx) => ctx.wizard.chosenFramework ?? null,
     })
 
     t.nonNull.list.nonNull.field('frameworks', {
@@ -77,6 +79,7 @@ export const Wizard = objectType({
     t.field('testingType', {
       type: TestingTypeEnum,
       description: 'The testing type we are setting in the wizard, null if this has not been chosen',
+      resolve: (source) => source.chosenTestingType,
     })
 
     t.nonNull.list.nonNull.field('testingTypes', {
@@ -84,7 +87,10 @@ export const Wizard = objectType({
       resolve: () => Array.from(TESTING_TYPES),
     })
 
-    t.string('title', { description: 'The title of the page, given the current step of the wizard' })
+    t.string('title', {
+      description: 'The title of the page, given the current step of the wizard',
+      resolve: (source, args, ctx) => ctx.wizard.title ?? null,
+    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/coreDataShape',

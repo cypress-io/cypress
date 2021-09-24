@@ -12,6 +12,41 @@ export class WizardActions {
     return this.data.history
   }
 
+  async initializeOpenProject () {
+    if (!this.ctx.activeProject) {
+      throw Error('No active project found. Cannot open a browser without an active project')
+    }
+
+    if (!this.data.chosenTestingType) {
+      throw Error('Must set testingType before initializing a project')
+    }
+
+    // do not re-initialize plugins and dev-server.
+    if (this.data.chosenTestingType === 'component' && this.ctx.activeProject.ctPluginsInitialized) {
+      this.ctx.debug('CT already initialized. Returning.')
+
+      return
+    }
+
+    if (this.data.chosenTestingType === 'e2e' && this.ctx.activeProject.e2ePluginsInitialized) {
+      this.ctx.debug('E2E already initialized. Returning.')
+
+      return
+    }
+
+    await this.ctx.actions.project.initializeActiveProject()
+
+    if (this.ctx.wizardData.chosenTestingType === 'e2e') {
+      this.ctx.activeProject.e2ePluginsInitialized = true
+    }
+
+    if (this.ctx.wizardData.chosenTestingType === 'component') {
+      this.ctx.activeProject.ctPluginsInitialized = true
+    }
+
+    this.ctx.debug('finishing initializing project')
+  }
+
   validateManualInstall () {
     //
   }
@@ -24,7 +59,7 @@ export class WizardActions {
     return this.data
   }
 
-  setFramework (framework: NexusGenEnums['FrontendFramework']) {
+  setFramework (framework: NexusGenEnums['FrontendFrameworkEnum']) {
     this.ctx.coreData.wizard.chosenFramework = framework
 
     if (framework !== 'react' && framework !== 'vue') {

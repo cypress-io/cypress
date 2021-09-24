@@ -1,18 +1,27 @@
+import type { MutationAppCreateConfigFileArgs } from '@packages/graphql/src/gen/nxs.gen'
 import type { FoundBrowser, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import path from 'path'
+
 import type { DataContext } from '..'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
+   * TODO(tim): figure out what this is actually doing, it seems it's necessary in
+   *   order for CT to startup
    */
   initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: string, options: LaunchOpts): Promise<unknown>
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProject(projectRoot: string): void
 }
 
 export class ProjectActions {
-  constructor (private ctx: DataContext, private api: ProjectApiShape) {}
+  constructor (private ctx: DataContext) {}
+
+  private get api () {
+    return this.ctx._apis.projectApi
+  }
 
   setActiveProject (projectRoot: string) {
     this.ctx.coreData.app.activeProject = {
@@ -26,42 +35,15 @@ export class ProjectActions {
     return this
   }
 
-  initializeActiveProject () {
-    // await openProject.create(args.projectRoot, args, options, browsers)
-    // if (!this.ctx.activeProject) {
-    //   throw Error('Cannot initialize project without an active project')
-    // }
+  async initializeActiveProject () {
+    if (!this.ctx.activeProject) {
+      throw Error('Cannot initialize project without an active project')
+    }
+    // args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]
 
-    // if (args.testingType === 'e2e') {
-    //   this.ctx.activeProject.setE2EPluginsInitialized(true)
-    // }
+    const browsers = [...(this.ctx.browserList ?? [])]
 
-    // if (args.testingType === 'component') {
-    //   this.ctx.activeProject.setCtPluginsInitialized(true)
-    // }
-  }
-
-  launchProject () {
-    // this.ctx.debug('launching with browser %o', browser)
-
-    // const browser = this.ctx.appData.browsers?.find((x) => x.name === 'chrome')
-
-    // if (!browser) {
-    //   throw Error(`Could not find chrome browser`)
-    // }
-
-    // const spec: Cypress.Spec = {
-    //   name: '',
-    //   absolute: '',
-    //   relative: '',
-    //   specType: ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
-    // }
-
-    // await ctx.actions.launchOpenProject(browser.config, spec, {})
-
-    // // ctx.actions.project.launchProject()
-
-    // return this.api.launchProject(browser, spec, options)
+    await this.api.initializeProject(this.ctx.launchArgs, this.ctx.launchOptions, browsers)
   }
 
   createProject () {
@@ -78,6 +60,23 @@ export class ProjectActions {
     this.setActiveProject(projectRoot)
   }
 
+  async launchProject () {
+    const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
+
+    if (!browser) {
+      throw Error(`Could not find browser`)
+    }
+
+    const spec: Cypress.Spec = {
+      name: '',
+      absolute: '',
+      relative: '',
+      specType: this.ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
+    }
+
+    return this.api.launchProject(browser, spec, {})
+  }
+
   removeProject () {
     //
   }
@@ -86,7 +85,13 @@ export class ProjectActions {
     //
   }
 
-  createConfigFile () {
-    //
+  createConfigFile (args: MutationAppCreateConfigFileArgs) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create config file without activeProject.`)
+    }
+
+    this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
   }
 }

@@ -8,10 +8,11 @@ export class BrowserDataSource {
     return `${obj.name}-${obj.family}-${obj.channel}`
   }
 
-  browserFromId (browserId: string) {
-    const [, browserIdParts] = this.ctx.fromId(browserId)
-    const [name, family, channel] = browserIdParts?.split('-') as string[]
+  isSelected (obj: FoundBrowser) {
+    if (!this.ctx.wizardData.chosenBrowser) {
+      return false
+    }
 
-    return this.ctx.browser
+    return this.idForBrowser(this.ctx.wizardData.chosenBrowser) === this.idForBrowser(obj)
   }
 }

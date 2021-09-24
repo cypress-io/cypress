@@ -8,7 +8,11 @@ export interface AuthApiShape {
 }
 
 export class AuthActions {
-  constructor (private ctx: DataContext, private authApi: AuthApiShape) {}
+  constructor (private ctx: DataContext) {}
+
+  get authApi () {
+    return this.ctx._apis.authApi
+  }
 
   async refreshUser () {
     // // TODO(tim): This should be injected, we should avoid async feching

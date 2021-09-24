@@ -1,4 +1,4 @@
-import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS } from '@packages/types'
+import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, WIZARD_STEPS } from '@packages/types'
 import dedent from 'dedent'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
@@ -6,8 +6,27 @@ import type { DataContext } from '..'
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
+  private get data () {
+    return this.ctx.wizardData
+  }
+
+  get description () {
+    return WIZARD_STEPS.find((step) => step.type === this.data.currentStep)?.description
+  }
+
+  get title () {
+    return WIZARD_STEPS.find((step) => step.type === this.data.currentStep)?.title
+  }
+
   packagesToInstall () {
-    //
+    if (!this.chosenFramework || !this.chosenBundler) {
+      return null
+    }
+
+    return [
+      { name: this.chosenFramework.name, description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package] },
+      { name: this.chosenBundler.name, description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package] },
+    ]
   }
 
   get chosenTestingTypePluginsInitialized () {
@@ -173,7 +192,7 @@ ${exportStatement}
 }`
 }
 
-const FRAMEWORK_CONFIG_FILE: Partial<Record<NexusGenEnums['FrontendFramework'], Record<NexusGenEnums['WizardCodeLanguage'], string> | null>> = {
+const FRAMEWORK_CONFIG_FILE: Partial<Record<NexusGenEnums['FrontendFrameworkEnum'], Record<NexusGenEnums['WizardCodeLanguage'], string> | null>> = {
   nextjs: {
     js: dedent`
       const injectNextDevServer = require('@cypress/react/plugins/next')

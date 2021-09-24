@@ -30,7 +30,7 @@ import { useMutation } from '@urql/vue'
 import { useI18n } from "../composables";
 
 gql`
-mutation EnvironmentSetupSetFramework($framework: FrontendFramework!) {
+mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
   wizardSetFramework(framework: $framework) {
     ...EnvironmentSetup
   }

@@ -11,6 +11,10 @@ export const Browser = objectType({
       resolve: () => false,
     })
 
+    t.nonNull.boolean('isSelected', {
+      resolve: (source, args, ctx) => ctx.browser.isSelected(source),
+    })
+
     t.nonNull.string('displayName')
     t.nonNull.field('family', {
       type: BrowserFamilyEnum,

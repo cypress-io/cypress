@@ -25,8 +25,12 @@ export const WizardFrontendFramework = objectType({
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',
       resolve: (source, args, ctx) => {
-        return source
+        return []
       },
     })
+  },
+  sourceType: {
+    module: '@packages/types',
+    export: 'FrontendFramework',
   },
 })

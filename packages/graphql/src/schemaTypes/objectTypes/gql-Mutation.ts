@@ -1,4 +1,4 @@
-import { arg, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
@@ -61,7 +61,24 @@ export const mutation = mutationType({
       type: Wizard,
       description: 'Validates that the manual install has occurred properly',
       resolve: (root, args, ctx) => {
-        return ctx.actions.wizard.validateManualInstall()
+        ctx.actions.wizard.validateManualInstall()
+
+        return ctx.wizardData
+      },
+    })
+
+    t.field('launchpadSetBrowser', {
+      type: 'Query',
+      description: 'Sets the active browser',
+      args: {
+        id: nonNull(idArg({
+          description: 'ID of the browser that we want to set',
+        })),
+      },
+      resolve: (root, args, ctx) => {
+        ctx.actions.app.setActiveBrowser(args.id)
+
+        return {}
       },
     })
 
@@ -73,7 +90,7 @@ export const mutation = mutationType({
       },
       description: 'Create a Cypress config file for a new project',
       resolve: async (root, args, ctx) => {
-        await ctx.actions.project.createConfigFile()
+        await ctx.actions.project.createConfigFile(args)
 
         return ctx.appData
       },
@@ -114,6 +131,8 @@ export const mutation = mutationType({
       type: 'Wizard',
       description: 'Initializes open_project global singleton to manager current project state',
       async resolve (_root, args, ctx) {
+        await ctx.actions.wizard.initializeOpenProject()
+
         return ctx.wizardData
       },
     })

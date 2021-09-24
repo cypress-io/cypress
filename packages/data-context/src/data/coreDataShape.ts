@@ -34,8 +34,9 @@ export interface WizardDataShape {
   chosenBundler: NexusGenEnums['SupportedBundlers'] | null
   allBundlers: typeof BUNDLERS
   chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
-  chosenFramework: NexusGenEnums['FrontendFramework'] | null
+  chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenManualInstall: boolean
+  chosenBrowser: FoundBrowser | null
 }
 
 export interface CoreDataShape {
@@ -64,6 +65,7 @@ export function makeCoreData (): CoreDataShape {
       currentStep: 'welcome',
       allBundlers: BUNDLERS,
       history: ['welcome'],
+      chosenBrowser: null,
     },
     user: null,
   }

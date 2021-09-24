@@ -18,6 +18,9 @@ type App {
 
   """All known projects for the app"""
   projects: [Project!]!
+
+  """The currently selected browser for the application"""
+  selectedBrowser: Browser
 }
 
 """Container representing a browser"""
@@ -29,6 +32,7 @@ type Browser implements Node {
 
   """Relay style Node ID field for the Browser field"""
   id: ID!
+  isSelected: Boolean!
   majorVersion: String
   name: String!
   path: String!
@@ -231,7 +235,7 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-enum FrontendFramework {
+enum FrontendFrameworkEnum {
   cra
   nextjs
   nuxtjs
@@ -243,7 +247,7 @@ enum FrontendFramework {
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+scalar JSON
 
 type Mutation {
   """Add project to projects array and cache it"""
@@ -259,6 +263,12 @@ type Mutation {
 
   """Launches project from open_project global singleton"""
   launchOpenProject: App
+
+  """Sets the active browser"""
+  launchpadSetBrowser(
+    """ID of the browser that we want to set"""
+    id: ID!
+  ): Query
 
   """Auth with Cypress Cloud"""
   login: Query
@@ -279,7 +289,7 @@ type Mutation {
   wizardSetBundler(bundler: SupportedBundlers!): Wizard
 
   """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFramework!): Wizard
+  wizardSetFramework(framework: FrontendFrameworkEnum!): Wizard
 
   """Sets the frontend bundler we want to use for the project"""
   wizardSetManualInstall(isManual: Boolean!): Wizard
@@ -510,7 +520,7 @@ type WizardFrontendFramework implements Node {
   supportedBundlers: [WizardBundler!]!
 
   """The name of the framework"""
-  type: FrontendFramework!
+  type: FrontendFrameworkEnum!
 }
 
 enum WizardNavigateDirection {

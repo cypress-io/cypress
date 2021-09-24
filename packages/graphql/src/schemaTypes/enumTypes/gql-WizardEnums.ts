@@ -13,7 +13,7 @@ export const WizardNavigateDirectionEnum = enumType({
 })
 
 export const FrontendFrameworkEnum = enumType({
-  name: 'FrontendFramework',
+  name: 'FrontendFrameworkEnum',
   members: FRONTEND_FRAMEWORKS.map((t) => t.type),
 })
 

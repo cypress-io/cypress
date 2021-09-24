@@ -22,12 +22,14 @@ export function viteLaunchpad () {
 export function viteCleanApp () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgApp,
+    waitForExit: true,
   })
 }
 
 export function viteCleanLaunchpad () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgLaunchpad,
+    waitForExit: true,
   })
 }
 

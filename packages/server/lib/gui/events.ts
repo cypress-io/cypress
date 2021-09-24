@@ -16,7 +16,6 @@ const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
-const { openProject } = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -29,11 +28,13 @@ const savedState = require('../saved_state')
 import * as config from '../config'
 import auth from './auth'
 import user from '../user'
+import { openProject } from '../open_project'
 
 import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
-import type { LaunchArgs } from '@packages/types'
+import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
 import { makeDataContext } from '@packages/data-context'
+import { getBrowsers } from '../browsers/utils'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -502,7 +503,13 @@ module.exports = {
 
     const ctx = makeDataContext({
       launchArgs: options,
-      userApi: {
+      launchOptions: {},
+      appApi: {
+        getBrowsers () {
+          return getBrowsers()
+        },
+      },
+      authApi: {
         logIn () {
           return auth.start(() => {}, 'launchpad')
         },
@@ -518,15 +525,21 @@ module.exports = {
         getConfig (projectRoot: string) {
           return config.get(projectRoot)
         },
-        launchProject () {
-          //
+        launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
+          return openProject.launch({ ...browser }, spec, options)
+        },
+        initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+          return openProject.create(args.projectRoot, args, options, browsers)
         },
         insertProject () {
-          //
+          // TODO
         },
       },
-      // coreData options, {}
     })
+
+    // Fetch the browsers when the app starts, so we have some by
+    // the time we're continuing.
+    ctx.actions.app.refreshBrowsers()
 
     setDataContext(ctx)
   },
