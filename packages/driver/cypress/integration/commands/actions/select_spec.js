@@ -366,6 +366,17 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select').select('foo')
       })
 
+      it('throws when called with no arguments', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` was not called with any value, index, or text.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select[name=maps]').select()
+      })
+
       it('throws on anything other than a select', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` can only be called on a `<select>`. Your subject is a: `<input id="input">`')

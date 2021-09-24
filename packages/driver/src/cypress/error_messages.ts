@@ -1381,6 +1381,10 @@ export default {
   },
 
   select: {
+    no_argument: {
+      message: `${cmd('select')} was not called with any value, index, or text.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
     disabled: {
       message: `${cmd('select')} failed because this element is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
