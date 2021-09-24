@@ -145,7 +145,7 @@ export async function getDefaultConfigFilePath (projectRoot: string, returnDefau
 
   // if we found more than one, throw a language conflict
   if (foundConfigFiles.length > 1) {
-    return errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
+    throw errors.throw('CONFIG_FILES_LANGUAGE_CONFLICT', projectRoot, ...foundConfigFiles)
   }
 
   if (returnDefaultValueIfNotFound) {
