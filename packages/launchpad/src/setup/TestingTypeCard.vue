@@ -13,7 +13,7 @@
       <span class="flex items-center px-3 py-1 border rounded-full">
         <i-oi-clock class="mr-2 text-gray-300 w-14px h-14px" />8 min
       </span>
-      <span class="border rounded-full pt-2px pl-4px text-body-gray-400 w-32px h-32px">
+      <span class="border rounded-full text-body-gray-400 w-32px h-32px flex items-center justify-center">
         <i-akar-icons-triangle-right class="h-24px w-24px" />
       </span>
     </div>
