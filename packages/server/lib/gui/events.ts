@@ -31,6 +31,7 @@ import user from '../user'
 import { openProject } from '../open_project'
 
 import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
+import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
 import { makeDataContext } from '@packages/data-context'
@@ -516,9 +517,8 @@ module.exports = {
         logOut () {
           return user.logOut()
         },
-        refreshUser () {
-          // TODO(tim)
-          return user.getSafely()
+        checkAuth (context) {
+          return checkAuthQuery(context)
         },
       },
       projectApi: {

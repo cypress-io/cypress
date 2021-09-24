@@ -21,6 +21,7 @@
     "check-ts": "yarn gulp checkTs",
     "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
     "clean-untracked-files": "git clean -d -f",
+    "debug": "yarn gulp debug",
     "precypress:open": "yarn ensure-deps",
     "cypress:open": "cypress open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",

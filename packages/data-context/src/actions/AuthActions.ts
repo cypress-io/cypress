@@ -4,7 +4,7 @@ import type { AuthenticatedUserShape } from '../data'
 export interface AuthApiShape {
   logIn(): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
-  refreshUser(): Promise<unknown>
+  checkAuth(context: DataContext): Promise<void>
 }
 
 export class AuthActions {
@@ -14,30 +14,11 @@ export class AuthActions {
     return this.ctx._apis.authApi
   }
 
-  async refreshUser () {
-    // // TODO(tim): This should be injected, we should avoid async feching
-    // // in constructors like this
-    // user.get().then((cachedUser: AuthenticatedUser) => {
-    //   // cache returns empty object if user is undefined
-    //   if (cachedUser.authToken) {
-    //     this._authenticatedUser = cachedUser
-    //   }
-
-    //   // TODO(tim): This is a huge hack. We need to cleanup the whole user auth layer
-    //   Promise.resolve(execute({
-    //     schema: this._remoteSchema,
-    //     document: parse(`{ cloudViewer { id } }`),
-    //     contextValue: this,
-    //   })).then((result) => {
-    //     if (!result.data?.cloudViewer) {
-    //       this._authenticatedUser = null
-    //       user.logOut()
-    //     }
-    //   })
-    // })
+  async checkAuth () {
+    return this.authApi.checkAuth(this.ctx)
   }
 
-  async logIn () {
+  async login () {
     this.setAuthenticatedUser(await this.authApi.logIn())
   }
 

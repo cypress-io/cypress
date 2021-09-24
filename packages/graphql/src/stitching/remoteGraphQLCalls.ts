@@ -1,5 +1,5 @@
 import { batchDelegateToSchema } from '@graphql-tools/batch-delegate'
-import type { GraphQLResolveInfo } from 'graphql'
+import { execute, GraphQLResolveInfo, parse } from 'graphql'
 import { remoteSchemaWrapped } from './remoteSchemaWrapped'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
@@ -24,6 +24,19 @@ type KnownBatchFields = PotentialFields & keyof FieldArgMapping
 
 const FieldConfig: Record<KnownBatchFields, string> = {
   cloudProjectsBySlugs: 'slugs',
+}
+
+export function checkAuthQuery (context: DataContext) {
+  return Promise.resolve(execute({
+    schema: remoteSchemaWrapped,
+    document: parse(`{ cloudViewer { id } }`),
+    contextValue: context,
+  })).then((result) => {
+    if (!result.data?.cloudViewer) {
+      context.coreData.user = null
+      context.actions.auth.logout()
+    }
+  })
 }
 
 export function cloudProjectBySlug (slug: string, context: DataContext, info: GraphQLResolveInfo) {

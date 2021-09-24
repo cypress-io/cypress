@@ -111,7 +111,7 @@ export const mutation = mutationType({
       type: 'Query',
       description: 'Auth with Cypress Cloud',
       async resolve (_root, args, ctx) {
-        await ctx.actions.auth.logIn()
+        await ctx.actions.auth.login()
 
         return {}
       },
