@@ -124,7 +124,7 @@ export const WizardStepEnum = enumType({
 })
 
 export const WIZARD_TITLES: Record<WizardStep, string | null> = {
-  welcome: 'Welcome to Cypress',
+  welcome: 'Welcome to Cypress!',
   selectFramework: 'Project Setup',
   initializePlugins: 'Initializing Config...',
   installDependencies: 'Install Dev Dependencies',
