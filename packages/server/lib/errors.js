@@ -705,6 +705,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`
           There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
           ${arg1}
+          
           Cypress does not know which one to read for config. Please remove one of the two and try again.
           `
     case 'CONFIG_FILE_NOT_FOUND':
