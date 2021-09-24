@@ -1,8 +1,10 @@
 <template>
-  <div class="bg-gray-100 flex items-center p-2 mb-8 justify-between">
-    <div class="flex items-center">
-      <img src="../images/cypress_s.png" class="p-2" />
-      Projects > {{ props.gql.app.activeProject?.title }}
+  <div class="flex items-center py-4 px-6 mb-8 justify-between border-b">
+    <div class="flex items-center ">
+      <img class="w-32px h-32px mr-2" src="../images/cypress-dark.png" />
+      <span class="text-primary">Projects</span> 
+      <i-oi-chevron-right class="text-gray-200 h-8px" />
+      <span class="text-body-gray-700">{{ props.gql.app.activeProject?.title }}</span>
     </div>
     <div>
       <Auth :gql="props.gql" />
