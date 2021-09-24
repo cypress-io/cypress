@@ -6,11 +6,16 @@ const path = require('path')
 const _ = require('lodash')
 
 const extension = require('@packages/extension')
-const launch = require('@packages/launcher/lib/browsers')
-const plugins = require('../../../lib/plugins')
 const utils = require('../../../lib/browsers/utils')
-const chrome = require('../../../lib/browsers/chrome')
 const { fs } = require('../../../lib/util/fs')
+
+const { stubable } = require('../../specUtils')
+const proxyquire = require('proxyquire')
+const plugins = stubable(require('../../../lib/plugins'))
+const launch = stubable(require('@packages/launcher/lib/browsers'))
+const chrome = proxyquire('../../../lib/browsers/chrome', {
+  '@packages/launcher': launch,
+})
 
 function verifyCriClientProtocolVersionCalled (criClient) {
   expect(criClient.ensureMinimumProtocolVersion).to.be.calledOnce
@@ -318,7 +323,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a('function')
+        expect(typeof this.launchedBrowser.kill).equal('function')
 
         return this.launchedBrowser.kill()
       }).then(() => {
