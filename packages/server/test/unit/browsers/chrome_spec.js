@@ -7,10 +7,10 @@ const _ = require('lodash')
 
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
-const plugins = require(`${root}../lib/plugins`)
-const utils = require(`${root}../lib/browsers/utils`)
-const chrome = require(`${root}../lib/browsers/chrome`)
-const { fs } = require(`${root}../lib/util/fs`)
+const plugins = require('../../../lib/plugins')
+const utils = require('../../../lib/browsers/utils')
+const chrome = require('../../../lib/browsers/chrome')
+const { fs } = require('../../../lib/util/fs')
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
