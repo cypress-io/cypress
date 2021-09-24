@@ -67,3 +67,12 @@ E2E tests:
 ## from repo root
 yarn workspace @packages/launchpad cypress:open
 ```
+
+## Utility class usage
+
+Windi CSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
+
+```bash
+## from launchpad directory
+yarn windi
+```

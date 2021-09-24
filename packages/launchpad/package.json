@@ -8,6 +8,7 @@
     "clean": "rimraf dist && rimraf ./node_modules/.vite && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run && yarn types",
+    "windi": "yarn windicss-analysis",
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
@@ -57,6 +58,7 @@
     "vue-tsc": "^0.3.0",
     "vue3-file-selector": "^1.0.1",
     "windicss": "3.1.4",
+    "windicss-analysis": "^0.3.4",
     "wonka": "^4.0.15"
   },
   "files": [
