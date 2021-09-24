@@ -1,5 +1,5 @@
 <template>
-  <main class="text-center" ref="projectUpload">
+  <main class="mx-6 text-center" ref="projectUpload">
     <h1 class="mb-2 text-2rem">{{ t('globalPage.empty.title') }}</h1>
     <p class="mb-6 text-lg font-light text-body-gray">{{ t('globalPage.empty.helper') }}</p>
     <FileSelector v-model="files" v-slot="{ openDialog }" allow-multiple>
@@ -9,7 +9,7 @@
           :class="{ 'border-blue-200': hovered }"
         >
           <IconPlaceholder
-            class="mx-auto max-w-65px h-full relative justify-center w-full text-primary"
+            class="relative justify-center w-full h-full mx-auto max-w-65px text-primary"
           />
           <i18n-t keypath="globalPage.empty.dropText">
             <button class="text-primary hover:underline">
