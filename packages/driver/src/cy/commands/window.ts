@@ -106,7 +106,22 @@ export default (Commands, Cypress, cy, state) => {
       if (options.log) {
         options._log = Cypress.log({ timeout: options.timeout })
       }
-
+      
+      if(options.touchDevice) {
+        const win = state('window');
+        const deviceMatchMedia = win.matchMedia;
+                Object.defineProperty(win, 'matchMedia', {
+                    value: (arg: string) => ({
+                        matches:
+                            (options.touchDevice &&
+                                arg === '(hover: none) and (pointer: coarse)') ||
+                            deviceMatchMedia(arg).matches,
+                        addListener: () => {},
+                        removeListener: () => {},
+                    }),
+                });
+     
+      }
       const getWindow = () => {
         const window = state('window')
 
