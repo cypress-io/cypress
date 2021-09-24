@@ -12,6 +12,10 @@ const utils = require('../../../lib/browsers/utils')
 const chrome = require('../../../lib/browsers/chrome')
 const { fs } = require('../../../lib/util/fs')
 
+function verifyCriClientProtocolVersionCalled (criClient) {
+  expect(criClient.ensureMinimumProtocolVersion).to.be.calledOnce
+}
+
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
     beforeEach(function () {
@@ -63,7 +67,6 @@ describe('lib/browsers/chrome', () => {
 
     afterEach(function () {
       mockfs.restore()
-      expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
     it('focuses on the page, calls CRI Page.visit, enables Page events, and sets download behavior', function () {
@@ -77,6 +80,8 @@ describe('lib/browsers/chrome', () => {
         expect(this.criClient.send).to.have.been.calledWith('Page.enable')
         expect(this.criClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.criClient.send).to.have.been.calledWith('Network.enable')
+
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -84,6 +89,7 @@ describe('lib/browsers/chrome', () => {
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         expect(plugins.execute).not.to.be.called
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -100,6 +106,7 @@ describe('lib/browsers/chrome', () => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
         expect(launch.launch).to.be.calledWith('chrome', 'about:blank', args)
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -115,6 +122,8 @@ describe('lib/browsers/chrome', () => {
           '--window-size=1280,720',
           '--force-device-scale-factor=1',
         ])
+
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -132,6 +141,8 @@ describe('lib/browsers/chrome', () => {
           '--user-data-dir=/profile/dir',
           '--disk-cache-dir=/profile/dir/CypressCache',
         ])
+
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -159,6 +170,8 @@ describe('lib/browsers/chrome', () => {
         expect(args).to.include.members([
           `--user-data-dir=${fullPath}`,
         ])
+
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -183,6 +196,7 @@ describe('lib/browsers/chrome', () => {
         ])
 
         expect(onWarning).calledOnce
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -205,6 +219,8 @@ describe('lib/browsers/chrome', () => {
           '--user-data-dir=/profile/dir',
           '--disk-cache-dir=/profile/dir/CypressCache',
         ])
+
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -229,6 +245,7 @@ describe('lib/browsers/chrome', () => {
         ])
 
         expect(onWarning).not.calledOnce
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -266,6 +283,7 @@ describe('lib/browsers/chrome', () => {
       }, 'http://', {}, this.automation)
       .then(() => {
         expect((getFile(fullPath).getMode()) & 0o0700).to.be.above(0o0500)
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -287,6 +305,8 @@ describe('lib/browsers/chrome', () => {
             exited_cleanly: true,
           },
         })
+
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -305,6 +325,7 @@ describe('lib/browsers/chrome', () => {
         expect(this.criClient.close).to.be.calledOnce
 
         expect(kill).to.be.calledOnce
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -325,6 +346,7 @@ describe('lib/browsers/chrome', () => {
         expect(this.criClient.send).to.have.been.calledWith('Page.startScreencast')
         expect(write).to.have.been.calledWith(frameMeta)
         expect(this.criClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+        verifyCriClientProtocolVersionCalled(this.criClient)
       })
     })
 
@@ -345,6 +367,8 @@ describe('lib/browsers/chrome', () => {
             mime: 'text/csv',
             url: 'http://localhost:1234/file.csv',
           })
+
+          verifyCriClientProtocolVersionCalled(this.criClient)
         })
       })
 
@@ -360,6 +384,8 @@ describe('lib/browsers/chrome', () => {
           expect(this.automation.push).to.be.calledWith('complete:download', {
             id: '1',
           })
+
+          verifyCriClientProtocolVersionCalled(this.criClient)
         })
       })
     })
