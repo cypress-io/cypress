@@ -63,7 +63,7 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
       }
 
-      // normalize valueOrText if its not an array
+      // normalize valueOrTextOrIndex if its not an array
       valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v) => {
         if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
 
