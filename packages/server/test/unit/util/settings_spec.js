@@ -162,6 +162,22 @@ describe('lib/util/settings', () => {
           expect(obj).to.deep.eq({ pageLoadTimeout: 30000, foo: 'bar' })
         })
       })
+
+      it('errors if in run mode and can\'t find file', function () {
+        return settings.read(projectRoot, { ...defaultOptions, args: { runProject: 'path' } })
+        .then(() => {
+          throw Error('read should have failed with no config file in run mode')
+        }).catch((err) => {
+          expect(err.type).to.equal('CONFIG_FILE_NOT_FOUND')
+
+          return fs.access(path.join(projectRoot, 'cypress.json'))
+          .then(() => {
+            throw Error('file should not have been created here')
+          }).catch((err) => {
+            expect(err.code).to.equal('ENOENT')
+          })
+        })
+      })
     })
 
     context('.write', () => {
@@ -196,9 +212,11 @@ describe('lib/util/settings', () => {
     it('.write does not create a file', function () {
       return settings.write(this.projectRoot, {}, this.options)
       .then(() => {
-        return fs.exists(path.join(this.projectRoot, 'cypress.json'))
-        .then((exists) => {
-          expect(exists).to.equal(false)
+        return fs.access(path.join(this.projectRoot, 'cypress.json'))
+        .then(() => {
+          throw Error('file shuold not have been created here')
+        }).catch((err) => {
+          expect(err.code).to.equal('ENOENT')
         })
       })
     })
