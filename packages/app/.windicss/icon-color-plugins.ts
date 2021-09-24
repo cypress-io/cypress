@@ -9,12 +9,12 @@ import createPlugin from 'windicss/plugin'
 import { reduce, kebabCase, isObject } from 'lodash'
 import Colors from 'windicss/colors'
 
- interface RuleConfig {
-   name: string
-   theme?: (key: string) => string
-   weight?: string
-   color?: string
- }
+interface RuleConfig {
+  name: string
+  theme?: (key: string) => string
+  weight?: string
+  color?: string
+}
 
 const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
   const resolvedColor = color ? color : weight ? theme(`colors.${name}.${weight}`) : theme(`colors.${name}`)
