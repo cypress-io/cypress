@@ -1,7 +1,7 @@
 import { defineConfig } from 'windicss/helpers'
 import InteractionVariants from '@windicss/plugin-interaction-variants'
-import { IconDuotoneColorsPlugin } from './icon-color-plugins'
-import { safelist } from './safelist'
+import { IconDuotoneColorsPlugin } from './.windicss/icon-color-plugins'
+import { safelist } from './.windicss/safelist'
 
 export default defineConfig({
   // This adds !important to all utility classes. https://csswizardry.com/2016/05/the-importance-of-important/
