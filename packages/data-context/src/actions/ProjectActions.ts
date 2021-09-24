@@ -39,11 +39,16 @@ export class ProjectActions {
     if (!this.ctx.activeProject) {
       throw Error('Cannot initialize project without an active project')
     }
-    // args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]
+
+    if (!this.ctx.wizardData.chosenTestingType) {
+      throw Error('Cannot initialize project without choosing testingType')
+    }
 
     const browsers = [...(this.ctx.browserList ?? [])]
 
-    await this.api.initializeProject(this.ctx.launchArgs, this.ctx.launchOptions, browsers)
+    await this.api.initializeProject(
+      { ...this.ctx.launchArgs, testingType: this.ctx.wizardData.chosenTestingType }, this.ctx.launchOptions, browsers,
+    )
   }
 
   createProject () {
