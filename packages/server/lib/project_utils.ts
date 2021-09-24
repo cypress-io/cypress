@@ -120,7 +120,7 @@ export const checkSupportFile = async ({
   configFile,
 }: {
   supportFile?: string | boolean
-  configFile?: string | boolean
+  configFile?: string | false
 }) => {
   if (supportFile && typeof supportFile === 'string') {
     const found = await fs.pathExists(supportFile)

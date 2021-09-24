@@ -54,7 +54,7 @@ type WebSocketOptionsCallback = (...args: any[]) => any
 export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
 
-  configFile?: string | boolean
+  configFile?: string | false
   browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
@@ -516,7 +516,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     projectRoot,
   }: {
     projectRoot: string
-    configFile?: string | boolean
+    configFile?: string | false
     onSettingsChanged?: false | (() => void)
   }) {
     // bail if we havent been told to
@@ -693,7 +693,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     // set default for "configFile" if undefined
     if (this.options.configFile === undefined
   || this.options.configFile === null) {
-      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.isTextTerminal)
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
     }
 
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)

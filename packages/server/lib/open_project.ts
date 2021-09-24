@@ -46,6 +46,12 @@ export interface LaunchArgs {
   os: PlatformName
 
   onFocusTests?: () => any
+  /**
+   * in run mode, the path of the project run
+   * path is relative if specified with --project,
+   * absolute if implied by currnet working directory
+   */
+  runProject?: string
 }
 
 // @see https://github.com/cypress-io/cypress/issues/18094
