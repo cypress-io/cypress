@@ -2,7 +2,7 @@
   <div v-if="!backendInitialized">
     Loading...
   </div>
-  <div v-else class="bg-white h-full">
+  <div v-else class="h-full mx-auto bg-white">
     <Main />
   </div>
 </template>
@@ -56,6 +56,6 @@ const backendInitialized = computed(() => !!query.data?.value?.app)
 
 <style lang="scss">
 html, body, #app {
-  @apply h-full;
+  @apply h-full bg-white;
 }
 </style>
