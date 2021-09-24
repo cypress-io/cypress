@@ -10,7 +10,7 @@ const newLineRe = /\n/g
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    select (subject, valueOrText, options = {}) {
+    select (subject, valueOrTextOrIndex, options = {}) {
       const userOptions = options
 
       options = _.defaults({}, userOptions, {
@@ -63,19 +63,23 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
       }
 
-      // normalize valueOrText if its not an array
-      valueOrText = [].concat(valueOrText).map((v) => {
+      // normalize valueOrTextOrIndex if its not an array
+      valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v) => {
+        if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
+          $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
+        }
+
         // https://github.com/cypress-io/cypress/issues/16045
         // replace `&nbsp;` in the text to `\us00a0` to find match.
         // @see https://stackoverflow.com/a/53306311/1038927
-        return v.replace(/&nbsp;/g, '\u00a0')
+        return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
       })
 
       const multiple = options.$el.prop('multiple')
 
       // throw if we're not a multiple select and we've
       // passed an array of values
-      if (!multiple && valueOrText.length > 1) {
+      if (!multiple && valueOrTextOrIndex.length > 1) {
         $errUtils.throwErrByPath('select.invalid_multiple')
       }
 
@@ -96,7 +100,7 @@ export default (Commands, Cypress, cy) => {
           const value = $elements.getNativeProp(el, 'value')
           const optEl = $dom.wrap(el)
 
-          if (valueOrText.includes(value)) {
+          if (valueOrTextOrIndex.includes(value) || valueOrTextOrIndex.includes(index)) {
             optionEls.push(optEl)
             values.push(value)
           }
@@ -124,7 +128,7 @@ export default (Commands, Cypress, cy) => {
           notAllUniqueValues = uniqueValues.length !== optionsObjects.length
 
           _.each(optionsObjects, (obj) => {
-            if (valueOrText.includes(obj.text)) {
+            if (valueOrTextOrIndex.includes(obj.text)) {
               optionEls.push(obj.$el)
               const objValue = obj.value
 
@@ -137,13 +141,13 @@ export default (Commands, Cypress, cy) => {
         // we have more than 1 option to set then blow up
         if (!multiple && (values.length > 1)) {
           $errUtils.throwErrByPath('select.multiple_matches', {
-            args: { value: valueOrText.join(', ') },
+            args: { value: valueOrTextOrIndex.join(', ') },
           })
         }
 
         if (!values.length) {
           $errUtils.throwErrByPath('select.no_matches', {
-            args: { value: valueOrText.join(', ') },
+            args: { value: valueOrTextOrIndex.join(', ') },
           })
         }
 
