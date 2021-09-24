@@ -65,7 +65,9 @@ export default (Commands, Cypress, cy) => {
 
       // normalize valueOrTextOrIndex if its not an array
       valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v) => {
-        if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
+        if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
+          $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
+        }
 
         // https://github.com/cypress-io/cypress/issues/16045
         // replace `&nbsp;` in the text to `\us00a0` to find match.
