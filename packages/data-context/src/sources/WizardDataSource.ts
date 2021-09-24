@@ -1,6 +1,6 @@
 import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, WIZARD_STEPS } from '@packages/types'
 import dedent from 'dedent'
-import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 
 export class WizardDataSource {
@@ -18,14 +18,22 @@ export class WizardDataSource {
     return WIZARD_STEPS.find((step) => step.type === this.data.currentStep)?.title
   }
 
-  packagesToInstall () {
+  packagesToInstall (): Array<NexusGenObjects['WizardNpmPackage']> | null {
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
     }
 
     return [
-      { name: this.chosenFramework.name, description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package] },
-      { name: this.chosenBundler.name, description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package] },
+      {
+        name: this.chosenFramework.name,
+        description: PACKAGES_DESCRIPTIONS[this.chosenFramework.package],
+        package: this.chosenFramework.package,
+      },
+      {
+        name: this.chosenBundler.name,
+        description: PACKAGES_DESCRIPTIONS[this.chosenBundler.package],
+        package: this.chosenBundler.package,
+      },
     ]
   }
 

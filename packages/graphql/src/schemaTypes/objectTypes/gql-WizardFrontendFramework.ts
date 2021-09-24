@@ -14,7 +14,7 @@ export const WizardFrontendFramework = objectType({
 
     t.nonNull.boolean('isSelected', {
       description: 'Whether this is the selected framework in the wizard',
-      resolve: (source, args, ctx) => false,
+      resolve: (source, args, ctx) => ctx.wizardData.chosenFramework === source.type,
     })
 
     t.nonNull.string('name', {
@@ -25,7 +25,7 @@ export const WizardFrontendFramework = objectType({
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',
       resolve: (source, args, ctx) => {
-        return []
+        return ctx.wizardData.allBundlers.filter((b) => source.supportedBundlers.some((x) => x === b.type))
       },
     })
   },

@@ -30,15 +30,6 @@ export const mutation = mutationType({
       resolve: (root, args, ctx) => ctx.actions.wizard.setBundler(args.bundler),
     })
 
-    t.field('wizardSetManualInstall', {
-      type: Wizard,
-      description: 'Sets the frontend bundler we want to use for the project',
-      args: {
-        isManual: nonNull('Boolean'),
-      },
-      resolve: (root, args, ctx) => ctx.actions.wizard.setManualInstall(args.isManual),
-    })
-
     t.field('wizardNavigate', {
       type: Wizard,
       args: {

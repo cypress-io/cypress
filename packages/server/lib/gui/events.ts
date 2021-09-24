@@ -502,7 +502,7 @@ module.exports = {
     // into the projects
     startGraphQLServer()
 
-    const ctx = makeDataContext({
+    const ctx = await makeDataContext({
       launchArgs: options,
       launchOptions: {},
       appApi: {

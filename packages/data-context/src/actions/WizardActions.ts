@@ -75,12 +75,6 @@ export class WizardActions {
     return this.data
   }
 
-  setManualInstall (isManual: boolean) {
-    this.ctx.coreData.wizard.chosenManualInstall = isManual
-
-    return this.data
-  }
-
   navigate (direction: NexusGenEnums['WizardNavigateDirection']) {
     this.ctx.debug(`_history is ${this._history.join(',')}`)
 

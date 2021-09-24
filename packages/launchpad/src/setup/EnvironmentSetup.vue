@@ -5,7 +5,7 @@
         :name="t('setupPage.projectSetup.frameworkLabel')"
         @select="setFEFramework"
         :options="frameworks ?? []"
-        :value="props.gql.framework?.id ?? undefined"
+        :value="props.gql.framework?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
       />
       <SelectFramework
@@ -13,7 +13,7 @@
         :disabled="bundlers.length === 1"
         @select="setFEBundler"
         :options="bundlers || []"
-        :value="props.gql.bundler?.id ?? undefined"
+        :value="props.gql.bundler?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
       />
     </div>
@@ -25,7 +25,7 @@ import { computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import SelectFramework from "../components/select/SelectFramework.vue";
 import { gql } from '@urql/core'
-import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFramework, SupportedBundlers } from '../generated/graphql'
+import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from "../composables";
 
@@ -51,12 +51,17 @@ fragment EnvironmentSetup on Wizard {
   bundler {
     id
     name
+    type
+    isSelected
   }
   framework {
+    type
     id
     name
+    isSelected
     supportedBundlers {
       id
+      type
       name
     }
   }
@@ -64,10 +69,12 @@ fragment EnvironmentSetup on Wizard {
     id
     name
     isSelected
+    type
   }
   allBundlers {
     id
     name
+    type
   }
 
   ...InstallDependencies
@@ -83,10 +90,11 @@ const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
 const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
 
 const setFEBundler = (bundler: SupportedBundlers) => {
+  console.log(bundler)
   setBundler.executeMutation({ bundler })
 };
 
-const setFEFramework = (framework: FrontendFramework) => {
+const setFEFramework = (framework: FrontendFrameworkEnum) => {
   setFramework.executeMutation({ framework })
 };
 
