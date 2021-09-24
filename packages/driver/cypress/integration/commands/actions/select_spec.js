@@ -401,7 +401,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when finding duplicate values', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` matched more than one `option` by value or text: `bm`')
+          expect(err.message).to.include('`cy.select()` matched more than one `option` by value, index, or text: `bm`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -435,7 +435,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when value or text does not exist', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value or text matching: `foo`')
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `foo`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
