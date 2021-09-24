@@ -7,7 +7,7 @@ import api from './api'
 import cache from './cache'
 import user from './user'
 import keys from './util/keys'
-import settings from './util/settings'
+import * as settings from './util/settings'
 import { ProjectBase } from './project-base'
 import { getDefaultConfigFilePath } from './project_utils'
 

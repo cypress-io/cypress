@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import path from 'path'
 
-import settings from './util/settings'
+import * as settings from './util/settings'
 import errors from './errors'
 import { fs } from './util/fs'
 import { escapeFilenameInUrl } from './util/escape_filename'
