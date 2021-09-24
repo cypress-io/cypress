@@ -61,6 +61,12 @@ describe('lib/browsers/index', () => {
     })
 
     it('throws when no browser can be found', () => {
+      sinon.stub(utils, 'getBrowsers').resolves([
+        { name: 'chrome', channel: 'stable' },
+        { name: 'firefox', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ])
+
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
