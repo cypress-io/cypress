@@ -2,8 +2,12 @@
   <div class="flex flex-col flex-1 min-h-0 bg-gray-800">
     <div class="flex flex-col flex-1 pt-5 pb-4 overflow-y-auto">
       <div class="flex items-center flex-shrink-0 px-4">
-        <i-cy-bookmark_x24 class="icon-dark-gray-300 icon-light-gray-800 w-24px h-24px" />
-        <i-bi-bookmark-star class="text-white w-18px h-18px" />
+        <i-cy-bookmark_x24
+          class="icon-dark-gray-300
+          icon-light-gray-800
+          w-24px
+          h-24px"/>
+        <i-bi-bookmark-star class="text-white w-18px h-18px"/>
       </div>
       <nav class="flex-1 px-2 mt-5 space-y-1 bg-gray-800" aria-label="Sidebar">
         <router-link
