@@ -6,6 +6,8 @@ import type { Query as CloudQuery } from '../gen/cloud-source-types.gen'
 import type { DataContext } from '@packages/data-context'
 import { delegateToSchema } from '@graphql-tools/delegate'
 
+type ArrVal<T> = T extends Array<infer U> ? U : never
+
 type PotentialFields = Exclude<keyof CloudQuery, '__typename'>
 
 interface FieldArgMapping {

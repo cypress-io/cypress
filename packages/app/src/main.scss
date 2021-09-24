@@ -12,12 +12,19 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-em {
-  @apply text-purple-400 not-italic;
+/**
+ * Animations
+ * -------------------------
+ */
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
 }
 
-a {
-  @apply text-indigo-600 hover:underline;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 /**

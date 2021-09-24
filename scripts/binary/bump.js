@@ -96,7 +96,7 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity)
 
   if (check.unemptyString(creds.githubToken)) {
     providers.travis = {
-      githubToken: creds.githubToken,
+      githubToken: process.env.GH_TOKEN,
     }
   }
 
@@ -217,6 +217,7 @@ module.exports = {
       console.log('do we have GH_APP_ID?', Boolean(process.env.GH_APP_ID))
       console.log('do we have GH_INSTALLATION_ID?', Boolean(process.env.GH_INSTALLATION_ID))
       console.log('do we have GH_PRIVATE_KEY?', Boolean(process.env.GH_PRIVATE_KEY))
+      console.log('do we have GH_TOKEN?', Boolean(process.env.GH_TOKEN))
 
       const parsedRepo = parse(project)
       const owner = parsedRepo[0]
@@ -249,7 +250,7 @@ Testing new Cypress version ${version}
         owner,
         repo,
         message,
-        token: creds.githubToken,
+        token: process.env.GH_TOKEN,
       }
 
       const createGithubCommitStatusCheck = function ({ sha }) {

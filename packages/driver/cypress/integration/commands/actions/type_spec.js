@@ -1657,7 +1657,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           href="#"
           target="_blank" alt="area" />
           </map>
-          <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+          <img usemap="#map" src="/fixtures/media/cypress.png" alt="image" />
           `).prependTo(cy.$$('body'))
 
         let keydown = cy.stub()
