@@ -162,7 +162,13 @@ export function ensureExists (path, options) {
   return settings.exists(path, options)
 }
 
-export async function writeProjectId (id: string, projectRoot: string) {
+interface ProjectIdOptions{
+  id: string
+  projectRoot: string
+  configFile: string
+}
+
+export async function writeProjectId ({ id, projectRoot, configFile }: ProjectIdOptions) {
   const attrs = { projectId: id }
 
   logger.info('Writing Project ID', _.clone(attrs))
@@ -170,7 +176,7 @@ export async function writeProjectId (id: string, projectRoot: string) {
   // TODO: We need to set this
   // this.generatedProjectIdTimestamp = new Date()
 
-  await settings.write(projectRoot, attrs)
+  await settings.write(projectRoot, attrs, { configFile })
 
   return id
 }
@@ -180,10 +186,13 @@ interface ProjectDetails {
   projectRoot: string
   orgId: string | null
   public: boolean
+  configFile: string
 }
 
-export async function createCiProject (projectDetails: ProjectDetails, projectRoot: string) {
-  debug('create CI project with projectDetails %o projectRoot %s', projectDetails, projectRoot)
+export async function createCiProject (projectDetails: ProjectDetails) {
+  debug('create CI project with projectDetails %o projectRoot %s', projectDetails)
+
+  const { projectRoot } = projectDetails
 
   const authToken = await user.ensureAuthToken()
   const remoteOrigin = await commitInfo.getRemoteOrigin(projectRoot)
@@ -195,7 +204,7 @@ export async function createCiProject (projectDetails: ProjectDetails, projectRo
 
   const newProject = await api.createProject(projectDetails, remoteOrigin, authToken)
 
-  await writeProjectId(newProject.id, projectRoot)
+  await writeProjectId({ ...projectDetails, id: newProject.id })
 
   return newProject
 }
