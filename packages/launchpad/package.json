@@ -5,8 +5,8 @@
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
     "build-prod": "cross-env NODE_ENV=production vite build",
-    "clean": "rm -rf dist && rm -rf ./node_modules/.vite && echo 'cleaned'",
-    "clean-deps": "rm -rf node_modules",
+    "clean": "rimraf dist && rimraf ./node_modules/.vite && echo 'cleaned'",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run && yarn types",
     "windi": "yarn windicss-analysis",
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
@@ -43,6 +43,7 @@
     "graphql-tag": "^2.12.5",
     "javascript-time-ago": "2.3.8",
     "prismjs": "1.24.0",
+    "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "vite": "2.4.4",
     "vite-plugin-components": "0.11.3",
