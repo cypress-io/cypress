@@ -1023,7 +1023,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'write').resolves('project-id-123')
+      sinon.stub(settings, 'write').resolves()
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
@@ -1032,7 +1032,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     it('calls api.createProject with user session', function () {
       return createCiProject({ foo: 'bar', projectRoot }).then(() => {
-        expect(api.createProject).to.be.calledWith({ foo: 'bar', projectRoot }, 'remoteOrigin', 'auth-token-123')
+        expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
       })
     })
 

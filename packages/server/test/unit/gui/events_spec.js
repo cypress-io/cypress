@@ -927,11 +927,11 @@ describe('lib/gui/events', () => {
     describe('set:project:id', () => {
       it('calls writeProjectId with projectRoot', function () {
         const arg = { id: '1', projectRoot: '/project/root/', configFile: 'cypress.json' }
-        const stub = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
+        const stubWriteProjectId = sinon.stub(ProjectStatic, 'writeProjectId').resolves()
 
         return this.handleEvent('set:project:id', arg)
         .then(() => {
-          expect(stub).to.be.calledWith(arg.id, arg.projectRoot)
+          expect(stubWriteProjectId).to.be.calledWith(arg)
           expect(this.send.firstCall.args[0]).to.eq('response')
           expect(this.send.firstCall.args[1].id).to.match(/set:project:id-/)
         })

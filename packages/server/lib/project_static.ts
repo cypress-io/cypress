@@ -189,10 +189,8 @@ interface ProjectDetails {
   configFile: string
 }
 
-export async function createCiProject (projectDetails: ProjectDetails) {
+export async function createCiProject ({ projectRoot, configFile, ...projectDetails }: ProjectDetails) {
   debug('create CI project with projectDetails %o projectRoot %s', projectDetails)
-
-  const { projectRoot } = projectDetails
 
   const authToken = await user.ensureAuthToken()
   const remoteOrigin = await commitInfo.getRemoteOrigin(projectRoot)
@@ -204,7 +202,11 @@ export async function createCiProject (projectDetails: ProjectDetails) {
 
   const newProject = await api.createProject(projectDetails, remoteOrigin, authToken)
 
-  await writeProjectId({ ...projectDetails, id: newProject.id })
+  await writeProjectId({
+    configFile,
+    projectRoot,
+    id: newProject.id,
+  })
 
   return newProject
 }
