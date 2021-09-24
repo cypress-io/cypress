@@ -694,12 +694,19 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg1.error)}
 
         Learn more at https://on.cypress.io/reporters`
-      // TODO: reword with cypress vocabulary
+      // TODO: update with vetted cypress language
     case 'NO_DEFAULT_CONFIG_FILE_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
 
         We looked but did not find a default config file in this folder: ${chalk.blue(arg1)}`
+      // TODO: update with vetted cypress language
+    case 'CONFIG_FILES_LANGUAGE_CONFLICT':
+      return stripIndent`
+          There is both a \`${arg2}\` and a \`${arg3}\` at the location below:
+          ${arg1}
+          Cypress does not know which one to read for config. Please remove one of the two and try again.
+          `
     case 'CONFIG_FILE_NOT_FOUND':
       return stripIndent`\
         Could not find a Cypress configuration file, exiting.
