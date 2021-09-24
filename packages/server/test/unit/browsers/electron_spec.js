@@ -7,10 +7,16 @@ const check = require('check-more-types')
 
 const menu = require('../../../lib/gui/menu')
 const plugins = require('../../../lib/plugins')
-const Windows = require('../../../lib/gui/windows')
-const electron = require('../../../lib/browsers/electron')
 const savedState = require('../../../lib/saved_state')
 const { Automation } = require('../../../lib/automation')
+
+const { stubable } = require('../../specUtils')
+const proxyquire = require('proxyquire')
+const Windows = stubable(require('../../../lib/gui/windows'))
+
+const electron = proxyquire('../../../lib/browsers/electron', {
+  '../gui/windows': Windows,
+})
 
 const ELECTRON_PID = 10001
 
