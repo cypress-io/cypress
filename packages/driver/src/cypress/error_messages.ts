@@ -1402,7 +1402,7 @@ export default {
       docsUrl: 'https://on.cypress.io/select',
     },
     multiple_matches: {
-      message: `${cmd('select')} matched more than one \`option\` by value, or text: \`{{value}}\``,
+      message: `${cmd('select')} matched more than one \`option\` by value or text: \`{{value}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
     no_matches: {
