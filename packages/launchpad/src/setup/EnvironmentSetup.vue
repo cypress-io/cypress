@@ -8,7 +8,7 @@
         :value="props.gql.framework?.type ?? undefined"
         :placeholder="t('setupPage.projectSetup.frameworkPlaceholder')"
       />
-      <SelectFramework
+      <SelectBundler
         :name="t('setupPage.projectSetup.bundlerLabel')"
         :disabled="bundlers.length === 1"
         @select="setFEBundler"
@@ -24,6 +24,7 @@
 import { computed } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import SelectFramework from "../components/select/SelectFramework.vue";
+import SelectBundler from "../components/select/SelectBundler.vue";
 import { gql } from '@urql/core'
 import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
@@ -95,6 +96,7 @@ const setFEBundler = (bundler: SupportedBundlers) => {
 };
 
 const setFEFramework = (framework: FrontendFrameworkEnum) => {
+  console.log(framework)
   setFramework.executeMutation({ framework })
 };
 

@@ -291,9 +291,6 @@ type Mutation {
   """Sets the frontend framework we want to use for the project"""
   wizardSetFramework(framework: FrontendFrameworkEnum!): Wizard
 
-  """Sets the frontend bundler we want to use for the project"""
-  wizardSetManualInstall(isManual: Boolean!): Wizard
-
   """Sets the current testing type we want to use"""
   wizardSetTestingType(type: TestingTypeEnum!): Wizard
 

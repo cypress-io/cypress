@@ -56,7 +56,7 @@ export class WizardDataSource {
       return false
     }
 
-    if (data.currentStep === 'selectFramework' && !data.chosenBundler && !data.chosenFramework) {
+    if (data.currentStep === 'selectFramework' && (!data.chosenBundler || !data.chosenFramework)) {
       return false
     }
 

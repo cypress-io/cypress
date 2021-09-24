@@ -33,14 +33,6 @@ fragment InstallDependencies on Wizard {
 }
 `
 
-gql`
-mutation InstallDependenciesManualInstall($isManual: Boolean!) {
-  wizardSetManualInstall(isManual: $isManual) {
-    ...InstallDependencies
-  }
-}
-`
-
 const isManualInstall = ref(false)
 
 const props = defineProps<{
