@@ -9,7 +9,6 @@ const chromePolicyCheck = require('../../../lib/util/chrome_policy_check')
 const cache = require('../../../lib/cache')
 const logger = require('../../../lib/logger')
 const ProjectBase = require('../../../lib/project-base').ProjectBase
-const ProjectStatic = require('../../../lib/project_static')
 const Updater = require('../../../lib/updater')
 const user = require('../../../lib/user')
 const errors = require('../../../lib/errors')
@@ -18,13 +17,22 @@ const { openProject } = require('../../../lib/open_project')
 const open = require('../../../lib/util/open')
 const auth = require('../../../lib/gui/auth')
 const logs = require('../../../lib/gui/logs')
-const events = require('../../../lib/gui/events')
-const dialog = require('../../../lib/gui/dialog')
-const files = require('../../../lib/gui/files')
-const ensureUrl = require('../../../lib/util/ensure-url')
 const konfig = require('../../../lib/konfig')
 const api = require('../../../lib/api')
 const savedState = require('../../../lib/saved_state')
+
+const { stubable } = require('../../specUtils')
+const proxyquire = require('proxyquire')
+const dialog = stubable(require('../../../lib/gui/dialog'))
+const files = stubable(require('../../../lib/gui/files'))
+const ProjectStatic = stubable(require('../../../lib/project_static'))
+const ensureUrl = stubable(require('../../../lib/util/ensure-url'))
+const events = proxyquire('../../../lib/gui/events', {
+  './dialog': dialog,
+  './files': files,
+  '../project_static': ProjectStatic,
+  '../util/ensure-url': ensureUrl,
+})
 
 describe('lib/gui/events', () => {
   beforeEach(function () {
