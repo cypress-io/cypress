@@ -43,7 +43,7 @@
         class="pr-8px"
         :icon="icons[i?.iconPath]"
         :active="!!i?.selected"
-        @click="handleSelect(i.id)"
+        @click="handleSelect(i.type)"
       />
       <div class="flex-grow" />
       <img src="../images/cypress_s.png" class="m-4 mx-auto w-7" />

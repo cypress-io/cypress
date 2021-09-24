@@ -9,6 +9,7 @@ import * as stubData from '../../src/graphql/testStubCloudTypes'
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import 'cypress-file-upload'
+import { navigationMenu } from '../../src/graphql/testNavigationMenu'
 
 /**
  * This variable is mimicing ipc provided by electron.
@@ -33,6 +34,7 @@ Cypress.Commands.add(
         app.use(urql, testUrqlClient({
           context: {
             stubData,
+            navigationMenu,
           },
         }))
       },
@@ -46,6 +48,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
   let hasMounted = false
   const context = {
     stubData,
+    navigationMenu,
   }
 
   return mount(defineComponent({
@@ -106,6 +109,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
             app.use(urql, testUrqlClient({
               context: {
                 stubData,
+                navigationMenu,
               },
               rootValue: options.type?.(context) ?? {},
             }))
