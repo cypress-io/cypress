@@ -8,6 +8,11 @@ import authStore from '../auth/auth-store'
 import LoginForm from '../auth/login-form'
 import DashboardBanner from './dashboard-banner'
 import WhatIsDashboard from './what-is-dashboard'
+import ErrorMessage from './error-message'
+
+function isConfigJSONFile (filePath) {
+  return /\.json$/.test(filePath)
+}
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -30,15 +35,20 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className="empty">
         {
-          this.state.setupProjectOpen && authStore.isAuthenticated ?
-            this._projectSetup()
+          !isConfigJSONFile(this.props.project.configFile) ?
+            <ErrorMessage>
+              Cypress can only configure a project with a json config file
+            </ErrorMessage>
             :
-            this.props.isValid ? authStore.isAuthenticated ?
-              this._connectProject()
+            this.state.setupProjectOpen && authStore.isAuthenticated ?
+              this._projectSetup()
               :
-              this._logIn()
-              :
-              this._invalidProject()
+              this.props.isValid ? authStore.isAuthenticated ?
+                this._connectProject()
+                :
+                this._logIn()
+                :
+                this._invalidProject()
         }
       </div>
     )
