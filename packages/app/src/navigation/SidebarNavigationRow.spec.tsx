@@ -1,8 +1,8 @@
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
-import BookIcon from '~icons/cy/book_x16'
-import SettingsIcon from '~icons/mdi/settings'
-import HeartIcon from '~icons/mdi/heart'
-import BookmarkIcon from '~icons/bi/bookmark-star'
+import BookIcon from '~icons/cy/book_x24'
+import SettingsIcon from '~icons/cy/settings_x24'
+import TestResultsIcon from '~icons/cy/test-results_x24'
+import PlaceholderIcon from '~icons/cy/placeholder_x24'
 
 describe('SidebarNavigationRow', () => {
   it('renders something', () => {
@@ -12,8 +12,8 @@ describe('SidebarNavigationRow', () => {
       <h2 class="text-white text-sm uppercase truncate">Tab Style</h2>
       <SidebarNavigationRow icon={BookIcon} active/>
       <SidebarNavigationRow icon={SettingsIcon} />
-      <SidebarNavigationRow icon={HeartIcon} />
-      <SidebarNavigationRow icon={BookmarkIcon} active/>
+      <SidebarNavigationRow icon={TestResultsIcon} />
+      <SidebarNavigationRow icon={PlaceholderIcon} />
     </div>))
   })
 })
