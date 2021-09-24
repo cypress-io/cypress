@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-5 mx-auto text-center">
+  <div class="flex justify-center mx-4 md:mx-auto mt-9 max-w-804px gap-24px">
     <TestingTypeCard
       :id="ct.id"
       :title="ct.title"

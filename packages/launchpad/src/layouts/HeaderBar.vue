@@ -1,9 +1,9 @@
 <template>
-  <div class="flex items-center py-4 px-6 mb-8 justify-between border-b">
+  <div class="flex items-center justify-between px-6 py-4 border-b">
     <div class="flex items-center ">
-      <img class="w-32px h-32px mr-2" src="../images/cypress-dark.png" />
+      <img class="mr-2 w-32px h-32px" src="../images/cypress-dark.png" />
       <span class="text-primary">Projects</span> 
-      <i-oi-chevron-right class="text-gray-200 h-8px" />
+      <i-oi-chevron-right class="text-gray-300 h-8px" />
       <span class="text-body-gray-700">{{ props.gql.app.activeProject?.title }}</span>
     </div>
     <div>
