@@ -1,6 +1,6 @@
 export * from './constants'
 
-export {
+export type {
   AllPackages,
   AllPackageTypes,
 } from './constants'

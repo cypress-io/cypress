@@ -3230,7 +3230,7 @@
     sync-fetch "0.3.0"
     tslib "~2.3.0"
 
-"@graphql-tools/batch-delegate@8.1.0", "@graphql-tools/batch-delegate@^8.0.12":
+"@graphql-tools/batch-delegate@8.1.0":
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/@graphql-tools/batch-delegate/-/batch-delegate-8.1.0.tgz#3214703a43084c6fc8ee6c949ce181fd8cee117a"
   integrity sha512-iebquVJEjfP6QGUiQR5V1xdnB+rJbfIHYHBHQc5X/W6wUD4NlaovjGXTDHiEl/B72TWVRtpuOs4KO0WT+GKO4Q==
@@ -3261,7 +3261,7 @@
     tslib "~2.3.0"
     unixify "^1.0.0"
 
-"@graphql-tools/delegate@8.2.1", "@graphql-tools/delegate@^8.1.1", "@graphql-tools/delegate@^8.2.0":
+"@graphql-tools/delegate@8.2.1", "@graphql-tools/delegate@^8.2.0":
   version "8.2.1"
   resolved "https://registry.yarnpkg.com/@graphql-tools/delegate/-/delegate-8.2.1.tgz#750df27be7641836e0cb654b953581de30f2d1a6"
   integrity sha512-fvQjSrCJCfchSQlLNHPcj1TwojyV1CPtXmwtSEVKvyp9axokuP37WGyliOWUYCepfwpklklLFUeTEiWlCoxv2Q==
@@ -3457,14 +3457,14 @@
   dependencies:
     tslib "~2.3.0"
 
-"@graphql-tools/utils@8.2.3", "@graphql-tools/utils@^8.0.1", "@graphql-tools/utils@^8.0.2", "@graphql-tools/utils@^8.1.1", "@graphql-tools/utils@^8.1.2", "@graphql-tools/utils@^8.2.0", "@graphql-tools/utils@^8.2.2", "@graphql-tools/utils@^8.2.3":
+"@graphql-tools/utils@8.2.3", "@graphql-tools/utils@^8.0.1", "@graphql-tools/utils@^8.0.2", "@graphql-tools/utils@^8.1.1", "@graphql-tools/utils@^8.2.0", "@graphql-tools/utils@^8.2.2", "@graphql-tools/utils@^8.2.3":
   version "8.2.3"
   resolved "https://registry.yarnpkg.com/@graphql-tools/utils/-/utils-8.2.3.tgz#9d7b9e7e116d11d26c2687f4d9cfb2b54568838b"
   integrity sha512-RR+aiusf2gIfnPmrDIH1uA45QuPiHB54RD+BmWyMcl88tWAjeJtqZeWPqUTq/1EXrNeocJAJQqogHV4Fbbzx3A==
   dependencies:
     tslib "~2.3.0"
 
-"@graphql-tools/wrap@8.1.1", "@graphql-tools/wrap@^8.0.13", "@graphql-tools/wrap@^8.1.0":
+"@graphql-tools/wrap@8.1.1", "@graphql-tools/wrap@^8.1.0":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@graphql-tools/wrap/-/wrap-8.1.1.tgz#7003033372d6ef984065028430429655614af899"
   integrity sha512-Z2ylFug2iHMbpcc2Bs/avNTKmhoJrUO6l0JrQbgiZZJWBaBz6yw+fyfL/kCLQluiU5/SXsvUxxPGBQ9tqb864g==

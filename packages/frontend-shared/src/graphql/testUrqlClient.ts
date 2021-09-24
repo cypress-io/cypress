@@ -1,8 +1,8 @@
 import { Client, createClient, dedupExchange, errorExchange } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
-import { graphqlSchema } from '@packages/graphql'
 import { makeCacheExchange } from './urqlClient'
 import type * as stubData from './testStubCloudTypes'
+import { clientTestSchema } from './clientTestSchema'
 
 export interface ClientTestContext {
   stubData: typeof stubData
@@ -26,7 +26,7 @@ export function testUrqlClient (config: TestUrqlClientConfig): Client {
       }),
       makeCacheExchange(),
       executeExchange({
-        schema: graphqlSchema,
+        schema: clientTestSchema,
         ...config,
       }),
     ],
