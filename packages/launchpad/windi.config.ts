@@ -27,6 +27,9 @@ export default defineConfig({
     },
   },
   safelist,
+  shortcuts: {
+    'max-content': 'mx-auto max-w-1280px',
+  },
   extract: {
     // accepts globs and file paths relative to project root
     include: ['index.html', 'src/**/*.{vue,html,tsx}'],
