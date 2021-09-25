@@ -5,9 +5,10 @@
   "private": false,
   "main": "index.js",
   "scripts": {
-    "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn copy \"./src/**/*.template.js\" \"./dist/src\"",
+    "build": "yarn prepare-example && tsc -p ./tsconfig.json && node scripts/example copy-to ./dist/initial-template && yarn prepare-copy-templates",
     "build-prod": "yarn build",
     "prepare-example": "node scripts/example copy-to ./initial-template",
+    "prepare-copy-templates": "node scripts/copy-templates copy-to ./dist/src",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
     "test:watch": "yarn test -w"
   },
@@ -20,6 +21,7 @@
     "chalk": "4.1.0",
     "cli-highlight": "2.1.10",
     "commander": "6.1.0",
+    "fast-glob": "3.2.7",
     "find-up": "5.0.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",

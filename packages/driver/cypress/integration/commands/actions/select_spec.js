@@ -36,6 +36,12 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('selects by index', () => {
+      cy.get('select[name=maps]').select(2).then(($select) => {
+        expect($select).to.have.value('de_nuke')
+      })
+    })
+
     it('selects by trimmed text with newlines stripped', () => {
       cy.get('select[name=maps]').select('italy').then(($select) => {
         expect($select).to.have.value('cs_italy')
@@ -85,6 +91,18 @@ describe('src/cy/commands/actions/select', () => {
     it('can select an array of texts', () => {
       cy.get('select[name=movies]').select(['The Human Condition', 'There Will Be Blood']).then(($select) => {
         expect($select.val()).to.deep.eq(['thc', 'twbb'])
+      })
+    })
+
+    it('can select an array of indexes', () => {
+      cy.get('select[name=movies]').select([1, 5]).then(($select) => {
+        expect($select.val()).to.deep.eq(['thc', 'twbb'])
+      })
+    })
+
+    it('can select an array of same value and index', () => {
+      cy.get('select[name=movies]').select(['thc', 1]).then(($select) => {
+        expect($select.val()).to.deep.eq(['thc'])
       })
     })
 
@@ -359,6 +377,39 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('input:first').select('foo')
       })
 
+      it('throws on negative index', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` was called with an invalid index: `-1`. Index must be a non-negative integer.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select:first').select(-1)
+      })
+
+      it('throws on non-integer index', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` was called with an invalid index: `1.5`. Index must be a non-negative integer.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select:first').select(1.5)
+      })
+
+      it('throws on out-of-range index', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `3`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select[name=foods]').select(3)
+      })
+
       it('throws when finding duplicate values', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` matched more than one `option` by value or text: `bm`')
@@ -395,7 +446,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when value or text does not exist', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value or text matching: `foo`')
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `foo`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -526,7 +577,7 @@ describe('src/cy/commands/actions/select', () => {
           done()
         })
 
-        cy.get('#select-maps').select('de_dust2').then(($select) => {})
+        cy.get('#select-maps').select('de_dust2').then(($select) => { })
       })
 
       it('snapshots after clicking', () => {
