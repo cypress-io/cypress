@@ -119,7 +119,7 @@ commands:
     steps:
       - run:
           name: Build all codegen
-          command: gulp buildProd
+          command: yarn gulp buildProd
       - run:
           name: Build packages
           command: yarn build
@@ -947,7 +947,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: gulp checkTs
+          command: yarn gulp checkTs
 
 
   # a special job that keeps polling Circle and when all
