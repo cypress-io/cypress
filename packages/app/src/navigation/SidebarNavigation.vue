@@ -2,7 +2,7 @@
   <div class="flex-1 flex flex-col min-h-0 bg-gray-800">
     <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
       <div class="flex items-center flex-shrink-0 px-4">
-        <i-cy-book-mark_x24
+        <i-cy-bookmark_x24
           class="icon-dark-gray-300
           icon-light-gray-800
           w-24px
