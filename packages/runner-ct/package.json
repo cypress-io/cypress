@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build && tsc",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "ts-node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cypress:run": "ts-node ../../scripts/cypress.js run-ct --project ${PWD}",
     "postinstall": "echo '@packages/runner needs: yarn build'",
@@ -52,6 +52,7 @@
     "react-devtools-inline": "^4.10.1",
     "react-dom": "16.8.6",
     "react-split-pane": "^0.1.92",
+    "rimraf": "3.0.2",
     "sass-loader": "^10.0.3",
     "sockjs-client": "^1.5.0",
     "strip-ansi": "6.0.0",

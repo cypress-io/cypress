@@ -6,7 +6,7 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "clean": "node scripts/clean.js || true",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "clean-js": "yarn clean",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
@@ -29,6 +29,7 @@
     "chai-as-promised": "7.1.1",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
+    "rimraf": "3.0.2",
     "shelljs": "0.8.3",
     "sinon": "^10.0.0",
     "sinon-chai": "3.4.0",

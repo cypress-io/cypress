@@ -46,7 +46,13 @@ export async function spawned (
 
   spawningApps.add(prefix)
   const [executable, ...rest] = command.split(' ')
-  const cp = spawn(executable, rest, {
+  let useExecutable = executable
+
+  if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
+    useExecutable = `${executable}.cmd`
+  }
+
+  const cp = spawn(useExecutable, rest, {
     stdio: 'pipe',
     env: {
       FORCE_COLOR: '1',
@@ -91,12 +97,38 @@ export async function spawned (
 
   return new Promise((resolve, reject) => {
     if (waitForExit) {
-      cp.once('exit', () => {
-        resolve(cp)
+      if (process.platform === 'win32') {
+        cp.on('exit', (code, signal) => {
+          console.log(`Exit code: ${code} => ${signal}`)
+          resolve(cp)
+        })
+      } else {
+        cp.once('exit', (code, signal) => {
+          console.log(`Exit code: ${code} => ${signal}`)
+          resolve(cp)
+        })
+      }
+
+      cp.once('error', (e) => {
+        console.log(`error executing ${command}`, e)
+        reject(e)
+      })
+    } else {
+      if (process.platform === 'win32') {
+        cp.on('exit', (code, signal) => {
+          console.log(`Exit code: ${code} => ${signal}`)
+        })
+      } else {
+        cp.once('exit', (code, signal) => {
+          console.log(`Exit code: ${code} => ${signal}`)
+        })
+      }
+
+      cp.once('error', (e) => {
+        console.log(`error executing ${command}`, e)
+        reject(e)
       })
 
-      cp.once('error', reject)
-    } else {
       cp.stdout?.once('data', () => {
         spawningApps.delete(prefix)
         resolve(cp)
