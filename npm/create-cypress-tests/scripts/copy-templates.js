@@ -17,19 +17,21 @@ program
     unique: true,
   })
 
-  const relativizeOutput = (template, dir) => {
-    dir = dir.replace('/\\/g', '/')
-    if (!dir.endsWith('/')) {
-      dir += '/'
-    }
+  const srcOuput = './src/'
+  let destinationOuput = destination.replace('/\\/g', '/')
 
-    return `${dir}${template}`
+  if (!destinationOuput.endsWith('/')) {
+    destinationOuput += '/'
+  }
+
+  const relOutput = (template, forSource) => {
+    return `${forSource ? srcOuput : destinationOuput}${template}`
   }
 
   const result = await Promise.all(templates.map(async (template) => {
     await fs.copy(path.join(srcPath, template), path.join(destinationPath, template))
 
-    return () => console.log(`✅ ${relativizeOutput(template, './src/')} successfully copied to ${chalk.cyan(relativizeOutput(template, destination))}`)
+    return () => console.log(`✅ ${relOutput(template, true)} successfully copied to ${chalk.cyan(relOutput(template, false))}`)
   }))
 
   result.forEach((r) => r())
