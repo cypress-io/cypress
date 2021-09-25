@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf ./node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:open:ct": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project .",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
@@ -52,6 +52,7 @@
     "react-popper": "2.2.5",
     "react-select": "3.1.0",
     "react-transition-group": "4.4.1",
+    "rimraf": "3.0.2",
     "webpack": "4.44.2",
     "webpack-cli": "3.3.2"
   },

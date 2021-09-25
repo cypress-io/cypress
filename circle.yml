@@ -119,7 +119,7 @@ commands:
     steps:
       - run:
           name: Build all codegen
-          command: yarn gulp buildProd
+          command: gulp buildProd
       - run:
           name: Build packages
           command: yarn build
@@ -392,7 +392,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - run: 
+      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
@@ -947,7 +947,7 @@ jobs:
       - install-required-node
       - run:
           name: Check TS Types
-          command: yarn gulp checkTs
+          command: gulp checkTs
 
 
   # a special job that keeps polling Circle and when all

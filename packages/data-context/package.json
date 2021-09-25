@@ -7,14 +7,15 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rm -rf node_modules",
-    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean-deps": "rimraf ./node_modules",
+    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {},
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
-    "mocha": "7.0.1"
+    "mocha": "7.0.1",
+    "rimraf": "3.0.2"
   }
 }

@@ -5,8 +5,8 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rm -rf node_modules",
-    "clean": "rm -f src/*.js src/**/*.js"
+    "clean-deps": "rimraf ./node_modules",
+    "clean": "rimraf ./src/*.js ./src/**/*.js"
   },
   "dependencies": {},
   "devDependencies": {
@@ -20,6 +20,7 @@
     "classnames": "2.3.1",
     "graphql": "^15.5.1",
     "graphql-tag": "^2.12.5",
+    "rimraf": "3.0.2",
     "vite-plugin-icons": "0.6.3",
     "vue": "3.2.6",
     "vue-i18n": "9.2.0-beta.1",

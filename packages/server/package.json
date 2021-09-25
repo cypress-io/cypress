@@ -6,7 +6,7 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf ./node_modules",
     "codecov": "codecov",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
@@ -101,6 +101,7 @@
     "recast": "0.20.4",
     "resolve": "1.17.0",
     "return-deep-diff": "0.4.0",
+    "rimraf": "3.0.2",
     "sanitize-filename": "1.6.3",
     "semver": "7.3.2",
     "send": "0.17.1",

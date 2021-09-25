@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf ./node_modules",
     "https": "node https.js",
     "regenerate:certs": "cd ./test/helpers/certs && ./regenerate-certs.sh",
     "start": "node index.js",
@@ -30,6 +30,7 @@
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
+    "rimraf": "3.0.2",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.3",
     "sinon-chai": "3.3.0",
