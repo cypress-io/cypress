@@ -22,16 +22,36 @@ function prefixTypegen (s: string) {
   return `${chalk.cyan('nexusTypegen')}: ${s}`
 }
 
+async function windowsTouch (filename: string, time: Date) {
+  // `fs.utimesSync` is used here to prevent existing file contents from being overwritten.
+  // It also updates the last modification timestamp of the file, which is consistent with what POSIX touch does.
+  try {
+    fs.utimesSync(filename, time, time)
+  } catch (e) {
+    fs.closeSync(fs.openSync(filename, 'w'))
+  }
+}
+
 export async function nexusTypegen (cfg: NexusTypegenCfg) {
   const dfd = pDefer()
 
   if (cfg.outputPath) {
     await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
-    execSync(`touch ${path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-source-types.gen.ts')}`)
-    execSync(`touch ${cfg.outputPath}`)
+
+    // on windows there is no `touch` equivalent command
+    if (process.platform === 'win32') {
+      const time = new Date()
+
+      await windowsTouch(path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-source-types.gen.ts'), time)
+      await windowsTouch(cfg.outputPath, time)
+    } else {
+      execSync(`touch ${path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-source-types.gen.ts')}`)
+      execSync(`touch ${cfg.outputPath}`)
+    }
   }
 
-  const out = spawn('node', ['-r', '@packages/ts/register', cfg.filePath], {
+  const nodeCmd = `node${process.platform === 'win32' ? '.cmd' : ''}`
+  const out = spawn(nodeCmd, ['-r', '@packages/ts/register', cfg.filePath], {
     cwd: cfg.cwd,
     env: {
       ...process.env,
