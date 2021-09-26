@@ -3,15 +3,21 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import 'chai-as-promised' // for the types!
 import chalk from 'chalk'
-import { connect } from '@packages/network'
 import CRI from 'chrome-remote-interface'
 import { expect } from 'chai'
 import humanInterval from 'human-interval'
-import * as protocol from '../../../lib/browsers/protocol'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
 import { stripIndents } from 'common-tags'
+
+import proxyquire from 'proxyquire'
+const connect = { createRetryingSocket: () => {} }
+const protocol = proxyquire(
+  '../../../lib/browsers/protocol', {
+    '@packages/network': { connect },
+  },
+)
 
 describe('lib/browsers/protocol', () => {
   // protocol connects explicitly to this host
