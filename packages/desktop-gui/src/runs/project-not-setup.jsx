@@ -99,20 +99,6 @@ export default class ProjectNotSetup extends Component {
     )
   }
 
-  _errorJSONFileOnly (configFile) {
-    return (<div className='runs-list-error'>
-      <div className='empty'>
-        <h4>
-          <i className='fas fa-exclamation-triangle red'></i>{' '}
-          Cypress can only configure a project with a json config file
-        </h4>
-        Your config file <code>{configFile}</code> could be
-        <br />
-        too complicated to safely update.
-      </div>
-    </div>)
-  }
-
   _projectSetup () {
     return (
       <SetupProject
