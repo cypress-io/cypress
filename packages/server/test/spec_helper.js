@@ -9,7 +9,6 @@ global.supertest = require('supertest')
 global.nock = require('nock')
 global.expect = chai.expect
 global.mockery = require('mockery')
-global.proxyquire = require('proxyquire')
 global.sinon = require('sinon')
 const _ = require('lodash')
 const Promise = require('bluebird')
@@ -121,7 +120,9 @@ afterEach(() => {
 module.exports = {
   expect: global.expect,
   nock: global.nock,
-  proxyquire: global.proxyquire,
   sinon: global.sinon,
   root: global.root,
+  get proxyquire () {
+    throw new Error(`proxyquire cannot be imported from spec helper.\n\nIt must be imported directly in the spec file in order for the relative path resolution to work correctly.`)
+  },
 }

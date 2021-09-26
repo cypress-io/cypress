@@ -1,8 +1,9 @@
 import Bluebird from 'bluebird'
 import { create } from '../../../lib/browsers/cri-client'
 import EventEmitter from 'events'
+import proxyquire from 'proxyquire'
 
-const { expect, proxyquire, sinon } = require('../../spec_helper')
+const { expect, sinon } = require('../../spec_helper')
 
 const DEBUGGER_URL = 'http://foo'
 
@@ -32,7 +33,7 @@ describe('lib/browsers/cri-client', function () {
       _notifier: new EventEmitter(),
     })
 
-    criClient = proxyquire('../lib/browsers/cri-client', {
+    criClient = proxyquire('../../../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,
     })
 
