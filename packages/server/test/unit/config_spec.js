@@ -4,12 +4,17 @@ const _ = require('lodash')
 const path = require('path')
 const R = require('ramda')
 const debug = require('debug')('test')
-const config = require('../../lib/config')
 const errors = require('../../lib/errors')
-const configUtil = require('../../lib/util/config')
 const findSystemNode = require('../../lib/util/find_system_node')
 const scaffold = require('../../lib/scaffold')
 let settings = require('../../lib/util/settings')
+
+const proxyquire = require('proxyquire')
+const { stubable } = require('../specUtils')
+const configUtil = stubable(require('../../lib/util/config'))
+const config = proxyquire('../../lib/config', {
+  './util/config': configUtil,
+})
 
 describe('lib/config', () => {
   beforeEach(function () {
