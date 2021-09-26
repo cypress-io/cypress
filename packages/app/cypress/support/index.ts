@@ -21,5 +21,6 @@ import '../../src/main.scss'
 import '@iconify/iconify'
 import '@purge-icons/generated'
 import { createRouter } from '../../src/router/router'
+import { createI18n } from '../../src/locales/i18n';
 
-registerMountFn({ plugins: [() => createRouter()] })
+registerMountFn({ plugins: [() => createRouter(), () => createI18n() ] })

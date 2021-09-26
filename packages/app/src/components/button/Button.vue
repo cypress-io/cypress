@@ -6,7 +6,7 @@
   >
     <span v-if="prefixIcon || $slots.prefix" :class="iconClasses" class="justify-self-start">
       <slot name="prefix">
-        <Icon :icon="prefixIcon" :class="prefixIconClass" />
+        <component :is="prefixIcon" :class="prefixIconClass" />
       </slot>
     </span>
     <span class="flex-grow">
@@ -14,7 +14,7 @@
     </span>
     <span v-if="suffixIcon || $slots.suffix" :class="iconClasses" class="justify-self-end">
       <slot name="suffix">
-        <Icon :icon="suffixIcon" :class="suffixIconClass" />
+        <component :is="suffixIcon" :class="suffixIconClass" />
       </slot>
     </span>
   </button>
