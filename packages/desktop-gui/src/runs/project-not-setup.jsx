@@ -8,11 +8,6 @@ import authStore from '../auth/auth-store'
 import LoginForm from '../auth/login-form'
 import DashboardBanner from './dashboard-banner'
 import WhatIsDashboard from './what-is-dashboard'
-import ErrorMessage from './error-message'
-
-function isConfigJSONFile (filePath) {
-  return /\.json$/.test(filePath)
-}
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -35,20 +30,15 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className="empty">
         {
-          !isConfigJSONFile(this.props.project.configFile) ?
-            <ErrorMessage>
-              Cypress can only configure a project with a json config file
-            </ErrorMessage>
+          this.state.setupProjectOpen && authStore.isAuthenticated ?
+            this._projectSetup()
             :
-            this.state.setupProjectOpen && authStore.isAuthenticated ?
-              this._projectSetup()
+            this.props.isValid ? authStore.isAuthenticated ?
+              this._connectProject()
               :
-              this.props.isValid ? authStore.isAuthenticated ?
-                this._connectProject()
-                :
-                this._logIn()
-                :
-                this._invalidProject()
+              this._logIn()
+              :
+              this._invalidProject()
         }
       </div>
     )
@@ -107,6 +97,20 @@ export default class ProjectNotSetup extends Component {
         </p>
       </div>
     )
+  }
+
+  _errorJSONFileOnly (configFile) {
+    return (<div className='runs-list-error'>
+      <div className='empty'>
+        <h4>
+          <i className='fas fa-exclamation-triangle red'></i>{' '}
+          Cypress can only configure a project with a json config file
+        </h4>
+        Your config file <code>{configFile}</code> could be
+        <br />
+        too complicated to safely update.
+      </div>
+    </div>)
   }
 
   _projectSetup () {
