@@ -4,12 +4,12 @@ const _ = require('lodash')
 const path = require('path')
 const R = require('ramda')
 const debug = require('debug')('test')
-const config = require(`${root}lib/config`)
-const errors = require(`${root}lib/errors`)
-const configUtil = require(`${root}lib/util/config`)
-const findSystemNode = require(`${root}lib/util/find_system_node`)
-const scaffold = require(`${root}lib/scaffold`)
-let settings = require(`${root}lib/util/settings`)
+const config = require('../../lib/config')
+const errors = require('../../lib/errors')
+const configUtil = require('../../lib/util/config')
+const findSystemNode = require('../../lib/util/find_system_node')
+const scaffold = require('../../lib/scaffold')
+let settings = require('../../lib/util/settings')
 
 describe('lib/config', () => {
   beforeEach(function () {
