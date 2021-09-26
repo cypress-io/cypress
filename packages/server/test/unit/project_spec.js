@@ -7,13 +7,13 @@ const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('../support/helpers/fixtures')
 const { sinon } = require('../spec_helper')
-const api = require(`${root}lib/api`)
-const user = require(`${root}lib/user`)
-const cache = require(`${root}lib/cache`)
-const config = require(`${root}lib/config`)
-const scaffold = require(`${root}lib/scaffold`)
-const { ServerE2E } = require(`${root}lib/server-e2e`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const api = require('../../lib/api')
+const user = require('../../lib/user')
+const cache = require('../../lib/cache')
+const config = require('../../lib/config')
+const scaffold = require('../../lib/scaffold')
+const { ServerE2E } = require('../../lib/server-e2e')
+const ProjectBase = require('../../lib/project-base').ProjectBase
 const {
   getOrgs,
   paths,
@@ -25,17 +25,17 @@ const {
   getProjectStatuses,
   createCiProject,
   writeProjectId,
-} = require(`${root}lib/project_static`)
-const ProjectUtils = require(`${root}lib/project_utils`)
-const { Automation } = require(`${root}lib/automation`)
-const savedState = require(`${root}lib/saved_state`)
-const plugins = require(`${root}lib/plugins`)
-const runEvents = require(`${root}lib/plugins/run_events`)
-const system = require(`${root}lib/util/system`)
-const { fs } = require(`${root}lib/util/fs`)
-const settings = require(`${root}lib/util/settings`)
-const Watchers = require(`${root}lib/watchers`)
-const { SocketE2E } = require(`${root}lib/socket-e2e`)
+} = require('../../lib/project_static')
+const ProjectUtils = require('../../lib/project_utils')
+const { Automation } = require('../../lib/automation')
+const savedState = require('../../lib/saved_state')
+const plugins = require('../../lib/plugins')
+const runEvents = require('../../lib/plugins/run_events')
+const system = require('../../lib/util/system')
+const { fs } = require('../../lib/util/fs')
+const settings = require('../../lib/util/settings')
+const Watchers = require('../../lib/watchers')
+const { SocketE2E } = require('../../lib/socket-e2e')
 
 describe('lib/project-base', () => {
   beforeEach(function () {
