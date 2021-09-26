@@ -358,6 +358,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
 }
 
 export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
+  debugger
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
@@ -476,6 +477,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   if (!await fs.pathExists(path.join(userCSSPath, 'userChrome.css'))) {
     try {
+      debugger
       await fs.mkdir(userCSSPath)
     } catch {
       // probably the folder already exists, this is fine
