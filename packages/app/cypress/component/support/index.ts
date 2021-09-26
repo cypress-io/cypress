@@ -19,6 +19,12 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 import 'virtual:windi.css'
 import '../../../src/main.scss'
 import '@iconify/iconify'
+<<<<<<< HEAD:packages/app/cypress/component/support/index.ts
 import { createRouter } from '../../../src/router/router'
+=======
+import '@purge-icons/generated'
+import { createRouter } from '../../src/router/router'
+import { createI18n } from '../../src/locales/i18n';
+>>>>>>> 0332774429 (wip):packages/app/cypress/support/index.ts
 
-registerMountFn({ plugins: [() => createRouter()] })
+registerMountFn({ plugins: [() => createRouter(), () => createI18n() ] })

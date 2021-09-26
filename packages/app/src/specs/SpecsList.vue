@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <div class="p-24px">
     <SpecsListHeader
       v-model="search"
@@ -24,6 +25,9 @@
       </router-link>
     </div>
   </div>
+=======
+  <SpecsListHeader v-model="searchString"/>
+>>>>>>> 0332774429 (wip)
 </template>
 
 <script setup lang="ts">
@@ -34,6 +38,7 @@ import { computed, ref } from 'vue'
 import type { SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
+<<<<<<< HEAD
 const { t } = useI18n()
 const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}${spec.node.fileExtension}`
 
@@ -70,4 +75,7 @@ const filteredSpecs = computed(() => {
     return s.node.relative.toLowerCase().includes(search.value.toLowerCase())
   })?.sort(sortByGitStatus)
 })
+=======
+const searchString = ref('')
+>>>>>>> 0332774429 (wip)
 </script>
