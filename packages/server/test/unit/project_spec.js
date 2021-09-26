@@ -10,10 +10,40 @@ const { sinon } = require('../spec_helper')
 const api = require('../../lib/api')
 const user = require('../../lib/user')
 const cache = require('../../lib/cache')
-const config = require('../../lib/config')
+const { Automation } = require('../../lib/automation')
+const savedState = require('../../lib/saved_state')
+const plugins = require('../../lib/plugins')
+const runEvents = require('../../lib/plugins/run_events')
+const system = require('../../lib/util/system')
+const { fs } = require('../../lib/util/fs')
+const settings = require('../../lib/util/settings')
+const Watchers = require('../../lib/watchers')
+const { SocketE2E } = require('../../lib/socket-e2e')
+
+const proxyquire = require('proxyquire')
+const { stubable } = require('../specUtils')
+
+// Cannot inject since not used directly in SUT !!
+const config = stubable(require('../../lib/config'))
+
+// This needs to be imported after config (inherent coupling)!!!
 const scaffold = require('../../lib/scaffold')
-const { ServerE2E } = require('../../lib/server-e2e')
-const ProjectBase = require('../../lib/project-base').ProjectBase
+
+// Cannot inject since not used directly in SUT !!
+const serverE2E = stubable(require('../../lib/server-e2e'))
+const { ServerE2E } = serverE2E
+
+// Cannot inject since not used directly in SUT !!
+const ProjectUtils = stubable(require('../../lib/project_utils'))
+
+// Here we need to proxyquire a dependency of the SUT in order to inject two levels down
+const projectBase = proxyquire('../../lib/project-base', {
+  './config': config,
+  './server-e2e': serverE2E,
+  './project_utils': ProjectUtils,
+})
+const { ProjectBase } = projectBase
+
 const {
   getOrgs,
   paths,
@@ -25,17 +55,9 @@ const {
   getProjectStatuses,
   createCiProject,
   writeProjectId,
-} = require('../../lib/project_static')
-const ProjectUtils = require('../../lib/project_utils')
-const { Automation } = require('../../lib/automation')
-const savedState = require('../../lib/saved_state')
-const plugins = require('../../lib/plugins')
-const runEvents = require('../../lib/plugins/run_events')
-const system = require('../../lib/util/system')
-const { fs } = require('../../lib/util/fs')
-const settings = require('../../lib/util/settings')
-const Watchers = require('../../lib/watchers')
-const { SocketE2E } = require('../../lib/socket-e2e')
+} = proxyquire('../../lib/project_static', {
+  './project-base': projectBase,
+})
 
 describe('lib/project-base', () => {
   beforeEach(function () {
