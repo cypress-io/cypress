@@ -285,7 +285,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       options = _.defaults({}, options, { log: true })
-      const args = [subject, msOrAlias, options]
+      const args: any = [subject, msOrAlias, options]
 
       try {
         if (_.isFinite(msOrAlias)) {
@@ -322,7 +322,7 @@ export default (Commands, Cypress, cy, state) => {
         }
 
         return throwErr(arg)
-      } catch (err) {
+      } catch (err: any) {
         if (err.name === 'CypressError') {
           throw err
         } else {
