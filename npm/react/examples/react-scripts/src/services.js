@@ -1,5 +1,6 @@
-export const fetchIngredients = () => {
-  return fetch(
+export const fetchIngredients = async () => {
+  const r = await fetch(
     'https://httpbin.org/anything?ingredients=bacon&ingredients=mozzarella&ingredients=pineapples',
-  ).then((r) => r.json())
+  )
+  return r.json()
 }

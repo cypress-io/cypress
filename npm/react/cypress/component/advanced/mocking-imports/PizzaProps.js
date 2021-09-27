@@ -4,10 +4,9 @@ import { fetchIngredients as defaultFetchIngredients } from './services'
 export default function PizzaProps ({ fetchIngredients }) {
   const [ingredients, setIngredients] = React.useState([])
 
-  const handleCook = () => {
-    fetchIngredients().then((response) => {
-      setIngredients(response.args.ingredients)
-    })
+  const handleCook = async () => {
+    const { args } = await fetchIngredients()
+    setIngredients(args.ingredients)
   }
 
   return (
