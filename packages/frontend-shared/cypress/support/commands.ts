@@ -1,4 +1,5 @@
 import '@testing-library/cypress/add-commands'
+import type { MountingOptions } from '@vue/test-utils'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
@@ -74,6 +75,28 @@ export const registerMountFn = ({ plugins }) => {
 
     let hasMounted = false
 
+    const mountingOptions: MountingOptions<any, any> = {
+      global: {
+        stubs: {
+          transition: false,
+        },
+        plugins: [
+          {
+            install (app) {
+              app.use(urql, testUrqlClient({
+                context,
+                rootValue: options.type(context),
+              }))
+            },
+          },
+        ],
+      },
+    }
+
+    each(plugins, (pluginFn: () => any) => {
+      mountingOptions?.global?.plugins?.push(pluginFn())
+    })
+
     return mount(defineComponent({
       name: `mountFragment`,
       setup () {
@@ -120,23 +143,7 @@ export const registerMountFn = ({ plugins }) => {
 
         return props.gql ? options.render(props.gql) : h('div')
       },
-    }), {
-      global: {
-        stubs: {
-          transition: false,
-        },
-        plugins: [
-          {
-            install (app) {
-              app.use(urql, testUrqlClient({
-                context,
-                rootValue: options.type(context),
-              }))
-            },
-          },
-        ],
-      },
-    }).then(() => context)
+    }), mountingOptions).then(() => context)
   }
 
   Cypress.Commands.add('mountFragment', mountFragment)
