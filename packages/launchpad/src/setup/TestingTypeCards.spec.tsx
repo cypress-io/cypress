@@ -1,4 +1,3 @@
-import { Query } from '@packages/graphql'
 import {
   TestingTypeCardsFragmentDoc,
 } from '../generated/graphql-test'
@@ -8,7 +7,17 @@ describe('TestingTypeCards', () => {
   it('renders correct label depending if testingType has been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
       type: (ctx) => {
-        return new Query()
+        return {
+          ...ctx.stubQuery,
+          app: {
+            ...ctx.stubApp,
+            activeProject: {
+              ...ctx.stubData.project,
+              isFirstTimeE2E: true,
+              isFirstTimeCT: false,
+            },
+          },
+        }
       },
       render: (gqlVal) => {
         return <TestingTypeCards gql={gqlVal} />

@@ -3,7 +3,7 @@ import { print } from 'graphql'
 import fetch from 'cross-fetch'
 import getenv from 'getenv'
 
-import type { BaseContext } from '../context/BaseContext'
+import type { DataContext } from '@packages/data-context'
 
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 const REMOTE_SCHEMA_URLS = {
@@ -16,8 +16,8 @@ const REMOTE_SCHEMA_URLS = {
  * Takes a "document" and executes it against the GraphQL schema
  * @returns
  */
-export const remoteSchemaExecutor: Executor<BaseContext> = async ({ document, variables, context }) => {
-  if (!context?.authenticatedUser) {
+export const remoteSchemaExecutor: Executor<DataContext> = async ({ document, variables, context }) => {
+  if (!context?.user) {
     return { data: null }
   }
 
@@ -31,7 +31,7 @@ export const remoteSchemaExecutor: Executor<BaseContext> = async ({ document, va
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `bearer ${context?.authenticatedUser.authToken}`,
+      'Authorization': `bearer ${context?.user.authToken}`,
     },
     body: JSON.stringify({
       query,

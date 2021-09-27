@@ -8,17 +8,14 @@ const stripAnsi = require('strip-ansi')
 const dialog = require('./dialog')
 const pkg = require('./package')
 const logs = require('./logs')
-const auth = require('./auth')
 const Windows = require('./windows')
 const { openExternal } = require('./links')
 const files = require('./files')
 const open = require('../util/open')
-const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
 const ProjectStatic = require('../project_static')
 
-const { openProject } = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
@@ -28,10 +25,19 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
-import { ServerContext } from '../graphql/ServerContext'
-import { startGraphQLServer, setServerContext } from '@packages/graphql/src/server'
-import type { LaunchArgs } from '@packages/types'
+import * as config from '../config'
+import auth from './auth'
+import user from '../user'
+import { openProject } from '../open_project'
+
+import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
+import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
+import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
+import { makeDataContext } from '@packages/data-context'
+import browserUtils from '../browsers/utils'
+
+const { getBrowsers } = browserUtils
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -123,11 +129,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'log:in':
-      return user.logIn(arg)
-      .then(send)
-      .catch(sendErr)
-
     case 'log:out':
       return user.logOut()
       .then(send)
@@ -163,6 +164,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       })
 
       return openProject.launch(arg.browser, fullSpec, {
+        // TODO: Tim see why this
         projectRoot: options.projectRoot,
         onBrowserOpen () {
           return send({ browserOpened: true })
@@ -401,7 +403,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'new:project:banner:closed':
       return openProject.getProject()
-      .saveState({ showedNewProjectBanner: true })
+      ?.saveState({ showedNewProjectBanner: true })
       .then(sendNull)
 
     case 'has:opened:cypress':
@@ -423,14 +425,14 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'remove:scaffolded:files':
       return openProject.getProject()
-      .removeScaffoldedFiles()
+      ?.removeScaffoldedFiles()
       .then(sendNull)
 
     case 'set:prompt:shown':
       return openProject.getProject()
-      .saveState({
+      ?.saveState({
         promptsShown: {
-          ...openProject.getProject().state.promptsShown,
+          ...(openProject.getProject()?.state?.promptsShown ?? {}),
           [arg]: Date.now(),
         },
       })
@@ -498,10 +500,45 @@ module.exports = {
     // into the projects
     startGraphQLServer()
 
-    const serverContext = setServerContext(new ServerContext(options, {}))
+    const ctx = await makeDataContext({
+      launchArgs: options,
+      launchOptions: {},
+      appApi: {
+        getBrowsers () {
+          return getBrowsers()
+        },
+      },
+      authApi: {
+        logIn () {
+          return auth.start(() => {}, 'launchpad')
+        },
+        logOut () {
+          return user.logOut()
+        },
+        checkAuth (context) {
+          return checkAuthQuery(context)
+        },
+      },
+      projectApi: {
+        getConfig (projectRoot: string) {
+          return config.get(projectRoot)
+        },
+        launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
+          return openProject.launch({ ...browser }, spec, options)
+        },
+        initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
+          return openProject.create(args.projectRoot, args, options, browsers)
+        },
+        insertProject () {
+          // TODO
+        },
+      },
+    })
 
-    if (options.projectRoot) {
-      serverContext.actions.addProject(options.projectRoot)
-    }
+    // Fetch the browsers when the app starts, so we have some by
+    // the time we're continuing.
+    ctx.actions.app.refreshBrowsers()
+
+    setDataContext(ctx)
   },
 }
