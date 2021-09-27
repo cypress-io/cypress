@@ -1148,9 +1148,9 @@ export default {
           The request we sent was:
 
           ${getHttpProps([
-            { key: 'method', value: obj.method },
-            { key: 'URL', value: obj.url },
-          ])}
+          { key: 'method', value: obj.method },
+          { key: 'URL', value: obj.url },
+        ])}
 
           ${divider(60, '-')}
 
@@ -1182,22 +1182,22 @@ export default {
           The request we sent was:
 
           ${getHttpProps([
-              { key: 'method', value: obj.method },
-              { key: 'URL', value: obj.url },
-              { key: 'headers', value: obj.requestHeaders },
-              { key: 'body', value: obj.requestBody },
-              { key: 'redirects', value: obj.redirects },
-            ])}
+          { key: 'method', value: obj.method },
+          { key: 'URL', value: obj.url },
+          { key: 'headers', value: obj.requestHeaders },
+          { key: 'body', value: obj.requestBody },
+          { key: 'redirects', value: obj.redirects },
+        ])}
 
           ${divider(60, '-')}
 
           The response we got was:
 
           ${getHttpProps([
-              { key: 'status', value: `${obj.status} - ${obj.statusText}` },
-              { key: 'headers', value: obj.responseHeaders },
-              { key: 'body', value: obj.responseBody },
-            ])}
+          { key: 'status', value: `${obj.status} - ${obj.statusText}` },
+          { key: 'headers', value: obj.responseHeaders },
+          { key: 'body', value: obj.responseBody },
+        ])}
           `, 10),
         docsUrl: 'https://on.cypress.io/request',
       }
@@ -1210,9 +1210,9 @@ export default {
           The request we sent was:
 
           ${getHttpProps([
-              { key: 'method', value: obj.method },
-              { key: 'URL', value: obj.url },
-            ])}
+          { key: 'method', value: obj.method },
+          { key: 'URL', value: obj.url },
+        ])}
 
           No response was received within the timeout.`, 10),
         docsUrl: 'https://on.cypress.io/request',
@@ -1381,6 +1381,14 @@ export default {
   },
 
   select: {
+    invalid_argument: {
+      message: `${cmd('select')} must be passed a string, number, or array as its 1st argument. You passed: \`{{value}}\`.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
+    invalid_array_argument: {
+      message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{value}}\`.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
     disabled: {
       message: `${cmd('select')} failed because this element is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
@@ -1393,6 +1401,10 @@ export default {
       message: `${cmd('select')} was called with an array of arguments but does not have a \`multiple\` attribute set.`,
       docsUrl: 'https://on.cypress.io/select',
     },
+    invalid_number: {
+      message: `${cmd('select')} was called with an invalid index: \`{{index}}\`. Index must be a non-negative integer.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
     multiple_elements: {
       message: `${cmd('select')} can only be called on a single \`<select>\`. Your subject contained {{num}} elements.`,
       docsUrl: 'https://on.cypress.io/select',
@@ -1402,7 +1414,7 @@ export default {
       docsUrl: 'https://on.cypress.io/select',
     },
     no_matches: {
-      message: `${cmd('select')} failed because it could not find a single \`<option>\` with value or text matching: \`{{value}}\``,
+      message: `${cmd('select')} failed because it could not find a single \`<option>\` with value, index, or text matching: \`{{value}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
     option_disabled: {
