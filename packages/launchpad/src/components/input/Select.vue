@@ -1,8 +1,8 @@
 <template>
   <Listbox
-    :value="modelValue"
+    :value="props.modelValue"
     as="div"
-    @update:modelValue="emit('update:modelValue', $event)"
+    @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
       <ListboxLabel class="block text-sm font-medium text-gray-700">
@@ -153,7 +153,7 @@ interface Option {
   [key: string]: any
 }
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   options: Option[],
   modelValue?: Option // Current object being selected
   placeholder?: string
@@ -168,5 +168,11 @@ withDefaults(defineProps<{
   itemKey: 'key',
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: Option)
+}>()
+
+const handleUpdate = (value: Option) => {
+  emit('update:modelValue', value)
+}
 </script>
