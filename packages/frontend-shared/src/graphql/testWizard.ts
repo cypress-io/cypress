@@ -23,9 +23,10 @@ export const wizard: CodegenTypeMap['Wizard'] = {
       package: '@cypress/webpack-dev-server',
     },
   ],
-  allBundlers: BUNDLERS.map((bundler) => {
+  allBundlers: BUNDLERS.map((bundler, idx) => {
     return {
       ...testNodeId('WizardBundler'),
+      isSelected: idx === 0,
       ...bundler,
     }
   }),
@@ -41,7 +42,7 @@ export const wizard: CodegenTypeMap['Wizard'] = {
       ...type,
     }
   }),
-  frameworks: FRONTEND_FRAMEWORKS.map((framework) => {
+  frameworks: FRONTEND_FRAMEWORKS.map((framework, idx) => {
     // get around readonly errors
     const supportedBundlers = framework.supportedBundlers as unknown as Array<CodegenTypeMap['WizardBundler']>
 
@@ -49,7 +50,7 @@ export const wizard: CodegenTypeMap['Wizard'] = {
       ...testNodeId('WizardFrontendFramework'),
       ...framework,
       supportedBundlers,
-      isSelected: false,
+      isSelected: idx === 0,
     }
   }),
 }

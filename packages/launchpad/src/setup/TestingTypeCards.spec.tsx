@@ -6,6 +6,19 @@ import TestingTypeCards from './TestingTypeCards.vue'
 describe('TestingTypeCards', () => {
   it('renders correct label depending if testingType has been configured', () => {
     cy.mountFragment(TestingTypeCardsFragmentDoc, {
+      type: (ctx) => {
+        return {
+          ...ctx.stubQuery,
+          app: {
+            ...ctx.stubApp,
+            activeProject: {
+              ...ctx.stubApp.activeProject,
+              isFirstTimeE2E: true,
+              isFirstTimeCT: false,
+            },
+          },
+        }
+      },
       render: (gqlVal) => {
         return <TestingTypeCards gql={gqlVal} />
       },

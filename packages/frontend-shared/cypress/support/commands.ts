@@ -12,7 +12,6 @@ import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import { each } from 'lodash'
 import 'cypress-file-upload'
 import { navigationMenu } from '../../src/graphql/testNavigationMenu'
-import * as testCypressProjects from '../../src/graphql/testCypressProjects'
 import { query as stubQuery } from '../../src/graphql/testQuery'
 import { wizard as stubWizard } from '../../src/graphql/testWizard'
 import { app as stubApp } from '../../src/graphql/testApp'
@@ -34,7 +33,6 @@ const createContext = (): ClientTestContext => {
     stubData,
     stubQuery,
     navigationMenu,
-    cypressProjects: testCypressProjects,
   }
 }
 

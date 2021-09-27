@@ -17,7 +17,6 @@
       @click="e2eNextStep"
       v-if="e2e"
     />
-
   </div>
 </template>
 
