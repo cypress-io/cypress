@@ -1386,7 +1386,7 @@ export default {
       docsUrl: 'https://on.cypress.io/select',
     },
     invalid_array_argument: {
-      message: `${cmd('select')} must be passed an array contianing only strings and numbers. You passed: \`{{valueOrTextOrIndex}}\`.`,
+      message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{valueOrTextOrIndex}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
     disabled: {
