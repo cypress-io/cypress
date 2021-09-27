@@ -1,21 +1,22 @@
 <template>
-  <div class="max-w-4xl mx-5 mx-auto text-center">
+  <div class="flex justify-center mx-4 md:mx-auto mt-9 max-w-804px gap-24px">
     <TestingTypeCard
-      :id="ct.id"
+      :id="ct.type"
       :title="ct.title"
       :description="firstTimeCT ? ct.description : 'LAUNCH'"
       :role="firstTimeCT ? 'setup-component-testing' : 'launch-component-testing'"
       @click="ctNextStep" 
+      v-if="ct"
     />
 
     <TestingTypeCard
-      :id="e2e.id"
+      :id="e2e.type"
       :title="e2e.title"
       :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
       :role="firstTimeE2E ? 'setup-e2e-testing' : 'launch-e2e-testing'"
       @click="e2eNextStep"
+      v-if="e2e"
     />
-
   </div>
 </template>
 
@@ -35,7 +36,8 @@ gql`
 fragment TestingTypeCards on Query {
   app {
     activeProject {
-     	isFirstTimeCT
+      id
+      isFirstTimeCT
       isFirstTimeE2E
     }
   }
@@ -43,20 +45,20 @@ fragment TestingTypeCards on Query {
   wizard {
     testingTypes {
       id
+      type
       title
       description
     }
   }
+
+  ...ConfigFile
 }
 `
 
 gql`
 mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
   wizardSetTestingType(type: $testingType) {
-    step
     testingType
-    title
-    description
   }
 }
 `
@@ -65,6 +67,10 @@ gql`
 mutation TestingTypeCardsNavigateForward {
   wizardNavigate(direction: forward) {
     step
+    chosenTestingTypePluginsInitialized
+    canNavigateForward
+    title
+    description
   }
 }
 `
@@ -77,7 +83,7 @@ const props = defineProps<{
 }>()
 
 const ct = computed(() => {
-  return props.gql.wizard.testingTypes.find(x => x.id === 'component')!
+  return props.gql.wizard.testingTypes.find(x => x.type === 'component')
 })
 
 const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
@@ -98,6 +104,6 @@ const e2eNextStep = async () => {
 }
 
 const e2e = computed(() => {
-  return props.gql.wizard.testingTypes.find(x => x.id === 'e2e')!
+  return props.gql.wizard.testingTypes.find(x => x.type === 'e2e')
 })
 </script>

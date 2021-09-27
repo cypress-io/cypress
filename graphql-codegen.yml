@@ -1,38 +1,97 @@
+# https://www.graphql-code-generator.com/docs/getting-started/index
+
+documentFilters: &documentFilters
+  immutableTypes: true
+  useTypeImports: true
+  preResolveTypes: true
+  onlyOperationTypes: true
+  avoidOptionals: true
+
+vueOperations: &vueOperations
+  schema: './packages/graphql/schemas/schema.graphql'
+  config:
+    <<: *documentFilters
+  plugins:
+    - add:
+        content: '/* eslint-disable */'
+    - 'typescript'
+    - 'typescript-operations'
+    - 'typed-document-node':
+        # Intentionally specified under typed-document-node rather than top level config,
+        # becuase we don't want it flattening the types for the operations
+        flattenGeneratedTypes: true
+
+vueTesting: &vueTesting
+  schema: './packages/graphql/schemas/schema.graphql'
+  config:
+    <<: *documentFilters
+  plugins:
+    - add:
+        content: '/* eslint-disable */'
+    - 'typescript'
+    - 'typescript-operations'
+    - 'typed-document-node'
+
 overwrite: true
-schema: './packages/graphql/schema.graphql'
+config:
+  enumsAsTypes: true
+  declarationKind: 'interface'
+  strictScalars: true
+  scalars: 
+    Date: string
+    DateTime: string
+    JSON: any  
 generates:
-  './packages/app/src/generated/graphql.ts':
-    documents: './packages/app/src/**/*.vue'
-    config:
-      immutableTypes: true
-      useTypeImports: true
-      preResolveTypes: true
-      onlyOperationTypes: true
-      avoidOptionals: true
-      enumsAsTypes: true
+  ###
+  # Generates types for us to infer the correct "source types" when we mock out on the frontend
+  # This ensures we have proper type checking when we're using cy.mountFragment in component tests
+  ###
+  './packages/frontend-shared/src/generated/test-graphql-types.gen.ts':
+    schema: 'packages/graphql/schemas/schema.graphql'
     plugins:
       - add:
           content: '/* eslint-disable */'
       - 'typescript':
-      - 'typescript-operations'
-      - 'typed-document-node'
+          nonOptionalTypename: true
+      - 'packages/frontend-shared/script/codegen-type-map.js'
+
+  './packages/frontend-shared/src/generated/test-cloud-graphql-types.gen.ts':
+    schema: 'packages/graphql/schemas/cloud.graphql'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript':
+          nonOptionalTypename: true
+      - 'packages/frontend-shared/script/codegen-type-map.js'
+
+  './packages/graphql/src/gen/cloud-source-types.gen.ts':
+    schema: 'packages/graphql/schemas/cloud.graphql'
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript'
+
+  ###
+  # All of the GraphQL Query/Mutation documents we import for use in the .vue
+  # files for useQuery / useMutation, as well as types associated with the fragments
+  ###
   './packages/launchpad/src/generated/graphql.ts':
     documents: './packages/launchpad/src/**/*.vue'
-    config:
-      immutableTypes: true
-      useTypeImports: true
-      preResolveTypes: true
-      onlyOperationTypes: true
-      avoidOptionals: true
-      enumsAsTypes: true
-    plugins:
-      - add:
-          content: '/* eslint-disable */'
-      - 'typescript':
-      - 'typescript-operations'
-      - 'typed-document-node'
-  './packages/graphql/src/testing/testUnionType.ts':
-    plugins:
-      - add:
-          content: '/* eslint-disable */'
-      - 'packages/graphql/script/codegen-mount.js'
+    <<: *vueOperations
+
+  './packages/app/src/generated/graphql.ts':
+    documents: './packages/app/src/**/*.vue'
+    <<: *vueOperations
+
+  ###
+  # All GraphQL documents imported into the .spec.tsx files for component testing.
+  # Similar to generated/graphql.ts, except it doesn't include the flattening for the document nodes,
+  # so we can actually use the document in cy.mountFragment
+  ###
+  './packages/launchpad/src/generated/graphql-test.ts':
+    documents: './packages/launchpad/src/**/*.vue'
+    <<: *vueTesting
+
+  './packages/app/src/generated/graphql-test.ts':
+    documents: './packages/app/src/**/*.vue'
+    <<: *vueTesting

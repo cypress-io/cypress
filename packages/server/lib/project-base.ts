@@ -38,8 +38,8 @@ import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptio
 // Instead, this is an interface of values that have been manually validated to exist
 // and are required when creating a project.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env'>>// TODO: Figure out how to type this better.
+  Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreTestFiles'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -47,6 +47,7 @@ export interface Cfg extends ReceivedCypressOptions {
   state?: {
     firstOpened?: number
     lastOpened?: number
+    promptsShown?: object
   }
   resolved: ResolvedConfigurationOptions
 }
@@ -361,7 +362,15 @@ export class ProjectBase<TServer extends Server> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    const allSpecs = await specsUtil.find(updatedConfig)
+    const allSpecs = await specsUtil.findSpecs({
+      projectRoot: updatedConfig.projectRoot,
+      fixturesFolder: updatedConfig.fixturesFolder,
+      supportFile: updatedConfig.supportFile,
+      testFiles: updatedConfig.testFiles,
+      ignoreTestFiles: updatedConfig.ignoreTestFiles,
+      componentFolder: updatedConfig.componentFolder,
+      integrationFolder: updatedConfig.integrationFolder,
+    })
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
       if (this.testingType === 'component') {
         return spec.specType === 'component'

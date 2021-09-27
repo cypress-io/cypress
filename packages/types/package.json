@@ -5,11 +5,13 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build-prod": "tsc",
-    "clean": "rm -f src/*.js src/**/*.js"
+    "build-prod": "tsc || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit",
+    "clean": "rimraf src/*.js src/**/*.js"
   },
   "dependencies": {},
   "devDependencies": {
+    "rimraf": "3.0.2",
     "typescript": "^4.2.3"
   },
   "files": [

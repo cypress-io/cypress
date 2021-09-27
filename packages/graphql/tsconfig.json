@@ -2,7 +2,7 @@
   "extends": "../ts/tsconfig.json",
   "include": [
     "src/*.ts",
-    "src/**/*.ts",
+    "src/**/*.ts"
   ],
   "exclude": [
     "test",
@@ -11,7 +11,9 @@
   "compilerOptions": {
     "importHelpers": true,
     "strict": true,
+    "allowJs": false,
     "noImplicitAny": true,
+    "resolveJsonModule": true,
     "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",

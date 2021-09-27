@@ -2,12 +2,12 @@
   <div class="max-w-4xl mx-auto text-center">
     <button
       :key="type.id"
-      v-for="type in testingTypes"
+      v-for="type of props.gql.testingTypes"
       class="block h-45 border border-gray-200 m-5 p-2 rounded md:h-100 md:w-2/5 md:p-9 md:inline-block"
-      @click="selectTestingType(type.id)"
+      @click="selectTestingType(type.type)"
     >
       <img
-        :src="icons[type.id]"
+        :src="TestingTypeIcons[type.id]"
         class="float-left m-5 md:mx-auto md:mb-10 md:float-none"
       />
       <p class="text-indigo-700 text-left mt-3 md:text-center">{{ type.title }}</p>
@@ -16,20 +16,21 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
+<script lang="ts" setup>
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { TestingTypeSelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
+import { TestingType_SelectDocument, TestingTypeFragment, TestingTypeEnum } from '../generated/graphql'
 import { TestingTypeIcons } from "../utils/icons";
 
 gql`
-mutation TestingTypeSelect($testingType: TestingTypeEnum!) {
+mutation TestingType_Select($testingType: TestingTypeEnum!) {
   wizardSetTestingType(type: $testingType) {
     step
+    canNavigateForward
     testingType
     title
     description
+    ...TestingType
   }
 }
 `
@@ -38,31 +39,20 @@ gql`
 fragment TestingType on Wizard {
   testingTypes {
     id
+    type
     title
     description
   }
 }
 `
 
-export default defineComponent({
-  props: {
-    gql: {
-      type: Object as PropType<TestingTypeFragment>,
-      required: true,
-    }
-  },
-  setup(props) {
-    const mutation = useMutation(TestingTypeSelectDocument)
+const props = defineProps<{
+  gql: TestingTypeFragment
+}>()
 
-    const selectTestingType = (testingType: TestingTypeEnum) => {
-      mutation.executeMutation({ testingType });
-    };
+const mutation = useMutation(TestingType_SelectDocument)
 
-    return { 
-      icons: TestingTypeIcons,
-      testingTypes: props.gql.testingTypes, 
-      selectTestingType 
-    };
-  },
-});
+const selectTestingType = (testingType: TestingTypeEnum) => {
+  mutation.executeMutation({ testingType });
+};
 </script>

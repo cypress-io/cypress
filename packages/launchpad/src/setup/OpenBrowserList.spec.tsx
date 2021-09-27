@@ -1,4 +1,4 @@
-import { OpenBrowserListFragmentDoc } from '../generated/graphql'
+import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
 import { longBrowsersList } from '../../cypress/fixtures/browsers/long-browsers-list'
 
@@ -9,9 +9,10 @@ describe('<OpenBrowserList />', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       type: (ctx) => {
-        ctx.app.setBrowsers(Array.from(longBrowsersList))
-
-        return ctx.app
+        return {
+          ...ctx.stubApp,
+          selectedBrowser: null,
+        }
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })
@@ -20,10 +21,20 @@ describe('<OpenBrowserList />', () => {
       cy.contains('label', browser.displayName).should('be.visible')
     })
 
-    cy.get(launchButtonSelector).should('be.visible').and('have.text', 'Launch Electron')
-    cy.contains('label', 'Canary').click()
-    cy.get(launchButtonSelector).should('be.visible').and('have.text', 'Launch Canary')
+    // no selected browser so launch buttun should not exist
+    cy.get(launchButtonSelector).should('not.exist')
+  })
 
+  it('renders launch button when a browser is selected', () => {
+    cy.viewport(1000, 750)
+    cy.mountFragment(OpenBrowserListFragmentDoc, {
+      type: (ctx) => {
+        return ctx.stubApp
+      },
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
+    })
+
+    cy.get(launchButtonSelector).should('be.visible').and('have.text', 'Launch Electron')
     cy.contains('button', 'different browser').should('not.exist')
   })
 })

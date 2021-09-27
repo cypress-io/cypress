@@ -1,7 +1,7 @@
 <template>
   <div class="text-left relative">
     <label class="text-gray-800 text-sm my-3 block" :class="disabledClass">{{
-      name
+      props.name
     }}</label>
     <button
       class="
@@ -17,34 +17,29 @@
         w-full
         focus:border-indigo-600 focus:outline-transparent
       "
+      data-cy="select-framework"
       :class="disabledClass 
         + (isOpen ? ' border-indigo-600' : ' border-gray-200') 
-        + (disabled ? ' bg-gray-300 text-gray-600' : '')"
+        + (props.disabled ? ' bg-gray-300 text-gray-600' : '')"
       @click="
-        if (!disabled) {
+        if (!props.disabled) {
           isOpen = !isOpen;
         }
       "
-      :disabled="disabled"
+      :disabled="props.disabled"
       v-click-outside="() => (isOpen = false)"
     >
       <template v-if="selectedOptionObject">
         <img
-          :src="FrameworkBundlerLogos[selectedOptionObject.id]"
+          :src="FrameworkBundlerLogos[selectedOptionObject.type]"
           class="w-5 h-5 mr-3"
         />
         <span>
           {{ selectedOptionObject.name }}
         </span>
-        <span
-          v-if="selectedOptionObject.description"
-          class="text-gray-400 ml-2"
-        >
-          {{ selectedOptionObject.description }}
-        </span>
       </template>
       <span v-else class="text-gray-400">
-        {{ placeholder }}
+        {{ props.placeholder }}
       </span>
       <span class="flex-grow"></span>
       <i-fa-angle-down />
@@ -64,85 +59,53 @@
       style="margin-top: -3px"
     >
       <li
-        v-for="opt in options"
-        :key="opt.id"
-        @click="selectOption(opt)"
+        v-for="opt in props.options"
+        :key="opt.type"
+        @click="selectOption(opt.type)"
         focus="1"
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
       >
         <img
-          :src="FrameworkBundlerLogos[opt.id]"
+          :src="FrameworkBundlerLogos[opt.type]"
           class="w-5 h-5 mr-3"
         />
         <span>
           {{ opt.name }}
-        </span>
-        <span v-if="opt.description" class="text-gray-400 ml-2">
-          {{ opt.description }}
         </span>
       </li>
     </ul>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType, ref } from "vue";
-import { ClickOutside } from '../../directives/ClickOutside'
+<script lang="ts" setup>
+import { computed, ref } from "vue";
+import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
+import type { EnvironmentSetupFragment, FrontendFrameworkEnum } from "../../generated/graphql";
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
-export interface Option {
-  name: string;
-  description?: string;
-  id: string;
-}
+const emit = defineEmits<{
+  (event: 'select', type: FrontendFrameworkEnum)
+}>()
 
-export default defineComponent({
-  emits: { select: Object },
-  directives: { ClickOutside },
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    value: {
-      type: String,
-      default: undefined,
-    },
-    placeholder: {
-      type: String,
-      default: undefined,
-    },
-    options: {
-      type: Array as PropType<ReadonlyArray<Option>>,
-      required: true,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  setup(props, { emit }) {
-    const isOpen = ref(false);
+const props = withDefaults(defineProps<{
+  name: string
+  value?: string
+  placeholder?: string
+  options: EnvironmentSetupFragment['frameworks']
+  disabled?: boolean
+}>(), {
+  disabled: false
+})
 
-    const selectedOptionObject = computed(() => {
-      return props.options.find((opt) => opt.id === props.value);
-    });
+const isOpen = ref(false);
 
-    const selectOption = (opt: Option) => {
-      emit("select", opt.id);
-    };
-
-    const disabledClass = computed(() =>
-      props.disabled ? "opacity-50" : undefined
-    );
-
-    return {
-      isOpen,
-      selectedOptionObject,
-      selectOption,
-      disabledClass,
-      FrameworkBundlerLogos
-    };
-  },
+const selectedOptionObject = computed(() => {
+  return props.options.find((opt) => opt.type === props.value);
 });
+
+const selectOption = (opt: FrontendFrameworkEnum) => {
+  emit("select", opt);
+};
+
+const disabledClass = computed(() => props.disabled ? "opacity-50" : undefined)
 </script>

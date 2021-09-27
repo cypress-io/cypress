@@ -4,7 +4,7 @@
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
-    "build": "rimraf dist && yarn rollup -c rollup.config.js",
+    "build": "rimraf dist && rollup -c rollup.config.js",
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
@@ -53,7 +53,7 @@
     "vue-loader": "16.1.2",
     "vue-router": "^4.0.0",
     "vue-style-loader": "4.1.2",
-    "vue-tsc": "0.2.2",
+    "vue-tsc": "^0.3.0",
     "vuex": "^4.0.0",
     "webpack": "4.42.0"
   },

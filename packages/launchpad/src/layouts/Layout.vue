@@ -38,11 +38,12 @@
     <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch" :style="`background-image: url('${bottomBackground}');`" style="background-position: bottom center;background-repeat: no-repeat;">
       <SideBarItem
         v-for="i in sideMenuDefinition"
-        :key="i.id"
+        :key="i?.id"
+        :gql="i"
         class="pr-8px"
-        :icon="i.icon"
-        :active="!!i.selected"
-        @click="handleSelect(i.id)"
+        :icon="icons[i?.iconPath]"
+        :active="!!i?.selected"
+        @click="handleSelect(i.type)"
       />
       <div class="flex-grow" />
       <img src="../images/cypress_s.png" class="m-4 mx-auto w-7" />
@@ -69,16 +70,15 @@ gql`
 query Layout {
   app {
     activeProject {
+      id
       title
     }
   }
-
   navigationMenu {
+    selected
     items {
       id
-      name
-      selected
-      iconPath
+      ...SideBarItem
     }
   }
 }
@@ -87,9 +87,9 @@ query Layout {
 gql`
 mutation NavigationMenuSetItem($type: NavItem!) {
   navigationMenuSetItem (type: $type) {
+    selected
     items {
-      name
-      selected
+      ...SideBarItem
     }
   }
 } 
@@ -101,6 +101,7 @@ const icons = {
   'clarity/settings-line': IconSettingsLine,
   'clarity/bullet-list-line': IconRunsLine,
 }
+
 
 export default defineComponent({
   components: {
@@ -126,14 +127,11 @@ export default defineComponent({
     })
 
     const sideMenuDefinition = computed(() => 
-      result.data?.value?.navigationMenu?.items.map(item => ({
-        ...item,
-        id: item!.id,
-        icon: icons[item!.iconPath]
-      })) ?? []
+      result.data?.value?.navigationMenu?.items
     )
 
     return { 
+      icons,
       handleSelect,
       projectTitle, 
       selected,

@@ -8,14 +8,10 @@
  */
 
 import type { SpawnOptions } from 'child_process'
-import getenv from 'getenv'
 
 import { monorepoPaths } from '../monorepoPaths'
 import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProcessUtils'
-import { CYPRESS_INTERNAL_GQL_TEST_PORT } from '../gulpConstants'
-
-const CYPRESS_VITE_APP_PORT = getenv.int('CYPRESS_VITE_APP_PORT', 3333)
-const CYPRESS_VITE_LAUNCHPAD_PORT = getenv.int('CYPRESS_VITE_LAUNCHPAD_PORT', 3001)
+import { CYPRESS_INTERNAL_GQL_TEST_PORT, CYPRESS_INTERNAL_VITE_APP_PORT, CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT } from '../gulpConstants'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -26,13 +22,13 @@ const CYPRESS_VITE_LAUNCHPAD_PORT = getenv.int('CYPRESS_VITE_LAUNCHPAD_PORT', 30
  *------------------------------------------------------------------------**/
 
 export function viteApp () {
-  return spawnViteDevServer('vite-app', `yarn vite --port ${CYPRESS_VITE_APP_PORT} --base /__vite__/`, {
+  return spawnViteDevServer('vite-app', `yarn vite --port ${CYPRESS_INTERNAL_VITE_APP_PORT} --base /__vite__/`, {
     cwd: monorepoPaths.pkgApp,
   })
 }
 
 export function viteLaunchpad () {
-  return spawnViteDevServer('vite-launchpad', `yarn vite --port ${CYPRESS_VITE_LAUNCHPAD_PORT}`, {
+  return spawnViteDevServer('vite-launchpad', `yarn vite --port ${CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}`, {
     cwd: monorepoPaths.pkgLaunchpad,
   })
 }
@@ -42,19 +38,26 @@ export function viteLaunchpad () {
 function watchViteBuild (
   prefix: AllSpawnableApps,
   command: string,
-  opts: SpawnOptions = {},
+  options: SpawnOptions = {},
 ) {
   // This will match strings like "built in 200ms" and "built in 5s"
-  return spawnUntilMatch(prefix, command, /built in (\d+)(m?s)/i, opts)
+  return spawnUntilMatch(prefix, {
+    command,
+    match: /built in (\d+)(m?s)/i,
+    options,
+  })
 }
 
 function spawnViteDevServer (
   prefix: AllSpawnableApps,
   command: string,
-  opts: SpawnOptions = {},
-
+  options: SpawnOptions = {},
 ) {
-  return spawnUntilMatch(prefix, command, 'dev server running at', opts)
+  return spawnUntilMatch(prefix, {
+    command,
+    match: 'dev server running at',
+    options,
+  })
 }
 
 /**------------------------------------------------------------------------
@@ -90,12 +93,14 @@ export function viteBuildLaunchpad () {
 export function viteCleanApp () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgApp,
+    waitForExit: true,
   })
 }
 
 export function viteCleanLaunchpad () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgLaunchpad,
+    waitForExit: true,
   })
 }
 
@@ -109,9 +114,9 @@ export function viteCleanLaunchpad () {
  *------------------------------------------------------------------------**/
 
 // After running `viteServeLaunchpadForTest`, you're able to visit
-// `http://localhost:5000` to access the Launchpad frontend.
+// `http://localhost:5555` to access the Launchpad frontend.
 export function viteServeLaunchpadForTest () {
-  return spawned('vite:serve-launchpad-for-test', `yarn serve ./dist-e2e -p 5000`, {
+  return spawned('vite:serve-launchpad-for-test', `yarn serve ./dist-e2e -p 5555`, {
     cwd: monorepoPaths.pkgLaunchpad,
   })
 }
@@ -144,7 +149,7 @@ export async function viteWatchBuildLaunchpadForTest () {
  *------------------------**/
 // /* Serve */
 // export function viteServeAppForTest() {
-//   return spawned('vite:serve-app-for-test', `yarn serve ./dist-e2e -p 5000`, {
+//   return spawned('vite:serve-app-for-test', `yarn serve ./dist-e2e -p 5555`, {
 //     cwd: monorepoPaths.pkgLaunchpad
 //   })
 // }

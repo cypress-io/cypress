@@ -11,7 +11,7 @@ import childProcess, { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 
 import { monorepoPaths } from '../monorepoPaths'
-import { CYPRESS_INTERNAL_GQL_PORT, CYPRESS_INTERNAL_GQL_TEST_PORT } from '../gulpConstants'
+import { getGulpGlobal, CYPRESS_INTERNAL_GQL_PORT, CYPRESS_INTERNAL_GQL_TEST_PORT } from '../gulpConstants'
 
 const gqlPort = process.env.CYPRESS_INTERNAL_GQL_PORT || `${CYPRESS_INTERNAL_GQL_PORT}`
 const gqlTestPort = process.env.CYPRESS_INTERNAL_GQL_TEST_PORT || `${CYPRESS_INTERNAL_GQL_TEST_PORT}`
@@ -26,27 +26,14 @@ const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
  *------------------------------------------------------------------------**/
 
 export async function startCypress () {
-  return spawnCypressWithMode('open', {
+  return spawnCypressWithMode('open', 'dev', {
     CYPRESS_INTERNAL_GQL_PORT: gqlPort,
   })
 }
 
 export async function runCypress () {
-  return spawnCypressWithMode('run', {
+  return spawnCypressWithMode('run', 'prod', {
     CYPRESS_INTERNAL_ENV: process.env.CYPRESS_INTERNAL_ENV || 'production',
-    CYPRESS_INTERNAL_GQL_PORT: gqlPort,
-  })
-}
-
-/**------------------------------------------------------------------------
- *                            Watch Commands
- * Starts Cypress, but watches the GraphQL files, and restarts the server.
- *  * startCypressWatch - Normal `cypress open` command, with watching
- *------------------------------------------------------------------------**/
-
-export async function startCypressWatch () {
-  return watchCypress({
-    CYPRESS_INTERNAL_DEV_WATCH: 'true',
     CYPRESS_INTERNAL_GQL_PORT: gqlPort,
   })
 }
@@ -61,7 +48,7 @@ export async function startCypressWatch () {
 // Use the GQL Test Port (52100 by default, defined in ./gulp/gulpConstants)
 // Spawns Cypress in "Test Cypress within Cypress" mode
 export async function startCypressForTest () {
-  return spawnCypressWithMode('open', {
+  return spawnCypressWithMode('open', 'test', {
     CYPRESS_INTERNAL_ENV: 'production',
     CYPRESS_INTERNAL_GQL_PORT: gqlTestPort,
     CYPRESS_INTERNAL_E2E_TESTING_SELF: 'true',
@@ -69,7 +56,7 @@ export async function startCypressForTest () {
 }
 
 export async function runCypressAgainstDist () {
-  return spawnCypressWithMode('run', {
+  return spawnCypressWithMode('run', 'test', {
     CYPRESS_INTERNAL_ENV: 'staging',
     CYPRESS_INTERNAL_GQL_PORT: gqlPort,
   })
@@ -81,7 +68,7 @@ export async function runCypressAgainstDist () {
  *  * watchCypress - Watch the dev server and graphql files
  *------------------------------------------------------------------------**/
 
-async function spawnCypressWithMode (mode: 'open' | 'run', env: Record<string, string> = {}) {
+async function spawnCypressWithMode (mode: 'open' | 'run', type: 'dev' | 'prod' | 'test', env: Record<string, string> = {}) {
   const argv = process.argv.slice(3)
 
   if (mode === 'open') {
@@ -94,30 +81,45 @@ async function spawnCypressWithMode (mode: 'open' | 'run', env: Record<string, s
     argv.push('--dev')
   }
 
+  const finalEnv = {
+    ...process.env,
+    ...env,
+    LAUNCHPAD: '1',
+  }
+
   return childProcess.fork(pathToCli, [mode, ...argv], {
     stdio: 'inherit',
     execArgv: [],
-    env: {
-      ...env,
-      ...process.env,
-      LAUNCHPAD: '1',
-    },
+    env: finalEnv,
   })
 }
 
-/**
- * Starts cypress, but watches the GraphQL files & restarts the server
- * when any of those change.
- */
-async function watchCypress (env: Record<string, string> = {}) {
-  let child: ChildProcess | null = null
+/**------------------------------------------------------------------------
+ *                            Watch Commands
+ * Starts Cypress, but watches the GraphQL files, and restarts the server.
+ *  * startCypressWatch - Normal `cypress open` command, with watching
+ *------------------------------------------------------------------------**/
+
+export async function startCypressWatch () {
+  const shouldWatch = getGulpGlobal('shouldWatch')
+
+  const watcher = chokidar.watch([
+    'packages/graphql/src/**/*.{js,ts}',
+    'packages/server/lib/graphql/**/*.{js,ts}',
+  ], {
+    cwd: monorepoPaths.root,
+    ignored: /\.gen\.ts/,
+    ignoreInitial: true,
+  })
+
   let isClosing = false
+  let isRestarting = false
+  let child: ChildProcess | null = null
 
   async function startCypressWithListeners () {
-    child = await spawnCypressWithMode('open', {
+    child = await spawnCypressWithMode('open', 'dev', {
       CYPRESS_INTERNAL_DEV_WATCH: 'true',
       CYPRESS_INTERNAL_GQL_PORT: gqlPort,
-      ...env,
     })
 
     child.on('exit', (code) => {
@@ -130,14 +132,6 @@ async function watchCypress (env: Record<string, string> = {}) {
       child = null
     })
   }
-
-  const watcher = chokidar.watch('src/**/*.{js,ts}', {
-    cwd: monorepoPaths.pkgGraphql,
-    ignored: /\.gen\.ts/,
-    ignoreInitial: true,
-  })
-
-  let isRestarting = false
 
   async function restartServer () {
     if (isRestarting) {
@@ -164,8 +158,10 @@ async function watchCypress (env: Record<string, string> = {}) {
     await startCypressWithListeners()
   }
 
-  watcher.on('add', restartServer)
-  watcher.on('change', restartServer)
+  if (shouldWatch) {
+    watcher?.on('add', restartServer)
+    watcher?.on('change', restartServer)
+  }
 
   await startCypressWithListeners()
 

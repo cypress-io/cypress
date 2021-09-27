@@ -1,36 +1,37 @@
-import { makeSchema, asNexusMethod } from 'nexus'
 import path from 'path'
-import { JSONResolver, DateTimeResolver } from 'graphql-scalars'
-import * as entities from './entities'
-import * as constants from './constants'
-import * as testingTypes from './testing/testUnionType'
+import { makeSchema, connectionPlugin } from 'nexus'
 
-const customScalars = [
-  asNexusMethod(JSONResolver, 'json'),
-  asNexusMethod(DateTimeResolver, 'dateTime'),
-]
-
-// for vite
-const dirname = typeof __dirname !== 'undefined' ? __dirname : ''
-
-// for vite
-process.cwd ??= () => ''
+import * as schemaTypes from './schemaTypes/'
+import { nodePlugin } from './plugins/nexusNodePlugin'
+import { remoteSchemaWrapped } from './stitching/remoteSchemaWrapped'
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
 export const graphqlSchema = makeSchema({
-  types: [entities, constants, customScalars, dirname ? null : testingTypes],
+  types: schemaTypes,
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: isCodegen,
-  // for vite
-  outputs: isCodegen ? {
-    typegen: path.join(dirname, 'gen/nxs.gen.ts'),
-    schema: path.join(dirname, '..', 'schema.graphql'),
-  } : false,
-  contextType: {
-    module: path.join(dirname, './context/BaseContext.ts'),
-    export: 'BaseContext',
+  outputs: {
+    typegen: {
+      outputPath: path.join(__dirname, 'gen/nxs.gen.ts'),
+      declareInputs: true,
+    },
+    schema: path.join(__dirname, '..', 'schemas', 'schema.graphql'),
   },
+  contextType: {
+    module: '@packages/data-context',
+    export: 'DataContext',
+  },
+  mergeSchema: {
+    schema: remoteSchemaWrapped,
+    skipFields: {
+      Mutation: ['test'],
+    },
+  },
+  plugins: [
+    connectionPlugin(),
+    nodePlugin,
+  ],
   formatTypegen (content, type) {
     if (type === 'schema') {
       return content
@@ -38,5 +39,8 @@ export const graphqlSchema = makeSchema({
 
     // TODO(tim): fix in nexus to prevent the regex
     return `/* eslint-disable */\n${content.replace(/\.js"/g, '"')}`
+  },
+  features: {
+    abstractTypeRuntimeChecks: false,
   },
 })

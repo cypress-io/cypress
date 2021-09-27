@@ -6,7 +6,7 @@ import type { AddressInfo } from 'net'
 import cors from 'cors'
 import getenv from 'getenv'
 import { graphqlSchema } from './schema'
-import type { BaseContext } from './context/BaseContext'
+import type { DataContext } from '@packages/data-context'
 
 const debug = Debug('cypress:server:graphql')
 const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52159)
@@ -31,13 +31,13 @@ export function closeGraphQLServer (): Promise<void | null> {
 }
 
 // singleton during the lifetime of the application
-let serverContext: BaseContext | undefined
+let dataContext: DataContext | undefined
 
 // Injected this way, since we want to set this up where the IPC layer
 // is established in the server package, which should be an independent
 // layer from GraphQL
-export function setServerContext (ctx: BaseContext) {
-  serverContext = ctx
+export function setDataContext (ctx: DataContext) {
+  dataContext = ctx
 
   return ctx
 }
@@ -51,15 +51,15 @@ export function startGraphQLServer ({ port }: { port: number } = { port: GRAPHQL
 
   app.use(cors())
 
-  app.use('/graphql', graphqlHTTP(() => {
-    if (!serverContext) {
-      throw new Error(`setServerContext has not been called`)
+  app.use('/graphql', graphqlHTTP((req) => {
+    if (!dataContext) {
+      throw new Error(`setDataContext has not been called`)
     }
 
     return {
       schema: graphqlSchema,
       graphiql: true,
-      context: serverContext,
+      context: dataContext,
     }
   }))
 

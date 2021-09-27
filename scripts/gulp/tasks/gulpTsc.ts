@@ -12,7 +12,18 @@ process.on('unhandledRejection', (reason) => {
   process.exit(1)
 })
 
-export function getTsPackages (packagesPath: string = ''): Promise<Set<string>> {
+export async function checkTs () {
+  const [a, b] = await Promise.all([
+    getTsPackages(),
+    getTsPackages('npm'),
+  ])
+
+  await buildPackageTsc({
+    tsPackages: new Set([...a, ...b]),
+  })
+}
+
+export function getTsPackages (packagesPath: string = 'packages'): Promise<Set<string>> {
   const dfd = {} as Record<string, any>
 
   dfd.promise = new Promise((resolve, reject) => {
@@ -21,7 +32,7 @@ export function getTsPackages (packagesPath: string = ''): Promise<Set<string>> 
   })
 
   glob(
-    path.join(monorepoPaths.root, packagesPath, '/packages/*/package.json'),
+    path.join(monorepoPaths.root, packagesPath, '/*/package.json'),
     (err, packageJsons) => {
       if (err) {
         return dfd.reject(err)
@@ -40,9 +51,9 @@ export function getTsPackages (packagesPath: string = ''): Promise<Set<string>> 
       const packages = new Set<string>()
 
       required.forEach((r) => {
-        // Select only packages that have build-ts
-        if (r.scripts && r.scripts['build-ts']) {
-          packages.add(r.name)
+        // Select only packages that have check-ts
+        if (r.scripts && r.scripts['check-ts']) {
+          packages.add(`${packagesPath}/${r.name}`)
         }
       })
 
@@ -54,7 +65,6 @@ export function getTsPackages (packagesPath: string = ''): Promise<Set<string>> 
 }
 
 export async function buildPackageTsc ({
-  packagesPath = '',
   tsPackages = new Set(),
   onlyPackages,
 }: {
@@ -73,30 +83,28 @@ export async function buildPackageTsc ({
   const packages = onlyPackages || [...Array.from(tsPackages)]
 
   for (const pkg of packages) {
+    const cwd = path.join(
+      monorepoPaths.root,
+      `/${pkg.replace(/\@(packages|cypress)\//, '')}`,
+    )
+
     try {
-      await execAsync('tsc', {
-        cwd: path.join(
-          __dirname,
-          '../../',
-          packagesPath,
-          `/packages/${pkg.replace(/\@(packages|cypress|frontend)\//, '')}`,
-        ),
-      })
+      await execAsync('yarn check-ts', { cwd })
 
       built++
       console.log(
-        `${chalk.green(`Built`)} ${pkg} ${chalk.magenta(
+        `${chalk.green(`Built`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,
         )}`,
       )
     } catch (e) {
       console.log(
-        `${chalk.red(`Failed built`)} ${pkg} ${chalk.magenta(
+        `${chalk.red(`Failed building`)} ${cwd} ${chalk.magenta(
           `${built} / ${packages.length}`,
         )}`,
       )
 
-      errors.push({ package: pkg, stdout: e.stdout })
+      errors.push({ package: cwd, stdout: e.stdout })
     }
   }
 

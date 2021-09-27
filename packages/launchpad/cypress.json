@@ -1,9 +1,8 @@
 {
-  "projectId": "ypt4pf",
-  "baseUrl": "http://localhost:5000",
+  "projectId": "sehy69",
+  "baseUrl": "http://localhost:5555",
   "viewportWidth": 800,
   "viewportHeight": 850,
-  "fixturesFolder": false,
   "video": false,
   "retries": {
     "runMode": 2,

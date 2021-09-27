@@ -42,7 +42,7 @@
     </nav>
     <div v-if="tsInstalled" class="relative">
       <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
-      <CopyButton v-if="manualInstall && code" :text="code" />
+      <CopyButton v-if="manualCreate && code" :text="code" />
     </div>
   </WizardLayout>
 </template>
@@ -56,28 +56,36 @@ import PrismJs from "vue-prism-component";
 import WizardLayout from "./WizardLayout.vue";
 import CopyButton from "../components/button/CopyButton.vue";
 import { languages } from "../utils/configFile";
-import { ConfigFileFragment, AppCreateConfigFileDocument } from "../generated/graphql";
+import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from "../generated/graphql";
 import { useMutation } from "@urql/vue";
 
 gql`
 fragment ConfigFile on Query {
   app {
     activeProject {
+      id
       projectRoot
     }
   }
   wizard {
-    canNavigateForward
-    sampleCodeJs: sampleCode(lang: js)
-    sampleCodeTs: sampleCode(lang: ts)
+    ...SampleCode
   }
 }
 `
 
 gql`
-mutation appCreateConfigFile($code: String!, $configFilename: String!) {
+fragment SampleCode on Wizard {
+  canNavigateForward
+  sampleCodeJs: sampleCode(lang: js)
+  sampleCodeTs: sampleCode(lang: ts)
+}
+`
+
+gql`
+mutation ConfigFile_appCreateConfigFile($code: String!, $configFilename: String!) {
   appCreateConfigFile(code: $code, configFilename: $configFilename) {
     activeProject {
+      id
       projectRoot
     }
   }
@@ -88,25 +96,23 @@ const props = defineProps<{
   gql: ConfigFileFragment 
 }>()
 
-
-const manualInstall = ref(false);
+const manualCreate = ref(false);
 
 const altFn = (val: boolean) => {
-  manualInstall.value = val
+  manualCreate.value = val
 }
 
 const tsInstalled = ref(false);
 const language = ref<"js" | "ts">("ts");
 const nextButtonName = computed(() =>
-  manualInstall.value ? "I've added this file" : "Create File"
+  manualCreate.value ? "I've added this file" : "Create File"
 );
 
 import("prismjs/components/prism-typescript").then(() => {
   tsInstalled.value = true;
 });
 
-
-const createConfigFile = useMutation(AppCreateConfigFileDocument)
+const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
 
 const code = computed(() => {
   if (language.value === 'js') {
@@ -116,6 +122,10 @@ const code = computed(() => {
 })
 
 const createConfig = async () => {
+  if (manualCreate.value) {
+    return
+  }
+
   if (!props.gql.app?.activeProject?.projectRoot) {
     throw Error(`Cannot find the active project's projectRoot. This should never happen.`)
   }

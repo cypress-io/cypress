@@ -118,6 +118,9 @@ module.exports = {
         }
 
         // strip dev out of child process options
+        /**
+         * @type {import('child_process').ForkOptions}
+         */
         let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
 
         // figure out if we're going to be force enabling or disabling colors.
@@ -154,7 +157,12 @@ module.exports = {
         let child
 
         if (process.env.CYPRESS_INTERNAL_DEV_WATCH) {
+          if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
+            stdioOptions.execArgv = [process.env.CYPRESS_INTERNAL_DEV_DEBUG]
+          }
+
           debug('spawning Cypress as fork: %s', startScriptPath)
+
           child = cp.fork(startScriptPath, args, stdioOptions)
           process.on('message', (msg) => {
             child.send(msg)

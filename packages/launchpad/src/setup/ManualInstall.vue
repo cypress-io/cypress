@@ -34,8 +34,10 @@ import type { ManualInstallFragment } from "../generated/graphql";
 gql`
 fragment ManualInstall on Wizard {
   packagesToInstall {
+    id
     name
     description
+    package
   }
 }
 `
@@ -53,7 +55,7 @@ const dependenciesCode = computed(
   () =>
     "yarn add -D \\\n" +
     (props.gql.packagesToInstall ?? [])
-      .map((pack) => `                    ${pack.name} \\`)
+      .map((pack) => `                    ${pack.package} \\`)
       .join("\n")
 );
 const projectTitle = 'TODO: project title in gql'

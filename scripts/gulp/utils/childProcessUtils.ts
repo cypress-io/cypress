@@ -3,7 +3,7 @@ import through2 from 'through2'
 import pDefer from 'p-defer'
 import util from 'util'
 
-import { prefixStream } from './prefixStream'
+import { prefixLog, prefixStream } from './prefixStream'
 
 export type AllSpawnableApps =
   | `vite-${string}`
@@ -15,18 +15,22 @@ interface SpawnedOptions extends SpawnOptions {
   waitForExit?: boolean
 }
 
+interface SpawnUntilMatchConfig {
+  command: string
+  match: string | RegExp
+  options?: SpawnOptions
+}
+
 export async function spawnUntilMatch (
   prefix: AllSpawnableApps,
-  command: string,
-  match: string | RegExp,
-  opts: SpawnOptions = {},
+  config: SpawnUntilMatchConfig,
 ) {
   const dfd = pDefer()
   let ready = false
 
-  spawned(prefix, command, opts, {
+  spawned(prefix, config.command, config.options ?? {}, {
     tapOut (chunk, enc, cb) {
-      if (!ready && String(chunk).match(match)) {
+      if (!ready && String(chunk).match(config.match)) {
         ready = true
         setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
       }
@@ -50,7 +54,13 @@ export async function spawned (
   const { waitForExit, ...spawnOpts } = opts
 
   const [executable, ...rest] = command.split(' ')
-  const cp = spawn(executable, rest, {
+  let useExecutable = executable
+
+  if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
+    useExecutable = `${executable}.cmd`
+  }
+
+  const cp = spawn(useExecutable, rest, {
     stdio: 'pipe',
     env: {
       FORCE_COLOR: '1',
@@ -86,19 +96,51 @@ export async function spawned (
   prefixedStdout?.pipe(process.stdout)
   prefixedStderr?.pipe(process.stderr)
 
+  const log = prefixLog(`${prefix}:${cp.pid}`)
+
   return new Promise((resolve, reject) => {
     if (waitForExit) {
-      cp.once('exit', () => {
-        resolve(cp)
+      if (process.platform === 'win32') {
+        cp.on('exit', (code, signal) => {
+          log.log(`Exit code: ${code} => ${signal}`)
+          resolve(cp)
+        })
+      } else {
+        cp.once('exit', (code, signal) => {
+          log.log(`Exit code: ${code} => ${signal}`)
+          resolve(cp)
+        })
+      }
+
+      cp.once('error', (e) => {
+        log.error(`error executing ${command} ${writeError(e)}`)
+        reject(e)
+      })
+    } else {
+      if (process.platform === 'win32') {
+        cp.on('exit', (code, signal) => {
+          log.log(`Exit code: ${code} => ${signal}`)
+        })
+      } else {
+        cp.once('exit', (code, signal) => {
+          log.log(`Exit code: ${code} => ${signal}`)
+        })
+      }
+
+      cp.once('error', (e) => {
+        log.error(`error executing ${command} ${writeError(e)}`)
+        reject(e)
       })
 
-      cp.once('error', reject)
-    } else {
       cp.stdout?.once('data', () => {
         resolve(cp)
       })
     }
   })
+}
+
+function writeError (e: Error) {
+  return JSON.stringify({ name: e.name, message: e.message, stack: e.stack })
 }
 
 const execAsyncLocal = util.promisify(exec)

@@ -1,16 +1,15 @@
-import type { RunGroupTotals } from '@packages/graphql/src/entities/run/Run'
 import RunResults from './RunResults.vue'
-
-const totals: RunGroupTotals = {
-  totalDuration: 1000,
-  totalPassed: 5,
-  totalFailed: 0,
-  totalSkipped: 0,
-  totalPending: 4,
-}
+import { RunCardFragmentDoc } from '../generated/graphql-test'
 
 describe('<RunResults />', () => {
   it('playground', () => {
-    cy.mount(() => <RunResults totals={totals} />)
+    cy.mountFragment(RunCardFragmentDoc, {
+      type: (ctx) => {
+        return ctx.stubCloudData.CloudRunStubs.allPassing
+      },
+      render (gql) {
+        return <RunResults gql={gql} />
+      },
+    })
   })
 })

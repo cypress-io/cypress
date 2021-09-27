@@ -22,8 +22,8 @@ export const getPathToIndex = (pkg: RunnerPkg) => {
 
 export const getPathToDesktopIndex = (pkg: 'desktop-gui' | 'launchpad') => {
   // TODO: check if there's a better approach to fix here
-  if (pkg === 'launchpad' && process.env.CYPRESS_INTERNAL_ENV === 'development') {
-    return `http://localhost:3001`
+  if (pkg === 'launchpad' && process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT) {
+    return `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}`
   }
 
   return `file://${path.join(__dirname, '..', '..', pkg, 'dist', 'index.html')}`

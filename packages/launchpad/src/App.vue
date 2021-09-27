@@ -2,13 +2,13 @@
   <div v-if="!backendInitialized">
     Loading...
   </div>
-  <div v-else class="bg-white h-full">
+  <div v-else class="h-full mx-auto bg-white">
     <Main />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import Main from './Main.vue'
 import { AppQueryDocument } from './generated/graphql'
@@ -28,9 +28,13 @@ query AppQuery {
  */
 const query = useQuery({ 
   query: AppQueryDocument,
-  requestPolicy: 'network-only'
+  requestPolicy: 'cache-and-network'
 })
 
+
+watch(query.data, () => {
+  console.log(query.data.value)
+})
 
 let interval: number
 const poll = () => {
@@ -52,6 +56,6 @@ const backendInitialized = computed(() => !!query.data?.value?.app)
 
 <style lang="scss">
 html, body, #app {
-  @apply h-full;
+  @apply h-full bg-white;
 }
 </style>

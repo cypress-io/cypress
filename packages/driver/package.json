@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "patch-package",
@@ -69,6 +69,7 @@
     "react-16.0.0": "npm:react@16.0.0",
     "react-dom-15.6.1": "npm:react-dom@15.6.1",
     "react-dom-16.0.0": "npm:react-dom@16.0.0",
+    "rimraf": "3.0.2",
     "rollup-plugin-node-builtins": "^2.1.2",
     "setimmediate": "1.0.5",
     "sinon": "8.1.1",
