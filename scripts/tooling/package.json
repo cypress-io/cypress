@@ -4,11 +4,13 @@
   "description": "Tools and scripts to facilitate Cypress CI, publish and release tasks.",
   "private": true,
   "devDependencies": {
-    "@packages/ts": "0.0.0-development"
+    "@packages/ts": "0.0.0-development",
+    "rimraf": "^3.0.2"
   },
   "bin": {
     "tooling_build-typescript": "./build-prod/typescript.js",
-    "tooling_clean-typescript": "./build-prod/clean-typescript.js"
+    "tooling_clean-typescript": "./build-prod/clean-typescript.js",
+    "tooling_clear-typescript-cache": "./dev/clear-typescript-cache.js"
   },
   "repository": "https://github.com/cypress-io/cypress.git"
 }
