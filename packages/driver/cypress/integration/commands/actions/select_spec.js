@@ -423,7 +423,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when finding duplicate values', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` matched more than one `option` by value, index, or text: `bm`')
+          expect(err.message).to.include('`cy.select()` matched more than one `option` by value or text: `bm`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
