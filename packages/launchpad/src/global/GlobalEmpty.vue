@@ -3,10 +3,10 @@
     ref="projectUpload"
     class="text-center"
   >
-    <h1 class="text-2rem mb-2">
+    <h1 class="mb-2 text-2rem">
       {{ t('globalPage.empty.title') }}
     </h1>
-    <p class="text-lg font-light text-gray-600 mb-6">
+    <p class="mb-6 text-lg font-light text-body-gray">
       {{ t('globalPage.empty.helper') }}
     </p>
     <FileSelector
@@ -19,23 +19,21 @@
         @click="openDialog"
       >
         <div
-          class="min-w-220px relative block w-full border-2 bg-gray-50 border-gray-300 border-dashed rounded-lg p-12 text-center hover:border-gray-400 text-center"
+          class="relative block w-full p-12 text-center border-2 border-gray-300 border-dashed rounded-lg h-240px min-w-220px bg-gray-50 hover:border-gray-400"
           :class="{ 'border-blue-200': hovered }"
         >
-          <IconPlaceholder
-            class="mx-auto max-w-65px h-full relative justify-center w-full text-indigo-600"
-          />
-          <i18n-t keypath="globalPage.empty.dropText">
-            <button
-              class="text-indigo-600 hover:underline"
-            >
-              <!--
+          <IconPlaceholder class="relative mx-auto mb-2 w-72px h-72px text-primary" />
+          <span class="font-light text-body-gray-700 text-18px">
+            <i18n-t keypath="globalPage.empty.dropText">
+              <button class="font-medium text-primary hover:underline">
+                <!--
               This button allows keyboard users to fire a click event with the Enter or Space keys,
               which will be handled by the dropzone's existing click handler.
-             -->
-              {{ t('globalPage.empty.browseManually') }}
-            </button>
-          </i18n-t>
+                -->
+                {{ t('globalPage.empty.browseManually') }}
+              </button>
+            </i18n-t>
+          </span>
         </div>
       </Dropzone>
     </FileSelector>

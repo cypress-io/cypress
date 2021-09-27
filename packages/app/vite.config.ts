@@ -41,9 +41,7 @@ export default defineConfig({
         customCollections: ['cy'],
       }),
     }),
-    WindiCSS({
-      configFiles: [require.resolve('./.windicss/windi.config')],
-    }),
+    WindiCSS(),
     VueSvgLoader(),
   ],
   define: {

@@ -5,7 +5,7 @@ import getenv from 'getenv'
 
 import type { BaseContext } from '../context/BaseContext'
 
-const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV) as keyof typeof REMOTE_SCHEMA_URLS
+const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 const REMOTE_SCHEMA_URLS = {
   development: 'http://localhost:3000',
   staging: 'https://dashboard-staging.cypress.io',

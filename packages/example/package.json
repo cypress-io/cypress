@@ -6,7 +6,7 @@
   "types": "index.d.ts",
   "scripts": {
     "postinstall": "echo '@packages/example needs: yarn build'",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-e2e": "cypress run",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -35,6 +35,7 @@
     "gulp-rev-all": "2.0.2",
     "mocha": "2.5.3",
     "resolve-pkg": "2.0.0",
+    "rimraf": "3.0.2",
     "shelljs": "0.8.4"
   }
 }

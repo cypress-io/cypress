@@ -36,7 +36,7 @@ const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
   '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/static/favicon.ico',
+  '/__cypress/runner/favicon.ico',
 ]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//

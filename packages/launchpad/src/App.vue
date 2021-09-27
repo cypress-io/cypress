@@ -4,7 +4,7 @@
   </div>
   <div
     v-else
-    class="bg-white h-full"
+    class="h-full mx-auto bg-white"
   >
     <Main />
   </div>
@@ -54,6 +54,6 @@ const backendInitialized = computed(() => !!query.data?.value?.app)
 
 <style lang="scss">
 html, body, #app {
-  @apply h-full;
+  @apply h-full bg-white;
 }
 </style>

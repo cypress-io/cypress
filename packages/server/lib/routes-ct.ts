@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import httpProxy from 'http-proxy'
-import { handle, makeServeConfig } from './runner-ct'
+import { makeServeConfig } from './runner-ct'
 import { Request, Response, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -49,8 +49,6 @@ export const createRoutesCT = ({
     myProxy.web(req, res, {}, (e) => {
     })
   })
-
-  routesCt.get('/__cypress/runner/*', handle)
 
   routesCt.get('/__cypress/static/*', (req, res) => {
     const pathToFile = getPathToDist('static', req.params[0])
