@@ -47,10 +47,10 @@
 </template>
 
 <script lang="ts" setup>
-import { defineProps } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 withDefaults(defineProps <{
-  icon?: any
+  icon?: FunctionalComponent<SVGAttributes, {}>
   // Currently active row (generally the current route)
   active?: boolean
   }>(), {
