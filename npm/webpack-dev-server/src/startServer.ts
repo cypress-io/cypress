@@ -57,13 +57,13 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     debug('using webpack-dev-server v3')
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
-      // @ts-expect-error ignore webpack-dev-server v3 type errors
+      // @ts-ignore ignore webpack-dev-server v3 type errors
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
     }
 
-    // @ts-expect-error ignore webpack-dev-server v3 type errors
+    // @ts-ignore ignore webpack-dev-server v3 type errors
     return new WebpackDevServer(compiler, webpackDevServerConfig)
   }
 

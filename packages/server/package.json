@@ -6,7 +6,7 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "codecov": "codecov",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
@@ -179,6 +179,7 @@
     "proxyquire": "2.1.3",
     "react": "16.8.6",
     "repl.history": "0.1.4",
+    "rimraf": "3.0.2",
     "sinon": "5.1.1",
     "snap-shot-it": "7.9.3",
     "ssestream": "1.0.1",

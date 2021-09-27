@@ -8,28 +8,31 @@ type App {
   activeProject: Project
 
   """Browsers found that are compatible with Cypress"""
-  browsers: [Browser!]!
+  browsers: [Browser!]
 
   """See if the GraphQL server is alive"""
   healthCheck: String!
-
-  """Whether this is the first open of the application or not"""
-  isFirstOpen: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
   """All known projects for the app"""
   projects: [Project!]!
+
+  """The currently selected browser for the application"""
+  selectedBrowser: Browser
 }
 
 """Container representing a browser"""
-type Browser {
+type Browser implements Node {
   channel: String!
   disabled: Boolean!
   displayName: String!
   family: BrowserFamily!
-  id: String!
+
+  """Relay style Node ID field for the Browser field"""
+  id: ID!
+  isSelected: Boolean!
   majorVersion: String
   name: String!
   path: String!
@@ -232,7 +235,7 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-enum FrontendFramework {
+enum FrontendFrameworkEnum {
   cra
   nextjs
   nuxtjs
@@ -244,7 +247,7 @@ enum FrontendFramework {
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
-scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+scalar JSON
 
 type Mutation {
   """Add project to projects array and cache it"""
@@ -260,6 +263,12 @@ type Mutation {
 
   """Launches project from open_project global singleton"""
   launchOpenProject: App
+
+  """Sets the active browser"""
+  launchpadSetBrowser(
+    """ID of the browser that we want to set"""
+    id: ID!
+  ): Query
 
   """Auth with Cypress Cloud"""
   login: Query
@@ -280,10 +289,7 @@ type Mutation {
   wizardSetBundler(bundler: SupportedBundlers!): Wizard
 
   """Sets the frontend framework we want to use for the project"""
-  wizardSetFramework(framework: FrontendFramework!): Wizard
-
-  """Sets the frontend bundler we want to use for the project"""
-  wizardSetManualInstall(isManual: Boolean!): Wizard
+  wizardSetFramework(framework: FrontendFrameworkEnum!): Wizard
 
   """Sets the current testing type we want to use"""
   wizardSetTestingType(type: TestingTypeEnum!): Wizard
@@ -300,11 +306,14 @@ enum NavItem {
 }
 
 """Container describing a single nav item"""
-type NavigationItem {
+type NavigationItem implements Node {
   iconPath: String!
-  id: NavItem!
+
+  """Relay style Node ID field for the NavigationItem field"""
+  id: ID!
   name: String!
   selected: Boolean!
+  type: NavItem!
 }
 
 """Container for state associated with the side navigation menu"""
@@ -359,9 +368,12 @@ enum PluginsState {
   uninitialized
 }
 
-"""A Cypress project is a container"""
-type Project {
+"""A Cypress Project is represented by a cypress.json file"""
+type Project implements Node {
+  """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject
+
+  """Relay style Node ID field for the Project field"""
   id: ID!
 
   """Whether the user configured this project to use Component Testing"""
@@ -373,7 +385,6 @@ type Project {
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
-  resolvedConfig: ResolvedConfig
   title: String!
 }
 
@@ -406,114 +417,6 @@ type Query {
   wizard: Wizard!
 }
 
-type ResolvedBooleanOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: Boolean
-}
-
-"""Resolve config for a project"""
-type ResolvedConfig {
-  animationDistanceThreshold: ResolvedNumberOption
-  baseUrl: ResolvedStringOption
-  blockHosts: ResolvedStringOption
-  chromeWebSecurity: ResolvedBooleanOption
-  component: ResolvedConfig
-  componentFolder: ResolvedStringOption
-  defaultCommandTimeout: ResolvedNumberOption
-  downloadsFolder: ResolvedStringOption
-  e2e: ResolvedConfig
-  env: ResolvedJsonOption
-  execTimeout: ResolvedNumberOption
-  experimentalFetchPolyfill: ResolvedBooleanOption
-  experimentalInteractiveRunEvents: ResolvedBooleanOption
-  experimentalSessionSupport: ResolvedBooleanOption
-  experimentalSourceRewriting: ResolvedBooleanOption
-  experimentalStudio: ResolvedBooleanOption
-  fileServerFolder: ResolvedStringOption
-  fixturesFolder: ResolvedStringOption
-  ignoreTestFiles: ResolvedStringListOption
-  includeShadowDom: ResolvedBooleanOption
-  integrationFolder: ResolvedStringOption
-  nodeVersion: ResolvedStringOption
-  numTestsKeptInMemory: ResolvedNumberOption
-  pageLoadTimeout: ResolvedNumberOption
-  pluginsFile: ResolvedStringOption
-  port: ResolvedNumberOption
-  projectId: ResolvedStringOption
-  redirectionLimit: ResolvedNumberOption
-  reporter: ResolvedStringOption
-  requestTimeout: ResolvedNumberOption
-  resolvedNodePath: ResolvedStringOption
-  resolvedNodeVersion: ResolvedStringOption
-  retries: ResolvedNumberOption
-  screenshotOnRunFailure: ResolvedBooleanOption
-  screenshotsFolder: ResolvedStringOption
-  scrollBehavior: ResolvedStringOption
-  supportFile: ResolvedStringOption
-  supportFolder: ResolvedStringOption
-  taskTimeout: ResolvedNumberOption
-  testFiles: ResolvedStringOption
-  trashAssetsBeforeRuns: ResolvedBooleanOption
-  userAgent: ResolvedStringOption
-  video: ResolvedBooleanOption
-  videoCompression: ResolvedNumberOption
-  videoUploadOnPasses: ResolvedBooleanOption
-  videosFolder: ResolvedStringOption
-  viewportHeight: ResolvedNumberOption
-  viewportWidth: ResolvedNumberOption
-  waitForAnimations: ResolvedBooleanOption
-  watchForFileChanges: ResolvedBooleanOption
-}
-
-enum ResolvedConfigOption {
-  config
-  default
-  env
-  plugin
-  runtime
-}
-
-"""
-An JSON object represented as a string via JSON.stringify. Useful for representing complex types like `env`
-"""
-type ResolvedJsonOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: String
-}
-
-type ResolvedNumberOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: String
-}
-
-interface ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-}
-
-type ResolvedStringListOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: [String]
-}
-
-type ResolvedStringOption implements ResolvedOptionBase {
-  from: ResolvedConfigOption
-  type: ResolvedType!
-  value: String
-}
-
-enum ResolvedType {
-  array
-  boolean
-  json
-  number
-  string
-}
-
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
@@ -525,10 +428,13 @@ enum TestingTypeEnum {
   e2e
 }
 
-type TestingTypeInfo {
+type TestingTypeInfo implements Node {
   description: String!
-  id: TestingTypeEnum!
+
+  """Relay style Node ID field for the TestingTypeInfo field"""
+  id: ID!
   title: String!
+  type: TestingTypeEnum!
 }
 
 """
@@ -543,6 +449,9 @@ type Wizard {
   Given the current state, returns whether the user progress to the next step of the wizard
   """
   canNavigateForward: Boolean!
+
+  """Whether the plugins for the selected testing type has been initialized"""
+  chosenTestingTypePluginsInitialized: Boolean!
 
   """The title of the page, given the current step of the wizard"""
   description: String
@@ -574,13 +483,21 @@ type Wizard {
 }
 
 """Wizard bundler"""
-type WizardBundler {
-  id: SupportedBundlers!
+type WizardBundler implements Node {
+  """Relay style Node ID field for the WizardBundler field"""
+  id: ID!
 
   """Whether this is the selected framework bundler"""
   isSelected: Boolean
+
+  """Display name of the bundler"""
   name: String!
+
+  """Package to install associated with the bundler"""
   package: String!
+
+  """The name of the framework"""
+  type: SupportedBundlers!
 }
 
 enum WizardCodeLanguage {
@@ -589,9 +506,9 @@ enum WizardCodeLanguage {
 }
 
 """A frontend framework that we can setup within the app"""
-type WizardFrontendFramework {
-  """The name of the framework"""
-  id: FrontendFramework!
+type WizardFrontendFramework implements Node {
+  """Relay style Node ID field for the WizardFrontendFramework field"""
+  id: ID!
 
   """Whether this is the selected framework in the wizard"""
   isSelected: Boolean!
@@ -601,6 +518,9 @@ type WizardFrontendFramework {
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
+
+  """The name of the framework"""
+  type: FrontendFrameworkEnum!
 }
 
 enum WizardNavigateDirection {
@@ -609,11 +529,15 @@ enum WizardNavigateDirection {
 }
 
 """Details about an NPM Package listed during the wizard install"""
-type WizardNpmPackage {
+type WizardNpmPackage implements Node {
   description: String!
+
+  """Relay style Node ID field for the WizardNpmPackage field"""
+  id: ID!
 
   """The package name that you would npm install"""
   name: String!
+  package: String!
 }
 
 enum WizardStep {

@@ -14,6 +14,9 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
 import { closeGraphQLServer } from '@packages/graphql/src/server'
+import { fs } from './util/fs'
+import path from 'path'
+import os from 'os'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -22,9 +25,36 @@ interface SpecsByType {
   integration: Cypress.Spec[]
 }
 
+// @see https://github.com/cypress-io/cypress/issues/18094
+async function win32BitWarning (onWarning: (error: Error) => void) {
+  if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
+
+  // adapted from https://github.com/feross/arch/blob/master/index.js
+  let useEnv = false
+
+  try {
+    useEnv = !!(process.env.SYSTEMROOT && await fs.stat(process.env.SYSTEMROOT))
+  } catch (err) {
+    // pass
+  }
+
+  const sysRoot = useEnv ? process.env.SYSTEMROOT! : 'C:\\Windows'
+
+  // If %SystemRoot%\SysNative exists, we are in a WOW64 FS Redirected application.
+  let hasX64 = false
+
+  try {
+    hasX64 = !!(await fs.stat(path.join(sysRoot, 'sysnative')))
+  } catch (err) {
+    // pass
+  }
+
+  onWarning(errors.get('WIN32_DEPRECATION', hasX64))
+}
+
 export class OpenProject {
   openProject: ProjectBase<any> | null = null
-  relaunchBrowser: ((...args: unknown[]) => void) | null = null
+  relaunchBrowser: ((...args: unknown[]) => Bluebird<void>) | null = null
   specsWatcher: chokidar.FSWatcher | null = null
   componentSpecsWatcher: chokidar.FSWatcher | null = null
 
@@ -51,17 +81,11 @@ export class OpenProject {
     return this.openProject?.getConfig()
   }
 
-  getRecordKeys () {
-    return this.tryToCall('getRecordKeys')
-  }
+  getRecordKeys = this.tryToCall('getRecordKeys')
 
-  getRuns () {
-    return this.tryToCall('getRuns')
-  }
+  getRuns = this.tryToCall('getRuns')
 
-  requestAccess () {
-    return this.tryToCall('requestAccess')
-  }
+  requestAccess = this.tryToCall('requestAccess')
 
   getProject () {
     return this.openProject
@@ -179,7 +203,7 @@ export class OpenProject {
 
       afterSpec()
       .catch((err) => {
-        this.openProject!.options.onError(err)
+        this.openProject?.options.onError(err)
       })
 
       if (onBrowserClose) {
@@ -382,6 +406,8 @@ export class OpenProject {
         if (this.relaunchBrowser) {
           return this.relaunchBrowser()
         }
+
+        return
       },
     })
 
@@ -405,6 +431,8 @@ export class OpenProject {
         testingType: args.testingType,
       },
     })
+
+    await win32BitWarning(options.onWarning)
 
     try {
       await this.openProject.initializeConfig(browsers)

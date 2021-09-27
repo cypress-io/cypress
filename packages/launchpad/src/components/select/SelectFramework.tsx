@@ -5,11 +5,15 @@ const manyOptions = [
   {
     name: 'Vue.js',
     id: 'vue',
+    isSelected: false,
+    type: 'vuecli',
   },
   {
     name: 'React.js',
     description: '(detected)',
     id: 'react',
+    isSelected: false,
+    type: 'react',
   },
 ] as const
 
@@ -43,6 +47,8 @@ describe('<BigSelect />', () => {
           {
             name: 'VueJs',
             id: 'vue',
+            isSelected: false,
+            type: 'vuecli',
           },
         ]}
       />

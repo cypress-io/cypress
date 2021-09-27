@@ -8,13 +8,13 @@ const CYPRESS_VITE_APP_PORT = getenv.int('CYPRESS_VITE_APP_PORT', 3333)
 const CYPRESS_VITE_LAUNCHPAD_PORT = getenv.int('CYPRESS_VITE_LAUNCHPAD_PORT', 3001)
 
 export function viteApp () {
-  return viteDev('vite-app', `yarn vite --port ${CYPRESS_VITE_APP_PORT} --base /__vite__/`, {
+  return viteDev('vite-app', `vite --port ${CYPRESS_VITE_APP_PORT} --base /__vite__/`, {
     cwd: monorepoPaths.pkgApp,
   })
 }
 
 export function viteLaunchpad () {
-  return viteDev('vite-launchpad', `yarn vite --port ${CYPRESS_VITE_LAUNCHPAD_PORT}`, {
+  return viteDev('vite-launchpad', `vite --port ${CYPRESS_VITE_LAUNCHPAD_PORT}`, {
     cwd: monorepoPaths.pkgLaunchpad,
   })
 }
@@ -22,12 +22,14 @@ export function viteLaunchpad () {
 export function viteCleanApp () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgApp,
+    waitForExit: true,
   })
 }
 
 export function viteCleanLaunchpad () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgLaunchpad,
+    waitForExit: true,
   })
 }
 

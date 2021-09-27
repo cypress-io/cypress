@@ -1,14 +1,15 @@
 import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch } from './tasks/gulpCypress'
-import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, printUrqlSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
+import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
 import { checkTs } from './tasks/gulpTsc'
 import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
 import { makePathMap } from './utils/makePathMap'
 import { setGulpGlobal } from './gulpConstants'
+import { makePackage } from './tasks/gulpMakePackage'
 
 gulp.task(
-  'dev',
+  'codegen',
   gulp.series(
     // Autobarrel watcher
     autobarrelWatcher,
@@ -16,16 +17,24 @@ gulp.task(
     // Fetch the latest "remote" schema from the Cypress cloud
     syncRemoteGraphQL,
 
-    gulp.parallel(
-      // Clean the vite apps
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
     // Codegen for our GraphQL Server so we have the latest schema to build the frontend codegen correctly
     nexusCodegenWatch,
 
     // ... and generate the correct GraphQL types for the frontend
     graphqlCodegenWatch,
+  ),
+)
+
+gulp.task(
+  'dev',
+  gulp.series(
+    'codegen',
+
+    gulp.parallel(
+      // Clean the vite apps
+      viteCleanApp,
+      viteCleanLaunchpad,
+    ),
 
     // Now that we have the codegen, we can start the frontend(s)
     gulp.parallel(
@@ -94,9 +103,10 @@ gulp.task(
 //   'debug', // Tim: TODO
 // )
 
+gulp.task(makePackage)
 gulp.task(checkTs)
 gulp.task(syncRemoteGraphQL)
-gulp.task(printUrqlSchema)
+gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)
 gulp.task(nexusCodegen)
 gulp.task(nexusCodegenWatch)

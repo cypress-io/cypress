@@ -1,20 +1,19 @@
 <template>
   <template v-if="query.data.value">
-    <template v-if="query.data.value.app.isInGlobalMode">
-      <GlobalPage :gql="query.data.value.app"/>
-    </template>
-
-    <template v-else>
-      <HeaderBar :gql="query.data.value" />
-      <template v-if="query.data.value?.wizard.step === 'welcome'">
-        <WizardHeader :gql="query.data.value.wizard" />
-        <TestingTypeCards :gql="query.data.value" />
+    <HeaderBar :gql="query.data.value" />
+    <div class="max-content">
+      <template v-if="query.data.value.app.isInGlobalMode">
+        <GlobalPage />
       </template>
-      <Wizard 
-        v-else
-        :gql="query.data.value" 
-      />
-    </template>
+
+      <template v-else>
+        <template v-if="query.data.value?.wizard.step === 'welcome'">
+          <WizardHeader :gql="query.data.value.wizard" />
+          <TestingTypeCards :gql="query.data.value" />
+        </template>
+        <Wizard v-else :gql="query.data.value" />
+      </template>
+    </div>
   </template>
   <div v-else>Loading</div>
 </template>
@@ -34,6 +33,7 @@ query MainQuery {
   ...Wizard
 
   wizard {
+    canNavigateForward
     ...WizardHeader
   }
 

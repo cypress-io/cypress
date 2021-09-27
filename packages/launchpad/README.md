@@ -36,21 +36,13 @@ yarn workspace @packages/launchpad build
 
 For the best development experience, you will want to use VS Code with the [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) extension. This will give you type completion inside `vue` files.
 
-You probably want to start Vite in watch mode:
 
 ```bash
 ## from repo root
-yarn workspace @packages/launchpad watch
+yarn dev
 ```
 
-The start the application:
-
-```bash
-## from repo root
-yarn workspace @packages/launchpad dev
-```
-
-This also starts the GraphQL Server. You can access it on `http://localhost:52159/graphql`.
+This starts Vite in watch mode. It also starts the GraphQL Server. You can access it on `http://localhost:52159/graphql`.
 
 ![graphql](../graphql/gql.png)
 
@@ -74,4 +66,13 @@ E2E tests:
 ```bash
 ## from repo root
 yarn workspace @packages/launchpad cypress:open
+```
+
+## Utility class usage
+
+Windi CSS can create an awesome interactive summary showing our usage of utility classes and design tokens. Running this command will generate this report and serve it on localhost.
+
+```bash
+## from launchpad directory
+yarn windi
 ```

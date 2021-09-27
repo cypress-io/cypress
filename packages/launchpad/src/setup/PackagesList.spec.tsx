@@ -4,7 +4,9 @@ import PackagesList from './PackagesList.vue'
 describe('<PackagesList />', () => {
   it('playground', () => {
     cy.mountFragment(PackagesListFragmentDoc, {
-      type: (ctx) => ctx.wizard,
+      type: (ctx) => {
+        return ctx.stubWizard
+      },
       render: (gqlVal) => <PackagesList gql={gqlVal} />,
     })
   })

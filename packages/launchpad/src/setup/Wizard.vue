@@ -1,6 +1,6 @@
 <template>
   <WizardHeader :gql="props.gql.wizard" v-if="props.gql.wizard" />
-  <div class="mx-5">
+  <div class="mb-5">
     <EnvironmentSetup 
       v-if="props.gql.wizard.step === 'selectFramework'" 
       :gql="props.gql.wizard" 
@@ -15,7 +15,7 @@
     />
     <InitializeConfig 
       v-if="props.gql.wizard.step === 'initializePlugins'" 
-      :gql="props.gql"
+      :gql="props.gql.wizard"
     />
     <OpenBrowser v-if="props.gql.wizard.step === 'setupComplete'" />
   </div>
@@ -40,9 +40,9 @@ fragment Wizard on Query {
     testingType
     ...EnvironmentSetup
     ...InstallDependencies
+    ...InitializeConfig
   }
   ...ConfigFile
-  ...InitializeConfig
 }`
 
 const props = defineProps<{

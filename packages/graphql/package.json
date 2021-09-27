@@ -7,35 +7,34 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rm -rf node_modules",
-    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
-    "@graphql-tools/batch-delegate": "^8.0.12",
-    "@graphql-tools/delegate": "^8.1.1",
-    "@graphql-tools/utils": "^8.1.2",
-    "@graphql-tools/wrap": "^8.0.13",
+    "@graphql-tools/batch-delegate": "8.1.0",
+    "@graphql-tools/delegate": "8.2.1",
+    "@graphql-tools/utils": "8.2.3",
+    "@graphql-tools/wrap": "8.1.1",
     "cors": "2.8.5",
     "cross-fetch": "^3.1.4",
     "dedent": "^0.7.0",
     "express": "4.17.1",
     "express-graphql": "^0.12.0",
-    "fake-uuid": "^1.0.0",
     "getenv": "^1.0.0",
     "graphql": "^15.5.1",
-    "graphql-relay": "^0.9.0",
     "graphql-scalars": "^1.10.0",
-    "nexus": "^1.2.0-next.15",
-    "nexus-decorators": "^0.2.5"
+    "nexus": "^1.2.0-next.15"
   },
   "devDependencies": {
+    "@packages/data-context": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
+    "rimraf": "3.0.2",
     "snap-shot-it": "7.9.3"
   },
   "files": [

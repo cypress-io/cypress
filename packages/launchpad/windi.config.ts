@@ -1,8 +1,11 @@
 import { defineConfig } from 'windicss/helpers'
 import Colors from 'windicss/colors'
+import { customColors } from './src/design/colors'
 import { map, reduce, kebabCase } from 'lodash'
 
-const safelist = reduce(Colors, (acc, variants, colorName) => {
+const colors = Object.assign(Colors, customColors)
+
+const safelist = reduce(colors, (acc, variants, colorName) => {
   const name = kebabCase(colorName)
 
   return `${acc}
@@ -20,9 +23,13 @@ export default defineConfig({
       gridTemplateRows: {
         launchpad: '64px 1fr',
       },
+      colors,
     },
   },
   safelist,
+  shortcuts: {
+    'max-content': 'mx-auto max-w-1256px',
+  },
   extract: {
     // accepts globs and file paths relative to project root
     include: ['index.html', 'src/**/*.{vue,html,tsx}'],

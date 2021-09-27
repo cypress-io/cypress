@@ -3,77 +3,50 @@
     :next="nextButtonName" 
     alt="Install manually" 
     :altFn="altFn"
-    :canNavigateForward="gql.canNavigateForward"
+    :canNavigateForward="props.gql.canNavigateForward"
   >
     <PackagesList
-      v-if="!manualInstall" 
-      :gql="gql" 
+      v-if="!isManualInstall" 
+      :gql="props.gql" 
     />
     <ManualInstall 
       v-else 
-      @back="manualInstall = false" 
-      :gql="gql || []" 
+      :gql="props.gql" 
     />
   </WizardLayout>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, PropType } from "vue";
+<script lang="ts" setup>
+import { computed, ref } from "vue";
 import WizardLayout from "./WizardLayout.vue";
 import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
 import { gql } from '@urql/core'
-import { useMutation } from "@urql/vue";
-import { InstallDependenciesFragment, InstallDependenciesManualInstallDocument } from "../generated/graphql";
+import type { InstallDependenciesFragment } from "../generated/graphql";
 import { useI18n } from "../composables";
 
 gql`
 fragment InstallDependencies on Wizard {
   ...PackagesList
   ...ManualInstall
-  isManualInstall
   canNavigateForward
 }
 `
 
-gql`
-mutation InstallDependenciesManualInstall($isManual: Boolean!) {
-  wizardSetManualInstall(isManual: $isManual) {
-    ...InstallDependencies
-  }
+const isManualInstall = ref(false)
+
+const props = defineProps<{
+  gql: InstallDependenciesFragment
+}>()
+
+const { t } = useI18n()
+const nextButtonName = computed(() =>
+  isManualInstall.value ?
+    t('setupPage.install.confirmManualInstall') :
+    t('setupPage.install.startButton')
+);
+
+const altFn = (val: boolean) => {
+  isManualInstall.value = val
 }
-`
-
-
-export default defineComponent({
-  components: {
-    WizardLayout,
-    PackagesList,
-    ManualInstall,
-  },
-  props: {
-    gql: {
-      type: Object as PropType<InstallDependenciesFragment>,
-      required: true
-    }
-  },
-  setup(props) {
-    const { t } = useI18n()
-    const toggleManual = useMutation(InstallDependenciesManualInstallDocument)
-    const nextButtonName = computed(() =>
-      props.gql.isManualInstall ?
-        t('setupPage.install.confirmManualInstall') :
-        t('setupPage.install.startButton')
-    );
-
-    return { 
-      manualInstall: computed(() => props.gql.isManualInstall),
-      nextButtonName, 
-      gql: computed(() => props.gql),
-      altFn (val: boolean) {
-        toggleManual.executeMutation({ isManual: val })
-      }
-    };
-  },
-});
 </script>
