@@ -62,16 +62,15 @@ program
 
   tasks.run()
   .then(() => {
-    log('')
-    log('Type check passed successfully.')
-  })
-  .catch((err) => {
-    process.exitCode = 1
+    if (tasks.err[0].errors.length > 0) {
+      process.exitCode = 1
 
-    err.errors.forEach((e) => {
       log('')
-      log(`${e.name} failed\n${e.err.stdout}`)
-    })
+      log('Type check failed.')
+    } else {
+      log('')
+      log('Type check passed successfully.')
+    }
   })
 })
 
