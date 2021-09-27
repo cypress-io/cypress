@@ -8428,17 +8428,6 @@
     tapable "^2.1.1"
     webpack "^5.38.1"
 
-"@types/webpack-dev-server@3.11.6":
-  version "3.11.6"
-  resolved "https://registry.yarnpkg.com/@types/webpack-dev-server/-/webpack-dev-server-3.11.6.tgz#d8888cfd2f0630203e13d3ed7833a4d11b8a34dc"
-  integrity sha512-XCph0RiiqFGetukCTC3KVnY1jwLcZ84illFRMbyFzCcWl90B/76ew0tSqF46oBhnLC4obNDG7dMO0JfTN0MgMQ==
-  dependencies:
-    "@types/connect-history-api-fallback" "*"
-    "@types/express" "*"
-    "@types/serve-static" "*"
-    "@types/webpack" "^4"
-    http-proxy-middleware "^1.0.0"
-
 "@types/webpack-dev-server@^4.0.0":
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/@types/webpack-dev-server/-/webpack-dev-server-4.0.3.tgz#0f5e3e2ba37cb52f1363de82f41ae140bd017ef3"
