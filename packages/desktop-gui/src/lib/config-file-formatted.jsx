@@ -6,7 +6,11 @@ const configFileFormatted = (configFile) => {
     return <><code>cypress.json</code> file (currently disabled by <code>--config-file false</code>)</>
   }
 
-  if (isUndefined(configFile) || ['cypress.json', 'cypress.config.js'].includes(configFile)) {
+  if (isUndefined(configFile)) {
+    return <><code>cypress.json</code> file</>
+  }
+
+  if (['cypress.json', 'cypress.config.js'].includes(configFile)) {
     return <><code>{configFile}</code> file</>
   }
 
