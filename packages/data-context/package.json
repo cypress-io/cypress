@@ -13,12 +13,11 @@
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
   },
   "dependencies": {
-    "@packages/types": "0.0.0-development",
     "dataloader": "^2.0.0"
   },
   "devDependencies": {
-    "@packages/data-context": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
     "mocha": "7.0.1",
     "rimraf": "3.0.2"
   },
