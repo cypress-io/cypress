@@ -206,7 +206,7 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
     userExtensions = userExtensions.concat(pluginExtensions)
   }
 
-  const extensions = [].concat(userExtensions, extPath, pathToTheme)
+  const extensions = ([] as any).concat(userExtensions, extPath, pathToTheme)
 
   args.push(LOAD_EXTENSION + _.compact(extensions).join(','))
 
