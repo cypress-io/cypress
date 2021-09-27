@@ -529,7 +529,7 @@ module.exports = {
         initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
           return openProject.create(args.projectRoot, args, options, browsers)
         },
-        insertProject () {
+        insertProject (projectRoot: string) {
           // TODO
         },
       },
@@ -538,6 +538,8 @@ module.exports = {
     // Fetch the browsers when the app starts, so we have some by
     // the time we're continuing.
     ctx.actions.app.refreshBrowsers()
+    // load projects from cache on start
+    ctx.actions.project.loadProjects()
 
     setDataContext(ctx)
   },

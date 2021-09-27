@@ -22,3 +22,5 @@ export function useModelWrapper<T, N extends string = 'modelValue'> (
 export function useI18n () {
   return _useI18n<{ message: MessageSchema }>({ useScope: 'global' })
 }
+
+export { useSetActiveProject } from './useSetActiveProject'

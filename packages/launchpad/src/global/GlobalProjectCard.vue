@@ -1,13 +1,11 @@
 <template>
   <div class="relative min-w-200px rounded-lg border border-gray-300 bg-white px-16px pt-13px pb-15px shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
     <div class="flex-1 min-w-0">
-      <button class="focus:outline-none underline-transparent grid w-full text-left children:truncate" @click="$emit('click', project)">
-        <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">{{ project.id }}</p>
+      <button class="focus:outline-none underline-transparent grid w-full text-left children:truncate" @dblclick="setActiveProject(project.projectRoot)">
+        <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">{{ project.title }}</p>
         <p class="text-sm text-gray-500 relative flex flex-wrap self-end items-center gap-1 bullet-points children:flex children:items-center children:gap-1">
-          <!-- <span>{{ getTimeAgo(project.lastRun) }}</span> -->
-          <span>{{ project.id }}</span>
+          <span>{{ project.projectRoot }}</span>
         </p>
-        <!-- <Icon :icon="iconForStatus.icon" :class="iconForStatus.classes" class="ml-2 justify-self-end self-center row-start-1 row-end-3 col-start-2 text-sm"/> -->
       </button>
     </div>
   </div>
@@ -19,8 +17,9 @@ import Icon from '../components/icon/Icon.vue'
 import IconChecked from 'virtual:vite-icons/mdi/check-circle'
 import IconX from 'virtual:vite-icons/mdi/plus-circle'
 import IconPending from 'virtual:vite-icons/mdi/refresh-circle'
+import { useSetActiveProject } from '../composables'
 
-import { getTimeAgo } from "../utils/time";
+const { setActiveProject } = useSetActiveProject()
 
 const icons = {
   passed: {

@@ -1,5 +1,6 @@
 import type { MutationAppCreateConfigFileArgs } from '@packages/graphql/src/gen/nxs.gen'
 import type { FoundBrowser, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -36,6 +37,17 @@ export class ProjectActions {
     return this
   }
 
+  async loadProjects () {
+    const projectRoots = await getProjectRoots() as string[]
+
+    this.ctx.coreData.app.projects = [
+      ...this.ctx?.coreData?.app?.projects,
+      ...projectRoots.map((projectRoot) => ({ projectRoot })),
+    ]
+
+    return this.ctx.coreData.app.projects
+  }
+
   async initializeActiveProject () {
     if (!this.ctx.activeProject || !this.ctx.wizardData.chosenTestingType) {
       throw Error('Cannot initialize project without an active project')
@@ -61,6 +73,7 @@ export class ProjectActions {
 
     if (!found) {
       this.ctx.coreData.app.projects.push({ projectRoot })
+      insertProject(projectRoot)
     }
 
     await this.setActiveProject(projectRoot)

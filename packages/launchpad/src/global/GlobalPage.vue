@@ -9,7 +9,7 @@
         <GlobalPageHeader v-model="match" />
       </div>
 
-      <GlobalProjectCard v-for="project in props.gql.projects" :key="project.id" :project="project" />
+      <GlobalProjectCard v-for="project in props.gql?.projects" :key="project.id" :project="project" />
     </div>
   </template>
 
@@ -32,6 +32,7 @@ fragment GlobalPage on App {
   projects {
     id
     title
+    projectRoot
   }
 }
 `
@@ -39,80 +40,6 @@ fragment GlobalPage on App {
 const props = defineProps<{
   gql: GlobalPageFragment,
 }>()
-
-console.log(props.gql.projects[0].id)
-type Project = {
-  name: string,
-  lastRunStatus: 'passed' | 'failed' | 'pending'
-  lastRun: number
-}
-
-const testProject: Project = {
-  name: 'Project Name',
-  lastRunStatus: 'passed',
-  lastRun: Date.now() - 1000 * 60 * 60 * 24 * 255 // 255 days ago
-}
-
-// I don't know why this isn't type checking correctly
-// but it'll be deleted momentarily when this data is pulled in from gql
-// @ts-ignore
-const projects: Ref<Project[]> = ref([
-  testProject,
-  {
-    name: 'Project Name 2',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 100 // 100 days ago
-  },
-  {
-    name: 'Fifty Days Ago',
-    lastRunStatus: 'pending',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 50 // 50 days ago
-  },
-  {
-    name: 'Ten Days ago',
-    lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 10 // 10 days ago
-  },
-  {
-    name: 'Five days',
-    lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 5 // 5 days ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 7',
-    lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0 // today
-  },
-  {
-    name: 'Project Name 8',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0 // yesterday
-  },
-])
-
-const filteredProjects = computed(() => {
-  return projects.value.filter(p => p.name.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
-})
 
 const match = ref('')
 </script>

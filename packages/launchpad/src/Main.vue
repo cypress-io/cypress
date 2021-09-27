@@ -3,7 +3,7 @@
     <HeaderBar :gql="query.data.value" />
     <div class="max-content">
       <template v-if="query.data.value.app.isInGlobalMode">
-        <GlobalPage />
+        <GlobalPage :gql="query.data.value.app" />
       </template>
 
       <template v-else>
@@ -46,4 +46,5 @@ query MainQuery {
 `
 
 const query = useQuery({ query: MainQueryDocument })
+console.log('gql data: ',query.data?.value)
 </script>
