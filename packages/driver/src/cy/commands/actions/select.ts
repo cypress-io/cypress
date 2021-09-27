@@ -11,7 +11,7 @@ const newLineRe = /\n/g
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrTextOrIndex, options = {}) {
-      if (!valueOrTextOrIndex) {
+      if (!_.isNumber(valueOrTextOrIndex) && !_.isString(valueOrTextOrIndex) && !_.isArray(valueOrTextOrIndex)) {
         $errUtils.throwErrByPath('select.no_argument')
       }
 
