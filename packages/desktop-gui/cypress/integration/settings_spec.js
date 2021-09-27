@@ -326,9 +326,9 @@ describe('Settings', () => {
 
     context('when configFile is false', () => {
       beforeEach(function () {
-        this.openProject.resolve(Cypress._.assign({
+        this.openProject.resolve(Cypress._.assign(this.config, {
           configFile: false,
-        }, this.config))
+        }))
 
         this.goToSettings()
 
@@ -342,9 +342,9 @@ describe('Settings', () => {
 
     context('when configFile is set', function () {
       beforeEach(function () {
-        this.openProject.resolve(Cypress._.assign({
+        this.openProject.resolve(Cypress._.assign(this.config, {
           configFile: 'special-cypress.json',
-        }, this.config))
+        }))
 
         this.goToSettings()
 
