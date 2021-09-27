@@ -39,7 +39,7 @@
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "yarn-deduplicate --strategy=highest && patch-package && yarn gulp postinstall && ./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, . && eslint --ext .js,.jsx,.ts,.tsx,.json,.vue packages/launchpad",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "npm-release": "node scripts/npm-release.js",
