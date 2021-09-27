@@ -20,6 +20,10 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "faker": "5.5.3",
+    "@types/faker": "5.5.8",
+    "just-my-luck": "3.0.0",
+    "combine-properties": "0.1.0",
     "@cypress/vue": "0.0.0-development",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
