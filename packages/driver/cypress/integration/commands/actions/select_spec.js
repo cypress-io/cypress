@@ -410,6 +410,17 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select:first').select(1.5)
       })
 
+      it('throws on out-of-range index', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `3`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select[name=foods]').select(3)
+      })
+
       it('throws when finding duplicate values', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` matched more than one `option` by value, index, or text: `bm`')
