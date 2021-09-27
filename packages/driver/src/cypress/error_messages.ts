@@ -1382,11 +1382,11 @@ export default {
 
   select: {
     invalid_argument: {
-      message: `${cmd('select')} must be passed a string, number, or array as its 1st argument. You passed: \`{{valueOrTextOrIndex}}\`.`,
+      message: `${cmd('select')} must be passed a string, number, or array as its 1st argument. You passed: \`{{value}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
     invalid_array_argument: {
-      message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{valueOrTextOrIndex}}\`.`,
+      message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{value}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
     disabled: {

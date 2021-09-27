@@ -11,12 +11,22 @@ const newLineRe = /\n/g
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrTextOrIndex, options = {}) {
-      if (!_.isNumber(valueOrTextOrIndex) && !_.isString(valueOrTextOrIndex) && !_.isArray(valueOrTextOrIndex)) {
-        $errUtils.throwErrByPath('select.invalid_argument', { args: { valueOrTextOrIndex: JSON.stringify(valueOrTextOrIndex) } })
+      if (
+        !_.isNumber(valueOrTextOrIndex)
+        && !_.isString(valueOrTextOrIndex)
+        && !_.isArray(valueOrTextOrIndex)
+      ) {
+        $errUtils.throwErrByPath('select.invalid_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
-      if (_.isArray(valueOrTextOrIndex) && (valueOrTextOrIndex.length === 0 || !valueOrTextOrIndex.reduce((val) => _.isNumber(val) || _.isString(val)))) {
-        $errUtils.throwErrByPath('select.invalid_array_argument', { args: { valueOrTextOrIndex: JSON.stringify(valueOrTextOrIndex) } })
+      if (
+        _.isArray(valueOrTextOrIndex)
+        && (
+          valueOrTextOrIndex.length === 0
+          || !_.some(valueOrTextOrIndex, (val) => _.isNumber(val) || _.isString(val))
+        )
+      ) {
+        $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
       const userOptions = options
