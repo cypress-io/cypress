@@ -12,7 +12,7 @@ describe('TestingTypeCards', () => {
           app: {
             ...ctx.stubApp,
             activeProject: {
-              ...ctx.stubApp.activeProject,
+              ...ctx.stubData.project,
               isFirstTimeE2E: true,
               isFirstTimeCT: false,
             },

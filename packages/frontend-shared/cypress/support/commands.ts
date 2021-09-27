@@ -5,7 +5,8 @@ import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
 import { ClientTestContext, testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, watch, defineComponent, h } from 'vue'
-import * as stubData from '../../src/graphql/testStubCloudTypes'
+import * as stubCloudData from '../../src/graphql/testStubCloudTypes'
+import * as stubData from '../../src/graphql/testStubData'
 
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
@@ -30,6 +31,7 @@ const createContext = (): ClientTestContext => {
   return {
     stubApp,
     stubWizard,
+    stubCloudData,
     stubData,
     stubQuery,
     navigationMenu,

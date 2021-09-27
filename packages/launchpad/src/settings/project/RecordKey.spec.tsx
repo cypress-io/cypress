@@ -6,7 +6,7 @@ describe('<RecordKey />', () => {
     cy.viewport(800, 600)
     cy.mountFragment(RecordKeyFragmentDoc, {
       type: (ctx) => {
-        return ctx.stubData.CloudRecordKeyStubs.e2eProject
+        return ctx.stubCloudData.CloudRecordKeyStubs.e2eProject
       },
       render: (gql) => (
         <div class="py-4 px-8">

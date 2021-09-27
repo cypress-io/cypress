@@ -15,3 +15,5 @@ export const createActiveProject = (): CodegenTypeMap['Project'] => {
 }
 
 export const activeProject = createActiveProject()
+
+export const project = activeProject

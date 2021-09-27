@@ -9,7 +9,7 @@ xdescribe('<ProjectSettings />', () => {
       render: (gqlVal) => {
         return (
           <div class="py-4 px-8">
-            <ProjectSettings gql={gqlVal} />
+            <ProjectSettings />
           </div>
         )
       },
