@@ -8,6 +8,7 @@ export const createActiveProject = (): CodegenTypeMap['Project'] => {
     ...testNodeId('Project'),
     isFirstTimeCT: true,
     isFirstTimeE2E: true,
+    projectId: 'test-project-id',
     title: 'test-project',
     projectRoot: '/usr/local/dev/projects/test-project',
   }

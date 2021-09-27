@@ -9,12 +9,31 @@ export const wizard: CodegenTypeMap['Wizard'] = {
   canNavigateForward: true,
   step: 'welcome',
   isManualInstall: false,
+  packagesToInstall: [
+    {
+      ...testNodeId('WizardNpmPackage'),
+      description: 'Used to interact with React components via Cypress',
+      name: '@cypress/react',
+      package: '@cypress/react',
+    },
+    {
+      ...testNodeId('WizardNpmPackage'),
+      description: 'Used to bundle code',
+      name: '@cypress/webpack-dev-server',
+      package: '@cypress/webpack-dev-server',
+    },
+  ],
   allBundlers: BUNDLERS.map((bundler) => {
     return {
       ...testNodeId('WizardBundler'),
       ...bundler,
     }
   }),
+  sampleCode: `
+    import { startDevServer } from '@cypress/vite-dev-server'
+
+    /* This is some test data. It does not need to be valid code. */
+  `,
   chosenTestingTypePluginsInitialized: false,
   testingTypes: (TESTING_TYPES as Writeable<typeof TESTING_TYPES>).map((type) => {
     return {

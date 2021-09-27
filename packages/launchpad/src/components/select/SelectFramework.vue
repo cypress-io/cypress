@@ -17,6 +17,7 @@
         w-full
         focus:border-indigo-600 focus:outline-transparent
       "
+      data-cy="select-framework"
       :class="disabledClass 
         + (isOpen ? ' border-indigo-600' : ' border-gray-200') 
         + (props.disabled ? ' bg-gray-300 text-gray-600' : '')"

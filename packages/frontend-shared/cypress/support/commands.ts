@@ -1,4 +1,5 @@
 import '@testing-library/cypress/add-commands'
+import type { MountingOptions } from '@vue/test-utils'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
@@ -71,10 +72,13 @@ export const registerMountFn = ({ plugins }) => {
         options?.global?.plugins?.push(pluginFn())
       })
 
+      const context = createContext()
+
       options.global.plugins.push({
         install (app) {
           app.use(urql, testUrqlClient({
-            context: createContext(),
+            context,
+            rootValue: context,
           }))
         },
       })
@@ -88,10 +92,11 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
   let hasMounted = false
   const context = createContext()
 
-  return mount(defineComponent({
+  const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
+
+  const componentToMount = defineComponent({
     name: `mountFragment`,
     setup () {
-      const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
       const query = `
         query MountFragmentTest {
           ${fieldName} {
@@ -133,7 +138,9 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
 
       return props.gql ? options.render(props.gql) : h('div')
     },
-  }), {
+  })
+
+  const mountingOptions: MountingOptions<any, any> = {
     global: {
       stubs: {
         transition: false,
@@ -144,13 +151,17 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
           install (app) {
             app.use(urql, testUrqlClient({
               context,
-              rootValue: options.type?.(context) ?? {},
+              rootValue: {
+                [fieldName]: options.type?.(context) ?? {},
+              },
             }))
           },
         },
       ],
     },
-  }).then(() => context)
+  }
+
+  return mount(componentToMount, mountingOptions).then(() => context)
 }
 
 Cypress.Commands.add('mountFragment', mountFragment)
