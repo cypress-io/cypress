@@ -3,6 +3,8 @@ import { observer } from 'mobx-react'
 import React from 'react'
 
 import ipc from '../lib/ipc'
+import { isFileJSON } from '../lib/utils'
+import { configFileFormatted } from '../lib/config-file-formatted'
 
 const openHelp = (e) => {
   e.preventDefault()
@@ -89,6 +91,9 @@ const NodeVersion = observer(({ project }) => {
         <div className='well text-muted'>
           This Node.js version is used to:
           <ul>
+            {isFileJSON(project.configFile)
+              ? undefined
+              : <li>Execute code in the {configFileFormatted(project.configFile)}</li>}
             <li>Build files in the {formatIntegrationFolder()} folder.</li>
             <li>Build files in the <code>cypress/support</code> folder.</li>
             <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
