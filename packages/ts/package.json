@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-unit": "node test",
@@ -14,6 +14,7 @@
     "debug": "4.3.2"
   },
   "devDependencies": {
+    "rimraf": "3.0.2",
     "ts-node": "5.0.1"
   },
   "files": [

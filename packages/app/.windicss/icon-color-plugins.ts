@@ -37,12 +37,21 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[stroke].icon-light': {
         stroke: resolvedColor,
       },
+      '> *[fill][stroke].icon-light-fill': {
+        fill: resolvedColor,
+      },
     },
     [darkKey]: {
+      '> *[fill].icon-dark-fill': {
+        fill: resolvedColor,
+      },
       '> *[fill].icon-dark': {
         fill: resolvedColor,
       },
       '> *[stroke].icon-dark': {
+        stroke: resolvedColor,
+      },
+      '> *[fill][stroke].icon-dark-stroke': {
         stroke: resolvedColor,
       },
     },
@@ -73,17 +82,17 @@ function addIconUtilityClasses (theme) {
     // Output is an object where each new class is a key
     // And the selectors and values affected are values
     /**
-     * {
-     *  `.icon-light-green-500`: {
-     *    '> *[stroke].icon-light': {
-     *      stroke: resolvedColor
-     *    },
-     *    '> *[fill].icon-light': {
-     *      fill: resolvedColor
-     *    }
-     *  }
-     * }
-     */
+      * {
+      *  `.icon-light-green-500`: {
+      *    '> *[stroke].icon-light': {
+      *      stroke: resolvedColor
+      *    },
+      *    '> *[fill].icon-light': {
+      *      fill: resolvedColor
+      *    }
+      *  }
+      * }
+      */
     return { ...acc, ...additionalClasses }
   }, {
 

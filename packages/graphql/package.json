@@ -7,8 +7,8 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "clean-deps": "rm -rf node_modules",
-    "clean": "rm -f ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"
@@ -34,6 +34,7 @@
     "@types/dedent": "^0.7.0",
     "chai": "^4.2.0",
     "mocha": "^8.1.3",
+    "rimraf": "3.0.2",
     "snap-shot-it": "7.9.3"
   },
   "files": [

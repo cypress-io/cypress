@@ -11,7 +11,7 @@
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "dev": "yarn gulp dev --project ${PWD}",
+    "dev": "gulp dev --project ${PWD}",
     "start": "echo \"run 'yarn dev' from the root\" && exit 1",
     "watch": "echo \"run 'yarn dev' from the root\" && exit 1",
     "vite:dev": "vite",

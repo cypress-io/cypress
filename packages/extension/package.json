@@ -7,7 +7,7 @@
     "build": "gulp build",
     "build-prod": "yarn build",
     "clean": "gulp clean",
-    "clean-deps": "rm -rf node_modules",
+    "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",

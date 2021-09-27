@@ -8,6 +8,7 @@ import * as stubData from '../../src/graphql/testStubCloudTypes'
 
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { createI18n } from '@packages/launchpad/src/locales/i18n'
+import { each } from 'lodash'
 import 'cypress-file-upload'
 import { navigationMenu } from '../../src/graphql/testNavigationMenu'
 
@@ -43,6 +44,34 @@ Cypress.Commands.add(
     return mount(comp, options)
   },
 )
+
+export const registerMountFn = ({ plugins }) => {
+  Cypress.Commands.add(
+    'mount',
+    <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+      options.global = options.global || {}
+      options.global.stubs = options.global.stubs || {}
+      options.global.stubs.transition = false
+      options.global.plugins = options.global.plugins || []
+      each(plugins, (pluginFn: () => any) => {
+        options?.global?.plugins?.push(pluginFn())
+      })
+
+      options.global.plugins.push({
+        install (app) {
+          app.use(urql, testUrqlClient({
+            context: {
+              stubData,
+              navigationMenu,
+            },
+          }))
+        },
+      })
+
+      return mount(comp, options)
+    },
+  )
+}
 
 function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
   let hasMounted = false
