@@ -130,7 +130,7 @@ const processRunOptions = (options = {}) => {
 
   // if we have specific spec(s) push that into the args
   if (options.spec) {
-    args.push('--spec', options.spec)
+    if (_.isString(options.spec)) args.push('--spec', options.spec)
   }
 
   if (options.tag) {

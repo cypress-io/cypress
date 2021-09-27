@@ -431,6 +431,13 @@ describe('cli', () => {
       })
     })
 
+    it('can handle invalid spec option', () => {
+      this.exec('run --spec {}')
+      expect(run.start).to.be.calledWith({
+        spec: '{}',
+      })
+    })
+
     it('calls run with space-separated --spec', () => {
       this.exec('run --spec a b c d e f g')
       expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
