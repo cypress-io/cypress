@@ -507,7 +507,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws invalid array argument error when called with empty array', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array contianing only strings and numbers. You passed: ``')
+          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[]`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -518,7 +518,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws invalid array argument error when called with invalid array', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array contianing only strings and numbers. You passed: `true,false`')
+          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[true,false]`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
