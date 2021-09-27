@@ -1381,8 +1381,12 @@ export default {
   },
 
   select: {
-    no_argument: {
-      message: `${cmd('select')} was not called with any value, index, or text.`,
+    invalid_argument: {
+      message: `${cmd('select')} must be passed a string, number, or array as its 1st argument. You passed: \`{{valueOrTextOrIndex}}\`.`,
+      docsUrl: 'https://on.cypress.io/select',
+    },
+    invalid_array_argument: {
+      message: `${cmd('select')} must be passed an array contianing only strings and numbers. You passed: \`{{valueOrTextOrIndex}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
     disabled: {

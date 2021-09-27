@@ -12,7 +12,11 @@ export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrTextOrIndex, options = {}) {
       if (!_.isNumber(valueOrTextOrIndex) && !_.isString(valueOrTextOrIndex) && !_.isArray(valueOrTextOrIndex)) {
-        $errUtils.throwErrByPath('select.no_argument')
+        $errUtils.throwErrByPath('select.invalid_argument', { args: { valueOrTextOrIndex } })
+      }
+
+      if (_.isArray(valueOrTextOrIndex) && (valueOrTextOrIndex.length === 0 || !valueOrTextOrIndex.reduce((val) => _.isNumber(val) || _.isString(val)))) {
+        $errUtils.throwErrByPath('select.invalid_array_argument', { args: { valueOrTextOrIndex } })
       }
 
       const userOptions = options

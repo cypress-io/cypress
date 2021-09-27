@@ -374,7 +374,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when called with no arguments', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` was not called with any value, index, or text.')
+          expect(err.message).to.include('`cy.select()` must be passed a string, number, or array as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -385,7 +385,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when called with null', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` was not called with any value, index, or text.')
+          expect(err.message).to.include('`cy.select()` must be passed a string, number, or array as its 1st argument. You passed: `null`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -396,7 +396,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when called with invalid type', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` was not called with any value, index, or text.')
+          expect(err.message).to.include('`cy.select()` must be passed a string, number, or array as its 1st argument. You passed: `true`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -494,7 +494,7 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=foods]').select('foo')
       })
 
-      it('throws no matches error when called with empty string', (done) => {
+      it('throws invalid argument error when called with empty string', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: ``')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
@@ -505,15 +505,26 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=foods]').select('')
       })
 
-      it('throws no matches error when called with empty array', (done) => {
+      it('throws invalid array argument error when called with empty array', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: ``')
+          expect(err.message).to.include('`cy.select()` must be passed an array contianing only strings and numbers. You passed: ``')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
         })
 
         cy.get('select[name=foods]').select([])
+      })
+
+      it('throws invalid array argument error when called with invalid array', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` must be passed an array contianing only strings and numbers. You passed: `true,false`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select[name=foods]').select([true, false])
       })
 
       it('throws when the <select> itself is disabled', (done) => {
