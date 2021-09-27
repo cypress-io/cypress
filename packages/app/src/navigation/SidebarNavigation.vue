@@ -6,12 +6,26 @@
           class="icon-dark-gray-300
           icon-light-gray-800
           w-24px
-          h-24px"/>
-        <i-bi-bookmark-star class="text-white w-18px h-18px"/>
+          h-24px"
+        />
+        <i-bi-bookmark-star class="text-white w-18px h-18px" />
       </div>
-      <nav class="mt-5 flex-1 px-2 bg-gray-800 space-y-1" aria-label="Sidebar">
-        <router-link custom v-slot="{ href, isActive }" v-for="item in navigation" :key="item.name" :to="item.href">
-          <SidebarNavigationRow :active="isActive" :icon="item.icon" :href="href">
+      <nav
+        class="mt-5 flex-1 px-2 bg-gray-800 space-y-1"
+        aria-label="Sidebar"
+      >
+        <router-link
+          v-for="item in navigation"
+          v-slot="{ href, isActive }"
+          :key="item.name"
+          custom
+          :to="item.href"
+        >
+          <SidebarNavigationRow
+            :active="isActive"
+            :icon="item.icon"
+            :href="href"
+          >
             {{ item.name }}
           </SidebarNavigationRow>
         </router-link>
@@ -30,7 +44,7 @@ import SettingsIcon from '~icons/cy/settings_x24'
 const navigation = [
   { name: 'Specs', icon: SpecsIcon, href: '/' },
   { name: 'Runs', icon: CodeIcon, href: '/runs' },
-  { name: 'Settings', icon: SettingsIcon, href: '/settings' }
+  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
 ]
 
 defineProps<{

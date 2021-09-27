@@ -22,6 +22,7 @@
     "graphql-tag": "^2.12.5",
     "vite-plugin-icons": "0.6.3",
     "vue": "3.2.6",
+    "vue-eslint-parser": "7.11.0",
     "vue-i18n": "9.2.0-beta.1",
     "wonka": "^4.0.15"
   }

@@ -71,7 +71,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
   let hasMounted = false
 
   return mount(defineComponent({
-    name: `mountFragment`,
+    name: `MountFragment`,
     setup () {
       const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
       const result = useQuery({
