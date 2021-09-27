@@ -9,9 +9,7 @@ describe('<OpenBrowserList />', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(OpenBrowserListFragmentDoc, {
       type: (ctx) => {
-        ctx.app.setBrowsers(Array.from(longBrowsersList))
-
-        return ctx.app
+        return ctx.stubApp
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })

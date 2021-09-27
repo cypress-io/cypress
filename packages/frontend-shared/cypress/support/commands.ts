@@ -11,6 +11,10 @@ import { createI18n } from '@packages/launchpad/src/locales/i18n'
 import { each } from 'lodash'
 import 'cypress-file-upload'
 import { navigationMenu } from '../../src/graphql/testNavigationMenu'
+import * as testCypressProjects from '../../src/graphql/testCypressProjects'
+import { query as stubQuery } from '../../src/graphql/testQuery'
+import { wizard as stubWizard } from '../../src/graphql/testWizard'
+import { app as stubApp } from '../../src/graphql/testApp'
 
 /**
  * This variable is mimicing ipc provided by electron.
@@ -22,9 +26,22 @@ import { navigationMenu } from '../../src/graphql/testNavigationMenu'
   send: () => {},
 }
 
+const createContext = (): ClientTestContext => {
+  return {
+    stubApp,
+    stubWizard,
+    stubData,
+    stubQuery,
+    navigationMenu,
+    cypressProjects: testCypressProjects,
+  }
+}
+
 Cypress.Commands.add(
   'mount',
   <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
+    const context = createContext()
+
     options.global = options.global || {}
     options.global.stubs = options.global.stubs || {}
     options.global.stubs.transition = false
@@ -33,10 +50,7 @@ Cypress.Commands.add(
     options.global.plugins.push({
       install (app) {
         app.use(urql, testUrqlClient({
-          context: {
-            stubData,
-            navigationMenu,
-          },
+          context,
         }))
       },
     })
@@ -60,10 +74,7 @@ export const registerMountFn = ({ plugins }) => {
       options.global.plugins.push({
         install (app) {
           app.use(urql, testUrqlClient({
-            context: {
-              stubData,
-              navigationMenu,
-            },
+            context: createContext(),
           }))
         },
       })
@@ -75,25 +86,21 @@ export const registerMountFn = ({ plugins }) => {
 
 function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
   let hasMounted = false
-  const context = {
-    stubData,
-    navigationMenu,
-  }
+  const context = createContext()
 
   return mount(defineComponent({
     name: `mountFragment`,
     setup () {
       const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
-      const result = useQuery({
-        query: `
-          query MountFragmentTest {
-            ${fieldName} {
-              ...${(source.definitions[0] as FragmentDefinitionNode).name.value}
-            }
+      const query = `
+        query MountFragmentTest {
+          ${fieldName} {
+            ...${(source.definitions[0] as FragmentDefinitionNode).name.value}
           }
-          ${print(source)}
-        `,
-      })
+        }
+        ${print(source)}
+      `
+      const result = useQuery({ query })
 
       if (!options.expectError) {
         watch(result.error, (o) => {
@@ -136,10 +143,7 @@ function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Va
         {
           install (app) {
             app.use(urql, testUrqlClient({
-              context: {
-                stubData,
-                navigationMenu,
-              },
+              context,
               rootValue: options.type?.(context) ?? {},
             }))
           },

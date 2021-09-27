@@ -26,6 +26,7 @@ export class ProjectActions {
   async setActiveProject (projectRoot: string) {
     this.ctx.coreData.app.activeProject = {
       projectRoot,
+      title: '',
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),

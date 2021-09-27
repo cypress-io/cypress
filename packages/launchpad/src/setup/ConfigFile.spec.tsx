@@ -10,11 +10,7 @@ describe('<ConfigFile />', () => {
   beforeEach(() => {
     cy.mountFragment(ConfigFileFragmentDoc, {
       type: (ctx) => {
-        // ctx.wizard.setTestingType('component')
-        // ctx.wizard.setFramework('cra')
-        // ctx.wizard.setBundler('webpack')
-
-        return {}
+        return ctx.stubQuery
       },
       render: (gql) => {
         return (

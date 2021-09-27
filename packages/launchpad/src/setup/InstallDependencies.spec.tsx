@@ -5,10 +5,7 @@ describe('<InstallDependencies />', () => {
   beforeEach(() => {
     cy.mountFragment(InstallDependenciesFragmentDoc, {
       type: (ctx) => {
-        ctx.wizard.setBundler('webpack')
-        ctx.wizard.setFramework('react')
-
-        return ctx.wizard
+        return ctx.stubWizard
       },
       render: (gqlVal) => {
         return <InstallDependencies gql={gqlVal} />
