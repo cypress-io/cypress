@@ -108,8 +108,8 @@ Also, your proposed solution may not be compatible with the direction we want to
 
 ## Common issues
 
-Label | Description | Main issue | Issues
---- | --- | --- | ---
+Label | Description | Issues
+--- | --- | ---
 browser detection | Local browser is not detected | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20browser%20detection), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+browser+detection%22+is%3Aclosed)
 cross-origin | Getting cross-origin error | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20cross-origin%20%E2%A4%AD), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cross-origin+%E2%A4%AD%22+is%3Aclosed)
 cy.request | Issues related to cy.request command | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20cy.request), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cy.request%22+is%3Aclosed)
