@@ -46,5 +46,4 @@ query MainQuery {
 `
 
 const query = useQuery({ query: MainQueryDocument })
-console.log('gql data: ',query.data?.value)
 </script>
