@@ -9,7 +9,11 @@
         <GlobalPageHeader v-model="match" />
       </div>
 
-      <GlobalProjectCard v-for="project in filteredProjects" :key="project.id" :project="project" />
+      <GlobalProjectCard
+        v-for="project in filteredProjects"
+        :key="project.id"
+        :gql="project"
+      />
     </div>
   </template>
 
@@ -30,9 +34,7 @@ import type { GlobalPageFragment } from "../generated/graphql"
 gql`
 fragment GlobalPage on App {
   projects {
-    id
-    title
-    projectRoot
+    ...GlobalProjectCard_Project
   }
 }
 `
