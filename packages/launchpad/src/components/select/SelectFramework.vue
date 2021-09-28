@@ -21,6 +21,7 @@
         w-full
         focus:border-indigo-600 focus:outline-transparent
       "
+      data-cy="select-framework"
       :class="disabledClass
         + (isOpen ? ' border-indigo-600' : ' border-gray-200')
         + (props.disabled ? ' bg-gray-300 text-gray-600' : '')"
@@ -33,17 +34,11 @@
     >
       <template v-if="selectedOptionObject">
         <img
-          :src="FrameworkBundlerLogos[selectedOptionObject.id]"
+          :src="FrameworkBundlerLogos[selectedOptionObject.type]"
           class="w-5 h-5 mr-3"
         >
         <span>
           {{ selectedOptionObject.name }}
-        </span>
-        <span
-          v-if="selectedOptionObject.description"
-          class="text-gray-400 ml-2"
-        >
-          {{ selectedOptionObject.description }}
         </span>
       </template>
       <span
@@ -74,20 +69,14 @@
         :key="opt.id"
         focus="1"
         class="cursor-pointer flex items-center py-1 px-2 hover:bg-gray-10"
-        @click="selectOption(opt)"
+        @click="selectOption(opt.type)"
       >
         <img
-          :src="FrameworkBundlerLogos[opt.id]"
+          :src="FrameworkBundlerLogos[opt.type]"
           class="w-5 h-5 mr-3"
         >
         <span>
           {{ opt.name }}
-        </span>
-        <span
-          v-if="opt.description"
-          class="text-gray-400 ml-2"
-        >
-          {{ opt.description }}
         </span>
       </li>
     </ul>
@@ -97,6 +86,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { ClickOutside as vClickOutside } from '../../directives/ClickOutside'
+import type { EnvironmentSetupFragment, FrontendFrameworkEnum } from '../../generated/graphql'
 import { FrameworkBundlerLogos } from '../../utils/icons'
 
 export interface Option {
@@ -105,14 +95,15 @@ export interface Option {
   id: string;
 }
 
-const emit = defineEmits<{(event: 'select', id: string)
+const emit = defineEmits<{
+  (event: 'select', type: FrontendFrameworkEnum)
 }>()
 
 const props = withDefaults(defineProps<{
   name: string
   value?: string
   placeholder?: string
-  options: Readonly<Option[]>
+  options: EnvironmentSetupFragment['frameworks']
   disabled?: boolean
 }>(), {
   disabled: false,
@@ -126,10 +117,9 @@ const selectedOptionObject = computed(() => {
   return props.options.find((opt) => opt.id === props.value)
 })
 
-const selectOption = (opt: Option) => {
-  emit('select', opt.id)
+const selectOption = (opt: FrontendFrameworkEnum) => {
+  emit('select', opt)
 }
 
 const disabledClass = computed(() => props.disabled ? 'opacity-50' : undefined)
-
 </script>

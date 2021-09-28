@@ -6,7 +6,7 @@ import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 
-import { printUrqlSchema } from '../tasks/gulpGraphql'
+import { generateFrontendSchema } from '../tasks/gulpGraphql'
 import { monorepoPaths } from '../monorepoPaths'
 
 interface NexusTypegenCfg {
@@ -82,7 +82,7 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
   out.on('error', dfd.reject)
 
   return dfd.promise.then(() => {
-    return printUrqlSchema()
+    return generateFrontendSchema()
   })
 }
 

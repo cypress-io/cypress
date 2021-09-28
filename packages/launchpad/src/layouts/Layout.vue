@@ -47,7 +47,7 @@
         class="pr-8px"
         :icon="icons[i?.iconPath]"
         :active="!!i?.selected"
-        @click="handleSelect(i.id)"
+        @click="handleSelect(i.type)"
       />
       <div class="flex-grow" />
       <img

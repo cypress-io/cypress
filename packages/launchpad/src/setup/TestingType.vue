@@ -4,7 +4,7 @@
       v-for="type of props.gql.testingTypes"
       :key="type.id"
       class="block h-45 border border-gray-200 m-5 p-2 rounded md:h-100 md:w-2/5 md:p-9 md:inline-block"
-      @click="selectTestingType(type.id)"
+      @click="selectTestingType(type.type)"
     >
       <img
         :src="TestingTypeIcons[type.id]"
@@ -44,6 +44,7 @@ gql`
 fragment TestingType on Wizard {
   testingTypes {
     id
+    type
     title
     description
   }

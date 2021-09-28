@@ -4,7 +4,7 @@ import path from 'path'
 import pDefer from 'p-defer'
 import chalk from 'chalk'
 import fs from 'fs-extra'
-import { buildSchema, introspectionFromSchema } from 'graphql'
+import { buildSchema, extendSchema, GraphQLSchema, introspectionFromSchema, isObjectType, parse } from 'graphql'
 import { minifyIntrospectionQuery } from '@urql/introspection'
 
 import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
@@ -99,19 +99,53 @@ export async function syncRemoteGraphQL () {
     // TODO(tim): fix
     await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
     await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'schemas/cloud.graphql'), body)
-    await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-introspection.gen.json'), JSON.stringify(introspectionFromSchema(buildSchema(body)), null, 2))
   } catch {}
 }
 
-export async function printUrqlSchema () {
+/**
+ * Generates the schema so the urql GraphCache is
+ */
+export async function generateFrontendSchema () {
   const schemaContents = await fs.promises.readFile(path.join(monorepoPaths.pkgGraphql, 'schemas/schema.graphql'), 'utf8')
+  const schema = buildSchema(schemaContents, { assumeValid: true })
+  const testExtensions = generateTestExtensions(schema)
+  const extendedSchema = extendSchema(schema, parse(testExtensions))
 
   const URQL_INTROSPECTION_PATH = path.join(monorepoPaths.pkgFrontendShared, 'src/generated/urql-introspection.gen.ts')
 
   await fs.ensureDir(path.dirname(URQL_INTROSPECTION_PATH))
+  await fs.writeFile(path.join(monorepoPaths.pkgFrontendShared, 'src/generated/schema-for-tests.gen.json'), JSON.stringify(introspectionFromSchema(extendedSchema), null, 2))
 
   await fs.promises.writeFile(
     URQL_INTROSPECTION_PATH,
-    `/* eslint-disable */\nexport const urqlSchema = ${JSON.stringify(minifyIntrospectionQuery(introspectionFromSchema(buildSchema(schemaContents))), null, 2)} as const`,
+    `/* eslint-disable */\nexport const urqlSchema = ${JSON.stringify(minifyIntrospectionQuery(introspectionFromSchema(schema)), null, 2)} as const`,
   )
+}
+
+/**
+ * Adds two fields to the GraphQL types specific to testing
+ *
+ * @param schema
+ * @returns
+ */
+function generateTestExtensions (schema: GraphQLSchema) {
+  const objects: string[] = []
+  const typesMap = schema.getTypeMap()
+
+  for (const [typeName, type] of Object.entries(typesMap)) {
+    if (!typeName.startsWith('__') && isObjectType(type)) {
+      if (isObjectType(type)) {
+        objects.push(typeName)
+      }
+    }
+  }
+
+  return `
+    union TestUnion = ${objects.join(' | ')}
+
+    extend type Query {
+      testFragmentMember: TestUnion!
+      testFragmentMemberList: [TestUnion!]!
+    }
+  `
 }

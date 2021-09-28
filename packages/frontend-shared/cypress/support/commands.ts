@@ -3,41 +3,44 @@ import type { MountingOptions } from '@vue/test-utils'
 import { mount, CyMountOptions } from '@cypress/vue'
 import urql, { TypedDocumentNode, useQuery } from '@urql/vue'
 import { print, FragmentDefinitionNode } from 'graphql'
-import { testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
+import { ClientTestContext, testUrqlClient } from '@packages/frontend-shared/src/graphql/testUrqlClient'
 import { Component, computed, watch, defineComponent, h } from 'vue'
-import { ClientTestContext } from '../../src/graphql/ClientTestContext'
-import type { TestSourceTypeLookup } from '@packages/graphql/src/testing/testUnionType'
+import * as stubCloudData from '../../src/graphql/testStubCloudTypes'
+import * as stubData from '../../src/graphql/testStubData'
+
+import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { each } from 'lodash'
 import 'cypress-file-upload'
+import { navigationMenu } from '../../src/graphql/testNavigationMenu'
+import { query as stubQuery } from '../../src/graphql/testQuery'
+import { wizard as stubWizard } from '../../src/graphql/testWizard'
+import { app as stubApp } from '../../src/graphql/testApp'
 
 /**
  * This variable is mimicing ipc provided by electron.
  * It has to be loaded run before initializing GraphQL
  * because graphql uses it.
  */
-;(window as any).ipc = {
+(window as any).ipc = {
   on: () => {},
   send: () => {},
+}
+
+const createContext = (): ClientTestContext => {
+  return {
+    stubApp,
+    stubWizard,
+    stubCloudData,
+    stubData,
+    stubQuery,
+    navigationMenu,
+  }
 }
 
 export const registerMountFn = ({ plugins }) => {
   Cypress.Commands.add(
     'mount',
     <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
-      const context = new ClientTestContext({
-        config: {},
-        cwd: '/dev/null',
-        // @ts-ignore
-        browser: null,
-        global: false,
-        project: '/dev/null',
-        projectRoot: '/dev/null',
-        invokedFromCli: true,
-        testingType: 'e2e',
-        os: 'darwin',
-        _: [''],
-      }, {})
-
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
       options.global.stubs.transition = false
@@ -46,10 +49,13 @@ export const registerMountFn = ({ plugins }) => {
         options?.global?.plugins?.push(pluginFn())
       })
 
+      const context = createContext()
+
       options.global.plugins.push({
         install (app) {
           app.use(urql, testUrqlClient({
             context,
+            rootValue: context,
           }))
         },
       })
@@ -59,21 +65,9 @@ export const registerMountFn = ({ plugins }) => {
   )
 
   function mountFragment<Result, Variables, T extends TypedDocumentNode<Result, Variables>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
-    const context = new ClientTestContext({
-      config: {},
-      cwd: '/dev/null',
-      // @ts-ignore
-      browser: null,
-      global: false,
-      project: '/dev/null',
-      projectRoot: '/dev/null',
-      invokedFromCli: true,
-      testingType: 'e2e',
-      os: 'darwin',
-      _: [''],
-    }, {})
-
     let hasMounted = false
+    const context = createContext()
+    const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
 
     const mountingOptions: MountingOptions<any, any> = {
       global: {
@@ -85,7 +79,9 @@ export const registerMountFn = ({ plugins }) => {
             install (app) {
               app.use(urql, testUrqlClient({
                 context,
-                rootValue: options.type(context),
+                rootValue: {
+                  [fieldName]: options.type?.(context) ?? {},
+                },
               }))
             },
           },
@@ -155,8 +151,8 @@ export const registerMountFn = ({ plugins }) => {
 
 type GetRootType<T> = T extends TypedDocumentNode<infer U, any>
   ? U extends { __typename?: infer V }
-    ? V extends keyof TestSourceTypeLookup
-      ? TestSourceTypeLookup[V]
+    ? V extends keyof CodegenTypeMap
+      ? CodegenTypeMap[V]
       : never
     : never
   : never
@@ -164,7 +160,7 @@ type GetRootType<T> = T extends TypedDocumentNode<infer U, any>
 type MountFragmentConfig<T extends TypedDocumentNode> = {
   variables?: T['__variablesType']
   render: (frag: Exclude<T['__resultType'], undefined>) => JSX.Element
-  type: (ctx: ClientTestContext) => GetRootType<T>
+  type?: (ctx: ClientTestContext) => GetRootType<T>
   expectError?: boolean
 } & CyMountOptions<unknown>
 

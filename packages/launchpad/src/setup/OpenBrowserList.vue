@@ -9,10 +9,10 @@
         :key="browser.id"
         class="text-center w-160px pt-6 pb-4 block border-1 rounded relative"
         :class="{
-          'border-indigo-300 ring-2 ring-indigo-50': selectedBrowser.displayName === browser.displayName && selectedBrowser.version === browser.version,
-          'border-gray-200': selectedBrowser.displayName !== browser.displayName,
+          'border-indigo-300 ring-2 ring-indigo-50': browser.isSelected,
+          'border-gray-200': !browser.isSelected,
           'filter grayscale bg-gray-100': browser.disabled,
-          'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && selectedBrowser.displayName !== browser.displayName
+          'hover:border-indigo-200 hover:ring-2 hover:ring-indigo-50': !browser.disabled && !browser.isSelected
         }"
       >
         <input
@@ -70,10 +70,10 @@
 <script lang="ts" setup>
 import { gql } from '@urql/core'
 import { useI18n } from '../composables'
-import type { OpenBrowserListFragment } from '../generated/graphql'
+import { useMutation } from '@urql/vue'
+import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from '../generated/graphql'
 import Button from '../components/button/Button.vue'
-import { computed, ref, defineEmits } from 'vue'
-import _clone from 'lodash/clone'
+import { computed } from 'vue'
 import openInNew from 'virtual:vite-icons/mdi/open-in-new'
 
 import chromeIcon from '../../../../node_modules/browser-logos/src/chrome/chrome.svg?url'
@@ -90,12 +90,27 @@ import firefoxNightlyIcon from '../../../../node_modules/browser-logos/src/firef
 import firefoxDeveloperEditionIcon from '../../../../node_modules/browser-logos/src/firefox-developer-edition/firefox-developer-edition.svg?url'
 
 gql`
+mutation OpenBrowserList_SetBrowser($id: ID!) {
+  launchpadSetBrowser(id: $id) {
+    app {
+      ...OpenBrowserList
+    }
+  }
+}
+`
+
+gql`
 fragment OpenBrowserList on App {
+  selectedBrowser {
+    id
+    displayName
+  }
   browsers {
     id
     name
     family
     disabled
+    isSelected
     channel
     displayName
     path
@@ -128,17 +143,13 @@ const allBrowsersIcons = {
   'Edge Dev': edgeDevIcon,
 }
 
-const selectedBrowser = ref(props.gql.browsers[0])
+const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
 
 const setSelected = (browserId: string) => {
-  const selected = props.gql.browsers.find((b) => b.id === browserId)
-
-  if (selected) {
-    selectedBrowser.value = selected
-  }
+  setBrowser.executeMutation({ id: browserId })
 }
 
-const launchText = computed(() => selectedBrowser.value ? `${t('setupPage.openBrowser.launch')} ${selectedBrowser.value.displayName}` : '')
+const launchText = computed(() => props.gql.selectedBrowser ? `${t('setupPage.openBrowser.launch')} ${props.gql.selectedBrowser.displayName}` : '')
 </script>
 
 <style scoped>

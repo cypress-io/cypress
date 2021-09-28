@@ -17045,7 +17045,7 @@ data-urls@^1.0.0, data-urls@^1.1.0:
     whatwg-mimetype "^2.2.0"
     whatwg-url "^7.0.0"
 
-dataloader@2.0.0:
+dataloader@2.0.0, dataloader@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/dataloader/-/dataloader-2.0.0.tgz#41eaf123db115987e21ca93c005cd7753c55fe6f"
   integrity sha512-YzhyDAwA4TaQIhM5go+vCLmU0UikghC/t9DTQYZR2M/UvZ1MdOhPezSDZcjj9uqQJOMqjLcpWtyW2iNINdlatQ==
@@ -29374,13 +29374,6 @@ next@^10.1.2:
     vm-browserify "1.1.2"
     watchpack "2.1.1"
 
-nexus-decorators@^0.2.5:
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/nexus-decorators/-/nexus-decorators-0.2.5.tgz#d18c621bf3bb079f49baac46dc83f472f1da1fc1"
-  integrity sha512-A0RtBak6tDaDf0/b6wjzfzqNrjGsW5oLqut7Tkp3hfD64q3fDDjrAhxly/to0VwbA//wFhIxaRbqhUjBFPrglw==
-  dependencies:
-    stack-utils "^2.0.3"
-
 nexus@^1.2.0-next.15:
   version "1.2.0-next.15"
   resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.2.0-next.15.tgz#db1e6d76321d348cd6075ad605c4edb526eb154c"
@@ -37874,13 +37867,6 @@ stack-utils@^1.0.1:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/stack-utils/-/stack-utils-1.0.4.tgz#4b600971dcfc6aed0cbdf2a8268177cc916c87c8"
   integrity sha512-IPDJfugEGbfizBwBZRZ3xpccMdRyP5lqsBWXGQWimVjua/ccLCeMOAVjlc1R7LxFjo5sEDhyNIXd8mo/AiDS9w==
-  dependencies:
-    escape-string-regexp "^2.0.0"
-
-stack-utils@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/stack-utils/-/stack-utils-2.0.3.tgz#cd5f030126ff116b78ccb3c027fe302713b61277"
-  integrity sha512-gL//fkxfWUsIlFL2Tl42Cl6+HFALEaB1FU76I/Fy+oZjRreP7OPMXFlGbxM7NQsI0ZpUfw76sHnv0WNYuTb7Iw==
   dependencies:
     escape-string-regexp "^2.0.0"
 

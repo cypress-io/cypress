@@ -2,7 +2,7 @@
   <div class="flex justify-center mx-4 md:mx-auto mt-9 max-w-804px gap-24px">
     <TestingTypeCard
       v-if="ct"
-      :id="ct.id"
+      :id="ct.type"
       :title="ct.title"
       :description="firstTimeCT ? ct.description : 'LAUNCH'"
       :role="firstTimeCT ? 'setup-component-testing' : 'launch-component-testing'"
@@ -11,7 +11,7 @@
 
     <TestingTypeCard
       v-if="e2e"
-      :id="e2e.id"
+      :id="e2e.type"
       :title="e2e.title"
       :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
       :role="firstTimeE2E ? 'setup-e2e-testing' : 'launch-e2e-testing'"
@@ -45,6 +45,7 @@ fragment TestingTypeCards on Query {
   wizard {
     testingTypes {
       id
+      type
       title
       description
     }
@@ -82,7 +83,7 @@ const props = defineProps<{
 }>()
 
 const ct = computed(() => {
-  return props.gql.wizard.testingTypes.find((x) => x.id === 'component')
+  return props.gql.wizard.testingTypes.find((x) => x.type === 'component')
 })
 
 const firstTimeCT = computed(() => props.gql.app.activeProject?.isFirstTimeCT)
@@ -103,6 +104,6 @@ const e2eNextStep = async () => {
 }
 
 const e2e = computed(() => {
-  return props.gql.wizard.testingTypes.find((x) => x.id === 'e2e')
+  return props.gql.wizard.testingTypes.find((x) => x.type === 'e2e')
 })
 </script>

@@ -4,7 +4,9 @@ export interface LaunchOpts {
   browser?: FoundBrowser
   url?: string
   automationMiddleware?: AutomationMiddleware
+  projectRoot?: string
   onBrowserClose?: (...args: unknown[]) => void
+  onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void
 }
 

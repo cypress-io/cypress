@@ -37,6 +37,7 @@ fragment ManualInstall on Wizard {
     id
     name
     description
+    package
   }
 }
 `
@@ -52,7 +53,7 @@ const dependenciesCode = computed(
   () => {
     return `yarn add -D \\\n${
     (props.gql.packagesToInstall ?? [])
-    .map((pack) => `                    ${pack.name} \\`)
+    .map((pack) => `                    ${pack.package} \\`)
     .join('\n')}`
   },
 )

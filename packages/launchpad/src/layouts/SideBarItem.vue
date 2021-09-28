@@ -34,6 +34,7 @@ fragment SideBarItem on NavigationItem {
   name
   selected
   iconPath
+  type
 }
 `
 
