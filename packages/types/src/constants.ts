@@ -97,11 +97,6 @@ export const NAV_ITEMS = [
 
 export const WIZARD_STEPS = [
   {
-    type: 'global',
-    title: 'Global',
-    description: 'Choose a cypress project to test',
-  },
-  {
     type: 'welcome',
     title: 'Welcome to Cypress',
     description: 'Choose which method of testing you would like to set up first.',

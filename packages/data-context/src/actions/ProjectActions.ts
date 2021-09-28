@@ -59,9 +59,13 @@ export class ProjectActions {
 
     const browsers = [...(this.ctx.browserList ?? [])]
 
-    await this.api.initializeProject(
-      { ...this.ctx.launchArgs, testingType: this.ctx.wizardData.chosenTestingType }, this.ctx.launchOptions, browsers,
-    )
+    const launchArgs: LaunchArgs = {
+      ...this.ctx.launchArgs,
+      projectRoot: this.ctx.coreData.app.activeProject?.projectRoot!,
+      testingType: this.ctx.wizardData.chosenTestingType,
+    }
+
+    await this.api.initializeProject(launchArgs, this.ctx.launchOptions, browsers)
   }
 
   createProject () {

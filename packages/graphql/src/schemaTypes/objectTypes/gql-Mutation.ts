@@ -159,8 +159,6 @@ export const mutation = mutationType({
       },
       async resolve (_root, args, ctx) {
         await ctx.actions.project.setActiveProject(args.path)
-        ctx.actions.wizard.setSelectedNavItem('projectSetup')
-        ctx.actions.wizard.navigate('forward')
 
         return ctx.coreData.app
       },

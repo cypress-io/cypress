@@ -70,10 +70,6 @@ export class WizardDataSource {
       }
     }
 
-    if (data.currentStep === 'global' && !this.ctx.activeProject) {
-      return false
-    }
-
     // TODO: add constraints here to determine if we can move forward
     {
       return true

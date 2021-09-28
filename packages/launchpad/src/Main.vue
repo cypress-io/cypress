@@ -2,7 +2,7 @@
   <template v-if="query.data.value">
     <HeaderBar :gql="query.data.value" />
     <div class="max-content">
-      <template v-if="query.data.value.app.isInGlobalMode">
+      <template v-if="query.data.value.app.isInGlobalMode && !query.data.value?.app.activeProject">
         <GlobalPage :gql="query.data.value.app" />
       </template>
 
