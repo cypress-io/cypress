@@ -10,8 +10,12 @@
         <i-oi-chevron-right class="text-gray-300 h-8px" />
         <span class="text-body-gray-700">{{ props.gql.app.activeProject?.title }}</span>
       </div>
-      <div>
-        <Auth :gql="props.gql" />
+      <div class="flex gap-6">
+        <!-- <Auth :gql="props.gql" /> -->
+
+        <TopNav />
+
+        <Auth :gql="props.gql"></Auth>
       </div>
     </div>
   </div>
@@ -20,6 +24,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import type { HeaderBarFragment } from '../generated/graphql'
+import TopNav from '../components/topnav/TopNav.vue'
 import Auth from '../setup/Auth.vue'
 
 gql`
