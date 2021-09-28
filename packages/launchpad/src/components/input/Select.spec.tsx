@@ -1,4 +1,5 @@
 import Icon from '../icon/Icon.vue'
+import { h } from 'vue'
 import IconHeart from 'virtual:vite-icons/mdi/heart'
 import { defaultMessages } from '../../locales/i18n'
 
@@ -127,15 +128,31 @@ describe('<Select />', () => {
     })
 
     it('does not render the placeholder after selecting an option', () => {
-      mountSelect({
-        placeholder: 'A placeholder',
-        modelValue: undefined,
-      }).get(inputSelector)
-      .should('contain.text', 'A placeholder')
-      .then(openSelect)
-      .then(selectFirstOption)
-      .get(inputSelector)
-      .should('not.contain.text', 'A placeholder')
+      // The width and padding need to be here so that
+      // a click on the body dismisses the options
+      cy.mount({
+        components: { Select },
+        data () {
+          return {
+            model: undefined,
+          }
+        },
+        render () {
+          return h(Select, {
+            modelValue: this.model,
+            'onUpdate:modelValue': (value: any) => this.model = value,
+            options: defaultOptions,
+            placeholder: 'A placeholder',
+          })
+        },
+      }).then(() => {
+        cy.get(inputSelector)
+        .should('contain.text', 'A placeholder')
+        .then(openSelect)
+        .then(selectFirstOption)
+        .get(inputSelector)
+        .should('not.contain.text', 'A placeholder')
+      })
     })
 
     it('does not render the placeholder when there is a value selected', () => {
@@ -185,52 +202,6 @@ describe('<Select />', () => {
 
       // The check mark shouldn't exist because we overwrote it
       .get(checkIconSelector).should('not.exist')
-    })
-  })
-
-  describe('playground', () => {
-    it('renders examples', () => {
-      const moreOptions = [
-        { name: 'Jess', id: '1i24u' },
-        { name: 'Bart', id: 'ewopf' },
-        { name: 'Lachlan', id: 'ewiofjdew' },
-        { name: 'Jill', id: '2r2rj3' },
-        { name: 'Bruno', id: '3r2rj3' },
-        { name: 'Jade', id: '4r2rj3' },
-        { name: 'Bella', id: '5r2rj3' },
-      ]
-
-      let firstSelect = undefined
-      let secondSelect = moreOptions[0]
-
-      cy.mount(() => (<div class="w-350px p-12">
-        <b>With placeholder, null value</b>
-        <Select modelValue={firstSelect}
-          data-testid="first-select"
-          placeholder="Choose a color..."
-          options={defaultOptions}
-        ></Select>
-
-        <b>Pre-selected</b>
-        <Select modelValue={secondSelect}
-          data-testid="second-select"
-          item-value="name"
-          item-key="id"
-          options={moreOptions}
-        ></Select>
-      </div>))
-
-      const firstSelector = `[data-testid=first-select]`
-      const secondSelector = `[data-testid=second-select]`
-
-      cy.get(firstSelector).click()
-      .then(selectFirstOption)
-      .get(firstSelector).should('have.text', defaultOptions[0].value)
-
-      cy.get(secondSelector).click().get(optionsSelector).within(($options) => {
-        return cy.wrap(Cypress.$($options[1])).click()
-      }).get(secondSelector)
-      .should('contain.text', moreOptions[1].name)
     })
   })
 })

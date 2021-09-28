@@ -10,17 +10,17 @@
 <script>
 export default {
   name: 'AppForm',
-  data() {
+  data () {
     return {
       name: '',
       email: '',
-    };
+    }
   },
   computed: {
-    hasValidFields() {
-      return Boolean(this.email && this.name);
+    hasValidFields () {
+      return Boolean(this.email && this.name)
     },
   },
-};
+}
 </script>
 <style></style>

@@ -35,7 +35,11 @@
     >
       {{ projectTitle }}
     </div>
-    <div class="bg-gray-900 text-gray-500 flex flex-col items-stretch" :style="`background-image: url('${bottomBackground}');`" style="background-position: bottom center;background-repeat: no-repeat;">
+    <div
+      class="bg-gray-900 text-gray-500 flex flex-col items-stretch"
+      :style="`background-image: url('${bottomBackground}');`"
+      style="background-position: bottom center;background-repeat: no-repeat;"
+    >
       <SideBarItem
         v-for="i in sideMenuDefinition"
         :key="i?.id"
@@ -46,7 +50,10 @@
         @click="handleSelect(i.type)"
       />
       <div class="flex-grow" />
-      <img src="../images/cypress_s.png" class="m-4 mx-auto w-7" />
+      <img
+        src="../images/cypress_s.png"
+        class="m-4 mx-auto w-7"
+      >
     </div>
     <div class="flex items-stretch flex-col">
       <slot :item="selected" />
@@ -55,12 +62,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
-import SideBarItem from "./SideBarItem.vue";
+import { computed, defineComponent } from 'vue'
+import SideBarItem from './SideBarItem.vue'
 import bottomBackground from '../images/bottom_filler.svg'
-import { gql } from "@urql/core";
+import { gql } from '@urql/core'
 import { useMutation, useQuery } from '@urql/vue'
-import { LayoutDocument, NavigationMenuSetItemDocument, NavItem } from "../generated/graphql";
+import { LayoutDocument, NavigationMenuSetItemDocument, NavItem } from '../generated/graphql'
 import IconDashboardLine from 'virtual:vite-icons/clarity/dashboard-line'
 import IconTerminalLine from 'virtual:vite-icons/clarity/terminal-line'
 import IconSettingsLine from 'virtual:vite-icons/clarity/settings-line'
@@ -102,42 +109,42 @@ const icons = {
   'clarity/bullet-list-line': IconRunsLine,
 }
 
-
 export default defineComponent({
   components: {
     SideBarItem,
   },
 
-  setup() {
+  setup () {
     const result = useQuery({
-      query: LayoutDocument
+      query: LayoutDocument,
     })
 
     const setMenuItem = useMutation(NavigationMenuSetItemDocument)
 
-    const projectTitle = computed(() => result.data.value?.app.activeProject?.title);
+    const projectTitle = computed(() => result.data.value?.app.activeProject?.title)
 
     const handleSelect = (type: NavItem) => {
       setMenuItem.executeMutation({ type })
     }
 
     const selected = computed(() => {
-      const item = result.data?.value?.navigationMenu?.items.find(item => item!.selected)
+      const item = result.data?.value?.navigationMenu?.items.find((item) => item!.selected)
+
       return item?.id ?? null
     })
 
-    const sideMenuDefinition = computed(() => 
-      result.data?.value?.navigationMenu?.items
-    )
+    const sideMenuDefinition = computed(() => {
+      return result.data?.value?.navigationMenu?.items
+    })
 
-    return { 
+    return {
       icons,
       handleSelect,
-      projectTitle, 
+      projectTitle,
       selected,
-      sideMenuDefinition, 
+      sideMenuDefinition,
       bottomBackground,
-    };
+    }
   },
-});
+})
 </script>

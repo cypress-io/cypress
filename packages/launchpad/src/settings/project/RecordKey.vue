@@ -1,45 +1,66 @@
 <template>
   <ProjectSettingsSection>
-    <template #title>{{ t('settingsPage.recordKey.title') }}</template>
+    <template #title>
+      {{ t('settingsPage.recordKey.title') }}
+    </template>
     <template #description>
       <i18n-t keypath="settingsPage.recordKey.description">
-        <a href="https://docs.cypress.io" target="_blank">{{ t('links.learnMore') }}</a>
+        <a
+          href="https://docs.cypress.io"
+          target="_blank"
+        >{{ t('links.learnMore') }}</a>
       </i18n-t>
     </template>
-    <div class="inline-flex justify-start gap-10px" v-if="props.gql.key">
+    <div
+      v-if="props.gql.key"
+      class="inline-flex justify-start gap-10px"
+    >
       <Input
-        v-model="props.gql.key"
+        :value="props.gql.key"
         class="font-mono"
-        inputClasses="text-sm"
+        input-classes="text-sm"
         disabled
         :type="showRecordKey ? 'text' : 'password'"
       >
         <template #prefix>
-          <Icon :icon="IconKey" class="text-cool-gray-400" />
+          <Icon
+            :icon="IconKey"
+            class="text-cool-gray-400"
+          />
         </template>
         <template #suffix>
           <button
-            @click="showRecordKey = !showRecordKey"
             aria-label="Record Key Visibility Toggle"
             class="text-cool-gray-400 hover:text-cool-gray-500"
+            @click="showRecordKey = !showRecordKey"
           >
-            <Icon v-if="showRecordKey" :icon="IconEyeOpen"></Icon>
-            <Icon v-else :icon="IconEyeClosed"></Icon>
+            <Icon
+              v-if="showRecordKey"
+              :icon="IconEyeOpen"
+            />
+            <Icon
+              v-else
+              :icon="IconEyeClosed"
+            />
           </button>
         </template>
       </Input>
       <Button
         variant="outline"
+        :prefix-icon="IconDashedSquare"
+        prefix-icon-class="text-cool-gray-500"
         @click="clipboard.copy()"
-        :prefixIcon="IconDashedSquare"
-        prefixIconClass="text-cool-gray-500"
-      >{{ clipboard.copied.value ? t('clipboard.copied') : t('clipboard.copy') }}</Button>
+      >
+        {{ clipboard.copied.value ? t('clipboard.copied') : t('clipboard.copy') }}
+      </Button>
       <Button
         variant="outline"
+        :prefix-icon="IconKey"
+        prefix-icon-class="text-cool-gray-500 w-1.2rem h-1.2rem"
         @click="openManageKeys"
-        :prefixIcon="IconKey"
-        prefixIconClass="text-cool-gray-500 w-1.2rem h-1.2rem"
-      >{{ t('settingsPage.recordKey.manageKeys') }}</Button>
+      >
+        {{ t('settingsPage.recordKey.manageKeys') }}
+      </Button>
     </div>
   </ProjectSettingsSection>
 </template>

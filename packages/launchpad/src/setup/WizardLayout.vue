@@ -6,27 +6,27 @@
 
     <ButtonBar
       v-if="!noContainer"
-      :nextFn="nextFn"
-      :canNavigateForward="canNavigateForward"
-      :backFn="backFn"
-      :altFn="altFn"
+      :next-fn="nextFn"
+      :can-navigate-forward="canNavigateForward"
+      :back-fn="backFn"
+      :alt-fn="altFn"
       :next="nextLabel"
-      :showNext="showNext"
+      :show-next="showNext"
       :back="backLabel"
       :alt="alt"
     >
-      <slot name="button-bar"></slot>
+      <slot name="button-bar" />
     </ButtonBar>
   </div>
 </template>
 
 <script lang="ts" setup>
-import ButtonBar from "./ButtonBar.vue"
-import { computed } from "vue"
+import ButtonBar from './ButtonBar.vue'
+import { computed } from 'vue'
 import { useMutation } from '@urql/vue'
 import { gql } from '@urql/core'
-import { WizardLayoutNavigateDocument } from "../generated/graphql"
-import { useI18n } from "../composables"
+import { WizardLayoutNavigateDocument } from '../generated/graphql'
+import { useI18n } from '../composables'
 
 gql`
 fragment WizardLayout on Wizard {
@@ -55,29 +55,37 @@ const props = withDefaults(
     showNext?: boolean
     canNavigateForward?: boolean
     noContainer?: boolean
-    altFn?: (val: boolean) => void
+    altFn?:(val: boolean) => void
     nextFn?: (...args: unknown[]) => any,
   }>(), {
-  showNext: true
-})
+    next: undefined,
+    showNext: true,
+    back: undefined,
+    alt: undefined,
+    canNavigateForward: undefined,
+    noContainer: undefined,
+    altFn: undefined,
+    nextFn: undefined,
+  },
+)
 
 const nextLabel = computed(() => props.next || t('setupPage.step.next'))
 const backLabel = computed(() => props.back || t('setupPage.step.back'))
 
 const navigate = useMutation(WizardLayoutNavigateDocument)
 
-async function nextFn() {
+async function nextFn () {
   await props.nextFn?.()
   navigate.executeMutation({ direction: 'forward' })
 }
 
-function backFn() {
+function backFn () {
   navigate.executeMutation({ direction: 'back' })
 }
 
 const wrapperClasses = {
-  'default': "max-w-3xl min-h-70 mx-auto border-1 border-gray-200 rounded m-10 flex flex-col",
-  'no-container': ''
+  'default': 'max-w-3xl min-h-70 mx-auto border-1 border-gray-200 rounded m-10 flex flex-col',
+  'no-container': '',
 }
 
 </script>

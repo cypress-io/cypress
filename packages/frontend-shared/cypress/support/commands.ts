@@ -94,7 +94,7 @@ export const registerMountFn = ({ plugins }) => {
     })
 
     return mount(defineComponent({
-      name: `mountFragment`,
+      name: `MountFragment`,
       setup () {
         const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
         const result = useQuery({

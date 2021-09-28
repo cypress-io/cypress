@@ -1,29 +1,29 @@
 <template>
-  <WizardLayout 
-    :next="nextButtonName" 
-    alt="Install manually" 
-    :altFn="altFn"
-    :canNavigateForward="props.gql.canNavigateForward"
+  <WizardLayout
+    :next="nextButtonName"
+    alt="Install manually"
+    :alt-fn="altFn"
+    :can-navigate-forward="props.gql.canNavigateForward"
   >
     <PackagesList
-      v-if="!isManualInstall" 
-      :gql="props.gql" 
+      v-if="!isManualInstall"
+      :gql="props.gql"
     />
-    <ManualInstall 
-      v-else 
-      :gql="props.gql" 
+    <ManualInstall
+      v-else
+      :gql="props.gql"
     />
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
-import WizardLayout from "./WizardLayout.vue";
-import PackagesList from "./PackagesList.vue";
-import ManualInstall from "./ManualInstall.vue";
+import { computed, ref } from 'vue'
+import WizardLayout from './WizardLayout.vue'
+import PackagesList from './PackagesList.vue'
+import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
-import type { InstallDependenciesFragment } from "../generated/graphql";
-import { useI18n } from "../composables";
+import type { InstallDependenciesFragment } from '../generated/graphql'
+import { useI18n } from '../composables'
 
 gql`
 fragment InstallDependencies on Wizard {
@@ -40,11 +40,11 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const nextButtonName = computed(() =>
-  isManualInstall.value ?
+const nextButtonName = computed(() => {
+  return isManualInstall.value ?
     t('setupPage.install.confirmManualInstall') :
     t('setupPage.install.startButton')
-);
+})
 
 const altFn = (val: boolean) => {
   isManualInstall.value = val

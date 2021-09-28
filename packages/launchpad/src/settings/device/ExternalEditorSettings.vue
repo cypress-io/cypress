@@ -1,19 +1,36 @@
 <template>
   <SettingsSection>
-    <template #title>{{ t('settingsPage.editor.title') }}</template>
-    <template #description>{{ t('settingsPage.editor.description') }}</template>
-    <Select :options="externalEditors"
+    <template #title>
+      {{ t('settingsPage.editor.title') }}
+    </template>
+    <template #description>
+      {{ t('settingsPage.editor.description') }}
+    </template>
+    <Select
       v-model="selectedEditor"
+      :options="externalEditors"
       item-value="name"
       :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
-      class="w-300px">
+      class="w-300px"
+    >
       <template #input-prefix="{ value }">
-        <Icon v-if="value" :icon="value.icon" class="text-md"></Icon>
-        <Icon v-else :icon="IconTerminal" class="text-gray-600 text-md"></Icon>
+        <Icon
+          v-if="value"
+          :icon="value.icon"
+          class="text-md"
+        />
+        <Icon
+          v-else
+          :icon="IconTerminal"
+          class="text-gray-600 text-md"
+        />
       </template>
       <template #item-prefix="{value}">
-        <Icon :icon="value.icon" class="text-md"></Icon>
-    </template>
+        <Icon
+          :icon="value.icon"
+          class="text-md"
+        />
+      </template>
     </Select>
   </SettingsSection>
 </template>
@@ -23,8 +40,8 @@
 import { ref } from 'vue'
 import Icon from '../../components/icon/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '../../composables';
-import Select from '../../components/input/Select.vue';
+import { useI18n } from '../../composables'
+import Select from '../../components/input/Select.vue'
 import VSCode from 'virtual:vite-icons/logos/visual-studio-code'
 import Atom from 'virtual:vite-icons/logos/atom-icon'
 import Webstorm from 'virtual:vite-icons/logos/webstorm'
@@ -38,32 +55,32 @@ const externalEditors = [
   {
     name: 'Visual Studio Code',
     key: 'vscode',
-    icon: VSCode
+    icon: VSCode,
   },
   {
-    name: "Webstorm",
-    key: "webstorm",
-    icon: Webstorm
+    name: 'Webstorm',
+    key: 'webstorm',
+    icon: Webstorm,
   },
   {
     name: 'Atom',
     key: 'atom',
-    icon: Atom
+    icon: Atom,
   },
   {
     name: 'Sublime Text',
     key: 'sublime',
-    icon: Sublime
+    icon: Sublime,
   },
   {
     name: 'Vim',
     key: 'vim',
-    icon: Vim
+    icon: Vim,
   },
   {
     name: 'Emacs',
     key: 'emacs',
-    icon: Emacs
+    icon: Emacs,
   },
 ]
 

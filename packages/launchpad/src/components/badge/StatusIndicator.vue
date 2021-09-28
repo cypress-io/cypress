@@ -3,7 +3,10 @@
     class="border-cool-gray-300 grid-flow-col grid items-center justify-between gap-6px rounded-sm border-1 text-sm text-center w-min cursor-default select-none px-8px"
     :class="classes"
   >
-    <i-mdi-circle class="h-8px w-8px" :class="classes" />
+    <i-mdi-circle
+      class="h-8px w-8px"
+      :class="classes"
+    />
     <slot />
   </span>
 </template>

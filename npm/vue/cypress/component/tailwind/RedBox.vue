@@ -7,17 +7,17 @@
 
 <script>
 export default {
-  props: ["status"],
+  props: ['status'],
   computed: {
-    greeting: function() {
+    greeting () {
       if (this.status) {
-        return "Hello";
-      } else {
-        return "Goodbye";
+        return 'Hello'
       }
-    }
-  }
-};
+
+      return 'Goodbye'
+    },
+  },
+}
 </script>
 
 <style scoped>

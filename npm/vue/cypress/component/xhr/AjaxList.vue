@@ -10,22 +10,22 @@
 
 <script>
 // example from https://alligator.io/vuejs/rest-api-axios/
-import axios from 'axios';
+import axios from 'axios'
 
 export default {
-  data() {
+  data () {
     return {
-      users: []
+      users: [],
     }
   },
 
   // Fetches posts when the component is created.
-  created() {
+  created () {
     axios.get('https://jsonplaceholder.cypress.io/users?_limit=3')
-    .then(response => {
+    .then((response) => {
       // JSON responses are automatically parsed.
       this.users = response.data
     })
-  }
+  },
 }
 </script>

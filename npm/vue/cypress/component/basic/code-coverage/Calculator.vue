@@ -7,21 +7,21 @@
 </template>
 
 <script>
-import { add } from "./calc";
+import { add } from './calc'
 
 export default {
-  name: "Calculator",
-  data() {
+  name: 'Calculator',
+  data () {
     return {
       a: 0,
-      b: 0
-    };
+      b: 0,
+    }
   },
 
   computed: {
-    sum() {
-      return add(parseFloat(this.a), parseFloat(this.b));
-    }
-  }
-};
+    sum () {
+      return add(parseFloat(this.a), parseFloat(this.b))
+    },
+  },
+}
 </script>
