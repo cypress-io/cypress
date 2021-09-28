@@ -49,7 +49,7 @@ export class ProjectActions {
   }
 
   async initializeActiveProject () {
-    if (!this.ctx.activeProject || !this.ctx.wizardData.chosenTestingType) {
+    if (!this.ctx.activeProject?.projectRoot || !this.ctx.wizardData.chosenTestingType) {
       throw Error('Cannot initialize project without an active project')
     }
 
@@ -61,7 +61,7 @@ export class ProjectActions {
 
     const launchArgs: LaunchArgs = {
       ...this.ctx.launchArgs,
-      projectRoot: this.ctx.coreData.app.activeProject?.projectRoot!,
+      projectRoot: this.ctx.activeProject.projectRoot,
       testingType: this.ctx.wizardData.chosenTestingType,
     }
 
