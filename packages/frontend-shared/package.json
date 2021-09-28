@@ -44,7 +44,7 @@
     "rimraf": "3.0.2",
     "unplugin-icons": "^0.11.4",
     "unplugin-vue-components": "^0.15.4",
-    "vite": "^2.5.10",
+    "vite": "2.4.4",
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-windicss": "^1.4.7",
     "vite-svg-loader": "^2.2.0",
