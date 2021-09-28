@@ -1,10 +1,13 @@
 <template>
   <div class="relative min-w-200px rounded-lg border border-gray-300 bg-white px-16px pt-13px pb-15px shadow-sm flex items-center space-x-3 hover:border-gray-400 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
     <div class="flex-1 min-w-0">
-      <button class="focus:outline-none underline-transparent grid w-full text-left children:truncate" @dblclick="setActiveProject(project.projectRoot)">
-        <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">{{ project.title }}</p>
+      <button
+        class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
+        @dblclick="setActiveProject(props.gql.projectRoot)"
+      >
+        <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">{{ props.gql.title }}</p>
         <p class="text-sm text-gray-500 relative flex flex-wrap self-end items-center gap-1 bullet-points children:flex children:items-center children:gap-1">
-          <span>{{ project.projectRoot }}</span>
+          <span>{{ props.gql.projectRoot }}</span>
         </p>
       </button>
     </div>
@@ -12,38 +15,66 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, FunctionalComponent, SVGAttributes } from 'vue'
+import { gql } from '@urql/vue'
 import Icon from '../components/icon/Icon.vue'
 import IconChecked from 'virtual:vite-icons/mdi/check-circle'
 import IconX from 'virtual:vite-icons/mdi/plus-circle'
 import IconPending from 'virtual:vite-icons/mdi/refresh-circle'
 import { useSetActiveProject } from '../composables'
+import type { CloudRunStatus, GlobalProjectCard_ProjectFragment } from '../generated/graphql'
 
 const { setActiveProject } = useSetActiveProject()
 
-const icons = {
-  passed: {
+type IconMap = {
+  [x in CloudRunStatus]: {
+    icon: FunctionalComponent<SVGAttributes, {}>
+    classes: string
+  }
+}
+
+const icons: Partial<IconMap> = {
+  PASSED: {
     icon: IconChecked,
     classes: 'text-green-500'
   },
-  failed: {
+  FAILED: {
     icon: IconX,
     classes: 'text-red-500 rotate-45 translate'
   },
-  pending: {
+  RUNNING: {
     icon: IconPending,
     classes: 'text-blue-500'
   }
 }
 
+gql`
+fragment GlobalProjectCard_Project on Project {
+  id
+  title
+  projectRoot
+  cloudProject {
+    latestRun {
+      status
+    }
+  }
+}
+`
+
 // TODO: I want to use an enum here for 'lastRunStatus'
 // but I'm struggling to get the types within the tests
 // When GQL exists, I'll be able to pull in the shared types.
 const props = defineProps<{
-  project: { name: string, lastRun: number, lastRunStatus: string, id: string }
+  gql: GlobalProjectCard_ProjectFragment
 }>()
 
-const iconForStatus = computed(() => icons[props.project.lastRunStatus])
+const iconForStatus = computed(() => {
+  const status = props.gql.cloudProject?.latestRun?.status
+  if (!status) {
+    return
+  }
+  return icons[status]
+})
 </script>
 
 <style scoped lang="scss">
