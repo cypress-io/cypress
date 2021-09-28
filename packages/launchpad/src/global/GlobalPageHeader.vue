@@ -1,23 +1,26 @@
 <template>
   <Input
+    v-model="localValue"
     type="search"
     class="min-w-200px w-80% flex-grow"
     :placeholder="t('globalPage.searchPlaceholder')"
-    v-model="localValue"
   />
   <Button
-    @click="$emit('new-project')"
-    :prefixIcon="IconPlus"
-    prefixIconClass="text-center justify-center text-lg"
+    :prefix-icon="IconPlus"
+    prefix-icon-class="text-center justify-center text-lg"
     class="w-20% min-w-120px text-size-16px h-full focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-  >{{ t('globalPage.newProjectButton') }}</Button>
+    @click="$emit('new-project')"
+  >
+    {{ t('globalPage.newProjectButton') }}
+  </Button>
 </template>
 
 <script lang="ts" setup>
-import Button from '../components/button/Button.vue'
-import Input from '../components/input/Input.vue'
-import IconPlus from 'virtual:vite-icons/mdi/plus'
-import { useI18n, useModelWrapper } from '../composables'
+import Button from '@cy/components/Button.vue'
+import Input from '@cy/components/Input.vue'
+import IconPlus from '~icons/mdi/plus'
+import { useModelWrapper } from '@packages/frontend-shared/src/composables'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 

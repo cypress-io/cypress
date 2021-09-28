@@ -25,6 +25,7 @@
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
+    "@packages/frontend-shared": "0.0.0-development",
     "@testing-library/cypress": "8.0.0",
     "@urql/core": "2.3.1",
     "@urql/devtools": "2.0.3",

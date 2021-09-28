@@ -8,26 +8,27 @@
 </template>
 
 <script>
-import Card from "../Card/Card.vue"
+import Card from '../Card/Card.vue'
 
 export default {
-  name: "Hello",
+  name: 'Hello',
   components: { Card },
-  data() {
+  data () {
     return {
-      username: "",
-    };
+      username: '',
+    }
   },
 
   computed: {
-    error() {
-      console.log(this.username);
+    error () {
+      console.log(this.username)
+
       return this.username.trim().length < 7
-        ? "Please enter a longer username"
-        : "";
+        ? 'Please enter a longer username'
+        : ''
     },
   },
-};
+}
 </script>
 
 <style scoped>

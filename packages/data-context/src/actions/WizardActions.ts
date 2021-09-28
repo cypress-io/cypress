@@ -36,12 +36,15 @@ export class WizardActions {
 
     await this.ctx.actions.project.initializeActiveProject()
 
+    // Cannot have both the e2e & component plugins initialized at the same time
     if (this.ctx.wizardData.chosenTestingType === 'e2e') {
       this.ctx.activeProject.e2ePluginsInitialized = true
+      this.ctx.activeProject.ctPluginsInitialized = false
     }
 
     if (this.ctx.wizardData.chosenTestingType === 'component') {
       this.ctx.activeProject.ctPluginsInitialized = true
+      this.ctx.activeProject.e2ePluginsInitialized = false
     }
 
     this.ctx.debug('finishing initializing project')

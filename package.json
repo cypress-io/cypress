@@ -40,7 +40,7 @@
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "yarn-deduplicate --strategy=highest && patch-package && gulp postinstall && ./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "npm-release": "node scripts/npm-release.js",
@@ -89,7 +89,7 @@
     "@graphql-codegen/typed-document-node": "2.1.4",
     "@graphql-codegen/typescript": "2.2.2",
     "@graphql-codegen/typescript-operations": "2.1.4",
-    "@graphql-eslint/eslint-plugin": "^2.2.0",
+    "@graphql-eslint/eslint-plugin": "2.2.0",
     "@graphql-tools/batch-delegate": "8.1.0",
     "@graphql-tools/delegate": "8.2.1",
     "@graphql-tools/utils": "8.2.3",
@@ -153,6 +153,7 @@
     "eslint-plugin-mocha": "8.1.0",
     "eslint-plugin-react": "7.22.0",
     "eslint-plugin-react-hooks": "4.2.0",
+    "eslint-plugin-vue": "7.18.0",
     "execa": "4.0.0",
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
@@ -266,7 +267,7 @@
   },
   "lint-staged": {
     "*.coffee": "yarn stop-only --folder",
-    "*.{js,jsx,ts,tsx,json,eslintrc}": "eslint --fix"
+    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",

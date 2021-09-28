@@ -1,6 +1,4 @@
 import { computed } from 'vue'
-import { useI18n as _useI18n } from 'vue-i18n'
-import type { MessageSchema } from '../locales/schema'
 
 /**
  * This snippet comes from Thorsten Lünborg and is explained in this blog post https://www.vuemastery.com/blog/vue-3-data-down-events-up/
@@ -19,6 +17,4 @@ export function useModelWrapper<T, N extends string = 'modelValue'> (
   })
 }
 
-export function useI18n () {
-  return _useI18n<{ message: MessageSchema }>({ useScope: 'global' })
-}
+export { useSetActiveProject } from './useSetActiveProject'

@@ -1,5 +1,5 @@
 <template>
-  <template v-if="projects.length">
+  <template v-if="props.gql?.projects?.length">
     <!-- Welcome Guide can fetch its own information for if it should render -->
     <WelcomeGuide />
 
@@ -9,7 +9,11 @@
         <GlobalPageHeader v-model="match" />
       </div>
 
-      <GlobalProjectCard v-for="project, idx in filteredProjects" :key="idx" :project="project" />
+      <GlobalProjectCard
+        v-for="project in filteredProjects"
+        :key="project.id"
+        :gql="project"
+      />
     </div>
   </template>
 
@@ -18,84 +22,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import type { Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
+import { gql } from '@urql/vue'
 import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
+import type { GlobalPageFragment } from '../generated/graphql'
 
-type Project = {
-  name: string,
-  lastRunStatus: 'passed' | 'failed' | 'pending'
-  lastRun: number
+gql`
+fragment GlobalPage on App {
+  projects {
+    ...GlobalProjectCard_Project
+  }
 }
+`
 
-const testProject: Project = {
-  name: 'Project Name',
-  lastRunStatus: 'passed',
-  lastRun: Date.now() - 1000 * 60 * 60 * 24 * 255 // 255 days ago
-}
-
-// I don't know why this isn't type checking correctly
-// but it'll be deleted momentarily when this data is pulled in from gql
-// @ts-ignore
-const projects: Ref<Project[]> = ref([
-  testProject,
-  {
-    name: 'Project Name 2',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 100 // 100 days ago
-  },
-  {
-    name: 'Fifty Days Ago',
-    lastRunStatus: 'pending',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 50 // 50 days ago
-  },
-  {
-    name: 'Ten Days ago',
-    lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 10 // 10 days ago
-  },
-  {
-    name: 'Five days',
-    lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 5 // 5 days ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 6',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 1 // 1 day ago
-  },
-  {
-    name: 'Project Name 7',
-    lastRunStatus: 'passed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0 // today
-  },
-  {
-    name: 'Project Name 8',
-    lastRunStatus: 'failed',
-    lastRun: Date.now() - 1000 * 60 * 60 * 24 * 0 // yesterday
-  },
-])
+const props = defineProps<{
+  gql: GlobalPageFragment,
+}>()
 
 const filteredProjects = computed(() => {
-  return projects.value.filter(p => p.name.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return props.gql.projects.filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
 })
 
 const match = ref('')

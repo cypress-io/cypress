@@ -1,18 +1,18 @@
 <template>
   <prism-editor
-    class="font-mono leading-tight prism-editor"
     v-model="localValue"
+    class="font-mono leading-tight prism-editor"
     :readonly="readonly"
     :highlight="highlighter"
   />
 </template>
 
 <script setup lang="ts">
-import prism from "prismjs"
-import { PrismEditor } from "vue-prism-editor"
-import "vue-prism-editor/dist/prismeditor.min.css" // import the styles somewhere
-import "prismjs/themes/prism.css" // import syntax highlighting styles
-import { useModelWrapper } from "../../composables"
+import prism from 'prismjs'
+import { PrismEditor } from 'vue-prism-editor'
+import 'vue-prism-editor/dist/prismeditor.min.css' // import the styles somewhere
+import 'prismjs/themes/prism.css' // import syntax highlighting styles
+import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 
 const props = defineProps<{
   modelValue: string

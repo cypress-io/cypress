@@ -1,5 +1,10 @@
 <template>
-  <WizardLayout no-container :canNavigateForward="false" :showNext="false" #={backFn}>
+  <WizardLayout
+    no-container
+    :can-navigate-forward="false"
+    :show-next="false"
+    #="{backFn}"
+  >
     <div v-if="!query.data.value">
       Loading browsers...
     </div>
@@ -14,10 +19,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useMutation, gql, useQuery } from "@urql/vue";
-import OpenBrowserList from "./OpenBrowserList.vue"
-import WizardLayout from "./WizardLayout.vue";
-import { OpenBrowserDocument, LaunchOpenProjectDocument } from "../generated/graphql"
+import { useMutation, gql, useQuery } from '@urql/vue'
+import OpenBrowserList from './OpenBrowserList.vue'
+import WizardLayout from './WizardLayout.vue'
+import { OpenBrowserDocument, LaunchOpenProjectDocument } from '../generated/graphql'
 
 gql`
 query OpenBrowser {

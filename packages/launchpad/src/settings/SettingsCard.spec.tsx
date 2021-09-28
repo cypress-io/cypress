@@ -1,5 +1,5 @@
 import SettingsCard from './SettingsCard.vue'
-import IconLaptop from 'virtual:vite-icons/mdi/laptop'
+import IconLaptop from '~icons/mdi/laptop'
 
 describe('<SettingsCard />', () => {
   it('renders', () => {
