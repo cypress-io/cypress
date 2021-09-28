@@ -31,6 +31,7 @@ import user from '../user'
 import { openProject } from '../open_project'
 
 import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
+import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
@@ -529,8 +530,11 @@ module.exports = {
         initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
           return openProject.create(args.projectRoot, args, options, browsers)
         },
-        insertProject (projectRoot: string) {
-          // TODO
+        insertProjectToCache (projectRoot: string) {
+          insertProject(projectRoot)
+        },
+        getProjectRootsFromCache () {
+          return getProjectRoots() as string[]
         },
       },
     })

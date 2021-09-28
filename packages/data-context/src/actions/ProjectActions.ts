@@ -1,6 +1,5 @@
 import type { MutationAppCreateConfigFileArgs } from '@packages/graphql/src/gen/nxs.gen'
 import type { FoundBrowser, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
-import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -14,7 +13,8 @@ export interface ProjectApiShape {
    */
   initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
-  insertProject(projectRoot: string): void
+  insertProjectToCache(projectRoot: string): void
+  getProjectRootsFromCache(): string[]
 }
 
 export class ProjectActions {
@@ -38,7 +38,7 @@ export class ProjectActions {
   }
 
   async loadProjects () {
-    const projectRoots = await getProjectRoots() as string[]
+    const projectRoots = await this.ctx._apis.projectApi.getProjectRootsFromCache()
 
     this.ctx.coreData.app.projects = [
       ...this.ctx?.coreData?.app?.projects,
@@ -77,7 +77,7 @@ export class ProjectActions {
 
     if (!found) {
       this.ctx.coreData.app.projects.push({ projectRoot })
-      insertProject(projectRoot)
+      this.ctx._apis.projectApi.insertProjectToCache(projectRoot)
     }
 
     await this.setActiveProject(projectRoot)

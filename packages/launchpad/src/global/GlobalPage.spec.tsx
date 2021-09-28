@@ -9,8 +9,7 @@ const anotherTestProject = 'another-test-project'
 const testProjectPath = '/usr/local/dev/projects/test-project'
 
 describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
-  // TODO: add gql so that we can mock out the fragment response
-  describe.skip('without projects', () => {
+  describe('without projects', () => {
     it('renders the empty state', () => {
       cy.mount(() => (<div>
         <GlobalPage />
