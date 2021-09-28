@@ -355,6 +355,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     },
     scaled: getShouldScale(screenshotConfig),
     blackout: getBlackout(screenshotConfig),
+    overwrite,
     startTime: startTime.toISOString(),
   })
 

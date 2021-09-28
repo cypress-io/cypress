@@ -136,6 +136,7 @@ const validate = (props, cmd, log) => {
   validateAndSetBoolean(props, values, cmd, log, 'scale')
   validateAndSetBoolean(props, values, cmd, log, 'disableTimersAndAnimations')
   validateAndSetBoolean(props, values, cmd, log, 'screenshotOnRunFailure')
+  validateAndSetBoolean(props, values, cmd, log, 'overwrite')
 
   if (blackout) {
     const existsNonString = _.some(blackout, (selector) => {

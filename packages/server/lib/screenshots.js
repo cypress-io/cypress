@@ -377,7 +377,7 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
 const getPathToScreenshot = function (data, details, screenshotsFolder) {
   const ext = mime.getExtension(getType(details))
 
-  return getPath(data, ext, screenshotsFolder, details.overwrite)
+  return getPath(data, ext, screenshotsFolder, data.overwrite)
 }
 
 module.exports = {
