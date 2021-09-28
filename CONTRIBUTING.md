@@ -4,17 +4,17 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress Gitter chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Join the [Cypress Gitter chat](https://on.cypress.io/chat) or [Discord](https://on.cypress.io/discord) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
 - Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
-- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+- Write some documentation or improve our existing docs. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
 
-- [Report bugs](https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md) by opening an issue.
-- [Request features](https://github.com/cypress-io/cypress/issues/new?template=3-feature.md) by opening an issue.
+- [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
+- [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Help triage existing issue](#triaging-issues).
-- Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. [Please thoroughly read our writing code guide](#writing-code).
+- Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. Please thoroughly read our [Writing Code guide](#writing-code).
 
 ## Table of Contents
 
@@ -82,21 +82,21 @@ Before filing a bug, make sure you are up to date. Your issue may have already b
 
 ### Getting more information
 
-For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it does not, this information can help us figure out and resolve an issue.
+For some issues, there are places you can check for more information. This may help you resolve the issue yourself. Even if it doesn't, this information can help us figure out and resolve an issue.
 
 - For issues in the web browser, check the JavaScript console and your Network tab in your DevTools.
 - Click on any command in the Command Log where the failure occurred, this will log more information about the error to the JavaScript console.
 - Use Cypress [`debug`](https://on.cypress.io/debug) or [`pause`](https://on.cypress.io/pause) commands to step through your commands.
-- Ask other Cypress users for help in our [chat](https://on.cypress.io/chat).
+- Ask other Cypress users for help in our [chat](https://on.cypress.io/chat) or [Discord](https://on.cypress.io/discord).
 - Try more advanced troubleshooting from [troubleshooting Cypress](https://on.cypress.io/debugging#Troubleshooting-Cypress) doc.
 
 ### Fill out our Issue Template
 
-When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE). Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that do not follow the issue template will be closed.
+When opening an issue, there is a provided issue template. Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that don't fill out the issue template will be closed.
 
 ### Describe Problems
 
-When you file a feature request or bug, we need you to **describe the problem you are facing first**, not just your desired solution.
+When you file a feature request or bug, it's best to **describe the problem you are facing first**, not just your desired solution.
 
 Often, your problem may have a lot in common with other similar problems. If we understand your use case, we can compare it to other use cases and sometimes find a more powerful or more general solution which solves several problems at once. Understanding the root issue can let us merge and contextualize things. Sometimes there's already a way to solve your problem that might just not be obvious.
 
@@ -104,27 +104,27 @@ Also, your proposed solution may not be compatible with the direction we want to
 
 ### Reproducibility
 
-**It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
+**It is nearly impossible for us to resolve issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
 
 ## Common issues
 
 Label | Description | Main issue | Issues
 --- | --- | --- | ---
-browser detection | Local browser is not detected | [8541](https://github.com/cypress-io/cypress/issues/8541) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20browser%20detection), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+browser+detection%22+is%3Aclosed)
-cross-origin | Getting cross-origin error | [944](https://github.com/cypress-io/cypress/issues/944) |[open](https://github.com/cypress-io/cypress/labels/topic%3A%20cross-origin%20%E2%A4%AD), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cross-origin+%E2%A4%AD%22+is%3Aclosed)
-cy.request | Issues related to cy.request command | [1647](https://github.com/cypress-io/cypress/issues/1647) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20cy.request), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cy.request%22+is%3Aclosed)
+browser detection | Local browser is not detected | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20browser%20detection), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+browser+detection%22+is%3Aclosed)
+cross-origin | Getting cross-origin error | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20cross-origin%20%E2%A4%AD), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cross-origin+%E2%A4%AD%22+is%3Aclosed)
+cy.request | Issues related to cy.request command | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20cy.request), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cy.request%22+is%3Aclosed)
 fixtures | Fixture loading and usage | | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20fixtures), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+fixtures%22+is%3Aclosed)
-hooks | Issues related to hooks | [4703](https://github.com/cypress-io/cypress/issues/4703), [665](https://github.com/cypress-io/cypress/issues/665) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20hooks%20%E2%86%AA), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+hooks+%E2%86%AA%22+is%3Aclosed)
-iframes | Working with iframes | [136](https://github.com/cypress-io/cypress/issues/136) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20iframes), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+iframes%22+is%3Aclosed)
-installation | Cypress cannot be downloaded or installed | [8392](https://github.com/cypress-io/cypress/issues/8392) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20installation), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+installation%22+is%3Aclosed)
-network | Controlling network requests | [3427](https://github.com/cypress-io/cypress/issues/3427), [3083](https://github.com/cypress-io/cypress/issues/3083), [1773](https://github.com/cypress-io/cypress/issues/1773) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20network), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+network%22+is%3Aclosed)
-performance | Slow loading, slow network, etc | [1305](https://github.com/cypress-io/cypress/issues/1305) | [open](https://github.com/cypress-io/cypress/labels/type%3A%20performance%20%F0%9F%8F%83%E2%80%8D%E2%99%80%EF%B8%8F), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22type%3A+performance+%F0%9F%8F%83%E2%80%8D%E2%99%80%EF%B8%8F%22+is%3Aclosed)
-screenshots | Taking image screenshots | [2102](https://github.com/cypress-io/cypress/issues/2102) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20screenshots%20%F0%9F%93%B8), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+screenshots+%F0%9F%93%B8%22+is%3Aclosed)
-scrolling | Scrolling elements into view | [871](https://github.com/cypress-io/cypress/issues/871) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20scrolling%20%E2%86%95%EF%B8%8F), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+scrolling+%E2%86%95%EF%B8%8F%22+is%3Aclosed)
-spec execution | Running all specs or some specs in some specific order | [390](https://github.com/cypress-io/cypress/issues/390) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20spec%20execution) | [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+spec+execution%22+is%3Aclosed)
-test execution | Running tests inside a single spec | [2908](https://github.com/cypress-io/cypress/issues/2908) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20test%20execution), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+test+execution%22+is%3Aclosed)
-typescript | Transpiling or bundling TypeScript | [7435](https://github.com/cypress-io/cypress/issues/7435) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20typescript), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+typescript%22+is%3Aclosed)
-video | Problems with video recordings | [2522](https://github.com/cypress-io/cypress/issues/2522) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20video%20%F0%9F%93%B9), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+video+%F0%9F%93%B9%22+is%3Aclosed)
+hooks | Issues related to hooks | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20hooks%20%E2%86%AA), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+hooks+%E2%86%AA%22+is%3Aclosed)
+iframes | Working with iframes | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20iframes), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+iframes%22+is%3Aclosed)
+installation | Cypress cannot be downloaded or installed |  [open](https://github.com/cypress-io/cypress/labels/topic%3A%20installation), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+installation%22+is%3Aclosed)
+network | Controlling network requests |  [open](https://github.com/cypress-io/cypress/labels/topic%3A%20network), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+network%22+is%3Aclosed)
+performance | Slow loading, slow network, etc | [open](https://github.com/cypress-io/cypress/labels/type%3A%20performance%20%F0%9F%8F%83%E2%80%8D%E2%99%80%EF%B8%8F), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22type%3A+performance+%F0%9F%8F%83%E2%80%8D%E2%99%80%EF%B8%8F%22+is%3Aclosed)
+screenshots | Taking image screenshots | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20screenshots%20%F0%9F%93%B8), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+screenshots+%F0%9F%93%B8%22+is%3Aclosed)
+scrolling | Scrolling elements into view |  [open](https://github.com/cypress-io/cypress/labels/topic%3A%20scrolling%20%E2%86%95%EF%B8%8F), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+scrolling+%E2%86%95%EF%B8%8F%22+is%3Aclosed)
+spec execution | Running all specs or some specs in some specific order |  [open](https://github.com/cypress-io/cypress/labels/topic%3A%20spec%20execution) | [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+spec+execution%22+is%3Aclosed)
+test execution | Running tests inside a single spec | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20test%20execution), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+test+execution%22+is%3Aclosed)
+typescript | Transpiling or bundling TypeScript | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20typescript), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+typescript%22+is%3Aclosed)
+video | Problems with video recordings | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20video%20%F0%9F%93%B9), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+video+%F0%9F%93%B9%22+is%3Aclosed)
 
 ## Triaging Issues
 
@@ -132,13 +132,12 @@ When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we 
 
 ### Is this a question?
 
-Some opened issue are questions, not bug reports or feature requests. Issues are reserved for potential bugs or feature requests *only*. If this is the case, you should:
+Some opened issues are questions, not bug reports or feature requests. Issues are reserved for potential bugs or feature requests *only*. If this is the case, you should:
 
 - Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
-- Guide them to existing resources where their questions can be asked like our [community chat](https://on.cypress.io/chat), our [documentation](https://docs.cypress.io), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
+- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord),, or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
 - Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
-- Add the `type: question` label to the issue.
-- Close the issue.
+- Move the issue to [Discussions](https://github.com/cypress-io/cypress/discussions).
 
 ### Does this issue belong in this repository?
 
@@ -147,18 +146,23 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 Issues may be opened about wanting changes to our [documentation](https://github.com/cypress-io/cypress-documentation), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
 
 - Thank them for their contribution.
-- Explain that this repo is only for bugs or feature requests of the Cypress product.
+- Explain that this repo is only for bugs or feature requests of the Cypress App.
 - If you have permission to 'Transfer the issue', do so. If not, explain that they can open an issue in our other repository and link to the repository.
 - Close the issue (if not already transferred).
 
-#### Our Dashboard Service
+#### Cypress Dashboard
 
 Issues may be opened about wanting features in our Dashboard Service. In this case you should:
 
-- Thank them for expressing interest in a new feature.
-- Refer them to the Dashboard ProductBoard: "You can express interest and see progress for this feature on our Roadmap from our Dashboard's product board here: https://portal.productboard.com/cypress-io/1-cypress-dashboard All related work for the Dashboard features is handled in that ProductBoard and will be handled by the Dashboard team directly when you comment there."
-- Close the issue
-- Close the issue to comments
+- Thank them for opening an issue.
+- Add the `external: dashboard` label.
+
+#### Component Testing
+
+Issues may be opened about wanting features in Component Testing. In this case you should:
+
+- Thank them for opening an issue.
+- Add the `component testing` label.
 
 ### Is this already an open issue?
 
@@ -173,9 +177,9 @@ If an issue already exists you should:
 
 ### Does the issue provide all the information from our issue template?
 
-When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE). If the opened issue does not provide enough information asked from the issue template you should:
+When opening an issue, there is a provided issue template based on the type of issue. If the opened issue does not provide enough information asked from the issue template you should:
 
-- Explain that we require new issues follow our provided [issue template](./.github/ISSUE_TEMPLATE) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
+- Explain that we require new issues follow our provided issue template and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
 - Close the issue.
 
 ### Are they running the current version of Cypress?
@@ -190,24 +194,23 @@ If they listed an older version of Cypress in their issue. We don't want to spen
 There will inevitably be suggestions that will not fit within the scope of Cypress's vision for our product. If an issue or pull request falls under this category you should:
 
 - Thank them for their contribution.
-- Explain why it doesn’t fit into the scope of Cypress, and offer clear suggestions for improvement, if you’re able. Be kind, but firm.
-- Link to relevant documentation, if there is any. If you notice repeated requests for things you don’t want to accept, add them into the [documentation](https://github.com/cypress-io/cypress-documentation) to avoid repeating yourself.
+- Explain why it doesn't fit into the scope at Cypress, and offer clear suggestions for improvement, if you're able. Be kind, but firm.
+- Link to relevant documentation, if there is any. If you notice repeated requests for things that are not within scope, add them into the [documentation](https://github.com/cypress-io/cypress-documentation) to avoid repeating yourself.
 - Add the `stage: wontfix` label to the issue.
-- Close the issue/pull request
+- Close the issue/pull request.
 
-### Is what they are describing actually happening?
+### Is what they're describing actually happening?
 
-The best way to determine the validity of a bug is to recreate it yourself. Follow the directions or information provided to recreate the bug that is described. Did they provide a repository that demonstrates the bug? Great - fork it and run the project and steps required. If they did not provide a repository, the best way to reproduce the issue is to have a 'sandbox' project up and running locally for Cypress. This is just a simple project with Cypress installed where you can freely edit the application under test and the tests themselves to recreate the problem.
+The best way to determine the validity of a bug is to recreate it yourself. Follow the directions or information provided to recreate the bug that is described. Did they provide a repository that demonstrates the bug? Great - fork it and run the project and steps required. If they didn't provide a repository, the best way to reproduce the issue is to have a 'sandbox' project up and running locally for Cypress. This is just a simple project with Cypress installed where you can freely edit the application under test and the tests themselves to recreate the problem.
 
 **Attempting to recreate the bug will lead to a few scenarios:**
 
-#### 1. You can not recreate the bug
+#### 1. You can't recreate the bug
 
- If you cannot recreate the situation happening you should:
+ If you can't recreate the situation happening you should:
 
 - Thank them for their contribution.
-- Explain that there is not enough information to reproduce the bug. Provide information on how you went about recreating the scenario, if you’re able. Note your OS, Browser, Cypress version and any other information.
-- Link them to our contributing guideline for [opening issues](#opening-issues).
+- Explain that there isn't enough information to reproduce the bug. Provide information on how you went about recreating the scenario, if you're able. Note your OS, Browser, Cypress version and any other information.
 - Note that if no reproducible example is provided, we will unfortunately have to close the issue.
 - Add the `stage: needs information` label to the issue.
 
@@ -216,7 +219,7 @@ The best way to determine the validity of a bug is to recreate it yourself. Foll
 If you can recreate the bug you should:
 
 - Thank them for their contribution.
-- Explain that you were able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
+- Explain that you're' able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
 - If you know where the code is that could possibly fix this issue - link to the file or line of code from the [cypress](https://github.com/cypress-io/cypress) repo and remind the user that we are open source and that we gladly accept PRs, even if they are a work in progress.
 - Add the `stage: ready for work` label to the issue.
 
@@ -234,7 +237,7 @@ Some issues are opened and sadly forgotten about by the person originally openin
 
 #### Not enough information ever provided
 
-Sometimes we request more information to be provided (label `stage: needs information`) for an open issue, but no one is able to provide a reproducible example or they simply never respond. **This does not mean that we don't believe that there is a bug!** We just, unfortunately, do not have a path forward to fix it without this information. In this case you should:
+Sometimes we request more information to be provided (label `stage: needs information`) for an open issue, but no one is able to provide a reproducible example or they simply never respond. **This does not mean that we don't believe that there is a bug!** We just, unfortunately, don't have a path forward to fix it without this information. In this case you should:
 
 - Add a comment reminding them or our request for more information and that the issue will be closed if it is not provided. Sometimes issues get forgotten about, and all the person needs is a gentle reminder.
 - If there is still no response after a weeks time, explain that you are closing the issue due to not enough information or inactivity and that they can comment in the issue with a reproducible example and we will reopen the issue.
@@ -246,7 +249,6 @@ Some issues are resolved by the community, by giving some guidance or a workarou
 
 - Explain that you are closing the issue as resolved and that they can comment if they are still having the issue and we will consider reopening it.
 - Close the issue.
-
 
 ## Writing Documentation
 
@@ -312,7 +314,7 @@ We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate 
 
 ### Requirements
 
-You must have the following installed on your system to run the project:
+You must have the following installed on your system to contribute locally:
 
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for minimum version requirements. You can use [avn](https://github.com/wbyoung/avn) to automatically switch to the right version of Node.js for this repo.)
 - [`yarn`](https://yarnpkg.com/en/docs/install)
@@ -372,7 +374,7 @@ $ yarn workspace @packages/server add my-new-dep1
 $ yarn workspace @packages/server add --dev my-new-dep1
 ```
 
-Alternatively, you can directly add the dependency to the corresponding `package.json`.
+Alternatively, you can directly add the dependency to the corresponding `package.json` and run `yarn`.
 
 #### Tasks
 
@@ -477,7 +479,7 @@ When adding links to outside resources within the Cypress Test Runner (including
 This is to ensure that links do not go dead in older versions of Cypress when the location of the link has changed. To add a new link:
 
 - Make up a new slug for the linked resource like `https://on.cypress.io/my-special-link`.
-- Open a PR adding the new slug in [links.yml](https://github.com/cypress-io/cypress-services/blob/develop/packages/on/data/links.yml) with the href of the resource it should redirect to. *Note: this requires access to the internal [cypress-services](https://github.com/cypress-io/cypress-services) repo which is only granted to employees. If you're an outside contributor and need a link reroute added, please comment in the relevant PR asking for assistance.*
+- Open a PR adding the new slug in [links.yml](https://github.com/cypress-io/cypress-services/blob/develop/packages/on/data/links.yml) with the href of the resource it should redirect to. *Note: this requires access to the internal [cypress-services](https://github.com/cypress-io/cypress-services) repo which is only granted to Cypress employees. If you're an outside contributor and need a link reroute added, please comment in the relevant PR asking for assistance.*
 - Wait for the PR to be reviewed and **deployed** from [cypress-services](https://github.com/cypress-io/cypress-services). This is required before your changes can be merged into the `cypress` project.
 
 ### Tests
@@ -562,10 +564,13 @@ Independent packages are automatically released when code is merged into `master
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE)**.
+- Break down pull requests into the smallest necessary parts to address the original issue or feature. This helps you get a timely review and helps the reviewer clearly understand which pieces of the code changes are relevant.
+- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
 - PR's can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
+- If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
+  ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 
@@ -589,7 +594,7 @@ If any of the Pull Request Review guidelines can't be met, a comment should be l
 - Run the code and use it as the end user would.
 - Double check the issue and PR description to ensure it is meeting the original requirements.
 - Read through every line of changed code (Yes, we know this could be a LOT).
-- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
+- If you don't understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
 
 ### Code Review Checklist
 
@@ -621,7 +626,8 @@ Below are guidelines to help during code review. If any of the following require
 - [ ] There's not a module from the ecosystem that should be used instead.
 - [ ] There is no redundant or duplicate code.
 - [ ] There are no irrelevant comments left in the code.
-- [ ] Tests are testing the code’s intended functionality in the best way possible.
+- [ ] There is no code that is irrelevant to the issue being addressed. If so, ask the contributor to break the work out into a separate PR.
+- [ ] Tests are testing the code's intended functionality in the best way possible.
 
 #### Internal
 
