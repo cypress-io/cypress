@@ -53,7 +53,7 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 // eslint-disable-next-line no-duplicate-imports
 import { computed, useSlots } from 'vue'
-import { useModelWrapper } from '../../composables'
+import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 
 const slots = useSlots()
 

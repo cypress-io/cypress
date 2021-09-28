@@ -1,6 +1,6 @@
 import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
-import { GlobalPageFragmentDoc } from '../generated/graphql-test'
+import { GlobalPageFragment, GlobalPageFragmentDoc } from '../generated/graphql-test'
 
 const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"`
 const emptyMessages = defaultMessages.globalPage.empty
@@ -12,7 +12,7 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
   describe('without projects', () => {
     it('renders the empty state', () => {
       cy.mount(() => (<div>
-        <GlobalPage />
+        <GlobalPage gql={{ gql: {} } as unknown as GlobalPageFragment}/>
       </div>))
 
       cy.findByText(emptyMessages.title).should('be.visible')
