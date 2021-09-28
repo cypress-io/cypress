@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { createServer, ViteDevServer, InlineConfig, UserConfig } from 'vite'
-import { dirname, resolve } from 'path'
+import { dirname, resolve, relative, isAbsolute } from 'path'
 import getPort from 'get-port'
 import { makeCypressPlugin } from './makeCypressPlugin'
 
@@ -54,10 +54,27 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
 
   // pre-optimizea all the specs
   if ((options.specs && options.specs.length)) {
-    finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    // fix: we must preserve entries configured on target project
+    const existingOptimizeDepsEntries = finalConfig.optimizeDeps.entries
+
+    if (existingOptimizeDepsEntries) {
+      finalConfig.optimizeDeps.entries = [...existingOptimizeDepsEntries, ...options.specs.map((spec) => spec.relative)]
+    } else {
+      finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    }
+
     // only optimize a supportFile is it is not false or undefined
     if (supportFile) {
-      finalConfig.optimizeDeps.entries.push(supportFile)
+      // fix: on windows we need to transform absolute paths to fast-glob pattern
+      if (process.platform === 'win32' && isAbsolute(supportFile)) {
+        if (isAbsolute(supportFile)) {
+          finalConfig.optimizeDeps.entries.push(relative(process.cwd(), supportFile).replace(/\\/g, '/'))
+        } else {
+          finalConfig.optimizeDeps.entries.push(supportFile.replace(/\\/g, '/'))
+        }
+      } else {
+        finalConfig.optimizeDeps.entries.push(supportFile)
+      }
     }
   }
 
