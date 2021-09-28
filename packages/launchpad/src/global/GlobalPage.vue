@@ -9,7 +9,7 @@
         <GlobalPageHeader v-model="match" />
       </div>
 
-      <GlobalProjectCard v-for="project in props.gql?.projects" :key="project.id" :project="project" />
+      <GlobalProjectCard v-for="project in filteredProjects" :key="project.id" :project="project" />
     </div>
   </template>
 
@@ -40,6 +40,10 @@ fragment GlobalPage on App {
 const props = defineProps<{
   gql: GlobalPageFragment,
 }>()
+
+const filteredProjects = computed(() => {
+  return props.gql.projects.filter(p => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+})
 
 const match = ref('')
 </script>

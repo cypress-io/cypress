@@ -1,5 +1,5 @@
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
-import { activeProject } from './testStubData'
+import { activeProject, createProject } from './testStubData'
 import { testNodeId } from './testUtils'
 
 export const longBrowsersList = [
@@ -140,6 +140,6 @@ export const app: CodegenTypeMap['App'] = {
   isInGlobalMode: false,
   browsers: allBrowsers,
   selectedBrowser: allBrowsers[0],
-  projects: [activeProject],
+  projects: [activeProject, createProject('another-test-project')],
   activeProject,
 }

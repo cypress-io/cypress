@@ -3,17 +3,17 @@ import type {
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './testUtils'
 
-export const createActiveProject = (): CodegenTypeMap['Project'] => {
+export const createProject = (title: string): CodegenTypeMap['Project'] => {
   return {
     ...testNodeId('Project'),
     isFirstTimeCT: true,
     isFirstTimeE2E: true,
-    projectId: 'test-project-id',
-    title: 'test-project',
-    projectRoot: '/usr/local/dev/projects/test-project',
+    projectId: `${title}-id`,
+    title,
+    projectRoot: `/usr/local/dev/projects/${title}`,
   }
 }
 
-export const activeProject = createActiveProject()
+export const activeProject = createProject('test-project')
 
 export const project = activeProject
