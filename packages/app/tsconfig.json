@@ -1,4 +1,3 @@
 {
-  "extends": "../frontend-shared/tsconfig.json",
-  "include": ["src/**/*.vue", "src/**/*.tsx", "cypress/**/*.ts"]
+  "extends": "../frontend-shared/tsconfig.json"
 }

@@ -61,7 +61,7 @@
     ],
     "paths": {
       "@cy/i18n": ["./src/locales/i18n"],
-      "@cy/components": ["./src/components/*"]
+      "@cy/components": ["./src/components"]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
