@@ -65,17 +65,8 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
 
     // only optimize a supportFile is it is not false or undefined
     if (supportFile) {
-      if (process.platform === 'win32') {
-        if (isAbsolute(supportFile)) {
-          // fix: on windows we need to transform absolute paths to fast-glob pattern, also replace backslashes with slashes
-          finalConfig.optimizeDeps.entries.push(relative(process.cwd(), supportFile).replace(/\\/g, '/'))
-        } else {
-          // fix: on windows we need to replace backslashes with slashes
-          finalConfig.optimizeDeps.entries.push(supportFile.replace(/\\/g, '/'))
-        }
-      } else {
-        finalConfig.optimizeDeps.entries.push(supportFile)
-      }
+      // fix: on windows we need to replace backslashes with slashes
+      finalConfig.optimizeDeps.entries.push(supportFile.replace(/\\/g, '/'))
     }
   }
 
