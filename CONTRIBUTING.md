@@ -626,7 +626,7 @@ Below are guidelines to help during code review. If any of the following require
 - [ ] There's not a module from the ecosystem that should be used instead.
 - [ ] There is no redundant or duplicate code.
 - [ ] There are no irrelevant comments left in the code.
-- [ ] There is no code that is irrelevant to the issue being addressed. If so, ask the contributor to break the work out into a separate PR.
+- [ ] There is no irrelevant code to the issue being addressed. If so, ask the contributor to break the work out into a separate PR.
 - [ ] Tests are testing the code's intended functionality in the best way possible.
 
 #### Internal
