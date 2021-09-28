@@ -1,12 +1,15 @@
 require('graceful-fs').gracefulify(require('fs'))
 const stripAnsi = require('strip-ansi')
 const debug = require('debug')('cypress:server:require_async:child')
+const tsNodeUtil = require('./ts_node')
 const util = require('../plugins/util')
 const ipc = util.wrapIpc(process)
 
 require('./suppress_warnings').suppress()
 
 const { file, projectRoot } = require('minimist')(process.argv.slice(2))
+
+let tsRegistered = false
 
 run(ipc, file, projectRoot)
 
@@ -22,6 +25,14 @@ function run (ipc, requiredFile, projectRoot) {
   debug('projectRoot:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
+  }
+
+  if (!tsRegistered) {
+    debug('register typescript for required file')
+    tsNodeUtil.register(projectRoot, requiredFile)
+
+    // ensure typescript is only registered once
+    tsRegistered = true
   }
 
   process.on('uncaughtException', (err) => {
