@@ -948,14 +948,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls Settings.write with projectRoot and attrs', function () {
-      return writeProjectId('id-123').then((id) => {
+      return writeProjectId({ id: 'id-123' }).then((id) => {
         expect(id).to.eq('id-123')
       })
     })
 
     // TODO: This
     xit('sets generatedProjectIdTimestamp', function () {
-      return writeProjectId('id-123').then(() => {
+      return writeProjectId({ id: 'id-123' }).then(() => {
         expect(this.project.generatedProjectIdTimestamp).to.be.a('date')
       })
     })
@@ -1016,13 +1016,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#createCiProject', () => {
     const projectRoot = '/_test-output/path/to/project-e2e'
+    const configFile = 'cypress.config.js'
 
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot, testingType: 'e2e' })
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'write').resolves('project-id-123')
+      sinon.stub(settings, 'write').resolves()
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
@@ -1030,19 +1031,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls api.createProject with user session', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
+      return createCiProject({ foo: 'bar', projectRoot }).then(() => {
         expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
       })
     })
 
     it('calls writeProjectId with id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
-        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' })
+      return createCiProject({ foo: 'bar', projectRoot, configFile }).then(() => {
+        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
       })
     })
 
     it('returns project id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then((projectId) => {
+      return createCiProject({ foo: 'bar', projectRoot }).then((projectId) => {
         expect(projectId).to.eql(this.newProject)
       })
     })
