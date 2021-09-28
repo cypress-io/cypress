@@ -12,7 +12,7 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { UserConfig } from 'vite'
-import { ArgumentsType } from '@antfu/utils'
+import type { ArgumentsType } from '@antfu/utils'
 
 type PluginOptions = {
   plugins?: any[]

@@ -1,5 +1,4 @@
 {
-  "include": ["src/**/*.vue", "src/**/*.tsx", "cypress/**/*.ts"],
   "compilerOptions": {
     /* Basic Options */
     "target": "esnext",
@@ -50,6 +49,10 @@
     // "typeRoots": [] /* List of folders to include type definitions from. */
  
     /* Type declaration files to be included in compilation. */
+    "paths": {
+      "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
+      "@cy/components/*": ["../frontend-shared/src/components/*"]
+    },
     "types": [
       "chrome",
       "./vue-shims",
@@ -59,10 +62,6 @@
       "cypress-file-upload",
       "cypress"
     ],
-    "paths": {
-      "@cy/i18n": ["./src/locales/i18n"],
-      "@cy/components": ["./src/components/*"]
-    },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
