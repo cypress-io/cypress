@@ -244,6 +244,18 @@ enum FrontendFrameworkEnum {
   vuecli
 }
 
+"""Git information about a spec file"""
+type GitInfo {
+  """Last person to change the file in git"""
+  author: String
+
+  """last modified as a pretty string, eg 2 days ago"""
+  lastModifiedHumanReadable: String
+
+  """last modified timestamp, eg 2021-09-14 13:43:19 +1000"""
+  lastModifiedTimestamp: String
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -385,6 +397,21 @@ type Project implements Node {
   """Used to associate project with Cypress cloud"""
   projectId: String
   projectRoot: String!
+
+  """Specs for a project conforming to Relay Connection specification"""
+  specs(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): SpecConnection
   title: String!
 }
 
@@ -415,6 +442,49 @@ type Query {
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
+}
+
+"""Represents a spec on the file system"""
+type Spec {
+  """Absolute path to spec"""
+  absolute: String!
+
+  """Git information about the spec file"""
+  gitInfo: GitInfo
+
+  """Name of spec file"""
+  name: String!
+
+  """Relative path to spec"""
+  relative: String!
+
+  """Type of spec"""
+  specType: SpecType!
+}
+
+type SpecConnection {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [SpecEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
+type SpecEdge {
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
+  cursor: String!
+
+  """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
+  node: Spec
+}
+
+enum SpecType {
+  component
+  integration
 }
 
 """The bundlers that we can use with Cypress"""

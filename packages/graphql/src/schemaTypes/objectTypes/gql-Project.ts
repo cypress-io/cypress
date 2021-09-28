@@ -44,5 +44,16 @@ export const Project = objectType({
         return ctx.project.isFirstTimeAccessing(source.projectRoot, 'e2e')
       },
     })
+
+    t.connectionField('specs', {
+      description: 'Specs for a project conforming to Relay Connection specification',
+      type: 'Spec',
+      resolve: async (source, args, ctx) => {
+        console.log('SPECS!!')
+        const s = await ctx.loaders.specs(source.projectRoot)
+        console.log(s)
+        return s
+      },
+    })
   },
 })
