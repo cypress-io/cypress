@@ -71,9 +71,7 @@ export class WizardDataSource {
     }
 
     // TODO: add constraints here to determine if we can move forward
-    {
-      return true
-    }
+    return true
   }
 
   sampleCode (lang: 'js' | 'ts') {
