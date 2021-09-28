@@ -1,5 +1,4 @@
 {
-  "include": ["src/**/*.vue", "src/**/*.tsx", "cypress/**/*.ts"],
   "compilerOptions": {
     /* Basic Options */
     "target": "esnext",
@@ -59,10 +58,6 @@
       "cypress-file-upload",
       "cypress"
     ],
-    "paths": {
-      "@cy/i18n": ["./src/locales/i18n"],
-      "@cy/components": ["./src/components"]
-    },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,

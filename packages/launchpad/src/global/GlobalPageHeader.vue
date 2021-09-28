@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '@cy/components/Button.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconPlus from '~icons/mdi/plus'
 import { useModelWrapper } from '../composables'

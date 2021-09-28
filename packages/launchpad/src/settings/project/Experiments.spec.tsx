@@ -10,7 +10,7 @@ describe('<Experiments />', () => {
 
   it('renders experiments that are passed in', () => {
     cy.mount(() => (
-      <div className="py-4 px-8">
+      <div class="py-4 px-8">
         <Experiments experiments={experiments}/>
       </div>
     ))
@@ -21,7 +21,7 @@ describe('<Experiments />', () => {
 
   it('fetches its own experiments', () => {
     cy.mount(() => (
-      <div className="py-4 px-8">
+      <div class="py-4 px-8">
         <Experiments />
       </div>
     ))
