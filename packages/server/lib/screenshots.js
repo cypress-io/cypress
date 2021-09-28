@@ -298,8 +298,8 @@ const getDimensions = function (details) {
   return pick(details.image.bitmap)
 }
 
-const ensureSafePath = function (withoutExt, extension, num = 0) {
-  const suffix = `${num ? ` (${num})` : ''}.${extension}`
+const ensureSafePath = function (withoutExt, extension, num = 0, overwrite) {
+  const suffix = `${(num && !overwrite) ? ` (${num})` : ''}.${extension}`
   const maxSafePrefixBytes = maxSafeBytes - suffix.length
   const filenameBuf = Buffer.from(path.basename(withoutExt))
 
@@ -315,7 +315,7 @@ const ensureSafePath = function (withoutExt, extension, num = 0) {
 
   return fs.pathExists(fullPath)
   .then((found) => {
-    if (found) {
+    if (found && !overwrite) {
       return ensureSafePath(withoutExt, extension, num + 1)
     }
 
@@ -342,7 +342,7 @@ const sanitizeToString = (title) => {
   return sanitize(_.toString(title))
 }
 
-const getPath = function (data, ext, screenshotsFolder) {
+const getPath = function (data, ext, screenshotsFolder, overwrite) {
   let names
   const specNames = (data.specName || '')
   .split(pathSeparatorRe)
@@ -371,13 +371,13 @@ const getPath = function (data, ext, screenshotsFolder) {
 
   const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
 
-  return ensureSafePath(withoutExt, ext)
+  return ensureSafePath(withoutExt, ext, overwrite)
 }
 
 const getPathToScreenshot = function (data, details, screenshotsFolder) {
   const ext = mime.getExtension(getType(details))
 
-  return getPath(data, ext, screenshotsFolder)
+  return getPath(data, ext, screenshotsFolder, details.overwrite)
 }
 
 module.exports = {
@@ -392,7 +392,7 @@ module.exports = {
   copy (src, dest) {
     return fs
     .copyAsync(src, dest, { overwrite: true })
-    .catch({ code: 'ENOENT' }, () => {})
+    .catch({ code: 'ENOENT' }, () => { })
   },
   // dont yell about ENOENT errors
 
