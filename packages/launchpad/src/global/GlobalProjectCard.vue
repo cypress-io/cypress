@@ -3,69 +3,46 @@
     <div class="flex-1 min-w-0">
       <button
         class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
-        @click="emit('projectSelected', project)"
+        @dblclick="setActiveProject(props.gql.projectRoot)"
       >
         <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">
-          {{ project.name }}
+          {{ props.gql.title }}
         </p>
         <p class="text-sm text-gray-500 relative flex flex-wrap self-end items-center gap-1 bullet-points children:flex children:items-center children:gap-1">
-          <span>{{ getTimeAgo(project.lastRun) }}</span>
-          <span>project/master</span>
-          <span>v8.0</span>
+          <span>{{ props.gql.projectRoot }}</span>
         </p>
-        <Icon
-          :icon="iconForStatus.icon"
-          :class="iconForStatus.classes"
-          class="ml-2 justify-self-end self-center row-start-1 row-end-3 col-start-2 text-sm"
-        />
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import Icon from '@cy/components/Icon.vue'
-import IconChecked from '~icons/mdi/check-circle'
-import IconX from '~icons/mdi/plus-circle'
-import IconPending from '~icons/mdi/refresh-circle'
+import { gql } from '@urql/vue'
+import { useSetActiveProject } from '@packages/frontend-shared/src/composables'
+import type { GlobalProjectCard_ProjectFragment } from '../generated/graphql'
 
-import { getTimeAgo } from '../utils/time'
+const { setActiveProject } = useSetActiveProject()
 
-const icons = {
-  passed: {
-    icon: IconChecked,
-    classes: 'text-green-500',
-  },
-  failed: {
-    icon: IconX,
-    classes: 'text-red-500 rotate-45 translate',
-  },
-  pending: {
-    icon: IconPending,
-    classes: 'text-blue-500',
-  },
+gql`
+fragment GlobalProjectCard_Project on Project {
+  id
+  title
+  projectRoot
+  cloudProject {
+    latestRun {
+      status
+    }
+  }
 }
+`
 
-// TOOD: use graphql types here
-interface Project {
- name: string
- lastRun: number
- lastRunStatus: string
-}
-
-// TODO: I want to use an enum here for 'lastRunStatus'
-// but I'm struggling to get the types within the tests
-// When GQL exists, I'll be able to pull in the shared types.
 const props = defineProps<{
-  project: Project
+  gql: GlobalProjectCard_ProjectFragment
 }>()
 
 const emit = defineEmits<{
-  (event: 'projectSelected', project: Project): void
+  (event: 'projectSelected', project: GlobalProjectCard_ProjectFragment): void
 }>()
-
-const iconForStatus = computed(() => icons[props.project.lastRunStatus])
 </script>
 
 <style scoped lang="scss">
