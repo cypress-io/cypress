@@ -534,7 +534,7 @@ module.exports = {
           insertProject(projectRoot)
         },
         getProjectRootsFromCache () {
-          return getProjectRoots() as string[]
+          return getProjectRoots()
         },
       },
     })

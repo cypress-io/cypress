@@ -14,7 +14,7 @@ export interface ProjectApiShape {
   initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
-  getProjectRootsFromCache(): string[]
+  getProjectRootsFromCache(): Promise<string[]>
 }
 
 export class ProjectActions {
