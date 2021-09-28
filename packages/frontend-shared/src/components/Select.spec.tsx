@@ -1,12 +1,12 @@
-import Icon from '../icon/Icon.vue'
+import Icon from './Icon.vue'
+import IconHeart from '~icons/mdi/heart'
+import { defaultMessages } from '@cy/i18n'
 import { h } from 'vue'
-import IconHeart from 'virtual:vite-icons/mdi/heart'
-import { defaultMessages } from '../../locales/i18n'
-
-const selectText = defaultMessages.components.select
 
 // Subject Under Test
 import Select from './Select.vue'
+
+const selectText = defaultMessages.components.select
 
 // Selectors
 const optionsSelector = '[role=option]'

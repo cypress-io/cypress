@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '../components/button/Button.vue'
+import Button from '@cy/components/Button.vue'
 
 const emit = defineEmits<{
   (event: 'itemSelected', item: Record<string, string>): void

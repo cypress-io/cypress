@@ -1,6 +1,6 @@
 import Icon from './Icon.vue'
-import IconCoffee from 'virtual:vite-icons/mdi/coffee'
-import IconHeart from 'virtual:vite-icons/mdi/heart'
+import IconCoffee from '~icons/mdi/coffee'
+import IconHeart from '~icons/mdi/heart'
 
 describe('<Icon />', () => {
   it('handles an icon SVG', () => {

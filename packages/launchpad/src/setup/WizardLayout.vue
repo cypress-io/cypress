@@ -26,7 +26,7 @@ import { computed } from 'vue'
 import { useMutation } from '@urql/vue'
 import { gql } from '@urql/core'
 import { WizardLayoutNavigateDocument } from '../generated/graphql'
-import { useI18n } from '../composables'
+import { useI18n } from '@cy/i18n'
 
 gql`
 fragment WizardLayout on Wizard {

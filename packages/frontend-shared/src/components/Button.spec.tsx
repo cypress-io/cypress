@@ -1,5 +1,5 @@
 import Button from './Button.vue'
-import IconCoffee from 'virtual:vite-icons/mdi/coffee'
+import IconCoffee from '~icons/mdi/coffee'
 
 describe('<Button />', () => {
   it('playground', { viewportWidth: 200, viewportHeight: 300 }, () => {

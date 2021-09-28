@@ -27,9 +27,9 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '../../components/button/Button.vue'
-import IconCode from 'virtual:vite-icons/mdi/code'
-import { useI18n } from '../../composables'
+import Button from '@cy/components/Button.vue'
+import IconCode from '~icons/mdi/code'
+import { useI18n } from '@cy/i18n'
 import { useClipboard } from '@vueuse/core'
 
 defineProps<{

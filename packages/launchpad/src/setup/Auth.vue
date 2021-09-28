@@ -28,7 +28,8 @@ import {
   LogoutDocument,
   AuthFragment,
 } from '../generated/graphql'
-import Button from '../components/button/Button.vue'
+import Button from '@cy/components/Button.vue'
+import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
   gql: AuthFragment

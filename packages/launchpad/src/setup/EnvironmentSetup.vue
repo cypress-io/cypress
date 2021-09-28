@@ -28,7 +28,7 @@ import SelectBundler from '../components/select/SelectBundler.vue'
 import { gql } from '@urql/core'
 import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
-import { useI18n } from '../composables'
+import { useI18n } from '@cy/i18n'
 
 gql`
 mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {

@@ -18,12 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '../composables'
+import { useI18n } from '@cy/i18n'
 import SettingsCard from './SettingsCard.vue'
 import ProjectSettings from './project/ProjectSettings.vue'
 import DeviceSettings from './device/DeviceSettings.vue'
-import IconLaptop from 'virtual:vite-icons/mdi/laptop'
-import IconBook from 'virtual:vite-icons/mdi/book'
+import IconLaptop from '~icons/mdi/laptop'
+import IconBook from '~icons/mdi/book'
 
 const { t } = useI18n()
 </script>

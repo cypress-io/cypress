@@ -15,13 +15,14 @@ import { navigationMenu } from '../../src/graphql/testNavigationMenu'
 import { query as stubQuery } from '../../src/graphql/testQuery'
 import { wizard as stubWizard } from '../../src/graphql/testWizard'
 import { app as stubApp } from '../../src/graphql/testApp'
+import { createI18n } from '@cy/i18n'
 
 /**
  * This variable is mimicing ipc provided by electron.
  * It has to be loaded run before initializing GraphQL
  * because graphql uses it.
  */
-(window as any).ipc = {
+;(window as any).ipc = {
   on: () => {},
   send: () => {},
 }
@@ -37,7 +38,11 @@ const createContext = (): ClientTestContext => {
   }
 }
 
-export const registerMountFn = ({ plugins }) => {
+export interface MountFnOptions {
+  plugins?: (() => any)[]
+}
+
+export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
     <C extends Parameters<typeof mount>[0]>(comp: C, options: CyMountOptions<C> = {}) => {
@@ -48,6 +53,8 @@ export const registerMountFn = ({ plugins }) => {
       each(plugins, (pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
       })
+
+      options.global.plugins.push(createI18n())
 
       const context = createContext()
 
@@ -75,6 +82,7 @@ export const registerMountFn = ({ plugins }) => {
           transition: false,
         },
         plugins: [
+          createI18n(),
           {
             install (app) {
               app.use(urql, testUrqlClient({

@@ -1,4 +1,4 @@
-import { defaultMessages } from '../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 import GlobalPage from './GlobalPage.vue'
 
 const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"`
