@@ -49,7 +49,7 @@ export interface LaunchArgs {
   /**
    * in run mode, the path of the project run
    * path is relative if specified with --project,
-   * absolute if implied by currnet working directory
+   * absolute if implied by current working directory
    */
   runProject?: string
 }
