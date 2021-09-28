@@ -14,10 +14,11 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '../components/button/Button.vue'
-import Input from '../components/input/Input.vue'
-import IconPlus from 'virtual:vite-icons/mdi/plus'
-import { useI18n, useModelWrapper } from '../composables'
+import Button from '@cy/components/Button.vue'
+import Input from '@cy/components/Input.vue'
+import IconPlus from '~icons/mdi/plus'
+import { useModelWrapper } from '../composables'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 

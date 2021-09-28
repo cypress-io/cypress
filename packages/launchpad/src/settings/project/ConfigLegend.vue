@@ -34,7 +34,7 @@
 <script lang="ts" setup>
 import ConfigBadge from "./ConfigBadge.vue";
 import { computed } from "vue";
-import { useI18n } from "../../composables";
+import { useI18n } from "@cy/i18n";
 
 const { t } = useI18n()
 const legendText = computed(() => ({

@@ -21,17 +21,17 @@
 <script lang="ts" setup>
 
 import { ref } from 'vue'
-import Icon from '../../components/icon/Icon.vue'
+import Icon from '@cy/components/Icon.vue'
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '../../composables';
-import Select from '../../components/input/Select.vue';
-import VSCode from 'virtual:vite-icons/logos/visual-studio-code'
-import Atom from 'virtual:vite-icons/logos/atom-icon'
-import Webstorm from 'virtual:vite-icons/logos/webstorm'
-import Vim from 'virtual:vite-icons/logos/vim'
-import Sublime from 'virtual:vite-icons/logos/sublimetext-icon'
-import Emacs from 'virtual:vite-icons/logos/emacs'
-import IconTerminal from 'virtual:vite-icons/mdi/terminal'
+import { useI18n } from '@cy/i18n';
+import Select from '@cy/components/Select.vue';
+import VSCode from '~icons/logos/visual-studio-code'
+import Atom from '~icons/logos/atom-icon'
+import Webstorm from '~icons/logos/webstorm'
+import Vim from '~icons/logos/vim'
+import Sublime from '~icons/logos/sublimetext-icon'
+import Emacs from '~icons/logos/emacs'
+import IconTerminal from '~icons/mdi/terminal'
 
 // TODO, grab these from gql or the user's machine.
 const externalEditors = [

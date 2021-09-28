@@ -27,13 +27,13 @@
 import type { RunResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 // bi:check-lg
-import IconPass from 'virtual:vite-icons/bi/check-lg'
+import IconPass from '~icons/bi/check-lg'
 // eva:close-fill
-import IconFail from 'virtual:vite-icons/eva/close-fill'
+import IconFail from '~icons/eva/close-fill'
 // fa-solid:snowflake
-import IconFlake from 'virtual:vite-icons/fa-solid/snowflake'
+import IconFlake from '~icons/fa-solid/snowflake'
 // line-md:cancel
-import IconCancel from 'virtual:vite-icons/line-md/cancel'
+import IconCancel from '~icons/line-md/cancel'
 
 gql`
 fragment RunResults on CloudRun {

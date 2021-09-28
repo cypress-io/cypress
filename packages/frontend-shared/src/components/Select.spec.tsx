@@ -1,6 +1,6 @@
-import Icon from '../icon/Icon.vue'
-import IconHeart from 'virtual:vite-icons/mdi/heart'
-import { defaultMessages } from '../../locales/i18n'
+import Icon from './Icon.vue'
+import IconHeart from '~icons/mdi/heart'
+import { defaultMessages } from '@cy/i18n'
 
 const selectText = defaultMessages.components.select
 

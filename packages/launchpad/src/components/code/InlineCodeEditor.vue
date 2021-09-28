@@ -35,6 +35,7 @@ import _ from 'lodash'
 import "prismjs"
 import "@packages/reporter/src/errors/prism.scss"
 import CodeEditor from './CodeEditor.vue'
+import Icon from '@cy/components/Icon.vue'
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { computed, useSlots } from 'vue'
 import { useModelWrapper } from '../../composables'

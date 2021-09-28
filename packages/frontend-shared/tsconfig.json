@@ -48,7 +48,21 @@
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [] /* List of folders to include type definitions from. */
-    "types": ["chrome", "./vue-shims", "./vite-env", "vite-plugin-icons", "@intlify/vite-plugin-vue-i18n/client", "@testing-library/cypress", "cypress-file-upload"], /* Type declaration files to be included in compilation. */
+ 
+    /* Type declaration files to be included in compilation. */
+    "types": [
+      "chrome",
+      "./vue-shims",
+      "./vite-env",
+      "@intlify/vite-plugin-vue-i18n/client",
+      "@testing-library/cypress",
+      "cypress-file-upload",
+      "cypress"
+    ],
+    "paths": {
+      "@cy/i18n": ["./src/locales/i18n"],
+      "@cy/components": ["./src/components/*"]
+    },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,

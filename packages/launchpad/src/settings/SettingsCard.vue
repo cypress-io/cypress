@@ -36,8 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-  import IconCaret from 'virtual:vite-icons/mdi/caret'
-  import Icon from '../components/icon/Icon.vue'
+  import IconCaret from '~icons/mdi/caret'
+  import Icon from '@cy/components/Icon.vue'
   import type { FunctionalComponent, SVGAttributes } from 'vue'
   import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
   

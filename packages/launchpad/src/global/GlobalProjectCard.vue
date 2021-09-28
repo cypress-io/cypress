@@ -16,10 +16,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import Icon from '../components/icon/Icon.vue'
-import IconChecked from 'virtual:vite-icons/mdi/check-circle'
-import IconX from 'virtual:vite-icons/mdi/plus-circle'
-import IconPending from 'virtual:vite-icons/mdi/refresh-circle'
+import Icon from '@cy/components/Icon.vue'
+import IconChecked from '~icons/mdi/check-circle'
+import IconX from '~icons/mdi/plus-circle'
+import IconPending from '~icons/mdi/refresh-circle'
 
 import { getTimeAgo } from "../utils/time";
 

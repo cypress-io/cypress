@@ -26,7 +26,7 @@ import ExperimentRow from './ExperimentRow.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { experiments as defaultExperiments } from './projectSettings'
 import type { Experiment } from './projectSettings'
-import { useI18n } from '../../composables'
+import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
   experiments?: Experiment[]

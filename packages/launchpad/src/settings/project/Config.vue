@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '../../composables'
+import { useI18n } from '@cy/i18n'
 import cypressJson from '../../../cypress.json?raw' // TODO: remove this
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'

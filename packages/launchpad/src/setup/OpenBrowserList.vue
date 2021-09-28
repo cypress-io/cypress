@@ -55,12 +55,12 @@
 
 <script lang="ts" setup>
 import { gql } from "@urql/core";
-import { useI18n } from '../composables'
+import { useI18n } from '@cy/i18n'
 import { OpenBrowserListFragment, OpenBrowserList_SetBrowserDocument } from "../generated/graphql"
-import Button from "../components/button/Button.vue"
+import Button from "@cy/components/Button.vue"
 import { computed, ref, defineEmits } from "vue"
 import _clone from "lodash/clone"
-import openInNew from 'virtual:vite-icons/mdi/open-in-new'
+import openInNew from '~icons/mdi/open-in-new'
 
 
 import chromeIcon from "../../../../node_modules/browser-logos/src/chrome/chrome.svg?url"

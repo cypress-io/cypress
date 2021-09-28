@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { useModelWrapper } from '../../composables'
+import { useModelWrapper } from '../composables'
 import Icon from './Icon.vue'
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 

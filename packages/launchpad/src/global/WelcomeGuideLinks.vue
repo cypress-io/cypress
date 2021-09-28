@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '../components/button/Button.vue'
+import Button from '@cy/components/Button.vue'
 
 defineProps<{
   items: Record<string, string>[]

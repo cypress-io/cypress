@@ -15,8 +15,12 @@
 </template>
 
 <script lang="ts" setup>
-import Icon from '../components/icon/Icon.vue'
-import { HTMLAttributes, FunctionalComponent, SVGAttributes, computed } from 'vue'
+import Icon from '@cy/components/Icon.vue'
+import { computed } from 'vue'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { FunctionalComponent, SVGAttributes, HTMLAttributes } from 'vue'
+
 import type { SideBarItemFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 

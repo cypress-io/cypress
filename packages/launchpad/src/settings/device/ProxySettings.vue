@@ -17,7 +17,7 @@
 
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '../../composables';
+import { useI18n } from '@cy/i18n';
 import { ref } from 'vue';
 
 const { t } = useI18n()

@@ -22,9 +22,9 @@
 import RunIcon from './RunIcon.vue'
 import RunResults from './RunResults.vue'
 // bx:bx-user-circle
-import IconUserCircle from 'virtual:vite-icons/bx/bx-user-circle'
+import IconUserCircle from '~icons/bx/bx-user-circle'
 // carbon:branch
-import IconBranch from 'virtual:vite-icons/carbon/branch'
+import IconBranch from '~icons/carbon/branch'
 import { gql } from '@urql/core'
 import type { RunCardFragment } from '../generated/graphql'
 import { computed } from 'vue-demi'

@@ -47,12 +47,12 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useI18n } from "../composables"
-import Checkbox from '../components/checkbox/Checkbox.vue'
-import Button from '../components/button/Button.vue'
+import { useI18n } from "@cy/i18n"
+import Checkbox from '@cy/components/Checkbox.vue'
+import Button from '@cy/components/Button.vue'
 import WelcomeGuideLinks from './WelcomeGuideLinks.vue'
-import IconCircleX from 'virtual:vite-icons/akar-icons/circle-x'
-import IconPlaceholder from 'virtual:vite-icons/icons8/circle-thin'
+import IconCircleX from '~icons/akar-icons/circle-x'
+import IconPlaceholder from '~icons/icons8/circle-thin'
 
 const projects = [
   { path: '~/Documents/GitHub/web' },

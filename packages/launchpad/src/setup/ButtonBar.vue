@@ -14,8 +14,8 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import Button from "../components/button/Button.vue";
-import Switch from "../components/switch/Switch.vue";
+import Button from "@cy/components/Button.vue";
+import Switch from "@cy/components/Switch.vue";
 
 const props = withDefaults(
   defineProps<{

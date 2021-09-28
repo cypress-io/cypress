@@ -1,4 +1,6 @@
-const colors = {
+import Colors from 'windicss/colors'
+
+const customColors = {
   jade: {
     50: '#E0F6FA',
     100: '#C2F1DE',
@@ -144,46 +146,48 @@ const colors = {
   },
 }
 
-export const customColors = {
-  ...colors,
+export const cyColors = {
+  ...customColors,
   primary: {
-    ...colors.indigo,
-    DEFAULT: colors.indigo[500],
+    ...customColors.indigo,
+    DEFAULT: customColors.indigo[500],
   },
   secondary: {
-    ...colors.indigo,
-    DEFAULT: colors.indigo[50],
+    ...customColors.indigo,
+    DEFAULT: customColors.indigo[50],
   },
   error: {
-    ...colors.red,
-    DEFAULT: colors.red[400],
+    ...customColors.red,
+    DEFAULT: customColors.red[400],
   },
   caution: {
-    ...colors.red,
-    DEFAULT: colors.red[500],
+    ...customColors.red,
+    DEFAULT: customColors.red[500],
   },
   warning: {
-    ...colors.orange,
-    DEFAULT: colors.orange[500],
+    ...customColors.orange,
+    DEFAULT: customColors.orange[500],
   },
   'warning-light': {
-    ...colors.orange,
-    DEFAULT: colors.orange[400],
+    ...customColors.orange,
+    DEFAULT: customColors.orange[400],
   },
   success: {
-    ...colors.jade,
-    DEFAULT: colors.jade[400],
+    ...customColors.jade,
+    DEFAULT: customColors.jade[400],
   },
   'success-light': {
-    ...colors.jade,
-    DEFAULT: colors.jade[300],
+    ...customColors.jade,
+    DEFAULT: customColors.jade[300],
   },
   confirm: {
-    ...colors.jade,
-    DEFAULT: colors.jade[500],
+    ...customColors.jade,
+    DEFAULT: customColors.jade[500],
   },
   'body-gray': {
-    ...colors.gray,
-    DEFAULT: colors.gray[600],
+    ...customColors.gray,
+    DEFAULT: customColors.gray[600],
   },
 }
+
+export const colors = { ...Colors, ...cyColors }

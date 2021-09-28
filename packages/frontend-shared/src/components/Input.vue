@@ -40,10 +40,11 @@ export default {
 
 <script lang="ts" setup>
 import _ from 'lodash'
-import IconSearch from 'virtual:vite-icons/mdi/magnify'
+import Icon from './Icon.vue'
+import IconSearch from '~icons/mdi/magnify'
 import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 import { computed, useSlots, useAttrs } from 'vue'
-import { useModelWrapper } from '../../composables'
+import { useModelWrapper } from '../composables'
 
 const slots = useSlots()
 const attrs = useAttrs()

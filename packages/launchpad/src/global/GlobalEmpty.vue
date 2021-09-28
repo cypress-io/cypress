@@ -28,8 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "../composables"
-import IconPlaceholder from 'virtual:vite-icons/icons8/circle-thin'
+import { useI18n } from "@cy/i18n"
+import IconPlaceholder from '~icons/icons8/circle-thin'
 import { FileSelector, Dropzone } from 'vue3-file-selector'
 import { ref, watch, onMounted } from 'vue'
 

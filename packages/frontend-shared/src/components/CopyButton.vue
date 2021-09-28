@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent, nextTick, ref } from "vue";
-import { useI18n } from "../../composables";
+import { useI18n } from "@cy/i18n";
 
 export default defineComponent({
   props: {

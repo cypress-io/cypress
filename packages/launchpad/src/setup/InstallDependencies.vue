@@ -23,7 +23,7 @@ import PackagesList from "./PackagesList.vue";
 import ManualInstall from "./ManualInstall.vue";
 import { gql } from '@urql/core'
 import type { InstallDependenciesFragment } from "../generated/graphql";
-import { useI18n } from "../composables";
+import { useI18n } from "@cy/i18n";
 
 gql`
 fragment InstallDependencies on Wizard {

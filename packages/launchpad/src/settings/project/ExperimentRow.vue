@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import StatusIndicator from '../../components/badge/StatusIndicator.vue'
-import { useI18n } from '../../composables';
+import { useI18n } from '@cy/i18n';
 
 export interface Experiment {
   key: string

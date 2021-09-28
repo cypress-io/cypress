@@ -61,10 +61,10 @@ import bottomBackground from '../images/bottom_filler.svg'
 import { gql } from "@urql/core";
 import { useMutation, useQuery } from '@urql/vue'
 import { LayoutDocument, NavigationMenuSetItemDocument, NavItem } from "../generated/graphql";
-import IconDashboardLine from 'virtual:vite-icons/clarity/dashboard-line'
-import IconTerminalLine from 'virtual:vite-icons/clarity/terminal-line'
-import IconSettingsLine from 'virtual:vite-icons/clarity/settings-line'
-import IconRunsLine from 'virtual:vite-icons/clarity/bullet-list-line'
+import IconDashboardLine from '~icons/clarity/dashboard-line'
+import IconTerminalLine from '~icons/clarity/terminal-line'
+import IconSettingsLine from '~icons/clarity/settings-line'
+import IconRunsLine from '~icons/clarity/bullet-list-line'
 
 gql`
 query Layout {
