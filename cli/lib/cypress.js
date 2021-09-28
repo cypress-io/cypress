@@ -68,6 +68,19 @@ const cypressModuleApi = {
       return cli.parseRunCommand(args)
     },
   },
+
+  /**
+   * This function should not be used in pure JavaScript
+   * By the type of its argument it allows autocompletion and
+   * type checking of the configuration given by users.
+   *
+   * @see ../types/cypress-npm-api.d.ts
+   * @param {Cypress.ConfigOptions} config
+   * @returns {Cypress.ConfigOptions} the configuration passed in parameter
+   */
+  defineConfig (config) {
+    return config
+  },
 }
 
 module.exports = cypressModuleApi
