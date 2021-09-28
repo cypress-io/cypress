@@ -1,13 +1,17 @@
 <template>
-  <span class="flex align-center justify-center" v-if="icon">
+  <span
+    v-if="icon"
+    class="flex align-center justify-center"
+  >
     <component :is="icon" />
   </span>
 </template>
 
 <script lang="ts">
 export default {
-  inheritAttrs: true
+  inheritAttrs: true,
 }
+
 </script>
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'

@@ -2,8 +2,8 @@
   <div class="relative flex items-center">
     <div class="flex items-center h-5">
       <input
-        v-model="modelValue"
         :id="id"
+        :value="modelValue"
         :aria-describedby="`${id}-description`"
         :name="id"
         type="checkbox"
@@ -20,15 +20,19 @@
           'checked:border-jade-300 checked:bg-jade-600 checked:text-jade-600': state === 'success',
           'checked:border-red-300 checked:bg-red-600 checked:text-red-600': state === 'danger'
         }"
-      />
+        @update:modelValue="emit('update:modelValue', !!$event.target.value)"
+      >
     </div>
     <div class="ml-2 text-16px leading-normal">
-      
-        <slot name="label">
-          <label v-if="label" :for="id" class="disabled:text-gray-500 text-gray-500 font-light select-none">
-            {{ label }}
-          </label>
-        </slot>
+      <slot name="label">
+        <label
+          v-if="label"
+          :for="id"
+          class="disabled:text-gray-500 text-gray-500 font-light select-none"
+        >
+          {{ label }}
+        </label>
+      </slot>
     </div>
   </div>
 </template>
@@ -42,7 +46,11 @@ withDefaults(defineProps<{
   state?: InputState
   label?: string
 }>(), {
-  state: 'default'
+  state: 'default',
+  label: undefined,
 })
 
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void
+}>()
 </script>

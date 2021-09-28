@@ -5,7 +5,9 @@
         class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
         @dblclick="setActiveProject(props.gql.projectRoot)"
       >
-        <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">{{ props.gql.title }}</p>
+        <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">
+          {{ props.gql.title }}
+        </p>
         <p class="text-sm text-gray-500 relative flex flex-wrap self-end items-center gap-1 bullet-points children:flex children:items-center children:gap-1">
           <span>{{ props.gql.projectRoot }}</span>
         </p>
@@ -36,16 +38,23 @@ type IconMap = {
 const icons: Partial<IconMap> = {
   PASSED: {
     icon: IconChecked,
-    classes: 'text-green-500'
+    classes: 'text-green-500',
   },
   FAILED: {
     icon: IconX,
-    classes: 'text-red-500 rotate-45 translate'
+    classes: 'text-red-500 rotate-45 translate',
   },
   RUNNING: {
     icon: IconPending,
-    classes: 'text-blue-500'
-  }
+    classes: 'text-blue-500',
+  },
+}
+
+// TOOD: use graphql types here
+interface Project {
+ name: string
+ lastRun: number
+ lastRunStatus: string
 }
 
 gql`
@@ -61,18 +70,21 @@ fragment GlobalProjectCard_Project on Project {
 }
 `
 
-// TODO: I want to use an enum here for 'lastRunStatus'
-// but I'm struggling to get the types within the tests
-// When GQL exists, I'll be able to pull in the shared types.
 const props = defineProps<{
   gql: GlobalProjectCard_ProjectFragment
 }>()
 
+const emit = defineEmits<{
+  (event: 'projectSelected', project: Project): void
+}>()
+
 const iconForStatus = computed(() => {
   const status = props.gql.cloudProject?.latestRun?.status
+
   if (!status) {
     return
   }
+
   return icons[status]
 })
 </script>

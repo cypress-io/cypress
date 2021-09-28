@@ -22,14 +22,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import type { Ref } from 'vue'
-import { gql } from "@urql/core";
+import { computed, ref, Ref } from 'vue'
+import { gql } from '@urql/vue'
 import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import type { GlobalPageFragment } from "../generated/graphql"
+import type { GlobalPageFragment } from '../generated/graphql'
 
 gql`
 fragment GlobalPage on App {
@@ -44,7 +43,7 @@ const props = defineProps<{
 }>()
 
 const filteredProjects = computed(() => {
-  return props.gql.projects.filter(p => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
+  return props.gql.projects.filter((p) => p.title.toLowerCase().indexOf(match.value.toLowerCase()) !== -1)
 })
 
 const match = ref('')

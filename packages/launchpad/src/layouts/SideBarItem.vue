@@ -3,7 +3,10 @@
     class="relative mt-3 min-w-25px cursor-pointer flex items-center justify-center overflow-hidden"
   >
     <!-- Can't do a border-left solution because you need to round the corners. -->
-    <span class="absolute -left-7px rounded min-w-10px h-full" :class="{ 'bg-green-300': active }" />
+    <span
+      class="absolute -left-7px rounded min-w-10px h-full"
+      :class="{ 'bg-green-300': active }"
+    />
     <Icon
       :icon="icon"
       class="pl-0.25rem py-0.25rem min-h-25px min-w-25px w-full h-full"
@@ -15,8 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import Icon from '../components/icon/Icon.vue'
-import { HTMLAttributes, FunctionalComponent, SVGAttributes, computed } from 'vue'
+import Icon from '@cy/components/Icon.vue'
+import { computed } from 'vue'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { FunctionalComponent, SVGAttributes, HTMLAttributes } from 'vue'
+
 import type { SideBarItemFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 

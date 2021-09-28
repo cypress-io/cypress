@@ -11,11 +11,16 @@
           <WizardHeader :gql="query.data.value.wizard" />
           <TestingTypeCards :gql="query.data.value" />
         </template>
-        <Wizard v-else :gql="query.data.value" />
+        <Wizard
+          v-else
+          :gql="query.data.value"
+        />
       </template>
     </div>
   </template>
-  <div v-else>Loading</div>
+  <div v-else>
+    Loading
+  </div>
 </template>
 
 <script lang="ts" setup>
