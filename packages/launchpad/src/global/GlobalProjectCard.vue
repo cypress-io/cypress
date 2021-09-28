@@ -17,45 +17,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, FunctionalComponent, SVGAttributes } from 'vue'
 import { gql } from '@urql/vue'
-import Icon from '../components/icon/Icon.vue'
-import IconChecked from 'virtual:vite-icons/mdi/check-circle'
-import IconX from 'virtual:vite-icons/mdi/plus-circle'
-import IconPending from 'virtual:vite-icons/mdi/refresh-circle'
 import { useSetActiveProject } from '../composables'
-import type { CloudRunStatus, GlobalProjectCard_ProjectFragment } from '../generated/graphql'
+import type { GlobalProjectCard_ProjectFragment } from '../generated/graphql'
 
 const { setActiveProject } = useSetActiveProject()
-
-type IconMap = {
-  [x in CloudRunStatus]: {
-    icon: FunctionalComponent<SVGAttributes, {}>
-    classes: string
-  }
-}
-
-const icons: Partial<IconMap> = {
-  PASSED: {
-    icon: IconChecked,
-    classes: 'text-green-500',
-  },
-  FAILED: {
-    icon: IconX,
-    classes: 'text-red-500 rotate-45 translate',
-  },
-  RUNNING: {
-    icon: IconPending,
-    classes: 'text-blue-500',
-  },
-}
-
-// TOOD: use graphql types here
-interface Project {
- name: string
- lastRun: number
- lastRunStatus: string
-}
 
 gql`
 fragment GlobalProjectCard_Project on Project {
@@ -75,18 +41,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (event: 'projectSelected', project: Project): void
+  (event: 'projectSelected', project: GlobalProjectCard_ProjectFragment): void
 }>()
-
-const iconForStatus = computed(() => {
-  const status = props.gql.cloudProject?.latestRun?.status
-
-  if (!status) {
-    return
-  }
-
-  return icons[status]
-})
 </script>
 
 <style scoped lang="scss">
