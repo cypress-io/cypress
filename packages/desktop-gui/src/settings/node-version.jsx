@@ -93,7 +93,7 @@ const NodeVersion = observer(({ project }) => {
           <ul>
             {isFileJSON(project.configFile)
               ? undefined
-              : <li>Execute code in the {configFileFormatted(project.configFile)}</li>}
+              : <li>Execute code in the {configFileFormatted(project.configFile)}.</li>}
             <li>Build files in the {formatIntegrationFolder()} folder.</li>
             <li>Build files in the <code>cypress/support</code> folder.</li>
             <li>Execute code in the {formatPluginsFile() ? formatPluginsFile() : 'plugins'} file.</li>
