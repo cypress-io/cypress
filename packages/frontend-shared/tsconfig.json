@@ -49,6 +49,10 @@
     // "typeRoots": [] /* List of folders to include type definitions from. */
  
     /* Type declaration files to be included in compilation. */
+    "paths": {
+      "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
+      "@cy/components/*": ["../frontend-shared/src/components/*"]
+    },
     "types": [
       "chrome",
       "./vue-shims",
