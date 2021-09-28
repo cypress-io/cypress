@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { gql } from '@urql/vue'
-import { useSetActiveProject } from '../composables'
+import { useSetActiveProject } from '@packages/frontend-shared/src/composables'
 import type { GlobalProjectCard_ProjectFragment } from '../generated/graphql'
 
 const { setActiveProject } = useSetActiveProject()
