@@ -3,7 +3,7 @@ import type {
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './testUtils'
 
-export const createProject = (title: string): CodegenTypeMap['Project'] => {
+export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
   return {
     ...testNodeId('Project'),
     isFirstTimeCT: true,
@@ -14,6 +14,6 @@ export const createProject = (title: string): CodegenTypeMap['Project'] => {
   }
 }
 
-export const activeProject = createProject('test-project')
+export const activeProject = createTestProject('test-project')
 
 export const project = activeProject
