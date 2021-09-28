@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import StatusIndicator from '../../components/badge/StatusIndicator.vue'
+import StatusIndicator from '@packages/frontend-shared/src/components/StatusIndicator.vue'
 import { useI18n } from '@cy/i18n'
 
 export interface Experiment {

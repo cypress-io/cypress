@@ -8,7 +8,7 @@ xdescribe('<ProjectSettings />', () => {
     cy.mountFragment(ProjectSettingsDocument, {
       render: (gqlVal) => {
         return (
-          <div class="py-4 px-8">
+          <div className="py-4 px-8">
             <ProjectSettings />
           </div>
         )

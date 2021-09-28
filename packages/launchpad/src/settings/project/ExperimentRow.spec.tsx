@@ -5,7 +5,7 @@ describe('<ExperimentRow />', () => {
   it('renders an experiment with a status', { viewportWidth: 800, viewportHeight: 600 }, () => {
     cy.mount(() => (
       <ExperimentRow
-        class="resize overflow-auto w-600px p-12"
+        className="resize overflow-auto w-600px p-12"
         experiment={{
           ...experiments[0],
           enabled: true,
