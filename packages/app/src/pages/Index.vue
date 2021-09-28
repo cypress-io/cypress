@@ -1,5 +1,5 @@
 <template>
-  <Specs/>
+  <Specs />
 </template>
 
 <script setup lang="ts">

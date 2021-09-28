@@ -13,7 +13,7 @@ export default {
     return {}
   },
   components: {
-      ChildComponent
-  }
+    ChildComponent,
+  },
 }
 </script>

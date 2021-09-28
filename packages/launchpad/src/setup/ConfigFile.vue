@@ -1,10 +1,10 @@
 <template>
-  <WizardLayout 
-    :next="nextButtonName" 
-    alt="Create file manually" 
-    :altFn="altFn"
-    :nextFn="createConfig"
-    :canNavigateForward="props.gql.wizard.canNavigateForward"
+  <WizardLayout
+    :next="nextButtonName"
+    alt="Create file manually"
+    :alt-fn="altFn"
+    :next-fn="createConfig"
+    :can-navigate-forward="props.gql.wizard.canNavigateForward"
   >
     <nav
       class="
@@ -20,9 +20,9 @@
       <button
         v-for="lang of languages"
         :key="lang.id"
-        @click="language = lang.id"
         class="p-4 w-28 relative focus:outline-transparent"
         :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''"
+        @click="language = lang.id"
       >
         {{ lang.name }}
         <span
@@ -40,24 +40,35 @@
         />
       </button>
     </nav>
-    <div v-if="tsInstalled" class="relative">
-      <PrismJs :key="language" :language="language">{{ code }}</PrismJs>
-      <CopyButton v-if="manualCreate && code" :text="code" />
+    <div
+      v-if="tsInstalled"
+      class="relative"
+    >
+      <PrismJs
+        :key="language"
+        :language="language"
+      >
+        {{ code }}
+      </PrismJs>
+      <CopyButton
+        v-if="manualCreate && code"
+        :text="code"
+      />
     </div>
   </WizardLayout>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
-import "prismjs";
-import "@packages/reporter/src/errors/prism.scss";
+import { computed, ref } from 'vue'
+import 'prismjs'
+import '@packages/reporter/src/errors/prism.scss'
 import { gql } from '@urql/core'
-import PrismJs from "vue-prism-component";
-import WizardLayout from "./WizardLayout.vue";
-import CopyButton from "@cy/components/CopyButton.vue";
-import { languages } from "../utils/configFile";
-import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from "../generated/graphql";
-import { useMutation } from "@urql/vue";
+import PrismJs from 'vue-prism-component'
+import WizardLayout from './WizardLayout.vue'
+import CopyButton from '@cy/components/CopyButton.vue'
+import { languages } from '../utils/configFile'
+import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from '../generated/graphql'
+import { useMutation } from '@urql/vue'
 
 gql`
 fragment ConfigFile on Query {
@@ -93,24 +104,24 @@ mutation ConfigFile_appCreateConfigFile($code: String!, $configFilename: String!
 `
 
 const props = defineProps<{
-  gql: ConfigFileFragment 
+  gql: ConfigFileFragment
 }>()
 
-const manualCreate = ref(false);
+const manualCreate = ref(false)
 
 const altFn = (val: boolean) => {
   manualCreate.value = val
 }
 
-const tsInstalled = ref(false);
-const language = ref<"js" | "ts">("ts");
-const nextButtonName = computed(() =>
-  manualCreate.value ? "I've added this file" : "Create File"
-);
+const tsInstalled = ref(false)
+const language = ref<'js' | 'ts'>('ts')
+const nextButtonName = computed(() => {
+  return manualCreate.value ? 'I\'ve added this file' : 'Create File'
+})
 
-import("prismjs/components/prism-typescript").then(() => {
-  tsInstalled.value = true;
-});
+import('prismjs/components/prism-typescript').then(() => {
+  tsInstalled.value = true
+})
 
 const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
 
@@ -118,6 +129,7 @@ const code = computed(() => {
   if (language.value === 'js') {
     return props.gql.wizard.sampleCodeJs
   }
+
   return props.gql.wizard.sampleCodeTs
 })
 
@@ -131,13 +143,13 @@ const createConfig = async () => {
   }
 
   if (!code.value) {
-    // should be impossible 
+    // should be impossible
     throw Error(`Code is required to create a config file. Got ${code.value}.`)
   }
 
-  await createConfigFile.executeMutation({ 
+  await createConfigFile.executeMutation({
     code: code.value,
-    configFilename: `cypress.config.${language.value}`
+    configFilename: `cypress.config.${language.value}`,
   })
 }
 </script>

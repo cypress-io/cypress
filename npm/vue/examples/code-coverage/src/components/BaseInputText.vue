@@ -7,20 +7,20 @@ export default {
   props: {
     value: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   computed: {
-    listeners() {
+    listeners () {
       return {
         // Pass all component listeners directly to input
         ...this.$listeners,
         // Override input listener to work with v-model
-        input: (event) => this.$emit("input", event.target.value),
-      };
+        input: (event) => this.$emit('input', event.target.value),
+      }
     },
   },
-};
+}
 </script>
 
 <style lang="scss" scoped>
@@ -33,4 +33,3 @@ export default {
   border: 1px solid $vue-blue;
 }
 </style>
-

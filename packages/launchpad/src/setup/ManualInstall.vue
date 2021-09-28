@@ -12,13 +12,13 @@
     "
   >
     <div
-      :key="i"
       v-for="i in [0, 1, 2]"
+      :key="i"
       class="rounded-md h-3 w-3 border border-1-gray-600"
     />
   </div>
   <div class="relative">
-    <pre class="text-left text-gray-500 p-5"><span 
+    <pre class="text-left text-gray-500 p-5"><span
     class="text-purple-500"
     >{{ projectTitle }}:~$</span> {{ dependenciesCode }}</pre>
     <CopyButton :text="dependenciesCode" />
@@ -26,10 +26,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
-import CopyButton from "@cy/components/CopyButton.vue";
+import { computed } from 'vue'
+import CopyButton from '@cy/components/CopyButton.vue'
 import { gql } from '@urql/core'
-import type { ManualInstallFragment } from "../generated/graphql";
+import type { ManualInstallFragment } from '../generated/graphql'
 
 gql`
 fragment ManualInstall on Wizard {
@@ -46,17 +46,16 @@ const props = defineProps<{
   gql: ManualInstallFragment
 }>()
 
-defineEmits<{
-  (event: 'back'): void
+defineEmits<{(event: 'back'): void
 }>()
 
-
 const dependenciesCode = computed(
-  () =>
-    "yarn add -D \\\n" +
+  () => {
+    return `yarn add -D \\\n${
     (props.gql.packagesToInstall ?? [])
-      .map((pack) => `                    ${pack.package} \\`)
-      .join("\n")
-);
+    .map((pack) => `                    ${pack.package} \\`)
+    .join('\n')}`
+  },
+)
 const projectTitle = 'TODO: project title in gql'
 </script>

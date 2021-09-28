@@ -1,14 +1,17 @@
 {
+  "globals": {
+    "defineProps": "readonly",
+    "defineEmits": "readonly",
+    "defineExpose": "readonly",
+    "withDefaults": "readonly"
+  },
   "plugins": [
     "cypress",
     "@cypress/dev"
   ],
   "extends": [
-    "plugin:@cypress/dev/general",
-    "plugin:@cypress/dev/tests",
-    "../reporter/src/.eslintrc.json"
+    "../frontend-shared/.eslintrc.json"
   ],
-  "parser": "@typescript-eslint/parser",
   "env": {
     "cypress/globals": true
   },

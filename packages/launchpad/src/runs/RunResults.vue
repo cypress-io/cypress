@@ -1,26 +1,26 @@
 <template>
-	<div class="h-7 border border-gray-200 rounded flex text-gray-500" :class="class">
-		<div class="flex items-center p-2">
-			<IconFlake class="text-gray-400 text-sm mr-1" />
-			0
-			<!-- 
+  <div class="h-7 border border-gray-200 rounded flex text-gray-500">
+    <div class="flex items-center p-2">
+      <IconFlake class="text-gray-400 text-sm mr-1" />
+      0
+      <!--
 				TODO: Is flake even exposed via the API?
-				{{props.flake}} 
+				{{props.flake}}
 				-->
-		</div>
-		<div class="flex items-center p-2">
-			<IconCancel class="text-gray-400 text-sm mr-1" />
-			{{props.gql.totalSkipped}}
-		</div>
-		<div class="flex items-center p-2">
-			<IconPass class="text-green-600 text-xs mr-1" />
-			{{props.gql.totalPassed}}
-		</div>
-		<div class="flex items-center p-2">
-			<IconFail class="text-red-600 mr-1" />
-			{{props.gql.totalFailed}}
-		</div>
-	</div>
+    </div>
+    <div class="flex items-center p-2">
+      <IconCancel class="text-gray-400 text-sm mr-1" />
+      {{ props.gql.totalSkipped }}
+    </div>
+    <div class="flex items-center p-2">
+      <IconPass class="text-green-600 text-xs mr-1" />
+      {{ props.gql.totalPassed }}
+    </div>
+    <div class="flex items-center p-2">
+      <IconFail class="text-red-600 mr-1" />
+      {{ props.gql.totalFailed }}
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>

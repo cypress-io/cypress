@@ -49,6 +49,7 @@
     "vite-plugin-windicss": "^1.4.7",
     "vite-svg-loader": "^2.2.0",
     "vue": "3.2.6",
+    "vue-eslint-parser": "7.11.0",
     "vue-i18n": "^9.2.0-beta.7",
     "vue-tsc": "^0.3.0",
     "windicss": "3.1.8",
