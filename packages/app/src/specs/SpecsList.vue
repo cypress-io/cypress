@@ -1,8 +1,11 @@
 <template>
   <h2>Specs List</h2>>
-  <SpecsListHeader v-model="search"></SpecsListHeader>
+  <SpecsListHeader v-model="search" />
   <ul>
-    <li v-for="spec in specs" :key="spec.id">
+    <li
+      v-for="spec in specs"
+      :key="spec.id"
+    >
       {{ spec.name }} {{ spec.relativePath }}
     </li>
   </ul>
@@ -33,4 +36,5 @@ defineProps<{
 }>()
 
 const search = ref('')
+
 </script>
