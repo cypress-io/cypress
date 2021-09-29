@@ -703,6 +703,16 @@
     padding: 9px;
   }
 
+  .num-children {
+    color: $black;
+    background-color: $gray-500;
+  }
+
+  .num-elements {
+    color: $black;
+    background-color: $gray-600;
+  }
+
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
   &[min-width~="300px"] {
