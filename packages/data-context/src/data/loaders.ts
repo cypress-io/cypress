@@ -2,7 +2,7 @@ import type { FullConfig } from '@packages/types'
 import DataLoader from 'dataloader'
 import fs from 'fs-extra'
 import type { DataContext } from '..'
-import specsUtil from '@packages/server/lib/util/specs'
+import { GitInfo, getGitInfo } from './util'
 
 /**
  * Centralized location to load files. Allows us to consolidate
@@ -29,28 +29,13 @@ export class DataLoaders {
     return this.configLoader.load(projectRoot)
   }
 
-  async specs (projectRoot: string) {
-    const config = await this.projectConfig(projectRoot)
-
-    // this.ctx._apis.specsApi.
-    return specsUtil.findSpecs({
-      projectRoot,
-      fixturesFolder: config?.fixturesFolder ?? false,
-      supportFile: config?.supportFile ?? false,
-      testFiles: config?.testFiles ?? [],
-      ignoreTestFiles: config?.ignoreTestFiles as string[] ?? [],
-      componentFolder: config?.componentFolder ?? false,
-      integrationFolder: config?.integrationFolder ?? '',
-    })
+  gitInfo (path: string) {
+    return this.gitLoader.load(path)
   }
 
-  // gitInfo (paths: string[]) {
-  //   return this.specsLoader.load(paths)
-  // }
-
-  // private specsLoader = this.loader<string, FoundSpec>((specPaths) => {
-  //   return getGitInfo(specPaths)
-  // })
+  private gitLoader = this.loader<string, GitInfo>(async (absolutePaths) => {
+    return getGitInfo(absolutePaths)
+  })
 
   private configLoader = this.loader<string, FullConfig>((projectRoots) => {
     return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root)))

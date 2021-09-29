@@ -8,24 +8,27 @@ export const Spec = objectType({
   definition (t) {
     t.nonNull.field('specType', {
       type: SpecTypeEnum,
-      description: 'Type of spec'
+      description: 'Type of spec',
     })
 
     t.nonNull.string('absolute', {
-      description: 'Absolute path to spec'
+      description: 'Absolute path to spec',
     })
 
     t.nonNull.string('relative', {
-      description: 'Relative path to spec'
+      description: 'Relative path to spec',
     })
 
     t.nonNull.string('name', {
-      description: 'Name of spec file'
+      description: 'Name of spec file',
     })
 
     t.field('gitInfo', {
       type: GitInfo,
       description: 'Git information about the spec file',
+      resolve: async (source, args, ctx) => {
+        return ctx.loaders.gitInfo(source.absolute)
+      },
     })
-  }
+  },
 })

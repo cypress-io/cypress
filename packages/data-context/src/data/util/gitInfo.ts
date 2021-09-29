@@ -38,14 +38,22 @@ const getInfoWindows = async (absolutePaths: readonly string[]) => {
 }
 
 const getInfoPosix = async (absolutePaths: readonly string[]) => {
+  debug('getting git info for %o:', absolutePaths)
   const paths = absolutePaths.map((x) => path.resolve(x)).join(',')
-  const cmd = `for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
+
+  // for file in {one,two} is valid in bash, but for file {one} is not
+  // no need to use a for loop for a single file
+  const cmd = absolutePaths.length === 1
+    ? `${GIT_LOG_COMMAND} ${absolutePaths[0]}`
+    : `for file in {${paths}}; do echo $(${GIT_LOG_COMMAND} $file); done`
+
+  debug('executing command `%s`:', cmd)
 
   const result = await execa(cmd, { shell: true })
   const stdout = result.stdout.split('\n')
 
   if (stdout.length !== absolutePaths.length) {
-    debug('stdout', stdout)
+    debug('error... stdout:', stdout)
     throw Error(`Expect result array to have same length as input. Input: ${absolutePaths.length} Output: ${stdout.length}`)
   }
 
@@ -54,7 +62,11 @@ const getInfoPosix = async (absolutePaths: readonly string[]) => {
   return stdout
 }
 
-export const getGitInfo = async (absolutePaths: readonly string[]): Promise<Map<string, GitInfo>> => {
+export const getGitInfo = async (absolutePaths: readonly string[]): Promise<GitInfo[]> => {
+  if (absolutePaths.length === 0) {
+    return []
+  }
+
   try {
     const stdout = await (
       os.platform() === 'win32'
@@ -62,7 +74,9 @@ export const getGitInfo = async (absolutePaths: readonly string[]): Promise<Map<
         : getInfoPosix(absolutePaths)
     )
 
-    const output: Map<string, GitInfo> = new Map()
+    const output: GitInfo[] = []
+
+    debug('stdout %s', stdout)
 
     for (let i = 0; i < absolutePaths.length; i++) {
       const file = absolutePaths[i]
@@ -70,7 +84,7 @@ export const getGitInfo = async (absolutePaths: readonly string[]): Promise<Map<
       const info = data?.match(GIT_LOG_REGEXP)
 
       if (file && info && info[1] && info[2] && info[3]) {
-        output.set(file, {
+        output.push({
           lastModifiedTimestamp: info[1],
           lastModifiedHumanReadable: info[2],
           author: info[3],
@@ -86,6 +100,6 @@ export const getGitInfo = async (absolutePaths: readonly string[]): Promise<Map<
     // file is not under source control
     // ... etc ...
     // just return an empty map
-    return new Map()
+    return []
   }
 }
