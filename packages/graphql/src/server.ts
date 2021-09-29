@@ -48,9 +48,7 @@ export function startGraphQLServer ({ port }: { port: number } = { port: GRAPHQL
   endpoint: string
 }> {
   app = express()
-
   app.use(cors())
-
   app.use('/graphql', graphqlHTTP((req) => {
     if (!dataContext) {
       throw new Error(`setDataContext has not been called`)

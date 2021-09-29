@@ -225,6 +225,9 @@ gulp.task(serveBuiltLaunchpadForTest)
 gulp.task(viteBuildAndWatchLaunchpadForTest)
 gulp.task(viteBuildAndWatchAppForTest)
 
+gulp.task(viteBuildApp)
+gulp.task(viteBuildLaunchpad)
+
 gulp.task('debugCypressLaunchpad', gulp.series(
   async function setupDebugBrk () {
     setGulpGlobal('debug', '--inspect-brk')
