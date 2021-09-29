@@ -156,7 +156,7 @@ module.exports = {
         debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
         let child
 
-        if (process.env.CYPRESS_INTERNAL_DEV_WATCH) {
+        if (process.env.CYPRESS_INTERNAL_DEV_WATCH || process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
           if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
             stdioOptions.execArgv = [process.env.CYPRESS_INTERNAL_DEV_DEBUG]
           }

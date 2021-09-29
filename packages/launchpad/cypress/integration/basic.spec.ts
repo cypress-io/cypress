@@ -1,5 +1,5 @@
 describe('Launchpad', () => {
   it('resolves the home page', () => {
-    cy.visit('http://localhost:5000')
+    cy.visit('http://localhost:5555')
   })
 })

@@ -8,10 +8,10 @@
  */
 
 import type { SpawnOptions } from 'child_process'
+import { ENV_VARS } from '../gulpConstants'
 
 import { monorepoPaths } from '../monorepoPaths'
 import { AllSpawnableApps, spawned, spawnUntilMatch } from '../utils/childProcessUtils'
-import { CYPRESS_INTERNAL_GQL_TEST_PORT, CYPRESS_INTERNAL_VITE_APP_PORT, CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT } from '../gulpConstants'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -22,14 +22,26 @@ import { CYPRESS_INTERNAL_GQL_TEST_PORT, CYPRESS_INTERNAL_VITE_APP_PORT, CYPRESS
  *------------------------------------------------------------------------**/
 
 export function viteApp () {
-  return spawnViteDevServer('vite-app', `yarn vite --port ${CYPRESS_INTERNAL_VITE_APP_PORT} --base /__vite__/`, {
+  const GQL_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_GQL_PORT
+  const APP_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_VITE_APP_PORT
+
+  return spawnViteDevServer('vite-app', `yarn vite --port ${APP_PORT} --base /__vite__/`, {
     cwd: monorepoPaths.pkgApp,
+    env: {
+      VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
+    },
   })
 }
 
 export function viteLaunchpad () {
-  return spawnViteDevServer('vite-launchpad', `yarn vite --port ${CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT}`, {
+  const GQL_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_GQL_PORT
+  const LAUNCHPAD_PORT = ENV_VARS.DEV.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
+
+  return spawnViteDevServer('vite-launchpad', `yarn vite --port ${LAUNCHPAD_PORT}`, {
     cwd: monorepoPaths.pkgLaunchpad,
+    env: {
+      VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
+    },
   })
 }
 
@@ -109,37 +121,43 @@ export function viteCleanLaunchpad () {
  * Build and serve the Vite frontend(s) as web apps on a static server.
  *  * viteBuildLaunchpadForTest
  *  * viteBuildAppForTest
- *  * viteServeLaunchpadForTest
- *  * viteServeAppForTest
+ *  * serveBuiltLaunchpadForTest
+ *  * serveBuiltAppForTest
  *------------------------------------------------------------------------**/
 
-// After running `viteServeLaunchpadForTest`, you're able to visit
+// After running `serveBuiltLaunchpadForTest`, you're able to visit
 // `http://localhost:5555` to access the Launchpad frontend.
-export function viteServeLaunchpadForTest () {
-  return spawned('vite:serve-launchpad-for-test', `yarn serve ./dist-e2e -p 5555`, {
-    cwd: monorepoPaths.pkgLaunchpad,
+export function serveBuiltLaunchpadForTest () {
+  return spawnUntilMatch('serve:launchpad-for-test', {
+    command: `yarn serve ./dist-e2e -p 5555`,
+    match: 'Accepting connections',
+    options: {
+      cwd: monorepoPaths.pkgLaunchpad,
+    },
   })
 }
 
 export function viteBuildLaunchpadForTest () {
+  const GQL_PORT = ENV_VARS.E2E_TEST_TARGET.CYPRESS_INTERNAL_GQL_PORT
+
   return spawned('vite:build-launchpad-for-test', `yarn vite build --outDir=./dist-e2e`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
     env: {
       NODE_ENV: 'production',
-      VITE_CYPRESS_INTERNAL_GQL_PORT: `${CYPRESS_INTERNAL_GQL_TEST_PORT}`,
-      ...process.env,
+      VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
     },
   })
 }
 
-export async function viteWatchBuildLaunchpadForTest () {
+export async function viteBuildAndWatchLaunchpadForTest () {
+  const GQL_PORT = ENV_VARS.E2E_TEST_TARGET.CYPRESS_INTERNAL_GQL_PORT
+
   return watchViteBuild('vite:build-watch-launchpad-for-test', `yarn vite build --watch --outDir=./dist-e2e`, {
     cwd: monorepoPaths.pkgLaunchpad,
     env: {
       NODE_ENV: 'production',
-      VITE_CYPRESS_INTERNAL_GQL_PORT: `${CYPRESS_INTERNAL_GQL_TEST_PORT}`,
-      ...process.env,
+      VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
     },
   })
 }
@@ -147,22 +165,34 @@ export async function viteWatchBuildLaunchpadForTest () {
 /**----------------------
  *todo    Implement E2E tests for the App.
  *------------------------**/
-// /* Serve */
-// export function viteServeAppForTest() {
-//   return spawned('vite:serve-app-for-test', `yarn serve ./dist-e2e -p 5555`, {
-//     cwd: monorepoPaths.pkgLaunchpad
-//   })
-// }
-//
-//
-// /* Build */
-// export function viteBuildAppForTest() {
-//   return spawned('vite:build-app-for-test', `yarn vite build --outDir=./dist-e2e`, {
-//     cwd: monorepoPaths.pkgApp,
-//     waitForExit: true,
-//     env: {
-//       [`VITE_${CYPRESS_INTERNAL_GQL_PORT}`]: `${CYPRESS_INTERNAL_GQL_PORT}`,
-//       ...process.env
-//     }
-//   })
-// }
+
+export function viteBuildAppForTest () {
+  const GQL_PORT = ENV_VARS.E2E_TEST_TARGET.CYPRESS_INTERNAL_GQL_PORT
+
+  return spawned('vite:build-app-for-test', `yarn vite build --outDir=./dist-e2e`, {
+    cwd: monorepoPaths.pkgApp,
+    waitForExit: true,
+    env: {
+      VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
+      ...process.env,
+    },
+  })
+}
+
+export function serveBuiltAppForTest () {
+  return spawned('serve:app-for-test', `yarn serve ./dist-e2e -p 5556`, {
+    cwd: monorepoPaths.pkgApp,
+  })
+}
+
+export async function viteBuildAndWatchAppForTest () {
+  const GQL_PORT = ENV_VARS.E2E_TEST_TARGET.CYPRESS_INTERNAL_GQL_PORT
+
+  return watchViteBuild('vite:build-watch-app-for-test', `yarn vite build --watch --outDir=./dist-e2e`, {
+    cwd: monorepoPaths.pkgApp,
+    env: {
+      NODE_ENV: 'production',
+      VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
+    },
+  })
+}

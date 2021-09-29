@@ -7,35 +7,28 @@
 
 import chokidar from 'chokidar'
 import path from 'path'
-import childProcess, { ChildProcess } from 'child_process'
+import type { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 
 import { monorepoPaths } from '../monorepoPaths'
-import { getGulpGlobal, CYPRESS_INTERNAL_GQL_PORT, CYPRESS_INTERNAL_GQL_TEST_PORT } from '../gulpConstants'
-
-const gqlPort = process.env.CYPRESS_INTERNAL_GQL_PORT || `${CYPRESS_INTERNAL_GQL_PORT}`
-const gqlTestPort = process.env.CYPRESS_INTERNAL_GQL_TEST_PORT || `${CYPRESS_INTERNAL_GQL_TEST_PORT}`
+import { ENV_VARS, getGulpGlobal } from '../gulpConstants'
+import { forked } from '../utils/childProcessUtils'
 
 const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
 
 /**------------------------------------------------------------------------
  *                            Cypress CLI
  * Starts Cypress, like a user would.
- *  * startCypress - Normal `cypress open` command
+ *  * openCypress - Normal `cypress open` command
  *  * runCypress - Normal `cypress run` command
  *------------------------------------------------------------------------**/
 
-export async function startCypress () {
-  return spawnCypressWithMode('open', 'dev', {
-    CYPRESS_INTERNAL_GQL_PORT: gqlPort,
-  })
+export async function openCypressLaunchpad () {
+  return spawnCypressWithMode('open', 'dev', ENV_VARS.DEV_OPEN, ['--project', monorepoPaths.pkgLaunchpad])
 }
 
-export async function runCypress () {
-  return spawnCypressWithMode('run', 'prod', {
-    CYPRESS_INTERNAL_ENV: process.env.CYPRESS_INTERNAL_ENV || 'production',
-    CYPRESS_INTERNAL_GQL_PORT: gqlPort,
-  })
+export async function runCypressProd () {
+  return spawnCypressWithMode('run', 'prod', ENV_VARS.PROD)
 }
 
 /**------------------------------------------------------------------------
@@ -48,18 +41,11 @@ export async function runCypress () {
 // Use the GQL Test Port (52100 by default, defined in ./gulp/gulpConstants)
 // Spawns Cypress in "Test Cypress within Cypress" mode
 export async function startCypressForTest () {
-  return spawnCypressWithMode('open', 'test', {
-    CYPRESS_INTERNAL_ENV: 'production',
-    CYPRESS_INTERNAL_GQL_PORT: gqlTestPort,
-    CYPRESS_INTERNAL_E2E_TESTING_SELF: 'true',
-  })
+  return spawnCypressWithMode('open', 'test', ENV_VARS.E2E_TEST_TARGET)
 }
 
 export async function runCypressAgainstDist () {
-  return spawnCypressWithMode('run', 'test', {
-    CYPRESS_INTERNAL_ENV: 'staging',
-    CYPRESS_INTERNAL_GQL_PORT: gqlPort,
-  })
+  return spawnCypressWithMode('run', 'test', ENV_VARS.E2E_TEST_TARGET)
 }
 
 /**------------------------------------------------------------------------
@@ -68,8 +54,21 @@ export async function runCypressAgainstDist () {
  *  * watchCypress - Watch the dev server and graphql files
  *------------------------------------------------------------------------**/
 
-async function spawnCypressWithMode (mode: 'open' | 'run', type: 'dev' | 'prod' | 'test', env: Record<string, string> = {}) {
-  const argv = process.argv.slice(3)
+async function spawnCypressWithMode (
+  mode: 'open' | 'run',
+  type: 'dev' | 'prod' | 'test',
+  env: Record<string, string> = {},
+  additionalArgv: string[] = [],
+) {
+  const argv = process.argv.slice(3).concat(additionalArgv)
+
+  const debugFlag = getGulpGlobal('debug')
+
+  console.log(debugFlag)
+
+  if (debugFlag) {
+    env = { ...env, CYPRESS_INTERNAL_DEV_DEBUG: debugFlag }
+  }
 
   if (mode === 'open') {
     if (!argv.includes('--project') && !argv.includes('--global')) {
@@ -87,10 +86,9 @@ async function spawnCypressWithMode (mode: 'open' | 'run', type: 'dev' | 'prod' 
     LAUNCHPAD: '1',
   }
 
-  return childProcess.fork(pathToCli, [mode, ...argv], {
-    stdio: 'inherit',
-    execArgv: [],
+  return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {
     env: finalEnv,
+    waitForData: false,
   })
 }
 
@@ -101,8 +99,6 @@ async function spawnCypressWithMode (mode: 'open' | 'run', type: 'dev' | 'prod' 
  *------------------------------------------------------------------------**/
 
 export async function startCypressWatch () {
-  const shouldWatch = getGulpGlobal('shouldWatch')
-
   const watcher = chokidar.watch([
     'packages/graphql/src/**/*.{js,ts}',
     'packages/server/lib/graphql/**/*.{js,ts}',
@@ -117,10 +113,12 @@ export async function startCypressWatch () {
   let child: ChildProcess | null = null
 
   async function startCypressWithListeners () {
-    child = await spawnCypressWithMode('open', 'dev', {
-      CYPRESS_INTERNAL_DEV_WATCH: 'true',
-      CYPRESS_INTERNAL_GQL_PORT: gqlPort,
-    })
+    let WATCH_ENV: Record<string, string> = {
+      ...ENV_VARS.DEV,
+      CYPRESS_INTERNAL_DEV_WATCH: `true`,
+    }
+
+    child = await spawnCypressWithMode('open', 'dev', WATCH_ENV)
 
     child.on('exit', (code) => {
       if (isClosing) {
@@ -143,7 +141,7 @@ export async function startCypressWatch () {
     if (child) {
       child.on('exit', dfd.resolve)
       isRestarting = true
-      child.send('close')
+      child.send('gulpWatcherClose')
     } else {
       dfd.resolve()
     }
@@ -158,15 +156,14 @@ export async function startCypressWatch () {
     await startCypressWithListeners()
   }
 
-  if (shouldWatch) {
-    watcher?.on('add', restartServer)
-    watcher?.on('change', restartServer)
-  }
+  watcher.on('add', restartServer)
+  watcher.on('change', restartServer)
 
   await startCypressWithListeners()
 
   process.on('beforeExit', () => {
     isClosing = true
-    child?.send('close')
+    watcher.close()
+    child?.send('gulpWatcherClose')
   })
 }

@@ -10,13 +10,13 @@
 import gulp from 'gulp'
 import { monorepoPaths } from './monorepoPaths'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
-import { startCypress, startCypressWatch, startCypressForTest, runCypressAgainstDist } from './tasks/gulpCypress'
+import { startCypressWatch, startCypressForTest, runCypressAgainstDist, openCypressLaunchpad } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteBuildApp, viteBuildLaunchpad, viteWatchBuildLaunchpadForTest, viteBuildLaunchpadForTest, viteServeLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteBuildApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, serveBuiltLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, serveBuiltAppForTest, viteBuildAppForTest, viteBuildAndWatchAppForTest } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
-// import { setGulpGlobal } from './gulpConstants'
 import { makePackage } from './tasks/gulpMakePackage'
+import { setGulpGlobal } from './gulpConstants'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -64,27 +64,48 @@ gulp.task(
   ),
 )
 
+gulp.task(
+  'debug',
+  gulp.series(
+    async function setupDebug () {
+      setGulpGlobal('debug', '--inspect')
+    },
+    'dev',
+  ),
+)
+
+gulp.task(
+  'debugBrk',
+  gulp.series(
+    async function setupDebugBrk () {
+      setGulpGlobal('debug', '--inspect-brk')
+    },
+    'dev',
+  ),
+)
+
 /**------------------------------------------------------------------------
  *                            Static Builds
  *  Tasks that aren't watched. Usually composed together with other tasks.
  *------------------------------------------------------------------------**/
 
-gulp.task('buildProd', gulp.series(
-  syncRemoteGraphQL,
-  gulp.parallel(
-    viteCleanApp,
-    viteCleanLaunchpad,
-  ),
+gulp.task('buildProd',
+  gulp.series(
+    gulp.parallel(
+      viteCleanApp,
+      viteCleanLaunchpad,
+    ),
 
-  nexusCodegen,
-  graphqlCodegen,
+    syncRemoteGraphQL,
+    nexusCodegen,
+    graphqlCodegen,
 
-  // Build the frontend(s) for production.
-  gulp.parallel(
-    viteBuildApp,
-    viteBuildLaunchpad,
-  ),
-))
+    // Build the frontend(s) for production.
+    gulp.parallel(
+      viteBuildApp,
+      viteBuildLaunchpad,
+    ),
+  ))
 
 gulp.task(
   'postinstall',
@@ -104,7 +125,7 @@ gulp.task(
  * * cypressRunLaunchpad is meant to be run in CI and does not watch.
  *------------------------------------------------------------------------**/
 
-gulp.task('cypressRunLaunchpad', gulp.series(
+gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 1. Build the Cypress App itself
   'buildProd',
 
@@ -112,7 +133,7 @@ gulp.task('cypressRunLaunchpad', gulp.series(
   viteBuildLaunchpadForTest,
 
   // 3. Host the Launchpad on a static server for cy.visit.
-  gulp.parallel(viteServeLaunchpadForTest),
+  serveBuiltLaunchpadForTest,
 
   // 4. Start the TEST Cypress App, such that its ports and other globals
   //    don't conflict with the real Cypress App.
@@ -138,41 +159,51 @@ gulp.task('cypressRunLaunchpad', gulp.series(
   },
 ))
 
-// Open Cypress in production mode.
-// Rebuild the Launchpad app between changes.
-gulp.task('cypressOpenLaunchpad', gulp.series(
-  // 1. Build the Cypress App itself
-  'buildProd',
-
+const cyOpenLaunchpad = gulp.series(
   // 2. Build + watch Launchpad under test.
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
-  viteWatchBuildLaunchpadForTest,
-
-  // 3. Host the Launchpad on a static server for cy.visit.
-  gulp.parallel(viteServeLaunchpadForTest),
+  viteBuildAndWatchLaunchpadForTest,
 
   // 4. Start the TEST Cypress App, such that its ports and other globals
   //    don't conflict with the real Cypress App.
   startCypressForTest,
 
-  // 5. Start the REAL Cypress App, which will launch in open mode.
-  async () => {
-    process.argv.push('--project', monorepoPaths.pkgLaunchpad)
-    process.env.CYPRESS_INTERNAL_ENV = 'production'
+  // 3. Host the Launchpad on a static server for cy.visit.
+  serveBuiltLaunchpadForTest,
 
-    return await startCypress()
-  },
+  // 5. Start the REAL (dev) Cypress App, which will launch in open mode.
+  openCypressLaunchpad,
+)
+
+// Open Cypress in production mode.
+// Rebuild the Launchpad app between changes.
+gulp.task('cyOpenLaunchpadE2E', gulp.series(
+  // 1. Build the Cypress App itself
+  'buildProd',
+
+  // 2. Open the launchpad app
+  cyOpenLaunchpad,
 ))
 
 /**------------------------------------------------------------------------
- *                             Graphql Workflow
- * Graphql tasks that are generally composed and not run on their own
- * during development.
+ *                             Utilities
+ * checkTs: Runs `check-ts` in each of the packages & prints errors when
+ *          all are completed
+ *
+ * makePackage: Scaffolds a new package in the packages/ directory
  *------------------------------------------------------------------------**/
 
-gulp.task(makePackage)
 gulp.task(checkTs)
+gulp.task(makePackage)
+
+/**------------------------------------------------------------------------
+ *                             Internal / Test / Debug
+ *
+ * Tasks that are typically composed into other workflows, but are exposed
+ * here for debugging, e.g. `yarn gulp syncRemoteGraphQL`
+ *------------------------------------------------------------------------**/
+
 gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)
@@ -180,3 +211,28 @@ gulp.task(nexusCodegen)
 gulp.task(nexusCodegenWatch)
 gulp.task(graphqlCodegen)
 gulp.task(graphqlCodegenWatch)
+gulp.task(startCypressForTest)
+
+gulp.task(viteCleanApp)
+gulp.task(viteCleanLaunchpad)
+
+gulp.task(viteBuildLaunchpadForTest)
+gulp.task(viteBuildAppForTest)
+
+gulp.task(serveBuiltAppForTest)
+gulp.task(serveBuiltLaunchpadForTest)
+
+gulp.task(viteBuildAndWatchLaunchpadForTest)
+gulp.task(viteBuildAndWatchAppForTest)
+
+gulp.task('debugCypressLaunchpad', gulp.series(
+  async function setupDebugBrk () {
+    setGulpGlobal('debug', '--inspect-brk')
+  },
+  openCypressLaunchpad,
+))
+
+gulp.task(openCypressLaunchpad)
+
+// If we want to run individually, for debugging/testing
+gulp.task('cyOpenLaunchpadOnly', cyOpenLaunchpad)
