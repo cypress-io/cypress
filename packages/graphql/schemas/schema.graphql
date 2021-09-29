@@ -279,6 +279,9 @@ type Mutation {
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): NavigationMenu
 
+  """Set active project to run tests on"""
+  setActiveProject(path: String!): App!
+
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 

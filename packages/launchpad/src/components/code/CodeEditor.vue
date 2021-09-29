@@ -12,7 +12,7 @@ import prism from 'prismjs'
 import { PrismEditor } from 'vue-prism-editor'
 import 'vue-prism-editor/dist/prismeditor.min.css' // import the styles somewhere
 import 'prismjs/themes/prism.css' // import syntax highlighting styles
-import { useModelWrapper } from '../../composables'
+import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 
 const props = defineProps<{
   modelValue: string

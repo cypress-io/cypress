@@ -19,7 +19,7 @@
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconPlus from '~icons/mdi/plus'
-import { useModelWrapper } from '../composables'
+import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
