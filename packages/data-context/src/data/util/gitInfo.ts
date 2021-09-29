@@ -9,7 +9,7 @@ export interface GitInfo {
   lastModifiedHumanReadable: string | null
 }
 
-const debug = Debug('cypress:server:git')
+const debug = Debug('cypress:data-context:git-info')
 
 // matches <timestamp> <when> <author>
 // $ git log -1 --pretty=format:%ci %ar %an <file>

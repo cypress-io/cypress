@@ -53,7 +53,7 @@ export const Project = objectType({
         specType: arg({ type: SpecTypeEnum }),
       },
       inheritAdditionalArgs: true,
-      nodes: async (source, args, ctx) => {
+      nodes: (source, args, ctx) => {
         return ctx.actions.project.findSpecs(source.projectRoot, args.specType)
       },
     })

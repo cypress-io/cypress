@@ -2,4 +2,3 @@
 // created by autobarrel, do not modify directly
 
 export * from './gitInfo'
-export * from './specs'

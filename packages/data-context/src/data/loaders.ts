@@ -33,7 +33,7 @@ export class DataLoaders {
     return this.gitLoader.load(path)
   }
 
-  private gitLoader = this.loader<string, GitInfo>(async (absolutePaths) => {
+  private gitLoader = this.loader<string, GitInfo>((absolutePaths) => {
     return getGitInfo(absolutePaths)
   })
 
