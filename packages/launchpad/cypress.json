@@ -14,8 +14,9 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
+  "componentFolder": "src",
   "component": {
-    "componentFolder": "src"
+    "testFiles": "**/*.spec.{js,ts,tsx,jsx}"
   },
   "e2e": {
     "supportFile": false

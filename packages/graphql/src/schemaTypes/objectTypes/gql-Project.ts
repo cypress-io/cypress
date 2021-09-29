@@ -1,5 +1,6 @@
-import { objectType } from 'nexus'
+import { arg, objectType } from 'nexus'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
+import { SpecTypeEnum } from '../enumTypes'
 
 export interface ProjectShape {
   projectId?: string | null
@@ -48,11 +49,12 @@ export const Project = objectType({
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
-      resolve: async (source, args, ctx) => {
-        console.log('SPECS!!')
-        const s = await ctx.loaders.specs(source.projectRoot)
-        console.log(s)
-        return s
+      additionalArgs: {
+        specType: arg({ type: SpecTypeEnum }),
+      },
+      inheritAdditionalArgs: true,
+      nodes: async (source, args, ctx) => {
+        return ctx.actions.project.findSpecs(source.projectRoot, args.specType)
       },
     })
   },

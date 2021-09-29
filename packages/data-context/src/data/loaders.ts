@@ -1,8 +1,7 @@
-import type { FoundSpec, FullConfig } from '@packages/types'
+import type { FullConfig } from '@packages/types'
 import DataLoader from 'dataloader'
 import fs from 'fs-extra'
 import type { DataContext } from '..'
-import { getGitInfo } from './util'
 import specsUtil from '@packages/server/lib/util/specs'
 
 /**
@@ -32,6 +31,8 @@ export class DataLoaders {
 
   async specs (projectRoot: string) {
     const config = await this.projectConfig(projectRoot)
+
+    // this.ctx._apis.specsApi.
     return specsUtil.findSpecs({
       projectRoot,
       fixturesFolder: config?.fixturesFolder ?? false,

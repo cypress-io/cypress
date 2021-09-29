@@ -411,6 +411,7 @@ type Project implements Node {
 
     """Returns the last n elements from the list."""
     last: Int
+    specType: SpecType
   ): SpecConnection
   title: String!
 }

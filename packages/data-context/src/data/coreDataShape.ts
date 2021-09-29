@@ -1,7 +1,7 @@
 import { BUNDLERS, FoundBrowser, FoundSpec } from '@packages/types'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 
-type Maybe<T> = T | null | undefined
+export type Maybe<T> = T | null | undefined
 
 export interface AuthenticatedUserShape {
   name?: string

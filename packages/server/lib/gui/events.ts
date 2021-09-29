@@ -29,10 +29,11 @@ import * as config from '../config'
 import auth from './auth'
 import user from '../user'
 import { openProject } from '../open_project'
+import specsUtil from '../util/specs'
 
 import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
-import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
 import { makeDataContext } from '@packages/data-context'
 import browserUtils from '../browsers/utils'
@@ -531,6 +532,9 @@ module.exports = {
         },
         insertProject () {
           // TODO
+        },
+        findSpecs (payload: FindSpecs) {
+          return specsUtil.findSpecs(payload)
         },
       },
     })
