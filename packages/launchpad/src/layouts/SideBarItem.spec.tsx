@@ -1,5 +1,5 @@
 import SideBarItem from './SideBarItem.vue'
-import IconCoffee from 'virtual:vite-icons/mdi/coffee'
+import IconCoffee from '~icons/mdi/coffee'
 import { SideBarItemFragmentDoc } from '../generated/graphql-test'
 
 describe('<SideBarItem />', { viewportWidth: 200, viewportHeight: 150 }, () => {

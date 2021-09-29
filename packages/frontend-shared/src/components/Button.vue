@@ -35,13 +35,21 @@
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   inheritAttrs: true,
-}
+})
 </script>
 
 <script lang="ts" setup>
-import { computed, useAttrs, ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+import Icon from './Icon.vue'
+
+// eslint-disable-next-line no-duplicate-imports
+import { computed, useAttrs } from 'vue'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
   primary: 'border-indigo-600 bg-indigo-600 text-white',

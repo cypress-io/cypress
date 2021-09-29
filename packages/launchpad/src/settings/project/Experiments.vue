@@ -29,8 +29,11 @@
 import { computed } from 'vue'
 import ExperimentRow from './ExperimentRow.vue'
 import SettingsSection from '../SettingsSection.vue'
-import { experiments as defaultExperiments, Experiment } from './projectSettings'
-import { useI18n } from '../../composables'
+import { experiments as defaultExperiments } from './projectSettings'
+
+// eslint-disable-next-line no-duplicate-imports
+import type { Experiment } from './projectSettings'
+import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
   experiments?: Experiment[]

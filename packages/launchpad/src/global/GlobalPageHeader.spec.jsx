@@ -1,4 +1,4 @@
-import { defaultMessages } from '../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 

@@ -55,10 +55,14 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { computed, useSlots, useAttrs, InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 import _ from 'lodash'
-import IconSearch from 'virtual:vite-icons/mdi/magnify'
-import { useModelWrapper } from '../../composables'
+import Icon from './Icon.vue'
+import IconSearch from '~icons/mdi/magnify'
+
+import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
+// eslint-disable-next-line no-duplicate-imports
+import { computed, useSlots, useAttrs } from 'vue'
+import { useModelWrapper } from '../composables'
 
 const slots = useSlots()
 const attrs = useAttrs()

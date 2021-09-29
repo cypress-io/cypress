@@ -150,5 +150,18 @@ export const mutation = mutationType({
         return ctx.appData
       },
     })
+
+    t.nonNull.field('setActiveProject', {
+      type: 'App',
+      description: 'Set active project to run tests on',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      async resolve (_root, args, ctx) {
+        await ctx.actions.project.setActiveProject(args.path)
+
+        return ctx.coreData.app
+      },
+    })
   },
 })

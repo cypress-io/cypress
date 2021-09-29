@@ -1,4 +1,7 @@
-import { createI18n as _createI18n } from 'vue-i18n'
+import {
+  useI18n as _useI18n,
+  createI18n as _createI18n,
+} from 'vue-i18n'
 
 import type enUS from './en-US.json'
 // Imports a special compiled messages object
@@ -19,4 +22,8 @@ export function createI18n (opts = {}) {
     messages: compiledMessages,
     ...opts,
   })
+}
+
+export function useI18n () {
+  return _useI18n<{ message: MessageSchema }>({ useScope: 'global' })
 }

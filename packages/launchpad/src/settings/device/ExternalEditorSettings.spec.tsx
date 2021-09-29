@@ -1,5 +1,5 @@
 import ExternalEditorSettings from './ExternalEditorSettings.vue'
-import { defaultMessages } from '../../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 
 const editorText = defaultMessages.settingsPage.editor
 

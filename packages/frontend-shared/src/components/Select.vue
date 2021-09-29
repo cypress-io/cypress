@@ -141,11 +141,11 @@
 
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
-import IconCheck from 'virtual:vite-icons/mdi/check'
-import IconCaret from 'virtual:vite-icons/mdi/caret'
-import Icon from '../icon/Icon.vue'
+import IconCheck from '~icons/mdi/check'
+import IconCaret from '~icons/mdi/caret'
+import Icon from './Icon.vue'
 import { get } from 'lodash'
-import { useI18n } from '../../composables'
+import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
