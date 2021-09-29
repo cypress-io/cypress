@@ -9,11 +9,7 @@ describe('<SpecsListHeader />', () => {
 
     cy.mount(<SpecsListHeader
       vModel={search.value}
-      modelValue={search.value}
       onNewSpec={onNewSpec}
-      onInput={(e) => {
-        search.value = e.target.value
-      }}
     />)
     .get('input').type(searchString)
     // .get('button').click()

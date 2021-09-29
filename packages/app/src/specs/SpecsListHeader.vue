@@ -1,11 +1,8 @@
 <template>
-  <Button @click="emit('new-spec')">
-    {{ t('specPage.newSpecButton') }}
-  </Button>
   <Input
     type="search"
     class="min-w-200px h-full flex-grow"
-    prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
+    prefix-icon-classes="icon-light-gray-50 icon-dark-pink-500"
     :prefix-icon="MagnifyingGlass"
     :value="inputValue"
     :placeholder="t('specPage.searchPlaceholder')"
@@ -20,7 +17,7 @@
       class="min-w-127px text-size-16px focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
       @click="$emit('new-spec')"
     >
-      {{ t('specsPage.newSpecButton') }}
+      {{ t('specPage.newSpecButton') }}
     </Button>
   </div>
 </template>

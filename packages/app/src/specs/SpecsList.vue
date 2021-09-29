@@ -1,5 +1,5 @@
 <template>
-  <h2>Specs List</h2>>
+  <h2 class="text-2xl">Specs List</h2>>
   <SpecsListHeader v-model="search" />
   <ul>
     <li
