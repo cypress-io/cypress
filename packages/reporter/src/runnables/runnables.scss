@@ -4,13 +4,13 @@
   min-height: 0; // needed for firefox or else scrolling gets funky
 
   .container {
-    box-shadow: 0 1px 2px #aaa;
+    box-shadow: 0 1px 2px $gray-600;
     flex-grow: 2;
     overflow-y: auto;
   }
 
   .wrap {
-    box-shadow: 0 1px 2px #aaa;
+    box-shadow: 0 1px 2px $gray-600;
     margin-bottom: 40px;
     padding-left: 0;
     width: 100%;
@@ -21,12 +21,12 @@
   }
 
   .no-tests {
-    background-color: #f5f5f5;
+    background-color: $gray-1000;
     min-height: 20px;
     padding: 24px;
 
     h2 {
-      color: #e94f5f;
+      color: $red-600;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
@@ -34,7 +34,7 @@
     }
 
     h3 {
-      color: #3386d4;
+      color: $indigo-700;
       font-size: 1.2em;
       font-weight: 500;
       line-height: 1.4;
@@ -46,12 +46,12 @@
       font-size: 1.1em;
 
       &.text-muted {
-        color: #b4b5bc;
+        color: $gray-600;
       }
     }
 
     a {
-      color: #3386d4;
+      color: $indigo-700;
       cursor: pointer;
     }
 
@@ -64,8 +64,8 @@
       margin-bottom: 1.6em;
       border: none;
       height: 1px;
-      color: #dadade;
-      background-color: #dadade;
+      color: $gray-900;
+      background-color: $gray-900;
     }
 
     .open-studio,
@@ -81,8 +81,8 @@
 
   .runnable {
     width: 100%;
-    color: #6c6c6c;
-    background-color: #fff;
+    color: $gray-400;
+    background-color: $black;
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
@@ -94,14 +94,14 @@
       .collapsible-header {
         &:focus {
           .collapsible-header-inner {
-            background-color: #f7f8f9;
+            background-color: $gray-1000;
             cursor: pointer;
           }
         }
 
         .collapsible-header-inner {
           &:hover {
-            background-color: #f7f8f9;
+            background-color: $gray-1000;
             cursor: pointer;
           }
 
@@ -132,7 +132,7 @@
       }
 
       .hooks-container, .runnable-err-wrapper {
-        border-color: #828282;
+        border-color: $gray-500;
       }
     }
 
@@ -155,7 +155,7 @@
     &.suite .collapsible-indicator  {
       padding-left: 2px;
       font-size: 14px;
-      color: #bbbcbd;
+      color: $gray-700;
     }
 
 
@@ -176,7 +176,7 @@
 
     &.runnable-pending > div > .runnable-wrapper,
     &.runnable-pending > div > .runnable-instruments {
-      border-left: 5px solid lighten($pending, 25%);
+      border-left: 5px solid darken($pending, 25%);
       padding-bottom: 0;
     }
 
@@ -192,22 +192,22 @@
 
     &.runnable-studio.runnable-passed > div > .runnable-wrapper,
     &.runnable-studio.runnable-passed > div > .runnable-instruments {
-      border-left: 5px solid #3386d4;
+      border-left: 5px solid $indigo-700;
     }
 
-    &.runnable-skipped > .runnable-wrapper {
+    &.runnable-skipped  all box shadows> .runnable-wrapper {
       .runnable-state {
         @include runnable-state-skipped;
       }
 
       .runnable-title {
-        color: #aaa;
+        color: $gray-600;
       }
     }
 
     &.runnable-skipped > div > .runnable-wrapper,
     &.runnable-skipped > div > .runnable-instruments {
-      border-left: 5px solid #9a9aaa;
+      border-left: 5px solid $gray-500;
     }
 
     &.test.runnable-failed {
@@ -218,7 +218,7 @@
 
     &.suite > div > .runnable-wrapper {
       .runnable-title {
-        color: #111;
+        color: $gray-50;
         font-size: 13px;
       }
     }
@@ -248,7 +248,7 @@
         @include runnable-state-pending;
       }
       .runnable-title {
-        color: lighten($pending, 25%);
+        color: darken($pending, 25%);
       }
 
       .runnable-commands-region {
@@ -278,7 +278,7 @@
     white-space: pre-line;
 
     &:focus {
-      outline: 1px dotted #6c6c6c;
+      outline: 1px dotted $gray-400;
     }
   }
 
@@ -289,7 +289,7 @@
     width: 100%;
 
     &:focus {
-      outline: 1px dotted #6c6c6c;
+      outline: 1px dotted $gray-400;
       outline-offset: 3px;
     }
   }
@@ -310,13 +310,13 @@
 
     .runnable-controls-status {
       margin: 0 2px;
-      color: #999;
+      color: $gray-500;
       visibility: hidden;
       font-size: 15px;
     }
 
     .runnable-controls-studio {
-      color: #3386d4;
+      color: $indigo-700;
       opacity: 0;
       display: none;
     }
@@ -361,8 +361,8 @@
   }
 
   .runnable-header {
-    background: #f2f2f2;
-    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+    background: $gray-1000;
+    box-shadow: 0 2px 7px rgba($white, 0.25);
     display: block;
     font-size: 13px;
     line-height: 24px;
@@ -377,7 +377,7 @@
     span > span > span:before {
       @extend .#{$fa-css-prefix};
       @extend .#{$fa-css-prefix}-file;
-      color: #bdbdbd;
+      color: $gray-700;
       display: inline;
       margin-right: 5px;
     }
@@ -398,16 +398,16 @@
       }
 
       &:not(.studio-copy):active {
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        box-shadow: inset 0 3px 5px rgba($white, 0.125);
       }
     }
 
     .studio-cancel {
-      background-color: #e8e8ec;
-      color: #777;
+      background-color: $gray-900;
+      color: $gray-400;
 
       &:hover {
-        background-color: darken(#e8e8ec, 5%);
+        background-color: lighten($gray-900, 5%);
       }
     }
 
@@ -415,7 +415,7 @@
       margin-left: auto;
 
       .studio-copy {
-        color: #3386d4;
+        color: $indigo-700;
         display: none;
         font-size: 16px;
         padding: 3px 10px;
@@ -425,7 +425,7 @@
         }
 
         &:hover, &:focus {
-          color: darken(#3386d4, 5%);
+          color: lighten($indigo-700, 5%);
         }
 
         &.studio-copy-success {
@@ -435,26 +435,26 @@
         &[disabled],
         &[disabled]:hover,
         &[disabled]:active {
-          color: #3386d4;
+          color: $indigo-700;
           opacity: 0.5;
         }
       }
     }
 
     .studio-save {
-      background-color: #3386d4;
-      color: #fff;
+      background-color: $indigo-700;
+      color: $black;
       display: none;
       margin-left: 4px;
 
       &:hover {
-        background-color: darken(#3386d4, 10%);
+        background-color: lighten($indigo-700, 10%);
       }
 
       &[disabled],
       &[disabled]:hover,
       &[disabled]:active {
-        background-color: #3386d4;
+        background-color: $indigo-700;
         opacity: 0.5;
       }
     }
@@ -478,27 +478,27 @@
 
       div:nth-child(1) {
         animation-delay:0.1s;
-        background: #56b790;
+        background: $jade-700;
       }
 
       div:nth-child(2) {
         animation-delay:0.2s;
-        background: #4a88cc;
+        background: $indigo-700;
       }
 
       div:nth-child(3) {
         animation-delay:0.3s;
-        background: #b96162;
+        background: $red-600;
       }
 
       div:nth-child(4) {
         animation-delay:0.4s;
-        background: #e3b065;
+        background: $orange-700;
       }
 
       div:nth-child(5) {
         animation-delay:0.5s;
-        background: #a9abad;
+        background: $gray-600;
       }
 
       @keyframes scaling {

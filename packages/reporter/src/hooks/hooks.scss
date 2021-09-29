@@ -2,7 +2,7 @@
   .hooks-container {
     margin: 5px 0 5px 5px;
     padding-left: 10px;
-    border-left: 1px dotted #DDD;
+    border-left: 1px dotted $gray-900;
 
     .hook-item {
       margin-bottom: 5px;
@@ -18,7 +18,7 @@
 
       &:hover {
         .collapsible-header {
-          color: #6a6b6c;
+          color: $gray-400;
         }
 
         .hook-open-in-ide {
@@ -28,7 +28,7 @@
 
       .collapsible-header {
         text-transform: uppercase;
-        color: #959595;
+        color: $gray-500;
         display: inline-block;
         flex-grow: 1;
         font-size: 11px;
@@ -45,18 +45,18 @@
       }
 
       .hook-failed-message {
-        color: #E94F5F;
+        color: $red-600;
         display: none;
       }
 
       .hook-open-in-ide {
         align-items: center;
-        color: #6a6b6c;
+        color: $gray-400;
         display: none;
         padding: 4px 10px;
 
         &:hover, &:focus {
-          background-color: rgba(186, 186, 186, 0.2);
+          background-color: rgba($gray-700, 0.2);
           outline: none;
           text-decoration: none;
         }

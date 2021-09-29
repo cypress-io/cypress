@@ -1,11 +1,11 @@
 .reporter {
   .error {
-    background-color: #f5f5f5;
+    background-color: $gray-1000;
     min-height: 20px;
     padding: 24px;
 
     h2 {
-      color: #e94f5f;
+      color: $red-600;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
@@ -25,7 +25,7 @@
     }
 
     pre {
-      background: #fcf8e3;
+      background: $orange-1000;
       display: block;
       width: 100%;
       white-space: initial;
@@ -56,7 +56,7 @@
     cursor: default;
     margin: 5px 0 5px 5px;
     padding-left: 10px;
-    border-left: 1px dotted #DDD;
+    border-left: 1px dotted $gray-900;
   }
 
   .studio-err-wrapper {
@@ -134,12 +134,12 @@
         outline: 0;
 
         div {
-          background: #fee0e3;
+          background: $red-900;
         }
       }
 
       div {
-        background: #ffeaec;
+        background: $red-1000;
         cursor: pointer;
         outline: none;
         padding: 7px 5px;
@@ -150,17 +150,17 @@
         }
 
         &:active {
-          background: darken($err-header-background, 2%);
+          background: lighten($err-header-background, 2%);
         }
 
         .collapsible-header-text {
-          color: #4f4f4f;
+          color: $gray-200;
           font-size: 13px;
         }
 
         .collapsible-indicator {
           line-height: 18px;
-          color: #bbbcbd !important;
+          color: $gray-700 !important;
         }
       }
     }
@@ -175,8 +175,8 @@
       }
 
       div {
-        background: #ffeaec;
-        color: #4f4f4f;
+        background: $red-1000;
+        color: $gray-200;
         cursor: pointer;
         font-size: 13px;
         height: 100%;
@@ -192,11 +192,11 @@
         }
 
         &:active {
-          background: darken($err-header-background, 2%);
+          background: lighten($err-header-background, 2%);
         }
 
         i {
-          border: solid 1px #4f4f4f;
+          border: solid 1px $gray-200;
           border-radius: 4px;
           font-size: 6px;
           padding: 4px 3px;
@@ -226,19 +226,19 @@
   }
 
   .test-err-code-frame {
-    background-color: #fff;
-    border: 1px solid #ffe4e7;
+    background-color: $black;
+    border: 1px solid $red-900;
     margin: 0 10px 10px;
 
     .runnable-err-file-path {
       &:before {
         @extend .#{$fa-css-prefix};
         @extend .#{$fa-css-prefix}-file;
-        color: #bdbdbd;
+        color: $gray-700;
         margin-right: 5px;
       }
 
-      background: #f6f6f6;
+      background: $gray-1000;
       display: block;
       font-size: 13px;
       line-height: 24px;

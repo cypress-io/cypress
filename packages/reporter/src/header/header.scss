@@ -1,7 +1,7 @@
 .reporter {
   header {
-    background-color: #f8f8f8;
-    border-bottom: 1px solid #ddd;
+    background-color: $gray-1000;
+    border-bottom: 1px solid $gray-900;
     display: flex;
     flex-shrink: 0;
     flex-wrap: wrap;
@@ -16,7 +16,7 @@
     }
 
     button {
-      background-color: #f8f8f8;
+      background-color: $gray-1000;
       border-color: transparent;
       border-radius: 0;
       display: block;
@@ -27,11 +27,11 @@
       width: 40px;
 
       &:hover {
-        background-color: #e9e9e9;
+        background-color: $gray-900;
       }
 
       &:active {
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        box-shadow: inset 0 3px 5px rgba($white, 0.125);
       }
 
       &[disabled],
@@ -39,7 +39,7 @@
       &[disabled]:active {
         background: none;
         box-shadow: none;
-        color: #999;
+        color: $gray-500;
       }
     }
   }
@@ -48,7 +48,7 @@
     display: flex;
 
     button {
-      border-right: 1px solid #ddd;
+      border-right: 1px solid $gray-900;
       font-weight: 400;
       padding: 10px 12px;
       width: auto !important;
@@ -78,15 +78,15 @@
       padding: 10px 5px;
 
       &.passed {
-        color: #23AE89;
+        color: $jade-600;
       }
 
       &.failed {
-        color: #E94B3B;
+        color: $red-500;
       }
 
       &.pending {
-        color: #aaa;
+        color: $gray-600;
       }
 
       i {
@@ -95,8 +95,8 @@
     }
 
     .duration {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
+      border-left: 1px solid $gray-900;
+      border-right: 1px solid $gray-900;
       padding-left: 10px;
       padding-right: 10px;
     }
@@ -110,7 +110,7 @@
       display: flex;
 
       &:last-child button {
-        border-right: 1px solid #ddd;
+        border-right: 1px solid $gray-900;
       }
     }
 
@@ -119,7 +119,7 @@
       margin-right: 5px;
 
       label {
-        background-color: #CC4239;
+        background-color: $red-500;
       }
     }
 
@@ -144,7 +144,7 @@
       i:first-child {
         @extend .far;
         @extend .#{$fa-css-prefix}-circle;
-        color: #999;
+        color: $gray-500;
         font-size: 80%;
         margin-right: 3px;
         position: relative;
@@ -155,7 +155,7 @@
         i:first-child {
           @extend .fas;
           @extend .#{$fa-css-prefix}-circle;
-          color: $yellow-dark;
+          color: $yellow-light;
         }
       }
     }
