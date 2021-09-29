@@ -1,3 +1,5 @@
+/// <reference path="../../../../../cli/types/mocha/index.d.ts" />
+
 import * as babel from '@babel/core'
 import { expect } from 'chai'
 import { createTransformPluginsFileBabelPlugin } from './babelTransform'
