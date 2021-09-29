@@ -83,7 +83,7 @@ function addIconUtilityClasses (theme) {
     // And the selectors and values affected are values
     /**
       * {
-      *  `.icon-light-green-500`: {
+      *  `.icon-light-jade-500`: {
       *    '> *[stroke].icon-light': {
       *      stroke: resolvedColor
       *    },
