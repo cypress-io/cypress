@@ -3,4 +3,5 @@
 
 export * from './gql-BrowserFamilyEnum'
 export * from './gql-ProjectEnums'
+export * from './gql-SpecEnum'
 export * from './gql-WizardEnums'
