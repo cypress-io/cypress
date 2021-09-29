@@ -133,9 +133,9 @@ const validate = (props, cmd, log) => {
     values.capture = capture
   }
 
-  ;['scale', 'disableTimersAndAnimations', 'screenshotOnRunFailure', 'overwrite'].map(key =>
-  	validateAndSetBoolean(props, values, cmd, log, key)
-  )
+  ['scale', 'disableTimersAndAnimations', 'screenshotOnRunFailure', 'overwrite'].map((key) => {
+    return validateAndSetBoolean(props, values, cmd, log, key)
+  })
 
   if (blackout) {
     const existsNonString = _.some(blackout, (selector) => {
