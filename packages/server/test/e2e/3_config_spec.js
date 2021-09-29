@@ -67,4 +67,10 @@ describe('e2e config', () => {
       project: Fixtures.projectPath('config-with-js'),
     })
   })
+
+  it('supports custom configFile in a default TypeScript file', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('config-with-ts'),
+    })
+  })
 })
