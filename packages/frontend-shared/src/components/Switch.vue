@@ -1,7 +1,7 @@
 <template>
   <button
     class="rounded-md h-3 w-6 relative focus:outline-transparent"
-    :class="value ? 'bg-green-600' : 'bg-gray-600'"
+    :class="value ? 'bg-jade-600' : 'bg-gray-600'"
     @click="$emit('update', !value)"
   >
     <span

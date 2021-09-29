@@ -17,7 +17,7 @@ import { computed } from 'vue'
 export type StatusIndicatorType = 'success' | 'warning' | 'error' | 'disabled'
 
 const typeClasses: Record<StatusIndicatorType, string> = {
-  success: 'text-green-600',
+  success: 'text-jade-600',
   error: 'text-red-600',
   warning: 'text-amber-600',
   disabled: 'text-cool-gray-400',

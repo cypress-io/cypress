@@ -2,7 +2,7 @@
   <Input
     type="search"
     class="min-w-200px h-full flex-grow"
-    prefix-icon-classes="icon-light-green-50 icon-dark-pink-500"
+    prefix-icon-classes="icon-light-jade-50 icon-dark-pink-500"
     :prefix-icon="MagnifyingGlass"
     :value="inputValue"
     :placeholder="t('specPage.searchPlaceholder')"

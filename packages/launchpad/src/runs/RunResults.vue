@@ -13,7 +13,7 @@
       {{ props.gql.totalSkipped }}
     </div>
     <div class="flex items-center p-2">
-      <IconPass class="text-green-600 text-xs mr-1" />
+      <IconPass class="text-jade-600 text-xs mr-1" />
       {{ props.gql.totalPassed }}
     </div>
     <div class="flex items-center p-2">

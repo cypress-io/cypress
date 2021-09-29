@@ -1,7 +1,7 @@
 <template>
   <IconPass
     v-if="props.gql.status === 'PASSED'"
-    class="text-green-500 text-xl"
+    class="text-jade-500 text-xl"
   />
   <IconFail
     v-else-if="props.gql.status ==='FAILED'"
