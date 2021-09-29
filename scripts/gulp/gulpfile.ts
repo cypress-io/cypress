@@ -8,11 +8,10 @@
  */
 
 import gulp from 'gulp'
-import { monorepoPaths } from './monorepoPaths'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
-import { startCypressWatch, startCypressForTest, runCypressAgainstDist, openCypressLaunchpad } from './tasks/gulpCypress'
+import { startCypressWatch, startCypressForTest, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteBuildApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, serveBuiltLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, serveBuiltAppForTest, viteBuildAppForTest, viteBuildAndWatchAppForTest } from './tasks/gulpVite'
+import { viteApp, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, serveBuiltLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, serveBuiltAppForTest, viteBuildAppForTest, viteBuildAndWatchAppForTest, viteBuildApp, viteBuildLaunchpad } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
@@ -140,22 +139,31 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
   startCypressForTest,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
-  async function cypressRunReal () {
-    process.argv.push('--project', monorepoPaths.pkgLaunchpad)
-    // return runCypressAgainstDist()
-    const child = await runCypressAgainstDist()
+  async function _runCypressLaunchpad () {
+    wrapRunWithExit(await runCypressLaunchpad())
+  },
+))
 
-    child.on('exit', (code) => {
-      console.log({ code })
-    })
+gulp.task('cyRunAppE2E', gulp.series(
+  // 1. Build the Cypress App itself
+  'buildProd',
 
-    child.on('error', (err) => {
-      console.error({ err })
-    })
+  // 2. Build the Launchpad under test.
+  gulp.parallel(
+    viteBuildLaunchpadForTest,
+    viteBuildAppForTest,
+  ),
 
-    child.on('disconnect', () => {
-      console.error('disconnect')
-    })
+  // 3. Host the Launchpad on a static server for cy.visit.
+  serveBuiltAppForTest,
+
+  // 4. Start the TEST Cypress App, such that its ports and other globals
+  //    don't conflict with the real Cypress App.
+  startCypressForTest,
+
+  // 5. Start the REAL Cypress App, which will execute the integration specs.
+  async function _runCypressApp () {
+    wrapRunWithExit(await runCypressApp())
   },
 ))
 
@@ -176,14 +184,41 @@ const cyOpenLaunchpad = gulp.series(
   openCypressLaunchpad,
 )
 
+const cyOpenApp = gulp.series(
+  // 2. Build + watch Launchpad under test.
+  //    This watches for changes and is not the same things as statically
+  //    building the app for production.
+  viteBuildAndWatchAppForTest,
+
+  // 3. Start the TEST Cypress App, such that its ports and other globals
+  //    don't conflict with the real Cypress App.
+  startCypressForTest,
+
+  // 4. Host the Launchpad on a static server for cy.visit.
+  serveBuiltAppForTest,
+
+  // 5. Start the REAL (dev) Cypress App, which will launch in open mode.
+  openCypressApp,
+)
+
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenLaunchpadE2E', gulp.series(
   // 1. Build the Cypress App itself
   'buildProd',
 
-  // 2. Open the launchpad app
+  // 2. Open the "app"
   cyOpenLaunchpad,
+))
+
+// Open Cypress in production mode.
+// Rebuild the Launchpad app between changes.
+gulp.task('cyOpenAppE2E', gulp.series(
+  // 1. Build the Cypress App itself
+  'buildProd',
+
+  // 2. Open the launchpad app
+  cyOpenApp,
 ))
 
 /**------------------------------------------------------------------------
@@ -235,7 +270,10 @@ gulp.task('debugCypressLaunchpad', gulp.series(
   openCypressLaunchpad,
 ))
 
+gulp.task(startCypressWatch)
+gulp.task(openCypressApp)
 gulp.task(openCypressLaunchpad)
 
 // If we want to run individually, for debugging/testing
 gulp.task('cyOpenLaunchpadOnly', cyOpenLaunchpad)
+gulp.task('cyOpenAppOnly', cyOpenApp)

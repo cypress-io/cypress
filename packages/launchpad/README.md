@@ -42,7 +42,7 @@ For the best development experience, you will want to use VS Code with the [Vola
 yarn dev
 ```
 
-This starts Vite in watch mode. It also starts the GraphQL Server. You can access it on `http://localhost:52159/graphql`.
+This starts Vite in watch mode. It also starts the GraphQL Server. You can access it on `http://localhost:52200/graphql`.
 
 ![graphql](../graphql/gql.png)
 

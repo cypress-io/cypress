@@ -9,7 +9,7 @@ import { graphqlSchema } from './schema'
 import type { DataContext } from '@packages/data-context'
 
 const debug = Debug('cypress:server:graphql')
-const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52159)
+const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52200)
 
 let app: ReturnType<typeof express>
 let server: Server

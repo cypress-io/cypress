@@ -4,6 +4,7 @@ import pDefer from 'p-defer'
 import util from 'util'
 
 import { prefixLog, prefixStream } from './prefixStream'
+import { addChildProcess } from '../tasks/gulpRegistry'
 
 export type AllSpawnableApps =
   | `vite-${string}`
@@ -106,6 +107,8 @@ export async function spawned (
     },
   })
 
+  addChildProcess(cp)
+
   return streamHandler(cp, {
     tapErr,
     tapOut,
@@ -129,7 +132,7 @@ export async function forked (
 ) {
   const { waitForExit, waitForData, tapErr, tapOut, ...spawnOpts } = opts
 
-  console.log(args)
+  // console.log(args)
 
   // let useExecutable = executable
   // if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
@@ -146,6 +149,8 @@ export async function forked (
       ...spawnOpts.env,
     },
   })
+
+  addChildProcess(cp)
 
   return streamHandler(cp, {
     tapOut,
@@ -229,32 +234,23 @@ function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
   const log = prefixLog(`${prefix}:${cp.pid}`)
 
   if (waitForExit) {
-    if (process.platform === 'win32') {
-      cp.on('exit', (code, signal) => {
-        log.log(`Exit code: ${code} => ${signal}`)
-        dfd.resolve(cp)
-      })
-    } else {
-      cp.once('exit', (code, signal) => {
-        log.log(`Exit code: ${code} => ${signal}`)
-        dfd.resolve(cp)
-      })
-    }
+    cp.on('exit', (code, signal) => {
+      log.log(`Exit code: ${code} => ${signal}`)
+      prefixedStdout?.unpipe(process.stdout)
+      prefixedStderr?.unpipe(process.stderr)
+      dfd.resolve(cp)
+    })
 
     cp.once('error', (e) => {
       log.error(`error executing ${command} ${writeError(e)}`)
+      prefixedStdout?.unpipe(process.stdout)
+      prefixedStderr?.unpipe(process.stderr)
       dfd.reject(e)
     })
   } else {
-    if (process.platform === 'win32') {
-      cp.on('exit', (code, signal) => {
-        log.log(`Exit code: ${code} => ${signal}`)
-      })
-    } else {
-      cp.once('exit', (code, signal) => {
-        log.log(`Exit code: ${code} => ${signal}`)
-      })
-    }
+    cp.once('exit', (code, signal) => {
+      log.log(`Exit code: ${code} => ${signal}`)
+    })
 
     cp.once('error', (e) => {
       log.error(`error executing ${command} ${writeError(e)}`)

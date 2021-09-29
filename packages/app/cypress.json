@@ -1,6 +1,6 @@
 {
   "projectId": "ypt4pf",
-  "baseUrl": "http://localhost:5555",
+  "baseUrl": "http://localhost:5556",
   "viewportWidth": 800,
   "viewportHeight": 850,
   "fixturesFolder": false,
@@ -17,5 +17,8 @@
   },
   "component": {
     "componentFolder": "src"
+  },
+  "e2e": {
+    "supportFile": false
   }
 }

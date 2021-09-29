@@ -153,28 +153,18 @@ module.exports = {
           args = [...electronArgs, '--', ...args]
         }
 
-        debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
-        let child
-
-        if (process.env.CYPRESS_INTERNAL_DEV_WATCH || process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
-          if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
-            stdioOptions.execArgv = [process.env.CYPRESS_INTERNAL_DEV_DEBUG]
-          }
-
-          debug('spawning Cypress as fork: %s', startScriptPath)
-
-          child = cp.fork(startScriptPath, args, stdioOptions)
-          process.on('message', (msg) => {
-            child.send(msg)
-          })
-        } else {
-          debug('spawning Cypress with executable: %s', executable)
-          if (startScriptPath) {
-            args.unshift(startScriptPath)
-          }
-
-          child = cp.spawn(executable, args, stdioOptions)
+        if (startScriptPath) {
+          args.unshift(startScriptPath)
         }
+
+        if (process.env.CYPRESS_INTERNAL_DEV_DEBUG) {
+          args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
+        }
+
+        debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
+        debug('spawning Cypress with executable: %s', executable)
+
+        const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event) {
           return function (code, signal) {
