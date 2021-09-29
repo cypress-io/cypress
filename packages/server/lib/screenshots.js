@@ -316,7 +316,7 @@ const ensureSafePath = function (withoutExt, extension, num = 0, overwrite) {
   return fs.pathExists(fullPath)
   .then((found) => {
     if (found && !overwrite) {
-      return ensureSafePath(withoutExt, extension, num + 1)
+      return ensureSafePath(withoutExt, extension, num + 1, overwrite)
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
@@ -328,7 +328,7 @@ const ensureSafePath = function (withoutExt, extension, num = 0, overwrite) {
       if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
         maxSafeBytes -= 1
 
-        return ensureSafePath(withoutExt, extension, num)
+        return ensureSafePath(withoutExt, extension, num, overwrite)
       }
 
       throw err

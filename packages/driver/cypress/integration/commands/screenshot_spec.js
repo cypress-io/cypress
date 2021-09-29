@@ -312,22 +312,6 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    it('can rename duplicate files', function () {
-      const runnable = cy.state('runnable')
-
-      runnable.title = 'foo bar'
-
-      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
-
-      cy.screenshot('my/file').then(() => {
-        expect(Cypress.automation.withArgs('take:screenshot').args[0][1].name).to.equal('my/file')
-      })
-
-      cy.screenshot('my/file').then(() => {
-        expect(Cypress.automation.withArgs('take:screenshot').args[0][1].name).to.equal('my/file (1)')
-      })
-    })
-
     it('calls onBeforeScreenshot callback with documentElement', function () {
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.stub(Screenshot, 'onBeforeScreenshot')
