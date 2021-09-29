@@ -62,7 +62,7 @@ program
 
   tasks.run()
   .then(() => {
-    if (tasks.err[0].errors.length > 0) {
+    if (tasks.err[0] && tasks.err[0].errors.length > 0) {
       process.exitCode = 1
 
       log('')
