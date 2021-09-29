@@ -54,4 +54,11 @@ describe('e2e config', () => {
       configFile: 'cypress.config.custom.js',
     })
   })
+
+  it('supports custom configFile in TypeScript', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('config-with-custom-file-ts'),
+      configFile: 'cypress.config.custom.ts',
+    })
+  })
 })
