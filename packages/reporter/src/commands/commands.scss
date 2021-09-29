@@ -241,8 +241,8 @@
   }
 
   .command-state-pending > span > .command-wrapper {
-    border-left: 2px solid $pending;
-    background-color: lighten($pending, 40%);
+    border-left: 2px solid $indigo-800;
+    background-color: $indigo-1000;
     cursor: default;
 
     &:hover {
