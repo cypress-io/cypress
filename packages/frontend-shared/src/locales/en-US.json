@@ -21,6 +21,14 @@
     "enabled": "Enabled",
     "disabled": "Disabled"
   },
+  "specPage": {
+    "pageTitle": "Specs",
+    "newSpecButton": "New Spec",
+    "searchPlaceholder": "Search Specs",
+    "componentSpecsHeader": "Component Specs",
+    "e2eSpecsHeader": "E2E Specs",
+    "gitStatusHeader": "Git Status"
+  },
   "setupPage": {
     "projectSetup": {
       "frameworkLabel": "Front-end Framework",

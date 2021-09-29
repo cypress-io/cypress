@@ -3,17 +3,22 @@ import { ref } from 'vue'
 describe('<SpecsListHeader />', () => {
   it('renders', () => {
     const search = ref('')
+    const searchString = 'my/component.cy.tsx'
+    const onNewSpec = cy.spy().as('New Spec')
     cy.mount(<SpecsListHeader
       vModel={search.value}
       modelValue={search.value}
+      onNewSpec={onNewSpec}
       onInput={(e) => {
         console.log('on change', e);
         search.value = e.target.value
       }}
-    />).get('input').type('hello world')
+    />)
+    .get('input').type(searchString)
+    .get('button').click()
     .should(() => {
-      console.log('search.value', search.value)
-      // expect(search.value).to.equal('hello world')
+      expect(search.value).to.equal(searchString)
+      expect(onNewSpec).to.have.been.called
     })
   })
 })
