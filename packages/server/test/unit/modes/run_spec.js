@@ -20,7 +20,6 @@ const random = require(`${root}../lib/util/random`)
 const system = require(`${root}../lib/util/system`)
 const specsUtil = require(`${root}../lib/util/specs`)
 const { experimental } = require(`${root}../lib/experiments`)
-const ProjectStatic = require(`${root}../lib/project_static`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
@@ -660,7 +659,6 @@ describe('lib/modes/run', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
-      sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
@@ -738,7 +736,6 @@ describe('lib/modes/run', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
-      sinon.stub(ProjectStatic, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(system, 'info').resolves({ osName: 'osFoo', osVersion: 'fooVersion' })
