@@ -136,12 +136,12 @@
         }
 
         &.dom {
-          background-color: lighten($indigo-1000, 3%);
+          background-color: $indigo-800;
         }
 
         &.agent,
         &.primitive {
-          background-color: lighten($red-900, 3%);
+          background-color: $red-800;
         }
 
         &.show-count {
@@ -195,7 +195,7 @@
       .num-children,
       .command-alias-count,
       .command-interceptions-count {
-        background-color: lighten($orange-800, 8%) !important;
+        background-color: $orange-700 !important;
       }
     }
 
@@ -374,11 +374,11 @@
       }
 
       .fa-circle.bad {
-        color: $orange-700;
+        color: $orange-500;
       }
 
       .fa-circle.pending {
-        color: $gray-600;
+        color: $gray-500;
       }
     }
   }
