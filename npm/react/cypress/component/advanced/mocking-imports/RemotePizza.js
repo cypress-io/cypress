@@ -4,10 +4,9 @@ import { fetchIngredients as defaultFetchIngredients } from './services'
 export default function RemotePizza () {
   const [ingredients, setIngredients] = React.useState([])
 
-  const handleCook = () => {
-    defaultFetchIngredients().then((response) => {
-      setIngredients(response.args.ingredients)
-    })
+  const handleCook = async () => {
+    const { args } = await defaultFetchIngredients()
+    setIngredients(args.ingredients)
   }
 
   return (
