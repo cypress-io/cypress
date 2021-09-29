@@ -10,16 +10,8 @@
       >
         <span class="text-gray-500 flex items-center justify-center">
           <slot name="prefix">
-            <Icon
-              v-if="prefixIcon"
-              class="pointer-events-none"
-              :icon="prefixIcon"
-              :class="prefixIconClasses"
-            />
-            <Icon
-              v-else-if="type === 'search'"
-              :icon="IconSearch"
-            />
+            <component v-if="prefixIcon" :is="prefixIcon" class="pointer-events-none" :class="prefixIconClasses"></component>
+            <i-magnifying-glass_x24 v-else-if="type === 'search'"></i-magnifying-glass_x24>
           </slot>
         </span>
       </div>
@@ -36,11 +28,7 @@
       >
         <span class="text-gray-500 flex items-center justify-center">
           <slot name="suffix">
-            <Icon
-              :icon="suffixIcon"
-              class="pointer-events-none"
-              :class="suffixIconClasses"
-            />
+            <component v-if="suffixIcon" :is="suffixIcon" class="pointer-events-none" :class="suffixIconClasses"></component>
           </slot>
         </span>
       </div>
@@ -56,8 +44,6 @@ export default {
 
 <script lang="ts" setup>
 import _ from 'lodash'
-import Icon from './Icon.vue'
-import IconSearch from '~icons/mdi/magnify'
 
 import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
