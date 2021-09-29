@@ -302,6 +302,7 @@ describe('taking screenshots', () => {
     })
   })
 
+  // @see https://github.com/cypress-io/cypress/issues/7955
   it('can pass overwrite option to replace existing filename', () => {
     cy.viewport(600, 200)
     cy.visit('http://localhost:3322/color/yellow')
