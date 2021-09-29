@@ -3,6 +3,7 @@ const path = require('path')
 require('../../spec_helper')
 const { fs } = require('../../../lib/util/fs')
 const settings = require(`../../../lib/util/settings`)
+const { insertValuesInConfigFile } = require(`../../../lib/util/config-file-updater`)
 
 const projectRoot = process.cwd()
 const defaultOptions = {
@@ -180,10 +181,10 @@ describe('lib/util/settings', () => {
       })
     })
 
-    context('.write', () => {
+    context('.insertValuesInConfigFile', () => {
       it('promises cypress.json updates', function () {
         return this.setup().then(() => {
-          return settings.write(projectRoot, { foo: 'bar' }, defaultOptions)
+          return insertValuesInConfigFile(projectRoot, { foo: 'bar' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ foo: 'bar' })
         })
@@ -192,7 +193,7 @@ describe('lib/util/settings', () => {
       it('only writes over conflicting keys', function () {
         return this.setup({ projectId: '12345', autoOpen: true })
         .then(() => {
-          return settings.write(projectRoot, { projectId: 'abc123' }, defaultOptions)
+          return insertValuesInConfigFile(projectRoot, { projectId: 'abc123' }, defaultOptions)
         }).then((obj) => {
           expect(obj).to.deep.eq({ projectId: 'abc123', autoOpen: true })
         })
@@ -210,7 +211,7 @@ describe('lib/util/settings', () => {
     })
 
     it('.write does not create a file', function () {
-      return settings.write(this.projectRoot, {}, this.options)
+      return insertValuesInConfigFile(this.projectRoot, {}, this.options)
       .then(() => {
         return fs.access(path.join(this.projectRoot, 'cypress.json'))
         .then(() => {

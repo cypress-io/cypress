@@ -8,23 +8,12 @@ import Debug from 'debug'
 
 const debug = Debug('cypress:server:settings')
 
-interface SettingsOptions {
+export interface SettingsOptions {
   testingType?: 'component' |'e2e'
   configFile?: string | false
   args?: {
     runProject?: string
   }
-}
-
-function jsCode (obj) {
-  const objJSON = obj && !_.isEmpty(obj)
-    ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
-    : `{
-
-}`
-
-  return `module.exports = ${objJSON}
-`
 }
 
 // TODO:
@@ -74,40 +63,8 @@ function _pathToFile (projectRoot, file) {
   return path.isAbsolute(file) ? file : path.join(projectRoot, file)
 }
 
-function _err (type, file, err) {
-  const e = errors.get(type, file, err)
-
-  e.code = err.code
-  e.errno = err.errno
-  throw e
-}
-
 function _logReadErr (file, err) {
   errors.throw('ERROR_READING_FILE', file, err)
-}
-
-function _logWriteErr (file, err) {
-  return _err('ERROR_WRITING_FILE', file, err)
-}
-
-function _write (file, obj = {}) {
-  if (/\.json$/.test(file)) {
-    debug('writing json file')
-
-    return fs.outputJson(file, obj, { spaces: 2 })
-    .then(() => obj)
-    .catch((err) => {
-      return _logWriteErr(file, err)
-    })
-  }
-
-  debug('writing javascript file')
-
-  return fs.writeFileAsync(file, jsCode(obj))
-  .return(obj)
-  .catch((err) => {
-    return _logWriteErr(file, err)
-  })
 }
 
 function _applyRewriteRules (obj = {}) {

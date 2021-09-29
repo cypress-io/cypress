@@ -10,6 +10,7 @@ import keys from './util/keys'
 import * as settings from './util/settings'
 import { ProjectBase } from './project-base'
 import { getDefaultConfigFilePath } from './project_utils'
+import { insertValuesInConfigFile } from './util/config-file-updater'
 
 const debug = Debug('cypress:server:project_static')
 
@@ -174,7 +175,7 @@ export async function writeProjectId ({ id, projectRoot, configFile }: ProjectId
   // TODO: We need to set this
   // this.generatedProjectIdTimestamp = new Date()
 
-  await settings.write(projectRoot, attrs, { configFile })
+  await insertValuesInConfigFile(projectRoot, attrs, { configFile })
 
   return id
 }

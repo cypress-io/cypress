@@ -20,7 +20,7 @@ const { allowDestroy } = require(`${root}../lib/util/server_destroy`)
 const cypress = require(`${root}../lib/cypress`)
 const screenshots = require(`${root}../lib/screenshots`)
 const videoCapture = require(`${root}../lib/video_capture`)
-const settings = require(`${root}../lib/util/settings`)
+const { insertValuesInConfigFile } = require(`${root}../lib/util/config-file-updater`)
 
 // mutates mocha test runner - needed for `test.titlePath`
 require(`${root}../lib/project-base`)
@@ -470,7 +470,7 @@ const e2e = {
       const s = options.settings
 
       if (s) {
-        await settings.write(e2ePath, s)
+        await insertValuesInConfigFile(e2ePath, s)
       }
     })
 
