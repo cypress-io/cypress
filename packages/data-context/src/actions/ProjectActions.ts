@@ -79,8 +79,6 @@ export class ProjectActions {
       this.ctx.coreData.app.projects.push({ projectRoot })
       this.ctx._apis.projectApi.insertProjectToCache(projectRoot)
     }
-
-    await this.setActiveProject(projectRoot)
   }
 
   async launchProject () {

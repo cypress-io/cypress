@@ -1,9 +1,8 @@
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 
-const setActiveProjectMutation = gql`
-mutation setActiveProject($path: String!) {
-  setActiveProject(path: $path) {
+function makeSetActiveProjectQuery (query?: string) {
+  const activeProjectQuery = `
     activeProject {
       id
       title
@@ -12,12 +11,23 @@ mutation setActiveProject($path: String!) {
       isFirstTimeCT
       isFirstTimeE2E
     }
-  }
-}
-`
+  `
 
-export function useSetActiveProject () {
-  const activeProjectMutation = useMutation(setActiveProjectMutation)
+  return gql`
+    mutation setActiveProject($path: String!) {
+      setActiveProject(path: $path) {
+        ${query ? query : activeProjectQuery}
+      }
+    }
+  `
+}
+
+/**
+ * @param query Graphql query to select data from the App node in graphql
+ * @returns setActiveProject function to execute setActiveProject mutation with provided path
+ */
+export function useSetActiveProject (query?: string) {
+  const activeProjectMutation = useMutation(makeSetActiveProjectQuery(query))
 
   const setActiveProject = (path: string) => activeProjectMutation.executeMutation({ path })
 
