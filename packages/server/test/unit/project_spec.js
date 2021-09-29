@@ -13,7 +13,7 @@ const cache = require(`${root}lib/cache`)
 const config = require(`${root}lib/config`)
 const scaffold = require(`${root}lib/scaffold`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const ProjectBase = require(`${root}lib/project-base`).ProjectBase
+const { ProjectBase } = require(`${root}lib/project-base`)
 const {
   getOrgs,
   paths,
@@ -532,8 +532,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
       this.project._server = { close () {} }
+      this.project._isServerOpen = true
 
       sinon.stub(this.project, 'getConfig').returns(this.config)
+
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
@@ -713,12 +715,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
       this.watch = sinon.stub(this.project.watchers, 'watch')
+      this.watchTree = sinon.stub(this.project.watchers, 'watchTree')
     })
 
     it('watches cypress.json and cypress.env.json', function () {
       this.project.watchSettings({ onSettingsChanged () {} }, {})
-      expect(this.watch).to.be.calledTwice
-      expect(this.watch).to.be.calledWith('/path/to/cypress.json')
+      expect(this.watch).to.be.calledOnce
+      expect(this.watchTree).to.be.calledOnce
+      expect(this.watchTree).to.be.calledWith('/path/to/cypress.json')
 
       expect(this.watch).to.be.calledWith('/path/to/cypress.env.json')
     })
@@ -944,14 +948,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls Settings.write with projectRoot and attrs', function () {
-      return writeProjectId('id-123').then((id) => {
+      return writeProjectId({ id: 'id-123' }).then((id) => {
         expect(id).to.eq('id-123')
       })
     })
 
     // TODO: This
     xit('sets generatedProjectIdTimestamp', function () {
-      return writeProjectId('id-123').then(() => {
+      return writeProjectId({ id: 'id-123' }).then(() => {
         expect(this.project.generatedProjectIdTimestamp).to.be.a('date')
       })
     })
@@ -1012,13 +1016,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#createCiProject', () => {
     const projectRoot = '/_test-output/path/to/project-e2e'
+    const configFile = 'cypress.config.js'
 
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot, testingType: 'e2e' })
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'write').resolves('project-id-123')
+      sinon.stub(settings, 'write').resolves()
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
@@ -1026,19 +1031,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls api.createProject with user session', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
+      return createCiProject({ foo: 'bar', projectRoot }).then(() => {
         expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
       })
     })
 
     it('calls writeProjectId with id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
-        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' })
+      return createCiProject({ foo: 'bar', projectRoot, configFile }).then(() => {
+        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
       })
     })
 
     it('returns project id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then((projectId) => {
+      return createCiProject({ foo: 'bar', projectRoot }).then((projectId) => {
         expect(projectId).to.eql(this.newProject)
       })
     })
