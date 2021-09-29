@@ -100,21 +100,20 @@ $fuchsia-1000: #39054a;
 $black: black;
 $white: white;
 
-$pass: $jade-600;
-$fail: $red-600;
+$pass: $jade-400;
+$fail: $red-400;
 $pending: $indigo-400;
-$pinned: $purple-500;
-$yellow-light: $orange-700;
-$yellow-medium: darken($yellow-light, 25%);
+$pinned: $purple-400;
+$yellow-medium: darken($orange-700, 25%);
 $retried: $orange-800;
 
 $link-text: $indigo-600;
 
 $err-background: $red-1000;
 $err-code-background: $red-900;
-$err-text: $red-500;
+$err-text: $red-400;
 $err-header-background: $red-900;
-$err-header-text: $red-500;
+$err-header-text: $red-400;
 
 $warn-background: $red-1000;
 $warn-header-background: $orange-1000;

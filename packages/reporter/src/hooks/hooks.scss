@@ -18,7 +18,7 @@
 
       &:hover {
         .collapsible-header {
-          color: $gray-400;
+          color: $gray-300;
         }
 
         .hook-open-in-ide {
@@ -28,7 +28,7 @@
 
       .collapsible-header {
         text-transform: uppercase;
-        color: $gray-500;
+        color: $gray-400;
         display: inline-block;
         flex-grow: 1;
         font-size: 11px;

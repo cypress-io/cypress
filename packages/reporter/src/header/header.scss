@@ -78,15 +78,15 @@
       padding: 10px 5px;
 
       &.passed {
-        color: $jade-600;
+        color: $pass;
       }
 
       &.failed {
-        color: $red-500;
+        color: $fail;
       }
 
       &.pending {
-        color: $gray-600;
+        color: $gray-400;
       }
 
       i {
@@ -155,7 +155,7 @@
         i:first-child {
           @extend .fas;
           @extend .#{$fa-css-prefix}-circle;
-          color: $yellow-light;
+          color: $orange-400;
         }
       }
     }

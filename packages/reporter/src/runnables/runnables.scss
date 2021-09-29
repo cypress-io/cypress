@@ -10,7 +10,7 @@
   }
 
   .wrap {
-    box-shadow: 0 1px 2px $gray-600;
+    border-bottom: 1px solid $gray-900;
     margin-bottom: 40px;
     padding-left: 0;
     width: 100%;
@@ -26,7 +26,7 @@
     padding: 24px;
 
     h2 {
-      color: $red-600;
+      color: $red-400;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
@@ -34,7 +34,7 @@
     }
 
     h3 {
-      color: $indigo-700;
+      color: $indigo-400;
       font-size: 1.2em;
       font-weight: 500;
       line-height: 1.4;
@@ -51,7 +51,7 @@
     }
 
     a {
-      color: $indigo-700;
+      color: $indigo-300;
       cursor: pointer;
     }
 
@@ -82,7 +82,7 @@
   .runnable {
     width: 100%;
     color: $gray-400;
-    background-color: $black;
+    background-color: $gray-1000;
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
@@ -176,7 +176,7 @@
 
     &.runnable-pending > div > .runnable-wrapper,
     &.runnable-pending > div > .runnable-instruments {
-      border-left: 5px solid darken($pending, 25%);
+      border-left: 5px solid $pending;
       padding-bottom: 0;
     }
 
@@ -248,7 +248,7 @@
         @include runnable-state-pending;
       }
       .runnable-title {
-        color: darken($pending, 25%);
+        color: $indigo-300;
       }
 
       .runnable-commands-region {
@@ -316,7 +316,7 @@
     }
 
     .runnable-controls-studio {
-      color: $indigo-700;
+      color: $indigo-300;
       opacity: 0;
       display: none;
     }
@@ -362,7 +362,7 @@
 
   .runnable-header {
     background: $gray-1000;
-    box-shadow: 0 2px 7px rgba($white, 0.25);
+    border-bottom: 1px solid $gray-900;
     display: block;
     font-size: 13px;
     line-height: 24px;
@@ -380,6 +380,10 @@
       color: $gray-700;
       display: inline;
       margin-right: 5px;
+    }
+
+    a, a:active, a:focus, a:hover {
+      color: $white;
     }
   }
 
@@ -478,27 +482,27 @@
 
       div:nth-child(1) {
         animation-delay:0.1s;
-        background: $jade-700;
+        background: $jade-400;
       }
 
       div:nth-child(2) {
         animation-delay:0.2s;
-        background: $indigo-700;
+        background: $indigo-400;
       }
 
       div:nth-child(3) {
         animation-delay:0.3s;
-        background: $red-600;
+        background: $red-400;
       }
 
       div:nth-child(4) {
         animation-delay:0.4s;
-        background: $orange-700;
+        background: $orange-400;
       }
 
       div:nth-child(5) {
         animation-delay:0.5s;
-        background: $gray-600;
+        background: $gray-400;
       }
 
       @keyframes scaling {

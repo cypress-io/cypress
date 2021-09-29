@@ -242,12 +242,8 @@
 
   .command-state-pending > span > .command-wrapper {
     border-left: 2px solid $indigo-800;
-    background-color: $indigo-1000;
+    background-color: $gray-900;
     cursor: default;
-
-    &:hover {
-      box-shadow: none;
-    }
 
     .command-wrapper-text {
       padding-left: 3px;
@@ -290,7 +286,7 @@
     background-color: $err-header-background;
 
     &:hover {
-      background: lighten($err-header-background, 2%);
+      background: $red-800;
     }
 
     .command-wrapper-text {
@@ -673,7 +669,7 @@
   }
 
   .command-is-pinned > span > .command-wrapper {
-    background: lighten($pinned, 40%);
+    background: $purple-1000;
     border-left: 2px solid $pinned;
 
     &,
@@ -682,7 +678,7 @@
     }
 
     &:hover {
-      background: lighten($pinned, 38%);
+      background: $purple-900;
     }
 
     .command-wrapper-text {
