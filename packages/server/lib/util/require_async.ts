@@ -14,10 +14,6 @@ let requireProcess: cp.ChildProcess | null
 interface RequireAsyncOptions{
   projectRoot: string
   loadErrorCode: string
-  /**
-   * members of the object returned that are functions and will need to be wrapped
-   */
-  functionNames: string[]
 }
 
 interface ChildOptions{

@@ -37,7 +37,7 @@ export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
-  browser: Browser
+  browser?: Browser['name']
   configFile?: string
   project: string // projectRoot
   projectRoot: string // same as above
@@ -46,6 +46,12 @@ export interface LaunchArgs {
   os: PlatformName
 
   onFocusTests?: () => any
+  /**
+   * in run mode, the path of the project run
+   * path is relative if specified with --project,
+   * absolute if implied by current working directory
+   */
+  runProject?: string
 }
 
 // @see https://github.com/cypress-io/cypress/issues/18094
@@ -456,7 +462,7 @@ export class OpenProject {
     try {
       await this.openProject.initializeConfig()
       await this.openProject.open()
-    } catch (err) {
+    } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throw(err.type, err.port)
       } else {

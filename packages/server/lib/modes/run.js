@@ -11,7 +11,6 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectStatic = require('../project_static')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const { openProject } = require('../open_project')
@@ -609,22 +608,21 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   return openProject.create(projectRoot, args, options)
 }
 
-const createAndOpenProject = function (socketId, options) {
+const createAndOpenProject = async function (socketId, options) {
   const { projectRoot, projectId } = options
 
-  return ProjectStatic.ensureExists(projectRoot, options)
-  .then(() => {
-    // open this project without
-    // adding it to the global cache
-    return openProjectCreate(projectRoot, socketId, options)
-  })
-  .call('getProject')
+  return openProjectCreate(projectRoot, socketId, options)
+  .then((open_project) => open_project.getProject())
   .then((project) => {
-    return Promise.props({
+    return Promise.all([
       project,
-      config: project.getConfig(),
-      projectId: getProjectId(project, projectId),
-    })
+      project.getConfig(),
+      getProjectId(project, projectId),
+    ]).then(([project, config, projectId]) => ({
+      project,
+      config,
+      projectId,
+    }))
   })
 }
 
