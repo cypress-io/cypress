@@ -394,7 +394,6 @@ module.exports = {
     .copyAsync(src, dest, { overwrite: true })
     .catch({ code: 'ENOENT' }, () => { })
   },
-  // dont yell about ENOENT errors
 
   get (screenshotsFolder) {
     // find all files in all nested dirs
