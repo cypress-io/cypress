@@ -87,15 +87,15 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
   })
 
-  it('handles CT specific behaviors', async function () {
+  it('sets CT specific defaults and calls CT function', async function () {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
-    const projectCt = new ProjectBase({ projectRoot: '../foo/bar', testingType: 'component' })
+    const projectCt = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'component' })
 
     await projectCt.initializeConfig()
 
-    return projectCt.open({}).then((project) => {
+    return projectCt.open({}).then(() => {
       expect(projectCt._cfg.viewportHeight).to.eq(500)
       expect(projectCt._cfg.viewportWidth).to.eq(500)
       expect(projectCt._cfg.baseUrl).to.eq('http://localhost:9999')
@@ -149,7 +149,8 @@ describe('lib/project-base', () => {
     const integrationFolder = 'foo/bar/baz'
 
     beforeEach(function () {
-      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder, browsers: [] })
+      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar', configFile: 'cypress.json' })
+      .resolves({ baz: 'quux', integrationFolder, browsers: [] })
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
