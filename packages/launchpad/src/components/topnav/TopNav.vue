@@ -43,20 +43,48 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="browsers">
-    <template #heading>
-      browser
+  <TopNavList v-if="browsers && selectedBrowser">
+    <template #heading="{ open }">
+      <div class="flex items-center gap-2 group-hocus:text-indigo-600">
+        <img
+          class="w-16px"
+          :src="selectedBrowser.icon"
+          :class="open ? '' : 'filter grayscale'"
+        >
+        <span>{{ selectedBrowser.displayName }} v{{ selectedBrowser.majorVersion }}</span>
+        <i-cy-chevron-down
+          class="w-2.5 transform"
+          :class="open ? 'rotate-180' : ''"
+        />
+      </div>
     </template>
     <TopNavListItem
       v-for="browser in browsers"
       :key="browser.id"
+      class="p-4 min-w-240px"
+      :class="browser.id === selectedBrowser.id ? 'bg-jade-50' : ''"
     >
       <template #prefix>
-        icon
+        <img
+          class="w-26px mr-4"
+          :src="browser.icon"
+        >
       </template>
-      <span>{{ browser.displayName }}</span>
-      <template #suffix>
-        append
+      <div>
+        <div class="text-indigo-600">
+          {{ browser.displayName }}
+        </div>
+        <div class="text-14px font-normal text-gray-500">
+          Version {{ browser.version }}
+        </div>
+      </div>
+      <template
+        v-if="selectedBrowser.id === browser.id"
+        #suffix
+      >
+        <div>
+          <i-cy-circle-check_x24 class="icon-dark-jade-200" />
+        </div>
       </template>
     </TopNavListItem>
   </TopNavList>
@@ -104,25 +132,14 @@
 
 <script setup lang="ts">
 
-import { gql, useQuery } from '@urql/vue'
 import _ from 'lodash'
 
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 
-import { TopNavDocument } from '../../generated/graphql'
-import { computed } from 'vue'
+import { useDetectedBrowsers } from '../../../../frontend-shared/src/composables/useDetectedBrowsers'
 
-gql`
-query TopNav {
-  app {
-    ...OpenBrowserList
-  }
-}
-`
-
-const query = useQuery({ query: TopNavDocument })
-const browsers = computed(() => query?.data?.value?.app?.browsers)
+const { browsers, selectedBrowser } = useDetectedBrowsers()
 
 const getUrl = (link) => {
   let result = link.url
