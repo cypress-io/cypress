@@ -308,14 +308,29 @@ describe('taking screenshots', () => {
     cy.visit('http://localhost:3322/color/yellow')
     cy.screenshot('overwrite-test', {
       overwrite: false,
+      clip: { x: 10, y: 10, width: 160, height: 80 },
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/overwrite-test.png`,
+      width: 160,
+      height: 80,
+      devicePixelRatio,
     })
 
     cy.screenshot('overwrite-test', {
       overwrite: true,
+      clip: { x: 10, y: 10, width: 100, height: 50 },
     })
 
-    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/overwrite-test.png`).should('exist')
     cy.readFile(`cypress/screenshots/${path.basename(__filename)}/overwrite-test (1).png`).should('not.exist')
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/overwrite-test.png`,
+      width: 100,
+      height: 50,
+      devicePixelRatio,
+    })
   })
 
   context('before hooks', () => {

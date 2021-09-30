@@ -60,7 +60,7 @@ describe('e2e screenshots', () => {
   // this tests that screenshots can be manually generated
   // and are also generated automatically on failure with
   // the test title as the file name
-  e2e.it('passes', {
+  e2e.it.only('passes', {
     spec: 'screenshots_spec.js',
     expectedExitCode: 5,
     snapshot: true,

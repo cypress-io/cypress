@@ -298,8 +298,9 @@ const getDimensions = function (details) {
   return pick(details.image.bitmap)
 }
 
-const ensureSafePath = function (withoutExt, extension, num = 0, overwrite) {
+const ensureSafePath = function (withoutExt, extension, overwrite, num = 0) {
   const suffix = `${(num && !overwrite) ? ` (${num})` : ''}.${extension}`
+
   const maxSafePrefixBytes = maxSafeBytes - suffix.length
   const filenameBuf = Buffer.from(path.basename(withoutExt))
 
@@ -316,7 +317,7 @@ const ensureSafePath = function (withoutExt, extension, num = 0, overwrite) {
   return fs.pathExists(fullPath)
   .then((found) => {
     if (found && !overwrite) {
-      return ensureSafePath(withoutExt, extension, num + 1, overwrite)
+      return ensureSafePath(withoutExt, extension, overwrite, num + 1)
     }
 
     // path does not exist, attempt to create it to check for an ENAMETOOLONG error
@@ -328,7 +329,7 @@ const ensureSafePath = function (withoutExt, extension, num = 0, overwrite) {
       if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
         maxSafeBytes -= 1
 
-        return ensureSafePath(withoutExt, extension, num, overwrite)
+        return ensureSafePath(withoutExt, extension, overwrite, num)
       }
 
       throw err
