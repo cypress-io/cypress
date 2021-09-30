@@ -257,7 +257,7 @@
       .command-method,
       .command-message,
       .command-pin {
-        color: lighten($pending, 15%);
+        color: $indigo-200;
       }
     }
 
@@ -418,7 +418,7 @@
         color: $pending;
 
         strong {
-          color: lighten($pending, 10%);
+          color: $indigo-300;
         }
       }
     }
@@ -434,7 +434,7 @@
         color: $fail;
 
         strong {
-          color: lighten($fail, 10%);
+          color: $red-300;
         }
       }
     }
@@ -449,10 +449,10 @@
         }
       }
       .command-message {
-        color: lighten($pass, 3%);
+        color: $jade-300;
 
         strong {
-          color: lighten($pass, 10%);
+          color: $jade-200;
         }
       }
     }

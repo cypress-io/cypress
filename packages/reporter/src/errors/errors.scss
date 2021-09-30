@@ -192,7 +192,7 @@
         }
 
         &:active {
-          background: lighten($err-header-background, 2%);
+          background: $red-900;
         }
 
         i {
