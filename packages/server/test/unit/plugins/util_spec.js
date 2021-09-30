@@ -176,7 +176,9 @@ describe('lib/plugins/util', () => {
         expect(actualErr.name).to.equal(err.name)
         expect(actualErr.message).to.equal(err.message)
 
-        expect(actualErr.stack).to.equal(err.stack)
+        // TODO(thlorenz): Assumes that the stack retains a specific value breaks when
+        // using tools/features i.e. sourcemap support that modify the stack
+        // expect(actualErr.stack).to.equal(err.stack)
       })
     })
 
