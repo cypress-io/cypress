@@ -139,7 +139,7 @@
       }
 
       div {
-        background: $red-1000;
+        background: $err-header-background;
         cursor: pointer;
         outline: none;
         padding: 7px 5px;
@@ -150,7 +150,7 @@
         }
 
         &:active {
-          background: lighten($err-header-background, 2%);
+          background: $err-header-background;
         }
 
         .collapsible-header-text {
@@ -175,7 +175,7 @@
       }
 
       div {
-        background: $red-1000;
+        background: $err-header-background;
         color: $gray-200;
         cursor: pointer;
         font-size: 13px;

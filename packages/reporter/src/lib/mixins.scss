@@ -6,7 +6,7 @@
 @mixin runnable-state-processing {
     @extend .far;
     @extend .#{$fa-css-prefix}-square;
-    color: #888;
+    color: $gray-500;
 
     // @extend .far overrides line-height, and so do many other specific selectors.
     line-height: 18px !important;
@@ -14,7 +14,7 @@
 
 @mixin runnable-state-skipped {
     @extend .#{$fa-css-prefix}-ban;
-    color: #888;
+    color: $gray-500;
 }
 
 @mixin runnable-state-failed {
@@ -29,10 +29,10 @@
 
 @mixin runnable-state-pending {
     @extend .#{$fa-css-prefix}-circle-notch;
-    color: lighten($pending, 20%);
+    color: $indigo-500;
 }
 
 @mixin studio-state-passed {
     @extend .#{$fa-css-prefix}-magic;
-    color: #3386d4;
+    color: $indigo-700;
 }
