@@ -669,7 +669,7 @@
   }
 
   .command-is-pinned > span > .command-wrapper {
-    background: $purple-1000;
+    background: $indigo-1000;
     border-left: 2px solid $pinned;
 
     &,
@@ -678,7 +678,7 @@
     }
 
     &:hover {
-      background: $purple-900;
+      background: $indigo-900;
     }
 
     .command-wrapper-text {

@@ -420,7 +420,8 @@
       margin-left: auto;
 
       .studio-copy {
-        color: $indigo-700;
+        background-color: $indigo-50;
+        color: $indigo-500;
         display: none;
         font-size: 16px;
         padding: 3px 10px;
@@ -430,7 +431,7 @@
         }
 
         &:hover, &:focus {
-          color: lighten($indigo-700, 5%);
+          background-color: $indigo-100;
         }
 
         &.studio-copy-success {
@@ -440,27 +441,29 @@
         &[disabled],
         &[disabled]:hover,
         &[disabled]:active {
-          color: $indigo-700;
-          opacity: 0.5;
+          color: $white;
+          background-color: $gray-500;
+          cursor: not-allowed;
         }
       }
     }
 
     .studio-save {
-      background-color: $indigo-700;
-      color: $black;
+      background-color: $indigo-500;
+      color: $white;
       display: none;
       margin-left: 4px;
 
       &:hover {
-        background-color: lighten($indigo-700, 10%);
+        background-color: $indigo-400;
       }
 
       &[disabled],
       &[disabled]:hover,
       &[disabled]:active {
-        background-color: $indigo-700;
-        opacity: 0.5;
+        color: $white;
+        background-color: $gray-500;
+        cursor: not-allowed;
       }
     }
   }

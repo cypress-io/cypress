@@ -28,14 +28,14 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
   }
 
   a {
-    color: $indigo-600;
+    color: $indigo-400;
     text-decoration: none;
     outline: none;
 
     &:hover,
     &:active,
     &:focus {
-      color: $indigo-500;
+      color: $indigo-300;
       text-decoration: underline;
       outline: inherit;
     }
