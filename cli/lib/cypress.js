@@ -70,7 +70,7 @@ const cypressModuleApi = {
   },
 
   /**
-   * provides automatic code completion for configuration in many popular code editors. 
+   * provides automatic code completion for configuration in many popular code editors.
    * While it's not strictly necessary for Cypress to parse your configuration, we
    * recommend wrapping your config object with `defineConfig()`
    * @example
