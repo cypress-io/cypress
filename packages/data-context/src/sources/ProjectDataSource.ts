@@ -35,7 +35,7 @@ export class ProjectDataSource {
       }
 
       // unexpected error
-      throw Error(e)
+      throw err
     }
   }
 }

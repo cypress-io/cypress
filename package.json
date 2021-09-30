@@ -207,6 +207,7 @@
     "semantic-release": "17.2.3",
     "semantic-release-monorepo": "7.0.3",
     "semver": "7.3.2",
+    "serve": "12.0.1",
     "shelljs": "0.8.3",
     "shx": "0.3.3",
     "sinon": "7.3.2",
@@ -218,6 +219,7 @@
     "terminal-banner": "1.1.0",
     "through": "2.3.8",
     "through2": "^4.0.2",
+    "tree-kill": "1.2.2",
     "ts-node": "8.3.0",
     "typescript": "^4.2.3",
     "yarn-deduplicate": "3.1.0"

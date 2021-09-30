@@ -58,6 +58,12 @@ module.exports = {
   },
 
   isNeeded () {
+    // Used when we're using Cypress to test Cypress - the headless Cypress
+    // doesn't need Xvfb
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+      return false
+    }
+
     if (process.env.ELECTRON_RUN_AS_NODE) {
       debug('Environment variable ELECTRON_RUN_AS_NODE detected, xvfb is not needed')
 

@@ -8,6 +8,7 @@ import {
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
+import { GRAPHQL_URL } from '../utils/env'
 
 export function makeCacheExchange () {
   return graphcacheExchange({
@@ -38,7 +39,7 @@ export function makeUrqlClient (): Client {
   }
 
   return createClient({
-    url: 'http://localhost:52159/graphql',
+    url: GRAPHQL_URL,
     requestPolicy: 'cache-and-network',
     exchanges,
   })
