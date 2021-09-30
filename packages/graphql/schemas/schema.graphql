@@ -33,7 +33,7 @@ type Browser implements Node {
   """Relay style Node ID field for the Browser field"""
   id: ID!
   isSelected: Boolean!
-  majorVersion: String
+  majorVersion(prefix: String): String
   name: String!
   path: String!
   version: String!
@@ -267,6 +267,9 @@ type Mutation {
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
+
+  """Clears the active project, returning to global mode"""
+  clearActiveProject: Query
 
   """
   Initializes open_project global singleton to manager current project state

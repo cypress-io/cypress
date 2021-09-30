@@ -8,6 +8,10 @@ export interface AppApiShape {
 export class AppActions {
   constructor (private ctx: DataContext) {}
 
+  async clearActiveProject () {
+    this.ctx.coreData.app.activeProject = null
+  }
+
   async setActiveBrowser (id: string) {
     const browserId = this.ctx.fromId(id, 'Browser')
 

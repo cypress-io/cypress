@@ -1,4 +1,4 @@
-import { objectType } from 'nexus'
+import { objectType, stringArg } from 'nexus'
 import { BrowserFamilyEnum } from '../enumTypes/gql-BrowserFamilyEnum'
 
 export const Browser = objectType({
@@ -20,7 +20,19 @@ export const Browser = objectType({
       type: BrowserFamilyEnum,
     })
 
-    t.string('majorVersion')
+    t.string('majorVersion', {
+      args: {
+        prefix: stringArg(),
+      },
+      resolve: (source, args) => {
+        if (args.prefix && source.majorVersion) {
+          return `${args.prefix}${source.majorVersion}`
+        }
+
+        return source.majorVersion ?? null
+      },
+    })
+
     t.nonNull.string('name')
     t.nonNull.string('path')
     t.nonNull.string('version')

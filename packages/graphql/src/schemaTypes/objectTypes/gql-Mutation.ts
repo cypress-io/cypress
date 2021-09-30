@@ -1,9 +1,20 @@
 import { idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { Query } from '.'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('clearActiveProject', {
+      type: Query,
+      description: 'Clears the active project, returning to global mode',
+      resolve: (root, args, ctx) => {
+        ctx.actions.app.clearActiveProject()
+
+        return {}
+      },
+    })
+
     t.field('wizardSetTestingType', {
       type: Wizard,
       description: 'Sets the current testing type we want to use',
