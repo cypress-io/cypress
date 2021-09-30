@@ -57,7 +57,7 @@ function getDirectoryPath (files: FileList) {
   return path.substring(0, path.lastIndexOf('/'))
 }
 
-const emits = defineEmits(['update:modelValue', 'new-project'])
+const emits = defineEmits(['update:modelValue'])
 
 const localValue = useModelWrapper(props, emits, 'modelValue')
 </script>
