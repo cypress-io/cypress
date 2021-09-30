@@ -145,7 +145,7 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
   async function _runCypressLaunchpad () {
-    await new Promise((resolve) => setTimeout(resolve), 1000)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     wrapRunWithExit(await runCypressLaunchpad())
   },
 ))
