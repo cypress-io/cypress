@@ -203,7 +203,7 @@ class ProxyRequest {
     }
 
     // ensure these fields are always ordered correctly regardless of when they are added
-    ['Response Status Code', 'Response Headers', 'Response Body', 'Request Headers', 'Request Body'].map((k) => delete consoleProps[k])
+    ['Response Status Code', 'Response Headers', 'Response Body', 'Request Headers', 'Request Body'].forEach((k) => delete consoleProps[k])
 
     // details on request
     consoleProps['Request Headers'] = this.preRequest.headers
