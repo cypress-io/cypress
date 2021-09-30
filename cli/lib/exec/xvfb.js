@@ -58,6 +58,10 @@ module.exports = {
   },
 
   isNeeded () {
+    if (process.env.DISABLE_XVFB) {
+      return false
+    }
+
     if (process.env.ELECTRON_RUN_AS_NODE) {
       debug('Environment variable ELECTRON_RUN_AS_NODE detected, xvfb is not needed')
 
