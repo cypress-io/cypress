@@ -22,7 +22,6 @@ export const ENV_VARS = {
     CYPRESS_INTERNAL_GQL_PORT: `52300`,
     CYPRESS_INTERNAL_ENV: 'staging', // Different than DEV, which will default to "development". TODO: Make this do less things internall
     CYPRESS_INTERNAL_E2E_TESTING_SELF: `true`,
-    DISABLE_XVFB: `1`,
   },
 
   // Uses the "built" vite assets, not the served ones

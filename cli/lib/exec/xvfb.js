@@ -58,7 +58,9 @@ module.exports = {
   },
 
   isNeeded () {
-    if (process.env.DISABLE_XVFB) {
+    // Used when we're using Cypress to test Cypress - the headless Cypress
+    // doesn't need Xvfb
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
       return false
     }
 
