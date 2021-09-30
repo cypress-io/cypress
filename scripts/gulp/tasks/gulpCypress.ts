@@ -1,63 +1,135 @@
+/**
+ * How the Cypress backend is started and watched. Formerly
+ * `node scripts/cypress.js open` or `node scripts/cypress.js run`
+ *
+ * @summary Gulp tasks to run the Cypress app.
+ */
+
 import chokidar from 'chokidar'
 import path from 'path'
-import childProcess, { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 
 import { monorepoPaths } from '../monorepoPaths'
-import { getGulpGlobal } from '../gulpConstants'
+import { ENV_VARS, getGulpGlobal } from '../gulpConstants'
+import { forked } from '../utils/childProcessUtils'
+import { exitAndRemoveProcess } from './gulpRegistry'
+import type { ChildProcess } from 'child_process'
 
-/**
- * Starts cypress, but watches the GraphQL files & restarts the server
- * when any of those change
- */
-export function startCypressWatch () {
-  const shouldWatch = getGulpGlobal('shouldWatch')
+const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
 
-  const watcher = shouldWatch ? chokidar.watch([
+/**------------------------------------------------------------------------
+ *                            Cypress CLI
+ * Starts Cypress, like a user would.
+ *  * openCypress - Normal `cypress open` command
+ *  * runCypress - Normal `cypress run` command
+ *------------------------------------------------------------------------**/
+
+export async function openCypressLaunchpad () {
+  return spawnCypressWithMode('open', 'dev', ENV_VARS.DEV_OPEN, ['--project', monorepoPaths.pkgLaunchpad])
+}
+
+export async function openCypressApp () {
+  return spawnCypressWithMode('open', 'dev', ENV_VARS.DEV_OPEN, ['--project', monorepoPaths.pkgApp])
+}
+
+export async function runCypressLaunchpad () {
+  return spawnCypressWithMode('run', 'dev', ENV_VARS.PROD, ['--project', monorepoPaths.pkgLaunchpad])
+}
+
+export async function runCypressApp () {
+  return spawnCypressWithMode('run', 'dev', ENV_VARS.PROD, ['--project', monorepoPaths.pkgApp])
+}
+
+export async function runCypressProd () {
+  return spawnCypressWithMode('run', 'prod', ENV_VARS.PROD)
+}
+
+/**------------------------------------------------------------------------
+ *                             Testing Tasks
+ * Building and running the Cypress app and graphql server for testing.
+ *  * startCypressForTest - Start the Cypress server, but without watching
+ *  * runCypressAgainstDist - Serve the dist'd frontend over file://
+ *------------------------------------------------------------------------**/
+
+// Use the GQL Test Port (52300 by default, defined in ./gulp/gulpConstants)
+// Spawns Cypress in "Test Cypress within Cypress" mode
+export async function startCypressForTest () {
+  return spawnCypressWithMode('open', 'test', ENV_VARS.E2E_TEST_TARGET)
+}
+
+export async function runCypressAgainstDist () {
+  return spawnCypressWithMode('run', 'test', ENV_VARS.E2E_TEST_TARGET)
+}
+
+/**------------------------------------------------------------------------
+ *                         Start and Watch Utils
+ *  * spawnCypressWithMode - Formerly known as: `node ./scripts/cypress.js run`
+ *  * watchCypress - Watch the dev server and graphql files
+ *------------------------------------------------------------------------**/
+
+async function spawnCypressWithMode (
+  mode: 'open' | 'run',
+  type: 'dev' | 'prod' | 'test',
+  env: Record<string, string> = {},
+  additionalArgv: string[] = [],
+) {
+  let argv = process.argv.slice(3).concat(additionalArgv)
+
+  const debugFlag = getGulpGlobal('debug')
+
+  if (debugFlag) {
+    env = { ...env, CYPRESS_INTERNAL_DEV_DEBUG: debugFlag }
+  }
+
+  if (mode === 'open') {
+    if (!argv.includes('--project') && !argv.includes('--global')) {
+      argv.push('--global')
+    }
+
+    // If we've passed --record, it's for a "run" mode, probably in the same pipeline.
+    if (argv.includes('--record')) {
+      argv = argv.slice(0, argv.indexOf('--record'))
+    }
+  }
+
+  if (!argv.includes('--dev')) {
+    argv.push('--dev')
+  }
+
+  const finalEnv = {
+    ...process.env,
+    ...env,
+    LAUNCHPAD: '1',
+  }
+
+  return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {
+    env: finalEnv,
+    waitForData: false,
+  })
+}
+
+/**------------------------------------------------------------------------
+ *                            Watch Commands
+ * Starts Cypress, but watches the GraphQL files, and restarts the server.
+ *  * startCypressWatch - Normal `cypress open` command, with watching
+ *------------------------------------------------------------------------**/
+
+export async function startCypressWatch () {
+  const watcher = chokidar.watch([
     'packages/graphql/src/**/*.{js,ts}',
     'packages/server/lib/graphql/**/*.{js,ts}',
   ], {
     cwd: monorepoPaths.root,
     ignored: /\.gen\.ts/,
     ignoreInitial: true,
-  }) : null
-
-  let child: ChildProcess | null = null
+  })
 
   let isClosing = false
   let isRestarting = false
+  let child: ChildProcess | null = null
 
-  const argv = process.argv.slice(3)
-  const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
-
-  function openServer () {
-    if (child) {
-      child.removeAllListeners()
-    }
-
-    if (!argv.includes('--project') && !argv.includes('--global')) {
-      argv.push('--global')
-    }
-
-    if (!argv.includes('--dev')) {
-      argv.push('--dev')
-    }
-
-    const debugFlag = getGulpGlobal('debug')
-
-    if (debugFlag) {
-      process.env.CYPRESS_INTERNAL_DEV_DEBUG = debugFlag
-    }
-
-    child = childProcess.fork(pathToCli, ['open', ...argv], {
-      stdio: 'inherit',
-      execArgv: [],
-      env: {
-        ...process.env,
-        LAUNCHPAD: '1',
-        CYPRESS_INTERNAL_DEV_WATCH: shouldWatch ? 'true' : undefined,
-      },
-    })
+  async function startCypressWithListeners () {
+    child = await spawnCypressWithMode('open', 'dev', ENV_VARS.DEV)
 
     child.on('exit', (code) => {
       if (isClosing) {
@@ -78,27 +150,49 @@ export function startCypressWatch () {
     const dfd = pDefer()
 
     if (child) {
-      child.on('exit', dfd.resolve)
       isRestarting = true
-      child.send('close')
+      child.on('exit', dfd.resolve)
+      await exitAndRemoveProcess(child)
     } else {
       dfd.resolve()
     }
 
     await dfd.promise
+
+    if (child) {
+      child.removeAllListeners()
+    }
+
+    await startCypressWithListeners()
     isRestarting = false
-    openServer()
   }
 
-  if (shouldWatch) {
-    watcher?.on('add', restartServer)
-    watcher?.on('change', restartServer)
-  }
+  watcher.on('add', restartServer)
+  watcher.on('change', restartServer)
 
-  openServer()
+  await startCypressWithListeners()
 
   process.on('beforeExit', () => {
     isClosing = true
-    child?.send('close')
+    watcher.close()
+  })
+}
+
+export function wrapRunWithExit (proc: ChildProcess) {
+  function killAndExit (code: number) {
+    process.exit(code)
+  }
+
+  proc.on('exit', (code) => {
+    killAndExit(code ?? 0)
+  })
+
+  proc.on('error', (err) => {
+    console.error({ err })
+    killAndExit(1)
+  })
+
+  proc.on('disconnect', () => {
+    console.error('disconnected')
   })
 }
