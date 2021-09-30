@@ -29,10 +29,12 @@ import * as config from '../config'
 import auth from './auth'
 import user from '../user'
 import { openProject } from '../open_project'
+import specsUtil from '../util/specs'
 
 import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
+import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
-import type { FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
 import { makeDataContext } from '@packages/data-context'
 import browserUtils from '../browsers/utils'
@@ -529,8 +531,14 @@ module.exports = {
         initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
           return openProject.create(args.projectRoot, args, options, browsers)
         },
-        insertProject () {
-          // TODO
+        insertProjectToCache (projectRoot: string) {
+          insertProject(projectRoot)
+        },
+        getProjectRootsFromCache () {
+          return getProjectRoots()
+        },
+        findSpecs (payload: FindSpecs) {
+          return specsUtil.findSpecs(payload)
         },
       },
     })
@@ -538,6 +546,8 @@ module.exports = {
     // Fetch the browsers when the app starts, so we have some by
     // the time we're continuing.
     ctx.actions.app.refreshBrowsers()
+    // load projects from cache on start
+    ctx.actions.project.loadProjects()
 
     setDataContext(ctx)
   },

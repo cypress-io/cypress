@@ -1,11 +1,13 @@
-import type { MutationAppCreateConfigFileArgs } from '@packages/graphql/src/gen/nxs.gen'
-import type { FoundBrowser, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
+import type { Maybe } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
+  findSpecs(payload: FindSpecs): Promise<FoundSpec[]>
   /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
@@ -13,7 +15,8 @@ export interface ProjectApiShape {
    */
   initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
-  insertProject(projectRoot: string): void
+  insertProjectToCache(projectRoot: string): void
+  getProjectRootsFromCache(): Promise<string[]>
 }
 
 export class ProjectActions {
@@ -36,8 +39,38 @@ export class ProjectActions {
     return this
   }
 
+  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
+    const config = await this.ctx.loaders.projectConfig(projectRoot)
+    const specs = await this.api.findSpecs({
+      projectRoot,
+      fixturesFolder: config.fixturesFolder ?? false,
+      supportFile: config.supportFile ?? false,
+      testFiles: config.testFiles ?? [],
+      ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
+      componentFolder: config.componentFolder ?? false,
+      integrationFolder: config.integrationFolder ?? '',
+    })
+
+    if (!specType) {
+      return specs
+    }
+
+    return specs.filter((spec) => spec.specType === specType)
+  }
+
+  async loadProjects () {
+    const projectRoots = await this.ctx._apis.projectApi.getProjectRootsFromCache()
+
+    this.ctx.coreData.app.projects = [
+      ...this.ctx?.coreData?.app?.projects,
+      ...projectRoots.map((projectRoot) => ({ projectRoot })),
+    ]
+
+    return this.ctx.coreData.app.projects
+  }
+
   async initializeActiveProject () {
-    if (!this.ctx.activeProject || !this.ctx.wizardData.chosenTestingType) {
+    if (!this.ctx.activeProject?.projectRoot || !this.ctx.wizardData.chosenTestingType) {
       throw Error('Cannot initialize project without an active project')
     }
 
@@ -47,9 +80,13 @@ export class ProjectActions {
 
     const browsers = [...(this.ctx.browserList ?? [])]
 
-    await this.api.initializeProject(
-      { ...this.ctx.launchArgs, testingType: this.ctx.wizardData.chosenTestingType }, this.ctx.launchOptions, browsers,
-    )
+    const launchArgs: LaunchArgs = {
+      ...this.ctx.launchArgs,
+      projectRoot: this.ctx.activeProject.projectRoot,
+      testingType: this.ctx.wizardData.chosenTestingType,
+    }
+
+    await this.api.initializeProject(launchArgs, this.ctx.launchOptions, browsers)
   }
 
   createProject () {
@@ -61,6 +98,7 @@ export class ProjectActions {
 
     if (!found) {
       this.ctx.coreData.app.projects.push({ projectRoot })
+      this.ctx._apis.projectApi.insertProjectToCache(projectRoot)
     }
 
     await this.setActiveProject(projectRoot)
