@@ -385,38 +385,31 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
-  run-launchpad-integration-tests:
+  run-new-ui-tests:
     parameters:
+      package:
+        description: package to target
+        type: enum
+        enum: ['launchpad', 'app']
       browser:
         description: browser shortname to target
         type: string
-    steps:
-      - restore_cached_workspace
-      - run: yarn workspace @packages/launchpad cypress:run:e2e --browser <<parameters.browser>>
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: ./packages/launchpad/cypress/videos
-      - store-npm-logs
-
-  run-launchpad-component-tests:
-    parameters:
-      browser:
-        description: browser shortname to target
-        type: string
+      type:
+        description: ct or e2e
+        type: enum
+        enum: ['ct', 'e2e']
     steps:
       - restore_cached_workspace
       - run: 
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            yarn workspace @packages/launchpad cypress:run:ct --browser <<parameters.browser>> --record --parallel
+            yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: ./packages/launchpad/cypress/videos
       - store-npm-logs
-
 
   run-runner-ct-integration-tests:
     parameters:
@@ -1182,17 +1175,39 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
-    parallelism: 1
+    parallelism: 3
     steps:
-      - run-launchpad-component-tests:
+      - run-new-ui-tests:
           browser: chrome
+          package: launchpad
+          type: ct
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: launchpad
+          type: e2e
+
+  run-app-component-tests-chrome:
+    <<: *defaults
     parallelism: 3
     steps:
-      - run-launchpad-integration-tests:
+      - run-new-ui-tests:
           browser: chrome
+          package: app
+          type: ct
+
+  run-app-integration-tests-chrome:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          package: app
+          type: e2e
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -2091,6 +2106,15 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-launchpad-component-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
+    - run-app-integration-tests-chrome:
+        context: test-runner:launchpad-tests
+        requires:
+          - build
+    - run-app-component-tests-chrome:
+        context: test-runner:launchpad-tests
         requires:
           - build
     - desktop-gui-integration-tests-2x:
