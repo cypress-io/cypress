@@ -1,3 +1,5 @@
+$code-border-radius: 4px;
+
 .reporter {
   .error {
     background-color: $gray-1000;
@@ -84,14 +86,15 @@
   .runnable-err-header {
     display: flex;
     justify-content: space-between;
-    background-color: $err-header-background;
+    background-color: rgba($gray-1000, 0.5);
     padding: 5px 10px;
     font-weight: bold;
 
     .runnable-err-name {
       flex-grow: 2;
       font-size: 13px;
-      line-height: 22px;;
+      line-height: 22px;
+      color: $err-header-text;
 
       i {
         font-size: 10px;
@@ -146,11 +149,11 @@
         width: 100%;
 
         &:hover {
-          background: $red-900;
+          background: $gray-800;
         }
 
         &:active {
-          background: $red-900;
+          background: $gray-800;
         }
 
         .collapsible-header-text {
@@ -226,8 +229,9 @@
   }
 
   .test-err-code-frame {
-    background-color: $black;
-    border: 1px solid $red-900;
+    background-color: $gray-1000;
+    border: 1px solid $gray-800;
+    border-radius: $code-border-radius;
     margin: 0 10px 10px;
 
     .runnable-err-file-path {
@@ -238,7 +242,9 @@
         margin-right: 5px;
       }
 
-      background: $gray-1000;
+      background: rgba($gray-900, 0.5);
+      border-top-left-radius: $code-border-radius;
+      border-top-right-radius: $code-border-radius;
       display: block;
       font-size: 13px;
       line-height: 24px;
@@ -248,6 +254,8 @@
 
     pre {
       border: 0;
+      border-bottom-left-radius: $code-border-radius;
+      border-bottom-right-radius: $code-border-radius;
       padding-left: 10px;
     }
   }
