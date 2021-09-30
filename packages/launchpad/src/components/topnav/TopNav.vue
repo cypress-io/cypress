@@ -1,11 +1,13 @@
 <template>
   <TopNavList v-if="versionList">
     <template #heading>
-      {{ versionList[0].version }}
+      v{{ versionList[0].version }}
     </template>
     <TopNavListItem
       v-for="(item, index) in versionList"
       :key="item.version"
+      class="p-4 min-w-240px"
+      :class="index ? '' : 'bg-jade-50'"
     >
       <div class="whitespace-nowrap">
         <a
@@ -19,11 +21,16 @@
         v-if="!index"
         #suffix
       >
-        check
+        <div>
+          <i-cy-circle-check_x24 class="icon-dark-jade-200" />
+        </div>
       </template>
     </TopNavListItem>
     <TopNavListItem class="text-center p-4">
-      <a :href="releasesUrl">See all releases</a>
+      <a
+        :href="releasesUrl"
+        class="whitespace-nowrap"
+      >See all releases</a>
     </TopNavListItem>
   </TopNavList>
 
@@ -51,14 +58,14 @@
         <i-cy-life-ring_x16
           class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         />
-        <span>Docs {{ open }}</span>
+        <span>Docs</span>
         <i-cy-chevron-down
           class="w-2.5 transform"
           :class="open ? 'rotate-180' : ''"
         />
       </div>
     </template>
-    <div class="flex gap-24px">
+    <div class="flex gap-24px p-4">
       <div
         v-for="list in docsMenu"
         :key="list.title"

@@ -12,7 +12,7 @@
       </slot>
     </PopoverButton>
     <TransitionQuickFade>
-      <PopoverPanel class="absolute right-0 z-10 p-4 bg-white shadow rounded">
+      <PopoverPanel class="absolute right-0 z-10 bg-white shadow rounded">
         <ul
           v-if="variant !== 'panel'"
           class="flex flex-col"
