@@ -1,7 +1,16 @@
 <template>
   <TopNavList v-if="versionList">
-    <template #heading>
-      v{{ versionList[0].version }}
+    <template #heading="{ open }">
+      <div class="flex items-center gap-2 group-hocus:text-indigo-600">
+        <i-cy-box_x16
+          class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        />
+        <span>v{{ versionList[0].version }}</span>
+        <i-cy-chevron-down
+          class="w-2.5 transform"
+          :class="open ? 'rotate-180' : ''"
+        />
+      </div>
     </template>
     <TopNavListItem
       v-for="(item, index) in versionList"
