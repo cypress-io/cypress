@@ -11,7 +11,8 @@ import * as stubData from '../../src/graphql/testStubData'
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 import { each } from 'lodash'
 import 'cypress-file-upload'
-import { navigationMenu } from '../../src/graphql/testNavigationMenu'
+import { navigationMenu as stubNavigationMenu } from '../../src/graphql/testNavigationMenu'
+import { mutation as Mutation } from '../../src/graphql/testMutation'
 import { query as stubQuery } from '../../src/graphql/testQuery'
 import { wizard as stubWizard } from '../../src/graphql/testWizard'
 import { app as stubApp } from '../../src/graphql/testApp'
@@ -34,7 +35,8 @@ const createContext = (): ClientTestContext => {
     stubCloudData,
     stubData,
     stubQuery,
-    navigationMenu,
+    stubNavigationMenu,
+    Mutation,
   }
 }
 

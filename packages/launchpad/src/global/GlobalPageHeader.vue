@@ -5,14 +5,14 @@
     class="min-w-200px w-80% flex-grow"
     :placeholder="t('globalPage.searchPlaceholder')"
   />
-  <Input
+  <input
     ref="fileInputRef"
     type="file"
     class="hidden"
     webkitdirectory
     webkit-relative-path
     @change="handleFileSelection"
-  />
+  >
   <Button
     :prefix-icon="IconPlus"
     aria-controls="fileupload"
