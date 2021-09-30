@@ -1191,14 +1191,14 @@ jobs:
           package: launchpad
           type: e2e
 
-  run-app-component-tests-chrome:
-    <<: *defaults
-    parallelism: 3
-    steps:
-      - run-new-ui-tests:
-          browser: chrome
-          package: app
-          type: ct
+  # run-app-component-tests-chrome:
+  #   <<: *defaults
+  #   parallelism: 1
+  #   steps:
+  #     - run-new-ui-tests:
+  #         browser: chrome
+  #         package: app
+  #         type: ct
 
   run-app-integration-tests-chrome:
     <<: *defaults
@@ -2113,10 +2113,10 @@ linux-workflow: &linux-workflow
         context: test-runner:launchpad-tests
         requires:
           - build
-    - run-app-component-tests-chrome:
-        context: test-runner:launchpad-tests
-        requires:
-          - build
+    # - run-app-component-tests-chrome:
+    #     context: test-runner:launchpad-tests
+    #     requires:
+    #       - build
     - desktop-gui-integration-tests-2x:
         requires:
           - build
