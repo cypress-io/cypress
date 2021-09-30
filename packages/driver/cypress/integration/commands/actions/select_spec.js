@@ -112,6 +112,14 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('unselects all options if called with empty array', () => {
+      cy.get('select[name=movies]').select(['apoc', 'br'])
+
+      cy.get('select[name=movies]').select([]).then(($select) => {
+        expect($select.val()).to.deep.eq([])
+      })
+    })
+
     // readonly should only be limited to inputs, not checkboxes
     it('can select a readonly select', () => {
       cy.get('select[name=hunter]').select('gon').then(($select) => {
@@ -503,17 +511,6 @@ describe('src/cy/commands/actions/select', () => {
         })
 
         cy.get('select[name=foods]').select('')
-      })
-
-      it('throws invalid array argument error when called with empty array', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[]`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
-
-          done()
-        })
-
-        cy.get('select[name=foods]').select([])
       })
 
       it('throws invalid array argument error when called with invalid array', (done) => {
