@@ -642,6 +642,24 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
+    case 'COULD_NOT_INSERT_IN_CONFIG_FILE':
+      return stripIndent`\
+        Cypress was unable to insert those values in your configuration. You should try and add them yourself:
+
+        ${chalk.yellow(arg1)}
+
+        Open the file here
+        
+        ${chalk.yellow(arg2)}`
+    case 'COULD_NOT_UPDATE_IN_CONFIG_FILE':
+      return stripIndent`\
+            Cypress was unable to update the following values in your configuration.
+    
+            ${chalk.yellow(arg1)}
+    
+            Open the config file here
+            
+            ${chalk.yellow(arg2)}`
     // general configuration error not-specific to configuration or plugins files
     case 'CONFIG_VALIDATION_ERROR':
       return stripIndent`\

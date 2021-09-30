@@ -2,7 +2,7 @@ import * as path from 'path'
 import '../../spec_helper'
 
 import { fs } from '../../../lib/util/fs'
-import { insertValuesInConfigFile } from '../../../lib/util/config-file-updater'
+import { insertValueInJSString, insertValuesInConfigFile } from '../../../lib/util/config-file-updater'
 const projectRoot = process.cwd()
 const defaultOptions = {
   configFile: 'cypress.json',
@@ -63,5 +63,156 @@ describe('lib/util/config-file-updater', () => {
   })
 
   context('with js files', () => {
+    describe('#insertValueInJSString', () => {
+      describe('es6 vs es5', () => {
+        it('finds the object litteral and adds the values to it es6', async () => {
+          const src = ['export default {',
+            '  foo: 42',
+            '}'].join('\n')
+          const expectedOutput = ['export default {',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  foo: 42',
+            '}'].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('finds the object litterla and adds the values to it es5', async () => {
+          const src = ['module.exports = {',
+            '  foo: 42',
+            '}'].join('\n')
+          const expectedOutput = ['module.exports = {',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  foo: 42',
+            '}'].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+      })
+
+      describe('defineConfig', () => {
+        it('skips defineConfig and add to the object inside', async () => {
+          const src = [
+            'import { defineConfig } from "cypress"',
+            'export default defineConfig({',
+            '  foo: 42',
+            '})',
+          ].join('\n')
+          const expectedOutput = [
+            'import { defineConfig } from "cypress"',
+            'export default defineConfig({',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  foo: 42',
+            '})',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('skips defineConfig even if it renamed in an import (es6)', async () => {
+          const src = [
+            'import { defineConfig as cy_defineConfig } from "cypress"',
+            'export default cy_defineConfig({',
+            '  foo: 42',
+            '})',
+          ].join('\n')
+          const expectedOutput = [
+            'import { defineConfig as cy_defineConfig } from "cypress"',
+            'export default cy_defineConfig({',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  foo: 42',
+            '})',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('skips defineConfig even if it renamed in a require (es5)', async () => {
+          const src = [
+            'const { defineConfig: cy_defineConfig } = require("cypress")',
+            'module.exports = cy_defineConfig({',
+            '  foo: 42',
+            '})',
+          ].join('\n')
+          const expectedOutput = [
+            'const { defineConfig: cy_defineConfig } = require("cypress")',
+            'module.exports = cy_defineConfig({',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  foo: 42',
+            '})',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+      })
+
+      describe('updates', () => {
+        it('updates a value if the same value is found in resolved config', async () => {
+          const src = [
+            'module.exports = {',
+            '  foo: 42',
+            '}',
+          ].join('\n')
+          const expectedOutput = [
+            'module.exports = {',
+            '  foo: 1000',
+            '}',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { foo: 1000 }, { foo: 42 }, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('updates values and inserts config', async () => {
+          const src = [
+            'export default {',
+            '  foo: 42,',
+            '  bar: 84,',
+            '  component: {',
+            '    devServer(){',
+            '      return null',
+            '    }',
+            '  }',
+            '}',
+          ].join('\n')
+          const expectedOutput = [
+            'export default {',
+            '  projectId: "id1234",',
+            '  foo: 1000,',
+            '  bar: 3000,',
+            '  component: {',
+            '    devServer(){',
+            '      return null',
+            '    }',
+            '  }',
+            '}',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { foo: 1000, bar: 3000, projectId: 'id1234' }, { foo: 42, bar: 84 }, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+      })
+
+      describe('failures', () => {
+
+      })
+    })
   })
 })
