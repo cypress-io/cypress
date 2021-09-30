@@ -185,7 +185,7 @@ describe('lib/util/config-file-updater', () => {
             '  foo: 42,',
             '  bar: 84,',
             '  component: {',
-            '    devServer(){',
+            '    devServer() {',
             '      return null',
             '    }',
             '  }',
@@ -197,7 +197,7 @@ describe('lib/util/config-file-updater', () => {
             '  foo: 1000,',
             '  bar: 3000,',
             '  component: {',
-            '    devServer(){',
+            '    devServer() {',
             '      return null',
             '    }',
             '  }',
@@ -211,7 +211,72 @@ describe('lib/util/config-file-updater', () => {
       })
 
       describe('failures', () => {
+        it('should fail if not an object litteral', () => {
+          const src = [
+            'const foo = {}',
+            'export default foo',
+          ].join('\n')
 
+          return insertValueInJSString(src, { bar: 10 }, {}, 'path/to/config.js')
+          .then(() => {
+            throw Error('this should not succeed')
+          })
+          .catch((err) => {
+            expect(err).to.have.property('type', 'COULD_NOT_INSERT_IN_CONFIG_FILE')
+          })
+        })
+
+        it('should fail if one of the values to update is not a literal', () => {
+          const src = [
+            'const bar = 12',
+            'export default {',
+            '  foo: bar',
+            '}',
+          ].join('\n')
+
+          return insertValueInJSString(src, { foo: 10 }, { foo: 12 }, 'path/to/config.js')
+          .then(() => {
+            throw Error('this should not succeed')
+          })
+          .catch((err) => {
+            expect(err).to.have.property('type', 'COULD_NOT_UPDATE_CONFIG_FILE')
+          })
+        })
+
+        it('should fail with inlined values', () => {
+          const src = [
+            'const foo = 12',
+            'export default {',
+            '  foo',
+            '}',
+          ].join('\n')
+
+          return insertValueInJSString(src, { foo: 10 }, { foo: 12 }, 'path/to/config.js')
+          .then(() => {
+            throw Error('this should not succeed')
+          })
+          .catch((err) => {
+            expect(err).to.have.property('type', 'COULD_NOT_UPDATE_CONFIG_FILE')
+          })
+        })
+
+        it('should fail if there is a spread', () => {
+          const src = [
+            'const foo = { bar: 12 }',
+            'export default {',
+            '  bar: 8,',
+            '  ...foo',
+            '}',
+          ].join('\n')
+
+          return insertValueInJSString(src, { bar: 10 }, { bar: 12 }, 'path/to/config.js')
+          .then(() => {
+            throw Error('this should not succeed')
+          })
+          .catch((err) => {
+            expect(err).to.have.property('type', 'COULD_NOT_UPDATE_CONFIG_FILE')
+          })
+        })
       })
     })
   })

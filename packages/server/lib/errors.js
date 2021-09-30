@@ -651,7 +651,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Open the file here
         
         ${chalk.yellow(arg2)}`
-    case 'COULD_NOT_UPDATE_IN_CONFIG_FILE':
+    case 'COULD_NOT_UPDATE_CONFIG_FILE':
       return stripIndent`\
             Cypress was unable to update the following values in your configuration.
     
