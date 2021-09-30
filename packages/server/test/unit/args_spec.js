@@ -152,6 +152,12 @@ describe('lib/util/args', () => {
 
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo_spec.js`)
     })
+
+    it('can handle empty object', function () {
+      const options = this.setup('--run-project', 'foo', '--spec', {})
+
+      expect(options.spec).to.deep.eq({})
+    })
   })
 
   context('--tag', () => {

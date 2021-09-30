@@ -261,8 +261,10 @@ module.exports = {
         }
 
         options.spec = strToArray(spec).map(resolvePath)
-      } else {
+      } else if (_.isArray(spec)) {
         options.spec = spec.map(resolvePath)
+      } else {
+        options.spec = sanitizeAndConvertNestedArgs(spec, 'spec')
       }
     }
 
