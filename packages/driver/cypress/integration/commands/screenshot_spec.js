@@ -27,6 +27,7 @@ describe('src/cy/commands/screenshot', () => {
       capture: 'viewport',
       screenshotOnRunFailure: true,
       disableTimersAndAnimations: true,
+      overwrite: false,
       scale: true,
       blackout: ['.foo'],
     }
@@ -135,6 +136,7 @@ describe('src/cy/commands/screenshot', () => {
           isOpen: true,
           appOnly: false,
           scale: true,
+          overwrite: false,
           waitForCommandSynchronization: true,
           disableTimersAndAnimations: true,
           blackout: [],
@@ -146,6 +148,7 @@ describe('src/cy/commands/screenshot', () => {
           isOpen: false,
           appOnly: false,
           scale: true,
+          overwrite: false,
           waitForCommandSynchronization: true,
           disableTimersAndAnimations: true,
           blackout: [],
@@ -276,7 +279,7 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    it('takes screenshot of hook title with test', () => {})
+    it('takes screenshot of hook title with test', () => { })
   })
 
   context('#screenshot', () => {
@@ -411,6 +414,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: true,
             appOnly: true,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
@@ -431,6 +435,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: false,
             appOnly: true,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
@@ -453,6 +458,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: true,
             appOnly: false,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: true,
             disableTimersAndAnimations: true,
             blackout: [],
@@ -474,6 +480,7 @@ describe('src/cy/commands/screenshot', () => {
             isOpen: true,
             appOnly: true,
             scale: true,
+            overwrite: false,
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
