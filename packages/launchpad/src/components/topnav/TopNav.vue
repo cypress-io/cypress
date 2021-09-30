@@ -7,7 +7,7 @@
       v-for="(item, index) in versionList"
       :key="item.version"
     >
-      <div>
+      <div class="whitespace-nowrap">
         <a
           :href="`${releasesUrl}/tag/v${item.version}`"
           target="_blank"
@@ -36,7 +36,7 @@
       :key="browser.id"
     >
       <template #prefix>
-        hey
+        icon
       </template>
       <span>{{ browser.displayName }}</span>
       <template #suffix>
@@ -46,10 +46,19 @@
   </TopNavList>
 
   <TopNavList variant="panel">
-    <template #heading>
-      Docs
+    <template #heading="{ open }">
+      <div class="flex items-center gap-2 group-hocus:text-indigo-600">
+        <i-cy-life-ring_x16
+          class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        />
+        <span>Docs {{ open }}</span>
+        <i-cy-chevron-down
+          class="w-2.5 transform"
+          :class="open ? 'rotate-180' : ''"
+        />
+      </div>
     </template>
-    <div class="flex p-4 gap-24px">
+    <div class="flex gap-24px">
       <div
         v-for="list in docsMenu"
         :key="list.title"
@@ -66,7 +75,10 @@
             class="text-indigo-500 flex mb-2 items-center"
           >
             <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
-            <span class="whitespace-nowrap font-normal ml-2">{{ item.text }}</span>
+            <a
+              :href="getUrl(item.link)"
+              class="whitespace-nowrap font-normal ml-2"
+            >{{ item.text }}</a>
           </li>
         </ul>
       </div>
@@ -77,6 +89,7 @@
 <script setup lang="ts">
 
 import { gql, useQuery } from '@urql/vue'
+import _ from 'lodash'
 
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
@@ -94,6 +107,16 @@ query TopNav {
 
 const query = useQuery({ query: TopNavDocument })
 const browsers = computed(() => query?.data?.value?.app?.browsers)
+
+const getUrl = (link) => {
+  let result = link.url
+
+  if (link.params) {
+    result += `?${new URLSearchParams(link.params).toString()}`
+  }
+
+  return result
+}
 
 // will come from gql
 const versionList = [
