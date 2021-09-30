@@ -2992,6 +2992,7 @@ declare namespace Cypress {
     disableTimersAndAnimations: boolean
     padding: Padding
     scale: boolean
+    overwrite: boolean
     onBeforeScreenshot: ($el: JQuery) => void
     onAfterScreenshot: ($el: JQuery, props: {
       path: string

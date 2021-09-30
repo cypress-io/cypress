@@ -7,8 +7,9 @@ import api from './api'
 import cache from './cache'
 import user from './user'
 import keys from './util/keys'
-import settings from './util/settings'
+import * as settings from './util/settings'
 import { ProjectBase } from './project-base'
+import { getDefaultConfigFilePath } from './project_utils'
 
 const debug = Debug('cypress:server:project_static')
 
@@ -60,7 +61,7 @@ export async function _getProject (clientProject, authToken) {
     debug('got project from api')
 
     return _mergeDetails(clientProject, project)
-  } catch (err) {
+  } catch (err: any) {
     debug('failed to get project from api', err.statusCode)
     switch (err.statusCode) {
       case 404:
@@ -153,16 +154,19 @@ export async function add (path, options) {
   }
 }
 
-export function getId (path) {
-  return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: {} }).getProjectId()
+export async function getId (path) {
+  const configFile = await getDefaultConfigFilePath(path)
+
+  return new ProjectBase({ projectRoot: path, testingType: 'e2e', options: { configFile } }).getProjectId()
 }
 
-export function ensureExists (path, options) {
-  // is there a configFile? is the root writable?
-  return settings.exists(path, options)
+interface ProjectIdOptions{
+  id: string
+  projectRoot: string
+  configFile: string
 }
 
-export async function writeProjectId (id: string, projectRoot: string) {
+export async function writeProjectId ({ id, projectRoot, configFile }: ProjectIdOptions) {
   const attrs = { projectId: id }
 
   logger.info('Writing Project ID', _.clone(attrs))
@@ -170,7 +174,7 @@ export async function writeProjectId (id: string, projectRoot: string) {
   // TODO: We need to set this
   // this.generatedProjectIdTimestamp = new Date()
 
-  await settings.write(projectRoot, attrs)
+  await settings.write(projectRoot, attrs, { configFile })
 
   return id
 }
@@ -180,10 +184,11 @@ interface ProjectDetails {
   projectRoot: string
   orgId: string | null
   public: boolean
+  configFile: string
 }
 
-export async function createCiProject (projectDetails: ProjectDetails, projectRoot: string) {
-  debug('create CI project with projectDetails %o projectRoot %s', projectDetails, projectRoot)
+export async function createCiProject ({ projectRoot, configFile, ...projectDetails }: ProjectDetails) {
+  debug('create CI project with projectDetails %o projectRoot %s', projectDetails)
 
   const authToken = await user.ensureAuthToken()
   const remoteOrigin = await commitInfo.getRemoteOrigin(projectRoot)
@@ -195,7 +200,11 @@ export async function createCiProject (projectDetails: ProjectDetails, projectRo
 
   const newProject = await api.createProject(projectDetails, remoteOrigin, authToken)
 
-  await writeProjectId(newProject.id, projectRoot)
+  await writeProjectId({
+    configFile,
+    projectRoot,
+    id: newProject.id,
+  })
 
   return newProject
 }
