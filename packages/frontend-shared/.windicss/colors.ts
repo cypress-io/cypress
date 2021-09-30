@@ -2,7 +2,7 @@ import Colors from 'windicss/colors'
 
 const customColors = {
   jade: {
-    50: '#E0F6FA',
+    50: '#E4FBF2',
     100: '#C2F1DE',
     200: '#A3E7CB',
     300: '#69D3A7',
