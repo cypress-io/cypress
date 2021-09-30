@@ -196,7 +196,7 @@
       border-left: 5px solid $indigo-700;
     }
 
-    &.runnable-skipped  all box shadows> .runnable-wrapper {
+    &.runnable-skipped > .runnable-wrapper {
       .runnable-state {
         @include runnable-state-skipped;
       }

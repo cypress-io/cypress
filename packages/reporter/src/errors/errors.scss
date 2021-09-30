@@ -146,11 +146,11 @@
         width: 100%;
 
         &:hover {
-          background: $err-header-background;
+          background: $red-900;
         }
 
         &:active {
-          background: $err-header-background;
+          background: $red-900;
         }
 
         .collapsible-header-text {
