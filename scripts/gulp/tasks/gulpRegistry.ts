@@ -53,6 +53,10 @@ export async function exitAllProcesses () {
 
 process.stdin.resume() //so the program will not close instantly
 
+export async function exitAfterAll () {
+  process.stdin.pause()
+}
+
 function exitHandler (msg: string) {
   return async function _exitHandler (exitCode: number) {
     hasExited = true

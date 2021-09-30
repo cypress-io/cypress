@@ -16,6 +16,8 @@ import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
 import { setGulpGlobal } from './gulpConstants'
+import { exitAfterAll } from './tasks/gulpRegistry'
+import { execSync } from 'child_process'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -110,6 +112,7 @@ gulp.task(
   'postinstall',
   gulp.series(
     'buildProd',
+    exitAfterAll,
   ),
 )
 
@@ -282,3 +285,25 @@ gulp.task(openCypressLaunchpad)
 // If we want to run individually, for debugging/testing
 gulp.task('cyOpenLaunchpadOnly', cyOpenLaunchpad)
 gulp.task('cyOpenAppOnly', cyOpenApp)
+
+// Tapping into:
+// https://github.com/gulpjs/gulp-cli/blob/da8241ecbacd59158deaa5471ff8a7f43901a94b/lib/versioned/%5E4.0.0/log/sync-task.js#L21-L27
+const gulplog = require('gulplog')
+
+let didntExitCorrectly = false
+const warn = gulplog.warn
+
+gulplog.warn = function (...args: string[]) {
+  if (args.some((a) => String(a).includes('forget to signal async completion'))) {
+    didntExitCorrectly = true
+  }
+
+  return warn.apply(this, arguments)
+}
+
+process.on('exit', () => {
+  if (didntExitCorrectly) {
+    execSync('killall node')
+    process.exitCode = 1
+  }
+})

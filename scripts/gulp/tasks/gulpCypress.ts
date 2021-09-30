@@ -33,11 +33,11 @@ export async function openCypressApp () {
 }
 
 export async function runCypressLaunchpad () {
-  return spawnCypressWithMode('run', 'dev', ENV_VARS.DEV_OPEN, ['--project', monorepoPaths.pkgLaunchpad])
+  return spawnCypressWithMode('run', 'dev', ENV_VARS.PROD, ['--project', monorepoPaths.pkgLaunchpad])
 }
 
 export async function runCypressApp () {
-  return spawnCypressWithMode('run', 'dev', ENV_VARS.DEV_OPEN, ['--project', monorepoPaths.pkgApp])
+  return spawnCypressWithMode('run', 'dev', ENV_VARS.PROD, ['--project', monorepoPaths.pkgApp])
 }
 
 export async function runCypressProd () {
@@ -73,7 +73,7 @@ async function spawnCypressWithMode (
   env: Record<string, string> = {},
   additionalArgv: string[] = [],
 ) {
-  const argv = process.argv.slice(3).concat(additionalArgv)
+  let argv = process.argv.slice(3).concat(additionalArgv)
 
   const debugFlag = getGulpGlobal('debug')
 
@@ -84,6 +84,11 @@ async function spawnCypressWithMode (
   if (mode === 'open') {
     if (!argv.includes('--project') && !argv.includes('--global')) {
       argv.push('--global')
+    }
+
+    // If we've passed --record, it's for a "run" mode, probably in the same pipeline.
+    if (argv.includes('--record')) {
+      argv = argv.slice(0, argv.indexOf('--record'))
     }
   }
 
