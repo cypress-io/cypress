@@ -1,13 +1,17 @@
 <template>
   <li class="flex border-b border-b-gray-50">
     <div v-if="hasPrefix">
-      <slot name="prefix" />
+      <div class="flex items-center h-full align-middle">
+        <slot name="prefix" />
+      </div>
     </div>
     <div class="flex-grow">
       <slot />
     </div>
     <div>
-      <slot name="suffix" />
+      <div class="flex items-center h-full align-middle">
+        <slot name="suffix" />
+      </div>
     </div>
   </li>
 </template>

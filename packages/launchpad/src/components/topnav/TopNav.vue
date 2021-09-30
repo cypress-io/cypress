@@ -1,16 +1,11 @@
 <template>
   <TopNavList v-if="versionList">
     <template #heading="{ open }">
-      <div class="flex items-center gap-2 group-hocus:text-indigo-600">
-        <i-cy-box_x16
-          class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
-        />
-        <span>v{{ versionList[0].version }}</span>
-        <i-cy-chevron-down
-          class="w-2.5 transform"
-          :class="open ? 'rotate-180' : ''"
-        />
-      </div>
+      <i-cy-box_x16
+        class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+      />
+      <span>v{{ versionList[0].version }}</span>
     </template>
     <TopNavListItem
       v-for="(item, index) in versionList"
@@ -30,12 +25,10 @@
         v-if="!index"
         #suffix
       >
-        <div>
-          <i-cy-circle-check_x24 class="icon-dark-jade-200" />
-        </div>
+        <i-cy-circle-check_x24 class="icon-dark-jade-200" />
       </template>
     </TopNavListItem>
-    <TopNavListItem class="text-center p-4">
+    <TopNavListItem class="p-4 text-center">
       <a
         :href="releasesUrl"
         class="whitespace-nowrap"
@@ -43,43 +36,37 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="browsers && selectedBrowser">
+  <TopNavList v-if="browserQuery?.data?.value?.app">
     <template #heading="{ open }">
-      <div class="flex items-center gap-2 group-hocus:text-indigo-600">
-        <img
-          class="w-16px"
-          :src="selectedBrowser.icon"
-          :class="open ? '' : 'filter grayscale'"
-        >
-        <span>{{ selectedBrowser.displayName }} v{{ selectedBrowser.majorVersion }}</span>
-        <i-cy-chevron-down
-          class="w-2.5 transform"
-          :class="open ? 'rotate-180' : ''"
-        />
-      </div>
+      <img
+        class="w-16px filter group-hocus:grayscale-0"
+        :class="open ? 'grayscale-0' : 'grayscale'"
+        :src="allBrowsersIcons[browserQuery.data.value.app.selectedBrowser.displayName]"
+      >
+      <span>{{ browserQuery.data.value.app.selectedBrowser.displayName }} v{{ browserQuery.data.value.app.selectedBrowser.majorVersion }}</span>
     </template>
     <TopNavListItem
-      v-for="browser in browsers"
+      v-for="browser in browserQuery.data.value.app.browsers"
       :key="browser.id"
       class="p-4 min-w-240px"
-      :class="browser.id === selectedBrowser.id ? 'bg-jade-50' : ''"
+      :class="browser.isSelected ? 'bg-jade-50' : ''"
     >
       <template #prefix>
         <img
-          class="w-26px mr-4"
-          :src="browser.icon"
+          class="mr-4 w-26px"
+          :src="allBrowsersIcons[browser.displayName]"
         >
       </template>
       <div>
         <div class="text-indigo-600">
           {{ browser.displayName }}
         </div>
-        <div class="text-14px font-normal text-gray-500">
+        <div class="font-normal text-gray-500 text-14px">
           Version {{ browser.version }}
         </div>
       </div>
       <template
-        v-if="selectedBrowser.id === browser.id"
+        v-if="browser.isSelected"
         #suffix
       >
         <div>
@@ -91,24 +78,19 @@
 
   <TopNavList variant="panel">
     <template #heading="{ open }">
-      <div class="flex items-center gap-2 group-hocus:text-indigo-600">
-        <i-cy-life-ring_x16
-          class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
-        />
-        <span>Docs</span>
-        <i-cy-chevron-down
-          class="w-2.5 transform icon-dark-gray-100 group-hocus:icon-dark-indigo-500"
-          :class="open ? 'rotate-180 icon-dark-indigo-500' : ''"
-        />
-      </div>
+      <i-cy-life-ring_x16
+        class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
+        :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
+      />
+      <span>Docs</span>
     </template>
-    <div class="flex gap-24px p-4">
+    <div class="flex p-4 gap-24px">
       <div
         v-for="list in docsMenu"
         :key="list.title"
         class="min-w-164px"
       >
-        <h2 class="text-gray-800 font-semibold">
+        <h2 class="font-semibold text-gray-800">
           {{ list.title }}
         </h2>
         <hr class="border-gray-50 my-2.5">
@@ -116,12 +98,12 @@
           <li
             v-for="item in list.children"
             :key="item.text"
-            class="text-indigo-500 flex mb-2 items-center"
+            class="flex items-center mb-2 text-indigo-500"
           >
             <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
             <a
               :href="getUrl(item.link)"
-              class="whitespace-nowrap font-normal ml-2"
+              class="ml-2 font-normal whitespace-nowrap"
             >{{ item.text }}</a>
           </li>
         </ul>
@@ -133,13 +115,43 @@
 <script setup lang="ts">
 
 import _ from 'lodash'
-
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
+import { gql, useQuery } from '@urql/vue'
+import { TopNavDocument } from '../../generated/graphql'
+import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
 
-import { useDetectedBrowsers } from '../../../../frontend-shared/src/composables/useDetectedBrowsers'
+gql`
+query TopNav {
+  app {
+    ...DetectedBrowsers
+  }
+}
+`
 
-const { browsers, selectedBrowser } = useDetectedBrowsers()
+gql`
+fragment DetectedBrowsers on App {
+  selectedBrowser {
+    id
+    displayName
+    majorVersion
+  }
+  browsers {
+    id
+    name
+    family
+    disabled
+    isSelected
+    channel
+    displayName
+    path
+    version
+    majorVersion
+  }
+}
+`
+
+const browserQuery = useQuery({ query: TopNavDocument })
 
 const getUrl = (link) => {
   let result = link.url
@@ -151,19 +163,19 @@ const getUrl = (link) => {
   return result
 }
 
-// will come from gql
+// TODO: will come from gql
 const versionList = [
   {
     version: '8.4.1',
     released: '2 days ago',
   },
   {
-    version: '8.4.1',
-    released: '2 days ago',
+    version: '8.4.0',
+    released: '6 days ago',
   },
   {
-    version: '8.4.1',
-    released: '2 days ago',
+    version: '8.3.1',
+    released: '12 days ago',
   },
 ]
 
