@@ -70,9 +70,13 @@ const cypressModuleApi = {
   },
 
   /**
-   * This function should not be used in pure JavaScript
-   * By the type of its argument it allows autocompletion and
-   * type checking of the configuration given by users.
+   * provides automatic code completion for configuration in many popular code editors. 
+   * While it's not strictly necessary for Cypress to parse your configuration, we
+   * recommend wrapping your config object with `defineConfig()`
+   * @example
+   * module.exports = defineConfig({
+   *   viewportWith: 400
+   * })
    *
    * @see ../types/cypress-npm-api.d.ts
    * @param {Cypress.ConfigOptions} config
