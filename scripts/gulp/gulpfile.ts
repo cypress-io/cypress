@@ -190,7 +190,10 @@ const cyOpenApp = gulp.series(
   // 2. Build + watch Launchpad under test.
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
-  viteBuildAndWatchAppForTest,
+  gulp.parallel(
+    viteBuildLaunchpadForTest,
+    viteBuildAndWatchAppForTest,
+  ),
 
   // 3. Start the TEST Cypress App, such that its ports and other globals
   //    don't conflict with the real Cypress App.
