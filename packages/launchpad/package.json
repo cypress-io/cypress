@@ -7,7 +7,7 @@
     "build-prod": "cross-env NODE_ENV=production vite build",
     "clean": "rimraf dist && rimraf ./node_modules/.vite && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
-    "test": "yarn cypress:run && yarn types",
+    "test": "yarn cypress:run:ct && yarn types",
     "windi": "yarn windicss-analysis",
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
     "cypress:open": "yarn gulp cyOpenLaunchpadE2E",

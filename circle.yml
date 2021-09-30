@@ -393,11 +393,6 @@ commands:
     steps:
       - restore_cached_workspace
       - run: yarn workspace @packages/launchpad cypress:run:e2e --browser <<parameters.browser>>
-      - run: 
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
-            yarn workspace @packages/launchpad cypress:run --browser <<parameters.browser>> --record --parallel
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -411,8 +406,11 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - run: yarn gulp graphqlCodegen
-      - run: yarn workspace @packages/launchpad cypress:run:ct --browser <<parameters.browser>>
+      - run: 
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
+            yarn workspace @packages/launchpad cypress:run:ct --browser <<parameters.browser>> --record --parallel
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:

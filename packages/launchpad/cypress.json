@@ -16,7 +16,9 @@
   },
   "componentFolder": "src",
   "component": {
-    "testFiles": "**/*.spec.{js,ts,tsx,jsx}"
+    "testFiles": "**/*.spec.{js,ts,tsx,jsx}",
+    "supportFile": "cypress/component/support/index.ts",
+    "pluginsFile": "cypress/component/plugins/index.js"
   },
   "e2e": {
     "supportFile": false
