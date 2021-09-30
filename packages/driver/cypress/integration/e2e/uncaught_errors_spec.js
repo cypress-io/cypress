@@ -175,6 +175,23 @@ describe('uncaught errors', () => {
     }).get('button:first').click()
   })
 
+  it('does not fail if thrown custom error with readonly name', (done) => {
+    cy.once('fail', (err) => {
+      expect(err.name).to.include('CustomError')
+      expect(err.message).to.include('custom error')
+
+      done()
+    })
+
+    cy.then(() => {
+      throw new class CustomError extends Error {
+        get name () {
+          return 'CustomError'
+        }
+      }('custom error')
+    })
+  })
+
   it('fails test based on an uncaught error after last command and before completing', (done) => {
     cy.on('fail', () => {
       done()

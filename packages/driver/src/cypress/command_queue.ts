@@ -343,9 +343,10 @@ export default {
 
         // since this failed this means that a specific command failed
         // and we should highlight it in red or insert a new command
-        if (_.isObject(err)) {
+        // @ts-ignore
+        if (_.isObject(err) && !err.name) {
           // @ts-ignore
-          err.name = err.name || 'CypressError'
+          err.name = 'CypressError'
         }
 
         commandRunningFailed(Cypress, state, err)
