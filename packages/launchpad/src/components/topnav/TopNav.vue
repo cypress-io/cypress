@@ -97,8 +97,8 @@
         />
         <span>Docs</span>
         <i-cy-chevron-down
-          class="w-2.5 transform"
-          :class="open ? 'rotate-180' : ''"
+          class="w-2.5 transform icon-dark-gray-100 group-hocus:icon-dark-indigo-500"
+          :class="open ? 'rotate-180 icon-dark-indigo-500' : ''"
         />
       </div>
     </template>

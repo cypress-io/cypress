@@ -11,11 +11,8 @@
         <span class="text-body-gray-700">{{ props.gql.app.activeProject?.title }}</span>
       </div>
       <div class="flex gap-6">
-        <!-- <Auth :gql="props.gql" /> -->
-
         <TopNav />
-
-        <Auth :gql="props.gql"></Auth>
+        <Auth :gql="props.gql" />
       </div>
     </div>
   </div>
