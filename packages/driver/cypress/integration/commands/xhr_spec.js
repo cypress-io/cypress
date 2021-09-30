@@ -2407,12 +2407,12 @@ describe('src/cy/commands/xhr', () => {
       it('logs response', () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
-            expect(consoleProps['Response Body']).to.deep.eq({
+            expect(consoleProps['Response Body'].trim()).to.deep.eq(JSON.stringify({
               some: 'json',
               foo: {
                 bar: 'baz',
               },
-            })
+            }, null, 2))
           })
         })
       })
