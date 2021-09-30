@@ -120,9 +120,11 @@ gulp.task(
  * the Electron app. However, when e2e testing the launchpad, we'll want to
  * visit it using cy.visit within our integration suites.
  *
- * * cypressOpenLaunchpad is for local dev and watches.
- * * cypressRunLaunchpad is meant to be run in CI and does not watch.
- *------------------------------------------------------------------------**/
+ * * cyOpenLaunchpadE2E is for local dev and watches.
+ * * cyRunLaunchpadE2E is meant to be run in CI and does not watch.
+ * * cyOpenAppE2E is for local dev and watches.
+ * * cyRunAppE2E is meant to be run in CI and does not watch.
+*------------------------------------------------------------------------**/
 
 gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 1. Build the Cypress App itself

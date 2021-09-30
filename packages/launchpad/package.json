@@ -10,9 +10,9 @@
     "test": "yarn cypress:run && yarn types",
     "windi": "yarn windicss-analysis",
     "cypress:launch": "cross-env TZ=America/New_York node ../../scripts/cypress open --project ${PWD}",
-    "cypress:open": "yarn gulp cypressOpenLaunchpad",
+    "cypress:open": "yarn gulp cyOpenLaunchpadE2E",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
-    "cypress:run:e2e": "yarn gulp cypressRunLaunchpad",
+    "cypress:run:e2e": "yarn gulp cyRunLaunchpadE2E",
     "dev": "yarn gulp dev --project ${PWD}",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "watch": "echo 'run yarn dev from the root' && exit 1"
