@@ -1,19 +1,32 @@
 <template>
-  <h2 class="text-2xl">Specs List</h2>>
+  <h3 class="text-2xl">Specs List</h3>
   <SpecsListHeader v-model="search" />
-  <ul>
-    <li
-      v-for="spec in specs"
-      :key="spec.id"
-    >
-      {{ spec.name }} {{ spec.relativePath }}
-    </li>
-  </ul>
+  <SpecsListRow
+    v-for="spec in gql.activeProject?.specs?.edges"
+    :key="spec?.node?.absolute"
+  ></SpecsListRow>
 </template>
 
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
-import { ref } from 'vue'
+import SpecsListRow from './SpecsListRow.vue'
+import { gql } from '@urql/vue'
+import type { SpecsList_SpecsFragment } from '../generated/graphql'
+import { computed, ref } from 'vue'
+
+gql`
+fragment SpecsList_Specs on App {
+  activeProject {
+    specs(first: 1000) {
+      edges {
+        node {
+          ...SpecListRow
+        }
+      }
+    }
+  }
+}
+`
 
 interface GitInfo {
   comitter?: string,
@@ -21,20 +34,21 @@ interface GitInfo {
   fileState: 'modified' | 'unmodified' | 'added' | 'deleted'
 }
 
-interface Spec {
-  id: string,
-  relativePath: string,
-  name: string,
-  componentName: string,
-  extension: string,
-  specExtension: string,
-  gitInfo?: GitInfo
-}
+// interface Spec {
+//   id: string,
+//   relativePath: string,
+//   name: string,
+//   componentName: string,
+//   extension: string,
+//   specExtension: string,
+//   gitInfo?: GitInfo
+// }
 
-defineProps<{
-  specs: Spec[]
+const props = defineProps<{
+  gql: SpecsList_SpecsFragment
 }>()
 
 const search = ref('')
+const specs = computed(() => props.gql.activeProject?.specs?.edges)
 
 </script>
