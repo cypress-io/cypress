@@ -12,10 +12,9 @@ import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/tes
 import { each } from 'lodash'
 import 'cypress-file-upload'
 import { navigationMenu as stubNavigationMenu } from '../../src/graphql/testNavigationMenu'
-import { mutation as Mutation } from '../../src/graphql/testMutation'
-import { query as stubQuery } from '../../src/graphql/testQuery'
-import { wizard as stubWizard } from '../../src/graphql/testWizard'
-import { app as stubApp } from '../../src/graphql/testApp'
+import { stubQuery } from '../../src/graphql/testQuery'
+import { stubWizard } from '../../src/graphql/testWizard'
+import { stubApp as stubApp } from '../../src/graphql/testApp'
 import { createI18n } from '@cy/i18n'
 
 /**
@@ -36,7 +35,6 @@ const createContext = (): ClientTestContext => {
     stubData,
     stubQuery,
     stubNavigationMenu,
-    Mutation,
   }
 }
 
