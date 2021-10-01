@@ -33,6 +33,10 @@ const API = {
 
   start ({ specs, config }) {
     if (!plugins.has('dev-server:start')) {
+      if (config.configFile && !/\.json$/.test(config.configFile)) {
+        return errors.throw('CT_NO_DEV_START_FUNCTION', config.configFile)
+      }
+
       return errors.throw('CT_NO_DEV_START_EVENT', config.pluginsFile)
     }
 

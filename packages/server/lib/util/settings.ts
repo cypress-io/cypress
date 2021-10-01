@@ -163,14 +163,6 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     return Promise.reject(err)
   })
   .then((configObject = {}) => {
-    if (isComponentTesting(options) && 'component' in configObject) {
-      configObject = { ...configObject, ...configObject.component }
-    }
-
-    if (!isComponentTesting(options) && 'e2e' in configObject) {
-      configObject = { ...configObject, ...configObject.e2e }
-    }
-
     debug('resolved configObject', configObject)
     const changed = _applyRewriteRules(configObject)
 

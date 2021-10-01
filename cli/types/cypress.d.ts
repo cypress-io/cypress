@@ -9,7 +9,7 @@ declare namespace Cypress {
   type ViewportOrientation = 'portrait' | 'landscape'
   type PrevSubject = 'optional' | 'element' | 'document' | 'window'
   type TestingType = 'e2e' | 'component'
-  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptionsMergedWithTestingTypes | Promise<ConfigOptionsMergedWithTestingTypes>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -323,7 +323,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
+    config<K extends keyof ResolvedConfigOptions>(key: K): ResolvedConfigOptions[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -332,7 +332,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
+    config<K extends keyof ResolvedConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -344,7 +344,7 @@ declare namespace Cypress {
     })
     ```
      */
-    config(Object: ConfigOptions): void
+    config(Object: ConfigOptionsMergedWithTestingTypes): void
 
     // no real way to type without generics
     /**
@@ -2495,6 +2495,17 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  type PluginsFunction = ((on: PluginEvents, config: PluginConfigOptions) => Promise<ConfigOptionsMergedWithTestingTypes> | ConfigOptionsMergedWithTestingTypes | undefined | void)
+
+  type TestingTypeConfig = Omit<ResolvedConfigOptions, TestingType> & { setupNodeEvents?: PluginsFunction }
+  type TestingTypeConfigComponent<T = any> = TestingTypeConfig & {
+    /**
+     * Return the setup of your server
+     * @param options the dev server options to pass directly to the dev-server
+     */
+    devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig: T): ResolvedDevServerConfig
+    devServerOptions?: T
+  }
   interface PEMCert {
     /**
      * Path to the certificate file, relative to project root.
@@ -2620,6 +2631,7 @@ declare namespace Cypress {
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
+     * @deprecated use the testFiles glob in the e2e object
      */
     integrationFolder: string
     /**
@@ -2630,6 +2642,7 @@ declare namespace Cypress {
     /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
+     * @deprecated nodeVersion will soon be fixed to "system" to avoid confusion
      */
     nodeVersion: 'system' | 'bundled'
     /**
@@ -2764,6 +2777,7 @@ declare namespace Cypress {
     blockHosts: null | string | string[]
     /**
      * Path to folder containing component test files.
+     * @deprecated use the testFiles pattern inside the component object instead
      */
     componentFolder: false | string
     /**
@@ -2772,6 +2786,7 @@ declare namespace Cypress {
     projectId: null | string
     /**
      * Path to the support folder.
+     * @deprecated use supportFile instead
      */
     supportFolder: string
     /**
@@ -2789,15 +2804,13 @@ declare namespace Cypress {
 
     /**
      * Override default config options for Component Testing runner.
-     * @default {}
      */
-    component: Omit<ResolvedConfigOptions, TestingType>
+    component: TestingTypeConfigComponent
 
     /**
      * Override default config options for E2E Testing runner.
-     * @default {}
      */
-    e2e: Omit<ResolvedConfigOptions, TestingType>
+    e2e: TestingTypeConfig
 
     /**
      * An array of objects defining the certificates
@@ -2876,16 +2889,31 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptionsMergedWithTestingTypes, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
 
+  // here we need to use the `Function` type to type setup functions options properly
+  // if we don't, they will be typed as any
+  /* tslint:disable-next-line ban-types */
+  type DeepPartial<T> = T extends Function ? T : T extends object ? { [P in keyof T]?: DeepPartial<T[P]>; } : T
+
   /**
-   * All configuration items are optional.
+   * ConfigOptions after the current testingType has been merged into the root.
    */
-  type CoreConfigOptions = Partial<Omit<ResolvedConfigOptions, TestingType>>
-  type ConfigOptions = CoreConfigOptions & { e2e?: CoreConfigOptions, component?: CoreConfigOptions }
+  type ConfigOptionsMergedWithTestingTypes = DeepPartial<ResolvedConfigOptions>
+
+  /**
+   * Config model of cypress. To be used in `cypress.config.js`
+   */
+  type ConfigOptions = Omit<ConfigOptionsMergedWithTestingTypes, 'pluginsFile' | 'supportFile' | 'supportFolder'>
+  & {
+    component?: {
+      // make devServer required in component
+      devServer: TestingTypeConfigComponent['devServer'], 
+    }
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
@@ -5314,7 +5342,7 @@ declare namespace Cypress {
 
   interface BeforeRunDetails {
     browser?: Browser
-    config: ConfigOptions
+    config: ConfigOptionsMergedWithTestingTypes
     cypressVersion: string
     group?: string
     parallel?: boolean

@@ -43,8 +43,8 @@ export const options = [
   }, {
     name: 'component',
     // runner-ct overrides
-    defaultValue: {},
-    validation: v.isValidConfig,
+    defaultValue: null,
+    validation: v.isValidTestingTypeConfig,
   }, {
     name: 'componentFolder',
     defaultValue: 'cypress/component',
@@ -52,7 +52,7 @@ export const options = [
     isFolder: true,
   }, {
     name: 'configFile',
-    defaultValue: 'cypress.json',
+    defaultValue: null,
     validation: v.isStringOrFalse,
     // not truly internal, but can only be set via cli,
     // so we don't consider it a "public" option
@@ -61,6 +61,16 @@ export const options = [
     name: 'defaultCommandTimeout',
     defaultValue: 4000,
     validation: v.isNumber,
+  }, {
+    name: 'devServer',
+    defaultvalue: null,
+    validation: v.isFunction,
+    onlyInOverride: 'component',
+  }, {
+    name: 'devServerOptions',
+    defaultvalue: null,
+    validation: v.isPlainObject,
+    onlyInOverride: 'component',
   }, {
     name: 'devServerPublicPathRoute',
     defaultValue: '/__cypress/src',
@@ -73,8 +83,8 @@ export const options = [
   }, {
     name: 'e2e',
     // e2e runner overrides
-    defaultValue: {},
-    validation: v.isValidConfig,
+    defaultValue: null,
+    validation: v.isValidTestingTypeConfig,
   }, {
     name: 'env',
     validation: v.isPlainObject,
@@ -216,6 +226,11 @@ export const options = [
     defaultValue: 'cypress/screenshots',
     validation: v.isStringOrFalse,
     isFolder: true,
+  }, {
+    name: 'setupNodeEvents',
+    defaultvalue: null,
+    validation: v.isFunction,
+    onlyInOverride: true,
   }, {
     name: 'socketId',
     defaultValue: null,

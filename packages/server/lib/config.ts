@@ -62,6 +62,7 @@ const breakingKeys = _.map(breakingOptions, 'name')
 const folders = _(options).filter({ isFolder: true }).map('name').value()
 const validationRules = createIndex(options, 'name', 'validation')
 const defaultValues: Record<string, any> = createIndex(options, 'name', 'defaultValue')
+const onlyInOverrideValues = createIndex(options, 'name', 'onlyInOverride')
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   return _.reduce(folders, (memo, folder) => {
@@ -88,9 +89,25 @@ const validateNoBreakingConfig = (cfg) => {
   })
 }
 
-const validate = (cfg, onErr) => {
+/**
+ * validate a root config object
+ * @param {object} cfg config object to validate
+ * @param {(errMsg:string) => void} onErr function run when invalid config is found
+ * @param {boolean} bypassRootLimitations skip checks related to position when we are working with merged configs
+ * @returns
+ */
+function validate (cfg, onErr,
+  { bypassRootLimitations } = { bypassRootLimitations: false }) {
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
+
+    if (!bypassRootLimitations && onlyInOverrideValues[key]) {
+      if (onlyInOverrideValues[key] === true) {
+        return onErr(`key \`${key}\` is only valid in a testingType object, it is invalid to use it in the root`)
+      }
+
+      return onErr(`key \`${key}\` is only valid in the \`${onlyInOverrideValues[key]}\` object, it is invalid to use it in the root`)
+    }
 
     // does this key have a validation rule?
     if (validationFn) {
@@ -107,8 +124,13 @@ const validate = (cfg, onErr) => {
 }
 
 const validateFile = (file) => {
-  return (settings) => {
-    return validate(settings, (errMsg) => {
+  return (configObject) => {
+    // disallow use of pluginFile in evaluated configuration files
+    if (/\.(ts|js)$/.test(file) && configObject.pluginsFile) {
+      errors.throw('CONFLICT_PLUGINSFILE_CONFIGJS', file)
+    }
+
+    return validate(configObject, (errMsg) => {
       return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
     })
   }
@@ -120,6 +142,10 @@ const hideSpecialVals = function (val, key) {
   }
 
   return val
+}
+
+function isComponentTesting (options: Record<string, string> = {}) {
+  return options.testingType === 'component'
 }
 
 // an object with a few utility methods
@@ -204,15 +230,17 @@ export function allowed (obj = {}) {
 }
 
 export function get (projectRoot, options = {}) {
+  const configFilename = settings.configFile(projectRoot, options)
+
   return Promise.all([
-    settings.read(projectRoot, options).then(validateFile('cypress.json')),
+    settings.read(projectRoot, options).then(validateFile(configFilename)),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
   ])
-  .spread((settings, envFile) => {
+  .spread((configObject, envFile) => {
     return set({
       projectName: getNameFromRoot(projectRoot),
       projectRoot,
-      config: _.cloneDeep(settings),
+      config: _.cloneDeep(configObject),
       envFile: _.cloneDeep(envFile),
       options,
     })
@@ -238,15 +266,19 @@ export function set (obj: Record<string, any> = {}) {
   config.projectRoot = projectRoot
   config.projectName = projectName
 
-  return mergeDefaults(config, options)
+  return mergeAllConfigs(config, options).then((configObject = {}) => {
+    debug('merged config is %o', configObject)
+
+    return configObject
+  })
 }
 
-export function mergeDefaults (config: Record<string, any> = {}, options: Record<string, any> = {}) {
+function mergeCLIOptions (config, options) {
   const resolved = {}
 
   config.rawJson = _.cloneDeep(config)
 
-  _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
+  _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers', 'testingType'))
   debug('merged config with options, got %o', config)
 
   _
@@ -258,6 +290,10 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     config[key] = val
   }).value()
 
+  return resolved
+}
+
+function cleanUpConfig (config, options, resolved) {
   let url = config.baseUrl
 
   if (url) {
@@ -266,8 +302,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     // https://regexr.com/48rvt
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
-
-  _.defaults(config, defaultValues)
 
   // split out our own app wide env from user env variables
   // and delete envFile
@@ -290,6 +324,25 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
     // to zero
     config.numTestsKeptInMemory = 0
   }
+}
+
+export function mergeAllConfigs (config: Record<string, any> = {}, options: Record<string, any> = {}) {
+  const resolved = mergeCLIOptions(config, options)
+
+  cleanUpConfig(config, options, resolved)
+
+  validate(config, (errMsg) => {
+    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
+  })
+
+  const testingType = isComponentTesting(options) ? 'component' : 'e2e'
+
+  if (testingType in config) {
+    config = { ...config, ...config[testingType] }
+  }
+
+  // 3 - merge the defaults
+  _.defaults(config, defaultValues)
 
   config = setResolvedConfigValues(config, defaultValues, resolved)
 
@@ -300,13 +353,6 @@ export function mergeDefaults (config: Record<string, any> = {}, options: Record
   config = setAbsolutePaths(config, defaultValues)
 
   config = setParentTestsPaths(config)
-
-  // validate config again here so that we catch
-  // configuration errors coming from the CLI overrides
-  // or env var overrides
-  validate(config, (errMsg) => {
-    return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
-  })
 
   validateNoBreakingConfig(config)
 

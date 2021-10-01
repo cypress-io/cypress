@@ -79,15 +79,31 @@ const init = (config, options) => {
 
     registeredEvents = {}
 
-    const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
+    const pluginsFile = typeof config.pluginsFile === 'string'
+      ? config.pluginsFile
+      : path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
+    const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'pipe',
       env: {
         ...process.env,
         NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS || '',
       },
+    }
+
+    const testingType = options.testingType || 'e2e'
+
+    if (/\.json$/.test(options.configFile) || options.configFile === false) {
+      childArguments.push('--file', pluginsFile)
+    } else if (config[testingType] && (config[testingType].setupNodeEvents || (testingType === 'component' && config.component.devServer))) {
+      childArguments.push(
+        '--testingType', testingType,
+        '--file', options.configFile,
+      )
+    } else {
+      // if the config file is evaluated but there is no plugins function, fall back on default plugins
+      childArguments.push('--file', path.join(__dirname, 'child', 'default_plugins_file.js'))
     }
 
     if (config.resolvedNodePath) {
@@ -137,8 +153,6 @@ const init = (config, options) => {
     ipc.send('load', config)
 
     ipc.on('loaded', (newCfg, registrations) => {
-      _.omit(config, 'projectRoot', 'configFile')
-
       _.each(registrations, (registration) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
 

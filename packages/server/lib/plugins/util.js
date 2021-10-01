@@ -4,9 +4,62 @@ const debug = require('debug')('cypress:server:plugins')
 const Promise = require('bluebird')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
+const FUNCTION_SERIALIZED = '__cypress_function__'
 
 const serializeError = (err) => {
   return _.pick(err, 'name', 'message', 'stack', 'code', 'annotated', 'type')
+}
+
+function serializeArgument (arg) {
+  if (arg === null || arg === undefined) {
+    return null
+  }
+
+  if (typeof arg === 'function') {
+    return FUNCTION_SERIALIZED
+  }
+
+  if (typeof arg === 'object') {
+    if (_.isArray(arg)) {
+      return arg.map(serializeArgument)
+    }
+
+    const serializedObject = {}
+
+    for (const [key, val] of Object.entries(arg)) {
+      serializedObject[key] = serializeArgument(val)
+    }
+
+    return serializedObject
+  }
+
+  return arg
+}
+
+function deserializeArgument (arg) {
+  if (arg === null || arg === undefined) {
+    return null
+  }
+
+  if (arg === FUNCTION_SERIALIZED) {
+    return function () {
+      throw Error('this function is not meant to be used on it\'s own. It is the result of a deserialization and can be used to check the type of a returned object.')
+    }
+  }
+
+  if (typeof arg === 'object') {
+    if (_.isArray(arg)) {
+      return arg.map((argElement) => deserializeArgument(argElement))
+    }
+
+    return Object.keys(arg).reduce(function (acc, key) {
+      acc[key] = deserializeArgument(arg[key])
+
+      return acc
+    }, {})
+  }
+
+  return arg
 }
 
 module.exports = {
@@ -24,10 +77,12 @@ module.exports = {
     emitter.setMaxListeners(Infinity)
 
     return {
-      send (event, ...args) {
+      send (event, ...rawArgs) {
         if (aProcess.killed) {
           return
         }
+
+        const args = rawArgs.map((arg) => serializeArgument(arg))
 
         return aProcess.send({
           event,
@@ -35,8 +90,17 @@ module.exports = {
         })
       },
 
-      on: emitter.on.bind(emitter),
-      removeListener: emitter.removeListener.bind(emitter),
+      on (event, handler) {
+        function wrappedHandler (...rawArgs) {
+          return handler(...rawArgs.map((arg) => deserializeArgument(arg)))
+        }
+        handler.__realHandlerFunction__ = wrappedHandler
+        emitter.on(event, wrappedHandler)
+      },
+
+      removeListener (event, handler) {
+        emitter.removeListener(event, handler.__realHandlerFunction__)
+      },
     }
   },
 

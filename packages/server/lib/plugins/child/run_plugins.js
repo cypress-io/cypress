@@ -36,6 +36,8 @@ const getDefaultPreprocessor = function (config) {
 }
 
 let plugins
+let devServerFunction
+let devServerOptions
 
 const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
@@ -87,7 +89,15 @@ const load = (ipc, config, pluginsFile) => {
   .try(() => {
     debug('run plugins function')
 
-    return plugins(register, config)
+    if (devServerFunction) {
+      register('dev-server:start', (cypressDevServerOptions) => devServerFunction(cypressDevServerOptions, devServerOptions))
+    }
+
+    if (plugins) {
+      return plugins(register, config)
+    }
+
+    return
   })
   .tap(() => {
     if (!registeredEventsByName['file:preprocessor']) {
@@ -138,10 +148,36 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
+function interopRequire (pluginsFile) {
+  const exp = require(pluginsFile)
+
+  return exp && exp.default ? exp.default : exp
+}
+
+/**
+ * the plugins function can be either at the top level
+ * in a pluginsFile or in a non-dedicated cypress.config.js file
+ * This functions normalizes where the function is and runs it.
+ *
+ * @param {string} pluginsFile absolute path of the targeted file conatining the plugins function
+ * @param {string} functionName path to the function in the exported object like `"e2e.plugins"`
+ * @returns the plugins function found
+ */
+function getPluginsFunction (resolvedExport, testingType) {
+  if (testingType) {
+    if (resolvedExport[testingType]) {
+      return resolvedExport[testingType].setupNodeEvents
+    }
+  }
+
+  return resolvedExport
+}
+
 let tsRegistered = false
 
-const runPlugins = (ipc, pluginsFile, projectRoot) => {
-  debug('pluginsFile:', pluginsFile)
+const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
+  debug('plugins file:', pluginsFile)
+  debug('testingType:', testingType)
   debug('project root:', projectRoot)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
@@ -171,13 +207,19 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
   }
 
   try {
-    debug('require pluginsFile')
-    plugins = require(pluginsFile)
+    debug('require pluginsFile "%s"', pluginsFile)
+    const pluginsObject = interopRequire(pluginsFile)
 
-    // Handle export default () => {}
-    if (plugins && typeof plugins.default === 'function') {
-      plugins = plugins.default
+    plugins = getPluginsFunction(pluginsObject, testingType)
+
+    if (testingType === 'component' && pluginsObject.component) {
+      devServerFunction = pluginsObject.component.devServer
+      devServerOptions = pluginsObject.component.devServerOptions
     }
+
+    debug('plugins %O', plugins)
+    debug('devServerFunction %s', devServerFunction.toString())
+    debug('devServerOptions %O', devServerOptions)
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
@@ -185,7 +227,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
     return
   }
 
-  if (typeof plugins !== 'function') {
+  if (typeof plugins !== 'function' && !devServerFunction) {
     debug('not a function')
     ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
 
