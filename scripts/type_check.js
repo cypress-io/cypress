@@ -56,9 +56,9 @@ program
       },
     }
   }), {
-    concurrent: 4,
+    concurrent: process.env.CI ? 4 : 1,
+    renderer: process.env.CI ? 'verbose' : 'default',
     exitOnError: false,
-    renderer: 'slient',
   })
 
   tasks.run()
