@@ -16,7 +16,7 @@
         </slot>
         <i-cy-chevron-down
           class="w-2.5 transform group-hocus:icon-dark-indigo-500"
-          :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-100'"
+          :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
         />
       </div>
     </PopoverButton>

@@ -25,7 +25,7 @@
         v-if="!index"
         #suffix
       >
-        <i-cy-circle-check_x24 class="icon-dark-jade-200" />
+        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500" />
       </template>
     </TopNavListItem>
     <TopNavListItem class="p-4 text-center">
@@ -70,7 +70,7 @@
         #suffix
       >
         <div>
-          <i-cy-circle-check_x24 class="icon-dark-jade-200" />
+          <i-cy-circle-check_x24 class=" icon-dark-jade-100 icon-light-jade-500" />
         </div>
       </template>
     </TopNavListItem>
