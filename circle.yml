@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - issue-17944-remove-source-files
+        - feat/allow-cypress-js
 
 defaults: &defaults
   parallelism: 1
@@ -43,6 +44,7 @@ onlyMainBranches: &onlyMainBranches
       only:
         - develop
         - issue-17944-remove-source-files
+        - feat/allow-cypress-js
   requires:
     - create-build-artifacts
 
@@ -2125,6 +2127,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - build
     - test-kitchensink:
@@ -2137,6 +2140,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - build
     - create-build-artifacts:
@@ -2187,6 +2191,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2195,6 +2200,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2204,6 +2210,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - create-build-artifacts
 
@@ -2229,6 +2236,7 @@ linux-workflow: &linux-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - create-build-artifacts
 
@@ -2301,6 +2309,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - darwin-create-build-artifacts
 
@@ -2313,6 +2322,7 @@ mac-workflow: &mac-workflow
             only:
               - develop
               - issue-17944-remove-source-files
+              - feat/allow-cypress-js
         requires:
           - darwin-create-build-artifacts
 
