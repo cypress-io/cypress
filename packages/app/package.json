@@ -43,6 +43,8 @@
     "javascript-time-ago": "2.3.8",
     "prismjs": "1.24.0",
     "rimraf": "3.0.2",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "1.4.0",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "unplugin-icons": "^0.11.3",
     "unplugin-vue-components": "^0.15.2",
