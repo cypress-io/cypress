@@ -7,11 +7,17 @@
           src="../images/cypress-dark.png"
         >
         <span class="text-primary">Projects</span>
-        <i-oi-chevron-right class="text-gray-300 h-8px" />
-        <span class="text-body-gray-700">{{ props.gql.app.activeProject?.title }}</span>
+        <i-oi-chevron-right
+          v-if="props.gql?.app?.activeProject"
+          class="text-gray-300 h-8px"
+        />
+        <span class="text-body-gray-700">{{ props.gql?.app?.activeProject?.title }}</span>
       </div>
       <div class="flex gap-6">
-        <TopNav :gql="props?.gql?.app" />
+        <TopNav
+          :gql="props?.gql?.app"
+          :show-browsers="props.showBrowsers"
+        />
         <Auth :gql="props.gql" />
       </div>
     </div>
@@ -26,7 +32,7 @@ import TopNav from '../components/topnav/TopNav.vue'
 import Auth from '../setup/Auth.vue'
 
 gql`
-fragment HeaderBar on Query {
+fragment HeaderBar on App {
   app {
     activeProject {
       id
@@ -39,7 +45,8 @@ fragment HeaderBar on Query {
 `
 
 const props = defineProps<{
-  gql: HeaderBarFragment
+  gql: HeaderBarFragment,
+  showBrowsers?: Boolean
 }>()
 
 </script>

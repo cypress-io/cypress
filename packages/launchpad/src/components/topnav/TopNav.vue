@@ -42,7 +42,7 @@
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="props.gql && props.showBrowsers">
+  <TopNavList v-if="props.gql?.selectedBrowser && props.showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
