@@ -134,7 +134,7 @@ const allBrowsers = longBrowsersList.map((browser, idx) => {
   }
 })
 
-export const app: CodegenTypeMap['App'] = {
+export const stubApp: CodegenTypeMap['App'] = {
   __typename: 'App',
   healthCheck: 'OK',
   isInGlobalMode: false,

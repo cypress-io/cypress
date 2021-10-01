@@ -3,10 +3,9 @@ import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from './urqlClient'
 import type * as stubCloudData from './testStubCloudTypes'
 import type * as stubData from './testStubData'
-import type { app as stubApp } from './testApp'
-import type { wizard as stubWizard } from './testWizard'
-import type { mutation as Mutation } from './testMutation'
-import type { query as stubQuery } from './testQuery'
+import type { stubApp } from './testApp'
+import type { stubWizard } from './testWizard'
+import type { stubQuery } from './testQuery'
 import type { navigationMenu as stubNavigationMenu } from './testNavigationMenu'
 import { clientTestSchema } from './clientTestSchema'
 
@@ -17,7 +16,6 @@ export interface ClientTestContext {
   stubNavigationMenu: typeof stubNavigationMenu
   stubWizard: typeof stubWizard
   stubQuery: typeof stubQuery
-  Mutation: typeof Mutation
 }
 
 export interface TestUrqlClientConfig {

@@ -1,13 +1,13 @@
 import type { App, Mutation, Project } from '../generated/test-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
-import { app } from './testApp'
+import { stubApp } from './testApp'
 
 type MaybeResolver<T> = {
   [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: object, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
 }
 
-export const mutation: MaybeResolver<Mutation> = {
+export const stubMutation: MaybeResolver<Mutation> = {
   __typename: 'Mutation',
   addProject (path: string): App {
     const project: Project = {
@@ -20,13 +20,13 @@ export const mutation: MaybeResolver<Mutation> = {
     }
 
     const updatedApp: App = {
-      ...app,
-      projects: [...app.projects, project],
+      ...stubApp,
+      projects: [...stubApp.projects, project],
     }
 
     return updatedApp
   },
   setActiveProject (path: string) {
-    return app
+    return stubApp
   },
 }

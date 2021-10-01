@@ -4,7 +4,7 @@ import { testNodeId } from './testUtils'
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
-export const wizard: CodegenTypeMap['Wizard'] = {
+export const stubWizard: CodegenTypeMap['Wizard'] = {
   __typename: 'Wizard',
   canNavigateForward: true,
   step: 'welcome',
