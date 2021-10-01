@@ -993,8 +993,6 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
-      # check for compile errors with the releaserc scripts
-      - run: yarn test-npm-package-release-script
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -1003,6 +1001,14 @@ jobs:
       - store_artifacts:
           path: cli/test/html
       - store-npm-logs
+
+  unit-tests-release:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run: yarn test-npm-package-release-script
 
   lint-types:
     <<: *defaults
@@ -1958,185 +1964,188 @@ linux-workflow: &linux-workflow
     - build:
         requires:
           - node_modules_install
-    # - lint:
-    #     name: Linux lint
-    #     requires:
-    #       - build
-    # - percy-finalize:
-    #     context: test-runner:poll-circle-workflow
-    #     required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
-    #     requires:
-    #       - build
-    # - lint-types:
-    #     requires:
-    #       - build
-    # # unit, integration and e2e tests
-    # - cli-visual-tests:
-    #     requires:
-    #       - build
-    # - unit-tests:
-    #     requires:
-    #       - build
-    # - server-unit-tests:
-    #     requires:
-    #       - build
-    # - server-integration-tests:
-    #     requires:
-    #       - build
-    # - server-performance-tests:
-    #     requires:
-    #       - build
-    # - server-e2e-tests-chrome:
-    #     requires:
-    #       - build
-    # - server-e2e-tests-electron:
-    #     requires:
-    #       - build
-    # - server-e2e-tests-firefox:
-    #     requires:
-    #       - build
-    # - server-e2e-tests-non-root:
-    #     executor: non-root-docker-user
-    #     requires:
-    #       - build
-    # - driver-integration-tests-chrome:
-    #     requires:
-    #       - build
-    # - driver-integration-tests-chrome-beta:
-    #     requires:
-    #       - build
-    # - driver-integration-tests-firefox:
-    #     requires:
-    #       - build
-    # - driver-integration-tests-electron:
-    #     requires:
-    #       - build
-    # - runner-integration-tests-chrome:
-    #     requires:
-    #       - build
-    # - runner-integration-tests-firefox:
-    #     requires:
-    #       - build
-    # - runner-integration-tests-electron:
-    #     requires:
-    #       - build
-    # - runner-ct-integration-tests-chrome:
-    #     requires:
-    #       - build
+    - lint:
+        name: Linux lint
+        requires:
+          - build
+    - percy-finalize:
+        context: test-runner:poll-circle-workflow
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
+        requires:
+          - build
+    - lint-types:
+        requires:
+          - build
+    # unit, integration and e2e tests
+    - cli-visual-tests:
+        requires:
+          - build
+    - unit-tests:
+        requires:
+          - build
+    - unit-tests-release:
+        context: test-runner:npm-release
+        requires:
+          - build
+    - server-unit-tests:
+        requires:
+          - build
+    - server-integration-tests:
+        requires:
+          - build
+    - server-performance-tests:
+        requires:
+          - build
+    - server-e2e-tests-chrome:
+        requires:
+          - build
+    - server-e2e-tests-electron:
+        requires:
+          - build
+    - server-e2e-tests-firefox:
+        requires:
+          - build
+    - server-e2e-tests-non-root:
+        executor: non-root-docker-user
+        requires:
+          - build
+    - driver-integration-tests-chrome:
+        requires:
+          - build
+    - driver-integration-tests-chrome-beta:
+        requires:
+          - build
+    - driver-integration-tests-firefox:
+        requires:
+          - build
+    - driver-integration-tests-electron:
+        requires:
+          - build
+    - runner-integration-tests-chrome:
+        requires:
+          - build
+    - runner-integration-tests-firefox:
+        requires:
+          - build
+    - runner-integration-tests-electron:
+        requires:
+          - build
+    - runner-ct-integration-tests-chrome:
+        requires:
+          - build
 
-    # - desktop-gui-integration-tests-2x:
-    #     requires:
-    #       - build
-    # - desktop-gui-component-tests:
-    #     requires:
-    #       - build
-    # - reporter-integration-tests:
-    #     requires:
-    #       - build
-    # - ui-components-integration-tests:
-    #     requires:
-    #       - build
-    # - npm-webpack-dev-server:
-    #     requires:
-    #       - build
-    # - npm-vite-dev-server:
-    #     requires:
-    #       - build
-    # - npm-webpack-preprocessor:
-    #     requires:
-    #       - build
-    # - npm-webpack-batteries-included-preprocessor:
-    #     requires:
-    #       - build
-    # - npm-design-system:
-    #     requires:
-    #       - build
-    # - npm-vue:
-    #     requires:
-    #       - build
-    # - npm-react:
-    #     requires:
-    #       - build
-    # - npm-angular:
-    #     requires:
-    #       - build
-    # - npm-mount-utils:
-    #     requires:
-    #       - build
-    # - npm-create-cypress-tests:
-    #     requires:
-    #       - build
-    # - npm-eslint-plugin-dev:
-    #     requires:
-    #       - build
-    # - npm-cypress-schematic:
-    #     requires:
-    #       - build
-    # # This release definition must be updated with any new jobs
-    # # Any attempts to automate this are welcome
-    # # If CircleCI provided an "after all" hook, then this wouldn't be necessary
-    # - npm-release:
-    #     context: test-runner:npm-release
-    #     requires:
-    #       - build
-    #       - npm-eslint-plugin-dev
-    #       - npm-create-cypress-tests
-    #       - npm-react
-    #       - npm-mount-utils
-    #       - npm-vue
-    #       - npm-design-system
-    #       - npm-webpack-batteries-included-preprocessor
-    #       - npm-webpack-preprocessor
-    #       # - npm-vite-dev-server
-    #       - npm-webpack-dev-server
-    #       - npm-cypress-schematic
-    #       - ui-components-integration-tests
-    #       - reporter-integration-tests
-    #       - Linux lint
-    #       - desktop-gui-component-tests
-    #       - desktop-gui-integration-tests-2x
-    #       - runner-ct-integration-tests-chrome
-    #       - runner-integration-tests-firefox
-    #       - runner-integration-tests-chrome
-    #       - runner-integration-tests-electron
-    #       - driver-integration-tests-firefox
-    #       - driver-integration-tests-chrome
-    #       - driver-integration-tests-electron
-    #       - server-e2e-tests-non-root
-    #       - server-e2e-tests-firefox
-    #       - server-e2e-tests-electron
-    #       - server-e2e-tests-chrome
-    #       - server-performance-tests
-    #       - server-integration-tests
-    #       - server-unit-tests
-    #       - unit-tests
-    #       - cli-visual-tests
+    - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - desktop-gui-component-tests:
+        requires:
+          - build
+    - reporter-integration-tests:
+        requires:
+          - build
+    - ui-components-integration-tests:
+        requires:
+          - build
+    - npm-webpack-dev-server:
+        requires:
+          - build
+    - npm-vite-dev-server:
+        requires:
+          - build
+    - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-design-system:
+        requires:
+          - build
+    - npm-vue:
+        requires:
+          - build
+    - npm-react:
+        requires:
+          - build
+    - npm-angular:
+        requires:
+          - build
+    - npm-mount-utils:
+        requires:
+          - build
+    - npm-create-cypress-tests:
+        requires:
+          - build
+    - npm-eslint-plugin-dev:
+        requires:
+          - build
+    - npm-cypress-schematic:
+        requires:
+          - build
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - npm-release:
+        context: test-runner:npm-release
+        requires:
+          - build
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-design-system
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          # - npm-vite-dev-server
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - ui-components-integration-tests
+          - reporter-integration-tests
+          - Linux lint
+          - desktop-gui-component-tests
+          - desktop-gui-integration-tests-2x
+          - runner-ct-integration-tests-chrome
+          - runner-integration-tests-firefox
+          - runner-integration-tests-chrome
+          - runner-integration-tests-electron
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-electron
+          - server-e2e-tests-non-root
+          - server-e2e-tests-firefox
+          - server-e2e-tests-electron
+          - server-e2e-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - unit-tests
+          - unit-tests-release
+          - cli-visual-tests
 
-    # # various testing scenarios, like building full binary
-    # # and testing it on a real project
-    # - test-against-staging:
-    #     context: test-runner:record-tests
-    #     filters:
-    #       branches:
-    #         only:
-    #           - develop
-    #           - tgriesser/chore/fix-release
-    #           - matth/fix/hang-investigation
-    #     requires:
-    #       - build
-    # - test-kitchensink:
-    #     requires:
-    #       - build
-    # - test-kitchensink-against-staging:
-    #     context: test-runner:record-tests
-    #     filters:
-    #       branches:
-    #         only:
-    #           - develop
-    #           - tgriesser/chore/fix-release
-    #           - matth/fix/hang-investigation
-    #     requires:
-    #       - build
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
+    - test-against-staging:
+        context: test-runner:record-tests
+        filters:
+          branches:
+            only:
+              - develop
+              - tgriesser/chore/fix-release
+        requires:
+          - build
+    - test-kitchensink:
+        requires:
+          - build
+    - test-kitchensink-against-staging:
+        context: test-runner:record-tests
+        filters:
+          branches:
+            only:
+              - develop
+              - tgriesser/chore/fix-release
+        requires:
+          - build
     - create-build-artifacts:
         context:
           - test-runner:upload
