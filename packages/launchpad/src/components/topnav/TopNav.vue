@@ -10,28 +10,31 @@
     <TopNavListItem
       v-for="(item, index) in versionList"
       :key="item.version"
-      class="p-4 min-w-240px"
+      :selectable="!!index"
+      class="px-4 py-2 min-w-240px"
       :class="index ? '' : 'bg-jade-50'"
     >
       <div class="whitespace-nowrap">
         <a
           :href="`${releasesUrl}/tag/v${item.version}`"
+          :class="index ? '' : 'text-jade-600'"
+          class="font-semibold"
           target="_blank"
         >{{ item.version }}</a>
         <br>
-        {{ item.released }}
+        <span class="text-gray-600 text-14px">Released {{ item.released }}</span>
       </div>
       <template
         v-if="!index"
         #suffix
       >
-        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500" />
+        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
       </template>
     </TopNavListItem>
-    <TopNavListItem class="p-4 text-center">
+    <TopNavListItem class="p-4 text-center bg-gray-50">
       <a
         :href="releasesUrl"
-        class="whitespace-nowrap"
+        class="block w-full py-2 border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
       >See all releases</a>
     </TopNavListItem>
   </TopNavList>
@@ -48,20 +51,21 @@
     <TopNavListItem
       v-for="browser in browserQuery.data.value.app.browsers"
       :key="browser.id"
-      class="p-4 min-w-240px"
+      class="px-4 py-3 min-w-240px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
+      :selectable="!browser.isSelected"
     >
       <template #prefix>
         <img
-          class="mr-4 w-26px"
+          class="mr-4 min-w-26px"
           :src="allBrowsersIcons[browser.displayName]"
         >
       </template>
       <div>
-        <div class="text-indigo-600">
+        <div :class="browser.isSelected ? 'text-jade-600': 'text-indigo-600'">
           {{ browser.displayName }}
         </div>
-        <div class="font-normal text-gray-500 text-14px">
+        <div class="mr-6 font-normal text-gray-500 whitespace-nowrap text-14px">
           Version {{ browser.version }}
         </div>
       </div>
@@ -70,7 +74,7 @@
         #suffix
       >
         <div>
-          <i-cy-circle-check_x24 class=" icon-dark-jade-100 icon-light-jade-500" />
+          <i-cy-circle-check_x24 class=" icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
         </div>
       </template>
     </TopNavListItem>

@@ -1,5 +1,8 @@
 <template>
-  <li class="flex border-b border-b-gray-50">
+  <li
+    class="flex transition-colors duration-300 border-b border-b-gray-50"
+    :class="selectable ? 'hover:bg-indigo-50' : ''"
+  >
     <div v-if="hasPrefix">
       <div class="flex items-center h-full align-middle">
         <slot name="prefix" />
@@ -9,7 +12,10 @@
       <slot />
     </div>
     <div>
-      <div class="flex items-center h-full align-middle">
+      <div
+        v-if="hasSuffix"
+        class="flex items-center h-full align-middle"
+      >
         <slot name="suffix" />
       </div>
     </div>
@@ -26,4 +32,9 @@ const hasPrefix = computed(() => {
 const hasSuffix = computed(() => {
   return Boolean(slots.suffix)
 })
+
+const props = defineProps<{
+  selectable?: Boolean,
+}>()
+
 </script>

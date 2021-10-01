@@ -15,13 +15,13 @@
           default
         </slot>
         <i-cy-chevron-down
-          class="w-2.5 transform group-hocus:icon-dark-indigo-500"
+          class="w-2.5 transform group-hocus:icon-dark-indigo-500 transition-all duration-300"
           :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
         />
       </div>
     </PopoverButton>
     <TransitionQuickFade>
-      <PopoverPanel class="absolute right-0 z-10 bg-white rounded shadow">
+      <PopoverPanel class="absolute right-0 z-10 bg-white rounded shadow top-9">
         <ul
           v-if="variant !== 'panel'"
           class="flex flex-col"
