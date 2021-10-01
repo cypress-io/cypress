@@ -59,8 +59,10 @@
       :selectable="!browser.isSelected"
     >
       <template #prefix>
+        <!-- setting both width and min-width on these icons looks odd,
+        but makes all possible browser icons happy about what size to be -->
         <img
-          class="mr-4 min-w-26px"
+          class="mr-4 min-w-26px w-26px"
           :src="allBrowsersIcons[browser.displayName]"
         >
       </template>
