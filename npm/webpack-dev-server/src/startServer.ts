@@ -79,6 +79,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
       hot: false,
     }
 
+    // @ts-ignore ignore webpack-dev-server v3 type errors
     return new WebpackDevServer(webpackDevServerConfig, compiler)
   }
 
