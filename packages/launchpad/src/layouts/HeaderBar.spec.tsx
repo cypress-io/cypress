@@ -32,6 +32,7 @@ describe('<HeaderBar />', () => {
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 
+    // TODO: These selectors could be a little more stable but let's revisit when everything is wired up.
     cy.contains('button', 'Electron v73').should('not.exist')
     cy.contains('button', 'Docs').click()
     cy.contains('a', 'Write your first test').should('be.visible')
