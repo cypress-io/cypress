@@ -5,7 +5,7 @@ import { action } from 'mobx'
 
 import { client } from '@packages/socket'
 
-import { studioRecorder } from './studio'
+// import { studioRecorder } from './studio'
 import { automation } from './automation'
 import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
@@ -96,7 +96,7 @@ export const eventManager = {
     })
 
     ws.on('watched:file:changed', () => {
-      studioRecorder.cancel()
+      // studioRecorder.cancel()
       rerun()
     })
 
@@ -232,7 +232,7 @@ export const eventManager = {
     const studioInit = () => {
       ws.emit('studio:init', (showedStudioModal) => {
         if (!showedStudioModal) {
-          studioRecorder.showInitModal()
+          // studioRecorder.showInitModal()
         } else {
           rerun()
         }
@@ -240,28 +240,28 @@ export const eventManager = {
     }
 
     reporterBus.on('studio:init:test', (testId) => {
-      studioRecorder.setTestId(testId)
+      // studioRecorder.setTestId(testId)
 
       studioInit()
     })
 
     reporterBus.on('studio:init:suite', (suiteId) => {
-      studioRecorder.setSuiteId(suiteId)
+      // studioRecorder.setSuiteId(suiteId)
 
       studioInit()
     })
 
     reporterBus.on('studio:cancel', () => {
-      studioRecorder.cancel()
+      // studioRecorder.cancel()
       rerun()
     })
 
     reporterBus.on('studio:remove:command', (commandId) => {
-      studioRecorder.removeLog(commandId)
+      // studioRecorder.removeLog(commandId)
     })
 
     reporterBus.on('studio:save', () => {
-      studioRecorder.startSave()
+      // studioRecorder.startSave()
     })
 
     reporterBus.on('studio:copy:to:clipboard', (cb) => {
@@ -269,7 +269,7 @@ export const eventManager = {
     })
 
     localBus.on('studio:start', () => {
-      studioRecorder.closeInitModal()
+      // studioRecorder.closeInitModal()
       rerun()
     })
 
@@ -280,13 +280,13 @@ export const eventManager = {
     localBus.on('studio:save', (saveInfo) => {
       ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
-          reporterBus.emit('test:set:state', studioRecorder.saveError(err), _.noop)
+          // reporterBus.emit('test:set:state', studioRecorder.saveError(err), _.noop)
         }
       })
     })
 
     localBus.on('studio:cancel', () => {
-      studioRecorder.cancel()
+      // studioRecorder.cancel()
       rerun()
     })
 
@@ -356,7 +356,7 @@ export const eventManager = {
             return
           }
 
-          studioRecorder.initialize(config, state)
+          // studioRecorder.initialize(config, state)
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
 
@@ -416,7 +416,7 @@ export const eventManager = {
         reporterBus.emit('reporter:collect:run:state', (reporterState) => {
           resolve({
             ...reporterState,
-            studio: studioRecorder.state,
+            // studio: studioRecorder.state,
           })
         })
       })
@@ -492,13 +492,13 @@ export const eventManager = {
     })
 
     Cypress.on('test:before:run:async', (_attr, test) => {
-      studioRecorder.interceptTest(test)
+      // studioRecorder.interceptTest(test)
     })
 
     Cypress.on('test:after:run', (test) => {
-      if (studioRecorder.isOpen && test.state !== 'passed') {
-        studioRecorder.testFailed()
-      }
+      // if (studioRecorder.isOpen && test.state !== 'passed') {
+      //   studioRecorder.testFailed()
+      // }
     })
   },
 
@@ -516,7 +516,7 @@ export const eventManager = {
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
       scrollTop: state.scrollTop,
-      studioActive: studioRecorder.hasRunnableId,
+      // studioActive: studioRecorder.hasRunnableId,
     })
   },
 
@@ -534,7 +534,7 @@ export const eventManager = {
     // need to stop cypress always
     Cypress.stop()
 
-    studioRecorder.setInactive()
+    // studioRecorder.setInactive()
     selectorPlaygroundModel.setOpen(false)
 
     return this._restart()
@@ -557,23 +557,23 @@ export const eventManager = {
   },
 
   _interceptStudio (displayProps) {
-    if (studioRecorder.isActive) {
-      displayProps.hookId = studioRecorder.hookId
+    // if (studioRecorder.isActive) {
+    //   displayProps.hookId = studioRecorder.hookId
 
-      if (displayProps.name === 'visit' && displayProps.state === 'failed') {
-        studioRecorder.testFailed()
-        reporterBus.emit('test:set:state', studioRecorder.testError, _.noop)
-      }
-    }
+    //   if (displayProps.name === 'visit' && displayProps.state === 'failed') {
+    //     studioRecorder.testFailed()
+    //     reporterBus.emit('test:set:state', studioRecorder.testError, _.noop)
+    //   }
+    // }
 
     return displayProps
   },
 
   _studioCopyToClipboard (cb) {
-    ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
-      studioRecorder.copyToClipboard(commandsText)
-      .then(cb)
-    })
+    // ws.emit('studio:get:commands:text', studioRecorder.logs, (commandsText) => {
+    //   studioRecorder.copyToClipboard(commandsText)
+    //   .then(cb)
+    // })
   },
 
   emit (event, ...args) {
