@@ -10,7 +10,7 @@ export interface StartDevServerOptions {
   /**
    * the Cypress dev server configuration object
    */
-  options: Cypress.DevServerConfig
+  options: Cypress.CypressDevServerOptions
   /**
    * By default, vite will use your vite.config file to
    * Start the server. If you need additional plugins or
