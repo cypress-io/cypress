@@ -153,10 +153,16 @@ describe('lib/util/args', () => {
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo_spec.js`)
     })
 
-    it('can handle empty object', function () {
-      const options = this.setup('--run-project', 'foo', '--spec', {})
+    it('throws if argument cannot be parsed', function () {
+      expect(() => {
+        return this.setup('--run-project', 'foo', '--spec', {})
+      }).to.throw
 
-      expect(options.spec).to.deep.eq({})
+      try {
+        return this.setup('--run-project', 'foo', '--spec', {})
+      } catch (err) {
+        return snapshot('invalid spec error', stripAnsi(err.message))
+      }
     })
   })
 

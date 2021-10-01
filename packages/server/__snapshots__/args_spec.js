@@ -21,3 +21,11 @@ You passed: xyz
 
 The error was: Cannot read property 'split' of undefined
 `
+
+exports['invalid spec error'] = `
+Cypress encountered an error while parsing the argument spec
+
+You passed: [object Object]
+
+The error was: spec.map is not a function
+`

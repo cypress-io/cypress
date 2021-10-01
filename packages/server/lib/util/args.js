@@ -247,24 +247,29 @@ module.exports = {
     }
 
     if (spec) {
-      const resolvePath = (p) => {
-        return path.resolve(options.cwd, p)
-      }
-
-      // https://github.com/cypress-io/cypress/issues/8818
-      // Sometimes spec is parsed to array. Because of that, we need check.
-      if (typeof spec === 'string') {
-        // clean up single quotes wrapping the spec for Windows users
-        // https://github.com/cypress-io/cypress/issues/2298
-        if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
-          spec = spec.substring(1, spec.length - 1)
+      try {
+        const resolvePath = (p) => {
+          return path.resolve(options.cwd, p)
         }
 
-        options.spec = strToArray(spec).map(resolvePath)
-      } else if (_.isArray(spec)) {
-        options.spec = spec.map(resolvePath)
-      } else {
-        options.spec = sanitizeAndConvertNestedArgs(spec, 'spec')
+        // https://github.com/cypress-io/cypress/issues/8818
+        // Sometimes spec is parsed to array. Because of that, we need check.
+        if (typeof spec === 'string') {
+          // clean up single quotes wrapping the spec for Windows users
+          // https://github.com/cypress-io/cypress/issues/2298
+          if (spec[0] === '\'' && spec[spec.length - 1] === '\'') {
+            spec = spec.substring(1, spec.length - 1)
+          }
+
+          options.spec = strToArray(spec).map(resolvePath)
+        } else {
+          options.spec = spec.map(resolvePath)
+        }
+      } catch (err) {
+        debug('could not pass config spec value %s', spec)
+        debug('error %o', err)
+
+        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'spec', spec, err.message)
       }
     }
 
