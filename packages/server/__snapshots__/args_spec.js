@@ -27,5 +27,5 @@ Cypress encountered an error while parsing the argument spec
 
 You passed: [object Object]
 
-The error was: spec.map is not a function
+The error was: spec must be a string or comma-separated list
 `
