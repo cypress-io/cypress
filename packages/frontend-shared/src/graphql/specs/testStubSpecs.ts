@@ -1,9 +1,9 @@
-// @ts-nocheck
-// @ts-ignore
 import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import combineProperties from 'combine-properties'
+import type { Spec } from '../../generated/test-graphql-types.gen'
+import { testNodeId } from '../testUtils'
 templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
 let jml
@@ -15,6 +15,7 @@ const setupSeeds = () => {
 
 setupSeeds()
 
+// TODO BEFORE MERGE, REMOVE
 beforeEach(() => setupSeeds)
 
 
@@ -89,7 +90,7 @@ const nameTemplates = {
 
 const prefixes = ['I', 'V', 'Cy', null]
 
-export const componentNameGenerator = (options: { template: any, omit: any, overrides: any } = {template: nameTemplates.medium1, omit: [], overrides: {}}) => {
+export const componentNameGenerator = (options: { template: any, omit?: any, overrides?: any } = {template: nameTemplates.medium1, omit: [], overrides: {}}) => {
   const withoutValues = reduce(options.omit, (acc, v) => {
     acc[v] = null
     return acc
@@ -122,8 +123,8 @@ const allRandomComponents = combineProperties({
   directory: keys(directories)
 })
 
-export const randomComponents = (n = 200) => {
-  return faker.random.arrayElements(allRandomComponents, n).map(d => {
+export const randomComponents = (n = 200): Spec[] => {
+  return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
     const name = componentNameGenerator({
       overrides: d,
       template: faker.random.objectElement(nameTemplates)
@@ -131,17 +132,21 @@ export const randomComponents = (n = 200) => {
 
     const gitFileState = jml.pick(['modified', 'unmodified', 'added', 'deleted'])
     return {
-      componentName: name,
-      relativePath: directories[d.directory](d),
-      specExtension: d.specPattern,
-      fileExtension: d.fileExtension,
+      // componentName: name,
+      relative: directories[d.directory](d),
+      absolute: '',
+      // specExtension: d.specPattern,
+      // fileExtension: d.fileExtension,
       name: `${name}${d.specPattern}${d.fileExtension}`,
-      id: faker.datatype.uuid(),
-      gitInfo: {
-        comitter: gitFileState ? faker.internet.userName() : undefined,
-        timeAgo: gitFileState ? faker.datatype.datetime() : undefined,
-        fileState: gitFileState
-      }
+      specType: 'component',
+      __typename: 'Spec'
+
+      // id: faker.datatype.uuid(),
+      // gitInfo: {
+      //   comitter: gitFileState ? faker.internet.userName() : undefined,
+      //   timeAgo: gitFileState ? faker.datatype.datetime() : undefined,
+      //   fileState: gitFileState
+      // }
     }
   }, n)
 }
