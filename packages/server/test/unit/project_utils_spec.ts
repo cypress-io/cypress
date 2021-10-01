@@ -1,9 +1,9 @@
 import Chai from 'chai'
 import path from 'path'
-const { sinon } = require('../spec_helper')
-import { getSpecUrl, checkSupportFile } from '../../lib/project_utils'
+import sinon from 'sinon'
+import { fs } from '../../lib/util/fs'
+import { getSpecUrl, checkSupportFile, getDefaultConfigFilePath } from '../../lib/project_utils'
 import Fixtures from '../support/helpers/fixtures'
-import settings from '../../lib/util/settings'
 
 const todosPath = Fixtures.projectPath('todos')
 
@@ -120,6 +120,60 @@ describe('lib/project_utils', () => {
         })
       } catch (e) {
         expect(e.message).to.include('The support file is missing or invalid.')
+      }
+    })
+  })
+
+  describe('getDefaultConfigFilePath', () => {
+    let readdirStub
+    const projectRoot = '/a/project/root'
+
+    beforeEach(() => {
+      readdirStub = sinon.stub(fs, 'readdir')
+    })
+
+    afterEach(() => {
+      readdirStub.restore()
+    })
+
+    it('finds cypress.json when present', async () => {
+      readdirStub.withArgs(projectRoot).resolves(['cypress.json'])
+      const ret = await getDefaultConfigFilePath(projectRoot)
+
+      expect(ret).to.equal('cypress.json')
+    })
+
+    it('defaults to cypress.config.js when present', async () => {
+      readdirStub.withArgs(projectRoot).resolves(['cypress.config.js'])
+      const ret = await getDefaultConfigFilePath(projectRoot)
+
+      expect(ret).to.equal('cypress.config.js')
+    })
+
+    it('defaults to cypress.json when no file is returned', async () => {
+      readdirStub.withArgs(projectRoot).resolves([])
+      const ret = await getDefaultConfigFilePath(projectRoot)
+
+      expect(ret).to.equal('cypress.json')
+    })
+
+    it('errors if two default files are present', async () => {
+      readdirStub.withArgs(projectRoot).resolves(['cypress.config.js', 'cypress.json'])
+      try {
+        await getDefaultConfigFilePath(projectRoot)
+        throw Error('should have failed')
+      } catch (err) {
+        expect(err).to.have.property('type', 'CONFIG_FILES_LANGUAGE_CONFLICT')
+      }
+    })
+
+    it('errors if no file is present and we asked not to create any', async () => {
+      readdirStub.withArgs(projectRoot).resolves([])
+      try {
+        await getDefaultConfigFilePath(projectRoot, false)
+        throw Error('should have failed')
+      } catch (err) {
+        expect(err).to.have.property('type', 'NO_DEFAULT_CONFIG_FILE_FOUND')
       }
     })
   })

@@ -40,7 +40,7 @@ describe('gui/files', () => {
       sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
 
       this.showSaveDialog = sinon.stub(dialog, 'showSaveDialog').resolves(this.selectedPath)
-      this.createFile = sinon.stub(specWriter, 'createFile').resolves({ path: this.selectedPath })
+      this.createFile = sinon.stub(specWriter, 'createFile').resolves()
       this.getSpecs = sinon.stub(openProject, 'getSpecs').resolves(this.specs)
 
       return openProject.create('/_test-output/path/to/project-e2e', {

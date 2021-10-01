@@ -138,10 +138,6 @@ export const options = [
     defaultValue: false,
     isInternal: true,
   }, {
-    name: 'javascripts',
-    defaultValue: [],
-    isInternal: true,
-  }, {
     name: 'morgan',
     defaultValue: true,
     isInternal: true,

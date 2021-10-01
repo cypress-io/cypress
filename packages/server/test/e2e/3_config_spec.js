@@ -1,5 +1,3 @@
-const fs = require('fs')
-const path = require('path')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 
@@ -50,21 +48,16 @@ describe('e2e config', () => {
     })
   })
 
-  it('does not create a cypress.json when `module.exports = {}` is the only thing in cypress.config.js', function () {
-    const project = Fixtures.projectPath('config-with-empty-cypress-config')
-
+  it('supports custom configFile in JavaScript', function () {
     return e2e.exec(this, {
-      project,
-    }).then(() => {
-      expect(fs.existsSync(path.resolve(project, 'cypress.json'))).to.be.false
+      project: Fixtures.projectPath('config-with-custom-file-js'),
+      configFile: 'cypress.config.custom.js',
     })
   })
 
-  it('does not crash when `module.exports = {}` is the only thing in cypress.config.js and there is a cypress.json', function () {
-    const project = Fixtures.projectPath('config-with-json-and-empty-cypress-config')
-
+  it('supports custom configFile in a default JavaScript file', function () {
     return e2e.exec(this, {
-      project,
+      project: Fixtures.projectPath('config-with-js'),
     })
   })
 })

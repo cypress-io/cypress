@@ -6,7 +6,8 @@ import path from 'path'
 
 import browsers from './browsers'
 import pkg from '@packages/root'
-import { ServerCt, SocketCt } from '@packages/server-ct'
+import { ServerCt } from './server-ct'
+import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import api from './api'
 import { Automation } from './automation'
@@ -22,25 +23,22 @@ import system from './util/system'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
-import settings from './util/settings'
+import * as settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { createRoutes as createE2ERoutes } from './routes'
-import { createRoutes as createCTRoutes } from '@packages/server-ct/src/routes-ct'
-import { checkSupportFile } from './project_utils'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
 // and are required when creating a project.
-// TODO: Figure out how to type this better.
 type ReceivedCypressOptions =
-  Partial<Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute'>>
-  & Partial<Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder'>>
+  Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreTestFiles'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -56,7 +54,7 @@ type WebSocketOptionsCallback = (...args: any[]) => any
 export interface OpenProjectLaunchOptions {
   args?: LaunchArgs
 
-  configFile?: string | boolean
+  configFile?: string | false
   browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.
@@ -85,6 +83,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
+  private _isServerOpen: boolean = false
 
   public browser: any
   public options: OpenProjectLaunchOptions
@@ -227,9 +226,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
       testingType: this.testingType,
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
-      createRoutes: this.testingType === 'e2e' ? createE2ERoutes : createCTRoutes,
       specsStore,
     })
+
+    this._isServerOpen = true
 
     // if we didnt have a cfg.port
     // then get the port once we
@@ -358,6 +358,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     this.spec = null
     this.browser = null
 
+    if (!this._isServerOpen) {
+      return
+    }
+
     const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
 
     await Promise.all([
@@ -365,6 +369,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       this.watchers?.close(),
       typeof closePreprocessor === 'function' ? closePreprocessor() : Promise.resolve(),
     ])
+
+    this._isServerOpen = false
 
     process.chdir(localCwd)
 
@@ -390,7 +396,15 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     ctDevServerPort: number | undefined
     startSpecWatcher: () => void
   }> {
-    const allSpecs = await specsUtil.find(updatedConfig)
+    const allSpecs = await specsUtil.findSpecs({
+      projectRoot: updatedConfig.projectRoot,
+      fixturesFolder: updatedConfig.fixturesFolder,
+      supportFile: updatedConfig.supportFile,
+      testFiles: updatedConfig.testFiles,
+      ignoreTestFiles: updatedConfig.ignoreTestFiles,
+      componentFolder: updatedConfig.componentFolder,
+      integrationFolder: updatedConfig.integrationFolder,
+    })
     const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
       if (this.testingType === 'component') {
         return spec.specType === 'component'
@@ -579,7 +593,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err) {
+    } catch (err: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
       // only include the message if this is the standard MODULE_NOT_FOUND
@@ -708,6 +722,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   }
 
   async initializeConfig (): Promise<Cfg> {
+    // set default for "configFile" if undefined
+    if (this.options.configFile === undefined
+  || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (theCfg.browsers) {

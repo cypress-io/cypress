@@ -43,7 +43,7 @@ const webpackConfigLoadsBabel = {
   *   return config
   * }
   */
-module.exports = (on, config, { setWebpackConfig } = { setWebpackConfig: null }) => {
+module.exports = (config, { setWebpackConfig } = { setWebpackConfig: null }) => {
   debug('env object %o', config.env)
 
   debug('initial environments %o', {

@@ -10,6 +10,7 @@ macBuildFilters: &macBuildFilters
         - develop
         - issue-17944-remove-source-files
         - feat/allow-cypress-js
+        - tgriesser/chore/fix-release
 
 defaults: &defaults
   parallelism: 1
@@ -45,6 +46,7 @@ onlyMainBranches: &onlyMainBranches
         - develop
         - issue-17944-remove-source-files
         - feat/allow-cypress-js
+        - tgriesser/chore/fix-release
   requires:
     - create-build-artifacts
 
@@ -993,8 +995,6 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
-      # check for compile errors with the releaserc scripts
-      - run: yarn test-npm-package-release-script
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -1003,6 +1003,14 @@ jobs:
       - store_artifacts:
           path: cli/test/html
       - store-npm-logs
+
+  unit-tests-release:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run: yarn test-npm-package-release-script
 
   lint-types:
     <<: *defaults
@@ -1030,18 +1038,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn test-unit --scope @packages/server
-      - verify-mocha-results:
-          expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
-
-  server-ct-unit-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - restore_cached_workspace
-      - run: yarn test-unit --scope @packages/server-ct
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -1157,6 +1153,7 @@ jobs:
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
+    resource_class: medium
     parallelism: 5
     steps:
       - run-driver-integration-tests:
@@ -1491,7 +1488,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-17944-remove-source-files" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tgriesser/chore/fix-release" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1984,6 +1981,10 @@ linux-workflow: &linux-workflow
     - unit-tests:
         requires:
           - build
+    - unit-tests-release:
+        context: test-runner:npm-release
+        requires:
+          - build
     - server-unit-tests:
         requires:
           - build
@@ -2083,6 +2084,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
+        context: test-runner:npm-release
         requires:
           - build
           - npm-eslint-plugin-dev
@@ -2116,6 +2118,7 @@ linux-workflow: &linux-workflow
           - server-integration-tests
           - server-unit-tests
           - unit-tests
+          - unit-tests-release
           - cli-visual-tests
 
     # various testing scenarios, like building full binary
@@ -2128,6 +2131,7 @@ linux-workflow: &linux-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - build
     - test-kitchensink:
@@ -2141,6 +2145,7 @@ linux-workflow: &linux-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - build
     - create-build-artifacts:
@@ -2192,6 +2197,7 @@ linux-workflow: &linux-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-npm-module-and-verify-binary:
@@ -2201,6 +2207,7 @@ linux-workflow: &linux-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
     - test-binary-against-staging:
@@ -2211,6 +2218,7 @@ linux-workflow: &linux-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2237,6 +2245,7 @@ linux-workflow: &linux-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - create-build-artifacts
 
@@ -2310,6 +2319,7 @@ mac-workflow: &mac-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 
@@ -2323,6 +2333,7 @@ mac-workflow: &mac-workflow
               - develop
               - issue-17944-remove-source-files
               - feat/allow-cypress-js
+              - tgriesser/chore/fix-release
         requires:
           - darwin-create-build-artifacts
 

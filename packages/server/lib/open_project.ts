@@ -14,6 +14,9 @@ import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { Browser, FoundBrowser, PlatformName } from '@packages/launcher'
 import type { AutomationMiddleware } from './automation'
+import { fs } from './util/fs'
+import path from 'path'
+import os from 'os'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -25,11 +28,16 @@ interface LaunchOpts {
   onError?: (err: Error) => void
 }
 
+interface SpecsByType {
+  component: Cypress.Spec[]
+  integration: Cypress.Spec[]
+}
+
 export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
-  browser: Browser
+  browser?: Browser['name']
   configFile?: string
   project: string // projectRoot
   projectRoot: string // same as above
@@ -38,6 +46,39 @@ export interface LaunchArgs {
   os: PlatformName
 
   onFocusTests?: () => any
+  /**
+   * in run mode, the path of the project run
+   * path is relative if specified with --project,
+   * absolute if implied by current working directory
+   */
+  runProject?: string
+}
+
+// @see https://github.com/cypress-io/cypress/issues/18094
+async function win32BitWarning (onWarning: (error: Error) => void) {
+  if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
+
+  // adapted from https://github.com/feross/arch/blob/master/index.js
+  let useEnv = false
+
+  try {
+    useEnv = !!(process.env.SYSTEMROOT && await fs.stat(process.env.SYSTEMROOT))
+  } catch (err) {
+    // pass
+  }
+
+  const sysRoot = useEnv ? process.env.SYSTEMROOT! : 'C:\\Windows'
+
+  // If %SystemRoot%\SysNative exists, we are in a WOW64 FS Redirected application.
+  let hasX64 = false
+
+  try {
+    hasX64 = !!(await fs.stat(path.join(sysRoot, 'sysnative')))
+  } catch (err) {
+    // pass
+  }
+
+  onWarning(errors.get('WIN32_DEPRECATION', hasX64))
 }
 
 export class OpenProject {
@@ -69,17 +110,11 @@ export class OpenProject {
     return this.openProject!.getConfig()
   }
 
-  getRecordKeys () {
-    return this.tryToCall('getRecordKeys')
-  }
+  getRecordKeys = this.tryToCall('getRecordKeys')
 
-  getRuns () {
-    return this.tryToCall('getRuns')
-  }
+  getRuns = this.tryToCall('getRuns')
 
-  requestAccess () {
-    return this.tryToCall('requestAccess')
-  }
+  requestAccess = this.tryToCall('requestAccess')
 
   getProject () {
     return this.openProject
@@ -231,8 +266,8 @@ export class OpenProject {
   }
 
   getSpecs (cfg) {
-    return specsUtil.find(cfg)
-    .then((specs: Cypress.Cypress['spec'][] = []) => {
+    return specsUtil.findSpecs(cfg)
+    .then((specs: Cypress.Spec[] = []) => {
       // TODO merge logic with "run.js"
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -260,20 +295,21 @@ export class OpenProject {
 
       // assumes all specs are integration specs
       return {
-        integration: specs,
+        integration: specs.filter((x) => x.specType === 'integration'),
+        component: [],
       }
     })
   }
 
   getSpecChanges (options: OpenProjectLaunchOptions = {}) {
-    let currentSpecs: Cypress.Cypress['spec'][]
+    let currentSpecs: SpecsByType
 
     _.defaults(options, {
       onChange: () => { },
       onError: () => { },
     })
 
-    const sendIfChanged = (specs = []) => {
+    const sendIfChanged = (specs: SpecsByType = { component: [], integration: [] }) => {
       // dont do anything if the specs haven't changed
       if (_.isEqual(specs, currentSpecs)) {
         return
@@ -332,9 +368,12 @@ export class OpenProject {
       }
     }
 
-    const get = () => {
+    const get = (): Bluebird<SpecsByType> => {
       if (!this.openProject) {
-        return
+        return Bluebird.resolve({
+          component: [],
+          integration: [],
+        })
       }
 
       const cfg = this.openProject.getConfig()
@@ -418,10 +457,12 @@ export class OpenProject {
       },
     })
 
+    await win32BitWarning(options.onWarning)
+
     try {
       await this.openProject.initializeConfig()
       await this.openProject.open()
-    } catch (err) {
+    } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throw(err.type, err.port)
       } else {

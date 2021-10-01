@@ -249,3 +249,7 @@ export const getSimpleConfig = () => ({
 })
 
 export { HtmlWebpackPlugin }
+
+export function getCopyWebpackPlugin () {
+  return require('copy-webpack-plugin')
+}

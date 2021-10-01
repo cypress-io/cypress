@@ -5,8 +5,8 @@ import { makeWebpackConfig, UserWebpackDevServerOptions } from './makeWebpackCon
 import { webpackDevServerFacts } from './webpackDevServerFacts'
 
 export interface StartDevServer extends UserWebpackDevServerOptions {
-  /* this is the Cypress options object */
-  options: Cypress.DevServerOptions
+  /* this is the Cypress dev server configuration object */
+  options: Cypress.DevServerConfig
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
   /* base html template to render in AUT */
@@ -57,12 +57,13 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
     debug('using webpack-dev-server v3')
     webpackDevServerConfig = {
       ...webpackDevServerConfig,
-      // @ts-expect-error ignore webpack-dev-server v3 type errors
+      // @ts-ignore ignore webpack-dev-server v3 type errors
       inline: false,
       publicPath: devServerPublicPathRoute,
       noInfo: false,
     }
 
+    // @ts-ignore ignore webpack-dev-server v3 type errors
     return new WebpackDevServer(compiler, webpackDevServerConfig)
   }
 

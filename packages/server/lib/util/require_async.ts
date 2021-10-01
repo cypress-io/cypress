@@ -29,7 +29,7 @@ const killChildProcess = () => {
   requireProcess = null
 }
 
-export default async function requireAsync (filePath: string, options: RequireAsyncOptions): Promise<any> {
+export async function requireAsync (filePath: string, options: RequireAsyncOptions): Promise<any> {
   return new Promise((resolve, reject) => {
     if (requireProcess) {
       debug('kill existing config process')

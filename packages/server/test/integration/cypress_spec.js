@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-properties */
 require('../spec_helper')
-const { clearCypressJsonCache } = require('../cache_helper')
 
 const R = require('ramda')
 const _ = require('lodash')
@@ -48,7 +47,7 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
-const electronApp = require(`${root}lib/util/electron-app`)
+const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`${root}lib/saved_state`)
 
 const TYPICAL_BROWSERS = [
@@ -173,14 +172,12 @@ describe('lib/cypress', () => {
     try {
       // make sure every project
       // we spawn is closed down
-      openProject.getProject().isOpen = true
       await openProject.close()
     } catch (e) {
       // ...
     }
 
     Fixtures.remove()
-    clearCypressJsonCache()
   })
 
   context('test browsers', () => {
@@ -502,7 +499,7 @@ describe('lib/cypress', () => {
         ])
       }).each(ensureDoesNotExist)
       .then(() => {
-        this.expectExitWithErr('CONFIG_FILE_NOT_FOUND', this.pristinePath)
+        this.expectExitWithErr('NO_DEFAULT_CONFIG_FILE_FOUND', this.pristinePath)
       })
     })
 
@@ -514,8 +511,10 @@ describe('lib/cypress', () => {
         return fs.statAsync(path.join(this.pristinePath, 'cypress', 'integration'))
       }).then(() => {
         throw new Error('integration folder should not exist!')
-      }).catch((e) => {
-        expect(e.code).to.equal('ENOENT')
+      }).catch((err) => {
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
       })
     })
 
@@ -772,7 +771,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
-        this.expectExitWithErr('CONFIG_FILE_ERROR', this.todosPath)
+        this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
       })
     })
 
@@ -1799,31 +1798,27 @@ describe('lib/cypress', () => {
         this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
-      afterEach(function () {
-        delete require.cache[path.join(this.pristinePath, this.filename)]
-      })
-
       it('reads config from a custom config file', function () {
-        fs.outputJSON(path.join(this.pristinePath, this.filename), {
+        return fs.writeJson(path.join(this.pristinePath, this.filename), {
           env: { foo: 'bar' },
           port: 2020,
-        })
-
-        return cypress.start([
-          `--config-file=${this.filename}`,
-        ])
-        .then(() => {
-          const options = Events.start.firstCall.args[0]
-
-          return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
         }).then(() => {
-          expect(this.open).to.be.called
+          cypress.start([
+          `--config-file=${this.filename}`,
+          ])
+          .then(() => {
+            const options = Events.start.firstCall.args[0]
 
-          const cfg = this.open.getCall(0).args[0]
+            return Events.handleEvent(options, {}, {}, 123, 'open:project', this.pristinePath)
+          }).then(() => {
+            expect(this.open).to.be.called
 
-          expect(cfg.env.foo).to.equal('bar')
+            const cfg = this.open.getCall(0).args[0]
 
-          expect(cfg.port).to.equal(2020)
+            expect(cfg.env.foo).to.equal('bar')
+
+            expect(cfg.port).to.equal(2020)
+          })
         })
       })
 

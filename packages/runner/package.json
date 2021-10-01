@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@cypress/design-system": "0.0.0-development",
+    "@cypress/icons": "0.7.0",
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fontsource/mulish": "4.3.0",

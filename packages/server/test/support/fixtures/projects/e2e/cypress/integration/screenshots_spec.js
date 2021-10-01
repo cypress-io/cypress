@@ -302,13 +302,44 @@ describe('taking screenshots', () => {
     })
   })
 
+  // @see https://github.com/cypress-io/cypress/issues/7955
+  it('can pass overwrite option to replace existing filename', () => {
+    cy.viewport(600, 200)
+    cy.visit('http://localhost:3322/color/yellow')
+    cy.screenshot('overwrite-test', {
+      overwrite: false,
+      clip: { x: 10, y: 10, width: 160, height: 80 },
+    })
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/overwrite-test.png`,
+      width: 160,
+      height: 80,
+      devicePixelRatio,
+    })
+
+    cy.screenshot('overwrite-test', {
+      overwrite: true,
+      clip: { x: 10, y: 10, width: 100, height: 50 },
+    })
+
+    cy.readFile(`cypress/screenshots/${path.basename(__filename)}/overwrite-test (1).png`).should('not.exist')
+
+    cy.task('check:screenshot:size', {
+      name: `${path.basename(__filename)}/overwrite-test.png`,
+      width: 100,
+      height: 50,
+      devicePixelRatio,
+    })
+  })
+
   context('before hooks', () => {
     before(() => {
       // failure 2
       throw new Error('before hook failing')
     })
 
-    it('empty test 1', () => {})
+    it('empty test 1', () => { })
   })
 
   context('each hooks', () => {
@@ -322,7 +353,7 @@ describe('taking screenshots', () => {
       throw new Error('after each hook failed')
     })
 
-    it('empty test 2', () => {})
+    it('empty test 2', () => { })
   })
 
   context(`really long test title ${Cypress._.repeat('a', 255)}`, () => {

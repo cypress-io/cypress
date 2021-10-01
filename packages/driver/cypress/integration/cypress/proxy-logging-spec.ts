@@ -1,3 +1,5 @@
+import { expect } from 'chai'
+
 describe('Proxy Logging', () => {
   const { _ } = Cypress
 
@@ -43,12 +45,6 @@ describe('Proxy Logging', () => {
     }
   }
 
-  beforeEach(() => {
-    // block race conditions caused by log update debouncing
-    // @ts-ignore
-    Cypress.config('logAttrsDelay', 0)
-  })
-
   context('request logging', () => {
     it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
@@ -80,11 +76,8 @@ describe('Proxy Logging', () => {
         expect(log.consoleProps).to.not.have.property('Matched `cy.intercept()`')
 
         // trigger: .snapshot('request')
-        cy.once('log:changed', (log) => {
-          expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request'])
-
-          // trigger: .snapshot('response')
-          cy.once('log:changed', (log) => {
+        cy.on('log:changed', (log) => {
+          try {
             expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
             expect(log.consoleProps['Response Headers']).to.include({
               'x-powered-by': 'Express',
@@ -101,8 +94,48 @@ describe('Proxy Logging', () => {
             )
 
             done()
-          })
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion error, retrying', err)
+          }
         })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/17656
+    it('xhr log has response body/status code', (done) => {
+      cy.window()
+      .then((win) => {
+        cy.on('log:changed', (log) => {
+          try {
+            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
+            expect(log.consoleProps['Response Headers']).to.include({
+              'x-powered-by': 'Express',
+            })
+
+            expect(log.consoleProps['Response Body']).to.include('Cannot GET /some-url')
+            expect(log.consoleProps['Response Status Code']).to.eq(404)
+
+            expect(log.renderProps).to.include({
+              indicator: 'bad',
+              message: 'GET 404 /some-url',
+            })
+
+            expect(Object.keys(log.consoleProps)).to.deep.eq(
+              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'XHR', 'groups', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
+            )
+
+            done()
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log('assertion error, retrying', err)
+          }
+        })
+
+        const xhr = new win.XMLHttpRequest()
+
+        xhr.open('GET', '/some-url')
+        xhr.send()
       })
     })
 
@@ -238,7 +271,7 @@ describe('Proxy Logging', () => {
         .wrap(logs)
         .should((logs) => {
           // retries...
-          expect(logs).to.have.length.greaterThan(2)
+          expect(logs).to.have.length.greaterThan(0)
 
           for (const log of logs) {
             expect(log.err).to.include({ name: 'Error' })
