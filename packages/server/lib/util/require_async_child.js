@@ -27,7 +27,7 @@ function run (ipc, requiredFile, projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
   }
 
-  if (!tsRegistered) {
+  if (!tsRegistered && requiredFile.endsWith('.ts')) {
     debug('register typescript for required file')
     tsNodeUtil.register(projectRoot, requiredFile)
 
