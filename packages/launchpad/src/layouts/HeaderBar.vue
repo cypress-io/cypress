@@ -11,7 +11,7 @@
         <span class="text-body-gray-700">{{ props.gql.app.activeProject?.title }}</span>
       </div>
       <div class="flex gap-6">
-        <TopNav />
+        <TopNav :gql="props?.gql?.app" />
         <Auth :gql="props.gql" />
       </div>
     </div>
@@ -22,6 +22,7 @@
 import { gql } from '@urql/vue'
 import type { HeaderBarFragment } from '../generated/graphql'
 import TopNav from '../components/topnav/TopNav.vue'
+
 import Auth from '../setup/Auth.vue'
 
 gql`
@@ -31,6 +32,7 @@ fragment HeaderBar on Query {
       id
       title
     }
+  ...TopNav
   }
   ...Auth
 }

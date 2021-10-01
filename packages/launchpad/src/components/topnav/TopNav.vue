@@ -28,28 +28,31 @@
         v-if="!index"
         #suffix
       >
-        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
+        <i-cy-circle-check_x24
+          class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px"
+        />
       </template>
     </TopNavListItem>
     <TopNavListItem class="p-4 text-center bg-gray-50">
       <a
         :href="releasesUrl"
+        target="_blank"
         class="block w-full py-2 border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
       >See all releases</a>
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="browserQuery?.data?.value?.app">
+  <TopNavList v-if="props.gql && props.showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[browserQuery.data.value.app.selectedBrowser.displayName]"
+        :src="allBrowsersIcons[props.gql?.selectedBrowser?.displayName || '']"
       >
-      <span>{{ browserQuery.data.value.app.selectedBrowser.displayName }} v{{ browserQuery.data.value.app.selectedBrowser.majorVersion }}</span>
+      <span>{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
-      v-for="browser in browserQuery.data.value.app.browsers"
+      v-for="browser in props.gql.browsers"
       :key="browser.id"
       class="px-4 py-3 min-w-240px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
@@ -62,10 +65,14 @@
         >
       </template>
       <div>
-        <div :class="browser.isSelected ? 'text-jade-600': 'text-indigo-600'">
+        <div
+          :class="browser.isSelected ? 'text-jade-600' : 'text-indigo-600'"
+        >
           {{ browser.displayName }}
         </div>
-        <div class="mr-6 font-normal text-gray-500 whitespace-nowrap text-14px">
+        <div
+          class="mr-6 font-normal text-gray-500 whitespace-nowrap text-14px"
+        >
           Version {{ browser.version }}
         </div>
       </div>
@@ -74,7 +81,9 @@
         #suffix
       >
         <div>
-          <i-cy-circle-check_x24 class=" icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
+          <i-cy-circle-check_x24
+            class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px"
+          />
         </div>
       </template>
     </TopNavListItem>
@@ -107,6 +116,7 @@
             <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
             <a
               :href="getUrl(item.link)"
+              target="_blank"
               class="ml-2 font-normal whitespace-nowrap"
             >{{ item.text }}</a>
           </li>
@@ -117,24 +127,48 @@
 </template>
 
 <script setup lang="ts">
-
-import _ from 'lodash'
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
-import { gql, useQuery } from '@urql/vue'
-import { TopNavDocument } from '../../generated/graphql'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
+import { gql } from '@urql/vue'
+import type { TopNavFragment } from '../../generated/graphql'
 
-gql`
-query TopNav {
-  app {
-    ...DetectedBrowsers
+const getUrl = (link) => {
+  let result = link.url
+
+  if (link.params) {
+    result += `?${new URLSearchParams(link.params).toString()}`
   }
+
+  return result
 }
-`
+
+const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
+
+const utm_medium = 'Docs Menu'
+
+// TODO: will come from gql
+const versionList = [
+  {
+    version: '8.4.1',
+    released: '2 days ago',
+  },
+  {
+    version: '8.4.0',
+    released: '6 days ago',
+  },
+  {
+    version: '8.3.1',
+    released: '12 days ago',
+  },
+  {
+    version: '8.3.0',
+    released: '2 weeks ago',
+  },
+]
 
 gql`
-fragment DetectedBrowsers on App {
+fragment TopNavContent on App {
   selectedBrowser {
     id
     displayName
@@ -155,37 +189,10 @@ fragment DetectedBrowsers on App {
 }
 `
 
-const browserQuery = useQuery({ query: TopNavDocument })
-
-const getUrl = (link) => {
-  let result = link.url
-
-  if (link.params) {
-    result += `?${new URLSearchParams(link.params).toString()}`
-  }
-
-  return result
-}
-
-// TODO: will come from gql
-const versionList = [
-  {
-    version: '8.4.1',
-    released: '2 days ago',
-  },
-  {
-    version: '8.4.0',
-    released: '6 days ago',
-  },
-  {
-    version: '8.3.1',
-    released: '12 days ago',
-  },
-]
-
-const releasesUrl = 'https://github.com/cypress-io/cypress/releases/'
-
-const utm_medium = 'Docs Menu'
+const props = defineProps<{
+    gql: TopNavFragment,
+    showBrowsers?: Boolean
+}>()
 
 const docsMenu = [{
   title: 'Getting Started',
