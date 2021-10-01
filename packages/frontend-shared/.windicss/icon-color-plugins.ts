@@ -7,7 +7,7 @@
 
 import createPlugin from 'windicss/plugin'
 import { reduce, kebabCase, isObject } from 'lodash'
-import Colors from 'windicss/colors'
+import { colors } from './colors'
 
 interface RuleConfig {
   name: string
@@ -59,7 +59,7 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
 }
 
 function addIconUtilityClasses (theme) {
-  return reduce(Colors, (acc, variants, colorName) => {
+  return reduce(colors, (acc, variants, colorName) => {
     // lightGray => light-gray
     const name = kebabCase(colorName)
 
