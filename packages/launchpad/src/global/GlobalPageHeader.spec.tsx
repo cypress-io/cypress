@@ -33,9 +33,22 @@ describe('<GlobalPageHeader />', () => {
 
   it('handles a file upload', () => {
     cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-600px"><GlobalPageHeader /></div>))
+    const fileUploadSpy = cy.spy()
 
-    cy.get('input[type=file]')
-    .then((subject) => attachFileToInputElement(subject[0] as HTMLInputElement))
-    .trigger('change', { force: true })
+    cy.get('input[file]')
+       .as('file-input')
+       
+       // Test that we open the file picker
+       .invoke('on', 'change', fileUploadSpy)
+
+       .get('@file-input')
+       // Simulate attaching file to input element
+       .then(attachFileToInputElement)
+       .get('[data-testid=add-project-button]')
+       .click()
+       .get(fileUploadSpy).should.have.been.called
+       // Since this component does not emit an event
+       // you can't tell if `addProject` was added with a valid directory name.
+       // I talk about how you could to solve this in another comment.
   })
 })
