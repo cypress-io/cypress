@@ -470,7 +470,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const isWin = $dom.isWindow(subject)
 
-      let screenshotConfig = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
+      let screenshotConfig: any = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
 
       screenshotConfig = $Screenshot.validate(screenshotConfig, 'screenshot', options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
