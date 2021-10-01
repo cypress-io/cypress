@@ -69,7 +69,6 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
   const ast = parse(fileContents, { plugins: ['typescript'], sourceType: 'module' })
 
   let objectLiteralStartIndex = -1
-  let objectLiteralEndIndex = -1
   let objectLiteralNode: namedTypes.ObjectExpression
 
   function handleExports (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>) {
@@ -87,7 +86,6 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     if (nodePath.node.type === 'ObjectExpression') {
       objectLiteralNode = nodePath.node
       objectLiteralStartIndex = (objectLiteralNode as any).start + 1
-      objectLiteralEndIndex = (objectLiteralNode as any).end - 1
       debug('found object litteral %o', objectLiteralNode)
     }
   }
@@ -110,62 +108,129 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     },
   })
 
-  const objKeys = Object.keys(obj)
+  // deal with keys to update on the root
+  const objFlatKeys = Object.keys(obj).filter((key) => ['boolean', 'number', 'string'].includes(typeof obj[key]))
 
-  const keysToInsert = objKeys.filter((key) => !config[key])
-  const keysToUpdate = objKeys.filter((key) => config[key] && config[key] !== obj[key])
+  const keysToInsertFlat = objFlatKeys.filter((key) => !config[key])
+  const keysToUpdateFlat = objFlatKeys.filter((key) => config[key] && config[key] !== obj[key])
 
-  debug('keys absent from the original config ', keysToInsert)
+  debug('top level keys absent from the original config ', keysToInsertFlat)
 
-  const valuesInserted = keysToInsert.length ? `\n  ${ keysToInsert.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join('\n  ')}` : ''
-
-  debug('inserting values ', valuesInserted)
+  const valuesInserted = keysToInsertFlat.length ? `\n  ${ keysToInsertFlat.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join('\n  ')}` : ''
 
   if (objectLiteralStartIndex < 0) {
-    if (keysToUpdate.length) {
+    if (keysToUpdateFlat.length) {
       throw errors.get('COULD_NOT_UPDATE_IN_CONFIG_FILE', obj, configFilePath)
-    } else if (keysToInsert.length) {
+    } else if (keysToInsertFlat.length) {
       throw errors.get('COULD_NOT_INSERT_IN_CONFIG_FILE', obj, configFilePath)
     } else {
       return fileContents
     }
   }
 
-  const insertedValuesSplicer: Splicer[] = keysToInsert.length ? [{
+  const insertedValuesSplicer: Splicer[] = keysToInsertFlat.length ? [{
     start: objectLiteralStartIndex,
     end: objectLiteralStartIndex,
     replaceString: valuesInserted,
   }] : []
 
-  const originalLiteralObjectContents = fileContents.slice(objectLiteralStartIndex, objectLiteralEndIndex)
-
-  debug(`Will try to update ${JSON.stringify(originalLiteralObjectContents)} with ${keysToUpdate}`)
-
-  const updatedObjectContentsSplicers: Splicer[] = keysToUpdate.reduce(
+  const updatedObjectContentsSplicers: Splicer[] = keysToUpdateFlat.reduce(
     (acc: Splicer[], key: string) => {
-      const propertyToUpdate = objectLiteralNode.properties.find((prop) => {
-        return prop.type === 'ObjectProperty' && prop.key.type === 'Identifier' && prop.key.name === key
-      && (prop.value.type === 'NumericLiteral' || prop.value.type === 'StringLiteral' || prop.value.type === 'BooleanLiteral')
-      && prop.value.value === config[key]
-      })
+      const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
-      if (propertyToUpdate) {
+      if (propertyToUpdate && isPrimitive(propertyToUpdate.value) && propertyToUpdate.value.value === config[key]) {
         acc.push({
-          start: (propertyToUpdate as any).start,
-          end: (propertyToUpdate as any).end,
-          replaceString: `${key}: ${JSON.stringify(obj[key])}`,
+          start: (propertyToUpdate.value as any).start,
+          end: (propertyToUpdate.value as any).end,
+          replaceString: JSON.stringify(obj[key]),
         })
       } else {
         throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, configFilePath)
       }
 
       return acc
-    }, insertedValuesSplicer as Splicer[],
+    }, insertedValuesSplicer,
   )
 
-  debug('updatedObjectContentsSplicers %o', updatedObjectContentsSplicers)
+  // Subkeys
+  const objSubkeys = Object.keys(obj).filter((key) => typeof obj[key] === 'object').reduce((acc: Array<{key: string, subkey: string}>, key) => {
+    Object.entries(obj[key]).forEach(([subkey, value]) => {
+      if (['boolean', 'number', 'string'].includes(typeof value)) {
+        acc.push({ key, subkey })
+      }
+    })
 
-  const sortedSplicers = updatedObjectContentsSplicers.sort((a, b) => a.start > b.start ? 1 : -1)
+    return acc
+  }, [])
+
+  const subkeysToInsertWithoutKey = objSubkeys.filter((key) => !config[key.key])
+  const subkeysToInsertOnExistingKey = objSubkeys.filter((key) => config[key.key] && !config[key.key][key.subkey])
+  const subkeysToUpdate = objSubkeys.filter((key) => config[key.key] && config[key.key][key.subkey] && config[key.key][key.subkey] !== obj[key.key][key.subkey])
+
+  const keysToInsertForSubKeys: Record<string, string[]> = {}
+
+  subkeysToInsertWithoutKey.forEach((keyTuple) => {
+    const subkeyList = keysToInsertForSubKeys[keyTuple.key] || []
+
+    subkeyList.push(keyTuple.subkey)
+    keysToInsertForSubKeys[keyTuple.key] = subkeyList
+  })
+
+  let subvaluesInserted = ''
+
+  for (const key in keysToInsertForSubKeys) {
+    subvaluesInserted += `\n  ${key}: {`
+    keysToInsertForSubKeys[key].forEach((subkey) => {
+      subvaluesInserted += `\n    ${subkey}: ${JSON.stringify(obj[key][subkey])},`
+    })
+
+    subvaluesInserted += `\n  },`
+  }
+
+  if (subkeysToInsertWithoutKey.length) {
+    updatedObjectContentsSplicers.push({
+      start: objectLiteralStartIndex,
+      end: objectLiteralStartIndex,
+      replaceString: subvaluesInserted,
+    })
+  }
+
+  subkeysToInsertOnExistingKey.forEach((keyTuple) => {
+    // find the position of the key to add onto
+    const propertyToUpdate = propertyFromKey(objectLiteralNode, keyTuple.key)
+
+    if (propertyToUpdate?.value.type === 'ObjectExpression') {
+      const insertingPoint = (propertyToUpdate.value as any).start + 1
+
+      // add to the splicerArray starting and ending at this position
+      updatedObjectContentsSplicers.push({
+        start: insertingPoint,
+        end: insertingPoint,
+        replaceString: `\n    ${keyTuple.subkey}: ${JSON.stringify(obj[keyTuple.key][keyTuple.subkey])},`,
+      })
+    }
+  })
+
+  subkeysToUpdate.forEach((keyTuple) => {
+    // find the position of the key to update
+    const topPropertyToUpdate = propertyFromKey(objectLiteralNode, keyTuple.key)
+
+    if (topPropertyToUpdate?.value.type === 'ObjectExpression') {
+      // find the position of the subkey to update
+      const subPropertyToUpdate = propertyFromKey(topPropertyToUpdate.value, keyTuple.subkey)
+
+      if (isPrimitive(subPropertyToUpdate?.value) && subPropertyToUpdate?.value.value === config[keyTuple.key][keyTuple.subkey]) {
+        updatedObjectContentsSplicers.push({
+          start: (subPropertyToUpdate?.value as any).start,
+          end: (subPropertyToUpdate?.value as any).end,
+          replaceString: JSON.stringify(obj[keyTuple.key][keyTuple.subkey]),
+        })
+      }
+    }
+  })
+
+  // sort splicers to keep the order of the original file
+  const sortedSplicers = updatedObjectContentsSplicers.sort((a, b) => a.start === b.start ? 0 : a.start > b.start ? 1 : -1)
 
   debug('sortedSplicers %o', sortedSplicers)
 
@@ -227,6 +292,16 @@ export function isDefineConfigFunction (ast: File, functionName: string): boolea
   })
 
   return value
+}
+
+function propertyFromKey (objectLiteralNode: namedTypes.ObjectExpression, key: string): namedTypes.ObjectProperty | undefined {
+  return objectLiteralNode.properties.find((prop) => {
+    return prop.type === 'ObjectProperty' && prop.key.type === 'Identifier' && prop.key.name === key
+  }) as namedTypes.ObjectProperty
+}
+
+function isPrimitive (value: NodePath['node']): value is namedTypes.NumericLiteral | namedTypes.StringLiteral | namedTypes.BooleanLiteral {
+  return value.type === 'NumericLiteral' || value.type === 'StringLiteral' || value.type === 'BooleanLiteral'
 }
 
 interface Splicer{

@@ -1,4 +1,5 @@
 import * as path from 'path'
+import { expect } from 'chai'
 import '../../spec_helper'
 
 import { fs } from '../../../lib/util/fs'
@@ -205,6 +206,80 @@ describe('lib/util/config-file-updater', () => {
           ].join('\n')
 
           const output = await insertValueInJSString(src, { foo: 1000, bar: 3000, projectId: 'id1234' }, { foo: 42, bar: 84 }, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+      })
+
+      describe('subkeys', () => {
+        it('should insert nested values', async () => {
+          const src = [
+            'module.exports = {',
+            '  foo: 42',
+            '}',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42 }, '')
+
+          const expectedOutput = [
+            'module.exports = {',
+            '  component: {',
+            '    specFilePattern: "src/**/*.spec.cy.js",',
+            '  },',
+            '  foo: 42',
+            '}',
+          ].join('\n')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('should insert nested values into existing keys', async () => {
+          const src = [
+            'module.exports = {',
+            '  component: {',
+            '    viewportWidth: 800',
+            '  },',
+            '  foo: 42',
+            '}',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42, component: { viewportWidth: 800 } }, '')
+
+          const expectedOutput = [
+            'module.exports = {',
+            '  component: {',
+            '    specFilePattern: "src/**/*.spec.cy.js",',
+            '    viewportWidth: 800',
+            '  },',
+            '  foo: 42',
+            '}',
+          ].join('\n')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('should update nested values', async () => {
+          const src = [
+            'module.exports = {',
+            '  foo: 42,',
+            '  component: {',
+            '    specFilePattern: \'components/**/*.spec.cy.js\',',
+            '    foo: 82',
+            '  }',
+            '}',
+          ].join('\n')
+
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42, component: { foo: 82, specFilePattern: 'components/**/*.spec.cy.js' } }, '')
+
+          const expectedOutput = [
+            'module.exports = {',
+            '  foo: 42,',
+            '  component: {',
+            '    specFilePattern: "src/**/*.spec.cy.js",',
+            '    foo: 82',
+            '  }',
+            '}',
+          ].join('\n')
 
           expect(output).to.equal(expectedOutput)
         })
