@@ -1095,11 +1095,7 @@ export default {
       message: stripIndent`\
         ${cmd('request')} was invoked with \`{ failOnStatusCode: false, retryOnStatusCodeFailure: true }\`.
 
-        These options are incompatible with each other.
-
-        - To retry on non-2xx status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
-        - To not retry on non-2xx status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
-        - To fail on non-2xx status codes without retrying (the default behavior), pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\``,
+        \`failOnStatusCode\` must be \`true\` if \`retryOnStatusCodeFailure\` is \`true\`.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     auth_invalid: {
