@@ -29565,10 +29565,9 @@ package-json@^6.3.0:
     registry-url "^5.0.0"
     semver "^6.2.0"
 
-packherd@^0.9.0:
+packherd@thlorenz/packherd#a7fb7ff:
   version "0.9.0"
-  resolved "https://registry.yarnpkg.com/packherd/-/packherd-0.9.0.tgz#cbd6aa9bd19d63dd000e9e332660e01a26ae6b82"
-  integrity sha512-K8EWO3thp/p4FI6jI22WuWJh1T58Z/7bxkT9W8DEto0e5p7iNRGgyhFRRwqMYalTXQR+XOZxdo5lGSR9ExxbXA==
+  resolved "https://codeload.github.com/thlorenz/packherd/tar.gz/a7fb7ffdcc928b87d66b4b447b1e47b3aa688839"
   dependencies:
     convert-source-map "^1.7.0"
     debug "^4.3.1"
