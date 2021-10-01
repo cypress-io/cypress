@@ -156,16 +156,6 @@ module.exports = {
         return process.exit(code)
       })
 
-      if (process.env.CYPRESS_INTERNAL_DEV_WATCH) {
-        spawned.on('exit', () => {
-          process.exit(0)
-        })
-
-        process.on('exit', () => {
-          spawned.kill(9)
-        })
-      }
-
       return spawned
     }).catch((err) => {
       // eslint-disable-next-line no-console

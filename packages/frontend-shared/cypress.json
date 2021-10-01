@@ -3,7 +3,6 @@
   "baseUrl": "http://localhost:5555",
   "viewportWidth": 800,
   "viewportHeight": 850,
-  "video": false,
   "retries": {
     "runMode": 2,
     "openMode": 0

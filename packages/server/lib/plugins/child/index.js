@@ -1,3 +1,5 @@
+// process.title = 'Cypress: Plugin Manager'
+
 require('graceful-fs').gracefulify(require('fs'))
 
 require('../../util/suppress_warnings').suppress()

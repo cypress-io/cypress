@@ -11,7 +11,7 @@ import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
 import { spawned } from '../utils/childProcessUtils'
 import { spawn } from 'child_process'
-import { CYPRESS_INTERNAL_CLOUD_ENV } from '../gulpConstants'
+import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
 
 export async function nexusCodegen () {
   return nexusTypegen({
@@ -89,12 +89,12 @@ const ENV_MAP = {
 }
 
 export async function syncRemoteGraphQL () {
-  if (!ENV_MAP[CYPRESS_INTERNAL_CLOUD_ENV]) {
+  if (!ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV]) {
     throw new Error(`Expected --env to be one of ${Object.keys(ENV_MAP).join(', ')}`)
   }
 
   try {
-    const body = await rp.get(`${ENV_MAP[CYPRESS_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
+    const body = await rp.get(`${ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
 
     // TODO(tim): fix
     await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))

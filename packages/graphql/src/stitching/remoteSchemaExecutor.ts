@@ -6,9 +6,10 @@ import getenv from 'getenv'
 import type { DataContext } from '@packages/data-context'
 
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
+
 const REMOTE_SCHEMA_URLS = {
-  development: 'http://localhost:3000',
   staging: 'https://dashboard-staging.cypress.io',
+  development: 'http://localhost:3000',
   production: 'https://dashboard.cypress.io',
 }
 
