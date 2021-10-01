@@ -81,7 +81,7 @@ describe('lib/util/config-file-updater', () => {
           expect(output).to.equal(expectedOutput)
         })
 
-        it('finds the object litterla and adds the values to it es5', async () => {
+        it('finds the object litteral and adds the values to it es5', async () => {
           const src = ['module.exports = {',
             '  foo: 42',
             '}'].join('\n')
@@ -89,6 +89,36 @@ describe('lib/util/config-file-updater', () => {
             '  projectId: "id1234",',
             '  viewportWidth: 400,',
             '  foo: 42',
+            '}'].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('works with and without the quotes around keys (es6)', async () => {
+          const src = ['export default {',
+            '  "foo": 42',
+            '}'].join('\n')
+          const expectedOutput = ['export default {',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  "foo": 42',
+            '}'].join('\n')
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+
+          expect(output).to.equal(expectedOutput)
+        })
+
+        it('works with and without the quotes around keys (es5)', async () => {
+          const src = ['module.exports = {',
+            '  "foo": 42',
+            '}'].join('\n')
+          const expectedOutput = ['module.exports = {',
+            '  projectId: "id1234",',
+            '  viewportWidth: 400,',
+            '  "foo": 42',
             '}'].join('\n')
 
           const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
@@ -212,7 +242,7 @@ describe('lib/util/config-file-updater', () => {
       })
 
       describe('subkeys', () => {
-        it('should insert nested values', async () => {
+        it('inserts nested values', async () => {
           const src = [
             'module.exports = {',
             '  foo: 42',
@@ -233,7 +263,7 @@ describe('lib/util/config-file-updater', () => {
           expect(output).to.equal(expectedOutput)
         })
 
-        it('should insert nested values into existing keys', async () => {
+        it('inserts nested values into existing keys', async () => {
           const src = [
             'module.exports = {',
             '  component: {',
@@ -258,7 +288,7 @@ describe('lib/util/config-file-updater', () => {
           expect(output).to.equal(expectedOutput)
         })
 
-        it('should update nested values', async () => {
+        it('updates nested values', async () => {
           const src = [
             'module.exports = {',
             '  foo: 42,',
@@ -286,7 +316,7 @@ describe('lib/util/config-file-updater', () => {
       })
 
       describe('failures', () => {
-        it('should fail if not an object litteral', () => {
+        it('fails if not an object litteral', () => {
           const src = [
             'const foo = {}',
             'export default foo',
@@ -297,11 +327,11 @@ describe('lib/util/config-file-updater', () => {
             throw Error('this should not succeed')
           })
           .catch((err) => {
-            expect(err).to.have.property('type', 'COULD_NOT_INSERT_IN_CONFIG_FILE')
+            expect(err).to.have.property('type', 'COULD_NOT_UPDATE_CONFIG_FILE')
           })
         })
 
-        it('should fail if one of the values to update is not a literal', () => {
+        it('fails if one of the values to update is not a literal', () => {
           const src = [
             'const bar = 12',
             'export default {',
@@ -318,7 +348,7 @@ describe('lib/util/config-file-updater', () => {
           })
         })
 
-        it('should fail with inlined values', () => {
+        it('fails with inlined values', () => {
           const src = [
             'const foo = 12',
             'export default {',
@@ -335,7 +365,7 @@ describe('lib/util/config-file-updater', () => {
           })
         })
 
-        it('should fail if there is a spread', () => {
+        it('fails if there is a spread', () => {
           const src = [
             'const foo = { bar: 12 }',
             'export default {',
