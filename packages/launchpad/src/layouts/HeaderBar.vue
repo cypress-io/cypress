@@ -7,6 +7,7 @@
           src="../images/cypress-dark.png"
         >
         <span class="text-primary">Projects</span>
+        <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
           v-if="props.gql?.app?.activeProject"
           class="text-gray-300 h-8px"

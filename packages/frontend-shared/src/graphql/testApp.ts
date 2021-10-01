@@ -142,5 +142,4 @@ export const app: CodegenTypeMap['App'] = {
   selectedBrowser: allBrowsers[0],
   projects: [activeProject, createTestProject('another-test-project')],
   activeProject,
-
 }

@@ -178,13 +178,8 @@ fragment TopNavContent on App {
   }
   browsers {
     id
-    name
-    family
-    disabled
     isSelected
-    channel
     displayName
-    path
     version
     majorVersion
   }

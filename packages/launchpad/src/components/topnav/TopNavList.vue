@@ -11,9 +11,7 @@
         <slot
           name="heading"
           :open="open"
-        >
-          default
-        </slot>
+        />
         <i-cy-chevron-down
           class="w-2.5 transform group-hocus:icon-dark-indigo-500 transition-all duration-300"
           :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
