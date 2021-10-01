@@ -1,3 +1,9 @@
+// https://github.com/cypress-io/cypress/issues/18069
+// This fixture project is copied to packages/server/.project and executed there.
+// Because of that, the reference path is wrong here.
+/// <reference path="../../../../../../cli/types/mocha/index.d.ts" />
+/// <reference path="../../../../../../cli/types/jquery/index.d.ts" />
+
 /**
  * This tests the error UI for a certain webpack preprocessor setup.
  * It does this by having a test fail and then a subsequent test run that
@@ -24,7 +30,7 @@ context('validation errors', function () {
   })
 
   verify(this, {
-    line: 23,
+    line: 29,
     column: 8,
     message: 'can only accept a string preset or',
     stack: ['throwErrBadArgs', 'From Your Spec Code:'],
