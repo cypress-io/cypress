@@ -89,7 +89,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
       return
     }
 
-    throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'Exported object is not an object literal', configFilePath)
+    throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'Exported object is not an object literal')
   }
 
   visit(ast, {
@@ -114,7 +114,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
 
   if (!objectLiteralNode) {
     // if the export is no object litteral
-    throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'No export could be found', configFilePath)
+    throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'No export could be found')
   }
 
   setRootKeysSplicers(splicers, obj, config, objectLiteralStartIndex, objectLiteralNode, configFilePath)
@@ -287,7 +287,7 @@ function setSubKeysSplicers (
         replaceString: `\n    ${subkey}: ${JSON.stringify(obj[parent][subkey])},`,
       })
     } else {
-      throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, `The value of ${parent} is not expressed as an object literal. Cypress can not add values to it.`, configFilePath)
+      throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, `The value of ${parent} is not expressed as an object literal. Cypress can not add values to it.`)
     }
   })
 
@@ -327,7 +327,7 @@ function setSplicerToUpdateProperty (splicers: Splicer[],
       })
     }
   } else {
-    throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, `Value for \`${key}\` is not a primitive. Updating this value could break your config.`, configFilePath)
+    throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, `Value for \`${key}\` is not a primitive. Updating this value could break your config.`)
   }
 }
 
