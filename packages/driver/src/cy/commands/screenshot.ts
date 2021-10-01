@@ -284,6 +284,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     capture,
     padding,
     clip,
+    overwrite,
     disableTimersAndAnimations,
     onBeforeScreenshot,
     onAfterScreenshot,
@@ -313,6 +314,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
       waitForCommandSynchronization: !isAppOnly(screenshotConfig),
       disableTimersAndAnimations,
       blackout: getBlackout(screenshotConfig),
+      overwrite,
     }
   }
 
@@ -353,6 +355,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     },
     scaled: getShouldScale(screenshotConfig),
     blackout: getBlackout(screenshotConfig),
+    overwrite,
     startTime: startTime.toISOString(),
   })
 
@@ -450,7 +453,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const isWin = $dom.isWindow(subject)
 
-      let screenshotConfig = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
+      let screenshotConfig = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
 
       screenshotConfig = $Screenshot.validate(screenshotConfig, 'screenshot', options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
