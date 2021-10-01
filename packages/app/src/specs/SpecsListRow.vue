@@ -1,17 +1,29 @@
 <template>
-  {{ spec }}
+  {{ spec?.name }} - {{ spec.absolute }} - {{ spec.gitInfo?.lastModifiedHumanReadable }}
 </template>
 
 <script lang="ts" setup>
-import { gql } from "@urql/core";
-import type { SpecsList_SpecsFragment } from "../generated/graphql";
+import { gql } from '@urql/core'
+import { computed } from 'vue-demi'
+import type { SpecListRowFragment } from '../generated/graphql'
 
 gql`
-fragment SpecsListRow on Spec {
-
+fragment SpecListRow on SpecEdge {
+  node {
+    id
+    absolute
+    name
+    gitInfo {
+      author
+      lastModifiedHumanReadable
+    }
+  }
 }
 `
-defineProps<{
-  spec: SpecsList_SpecsFragment
+
+const props = defineProps<{
+  gql: SpecListRowFragment
 }>()
+
+const spec = computed(() => props.gql.node)
 </script>

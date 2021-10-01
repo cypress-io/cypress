@@ -6,21 +6,21 @@
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/core';
-import { useQuery } from '@urql/vue';
-import { Specs_AppDocument } from '../generated/graphql';
+import { gql } from '@urql/core'
+import { useQuery } from '@urql/vue'
+import { Specs_AppDocument } from '../generated/graphql'
 import SpecsList from '../specs/SpecsList.vue'
 
 gql`
 query Specs_App {
   app {
-    ...SpecsList_Specs
+    ...SpecsList
   } 
 }
 `
 
 const query = useQuery({
-  query: Specs_AppDocument
+  query: Specs_AppDocument,
 })
 
 </script>

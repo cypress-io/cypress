@@ -5,6 +5,7 @@ import { GitInfo } from './gql-GitInfo'
 export const Spec = objectType({
   name: 'Spec',
   description: 'Represents a spec on the file system',
+  node: 'absolute',
   definition (t) {
     t.nonNull.field('specType', {
       type: SpecTypeEnum,

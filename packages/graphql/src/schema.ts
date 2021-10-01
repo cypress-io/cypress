@@ -29,7 +29,11 @@ export const graphqlSchema = makeSchema({
     },
   },
   plugins: [
-    connectionPlugin(),
+    connectionPlugin({
+      nonNullDefaults: {
+        output: true,
+      },
+    }),
     nodePlugin,
   ],
   formatTypegen (content, type) {

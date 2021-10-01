@@ -449,12 +449,15 @@ type Query {
 }
 
 """Represents a spec on the file system"""
-type Spec {
+type Spec implements Node {
   """Absolute path to spec"""
   absolute: String!
 
   """Git information about the spec file"""
   gitInfo: GitInfo
+
+  """Relay style Node ID field for the Spec field"""
+  id: ID!
 
   """Name of spec file"""
   name: String!
@@ -470,7 +473,7 @@ type SpecConnection {
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
   """
-  edges: [SpecEdge]
+  edges: [SpecEdge!]!
 
   """
   https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
@@ -483,7 +486,7 @@ type SpecEdge {
   cursor: String!
 
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
-  node: Spec
+  node: Spec!
 }
 
 enum SpecType {
