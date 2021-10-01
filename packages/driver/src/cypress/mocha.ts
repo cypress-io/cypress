@@ -15,22 +15,22 @@ const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
 
 const { Test, Runner, Runnable, Hook, Suite } = Mocha
 
-const runnerRun = Runner.prototype.run
-const runnerFail = Runner.prototype.fail
-const runnerRunTests = Runner.prototype.runTests
-const runnableRun = Runnable.prototype.run
-const runnableClearTimeout = Runnable.prototype.clearTimeout
-const runnableResetTimeout = Runnable.prototype.resetTimeout
-const testRetries = Test.prototype.retries
-const testClone = Test.prototype.clone
-const suiteAddTest = Suite.prototype.addTest
-const suiteAddSuite = Suite.prototype.addSuite
-const suiteRetries = Suite.prototype.retries
-const hookRetries = Hook.prototype.retries
-const suiteBeforeAll = Suite.prototype.beforeAll
-const suiteBeforeEach = Suite.prototype.beforeEach
-const suiteAfterAll = Suite.prototype.afterAll
-const suiteAfterEach = Suite.prototype.afterEach
+const runnerRun = window.Mocha.Runner.run
+const runnerFail = window.Mocha.Runner.fail
+const runnerRunTests = window.Mocha.Runner.runTests
+const runnableRun = window.Mocha.Runnable.run
+const runnableClearTimeout = window.Mocha.Runnable.clearTimeout
+const runnableResetTimeout = window.Mocha.Runnable.resetTimeout
+const testRetries = window.Mocha.Test.retries
+const testClone = window.Mocha.Test.clone
+const suiteAddTest = window.Mocha.Suite.addTest
+const suiteAddSuite = window.Mocha.Suite.addSuite
+const suiteRetries = window.Mocha.Suite.retries
+const hookRetries = window.Mocha.Hook.retries
+const suiteBeforeAll = window.Mocha.Suite.beforeAll
+const suiteBeforeEach = window.Mocha.Suite.beforeEach
+const suiteAfterAll = window.Mocha.Suite.afterAll
+const suiteAfterEach = window.Mocha.Suite.afterEach
 
 // don't let mocha pollute the global namespace
 delete window.mocha

@@ -39,7 +39,7 @@ const runScriptsFromUrls = (specWindow, scripts) => {
 
 // Supports either scripts as objects or as async import functions
 export default {
-  runScripts: (specWindow, scripts) => {
+  runScripts: (specWindow, scripts): Bluebird<any> => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {
       // chain the loading promises
