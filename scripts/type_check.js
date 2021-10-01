@@ -58,6 +58,7 @@ program
   }), {
     concurrent: 4,
     exitOnError: false,
+    renderer: 'slient',
   })
 
   tasks.run()
