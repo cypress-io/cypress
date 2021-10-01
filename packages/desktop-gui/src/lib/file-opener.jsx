@@ -33,21 +33,20 @@ const FileOpener = observer((props) => {
       getUserEditor={getUserEditor}
       setUserEditor={ipc.setUserEditor}
       className={props.className}
-    >
-      <span><i className="fas fa-external-link-alt fa-sm" /> Open in IDE</span>
-    </Opener>
+      children={props.children}
+    />
   )
 })
 
-const fileDetails = PropTypes.shape({
+export const FileDetails = PropTypes.shape({
   absoluteFile: PropTypes.string.isRequired,
   originalFile: PropTypes.string.isRequired,
   relativeFile: PropTypes.string.isRequired,
 })
 
 FileOpener.propTypes = {
-  fileDetails: fileDetails.isRequired,
+  fileDetails: FileDetails.isRequired,
   className: PropTypes.string,
 }
 
-export default FileOpener
+export { FileOpener }

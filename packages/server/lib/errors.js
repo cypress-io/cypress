@@ -644,9 +644,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg2)}`
     case 'COULD_NOT_UPDATE_CONFIG_FILE':
       msg = stripIndent`\
-            Cypress was unable to update the following values in your configuration.
+            Cypress was unable to update the following values in your configuration file.
     
-            ${chalk.yellow(JSON.stringify(arg1))}`
+            \`\`\`js
+            ${JSON.stringify(arg1, null, 2)}
+            \`\`\``
 
       return { msg, details: arg2 }
     // general configuration error not-specific to configuration or plugins files

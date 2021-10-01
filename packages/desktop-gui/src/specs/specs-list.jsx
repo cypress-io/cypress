@@ -8,7 +8,7 @@ import Loader from 'react-loader'
 import BootstrapModal from 'react-bootstrap-modal'
 import Tooltip from '@cypress/react-tooltip'
 
-import FileOpener from './file-opener'
+import FileOpener from './spec-file-opener'
 import Notification from '../notifications/notification'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
