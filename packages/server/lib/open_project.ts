@@ -124,16 +124,20 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.openProject!.reset()
 
-    const url = getSpecUrl({
-      absoluteSpecPath: spec.absolute,
-      specType: spec.specType,
-      browserUrl: this.openProject.cfg.browserUrl,
-      integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
-      componentFolder: this.openProject.cfg.componentFolder || 'component?',
-      projectRoot: this.openProject.projectRoot,
-    })
+    // const url = getSpecUrl({
+    //   absoluteSpecPath: spec.absolute,
+    //   specType: spec.specType,
+    //   browserUrl: this.openProject.cfg.browserUrl,
+    //   integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
+    //   componentFolder: this.openProject.cfg.componentFolder || 'component?',
+    //   projectRoot: this.openProject.projectRoot,
+    // })
 
-    debug('open project url %s', url)
+    // just hard code for now
+    // note: you need to run `yarn vite` in `app`
+    const url = `http://localhost:3000/__vite__`
+
+    debug('open project url %s browser url %s', url, this.openProject.cfg.browserUrl)
 
     const cfg = this.openProject.getConfig()
 
