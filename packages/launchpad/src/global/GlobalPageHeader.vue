@@ -20,7 +20,7 @@
     class="w-20% min-w-120px text-size-16px h-full focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
     @click="handleButtonClick"
   >
-    {{ t('globalPage.newProjectButton') }}
+    {{ t('globalPage.addProjectButton') }}
   </Button>
 </template>
 
