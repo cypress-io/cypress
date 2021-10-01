@@ -74,8 +74,6 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
       minify: false,
     },
 
-    resolve: { alias },
-
     // You cannot add or remove arbitrary options from shared plugins.
     // Please use the PluginsOverride option for this.
     plugins: makePlugins(plugins),
@@ -84,8 +82,15 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
         CYPRESS_INTERNAL_ENV: 'development',
       },
       'setImmediate': {},
+      'global': 'window',
     },
     ...config,
+    resolve: {
+      alias: {
+        ...alias,
+        ...config.resolve?.alias,
+      },
+    },
   }
 }
 
