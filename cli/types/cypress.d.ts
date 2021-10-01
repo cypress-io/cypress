@@ -2503,7 +2503,7 @@ declare namespace Cypress {
      * Return the setup of your server
      * @param options the dev server options to pass directly to the dev-server
      */
-    devServer(options: DevServerOptions): Promise<ResolvedDevServerConfig> | ResolvedDevServerConfig
+    devServer(options: CypressDevServerOptions): Promise<ResolvedDevServerConfig> | ResolvedDevServerConfig
   }
   interface PEMCert {
     /**
@@ -5349,7 +5349,7 @@ declare namespace Cypress {
     tag?: string
   }
 
-  interface DevServerConfig {
+  interface CypressDevServerOptions {
     specs: Spec[]
     config: ResolvedConfigOptions & RuntimeConfigOptions
     devServerEvents: NodeJS.EventEmitter
@@ -5368,7 +5368,7 @@ declare namespace Cypress {
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
-    (action: 'dev-server:start', fn: (file: DevServerConfig) => Promise<ResolvedDevServerConfig>): void
+    (action: 'dev-server:start', fn: (file: CypressDevServerOptions) => Promise<ResolvedDevServerConfig>): void
     (action: 'task', tasks: Tasks): void
   }
 
