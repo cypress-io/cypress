@@ -21,10 +21,8 @@ export default (Commands, Cypress, cy) => {
 
       if (
         _.isArray(valueOrTextOrIndex)
-        && (
-          valueOrTextOrIndex.length === 0
-          || !_.some(valueOrTextOrIndex, (val) => _.isNumber(val) || _.isString(val))
-        )
+        && valueOrTextOrIndex.length > 0
+        && !_.some(valueOrTextOrIndex, (val) => _.isNumber(val) || _.isString(val))
       ) {
         $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
@@ -163,7 +161,7 @@ export default (Commands, Cypress, cy) => {
           })
         }
 
-        if (!values.length) {
+        if (!values.length && !(_.isArray(valueOrTextOrIndex) && valueOrTextOrIndex.length === 0)) {
           $errUtils.throwErrByPath('select.no_matches', {
             args: { value: valueOrTextOrIndex.join(', ') },
           })
