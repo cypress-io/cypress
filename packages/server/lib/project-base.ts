@@ -575,7 +575,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     if (configFile !== false) {
-      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
+      this.watchers.watchTree(settings.pathToConfigFile({ configFile }), obj)
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
@@ -878,7 +878,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       return readSettings.projectId
     }
 
-    return errors.throw('NO_PROJECT_ID', settings.configFile(this.projectRoot, this.options), this.projectRoot)
+    return errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
   }
 
   async verifyExistence () {

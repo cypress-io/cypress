@@ -230,7 +230,7 @@ export function allowed (obj = {}) {
 }
 
 export function get (projectRoot, options = {}) {
-  const configFilename = settings.configFile(projectRoot, options)
+  const configFilename = settings.configFile(options)
 
   return Promise.all([
     settings.read(projectRoot, options).then(validateFile(configFilename)),
