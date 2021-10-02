@@ -544,7 +544,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     projectRoot,
   }: {
     onSettingsChanged?: false | (() => void)
-    configFile?: string | boolean
+    configFile?: string | false
     projectRoot: string
   }) {
     // bail if we havent been told to
@@ -575,7 +575,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     }
 
     if (configFile !== false) {
-      this.watchers.watchTree(settings.pathToConfigFile({ configFile }), obj)
+      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
