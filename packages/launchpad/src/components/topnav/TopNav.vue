@@ -170,7 +170,7 @@ const versionList = [
 ]
 
 gql`
-fragment TopNavContent on App {
+fragment TopNav on App {
   selectedBrowser {
     id
     displayName

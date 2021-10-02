@@ -33,13 +33,13 @@ import TopNav from '../components/topnav/TopNav.vue'
 import Auth from '../setup/Auth.vue'
 
 gql`
-fragment HeaderBar on App {
+fragment HeaderBar on Query {
   app {
     activeProject {
       id
       title
     }
-  ...TopNav
+      ...TopNav
   }
   ...Auth
 }
