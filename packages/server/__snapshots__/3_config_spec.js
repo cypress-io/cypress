@@ -152,3 +152,12 @@ We found an invalid value in the file: \`cypress.json\`
 Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
 
 `
+
+exports['e2e config throws error when multiple default config file are found in project 1'] = `
+There is both a \`cypress.config.js\` and a \`cypress.config.ts\` at the location below:
+/foo/bar/.projects/pristine
+
+Cypress does not know which one to read for config. Please remove one of the two and try again.
+
+
+`

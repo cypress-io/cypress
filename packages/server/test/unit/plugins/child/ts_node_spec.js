@@ -4,9 +4,9 @@ const tsnode = require('ts-node')
 
 const resolve = require(`${root}../../lib/util/resolve`)
 
-const tsNodeUtil = require(`${root}../../lib/plugins/child/ts_node`)
+const tsNodeUtil = require(`${root}../../lib/util/ts_node`)
 
-describe('lib/plugins/child/ts_node', () => {
+describe('lib/util/ts_node', () => {
   beforeEach(() => {
     sinon.stub(tsnode, 'register')
     sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
