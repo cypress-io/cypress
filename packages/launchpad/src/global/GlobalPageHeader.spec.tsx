@@ -4,6 +4,7 @@ import { ref } from 'vue'
 
 const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"]`
 const fileInputSelector = 'input[type=file]'
+const addProjectSelector = '[data-testid=addProjectButton]'
 
 describe('<GlobalPageHeader />', () => {
   beforeEach(() => {
@@ -31,6 +32,11 @@ describe('<GlobalPageHeader />', () => {
     cy.get(fileInputSelector).should('not.be.visible')
   })
 
+  it('should be accessible', () => {
+    cy.get(addProjectSelector)
+    .should('have.attr', 'aria-controls', 'fileupload')
+  })
+
   it('should have webkit attributes', () => {
     // These two properties allow us to get the full file path of the file
     cy.get(fileInputSelector).should('have.attr', 'webkitdirectory')
@@ -40,7 +46,7 @@ describe('<GlobalPageHeader />', () => {
   it('handles a file upload', () => {
     cy.get(fileInputSelector)
     .attachFile('test-project/cypress.json')
-    .findByText(defaultMessages.globalPage.addProjectButton)
+    .get(addProjectSelector)
     .click()
     .get('@fileUpload').should('have.been.called')
   })

@@ -18,6 +18,7 @@
     aria-controls="fileupload"
     prefix-icon-class="text-center justify-center text-lg"
     class="w-20% min-w-120px text-size-16px h-full focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+    data-testid="addProjectButton"
     @click="handleButtonClick"
   >
     {{ t('globalPage.addProjectButton') }}
