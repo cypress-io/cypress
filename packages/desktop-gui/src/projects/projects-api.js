@@ -141,6 +141,8 @@ const updateProjectStatus = (project) => {
   return ipc.getProjectStatus(project.clientDetails())
   .then((projectDetails) => {
     project.update(projectDetails)
+
+    return projectDetails
   })
   .catch(ipc.isUnauthed, ipc.handleUnauthed)
   .catch((err) => {

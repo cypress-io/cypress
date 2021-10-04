@@ -8,7 +8,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import OrgSelector from './org-selector'
 import ProjectSelector from './project-selector'
-import { FileOpener } from '../lib/file-opener'
+import { ManualSetup } from './manual-setup'
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import orgsStore from '../organizations/organizations-store'
@@ -97,10 +97,21 @@ class SetupProject extends Component {
     return (
       <div className='setup-project'>
         <button className='btn btn-link btn-back' onClick={this.props.onClose}><i className='fa fa-chevron-left' /> Back</button>
-        <div className='title-wrapper'>
-          <h4>Set up project</h4>
-        </div>
-        {this._isLoaded() ? this._form() : <Loader color='#888' scale={0.5}/>}
+        {this.state.error?.type === 'COULD_NOT_UPDATE_CONFIG_FILE'
+          ? <ManualSetup
+            error={this.state.error}
+            project={this.props.project}
+            configFile={this.props.project.configFile}
+          />
+          : <>
+            <div className='title-wrapper'>
+              <h4>Set up project</h4>
+            </div>
+            { this._isLoaded()
+              ? this._form()
+              : <Loader color='#888' scale={0.5}/>}
+          </>
+        }
       </div>
     )
   }
@@ -259,31 +270,10 @@ class SetupProject extends Component {
 
     if (!error) return null
 
-    const relativeFile = this.props.project.configFile
-    const absoluteFile = `${ this.props.project.projectRoot }/${ relativeFile }`
-
     return (
       <div>
         <p className='text-danger'>An error occurred setting up your project:</p>
-        {error.isCypressErr && error.type === 'COULD_NOT_UPDATE_CONFIG_FILE'
-          ? <p className='alert alert-danger'>
-            {error.message}<br/>
-            <FileOpener
-              fileDetails={{
-                absoluteFile,
-                relativeFile,
-                originalFile: absoluteFile,
-              }}
-            >
-              { relativeFile }
-            </FileOpener>
-            <br/>
-            Reason: {error.details}
-            <br/>
-            Click on the file name to open the config file in your editor.
-          </p>
-          : <pre className='alert alert-danger'>{error.message}</pre>
-        }
+        <pre className='alert alert-danger'>{error.message}</pre>
       </div>
     )
   }
