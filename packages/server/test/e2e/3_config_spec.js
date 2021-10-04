@@ -1,4 +1,6 @@
 const e2e = require('../support/helpers/e2e').default
+const { fs } = require('../../lib/util/fs')
+const path = require('path')
 const Fixtures = require('../support/helpers/fixtures')
 
 describe('e2e config', () => {
@@ -55,9 +57,37 @@ describe('e2e config', () => {
     })
   })
 
+  it('supports custom configFile in TypeScript', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('config-with-custom-file-ts'),
+      configFile: 'cypress.config.custom.ts',
+    })
+  })
+
   it('supports custom configFile in a default JavaScript file', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('config-with-js'),
+    })
+  })
+
+  it('supports custom configFile in a default TypeScript file', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('config-with-ts'),
+    })
+  })
+
+  it('throws error when multiple default config file are found in project', function () {
+    const projectRoot = Fixtures.projectPath('pristine')
+
+    return Promise.all([
+      fs.writeFile(path.join(projectRoot, 'cypress.config.js'), 'module.exports = {}'),
+      fs.writeFile(path.join(projectRoot, 'cypress.config.ts'), 'export default {}'),
+    ]).then(() => {
+      return e2e.exec(this, {
+        project: projectRoot,
+        expectedExitCode: 1,
+        snapshot: true,
+      })
     })
   })
 })
