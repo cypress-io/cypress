@@ -214,7 +214,7 @@ const docsMenu = [{
   {
     text: t('topNav.docsMenu.organizingTests'),
     link: {
-      url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-testsp',
+      url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests',
       params: {
         utm_medium,
         utm_content: 'Organizing Tests',
