@@ -15,7 +15,14 @@
     "copied": "Copied"
   },
   "file": {
-    "edit": "Edit"
+    "edit": "Edit",
+    "git": {
+      "modified": "Modified",
+      "added": "Added",
+      "created": "Created",
+      "unmodified": "Unmodified",
+      "deleted": "Deleted"
+    }
   },
   "status": {
     "enabled": "Enabled",
@@ -27,7 +34,11 @@
     "searchPlaceholder": "Search Specs",
     "componentSpecsHeader": "Component Specs",
     "e2eSpecsHeader": "E2E Specs",
-    "gitStatusHeader": "Git Status"
+    "gitStatusHeader": "Git Status",
+    "rows": {
+      "gitInfoWithAuthor": "{fileState} {timeAgo} by {author}",
+      "gitInfo": "{fileState} {timeAgo}"
+    }
   },
   "setupPage": {
     "projectSetup": {

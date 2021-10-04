@@ -4,6 +4,9 @@ export const GitInfo = objectType({
   name: 'GitInfo',
   description: 'Git information about a spec file',
   definition (t) {
+    t.nonNull.string('id', {
+      description: 'Unique key'
+    }),
     t.string('author', {
       description: 'Last person to change the file in git',
     })

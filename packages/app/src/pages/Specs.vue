@@ -1,7 +1,9 @@
 <template>
   <div>
     <h2>Specs Page</h2>
-    <SpecsList :gql="query.data.value?.app" />
+    <template v-if="query.data.value?.app">
+      <SpecsList :gql="query.data.value?.app" />
+    </template>
   </div>
 </template>
 

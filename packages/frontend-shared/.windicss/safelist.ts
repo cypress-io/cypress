@@ -22,6 +22,4 @@ const colorSafelist = reduce(colors, (acc, variants, colorName) => {
   }).join(' ')}`
 }, '')
 
-console.log(colorSafelist)
-
 export const safelist = `${textSafelist} ${colorSafelist}`
