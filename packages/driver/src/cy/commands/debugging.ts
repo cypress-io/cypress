@@ -48,6 +48,7 @@ export default (Commands, Cypress, cy, state, config) => {
     // presses a key or clicks in the UI to continue
     pause (subject, options = {}) {
       // bail if we're headless
+      // console.log('isInteractive: ', config('isInteractive'))
       if (!config('isInteractive')) {
         return subject
       }

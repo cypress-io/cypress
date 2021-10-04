@@ -5,6 +5,7 @@ describe('src/cy/commands/debugging', () => {
     })
 
     it('does not change the subject', () => {
+      cy.pause()
       cy.wrap({}).debug().then((subject) => {
         expect(subject).to.deep.eq({})
       })
