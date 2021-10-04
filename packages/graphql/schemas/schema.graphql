@@ -249,6 +249,9 @@ type GitInfo {
   """Last person to change the file in git"""
   author: String
 
+  """Unique key"""
+  id: String!
+
   """last modified as a pretty string, eg 2 days ago"""
   lastModifiedHumanReadable: String
 

@@ -31,8 +31,8 @@ import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -49,7 +49,6 @@ export interface Cfg extends ReceivedCypressOptions {
     lastOpened?: number
     promptsShown?: object
   }
-  resolved: ResolvedConfigurationOptions
 }
 
 const localCwd = cwd()
