@@ -84,7 +84,7 @@ function backFn () {
 }
 
 const wrapperClasses = {
-  'default': 'max-w-3xl min-h-70 mx-auto border-1 border-gray-200 rounded m-10 flex flex-col',
+  'default': 'max-w-3xl mx-auto border-1 border-gray-200 rounded m-10 flex flex-col',
   'no-container': '',
 }
 
