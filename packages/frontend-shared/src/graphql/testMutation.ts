@@ -1,32 +1,31 @@
 import type { App, Mutation, Project } from '../generated/test-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
+import path from 'path'
 
 import { stubApp } from './testApp'
+import type { ClientTestContext } from '..'
 
 type MaybeResolver<T> = {
-  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((args: any, ctx: object, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
+  [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((source: unknown, args: any, ctx: ClientTestContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
 }
 
 export const stubMutation: MaybeResolver<Mutation> = {
   __typename: 'Mutation',
-  addProject (path: string): App {
+  addProject (source, args, ctx): App {
     const project: Project = {
-      id: '1',
-      title: 'Project',
-      projectRoot: path,
+      id: `project:${args.path}`,
+      title: path.basename(args.path),
+      projectRoot: args.path,
       isFirstTimeCT: true,
       isFirstTimeE2E: true,
       __typename: 'Project',
     }
 
-    const updatedApp: App = {
-      ...stubApp,
-      projects: [...stubApp.projects, project],
-    }
+    ctx.stubApp.projects = [...ctx.stubApp.projects, project]
 
-    return updatedApp
+    return ctx.stubApp
   },
-  setActiveProject (path: string) {
+  setActiveProject (source, args) {
     return stubApp
   },
 }

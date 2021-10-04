@@ -3,52 +3,45 @@ import GlobalPageHeader from './GlobalPageHeader.vue'
 import { ref } from 'vue'
 
 const searchSelector = `input[placeholder="${defaultMessages.globalPage.searchPlaceholder}"]`
-
-type FileWebKitDirectory = File & { path: string }
-
-export default function attachFileToInputElement (element: HTMLInputElement) {
-  const file = new File([new Blob()], 'cypress.json') as FileWebKitDirectory
-
-  file.path = 'absolute/path/to/cypress.json'
-
-  const dataTransfer = new window.DataTransfer()
-
-  dataTransfer.items.add(file)
-
-  element.files = dataTransfer.files
-}
+const fileInputSelector = 'input[type=file]'
 
 describe('<GlobalPageHeader />', () => {
-  it('renders and has a reactive input', () => {
+  beforeEach(() => {
     const search = ref('')
 
-    cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-600px"><GlobalPageHeader vModel={search.value}/></div>))
+    cy.wrap(search).as('search')
+    const fileUploadSpy = cy.spy().as('fileUpload')
 
+    cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-600px"><GlobalPageHeader onAddProject={fileUploadSpy} vModel={search.value}/></div>))
+    .get(fileInputSelector)
+    .then(($input) => {
+      $input.on('change', fileUploadSpy)
+    })
+  })
+
+  it('renders and has a reactive input', () => {
     const searchText = 'My project name goes here'
 
     cy.get(searchSelector).should('be.visible')
-    cy.get(searchSelector).type(searchText)
-    cy.should(() => expect(search.value).to.equal(searchText))
+    .get(searchSelector).type(searchText)
+    .get('@search').its('value').should('eq', searchText)
+  })
+
+  it('should not display the file input', () => {
+    cy.get(fileInputSelector).should('not.be.visible')
+  })
+
+  it('should have webkit attributes', () => {
+    // These two properties allow us to get the full file path of the file
+    cy.get(fileInputSelector).should('have.attr', 'webkitdirectory')
+    .get(fileInputSelector).should('have.attr', 'webkitRelativePath')
   })
 
   it('handles a file upload', () => {
-    cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-600px"><GlobalPageHeader /></div>))
-    const fileUploadSpy = cy.spy()
-
-    cy.get('input[file]')
-       .as('file-input')
-       
-       // Test that we open the file picker
-       .invoke('on', 'change', fileUploadSpy)
-
-       .get('@file-input')
-       // Simulate attaching file to input element
-       .then(attachFileToInputElement)
-       .get('[data-testid=add-project-button]')
-       .click()
-       .get(fileUploadSpy).should.have.been.called
-       // Since this component does not emit an event
-       // you can't tell if `addProject` was added with a valid directory name.
-       // I talk about how you could to solve this in another comment.
+    cy.get(fileInputSelector)
+    .attachFile('test-project/cypress.json')
+    .findByText(defaultMessages.globalPage.addProjectButton)
+    .click()
+    .get('@fileUpload').should('have.been.called')
   })
 })

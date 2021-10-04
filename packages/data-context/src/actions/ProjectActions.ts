@@ -77,7 +77,7 @@ export class ProjectActions {
 
     if (!found) {
       this.ctx.coreData.app.projects.push({ projectRoot })
-      this.ctx._apis.projectApi.insertProjectToCache(projectRoot)
+      this.api.insertProjectToCache(projectRoot)
     }
   }
 

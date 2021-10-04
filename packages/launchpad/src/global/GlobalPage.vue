@@ -6,7 +6,10 @@
     <!-- If there are projects -->
     <div class="grid grid-cols-1 gap-6 pt-6 grid-cols-2">
       <div class="min-w-full col-start-1 col-end-3 flex items-center gap-6">
-        <GlobalPageHeader v-model="match" />
+        <GlobalPageHeader
+          v-model="match"
+          @add-project="handleAddProject"
+        />
       </div>
 
       <GlobalProjectCard
@@ -23,12 +26,27 @@
 
 <script setup lang="ts">
 import { computed, ref, Ref } from 'vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
 import type { GlobalPageFragment } from '../generated/graphql'
+
+const addProjectMutation = gql`
+  mutation addProject($path: String!) {
+    addProject(path: $path) {
+      projects {
+        id
+        title
+        projectId
+        projectRoot
+        isFirstTimeCT
+        isFirstTimeE2E
+      }
+    }
+  }
+`
 
 gql`
 fragment GlobalPage on App {
@@ -37,6 +55,12 @@ fragment GlobalPage on App {
   }
 }
 `
+
+const addProject = useMutation(addProjectMutation)
+
+function handleAddProject (path: string) {
+  addProject.executeMutation({ path })
+}
 
 const props = defineProps<{
   gql: GlobalPageFragment,

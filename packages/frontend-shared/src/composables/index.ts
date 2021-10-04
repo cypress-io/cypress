@@ -17,6 +17,4 @@ export function useModelWrapper<T, N extends string = 'modelValue'> (
   })
 }
 
-export { useAddProject } from './useAddProject'
-
 export { useSetActiveProject } from './useSetActiveProject'

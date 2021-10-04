@@ -9,7 +9,7 @@ import * as stubCloudData from '../../src/graphql/testStubCloudTypes'
 import * as stubData from '../../src/graphql/testStubData'
 
 import type { CodegenTypeMap } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
-import { each } from 'lodash'
+import { each, cloneDeep } from 'lodash'
 import 'cypress-file-upload'
 import { navigationMenu as stubNavigationMenu } from '../../src/graphql/testNavigationMenu'
 import { stubQuery } from '../../src/graphql/testQuery'
@@ -28,14 +28,14 @@ import { createI18n } from '@cy/i18n'
 }
 
 const createContext = (): ClientTestContext => {
-  return {
+  return cloneDeep({
     stubApp,
     stubWizard,
     stubCloudData,
     stubData,
     stubQuery,
     stubNavigationMenu,
-  }
+  })
 }
 
 export interface MountFnOptions {

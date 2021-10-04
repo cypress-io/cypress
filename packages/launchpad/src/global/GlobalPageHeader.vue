@@ -10,7 +10,7 @@
     type="file"
     class="hidden"
     webkitdirectory
-    webkit-relative-path
+    webkitRelativePath
     @change="handleFileSelection"
   >
   <Button
@@ -29,15 +29,19 @@ import { ref } from 'vue'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconPlus from '~icons/mdi/plus'
-import { useAddProject, useModelWrapper } from '@packages/frontend-shared/src/composables'
+import { useModelWrapper } from '@packages/frontend-shared/src/composables'
 import { useI18n } from '@cy/i18n'
 
 const fileInputRef = ref<HTMLInputElement>()
 const { t } = useI18n()
-const { addProject } = useAddProject()
 
 const props = defineProps<{
   modelValue: string
+}>()
+
+const emits = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+  (e: 'addProject', value: string): void
 }>()
 
 function handleButtonClick () {
@@ -48,7 +52,7 @@ function handleFileSelection (e: Event) {
   const target = e.target as HTMLInputElement
   const dirPath = getDirectoryPath(target.files)
 
-  addProject(dirPath)
+  emits('addProject', dirPath)
 }
 
 function getDirectoryPath (files: FileList) {
@@ -56,8 +60,6 @@ function getDirectoryPath (files: FileList) {
 
   return path.substring(0, path.lastIndexOf('/'))
 }
-
-const emits = defineEmits(['update:modelValue'])
 
 const localValue = useModelWrapper(props, emits, 'modelValue')
 </script>

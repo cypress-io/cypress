@@ -8,6 +8,18 @@ const testProject = 'test-project'
 const anotherTestProject = 'another-test-project'
 const testProjectPath = '/usr/local/dev/projects/test-project'
 
+function attachFileToInputElement (element: HTMLInputElement) {
+  const file = new File([new Blob()], 'cypress.json')
+
+  Object.defineProperty(file, 'path', { value: 'absolute/path/to/yet-another-test-project/cypress.json' })
+
+  const dataTransfer = new DataTransfer()
+
+  dataTransfer.items.add(file)
+
+  element.files = dataTransfer.files
+}
+
 describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
   describe('without projects', () => {
     it('renders the empty state', () => {
@@ -48,6 +60,13 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
       cy.get(searchSelector).clear()
       cy.findByText(testProject).should('be.visible')
       cy.findByText(anotherTestProject).should('be.visible')
+    })
+
+    it('can add a project when clicking the button', () => {
+      cy.get('input[type=file]')
+      .then((subject) => attachFileToInputElement(subject[0] as unknown as HTMLInputElement))
+      .trigger('change', { force: true })
+      // .findByText('yet-another-test-project').should('be.visible')
     })
 
     describe('Welcome Guide', () => {
