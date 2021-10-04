@@ -218,7 +218,7 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
     }
 
     debug('plugins %O', plugins)
-    debug('devServerFunction %s', devServerFunction.toString())
+    debug('devServerFunction %s', devServerFunction ? devServerFunction.toString() : undefined)
     debug('devServerOptions %O', devServerOptions)
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
