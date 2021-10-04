@@ -14,6 +14,7 @@
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],
       "@packages/*": ["../*"]
-    }
+    },
+    "allowJs": true
   }
 }

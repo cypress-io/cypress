@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import _, { DebouncedFunc } from 'lodash'
 import $Cypress from '@packages/driver'
 import * as blankContents from '../blank-contents'
 import { visitFailure } from '../visit-failure'
@@ -11,14 +11,16 @@ import { studioRecorder } from '../studio'
 const $ = $Cypress.$
 
 export class AutIframe {
-  constructor (config) {
-    this.config = config
+  debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
+  $iframe?: JQuery<HTMLIFrameElement>
+
+  constructor (private projectName: string) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create () {
     this.$iframe = $('<iframe>', {
-      id: `Your App: '${this.config.projectName}'`,
+      id: `Your App: '${this.projectName}'`,
       class: 'aut-iframe',
     })
 
@@ -42,7 +44,7 @@ export class AutIframe {
   }
 
   _showContents (contents) {
-    this._body().html(contents)
+    this._body()?.html(contents)
   }
 
   _contents () {
@@ -50,15 +52,15 @@ export class AutIframe {
   }
 
   _window () {
-    return this.$iframe.prop('contentWindow')
+    return this.$iframe?.prop('contentWindow')
   }
 
   _document () {
-    return this.$iframe.prop('contentDocument')
+    return this.$iframe?.prop('contentDocument')
   }
 
   _body () {
-    return this._contents() && this._contents().find('body')
+    return this._contents()?.find('body')
   }
 
   detachDom = () => {

@@ -47,6 +47,16 @@ export const createRoutesCT = ({
 
   // TODO If prod, serve the build app files from app/dist
 
+  routesCt.get('/api', (req, res) => {
+    const options = makeServeConfig({
+      config,
+      getCurrentBrowser,
+      specsStore,
+    })
+
+    res.json(options)
+  })
+
   routesCt.get('/__/api', (req, res) => {
     const options = makeServeConfig({
       config,

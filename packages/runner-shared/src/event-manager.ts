@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import { action } from 'mobx'
 
 import { client } from '@packages/socket'
+import type { BaseStore } from './store'
 
 import { studioRecorder } from './studio'
 import { automation } from './automation'
@@ -11,6 +12,7 @@ import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
+import type { automationElementId } from './automation-element'
 
 const $ = $Cypress.$
 const ws = client.connect({
@@ -55,7 +57,7 @@ export const eventManager = {
     return Cypress
   },
 
-  addGlobalListeners (state, connectionInfo) {
+  addGlobalListeners (state: BaseStore, connectionInfo: { automationElement: typeof automationElementId, randomString: string }) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded

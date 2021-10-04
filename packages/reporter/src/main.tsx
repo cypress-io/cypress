@@ -2,7 +2,6 @@
 import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 // @ts-ignore
@@ -47,33 +46,14 @@ export interface MultiReporterProps extends BaseReporterProps{
 
 @observer
 class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
-  static propTypes = {
-    error: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      link: PropTypes.string,
-      callout: PropTypes.string,
-      message: PropTypes.string.isRequired,
-    }),
-    runner: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-    spec: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      relative: PropTypes.string.isRequired,
-      absolute: PropTypes.string.isRequired,
-    }),
-    experimentalStudioEnabled: PropTypes.bool,
-  }
-
-  static defaultProps = {
+  static defaultProps: Partial<SingleReporterProps> = {
     runMode: 'single',
     appState,
     events,
     runnablesStore,
     scroller,
     statsStore,
-  }
+  } 
 
   render () {
     const {

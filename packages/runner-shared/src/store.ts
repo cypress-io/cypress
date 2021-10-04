@@ -1,5 +1,6 @@
 import { action, observable } from 'mobx'
 import { nanoid } from 'nanoid'
+import { automation, automationStatus } from './automation'
 
 export type RunMode = 'single' | 'multi'
 
@@ -10,6 +11,7 @@ export abstract class BaseStore {
   /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+  @observable automation: typeof automationStatus[number] = automation.CONNECTING
 
   @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
     if (this.runMode === 'multi') {
