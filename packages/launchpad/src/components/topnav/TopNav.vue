@@ -5,7 +5,7 @@
         class="group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span>v{{ versionList[0].version }}</span>
+      <span data-cy="topnav-version-list">v{{ versionList[0].version }}</span>
     </template>
     <TopNavListItem
       v-for="(item, index) in versionList"
@@ -47,7 +47,7 @@
         :class="open ? 'grayscale-0' : 'grayscale'"
         :src="allBrowsersIcons[props.gql?.selectedBrowser?.displayName || '']"
       >
-      <span>{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
+      <span data-cy="topnav-browser-list">{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
       v-for="browser in props.gql.browsers"
@@ -93,7 +93,7 @@
         class="icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px"
         :class="open ? 'icon-dark-indigo-500 icon-light-indigo-50' : 'icon-dark-gray-500 icon-light-gray-100'"
       />
-      <span>Docs</span>
+      <span>{{ t('topNav.docsMenu.docsHeading') }}</span>
     </template>
     <div class="flex p-16px gap-24px">
       <div
