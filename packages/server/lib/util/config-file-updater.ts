@@ -60,30 +60,28 @@ export async function insertValuesInJavaScript (projectRoot: string, obj, option
   const config = await read(projectRoot, options)
   const fileContents = await fs.readFile(file, { encoding: 'utf8' })
 
-  await fs.writeFile(file, await insertValueInJSString(fileContents, obj, config, file))
+  await fs.writeFile(file, await insertValueInJSString(fileContents, obj, config))
 
   return { ...config, ...obj }
 }
 
-export async function insertValueInJSString (fileContents: string, obj: Record<string, any>, config: Record<string, any>, configFilePath: string): Promise<string> {
+export async function insertValueInJSString (fileContents: string, obj: Record<string, any>, config: Record<string, any>): Promise<string> {
   const ast = parse(fileContents, { plugins: ['typescript'], sourceType: 'module' })
 
-  let objectLiteralStartIndex = -1
   let objectLiteralNode: namedTypes.ObjectExpression | undefined
 
-  function handleExports (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>) {
+  function handleExport (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>) {
     if (nodePath.node.type === 'CallExpression'
         && nodePath.node.callee.type === 'Identifier') {
       const functionName = nodePath.node.callee.name
 
       if (isDefineConfigFunction(ast, functionName)) {
-        return handleExports(nodePath.get('arguments', 0))
+        return handleExport(nodePath.get('arguments', 0))
       }
     }
 
     if (nodePath.node.type === 'ObjectExpression' && !nodePath.node.properties.find((prop) => prop.type !== 'ObjectProperty')) {
       objectLiteralNode = nodePath.node
-      objectLiteralStartIndex = (objectLiteralNode as any).start + 1
       debug('found object litteral %o', objectLiteralNode)
 
       return
@@ -97,14 +95,14 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
       if (nodePath.node.left.type === 'MemberExpression') {
         if (nodePath.node.left.object.type === 'Identifier' && nodePath.node.left.object.name === 'module'
         && nodePath.node.left.property.type === 'Identifier' && nodePath.node.left.property.name === 'exports') {
-          handleExports(nodePath.get('right'))
+          handleExport(nodePath.get('right'))
         }
       }
 
       return false
     },
     visitExportDefaultDeclaration (nodePath) {
-      handleExports(nodePath.get('declaration'))
+      handleExport(nodePath.get('declaration'))
 
       return false
     },
@@ -117,8 +115,8 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'No export could be found')
   }
 
-  setRootKeysSplicers(splicers, obj, config, objectLiteralStartIndex, objectLiteralNode, configFilePath)
-  setSubKeysSplicers(splicers, obj, config, objectLiteralStartIndex, objectLiteralNode, configFilePath)
+  setRootKeysSplicers(splicers, obj, config, objectLiteralNode, '  ')
+  setSubKeysSplicers(splicers, obj, config, objectLiteralNode, '  ', '  ')
 
   // sort splicers to keep the order of the original file
   const sortedSplicers = splicers.sort((a, b) => a.start === b.start ? 0 : a.start > b.start ? 1 : -1)
@@ -189,10 +187,10 @@ function setRootKeysSplicers (
   splicers: Splicer[],
   obj: Record<string, any>,
   config: Record<string, any>,
-  objectLiteralStartIndex: number,
   objectLiteralNode: namedTypes.ObjectExpression,
-  configFilePath: string,
+  lineStartSpacer: string,
 ) {
+  const objectLiteralStartIndex = (objectLiteralNode as any).start + 1
   // add values
   const objFlatKeys = Object.keys(obj).filter((key) => ['boolean', 'number', 'string'].includes(typeof obj[key]))
 
@@ -201,7 +199,7 @@ function setRootKeysSplicers (
   debug('top level keys absent from the original config ', keysToInsertFlat)
 
   if (keysToInsertFlat.length) {
-    const valuesInserted = `\n  ${ keysToInsertFlat.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join('\n  ')}`
+    const valuesInserted = `\n${lineStartSpacer}${ keysToInsertFlat.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join(`\n${lineStartSpacer}`)}`
 
     splicers.push({
       start: objectLiteralStartIndex,
@@ -215,7 +213,7 @@ function setRootKeysSplicers (
     (key) => {
       const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
-      setSplicerToUpdateProperty(splicers, propertyToUpdate, config[key], obj[key], key, obj, configFilePath)
+      setSplicerToUpdateProperty(splicers, propertyToUpdate, config[key], obj[key], key, obj)
     },
   )
 }
@@ -224,11 +222,16 @@ function setSubKeysSplicers (
   splicers: Splicer[],
   obj: Record<string, any>,
   config: Record<string, any>,
-  objectLiteralStartIndex: number,
   objectLiteralNode: namedTypes.ObjectExpression,
-  configFilePath: string,
+  lineStartSpacer: string,
+  parentLineStartSpacer: string,
 ) {
+  const objectLiteralStartIndex = (objectLiteralNode as any).start + 1
+
+  const keysToUpdateWithObjects: string[] = []
+
   const objSubkeys = Object.keys(obj).filter((key) => typeof obj[key] === 'object').reduce((acc: Array<{parent: string, subkey: string}>, key) => {
+    keysToUpdateWithObjects.push(key)
     Object.entries(obj[key]).forEach(([subkey, value]) => {
       if (['boolean', 'number', 'string'].includes(typeof value)) {
         acc.push({ parent: key, subkey })
@@ -238,9 +241,7 @@ function setSubKeysSplicers (
     return acc
   }, [])
 
-  const subkeysToUpdate = objSubkeys.filter((key) => config[key.parent] && config[key.parent][key.subkey] && config[key.parent][key.subkey] !== obj[key.parent][key.subkey])
-
-  // add values where you have create the parent key
+  // add values where the parent key needs to be created
   const subkeysToInsertWithoutKey = objSubkeys.filter((key) => !config[key.parent])
   const keysToInsertForSubKeys: Record<string, string[]> = {}
 
@@ -254,12 +255,12 @@ function setSubKeysSplicers (
   let subvaluesInserted = ''
 
   for (const key in keysToInsertForSubKeys) {
-    subvaluesInserted += `\n  ${key}: {`
+    subvaluesInserted += `\n${parentLineStartSpacer}${key}: {`
     keysToInsertForSubKeys[key].forEach((subkey) => {
-      subvaluesInserted += `\n    ${subkey}: ${JSON.stringify(obj[key][subkey])},`
+      subvaluesInserted += `\n${parentLineStartSpacer}${lineStartSpacer}${subkey}: ${JSON.stringify(obj[key][subkey])},`
     })
 
-    subvaluesInserted += `\n  },`
+    subvaluesInserted += `\n${parentLineStartSpacer}},`
   }
 
   if (subkeysToInsertWithoutKey.length) {
@@ -270,43 +271,12 @@ function setSubKeysSplicers (
     })
   }
 
-  // add value where parent key already exists
-  const subkeysToInsertOnExistingKey = objSubkeys.filter((key) => config[key.parent] && !config[key.parent][key.subkey])
-
-  subkeysToInsertOnExistingKey.forEach(({ parent, subkey }) => {
-    // find the position of the key to add onto
-    const propertyToUpdate = propertyFromKey(objectLiteralNode, parent)
+  // add/update values where parent key already exists
+  keysToUpdateWithObjects.filter((key) => config[key]).forEach((key) => {
+    const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
     if (propertyToUpdate?.value.type === 'ObjectExpression') {
-      const insertingPoint = (propertyToUpdate.value as any).start + 1
-
-      // add to the splicerArray starting and ending at this position
-      splicers.push({
-        start: insertingPoint,
-        end: insertingPoint,
-        replaceString: `\n    ${subkey}: ${JSON.stringify(obj[parent][subkey])},`,
-      })
-    } else {
-      throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, `The value of ${parent} is not expressed as an object literal. Cypress can not add values to it.`)
-    }
-  })
-
-  // update values that already exist (both parent and subkey)
-  subkeysToUpdate.forEach(({ parent, subkey }) => {
-    // find the position of the key to update
-    const topPropertyToUpdate = propertyFromKey(objectLiteralNode, parent)
-
-    if (topPropertyToUpdate?.value.type === 'ObjectExpression') {
-      // find the position of the subkey to update
-      const subPropertyToUpdate = propertyFromKey(topPropertyToUpdate.value, subkey)
-
-      setSplicerToUpdateProperty(splicers,
-        subPropertyToUpdate,
-        config[parent][subkey],
-        obj[parent][subkey],
-        `${parent}.${subkey}`,
-        obj,
-        configFilePath)
+      setRootKeysSplicers(splicers, obj[key], config[key], propertyToUpdate.value, parentLineStartSpacer + lineStartSpacer)
     }
   })
 }
@@ -316,8 +286,7 @@ function setSplicerToUpdateProperty (splicers: Splicer[],
   originalValue: any,
   updatedValue: any,
   key: string,
-  obj: Record<string, any>,
-  configFilePath: string) {
+  obj: Record<string, any>) {
   if (propertyToUpdate && isPrimitive(propertyToUpdate.value)) {
     if (propertyToUpdate.value.value === originalValue) {
       splicers.push({
