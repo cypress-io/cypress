@@ -437,7 +437,7 @@ export class OpenProject {
     try {
       await this.openProject.initializeConfig(browsers)
       await this.openProject.open()
-    } catch (err) {
+    } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throw(err.type, err.port)
       } else {

@@ -24,15 +24,15 @@ import system from './util/system'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
-import settings from './util/settings'
+import * as settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+import type { LaunchArgs } from './open_project'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -49,7 +49,27 @@ export interface Cfg extends ReceivedCypressOptions {
     lastOpened?: number
     promptsShown?: object
   }
-  resolved: ResolvedConfigurationOptions
+}
+
+type WebSocketOptionsCallback = (...args: any[]) => any
+
+export interface OpenProjectLaunchOptions {
+  args?: LaunchArgs
+
+  configFile?: string | false
+  browsers?: Cypress.Browser[]
+
+  // Callback to reload the Desktop GUI when cypress.json is changed.
+  onSettingsChanged?: false | (() => void)
+
+  // Optional callbacks used for triggering events via the web socket
+  onReloadBrowser?: WebSocketOptionsCallback
+  onFocusTests?: WebSocketOptionsCallback
+  onSpecChanged?: WebSocketOptionsCallback
+  onSavedStateChanged?: WebSocketOptionsCallback
+  onChange?: WebSocketOptionsCallback
+
+  [key: string]: any
 }
 
 const localCwd = cwd()
@@ -514,7 +534,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     projectRoot,
   }: {
     projectRoot: string
-    configFile?: string | boolean
+    configFile?: string | false
     onSettingsChanged?: false | (() => void)
   }) {
     // bail if we havent been told to
@@ -687,7 +707,13 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this.automation
   }
 
-  async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
+  async initializeConfig (): Promise<Cfg> {
+    // set default for "configFile" if undefined
+    if (this.options.configFile === undefined
+  || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
