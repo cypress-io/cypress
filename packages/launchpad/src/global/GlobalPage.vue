@@ -34,7 +34,7 @@ import GlobalEmpty from './GlobalEmpty.vue'
 import type { GlobalPageFragment } from '../generated/graphql'
 
 const addProjectMutation = gql`
-  mutation addProject($path: String!) {
+  mutation GlobalPage_addProject($path: String!) {
     addProject(path: $path) {
       projects {
         id
