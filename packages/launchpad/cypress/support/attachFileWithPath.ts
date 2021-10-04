@@ -16,7 +16,7 @@ export function attachedFileWithPath (subject: HTMLInputElement, path: string) {
   dataTransfer.items.add(attachedFile)
   subject[0].files = dataTransfer.files
 
-  return subject
+  return cy.wrap(subject)
 }
 
 Cypress.Commands.add(

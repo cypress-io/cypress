@@ -46,7 +46,7 @@ const emits = defineEmits<{
 }>()
 
 function handleButtonClick () {
-  fileInputRef.value.click()
+  fileInputRef.value?.click()
 }
 
 function handleFileSelection (e: Event) {
@@ -56,10 +56,16 @@ function handleFileSelection (e: Event) {
   emits('addProject', dirPath)
 }
 
-function getDirectoryPath (files: FileList) {
-  const path = files[0].path
+type WebkitFile = File & { path: string }
+function getDirectoryPath (files: FileList | null) {
+  if (files) {
+    const file = files[0] as WebkitFile
+    const path = file.path
 
-  return path.substring(0, path.lastIndexOf('/'))
+    return path.substring(0, path.lastIndexOf('/'))
+  }
+
+  return ''
 }
 
 const localValue = useModelWrapper(props, emits, 'modelValue')

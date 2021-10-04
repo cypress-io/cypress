@@ -13,6 +13,7 @@ describe('<GlobalPageHeader />', () => {
     cy.wrap(search).as('search')
     const fileUploadSpy = cy.spy().as('fileUpload')
 
+    // @ts-ignore = vModel is v-model in vue
     cy.mount(() => (<div class="p-12 overflow-auto resize-x max-w-600px"><GlobalPageHeader onAddProject={fileUploadSpy} vModel={search.value}/></div>))
     .get(fileInputSelector)
     .then(($input) => {
