@@ -6,7 +6,7 @@ const path = require('path')
 const _ = require('lodash')
 
 const extension = require('@packages/extension')
-const launch = require('@packages/launcher/lib/browsers')
+const launch = require('@packages/launcher')
 const plugins = require(`${root}../lib/plugins`)
 const utils = require(`${root}../lib/browsers/utils`)
 const chrome = require(`${root}../lib/browsers/chrome`)
@@ -298,7 +298,7 @@ describe('lib/browsers/chrome', () => {
 
       return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a('function')
+        expect(typeof this.launchedBrowser.kill).to.equal('function')
 
         return this.launchedBrowser.kill()
       }).then(() => {
