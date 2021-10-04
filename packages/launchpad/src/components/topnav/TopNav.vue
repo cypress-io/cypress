@@ -22,15 +22,13 @@
           target="_blank"
         >{{ item.version }}</a>
         <br>
-        <span class="text-gray-600 text-14px">Released {{ item.released }}</span>
+        <span class="text-gray-600 text-14px">{{ t('topNav.released') }} {{ item.released }}</span>
       </div>
       <template
         v-if="!index"
         #suffix
       >
-        <i-cy-circle-check_x24
-          class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px"
-        />
+        <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
       </template>
     </TopNavListItem>
     <TopNavListItem class="p-16px text-center bg-gray-50">
@@ -38,11 +36,11 @@
         :href="releasesUrl"
         target="_blank"
         class="block w-full py-8px border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
-      >See all releases</a>
+      >{{ t('topNav.seeAllReleases') }}</a>
     </TopNavListItem>
   </TopNavList>
 
-  <TopNavList v-if="props.gql?.selectedBrowser && props.showBrowsers">
+  <TopNavList v-if="props.gql?.selectedBrowser && showBrowsers">
     <template #heading="{ open }">
       <img
         class="w-16px filter group-hocus:grayscale-0"
@@ -60,7 +58,7 @@
     >
       <template #prefix>
         <!-- setting both width and min-width on these icons looks odd,
-        but makes all possible browser icons happy about what size to be -->
+        but makes all possible browser icons happy about what size to be-->
         <img
           class="mr-16px min-w-26px w-26px"
           :src="allBrowsersIcons[browser.displayName]"
@@ -75,7 +73,7 @@
         <div
           class="mr-20px font-normal text-gray-500 whitespace-nowrap text-14px"
         >
-          Version {{ browser.version }}
+          {{ t('topNav.version') }} {{ browser.version }}
         </div>
       </div>
       <template
@@ -83,9 +81,7 @@
         #suffix
       >
         <div>
-          <i-cy-circle-check_x24
-            class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px"
-          />
+          <i-cy-circle-check_x24 class="icon-dark-jade-100 icon-light-jade-500 w-24px h-24px" />
         </div>
       </template>
     </TopNavListItem>
@@ -134,6 +130,9 @@ import TopNavList from './TopNavList.vue'
 import { allBrowsersIcons } from '../../../../frontend-shared/src/assets/browserLogos'
 import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const getUrl = (link) => {
   let result = link.url
@@ -187,14 +186,14 @@ fragment TopNav on App {
 `
 
 const props = defineProps<{
-    gql: TopNavFragment,
-    showBrowsers?: Boolean
+  gql: TopNavFragment,
+  showBrowsers?: Boolean
 }>()
 
 const docsMenu = [{
-  title: 'Getting Started',
+  title: t('topNav.docsMenu.gettingStartedTitle'),
   children: [{
-    text: 'Write your first test',
+    text: t('topNav.docsMenu.firstTest'),
     link: {
       url: 'https://on.cypress.io/writing-first-test',
       params: {
@@ -203,7 +202,7 @@ const docsMenu = [{
       },
     },
   }, {
-    text: 'Testing your app',
+    text: t('topNav.docsMenu.testingApp'),
     link: {
       url: 'https://on.cypress.io/testing-your-app',
       params: {
@@ -213,7 +212,7 @@ const docsMenu = [{
     },
   },
   {
-    text: 'Organizing Tests',
+    text: t('topNav.docsMenu.organizingTests'),
     link: {
       url: 'https://docs.cypress.io/guides/core-concepts/writing-and-organizing-testsp',
       params: {
@@ -223,9 +222,9 @@ const docsMenu = [{
     },
   }],
 }, {
-  title: 'References',
+  title: t('topNav.docsMenu.referencesTitle'),
   children: [{
-    text: 'Best practices',
+    text: t('topNav.docsMenu.bestPractices'),
     link: {
       url: 'https://on.cypress.io/best-practices',
       params: {
@@ -234,7 +233,7 @@ const docsMenu = [{
       },
     },
   }, {
-    text: 'Configuration',
+    text: t('topNav.docsMenu.configuration'),
     link: {
       url: 'https://on.cypress.io/configuration',
       params: {
@@ -243,7 +242,7 @@ const docsMenu = [{
       },
     },
   }, {
-    text: 'API',
+    text: t('topNav.docsMenu.api'),
     link: {
       url: 'https://on.cypress.io/api',
       params: {
@@ -253,9 +252,9 @@ const docsMenu = [{
     },
   }],
 }, {
-  title: 'Run in CI/CD',
+  title: t('topNav.docsMenu.ciTitle'),
   children: [{
-    text: 'Set up CI',
+    text: t('topNav.docsMenu.ciSetup'),
     link: {
       url: 'https://on.cypress.io/ci',
       params: {
@@ -264,7 +263,7 @@ const docsMenu = [{
       },
     },
   }, {
-    text: 'Run tests faster',
+    text: t('topNav.docsMenu.fasterTests'),
     link: {
       url: 'https://on.cypress.io/parallelization',
       params: {
@@ -274,7 +273,7 @@ const docsMenu = [{
     },
   },
   {
-    text: 'Smart Orchestration',
+    text: t('topNav.docsMenu.smartOrchestration'),
     link: {
       url: 'https://docs.cypress.io/guides/dashboard/smart-orchestration',
       params: {
