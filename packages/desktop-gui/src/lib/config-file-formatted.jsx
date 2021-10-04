@@ -10,7 +10,7 @@ const configFileFormatted = (configFile) => {
     return <><code>cypress.json</code> file</>
   }
 
-  if (['cypress.json', 'cypress.config.js'].includes(configFile)) {
+  if (['cypress.json', 'cypress.config.js', 'cypress.config.ts'].includes(configFile)) {
     return <><code>{configFile}</code> file</>
   }
 
