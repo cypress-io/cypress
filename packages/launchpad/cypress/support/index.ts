@@ -21,3 +21,4 @@ import '@iconify/iconify'
 import '@purge-icons/generated'
 
 import './commands'
+import './attachFileWithPath'
