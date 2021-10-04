@@ -132,21 +132,23 @@ export const randomComponents = (n = 200): Spec[] => {
 
     const gitFileState = jml.pick(['modified', 'unmodified', 'added', 'deleted'])
     return {
-      // componentName: name,
       relative: directories[d.directory](d),
-      absolute: '',
-      // specExtension: d.specPattern,
-      // fileExtension: d.fileExtension,
+      absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}`,
       name: `${name}${d.specPattern}${d.fileExtension}`,
       specType: 'component',
-      __typename: 'Spec'
+      __typename: 'Spec',
 
-      // id: faker.datatype.uuid(),
-      // gitInfo: {
-      //   comitter: gitFileState ? faker.internet.userName() : undefined,
-      //   timeAgo: gitFileState ? faker.datatype.datetime() : undefined,
-      //   fileState: gitFileState
-      // }
+      id: faker.datatype.uuid(),
+      gitInfo: {
+        __typename: 'GitInfo',
+        id: faker.datatype.uuid(),
+        author: faker.internet.userName(),
+        lastModifiedHumanReadable: new Date(faker.random.arrayElement([
+          faker.date.recent(8), 
+          faker.date.past(1),
+          faker.date.between(new Date(Date.now() - 6000000).toUTCString(), new Date().toUTCString())
+        ])).toUTCString()
+      }
     }
   }, n)
 }
