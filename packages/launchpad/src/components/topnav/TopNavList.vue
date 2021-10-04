@@ -5,7 +5,7 @@
   >
     <PopoverButton class="flex-grow h-full group focus:outline-none focus:ring-0">
       <div
-        class="flex items-center gap-2 group-hocus:text-indigo-600"
+        class="flex items-center gap-8px group-hocus:text-indigo-600"
         :class="open ? 'text-indigo-600' : ''"
       >
         <slot
@@ -13,13 +13,13 @@
           :open="open"
         />
         <i-cy-chevron-down
-          class="w-2.5 transform group-hocus:icon-dark-indigo-500 transition-all duration-300"
+          class="w-10px transform group-hocus:icon-dark-indigo-500 transition-all duration-300"
           :class="open ? 'rotate-180 icon-dark-indigo-500' : 'icon-dark-gray-200'"
         />
       </div>
     </PopoverButton>
     <TransitionQuickFade>
-      <PopoverPanel class="absolute right-0 z-10 bg-white rounded shadow top-9">
+      <PopoverPanel class="absolute right-0 z-10 bg-white rounded shadow top-36px">
         <ul
           v-if="variant !== 'panel'"
           class="flex flex-col"

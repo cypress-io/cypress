@@ -11,7 +11,7 @@
       v-for="(item, index) in versionList"
       :key="item.version"
       :selectable="!!index"
-      class="px-4 py-2 min-w-240px"
+      class="px-16px py-8px min-w-240px"
       :class="index ? '' : 'bg-jade-50'"
     >
       <div class="whitespace-nowrap">
@@ -33,11 +33,11 @@
         />
       </template>
     </TopNavListItem>
-    <TopNavListItem class="p-4 text-center bg-gray-50">
+    <TopNavListItem class="p-16px text-center bg-gray-50">
       <a
         :href="releasesUrl"
         target="_blank"
-        class="block w-full py-2 border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+        class="block w-full py-8px border-gray-100 text-14px whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
       >See all releases</a>
     </TopNavListItem>
   </TopNavList>
@@ -54,7 +54,7 @@
     <TopNavListItem
       v-for="browser in props.gql.browsers"
       :key="browser.id"
-      class="px-4 py-3 min-w-240px"
+      class="px-16px py-12px min-w-240px"
       :class="browser.isSelected ? 'bg-jade-50' : ''"
       :selectable="!browser.isSelected"
     >
@@ -62,7 +62,7 @@
         <!-- setting both width and min-width on these icons looks odd,
         but makes all possible browser icons happy about what size to be -->
         <img
-          class="mr-4 min-w-26px w-26px"
+          class="mr-16px min-w-26px w-26px"
           :src="allBrowsersIcons[browser.displayName]"
         >
       </template>
@@ -73,7 +73,7 @@
           {{ browser.displayName }}
         </div>
         <div
-          class="mr-6 font-normal text-gray-500 whitespace-nowrap text-14px"
+          class="mr-20px font-normal text-gray-500 whitespace-nowrap text-14px"
         >
           Version {{ browser.version }}
         </div>
@@ -99,7 +99,7 @@
       />
       <span>Docs</span>
     </template>
-    <div class="flex p-4 gap-24px">
+    <div class="flex p-16px gap-24px">
       <div
         v-for="list in docsMenu"
         :key="list.title"
@@ -108,18 +108,18 @@
         <h2 class="font-semibold text-gray-800">
           {{ list.title }}
         </h2>
-        <hr class="border-gray-50 my-2.5">
+        <hr class="border-gray-50 my-10px">
         <ul>
           <li
             v-for="item in list.children"
             :key="item.text"
-            class="flex items-center mb-2 text-indigo-500"
+            class="flex items-center mb-4px text-indigo-500"
           >
             <i-cy-book_x16 class="icon-dark-indigo-500 icon-light-indigo-50" />
             <a
               :href="getUrl(item.link)"
               target="_blank"
-              class="ml-2 font-normal whitespace-nowrap"
+              class="ml-4px font-normal whitespace-nowrap"
             >{{ item.text }}</a>
           </li>
         </ul>
@@ -254,7 +254,6 @@ const docsMenu = [{
   }],
 }, {
   title: 'Run in CI/CD',
-  itemIcon: 'far fa-lightbulb',
   children: [{
     text: 'Set up CI',
     link: {
