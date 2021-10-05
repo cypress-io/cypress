@@ -505,7 +505,7 @@ describe('lib/cypress', () => {
     })
 
     it('does not scaffold integration or example specs when runMode', function () {
-      return insertValuesInConfigFile(this.pristinePath, {})
+      return fs.writeJson(path.join(this.pristinePath, 'cypress.json'), {})
       .then(() => {
         return cypress.start([`--run-project=${this.pristinePath}`])
       }).then(() => {
@@ -562,19 +562,20 @@ describe('lib/cypress', () => {
 
         return fs.statAsync(this.cfg.fixturesFolder)
       }).then(() => {
-        return settings.read(this.idsPath)
+        return settings.read(this.idsPath, { configFile: 'cypress.json' })
       }).then((json) => {
         json.fixturesFolder = false
 
-        return insertValuesInConfigFile(this.idsPath, json)
-      }).then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
-      }).then(() => {
-        return fs.statAsync(this.cfg.fixturesFolder)
+        return insertValuesInConfigFile(this.idsPath, json, { configFile: 'cypress.json' })
         .then(() => {
-          throw new Error('fixturesFolder should not exist!')
-        }).catch(() => {
-          return done()
+          return cypress.start([`--run-project=${this.idsPath}`])
+        }).then(() => {
+          return fs.statAsync(this.cfg.fixturesFolder)
+          .then(() => {
+            throw new Error('fixturesFolder should not exist!')
+          }).catch(() => {
+            return done()
+          })
         })
       })
     })
@@ -622,7 +623,7 @@ describe('lib/cypress', () => {
       }).then((json) => {
         json.reporter = 'dot'
 
-        return insertValuesInConfigFile(this.idsPath, json)
+        return insertValuesInConfigFile(this.idsPath, json, { configFile: 'cypress.json' })
       }).then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -680,7 +681,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return insertValuesInConfigFile(this.idsPath, { supportFile: '/does/not/exist' })
+      return insertValuesInConfigFile(this.idsPath, { supportFile: '/does/not/exist' }, { configFile: 'cypress.json' })
       .then(() => {
         return cypress.start([`--run-project=${this.idsPath}`])
       }).then(() => {
@@ -786,7 +787,7 @@ describe('lib/cypress', () => {
     })
 
     it('logs error and exits when project has invalid cypress.json values', function () {
-      return insertValuesInConfigFile(this.todosPath, { baseUrl: 'localhost:9999' })
+      return insertValuesInConfigFile(this.todosPath, { baseUrl: 'localhost:9999' }, { configFile: 'cypress.json' })
       .then(() => {
         return cypress.start([`--run-project=${this.todosPath}`])
       }).then(() => {
@@ -1699,7 +1700,7 @@ describe('lib/cypress', () => {
         // this should be overriden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        return insertValuesInConfigFile(this.todosPath, json)
+        return insertValuesInConfigFile(this.todosPath, json, { configFile: 'cypress.json' })
       }).then(() => {
         return cypress.start([
           '--port=2121',
