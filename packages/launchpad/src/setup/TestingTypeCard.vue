@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative flex flex-col w-full border border-gray-200 rounded p-30px text text-body-gray-500"
+    class="relative flex flex-col w-full border border-gray-200 rounded p-30px text text-body-gray-500 hocus-default"
     :role="role"
   >
     <div class="border h-152px">
