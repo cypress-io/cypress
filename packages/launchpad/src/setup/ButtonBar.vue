@@ -20,10 +20,13 @@
         class="flex items-center px-3"
       >
         <label
+          for="altFn"
           class="text-gray-500 px-3"
           @click="handleAlt"
         >{{ alt }}</label>
         <Switch
+          size="l"
+          name="altFn"
           :value="altValue"
           @update="handleAlt"
         />
