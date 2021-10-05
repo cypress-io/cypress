@@ -3,12 +3,14 @@
     <slot>
       <Button
         v-if="showNext"
+        size="lg"
         :disabled="!canNavigateForward"
         @click="nextFn"
       >
         {{ next }}
       </Button>
       <Button
+        size="lg"
         variant="outline"
         @click="backFn"
       >
@@ -25,7 +27,7 @@
           @click="handleAlt"
         >{{ alt }}</label>
         <Switch
-          size="l"
+          size="lg"
           name="altFn"
           :value="altValue"
           @update="handleAlt"

@@ -1,7 +1,7 @@
 <template>
   <button
     style="width: fit-content"
-    class="flex items-center border rounded-sm gap-8px focus-default"
+    class="flex items-center border rounded gap-8px hocus-default"
     :class="classes"
   >
     <span
@@ -52,29 +52,28 @@ import { computed, useAttrs } from 'vue'
 import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 
 const VariantClassesTable = {
-  primary: 'border-indigo-600 bg-indigo-600 text-white',
-  outline: 'border-gray-200 text-indigo-600 bg-white',
+  primary: 'border-indigo-500 bg-indigo-600 text-white',
+  outline: 'border-gray-100 text-indigo-600',
   link: 'border-transparent text-indigo-600',
   text: 'border-0',
 }
 
 const SizeClassesTable = {
-  sm: 'px-1 py-1 text-xs',
-  md: 'px-2 py-1 text-sm',
-  lg: 'px-4 py-2 text-sm',
-  xl: 'px-6 py-3 text-lg',
+  sm: 'px-6px py-2px text-14px',
+  md: 'px-12px py-6px text-14px',
+  lg: 'px-16px py-8px',
 }
 
 const IconClassesTable = {
-  md: 'min-h-1.25em min-w-1.25em max-h-1.25em max-w-1.25em',
-  lg: 'min-h-2em min-w-2em max-h-2em max-w-2em',
-  xl: 'min-h-2.5em min-w-2.5em max-w-2.5em max-h-2.5em ',
+  sm: 'min-h-1.25em min-w-1.25em max-h-1.25em max-w-1.25em',
+  md: 'min-h-2em min-w-2em max-h-2em max-w-2em',
+  lg: 'min-h-2.5em min-w-2.5em max-w-2.5em max-h-2.5em ',
 }
 
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg'
   variant?: 'primary' | 'outline' | 'link' | 'text'
   prefixIconClass?: string
   suffixIconClass?: string

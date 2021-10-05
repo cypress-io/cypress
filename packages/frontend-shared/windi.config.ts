@@ -27,7 +27,8 @@ export default defineConfig({
     IconDuotoneColorsPlugin,
   ],
   shortcuts: {
-    'focus-default': 'focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent',
+    'focus-default': 'focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent transition transition-all duration-200',
+    'hocus-default': 'hocus:border hover:border-indigo-100 focus:border-indigo-300 hocus:ring-2 hocus:ring-indigo-100 hocus:outline-transparent transition transition-all duration-200',
   },
   extract: {
     // accepts globs and file paths relative to project root

@@ -1,7 +1,7 @@
 <template>
   <button
     :id="name"
-    class="rounded-50px relative focus-default"
+    class="rounded-50px relative hocus-default"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container]"
     role="switch"
     :aria-checked="value"
