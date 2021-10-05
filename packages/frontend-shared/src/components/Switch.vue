@@ -9,7 +9,7 @@
   >
     <span
       class="block toggle transform rounded-50px bg-white transition-transform duration-200 ease-out"
-      :class="[value ? sizeClasses[size].translate : '', sizeClasses[size].indicator]"
+      :class="[{ [sizeClasses[size].translate]: value }, sizeClasses[size].indicator]"
     />
   </button>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div class="px-5 py-5 flex gap-3 bg-gray-50 border-t border-t-1 border-t-gray-200 rounded-b">
+  <div class="px-5 py-5 flex gap-3 bg-gray-50 border-t border-t-1 border-t-gray-100 rounded-b">
     <slot>
       <Button
         v-if="showNext"

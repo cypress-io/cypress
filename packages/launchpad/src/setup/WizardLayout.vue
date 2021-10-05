@@ -1,5 +1,9 @@
 <template>
-  <div :class="noContainer ? wrapperClasses['no-container'] : wrapperClasses.default">
+  <div
+    :class="{
+      'max-w-3xl mx-auto border-1 border-gray-100 rounded m-10 flex flex-col': !noContainer
+    }"
+  >
     <div class="flex-grow">
       <slot :backFn="backFn" />
     </div>
@@ -81,11 +85,6 @@ async function nextFn () {
 
 function backFn () {
   navigate.executeMutation({ direction: 'back' })
-}
-
-const wrapperClasses = {
-  'default': 'max-w-3xl mx-auto border-1 border-gray-200 rounded m-10 flex flex-col',
-  'no-container': '',
 }
 
 </script>
