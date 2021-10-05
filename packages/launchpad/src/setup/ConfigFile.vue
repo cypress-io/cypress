@@ -27,7 +27,7 @@
           relative
           border-transparent
           border-1
-          hocus-default"
+          focus-default"
         :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''"
         @click="language = lang.id"
       >
