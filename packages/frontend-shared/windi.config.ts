@@ -26,6 +26,9 @@ export default defineConfig({
     InteractionVariants,
     IconDuotoneColorsPlugin,
   ],
+  shortcuts: {
+    'focus-default': 'focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent',
+  },
   extract: {
     // accepts globs and file paths relative to project root
     include: ['index.html', '**/*.{vue,html,tsx}', '../frontend-shared/**/*.{vue,html,tsx}'],

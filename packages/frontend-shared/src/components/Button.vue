@@ -1,7 +1,7 @@
 <template>
   <button
     style="width: fit-content"
-    class="flex items-center border rounded-sm gap-8px focus:border-indigo-600 focus:outline-transparent"
+    class="flex items-center border rounded-sm gap-8px focus-default"
     :class="classes"
   >
     <span

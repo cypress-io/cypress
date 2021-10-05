@@ -1,7 +1,7 @@
 <template>
   <button
     :id="name"
-    class="rounded-50px relative border-1 border-transparent focus:border-gray-800  focus:outline-transparent"
+    class="rounded-50px relative focus-default"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container]"
     role="switch"
     :aria-checked="value"
@@ -16,9 +16,9 @@
 
 <script lang="ts" setup>
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   value: boolean
-  size?: 's' | 'm' | 'l' | 'xl',
+  size?: 's' | 'm' | 'l' | 'xl'
   name: string // required for an id so that an external <label> can be associated with the switch
 }>(), {
   value: false,
