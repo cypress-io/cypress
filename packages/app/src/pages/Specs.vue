@@ -22,8 +22,8 @@ export const runSpec = () => {
   const el = document.querySelector<HTMLDivElement>('#reporter-vue')!
   el.appendChild(reporterEl)
 
-  renderReporter(el, store.spec, window.Runner.eventManager)
-  window.Runner.start({ config: _config, projectName: _projectName, store, spec: store.spec })
+  renderReporter(el, store.spec, window.UnifiedRunner.eventManager)
+  window.UnifiedRunner.start({ config: _config, projectName: _projectName, store, spec: store.spec })
 }
 
 </script>
@@ -71,7 +71,7 @@ declare global {
 }
 
 const initRunner = ({ base64Config, projectName }: Payload) => {
-  const config = window.Runner.decodeBase64(base64Config) as ConfigConsumedByNewRunner
+  const config = window.UnifiedRunner.decodeBase64(base64Config) as ConfigConsumedByNewRunner
   store.setSpecs(config.specs)
   _config = config
   _projectName = projectName
