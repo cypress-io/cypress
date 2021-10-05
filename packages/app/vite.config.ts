@@ -3,7 +3,17 @@ import Layouts from 'vite-plugin-vue-layouts'
 import Pages from 'vite-plugin-pages'
 import react from '@vitejs/plugin-react'
 
-export default makeConfig({}, {
+export default makeConfig({
+  optimizeDeps: {
+    include: [
+      '@urql/core',
+      'vue-i18n',
+      'vue-router',
+      '@urql/devtools',
+      '@urql/exchange-graphcache',
+    ],
+  },
+}, {
   plugins: [
     Layouts(),
     Pages({ extensions: ['vue'] }),
