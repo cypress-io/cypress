@@ -45,11 +45,7 @@ const styles = `
 `
 
 describe('SpecList', () => {
-
-  console.log('running spec!!!')
-
   const createSpecList = (selectStub: typeof cy.stub): React.FC => {
-    console.log('ceating spec list')
     return () => {
       const [selectedFile, setSelectedFile] = React.useState<string>()
 

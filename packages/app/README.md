@@ -63,3 +63,7 @@ You can see this in the video with the Settings cog. It uses and `evenodd` fill 
 ## Diagram
 
 ![](./unified-runner-diagram.png)]
+
+runner-ct CYPRESS_INTERNAL_VITE_APP_PORT=3333 yarn cypress:open
+app yarn vite --port 3333 --base __vite__
+

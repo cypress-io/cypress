@@ -1,3 +1,4 @@
+import type { SpecFile } from '@packages/types/src/spec'
 function injectReporterStyle () {
   const style = document.createElement('style')
   style.innerText = `
@@ -11,7 +12,18 @@ function injectReporterStyle () {
   document.head.appendChild(style)
 }
 
-export async function renderRunner (ready: (...args: unknown[]) => void) {
+export interface Payload {
+  base64Config: string
+  projectName: string
+}
+
+// just listing the actual data we consume, so we can
+// tighten the API and types later
+export interface ConfigConsumedByNewRunner {
+  specs: SpecFile[]
+}
+
+export async function renderRunner (ready: ({ base64Config, projectName }: Payload) => void) {
   const response = await window.fetch('/api')
   const data = await response.json()
   const script = document.createElement('script')

@@ -13,7 +13,6 @@ import $Cypress from '@packages/driver'
 import { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
 import { eventManager } from '@packages/runner-shared/src/event-manager'
 import type { FoundSpec } from '@packages/types/src/spec'
-import { BaseStore } from '@packages/runner-shared/src/store'
 import { automationElementId } from '@packages/runner-shared/src/automation-element'
 const driverUtils = $Cypress.utils
 
@@ -21,21 +20,9 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
-class Store extends BaseStore {}
 const randomString = `${Math.random()}`
 
-const store = new Store()
-
-const spec: FoundSpec = {
-  absolute: '/Users/lachlan/code/work/cypress5/packages/runner-ct/cypress/component/SpecList.spec.tsx',
-  name: 'SpecList.spec.tsx',
-  relative: 'cypress/component/SpecList.spec.tsx',
-  specType: 'component'
-}
-
 const Runner = {
-  spec, 
-
   eventManager, 
 
   decodeBase64: (base64: string) => {
@@ -45,14 +32,14 @@ const Runner = {
   emit (evt: string, ...args: unknown[]) {
   },
 
-  start ({ config, projectName }) {
+  start ({ config, projectName, store, spec }) {
+    console.log({ spec })
     eventManager.addGlobalListeners(store, {
       automationElement: automationElementId,
       randomString
     })
 
     config.spec = spec
-    console.log(config.spec)
     eventManager.setup(config)
 
     const specSrc = getSpecUrl(config.namespace, spec)
@@ -67,6 +54,7 @@ const Runner = {
 
     // In mount mode we need to render something right from spec file
     // So load application tests to the aut frame
+    console.log(specSrc)
     $autIframe.prop('src', specSrc)
 
     eventManager.initialize($autIframe, config)

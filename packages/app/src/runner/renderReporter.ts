@@ -1,12 +1,12 @@
 import { Reporter } from '@packages/reporter/src/main'
 import { eventManager as EventManager } from '@packages/runner-shared/src/event-manager'
-import type { FoundSpec } from '@packages/types/src/spec'
+import type { SpecFile } from '@packages/types/src/spec'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
 export function renderReporter (
   root: HTMLDivElement, 
-  spec: FoundSpec,
+  spec: SpecFile,
   eventManager: typeof EventManager
 ) {
   ReactDOM.render(
