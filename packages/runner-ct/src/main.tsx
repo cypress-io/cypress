@@ -43,6 +43,8 @@ const UnifiedRunner = {
   },
 
   emit (evt: string, ...args: unknown[]) {
+    console.log('event:', evt)
+    defaultEvents.emit(evt, ...args)
   },
 
   start ({ config, projectName, store, spec }) {

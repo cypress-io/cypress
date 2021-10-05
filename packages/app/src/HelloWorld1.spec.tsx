@@ -4,7 +4,7 @@ import { defineComponent, h } from "vue"
 describe('hello', () => {
   it('works', () => {
     const random = Math.random() * 10000
-    const str = `Today's random number is ${random.toFixed()}!`
+    const str = `Today's random number is ${random.toFixed()}`
     const Comp = defineComponent({
       render() {
         return h('div', { 

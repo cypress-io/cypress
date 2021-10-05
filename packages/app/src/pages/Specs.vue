@@ -76,6 +76,9 @@ const initRunner = ({ base64Config, projectName }: Payload) => {
   _config = config
   _projectName = projectName
 
+  window.UnifiedRunner.eventManager.on('restart', () => {
+    runSpec()
+  })
 }
 
 onMounted(() => {

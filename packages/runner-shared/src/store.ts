@@ -10,6 +10,7 @@ export class BaseStore {
   @observable specRunId: string | undefined
   @observable runMode: RunMode = 'single'
   @observable automation: typeof automationStatus[number] = automation.CONNECTING
+  @observable isLoading = true
 
   @action setSingleSpec (spec: Cypress.Spec | undefined) {
     this.setSpec(spec)
@@ -31,4 +32,9 @@ export class BaseStore {
       this.spec = foundSpec
     }
   }
+
+  @action setIsLoading (isLoading) {
+    this.isLoading = isLoading
+  }
+
 }
