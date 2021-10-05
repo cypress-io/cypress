@@ -109,12 +109,12 @@ export function read (projectRoot, options: SettingsOptions = {}) {
       loadErrorCode: 'CONFIG_FILE_ERROR',
     })
   .catch((err) => {
-    if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
+    if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT' && isJSONFile(file)) {
       if (options.args?.runProject) {
         return Promise.reject(errors.get('CONFIG_FILE_NOT_FOUND', options.configFile, projectRoot))
       }
 
-      return _write(file, {})
+      return fs.outputJson(file, {}, { spaces: 2 })
     }
 
     return Promise.reject(err)
@@ -129,6 +129,12 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     }
 
     debug('resolved configObject', configObject)
+
+    // only proceed to updating obsolete file when they are json
+    if (!isJSONFile(file)) {
+      return configObject
+    }
+
     const changed = _applyRewriteRules(configObject)
 
     // if our object is unchanged
@@ -138,9 +144,9 @@ export function read (projectRoot, options: SettingsOptions = {}) {
     }
 
     // else write the new reduced obj
-    return _write(file, changed)
-    .then((config) => {
-      return config
+    return fs.outputJson(file, changed, { spaces: 2 })
+    .then(() => {
+      return changed
     })
   }).catch((err) => {
     debug('an error occured when reading config', err)
@@ -150,6 +156,10 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
     return _logReadErr(file, err)
   })
+}
+
+function isJSONFile (filePath: string) {
+  return /\.json/.test(filePath)
 }
 
 export function readEnv (projectRoot) {
