@@ -117,7 +117,7 @@ commands:
 
   build-and-persist:
     description: Save entire folder as artifact for other jobs to run without reinstalling
-    steps: 
+    steps:
       - run:
           name: Build packages
           command: yarn build
@@ -129,7 +129,7 @@ commands:
             - .ssh
             - node_modules # contains the npm i -g modules
 
-  unpack-dependencies: 
+  unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
     steps:
       - run:
@@ -173,7 +173,7 @@ commands:
               echo "Node modules already cached for dependencies, exiting"
               circleci-agent step halt
             fi
-      - run: date +%Y-%U > cache_date            
+      - run: date +%Y-%U > cache_date
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
@@ -255,7 +255,7 @@ commands:
           name: Stop .only
           command: |
             . ./scripts/load-nvm.sh
-            yarn stop-only-all   
+            yarn stop-only-all
       - run:
           # Deps needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Deps
@@ -413,7 +413,7 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @cypress/system-tests test ./test/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
+          command: yarn workspace @tooling/system-tests test ./test/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -655,7 +655,7 @@ commands:
             if [[ -f yarn.lock ]]; then
               yarn --frozen-lockfile
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
-            else 
+            else
               npm install
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install ~/cypress/cypress.tgz
             fi
@@ -861,7 +861,7 @@ commands:
             - cypress/npm-package-url.json
 
 jobs:
-  ## Checks if we already have a valid cache for the node_modules_install and if it has, 
+  ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
     <<: *defaults
@@ -1964,7 +1964,7 @@ linux-workflow: &linux-workflow
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
     - npm-release:
-        requires:          
+        requires:
           - build
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
@@ -2138,7 +2138,7 @@ mac-workflow: &mac-workflow
         name: darwin-build
         executor: mac
         requires:
-          - darwin-node-modules-install        
+          - darwin-node-modules-install
         <<: *macBuildFilters
 
     - lint:

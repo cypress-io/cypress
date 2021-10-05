@@ -1,6 +1,6 @@
-const ciProvider = require('../../../lib/util/ci_provider')
+const ciProvider = require('@packages/server/lib/util/ci_provider')
 const { commitInfo } = require('@cypress/commit-info')
-const pkg = require('../../../../../package.json')
+const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const rp = require('@cypress/request-promise')
 const debug = require('debug')('cypress:performance')

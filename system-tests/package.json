@@ -1,7 +1,8 @@
 {
-  "name": "@cypress/system-tests",
+  "name": "@tooling/system-tests",
   "version": "1.0.0",
-  "description": "",
+  "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "test": "node ./scripts/run.js --glob-in-dir=test"

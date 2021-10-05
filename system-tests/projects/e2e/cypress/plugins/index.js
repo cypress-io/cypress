@@ -21,7 +21,7 @@ module.exports = (on, config) => {
   // TODO: fix this - in open mode, this will throw an error
   // since the relative path is different in open vs run mode
   try {
-    performance = require('../../../../test/support/helpers/performance')
+    performance = require('@tooling/system-tests/lib/performance')
   } catch (err) {
     console.error(err)
   }
