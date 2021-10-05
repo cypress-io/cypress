@@ -3,7 +3,7 @@ import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
 import specsUtil from './util/specs'
 /* eslint-disable no-duplicate-imports */
-import type { CommonSearchOptions } from './util/specs'
+import type { CommonSearchOptions } from '@packages/types'
 
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]

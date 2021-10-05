@@ -1,9 +1,14 @@
 <template>
   <SettingsSection>
-    <template #title>{{ t('settingsPage.config.title') }}</template>
+    <template #title>
+      {{ t('settingsPage.config.title') }}
+    </template>
     <template #description>
       <i18n-t keypath="settingsPage.config.description">
-        <a href="https://docs.cypress.io" target="_blank">cypress.config.js</a>
+        <a
+          href="https://docs.cypress.io"
+          target="_blank"
+        >cypress.config.js</a>
       </i18n-t>
     </template>
     <div class="flex w-full select-none">
@@ -22,7 +27,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '../../composables'
+import { useI18n } from '@cy/i18n'
 import cypressJson from '../../../cypress.json?raw' // TODO: remove this
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'

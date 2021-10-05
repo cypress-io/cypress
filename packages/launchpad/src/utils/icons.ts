@@ -8,9 +8,9 @@ import LogoReact from '../images/logos/react.svg'
 import componentLogo from '../images/testingTypes/component.svg'
 import e2eLogo from '../images/testingTypes/e2e.svg'
 
-import type { FrontendFramework, SupportedBundlers, TestingTypeEnum } from '../generated/graphql'
+import type { FrontendFrameworkEnum, SupportedBundlers, TestingTypeEnum } from '../generated/graphql'
 
-export const FrameworkBundlerLogos: Record<FrontendFramework | SupportedBundlers, string> = {
+export const FrameworkBundlerLogos: Record<FrontendFrameworkEnum | SupportedBundlers, string> = {
   webpack: LogoWebpack,
   vite: LogoVite,
   vue: LogoVue,

@@ -5,10 +5,18 @@
   >
     <div class="border h-152px">
       <!-- temp wrapper for icon -->
-      <component :is="icon" class="mx-auto mt-4" />
+      <component
+        :is="icon"
+        class="mx-auto mt-4"
+      />
     </div>
-    <h2 class="mt-4 text-primary text-18px">{{ title }}</h2>
-    <p class="mt-3 text-sm mb-60px" v-html="description" />
+    <h2 class="mt-4 text-primary text-18px">
+      {{ title }}
+    </h2>
+    <p
+      class="mt-3 text-sm mb-60px"
+      v-html="description"
+    />
     <div class="absolute left-0 right-0 flex justify-between bottom-30px px-30px">
       <span class="flex items-center px-3 py-1 border rounded-full">
         <i-oi-clock class="mr-2 text-gray-300 w-14px h-14px" />8 min
@@ -21,8 +29,8 @@
 </template>
 
 <script setup lang="ts">
-import type { TestingTypeEnum } from "../generated/graphql";
-import { TestingTypeIcons } from "../utils/icons";
+import type { TestingTypeEnum } from '../generated/graphql'
+import { TestingTypeIcons } from '../utils/icons'
 
 const props = defineProps<{
   id: TestingTypeEnum

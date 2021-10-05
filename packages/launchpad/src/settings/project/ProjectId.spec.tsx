@@ -19,7 +19,9 @@ describe('<ProjectId />', () => {
 
   it('renders the project ID in the input field', () => {
     cy.mountFragment(ProjectIdFragmentDoc, {
-      type: (ctx) => ctx.activeProject!,
+      type: (ctx) => {
+        return ctx.stubData.project
+      },
       render: (gqlVal) => (
         <div class="py-4 px-8">
           <ProjectId

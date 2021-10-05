@@ -1,4 +1,4 @@
-import { defaultMessages } from '../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 import WelcomeGuide from './WelcomeGuide.vue'
 
 const welcomeGuide = defaultMessages.welcomeGuide.header

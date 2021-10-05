@@ -1,6 +1,6 @@
 import Config from './Config.vue'
 import jsonObject from '../../../cypress.json?raw'
-import { defaultMessages } from '../../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 import { each } from 'lodash'
 
 describe('<Config/>', () => {

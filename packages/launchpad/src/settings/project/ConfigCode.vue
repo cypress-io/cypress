@@ -3,10 +3,15 @@
     <Button
       variant="outline"
       class="absolute top-4 right-4"
-      :prefixIcon="IconCode"
-      prefixIconClass="text-gray-500"
-    >{{ t('file.edit') }}</Button>
-    <pre @dblclick="copy(code)" class="p-2 font-mono text-gray-600 text-sm">{{ code }}</pre>
+      :prefix-icon="IconCode"
+      prefix-icon-class="text-gray-500"
+    >
+      {{ t('file.edit') }}
+    </Button>
+    <pre
+      class="p-2 font-mono text-gray-600 text-sm"
+      @dblclick="copy(code)"
+    >{{ code }}</pre>
     <div
       aria-hidden="true"
       class="pointer-events-none flex items-center text-center transition-opacity absolute top-0 left-0 w-full h-full"
@@ -22,14 +27,14 @@
 </template>
 
 <script lang="ts" setup>
-import Button from '../../components/button/Button.vue'
-import IconCode from 'virtual:vite-icons/mdi/code'
-import { useI18n } from '../../composables'
+import Button from '@cy/components/Button.vue'
+import IconCode from '~icons/mdi/code'
+import { useI18n } from '@cy/i18n'
 import { useClipboard } from '@vueuse/core'
 
 defineProps<{
   code: string,
-  mockCopy?: () => any
+  mockCopy?:() => any
 }>()
 
 const { copy, copied } = useClipboard()

@@ -1,6 +1,6 @@
 import ConfigCode from './ConfigCode.vue'
 import jsonObject from '../../../cypress.json'
-import { defaultMessages } from '../../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 
 const selector = '[data-testid=code]'
 const jsonString = JSON.stringify(jsonObject, null, 2)

@@ -36,7 +36,7 @@ ${dirs
         `pkg-${dir}`,
   )}: path.join(__dirname, '../../packages/${dir}')`
 }).join(',\n')}
-}
+} as const
 `,
   )
 }

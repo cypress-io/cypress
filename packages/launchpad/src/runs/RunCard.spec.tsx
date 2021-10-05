@@ -5,7 +5,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
   it('playground', () => {
     cy.mountFragment(RunCardFragmentDoc, {
       type: (ctx) => {
-        return ctx.stubData.CloudRunStubs.allPassing
+        return ctx.stubCloudData.CloudRunStubs.allPassing
       },
       render: (gqlVal) => {
         return (

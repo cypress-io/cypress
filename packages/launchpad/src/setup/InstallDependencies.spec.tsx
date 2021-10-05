@@ -5,10 +5,7 @@ describe('<InstallDependencies />', () => {
   beforeEach(() => {
     cy.mountFragment(InstallDependenciesFragmentDoc, {
       type: (ctx) => {
-        ctx.wizard.setBundler('webpack')
-        ctx.wizard.setFramework('react')
-
-        return ctx.wizard
+        return ctx.stubWizard
       },
       render: (gqlVal) => {
         return <InstallDependencies gql={gqlVal} />
@@ -21,7 +18,7 @@ describe('<InstallDependencies />', () => {
     cy.contains('@cypress/webpack-dev-server').should('exist')
   })
 
-  it('should infinitely toggle manual', () => {
+  xit('should infinitely toggle manual', () => {
     cy.contains('@cypress/react').should('exist')
     cy.contains('manually').click()
     cy.contains('yarn add').should('exist')

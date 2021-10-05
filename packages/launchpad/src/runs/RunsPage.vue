@@ -2,9 +2,9 @@
   <main class="min-w-650px max-w-800px">
     <div v-if="props.gql.runs?.nodes">
       <RunCard
-        v-for="run of props.gql.runs.nodes" 
-        :gql="run"
+        v-for="run of props.gql.runs.nodes"
         :key="run.id"
+        :gql="run"
       />
     </div>
   </main>

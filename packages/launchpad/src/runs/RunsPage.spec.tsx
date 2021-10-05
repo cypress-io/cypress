@@ -5,7 +5,7 @@ describe('<RunsPage />', () => {
   it('playground', () => {
     cy.mountFragment(RunsPageFragmentDoc, {
       type: (ctx) => {
-        return ctx.stubData.CloudProjectStubs.componentProject
+        return ctx.stubCloudData.CloudProjectStubs.componentProject
       },
       render: (gql) => (
         <RunsPage gql={gql} />

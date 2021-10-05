@@ -1,4 +1,4 @@
-import HeartIcon from 'virtual:vite-icons/mdi/heart'
+import HeartIcon from '~icons/mdi/heart'
 import InlineCodeEditor from './InlineCodeEditor.vue'
 import { ref } from 'vue'
 

@@ -2,13 +2,17 @@
   <div v-if="!backendInitialized">
     Loading...
   </div>
-  <div v-else class="h-full mx-auto bg-white">
+  <div
+    v-else
+    class="h-full mx-auto bg-white"
+    @click="handleLinkTargetBlank"
+  >
     <Main />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import Main from './Main.vue'
 import { AppQueryDocument } from './generated/graphql'
@@ -26,14 +30,9 @@ query AppQuery {
  * server and current project has been initialized.
  * We poll until those conditions are met, then render the app
  */
-const query = useQuery({ 
+const query = useQuery({
   query: AppQueryDocument,
-  requestPolicy: 'cache-and-network'
-})
-
-
-watch(query.data, () => {
-  console.log(query.data.value)
+  requestPolicy: 'cache-and-network',
 })
 
 let interval: number
@@ -52,10 +51,19 @@ const poll = () => {
 interval = window.setInterval(poll, 200)
 
 const backendInitialized = computed(() => !!query.data?.value?.app)
+
+const handleLinkTargetBlank = (event) => {
+  if (event.target.href && event.target.target === '_blank') {
+    event.preventDefault()
+    // TODO - use a mutation to open these links in the default user browser
+  }
+}
 </script>
 
 <style lang="scss">
-html, body, #app {
+html,
+body,
+#app {
   @apply h-full bg-white;
 }
 </style>

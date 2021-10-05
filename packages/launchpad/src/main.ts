@@ -4,7 +4,7 @@ import 'virtual:windi.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
-import { createI18n } from './locales/i18n'
+import { createI18n } from '@cy/i18n'
 
 const app = createApp(App)
 

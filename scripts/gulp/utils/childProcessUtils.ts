@@ -1,50 +1,92 @@
-import { exec, ExecOptions, spawn, SpawnOptions } from 'child_process'
+import { ChildProcess, exec, ExecOptions, fork, ForkOptions, spawn, SpawnOptions } from 'child_process'
 import through2 from 'through2'
+import pDefer from 'p-defer'
 import util from 'util'
 
-// import psTree from 'ps-tree'
-// import psNode from 'ps-node'
-// import util from 'util'
-
-import { prefixStream } from './prefixStream'
-
-const spawningApps = new Set()
-// const killAsync = util.promisify(psNode.kill)
-// const psTreeAsync = util.promisify(psTree)
-// const runningApps = new Map<
-//   AllSpawnableApps,
-//   [ChildProcess, ArgsFor<typeof spawned>, Function]
-// >()
-
-export async function allReady () {
-  while (spawningApps.size > 0) {
-    await new Promise((ready) => setTimeout(ready, 100))
-  }
-
-  return true
-}
+import { prefixLog, prefixStream } from './prefixStream'
+import { addChildProcess } from '../tasks/gulpRegistry'
 
 export type AllSpawnableApps =
   | `vite-${string}`
   | `vite:build-${string}`
+  | `serve:${string}`
   | 'gql-codegen'
+  | `cy:${string}`
 
-interface SpawnedOptions extends SpawnOptions {
+interface TapThroughConfig {
+  tapOut?: through2.TransformFunction
+  tapErr?: through2.TransformFunction
+}
+
+interface SpawnedOptions extends TapThroughConfig, SpawnOptions {
   waitForExit?: boolean
+  waitForData?: boolean
+}
+
+interface SpawnUntilMatchConfig {
+  command: string
+  match: string | RegExp
+  options?: SpawnOptions
+}
+
+export async function spawnUntilMatch (
+  prefix: AllSpawnableApps,
+  config: SpawnUntilMatchConfig,
+) {
+  const dfd = pDefer()
+  let ready = false
+
+  spawned(prefix, config.command, {
+    ...config.options,
+    tapOut (chunk, enc, cb) {
+      if (!ready && String(chunk).match(config.match)) {
+        ready = true
+        setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
+      }
+
+      cb(null, chunk)
+    },
+  })
+
+  return dfd.promise
+}
+
+interface ForkUntilMatchConfig {
+  modulePath: string
+  args: string[]
+  match: string | RegExp
+  options?: SpawnOptions
+}
+
+export async function forkUntilMatch (
+  prefix: AllSpawnableApps,
+  config: ForkUntilMatchConfig,
+) {
+  const dfd = pDefer<ChildProcess>()
+  let ready = false
+
+  const cp = await forked(prefix, config.modulePath, config.args, {
+    ...config.options,
+    tapOut (chunk, enc, cb) {
+      if (!ready && String(chunk).match(config.match)) {
+        ready = true
+        setTimeout(() => dfd.resolve(cp), 20) // flush the rest of the chunks
+      }
+
+      cb(null, chunk)
+    },
+  })
+
+  return dfd.promise
 }
 
 export async function spawned (
   prefix: AllSpawnableApps,
   command: string,
   opts: SpawnedOptions = {},
-  tapThrough: {
-    tapOut?: through2.TransformFunction
-    tapErr?: through2.TransformFunction
-  } = {},
 ) {
-  const { waitForExit, ...spawnOpts } = opts
+  const { waitForExit, waitForData, tapErr, tapOut, ...spawnOpts } = opts
 
-  spawningApps.add(prefix)
   const [executable, ...rest] = command.split(' ')
   let useExecutable = executable
 
@@ -52,94 +94,81 @@ export async function spawned (
     useExecutable = `${executable}.cmd`
   }
 
+  // console.log(useExecutable, rest, spawnOpts)
+
   const cp = spawn(useExecutable, rest, {
     stdio: 'pipe',
+    ...spawnOpts,
     env: {
       FORCE_COLOR: '1',
       NODE_ENV: 'development',
       ...process.env,
+      ...spawnOpts.env,
     },
-    ...spawnOpts,
   })
-  const tapOut = tapThrough.tapOut || null
-  const tapErr = tapThrough.tapErr || null
-  const prefixedStdout = cp.stdout?.pipe(
-    through2(function (chunk, enc, cb) {
-      if (tapOut) {
-        tapOut.call(this, chunk, enc, cb)
-      } else {
-        cb(null, chunk)
-      }
-    }),
-  )
-  .pipe(prefixStream(`${prefix}:${cp.pid}`))
 
-  const prefixedStderr = cp.stderr?.pipe(
-    through2(function (chunk, enc, cb) {
-      if (tapErr) {
-        tapErr.call(this, chunk, enc, cb)
-      } else {
-        cb(null, chunk)
-      }
-    }),
-  )
-  .pipe(prefixStream(`${prefix}:${cp.pid}`))
+  addChildProcess(cp)
 
-  prefixedStdout?.pipe(process.stdout)
-  prefixedStderr?.pipe(process.stderr)
+  return streamHandler(cp, {
+    tapErr,
+    tapOut,
+    command,
+    prefix,
+    waitForExit,
+    waitForData,
+  })
+}
 
-  // const cleanup = () => {
-  //   prefixedStdout?.unpipe(process.stdout)
-  //   prefixedStderr?.unpipe(process.stderr)
+interface ForkedOptions extends TapThroughConfig, ForkOptions {
+  waitForExit?: boolean
+  waitForData?: boolean
+}
+
+export async function forked (
+  prefix: AllSpawnableApps,
+  modulePath: string,
+  args: string[],
+  opts: ForkedOptions = {},
+) {
+  const { waitForExit, waitForData, tapErr, tapOut, ...spawnOpts } = opts
+
+  // console.log(args)
+
+  // let useExecutable = executable
+  // if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
+  //   useExecutable = `${executable}.cmd`
   // }
 
-  // runningApps.set(prefix, [cp, [prefix, command, opts], cleanup])
-
-  return new Promise((resolve, reject) => {
-    if (waitForExit) {
-      if (process.platform === 'win32') {
-        cp.on('exit', (code, signal) => {
-          console.log(`Exit code: ${code} => ${signal}`)
-          resolve(cp)
-        })
-      } else {
-        cp.once('exit', (code, signal) => {
-          console.log(`Exit code: ${code} => ${signal}`)
-          resolve(cp)
-        })
-      }
-
-      cp.once('error', (e) => {
-        console.log(`error executing ${command}`, e)
-        reject(e)
-      })
-    } else {
-      if (process.platform === 'win32') {
-        cp.on('exit', (code, signal) => {
-          console.log(`Exit code: ${code} => ${signal}`)
-        })
-      } else {
-        cp.once('exit', (code, signal) => {
-          console.log(`Exit code: ${code} => ${signal}`)
-        })
-      }
-
-      cp.once('error', (e) => {
-        console.log(`error executing ${command}`, e)
-        reject(e)
-      })
-
-      cp.stdout?.once('data', () => {
-        spawningApps.delete(prefix)
-        resolve(cp)
-      })
-    }
+  const cp = fork(modulePath, args, {
+    stdio: 'pipe',
+    ...spawnOpts,
+    env: {
+      FORCE_COLOR: '1',
+      NODE_ENV: 'development',
+      ...process.env,
+      ...spawnOpts.env,
+    },
   })
+
+  addChildProcess(cp)
+
+  return streamHandler(cp, {
+    tapOut,
+    tapErr,
+    command: modulePath,
+    prefix,
+    waitForExit,
+    waitForData,
+  })
+}
+
+function writeError (e: Error) {
+  return JSON.stringify({ name: e.name, message: e.message, stack: e.stack })
 }
 
 const execAsyncLocal = util.promisify(exec)
 
-interface ExecAsyncOptions extends ExecOptions {
+export interface ExecAsyncOptions extends ExecOptions {
   encoding?: string | null
   silent?: boolean
 }
@@ -165,4 +194,77 @@ export const execAsync = async (
   }
 
   return result
+}
+
+export interface StreamHandlerConfig extends TapThroughConfig {
+  prefix: string
+  waitForExit?: boolean
+  waitForData?: boolean
+  command: string
+}
+
+function streamHandler (cp: ChildProcess, config: StreamHandlerConfig) {
+  const dfd = pDefer<ChildProcess>()
+  const { command, tapErr = null, tapOut = null, prefix, waitForExit, waitForData = true } = config
+  const prefixedStdout = cp.stdout?.pipe(
+    through2(function (chunk, enc, cb) {
+      if (tapOut) {
+        tapOut.call(this, chunk, enc, cb)
+      } else {
+        cb(null, chunk)
+      }
+    }),
+  )
+  .pipe(prefixStream(`${prefix}:${cp.pid}`))
+
+  const prefixedStderr = cp.stderr?.pipe(
+    through2(function (chunk, enc, cb) {
+      if (tapErr) {
+        tapErr.call(this, chunk, enc, cb)
+      } else {
+        cb(null, chunk)
+      }
+    }),
+  )
+  .pipe(prefixStream(`${prefix}:${cp.pid}`))
+
+  prefixedStdout?.pipe(process.stdout)
+  prefixedStderr?.pipe(process.stderr)
+
+  const log = prefixLog(`${prefix}:${cp.pid}`)
+
+  if (waitForExit) {
+    cp.on('exit', (code, signal) => {
+      log.log(`Exit code: ${code} => ${signal}`)
+      prefixedStdout?.unpipe(process.stdout)
+      prefixedStderr?.unpipe(process.stderr)
+      dfd.resolve(cp)
+    })
+
+    cp.once('error', (e) => {
+      log.error(`error executing ${command} ${writeError(e)}`)
+      prefixedStdout?.unpipe(process.stdout)
+      prefixedStderr?.unpipe(process.stderr)
+      dfd.reject(e)
+    })
+  } else {
+    cp.once('exit', (code, signal) => {
+      log.log(`Exit code: ${code} => ${signal}`)
+    })
+
+    cp.once('error', (e) => {
+      log.error(`error executing ${command} ${writeError(e)}`)
+      dfd.reject(e)
+    })
+
+    if (waitForData) {
+      cp.stdout?.once('data', () => {
+        dfd.resolve(cp)
+      })
+    } else {
+      dfd.resolve(cp)
+    }
+  }
+
+  return dfd.promise
 }

@@ -17,7 +17,7 @@ interface RuleConfig {
 }
 
 const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
-  const resolvedColor = color ? color : weight ? theme(`colors.${name}.${weight}`) : theme(`colors.${name}`)
+  const resolvedColor = color ? color : weight ? theme?.(`colors.${name}.${weight}`) : theme?.(`colors.${name}`)
   let [lightKey, darkKey] = [`.icon-light-${name}`, `.icon-dark-${name}`]
 
   // transparent, black, and white

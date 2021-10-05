@@ -23,11 +23,13 @@
     "@vitejs/plugin-vue": "1.2.0",
     "@vue/compiler-sfc": "3.2.6",
     "cypress": "0.0.0-development",
+    "eslint-plugin-vue": "7.18.0",
     "mocha-junit-reporter": "^2.0.0",
     "mocha-multi-reporters": "^1.5.1",
     "react": "17.0.2",
     "vite": "2.4.4",
-    "vue": "3.2.6"
+    "vue": "3.2.6",
+    "vue-eslint-parser": "7.11.0"
   },
   "peerDependencies": {
     "vite": ">= 2.1.3"

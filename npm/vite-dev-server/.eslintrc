@@ -8,7 +8,10 @@
     "plugin:@cypress/dev/tests",
     "plugin:@cypress/dev/react"
   ],
-  "parser": "@typescript-eslint/parser",
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser"
+  },
   "env": {
     "cypress/globals": true
   },

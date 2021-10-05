@@ -1,8 +1,8 @@
 <template>
   <div class="shop-home">
-    <router-link 
-      :to="{ name: 'order' }" 
-      custom v-slot="{ navigate }">     
+    <router-link
+      :to="{ name: 'order' }"
+      custom v-slot="{ navigate }">
       <button class="order" @click="navigate">Place Your Order</button>
      </router-link>
     <br>

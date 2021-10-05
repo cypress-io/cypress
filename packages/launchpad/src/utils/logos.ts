@@ -5,9 +5,9 @@ import LogoNuxt from '../images/logos/nuxt.svg'
 import LogoVue from '../images/logos/vue.svg'
 import LogoReact from '../images/logos/react.svg'
 
-import type { Bundler, FrontendFramework } from '@packages/graphql/src/constants/wizardConstants'
+import type { FrontendFramework, SupportedBundlers } from '../generated/graphql'
 
-export const FrameworkBundlerLogos: Record<FrontendFramework | Bundler, string> = {
+export const FrameworkBundlerLogos: Record<FrontendFramework | SupportedBundlers, string> = {
   webpack: LogoWebpack,
   vite: LogoVite,
   vue: LogoVue,

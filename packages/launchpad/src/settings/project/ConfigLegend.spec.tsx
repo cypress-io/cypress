@@ -1,4 +1,4 @@
-import { defaultMessages } from '../../locales/i18n'
+import { defaultMessages } from '@cy/i18n'
 import ConfigLegend from './ConfigLegend.vue'
 import { each } from 'lodash'
 

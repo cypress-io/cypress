@@ -1,6 +1,5 @@
 // TODO: Why is this failing on CI?
 
-import { Query } from '@packages/graphql'
 import {
   ConfigFileFragmentDoc,
 } from '../generated/graphql-test'
@@ -11,11 +10,7 @@ describe('<ConfigFile />', () => {
   beforeEach(() => {
     cy.mountFragment(ConfigFileFragmentDoc, {
       type: (ctx) => {
-        ctx.wizard.setTestingType('component')
-        ctx.wizard.setFramework('cra')
-        ctx.wizard.setBundler('webpack')
-
-        return new Query()
+        return ctx.stubQuery
       },
       render: (gql) => {
         return (

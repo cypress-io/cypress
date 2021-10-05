@@ -1,7 +1,10 @@
 <template>
-  <WizardLayout :canNavigateForward="canNavigateForward">
+  <WizardLayout :can-navigate-forward="canNavigateForward">
     <div class="flex flex-col items-center mx-auto my-10">
-      <img src="../images/success.svg" class="my-2"/>
+      <img
+        src="../images/success.svg"
+        class="my-2"
+      >
       <span class="my-2">
         {{ props.gql.chosenTestingTypePluginsInitialized ? 'Project initialized.' : 'Initializing...' }}
       </span>
@@ -10,10 +13,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, computed } from 'vue';
-import WizardLayout from "./WizardLayout.vue";
-import { useMutation, gql } from "@urql/vue";
-import { InitializeConfigFragment, InitializeOpenProjectDocument } from "../generated/graphql"
+import { onMounted, computed } from 'vue'
+import WizardLayout from './WizardLayout.vue'
+import { useMutation, gql } from '@urql/vue'
+import { InitializeConfigFragment, InitializeOpenProjectDocument } from '../generated/graphql'
 
 gql`
 fragment InitializeConfig on Wizard {
