@@ -1,8 +1,6 @@
 describe('multidomain - rerun', () => {
   beforeEach(() => {
     cy.visit('/fixtures/multidomain.html')
-    // @ts-ignore
-    cy.anticipateMultidomain()
     cy.get('a').click()
   })
 
