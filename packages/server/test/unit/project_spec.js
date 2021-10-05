@@ -34,6 +34,7 @@ const runEvents = require(`${root}lib/plugins/run_events`)
 const system = require(`${root}lib/util/system`)
 const { fs } = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
+const configFileUpdater = require(`${root}lib/util/config-file-updater`)
 const Watchers = require(`${root}lib/watchers`)
 const { SocketE2E } = require(`${root}lib/socket-e2e`)
 
@@ -943,8 +944,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
-      sinon.stub(settings, 'write')
-      .withArgs(this.project.projectRoot, { projectId: 'id-123' })
+      sinon.stub(configFileUpdater, 'insertValuesInConfigFile')
+      .withArgs(this.project.projectRoot, { projectId: 'id-123' }, { configFile: 'cypress.json' })
       .resolves({ projectId: 'id-123' })
     })
 
@@ -1024,7 +1025,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'write').resolves()
+      sinon.stub(configFileUpdater, 'insertValuesInConfigFile').resolves()
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
@@ -1039,7 +1040,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     it('calls writeProjectId with id', function () {
       return createCiProject({ foo: 'bar', projectRoot, configFile }).then(() => {
-        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
+        expect(configFileUpdater.insertValuesInConfigFile).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
       })
     })
 
@@ -1148,6 +1149,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         '/path/to/second',
       ])
 
+      sinon.stub(ProjectUtils, 'getDefaultConfigFilePath').resolves('cypress.json')
       sinon.stub(settings, 'id').resolves('id-123')
     })
 

@@ -179,21 +179,6 @@ export function readEnv (projectRoot) {
   })
 }
 
-export function write (projectRoot, obj = {}, options: SettingsOptions = {}) {
-  if (options.configFile === false) {
-    return Promise.resolve({})
-  }
-
-  return read(projectRoot, options)
-  .then((settings) => {
-    _.extend(settings, obj)
-
-    const file = pathToConfigFile(projectRoot, options)
-
-    return _write(file, settings)
-  })
-}
-
 export function pathToConfigFile (projectRoot, options: SettingsOptions = {}) {
   const file = configFile(options)
 
