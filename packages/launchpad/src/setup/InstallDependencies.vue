@@ -1,16 +1,9 @@
 <template>
   <WizardLayout
-    :next="nextButtonName"
-    alt="Install manually"
-    :alt-fn="altFn"
+    :next=" t('setupPage.install.confirmManualInstall')"
     :can-navigate-forward="props.gql.canNavigateForward"
   >
-    <PackagesList
-      v-if="!isManualInstall"
-      :gql="props.gql"
-    />
     <ManualInstall
-      v-else
       :gql="props.gql"
     />
   </WizardLayout>
@@ -19,7 +12,6 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import WizardLayout from './WizardLayout.vue'
-import PackagesList from './PackagesList.vue'
 import ManualInstall from './ManualInstall.vue'
 import { gql } from '@urql/core'
 import type { InstallDependenciesFragment } from '../generated/graphql'
@@ -33,20 +25,10 @@ fragment InstallDependencies on Wizard {
 }
 `
 
-const isManualInstall = ref(false)
-
 const props = defineProps<{
   gql: InstallDependenciesFragment
 }>()
 
 const { t } = useI18n()
-const nextButtonName = computed(() => {
-  return isManualInstall.value ?
-    t('setupPage.install.confirmManualInstall') :
-    t('setupPage.install.startButton')
-})
 
-const altFn = (val: boolean) => {
-  isManualInstall.value = val
-}
 </script>
