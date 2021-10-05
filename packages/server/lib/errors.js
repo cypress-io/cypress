@@ -647,21 +647,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
       if (Object.keys(arg1).length === 1 && typeof Object.values(arg1)[0] !== 'object') {
         msg = stripIndent`\
-        In your config file, cypress cannot set your \`${Object.keys(arg1)[0]}\` key to \`${JSON.stringify(Object.values(arg1)[0])}\`
-
-        \`\`\`
-        ${Object.keys(arg1)[0]}: ${JSON.stringify(Object.values(arg1)[0])}
-        \`\`\``
+        In your config file, cypress cannot set your \`${Object.keys(arg1)[0]}\` key to \`${JSON.stringify(Object.values(arg1)[0])}\``
       } else {
         msg = stripIndent`\
-          Cypress was unable to add/update the following values in your configuration file.
-
-          \`\`\`
-          ${JSON.stringify(arg1, null, 2)}
-          \`\`\``
+          Cypress was unable to add/update values in your configuration file.
+        `
       }
 
-      return { msg, details: arg2 }
+      return { msg, details: arg2, payload: arg1 }
     // general configuration error not-specific to configuration or plugins files
     case 'CONFIG_VALIDATION_ERROR':
       return stripIndent`\
@@ -1079,7 +1072,7 @@ const clone = function (err, options = {}) {
   })
 
   // pull off these properties
-  const obj = _.pick(err, 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber')
+  const obj = _.pick(err, 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber', 'payload')
 
   if (options.html) {
     obj.message = ansi_up.ansi_to_html(err.message)
