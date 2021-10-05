@@ -4,6 +4,7 @@
       <span
         v-show="showCopied"
         class="mx-3"
+        role="status"
       >{{ t('clipboard.copied') }}</span>
     </transition>
     <button
@@ -15,6 +16,7 @@
   </div>
   <textarea
     ref="textElement"
+    tabindex="-1"
     :value="text"
     class="absolute -top-96"
   />
