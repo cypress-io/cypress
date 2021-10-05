@@ -71,7 +71,7 @@ function ManualSetup ({ error, configFile, project }) {
       </FileOpener>
 
       <p>3. Add the given <code>projectId</code> to the root of your config object</p>
-      <p>4. When you have added the <code>projectId</code>, this page should refresh. If not, click the "Retry" button</p>
+      <p>4. When you have added the <code>projectId</code>, this page should refresh. <br/>If not, click the "Retry" button</p>
       <p>
         <button
           disabled={isSubmitting}
