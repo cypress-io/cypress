@@ -91,4 +91,9 @@ onMounted(() => {
 </route>
 
 <style>
+iframe {
+  border: 5px solid black;
+  margin: 10px;
+  background: lightgray;
+}
 </style>

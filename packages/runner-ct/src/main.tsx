@@ -46,7 +46,6 @@ const UnifiedRunner = {
   },
 
   start ({ config, projectName, store, spec }) {
-    console.log({ spec })
     eventManager.addGlobalListeners(store, {
       automationElement: automationElementId,
       randomString
@@ -57,7 +56,13 @@ const UnifiedRunner = {
 
     const specSrc = getSpecUrl(config.namespace, spec)
     const $container = document.createElement('div')
-    document.querySelector('#runner-vue').appendChild($container)
+    const $runnerRoot = document.querySelector('#runner-vue')
+    // empty it
+    while ($runnerRoot.lastChild) {
+      $runnerRoot.removeChild($runnerRoot.firstChild)
+    }
+
+    $runnerRoot.appendChild($container)
 
     const autIframe = new AutIframe(config.projectName)
     const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
