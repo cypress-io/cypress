@@ -5,8 +5,11 @@
       :id="ct.type"
       :title="ct.title"
       :description="firstTimeCT ? ct.description : 'LAUNCH'"
-      :role="firstTimeCT ? 'setup-component-testing' : 'launch-component-testing'"
+      role="button"
+      :function="firstTimeCT ? 'setup-component-testing' : 'launch-component-testing'"
       @click="ctNextStep"
+      @keyup.enter="ctNextStep"
+      @keyup.space="ctNextStep"
     />
 
     <TestingTypeCard
@@ -14,8 +17,11 @@
       :id="e2e.type"
       :title="e2e.title"
       :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
-      :role="firstTimeE2E ? 'setup-e2e-testing' : 'launch-e2e-testing'"
+      :function="firstTimeE2E ? 'setup-e2e-testing' : 'launch-e2e-testing'"
+      role="button"
       @click="e2eNextStep"
+      @keyup.enter="e2eNextStep"
+      @keyup.space="e2eNextStep"
     />
   </div>
 </template>
