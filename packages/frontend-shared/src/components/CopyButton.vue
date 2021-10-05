@@ -8,7 +8,8 @@
       >{{ t('clipboard.copied') }}</span>
     </transition>
     <button
-      class="bg-gray-50 px-3 py-1 rounded text-indigo-600 border-1 border-transparent hocus-default"
+      id="copy-button"
+      class="bg-gray-50 text-14px px-2 py-1 rounded text-indigo-600 border-1 border-transparent hocus-default"
       @click="copyToClipboard"
     >
       {{ t('clipboard.copy') }}
