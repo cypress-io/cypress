@@ -19,6 +19,7 @@ export interface InitializeRoutes {
   getRemoteState: () => Cypress.RemoteState
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
+  exit: boolean
 }
 
 export const createCommonRoutes = ({

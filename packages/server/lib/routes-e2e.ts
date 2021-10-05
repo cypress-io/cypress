@@ -24,6 +24,7 @@ export const createRoutesE2E = ({
   getCurrentBrowser,
   onError,
   testingType,
+  exit,
 }: InitializeRoutes) => {
   const routesE2E = Router()
 
@@ -149,6 +150,7 @@ export const createRoutesE2E = ({
       getCurrentBrowser,
       getRemoteState,
       specsStore,
+      exit,
     })
   })
 

@@ -21,6 +21,7 @@ export const createRoutesCT = ({
   testingType,
   getSpec,
   getRemoteState,
+  exit,
 }: InitializeRoutes) => {
   const routesCt = Router()
 
@@ -54,6 +55,7 @@ export const createRoutesCT = ({
       getCurrentBrowser,
       getRemoteState,
       specsStore,
+      exit,
     })
   })
 
