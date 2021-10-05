@@ -991,8 +991,6 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
-      # check for compile errors with the releaserc scripts
-      - run: yarn test-npm-package-release-script
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -1001,6 +999,14 @@ jobs:
       - store_artifacts:
           path: cli/test/html
       - store-npm-logs
+
+  unit-tests-release:
+    <<: *defaults
+    resource_class: medium
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run: yarn test-npm-package-release-script
 
   lint-types:
     <<: *defaults
@@ -1975,6 +1981,10 @@ linux-workflow: &linux-workflow
     - unit-tests:
         requires:
           - build
+    - unit-tests-release:
+        context: test-runner:npm-release
+        requires:
+          - build
     - server-unit-tests:
         requires:
           - build
@@ -2108,6 +2118,7 @@ linux-workflow: &linux-workflow
           - server-integration-tests
           - server-unit-tests
           - unit-tests
+          - unit-tests-release
           - cli-visual-tests
 
     # various testing scenarios, like building full binary
