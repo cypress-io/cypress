@@ -9,14 +9,22 @@
         <div>{{ t('specPage.componentSpecsHeader') }}</div>
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
-      <SpecsListRow
+      <router-link
         v-for="spec in filteredSpecs"
+        v-slot="{ navigate }"
         :key="spec.node.id"
-        :gql="spec"
-        role="button"
-        tabindex="0"
-        class="grid grid-cols-2"
-      />
+        :to="path(spec)"
+        custom
+      >
+        <SpecsListRow
+          :gql="spec"
+          role="link"
+          tabindex="0"
+          class="grid grid-cols-2"
+          @click="navigate"
+          @keypress.enter="navigate"
+        />
+      </router-link>
     </div>
   </div>
 </template>
@@ -30,6 +38,7 @@ import type { SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
+const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}`
 
 gql`
 fragment SpecsList on App {
@@ -38,6 +47,9 @@ fragment SpecsList on App {
     projectRoot
     specs(first: 1000000) {
       edges {
+        node {
+          specType
+        }
         ...SpecListRow
       }
     }

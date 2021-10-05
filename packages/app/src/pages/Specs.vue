@@ -4,6 +4,9 @@
     <template v-if="query.data.value?.app">
       <SpecsList :gql="query.data.value?.app" />
     </template>
+    <p v-else>
+      Loading...
+    </p>
   </div>
 </template>
 
