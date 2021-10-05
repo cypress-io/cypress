@@ -23,16 +23,16 @@ const throwInvalidOptionError = (details) => {
  * @param {string} testingType The type of tests being executed
  * @returns {string[]} The array of new exec arguments
  */
-const processTestingType = (testingType) => {
-  if (testingType) {
-    if (testingType === 'e2e') {
-      return ['--testing-type', 'e2e']
-    }
+const processTestingType = (options) => {
+  if (options.testingType === 'component' || options.component) {
+    return ['--testing-type', 'component']
+  }
 
-    if (testingType === 'component') {
-      return ['--testing-type', 'component']
-    }
+  if (options.testingType === 'e2e' || options.e2e) {
+    return ['--testing-type', 'e2e']
+  }
 
+  if (options.testingType) {
     return throwInvalidOptionError(errors.invalidTestingType)
   }
 
