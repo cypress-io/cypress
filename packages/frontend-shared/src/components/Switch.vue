@@ -18,25 +18,25 @@
 
 withDefaults(defineProps<{
   value: boolean
-  size?: 's' | 'm' | 'l' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   name: string // required for an id so that an external <label> can be associated with the switch
 }>(), {
   value: false,
-  size: 'l',
+  size: 'lg',
 })
 
 const sizeClasses = {
-  's': {
+  'sm': {
     container: 'w-16px h-10px',
     indicator: 'w-6px h-6px ml-2px',
     translate: 'translate-x-6px',
   },
-  'm': {
+  'md': {
     container: 'w-24px h-12px',
     indicator: 'w-8px h-8px ml-2px',
     translate: 'translate-x-12px',
   },
-  'l': {
+  'lg': {
     container: 'w-32px h-16px',
     indicator: 'w-12px h-12px ml-2px',
     translate: 'translate-x-16px',
