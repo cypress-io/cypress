@@ -6,8 +6,7 @@
   >
     <span
       v-if="prefixIcon || $slots.prefix"
-      :class="iconClasses"
-      class="justify-self-start"
+      class="justify-self-start flex items-center"
     >
       <slot name="prefix">
         <Icon
@@ -22,7 +21,7 @@
     <span
       v-if="suffixIcon || $slots.suffix"
       :class="iconClasses"
-      class="justify-self-end"
+      class="justify-self-start flex items-center"
     >
       <slot name="suffix">
         <Icon
@@ -64,12 +63,6 @@ const SizeClassesTable = {
   lg: 'px-16px py-8px',
 }
 
-const IconClassesTable = {
-  sm: 'min-h-1.25em min-w-1.25em max-h-1.25em max-w-1.25em',
-  md: 'min-h-2em min-w-2em max-h-2em max-w-2em',
-  lg: 'min-h-2.5em min-w-2.5em max-w-2.5em max-h-2.5em ',
-}
-
 const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
@@ -84,7 +77,7 @@ const attrs = useAttrs() as ButtonHTMLAttributes
 const variantClasses = VariantClassesTable[props.variant || 'primary']
 const sizeClasses = SizeClassesTable[props.size || 'md']
 
-const iconClasses = ['flex', 'items-center', IconClassesTable[props.size || 'md']]
+const iconClasses = ['flex', 'items-center']
 
 const classes = computed(() => {
   return [
