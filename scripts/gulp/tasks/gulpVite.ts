@@ -121,21 +121,7 @@ export function viteCleanLaunchpad () {
  * Build and serve the Vite frontend(s) as web apps on a static server.
  *  * viteBuildLaunchpadForTest
  *  * viteBuildAppForTest
- *  * serveBuiltLaunchpadForTest
- *  * serveBuiltAppForTest
  *------------------------------------------------------------------------**/
-
-// After running `serveBuiltLaunchpadForTest`, you're able to visit
-// `http://localhost:5555` to access the Launchpad frontend.
-export function serveBuiltLaunchpadForTest () {
-  return spawnUntilMatch('serve:launchpad-for-test', {
-    command: `yarn serve ./dist-e2e -p 5555`,
-    match: 'Accepting connections',
-    options: {
-      cwd: monorepoPaths.pkgLaunchpad,
-    },
-  })
-}
 
 export function viteBuildLaunchpadForTest () {
   const GQL_PORT = ENV_VARS.E2E_TEST_TARGET.CYPRESS_INTERNAL_GQL_PORT
@@ -176,12 +162,6 @@ export function viteBuildAppForTest () {
       VITE_CYPRESS_INTERNAL_GQL_PORT: GQL_PORT,
       ...process.env,
     },
-  })
-}
-
-export function serveBuiltAppForTest () {
-  return spawned('serve:app-for-test', `yarn serve ./dist-e2e -p 5556`, {
-    cwd: monorepoPaths.pkgApp,
   })
 }
 

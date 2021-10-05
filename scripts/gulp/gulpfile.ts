@@ -11,7 +11,7 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, startCypressForTest, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, waitForTestGraphQLApi, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, serveBuiltLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, serveBuiltAppForTest, viteBuildAppForTest, viteBuildAndWatchAppForTest, viteBuildApp, viteBuildLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildAppForTest, viteBuildAndWatchAppForTest, viteBuildApp, viteBuildLaunchpad } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
@@ -143,9 +143,6 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 2. Build the Launchpad under test.
   viteBuildLaunchpadForTest,
 
-  // 3. Host the Launchpad on a static server for cy.visit.
-  serveBuiltLaunchpadForTest,
-
   // Ensure we have no existing cypress processes running
   killExistingCypress,
 
@@ -172,9 +169,6 @@ gulp.task('cyRunAppE2E', gulp.series(
     viteBuildAppForTest,
   ),
 
-  // 3. Host the Launchpad on a static server for cy.visit.
-  serveBuiltAppForTest,
-
   killExistingCypress,
 
   // 4. Start the TEST Cypress App, such that its ports and other globals
@@ -200,9 +194,6 @@ const cyOpenLaunchpad = gulp.series(
   //    don't conflict with the real Cypress App.
   startCypressForTest,
 
-  // 3. Host the Launchpad on a static server for cy.visit.
-  serveBuiltLaunchpadForTest,
-
   // 5. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressLaunchpad,
 )
@@ -219,9 +210,6 @@ const cyOpenApp = gulp.series(
   // 3. Start the TEST Cypress App, such that its ports and other globals
   //    don't conflict with the real Cypress App.
   startCypressForTest,
-
-  // 4. Host the Launchpad on a static server for cy.visit.
-  serveBuiltAppForTest,
 
   // 5. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressApp,
@@ -279,9 +267,6 @@ gulp.task(viteCleanLaunchpad)
 
 gulp.task(viteBuildLaunchpadForTest)
 gulp.task(viteBuildAppForTest)
-
-gulp.task(serveBuiltAppForTest)
-gulp.task(serveBuiltLaunchpadForTest)
 
 gulp.task(viteBuildAndWatchLaunchpadForTest)
 gulp.task(viteBuildAndWatchAppForTest)
