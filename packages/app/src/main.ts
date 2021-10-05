@@ -9,7 +9,7 @@ import { createRouter } from './router/router'
 
 const app = createApp(App)
 
-app.use(urql, makeUrqlClient())
+app.use(urql, makeUrqlClient('app'))
 app.use(createRouter())
 app.use(createI18n())
 

@@ -1,6 +1,9 @@
-import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+import type { WebContents } from 'electron'
+import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import debugLib from 'debug'
 import fsExtra from 'fs-extra'
+import type { EventEmitter } from 'events'
+
 import type { AuthApiShape } from './actions/AuthActions'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
@@ -14,6 +17,9 @@ import { BrowserDataSource } from './sources/BrowserDataSource'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 
 export interface DataContextConfig {
+  os: PlatformName
+  webContents: WebContents
+  rootBus: EventEmitter
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
   /**
@@ -38,6 +44,22 @@ export class DataContext {
   }
 
   loaders = makeLoaders(this)
+
+  async initializeData () {
+    const toAwait: Promise<any>[] = [
+      // Fetch the browsers when the app starts, so we have some by
+      // the time we're continuing.
+      this.actions.app.refreshBrowsers(),
+      // load projects from cache on start
+      this.actions.project.loadProjects(),
+    ]
+
+    if (this.config.launchArgs.projectRoot) {
+      toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+    }
+
+    return Promise.all(toAwait)
+  }
 
   get launchArgs () {
     return this.config.launchArgs
@@ -109,6 +131,7 @@ export class DataContext {
       appApi: this.config.appApi,
       authApi: this.config.authApi,
       projectApi: this.config.projectApi,
+      webContents: this.config.webContents,
     }
   }
 

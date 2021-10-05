@@ -13,7 +13,6 @@ import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
-import { closeGraphQLServer } from '@packages/graphql/src/server'
 import { fs } from './util/fs'
 import path from 'path'
 import os from 'os'
@@ -370,8 +369,6 @@ export class OpenProject {
       this.componentSpecsWatcher.close()
       this.componentSpecsWatcher = null
     }
-
-    return closeGraphQLServer()
   }
 
   closeBrowser () {

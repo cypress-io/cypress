@@ -621,9 +621,4 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
     return this.socket.sendSpecList(specs, testingType)
   }
-
-  // used for testing
-  __setMiddleware (middleware: any) {
-    this._middleware = middleware
-  }
 }

@@ -9,6 +9,8 @@ export type {
 
 export * from './browser'
 
+export type { PlatformName } from './browser'
+
 export {
   BROWSER_FAMILY,
   MIN_CHROME_VERSION,

@@ -79,7 +79,7 @@ describe('lib/gui/events', () => {
     it('ipc attaches callback on request', () => {
       sinon.stub(events, 'handleEvent')
 
-      events.start({ foo: 'bar' }, {}, { startGraphQL: false })
+      events.start({ foo: 'bar' }, {})
 
       expect(electron.ipcMain.on).to.be.calledWith('request')
     })
@@ -88,7 +88,7 @@ describe('lib/gui/events', () => {
       electron.ipcMain.on.yields('arg1', 'arg2')
       const handleEvent = sinon.stub(events, 'handleEvent')
 
-      events.start({ foo: 'bar' }, {}, { startGraphQL: false })
+      events.start({ foo: 'bar' }, {})
 
       expect(handleEvent).to.be.calledWith({ foo: 'bar' }, {}, 'arg1', 'arg2')
     })

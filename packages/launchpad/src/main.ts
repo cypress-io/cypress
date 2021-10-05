@@ -8,7 +8,7 @@ import { createI18n } from '@cy/i18n'
 
 const app = createApp(App)
 
-app.use(urql, makeUrqlClient())
+app.use(urql, makeUrqlClient('launchpad'))
 app.use(createI18n())
 
 app.mount('#app')

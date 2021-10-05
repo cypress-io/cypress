@@ -293,6 +293,7 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): App!
+  triggerIpc: Boolean
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard

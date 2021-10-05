@@ -3,5 +3,6 @@
 
 export * from './AppActions'
 export * from './AuthActions'
+export * from './DataEmitterActions'
 export * from './ProjectActions'
 export * from './WizardActions'

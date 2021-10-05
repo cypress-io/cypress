@@ -9,6 +9,7 @@ import {
 import { devtoolsExchange } from '@urql/devtools'
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { GRAPHQL_URL } from '../utils/env'
+import { pubSubExchange } from './urqlExchangePubsub'
 
 export function makeCacheExchange () {
   return graphcacheExchange({
@@ -19,10 +20,10 @@ export function makeCacheExchange () {
   })
 }
 
-export function makeUrqlClient (): Client {
+export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const exchanges: Exchange[] = [
-    devtoolsExchange,
     dedupExchange,
+    pubSubExchange(),
     errorExchange({
       onError (error) {
         // eslint-disable-next-line

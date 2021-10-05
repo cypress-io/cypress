@@ -5,6 +5,7 @@ const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
 const pluralize = require('pluralize')
 const stripAnsi = require('strip-ansi')
+
 const dialog = require('./dialog')
 const pkg = require('./package')
 const logs = require('./logs')
@@ -25,21 +26,13 @@ const fileOpener = require('../util/file-opener')
 const api = require('../api')
 const savedState = require('../saved_state')
 
-import * as config from '../config'
 import auth from './auth'
 import user from '../user'
 import { openProject } from '../open_project'
-import specsUtil from '../util/specs'
-
-import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
-import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
-import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
-import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
-import { makeDataContext } from '@packages/data-context'
-import browserUtils from '../browsers/utils'
 
-const { getBrowsers } = browserUtils
+import type { DataContext } from '@packages/data-context'
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -166,7 +159,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       })
 
       return openProject.launch(arg.browser, fullSpec, {
-        // TODO: Tim see why this
+        // TODO: Tim see why this "projectRoot" is passed along
         projectRoot: options.projectRoot,
         onBrowserOpen () {
           return send({ browserOpened: true })
@@ -480,7 +473,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   }
 }
 
-module.exports = {
+interface EventsStartArgs extends LaunchArgs {
+  ctx: DataContext
+  onFocusTests: () => void
+}
+
+export = {
   nullifyUnserializableValues,
 
   handleEvent,
@@ -489,66 +487,8 @@ module.exports = {
     return ipc.removeAllListeners()
   },
 
-  async start (options: LaunchArgs, bus: EventEmitter, { startGraphQL } = { startGraphQL: true }) {
+  async start (options: EventsStartArgs, bus: EventEmitter) {
     // curry left options
     ipc.on('request', _.partial(this.handleEvent, options, bus))
-
-    // support not starting server for testing purposes.
-    if (!startGraphQL) {
-      return
-    }
-
-    // TODO: Figure out how we want to cleanup & juggle the config, so it's not jammed
-    // into the projects
-    startGraphQLServer()
-
-    const ctx = await makeDataContext({
-      launchArgs: options,
-      launchOptions: {},
-      appApi: {
-        getBrowsers () {
-          return getBrowsers()
-        },
-      },
-      authApi: {
-        logIn () {
-          return auth.start(() => {}, 'launchpad')
-        },
-        logOut () {
-          return user.logOut()
-        },
-        checkAuth (context) {
-          return checkAuthQuery(context)
-        },
-      },
-      projectApi: {
-        getConfig (projectRoot: string) {
-          return config.get(projectRoot)
-        },
-        launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-          return openProject.launch({ ...browser }, spec, options)
-        },
-        initializeProject (args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]) {
-          return openProject.create(args.projectRoot, args, options, browsers)
-        },
-        insertProjectToCache (projectRoot: string) {
-          insertProject(projectRoot)
-        },
-        getProjectRootsFromCache () {
-          return getProjectRoots()
-        },
-        findSpecs (payload: FindSpecs) {
-          return specsUtil.findSpecs(payload)
-        },
-      },
-    })
-
-    // Fetch the browsers when the app starts, so we have some by
-    // the time we're continuing.
-    ctx.actions.app.refreshBrowsers()
-    // load projects from cache on start
-    ctx.actions.project.loadProjects()
-
-    setDataContext(ctx)
   },
 }

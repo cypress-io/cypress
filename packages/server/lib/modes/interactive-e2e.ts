@@ -1,19 +1,23 @@
-const _ = require('lodash')
-const os = require('os')
-const EE = require('events')
-const { app } = require('electron')
-const image = require('electron').nativeImage
-const cyIcons = require('@cypress/icons')
-const savedState = require('../saved_state')
-const menu = require('../gui/menu')
-const Events = require('../gui/events')
-const Windows = require('../gui/windows')
+import _ from 'lodash'
+import os from 'os'
+import EE from 'events'
+import { app, nativeImage as image } from 'electron'
+// eslint-disable-next-line no-duplicate-imports
+import type { WebContents } from 'electron'
+import cyIcons from '@cypress/icons'
+import savedState from '../saved_state'
+import menu from '../gui/menu'
+import Events from '../gui/events'
+import * as Windows from '../gui/windows'
+import { makeDataContext } from '../makeDataContext'
+import type { PlatformName } from '@packages/types'
+import { makeGraphQLServer } from '../gui/makeGraphQLServer'
 
 const isDev = () => {
   return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
 }
 
-module.exports = {
+export = {
   isMac () {
     return os.platform() === 'darwin'
   },
@@ -36,7 +40,7 @@ module.exports = {
         y: 'appY',
         devTools: 'isAppDevToolsOpen',
       },
-      onBlur () {
+      onBlur (this: {webContents: WebContents}) {
         if (this.webContents.isDevToolsOpened()) {
           return
         }
@@ -77,7 +81,11 @@ module.exports = {
     return args[os.platform()]
   },
 
-  ready (options = {}) {
+  /**
+   * @param {import('@packages/types').LaunchArgs} options
+   * @returns
+   */
+  ready (options) {
     const bus = new EE
 
     const { projectRoot } = options
@@ -96,14 +104,33 @@ module.exports = {
       return state.get()
     })
     .then((state) => {
-      return Windows.open(projectRoot, this.getWindowArgs(state, options))
-      .then((win) => {
-        Events.start(_.extend({}, options, {
+      return Windows.open(projectRoot, this.getWindowArgs(state))
+      .then(async (win) => {
+        const platform = os.platform()
+
+        assertValidPlatform(platform)
+
+        const ctx = makeDataContext({
+          rootBus: bus,
+          os: platform,
+          launchArgs: options,
+          webContents: win.webContents,
+        })
+
+        Events.start({
+          ...options,
+          ctx,
           onFocusTests () {
+            // @ts-ignore
             return app.focus({ steal: true }) || win.focus()
           },
-          os: os.platform(),
-        }), bus)
+          os: platform,
+        }, bus)
+
+        // Initializing the data context, loading browsers, etc.
+        ctx.initializeData()
+
+        await makeGraphQLServer(ctx)
 
         return win
       })
@@ -115,4 +142,12 @@ module.exports = {
 
     return this.ready(options)
   },
+}
+
+const SUPPORTED_PLATFORMS = ['linux', 'darwin', 'win32'] as const
+
+function assertValidPlatform (platform: NodeJS.Platform): asserts platform is PlatformName {
+  if (!SUPPORTED_PLATFORMS.includes(platform as any)) {
+    throw new Error(`Unsupported platform ${platform}, expected ${SUPPORTED_PLATFORMS.join(', ')}`)
+  }
 }

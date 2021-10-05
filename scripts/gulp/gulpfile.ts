@@ -30,11 +30,6 @@ gulp.task(
     // Autobarrel watcher
     autobarrelWatcher,
 
-    // Clean any vite assets
-    gulp.parallel(
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
     // Codegen for our GraphQL Server so we have the latest schema to build
     // the frontend codegen correctly
     // Fetch the latest "remote" schema from the Cypress cloud
@@ -53,19 +48,29 @@ gulp.task(
   gulp.series(
     'codegen',
 
+    killExistingCypress,
+
     // Now that we have the codegen, we can start the frontend(s)
     gulp.parallel(
       viteApp,
       viteLaunchpad,
     ),
 
-    killExistingCypress,
-
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
   ),
 )
+
+gulp.task('dev:clean', gulp.series(
+  // Clean any vite assets
+  gulp.parallel(
+    viteCleanApp,
+    viteCleanLaunchpad,
+  ),
+
+  'dev',
+))
 
 gulp.task(
   'debug',
