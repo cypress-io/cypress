@@ -8,26 +8,11 @@
 // import { render } from 'react-dom'
 
 // to support async/await
-import React from 'react'
-import 'regenerator-runtime/runtime'
-import { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
-import type { FoundSpec } from '@packages/types/src/spec'
-import { automationElementId } from '@packages/runner-shared/src/automation-element'
-
-import { autorun, action, configure } from 'mobx'
-import { render } from 'react-dom'
-import $Cypress from '@packages/driver'
-import defaultEvents from '@packages/reporter/src/lib/events'
-
-import App from './app/RunnerCt'
-import State from './lib/state'
-import { Container, eventManager } from '@packages/runner-shared'
-import util from './lib/util'
-
 // to support async/await
-import 'regenerator-runtime/runtime'
-
+import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
+import { eventManager } from '@packages/runner-shared'
+import defaultEvents from '@packages/reporter/src/lib/events'
 
 export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
@@ -36,6 +21,8 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
 const randomString = `${Math.random()}`
 
 const UnifiedRunner = {
+  defaultEvents,
+
   eventManager, 
 
   decodeBase64: (base64: string) => {
@@ -43,46 +30,60 @@ const UnifiedRunner = {
   },
 
   emit (evt: string, ...args: unknown[]) {
-    console.log('event:', evt)
     defaultEvents.emit(evt, ...args)
   },
 
-  start ({ config, projectName, store, spec }) {
-    eventManager.addGlobalListeners(store, {
-      automationElement: automationElementId,
-      randomString
-    })
+  // start ({ config, projectName, store, spec }) {
+  //   eventManager.addGlobalListeners(store, {
+  //     automationElement: automationElementId,
+  //     randomString
+  //   })
 
-    config.spec = spec
-    eventManager.setup(config)
+  //   config.spec = spec
+  //   eventManager.setup(config)
 
-    const specSrc = getSpecUrl(config.namespace, spec)
-    const $container = document.createElement('div')
-    const $runnerRoot = document.querySelector('#runner-vue')
-    // empty it
-    while ($runnerRoot.lastChild) {
-      $runnerRoot.removeChild($runnerRoot.firstChild)
-    }
+  //   const specSrc = getSpecUrl(config.namespace, spec)
+  //   const $container = document.createElement('div')
+  //   const $runnerRoot = document.querySelector('#runner-vue')
+  //   // empty it
+  //   while ($runnerRoot.lastChild) {
+  //     $runnerRoot.removeChild($runnerRoot.firstChild)
+  //   }
 
-    $runnerRoot.appendChild($container)
+  //   $runnerRoot.appendChild($container)
 
-    const autIframe = new AutIframe(config.projectName)
-    const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
-    autIframe.showInitialBlankContents()
+  //   const autIframe = new AutIframe(config.projectName)
+  //   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+  //   autIframe.showInitialBlankContents()
 
-    console.log(eventManager)
+  //   console.log(eventManager)
 
-    // In mount mode we need to render something right from spec file
-    // So load application tests to the aut frame
-    console.log(specSrc)
-    $autIframe.prop('src', specSrc)
+  //   // In mount mode we need to render something right from spec file
+  //   // So load application tests to the aut frame
+  //   console.log(specSrc)
+  //   $autIframe.prop('src', specSrc)
 
-    eventManager.initialize($autIframe, config)
-  }
+  //   eventManager.initialize($autIframe, config)
+  // }
 }
 
 // @ts-ignore
 window.UnifiedRunner = UnifiedRunner
+
+/** This is the OG runner-ct */
+import React from 'react'
+import 'regenerator-runtime/runtime'
+import { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
+import type { FoundSpec } from '@packages/types/src/spec'
+import { automationElementId } from '@packages/runner-shared/src/automation-element'
+
+import { autorun, action, configure } from 'mobx'
+import { render } from 'react-dom'
+
+import App from './app/RunnerCt'
+import State from './lib/state'
+import { Container } from '@packages/runner-shared'
+import util from './lib/util'
 
 configure({ enforceActions: 'always' })
 
