@@ -27,12 +27,12 @@ export function paths () {
 export async function getPathsAndIds () {
   const projectRoots: string[] = await cache.getProjectRoots()
 
-  // this assumes that the configFile for a cached project is 'cypress.json'
-  // https://git.io/JeGyF
   return Promise.all(projectRoots.map(async (projectRoot) => {
+    const configFile = await getDefaultConfigFilePath(projectRoot)
+
     return {
       path: projectRoot,
-      id: await settings.id(projectRoot),
+      id: await settings.id(projectRoot, { configFile }),
     }
   }))
 }

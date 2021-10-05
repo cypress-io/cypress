@@ -89,7 +89,7 @@ export function configFile (options: SettingsOptions = {}) {
 export function id (projectRoot, options = {}) {
   const file = pathToConfigFile(projectRoot, options)
 
-  return fs.readJson(file)
+  return read(file, options)
   .then((config) => config.projectId)
   .catch(() => {
     return null
