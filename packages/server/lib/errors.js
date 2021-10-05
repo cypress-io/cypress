@@ -1095,8 +1095,6 @@ const clone = function (err, options = {}) {
     obj[prop] = val
   }
 
-  console.log('obj - %O', obj)
-
   return obj
 }
 
