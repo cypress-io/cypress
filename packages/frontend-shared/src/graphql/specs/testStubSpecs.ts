@@ -3,21 +3,21 @@ import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import combineProperties from 'combine-properties'
 import type { Spec } from '../../generated/test-graphql-types.gen'
-import { testNodeId } from '../testUtils'
-templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+
+templateSettings.interpolate = /{{([\s\S]+?)}}/g
 
 let jml
 const setupSeeds = () => {
   const seed = 2
+
   faker.seed(seed)
-  jml = new JustMyLuck(JustMyLuck.MersenneTwister(seed))  
+  jml = new JustMyLuck(JustMyLuck.MersenneTwister(seed))
 }
 
 setupSeeds()
 
 // TODO BEFORE MERGE, REMOVE
 beforeEach(() => setupSeeds)
-
 
 /**
  * Component Naming Fixtures
@@ -27,7 +27,7 @@ export const modifiers = [
   'Dynamic',
   'Static',
   'Virtual',
-  'Lazy'
+  'Lazy',
 ]
 
 export const domainModels = [
@@ -39,7 +39,7 @@ export const domainModels = [
   'Login',
   'Logout',
   'Launchpad',
-  'Wizard'
+  'Wizard',
 ]
 
 export const componentNames = [
@@ -47,7 +47,7 @@ export const componentNames = [
   'Table',
   'Header',
   'Footer',
-  'Button',  
+  'Button',
   'Cell',
   'Row',
   'Skeleton',
@@ -56,7 +56,9 @@ export const componentNames = [
 ]
 
 export const specPattern = ['.spec', '_spec']
+
 export const fileExtension = ['.tsx', '.jsx', '.ts', '.js']
+
 export const directories = {
   rootDedicated: template('tests'),
   rootSrc: template('src'),
@@ -90,9 +92,10 @@ const nameTemplates = {
 
 const prefixes = ['I', 'V', 'Cy', null]
 
-export const componentNameGenerator = (options: { template: any, omit?: any, overrides?: any } = {template: nameTemplates.medium1, omit: [], overrides: {}}) => {
+export const componentNameGenerator = (options: { template: any, omit?: any, overrides?: any } = { template: nameTemplates.medium1, omit: [], overrides: {} }) => {
   const withoutValues = reduce(options.omit, (acc, v) => {
     acc[v] = null
+
     return acc
   }, {})
 
@@ -102,13 +105,13 @@ export const componentNameGenerator = (options: { template: any, omit?: any, ove
     domain: jml.pick(domainModels),
     prefix: jml.pick(prefixes),
     component: components[0],
-    component2: components[1]
+    component2: components[1],
   }
 
   return options.template({
     ...defaultOptions,
     ...withoutValues,
-    ...options.overrides
+    ...options.overrides,
   })
 }
 
@@ -120,22 +123,26 @@ const allRandomComponents = combineProperties({
   component2: componentNames,
   fileExtension,
   specPattern,
-  directory: keys(directories)
+  directory: keys(directories),
 })
 
 export const randomComponents = (n = 200): Spec[] => {
   return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
-    const name = componentNameGenerator({
+    const componentName = componentNameGenerator({
       overrides: d,
-      template: faker.random.objectElement(nameTemplates)
+      template: faker.random.objectElement(nameTemplates),
     })
 
-    const gitFileState = jml.pick(['modified', 'unmodified', 'added', 'deleted'])
+    const name = `${componentName}${d.specPattern}${d.fileExtension}`
+
     return {
-      relative: directories[d.directory](d),
-      absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}`,
-      name: `${name}${d.specPattern}${d.fileExtension}`,
+      relative: `${directories[d.directory](d)}/${name}`,
+      absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
+      name,
+      specFileExtension: d.specPattern,
+      fileExtension: d.fileExtension,
       specType: 'component',
+      fileName: name,
       __typename: 'Spec',
 
       id: faker.datatype.uuid(),
@@ -143,12 +150,12 @@ export const randomComponents = (n = 200): Spec[] => {
         __typename: 'GitInfo',
         id: faker.datatype.uuid(),
         author: faker.internet.userName(),
-        lastModifiedHumanReadable: new Date(faker.random.arrayElement([
-          faker.date.recent(8), 
+        lastModifiedTimestamp: new Date(faker.random.arrayElement([
+          faker.date.recent(8),
           faker.date.past(1),
-          faker.date.between(new Date(Date.now() - 6000000).toUTCString(), new Date().toUTCString())
-        ])).toUTCString()
-      }
+          faker.date.between(new Date(Date.now() - 6000000).toUTCString(), new Date().toUTCString()),
+        ])).toUTCString(),
+      },
     }
   }, n)
 }

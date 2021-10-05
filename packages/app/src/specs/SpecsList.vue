@@ -1,16 +1,23 @@
 <template>
-  <h3 class="text-2xl">
-    Specs List
-  </h3>
   <div class="p-24px">
-  <SpecsListHeader v-model="search" class="pb-32px"/>
-  <div class="grid items-center divide-y-1 children:h-40px">
-    <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
-      <div>{{ t('specPage.componentSpecsHeader') }}</div>
-      <div>{{ t('specPage.gitStatusHeader') }}</div>
+    <SpecsListHeader
+      v-model="search"
+      class="pb-32px"
+    />
+    <div class="grid items-center divide-y-1 children:h-40px">
+      <div class="grid grid-cols-2 children:text-gray-800 children:font-medium">
+        <div>{{ t('specPage.componentSpecsHeader') }}</div>
+        <div>{{ t('specPage.gitStatusHeader') }}</div>
+      </div>
+      <SpecsListRow
+        v-for="spec in filteredSpecs"
+        :key="spec.node.id"
+        :gql="spec"
+        role="button"
+        tabindex="0"
+        class="grid grid-cols-2"
+      />
     </div>
-    <SpecsListRow :gql="spec" v-for="spec in filteredSpecs" :key="spec.node.id" role="button" tabindex="0" class="grid grid-cols-2" />
-  </div>
   </div>
 </template>
 
@@ -18,7 +25,7 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
 import { gql } from '@urql/vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
@@ -45,5 +52,11 @@ const props = defineProps<{
 const search = ref('')
 const specs = computed(() => props.gql.activeProject?.specs?.edges)
 
-const filteredSpecs = computed(() => specs.value?.filter(s => s.node.name.toLowerCase().includes(search.value.toLowerCase())))
+// If this search becomes any more complex, push it into the server
+const sortByGitStatus = (a, b) => a.node.gitInfo ? 1 : -1
+const filteredSpecs = computed(() => {
+  return specs.value?.filter((s) => {
+    return s.node.name.toLowerCase().includes(search.value.toLowerCase())
+  })?.sort(sortByGitStatus)
+})
 </script>

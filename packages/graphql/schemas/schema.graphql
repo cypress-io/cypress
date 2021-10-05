@@ -450,8 +450,16 @@ type Query {
 
 """Represents a spec on the file system"""
 type Spec implements Node {
-  """Absolute path to spec"""
+  """
+  Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)
+  """
   absolute: String!
+
+  """The file extension (e.g. tsx, jsx)"""
+  fileExtension: String!
+
+  """The first part of the file, without extensions (e.g. MySpec)"""
+  fileName: String!
 
   """Git information about the spec file"""
   gitInfo: GitInfo
@@ -459,13 +467,18 @@ type Spec implements Node {
   """Relay style Node ID field for the Spec field"""
   id: ID!
 
-  """Name of spec file"""
+  """Full name of spec file (e.g. MySpec.test.tsx)"""
   name: String!
 
-  """Relative path to spec"""
+  """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
 
-  """Type of spec"""
+  """
+  The spec file's extension, including "spec" patterm (e.g. .spec.tsx, -spec.tsx, -test.tsx)
+  """
+  specFileExtension: String!
+
+  """Type of spec (e.g. component | integration)"""
   specType: SpecType!
 }
 
