@@ -44,34 +44,38 @@ function ManualSetup ({ error, configFile, project }) {
       <p>
         Error: {error.details}
       </p>
+      <ol>
+        <li>Copy the projectId below in your clipboard
+          <pre id="code-projecId-config" className="copy-to-clipboard">
+            <a className="action-copy" onClick={() => ipc.setClipboardText(codeToToAddKeys)}>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard' />
+              </Tooltip>
+            </a>
+            <code>{codeToToAddKeys}</code>
+          </pre>
+        </li>
 
-      <p>1. Copy the projectId below in your clipboard</p>
-      <pre id="code-projecId-config" className="copy-to-clipboard">
-        <a className="action-copy" onClick={() => ipc.setClipboardText(codeToToAddKeys)}>
-          <Tooltip
-            title='Copy to clipboard'
-            placement='top'
-            className='cy-tooltip'
+        <li>
+          Open the config file in your editor<br/>
+          <FileOpener
+            fileDetails={{
+              absoluteFile,
+              relativeFile,
+              originalFile: absoluteFile,
+            }}
           >
-            <i className='fas fa-clipboard' />
-          </Tooltip>
-        </a>
-        <code>{codeToToAddKeys}</code>
-      </pre>
+            { absoluteFile }
+          </FileOpener>
+        </li>
 
-      <p>2. Open the config file in your editor</p>
-      <FileOpener
-        fileDetails={{
-          absoluteFile,
-          relativeFile,
-          originalFile: absoluteFile,
-        }}
-      >
-        { absoluteFile }
-      </FileOpener>
-
-      <p>3. Add the given <code>projectId</code> to the root of your config object</p>
-      <p>4. When you have added the <code>projectId</code>, this page should refresh. <br/>If not, click the "Retry" button</p>
+        <li>Add the given <code>projectId</code> to the root of your config object</li>
+        <li>When you have added the <code>projectId</code>, this page should refresh. <br/>If not, click "Retry"</li>
+      </ol>
       <p>
         <button
           disabled={isSubmitting}

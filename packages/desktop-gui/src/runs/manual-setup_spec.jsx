@@ -7,7 +7,7 @@ import '../main.scss'
 
 /* global cy */
 describe('ManualSetup', () => {
-  it('Should reopen the project when hitting retry', () => {
+  it('Should reopen the project when hitting retry', { viewportHeight: 450 }, () => {
     const error = {
       message: '-!- there was an error updating your file -!-',
       details: '-- a failure --',
