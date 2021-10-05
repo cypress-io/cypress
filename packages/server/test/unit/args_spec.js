@@ -152,6 +152,18 @@ describe('lib/util/args', () => {
 
       expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo_spec.js`)
     })
+
+    it('throws if argument cannot be parsed', function () {
+      expect(() => {
+        return this.setup('--run-project', 'foo', '--spec', {})
+      }).to.throw
+
+      try {
+        return this.setup('--run-project', 'foo', '--spec', {})
+      } catch (err) {
+        return snapshot('invalid spec error', stripAnsi(err.message))
+      }
+    })
   })
 
   context('--tag', () => {
