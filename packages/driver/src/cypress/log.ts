@@ -18,7 +18,6 @@ const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewp
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
-let delay = null
 let counter = 0
 
 const { HIGHLIGHT_ATTR } = $Snapshots
@@ -114,10 +113,6 @@ const getCounter = () => {
 
 const setCounter = (num) => {
   return counter = num
-}
-
-const setDelay = (val) => {
-  return delay = val != null ? val : 4
 }
 
 const defaults = function (state, config, obj) {
@@ -527,12 +522,6 @@ export default {
   create (Cypress, cy, state, config) {
     counter = 0
     const logs = {}
-
-    // give us the ability to change the delay for firing
-    // the change event, or default it to 4
-    if (delay == null) {
-      delay = setDelay(config('logAttrsDelay'))
-    }
 
     const trigger = function (log, event) {
     // bail if we never fired our initial log event
