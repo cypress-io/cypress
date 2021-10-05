@@ -145,6 +145,10 @@ const isNewProject = (config) => {
   })
 }
 
+export function isJSONFile (filePath) {
+  return filePath && /\.json$/.test(filePath)
+}
+
 module.exports = {
   isNewProject,
 
@@ -234,7 +238,8 @@ module.exports = {
     debug(`plugins folder ${folder}`)
 
     // skip if user has explicitly set pluginsFile
-    if (!config.pluginsFile || !isDefault(config, 'pluginsFile')) {
+    // or if they use a js file as config
+    if (!config.pluginsFile || !isDefault(config, 'pluginsFile') || !isJSONFile(config.configFile)) {
       return Promise.resolve()
     }
 
