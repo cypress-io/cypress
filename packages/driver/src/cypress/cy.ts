@@ -622,10 +622,11 @@ export default {
             // we failed setting the remote window props which
             // means the page navigated to a different domain
 
-            // temporary hack so that other tests expecting cross-origin
-            // failures still fail as expected
+            // we expect a cross-origin error and are setting things up
+            // elsewhere to handle running cross-domain, so don't fail
+            // because of it
             if (state('anticipateMultidomain')) {
-              return stability.isStable(true, 'load')
+              return
             }
 
             let e = err

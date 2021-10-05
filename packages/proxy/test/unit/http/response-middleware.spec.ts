@@ -13,6 +13,7 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
+      'MaybeDelayForMultidomain',
       'SetInjectionLevel',
       'OmitProblematicHeaders',
       'MaybePreventCaching',
@@ -123,6 +124,81 @@ describe('http/response-middleware', function () {
         },
         incomingRes: {
           headers,
+        },
+      }
+    }
+  })
+
+  describe('MaybeDelayForMultidomain', function () {
+    const { MaybeDelayForMultidomain } = ResponseMiddleware
+    let ctx
+
+    it('doesn\'t do anything when not html or rendered html', function () {
+      prepareContext({})
+
+      return testMiddleware([MaybeDelayForMultidomain], ctx)
+      .then(() => {
+        expect(ctx.serverBus.emit).not.to.be.called
+      })
+    })
+
+    it('waits for server signal if res is html', function () {
+      prepareContext({
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+      })
+
+      const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
+
+      expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
+
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+
+      return promise
+    })
+
+    it('waits for server signal if incomingRes is rendered html', function () {
+      prepareContext({
+        req: {
+          headers: {
+            'accept': [
+              'text/html',
+              'application/xhtml+xml',
+            ],
+          },
+        },
+      })
+
+      const promise = testMiddleware([MaybeDelayForMultidomain], ctx)
+
+      expect(ctx.serverBus.emit).to.be.calledWith('delaying:cross:domain:html')
+
+      ctx.serverBus.once.withArgs('ready:for:domain').args[0][1]()
+
+      return promise
+    })
+
+    function prepareContext (props) {
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          headers: {},
+          ...props.res,
+        },
+        req: {
+          proxiedUrl: 'http:127.0.0.1:3501/multidomain.html',
+          headers: {},
+          ...props.req,
+        },
+        serverBus: {
+          emit: sinon.stub(),
+          once: sinon.stub(),
         },
       }
     }

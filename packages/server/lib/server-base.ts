@@ -2,6 +2,7 @@ import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
+import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import express, { Express } from 'express'
 import http from 'http'
@@ -117,6 +118,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
   protected _httpsProxy?: httpsProxy
+  protected _eventBus: EventEmitter
 
   protected _remoteAuth: unknown
   protected _remoteProps: unknown
@@ -131,9 +133,18 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // @ts-ignore
     this.request = Request()
     this.socketAllowed = new SocketAllowed()
+    this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
     this._fileServer = null
+
+    this._eventBus.on('delaying:cross:domain:html', (url) => {
+      this.socket.localBus.once('ready:for:domain', () => {
+        this._eventBus.emit('ready:for:domain')
+      })
+
+      this.socket.toDriver('cross:domain:html:received')
+    })
   }
 
   ensureProp = ensureProp
@@ -305,6 +316,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       socket: this.socket,
       netStubbingState: this.netStubbingState,
       request: this.request,
+      serverBus: this._eventBus,
     })
   }
 

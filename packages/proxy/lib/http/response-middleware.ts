@@ -227,6 +227,28 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   this.next()
 }
 
+const MaybeDelayForMultidomain: ResponseMiddleware = function () {
+  const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
+  const isRenderedHTML = reqWillRenderHtml(this.req)
+
+  // in the future, this will be any cross-origin url instead of
+  // a hard-coded one
+  if (this.req.proxiedUrl.includes('127.0.0.1:3501') && (isHTML || isRenderedHTML)) {
+    debug('is cross-domain, delay until domain:ready event')
+
+    this.serverBus.once('ready:for:domain', () => {
+      debug('ready for domain, let it go')
+      this.next()
+    })
+
+    this.serverBus.emit('delaying:cross:domain:html')
+
+    return
+  }
+
+  this.next()
+}
+
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
@@ -238,29 +260,49 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.getRenderedHTMLOrigins()[origin] = true
   }
 
+  debug('determine injection for %s', this.req.url)
+
   const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
+      debug('- partial injection (x-cypress-file-server-error)')
+
       return 'partial'
     }
 
-    if (!resContentTypeIs(this.incomingRes, 'text/html') || !isReqMatchOriginPolicy) {
+    const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
+
+    if (!isHTML || !isReqMatchOriginPolicy) {
+      debug('- no injection (%s, %s)', isHTML ? 'is html' : 'not html', isReqMatchOriginPolicy ? 'origin match' : 'no origin match')
+
       return false
     }
 
     if (this.req.proxiedUrl.includes('127.0.0.1:3501')) {
+      debug('- multidomain injection')
+
       return 'fullMultidomain'
     }
 
     if (this.res.isInitial) {
+      debug('- full injection')
+
       return 'full'
     }
 
     if (!isRenderedHTML) {
+      debug('- no injection (not rendered html)')
+
       return false
     }
 
+    debug('- partial injection (default)')
+
     return 'partial'
+  }
+
+  if (this.res.wantsInjection) {
+    debug('- already has injection: %s', this.res.wantsInjection)
   }
 
   if (!this.res.wantsInjection) {
@@ -455,6 +497,7 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
+  MaybeDelayForMultidomain,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,

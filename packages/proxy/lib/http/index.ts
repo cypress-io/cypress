@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
 import type {
   CypressIncomingRequest,
@@ -61,6 +62,7 @@ export type ServerCtx = Readonly<{
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
   request: any
+  serverBus: EventEmitter
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -199,6 +201,7 @@ export class Http {
   preRequests: PreRequests = new PreRequests()
   request: any
   socket: CyServer.Socket
+  serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
@@ -213,6 +216,7 @@ export class Http {
     this.netStubbingState = opts.netStubbingState
     this.socket = opts.socket
     this.request = opts.request
+    this.serverBus = opts.serverBus
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -232,6 +236,7 @@ export class Http {
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       socket: this.socket,
+      serverBus: this.serverBus,
       debug: (formatter, ...args) => {
         debugRequests(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
       },

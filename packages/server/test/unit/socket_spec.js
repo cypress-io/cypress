@@ -544,6 +544,16 @@ describe('lib/socket', () => {
         })
       })
     })
+
+    context('on(ready:for:domain)', () => {
+      it('emits ready:for:domain on local bus', function (done) {
+        this.server.socket.localBus.on('ready:for:domain', () => {
+          done()
+        })
+
+        this.client.emit('backend:request', 'ready:for:domain', () => {})
+      })
+    })
   })
 
   context('unit', () => {
