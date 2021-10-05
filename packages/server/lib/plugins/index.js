@@ -79,9 +79,6 @@ const init = (config, options) => {
 
     registeredEvents = {}
 
-    const pluginsFile = typeof config.pluginsFile === 'string'
-      ? config.pluginsFile
-      : path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
     const childArguments = ['--projectRoot', options.projectRoot]
     const childOptions = {
@@ -94,7 +91,11 @@ const init = (config, options) => {
 
     const testingType = options.testingType || 'e2e'
 
-    if (/\.json$/.test(options.configFile) || options.configFile === false) {
+    if (options.configFile === false || /\.json$/.test(options.configFile)) {
+      const pluginsFile = typeof config.pluginsFile === 'string'
+        ? config.pluginsFile
+        : path.join(__dirname, 'child', 'default_plugins_file.js')
+
       childArguments.push('--file', pluginsFile)
     } else if (config[testingType] && (config[testingType].setupNodeEvents || (testingType === 'component' && config.component.devServer))) {
       childArguments.push(
@@ -102,7 +103,8 @@ const init = (config, options) => {
         '--file', options.configFile,
       )
     } else {
-      // if the config file is evaluated but there is no plugins function, fall back on default plugins
+      // if the config file is evaluated (js/ts) but there is no
+      // plugins function, fall back on default plugins
       childArguments.push('--file', path.join(__dirname, 'child', 'default_plugins_file.js'))
     }
 
