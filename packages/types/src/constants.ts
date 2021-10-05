@@ -109,7 +109,7 @@ export const WIZARD_STEPS = [
   {
     type: 'selectFramework',
     title: 'Project Setup',
-    description: 'Confirm the front-end framework and bundler fused in your project.',
+    description: 'Confirm the front-end framework and bundler used in your project.',
   },
   {
     type: 'installDependencies',
