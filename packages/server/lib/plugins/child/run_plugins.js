@@ -35,7 +35,7 @@ const getDefaultPreprocessor = function (config) {
   return webpackPreprocessor(options)
 }
 
-let plugins
+let setupNodeEventsFunction
 let devServerFunction
 let devServerOptions
 
@@ -90,11 +90,14 @@ const load = (ipc, config, pluginsFile) => {
     debug('run plugins function')
 
     if (devServerFunction) {
+      debug('register dev server function')
       register('dev-server:start', (cypressDevServerOptions) => devServerFunction(cypressDevServerOptions, devServerOptions))
     }
 
-    if (plugins) {
-      return plugins(register, config)
+    if (setupNodeEventsFunction) {
+      debug('setupNodeEvents function')
+
+      return setupNodeEventsFunction(register, config)
     }
 
     return
@@ -210,14 +213,14 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
     debug('require pluginsFile "%s"', pluginsFile)
     const pluginsObject = interopRequire(pluginsFile)
 
-    plugins = getPluginsFunction(pluginsObject, testingType)
+    setupNodeEventsFunction = getPluginsFunction(pluginsObject, testingType)
 
     if (testingType === 'component' && pluginsObject.component) {
       devServerFunction = pluginsObject.component.devServer
       devServerOptions = pluginsObject.component.devServerOptions
     }
 
-    debug('plugins %O', plugins)
+    debug('plugins %O', setupNodeEventsFunction)
     debug('devServerFunction %s', devServerFunction ? devServerFunction.toString() : undefined)
     debug('devServerOptions %O', devServerOptions)
   } catch (err) {
@@ -227,9 +230,9 @@ const runPlugins = (ipc, pluginsFile, projectRoot, testingType) => {
     return
   }
 
-  if (typeof plugins !== 'function' && !devServerFunction) {
+  if (typeof setupNodeEventsFunction !== 'function' && !devServerFunction) {
     debug('not a function')
-    ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, plugins)
+    ipc.send('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', pluginsFile, setupNodeEventsFunction)
 
     return
   }

@@ -2503,9 +2503,10 @@ declare namespace Cypress {
      * Return the setup of your server
      * @param options the dev server options to pass directly to the dev-server
      */
-    devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig: T): ResolvedDevServerConfig
+    devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig: T): ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
     devServerOptions?: T
   }
+
   interface PEMCert {
     /**
      * Path to the certificate file, relative to project root.
