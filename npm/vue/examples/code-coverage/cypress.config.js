@@ -1,25 +1,28 @@
+const { defineConfig } = require('cypress')
+
 /// <reference types="cypress" />
 const { startDevServer } = require('@cypress/webpack-dev-server')
+
 const webpackConfig = require('../../webpack.config')
 
-/**
- * @type Cypress.PluginConfig
- */
-module.exports = (on, config) => {
-  on('dev-server:start', (options) => {
-    return startDevServer({
-      options,
-      webpackConfig,
-    })
-  })
+module.exports = defineConfig({
+  componentFolder: 'src',
+  fixturesFolder: false,
+  testFiles: '**/*.spec.js',
+  video: false,
 
-  require('@cypress/code-coverage/task')(on, config)
+  e2e: {
+    setupNodeEvents (on, config) {
+      on('dev-server:start', (options) => {
+        return startDevServer({
+          options,
+          webpackConfig,
+        })
+      })
 
-  return config
-}
-const json = {
-  "componentFolder": "src",
-  "fixturesFolder": false,
-  "testFiles": "**/*.spec.js",
-  "video": false
-}
+      require('@cypress/code-coverage/task')(on, config)
+
+      return config
+    },
+  },
+})

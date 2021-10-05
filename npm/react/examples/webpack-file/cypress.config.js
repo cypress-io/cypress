@@ -1,22 +1,22 @@
-// @ts-check
+const { defineConfig } = require('cypress')
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  require('@cypress/react/plugins/load-webpack')(on, config, {
-    // from the root of the project (folder with cypress.json file)
-    webpackFilename: 'webpack.config.js',
-  })
+module.exports = defineConfig({
+  video: false,
+  fixturesFolder: false,
+  testFiles: '**/*cy-spec.js',
+  viewportWidth: 500,
+  viewportHeight: 500,
 
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
-}
-const json = {
-  "video": false,
-  "fixturesFolder": false,
-  "testFiles": "**/*cy-spec.js",
-  "viewportWidth": 500,
-  "viewportHeight": 500
-}
+  e2e: {
+    setupNodeEvents (on, config) {
+      require('@cypress/react/plugins/load-webpack')(on, config, {
+        // from the root of the project (folder with cypress.json file)
+        webpackFilename: 'webpack.config.js',
+      })
+
+      // IMPORTANT to return the config object
+      // with the any changed environment variables
+      return config
+    },
+  },
+})

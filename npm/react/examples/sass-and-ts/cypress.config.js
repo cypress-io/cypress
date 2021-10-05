@@ -1,30 +1,33 @@
+const { defineConfig } = require('cypress')
+
 // @ts-check
 
 // load Webpack file devServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install
 const devServer = require('@cypress/react/plugins/load-webpack')
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  devServer(on, config, {
-    webpackFilename: 'webpack.config.js',
-  })
+module.exports = defineConfig({
+  video: false,
+  fixturesFolder: false,
+  testFiles: '**/*spec.*',
+  viewportWidth: 500,
+  viewportHeight: 500,
+  componentFolder: 'src',
+  nodeVersion: 'system',
 
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
-}
-const json = {
-  "video": false,
-  "fixturesFolder": false,
-  "testFiles": "**/*spec.*",
-  "viewportWidth": 500,
-  "viewportHeight": 500,
-  "componentFolder": "src",
-  "nodeVersion": "system",
-  "env": {
-    "coverage": true
-  }
-}
+  env: {
+    coverage: true,
+  },
+
+  e2e: {
+    setupNodeEvents (on, config) {
+      devServer(on, config, {
+        webpackFilename: 'webpack.config.js',
+      })
+
+      // IMPORTANT to return the config object
+      // with the any changed environment variables
+      return config
+    },
+  },
+})

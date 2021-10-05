@@ -1,3 +1,5 @@
+const { defineConfig } = require('cypress')
+
 // @ts-check
 
 // load file devServer that comes with this plugin
@@ -6,21 +8,21 @@ const devServer = require('@cypress/react/plugins/react-scripts')
 // @ts-ignore
 const happoTask = require('happo-cypress/task')
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  on('task', happoTask)
-  devServer(on, config)
+module.exports = defineConfig({
+  video: false,
+  testFiles: '**/*cy-spec.js',
+  viewportWidth: 400,
+  viewportHeight: 700,
+  componentFolder: 'src',
 
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
-}
-const json = {
-  "video": false,
-  "testFiles": "**/*cy-spec.js",
-  "viewportWidth": 400,
-  "viewportHeight": 700,
-  "componentFolder": "src"
-}
+  e2e: {
+    setupNodeEvents (on, config) {
+      on('task', happoTask)
+      devServer(on, config)
+
+      // IMPORTANT to return the config object
+      // with the any changed environment variables
+      return config
+    },
+  },
+})

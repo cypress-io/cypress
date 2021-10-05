@@ -1,21 +1,24 @@
+const { defineConfig } = require('cypress')
+
 const devServer = require('@cypress/react/plugins/next')
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  devServer(on, config)
+module.exports = defineConfig({
+  video: false,
+  testFiles: '**/*.spec.{js,jsx}',
+  viewportWidth: 500,
+  viewportHeight: 800,
+  experimentalFetchPolyfill: true,
+  componentFolder: 'cypress/components',
 
-  return config
-}
-const json = {
-  "video": false,
-  "testFiles": "**/*.spec.{js,jsx}",
-  "viewportWidth": 500,
-  "viewportHeight": 800,
-  "experimentalFetchPolyfill": true,
-  "componentFolder": "cypress/components",
-  "env": {
-    "coverage": true
-  }
-}
+  env: {
+    coverage: true,
+  },
+
+  e2e: {
+    setupNodeEvents (on, config) {
+      devServer(on, config)
+
+      return config
+    },
+  },
+})
