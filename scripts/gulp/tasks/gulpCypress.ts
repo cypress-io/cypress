@@ -4,7 +4,8 @@
  *
  * @summary Gulp tasks to run the Cypress app.
  */
-
+// @ts-expect-error - no types
+import rp from '@cypress/request-promise'
 import chokidar from 'chokidar'
 import path from 'path'
 import pDefer from 'p-defer'
@@ -13,7 +14,7 @@ import { monorepoPaths } from '../monorepoPaths'
 import { ENV_VARS, getGulpGlobal } from '../gulpConstants'
 import { forked } from '../utils/childProcessUtils'
 import { exitAndRemoveProcess } from './gulpRegistry'
-import type { ChildProcess } from 'child_process'
+import { ChildProcess, exec } from 'child_process'
 
 const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
 
@@ -23,6 +24,31 @@ const pathToCli = path.resolve(monorepoPaths.root, 'cli', 'bin', 'cypress')
  *  * openCypress - Normal `cypress open` command
  *  * runCypress - Normal `cypress run` command
  *------------------------------------------------------------------------**/
+
+export async function killExistingCypress () {
+  const dfd = pDefer()
+  const child = exec('killall Cypress')
+
+  child.on('error', dfd.resolve)
+  child.on('exit', dfd.resolve)
+}
+
+export async function waitForTestGraphQLApi () {
+  let i = 0
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    try {
+      return await rp.get('http://localhost:52300/graphql?query={__typename}')
+    } catch (e) {
+      if (i++ > 10) {
+        throw e
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+  }
+}
 
 export async function openCypressLaunchpad () {
   return spawnCypressWithMode('open', 'dev', ENV_VARS.DEV_OPEN, ['--project', monorepoPaths.pkgLaunchpad])
@@ -103,6 +129,7 @@ async function spawnCypressWithMode (
   }
 
   return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {
+    cwd: monorepoPaths.root,
     env: finalEnv,
     waitForData: false,
   })

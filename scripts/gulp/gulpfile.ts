@@ -9,7 +9,7 @@
 
 import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
-import { startCypressWatch, startCypressForTest, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp } from './tasks/gulpCypress'
+import { startCypressWatch, startCypressForTest, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, waitForTestGraphQLApi, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
 import { viteApp, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, serveBuiltLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, serveBuiltAppForTest, viteBuildAppForTest, viteBuildAndWatchAppForTest, viteBuildApp, viteBuildLaunchpad } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
@@ -58,6 +58,8 @@ gulp.task(
       viteApp,
       viteLaunchpad,
     ),
+
+    killExistingCypress,
 
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
@@ -139,9 +141,15 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 3. Host the Launchpad on a static server for cy.visit.
   serveBuiltLaunchpadForTest,
 
+  // Ensure we have no existing cypress processes running
+  killExistingCypress,
+
   // 4. Start the TEST Cypress App, such that its ports and other globals
   //    don't conflict with the real Cypress App.
   startCypressForTest,
+
+  // Wait for the Test Cypress open to start
+  waitForTestGraphQLApi,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
   async function _runCypressLaunchpad () {
@@ -162,9 +170,14 @@ gulp.task('cyRunAppE2E', gulp.series(
   // 3. Host the Launchpad on a static server for cy.visit.
   serveBuiltAppForTest,
 
+  killExistingCypress,
+
   // 4. Start the TEST Cypress App, such that its ports and other globals
   //    don't conflict with the real Cypress App.
   startCypressForTest,
+
+  // Wait for the Test Cypress open to start
+  waitForTestGraphQLApi,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
   async function _runCypressApp () {
@@ -303,6 +316,7 @@ gulplog.warn = function (...args: string[]) {
 
 process.on('exit', () => {
   if (didntExitCorrectly) {
+    execSync('killall Cypress')
     execSync('killall node')
     process.exitCode = 1
   }

@@ -27,10 +27,10 @@ export class ProjectDataSource {
 
       return Object.keys(overrides).length === 0
     } catch (e) {
-      const err = e as Error
+      const err = e as Error & { code?: string }
 
       // if they do not have a cypress.json, it's definitely their first time using Cypress.
-      if (err.name === 'ENOENT') {
+      if (err.code === 'ENOENT') {
         return true
       }
 
