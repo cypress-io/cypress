@@ -43,7 +43,7 @@ type ReceivedCypressOptions =
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
-  exit: boolean
+  exit?: boolean
   state?: {
     firstOpened?: number
     lastOpened?: number

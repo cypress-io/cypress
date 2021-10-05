@@ -99,7 +99,7 @@ export interface OpenServerOptions {
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
-  exit: boolean
+  exit?: boolean
   getCurrentBrowser: () => Browser
   getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
