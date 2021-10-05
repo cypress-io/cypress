@@ -13,7 +13,7 @@ With the goal of type safety, several tools and abstractions are used. The techn
 
 You will generally develop this in parallel with a front-end, in this case `@packages/launchpad`. Run `yarn dev` in `@packages/launchpad` and it will start up the GraphQL server. This also re-generates the `graphql.schema` file based on the declarations inside of [entities](https://github.com/cypress-io/cypress/blob/develop/packages/graphql/src/entities). 
 
-Visit `http://localhost:52159/graphql` for the GraphiQL interface.
+Visit `http://localhost:52200/graphql` for the GraphiQL interface.
 
 ![graphql](./gql.png)
 

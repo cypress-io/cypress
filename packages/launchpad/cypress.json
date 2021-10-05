@@ -3,7 +3,6 @@
   "baseUrl": "http://localhost:5555",
   "viewportWidth": 800,
   "viewportHeight": 850,
-  "video": false,
   "retries": {
     "runMode": 2,
     "openMode": 0
@@ -14,8 +13,11 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
+  "componentFolder": "src",
   "component": {
-    "componentFolder": "src"
+    "testFiles": "**/*.spec.{js,ts,tsx,jsx}",
+    "supportFile": "cypress/component/support/index.ts",
+    "pluginsFile": "cypress/component/plugins/index.js"
   },
   "e2e": {
     "supportFile": false

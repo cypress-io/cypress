@@ -4,3 +4,4 @@
 export * from './DataEmitter'
 export * from './coreDataShape'
 export * from './loaders'
+export * from './util/'
