@@ -51,7 +51,7 @@
           class="inline mr-2"
           :suffix-icon="openInNew"
           data-testid="launch-button"
-          size="lg"
+          size="lg-wide"
         >
           {{ launchText }}
         </Button>
