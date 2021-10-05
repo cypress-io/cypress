@@ -51,13 +51,13 @@
           class="inline mr-2"
           :suffix-icon="openInNew"
           data-testid="launch-button"
-          size="md"
+          size="lg"
         >
           {{ launchText }}
         </Button>
         <Button
           type="button"
-          size="sm"
+          size="lg"
           class="inline ml-2"
           variant="outline"
           @click="$emit('navigated-back')"
