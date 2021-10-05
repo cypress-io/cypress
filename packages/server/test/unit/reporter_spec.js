@@ -94,6 +94,18 @@ describe('lib/reporter', () => {
 
       expect(junitFn).to.be.calledWith(reporter.runner)
     })
+
+    it('passes the slow option through to mocha', function () {
+      const reporter = new Reporter('spec', {}, undefined, 2000)
+
+      reporter.setRunnables(this.root)
+
+      Object.values(reporter.runnables).forEach(function (v) {
+        expect(v._slow).to.eq(2000)
+      })
+
+      expect(reporter.mocha.suite._slow).to.eq(2000)
+    })
   })
 
   context('createSuite', () => {
@@ -111,7 +123,6 @@ describe('lib/reporter', () => {
     it('recursively creates suites for fullTitle', function () {
       const args = this.reporter.parseArgs('fail', [this.testObj])
 
-      console.log(args)
       expect(args[0]).to.eq('fail')
 
       const title = 'TodoMVC - React When page is initially opened should focus on the todo input field'

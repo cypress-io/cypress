@@ -70,8 +70,10 @@ const getParentTitle = function (runnable, titles) {
   return titles
 }
 
-const createSuite = function (obj, parent) {
+const createSuite = function (obj, parent, slow) {
   const suite = new Mocha.Suite(obj.title, {})
+
+  suite.slow(slow)
 
   if (parent) {
     suite.parent = parent
@@ -83,7 +85,7 @@ const createSuite = function (obj, parent) {
   return suite
 }
 
-const createRunnable = function (obj, parent) {
+const createRunnable = function (obj, parent, slow) {
   let fn
   const { body } = obj
 
@@ -104,6 +106,9 @@ const createRunnable = function (obj, parent) {
   runnable._retries = obj._retries
   // shouldn't need to set _currentRetry, but we'll do it anyways
   runnable._currentRetry = obj._currentRetry
+  // Because of the way we create the runnables without belonging to an instantiated mocha object,
+  // we have to set the 'slow' speed for each test and suite individually
+  runnable.slow(slow)
 
   if (runnable.body == null) {
     runnable.body = body
@@ -250,7 +255,7 @@ const reporters = {
 }
 
 class Reporter {
-  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
+  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot, slow) {
     if (!(this instanceof Reporter)) {
       return new Reporter(reporterName)
     }
@@ -258,6 +263,7 @@ class Reporter {
     this.reporterName = reporterName
     this.projectRoot = projectRoot
     this.reporterOptions = reporterOptions
+    this.slow = slow
     this.normalizeTest = this.normalizeTest.bind(this)
   }
 
@@ -273,6 +279,7 @@ class Reporter {
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
     this.mocha = new Mocha({ reporter })
+    this.mocha.slow(this.slow)
     this.mocha.suite = rootRunnable
     this.runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(this.runner)
@@ -301,7 +308,7 @@ class Reporter {
       switch (type) {
         case 'suite':
           // eslint-disable-next-line no-case-declarations
-          const suite = createSuite(runnableProps, parent)
+          const suite = createSuite(runnableProps, parent, this.slow)
 
           suite.tests = _.map(runnableProps.tests, (testProps) => {
             return this._createRunnable(testProps, 'test', suite)
@@ -313,7 +320,7 @@ class Reporter {
 
           return suite
         case 'test':
-          return createRunnable(runnableProps, parent)
+          return createRunnable(runnableProps, parent, this.slow)
         default:
           throw new Error(`Unknown runnable type: '${type}'`)
       }
@@ -472,8 +479,8 @@ class Reporter {
     })
   }
 
-  static create (reporterName, reporterOptions, projectRoot) {
-    return new Reporter(reporterName, reporterOptions, projectRoot)
+  static create (reporterName, reporterOptions, projectRoot, slow) {
+    return new Reporter(reporterName, reporterOptions, projectRoot, slow)
   }
 
   static loadReporter (reporterName, projectRoot) {

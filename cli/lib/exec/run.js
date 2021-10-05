@@ -128,6 +128,10 @@ const processRunOptions = (options = {}) => {
     args.push('--reporter-options', options.reporterOptions)
   }
 
+  if (options.slow) {
+    args.push('--slow', options.slow)
+  }
+
   // if we have specific spec(s) push that into the args
   if (options.spec) {
     args.push('--spec', options.spec)

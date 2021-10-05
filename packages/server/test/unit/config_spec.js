@@ -1460,6 +1460,7 @@ describe('lib/config', () => {
             retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             screenshotOnRunFailure: { value: true, from: 'default' },
             screenshotsFolder: { value: 'cypress/screenshots', from: 'default' },
+            slow: { value: 5000, from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             testFiles: { value: '**/*.*', from: 'default' },

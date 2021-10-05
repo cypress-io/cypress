@@ -605,6 +605,10 @@ const e2e = {
       args.push(`--reporter-options=${options.reporterOptions}`)
     }
 
+    if (options.slow) {
+      args.push(`--slow=${options.slow}`)
+    }
+
     if (options.browser) {
       args.push(`--browser=${options.browser}`)
     }

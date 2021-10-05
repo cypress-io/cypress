@@ -92,6 +92,10 @@ declare namespace CypressCommandLine {
      */
     reporterOptions: any
     /**
+     * Specify a slow test threshold in milliseconds
+     */
+    slow: number
+    /**
      * Specify the specs to run
      */
     spec: string

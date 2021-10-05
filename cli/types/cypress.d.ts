@@ -2573,6 +2573,11 @@ declare namespace Cypress {
      */
     reporterOptions: { [key: string]: any }
     /**
+     * A slow test threshold in milliseconds
+     * @default 5000
+     */
+    slow: number | null
+    /**
      * Whether Cypress will watch and restart tests on test file changes
      * @default true
      */

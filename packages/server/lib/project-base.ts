@@ -38,7 +38,7 @@ import type { LaunchArgs } from './open_project'
 // and are required when creating a project.
 type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
-  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreTestFiles'> // TODO: Figure out how to type this better.
+  & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'slow' | 'screenshotsFolder' | 'pluginsFile' | 'supportFile' | 'integrationFolder' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'componentFolder' | 'userAgent' | 'downloadsFolder' | 'env' | 'testFiles' | 'ignoreTestFiles'> // TODO: Figure out how to type this better.
 
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
@@ -75,7 +75,7 @@ const localCwd = cwd()
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
-type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
+type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'slow' | 'projectRoot'>
 
 export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected watchers: Watchers
@@ -273,6 +273,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       report: cfg.report,
       reporter: cfg.reporter,
       reporterOptions: cfg.reporterOptions,
+      slow: cfg.slow,
       projectRoot: this.projectRoot,
     })
 
@@ -554,7 +555,8 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     reporter,
     projectRoot,
     reporterOptions,
-  }: Pick<Cfg, 'report' | 'reporter' | 'projectRoot' | 'reporterOptions'>) {
+    slow,
+  }: Pick<Cfg, 'report' | 'reporter' | 'projectRoot' | 'reporterOptions', 'slow'>) {
     if (!report) {
       return
     }
@@ -575,10 +577,10 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       })
     }
 
-    return Reporter.create(reporter, reporterOptions, projectRoot)
+    return Reporter.create(reporter, reporterOptions, projectRoot, slow)
   }
 
-  startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, projectRoot }: StartWebsocketOptions) {
+  startWebsockets (options: Omit<OpenProjectLaunchOptions, 'args'>, { socketIoCookie, namespace, screenshotsFolder, report, reporter, reporterOptions, slow, projectRoot }: StartWebsocketOptions) {
   // if we've passed down reporter
   // then record these via mocha reporter
     const reporterInstance = this.initializeReporter({
@@ -586,6 +588,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       reporter,
       reporterOptions,
       projectRoot,
+      slow,
     })
 
     const onBrowserPreRequest = (browserPreRequest) => {
