@@ -48,15 +48,17 @@
         <Button
           v-if="launchText"
           type="submit"
-          class="inline px-6 py-2 mr-2"
+          class="inline mr-2"
           :suffix-icon="openInNew"
           data-testid="launch-button"
+          size="md"
         >
           {{ launchText }}
         </Button>
         <Button
           type="button"
-          class="inline px-6 py-2 ml-2"
+          size="sm"
+          class="inline ml-2"
           variant="outline"
           @click="$emit('navigated-back')"
         >
