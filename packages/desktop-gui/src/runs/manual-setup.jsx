@@ -17,7 +17,7 @@ function ManualSetup ({ error, configFile, project }) {
   const [isSubmitting, setSubmitting] = useState(false)
   const [newMessage, setNewMessage] = useState('')
 
-  const codeToToAddKeys = `  projectId: ${error.payload.projectId}`
+  const codeToToAddKeys = `  projectId: ${JSON.stringify(error.payload.projectId)}`
 
   const retry = (e) => {
     e.preventDefault()
@@ -45,17 +45,7 @@ function ManualSetup ({ error, configFile, project }) {
         Error: {error.details}
       </p>
 
-      <p>1. open the config file in your editor by clicking the link below</p>
-      <FileOpener
-        fileDetails={{
-          absoluteFile,
-          relativeFile,
-          originalFile: absoluteFile,
-        }}
-      >
-        { absoluteFile }
-      </FileOpener>
-      <p>2. Copy the projectId below in your clipboard</p>
+      <p>1. Copy the projectId below in your clipboard</p>
       <pre id="code-projecId-config" className="copy-to-clipboard">
         <a className="action-copy" onClick={() => ipc.setClipboardText(codeToToAddKeys)}>
           <Tooltip
@@ -68,16 +58,29 @@ function ManualSetup ({ error, configFile, project }) {
         </a>
         <code>{codeToToAddKeys}</code>
       </pre>
-      <p>3. Add the given <code>projectId</code> to the root of your config object</p>
-      <p>4. When you have added the <code>projectId</code>, this page should refresh automatically. If not, click the "Retry" button</p>
-      <button
-        disabled={isSubmitting}
-        className='btn btn-primary btn-block'
+
+      <p>2. Open the config file in your editor</p>
+      <FileOpener
+        fileDetails={{
+          absoluteFile,
+          relativeFile,
+          originalFile: absoluteFile,
+        }}
       >
-        { isSubmitting && <span><i className='fas fa-spin fa-sync-alt'/>{' '}</span> }
-        <span>Retry</span>
-      </button>
-      <p> </p>
+        { absoluteFile }
+      </FileOpener>
+
+      <p>3. Add the given <code>projectId</code> to the root of your config object</p>
+      <p>4. When you have added the <code>projectId</code>, this page should refresh. If not, click the "Retry" button</p>
+      <p>
+        <button
+          disabled={isSubmitting}
+          className='btn btn-primary btn-block'
+        >
+          { isSubmitting && <span><i className='fas fa-spin fa-sync-alt'/>{' '}</span> }
+          <span>Retry</span>
+        </button>
+      </p>
       {newMessage.length ? <p className="alert alert-danger">{newMessage}</p> : undefined}
     </form>)
 }

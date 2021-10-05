@@ -1030,12 +1030,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 }
 
 const get = function (type, arg1, arg2, arg3) {
-  let details
+  let details; let payload
   let msg = getMsgByType(type, arg1, arg2, arg3)
 
   if (_.isObject(msg)) {
     ({
       details,
+      payload,
     } = msg);
 
     ({
@@ -1050,6 +1051,7 @@ const get = function (type, arg1, arg2, arg3) {
   err.isCypressErr = true
   err.type = type
   err.details = details
+  err.payload = payload
 
   return err
 }
@@ -1092,6 +1094,8 @@ const clone = function (err, options = {}) {
 
     obj[prop] = val
   }
+
+  console.log('obj - %O', obj)
 
   return obj
 }
