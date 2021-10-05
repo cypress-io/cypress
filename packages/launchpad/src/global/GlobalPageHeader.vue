@@ -27,6 +27,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { getDirectoryPath } from '../utils/getDirectoryPath'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
 import IconPlus from '~icons/mdi/plus'
@@ -54,18 +55,6 @@ function handleFileSelection (e: Event) {
   const dirPath = getDirectoryPath(target.files)
 
   emits('addProject', dirPath)
-}
-
-type WebkitFile = File & { path: string }
-function getDirectoryPath (files: FileList | null) {
-  if (files) {
-    const file = files[0] as WebkitFile
-    const path = file?.path ?? ''
-
-    return path.substring(0, path.lastIndexOf('/'))
-  }
-
-  return ''
 }
 
 const localValue = useModelWrapper(props, emits, 'modelValue')

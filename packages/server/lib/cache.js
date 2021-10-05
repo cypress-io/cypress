@@ -84,6 +84,11 @@ module.exports = {
       return this._getProjects(tx).then((projects) => {
         const pathsToRemove = Promise.reduce(projects, (memo, path) => {
           return fs.statAsync(path)
+          .then((stat) => {
+            if (!stat.isDirectory()) {
+              memo.push(path)
+            }
+          })
           .catch(() => {
             return memo.push(path)
           }).return(memo)
@@ -141,6 +146,10 @@ module.exports = {
 
   removeUser () {
     return fileUtil.set({ USER: {} })
+  },
+
+  removeLatestProjects () {
+    return fileUtil.set({ PROJECTS: [] })
   },
 
   remove () {
