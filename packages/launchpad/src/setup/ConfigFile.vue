@@ -7,36 +7,19 @@
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
   >
     <nav
-      class="
-        rounded-t
-        text-left text-gray-500
-        px-5
-        bg-gray-50
-        flex
-        gap-2
-        border-b-1 border-gray-200
-      "
+      class="rounded-t text-left text-gray-500 px-5 bg-gray-50 flex gap-2 border-b-1 border-gray-200"
     >
       <button
         v-for="lang of languages"
         :key="lang.id"
-        class="p-4 w-28 relative focus:outline-transparent"
+        class="p-4 w-28 relative border-transparent border-1 hocus-default"
         :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''"
         @click="language = lang.id"
       >
         {{ lang.name }}
         <span
           v-if="language === lang.id"
-          class="
-            absolute
-            bottom-0
-            left-0
-            right-0
-            block
-            h-1
-            bg-indigo-500
-            rounded-t
-          "
+          class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-500 rounded-t"
         />
       </button>
     </nav>
@@ -59,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import 'prismjs'
 import '@packages/reporter/src/errors/prism.scss'
 import { gql } from '@urql/core'
@@ -111,6 +94,11 @@ const manualCreate = ref(false)
 
 const altFn = (val: boolean) => {
   manualCreate.value = val
+  nextTick(() => {
+    const copyButton = document.querySelector('#copy-button') as HTMLInputElement
+
+    copyButton.focus()
+  })
 }
 
 const tsInstalled = ref(false)
