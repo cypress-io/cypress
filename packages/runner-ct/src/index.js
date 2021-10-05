@@ -1,2 +1,2 @@
 import '@packages/runner/src/main.scss'
-import './main.ts'
+import './main.tsx'
