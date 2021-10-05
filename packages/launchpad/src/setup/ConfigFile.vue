@@ -94,11 +94,6 @@ const manualCreate = ref(false)
 
 const altFn = (val: boolean) => {
   manualCreate.value = val
-  nextTick(() => {
-    const copyButton = document.querySelector('#copy-button') as HTMLInputElement
-
-    copyButton.focus()
-  })
 }
 
 const tsInstalled = ref(false)
