@@ -1,7 +1,7 @@
 <template>
   <button
     :id="name"
-    class="rounded-50px relative focus:outline-transparent"
+    class="rounded-50px relative border-1 border-transparent focus:border-gray-800  focus:outline-transparent"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container]"
     role="switch"
     :aria-checked="value"
@@ -15,8 +15,6 @@
 </template>
 
 <script lang="ts" setup>
-
-import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
   value: boolean
