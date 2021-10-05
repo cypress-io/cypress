@@ -9,19 +9,31 @@ export const Spec = objectType({
   definition (t) {
     t.nonNull.field('specType', {
       type: SpecTypeEnum,
-      description: 'Type of spec',
+      description: 'Type of spec (e.g. component | integration)',
     })
 
     t.nonNull.string('absolute', {
-      description: 'Absolute path to spec',
+      description: 'Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)',
     })
 
     t.nonNull.string('relative', {
-      description: 'Relative path to spec',
+      description: 'Relative path to spec (e.g. src/component/MySpec.test.tsx)',
     })
 
     t.nonNull.string('name', {
-      description: 'Name of spec file',
+      description: 'Full name of spec file (e.g. MySpec.test.tsx)',
+    })
+
+    t.nonNull.string('fileExtension', {
+      description: 'The file extension (e.g. tsx, jsx)',
+    })
+
+    t.nonNull.string('specFileExtension', {
+      description: `The spec file's extension, including "spec" patterm (e.g. .spec.tsx, -spec.tsx, -test.tsx)`,
+    })
+
+    t.nonNull.string('fileName', {
+      description: `The first part of the file, without extensions (e.g. MySpec)`,
     })
 
     t.field('gitInfo', {
