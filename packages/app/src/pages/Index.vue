@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { toJS } from 'mobx'
 import { gql, useQuery } from '@urql/vue'
-import Specs, { runSpec } from './Specs.vue'
+import Specs from './Specs.vue'
 import { store } from '../store'
 import { IndexDocument } from '../generated/graphql'
 import type { Specs_SpecFragment } from '../generated/graphql'
@@ -53,7 +53,7 @@ const setSpec = (spec?: Specs_SpecFragment) => {
     name: spec.name
   })
 
-  runSpec()
+  // runSpec()
 }
 </script>
 

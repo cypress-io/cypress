@@ -11,7 +11,7 @@
 // to support async/await
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager } from '@packages/runner-shared'
+import { eventManager, AutIframe } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
 
 export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
@@ -21,6 +21,8 @@ export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
 const randomString = `${Math.random()}`
 
 const UnifiedRunner = {
+  AutIframe,
+
   defaultEvents,
 
   eventManager, 
@@ -73,7 +75,6 @@ window.UnifiedRunner = UnifiedRunner
 /** This is the OG runner-ct */
 import React from 'react'
 import 'regenerator-runtime/runtime'
-import { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
 import type { FoundSpec } from '@packages/types/src/spec'
 import { automationElementId } from '@packages/runner-shared/src/automation-element'
 

@@ -1,3 +1,8 @@
+interface ConnectionInfo { 
+  automationElement: '__cypress-string',
+  randomString: string 
+}
+
 /**
  * The eventManager and driver are bundled separately
  * by webpack. We cannot import them because of
@@ -8,28 +13,32 @@
  * 
  * This is attached to `window` under the `UnifiedRunner` namespace.
  */
-interface Window {
-  UnifiedRunner: {
-    /**
-     * decode config, which we receive as a base64 string
-     * This comes from Driver.utils
-     */
-    decodeBase64: (base64: string) => Record<string, unknown>
+export interface UnifiedRunner {
+  /**
+   * decode config, which we receive as a base64 string
+   * This comes from Driver.utils
+   */
+  decodeBase64: (base64: string) => Record<string, unknown>
 
-    /**
-     * Proxy event to the reporter via `Reporter.defaultEvents.emit`
-     */
-    emit (evt: string, ...args: unknown[]): void
+  /**
+   * Proxy event to the reporter via `Reporter.defaultEvents.emit`
+   */
+  emit (evt: string, ...args: unknown[]): void
 
-    /**
-     * This is the eventManager which orchestrates all the communication
-     * between the reporter, driver, and server, as well as handle
-     * setup, teardown and running of specs.
-     * 
-     * It's only used on the "Runner" part of the unified runner.
-     */
-    eventManager: any
+  /**
+   * This is the eventManager which orchestrates all the communication
+   * between the reporter, driver, and server, as well as handle
+   * setup, teardown and running of specs.
+   * 
+   * It's only used on the "Runner" part of the unified runner.
+   */
+  eventManager: {
+    addGlobalListeners: (state: Store, connectionInfo: ConnectionInfo) => void
+    setup: (config: Record<string, unknown>) => void
+    [key: string]: any
   }
+
+  AutIframe: AutIframe
 }
 
 /**
@@ -110,3 +119,85 @@ interface Window {
  *   - This then starts the reporter via an event, reporter:start, and calls Cypress.run, which executes the spec.
  * 
  */
+
+import { store, Store } from './store'
+import { injectRunner } from './runner/renderRunner'
+import type { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
+import type { SpecFile } from '@packages/types/src/spec'
+
+function getRunnerElement () {
+  const el = document.querySelector<HTMLElement>('#unified-runner')
+  if (!el) {
+    throw Error('Expected element with #unified-runner but did not find it.')
+  }
+  return el
+}
+
+function getReporterElement () {
+  const el = document.querySelector<HTMLElement>('#unified-reporter')
+  if (!el) {
+    throw Error('Expected element with #unified-reporter but did not find it.')
+  }
+  return el
+}
+
+function empty (el: HTMLElement) {
+  while (el.lastChild) {
+    el.removeChild(el.firstChild)
+  }
+}
+
+const randomString = `${Math.random()}`
+
+/**
+ * One-time setup. Required `window.UnifiedRunner` to exist,
+ * so passed as a callback to `renderRunner`, which injects `UnifiedRunner`
+ * onto `window`.
+ */
+function setupRunner () {
+  // @ts-ignore
+  const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
+
+  UnifiedRunner.eventManager.addGlobalListeners(store, {
+    automationElement: '__cypress-string',
+    randomString
+  })
+}
+
+function teardownSpec () {
+
+}
+
+export function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
+  return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
+}
+
+export function setupSpec (spec: SpecFile) {
+  // @ts-ignore - TODO: figure out how to manage window.config.
+  const config = window.config
+
+  // @ts-ignore
+  const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
+
+  UnifiedRunner.eventManager.setup(config)
+
+  const $runnerRoot = getRunnerElement()
+
+  // clear AUT, if there is one.
+  empty($runnerRoot)
+
+  // create new AUT 
+  const $container = document.createElement('div')
+  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+  autIframe.showInitialBlankContents()
+  $autIframe.prop('src', getSpecUrl(config.namespace, spec))
+
+  console.log($autIframe)
+  // TODO
+  // UnifiedRunner.eventManager.initialize()
+}
+
+export function initialize () {
+  injectRunner(setupRunner)
+}

@@ -1,4 +1,6 @@
+import type { UnifiedRunner } from '../runner'
 import type { SpecFile } from '@packages/types/src/spec'
+
 function injectReporterStyle () {
   const style = document.createElement('style')
   style.innerText = `
@@ -23,7 +25,7 @@ export interface ConfigConsumedByNewRunner {
   specs: SpecFile[]
 }
 
-export async function renderRunner (ready: ({ base64Config, projectName }: Payload) => void) {
+export async function injectRunner (ready: () => void) {
   const response = await window.fetch('/api')
   const data = await response.json()
   const script = document.createElement('script')
@@ -41,6 +43,9 @@ export async function renderRunner (ready: ({ base64Config, projectName }: Paylo
   injectReporterStyle()
 
   script.onload = () => {
-    ready(data)
+    // @ts-ignore - just stick config on window until we figure out how we are 
+    // going to manage it
+    window.config = (window.UnifiedRunner as UnifiedRunner).decodeBase64(data.base64Config)
+    ready()
   }
 }

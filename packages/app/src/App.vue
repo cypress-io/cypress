@@ -1,7 +1,8 @@
 <template>
   <router-view v-slot="{ Component }">
-    <keep-alive>
+    <!-- TODO(lachlan): put this back after doing proper cleanup when unmounting the runner page -->
+    <!-- <keep-alive> -->
       <component :is="Component" />
-    </keep-alive>
+    <!-- </keep-alive> -->
   </router-view>
 </template>
