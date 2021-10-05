@@ -104,7 +104,7 @@ export const WIZARD_STEPS = [
   {
     type: 'initializePlugins',
     title: 'Initializing Config...',
-    description: 'We need to install the following packages in order for component testing to work.',
+    description: 'Please wait while we load your project and find browsers installed on your system.',
   },
   {
     type: 'selectFramework',
@@ -114,7 +114,7 @@ export const WIZARD_STEPS = [
   {
     type: 'installDependencies',
     title: 'Install Dev Dependencies',
-    description: 'Please wait while we load your project and find browsers installed on your system.',
+    description: 'Paste the command below into your terminal to install the required packages.',
   },
   {
     type: 'createConfig',
