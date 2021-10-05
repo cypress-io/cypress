@@ -470,7 +470,7 @@ const e2e = {
       const s = options.settings
 
       if (s) {
-        await insertValuesInConfigFile(e2ePath, s)
+        await insertValuesInConfigFile(e2ePath, s, { configFile: 'cypress.json' })
       }
     })
 
