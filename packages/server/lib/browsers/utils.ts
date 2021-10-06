@@ -151,38 +151,21 @@ function removeFunctionsInObject (serializedObj) {
 }
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
-  // if we returned an array from the plugin
-  // then we know the user is using the deprecated
-  // interface and we need to warn them
-  // TODO: remove this logic in >= v5.0.0
-  if (pluginConfigResult[0]) {
-    options.onWarning(errors.get(
-      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
-    ))
+  // First, remove all dummy functions created on the plugins thread,
+  // they don't need to be checked
+  pluginConfigResult = removeFunctionsInObject(pluginConfigResult)
 
-    _.extend(pluginConfigResult, {
-      args: _.filter(pluginConfigResult, (_val, key) => {
-        return _.isNumber(key)
-      }),
-      extensions: [],
-    })
-  } else {
-    // First, remove all dummy functions created on the plugins thread,
-    // they don't need to be checked
-    pluginConfigResult = removeFunctionsInObject(pluginConfigResult)
+  // either warn about the array or potentially error on invalid props, but not both
 
-    // either warn about the array or potentially error on invalid props, but not both
+  // strip out all the known launch option properties from the resulting object
+  const unexpectedProperties: string[] = _
+  .chain(pluginConfigResult)
+  .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+  .keys()
+  .value()
 
-    // strip out all the known launch option properties from the resulting object
-    const unexpectedProperties: string[] = _
-    .chain(pluginConfigResult)
-    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-    .keys()
-    .value()
-
-    if (unexpectedProperties.length) {
-      errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
-    }
+  if (unexpectedProperties.length) {
+    errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
   }
 
   _.forEach(launchOptions, (val, key) => {
