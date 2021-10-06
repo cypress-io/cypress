@@ -27,6 +27,8 @@ describe('ManualSetup', () => {
       />
     </div>)
 
+    cy.percySnapshot()
+
     cy.contains('button', 'Try Again').click().then(() => {
       expect(projectsApi.reopenProject).to.have.been.called
     })

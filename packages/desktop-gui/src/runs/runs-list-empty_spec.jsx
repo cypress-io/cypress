@@ -24,6 +24,8 @@ describe('RunsListEmpty', () => {
     recordKey="123456-456789-789123"/>)
 
     cy.get('.first-run-instructions').should('exist')
+
+    cy.percySnapshot()
   })
 
   it('Displays another tutorial to record your first run', () => {
@@ -37,5 +39,7 @@ describe('RunsListEmpty', () => {
     recordKey="123456-456789-789123"/>)
 
     cy.get('.new-first-run-instructions').should('exist')
+
+    cy.percySnapshot()
   })
 })
