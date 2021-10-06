@@ -4,6 +4,7 @@ import '../../spec_helper'
 
 import { fs } from '../../../lib/util/fs'
 import { insertValueInJSString, insertValuesInConfigFile } from '../../../lib/util/config-file-updater'
+import { stripIndent } from '../../../lib/util/strip_indent'
 const projectRoot = process.cwd()
 const defaultOptions = {
   configFile: 'cypress.json',
@@ -67,61 +68,61 @@ describe('lib/util/config-file-updater', () => {
     describe('#insertValueInJSString', () => {
       describe('es6 vs es5', () => {
         it('finds the object litteral and adds the values to it es6', async () => {
-          const src = ['export default {',
-            '  foo: 42',
-            '}'].join('\n')
-          const expectedOutput = ['export default {',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  foo: 42',
-            '}'].join('\n')
+          const src = stripIndent`\
+              export default {
+                foo: 42,
+              }
+            `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const expectedOutput = stripIndent`\
+            export default {
+              projectId: "id1234",
+              viewportWidth: 400,
+              foo: 42,
+            }
+          `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {})
 
           expect(output).to.equal(expectedOutput)
         })
 
         it('finds the object litteral and adds the values to it es5', async () => {
-          const src = ['module.exports = {',
-            '  foo: 42',
-            '}'].join('\n')
-          const expectedOutput = ['module.exports = {',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  foo: 42',
-            '}'].join('\n')
+          const src = stripIndent`\
+              module.exports = {
+                foo: 42,
+              }
+            `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const expectedOutput = stripIndent`\
+            module.exports = {
+              projectId: "id1234",
+              viewportWidth: 400,
+              foo: 42,
+            }
+          `
 
-          expect(output).to.equal(expectedOutput)
-        })
-
-        it('works with and without the quotes around keys (es6)', async () => {
-          const src = ['export default {',
-            '  "foo": 42',
-            '}'].join('\n')
-          const expectedOutput = ['export default {',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  "foo": 42',
-            '}'].join('\n')
-
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {})
 
           expect(output).to.equal(expectedOutput)
         })
 
-        it('works with and without the quotes around keys (es5)', async () => {
-          const src = ['module.exports = {',
-            '  "foo": 42',
-            '}'].join('\n')
-          const expectedOutput = ['module.exports = {',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  "foo": 42',
-            '}'].join('\n')
+        it('works with and without the quotes around keys', async () => {
+          const src = stripIndent`\
+              export default {
+                "foo": 42,
+              }
+            `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const expectedOutput = stripIndent`\
+              export default {
+                projectId: "id1234",
+                viewportWidth: 400,
+                "foo": 42,
+              }
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {})
 
           expect(output).to.equal(expectedOutput)
         })
@@ -129,64 +130,67 @@ describe('lib/util/config-file-updater', () => {
 
       describe('defineConfig', () => {
         it('skips defineConfig and add to the object inside', async () => {
-          const src = [
-            'import { defineConfig } from "cypress"',
-            'export default defineConfig({',
-            '  foo: 42',
-            '})',
-          ].join('\n')
-          const expectedOutput = [
-            'import { defineConfig } from "cypress"',
-            'export default defineConfig({',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  foo: 42',
-            '})',
-          ].join('\n')
+          const src = stripIndent`\
+              import { defineConfig } from "cypress"
+              export default defineConfig({
+                foo: 42,
+              })
+            `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const expectedOutput = stripIndent`\
+              import { defineConfig } from "cypress"
+              export default defineConfig({
+                projectId: "id1234",
+                viewportWidth: 400,
+                foo: 42,
+              })
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {})
 
           expect(output).to.equal(expectedOutput)
         })
 
         it('skips defineConfig even if it renamed in an import (es6)', async () => {
-          const src = [
-            'import { defineConfig as cy_defineConfig } from "cypress"',
-            'export default cy_defineConfig({',
-            '  foo: 42',
-            '})',
-          ].join('\n')
-          const expectedOutput = [
-            'import { defineConfig as cy_defineConfig } from "cypress"',
-            'export default cy_defineConfig({',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  foo: 42',
-            '})',
-          ].join('\n')
+          const src = stripIndent`\
+              import { defineConfig as cy_defineConfig } from "cypress"
+              export default cy_defineConfig({
+                foo: 42,
+              })
+            `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const expectedOutput = stripIndent`\
+              import { defineConfig as cy_defineConfig } from "cypress"
+              export default cy_defineConfig({
+                projectId: "id1234",
+                viewportWidth: 400,
+                foo: 42,
+              })
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {})
 
           expect(output).to.equal(expectedOutput)
         })
 
         it('skips defineConfig even if it renamed in a require (es5)', async () => {
-          const src = [
-            'const { defineConfig: cy_defineConfig } = require("cypress")',
-            'module.exports = cy_defineConfig({',
-            '  foo: 42',
-            '})',
-          ].join('\n')
-          const expectedOutput = [
-            'const { defineConfig: cy_defineConfig } = require("cypress")',
-            'module.exports = cy_defineConfig({',
-            '  projectId: "id1234",',
-            '  viewportWidth: 400,',
-            '  foo: 42',
-            '})',
-          ].join('\n')
+          const src = stripIndent`\
+              const { defineConfig: cy_defineConfig } = require("cypress")
+              module.exports = cy_defineConfig({
+                foo: 42,
+              })
+            `
 
-          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {}, '')
+          const expectedOutput = stripIndent`\
+              const { defineConfig: cy_defineConfig } = require("cypress")
+              module.exports = cy_defineConfig({
+                projectId: "id1234",
+                viewportWidth: 400,
+                foo: 42,
+              })
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, {})
 
           expect(output).to.equal(expectedOutput)
         })
@@ -194,48 +198,49 @@ describe('lib/util/config-file-updater', () => {
 
       describe('updates', () => {
         it('updates a value if the same value is found in resolved config', async () => {
-          const src = [
-            'module.exports = {',
-            '  foo: 42',
-            '}',
-          ].join('\n')
-          const expectedOutput = [
-            'module.exports = {',
-            '  foo: 1000',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+              export default {
+                foo: 42,
+              }
+            `
+          const expectedOutput = stripIndent`\
+              export default {
+                foo: 1000,
+              }
+            `
 
-          const output = await insertValueInJSString(src, { foo: 1000 }, { foo: 42 }, '')
+          const output = await insertValueInJSString(src, { foo: 1000 }, { foo: 42 })
 
           expect(output).to.equal(expectedOutput)
         })
 
         it('updates values and inserts config', async () => {
-          const src = [
-            'export default {',
-            '  foo: 42,',
-            '  bar: 84,',
-            '  component: {',
-            '    devServer() {',
-            '      return null',
-            '    }',
-            '  }',
-            '}',
-          ].join('\n')
-          const expectedOutput = [
-            'export default {',
-            '  projectId: "id1234",',
-            '  foo: 1000,',
-            '  bar: 3000,',
-            '  component: {',
-            '    devServer() {',
-            '      return null',
-            '    }',
-            '  }',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+            export default {
+              foo: 42,
+              bar: 84,
+              component: {
+                devServer() {
+                  return null
+                }
+              }
+            }
+          `
 
-          const output = await insertValueInJSString(src, { foo: 1000, bar: 3000, projectId: 'id1234' }, { foo: 42, bar: 84 }, '')
+          const expectedOutput = stripIndent`\
+            export default {
+              projectId: "id1234",
+              foo: 1000,
+              bar: 3000,
+              component: {
+                devServer() {
+                  return null
+                }
+              }
+            }
+          `
+
+          const output = await insertValueInJSString(src, { foo: 1000, bar: 3000, projectId: 'id1234' }, { foo: 42, bar: 84 })
 
           expect(output).to.equal(expectedOutput)
         })
@@ -243,73 +248,71 @@ describe('lib/util/config-file-updater', () => {
 
       describe('subkeys', () => {
         it('inserts nested values', async () => {
-          const src = [
-            'module.exports = {',
-            '  foo: 42',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+          module.exports = {
+            foo: 42
+          }
+        `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42 }, '')
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42 })
 
-          const expectedOutput = [
-            'module.exports = {',
-            '  component: {',
-            '    specFilePattern: "src/**/*.spec.cy.js",',
-            '  },',
-            '  foo: 42',
-            '}',
-          ].join('\n')
+          const expectedOutput = stripIndent`\
+              module.exports = {
+                component: {
+                  specFilePattern: "src/**/*.spec.cy.js",
+                },
+                foo: 42
+              }
+            `
 
           expect(output).to.equal(expectedOutput)
         })
 
         it('inserts nested values into existing keys', async () => {
-          const src = [
-            'module.exports = {',
-            '  component: {',
-            '    viewportWidth: 800',
-            '  },',
-            '  foo: 42',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+              module.exports = {
+                component: {
+                  viewportWidth: 800
+                },
+                foo: 42
+              }
+            `
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42, component: { viewportWidth: 800 } }, '')
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42, component: { viewportWidth: 800 } })
 
-          const expectedOutput = [
-            'module.exports = {',
-            '  component: {',
-            '    specFilePattern: "src/**/*.spec.cy.js",',
-            '    viewportWidth: 800',
-            '  },',
-            '  foo: 42',
-            '}',
-          ].join('\n')
+          const expectedOutput = stripIndent`\
+            module.exports = {
+              component: {
+                specFilePattern: "src/**/*.spec.cy.js",
+                viewportWidth: 800
+              },
+              foo: 42
+            }
+          `
 
           expect(output).to.equal(expectedOutput)
         })
 
         it('updates nested values', async () => {
-          const src = [
-            'module.exports = {',
-            '  foo: 42,',
-            '  component: {',
-            '    specFilePattern: \'components/**/*.spec.cy.js\',',
-            '    foo: 82',
-            '  }',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+            module.exports = {
+              foo: 42,
+              component: {
+                specFilePattern: 'components/**/*.spec.cy.js',
+                foo: 82
+              }
+            }`
 
-          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42, component: { foo: 82, specFilePattern: 'components/**/*.spec.cy.js' } }, '')
+          const output = await insertValueInJSString(src, { component: { specFilePattern: 'src/**/*.spec.cy.js' } }, { foo: 42, component: { foo: 82, specFilePattern: 'components/**/*.spec.cy.js' } })
 
-          const expectedOutput = [
-            'module.exports = {',
-            '  foo: 42,',
-            '  component: {',
-            '    specFilePattern: "src/**/*.spec.cy.js",',
-            '    foo: 82',
-            '  }',
-            '}',
-          ].join('\n')
+          const expectedOutput = stripIndent`\
+          module.exports = {
+            foo: 42,
+            component: {
+              specFilePattern: "src/**/*.spec.cy.js",
+              foo: 82
+            }
+          }`
 
           expect(output).to.equal(expectedOutput)
         })
@@ -322,7 +325,7 @@ describe('lib/util/config-file-updater', () => {
             'export default foo',
           ].join('\n')
 
-          return insertValueInJSString(src, { bar: 10 }, {}, 'path/to/config.js')
+          return insertValueInJSString(src, { bar: 10 }, {})
           .then(() => {
             throw Error('this should not succeed')
           })
@@ -339,7 +342,7 @@ describe('lib/util/config-file-updater', () => {
             '}',
           ].join('\n')
 
-          return insertValueInJSString(src, { foo: 10 }, { foo: 12 }, 'path/to/config.js')
+          return insertValueInJSString(src, { foo: 10 }, { foo: 12 })
           .then(() => {
             throw Error('this should not succeed')
           })
@@ -349,14 +352,14 @@ describe('lib/util/config-file-updater', () => {
         })
 
         it('fails with inlined values', () => {
-          const src = [
-            'const foo = 12',
-            'export default {',
-            '  foo',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+            const foo = 12
+            export default {
+              foo
+            }
+            `
 
-          return insertValueInJSString(src, { foo: 10 }, { foo: 12 }, 'path/to/config.js')
+          return insertValueInJSString(src, { foo: 10 }, { foo: 12 })
           .then(() => {
             throw Error('this should not succeed')
           })
@@ -366,15 +369,15 @@ describe('lib/util/config-file-updater', () => {
         })
 
         it('fails if there is a spread', () => {
-          const src = [
-            'const foo = { bar: 12 }',
-            'export default {',
-            '  bar: 8,',
-            '  ...foo',
-            '}',
-          ].join('\n')
+          const src = stripIndent`\
+            const foo = { bar: 12 }
+            export default {
+              bar: 8,
+              ...foo
+            }
+            `
 
-          return insertValueInJSString(src, { bar: 10 }, { bar: 12 }, 'path/to/config.js')
+          return insertValueInJSString(src, { bar: 10 }, { bar: 12 })
           .then(() => {
             throw Error('this should not succeed')
           })
