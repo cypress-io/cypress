@@ -1,17 +1,8 @@
 code[class*="language-"],
 pre[class*="language-"] {
-	color: $gray-600;
+	color: $gray-800;
 	margin: 0;
 	text-shadow: $white 0px 1px;
-}
-
-:not(pre) > code[class*="language-"],
-pre[class*="language-"] {
-	background: $gray-50;
-}
-
-.token.punctuation {
-	color: $gray-600;
 }
 
 .token.property,
@@ -21,7 +12,7 @@ pre[class*="language-"] {
 .token.constant,
 .token.symbol,
 .token.deleted {
-	color: $red-600;
+	color: $red-500;
 }
 
 .token.selector,
@@ -30,10 +21,9 @@ pre[class*="language-"] {
 .token.char,
 .token.builtin,
 .token.inserted {
-	color: $jade-600;
+	color: $jade-500;
 }
 
-.token.operator,
 .token.entity,
 .token.url,
 .language-css .token.string,
@@ -41,16 +31,24 @@ pre[class*="language-"] {
 .token.regex,
 .token.important,
 .token.variable {
-	color: $orange-600;
+	color: $orange-500;
   background: $gray-50;
+}
+
+.token.operator,
+.token.punctuation {
+  color: $gray-500;
 }
 
 .token.atrule,
 .token.attr-value,
-.token.keyword,
-.token.function,
 .token.class-name {
-	color: $indigo-600;
+	color: $indigo-500;
+}
+
+.token.keyword,
+.token.function {
+  color: $purple-500;
 }
 
 .line-numbers .line-numbers-rows {
