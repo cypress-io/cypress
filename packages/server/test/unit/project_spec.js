@@ -87,15 +87,15 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
   })
 
-  it('handles CT specific behaviors', async function () {
+  it('sets CT specific defaults and calls CT function', async function () {
     sinon.stub(ServerE2E.prototype, 'open').resolves([])
     sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
 
-    const projectCt = new ProjectBase({ projectRoot: '../foo/bar', testingType: 'component' })
+    const projectCt = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'component' })
 
     await projectCt.initializeConfig()
 
-    return projectCt.open({}).then((project) => {
+    return projectCt.open({}).then(() => {
       expect(projectCt._cfg.viewportHeight).to.eq(500)
       expect(projectCt._cfg.viewportWidth).to.eq(500)
       expect(projectCt._cfg.baseUrl).to.eq('http://localhost:9999')
@@ -149,7 +149,8 @@ describe('lib/project-base', () => {
     const integrationFolder = 'foo/bar/baz'
 
     beforeEach(function () {
-      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder, browsers: [] })
+      sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar', configFile: 'cypress.json' })
+      .resolves({ baz: 'quux', integrationFolder, browsers: [] })
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
@@ -948,14 +949,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls Settings.write with projectRoot and attrs', function () {
-      return writeProjectId('id-123').then((id) => {
+      return writeProjectId({ id: 'id-123' }).then((id) => {
         expect(id).to.eq('id-123')
       })
     })
 
     // TODO: This
     xit('sets generatedProjectIdTimestamp', function () {
-      return writeProjectId('id-123').then(() => {
+      return writeProjectId({ id: 'id-123' }).then(() => {
         expect(this.project.generatedProjectIdTimestamp).to.be.a('date')
       })
     })
@@ -1016,13 +1017,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#createCiProject', () => {
     const projectRoot = '/_test-output/path/to/project-e2e'
+    const configFile = 'cypress.config.js'
 
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot, testingType: 'e2e' })
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-      sinon.stub(settings, 'write').resolves('project-id-123')
+      sinon.stub(settings, 'write').resolves()
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
       sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
@@ -1030,19 +1032,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('calls api.createProject with user session', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
+      return createCiProject({ foo: 'bar', projectRoot }).then(() => {
         expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
       })
     })
 
     it('calls writeProjectId with id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then(() => {
-        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' })
+      return createCiProject({ foo: 'bar', projectRoot, configFile }).then(() => {
+        expect(settings.write).to.be.calledWith(projectRoot, { projectId: 'project-id-123' }, { configFile })
       })
     })
 
     it('returns project id', function () {
-      return createCiProject({ foo: 'bar' }, projectRoot).then((projectId) => {
+      return createCiProject({ foo: 'bar', projectRoot }).then((projectId) => {
         expect(projectId).to.eql(this.newProject)
       })
     })
