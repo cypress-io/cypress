@@ -45,7 +45,6 @@ fragment TestingTypeCards on Query {
       isFirstTimeE2E
     }
   }
-
   wizard {
     testingTypes {
       id
@@ -54,7 +53,6 @@ fragment TestingTypeCards on Query {
       description
     }
   }
-
   ...ConfigFile
 }
 `

@@ -26,11 +26,6 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
   describe('with projects', () => {
     beforeEach(() => {
       cy.mountFragment(GlobalPageFragmentDoc, {
-        type: (ctx) => {
-          return {
-            ...ctx.stubApp,
-          }
-        },
         render: (gqlVal) => <GlobalPage gql={gqlVal} />,
       })
     })

@@ -31,7 +31,7 @@ module.exports = (on, config) => {
         viteConfig: {
           // TODO(tim): Figure out why this isn't being picked up
           optimizeDeps: {
-            include: ['@headlessui/vue', 'vue-prism-component'],
+            include: ['@headlessui/vue', 'vue-prism-component', 'vue3-file-selector'],
           },
         },
       })
