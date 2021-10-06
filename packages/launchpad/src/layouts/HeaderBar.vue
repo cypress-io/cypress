@@ -22,7 +22,14 @@
           :gql="props?.gql?.app"
           :show-browsers="props.showBrowsers"
         />
-        <Auth :gql="props.gql" />
+        <button @click="openLogin">
+          Login
+        </button>
+        <LoginModal v-model="isLoginOpen">
+          <template #footer>
+            <Auth :gql="props.gql" />
+          </template>
+        </LoginModal>
       </div>
     </div>
   </div>
@@ -30,8 +37,10 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
+import { ref } from 'vue'
 import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBarFragment } from '../generated/graphql'
 import TopNav from '../components/topnav/TopNav.vue'
+import LoginModal from '../components/topnav/LoginModal.vue'
 
 import Auth from '../setup/Auth.vue'
 
@@ -61,7 +70,12 @@ fragment HeaderBar on Query {
 }
 `
 
+const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
+
+const openLogin = () => {
+  isLoginOpen.value = true
+}
 
 const clearActiveProject = () => {
   if (props.gql.app.activeProject) {

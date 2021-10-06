@@ -13,8 +13,11 @@
   </div>
 
   <div v-else>
-    <Button @click="handleAuth">
-      Click to Authenticate
+    <Button
+      size="lg"
+      @click="handleAuth"
+    >
+      Login
     </Button>
   </div>
 </template>

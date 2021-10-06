@@ -36,7 +36,7 @@
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import TransitionQuickFade from '../transitions/TransitionQuickFade.vue'
 
-const props = defineProps<{
+defineProps<{
   variant?: String,
 }>()
 
