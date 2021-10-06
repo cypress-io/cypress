@@ -396,7 +396,7 @@ export class OpenProject {
     return Promise.all([
       closeGraphQLServer(),
       this.closeOpenProjectAndBrowsers(),
-    ])
+    ]).then(() => null)
   }
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
