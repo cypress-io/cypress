@@ -188,6 +188,19 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.field('removeProject', {
+      type: 'App',
+      description: 'Remove project from projects array and cache',
+      args: {
+        path: nonNull(stringArg()),
+      },
+      async resolve (_root, args, ctx) {
+        await ctx.actions.project.removeProject(args.path)
+
+        return ctx.appData
+      },
+    })
+
     t.nonNull.field('setActiveProject', {
       type: 'App',
       description: 'Set active project to run tests on',
