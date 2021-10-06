@@ -5,7 +5,7 @@ const driverMock = {}
 
 register({
   enzyme: require('enzyme'),
-  EnzymeAdapter: require('@wojtekmaj/enzyme-adapter-react-17'),
+  EnzymeAdapter: require('enzyme-adapter-react-16'),
   chaiEnzyme: require('chai-enzyme'),
   requireOverride (depPath) {
     if (depPath === '@packages/driver') {
