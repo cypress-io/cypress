@@ -4,12 +4,15 @@ import type { AddressInfo } from 'net'
 import type { DataContext } from '@packages/data-context'
 import getenv from 'getenv'
 import pDefer from 'p-defer'
+import cors from 'cors'
 
 const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52200)
 
 export async function makeGraphQLServer (ctx: DataContext) {
   const dfd = pDefer<number>()
   const app = express()
+
+  app.use(cors())
 
   // TODO: Figure out how we want to cleanup & juggle the config, so
   // it's not jammed into the projects
