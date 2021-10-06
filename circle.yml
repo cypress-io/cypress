@@ -417,7 +417,7 @@ commands:
           path: ./packages/runner-ct/cypress/videos
       - store-npm-logs
 
-  run-e2e-tests:
+  run-system-tests:
     parameters:
       browser:
         description: browser shortname to target
@@ -1067,31 +1067,31 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  server-e2e-tests-chrome:
+  server-system-tests-chrome:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: chrome
 
-  server-e2e-tests-electron:
+  server-system-tests-electron:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: electron
 
-  server-e2e-tests-firefox:
+  server-system-tests-firefox:
     <<: *defaults
     resource_class: medium
     parallelism: 8
     steps:
-      - run-e2e-tests:
+      - run-system-tests:
           browser: firefox
 
-  server-e2e-tests-non-root:
+  server-system-tests-non-root:
     <<: *defaults
     resource_class: medium
     steps:
@@ -1994,16 +1994,16 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-chrome:
+    - server-system-tests-chrome:
         requires:
           - build
-    - server-e2e-tests-electron:
+    - server-system-tests-electron:
         requires:
           - build
-    - server-e2e-tests-firefox:
+    - server-system-tests-firefox:
         requires:
           - build
-    - server-e2e-tests-non-root:
+    - server-system-tests-non-root:
         executor: non-root-docker-user
         requires:
           - build
@@ -2110,10 +2110,10 @@ linux-workflow: &linux-workflow
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-electron
-          - server-e2e-tests-non-root
-          - server-e2e-tests-firefox
-          - server-e2e-tests-electron
-          - server-e2e-tests-chrome
+          - server-system-tests-non-root
+          - server-system-tests-firefox
+          - server-system-tests-electron
+          - server-system-tests-chrome
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
