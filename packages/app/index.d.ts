@@ -1,4 +1,5 @@
-import type { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
+// import type { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
+// import type { Reporter } from '@packages/reporter/src/main'
 import type { Store } from './src/store'
 
 interface ConnectionInfo { 
@@ -51,7 +52,26 @@ declare global {
         [key: string]: any
       }
 
-      AutIframe: typeof AutIframe
+      /**
+       * To ensure we are only a single copy of React
+       * We get a reference to the copy of React (and React DOM)
+       * that is used in the Reporter and Driver, which are bundled with
+       * webpack.
+       * 
+       * Unfortunately, attempting to have React in a project
+       * using Vue causes mad conflicts because React'S JSX type
+       * is ambient, so we cannot actually type it.
+       */
+      React: any
+      ReactDOM: any
+
+      /**
+       * Any React components or general code needed from
+       * runner-shared, reporter or driver are also bundled with
+       * webpack and made available via the window.UnifedRunner namespace.
+       */
+      AutIframe: any
+      Reporter: any
     }
   }
 }

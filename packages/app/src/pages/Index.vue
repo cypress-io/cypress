@@ -3,8 +3,8 @@
     <div v-if="query.fetching.value">
       Loading...
     </div>
-    <div v-else>
-      <Specs :gql="query.data.value?.app?.activeProject"  />
+    <div v-else-if="query.data.value?.app?.activeProject">
+      <Specs :gql="query.data.value.app.activeProject" />
     </div>
   </div>
 </template>

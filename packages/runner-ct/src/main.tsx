@@ -1,31 +1,27 @@
-// import App from './app/RunnerCt'
-// import State from './lib/state'
-// import { Container, eventManager } from '@packages/runner-shared'
-// import util from './lib/util'
-// import defaultEvents from '@packages/reporter/src/lib/events'
-// import { autorun, action, configure } from 'mobx'
-// import React from 'react'
-// import { render } from 'react-dom'
-
-// to support async/await
-// to support async/await
+import React from 'react'
+import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
 const driverUtils = $Cypress.utils
-import { eventManager, AutIframe } from '@packages/runner-shared'
+import { eventManager, AutIframe, Container } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
+import { Reporter } from '@packages/reporter/src/main'
 
 export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
-const randomString = `${Math.random()}`
-
 const UnifiedRunner = {
+  React,
+
+  ReactDOM,
+
+  Reporter,
+
   AutIframe,
 
   defaultEvents,
 
-  eventManager, 
+  eventManager,
 
   decodeBase64: (base64: string) => {
     return JSON.parse(driverUtils.decodeBase64Unicode(base64))
@@ -34,62 +30,25 @@ const UnifiedRunner = {
   emit (evt: string, ...args: unknown[]) {
     defaultEvents.emit(evt, ...args)
   },
-
-  // start ({ config, projectName, store, spec }) {
-  //   eventManager.addGlobalListeners(store, {
-  //     automationElement: automationElementId,
-  //     randomString
-  //   })
-
-  //   config.spec = spec
-  //   eventManager.setup(config)
-
-  //   const specSrc = getSpecUrl(config.namespace, spec)
-  //   const $container = document.createElement('div')
-  //   const $runnerRoot = document.querySelector('#runner-vue')
-  //   // empty it
-  //   while ($runnerRoot.lastChild) {
-  //     $runnerRoot.removeChild($runnerRoot.firstChild)
-  //   }
-
-  //   $runnerRoot.appendChild($container)
-
-  //   const autIframe = new AutIframe(config.projectName)
-  //   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
-  //   autIframe.showInitialBlankContents()
-
-  //   console.log(eventManager)
-
-  //   // In mount mode we need to render something right from spec file
-  //   // So load application tests to the aut frame
-  //   console.log(specSrc)
-  //   $autIframe.prop('src', specSrc)
-
-  //   eventManager.initialize($autIframe, config)
-  // }
 }
 
 // @ts-ignore
 window.UnifiedRunner = UnifiedRunner
 
 /** This is the OG runner-ct */
-import React from 'react'
 import 'regenerator-runtime/runtime'
 import type { FoundSpec } from '@packages/types/src/spec'
-import { automationElementId } from '@packages/runner-shared/src/automation-element'
 
 import { autorun, action, configure } from 'mobx'
-import { render } from 'react-dom'
 
 import App from './app/RunnerCt'
 import State from './lib/state'
-import { Container } from '@packages/runner-shared'
 import util from './lib/util'
 
 configure({ enforceActions: 'always' })
 
-const Runner = {
-  emit (evt, ...args) {
+const Runner: any = {
+  emit (evt: string, ...args: unknown[]) {
     defaultEvents.emit(evt, ...args)
   },
 
@@ -150,9 +109,10 @@ const Runner = {
         />
       )
 
-      render(container, el)
+      ReactDOM.render(container, el)
     })()
   },
 }
 
+// @ts-ignore
 window.Runner = Runner

@@ -1,25 +1,23 @@
-import { Reporter } from '@packages/reporter/src/main'
-import React from 'react'
-import ReactDOM from 'react-dom'
+// @ts-nocheck
 import { getReporterElement } from '../runner'
 import type { Store } from '../store'
 
 export async function unmountReporter () {
-  ReactDOM.unmountComponentAtNode(getReporterElement())
-}
-
-class EmptyHeader extends React.Component {
-  render () {
-    return React.createElement('div')
-  }
+  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(getReporterElement())
 }
 
 export function renderReporter (
-  root: HTMLElement, 
+  root: HTMLElement,
   store: Store,
-  eventManager: typeof window.UnifiedRunner.eventManager
+  eventManager: typeof window.UnifiedRunner.eventManager,
 ) {
-  const reporter = React.createElement(Reporter, {
+  class EmptyHeader extends window.UnifiedRunner.React.Component {
+    render () {
+      return window.UnifiedRunner.React.createElement('div')
+    }
+  }
+
+  const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
     key: store.specRunId,
@@ -31,8 +29,8 @@ export function renderReporter (
     // TODO: Are we re-skinning the Reporter header?
     // If so, with React or Vue?
     // For now, just render and empty div.
-    renderReporterHeader: (props) => React.createElement(EmptyHeader, props)
+    renderReporterHeader: (props) => window.UnifiedRunner.React.createElement(EmptyHeader, props),
   })
 
-  ReactDOM.render(reporter, root)
+  window.UnifiedRunner.ReactDOM.render(reporter, root)
 }
