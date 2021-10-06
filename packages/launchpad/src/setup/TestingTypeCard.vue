@@ -36,7 +36,6 @@ const props = defineProps<{
   id: TestingTypeEnum
   title: string
   description: string
-  function: string
 }>()
 
 const icon = TestingTypeIcons[props.id]
