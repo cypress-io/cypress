@@ -47,6 +47,7 @@
     "prismjs": "1.24.0",
     "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
+    "type-fest": "^2.3.4",
     "vite": "2.4.4",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",

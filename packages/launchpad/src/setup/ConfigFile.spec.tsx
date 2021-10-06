@@ -10,9 +10,6 @@ import ConfigFile from './ConfigFile.vue'
 describe('<ConfigFile />', () => {
   beforeEach(() => {
     cy.mountFragment(ConfigFileFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubQuery
-      },
       render: (gql) => {
         return (
           <div>

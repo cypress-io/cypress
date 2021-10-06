@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { GlobalProjectCard_ProjectFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
+import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
 
 gql`
 mutation GlobalProjectCard_setActiveProject($path: String!) {
@@ -36,7 +36,7 @@ mutation GlobalProjectCard_setActiveProject($path: String!) {
 `
 
 gql`
-fragment GlobalProjectCard_Project on Project {
+fragment GlobalProjectCard on Project {
   id
   title
   projectRoot
@@ -55,11 +55,11 @@ const setActiveProject = (project: string) => {
 }
 
 const props = defineProps<{
-  gql: GlobalProjectCard_ProjectFragment
+  gql: GlobalProjectCardFragment
 }>()
 
 const emit = defineEmits<{
-  (event: 'projectSelected', project: GlobalProjectCard_ProjectFragment): void
+  (event: 'projectSelected', project: GlobalProjectCardFragment): void
 }>()
 </script>
 

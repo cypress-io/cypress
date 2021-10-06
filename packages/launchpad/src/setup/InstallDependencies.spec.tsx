@@ -5,9 +5,6 @@ import { defaultMessages } from '@cy/i18n'
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
     cy.mountFragment(InstallDependenciesFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubWizard
-      },
       render: (gqlVal) => {
         return <InstallDependencies gql={gqlVal} />
       },
