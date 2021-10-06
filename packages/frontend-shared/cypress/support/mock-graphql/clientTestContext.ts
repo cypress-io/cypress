@@ -56,7 +56,7 @@ export function makeClientTestContext (): ClientTestContext {
     app: {
       navItem: 'settings',
       browsers,
-      projects: [testProject],
+      projects: [testProject, createTestProject('another-test-project')],
       selectedBrowser: browsers[0],
       activeProject: testProject,
       isInGlobalMode: false,
