@@ -46,20 +46,38 @@ describe('gui/interactive', () => {
       })
     })
 
-    it('renders with saved width if it exists', () => {
-      expect(interactiveMode.getWindowArgs({ appWidth: 1 }).width).to.equal(1)
-    })
+    describe('width + height dimensions', () => {
+      // Choose preferred if you have no valid choice
+      // Use the saved value if it's valid
+      describe('when no dimension', () => {
+        it('renders with preferred width if no width saved', () => {
+          expect(interactiveMode.getWindowArgs({}).width).to.equal(1200)
+        })
 
-    it('renders with default width if no width saved', () => {
-      expect(interactiveMode.getWindowArgs({}).width).to.equal(800)
-    })
+        it('renders with preferred height if no height saved', () => {
+          expect(interactiveMode.getWindowArgs({}).height).to.equal(800)
+        })
+      })
 
-    it('renders with saved height if it exists', () => {
-      expect(interactiveMode.getWindowArgs({ appHeight: 2 }).height).to.equal(2)
-    })
+      describe('when saved dimension is too small', () => {
+        it('uses the preferred width', () => {
+          expect(interactiveMode.getWindowArgs({ appWidth: 1 }).width).to.equal(1200)
+        })
 
-    it('renders with default height if no height saved', () => {
-      expect(interactiveMode.getWindowArgs({}).height).to.equal(550)
+        it('uses the preferred height', () => {
+          expect(interactiveMode.getWindowArgs({ appHeight: 1 }).height).to.equal(800)
+        })
+      })
+
+      describe('when saved dimension is within min/max dimension', () => {
+        it('uses the saved width', () => {
+          expect(interactiveMode.getWindowArgs({ appWidth: 1500 }).width).to.equal(1500)
+        })
+
+        it('uses the saved height', () => {
+          expect(interactiveMode.getWindowArgs({ appHeight: 1500 }).height).to.equal(1500)
+        })
+      })
     })
 
     it('renders with saved x if it exists', () => {

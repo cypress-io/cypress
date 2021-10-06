@@ -1,4 +1,4 @@
-import { idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { booleanArg, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
@@ -10,6 +10,24 @@ export const mutation = mutationType({
         ctx.actions.emitter.toLaunchpad('someData')
 
         return
+      },
+    })
+
+    t.field('internal_clearLatestProjectCache', {
+      type: 'Boolean',
+      resolve: (source, args, ctx) => {
+        ctx.actions.project.clearLatestProjectCache()
+
+        return true
+      },
+    })
+
+    t.nonNull.field('clearActiveProject', {
+      type: 'Query',
+      resolve: (root, args, ctx) => {
+        ctx.actions.project.clearActiveProject()
+
+        return {}
       },
     })
 
@@ -152,9 +170,10 @@ export const mutation = mutationType({
       description: 'Add project to projects array and cache it',
       args: {
         path: nonNull(stringArg()),
+        open: booleanArg({ description: 'Whether to open the project when added' }),
       },
       async resolve (_root, args, ctx) {
-        await ctx.actions.project.addProject(args.path)
+        await ctx.actions.project.addProject(args)
 
         return ctx.appData
       },

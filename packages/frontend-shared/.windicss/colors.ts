@@ -1,8 +1,10 @@
+// NOTE: All the colors in this file are also temporarily stored in packages/reporter/src/lib/variables.scss, for use in the reporter. If you change any here, please also change them there.
+
 import Colors from 'windicss/colors'
 
 const customColors = {
   jade: {
-    50: '#E0F6FA',
+    50: '#E4FBF2',
     100: '#C2F1DE',
     200: '#A3E7CB',
     300: '#69D3A7',

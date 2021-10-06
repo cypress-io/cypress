@@ -1,12 +1,10 @@
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
+import { defaultMessages } from '@cy/i18n'
 
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
     cy.mountFragment(InstallDependenciesFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubWizard
-      },
       render: (gqlVal) => {
         return <InstallDependencies gql={gqlVal} />
       },
@@ -18,19 +16,9 @@ describe('<InstallDependencies />', () => {
     cy.contains('@cypress/webpack-dev-server').should('exist')
   })
 
-  xit('should infinitely toggle manual', () => {
-    cy.contains('@cypress/react').should('exist')
-    cy.contains('manually').click()
-    cy.contains('yarn add').should('exist')
-    cy.contains('Install manually').click()
-    cy.contains('@cypress/react').should('exist')
-    cy.contains('manually').click()
-    cy.contains('yarn add').should('exist')
-    cy.contains('Install manually').click()
-    cy.contains('@cypress/react').should('exist')
-  })
-
-  it('should allow to toggle to manual', () => {
-    cy.contains('manually').click()
+  it('shows expected actions', () => {
+    cy.contains('button', defaultMessages.clipboard.copy).should('be.visible')
+    cy.contains('button', defaultMessages.setupPage.install.confirmManualInstall).should('be.visible')
+    cy.contains('button', defaultMessages.setupPage.step.back).should('be.visible')
   })
 })

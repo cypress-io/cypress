@@ -7,7 +7,7 @@
       items-center
       px-5
       gap-2
-      border-b border-gray-200
+      border-b border-gray-100
       rounded-t-md
     "
   >

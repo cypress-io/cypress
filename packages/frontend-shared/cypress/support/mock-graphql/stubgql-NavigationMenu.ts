@@ -1,7 +1,8 @@
-import type { NavigationMenu } from '../generated/test-graphql-types.gen'
+import type { NavigationItem, NavigationMenu } from '../generated/test-graphql-types.gen'
 import { NAV_ITEMS } from '@packages/types'
+import type { MaybeResolver } from './clientTestUtils'
 
-export const navigationMenu: NavigationMenu = {
+export const stubNavigationMenu: NavigationMenu = {
   __typename: 'NavigationMenu',
   items: NAV_ITEMS.map((navItem, index) => {
     return {
@@ -15,3 +16,5 @@ export const navigationMenu: NavigationMenu = {
   }),
   selected: NAV_ITEMS[0].type,
 }
+
+export const stubNavigationItem: MaybeResolver<NavigationItem> = stubNavigationMenu.items[0]

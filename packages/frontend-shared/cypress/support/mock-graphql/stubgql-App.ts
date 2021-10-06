@@ -1,6 +1,5 @@
-import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
-import { activeProject, createTestProject } from './testStubData'
-import { testNodeId } from './testUtils'
+import type { App } from '../generated/test-graphql-types.gen'
+import type { MaybeResolver } from './clientTestUtils'
 
 export const longBrowsersList = [
   {
@@ -125,21 +124,22 @@ export const longBrowsersList = [
   },
 ] as const
 
-const allBrowsers = longBrowsersList.map((browser, idx) => {
-  return {
-    ...testNodeId('Browser'),
-    ...browser,
-    disabled: false,
-    isSelected: idx === 0,
-  }
-})
-
-export const app: CodegenTypeMap['App'] = {
+export const stubApp: MaybeResolver<App> = {
   __typename: 'App',
   healthCheck: 'OK',
-  isInGlobalMode: false,
-  browsers: allBrowsers,
-  selectedBrowser: allBrowsers[0],
-  projects: [activeProject, createTestProject('another-test-project')],
-  activeProject,
+  isInGlobalMode (source, args, ctx) {
+    return Boolean(ctx.app.activeProject)
+  },
+  browsers (source, args, ctx) {
+    return ctx.app.browsers
+  },
+  selectedBrowser (source, args, ctx) {
+    return ctx.app.selectedBrowser
+  },
+  projects (source, args, ctx) {
+    return ctx.app.projects
+  },
+  activeProject (source, args, ctx) {
+    return ctx.app.activeProject
+  },
 }

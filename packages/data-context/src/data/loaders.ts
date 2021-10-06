@@ -62,7 +62,7 @@ export class DataLoaders {
   })
 
   private loader<K, V, C = K> (batchLoadFn: DataLoader.BatchLoadFn<K, V>) {
-    const loader = new DataLoader<K, V, C>(batchLoadFn)
+    const loader = new DataLoader<K, V, C>(batchLoadFn, { cache: false })
 
     this._allLoaders.push(loader)
 

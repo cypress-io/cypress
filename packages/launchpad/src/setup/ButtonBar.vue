@@ -1,14 +1,16 @@
 <template>
-  <div class="px-5 py-5 flex gap-3 bg-gray-50 border-t border-t-1 border-t-gray-200 rounded-b">
+  <div class="px-5 py-5 flex gap-3 bg-gray-50 border-t border-t-1 border-t-gray-100 rounded-b">
     <slot>
       <Button
         v-if="showNext"
+        size="lg"
         :disabled="!canNavigateForward"
         @click="nextFn"
       >
         {{ next }}
       </Button>
       <Button
+        size="lg"
         variant="outline"
         @click="backFn"
       >
@@ -20,10 +22,13 @@
         class="flex items-center px-3"
       >
         <label
+          for="altFn"
           class="text-gray-500 px-3"
           @click="handleAlt"
         >{{ alt }}</label>
         <Switch
+          size="lg"
+          name="altFn"
           :value="altValue"
           @update="handleAlt"
         />

@@ -21,6 +21,26 @@
     "enabled": "Enabled",
     "disabled": "Disabled"
   },
+  "topNav": {
+    "released": "Released",
+    "version": "Version",
+    "seeAllReleases": "See all releases",
+    "docsMenu": {
+      "docsHeading": "Docs",
+      "gettingStartedTitle": "Getting Started",
+      "firstTest": "Write your first test",
+      "testingApp": "Testing your app",
+      "organizingTests": "Organizing Tests",
+      "referencesTitle": "References",
+      "bestPractices": "Best Practices",
+      "configuration": "Configuration",
+      "api": "API",
+      "ciTitle": "Run in CI/CD",
+      "ciSetup": "Set up CI",
+      "fasterTests": "Run tests faster",
+      "smartOrchestration": "Smart Orchestration"
+    }
+  },
   "setupPage": {
     "projectSetup": {
       "frameworkLabel": "Front-end Framework",
@@ -38,6 +58,9 @@
     },
     "openBrowser": {
       "launch": "Launch"
+    },
+    "configFile": {
+      "createManually": "Create file manually"
     }
   },
   "globalPage": {
@@ -48,7 +71,7 @@
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",
-    "newProjectButton": "New Project"
+    "addProjectButton": "New Project"
   },
   "welcomeGuide": {
     "header": {

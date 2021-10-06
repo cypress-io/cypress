@@ -1,11 +1,13 @@
+$code-border-radius: 4px;
+
 .reporter {
   .error {
-    background-color: #f5f5f5;
+    background-color: $gray-1000;
     min-height: 20px;
     padding: 24px;
 
     h2 {
-      color: #e94f5f;
+      color: $err-text;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
@@ -25,7 +27,7 @@
     }
 
     pre {
-      background: #fcf8e3;
+      background: $orange-900;
       display: block;
       width: 100%;
       white-space: initial;
@@ -56,7 +58,7 @@
     cursor: default;
     margin: 5px 0 5px 5px;
     padding-left: 10px;
-    border-left: 1px dotted #DDD;
+    border-left: 1px dotted $gray-900;
   }
 
   .studio-err-wrapper {
@@ -84,14 +86,15 @@
   .runnable-err-header {
     display: flex;
     justify-content: space-between;
-    background-color: $err-header-background;
+    background-color: rgba($gray-1000, 0.5);
     padding: 5px 10px;
     font-weight: bold;
 
     .runnable-err-name {
       flex-grow: 2;
       font-size: 13px;
-      line-height: 22px;;
+      line-height: 22px;
+      color: $err-header-text;
 
       i {
         font-size: 10px;
@@ -134,33 +137,33 @@
         outline: 0;
 
         div {
-          background: #fee0e3;
+          background: $red-900;
         }
       }
 
       div {
-        background: #ffeaec;
+        background: $err-header-background;
         cursor: pointer;
         outline: none;
         padding: 7px 5px;
         width: 100%;
 
         &:hover {
-          background: $err-header-background;
+          background: $gray-800;
         }
 
         &:active {
-          background: darken($err-header-background, 2%);
+          background: $gray-800;
         }
 
         .collapsible-header-text {
-          color: #4f4f4f;
+          color: $gray-200;
           font-size: 13px;
         }
 
         .collapsible-indicator {
           line-height: 18px;
-          color: #bbbcbd !important;
+          color: $gray-700 !important;
         }
       }
     }
@@ -175,8 +178,8 @@
       }
 
       div {
-        background: #ffeaec;
-        color: #4f4f4f;
+        background: $err-header-background;
+        color: $gray-200;
         cursor: pointer;
         font-size: 13px;
         height: 100%;
@@ -192,11 +195,11 @@
         }
 
         &:active {
-          background: darken($err-header-background, 2%);
+          background: $red-900;
         }
 
         i {
-          border: solid 1px #4f4f4f;
+          border: solid 1px $gray-200;
           border-radius: 4px;
           font-size: 6px;
           padding: 4px 3px;
@@ -226,19 +229,22 @@
   }
 
   .test-err-code-frame {
-    background-color: #fff;
-    border: 1px solid #ffe4e7;
+    background-color: $gray-1000;
+    border: 1px solid $gray-800;
+    border-radius: $code-border-radius;
     margin: 0 10px 10px;
 
     .runnable-err-file-path {
       &:before {
         @extend .#{$fa-css-prefix};
         @extend .#{$fa-css-prefix}-file;
-        color: #bdbdbd;
+        color: $gray-700;
         margin-right: 5px;
       }
 
-      background: #f6f6f6;
+      background: rgba($gray-900, 0.5);
+      border-top-left-radius: $code-border-radius;
+      border-top-right-radius: $code-border-radius;
       display: block;
       font-size: 13px;
       line-height: 24px;
@@ -247,8 +253,9 @@
     }
 
     pre {
-      background-color: #fff;
       border: 0;
+      border-bottom-left-radius: $code-border-radius;
+      border-bottom-right-radius: $code-border-radius;
       padding-left: 10px;
     }
   }
