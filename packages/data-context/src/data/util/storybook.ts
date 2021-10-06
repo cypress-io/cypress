@@ -157,19 +157,23 @@ function generateSpecFromCsf (parsed: CsfFile, storyFile: path.ParsedPath) {
       statement.source.value === 'react'
     },
   )
-  // Vue can be supported, but additional deps and config setup are required
-  const isVue = false
+  const isVue = parsed._ast.program.body.some(
+    (statement) => {
+      return statement.type === 'ImportDeclaration' &&
+      statement.source.value.endsWith('.vue')
+    },
+  )
 
-  // const isVue = parsed._ast.program.body.some(
-  //   (statement) =>
-  //     statement.type === "ImportDeclaration" &&
-  //     statement.source.value.endsWith(".vue")
-  // );
   if (!isReact && !isVue) {
     throw new Error('Provided story is not supported')
   }
 
-  const getDependency = () => (isReact ? '@cypress/react' : '@cypress/vue')
+  // const getDependency = () => (isReact ? '@cypress/react' : '@cypress/vue')
+  const getDependency = () => {
+    return (isReact
+      ? `import { mount, composeStories } from "@cypress/react"`
+      : `import { mount } from "@cypress/vue"\nimport { composeStories } from "@cypress/vue"`)
+  }
   const getMountSyntax = (component: string) => {
     return isReact ? `<${component} />` : `${component}()`
   }
@@ -195,7 +199,7 @@ function generateSpecFromCsf (parsed: CsfFile, storyFile: path.ParsedPath) {
 
   return endent`${isReact ? `import React from "react"` : ''}
     import * as stories from "./${storyFile.name}";
-    import { mount, composeStories } from "${getDependency()}";
+    ${getDependency()};
 
     const composedStories = composeStories(stories);
 
