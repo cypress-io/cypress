@@ -47,7 +47,6 @@
 </template>
 
 <script lang="ts" setup>
-import { getDirectoryPath } from '../utils/getDirectoryPath'
 import { useI18n } from '@cy/i18n'
 import IconPlaceholder from '~icons/icons8/circle-thin'
 import { FileSelector, Dropzone } from 'vue3-file-selector'
@@ -64,7 +63,7 @@ const emits = defineEmits<{
 
 watch(files, (newVal) => {
   if (newVal.length) {
-    emits('addProject', getDirectoryPath(newVal as FileList))
+    emits('addProject', newVal[0].path)
   }
 })
 
