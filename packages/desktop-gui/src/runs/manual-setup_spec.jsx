@@ -7,7 +7,7 @@ import '../main.scss'
 
 /* global cy */
 describe('ManualSetup', () => {
-  it('Should reopen the project when hitting retry', { viewportHeight: 650 }, () => {
+  it('Should reopen the project when hitting retry', { viewportHeight: 700 }, () => {
     const error = {
       message: `In your config file, cypress cannot set your \`projectId\` key to \`"iy7z59"\``,
       details: 'Exported object is not an object literal',
@@ -19,7 +19,7 @@ describe('ManualSetup', () => {
     appStore.projectRoot = '/exp/test-config-js/cypress.config.js'
     cy.stub(projectsApi, 'reopenProject').resolves({ projectId: 'id1234' })
 
-    mount(<div style={{ width: '650px', margin: '24px auto' }}>
+    mount(<div style={{ width: '500px', margin: '24px auto' }}>
       <ManualSetup
         error={error}
         configFile={'config.custom.js'}
