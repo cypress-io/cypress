@@ -642,16 +642,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
 
         ${chalk.yellow(arg2)}`
-      // TODO: update with cypress language
     case 'COULD_NOT_UPDATE_CONFIG_FILE':
 
       if (Object.keys(arg1).length === 1 && typeof Object.values(arg1)[0] !== 'object') {
-        msg = stripIndent`\
-        In your config file, cypress cannot set your \`${Object.keys(arg1)[0]}\` key to \`${JSON.stringify(Object.values(arg1)[0])}\``
+        msg = `Cannot automatically set your \`${Object.keys(arg1)[0]}\` to \`${Object.values(arg1)[0]}\``
       } else {
-        msg = stripIndent`\
-          Cypress was unable to add/update values in your configuration file.
-        `
+        msg = `Cypress was unable to add/update values in your configuration file.`
       }
 
       return { msg, details: arg2, payload: arg1 }
