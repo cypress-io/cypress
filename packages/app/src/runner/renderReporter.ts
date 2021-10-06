@@ -28,7 +28,7 @@ export function renderReporter (
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     experimentalStudioEnabled: false,
-    // TODO: Are we re-skinning the CommandLog header?
+    // TODO: Are we re-skinning the Reporter header?
     // If so, with React or Vue?
     // For now, just render and empty div.
     renderReporterHeader: (props) => React.createElement(EmptyHeader, props)

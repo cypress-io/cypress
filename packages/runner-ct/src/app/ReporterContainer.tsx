@@ -19,8 +19,6 @@ interface ReporterContainerProps {
   }
 }
 
-export { Reporter }
-
 export const ReporterContainer = namedObserver('ReporterContainer',
   (props: ReporterContainerProps) => {
     if (!props.state.spec) {

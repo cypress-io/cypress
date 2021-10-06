@@ -8,9 +8,9 @@
   </div>
 
   <!-- 
-    We want to manage the reporter and runner iframe with vanilla JS/jQuery
-    Prevent Vue from re-rendering these elements with v-once.
-  -->
+       We want to manage the reporter and runner iframe with vanilla JS/jQuery
+       Prevent Vue from re-rendering these elements with v-once. 
+   -->
   <div v-once> 
     <div id="unified-runner" />
     <div id="unified-reporter" />
@@ -20,15 +20,7 @@
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
 import { onMounted } from 'vue'
-import { 
-  initialize, 
-  setupReporter, 
-  executeSpec
-  // setupSpec, 
-  // teardownSpec, 
-} from '../runner'
-import { unmountReporter } from '../runner/renderReporter'
-// import { store } from '../store'
+import { initialize, executeSpec } from '../runner'
 import type { Specs_SpecsFragment } from '../generated/graphql'
 import type { SpecFile } from '@packages/types/src'
 

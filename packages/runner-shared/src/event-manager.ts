@@ -552,10 +552,6 @@ export const eventManager = {
 
   async _rerun () {
     await this.teardownReporter()
-    // await new Promise(resolve => {
-    //   reporterBus.once('reporter:restarted', resolve)
-    //   reporterBus.emit('reporter:restart:test:run')
-    // })
 
     // this probably isn't 100% necessary
     // since Cypress will fall out of scope
