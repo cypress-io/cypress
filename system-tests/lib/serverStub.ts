@@ -4,8 +4,6 @@ import bodyParser from 'body-parser'
 import { api as jsonSchemas } from '@cypress/json-schemas'
 import e2e from './e2e'
 
-console.log(jsonSchemas)
-
 export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 
 export const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
@@ -97,7 +95,7 @@ const routeHandlers = {
   postInstanceResults: {
     method: 'post',
     url: '/instances/:id/results',
-    req: 'postInstanceResultsRequest@1.0.0',
+    req: 'postInstanceResultsRequest@1.1.0',
     resSchema: 'postInstanceResultsResponse@1.0.0',
     res: sendUploadUrls,
   },

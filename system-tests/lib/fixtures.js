@@ -2,8 +2,8 @@ const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
 
-const root = path.join(__dirname, '..')
-const projects = path.join(root, 'projects')
+const root = path.join(__dirname, '..', '..', '..')
+const projects = path.join(root, 'test', 'support', 'fixtures', 'projects')
 const tmpDir = path.join(root, '.projects')
 
 // copy contents instead of deleting+creating new file, which can cause
