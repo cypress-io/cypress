@@ -143,7 +143,7 @@ async function spawnCypressWithMode (
 
 export async function startCypressWatch () {
   const watcher = chokidar.watch([
-    'packages/graphql/src/**/*.{js,ts}',
+    'packages/{graphql,data-context}/src/**/*.{js,ts}',
     'packages/server/lib/graphql/**/*.{js,ts}',
   ], {
     cwd: monorepoPaths.root,

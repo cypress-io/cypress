@@ -68,7 +68,7 @@
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",
-    "newProjectButton": "New Project"
+    "addProjectButton": "New Project"
   },
   "welcomeGuide": {
     "header": {

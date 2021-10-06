@@ -22,9 +22,4 @@ describe('<GlobalEmpty />', () => {
 
     cy.get('input[type=file]').should('have.length', 1)
   })
-
-  it('handles a file upload', () => {
-    cy.get('input[type=file]').attachFile('project-upload.json')
-    cy.get('[data-testid=upload-name]').should('have.text', 'project-upload.json')
-  })
 })
