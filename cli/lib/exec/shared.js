@@ -24,7 +24,7 @@ const throwInvalidOptionError = (details) => {
  * @returns {string[]} The array of new exec arguments
  */
 const processTestingType = (options) => {
-  if (options.testingType === 'component' || options.component) {
+  if (options.testingType === 'component' || options.component || options.ct) {
     return ['--testing-type', 'component']
   }
 

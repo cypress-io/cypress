@@ -21,7 +21,7 @@ exports['shows help for open --foo 1'] = `
     -c, --config <config>            sets configuration values. separate multiple
                                      values with a comma. overrides any value in
                                      cypress.json.
-    --component                      runs component tests
+    --ct, --component                runs component tests
     -C, --config-file <config-file>  path to JSON file where configuration values
                                      are set. defaults to "cypress.json". pass
                                      "false" to disable.
@@ -66,7 +66,7 @@ exports['shows help for run --foo 1'] = `
   Options:
     -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
-    --component                                runs component tests
+    --ct, --component                          runs component tests
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
     -C, --config-file <config-file>            path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
     --e2e                                      runs end to end tests
