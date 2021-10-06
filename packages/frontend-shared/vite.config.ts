@@ -74,6 +74,14 @@ export const makeConfig = (config: Partial<UserConfig> = {}, plugins: PluginOpti
       minify: false,
     },
 
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "${path.resolve(__dirname, '../reporter/src/lib/variables.scss')}" as *;`,
+        },
+      },
+    },
+
     resolve: { alias },
 
     // You cannot add or remove arbitrary options from shared plugins.

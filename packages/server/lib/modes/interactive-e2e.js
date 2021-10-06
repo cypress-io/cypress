@@ -19,12 +19,56 @@ module.exports = {
   },
 
   getWindowArgs (state) {
+    // Electron Window's arguments
+    // These options are passed to Electron's BrowserWindow
+    const minWidth = Math.round(/* 13" MacBook Air */ 1792 / 3) // Thirds
+
+    const preferredWidth = 1200
+    const minHeight = 800
+    const preferredHeight = 800
+
+    const chooseDimensions = ({ preferred, previous, minimum }) => {
+      // If the user doesn't have a previous size that's valid or big
+      // enough, use the preferred size instead.
+      if (!previous || previous < minimum) {
+        return preferred
+      }
+
+      return previous
+    }
+
     const common = {
-      backgroundColor: '#dfe2e4',
-      width: state.appWidth || 800,
-      height: state.appHeight || 550,
-      minWidth: 458,
-      minHeight: 400,
+      // The backgroundColor should match the value we will show in the
+      // launchpad frontend.
+
+      // When we use a dist'd launchpad (production), this color won't be
+      // as visible. However, in our local dev setup (launchpad running via
+      // a dev server), the backgroundColor will flash if it is a
+      // different color.
+      backgroundColor: 'white',
+
+      // Dimensions of the Electron window on initial launch.
+      // Because we are migrating users that may have
+      // a width smaller than the min dimensions, we will
+      // force the dimensions to be within the minimum bounds.
+      //
+      // Doing this before launch (instead of relying on minW + minH)
+      // prevents the window from jumping.
+      width: chooseDimensions({
+        preferred: preferredWidth,
+        minimum: minWidth,
+        previous: state.appWidth,
+      }),
+
+      height: chooseDimensions({
+        preferred: preferredHeight,
+        minimum: minHeight,
+        previous: state.appHeight,
+      }),
+
+      minWidth,
+      minHeight,
+
       x: state.appX,
       y: state.appY,
       type: 'INDEX',

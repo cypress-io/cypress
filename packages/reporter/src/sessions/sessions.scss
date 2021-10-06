@@ -5,27 +5,27 @@
 
   .clear-sessions {
     text-transform: none;
-    color: #6a6b6c;
+    color: $gray-400;
     display: flex;
     align-items: center;
     padding: 4px 10px;
     cursor: pointer;
     &:hover,
     &:focus {
-      color: rgb(48, 48, 48);
+      color: $gray-50;
     }
   }
 
   .session-item {
     padding: 3px 10px;
 
-    background-color: #eef1f4;
-    color: #777;
+    background-color: $gray-1000;
+    color: $gray-400;
     min-height: 20px;
 
     &:hover {
       cursor: pointer;
-      background-color: #e0e5e7;
+      background-color: $gray-900;
     }
   }
 }
