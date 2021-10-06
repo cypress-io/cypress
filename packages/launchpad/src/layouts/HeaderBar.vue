@@ -25,6 +25,9 @@
         <button @click="openLogin">
           Login
         </button>
+        <div v-if="props.gql.cloudViewer">
+          {{ props.gql.cloudViewer?.fullName }}
+        </div>
         <LoginModal v-model="isLoginOpen">
           <template #footer>
             <Auth :gql="props.gql" />

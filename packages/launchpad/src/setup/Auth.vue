@@ -4,7 +4,6 @@
   </div>
 
   <div v-else-if="viewer">
-    <p>Congrats {{ viewer?.email }}, you authenticated with Cypress Cloud.</p>
     <Button @click="handleLogout">
       Log out
     </Button>
