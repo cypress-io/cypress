@@ -1,0 +1,78 @@
+@import "../../node_modules/prismjs/themes/prism";
+@import "../../node_modules/prismjs/plugins/line-highlight/prism-line-highlight";
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: $gray-600;
+	margin: 0;
+	text-shadow: $white 0px 1px;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: $gray-50;
+}
+
+.token.punctuation {
+	color: $gray-600;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: $red-600;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: $jade-600;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.regex,
+.token.important,
+.token.variable {
+	color: $orange-600;
+  background: $gray-50;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword,
+.token.function,
+.token.class-name {
+	color: $indigo-600;
+}
+
+.line-numbers .line-numbers-rows {
+	border-right: 0;
+}
+
+.line-numbers-rows > span:before {
+	color: $gray-200;
+}
+
+.line-highlight {
+	background: linear-gradient(to right, rgba($gray-900,.1) 100%, rgba($gray-900,0));
+
+	&:before {
+		display: none;
+	}
+}
+
+.test-error-code-frame pre[data-line] {
+	padding-left: 0.5em;
+	position: relative;
+}
