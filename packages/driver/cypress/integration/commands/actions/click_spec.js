@@ -1090,6 +1090,12 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#overflow-auto-container').contains('quux').click()
       })
 
+      it('can click an element behind a sticky header', () => {
+        cy.viewport(400, 400)
+        cy.visit('./fixtures/sticky-header.html')
+        cy.get('p').click()
+      })
+
       it('does not scroll when being forced', () => {
         const scrolled = []
 
