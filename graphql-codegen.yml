@@ -29,7 +29,9 @@ vueTesting: &vueTesting
     - add:
         content: '/* eslint-disable */'
     - 'typescript'
-    - 'typescript-operations'
+    - 'typescript-operations':
+        # For modifying in mountFragment
+        immutableTypes: false
     - 'typed-document-node'
 
 overwrite: true
@@ -46,7 +48,7 @@ generates:
   # Generates types for us to infer the correct "source types" when we mock out on the frontend
   # This ensures we have proper type checking when we're using cy.mountFragment in component tests
   ###
-  './packages/frontend-shared/src/generated/test-graphql-types.gen.ts':
+  './packages/frontend-shared/cypress/support/generated/test-graphql-types.gen.ts':
     schema: 'packages/graphql/schemas/schema.graphql'
     plugins:
       - add:
@@ -55,7 +57,7 @@ generates:
           nonOptionalTypename: true
       - 'packages/frontend-shared/script/codegen-type-map.js'
 
-  './packages/frontend-shared/src/generated/test-cloud-graphql-types.gen.ts':
+  './packages/frontend-shared/cypress/support/generated/test-cloud-graphql-types.gen.ts':
     schema: 'packages/graphql/schemas/cloud.graphql'
     plugins:
       - add:

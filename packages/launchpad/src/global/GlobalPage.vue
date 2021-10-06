@@ -33,7 +33,7 @@ import type { GlobalPageFragment } from '../generated/graphql'
 gql`
 fragment GlobalPage on App {
   projects {
-    ...GlobalProjectCard_Project
+    ...GlobalProjectCard
   }
 }
 `

@@ -19,12 +19,12 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { useSetActiveProject } from '@packages/frontend-shared/src/composables'
-import type { GlobalProjectCard_ProjectFragment } from '../generated/graphql'
+import { GlobalProjectCardFragment } from '../generated/graphql'
 
 const { setActiveProject } = useSetActiveProject()
 
 gql`
-fragment GlobalProjectCard_Project on Project {
+fragment GlobalProjectCard on Project {
   id
   title
   projectRoot
@@ -37,11 +37,11 @@ fragment GlobalProjectCard_Project on Project {
 `
 
 const props = defineProps<{
-  gql: GlobalProjectCard_ProjectFragment
+  gql: GlobalProjectCardFragment
 }>()
 
 const emit = defineEmits<{
-  (event: 'projectSelected', project: GlobalProjectCard_ProjectFragment): void
+  (event: 'projectSelected', project: GlobalProjectCardFragment): void
 }>()
 </script>
 

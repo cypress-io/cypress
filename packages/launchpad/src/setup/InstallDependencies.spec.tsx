@@ -4,9 +4,6 @@ import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
 describe('<InstallDependencies />', () => {
   beforeEach(() => {
     cy.mountFragment(InstallDependenciesFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubWizard
-      },
       render: (gqlVal) => {
         return <InstallDependencies gql={gqlVal} />
       },

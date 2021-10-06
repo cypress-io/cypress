@@ -1,12 +1,9 @@
-import RunResults from './RunResults.vue'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
+import RunResults from './RunResults.vue'
 
 describe('<RunResults />', () => {
   it('playground', () => {
     cy.mountFragment(RunCardFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubCloudData.CloudRunStubs.allPassing
-      },
       render (gql) {
         return <RunResults gql={gql} />
       },

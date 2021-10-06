@@ -145,7 +145,7 @@ function generateTestExtensions (schema: GraphQLSchema) {
 
     extend type Query {
       testFragmentMember: TestUnion!
-      testFragmentMemberList: [TestUnion!]!
+      testFragmentMemberList(count: Int = 2): [TestUnion!]!
     }
   `
 }
