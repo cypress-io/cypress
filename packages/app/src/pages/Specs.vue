@@ -1,5 +1,8 @@
 <template>
-  <div v-for="spec of props.gql?.specs?.edges">
+  <div
+    v-for="spec of props.gql?.specs?.edges"
+    :key="spec?.node?.absolute"
+  >
     <button
       @click="execute(spec?.node ?? undefined)"
     >
@@ -7,27 +10,26 @@
     </button>
   </div>
 
-  <!-- 
+  <!--
        We want to manage the reporter and runner iframe with vanilla JS/jQuery
-       Prevent Vue from re-rendering these elements with v-once. 
+       Prevent Vue from re-rendering these elements with v-once.
    -->
-  <div v-once> 
-    <div id="unified-runner" />
-    <div id="unified-reporter" />
+  <div v-once>
+    <div :id="UnifiedRunnerAPI.RUNNER_ID" />
+    <div :id="UnifiedRunnerAPI.REPORTER_ID" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
 import { onMounted } from 'vue'
-import { initialize, executeSpec } from '../runner'
+import { UnifiedRunnerAPI } from '../runner'
 import type { Specs_SpecsFragment } from '../generated/graphql'
 import type { SpecFile } from '@packages/types/src'
 
 onMounted(() => {
-  initialize()
+  UnifiedRunnerAPI.initialize()
 })
-
 
 gql`
 fragment Specs_Spec on Spec {
@@ -54,8 +56,9 @@ const execute = (spec?: SpecFile) => {
   if (!spec) {
     return
   }
-  executeSpec(spec)
-} 
+
+  UnifiedRunnerAPI.executeSpec(spec)
+}
 
 const props = defineProps<{
   gql: Specs_SpecsFragment

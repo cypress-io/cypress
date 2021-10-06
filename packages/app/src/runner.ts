@@ -79,26 +79,29 @@
  *
  */
 
+const RUNNER_ID = 'unified-runner'
+const REPORTER_ID = 'unified-reporter'
+
 import { store, Store } from './store'
 import { injectRunner } from './runner/renderRunner'
 import type { SpecFile } from '@packages/types/src/spec'
 import { renderReporter, unmountReporter } from './runner/renderReporter'
 
 function getRunnerElement () {
-  const el = document.querySelector<HTMLElement>('#unified-runner')
+  const el = document.querySelector<HTMLElement>(`#${RUNNER_ID}`)
 
   if (!el) {
-    throw Error('Expected element with #unified-runner but did not find it.')
+    throw Error(`Expected element with #${RUNNER_ID} but did not find it.`)
   }
 
   return el
 }
 
-export function getReporterElement () {
-  const el = document.querySelector<HTMLElement>('#unified-reporter')
+function getReporterElement () {
+  const el = document.querySelector<HTMLElement>(`#${REPORTER_ID}`)
 
   if (!el) {
-    throw Error('Expected element with #unified-reporter but did not find it.')
+    throw Error(`Expected element with #${REPORTER_ID} but did not find it.`)
   }
 
   return el
@@ -126,7 +129,7 @@ function setupRunner () {
   })
 }
 
-export function setupReporter () {
+function setupReporter () {
   // Teardown reporter. Ideally we should reuse the existing reporter,
   // I am having trouble getting it to update, since it relies on React and props changing.
   const $reporterRoot = getReporterElement()
@@ -137,7 +140,7 @@ export function setupReporter () {
 /**
  * Get the URL for the spec. This is the URL of the AUT IFrame.
  */
-export function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
+function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
@@ -147,28 +150,22 @@ export function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
  * This should be called before you execute a spec,
  * or re-running the current spec.
  */
-export function teardownSpec (store: Store) {
-  // @ts-ignore
-  const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
-
-  return UnifiedRunner.eventManager.teardown(store)
+function teardownSpec (store: Store) {
+  return window.UnifiedRunner.eventManager.teardown(store)
 }
 
 /**
  * Set up a spec by creating a fresh AUT and initializing
  * Cypress on it.
  */
-export function setupSpec (spec: SpecFile) {
+function setupSpec (spec: SpecFile) {
   // @ts-ignore - TODO: figure out how to manage window.config.
   const config = window.config
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = spec
 
-  // @ts-ignore
-  const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
-
-  UnifiedRunner.eventManager.setup(config)
+  window.UnifiedRunner.eventManager.setup(config)
 
   const $runnerRoot = getRunnerElement()
 
@@ -181,14 +178,14 @@ export function setupSpec (spec: SpecFile) {
   $runnerRoot.append($container)
 
   // create new AUT
-  const autIframe = new UnifiedRunner.AutIframe('Test Project')
+  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   autIframe.showInitialBlankContents()
   $autIframe.prop('src', getSpecUrl(config.namespace, spec))
 
   // initialize Cypress (driver) with the AUT!
-  UnifiedRunner.eventManager.initialize($autIframe, config)
+  window.UnifiedRunner.eventManager.initialize($autIframe, config)
 }
 
 /**
@@ -198,13 +195,13 @@ export function setupSpec (spec: SpecFile) {
  *
  * This only needs to happen once, prior to running the first spec.
  */
-export function initialize () {
+function initialize () {
   injectRunner(setupRunner)
 }
 
 let hasInitializeReporter = false
 
-export const executeSpec = async (spec: SpecFile) => {
+const executeSpec = async (spec: SpecFile) => {
   store.setSpec(spec)
 
   await unmountReporter()
@@ -219,4 +216,12 @@ export const executeSpec = async (spec: SpecFile) => {
   hasInitializeReporter = true
 
   return setupSpec(spec)
+}
+
+export const UnifiedRunnerAPI = {
+  RUNNER_ID,
+  REPORTER_ID,
+  initialize,
+  getReporterElement,
+  executeSpec,
 }
