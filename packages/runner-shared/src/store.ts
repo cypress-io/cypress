@@ -36,5 +36,4 @@ export class BaseStore {
   @action setIsLoading (isLoading) {
     this.isLoading = isLoading
   }
-
 }
