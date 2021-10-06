@@ -31,7 +31,7 @@ describe('lib/config', () => {
       }
       const options = {}
 
-      config.mergeDefaults(cfg, options)
+      config.mergeAllConfigs(cfg, options)
 
       expect(errors.throw).have.been.calledOnce
     })
@@ -44,7 +44,7 @@ describe('lib/config', () => {
       }
       const options = {}
 
-      config.mergeDefaults(cfg, options)
+      config.mergeAllConfigs(cfg, options)
 
       expect(errors.throw).not.to.be.called
     })
@@ -1064,12 +1064,12 @@ describe('lib/config', () => {
     })
   })
 
-  context('.mergeDefaults', () => {
+  context('.mergeAllConfigs', () => {
     beforeEach(function () {
       this.defaults = (prop, value, cfg = {}, options = {}) => {
         cfg.projectRoot = '/foo/bar/'
 
-        return config.mergeDefaults(cfg, options)
+        return config.mergeAllConfigs(cfg, options)
         .then(R.prop(prop))
         .then((result) => {
           expect(result).to.deep.eq(value)
@@ -1266,35 +1266,35 @@ describe('lib/config', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeAllConfigs({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.numTestsKeptInMemory).to.eq(0)
       })
     })
 
     it('resets watchForFileChanges to false when runMode', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeAllConfigs({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.watchForFileChanges).to.be.false
       })
     })
 
     it('can override morgan in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { morgan: false })
+      return config.mergeAllConfigs({ projectRoot: '/foo/bar/' }, { morgan: false })
       .then((cfg) => {
         expect(cfg.morgan).to.be.false
       })
     })
 
     it('can override isTextTerminal in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
+      return config.mergeAllConfigs({ projectRoot: '/foo/bar/' }, { isTextTerminal: true })
       .then((cfg) => {
         expect(cfg.isTextTerminal).to.be.true
       })
     })
 
     it('can override socketId in options', () => {
-      return config.mergeDefaults({ projectRoot: '/foo/bar/' }, { socketId: 1234 })
+      return config.mergeAllConfigs({ projectRoot: '/foo/bar/' }, { socketId: 1234 })
       .then((cfg) => {
         expect(cfg.socketId).to.eq(1234)
       })
@@ -1313,7 +1313,7 @@ describe('lib/config', () => {
         },
       }
 
-      return config.mergeDefaults(obj)
+      return config.mergeAllConfigs(obj)
       .then((cfg) => {
         expect(cfg.env).to.deep.eq({
           foo: 'bar',
@@ -1344,7 +1344,7 @@ describe('lib/config', () => {
         },
       }
 
-      return config.mergeDefaults(obj, options)
+      return config.mergeAllConfigs(obj, options)
       .then((cfg) => {
         expect(cfg.env).to.deep.eq({
           host: 'localhost',
@@ -1418,7 +1418,7 @@ describe('lib/config', () => {
           port: 1234,
         }
 
-        return config.mergeDefaults(obj, options)
+        return config.mergeAllConfigs(obj, options)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
@@ -1503,7 +1503,7 @@ describe('lib/config', () => {
           },
         }
 
-        return config.mergeDefaults(obj, options)
+        return config.mergeAllConfigs(obj, options)
         .then((cfg) => {
           expect(cfg.resolved).to.deep.eq({
             animationDistanceThreshold: { value: 5, from: 'default' },
