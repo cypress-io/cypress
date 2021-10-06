@@ -295,7 +295,7 @@ export const eventManager = {
     const $window = $(window)
 
     //  TODO(lachlan): best place to do this?
-    // $window.on('hashchange', rerun)
+    $window.on('hashchange', rerun)
 
     // when we actually unload then
     // nuke all of the cookies again
@@ -544,7 +544,7 @@ export const eventManager = {
   },
 
   teardownReporter () {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
@@ -563,11 +563,12 @@ export const eventManager = {
   },
 
   async runSpec (state: BaseStore) {
-    if (!Cypress) { 
+    if (!Cypress) {
       return
     }
 
     await this.teardown(state)
+
     return this._rerun()
   },
 
