@@ -103,23 +103,23 @@ export const WIZARD_STEPS = [
   },
   {
     type: 'initializePlugins',
-    title: 'Project Setup',
-    description: 'Confirm the front-end framework and bundler fused in your project.',
+    title: 'Initializing Config...',
+    description: 'Please wait while we load your project and find browsers installed on your system.',
   },
   {
     type: 'selectFramework',
-    title: 'Initializing Config...',
-    description: 'We need to install the following packages in order for component testing to work.',
+    title: 'Project Setup',
+    description: 'Confirm the front-end framework and bundler used in your project.',
   },
   {
     type: 'installDependencies',
     title: 'Install Dev Dependencies',
-    description: 'Cypress will now create the following config file in the local directory for this project.',
+    description: 'Paste the command below into your terminal to install the required packages.',
   },
   {
     type: 'createConfig',
     title: 'Cypress.config',
-    description: 'Please wait while we load your project and find browsers installed on your system.',
+    description: 'Cypress will now create the following config file in the local directory for this project.',
   },
   {
     type: 'setupComplete',
