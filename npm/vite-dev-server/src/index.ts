@@ -16,10 +16,12 @@ export async function startDevServer (startDevServerArgs: StartDevServerOptions)
   return { port, close: app.httpServer!.close }
 }
 
-export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: Omit<InlineConfig, 'base' | 'root'>) {
+export type CypressViteDevServerConfig = Omit<InlineConfig, 'base' | 'root'>
+
+export function devServer (cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig?: CypressViteDevServerConfig) {
   return startDevServer({ options: cypressDevServerConfig, viteConfig: devServerConfig })
 }
 
-export function defineDevServerConfig (devServerConfig: Omit<InlineConfig, 'base' | 'root'>) {
+export function defineDevServerConfig (devServerConfig: CypressViteDevServerConfig) {
   return devServerConfig
 }
