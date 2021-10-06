@@ -30,7 +30,7 @@ export const logger = {
     _.each(formattedLog, (value, key) => {
       // don't log empty strings
       // _.trim([]) returns '' but we want to log empty arrays, so account for that
-      if (_.trim(value) === '' && !_.isArray(value)) return
+      if (_.isString(value) && _.trim(value) === '') return
 
       this.log(`%c${key}`, 'font-weight: bold', value)
     })

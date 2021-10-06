@@ -55,7 +55,7 @@ mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
 gql`
 fragment GlobalPage on App {
   projects {
-    ...GlobalProjectCard_Project
+    ...GlobalProjectCard
   }
 }
 `

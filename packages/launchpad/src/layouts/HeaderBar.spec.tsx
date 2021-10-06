@@ -6,10 +6,8 @@ describe('<HeaderBar />', () => {
   it('renders with functional browser menu when show-browsers prop is true', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(HeaderBarFragmentDoc, {
-      type: (ctx) => {
-        return {
-          ...ctx.stubQuery,
-        }
+      onResult: (result, ctx) => {
+        result.app.activeProject = null
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} show-browsers={true} /></div>,
     })
@@ -25,11 +23,6 @@ describe('<HeaderBar />', () => {
   it('renders without browser menu by default and other items work', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(HeaderBarFragmentDoc, {
-      type: (ctx) => {
-        return {
-          ...ctx.stubQuery,
-        }
-      },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 
@@ -44,11 +37,6 @@ describe('<HeaderBar />', () => {
   it('displays the active project name', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(HeaderBarFragmentDoc, {
-      type: (ctx) => {
-        return {
-          ...ctx.stubQuery,
-        }
-      },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><HeaderBar gql={gqlVal} /></div>,
     })
 

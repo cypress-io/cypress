@@ -55,7 +55,7 @@ fragment HeaderBar on Query {
       id
       title
     }
-      ...TopNav
+    ...TopNav
   }
   ...Auth
 }

@@ -8,11 +8,8 @@ describe('<OpenBrowserList />', () => {
   it('renders a long list of found browsers correctly', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(OpenBrowserListFragmentDoc, {
-      type: (ctx) => {
-        return {
-          ...ctx.stubApp,
-          selectedBrowser: null,
-        }
+      onResult: (result) => {
+        result.selectedBrowser = null
       },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })
@@ -28,9 +25,6 @@ describe('<OpenBrowserList />', () => {
   it('renders launch button when a browser is selected', () => {
     cy.viewport(1000, 750)
     cy.mountFragment(OpenBrowserListFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubApp
-      },
       render: (gqlVal) => <div class="resize overflow-auto border-current border-1"><OpenBrowserList gql={gqlVal} /></div>,
     })
 
