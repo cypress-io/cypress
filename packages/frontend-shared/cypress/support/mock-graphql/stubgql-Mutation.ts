@@ -40,4 +40,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return ctx.app
   },
+  generateSpecFromStory (source, args, ctx) {
+    return ctx.wizard
+  },
 }

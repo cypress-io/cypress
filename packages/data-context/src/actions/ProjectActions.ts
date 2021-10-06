@@ -2,10 +2,9 @@ import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType 
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { Maybe, ProjectShape } from '../data/coreDataShape'
-import fs from 'fs-extra'
 
 import type { DataContext } from '..'
-import { generateSpecFromStory } from '../data'
+import { generateSpecFromStory } from '../data/util/storybook'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
@@ -198,7 +197,7 @@ export class ProjectActions {
     if (this.ctx.activeProject?.isFirstTimeCT) {
       const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
 
-      fs.outputFileSync(indexHtmlPath, template)
+      this.ctx.fs.outputFileSync(indexHtmlPath, template)
     }
   }
 

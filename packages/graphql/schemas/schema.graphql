@@ -527,6 +527,18 @@ enum SpecType {
   integration
 }
 
+"""Storybook"""
+type Storybook {
+  """Whether this is the selected framework bundler"""
+  configured: Boolean
+
+  """Most recent generated spec"""
+  generatedSpec: String
+
+  """List of all Storybook stories"""
+  stories: [String!]!
+}
+
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
@@ -584,7 +596,7 @@ type Wizard {
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
   step: WizardStep!
-  storybook: WizardStorybook
+  storybook: Storybook
 
   """
   The testing type we are setting in the wizard, null if this has not been chosen
@@ -661,16 +673,4 @@ enum WizardStep {
   selectFramework
   setupComplete
   welcome
-}
-
-"""Wizard Storybook"""
-type WizardStorybook {
-  """Whether this is the selected framework bundler"""
-  configured: Boolean
-
-  """Most recent generated spec"""
-  generatedSpec: String
-
-  """List of all Storybook stories"""
-  stories: [String!]!
 }

@@ -1,8 +1,8 @@
 import { objectType } from 'nexus'
 
-export const WizardStorybook = objectType({
-  name: 'WizardStorybook',
-  description: 'Wizard Storybook',
+export const Storybook = objectType({
+  name: 'Storybook',
+  description: 'Storybook',
   definition (t) {
     t.boolean('configured', {
       description: 'Whether this is the selected framework bundler',
