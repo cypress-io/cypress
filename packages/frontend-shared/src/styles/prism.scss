@@ -1,7 +1,6 @@
 code[class*="language-"],
 pre[class*="language-"] {
-	color: $gray-800;
-	margin: 0;
+  @apply text-gray-500;
 	text-shadow: $white 0px 1px;
 }
 
@@ -12,7 +11,7 @@ pre[class*="language-"] {
 .token.constant,
 .token.symbol,
 .token.deleted {
-	color: $red-500;
+  @apply text-red-500;
 }
 
 .token.selector,
@@ -21,7 +20,7 @@ pre[class*="language-"] {
 .token.char,
 .token.builtin,
 .token.inserted {
-	color: $jade-500;
+  @apply text-jade-500;
 }
 
 .token.entity,
@@ -31,43 +30,47 @@ pre[class*="language-"] {
 .token.regex,
 .token.important,
 .token.variable {
-	color: $orange-500;
-  background: $gray-50;
+  @apply text-orange-500;
+  @apply bg-gray-50;
 }
 
 .token.operator,
 .token.punctuation {
-  color: $gray-500;
+  @apply text-gray-500;
 }
 
 .token.atrule,
 .token.attr-value,
 .token.class-name {
-	color: $indigo-500;
+  @apply text-indigo-500;
 }
 
 .token.keyword,
 .token.function {
-  color: $purple-500;
+  @apply text-purple-500;
+}
+
+.token.comment {
+  @apply text-gray-500;
 }
 
 .line-numbers .line-numbers-rows {
-	border-right: 0;
+  @apply border-r-0;
 }
 
 .line-numbers-rows > span:before {
-	color: $gray-200;
+  @apply text-gray-200;
 }
 
 .line-highlight {
-	background: linear-gradient(to right, rgba($gray-900,.1) 100%, rgba($gray-900,0));
+  @apply bg-gray-100;
 
 	&:before {
-		display: none;
+    @apply hidden;
 	}
 }
 
 .test-error-code-frame pre[data-line] {
-	padding-left: 0.5em;
-	position: relative;
+  @apply pl-2;
+  @apply relative;
 }

@@ -48,7 +48,7 @@
     </nav>
     <div
       v-if="tsInstalled"
-      class="relative"
+      class="relative p-4"
     >
       <PrismJs
         :key="language"
