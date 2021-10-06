@@ -67,7 +67,7 @@
     "empty": {
       "title": "Welcome to Cypress!",
       "helper": "Add your first project below to start testing with Cypress.",
-      "dropText": "Drag your project here or {0}",
+      "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",

@@ -1,4 +1,5 @@
-type WebkitFile = File & { path: string }
+export type WebkitFile = File & { path: string }
+
 export function getDirectoryPath (files: FileList | null) {
   if (files) {
     const file = files[0] as WebkitFile
