@@ -16,6 +16,7 @@
         v-for="project in filteredProjects"
         :key="project.id"
         :gql="project"
+        @removeProject="handleRemoveProject"
       />
     </div>
   </template>
@@ -28,13 +29,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, Ref } from 'vue'
+import { computed, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import { GlobalPageFragment, GlobalPage_AddProjectDocument } from '../generated/graphql'
+import { GlobalPageFragment, GlobalPage_AddProjectDocument, GlobalPage_RemoveProjectDocument } from '../generated/graphql'
 
 gql`
 mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
@@ -59,10 +60,26 @@ fragment GlobalPage on App {
 }
 `
 
+gql`
+mutation GlobalPage_RemoveProject($path: String!) {
+  removeProject(path: $path) {
+    projects {
+      id
+    }
+  }
+}
+`
+
 const addProject = useMutation(GlobalPage_AddProjectDocument)
 
 function handleAddProject (path: string) {
   addProject.executeMutation({ path })
+}
+
+const removeProject = useMutation(GlobalPage_RemoveProjectDocument)
+
+function handleRemoveProject (path: string) {
+  removeProject.executeMutation({ path })
 }
 
 const props = defineProps<{
