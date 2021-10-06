@@ -1,7 +1,7 @@
 <template>
   <WizardLayout
     :next="nextButtonName"
-    alt="Create file manually"
+    :alt="t('setupPage.configFile.createManually')"
     :alt-fn="altFn"
     :next-fn="createConfig"
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
@@ -75,6 +75,9 @@ import CopyButton from '@cy/components/CopyButton.vue'
 import { languages } from '../utils/configFile'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment ConfigFile on Query {

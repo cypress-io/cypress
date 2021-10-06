@@ -58,6 +58,9 @@
     },
     "openBrowser": {
       "launch": "Launch"
+    },
+    "configFile": {
+      "createManually": "Create file manually"
     }
   },
   "globalPage": {
