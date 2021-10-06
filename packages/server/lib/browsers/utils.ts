@@ -134,7 +134,7 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
 
 function removeFunctionsInObject (serializedObj) {
   if (serializedObj) {
-    for (const key of serializedObj) {
+    for (const key in serializedObj) {
       if (typeof serializedObj[key] === 'function') {
         delete serializedObj[key]
       } else if (typeof serializedObj[key] === 'object') {
