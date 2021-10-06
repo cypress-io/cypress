@@ -220,7 +220,6 @@ const parseOpts = (opts) => {
     'reporterOptions',
     'record',
     'runProject',
-    'slow',
     'spec',
     'tag')
 

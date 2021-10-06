@@ -70,10 +70,10 @@ const getParentTitle = function (runnable, titles) {
   return titles
 }
 
-const createSuite = function (obj, parent, slow) {
+const createSuite = function (obj, parent, slowTestThreshold) {
   const suite = new Mocha.Suite(obj.title, {})
 
-  suite.slow(slow)
+  suite.slow(slowTestThreshold)
 
   if (parent) {
     suite.parent = parent
@@ -85,7 +85,7 @@ const createSuite = function (obj, parent, slow) {
   return suite
 }
 
-const createRunnable = function (obj, parent, slow) {
+const createRunnable = function (obj, parent, slowTestThreshold) {
   let fn
   const { body } = obj
 
@@ -108,7 +108,7 @@ const createRunnable = function (obj, parent, slow) {
   runnable._currentRetry = obj._currentRetry
   // Because of the way we create the runnables without belonging to an instantiated mocha object,
   // we have to set the 'slow' speed for each test and suite individually
-  runnable.slow(slow)
+  runnable.slow(slowTestThreshold)
 
   if (runnable.body == null) {
     runnable.body = body
@@ -255,7 +255,7 @@ const reporters = {
 }
 
 class Reporter {
-  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot, slow) {
+  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot, slowTestThreshold) {
     if (!(this instanceof Reporter)) {
       return new Reporter(reporterName)
     }
@@ -263,7 +263,7 @@ class Reporter {
     this.reporterName = reporterName
     this.projectRoot = projectRoot
     this.reporterOptions = reporterOptions
-    this.slow = slow
+    this.slowTestThreshold = slowTestThreshold
     this.normalizeTest = this.normalizeTest.bind(this)
   }
 
@@ -308,7 +308,7 @@ class Reporter {
       switch (type) {
         case 'suite':
           // eslint-disable-next-line no-case-declarations
-          const suite = createSuite(runnableProps, parent, this.slow)
+          const suite = createSuite(runnableProps, parent, this.slowTestThreshold)
 
           suite.tests = _.map(runnableProps.tests, (testProps) => {
             return this._createRunnable(testProps, 'test', suite)
@@ -320,7 +320,7 @@ class Reporter {
 
           return suite
         case 'test':
-          return createRunnable(runnableProps, parent, this.slow)
+          return createRunnable(runnableProps, parent, this.slowTestThreshold)
         default:
           throw new Error(`Unknown runnable type: '${type}'`)
       }

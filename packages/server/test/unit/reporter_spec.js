@@ -95,7 +95,7 @@ describe('lib/reporter', () => {
       expect(junitFn).to.be.calledWith(reporter.runner)
     })
 
-    it('passes the slow option through to mocha', function () {
+    it('passes the slowTestThreshold option through to mocha', function () {
       const reporter = new Reporter('spec', {}, undefined, 2000)
 
       reporter.setRunnables(this.root)

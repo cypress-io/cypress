@@ -44,10 +44,10 @@
           "default": null,
           "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
         },
-        "slow": {
+        "slowTestThreshold": {
           "type": "number",
           "default": 5000,
-          "description": "Slow test timeout passed to mocha. See See https://on.cypress.io/configuration#Global"
+          "description": "Slow test slowTestThreshold passed to mocha. See https://on.cypress.io/configuration#Global"
         },
         "testFiles": {
           "type": [
@@ -84,7 +84,7 @@
         },
         "requestTimeout": {
           "type": "number",
-          "default": 5000,
+          "default": 10000,
           "description": "Time, in milliseconds, to wait for an XHR request to go out in a cy.wait() command"
         },
         "responseTimeout": {

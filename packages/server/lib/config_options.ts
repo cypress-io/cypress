@@ -217,8 +217,8 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'slow',
-    defaultValue: 5000,
+    name: 'slowTestThreshold',
+    defaultValue: 10000,
     validation: v.isNumber,
   }, {
     name: 'socketId',

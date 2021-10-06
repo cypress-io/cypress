@@ -94,7 +94,7 @@ declare namespace CypressCommandLine {
     /**
      * Specify a slow test threshold in milliseconds
      */
-    slow: number
+    slowTestThreshold: number
     /**
      * Specify the specs to run
      */

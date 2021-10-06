@@ -2574,9 +2574,9 @@ declare namespace Cypress {
     reporterOptions: { [key: string]: any }
     /**
      * A slow test threshold in milliseconds
-     * @default 5000
+     * @default 10000
      */
-    slow: number | null
+    slowTestThreshold: number | null
     /**
      * Whether Cypress will watch and restart tests on test file changes
      * @default true
@@ -2599,7 +2599,7 @@ declare namespace Cypress {
     pageLoadTimeout: number
     /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
-     * @default 5000
+     * @default 10000
      */
     requestTimeout: number
     /**
