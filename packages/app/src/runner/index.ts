@@ -15,7 +15,7 @@
  *
  */
 import { store, Store } from '../store'
-import { injectRunner } from './injectBundle'
+import { injectBundle } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
 import { getRunnerElement } from './utils'
@@ -110,7 +110,7 @@ function setupSpec (spec: SpecFile) {
  * This only needs to happen once, prior to running the first spec.
  */
 function initialize () {
-  injectRunner(setupRunner)
+  injectBundle(setupRunner)
 }
 
 /**

@@ -13,7 +13,7 @@ function injectReporterStyle () {
   document.head.appendChild(style)
 }
 
-export async function injectRunner (ready: () => void) {
+export async function injectBundle (ready: () => void) {
   const response = await window.fetch('/api')
   const data = await response.json()
   const script = document.createElement('script')
