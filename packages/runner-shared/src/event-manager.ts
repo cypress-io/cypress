@@ -334,7 +334,7 @@ export const eventManager = {
       window.Cypress = Cypress
     }
 
-    this._addListeners(Cypress)
+    this._addListeners()
 
     ws.emit('watch:test:file', config.spec)
   },
@@ -346,7 +346,6 @@ export const eventManager = {
   },
 
   initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
-    console.log('Initialize')
     performance.mark('initialize-start')
 
     return Cypress.initialize({
@@ -544,11 +543,19 @@ export const eventManager = {
     selectorPlaygroundModel.setOpen(false)
   },
 
-  async _rerun () {
-    await new Promise(resolve => {
+  teardownReporter () {
+    return new Promise(resolve => {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
+  },
+
+  async _rerun () {
+    await this.teardownReporter()
+    // await new Promise(resolve => {
+    //   reporterBus.once('reporter:restarted', resolve)
+    //   reporterBus.emit('reporter:restart:test:run')
+    // })
 
     // this probably isn't 100% necessary
     // since Cypress will fall out of scope

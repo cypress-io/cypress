@@ -61,6 +61,7 @@ const events: Events = {
     const { appState, runnablesStore, scroller, statsStore } = this
 
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable: RootRunnable = {}) => {
+      console.log('runnables:ready => setRunnables', rootRunnable)
       runnablesStore.setRunnables(rootRunnable)
     }))
 

@@ -8,6 +8,8 @@ export default makeConfig({
     include: [
       '@urql/core',
       'vue-i18n',
+      '@cypress/vue',
+      '@vue/test-utils',
       'vue-router',
       '@urql/devtools',
       '@urql/exchange-graphcache',

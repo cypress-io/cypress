@@ -1,48 +1,3 @@
-interface ConnectionInfo { 
-  automationElement: '__cypress-string',
-  randomString: string 
-}
-
-/**
- * The eventManager and driver are bundled separately
- * by webpack. We cannot import them because of
- * circular dependencies.
- * To work around this, we build the driver, eventManager
- * and some other dependencies using webpack, and consumed the dist'd
- * source code.
- * 
- * This is attached to `window` under the `UnifiedRunner` namespace.
- */
-export interface UnifiedRunner {
-  /**
-   * decode config, which we receive as a base64 string
-   * This comes from Driver.utils
-   */
-  decodeBase64: (base64: string) => Record<string, unknown>
-
-  /**
-   * Proxy event to the reporter via `Reporter.defaultEvents.emit`
-   */
-  emit (evt: string, ...args: unknown[]): void
-
-  /**
-   * This is the eventManager which orchestrates all the communication
-   * between the reporter, driver, and server, as well as handle
-   * setup, teardown and running of specs.
-   * 
-   * It's only used on the "Runner" part of the unified runner.
-   */
-  eventManager: {
-    addGlobalListeners: (state: Store, connectionInfo: ConnectionInfo) => void
-    setup: (config: Record<string, unknown>) => void
-    initialize: ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, unknown>) => void
-    teardown: (state: Store) => Promise<void>
-    [key: string]: any
-  }
-
-  AutIframe: typeof AutIframe
-}
-
 /**
  * There are several primary "phases" involved in running a spec. They are
  * - Teardown Phase
@@ -124,8 +79,8 @@ export interface UnifiedRunner {
 
 import { store, Store } from './store'
 import { injectRunner } from './runner/renderRunner'
-import type { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
 import type { SpecFile } from '@packages/types/src/spec'
+import { renderReporter } from './runner/renderReporter'
 
 function getRunnerElement () {
   const el = document.querySelector<HTMLElement>('#unified-runner')
@@ -135,7 +90,7 @@ function getRunnerElement () {
   return el
 }
 
-function getReporterElement () {
+export function getReporterElement () {
   const el = document.querySelector<HTMLElement>('#unified-reporter')
   if (!el) {
     throw Error('Expected element with #unified-reporter but did not find it.')
@@ -152,24 +107,49 @@ function empty (el: HTMLElement) {
 const randomString = `${Math.random()}`
 
 /**
+ * Reporter is not designed to have "no" spec selected.
+ * For now, setting the spec to __all accomplishes a similar effect
+ */
+const NULL_SPEC: SpecFile = {
+  relative: '__all',
+  absolute: '__all',
+  name: 'All Specs'  
+}
+
+/**
  * One-time setup. Required `window.UnifiedRunner` to exist,
  * so passed as a callback to `renderRunner`, which injects `UnifiedRunner`
  * onto `window`.
  */
 function setupRunner () {
-  // @ts-ignore
-  const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
-
-  UnifiedRunner.eventManager.addGlobalListeners(store, {
+  window.UnifiedRunner.eventManager.addGlobalListeners(store, {
     automationElement: '__cypress-string',
     randomString
   })
 }
 
+export function setupReporter () {
+ // Teardown reporter. Ideally we should reuse the existing reporter, 
+ // I am having trouble getting it to update, since it relies on React and props changing.
+  const $reporterRoot = getReporterElement()
+
+  renderReporter($reporterRoot, store, window.UnifiedRunner.eventManager)
+}
+
+/**
+ * Get the URL for the spec. This is the URL of the AUT IFrame.
+ */
 export function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
+
+/**
+ * Clean up the current Cypress instance and anything else prior to
+ * running a new spec.
+ * This should be called before you execute a spec,
+ * or re-running the current spec.
+ */
 export function teardownSpec (store: Store) {
   // @ts-ignore
   const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
@@ -177,6 +157,10 @@ export function teardownSpec (store: Store) {
   return UnifiedRunner.eventManager.teardown(store)
 }
 
+/**
+ * Set up a spec by creating a fresh AUT and initializing 
+ * Cypress on it.
+ */
 export function setupSpec (spec: SpecFile) {
   // @ts-ignore - TODO: figure out how to manage window.config.
   const config = window.config
@@ -208,6 +192,13 @@ export function setupSpec (spec: SpecFile) {
   UnifiedRunner.eventManager.initialize($autIframe, config)
 }
 
+/**
+ * Inject the global `UnifiedRunner` via a <script src="..."> tag.
+ * which includes the event manager and AutIframe constructor.
+ * It is bundlded via webpack and consumed like a third party module.
+ * 
+ * This only needs to happen once, prior to running the first spec.
+ */
 export function initialize () {
   injectRunner(setupRunner)
 }

@@ -10,35 +10,15 @@
     
     <div id="unified-runner" />
     <div id="unified-reporter" />
+    <button @click="setupReporter">Setup</button>
+    <button @click="unmountReporter">Teardown</button>
   </div>
 </template>
 
-<script lang="ts">
-// import { toJS } from 'mobx'
-
-// let _config: any
-// let _projectName: string
-
-// export const runSpec = () => {
-//   console.log(toJS(store.spec))
-//   if (!store.spec) {
-//     return
-//   }
-
-//   const reporterEl = document.createElement('div')
-//   reporterEl.id = 'reporter-root'
-//   const el = document.querySelector<HTMLDivElement>('#reporter-vue')!
-//   el.appendChild(reporterEl)
-
-//   renderReporter(el, store.spec, window.UnifiedRunner.eventManager)
-//   window.UnifiedRunner.start({ config: _config, projectName: _projectName, store, spec: store.spec })
-// }
-
-</script>
-
 <script lang="ts" setup>
-import { onMounted } from 'vue'
-import { initialize, setupSpec, teardownSpec } from '../runner'
+import { onMounted, ref } from 'vue'
+import { initialize, setupReporter, setupSpec, teardownSpec, } from '../runner'
+import { unmountReporter } from '../runner/renderReporter'
 import { store } from '../store'
 
 const s1 = {
@@ -55,15 +35,35 @@ const s2 = {
 
 const specs = [s1, s2]
 
+store.setSpec(s1)
+
+
+const delay = () => new Promise(res => setTimeout(res, 0))
+
+const first = ref(true)
+
 const executeSpec = async (spec: typeof s1) => {
+  store.setSpec(spec)
+
+  await unmountReporter()
+
+  if (first.value === false) {
+    await window.UnifiedRunner.eventManager.teardownReporter()
+  }
+
+  await delay()
   await teardownSpec(store)
+
+  await delay()
+  setupReporter()
+  await delay()
+  first.value = false
   return setupSpec(spec)
 }
 
 store.setSpecs([s1, s2])
 
 onMounted(() => {
-  console.log('Mounted. Initializing...')
   initialize()
 })
 
