@@ -32,4 +32,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   clearActiveProject () {
     return stubQuery
   },
+  removeProject () {
+    return stubApp
+  },
 }

@@ -73,7 +73,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'projectSelected', project: GlobalProjectCard_ProjectFragment): void
-  (event: 'removeProject', project: GlobalProjectCard_ProjectFragment): void
+  (event: 'removeProject', path: string): void
 }>()
 </script>
 
