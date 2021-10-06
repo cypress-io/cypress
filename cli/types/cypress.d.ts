@@ -2503,7 +2503,7 @@ declare namespace Cypress {
      * Return the setup of your server
      * @param options the dev server options to pass directly to the dev-server
      */
-    devServer(cypressDevServerConfig: Cypress.DevServerConfig, devServerConfig: T): ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+    devServer(cypressDevServerConfig: DevServerConfig, devServerConfig: T): ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
     devServerOptions?: T
   }
 
@@ -2912,7 +2912,7 @@ declare namespace Cypress {
   & {
     component?: {
       // make devServer required in component
-      devServer: TestingTypeConfigComponent['devServer'], 
+      devServer: TestingTypeConfigComponent['devServer'],
     }
   }
 
