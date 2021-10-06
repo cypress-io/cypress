@@ -8,6 +8,12 @@ export async function unmountReporter () {
   ReactDOM.unmountComponentAtNode(getReporterElement())
 }
 
+class EmptyHeader extends React.Component {
+  render () {
+    return React.createElement('div')
+  }
+}
+
 export function renderReporter (
   root: HTMLElement, 
   store: Store,
@@ -22,9 +28,10 @@ export function renderReporter (
     error: null, // errorMessages.reporterError(props.state.scriptError, props.state.spec.relative),
     resetStatsOnSpecChange: true,
     experimentalStudioEnabled: false,
-    // TODO: These props
-    // renderReporterHeader: renderReporterHeader,
-    // className: cs({ 'display-none': props.state.screenshotting }, styles.reporter),
+    // TODO: Are we re-skinning the CommandLog header?
+    // If so, with React or Vue?
+    // For now, just render and empty div.
+    renderReporterHeader: (props) => React.createElement(EmptyHeader, props)
   })
 
   ReactDOM.render(reporter, root)
