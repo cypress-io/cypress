@@ -47,30 +47,33 @@
 </template>
 
 <script lang="ts" setup>
+import { getDirectoryPath } from '../utils/getDirectoryPath'
 import { useI18n } from '@cy/i18n'
 import IconPlaceholder from '~icons/icons8/circle-thin'
 import { FileSelector, Dropzone } from 'vue3-file-selector'
 import { ref, watch, onMounted } from 'vue'
 
 const { t } = useI18n()
-const files = ref<File[]>([])
+const files = ref<FileList>([] as any)
 const uploadName = ref('')
 const projectUpload = ref<HTMLDivElement>()
 
-const selectProject = (file: File) => {
-  uploadName.value = file.name
-}
+const emits = defineEmits<{
+  (e: 'addProject', value: string): void
+}>()
 
 watch(files, (newVal) => {
-  const uploadLength = newVal.length
-  const latestUpload = newVal[uploadLength - 1]
-
-  selectProject(latestUpload)
+  if (newVal.length) {
+    emits('addProject', getDirectoryPath(newVal as FileList))
+  }
 })
 
 onMounted(() => {
   // TODO: remove this when vue3-file-selector supports setting this attribute
-  projectUpload.value?.querySelector('input[type=file]')?.setAttribute('webkitdirectory', 'webkitdirectory')
+  const fileRef = projectUpload.value?.querySelector('input[type=file]')
+
+  fileRef?.setAttribute('webkitdirectory', 'webkitdirectory')
+  fileRef?.setAttribute('webkitRelativePath', 'webkitRelativePath')
 })
 
 </script>

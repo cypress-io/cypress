@@ -1,9 +1,9 @@
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
-import { app } from './testApp'
-import { wizard } from './testWizard'
+import { stubApp } from './testApp'
+import { stubWizard } from './testWizard'
 
-export const query: CodegenTypeMap['Query'] = {
+export const stubQuery: CodegenTypeMap['Query'] = {
   __typename: 'Query',
-  app,
-  wizard,
+  app: stubApp,
+  wizard: stubWizard,
 }
