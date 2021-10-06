@@ -14,11 +14,9 @@ module.exports = defineConfig({
   viewportHeight: 500,
   componentFolder: 'src',
   nodeVersion: 'system',
-
   env: {
     coverage: true,
   },
-
   e2e: {
     setupNodeEvents (on, config) {
       devServer(on, config, {

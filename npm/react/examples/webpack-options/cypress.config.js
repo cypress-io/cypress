@@ -2,9 +2,7 @@ const { defineConfig } = require('cypress')
 
 // @ts-check
 const path = require('path')
-
 const { startDevServer } = require('@cypress/webpack-dev-server')
-
 const babelConfig = require('../../babel.config')
 
 module.exports = defineConfig({
@@ -13,7 +11,6 @@ module.exports = defineConfig({
   testFiles: '**/*cy-spec.js',
   viewportWidth: 500,
   viewportHeight: 500,
-
   e2e: {
     setupNodeEvents (on, config) {
       /** @type import("webpack").Configuration */

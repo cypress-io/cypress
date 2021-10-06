@@ -9,11 +9,9 @@ module.exports = defineConfig({
   viewportHeight: 800,
   experimentalFetchPolyfill: true,
   componentFolder: 'cypress/components',
-
   env: {
     coverage: true,
   },
-
   e2e: {
     setupNodeEvents (on, config) {
       devServer(on, config)

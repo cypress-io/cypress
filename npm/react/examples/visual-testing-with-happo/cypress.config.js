@@ -14,7 +14,6 @@ module.exports = defineConfig({
   viewportWidth: 400,
   viewportHeight: 700,
   componentFolder: 'src',
-
   e2e: {
     setupNodeEvents (on, config) {
       on('task', happoTask)

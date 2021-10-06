@@ -17,7 +17,6 @@ module.exports = defineConfig({
   viewportWidth: 1000,
   viewportHeight: 1000,
   componentFolder: "src",
-
   e2e: {
     setupNodeEvents(on, config) {
       addMatchImageSnapshotPlugin(on, config);

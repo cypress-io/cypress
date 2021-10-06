@@ -2,7 +2,6 @@ const { defineConfig } = require('cypress')
 
 /// <reference types="cypress" />
 const { startDevServer } = require('@cypress/webpack-dev-server')
-
 const webpackConfig = require('../../webpack.config')
 
 module.exports = defineConfig({
@@ -10,7 +9,6 @@ module.exports = defineConfig({
   fixturesFolder: false,
   testFiles: '**/*.spec.js',
   video: false,
-
   e2e: {
     setupNodeEvents (on, config) {
       on('dev-server:start', (options) => {

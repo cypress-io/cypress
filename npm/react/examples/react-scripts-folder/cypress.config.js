@@ -13,7 +13,6 @@ module.exports = defineConfig({
   viewportWidth: 500,
   viewportHeight: 800,
   componentFolder: 'cypress/component',
-
   e2e: {
     setupNodeEvents (on, config) {
       devServer(on, config)

@@ -2,7 +2,6 @@ const { defineConfig } = require('cypress')
 
 /// <reference types="cypress" />
 const { startDevServer } = require('@cypress/webpack-dev-server')
-
 const webpackConfig = require('@vue/cli-service/webpack.config')
 
 module.exports = defineConfig({
@@ -10,7 +9,6 @@ module.exports = defineConfig({
   fixturesFolder: false,
   testFiles: '**/*spec.js',
   componentFolder: 'src',
-
   e2e: {
     setupNodeEvents (on, config) {
       on('dev-server:start', (options) => {
