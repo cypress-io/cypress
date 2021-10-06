@@ -32,7 +32,7 @@ import { openProject } from '../open_project'
 import specsUtil from '../util/specs'
 
 import { setDataContext, startGraphQLServer } from '@packages/graphql/src/server'
-import { getProjectRoots, insertProject } from '@packages/server/lib/cache'
+import { getProjectRoots, insertProject, removeLatestProjects } from '@packages/server/lib/cache'
 import { checkAuthQuery } from '@packages/graphql/src/stitching/remoteGraphQLCalls'
 import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import type { EventEmitter } from 'events'
@@ -539,6 +539,9 @@ module.exports = {
         },
         findSpecs (payload: FindSpecs) {
           return specsUtil.findSpecs(payload)
+        },
+        clearLatestProjectsCache () {
+          return removeLatestProjects()
         },
       },
     })

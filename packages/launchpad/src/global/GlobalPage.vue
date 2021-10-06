@@ -21,7 +21,10 @@
   </template>
 
   <!-- Else, show the empty state -->
-  <GlobalEmpty v-else />
+  <GlobalEmpty
+    v-else
+    @add-project="handleAddProject"
+  />
 </template>
 
 <script setup lang="ts">
@@ -31,21 +34,21 @@ import WelcomeGuide from './WelcomeGuide.vue'
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import GlobalPageHeader from './GlobalPageHeader.vue'
 import GlobalEmpty from './GlobalEmpty.vue'
-import type { GlobalPageFragment } from '../generated/graphql'
+import { GlobalPageFragment, GlobalPage_AddProjectDocument } from '../generated/graphql'
 
-const addProjectMutation = gql`
-  mutation GlobalPage_addProject($path: String!) {
-    addProject(path: $path) {
-      projects {
-        id
-        title
-        projectId
-        projectRoot
-        isFirstTimeCT
-        isFirstTimeE2E
-      }
+gql`
+mutation GlobalPage_addProject($path: String!, $open: Boolean = true) {
+  addProject(path: $path, open: $open) {
+    projects {
+      id
+      title
+      projectId
+      projectRoot
+      isFirstTimeCT
+      isFirstTimeE2E
     }
   }
+}
 `
 
 gql`
@@ -56,7 +59,7 @@ fragment GlobalPage on App {
 }
 `
 
-const addProject = useMutation(addProjectMutation)
+const addProject = useMutation(GlobalPage_AddProjectDocument)
 
 function handleAddProject (path: string) {
   addProject.executeMutation({ path })

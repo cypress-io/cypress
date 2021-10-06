@@ -1,4 +1,4 @@
-import type { MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { Maybe } from '../data/coreDataShape'
@@ -17,6 +17,7 @@ export interface ProjectApiShape {
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
+  clearLatestProjectsCache(): Promise<unknown>
 }
 
 export class ProjectActions {
@@ -24,6 +25,12 @@ export class ProjectActions {
 
   private get api () {
     return this.ctx._apis.projectApi
+  }
+
+  clearActiveProject () {
+    this.ctx.appData.activeProject = null
+
+    return
   }
 
   async setActiveProject (projectRoot: string) {
@@ -93,12 +100,22 @@ export class ProjectActions {
     //
   }
 
-  async addProject (projectRoot: string) {
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+  async addProject (args: MutationAddProjectArgs) {
+    const dirStat = await this.ctx.fs.stat(args.path)
+
+    if (!dirStat.isDirectory()) {
+      throw new Error(`Cannot add ${args.path} as a project, it is not a directory`)
+    }
+
+    const found = this.ctx.projectsList.find((x) => x.projectRoot === args.path)
 
     if (!found) {
-      this.ctx.coreData.app.projects.push({ projectRoot })
-      this.api.insertProjectToCache(projectRoot)
+      this.ctx.coreData.app.projects.push({ projectRoot: args.path })
+      this.api.insertProjectToCache(args.path)
+    }
+
+    if (args.open) {
+      await this.setActiveProject(args.path)
     }
   }
 
@@ -135,5 +152,9 @@ export class ProjectActions {
     }
 
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
+  }
+
+  async clearLatestProjectCache () {
+    await this.api.clearLatestProjectsCache()
   }
 }

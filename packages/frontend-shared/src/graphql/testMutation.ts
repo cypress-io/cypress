@@ -4,6 +4,7 @@ import path from 'path'
 
 import { stubApp } from './testApp'
 import type { ClientTestContext } from '..'
+import { stubQuery } from './testQuery'
 
 type MaybeResolver<T> = {
   [K in keyof T]: K extends 'id' | '__typename' ? T[K] : T[K] | ((source: unknown, args: any, ctx: ClientTestContext, info: GraphQLResolveInfo) => MaybeResolver<T[K]>)
@@ -27,5 +28,8 @@ export const stubMutation: MaybeResolver<Mutation> = {
   },
   setActiveProject (source, args) {
     return stubApp
+  },
+  clearActiveProject () {
+    return stubQuery
   },
 }
