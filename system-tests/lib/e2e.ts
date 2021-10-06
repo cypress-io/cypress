@@ -1,4 +1,4 @@
-import { expect, root } from '../../spec_helper'
+import { expect } from './spec_helper'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -15,15 +15,15 @@ const snapshot = require('snap-shot-it')
 const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
-const { fs } = require(`${root}../lib/util/fs`)
-const { allowDestroy } = require(`${root}../lib/util/server_destroy`)
-const cypress = require(`${root}../lib/cypress`)
-const screenshots = require(`${root}../lib/screenshots`)
-const videoCapture = require(`${root}../lib/video_capture`)
-const settings = require(`${root}../lib/util/settings`)
+const { fs } = require(`@packages/server/lib/util/fs`)
+const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
+const cypress = require(`@packages/server/lib/cypress`)
+const screenshots = require(`@packages/server/lib/screenshots`)
+const videoCapture = require(`@packages/server/lib/video_capture`)
+const settings = require(`@packages/server/lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
-require(`${root}../lib/project-base`)
+require(`@packages/server/lib/project-base`)
 
 cp = Bluebird.promisifyAll(cp)
 

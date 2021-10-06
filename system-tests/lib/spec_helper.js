@@ -1,6 +1,6 @@
 const root = '@packages/server'
 
-require(`${root}/lib/environment`)
+require(`@packages/server/lib/environment`)
 
 const chai = require('chai')
 
@@ -16,7 +16,7 @@ global.sinon = require('sinon')
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
-const cache = require(`${root}/lib/cache`)
+const cache = require(`@packages/server/lib/cache`)
 
 require('chai')
 .use(require('@cypress/sinon-chai'))

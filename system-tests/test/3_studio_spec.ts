@@ -1,11 +1,10 @@
 import path from 'path'
 import snapshot from 'snap-shot-it'
 
-import { root } from '../lib/spec_helper'
 import e2e from '../lib/e2e'
 import { projectPath } from '../lib/fixtures'
 
-const { fs } = require(`${root}/lib/util/fs`)
+const { fs } = require(`@packages/server/lib/util/fs`)
 
 const project = projectPath('studio')
 
