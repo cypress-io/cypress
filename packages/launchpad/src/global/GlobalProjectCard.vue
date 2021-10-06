@@ -3,7 +3,7 @@
     <div class="flex-1 min-w-0">
       <button
         class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
-        @dblclick="setActiveProject(props.gql.projectRoot)"
+        @click="setActiveProject(props.gql.projectRoot)"
       >
         <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">
           {{ props.gql.title }}
@@ -17,11 +17,23 @@
 </template>
 
 <script setup lang="ts">
-import { gql } from '@urql/vue'
-import { useSetActiveProject } from '@packages/frontend-shared/src/composables'
-import { GlobalProjectCardFragment } from '../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
 
-const { setActiveProject } = useSetActiveProject()
+gql`
+mutation GlobalProjectCard_setActiveProject($path: String!) {
+  setActiveProject(path: $path) {
+    activeProject {
+      id
+      title
+      projectId
+      projectRoot
+      isFirstTimeCT
+      isFirstTimeE2E
+    }
+  }
+}
+`
 
 gql`
 fragment GlobalProjectCard on Project {
@@ -35,6 +47,12 @@ fragment GlobalProjectCard on Project {
   }
 }
 `
+
+const setActiveProjectMutation = useMutation(GlobalProjectCard_SetActiveProjectDocument)
+
+const setActiveProject = (project: string) => {
+  setActiveProjectMutation.executeMutation({ path: project })
+}
 
 const props = defineProps<{
   gql: GlobalProjectCardFragment

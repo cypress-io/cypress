@@ -4,6 +4,14 @@ import { MaybeResolver, testNodeId } from './clientTestUtils'
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
+export const allBundlers = BUNDLERS.map((bundler, idx) => {
+  return {
+    ...testNodeId('WizardBundler'),
+    isSelected: idx === 0,
+    ...bundler,
+  }
+})
+
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
   canNavigateForward: true,
@@ -23,13 +31,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
       package: '@cypress/webpack-dev-server',
     },
   ],
-  allBundlers: BUNDLERS.map((bundler, idx) => {
-    return {
-      ...testNodeId('WizardBundler'),
-      isSelected: idx === 0,
-      ...bundler,
-    }
-  }),
+  allBundlers,
   sampleCode: `
     import { startDevServer } from '@cypress/vite-dev-server'
 

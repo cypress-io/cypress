@@ -1,13 +1,12 @@
 import { cloneDeep } from 'lodash'
-import type { Bundler, BUNDLERS, FrontendFramework, TestingType } from '@packages/types'
 import type { CloudUser } from '../generated/test-cloud-graphql-types.gen'
-import type { WizardStep, NavItem, Project, Browser } from '../generated/test-graphql-types.gen'
+import type { WizardStep, NavItem, Project, Browser, WizardBundler, WizardFrontendFramework, TestingTypeEnum } from '../generated/test-graphql-types.gen'
 import { resetTestNodeIdx, testNodeId } from './clientTestUtils'
 import * as cloudTypes from './stubgql-CloudTypes'
 import { stubNavigationMenu } from './stubgql-NavigationMenu'
 import { createTestProject } from './stubgql-Project'
 import { longBrowsersList } from './stubgql-App'
-import { stubWizard } from './stubgql-Wizard'
+import { allBundlers } from './stubgql-Wizard'
 
 export interface ClientTestContext {
   app: {
@@ -21,12 +20,12 @@ export interface ClientTestContext {
   wizard: {
     step: WizardStep
     canNavigateForward: boolean
-    chosenTestingType: TestingType | null
-    chosenBundler: Bundler | null
-    chosenFramework: FrontendFramework | null
+    chosenTestingType: TestingTypeEnum | null
+    chosenBundler: WizardBundler | null
+    chosenFramework: WizardFrontendFramework | null
     chosenManualInstall: boolean
     currentStep: WizardStep
-    allBundlers: typeof BUNDLERS
+    allBundlers: WizardBundler[]
     history: WizardStep[]
     chosenBrowser: null
   }
@@ -70,7 +69,7 @@ export function makeClientTestContext (): ClientTestContext {
       chosenFramework: null,
       chosenManualInstall: false,
       currentStep: 'welcome',
-      allBundlers: stubWizard.allBundlers as any,
+      allBundlers,
       history: ['welcome'],
       chosenBrowser: null,
     },

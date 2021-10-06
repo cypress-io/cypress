@@ -45,6 +45,13 @@ describe('<GlobalPage />', { viewportHeight: 900, viewportWidth: 1200 }, () => {
       cy.findByText(anotherTestProject).should('be.visible')
     })
 
+    it('can add a project when clicking the button', () => {
+      cy.get('input[type=file]')
+      .attachFileWithPath('absolute/path/to/yet-another-test-project/cypress.json')
+      .trigger('change', { force: true })
+      // .findByText('yet-another-test-project').should('be.visible')
+    })
+
     describe('Welcome Guide', () => {
       it('renders the welcome guide', () => {
         cy.findByText(defaultMessages.welcomeGuide.header.description).should('be.visible')

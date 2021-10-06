@@ -30,4 +30,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return ctx.app
   },
+  clearActiveProject (source, args, ctx) {
+    ctx.app.activeProject = null
+
+    return {}
+  },
 }
