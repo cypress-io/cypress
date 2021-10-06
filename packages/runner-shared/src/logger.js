@@ -30,14 +30,8 @@ export const logger = {
     _.each(formattedLog, (value, key) => {
       // don't log empty strings
       // _.trim([]) returns '' but we want to log empty arrays, so account for that
-      // If value is a javascript object that isn't an array or null we need to stringify object.
-      if (value
-        && typeof value === 'object'
-        && !_.isArray(value)) {
-        value = JSON.stringify(value)
-      }
-
-      if (_.trim(value) === '' && !_.isArray(value)) return
+      // Return early if a javascript object that isn't an Array.
+      if (!_.isArray(value) && typeof value === 'object' && _.trim(value) === '') return
 
       this.log(`%c${key}`, 'font-weight: bold', value)
     })
