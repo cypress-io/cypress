@@ -64,7 +64,7 @@ const emits = defineEmits<{
 
 watch(files, (newVal) => {
   if (newVal.length) {
-    emits('addProject', getDirectoryPath(newVal))
+    emits('addProject', getDirectoryPath(newVal as FileList))
   }
 })
 
