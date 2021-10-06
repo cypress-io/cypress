@@ -172,7 +172,7 @@ function generateSpecFromCsf (parsed: CsfFile, storyFile: path.ParsedPath) {
   const getDependency = () => {
     return (isReact
       ? `import { mount, composeStories } from "@cypress/react"`
-      : `import { mount } from "@cypress/vue"\nimport { composeStories } from "@cypress/vue"`)
+      : `import { mount } from "@cypress/vue"\nimport { composeStories } from "@storybook/testing-vue3"`)
   }
   const getMountSyntax = (component: string) => {
     return isReact ? `<${component} />` : `${component}()`
