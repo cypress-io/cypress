@@ -4,9 +4,7 @@
   </div>
 
   <div v-else-if="viewer">
-    <p>
-      Congrats {{ viewer?.email }}, you authenticated with Cypress Cloud.
-    </p>
+    <p>Congrats {{ viewer?.email }}, you authenticated with Cypress Cloud.</p>
     <Button @click="handleLogout">
       Log out
     </Button>
@@ -17,7 +15,7 @@
       size="lg"
       @click="handleAuth"
     >
-      Login
+      {{ t('topNav.login.actionLogin') }}
     </Button>
   </div>
 </template>
@@ -81,4 +79,6 @@ const handleLogout = async () => {
 }
 
 const viewer = computed(() => props.gql?.cloudViewer)
+
+const { t } = useI18n()
 </script>

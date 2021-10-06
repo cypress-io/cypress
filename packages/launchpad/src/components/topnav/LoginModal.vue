@@ -10,7 +10,7 @@
       <div class="relative w-480px mx-auto bg-white rounded">
         <div class="border-b-1px min-h-64px flex justify-between items-center px-24px">
           <DialogTitle class="text-gray-900 text-18px">
-            Login To Cypress
+            {{ t('topNav.login.titleInitial') }}
           </DialogTitle>
           <button @click="setIsOpen(false)">
             Close
@@ -18,11 +18,16 @@
         </div>
 
         <DialogDescription class="p-24px text-gray-700 font-normal">
-          Logging in gives you access to the
+          <i18n-t keypath="topNav.login.bodyInitial">
+            <a
+              href="https://docs.cypress.io"
+              target="_blank"
+            >{{ t('topNav.login.dashboard') }}</a>
+          </i18n-t>
           <a
             href="https://on.cypress.io/dashboard"
             target="_blank"
-          >Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.
+          />
         </DialogDescription>
 
         <div class="border-t-1px px-24px py-16px bg-gray-50">
@@ -33,6 +38,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+import { useI18n } from '@cy/i18n'
 
 import {
   Dialog,
@@ -41,16 +47,17 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
-const setIsOpen = (value) => {
-  emit('update:modelValue', value)
-}
-
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
 
-const props = defineProps<{
+defineProps<{
   modelValue: boolean
 }>()
+
+const setIsOpen = (value) => {
+  emit('update:modelValue', value)
+}
+const { t } = useI18n()
 
 </script>
