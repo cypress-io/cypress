@@ -34,7 +34,7 @@ export const createCommonRoutes = ({
   specsStore,
   getRemoteState,
   nodeProxy,
-  exit
+  exit,
 }: InitializeRoutes) => {
   const router = Router()
 
