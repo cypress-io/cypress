@@ -1,5 +1,5 @@
-const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
-const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
+const $stackUtils = require('@packages/driver/src/cypress/stack_utils').default
+const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils').default
 const { stripIndent } = require('common-tags')
 
 describe('driver/src/cypress/stack_utils', () => {

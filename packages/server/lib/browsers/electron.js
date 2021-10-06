@@ -5,7 +5,7 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:server:browsers:electron')
 const menu = require('../gui/menu')
 const Windows = require('../gui/windows')
-const { CdpAutomation } = require('./cdp_automation')
+const { CdpAutomation, screencastOpts } = require('./cdp_automation')
 const savedState = require('../saved_state')
 const utils = require('./utils')
 const errors = require('../errors')
@@ -35,7 +35,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const _getAutomation = function (win, options) {
+const _getAutomation = function (win, options, parent) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -43,7 +43,15 @@ const _getAutomation = function (win, options) {
     })
   })
 
-  const automation = CdpAutomation(sendCommand)
+  const on = (eventName, cb) => {
+    win.webContents.debugger.on('message', (event, method, params) => {
+      if (method === eventName) {
+        cb(params)
+      }
+    })
+  }
+
+  const automation = new CdpAutomation(sendCommand, on, parent)
 
   if (!options.onScreencastFrame) {
     // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
@@ -54,7 +62,7 @@ const _getAutomation = function (win, options) {
         return fn(message, data)
       }
 
-      await sendCommand('Page.startScreencast')
+      await sendCommand('Page.startScreencast', screencastOpts)
 
       const ret = await fn(message, data)
 
@@ -96,9 +104,7 @@ const _maybeRecordVideo = function (webContents, options) {
       }
     })
 
-    await webContents.debugger.sendCommand('Page.startScreencast', {
-      format: 'jpeg',
-    })
+    await webContents.debugger.sendCommand('Page.startScreencast', screencastOpts)
   }
 }
 
@@ -177,10 +183,9 @@ module.exports = {
       win.maximize()
     }
 
-    automation.use(_getAutomation(win, preferences))
-
     return this._launch(win, url, automation, preferences)
     .tap(_maybeRecordVideo(win.webContents, preferences))
+    .tap(() => automation.use(_getAutomation(win, preferences, automation)))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options, automation) {

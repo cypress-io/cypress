@@ -115,8 +115,8 @@ const descriptions = {
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
   group: 'a named group for recorded runs in the Cypress Dashboard',
-  headed: 'displays the browser instead of running headlessly (defaults to true for Firefox and Chromium-family browsers)',
-  headless: 'hide the browser instead of running headed (defaults to true for Electron)',
+  headed: 'displays the browser instead of running headlessly',
+  headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
@@ -425,7 +425,7 @@ module.exports = {
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')
-      .start(util.parseOpts(opts), { isComponentTesting: true })
+      .start({ ...util.parseOpts(opts), testingType: 'component' })
       .catch(util.logErrorExit1)
     })
 
@@ -456,7 +456,7 @@ module.exports = {
     .action((opts) => {
       debug('running Cypress run-ct')
       require('./exec/run')
-      .start(util.parseOpts(opts), { isComponentTesting: true })
+      .start({ ...util.parseOpts(opts), testingType: 'component' })
       .then(util.exit)
       .catch(util.logErrorExit1)
     })

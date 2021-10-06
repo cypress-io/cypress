@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import EventEmitter from 'events'
 import snapshot from 'snap-shot-it'
 import { makeWebpackConfig } from '../../src/makeWebpackConfig'
 
@@ -9,6 +10,7 @@ describe('makeWebpackConfig', () => {
         publicPath: '/this-will-be-ignored',
       },
     }, {
+      devServerEvents: new EventEmitter(),
       devServerPublicPathRoute: '/test-public-path',
       isOpenMode: true,
       supportFile: '/support.js',

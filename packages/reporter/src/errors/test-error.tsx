@@ -11,6 +11,7 @@ import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
+import Command from '../commands/command-model'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -31,7 +32,8 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: Attempt
+  model: Attempt | Command
+  onPrintToConsole?: () => void
 }
 
 const TestError = observer((props: TestErrorProps) => {
@@ -39,9 +41,9 @@ const TestError = observer((props: TestErrorProps) => {
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = () => {
+  const onPrint = props.onPrintToConsole || (() => {
     events.emit('show:error', props.model)
-  }
+  })
 
   const _onPrintClick = (e: MouseEvent) => {
     e.stopPropagation()

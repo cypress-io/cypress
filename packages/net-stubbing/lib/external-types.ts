@@ -79,7 +79,7 @@ export namespace CyHttpMessages {
     /**
      * The headers of the HTTP message.
      */
-    headers: { [key: string]: string }
+    headers: { [key: string]: string | string[] }
   }
 
   export type IncomingResponse = BaseMessage & {
@@ -131,6 +131,10 @@ export namespace CyHttpMessages {
      * Request URL.
      */
     url: string
+    /**
+     * URL query string as object.
+     */
+    query: Record<string, string|number>
     /**
      * The HTTP version used in the request. Read only.
      */
@@ -263,9 +267,11 @@ interface RequestEvents {
  */
 export interface Interception {
   id: string
+  /* @internal */
+  browserRequestId?: string
   routeId: string
   /* @internal */
-  log?: any
+  setLogFlag: (flag: 'spied' | 'stubbed' | 'reqModified' | 'resModified') => void
   request: CyHttpMessages.IncomingRequest
   /**
    * Was `cy.wait()` used to wait on this request?
@@ -365,6 +371,10 @@ export interface RouteMatcherOptionsGeneric<S> {
    */
   query?: DictMatcher<S>
   /**
+   * If set, this `RouteMatcher` will only match the first `times` requests.
+   */
+  times?: number
+  /**
    * Match against the full request URL.
    * If a string is passed, it will be used as a substring match,
    * not an equality match.
@@ -379,7 +389,7 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string, string | object | boolean | null> & {
+export type StaticResponse = GenericStaticResponse<string, string | object | boolean | ArrayBuffer | null> & {
   /**
    * Milliseconds to delay before the response is sent.
    * @deprecated Use `delay` instead of `delayMs`.
@@ -498,7 +508,7 @@ declare global {
        *
        * @param mergeRouteMatcher Additional route matcher options to merge with `url`. Typically used for middleware.
        */
-      intercept(url: string, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
+      intercept(url: StringMatcher, mergeRouteMatcher: Omit<RouteMatcherOptions, 'url'>, response: RouteHandler): Chainable<null>
       /**
        * Wait for a specific request to complete.
        *

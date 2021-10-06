@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import eventManager from '../lib/event-manager'
+import { eventManager } from '@packages/runner-shared'
 
 class NoSpec extends Component {
   componentDidMount () {

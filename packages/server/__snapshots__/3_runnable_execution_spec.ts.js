@@ -188,3 +188,76 @@ exports['e2e runnable execution / runnables run correct number of times with nav
 
 
 `
+
+exports['e2e runnable execution / runs correctly after top navigation with already ran suite'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (runnables_already_run_suite.js)                                           │
+  │ Searched:   cypress/integration/runnables_already_run_suite.js                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  runnables_already_run_suite.js                                                  (1 of 1)
+
+
+  Top level describe 
+    suite 1
+      ✓ should pass
+    suite 2
+      1) should fail
+
+
+  1 passing
+  1 failing
+
+  1) Top level describe 
+       suite 2
+         should fail:
+     AssertionError: expected true to be false
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     runnables_already_run_suite.js                                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/runnables_already_run_suite.js/Top level descri     (1280x720)
+     be -- suite 2 -- should fail (failed).png                                                      
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  runnables_already_run_suite.js           XX:XX        2        1        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        2        1        1        -        -  
+
+
+`

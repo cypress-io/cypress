@@ -2,17 +2,20 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import { $ } from '@packages/driver'
+import $Cypress from '@packages/driver'
+import {
+  SnapshotControls,
+  ScriptError,
+  IframeModel,
+  selectorPlaygroundModel,
+  AutIframe,
+  logger,
+  studioRecorder,
+} from '@packages/runner-shared'
 
-import AutIframe from './aut-iframe'
-import ScriptError from '../errors/script-error'
-import SnapshotControls from './snapshot-controls'
-
-import IframeModel from './iframe-model'
-import logger from '../lib/logger'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import studioRecorder from '../studio/studio-recorder'
 import util from '../lib/util'
+
+const $ = $Cypress.$
 
 @observer
 export default class Iframes extends Component {
@@ -35,7 +38,7 @@ export default class Iframes extends Component {
         )}
         style={{
           top: headerHeight,
-          left: this.props.state.absoluteReporterWidth,
+          left: this.props.state.absoluteReporterWidth + this.props.state.specListWidth,
         }}
       >
         <div
@@ -74,6 +77,7 @@ export default class Iframes extends Component {
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
     this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
+    this.props.eventManager.on('visit:blank', this.autIframe.visitBlank)
 
     this.props.eventManager.on('run:end', this.autIframe.startStudio)
     this.props.eventManager.on('page:loading', (isLoading) => {
@@ -102,7 +106,6 @@ export default class Iframes extends Component {
 
     this.iframeModel = new IframeModel({
       state: this.props.state,
-      removeHeadStyles: this.autIframe.removeHeadStyles,
       restoreDom: this.autIframe.restoreDom,
       highlightEl: this.autIframe.highlightEl,
       detachDom: this.autIframe.detachDom,
@@ -122,7 +125,13 @@ export default class Iframes extends Component {
   }
 
   @action _setScriptError = (err) => {
-    this.props.state.scriptError = err
+    if (err && 'error' in err) {
+      this.props.state.scriptError = err.error
+    }
+
+    if (!err) {
+      this.props.state.scriptError = null
+    }
   }
 
   _run = (config) => {
@@ -146,7 +155,7 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
-    this.autIframe.showBlankContents()
+    this.autIframe.showInitialBlankContents()
 
     const $specIframe = $('<iframe />', {
       id: `Your Spec: '${specSrc}'`,

@@ -1,9 +1,9 @@
 import { getCommonConfig, HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-import webpack from 'webpack'
+import type { Configuration } from 'webpack'
 
 // @ts-ignore
-const config: webpack.Configuration = {
+const config: Configuration = {
   ...getCommonConfig(),
   entry: {
     reporter: [path.resolve(__dirname, 'src')],

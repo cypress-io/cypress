@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 function mutateConfiguration (testConfigOverride, config, env) {
   const globalConfig = _.clone(config())
@@ -73,6 +73,8 @@ class TestConfigOverride {
   }
 }
 
-export function create () {
-  return new TestConfigOverride()
+export default {
+  create () {
+    return new TestConfigOverride()
+  },
 }

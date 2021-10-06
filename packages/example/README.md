@@ -11,7 +11,7 @@ The actual example repo you're probably looking for is [the kitchen sink app her
 
 **THERE'S LIKELY NO REASON YOU NEED TO EDIT ANY OF THE CODE ON THIS REPO.**
 
-- Want to edit the `example` tests? -> edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/examples) instead.
+- Want to edit the `example` tests? -> edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration) instead.
 - Want to edit the actual [https://example.cypress.io](https://example.cypress.io) website? edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/tree/master/app) instead.
 
 ## Updating the `example` app

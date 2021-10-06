@@ -23,8 +23,4 @@ describe('Mount component', () => {
   it('shows hello', () => {
     cy.contains('Hello Vue!')
   })
-
-  it('has version', () => {
-    cy.window().its('Vue.version').should('be.a', 'string')
-  })
 })

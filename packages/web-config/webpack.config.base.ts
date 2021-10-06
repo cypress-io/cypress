@@ -55,7 +55,7 @@ const stats = {
   timings: true,
 }
 
-function makeSassLoaders ({ modules }): RuleSetRule {
+function makeSassLoaders ({ modules }: { modules: boolean }): RuleSetRule {
   const exclude = [/node_modules/]
 
   if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
@@ -249,3 +249,7 @@ export const getSimpleConfig = () => ({
 })
 
 export { HtmlWebpackPlugin }
+
+export function getCopyWebpackPlugin () {
+  return require('copy-webpack-plugin')
+}

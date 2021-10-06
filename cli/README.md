@@ -59,3 +59,25 @@ yarn add ~/{your-dirs}/cypress/cli/build/cypress-3.3.1.tgz --ignore-scripts
 ```
 
 Which installs the `tgz` file we have just built from folder `Users/jane-lane/{your-dirs}/cypress/cli/build`.
+
+#### Module API
+
+The module API can be tested locally using something like:
+
+```typescript
+/* @ts-ignore */
+import cypress from '../../cli/lib/cypress'
+
+const run = cypress.run as (options?: Partial<CypressCommandLine.CypressRunOptions>) => Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
+
+run({
+  spec: './cypress/component/advanced/framer-motion/Motion.spec.tsx',
+  testingType: 'component',
+  /* @ts-ignore */
+  dev: true,
+}).then(results => {
+  console.log(results)
+})
+```
+
+Note that the `dev` flag is required for local testing, as otherwise the command will fail with a binary error.

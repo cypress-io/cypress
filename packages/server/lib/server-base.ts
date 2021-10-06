@@ -3,32 +3,40 @@ import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express from 'express'
+import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
-import { AddressInfo } from 'net'
+import type { AddressInfo } from 'net'
 import url from 'url'
-import httpsProxy from '@packages/https-proxy'
+import la from 'lazy-ass'
+import type httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, cors, httpUtils, uri } from '@packages/network'
-import { NetworkProxy } from '@packages/proxy'
-import { SocketCt } from '@packages/server-ct'
+import { agent, clientCertificates, cors, httpUtils, uri } from '@packages/network'
+import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import type { SocketCt } from './socket-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
-import { SocketE2E } from './socket-e2e'
+import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { createInitialWorkers } from '@packages/rewriter'
+import type { SpecsStore } from './specs-store'
+import type { Cfg } from './project-base'
+import type { Browser } from '@packages/server/lib/browsers/types'
+import { InitializeRoutes, createCommonRoutes } from './routes'
+import { createRoutesE2E } from './routes-e2e'
+import { createRoutesCT } from './routes-ct'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
   '/__cypress/runner/cypress_runner.js', // TODO: fix this
-  '/__cypress/static/favicon.ico',
+  '/__cypress/runner/favicon.ico',
 ]
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -83,7 +91,20 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-export class ServerBase<TSocket extends SocketE2E | SocketCt> {
+export type WarningErr = Record<string, any>
+
+export interface OpenServerOptions {
+  SocketCtor: typeof SocketE2E | typeof SocketCt
+  specsStore: SpecsStore
+  testingType: Cypress.TestingType
+  onError: any
+  onWarning: any
+  getCurrentBrowser: () => Browser
+  getSpec: () => Cypress.Cypress['spec'] | null
+  shouldCorrelatePreRequests: () => boolean
+}
+
+export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
   protected request: Request
   protected isListening: boolean
@@ -139,6 +160,78 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
+  }
+
+  abstract createServer (
+    app: Express,
+    config: Cfg,
+    onWarning: unknown,
+  ): Bluebird<[number, WarningErr?]>
+
+  open (config: Cfg, {
+    getSpec,
+    getCurrentBrowser,
+    onError,
+    onWarning,
+    shouldCorrelatePreRequests,
+    specsStore,
+    testingType,
+    SocketCtor,
+  }: OpenServerOptions) {
+    debug('server open')
+
+    la(_.isPlainObject(config), 'expected plain config object', config)
+
+    return Bluebird.try(() => {
+      if (!config.baseUrl && testingType === 'component') {
+        throw new Error('ServerCt#open called without config.baseUrl.')
+      }
+
+      const app = this.createExpressApp(config)
+
+      logger.setSettings(config)
+
+      this._nodeProxy = httpProxy.createProxyServer({
+        target: config.baseUrl && testingType === 'component' ? config.baseUrl : undefined,
+      })
+
+      this._socket = new SocketCtor(config) as TSocket
+
+      clientCertificates.loadClientCertificateConfig(config)
+
+      const getRemoteState = () => {
+        return this._getRemoteState()
+      }
+
+      this.createNetworkProxy(config, getRemoteState, shouldCorrelatePreRequests)
+
+      if (config.experimentalSourceRewriting) {
+        createInitialWorkers()
+      }
+
+      this.createHosts(config.hosts)
+
+      const routeOptions: InitializeRoutes = {
+        config,
+        specsStore,
+        getRemoteState,
+        nodeProxy: this.nodeProxy,
+        networkProxy: this._networkProxy!,
+        onError,
+        getSpec,
+        getCurrentBrowser,
+        testingType,
+      }
+
+      const runnerSpecificRouter = testingType === 'e2e'
+        ? createRoutesE2E(routeOptions)
+        : createRoutesCT(routeOptions)
+
+      app.use(runnerSpecificRouter)
+      app.use(createCommonRoutes(routeOptions))
+
+      return this.createServer(app, config, onWarning)
+    })
   }
 
   createExpressApp (config) {
@@ -197,7 +290,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy (config, getRemoteState) {
+  createNetworkProxy (config, getRemoteState, shouldCorrelatePreRequests) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -206,6 +299,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // @ts-ignore
     this._networkProxy = new NetworkProxy({
       config,
+      shouldCorrelatePreRequests,
       getRemoteState,
       getFileServerToken,
       socket: this.socket,
@@ -217,6 +311,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   startWebsockets (automation, config, options: Record<string, unknown> = {}) {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
       this.networkProxy.reset()
@@ -230,10 +325,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return io
   }
 
-  createHosts (hosts = {}) {
+  createHosts (hosts: string[] | null = []) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
+  }
+
+  addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
+    this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+  }
+
+  emitRequestEvent (eventName, data) {
+    this.socket.toDriver('request:event', eventName, data)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -298,7 +401,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  _getRemoteState () {
+  _getRemoteState (): Cypress.RemoteState {
     // {
     //   origin: "http://localhost:2020"
     //   fileServer:
@@ -326,7 +429,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       visiting: this._remoteVisitingUrl,
       domainName: this._remoteDomainName,
       fileServer: this._remoteFileServer,
-    })
+    }) as Cypress.RemoteState
 
     debug('Getting remote state: %o', props)
 
@@ -511,5 +614,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     socket.once('upstream-connected', this.socketAllowed.add)
 
     return this.httpsProxy.connect(req, socket, head)
+  }
+
+  sendSpecList (specs: Cypress.Cypress['spec'][], testingType: Cypress.TestingType) {
+    return this.socket.sendSpecList(specs, testingType)
   }
 }

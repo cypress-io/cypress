@@ -1,0 +1,7 @@
+{
+  "extends": "../ts/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "experimentalDecorators": true
+  }
+}

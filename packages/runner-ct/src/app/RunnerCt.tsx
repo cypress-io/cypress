@@ -14,17 +14,16 @@ library.add(fas)
 library.add(fab)
 
 import State from '../lib/state'
-import EventManager from '../lib/event-manager'
+import { eventManager as EventManager, namedObserver, SpecList } from '@packages/runner-shared'
+import styles from '@packages/runner-shared/src/styles.module.scss'
 import { useGlobalHotKey } from '../lib/useHotKey'
 import { animationFrameDebounce } from '../lib/debounce'
 import { LeftNavMenu } from './LeftNavMenu'
 import { SpecContent } from './SpecContent'
 import { hideIfScreenshotting, hideSpecsListIfNecessary } from '../lib/hideGuard'
-import { namedObserver } from '../lib/mobx'
-import { SpecList } from './SpecList/SpecList'
 import { NoSpec } from './NoSpec'
 
-import styles from './RunnerCt.module.scss'
+import runnerCtStyles from './RunnerCt.module.scss'
 import './RunnerCt.scss'
 
 interface RunnerCtProps {
@@ -209,10 +208,10 @@ const RunnerCt = namedObserver('RunnerCt',
           {
             state.specs.length < 1 ? (
               <NoSpec message="No specs found">
-                <p className={styles.noSpecsDescription}>
+                <p className={runnerCtStyles.noSpecsDescription}>
                   Create a new spec file in
                   {' '}
-                  <span className={styles.folder}>
+                  <span className={runnerCtStyles.folder}>
                     {
                       props.config.componentFolder
                         ? props.config.componentFolder.replace(props.config.projectRoot, '')

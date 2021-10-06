@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import { onNetEvent } from '@packages/net-stubbing'
+import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
 import errors from './errors'
@@ -13,7 +13,8 @@ import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile } from './util/file-opener'
 import open from './util/open'
-import { DestroyableHttpServer } from './util/server_destroy'
+import type { DestroyableHttpServer } from './util/server_destroy'
+import * as session from './session'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -166,6 +167,12 @@ export class SocketBase {
         return this.io.emit('automation:push:message', message, data)
       },
     })
+
+    const resetRenderedHTMLOrigins = () => {
+      const origins = options.getRenderedHTMLOrigins()
+
+      Object.keys(origins).forEach((key) => delete origins[key])
+    }
 
     const onAutomationClientRequestCallback = (message, data, id) => {
       return this.onAutomation(automationClient, message, data, id)
@@ -364,6 +371,8 @@ export class SocketBase {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
+            case 'firefox:window:focus':
+              return firefoxUtil.windowFocus()
             case 'get:fixture':
               return getFixture(args[0], args[1])
             case 'read:file':
@@ -371,7 +380,7 @@ export class SocketBase {
             case 'write:file':
               return files.writeFile(config.projectRoot, args[0], args[1], args[2])
             case 'net':
-              return onNetEvent({
+              return onNetStubbingEvent({
                 eventName: args[0],
                 frame: args[1],
                 state: options.netStubbingState,
@@ -383,6 +392,24 @@ export class SocketBase {
               return exec.run(config.projectRoot, args[0])
             case 'task':
               return task.run(config.pluginsFile, args[0])
+            case 'save:session':
+              return session.saveSession(args[0])
+            case 'clear:session':
+              return session.clearSessions()
+            case 'get:session':
+              return session.getSession(args[0])
+            case 'reset:session:state':
+              session.clearSessions()
+              resetRenderedHTMLOrigins()
+
+              return
+            case 'get:rendered:html:origins':
+              return options.getRenderedHTMLOrigins()
+            case 'reset:rendered:html:origins': {
+              resetRenderedHTMLOrigins()
+
+              return
+            }
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
@@ -479,5 +506,9 @@ export class SocketBase {
 
   close () {
     return this.io.close()
+  }
+
+  sendSpecList (specs, testingType: Cypress.TestingType) {
+    this.toRunner('specs:changed', { specs, testingType })
   }
 }

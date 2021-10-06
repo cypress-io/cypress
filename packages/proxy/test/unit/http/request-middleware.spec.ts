@@ -7,6 +7,8 @@ describe('http/request-middleware', function () {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
       'MaybeEndRequestWithBufferedResponse',
+      'CorrelateBrowserPreRequest',
+      'SendToDriver',
       'InterceptRequest',
       'RedirectToClientRouteIfUnloaded',
       'EndRequestsToBlockedHosts',

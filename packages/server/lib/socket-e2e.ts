@@ -3,7 +3,7 @@ import path from 'path'
 import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
-import { DestroyableHttpServer } from './util/server_destroy'
+import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
 
 const debug = Debug('cypress:server:socket-e2e')
@@ -130,6 +130,12 @@ export class SocketE2E extends SocketBase {
               this.removeOnStudioTestFileChange()
             }
           })
+        })
+
+        socket.on('studio:get:commands:text', (commands, cb) => {
+          const commandsText = studio.getCommandsText(commands)
+
+          cb(commandsText)
         })
       },
     })

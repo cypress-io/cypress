@@ -13,6 +13,7 @@ const check = require('check-more-types')
 const debug = require('debug')('cypress:binary')
 const questionsRemain = require('@cypress/questions-remain')
 const R = require('ramda')
+const rp = require('@cypress/request-promise')
 
 const zip = require('./zip')
 const ask = require('./ask')
@@ -143,10 +144,86 @@ const deploy = {
         fail('Release Failed')
         throw err
       })
+      .then(() => {
+        return this.checkDownloads({ version })
+      })
     }
 
     return askMissingOptions(['version'])(options)
     .then(release)
+  },
+
+  checkDownloads ({ version }) {
+    const systems = [
+      { platform: 'linux', arch: 'x64' },
+      { platform: 'darwin', arch: 'x64' },
+      { platform: 'win32', arch: 'ia32' },
+      { platform: 'win32', arch: 'x64' },
+    ]
+
+    const urlExists = (url) => {
+      return rp.head(url)
+      .then(() => true)
+      .catch(() => false)
+    }
+
+    const checkSystem = ({ platform, arch }) => {
+      const url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
+      const system = `${platform}-${arch}`
+
+      process.stdout.write(`Checking for ${chalk.yellow(system)} at ${chalk.cyan(url)} ... `)
+
+      return urlExists(url)
+      .then((exists) => {
+        const result = exists ? '✅' : '❌'
+
+        process.stdout.write(`${result}\n`)
+
+        return { exists, platform, arch, url }
+      })
+    }
+
+    const allEnsured = (results) => {
+      return !results.filter(({ exists }) => !exists).length
+    }
+
+    return Promise.mapSeries(systems, checkSystem)
+    .then((results) => {
+      if (allEnsured(results)) return results
+
+      console.log(chalk.red(`\nCould not ensure v${version} of the Cypress binary is available for the following systems:`))
+
+      return results
+    })
+    .map((result) => {
+      const { exists, platform, arch, url } = result
+
+      if (exists) return result
+
+      console.log(`
+  ${chalk.yellow('Platform')}: ${platform}
+  ${chalk.yellow('Arch')}: ${arch}
+  ${chalk.yellow('URL')}: ${url}`)
+
+      return result
+    })
+    .then((results) => {
+      if (allEnsured(results)) return
+
+      const purgeCommand = `yarn binary-purge --version ${version}`
+      const ensureCommand = `yarn binary-ensure --version ${version}`
+
+      console.log(`\nPurge the cloudflare cache with ${chalk.yellow(purgeCommand)} and check again with ${chalk.yellow(ensureCommand)}\n`)
+
+      process.exit(1)
+    })
+  },
+
+  ensure () {
+    const options = this.parseOptions(process.argv)
+
+    return questionsRemain({ version: ask.getEnsureVersion })(options)
+    .then(this.checkDownloads)
   },
 
   build (options) {

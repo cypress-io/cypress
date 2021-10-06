@@ -1,6 +1,6 @@
 {
   "extends": [
-    "plugin:@cypress/dev/tests"
+    "../../.eslintrc.json"
   ],
   "parser": "@typescript-eslint/parser",
   "env": {

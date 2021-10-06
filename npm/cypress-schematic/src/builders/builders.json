@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/@angular-devkit/architect/src/builders-schema.json",
+  "builders": {
+    "cypress": {
+      "implementation": "./cypress",
+      "schema": "./cypress/schema.json",
+      "description": "Run Cypress tests"
+    }
+  }
+}

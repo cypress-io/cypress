@@ -19,18 +19,13 @@ function parse (obj) {
   const str = JSON.stringify(obj, [
     'usedJSHeapSize',
     'totalJSHeapSize',
-
     'jsHeapSizeLimit',
   ])
 
   return JSON.parse(str)
 }
 const stats = () => {
-  const { firefoxGcInterval, firefoxGcInOpenMode } = Cypress.config()
-
   cy.task('console', {
-    firefoxGcInterval,
-    firefoxGcInOpenMode,
     numTests: NUM_TESTS,
   })
 }

@@ -848,6 +848,20 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/16570
+    it('handles BigInt correctly', (done) => {
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'assert') {
+          cy.removeAllListeners('log:added')
+          expect(log.get('message')).to.eq('expected **2n** to equal **2n**')
+
+          done()
+        }
+      })
+
+      expect(2n).to.equal(2n)
+    })
+
     it('#consoleProps for regular objects', (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
@@ -1181,6 +1195,20 @@ describe('src/cy/commands/assertions', () => {
         it(v, (done) => {
           tester(v, done)
         })
+      })
+    })
+
+    describe('escape markdown', () => {
+      // https://github.com/cypress-io/cypress/issues/17357
+      it('images', (done) => {
+        const text = 'hello world ![JSDoc example](/slides/img/jsdoc.png)'
+        const result = 'hello world ``![JSDoc example](/slides/img/jsdoc.png)``'
+
+        expectMarkdown(
+          () => expect(text).to.equal(text),
+          `expected **${result}** to equal **${result}**`,
+          done,
+        )
       })
     })
   })

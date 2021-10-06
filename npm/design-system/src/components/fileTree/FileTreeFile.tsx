@@ -44,7 +44,12 @@ export const FileTreeFile = <T extends FileBase>({ item, indexes, style }: FileC
   }
 
   return (
-    <div className={cs(styles.node, styles.file, { [styles.active]: isSelected })} style={style} title={item.file.path}>
+    <div
+      className={cs(styles.node, styles.file, { [styles.active]: isSelected })}
+      style={style}
+      title={item.file.path}
+      data-cy={isSelected ? 'selected-spec' : ''}
+    >
       <InlineIcon {...inlineIconProps} />
       <NameWithHighlighting
         name={item.name}

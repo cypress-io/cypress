@@ -62,6 +62,14 @@ describe('lib/saved_state', () => {
       })
     })
 
+    it('has an empty state by default', () => {
+      return savedState.create()
+      .then((state) => state.get())
+      .then((state) => {
+        expect(state).to.be.empty
+      })
+    })
+
     it('only saves allowed keys', () => {
       return savedState.create()
       .then((state) => {

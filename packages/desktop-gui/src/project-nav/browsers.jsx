@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import cs from 'classnames'
 import Tooltip from '@cypress/react-tooltip'
 import { BrowserIcon, Dropdown } from '@packages/ui-components'
 
@@ -35,7 +36,7 @@ export default class Browsers extends Component {
       return (
         <li className='close-browser'>
           <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
-            <i className='fas fa-fw fa-times'></i>
+            <i className='fas fa-fw fa-times' />
             Stop
           </button>
         </li>
@@ -49,6 +50,8 @@ export default class Browsers extends Component {
   }
 
   _onSelect = (browser) => {
+    if (browser.unsupportedVersion) return true
+
     this.props.project.setChosenBrowser(browser)
   }
 
@@ -69,14 +72,14 @@ export default class Browsers extends Component {
     }
 
     return (
-      <>
+      <span className={cs({ 'unsupported-version': browser.unsupportedVersion })}>
         {icon}{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
         {this._info(browser)}
         {this._warn(browser)}
-      </>
+      </span>
     )
   }
 

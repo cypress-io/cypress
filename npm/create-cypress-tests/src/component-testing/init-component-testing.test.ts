@@ -153,7 +153,7 @@ describe('init component tests script', () => {
     promptSpy = sinon.stub(inquirer, 'prompt')
     .onCall(0)
     .returns(Promise.resolve({
-      framework: 'vue',
+      framework: 'vue@2',
     }) as any)
     .onCall(1)
     .returns(Promise.resolve({
@@ -178,7 +178,7 @@ describe('init component tests script', () => {
     promptSpy = sinon.stub(inquirer, 'prompt')
     .onCall(0)
     .returns(Promise.resolve({
-      framework: 'vue',
+      framework: 'vue@3',
     }) as any)
     .onCall(1)
     .returns(Promise.resolve({

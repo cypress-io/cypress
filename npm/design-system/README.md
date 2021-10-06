@@ -75,3 +75,7 @@ TODO: Add netlify site support and static app wrapper
 2. Import the first component inside of RunnerCT
 3. Hook up tests to circle
 4. Publish the package on npm (switch `package.json`'s `publishConfig` to 'public' instead of 'restricted' and then merge into master)
+
+## Changelog
+
+[Changelog](./CHANGELOG.md)

@@ -14,6 +14,9 @@
 <p align="center">
   Fast, easy and reliable testing for anything that runs in a browser.
 </p>
+<p align="center">
+  Join us, we're <a href="https://cypress.io/jobs">hiring</a>.
+</p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/cypress">

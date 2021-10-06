@@ -5,7 +5,7 @@ import sinon from 'sinon'
 import Resizer from './resizer'
 
 const createProps = () => ({
-  state: { windowWidth: 600 },
+  maxWidth: 600,
   onResizeStart: sinon.spy(),
   onResize: sinon.spy(),
   onResizeEnd: sinon.spy(),
@@ -83,7 +83,7 @@ describe('<Resizer />', () => {
       it('calls onResize with window width when clientX is above window width', () => {
         mousemoveEvent.clientX = 700
         document.dispatchEvent(mousemoveEvent)
-        expect(props.onResize).to.have.been.calledWith(props.state.windowWidth)
+        expect(props.onResize).to.have.been.calledWith(props.maxWidth)
       })
     })
 

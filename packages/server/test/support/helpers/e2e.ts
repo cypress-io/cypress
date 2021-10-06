@@ -23,7 +23,7 @@ const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
-require(`${root}../lib/project-e2e`)
+require(`${root}../lib/project-base`)
 
 cp = Bluebird.promisifyAll(cp)
 
@@ -47,6 +47,43 @@ const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
 export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
+
+// extract the 'Difference' section from a snap-shot-it error message
+const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
+const expectedAddedVideoSnapshotLines = [
+  'Warning: We failed processing this video.',
+  'This error will not alter the exit code.', '',
+  'TimeoutError: operation timed out',
+  '[stack trace lines]', '', '',
+  '│ Video:        false                                                                            │',
+]
+const expectedDeletedVideoSnapshotLines = [
+  '│ Video:        true                                                                             │',
+  '(Video)', '',
+  '-  Started processing:  Compressing to 32 CRF',
+]
+
+const isVideoSnapshotError = (err: Error) => {
+  const [added, deleted] = [[], []]
+  const matches = diffRe.exec(err.message)
+
+  if (!matches || !matches.length) {
+    return false
+  }
+
+  const lines = matches[1].split('\n')
+
+  for (const line of lines) {
+    // past this point, the content is variable - mp4 path length
+    if (line.includes('Finished processing:')) break
+
+    if (line.charAt(0) === '+') added.push(line.slice(1).trim())
+
+    if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
+  }
+
+  return _.isEqual(added, expectedAddedVideoSnapshotLines) && _.isEqual(deleted, expectedDeletedVideoSnapshotLines)
+}
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
@@ -497,8 +534,9 @@ const e2e = {
           return spec
         }
 
-        // TODO would not work for component tests
-        return path.join(options.project, 'cypress', 'integration', spec)
+        const specDir = options.testingType === 'component' ? 'component' : 'integration'
+
+        return path.join(options.project, 'cypress', specDir, spec)
       })
 
       // normalize the path to the spec
@@ -515,7 +553,7 @@ const e2e = {
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
-      `--testingType=e2e`,
+      `--testingType=${options.testingType || 'e2e'}`,
     ]
 
     if (options.testingType === 'component') {
@@ -648,7 +686,7 @@ const e2e = {
       Fixtures.installStubPackage(options.project, options.stubPackage)
     }
 
-    args = ['index.js'].concat(args)
+    args = options.args || ['index.js'].concat(args)
 
     let stdout = ''
     let stderr = ''
@@ -700,10 +738,20 @@ const e2e = {
 
         const str = normalizeStdout(stdout, options)
 
-        if (options.originalTitle) {
-          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
-        } else {
-          snapshot(str)
+        try {
+          if (options.originalTitle) {
+            snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+          } else {
+            snapshot(str)
+          }
+        } catch (err) {
+          // firefox has issues with recording video. for now, ignore snapshot diffs that only differ in this error.
+          // @see https://github.com/cypress-io/cypress/pull/16731
+          if (!(options.browser === 'firefox' && isVideoSnapshotError(err))) {
+            throw err
+          }
+
+          console.warn('(e2e warning) Firefox failed to process the video, but this is being ignored due to known issues with video processing in Firefox.')
         }
       }
 
@@ -716,7 +764,8 @@ const e2e = {
 
     return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
-      const sp = cp.spawn('node', args, {
+      const cmd = options.command || 'node'
+      const sp = cp.spawn(cmd, args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
         .extend({
@@ -740,11 +789,15 @@ const e2e = {
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
+          // disable frame skipping to make quick Chromium tests have matching snapshots/working video
+          CYPRESS_EVERY_NTH_FRAME: 1,
+
           // force file watching for use with --no-exit
           ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),
+        ...options.spawnOpts,
       })
 
       const ColorOutput = function () {

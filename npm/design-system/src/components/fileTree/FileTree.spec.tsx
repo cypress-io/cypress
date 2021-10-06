@@ -1,6 +1,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
-import { FileTree } from '../../../dist'
+import { FileTree } from './FileTree'
+import { mountAndSnapshot } from 'util/testing'
 
 const files = [
   {
@@ -36,7 +37,7 @@ describe('FileTree', () => {
   it('should send onFilePress callback on space and enter', () => {
     const filePressStub = cy.stub()
 
-    mount(
+    mountAndSnapshot(
       <div style={{ height: 500, width: 500 }}>
         <FileTree files={files} rootDirectory="/" emptyPlaceholder="No specs found" onFilePress={filePressStub} />
       </div>,
@@ -79,7 +80,7 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree]').focus()
 
-      cy.get('.treeChild').eq(0).then(assertSelectedBorder)
+      cy.contains('.treeChild', '/').then(assertSelectedBorder)
     })
 
     it('should preserve focus state', () => {
@@ -98,7 +99,7 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree]').focus()
 
-      cy.get('.treeChild').eq(2).then(assertSelectedBorder)
+      cy.contains('.treeChild', 'foo.spec.js').then(assertSelectedBorder)
     })
 
     it('should scroll to item on keyboard input', () => {
@@ -118,9 +119,11 @@ describe('FileTree', () => {
 
       cy.get('[data-cy=virtualized-tree] > div').scrollTo('bottom')
 
+      cy.contains('.treeChild', 'File 99').should('be.visible')
+
       cy.get('[data-cy=virtualized-tree]').focus().type('{downarrow}').type('{downarrow}')
 
-      cy.get('.treeChild').eq(4).should('be.visible')
+      cy.contains('.treeChild', 'File 3').should('be.visible')
     })
   })
 })

@@ -2,9 +2,9 @@ import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
 
-import { CypressIncomingRequest } from '@packages/proxy'
-import { BackendRoute } from './types'
-import { RouteMatcherOptions } from '../types'
+import type { CypressIncomingRequest } from '@packages/proxy'
+import type { BackendRoute } from './types'
+import type { RouteMatcherOptions } from '../types'
 import { getAllStringMatcherFields } from './util'
 
 /**
@@ -133,7 +133,7 @@ export function getRouteForRequest (routes: BackendRoute[], req: CypressIncoming
   const possibleRoutes = prevRoute ? orderedRoutes.slice(_.findIndex(orderedRoutes, prevRoute) + 1) : orderedRoutes
 
   for (const route of possibleRoutes) {
-    if (_doesRouteMatch(route.routeMatcher, req)) {
+    if (!route.disabled && _doesRouteMatch(route.routeMatcher, req)) {
       return route
     }
   }

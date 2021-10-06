@@ -1,0 +1,89 @@
+{
+  "title": "Cypress Target",
+  "description": "Cypress target option for Build Facade",
+  "type": "object",
+  "properties": {
+    "baseUrl": {
+      "type": "string",
+      "description": "Use this to directly pass the address of your distant server address with the port running your application"
+    },
+    "configFile": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "description": "Specify a path to a JSON file where configuration values are set or pass false to disable the use of a configuration file entirely."
+    },
+    "quiet": {
+      "type": "boolean",
+      "description": "If passed, Cypress output will not be printed to stdout. Only output from the configured Mocha reporter will print.",
+      "default": false
+    },
+    "browser": {
+      "type": "string",
+      "description": "The browser to run tests in.",
+      "enum": [
+        "electron",
+        "chrome",
+        "chromium",
+        "canary",
+        "firefox",
+        "edge"
+      ]
+    },
+    "devServerTarget": {
+      "type": "string",
+      "description": "Dev server target to run tests against."
+    },
+    "env": {
+      "type": "object",
+      "description": "A key-value pair of environment variables to pass to Cypress runner"
+    },
+    "exit": {
+      "type": "boolean",
+      "description": "Whether or not the Cypress Test Runner will stay open after running tests in a spec file",
+      "default": true
+    },
+    "headless": {
+      "type": "boolean",
+      "description": "Whether or not to open the Cypress application to run the tests. If set to 'true', will run in headless mode",
+      "default": false
+    },
+    "key": {
+      "type": "string",
+      "description": "The key Cypress should use to run tests in parallel/record the run (CI only)"
+    },
+    "parallel": {
+      "type": "boolean",
+      "description": "Whether or not Cypress should run its tests in parallel (CI only)",
+      "default": false
+    },
+    "record": {
+      "type": "boolean",
+      "description": "Whether or not Cypress should record the results of the tests",
+      "default": false
+    },
+    "reporter": {
+      "type": "string",
+      "description": "A built-in, custom, or third-party Mocha reporter"
+    },
+    "reporter-options": {
+      "type": "object",
+      "description": "A key-value pair of options that will be passed to the specified Mocha reporter"
+    },
+    "spec": {
+      "type": "string",
+      "description": "A comma delimited glob string that is provided to the Cypress runner to specify which spec files to run. i.e. '**examples/**,**actions.spec**"
+    },
+    "tsConfig": {
+      "type": "string",
+      "description": "The path of the Cypress tsconfig configuration json file."
+    },
+    "watch": {
+      "type": "boolean",
+      "description": "Recompile and run tests when files change.",
+      "default": false
+    }
+  },
+  "additionalProperties": true
+}

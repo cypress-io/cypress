@@ -3,7 +3,7 @@ import { ReporterHeaderProps } from '@packages/reporter/src/header/header'
 import Stats from '@packages/reporter/src/header/stats'
 import Controls from '@packages/reporter/src/header/controls'
 import { StatsStore } from '@packages/reporter/src/header/stats-store'
-import { namedObserver } from '../lib/mobx'
+import { namedObserver } from '@packages/runner-shared'
 import styles from './ReporterHeader.module.scss'
 
 export const EmptyReporterHeader: React.FC = () => {

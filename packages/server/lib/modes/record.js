@@ -19,6 +19,7 @@ const terminal = require('../util/terminal')
 const ciProvider = require('../util/ci_provider')
 const settings = require('../util/settings')
 const testsUtils = require('../util/tests_utils')
+const specWriter = require('../util/spec_writer')
 
 const logException = (err) => {
   // give us up to 1 second to
@@ -112,7 +113,7 @@ const getSpecRelativePath = (spec) => {
 }
 
 const uploadArtifacts = (options = {}) => {
-  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls } = options
+  const { video, screenshots, videoUploadUrl, shouldUploadVideo, screenshotUploadUrls, quiet } = options
 
   const uploads = []
   let count = 0
@@ -125,8 +126,10 @@ const uploadArtifacts = (options = {}) => {
 
   const send = (pathToFile, url) => {
     const success = () => {
-      // eslint-disable-next-line no-console
-      return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Done Uploading ${nums()}`, chalk.blue(pathToFile))
+      }
     }
 
     const fail = (err) => {
@@ -135,8 +138,10 @@ const uploadArtifacts = (options = {}) => {
         stack: err.stack,
       })
 
-      // eslint-disable-next-line no-console
-      return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      if (!quiet) {
+        // eslint-disable-next-line no-console
+        return console.log(`  - Failed Uploading ${nums()}`, chalk.red(pathToFile))
+      }
     }
 
     return uploads.push(
@@ -158,7 +163,7 @@ const uploadArtifacts = (options = {}) => {
     })
   }
 
-  if (!uploads.length) {
+  if (!uploads.length && !quiet) {
     // eslint-disable-next-line no-console
     console.log('  - Nothing to Upload')
   }
@@ -196,7 +201,7 @@ const updateInstanceStdout = (options = {}) => {
 }
 
 const postInstanceResults = (options = {}) => {
-  const { runId, instanceId, results, group, parallel, ciBuildId } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -222,6 +227,7 @@ const postInstanceResults = (options = {}) => {
     video,
     reporterStats,
     screenshots,
+    metadata,
   })
   .catch((err) => {
     debug('failed updating instance %o', {
@@ -581,6 +587,7 @@ const createRunAndRecordSpecs = (options = {}) => {
     project,
     onError,
     testingType,
+    quiet,
   } = options
   const recordKey = options.key
 
@@ -667,23 +674,29 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         debug('after spec run %o', { spec })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+        if (!quiet) {
+          // eslint-disable-next-line no-console
+          console.log('')
 
-        terminal.header('Uploading Results', {
-          color: ['blue'],
-        })
+          terminal.header('Uploading Results', {
+            color: ['blue'],
+          })
 
-        // eslint-disable-next-line no-console
-        console.log('')
+          // eslint-disable-next-line no-console
+          console.log('')
+        }
 
-        return postInstanceResults({
-          group,
-          config,
-          results,
-          parallel,
-          ciBuildId,
-          instanceId,
+        return specWriter.countStudioUsage(spec.absolute)
+        .then((metadata) => {
+          return postInstanceResults({
+            group,
+            config,
+            results,
+            parallel,
+            ciBuildId,
+            instanceId,
+            metadata,
+          })
         })
         .then((resp) => {
           if (!resp) {
@@ -699,6 +712,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             videoUploadUrl,
             shouldUploadVideo,
             screenshotUploadUrls,
+            quiet,
           })
           .finally(() => {
             // always attempt to upload stdout

@@ -1,6 +1,8 @@
 const snapshot = require('snap-shot-it')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+const { expect } = require('chai')
+
 const uploadUtils = require('../../binary/util/upload')
 const s3helpers = require('../../binary/s3-api').s3helpers
 
@@ -77,6 +79,10 @@ describe('move-binaries', () => {
   context('moveBinaries', () => {
     const move = moveBinaries.moveBinaries
 
+    beforeEach(() => {
+      sinon.stub(uploadUtils, 'purgeDesktopAppAllPlatforms').resolves()
+    })
+
     it('is a function', () => {
       la(is.fn(move))
     })
@@ -151,6 +157,8 @@ describe('move-binaries', () => {
 
       return move(args).then((result) => {
         la(is.object(result), 'expected a result', result)
+
+        expect(uploadUtils.purgeDesktopAppAllPlatforms).to.be.calledWith(version, 'cypress.zip')
 
         snapshot('collected builds and copied desktop', result)
       })

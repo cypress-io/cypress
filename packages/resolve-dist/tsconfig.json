@@ -1,0 +1,12 @@
+{
+  "extends": "./../ts/tsconfig.json",
+  "include": [
+    "**/*.ts"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
+  ],
+  "exclude": [
+    "test"
+  ]
+}

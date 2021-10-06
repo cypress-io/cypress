@@ -95,7 +95,7 @@ const routeHandlers = {
   postInstanceResults: {
     method: 'post',
     url: '/instances/:id/results',
-    req: 'postInstanceResultsRequest@1.0.0',
+    req: 'postInstanceResultsRequest@1.1.0',
     resSchema: 'postInstanceResultsResponse@1.0.0',
     res: sendUploadUrls,
   },

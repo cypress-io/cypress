@@ -32,4 +32,11 @@ describe('e2e runnable execution', () => {
     spec: 'runnable-run-count.spec.js',
     snapshot: true,
   })
+
+  e2e.it('runs correctly after top navigation with already ran suite', {
+    spec: 'runnables_already_run_suite.js',
+    snapshot: true,
+    expectedExitCode: 1,
+    config: { video: false },
+  })
 })

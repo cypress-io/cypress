@@ -705,6 +705,22 @@ module.exports = function (options = {}) {
         delete options.body
       }
 
+      // https://github.com/cypress-io/cypress/issues/6178
+      if (options.bodyIsBase64Encoded) {
+        try {
+          debug('body is base64 format: %s', options.body)
+          options.body = Buffer.from(options.body, 'base64')
+        } catch (e) {
+          debug('failed to parse base64 body.')
+
+          throw e
+        }
+
+        // These options should be set to send raw Buffer.
+        options.encoding = null
+        options.json = false
+      }
+
       const self = this
 
       const send = () => {

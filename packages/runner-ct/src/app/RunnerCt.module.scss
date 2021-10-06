@@ -49,17 +49,6 @@ $box-shadow-closest: 0px 0px 5px rgba(0, 0, 0, 0.4);
   height: 100vh;
 }
 
-.specsList {
-  position: relative;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  height: 100%;
-  min-width: 150px;
-
-  background: $spec-list-background-color;
-  z-index: 0;
-}
-
 .runner {
   box-shadow: shadow(s);
   left: 0 !important;

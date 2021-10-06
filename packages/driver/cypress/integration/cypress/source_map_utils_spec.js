@@ -1,10 +1,5 @@
 const { SourceMapConsumer } = require('source-map')
-import {
-  extractSourceMap,
-  getSourceContents,
-  getSourcePosition,
-  initializeSourceMapConsumer,
-} from '@packages/driver/src/cypress/source_map_utils'
+import $sourceMapUtils from '@packages/driver/src/cypress/source_map_utils'
 
 const _ = Cypress._
 const { encodeBase64Unicode } = Cypress.utils
@@ -51,19 +46,19 @@ const file2 = createFile('file2')
 describe('driver/src/cypress/source_map_utils', () => {
   context('.extractSourceMap', () => {
     it('returns null if there is no source map embedded', () => {
-      const sourceMap = extractSourceMap(file2, testContent)
+      const sourceMap = $sourceMapUtils.extractSourceMap(file2, testContent)
 
       expect(sourceMap).to.be.null
     })
 
     it('returns null if it is not an inline map', () => {
-      const sourceMap = extractSourceMap(file2, `${testContent}\n\/\/# sourceMappingURL=foo.map`)
+      const sourceMap = $sourceMapUtils.extractSourceMap(file2, `${testContent}\n\/\/# sourceMappingURL=foo.map`)
 
       expect(sourceMap).to.be.null
     })
 
     it('returns source map when content has an inline map', () => {
-      const sourceMap = extractSourceMap(file1, fileContents)
+      const sourceMap = $sourceMapUtils.extractSourceMap(file1, fileContents)
 
       expect(sourceMap).to.be.eql(sourceMap)
     })
@@ -76,7 +71,7 @@ describe('driver/src/cypress/source_map_utils', () => {
         const timeLimit = 10
         const startTime = Date.now()
 
-        extractSourceMap(file1, fileContents)
+        $sourceMapUtils.extractSourceMap(file1, fileContents)
 
         const endTime = Date.now()
 
@@ -86,7 +81,7 @@ describe('driver/src/cypress/source_map_utils', () => {
 
     // https://github.com/cypress-io/cypress/issues/7481
     it('does not garble utf-8 characters', () => {
-      const sourceMap = extractSourceMap(file1, fileContents)
+      const sourceMap = $sourceMapUtils.extractSourceMap(file1, fileContents)
 
       expect(sourceMap.sourcesContent[1]).to.include('サイプリスは一番')
     })
@@ -94,31 +89,31 @@ describe('driver/src/cypress/source_map_utils', () => {
 
   context('.getSourceContents', () => {
     before(() => {
-      return initializeSourceMapConsumer(file1, sourceMap)
+      return $sourceMapUtils.initializeSourceMapConsumer(file1, sourceMap)
     })
 
     it('provides source contents for given file', () => {
-      const contents = getSourceContents(file1.fullyQualifiedUrl, file1.relative)
+      const contents = $sourceMapUtils.getSourceContents(file1.fullyQualifiedUrl, file1.relative)
 
       expect(contents).to.equal(testContent)
     })
 
     it('returns null if no source map consumer can be found', () => {
-      expect(getSourceContents('does/not/exist', file1.relative)).to.be.null
+      expect($sourceMapUtils.getSourceContents('does/not/exist', file1.relative)).to.be.null
     })
 
     it('returns null if file does not have source map', () => {
-      expect(getSourceContents(file2.fullyQualifiedUrl, file1.relative)).to.be.null
+      expect($sourceMapUtils.getSourceContents(file2.fullyQualifiedUrl, file1.relative)).to.be.null
     })
   })
 
   context('.getSourcePosition', () => {
     before(() => {
-      return initializeSourceMapConsumer(file1, sourceMap)
+      return $sourceMapUtils.initializeSourceMapConsumer(file1, sourceMap)
     })
 
     it('returns source position for generated position', () => {
-      const position = getSourcePosition(file1.fullyQualifiedUrl, { line: 1, column: 2 })
+      const position = $sourceMapUtils.getSourcePosition(file1.fullyQualifiedUrl, { line: 1, column: 2 })
 
       expect(_.pick(position, 'line', 'column')).to.eql({ line: 1, column: 0 })
     })
@@ -130,14 +125,14 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('initializes and returns source map consumer and file', () => {
-      return initializeSourceMapConsumer(file1, sourceMap).then((consumer) => {
+      return $sourceMapUtils.initializeSourceMapConsumer(file1, sourceMap).then((consumer) => {
         expect(SourceMapConsumer.initialize).to.be.called
         expect(consumer).to.be.an.instanceof(SourceMapConsumer)
       })
     })
 
     it('resolves null and does not initialize if no source map is provided', () => {
-      return initializeSourceMapConsumer(file1).then((consumer) => {
+      return $sourceMapUtils.initializeSourceMapConsumer(file1).then((consumer) => {
         expect(SourceMapConsumer.initialize).not.to.be.called
         expect(consumer).to.be.null
       })

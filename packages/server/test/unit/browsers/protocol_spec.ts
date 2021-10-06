@@ -25,7 +25,7 @@ describe('lib/browsers/protocol', () => {
       let delay: number
       let i = 0
 
-      while ((delay = protocol._getDelayMsForRetry(i))) {
+      while ((delay = protocol._getDelayMsForRetry(i, 'FooBrowser'))) {
         delays.push(delay)
         i++
       }
@@ -35,7 +35,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Failed to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
       snapshot(delays)
@@ -46,7 +46,7 @@ describe('lib/browsers/protocol', () => {
     const expectedCdpFailedError = stripIndents`
       Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-      This usually indicates there was a problem opening the Chrome browser.
+      This usually indicates there was a problem opening the FooBrowser browser.
 
       The CDP port requested was ${chalk.yellow('12345')}.
 
@@ -57,7 +57,7 @@ describe('lib/browsers/protocol', () => {
       const innerErr = new Error('cdp connection failure')
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
-      const p = protocol.getWsTargetFor(12345)
+      const p = protocol.getWsTargetFor(12345, 'FooBrowser')
 
       return expect(p).to.eventually.be.rejected
       .and.property('message').include(expectedCdpFailedError)
@@ -77,7 +77,7 @@ describe('lib/browsers/protocol', () => {
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
-      const p = protocol.getWsTargetFor(12345)
+      const p = protocol.getWsTargetFor(12345, 'FooBrowser')
 
       return expect(p).to.eventually.be.rejected
       .and.property('message').include(expectedCdpFailedError)
@@ -106,7 +106,7 @@ describe('lib/browsers/protocol', () => {
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
-      const p = protocol.getWsTargetFor(12345)
+      const p = protocol.getWsTargetFor(12345, 'FooBrowser')
 
       await expect(p).to.eventually.equal('bar')
       expect(end).to.be.calledOnce
@@ -139,7 +139,7 @@ describe('lib/browsers/protocol', () => {
       .onSecondCall().resolves([])
       .onThirdCall().resolves(targets)
 
-      const targetUrl = await protocol.getWsTargetFor(port)
+      const targetUrl = await protocol.getWsTargetFor(port, 'FooBrowser')
 
       expect(criList).to.have.been.calledThrice
       expect(targetUrl).to.equal('ws://debug-url')
@@ -169,7 +169,7 @@ describe('lib/browsers/protocol', () => {
       .onSecondCall().resolves([])
       .onThirdCall().resolves(targets)
 
-      const targetUrl = await protocol.getWsTargetFor(port)
+      const targetUrl = await protocol.getWsTargetFor(port, 'FooBrowser')
 
       expect(criList).to.have.been.calledThrice
       expect(targetUrl).to.equal('ws://debug-url')
@@ -180,7 +180,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/62)`)
+        expect(line).to.include(`Failed to connect to FooBrowser, retrying in 1 second (attempt ${i + 18}/62)`)
       })
     })
   })

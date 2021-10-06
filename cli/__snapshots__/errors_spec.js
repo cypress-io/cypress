@@ -37,6 +37,7 @@ exports['errors individual has the following errors 1'] = [
   "invalidCypressEnv",
   "invalidRunProjectPath",
   "invalidSmokeTestDisplayError",
+  "invalidTestingType",
   "missingApp",
   "missingDependency",
   "missingXvfb",
@@ -61,13 +62,9 @@ current message
 
 ----------
 
-This is usually caused by a missing library or dependency.
+This may be due to a missing library or dependency. [34mhttps://on.cypress.io/required-dependencies[39m
 
-The error above should indicate which dependency is missing.
-
-[34mhttps://on.cypress.io/required-dependencies[39m
-
-If you are using Docker, we provide containers with all required dependencies installed.
+Please refer to the error above for more detail.
 
 ----------
 

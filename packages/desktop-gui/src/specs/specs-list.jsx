@@ -5,6 +5,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
+import BootstrapModal from 'react-bootstrap-modal'
 import Tooltip from '@cypress/react-tooltip'
 
 import FileOpener from './file-opener'
@@ -24,9 +25,7 @@ const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
     return `Running ${specType} tests`
   }
 
-  const label = specsN === 1 ? `Run 1 ${specType} spec` : `Run ${specsN} ${specType} specs`
-
-  return label
+  return specsN === 1 ? `Run 1 ${specType} spec` : `Run ${specsN} ${specType} specs`
 }
 
 /**
@@ -60,6 +59,7 @@ class SpecsList extends Component {
     super(props)
     this.state = {
       isFocused: false,
+      confirmRemoveScaffoldedFiles: false,
     }
 
     this.filterRef = React.createRef()
@@ -75,10 +75,12 @@ class SpecsList extends Component {
       // @ts-ignore
       window.__project = this.props.project
     }
+  }
 
-    this.state = {
-      firstTestBannerDismissed: false,
-    }
+  componentDidMount () {
+    ipc.hasOpenedCypress().then((opened) => {
+      this.props.project.update({ newUserBannerOpen: !opened })
+    })
   }
 
   componentDidUpdate () {
@@ -98,7 +100,7 @@ class SpecsList extends Component {
   }
 
   render () {
-    if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
+    if (specsStore.isLoading) return <Loader color='#888' scale={0.5} />
 
     const filteredSpecs = specsStore.getFilteredSpecs()
 
@@ -121,7 +123,8 @@ class SpecsList extends Component {
 
     return (
       <div className='specs'>
-        {this._firstTestBanner()}
+        {this._banners()}
+        {this._confirmRemoveScaffoldedFilesDialog()}
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
@@ -151,7 +154,7 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <div className='new-file-button'>
-            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus"></i> New Spec File</button>
+            <button className='btn btn-link' onClick={this._createNewFile}><i className="fa fa-plus" /> New Spec File</button>
           </div>
         </header>
         {this._specsList()}
@@ -415,24 +418,123 @@ class SpecsList extends Component {
               {this.props.project.integrationFolder}
             </code>
           </h5>
-          <a className='helper-docs-link' onClick={this._openHelp}>
-            <i className='fas fa-question-circle' />{' '}
-              Need help?
-          </a>
+          <p>
+            <a onClick={this._createNewFile}>
+              <i className='fas fa-plus' /> New Spec File
+            </a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a className='helper-docs-link' onClick={this._openHelp}>
+              <i className='fas fa-question-circle' /> Need help?
+            </a>
+          </p>
         </div>
       </div>
     )
   }
 
-  _firstTestBanner () {
-    if (!this.props.project.isNew || this.state.firstTestBannerDismissed) return
+  _closeBanners = () => {
+    this.props.project.closeBanners()
+    ipc.newProjectBannerClosed()
+  }
+
+  _removeScaffoldedFiles = () => {
+    ipc.removeScaffoldedFiles().then(this._closeBanners)
+  }
+
+  _openRemoveScaffoldedFilesDialog = () => {
+    this.setState({ confirmRemoveScaffoldedFiles: true })
+  }
+
+  _closeRemoveScaffoldedFilesDialog = () => {
+    this.setState({ confirmRemoveScaffoldedFiles: false })
+  }
+
+  _openHowToNewProjectBanner = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/writing-first-test',
+      params: {
+        utm_medium: 'New Project Banner',
+        utm_campaign: 'How To',
+      },
+    })
+  }
+
+  _openHowToNewUserBanner = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/writing-first-test',
+      params: {
+        utm_medium: 'New User Banner',
+        utm_campaign: 'How To',
+      },
+    })
+  }
+
+  _openIntroNewUserBanner = (e) => {
+    e.preventDefault()
+    ipc.externalOpen({
+      url: 'https://on.cypress.io/intro-to-cypress',
+      params: {
+        utm_medium: 'New User Banner',
+        utm_campaign: 'Intro Guide',
+      },
+    })
+  }
+
+  _banners () {
+    if (this.props.project.newProjectBannerOpen) {
+      return (
+        <div className="onboarding-banner new-project-banner info-box info-box-dismissible">
+          <p className="header">
+            <strong>Welcome to Cypress!</strong>
+          </p>
+          <p>We've created some sample test files that demonstrate key Cypress concepts to help you get started.</p>
+          <p className="action-links">
+            <a onClick={this._openHowToNewProjectBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a className="link-danger" onClick={this._openRemoveScaffoldedFilesDialog}>No thanks, delete example files</a>
+          </p>
+          <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
+        </div>
+      )
+    }
+
+    if (this.props.project.newUserBannerOpen) {
+      return (
+        <div className="onboarding-banner new-user-banner info-box info-box-dismissible">
+          <p className="header">
+            <strong>New to Cypress?</strong>
+          </p>
+          <p>We've created some new user guides on key Cypress concepts to help you get started.</p>
+          <p className="action-links">
+            <a onClick={this._openHowToNewUserBanner}>How to write your first test <i className="fa fa-sm fa-external-link-alt" /></a>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a onClick={this._openIntroNewUserBanner}>Introduction guide to Cypress <i className="fa fa-sm fa-external-link-alt" /></a>
+          </p>
+          <button className="close" onClick={this._closeBanners}><span>&times;</span></button>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  _confirmRemoveScaffoldedFilesDialog = () => {
+    if (!this.props.project.newProjectBannerOpen) return null
 
     return (
-      <div className="first-test-banner alert alert-info alert-dismissible">
-        <p>We've created some sample tests around key Cypress concepts. Run the first one or create your own test file.</p>
-        <p><a onClick={this._openHelp}>How to write tests</a></p>
-        <button className="close" onClick={this._removeFirstTestBanner}><span>&times;</span></button>
-      </div>
+      <BootstrapModal show={this.state.confirmRemoveScaffoldedFiles} onHide={this._closeRemoveScaffoldedFilesDialog} backdrop='static'>
+        <div className='modal-body confirm-remove-scaffolded-files'>
+          <BootstrapModal.Dismiss className='btn btn-link close'>&times;</BootstrapModal.Dismiss>
+          <h4>Are you sure that you want to delete all example spec files?</h4>
+          <h4 className="note">Note: this will not delete any new or edited files.</h4>
+        </div>
+        <div className='modal-footer'>
+          <BootstrapModal.Dismiss className='btn btn-link'>Cancel</BootstrapModal.Dismiss>
+          <button className='btn btn-danger' onClick={this._removeScaffoldedFiles}>Yes, delete files</button>
+        </div>
+      </BootstrapModal>
     )
   }
 
@@ -453,10 +555,6 @@ class SpecsList extends Component {
   _openHelp (e) {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/writing-first-test')
-  }
-
-  _removeFirstTestBanner = () => {
-    this.setState({ firstTestBannerDismissed: true })
   }
 }
 

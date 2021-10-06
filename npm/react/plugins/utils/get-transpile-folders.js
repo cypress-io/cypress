@@ -1,6 +1,9 @@
 // @ts-check
+const path = require('path')
+
 function getTranspileFolders (config) {
-  const folders = []
+  const rawFolders = config.addTranspiledFolders ?? []
+  const folders = rawFolders.map((folder) => path.resolve(config.projectRoot, folder))
 
   // user can disable folders, so check first
   if (config.componentFolder) {

@@ -6,12 +6,20 @@ const path = require('path')
 const Promise = require('bluebird')
 const { useFixedBrowserLaunchSize } = require('../../../utils')
 
+const { startDevServer } = require('@cypress/webpack-dev-server')
+
+const webpackConfig = {
+  output: {
+    publicPath: '/',
+  },
+}
+
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  if (config.testingType !== 'e2e') {
-    throw Error(`This is an e2e testing project. testingType should be 'e2e'. Received ${config.testingType}`)
+  if (config.testingType === 'component') {
+    on('dev-server:start', (options) => startDevServer({ options, webpackConfig }))
   }
 
   let performance = {
@@ -74,6 +82,18 @@ module.exports = (on, config) => {
   })
 
   on('task', {
+    'console:log' (msg) {
+      console.log(msg)
+
+      return null
+    },
+
+    'console:error' (msg) {
+      console.error(msg)
+
+      return null
+    },
+
     'returns:undefined' () {},
 
     'errors' (message) {

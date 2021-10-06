@@ -45,6 +45,20 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/15294
+    it('proxies focus event options', () => {
+      // The browser will try to read the preventScroll option if present
+      const optionGetter = cy.stub()
+      const fakeOptions = Object.defineProperty({}, 'preventScroll', {
+        get: optionGetter,
+      })
+
+      cy.get('#focus input').then(($input) => {
+        $input[0].focus(fakeOptions)
+        expect(optionGetter).to.be.calledOnce
+      })
+    })
+
     it('manually blurs focused subject as a fallback', () => {
       let blurred = false
 

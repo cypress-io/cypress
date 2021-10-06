@@ -1,5 +1,5 @@
 import { action, computed, observable } from 'mobx'
-import automation from './automation'
+import { automation, BaseStore } from '@packages/runner-shared'
 
 const _defaults = {
   messageTitle: null,
@@ -11,13 +11,15 @@ const _defaults = {
   height: 660,
 
   reporterWidth: null,
+  specListWidth: null,
+  specs: [],
 
   url: '',
   highlightUrl: false,
   isLoadingUrl: false,
 }
 
-export default class State {
+export default class State extends BaseStore {
   defaults = _defaults
 
   @observable isLoading = true
@@ -43,19 +45,27 @@ export default class State {
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
+  @observable specListWidth = _defaults.specListWidth
+
   // what the dom reports, always in pixels
   @observable absoluteReporterWidth = 0
   @observable headerHeight = 0
+  @observable absoluteSpecListWidth = 0
 
   @observable windowWidth = 0
   @observable windowHeight = 0
 
   @observable automation = automation.CONNECTING
+  @observable useInlineSpecList = false
 
   @observable.ref scriptError = null
 
-  constructor (reporterWidth = _defaults.reporterWidth) {
-    this.reporterWidth = reporterWidth
+  constructor ({ reporterWidth, specListWidth, specs, useInlineSpecList }) {
+    super()
+    this.reporterWidth = reporterWidth || _defaults.reporterWidth
+    this.specListWidth = useInlineSpecList ? specListWidth : 0
+    this.useInlineSpecList = useInlineSpecList || false
+    this.specs = specs || _defaults.specs
   }
 
   @computed get scale () {
@@ -67,7 +77,7 @@ export default class State {
   }
 
   @computed get _containerWidth () {
-    return this.windowWidth - this.absoluteReporterWidth
+    return this.windowWidth - this.absoluteReporterWidth - this.specListWidth
   }
 
   @computed get _containerHeight () {
@@ -108,7 +118,12 @@ export default class State {
     this.height = height
   }
 
-  @action updateWindowDimensions ({ windowWidth, windowHeight, reporterWidth, headerHeight }) {
+  @action updateWindowDimensions ({
+    windowWidth,
+    windowHeight,
+    reporterWidth,
+    headerHeight,
+  }) {
     if (windowWidth != null) this.windowWidth = windowWidth
 
     if (windowHeight != null) this.windowHeight = windowHeight

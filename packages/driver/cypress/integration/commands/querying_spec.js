@@ -2145,6 +2145,15 @@ space
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/1119
+      it('logs "0" on cy.contains(0)', function () {
+        cy.state('document').write('<span>0</span>')
+
+        cy.contains(0).then(() => {
+          expect(this.lastLog.get('message')).to.eq('0')
+        })
+      })
+
       it('#consoleProps', () => {
         const $complex = cy.$$('#complex-contains')
 

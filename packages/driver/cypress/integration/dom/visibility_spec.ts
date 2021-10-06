@@ -1,7 +1,5 @@
 const { $, dom } = Cypress
 
-export {}
-
 describe('src/cypress/dom/visibility', () => {
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
@@ -312,8 +310,8 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       this.$parentPointerEventsNone = add(`\
-<div style="pointer-events: none;">
-  <span style="position: fixed; top: 20px;">parent pointer-events: none</span>
+<div style="pointer-events: none">
+  <span style="position: fixed; left: 0; top: 50%;">parent pointer-events: none</span>
 </div>\
 `)
 

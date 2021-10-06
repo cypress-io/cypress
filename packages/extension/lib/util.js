@@ -2,6 +2,9 @@ module.exports = {
   getCookieUrl: (cookie = {}) => {
     const prefix = cookie.secure ? 'https://' : 'http://'
 
-    return prefix + cookie.domain + (cookie.path || '')
+    // https://github.com/cypress-io/cypress/issues/6375
+    const host = cookie.domain.startsWith('.') ? cookie.domain.slice(1) : cookie.domain
+
+    return prefix + host + (cookie.path || '')
   },
 }

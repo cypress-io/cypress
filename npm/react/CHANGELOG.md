@@ -1,3 +1,94 @@
+# [@cypress/react-v5.10.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.4...@cypress/react-v5.10.0) (2021-09-10)
+
+
+### Features
+
+* allow usage of @react/plugins with cypress.config.js ([#17738](https://github.com/cypress-io/cypress/issues/17738)) ([da4b1e0](https://github.com/cypress-io/cypress/commit/da4b1e06ce33945aabddda0e6e175dc0e1b488a5))
+
+# [@cypress/react-v5.9.4](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.3...@cypress/react-v5.9.4) (2021-08-10)
+
+
+### Bug Fixes
+
+* do not throw when alt path is found in next ([#17658](https://github.com/cypress-io/cypress/issues/17658)) ([ee7e203](https://github.com/cypress-io/cypress/commit/ee7e203fa059efeac45c7a18526e563643e76d77)), closes [#17476](https://github.com/cypress-io/cypress/issues/17476)
+
+# [@cypress/react-v5.9.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.2...@cypress/react-v5.9.3) (2021-08-03)
+
+
+### Bug Fixes
+
+* plugin for next 11.0.2 moved webpack-config ([#17529](https://github.com/cypress-io/cypress/issues/17529)) ([130c086](https://github.com/cypress-io/cypress/commit/130c0864e786ae5172f2c70fdc86664dcaf93083)), closes [#17519](https://github.com/cypress-io/cypress/issues/17519) [#17476](https://github.com/cypress-io/cypress/issues/17476)
+
+# [@cypress/react-v5.9.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.1...@cypress/react-v5.9.2) (2021-07-20)
+
+
+### Bug Fixes
+
+* improve React `mountHook` type ([#17241](https://github.com/cypress-io/cypress/issues/17241)) ([e40969a](https://github.com/cypress-io/cypress/commit/e40969abe39424585fd2075b17e4e7d189f53c3a))
+
+# [@cypress/react-v5.9.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.0...@cypress/react-v5.9.1) (2021-06-04)
+
+
+### Bug Fixes
+
+* **cypress/react:** add default webpack config path ([#16813](https://github.com/cypress-io/cypress/issues/16813)) ([0348170](https://github.com/cypress-io/cypress/commit/03481703c997088a3e7ef5ed3b55d9fee01821a0))
+* **npm/react:** webpack config sample bug ([#16737](https://github.com/cypress-io/cypress/issues/16737)) ([98fe58c](https://github.com/cypress-io/cypress/commit/98fe58cce3dd42fc6ca4616a9ed3c9da7b33794c))
+
+# [@cypress/react-v5.9.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.1...@cypress/react-v5.9.0) (2021-05-31)
+
+
+### Features
+
+* react-scripts. allow parametrise webpack config path ([#16644](https://github.com/cypress-io/cypress/issues/16644)) ([c618d30](https://github.com/cypress-io/cypress/commit/c618d30f3df99394df5c0b81ea3817caf0a7eaf4))
+
+# [@cypress/react-v5.8.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.8.0...@cypress/react-v5.8.1) (2021-05-26)
+
+
+### Bug Fixes
+
+* Prevent mount .wrap command appearing in log ([#16585](https://github.com/cypress-io/cypress/issues/16585)) ([fca9b9a](https://github.com/cypress-io/cypress/commit/fca9b9aeb052db668d054f589d7894fc4f9c6d5a))
+
+# [@cypress/react-v5.8.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.7.0...@cypress/react-v5.8.0) (2021-05-21)
+
+
+### Features
+
+* custom webpack config for react/plugins/babel ([#16597](https://github.com/cypress-io/cypress/issues/16597)) ([75c753b](https://github.com/cypress-io/cypress/commit/75c753be0ee302fed3559b633626036905a45c4d)), closes [#16596](https://github.com/cypress-io/cypress/issues/16596)
+
+# [@cypress/react-v5.7.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.6.0...@cypress/react-v5.7.0) (2021-05-12)
+
+
+### Features
+
+* allow to import/require files in CRA plugin out of src ([#16453](https://github.com/cypress-io/cypress/issues/16453)) ([811c7e3](https://github.com/cypress-io/cypress/commit/811c7e36074acf7b4bee9d96505d48141e9d49bf))
+
+# [@cypress/react-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.5.0...@cypress/react-v5.6.0) (2021-05-11)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([c4151fb](https://github.com/cypress-io/cypress/commit/c4151fbd9f3c10de28e3e8dd3a75d0e0973b52e2))
+* remove unnecessary dependency ([#16412](https://github.com/cypress-io/cypress/issues/16412)) ([7b242ac](https://github.com/cypress-io/cypress/commit/7b242acbf6bc3134e4b2f1b1a05fc243e96dfe40))
+* **npm/react:** support transpiling typescript files in support ([#16197](https://github.com/cypress-io/cypress/issues/16197)) ([60b217c](https://github.com/cypress-io/cypress/commit/60b217cccedf28c56b0573665f0b3ee81813a4cc))
+
+
+### Features
+
+* **npm/react:** Add craco plugin ([#16333](https://github.com/cypress-io/cypress/issues/16333)) ([958a9c2](https://github.com/cypress-io/cypress/commit/958a9c2691b4cdbee44053e9decbd6350b9cc7fe))
+
+# [@cypress/react-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.2...@cypress/react-v5.5.0) (2021-05-05)
+
+
+### Bug Fixes
+
+* accept webapck 4 & 5 as peer dependencies of @cypress/vue and @cypress/react ([#16290](https://github.com/cypress-io/cypress/issues/16290)) ([500cab9](https://github.com/cypress-io/cypress/commit/500cab95ef7a7d6b74b366ba8066bcf73f2955aa))
+* **npm/react:** support transpiling typescript files in support ([#16197](https://github.com/cypress-io/cypress/issues/16197)) ([8a83bb1](https://github.com/cypress-io/cypress/commit/8a83bb1c71c7e46a31c6a720ea25101603fa72b4))
+
+
+### Features
+
+* **npm/react:** Add craco plugin ([#16333](https://github.com/cypress-io/cypress/issues/16333)) ([2d8f55b](https://github.com/cypress-io/cypress/commit/2d8f55bfca2daf1dca31aaf1e596751a6cd3d793))
+
 # [@cypress/react-v5.4.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.4.1...@cypress/react-v5.4.2) (2021-04-30)
 
 

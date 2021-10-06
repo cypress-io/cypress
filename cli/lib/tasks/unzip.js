@@ -70,18 +70,6 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
         const unzipWithNode = () => {
           debug('unzipping with node.js (slow)')
 
-          const endFn = (err) => {
-            if (err) {
-              debug('error %s', err.message)
-
-              return reject(err)
-            }
-
-            debug('node unzip finished')
-
-            return resolve()
-          }
-
           const opts = {
             dir: installDir,
             onEntry: tick,
@@ -89,7 +77,19 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           debug('calling Node extract tool %s %o', zipFilePath, opts)
 
-          return unzipTools.extract(zipFilePath, opts, endFn)
+          return unzipTools.extract(zipFilePath, opts)
+          .then(() => {
+            debug('node unzip finished')
+
+            return resolve()
+          })
+          .catch((err) => {
+            if (err) {
+              debug('error %s', err.message)
+
+              return reject(err)
+            }
+          })
         }
 
         const unzipFallback = _.once(unzipWithNode)

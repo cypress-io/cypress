@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "cypress-schematic",
+  "title": "Cypress Install Schema",
+  "type": "object",
+  "properties": {
+    "e2eUpdate": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, `ng e2e` will be added or updated to use Cypress",
+      "x-prompt": "Would you like the default `ng e2e` command to use Cypress? [ Protractor to Cypress Migration Guide: https://on.cypress.io/protractor-to-cypress?cli=true ]"
+    }
+  },
+  "required": []
+}

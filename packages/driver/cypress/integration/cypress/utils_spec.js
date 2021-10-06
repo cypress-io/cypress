@@ -1,4 +1,5 @@
-const LimitedMap = require('@packages/driver/src/util/limited_map')
+const LimitedMap = require('@packages/driver/src/util/limited_map').default
+const { encodeBase64Unicode } = Cypress.utils
 const $utils = Cypress.utils
 
 describe('driver/src/cypress/utils', () => {
@@ -63,6 +64,15 @@ describe('driver/src/cypress/utils', () => {
 
       it('symbol', function () {
         expect(this.str(Symbol.iterator)).to.eq('Symbol')
+      })
+
+      it('circular', function () {
+        const obj = {}
+
+        obj.obj = obj
+
+        // at this point, there is no special formatting for a circular object, we simply fall back to String() on recursion failure
+        expect(this.str(obj)).to.be.a.string
       })
     })
 
@@ -212,7 +222,7 @@ describe('driver/src/cypress/utils', () => {
   context('.encodeBase64Unicode', () => {
     it('encodes base64, with utf-8 handling', () => {
       const str = 'サイプリスは一番'
-      const encoded = $utils.encodeBase64Unicode(str)
+      const encoded = encodeBase64Unicode(str)
 
       expect(encoded).to.equal('44K144Kk44OX44Oq44K544Gv5LiA55Wq')
     })

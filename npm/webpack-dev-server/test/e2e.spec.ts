@@ -1,10 +1,10 @@
-import webpack from 'webpack'
 import path from 'path'
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
 import http from 'http'
 import fs from 'fs'
+import { webpackDevServerFacts } from '../src/webpackDevServerFacts'
 
 import { startDevServer } from '../'
 
@@ -34,11 +34,11 @@ const requestSpecFile = (port: number) => {
 
 const root = path.join(__dirname, '..')
 
-const webpackConfig: webpack.Configuration = {
-  output: {
-    path: root,
-    publicPath: root,
-  },
+const webpackConfig = {
+  devServer: webpackDevServerFacts.isV3()
+    ? { contentBase: root }
+    : { static: { directory: root } },
+
 }
 
 const specs: Cypress.Cypress['spec'][] = [
@@ -117,7 +117,11 @@ describe('#startDevServer', () => {
     exitSpy()
 
     return new Promise((res) => {
-      devServerEvents.on('dev-server:compile:error', () => {
+      devServerEvents.on('dev-server:compile:error', (err: string) => {
+        expect(err).to.contain('./test/fixtures/compilation-fails.spec.js 1:5')
+        expect(err).to.contain('Module parse failed: Unexpected token (1:5)')
+        expect(err).to.contain('You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See https://webpack.js.org/concepts#loaders')
+        expect(err).to.contain('> this is an invalid spec file')
         expect(exitSpy.calledOnce).to.be.true
         close(() => res())
       })

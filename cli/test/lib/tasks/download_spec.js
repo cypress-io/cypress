@@ -313,6 +313,64 @@ describe('lib/tasks/download', function () {
   })
 
   context('with proxy env vars', () => {
+    const testUriHttp = 'http://anything.com'
+    const testUriHttps = 'https://anything.com'
+
+    beforeEach(function () {
+      this.env = _.clone(process.env)
+      // add a default no_proxy which does not match the testUri
+      process.env.NO_PROXY = 'localhost,.org'
+    })
+
+    afterEach(function () {
+      process.env = this.env
+    })
+
+    it('uses http_proxy on http request', () => {
+      process.env.http_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
+    })
+
+    it('ignores http_proxy on https request', () => {
+      process.env.http_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
+      process.env.https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+    })
+
+    it('falls back to npm_config_proxy', () => {
+      process.env.npm_config_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+      process.env.npm_config_https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+      process.env.https_proxy = 'https://baz'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://baz')
+    })
+
+    it('respects no_proxy on http and https requests', () => {
+      process.env.NO_PROXY = 'localhost,.com'
+
+      process.env.http_proxy = 'http://foo'
+      process.env.https_proxy = 'https://bar'
+
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq(null)
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
+    })
+
+    it('ignores no_proxy for npm proxy configs, prefers https over http', () => {
+      process.env.NO_PROXY = 'localhost,.com'
+
+      process.env.npm_config_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+
+      process.env.npm_config_https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('https://bar')
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+    })
+  })
+
+  context('with CA and CAFILE env vars', () => {
     beforeEach(function () {
       this.env = _.clone(process.env)
     })
@@ -321,20 +379,37 @@ describe('lib/tasks/download', function () {
       process.env = this.env
     })
 
-    it('prefers https_proxy over http_proxy', () => {
-      process.env.HTTP_PROXY = 'foo'
-      expect(download.getProxyUrl()).to.eq('foo')
-      process.env.https_proxy = 'bar'
-      expect(download.getProxyUrl()).to.eq('bar')
+    it('returns undefined if not set', () => {
+      return download.getCA().then((ca) => {
+        expect(ca).to.be.undefined
+      })
     })
 
-    it('falls back to npm_config_proxy', () => {
-      process.env.npm_config_proxy = 'foo'
-      expect(download.getProxyUrl()).to.eq('foo')
-      process.env.npm_config_https_proxy = 'bar'
-      expect(download.getProxyUrl()).to.eq('bar')
-      process.env.https_proxy = 'baz'
-      expect(download.getProxyUrl()).to.eq('baz')
+    it('returns CA from npm_config_ca', () => {
+      process.env.CYPRESS_DOWNLOAD_USE_CA = 'true'
+      process.env.npm_config_ca = 'foo'
+
+      return download.getCA().then((ca) => {
+        expect(ca).to.eqls('foo')
+      })
+    })
+
+    it('returns CA from npm_config_cafile', () => {
+      process.env.CYPRESS_DOWNLOAD_USE_CA = 'true'
+      process.env.npm_config_cafile = 'test/fixture/cafile.pem'
+
+      return download.getCA().then((ca) => {
+        expect(ca).to.eqls('bar\n')
+      })
+    })
+
+    it('returns undefined if failed reading npm_config_cafile', () => {
+      process.env.CYPRESS_DOWNLOAD_USE_CA = 'true'
+      process.env.npm_config_cafile = 'test/fixture/not-exists.pem'
+
+      return download.getCA().then((ca) => {
+        expect(ca).to.be.undefined
+      })
     })
   })
 })

@@ -30,7 +30,8 @@
           "testId": "r3",
           "timeout": 4000,
           "numElements": 1,
-          "type": "parent"
+          "type": "parent",
+          "hasConsoleProps": true
         },
         {
           "hookId": "r3",

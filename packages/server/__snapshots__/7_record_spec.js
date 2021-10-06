@@ -138,6 +138,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
 
   record pass
+plugin stdout
     ✓ passes
     - is pending
 
@@ -1624,6 +1625,10 @@ exports['e2e record passing passes 2'] = [
       "start": "2018-02-01T20:14:19.323Z",
       "end": "2018-02-01T20:14:19.323Z",
       "duration": 1234
+    },
+    "metadata": {
+      "studioCreated": 0,
+      "studioExtended": 0
     }
   },
   {
@@ -1700,6 +1705,10 @@ exports['e2e record passing passes 2'] = [
       "start": "2018-02-01T20:14:19.323Z",
       "end": "2018-02-01T20:14:19.323Z",
       "duration": 1234
+    },
+    "metadata": {
+      "studioCreated": 0,
+      "studioExtended": 0
     }
   },
   {
@@ -1773,6 +1782,10 @@ exports['e2e record passing passes 2'] = [
       "start": "2018-02-01T20:14:19.323Z",
       "end": "2018-02-01T20:14:19.323Z",
       "duration": 1234
+    },
+    "metadata": {
+      "studioCreated": 0,
+      "studioExtended": 0
     }
   }
 ]
@@ -2645,4 +2658,90 @@ Available browsers found on your system are:
 - browser1
 - browser2
 - browser3
+`
+
+exports['e2e record metadata sends Studio usage metadata 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (studio_written.spec.js)                                                   │
+  │ Searched:   cypress/integration/studio_written.spec.js                                         │
+  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  studio_written.spec.js                                                          (1 of 1)
+  Estimated: 8 seconds
+
+
+  suite
+    ✓ extended test
+    ✓ created test
+    nested suite
+      ✓ extended test
+      ✓ created test
+
+
+  4 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Estimated:    8 seconds                                                                        │
+  │ Spec Ran:     studio_written.spec.js                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Uploading Results)
+
+  - Nothing to Upload
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  studio_written.spec.js                   XX:XX        4        4        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                       
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
+
+
+`
+
+exports['e2e record quiet mode respects quiet mode 1'] = `
+
+
+  record pass
+    ✓ passes
+    - is pending
+
+
+  1 passing
+  1 pending
+
+
 `

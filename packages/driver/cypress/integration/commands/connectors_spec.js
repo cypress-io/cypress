@@ -934,7 +934,7 @@ describe('src/cy/commands/connectors', () => {
               Command: 'invoke',
               Function: '.math.sum(1, 2, 3)',
               'With Arguments': [1, 2, 3],
-              Subject: this.obj,
+              Subject: this.obj['math'],
               Yielded: 6,
             })
           })

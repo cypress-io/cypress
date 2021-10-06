@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const execa = require('execa')
-const Listr = require('listr')
+const { Listr } = require('listr2')
 const commander = require('commander')
 
 const program = new commander.Command()
@@ -49,7 +49,7 @@ program
 
   const tasks = new Listr(projects.map((proj) => {
     return {
-      title: proj.name,
+      options: { title: proj.name },
       task: () => {
         const cwd = proj.path
         const tsc = require.resolve('typescript/bin/tsc')

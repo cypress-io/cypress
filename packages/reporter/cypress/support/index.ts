@@ -8,5 +8,6 @@ installCustomPercyCommand({
   },
   elementOverrides: {
     '.command-progress': true,
+    '.cy-tooltip': true,
   },
 })

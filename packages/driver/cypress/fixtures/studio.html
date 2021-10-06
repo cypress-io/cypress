@@ -22,6 +22,10 @@
     <button class="mdown">click adds class removed by mousedown</button>
     <button class="mdown">mdown</button>
     <input id="input-placeholder" type="text" value="placeholder" />
+    <button id="assertions-1" class="container container-wide" value="submit1" type="button" data-channel="a1" data-target="none">assertions button</button>
+    <button id="long-attr" style="color: red; border: 1px solid blue; border-radius: 100px; z-index: 1; background-color: green;">long attr</button>
+    <button class="assertion-submit">submit</button>
+    <span id="success-message" style="display: none">action success!</span>
     <script>
       const btn1 = document.getElementsByClassName('interactive')[0]
       const btn2 = document.getElementsByClassName('interactive')[1]
@@ -57,6 +61,12 @@
 
       mdown.addEventListener('click', function() {
         mdown.classList.add('clicked')
+      })
+
+      const assertionSubmit = document.getElementsByClassName('assertion-submit')[0]
+
+      assertionSubmit.addEventListener('click', function() {
+        document.getElementById('success-message').style.display = 'block'
       })
     </script>
   </body>

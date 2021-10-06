@@ -14,6 +14,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
 const chalk = require('chalk')
+const { openProject } = require('../lib/open_project')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -114,7 +115,7 @@ module.exports = {
   openProject (options) {
     // this code actually starts a project
     // and is spawned from nodemon
-    return require('./open_project').open(options.project, options)
+    openProject.open(options.project, options)
   },
 
   start (argv = []) {
@@ -175,10 +176,6 @@ module.exports = {
         mode = 'logs'
       } else if (options.clearLogs) {
         mode = 'clearLogs'
-      } else if (options.getKey) {
-        mode = 'getKey'
-      } else if (options.generateKey) {
-        mode = 'generateKey'
       } else if (!(options.exitWithCode == null)) {
         mode = 'exitWithCode'
       } else if (options.runProject) {
@@ -240,24 +237,6 @@ module.exports = {
         // clear the logs + exit
         return require('./gui/logs').clear()
         .then(exit0)
-        .catch(exitErr)
-
-      case 'getKey':
-        // print the key + exit
-        return require('./project-base').ProjectBase
-        .getSecretKeyByPath(options.projectRoot)
-        .then((key) => {
-          return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
-        .catch(exitErr)
-
-      case 'generateKey':
-        // generate + print the key + exit
-        return require('./project-base').ProjectBase
-        .generateSecretKeyByPath(options.projectRoot)
-        .then((key) => {
-          return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
         .catch(exitErr)
 
       case 'exitWithCode':

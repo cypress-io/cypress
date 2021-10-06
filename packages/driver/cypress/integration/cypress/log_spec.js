@@ -1,4 +1,4 @@
-const $Log = require('@packages/driver/src/cypress/log')
+const $Log = require('@packages/driver/src/cypress/log').default
 
 describe('src/cypress/log', function () {
   context('#snapshot', function () {

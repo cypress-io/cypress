@@ -1,5 +1,5 @@
 import { findApp, FindAppParams } from './util'
-import { Browser, DetectedBrowser } from '../types'
+import type { Browser, DetectedBrowser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { merge } from 'ramda'
@@ -17,6 +17,12 @@ export const browsers: Detectors = {
       appName: 'Google Chrome.app',
       executable: 'Contents/MacOS/Google Chrome',
       appId: 'com.google.Chrome',
+      versionProperty: 'KSVersion',
+    },
+    beta: {
+      appName: 'Google Chrome Beta.app',
+      executable: 'Contents/MacOS/Google Chrome Beta',
+      appId: 'com.google.Chrome.beta',
       versionProperty: 'KSVersion',
     },
     canary: {

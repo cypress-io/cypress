@@ -7,7 +7,9 @@ describe('studio mocha events', { retries: 0 }, () => {
   it('only runs a single test by id', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {
-        studioTestId: 'r4',
+        studio: {
+          testId: 'r4',
+        },
       },
     }).then(() => {
       cy.get('.reporter').contains('test 2').should('exist')
@@ -20,7 +22,9 @@ describe('studio mocha events', { retries: 0 }, () => {
   it('creates a new test when adding to a suite', () => {
     runIsolatedCypress('cypress/fixtures/studio/basic_spec.js', {
       state: {
-        studioSuiteId: 'r2',
+        studio: {
+          suiteId: 'r2',
+        },
       },
     })
     .then(() => {
@@ -33,7 +37,9 @@ describe('studio mocha events', { retries: 0 }, () => {
   it('can add new test to root runnable', () => {
     runIsolatedCypress('cypress/fixtures/empty_spec.js', {
       state: {
-        studioSuiteId: 'r1',
+        studio: {
+          suiteId: 'r1',
+        },
       },
     })
     .then(() => {
@@ -46,7 +52,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('runs before hooks and test body but not after hooks when extending test', () => {
       runIsolatedCypress('cypress/fixtures/studio/hooks_spec.js', {
         state: {
-          studioTestId: 'r3',
+          studio: {
+            testId: 'r3',
+          },
         },
       })
       .then(() => {
@@ -65,7 +73,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('runs before hooks but not after hooks when adding to suite', () => {
       runIsolatedCypress('cypress/fixtures/studio/hooks_spec.js', {
         state: {
-          studioSuiteId: 'r2',
+          studio: {
+            suiteId: 'r2',
+          },
         },
       })
       .then(() => {
@@ -86,7 +96,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can be extended', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_test_spec.js', {
         state: {
-          studioTestId: 'r4',
+          studio: {
+            testId: 'r4',
+          },
         },
       })
       .then(() => {
@@ -100,7 +112,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can be extended when there are multiple in the spec', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_test_multiple_spec.js', {
         state: {
-          studioTestId: 'r5',
+          studio: {
+            testId: 'r5',
+          },
         },
       })
       .then(() => {
@@ -115,7 +129,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can extend a suite that contains an only spec', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_test_spec.js', {
         state: {
-          studioSuiteId: 'r3',
+          studio: {
+            suiteId: 'r3',
+          },
         },
       })
       .then(() => {
@@ -131,7 +147,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can be added to', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_suite_spec.js', {
         state: {
-          studioSuiteId: 'r3',
+          studio: {
+            suiteId: 'r3',
+          },
         },
       })
       .then(() => {
@@ -145,7 +163,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can be added to when there are multiple in the spec', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_suite_multiple_spec.js', {
         state: {
-          studioSuiteId: 'r4',
+          studio: {
+            suiteId: 'r4',
+          },
         },
       })
       .then(() => {
@@ -159,7 +179,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can extend a test within an only suite', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_suite_spec.js', {
         state: {
-          studioTestId: 'r7',
+          studio: {
+            testId: 'r7',
+          },
         },
       })
       .then(() => {
@@ -173,7 +195,9 @@ describe('studio mocha events', { retries: 0 }, () => {
     it('can extend a test within an only suite when there are multiple in the spec', () => {
       runIsolatedCypress('cypress/fixtures/studio/only_suite_multiple_spec.js', {
         state: {
-          studioTestId: 'r10',
+          studio: {
+            testId: 'r10',
+          },
         },
       })
       .then(() => {

@@ -1,5 +1,5 @@
 import { noop } from 'lodash'
-import { NetStubbingState } from './types'
+import type { NetStubbingState } from './types'
 
 export function state (): NetStubbingState {
   return {

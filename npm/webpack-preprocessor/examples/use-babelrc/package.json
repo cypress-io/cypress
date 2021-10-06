@@ -8,6 +8,5 @@
     "test": "../../node_modules/.bin/cypress run --dev"
   },
   "license": "ISC",
-  "author": "",
   "keywords": []
 }
