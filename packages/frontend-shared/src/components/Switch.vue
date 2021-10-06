@@ -39,7 +39,7 @@ const sizeClasses = {
   'lg': {
     container: 'w-32px h-16px',
     indicator: 'w-12px h-12px ml-2px',
-    translate: 'translate-x-16px',
+    translate: 'translate-x-14px',
   },
   'xl': {
     container: 'w-48px h-24px',
