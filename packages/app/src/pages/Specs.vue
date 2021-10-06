@@ -15,8 +15,8 @@
        Prevent Vue from re-rendering these elements with v-once.
    -->
   <div v-once>
-    <div :id="UnifiedRunnerAPI.RUNNER_ID" />
-    <div :id="UnifiedRunnerAPI.REPORTER_ID" />
+    <div :id="RUNNER_ID" />
+    <div :id="REPORTER_ID" />
   </div>
 </template>
 
@@ -24,6 +24,7 @@
 import { gql } from '@urql/vue'
 import { onMounted } from 'vue'
 import { UnifiedRunnerAPI } from '../runner'
+import { REPORTER_ID, RUNNER_ID } from '../runner/utils'
 import type { Specs_SpecsFragment } from '../generated/graphql'
 import type { SpecFile } from '@packages/types/src'
 

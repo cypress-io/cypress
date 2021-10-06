@@ -1,11 +1,28 @@
-import { UnifiedRunnerAPI } from '../runner'
-import type { Store } from '../store'
+import { store, Store } from '../store'
+import { getReporterElement } from './utils'
 
-export async function unmountReporter () {
-  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(UnifiedRunnerAPI.getReporterElement())
+let hasInitializeReporter = false
+
+async function unmountReporter () {
+  // We do not need to unmount the reporter at any point right now,
+  // but this will likely be useful for cleaning up at some point.
+  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(getReporterElement())
 }
 
-export function renderReporter (
+async function resetReporter () {
+  if (hasInitializeReporter) {
+    await window.UnifiedRunner.eventManager.teardownReporter()
+  }
+}
+
+function setupReporter () {
+  const $reporterRoot = getReporterElement()
+
+  renderReporter($reporterRoot, store, window.UnifiedRunner.eventManager)
+  hasInitializeReporter = true
+}
+
+function renderReporter (
   root: HTMLElement,
   store: Store,
   eventManager: typeof window.UnifiedRunner.eventManager,
@@ -32,4 +49,11 @@ export function renderReporter (
   })
 
   window.UnifiedRunner.ReactDOM.render(reporter, root)
+}
+
+export const UnifiedReporterAPI = {
+  unmountReporter,
+  setupReporter,
+  hasInitializeReporter,
+  resetReporter,
 }

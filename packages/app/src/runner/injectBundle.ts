@@ -1,5 +1,6 @@
 function injectReporterStyle () {
   const style = document.createElement('style')
+
   style.innerText = `
     .reporter {
       min-height: 0;
@@ -8,6 +9,7 @@ function injectReporterStyle () {
       position: absolute;
     }
   `
+
   document.head.appendChild(style)
 }
 
@@ -20,6 +22,7 @@ export async function injectRunner (ready: () => void) {
   script.type = 'text/javascript'
 
   const link = document.createElement('link')
+
   link.rel = 'stylesheet'
   link.href = '/__cypress/runner/cypress_runner.css'
 
@@ -29,7 +32,7 @@ export async function injectRunner (ready: () => void) {
   injectReporterStyle()
 
   script.onload = () => {
-    // @ts-ignore - just stick config on window until we figure out how we are 
+    // @ts-ignore - just stick config on window until we figure out how we are
     // going to manage it
     window.config = window.UnifiedRunner.decodeBase64(data.base64Config)
     ready()
