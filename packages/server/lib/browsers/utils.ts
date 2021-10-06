@@ -132,6 +132,24 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
+function removeFunctionsInObject (serializedObj) {
+  if (serializedObj) {
+    for (const key of serializedObj) {
+      if (typeof serializedObj[key] === 'function') {
+        delete serializedObj[key]
+      } else if (typeof serializedObj[key] === 'object') {
+        if (Array.isArray(serializedObj[key])) {
+          serializedObj[key] = serializedObj[key].filter((obj) => typeof obj !== 'function')
+        } else {
+          removeFunctionsInObject(serializedObj[key])
+        }
+      }
+    }
+  }
+
+  return serializedObj
+}
+
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
@@ -149,6 +167,10 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
       extensions: [],
     })
   } else {
+    // First, remove all dummy functions created on the plugins thread,
+    // they don't need to be checked
+    pluginConfigResult = removeFunctionsInObject(pluginConfigResult)
+
     // either warn about the array or potentially error on invalid props, but not both
 
     // strip out all the known launch option properties from the resulting object
