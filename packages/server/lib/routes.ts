@@ -1,4 +1,5 @@
 import type httpProxy from 'http-proxy'
+import Debug from 'debug'
 import { ErrorRequestHandler, Router } from 'express'
 
 import type { SpecsStore } from './specs-store'
@@ -8,6 +9,8 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+
+const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
   specsStore: SpecsStore
@@ -26,6 +29,8 @@ export const createCommonRoutes = ({
   networkProxy,
   testingType,
   getSpec,
+  getCurrentBrowser,
+  specsStore,
   getRemoteState,
   nodeProxy,
 }: InitializeRoutes) => {
@@ -47,6 +52,25 @@ export const createCommonRoutes = ({
     if (testingType === 'component') {
       iframesController.component({ config, nodeProxy }, req, res)
     }
+  })
+
+  const clientRoute = config.clientRoute
+
+  if (!clientRoute) {
+    throw Error(`clientRoute is required. Received ${clientRoute}`)
+  }
+
+  router.get(clientRoute, (req, res) => {
+    debug('Serving Cypress front-end by requested URL:', req.url)
+
+    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+      config,
+      testingType,
+      getSpec,
+      getCurrentBrowser,
+      getRemoteState,
+      specsStore,
+    })
   })
 
   router.all('*', (req, res) => {

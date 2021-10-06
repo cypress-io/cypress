@@ -1,6 +1,4 @@
 import path from 'path'
-import la from 'lazy-ass'
-import check from 'check-more-types'
 import Debug from 'debug'
 import { Router } from 'express'
 
@@ -8,7 +6,6 @@ import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
 import reporter from './controllers/reporter'
-import { runner } from './controllers/runner'
 import client from './controllers/client'
 import files from './controllers/files'
 import type { InitializeRoutes } from './routes'
@@ -17,13 +14,8 @@ const debug = Debug('cypress:server:routes-e2e')
 
 export const createRoutesE2E = ({
   config,
-  specsStore,
-  getRemoteState,
   networkProxy,
-  getSpec,
-  getCurrentBrowser,
   onError,
-  testingType,
 }: InitializeRoutes) => {
   const routesE2E = Router()
 
@@ -135,21 +127,6 @@ export const createRoutesE2E = ({
     debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
 
     res.sendFile(file, { etag: false })
-  })
-
-  la(check.unemptyString(config.clientRoute), 'missing client route in config', config)
-
-  routesE2E.get(`${config.clientRoute}`, (req, res) => {
-    debug('Serving Cypress front-end by requested URL:', req.url)
-
-    runner.serve(req, res, 'runner', {
-      config,
-      testingType,
-      getSpec,
-      getCurrentBrowser,
-      getRemoteState,
-      specsStore,
-    })
   })
 
   return routesE2E
