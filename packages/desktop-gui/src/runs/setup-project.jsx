@@ -105,6 +105,18 @@ class SetupProject extends Component {
             error={this.state.error}
             project={this.props.project}
             configFile={this.props.project.configFile}
+            retryInsert={(id) => {
+              this.setState({
+                isSubmitting: true,
+              })
+
+              this._setupWithExistingProject(id)
+              .then(() => {
+                this.setState({
+                  isSubmitting: true,
+                })
+              })
+            }}
           />
           : this._isLoaded()
             ? this._form()
@@ -393,7 +405,11 @@ class SetupProject extends Component {
       })
     }
 
-    return dashboardProjectsApi.setProjectId(this.state.selectedProjectId,
+    return this._setupWithExistingProject(this.state.selectedProjectId)
+  }
+
+  _setupWithExistingProject (projectId) {
+    return dashboardProjectsApi.setProjectId(projectId,
       this.props.project.path,
       this.props.project.configFile)
     .then((id) => {

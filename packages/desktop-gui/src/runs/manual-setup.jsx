@@ -6,11 +6,11 @@ import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
-function ManualSetup ({ error, configFile, project }) {
+function ManualSetup ({ error, configFile, project, retryInsert }) {
   const relativeFile = configFile
   const absoluteFile = `${ appStore.projectRoot }/${ relativeFile }`
 
-  const codeToToAddKeys = `projectId: ${JSON.stringify(error.payload.projectId)},`
+  const codeToToAddKeys = `projectId: '${error.payload.projectId}'',`
   const helpCodeAfter = `module.exports = {
   ${codeToToAddKeys} // <- add this line
   ...config
@@ -19,7 +19,11 @@ function ManualSetup ({ error, configFile, project }) {
   const retry = (e) => {
     e.preventDefault()
 
-    projectsApi.reopenProject(project)
+    projectsApi.reopenProject(project).then((project) => {
+      if (!project.id) {
+        retryInsert(error.payload.projectId)
+      }
+    })
   }
 
   return (
