@@ -145,13 +145,13 @@ const isNewProject = (config) => {
   })
 }
 
-export function isJSONFile (filePath) {
+function isJSONFile (filePath) {
   return filePath && /\.json$/.test(filePath)
 }
 
 module.exports = {
   isNewProject,
-
+  isJSONFile,
   integration (folder, config) {
     debug(`integration folder ${folder}`)
 
