@@ -3,7 +3,6 @@ import { objectType } from 'nexus'
 export const WizardStorybook = objectType({
   name: 'WizardStorybook',
   description: 'Wizard Storybook',
-  node: 'name',
   definition (t) {
     t.boolean('configured', {
       description: 'Whether this is the selected framework bundler',

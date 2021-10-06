@@ -664,15 +664,12 @@ enum WizardStep {
 }
 
 """Wizard Storybook"""
-type WizardStorybook implements Node {
+type WizardStorybook {
   """Whether this is the selected framework bundler"""
   configured: Boolean
 
   """Most recent generated spec"""
   generatedSpec: String
-
-  """Relay style Node ID field for the WizardStorybook field"""
-  id: ID!
 
   """List of all Storybook stories"""
   stories: [String!]!
