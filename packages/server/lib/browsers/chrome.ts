@@ -260,7 +260,7 @@ const _connectToChromeRemoteInterface = function (port, onError, browserDisplayN
   })
 }
 
-const _maybeRecordVideo = async function (client, options) {
+const _maybeRecordVideo = async function (client, options, browserMajorVersion) {
   if (!options.onScreencastFrame) {
     debug('options.onScreencastFrame is false')
 
@@ -273,7 +273,7 @@ const _maybeRecordVideo = async function (client, options) {
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', screencastOpts)
+  await client.send('Page.startScreencast', browserMajorVersion >= 89 ? screencastOpts() : screencastOpts(1))
 
   return client
 }
@@ -528,7 +528,7 @@ export = {
       await originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    await this._maybeRecordVideo(criClient, options)
+    await this._maybeRecordVideo(criClient, options, browser.majorVersion)
     await this._navigateUsingCRI(criClient, url)
     await this._handleDownloads(criClient, options.downloadsFolder, automation)
 
