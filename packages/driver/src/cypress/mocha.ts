@@ -27,6 +27,8 @@ const suiteAddTest = Suite.prototype.addTest
 const suiteAddSuite = Suite.prototype.addSuite
 const suiteRetries = Suite.prototype.retries
 const hookRetries = Hook.prototype.retries
+const suiteSlow = Suite.prototype.slow
+const hookSlow = Suite.prototype.slow
 const suiteBeforeAll = Suite.prototype.beforeAll
 const suiteBeforeEach = Suite.prototype.beforeEach
 const suiteAfterAll = Suite.prototype.afterAll
@@ -200,6 +202,14 @@ const restoreSuiteRetries = () => {
   Suite.prototype.retries = suiteRetries
 }
 
+const restoreSuiteSlow = () => {
+  Suite.prototype.slow = suiteSlow
+}
+
+const restoreHookSlow = () => {
+  Suite.prototype.slow = hookSlow
+}
+
 const restoreTestClone = () => {
   Test.prototype.clone = testClone
 }
@@ -261,6 +271,24 @@ const patchHookRetries = () => {
     }
 
     return hookRetries.apply(this, args)
+  }
+}
+
+const patchSuiteSlow = () => {
+  Suite.prototype.slow = function (...args) {
+    // Mocha calls this.slow() internally to set the default value of 75ms
+    // Any other value, we assume it's a user and inform them that this is doesn't actually do anything
+    if (args[0] !== undefined && args[0] !== 75) {
+      throw $errUtils.cypressErrByPath('mocha.manually_set_slow')
+    }
+  }
+}
+
+const patchHookSlow = () => {
+  Hook.prototype.slow = function (...args) {
+    if (args[0] !== undefined && args[0] !== 75) {
+      throw $errUtils.cypressErrByPath('mocha.manually_set_slow')
+    }
   }
 }
 
@@ -378,6 +406,10 @@ const patchSuiteAddTest = (specWindow, config) => {
       return testRetries.apply(this, args)
     }
 
+    test.slow = function () {
+      throw $errUtils.cypressErrByPath('mocha.manually_set_slow')
+    }
+
     return ret
   }
 }
@@ -468,6 +500,8 @@ const restore = () => {
   restoreRunnableResetTimeout()
   restoreSuiteRetries()
   restoreHookRetries()
+  restoreSuiteSlow()
+  restoreHookSlow()
   restoreRunnerRunTests()
   restoreTestClone()
   restoreSuiteAddTest()
@@ -482,6 +516,8 @@ const override = (specWindow, Cypress, config) => {
   patchRunnableResetTimeout()
   patchSuiteRetries()
   patchHookRetries()
+  patchSuiteSlow()
+  patchHookSlow()
   patchRunnerRunTests()
   patchTestClone()
   patchSuiteAddTest(specWindow, config)

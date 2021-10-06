@@ -892,6 +892,11 @@ export default {
 
     https://on.cypress.io/test-retries
     `,
+    manually_set_slow: stripIndent`\
+    Mocha \`this.slow()\` syntax is not supported.
+
+    The slow threshold can only be configured globally by \`slowTestThreshold\`. See https://on.cypress.io/configuration#Global
+    `,
     hook_registered_late: stripIndent`\
     Cypress detected you registered a(n) \`{{hookTitle}}\` hook while a test was running (possibly a hook nested inside another hook). All hooks must be registered before a test begins executing.
 
