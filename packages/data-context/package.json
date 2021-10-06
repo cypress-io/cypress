@@ -18,6 +18,7 @@
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@storybook/csf-tools": "^6.4.0-alpha.38",
     "mocha": "7.0.1",
     "rimraf": "3.0.2"
   },

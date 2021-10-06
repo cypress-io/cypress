@@ -105,6 +105,32 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('appCreateComponentIndexHtml', {
+      type: 'App',
+      args: {
+        template: nonNull('String'),
+      },
+      description: 'Create an Index HTML file for a new component testing project',
+      resolve: async (root, args, ctx) => {
+        await ctx.actions.project.createComponentIndexHtml(args.template)
+
+        return ctx.appData
+      },
+    })
+
+    t.nonNull.field('generateSpecFromStory', {
+      type: 'Wizard',
+      description: 'Generate spec from Storybook story',
+      args: {
+        storyPath: nonNull('String'),
+      },
+      async resolve (_root, args, ctx) {
+        await ctx.actions.project.generateSpecFromStory(args.storyPath)
+
+        return ctx.wizardData
+      },
+    })
+
     t.field('navigationMenuSetItem', {
       type: 'NavigationMenu',
       description: 'Set the current navigation item',

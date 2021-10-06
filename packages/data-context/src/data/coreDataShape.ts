@@ -1,5 +1,6 @@
 import { BUNDLERS, FoundBrowser, FoundSpec } from '@packages/types'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
+import type { StorybookFile } from '.'
 
 export type Maybe<T> = T | null | undefined
 
@@ -39,6 +40,7 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
+  generatedSpec: Omit<StorybookFile, 'content'> | null
 }
 
 export interface CoreDataShape {
@@ -68,6 +70,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
+      generatedSpec: null,
     },
     user: null,
   }

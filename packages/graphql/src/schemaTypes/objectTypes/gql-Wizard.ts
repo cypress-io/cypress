@@ -5,6 +5,7 @@ import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { arg, nonNull, objectType } from 'nexus'
 import { BUNDLERS, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
 import { TestingTypeEnum, WizardCodeLanguageEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
+import { WizardStorybook } from './gql-WizardStorybook'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -71,6 +72,11 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.sampleCode(args.lang),
     })
 
+    t.string('sampleTemplate', {
+      description: 'IndexHtml file based on bundler and framework of choice',
+      resolve: (source, args, ctx) => ctx.wizard.sampleTemplate(),
+    })
+
     t.nonNull.field('step', {
       type: WizardStepEnum,
       resolve: (source) => source.currentStep,
@@ -90,6 +96,11 @@ export const Wizard = objectType({
     t.string('title', {
       description: 'The title of the page, given the current step of the wizard',
       resolve: (source, args, ctx) => ctx.wizard.title ?? null,
+    })
+
+    t.field('storybook', {
+      type: WizardStorybook,
+      resolve: (source, args, ctx) => ctx.wizard.storybook,
     })
   },
   sourceType: {

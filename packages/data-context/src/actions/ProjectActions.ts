@@ -2,8 +2,10 @@ import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType 
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { Maybe, ProjectShape } from '../data/coreDataShape'
+import fs from 'fs-extra'
 
 import type { DataContext } from '..'
+import { generateSpecFromStory } from '../data'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
@@ -184,5 +186,31 @@ export class ProjectActions {
 
   async clearLatestProjectCache () {
     await this.api.clearLatestProjectsCache()
+  }
+
+  async createComponentIndexHtml (template: string) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create index.html without activeProject.`)
+    }
+
+    if (this.ctx.activeProject?.isFirstTimeCT) {
+      const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
+
+      fs.outputFileSync(indexHtmlPath, template)
+    }
+  }
+
+  async generateSpecFromStory (storyPath: string) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot generate a spec without activeProject.`)
+    }
+
+    const spec = await generateSpecFromStory(storyPath, project.projectRoot)
+
+    this.ctx.wizardData.generatedSpec = spec
   }
 }
