@@ -556,7 +556,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
     projectRoot,
     reporterOptions,
     slowTestThreshold,
-  }: Pick<Cfg, 'report' | 'reporter' | 'projectRoot' | 'reporterOptions', 'slowTestThreshold'>) {
+  }: Pick<Cfg, 'report' | 'reporter' | 'projectRoot' | 'reporterOptions' | 'slowTestThreshold'>) {
     if (!report) {
       return
     }
