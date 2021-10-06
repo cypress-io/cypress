@@ -1,5 +1,3 @@
-// import type { AutIframe } from '@packages/runner-shared/src/iframe/aut-iframe'
-// import type { Reporter } from '@packages/reporter/src/main'
 import type { Store } from './src/store'
 
 interface ConnectionInfo { 
@@ -69,6 +67,9 @@ declare global {
        * Any React components or general code needed from
        * runner-shared, reporter or driver are also bundled with
        * webpack and made available via the window.UnifedRunner namespace.
+       * 
+       * We cannot import the correct types, because this causes the linter and type
+       * checker to run on runner-shared and reporter, and it blows up.
        */
       AutIframe: any
       Reporter: any
