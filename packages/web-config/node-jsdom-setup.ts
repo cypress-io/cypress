@@ -2,7 +2,7 @@ import mockRequire from 'mock-require'
 import { JSDOM } from 'jsdom'
 import * as ansiEscapes from 'ansi-escapes'
 import enzyme from 'enzyme'
-import EnzymeAdapter from 'enzyme-adapter-react-16'
+import EnzymeAdapter from '@wojtekmaj/enzyme-adapter-react-17'
 import ChaiEnzyme from 'chai-enzyme'
 
 declare global {
