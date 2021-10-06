@@ -35,4 +35,9 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return {}
   },
+  removeProject (source, args, ctx) {
+    ctx.app.projects = ctx.app.projects.filter((p) => p.projectRoot !== args.path)
+
+    return ctx.app
+  },
 }
