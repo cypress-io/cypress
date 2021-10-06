@@ -994,11 +994,24 @@
 }
 
 .manual-project-setup{
-  p{
-    margin: 16px 0;
+  padding-bottom:32px;
+  .full-alert-container{
+    margin: 32px 0;
+    padding: 0;
+    .alert-danger{
+      p{
+        color: #a94442;
+      }
+      text-align: center;
+      margin: 0;
+    }
   }
+  
+
   ol{
-    padding-left: 16px
+    text-align: left;
+    margin-left: 16px;
+    padding-left: 0;
   }
 
   li{
@@ -1010,6 +1023,7 @@
     border: 0;
     background-color: #252831;
     border-radius: 3px;
+    margin: 8px 0;
     color: #eee;
   }
 }

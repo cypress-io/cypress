@@ -97,20 +97,19 @@ class SetupProject extends Component {
     return (
       <div className='setup-project'>
         <button className='btn btn-link btn-back' onClick={this.props.onClose}><i className='fa fa-chevron-left' /> Back</button>
+        <div className='title-wrapper'>
+          <h4>Set up project</h4>
+        </div>
         {this.state.error?.type === 'COULD_NOT_UPDATE_CONFIG_FILE'
           ? <ManualSetup
             error={this.state.error}
             project={this.props.project}
             configFile={this.props.project.configFile}
           />
-          : <>
-            <div className='title-wrapper'>
-              <h4>Set up project</h4>
-            </div>
-            { this._isLoaded()
-              ? this._form()
-              : <Loader color='#888' scale={0.5}/>}
-          </>
+          : this._isLoaded()
+            ? this._form()
+            : <Loader color='#888' scale={0.5}/>
+
         }
       </div>
     )

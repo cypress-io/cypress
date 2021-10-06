@@ -1,51 +1,53 @@
-import React, { useState } from 'react'
-import Markdown from 'markdown-it'
+import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { FileOpener } from '../lib/file-opener'
 import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
-
-const md = new Markdown({
-  html: true,
-  linkify: true,
-})
+import MarkdownRenderer from '../lib/markdown-renderer'
 
 function ManualSetup ({ error, configFile, project }) {
   const relativeFile = configFile
   const absoluteFile = `${ appStore.projectRoot }/${ relativeFile }`
-  const [isSubmitting, setSubmitting] = useState(false)
-  const [newMessage, setNewMessage] = useState('')
 
-  const codeToToAddKeys = `  projectId: ${JSON.stringify(error.payload.projectId)}`
+  const codeToToAddKeys = `projectId: ${JSON.stringify(error.payload.projectId)},`
+  const helpCodeAfter = `module.exports = {
+  ${codeToToAddKeys} // <- add this line
+  ...config
+}`
 
   const retry = (e) => {
     e.preventDefault()
 
-    setSubmitting(true)
-
-    projectsApi.reopenProject(project).then((config) => {
-      setSubmitting(false)
-      if (typeof config.projectId !== 'string') {
-        // display a message stating that there was no projectId found
-        setNewMessage('Cypress was not able to resolve a projectId in the config file')
-      }
-    })
+    projectsApi.reopenProject(project)
   }
 
   return (
     <form onSubmit={retry} className="manual-project-setup">
-      <div className='title-wrapper'>
-        <h4>Cypress can't update your local <code>projectId</code></h4>
+      <div className='full-alert-container'>
+        <div className='full-alert alert alert-danger error'>
+          <p className='header'>
+            <i className='fas fa-exclamation-triangle'></i>{' '}
+            <strong>Failed to configure your project for Cypress Cloud</strong>
+          </p>
+          <span className='alert-content'>
+            <MarkdownRenderer markdown={error.message}/>
+            <pre>
+              {error.details}
+            </pre>
+          </span>
+          <button
+            className='btn btn-default btn-sm'
+            onClick={retry}
+          >
+            <i className='fas fa-sync-alt'/>{' '}
+            Try Again
+          </button>
+        </div>
       </div>
-      <p>
-        <span dangerouslySetInnerHTML={{ __html: md.render(error.message) }} />
-      </p>
-      <p>
-        Error: {error.details}
-      </p>
+      <h4>Add the projectId manually</h4>
       <ol>
-        <li>Copy the projectId below in your clipboard
+        <li>Copy the projectId
           <pre id="code-projecId-config" className="copy-to-clipboard">
             <a className="action-copy" onClick={() => ipc.setClipboardText(codeToToAddKeys)}>
               <Tooltip
@@ -61,7 +63,7 @@ function ManualSetup ({ error, configFile, project }) {
         </li>
 
         <li>
-          Open the config file in your editor<br/>
+          Open your config file<br/>
           <FileOpener
             fileDetails={{
               absoluteFile,
@@ -72,20 +74,16 @@ function ManualSetup ({ error, configFile, project }) {
             { absoluteFile }
           </FileOpener>
         </li>
-
-        <li>Add the given <code>projectId</code> to the root of your config object</li>
-        <li>When you have added the <code>projectId</code>, this page should refresh. <br/>If not, click "Retry"</li>
+        <li>
+          Add the projectId to the root of the config object
+          <pre>
+            {helpCodeAfter}
+          </pre>
+        </li>
+        <li>
+          Save and wait a second or two.<br/> This screen should refresh and the error disapear.<br/>If it does not refresh, click "Try Again".
+        </li>
       </ol>
-      <p>
-        <button
-          disabled={isSubmitting}
-          className='btn btn-primary btn-block'
-        >
-          { isSubmitting && <span><i className='fas fa-spin fa-sync-alt'/>{' '}</span> }
-          <span>Retry</span>
-        </button>
-      </p>
-      {newMessage.length ? <p className="alert alert-danger">{newMessage}</p> : undefined}
     </form>)
 }
 

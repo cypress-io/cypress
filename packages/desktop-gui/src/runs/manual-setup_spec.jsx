@@ -7,29 +7,27 @@ import '../main.scss'
 
 /* global cy */
 describe('ManualSetup', () => {
-  it('Should reopen the project when hitting retry', { viewportHeight: 450 }, () => {
+  it('Should reopen the project when hitting retry', { viewportHeight: 650 }, () => {
     const error = {
-      message: '-!- there was an error updating your file -!-',
-      details: '-- a failure --',
+      message: `In your config file, cypress cannot set your \`projectId\` key to \`"iy7z59"\``,
+      details: 'Exported object is not an object literal',
       payload: {
         projectId: 'id1234',
       },
     }
 
-    appStore.projectRoot = '/path/to/project'
+    appStore.projectRoot = '/exp/test-config-js/cypress.config.js'
     cy.stub(projectsApi, 'reopenProject').resolves({ projectId: 'id1234' })
 
-    mount(<div style={{ width: '450px', margin: '24px auto' }}>
+    mount(<div style={{ width: '650px', margin: '24px auto' }}>
       <ManualSetup
         error={error}
         configFile={'config.custom.js'}
         project={{ id: 'test' }}
       />
-    </div>, {
-      stylesheets: '/__root/dist/app.css',
-    })
+    </div>)
 
-    cy.contains('button', 'Retry').click().then(() => {
+    cy.contains('button', 'Try Again').click().then(() => {
       expect(projectsApi.reopenProject).to.have.been.called
     })
   })
