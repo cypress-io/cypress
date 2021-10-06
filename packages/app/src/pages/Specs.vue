@@ -4,7 +4,7 @@
     Prevent Vue from re-rendering these elements with v-once.
   -->
   <div v-once>
-    <button v-for="spec of specs" @click="setupSpec(spec)">
+    <button v-for="spec of specs" @click="executeSpec(spec)">
       {{ spec.name }}
     </button>
     
@@ -38,7 +38,7 @@
 
 <script lang="ts" setup>
 import { onMounted } from 'vue'
-import { initialize, setupSpec } from '../runner'
+import { initialize, setupSpec, teardownSpec } from '../runner'
 import { store } from '../store'
 
 const s1 = {
@@ -54,6 +54,11 @@ const s2 = {
 }
 
 const specs = [s1, s2]
+
+const executeSpec = async (spec: typeof s1) => {
+  await teardownSpec(store)
+  return setupSpec(spec)
+}
 
 store.setSpecs([s1, s2])
 

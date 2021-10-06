@@ -65,7 +65,7 @@ export const eventManager = {
         return
       }
 
-      return this._reRun(state)
+      return this.runSpec(state)
     }
 
     ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
@@ -345,7 +345,8 @@ export const eventManager = {
     return this.Cypress.isBrowser(browserName)
   },
 
-  initialize ($autIframe, config) {
+  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
+    console.log('Initialize')
     performance.mark('initialize-start')
 
     return Cypress.initialize({
@@ -528,8 +529,10 @@ export const eventManager = {
     ws.off()
   },
 
-  _reRun (state) {
-    if (!Cypress) return
+  async teardown (state: BaseStore) {
+    if (!Cypress) {
+      return
+    }
 
     state.setIsLoading(true)
 
@@ -539,24 +542,30 @@ export const eventManager = {
 
     studioRecorder.setInactive()
     selectorPlaygroundModel.setOpen(false)
-
-    return this._restart()
-    .then(() => {
-      // this probably isn't 100% necessary
-      // since Cypress will fall out of scope
-      // but we want to be aggressive here
-      // and force GC early and often
-      Cypress.removeAllListeners()
-
-      localBus.emit('restart')
-    })
   },
 
-  _restart () {
-    return new Promise((resolve) => {
+  async _rerun () {
+    await new Promise(resolve => {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
+
+    // this probably isn't 100% necessary
+    // since Cypress will fall out of scope
+    // but we want to be aggressive here
+    // and force GC early and often
+    Cypress.removeAllListeners()
+
+    localBus.emit('restart')
+  },
+
+  async runSpec (state: BaseStore) {
+    if (!Cypress) { 
+      return
+    }
+
+    await this.teardown(state)
+    return this._rerun()
   },
 
   _interceptStudio (displayProps) {

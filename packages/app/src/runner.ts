@@ -35,10 +35,12 @@ export interface UnifiedRunner {
   eventManager: {
     addGlobalListeners: (state: Store, connectionInfo: ConnectionInfo) => void
     setup: (config: Record<string, unknown>) => void
+    initialize: ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, unknown>) => void
+    teardown: (state: Store) => Promise<void>
     [key: string]: any
   }
 
-  AutIframe: AutIframe
+  AutIframe: typeof AutIframe
 }
 
 /**
@@ -164,17 +166,23 @@ function setupRunner () {
   })
 }
 
-function teardownSpec () {
-
-}
-
 export function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
+}
+
+export function teardownSpec (store: Store) {
+  // @ts-ignore
+  const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
+
+  return UnifiedRunner.eventManager.teardown(store)
 }
 
 export function setupSpec (spec: SpecFile) {
   // @ts-ignore - TODO: figure out how to manage window.config.
   const config = window.config
+
+  // this is how the Cypress driver knows which spec to run.
+  config.spec = spec
 
   // @ts-ignore
   const UnifiedRunner = window.UnifiedRunner as UnifiedRunner
@@ -186,16 +194,18 @@ export function setupSpec (spec: SpecFile) {
   // clear AUT, if there is one.
   empty($runnerRoot)
 
-  // create new AUT 
+  // create root for new AUT
   const $container = document.createElement('div')
-  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  $runnerRoot.append($container)
+
+  // create new AUT 
+  const autIframe = new UnifiedRunner.AutIframe('Test Project')
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
   autIframe.showInitialBlankContents()
   $autIframe.prop('src', getSpecUrl(config.namespace, spec))
 
-  console.log($autIframe)
-  // TODO
-  // UnifiedRunner.eventManager.initialize()
+  // initialize Cypress (driver) with the AUT!
+  UnifiedRunner.eventManager.initialize($autIframe, config)
 }
 
 export function initialize () {
