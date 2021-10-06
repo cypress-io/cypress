@@ -5,7 +5,6 @@ import { getReporterElement } from '../runner'
 import type { Store } from '../store'
 
 export async function unmountReporter () {
-  // await window.UnifiedRunner.eventManager.teardownReporter()
   ReactDOM.unmountComponentAtNode(getReporterElement())
 }
 
@@ -14,7 +13,6 @@ export function renderReporter (
   store: Store,
   eventManager: typeof window.UnifiedRunner.eventManager
 ) {
-  console.log(`Rendering reporter with runId ${store.specRunId}`)
   const reporter = React.createElement(Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,

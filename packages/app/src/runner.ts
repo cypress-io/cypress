@@ -80,7 +80,7 @@
 import { store, Store } from './store'
 import { injectRunner } from './runner/renderRunner'
 import type { SpecFile } from '@packages/types/src/spec'
-import { renderReporter } from './runner/renderReporter'
+import { renderReporter, unmountReporter } from './runner/renderReporter'
 
 function getRunnerElement () {
   const el = document.querySelector<HTMLElement>('#unified-runner')
@@ -202,3 +202,41 @@ export function setupSpec (spec: SpecFile) {
 export function initialize () {
   injectRunner(setupRunner)
 }
+
+/* ... */
+
+const s1 = {
+  name: "HelloWorld1.spec.tsx",
+  relative: "src/HelloWorld1.spec.tsx",
+  absolute: "/Users/lachlan/code/work/cypress5/packages/app/src/HelloWorld1.spec.tsx"
+}
+
+const s2 = {
+  name: "HelloWorld2.spec.tsx",
+  relative: "src/HelloWorld2.spec.tsx",
+  absolute: "/Users/lachlan/code/work/cypress5/packages/app/src/HelloWorld2.spec.tsx"
+}
+
+const specs = [s1, s2]
+
+store.setSpec(s1)
+
+let first = true
+
+export const executeSpec = async (spec: SpecFile) => {
+  store.setSpec(spec)
+
+  await unmountReporter()
+
+  if (!first) {
+    await window.UnifiedRunner.eventManager.teardownReporter()
+  }
+
+  await teardownSpec(store)
+
+  setupReporter()
+  first = false
+  return setupSpec(spec)
+}
+
+store.setSpecs([s1, s2])
