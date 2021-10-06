@@ -7,7 +7,7 @@ export class DataEmitterActions {
     // this.ctx
   }
 
-  toApp () {
+  toApp (...args: any[]) {
     // this.ctx
   }
 

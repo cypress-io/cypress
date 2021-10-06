@@ -5,8 +5,31 @@ import type { DataContext } from '@packages/data-context'
 import getenv from 'getenv'
 import pDefer from 'p-defer'
 import cors from 'cors'
+import type { Server } from 'http'
 
 const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52200)
+
+let graphqlServer: Server | undefined
+
+export async function closeGraphQLServer () {
+  if (!graphqlServer) {
+    return
+  }
+
+  const dfd = pDefer()
+
+  graphqlServer.close((err) => {
+    if (err) {
+      dfd.reject()
+    }
+
+    dfd.resolve()
+  })
+
+  graphqlServer = undefined
+
+  dfd.promise
+}
 
 export async function makeGraphQLServer (ctx: DataContext) {
   const dfd = pDefer<number>()
@@ -18,8 +41,8 @@ export async function makeGraphQLServer (ctx: DataContext) {
   // it's not jammed into the projects
   addGraphQLHTTP(app, ctx)
 
-  const graphqlServer = app.listen(GRAPHQL_PORT, () => {
-    const endpoint = `http://localhost:${(graphqlServer.address() as AddressInfo).port}/graphql`
+  const srv = graphqlServer = app.listen(GRAPHQL_PORT, () => {
+    const endpoint = `http://localhost:${(srv.address() as AddressInfo).port}/graphql`
 
     if (process.env.NODE_ENV === 'development') {
       /* eslint-disable-next-line no-console */

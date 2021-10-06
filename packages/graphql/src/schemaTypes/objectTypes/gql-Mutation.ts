@@ -4,12 +4,21 @@ import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
-    t.field('triggerIpc', {
+    t.field('internal_triggerIpcToLaunchpad', {
       type: 'Boolean',
       resolve: (root, args, ctx) => {
         ctx.actions.emitter.toLaunchpad('someData')
 
-        return
+        return true
+      },
+    })
+
+    t.field('internal_triggerIpcToApp', {
+      type: 'Boolean',
+      resolve: (root, args, ctx) => {
+        ctx.actions.emitter.toApp('someData')
+
+        return true
       },
     })
 

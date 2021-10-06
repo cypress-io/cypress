@@ -16,6 +16,7 @@ import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } f
 import { fs } from './util/fs'
 import path from 'path'
 import os from 'os'
+import { closeGraphQLServer } from './gui/makeGraphQLServer'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -392,7 +393,10 @@ export class OpenProject {
 
     this.stopSpecsWatcher()
 
-    return this.closeOpenProjectAndBrowsers()
+    return Promise.all([
+      closeGraphQLServer(),
+      this.closeOpenProjectAndBrowsers(),
+    ])
   }
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
