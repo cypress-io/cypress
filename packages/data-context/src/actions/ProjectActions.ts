@@ -110,22 +110,28 @@ export class ProjectActions {
   }
 
   async addProject (args: MutationAddProjectArgs) {
-    const dirStat = await this.ctx.fs.stat(args.path)
+    const path = await this.getDirectoryPath(args.path)
 
-    if (!dirStat.isDirectory()) {
-      throw new Error(`Cannot add ${args.path} as a project, it is not a directory`)
-    }
-
-    const found = this.projects.find((x) => x.projectRoot === args.path)
+    const found = this.projects.find((x) => x.projectRoot === path)
 
     if (!found) {
-      this.projects.push({ projectRoot: args.path })
-      this.api.insertProjectToCache(args.path)
+      this.projects.push({ projectRoot: path })
+      this.api.insertProjectToCache(path)
     }
 
     if (args.open) {
-      await this.setActiveProject(args.path)
+      await this.setActiveProject(path)
     }
+  }
+
+  private async getDirectoryPath (path: string) {
+    const dirStat = await this.ctx.fs.stat(path)
+
+    if (dirStat.isDirectory()) {
+      return path
+    }
+
+    return path.substring(0, path.lastIndexOf('/'))
   }
 
   async launchProject () {

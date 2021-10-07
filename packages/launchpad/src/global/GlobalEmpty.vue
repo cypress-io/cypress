@@ -48,7 +48,6 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import type { WebkitFile } from '../utils/getDirectoryPath'
 import IconPlaceholder from '~icons/icons8/circle-thin'
 import { FileSelector, Dropzone } from 'vue3-file-selector'
 import { ref, watch, onMounted } from 'vue'
@@ -62,10 +61,10 @@ const emits = defineEmits<{
   (e: 'addProject', value: string): void
 }>()
 
+type WebkitFile = File & { path: string }
 watch(files, (newVal) => {
   if (newVal.length) {
-    // if a user enters an incorrect path then their next attempts will be pushed to the back
-    const file = newVal[newVal.length - 1] as WebkitFile
+    const file = newVal[0] as WebkitFile
 
     emits('addProject', file.path)
   }
