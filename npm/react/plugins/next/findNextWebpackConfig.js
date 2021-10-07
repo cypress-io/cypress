@@ -3,6 +3,7 @@
 const debug = require('debug')('@cypress/react')
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config').default
 const { findPagesDir } = require('../../dist/next/findPagesDir')
+const { getRunWebpackSpan } = require('../../dist/next/getRunWebpackSpan')
 
 async function getNextWebpackConfig (config) {
   let loadConfig
@@ -20,6 +21,7 @@ async function getNextWebpackConfig (config) {
     }
   }
   const nextConfig = await loadConfig('development', config.projectRoot)
+  const runWebpackSpan = await getRunWebpackSpan()
   const nextWebpackConfig = await getNextJsBaseWebpackConfig(
     config.projectRoot,
     {
@@ -30,6 +32,7 @@ async function getNextWebpackConfig (config) {
       pagesDir: findPagesDir(config.projectRoot),
       entrypoints: {},
       rewrites: { fallback: [], afterFiles: [], beforeFiles: [] },
+      ...runWebpackSpan,
     },
   )
 
