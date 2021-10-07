@@ -138,11 +138,11 @@ export const randomComponents = (n = 200): Spec[] => {
     return {
       relative: `${directories[d.directory](d)}/${name}`,
       absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
-      name,
+      name: `${componentName}${d.specPattern}`,
       specFileExtension: d.specPattern,
       fileExtension: d.fileExtension,
       specType: 'component',
-      fileName: name,
+      fileName: componentName,
       __typename: 'Spec',
 
       id: faker.datatype.uuid(),

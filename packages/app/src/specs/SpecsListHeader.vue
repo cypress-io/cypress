@@ -1,25 +1,26 @@
 <template>
   <div class="flex w-full gap-16px">
-  <Input
-    type="search"
-    class="flex-grow h-full min-w-200px"
-    prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
-    :prefix-icon="IconMagnifyingGlass"
-    :model-value="inputValue"
-    :placeholder="t('specPage.searchPlaceholder')"
-    @input="onInput"
-  />
+    <Input
+      type="search"
+      class="flex-grow h-full min-w-200px"
+      prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
+      :prefix-icon="IconMagnifyingGlass"
+      :model-value="inputValue"
+      :placeholder="t('specPage.searchPlaceholder')"
+      @input="onInput"
+    />
 
-  <div class="flex h-40px gap-16px min-w-127px">
-    <Button
-      :prefix-icon="IconAdd"
-      prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
-      class="min-w-127px text-size-16px focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-      @click="$emit('new-spec')"
-    >
-      {{ t('specPage.newSpecButton') }}
-    </Button>
-  </div>
+    <div class="flex h-40px gap-16px min-w-127px">
+      <Button
+        data-testid="new-spec-button"
+        :prefix-icon="IconAdd"
+        prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
+        class="min-w-127px text-size-16px focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+        @click="$emit('new-spec')"
+      >
+        {{ t('specPage.newSpecButton') }}
+      </Button>
+    </div>
   </div>
 </template>
 

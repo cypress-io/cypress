@@ -18,6 +18,7 @@
       >
         <SpecsListRow
           :gql="spec"
+          data-testid="specs-list-row"
           role="link"
           tabindex="0"
           class="grid grid-cols-2"
@@ -33,22 +34,24 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
 import { gql } from '@urql/vue'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import type { SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
-const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}`
+const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}${spec.node.fileExtension}`
 
 gql`
 fragment SpecsList on App {
   activeProject {
     id
     projectRoot
-    specs(first: 1000000) {
+    specs(first: 1) {
       edges {
         node {
+          name
           specType
+          relative
         }
         ...SpecListRow
       }
@@ -68,7 +71,7 @@ const specs = computed(() => props.gql.activeProject?.specs?.edges)
 const sortByGitStatus = (a, b) => a.node.gitInfo ? 1 : -1
 const filteredSpecs = computed(() => {
   return specs.value?.filter((s) => {
-    return s.node.name.toLowerCase().includes(search.value.toLowerCase())
+    return s.node.relative.toLowerCase().includes(search.value.toLowerCase())
   })?.sort(sortByGitStatus)
 })
 </script>
