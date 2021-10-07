@@ -10,7 +10,7 @@
       <div class="relative w-480px mx-auto bg-white rounded">
         <div class="border-b-1px min-h-64px flex justify-between items-center px-24px">
           <DialogTitle class="text-gray-900 text-18px">
-            {{ t('topNav.login.titleInitial') }}
+            {{ title }}
           </DialogTitle>
           <button @click="setIsOpen(false)">
             Close
@@ -18,20 +18,28 @@
         </div>
 
         <DialogDescription class="p-24px text-gray-700 font-normal">
-          <i18n-t keypath="topNav.login.bodyInitial">
+          <i18n-t
+            v-if="!viewer"
+            keypath="topNav.login.bodyInitial"
+          >
             <a
-              href="https://docs.cypress.io"
+              href="https://on.cypress.io/dashboard"
               target="_blank"
             >{{ t('topNav.login.dashboard') }}</a>
           </i18n-t>
-          <a
-            href="https://on.cypress.io/dashboard"
-            target="_blank"
-          />
+          <i18n-t
+            v-else-if="viewer"
+            keypath="topNav.login.bodySuccess"
+          >
+            <span>{{ viewer.fullName }}</span>
+          </i18n-t>
         </DialogDescription>
 
         <div class="border-t-1px px-24px py-16px bg-gray-50">
-          <slot name="footer" />
+          <Auth
+            :gql="props.gql"
+            @continue="$emit('update:modelValue', false)"
+          />
         </div>
       </div>
     </div>
@@ -39,6 +47,9 @@
 </template>
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
+import { gql } from '@urql/core'
+import { computed } from 'vue'
+import Auth from '../../setup/Auth.vue'
 
 import {
   Dialog,
@@ -47,17 +58,40 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
+import type { LoginModalFragment } from '../../generated/graphql'
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
 
-defineProps<{
-  modelValue: boolean
+const props = defineProps<{
+  modelValue: boolean,
+  gql: LoginModalFragment
 }>()
+
+gql`
+fragment LoginModal on Query {
+  cloudViewer {
+    id
+    email
+    fullName
+  }
+}
+`
 
 const setIsOpen = (value) => {
   emit('update:modelValue', value)
 }
 const { t } = useI18n()
+
+const viewer = computed(() => props.gql?.cloudViewer)
+
+const title = computed(() => {
+  if (viewer.value) {
+    return t('topNav.login.titleSuccess')
+  }
+
+  return t('topNav.login.titleInitial')
+})
 
 </script>

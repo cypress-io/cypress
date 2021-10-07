@@ -3,18 +3,21 @@
     An error occurred while authenticating: {{ error }}
   </div>
 
-  <div v-else-if="viewer">
-    <Button @click="handleLogout">
-      Log out
-    </Button>
-  </div>
-
-  <div v-else>
+  <!-- <div v-else-if="viewer">
     <Button
       size="lg"
+      @click="handleLogout">
+      Log Out
+    </Button>
+  </div>-->
+
+  <div>
+    <Button
+      size="lg"
+      :variant="buttonVariant"
       @click="handleAuth"
     >
-      {{ t('topNav.login.actionLogin') }}
+      {{ buttonMessage }}
     </Button>
   </div>
 </template>
@@ -64,8 +67,20 @@ mutation Login {
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
 const error = ref<string>()
+const clickedOnce = ref(false)
+
+const emit = defineEmits<{
+  (event: 'continue', value: boolean): void
+}>()
 
 const handleAuth = async () => {
+  if (viewer.value) {
+    emit('continue', true)
+
+    return
+  }
+
+  clickedOnce.value = true
   const result = await login.executeMutation({})
 
   error.value = result.error?.message ?? undefined
@@ -78,6 +93,31 @@ const handleLogout = async () => {
 }
 
 const viewer = computed(() => props.gql?.cloudViewer)
+
+const buttonMessage = computed(() => {
+  if (!clickedOnce.value && !viewer.value) {
+    return t('topNav.login.actionLogin')
+  }
+
+  if (clickedOnce.value && !viewer.value) {
+    return t('topNav.login.actionWaiting')
+  }
+
+  if (viewer.value) {
+    return t('topNav.login.actionContinue')
+  }
+
+  // default
+  return t('topNav.login.actionLogin')
+})
+
+const buttonVariant = computed(() => {
+  if (clickedOnce.value && !viewer.value) {
+    return 'pending'
+  }
+
+  return 'primary'
+})
 
 const { t } = useI18n()
 </script>

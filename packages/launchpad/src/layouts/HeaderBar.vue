@@ -28,11 +28,10 @@
         <div v-if="props.gql.cloudViewer">
           {{ props.gql.cloudViewer?.fullName }}
         </div>
-        <LoginModal v-model="isLoginOpen">
-          <template #footer>
-            <Auth :gql="props.gql" />
-          </template>
-        </LoginModal>
+        <LoginModal
+          v-model="isLoginOpen"
+          :gql="props.gql"
+        />
       </div>
     </div>
   </div>
@@ -44,8 +43,6 @@ import { ref } from 'vue'
 import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBarFragment } from '../generated/graphql'
 import TopNav from '../components/topnav/TopNav.vue'
 import LoginModal from '../components/topnav/LoginModal.vue'
-
-import Auth from '../setup/Auth.vue'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
