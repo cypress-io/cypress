@@ -17,6 +17,8 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 export const createRoutesCT = ({
   config,
   nodeProxy,
+  getCurrentBrowser,
+  specsStore,
 }: InitializeRoutes) => {
   const routesCt = Router()
 
