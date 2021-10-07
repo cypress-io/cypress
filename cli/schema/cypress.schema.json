@@ -46,8 +46,8 @@
         },
         "slowTestThreshold": {
           "type": "number",
-          "default": 5000,
-          "description": "Slow test slowTestThreshold passed to mocha. See https://on.cypress.io/configuration#Global"
+          "default": 10000,
+          "description": "Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in red if over the threshold and in yellow if over half the threshold. See https://on.cypress.io/configuration#Global"
         },
         "testFiles": {
           "type": [
@@ -84,7 +84,7 @@
         },
         "requestTimeout": {
           "type": "number",
-          "default": 10000,
+          "default": 5000,
           "description": "Time, in milliseconds, to wait for an XHR request to go out in a cy.wait() command"
         },
         "responseTimeout": {

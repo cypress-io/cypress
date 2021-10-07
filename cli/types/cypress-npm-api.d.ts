@@ -92,7 +92,7 @@ declare namespace CypressCommandLine {
      */
     reporterOptions: any
     /**
-     * Specify a slow test threshold in milliseconds
+     * Specify a slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in red if over the threshold and in yellow if over half the threshold.
      */
     slowTestThreshold: number
     /**

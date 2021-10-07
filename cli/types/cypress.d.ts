@@ -2573,7 +2573,7 @@ declare namespace Cypress {
      */
     reporterOptions: { [key: string]: any }
     /**
-     * A slow test threshold in milliseconds
+     * Slow test threshold in milliseconds. Only affects the visual output of some reporters. For example, the spec reporter will display the test time in red if over the threshold and in yellow if over half the threshold.
      * @default 10000
      */
     slowTestThreshold: number | null
