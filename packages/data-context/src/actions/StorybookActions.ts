@@ -113,10 +113,10 @@ export class StorybookActions {
     .join('\n\n')
 
     return endent`${isReact ? `import React from "react"` : ''}
-      import * as stories from "./${storyFile.name}";
-      ${getDependency()};
+      import * as stories from "./${storyFile.name}"
+      ${getDependency()}
   
-      const composedStories = composeStories(stories);
+      const composedStories = composeStories(stories)
   
       describe('${parsed.meta.title || parsed.meta.component}', () => {
         ${itContent}
