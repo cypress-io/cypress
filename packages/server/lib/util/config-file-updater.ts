@@ -192,14 +192,14 @@ function setRootKeysSplicers (
 ) {
   const objectLiteralStartIndex = (objectLiteralNode as any).start + 1
   // add values
-  const objFlatKeys = Object.keys(obj).filter((key) => ['boolean', 'number', 'string'].includes(typeof obj[key]))
+  const objKeys = Object.keys(obj).filter((key) => ['boolean', 'number', 'string'].includes(typeof obj[key]))
 
-  const keysToInsertFlat = objFlatKeys.filter((key) => !config[key])
+  const keysToInsert = objKeys.filter((key) => !(key in config))
 
-  debug('top level keys absent from the original config ', keysToInsertFlat)
+  debug('keys to instert %O', keysToInsert)
 
-  if (keysToInsertFlat.length) {
-    const valuesInserted = `\n${lineStartSpacer}${ keysToInsertFlat.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join(`\n${lineStartSpacer}`)}`
+  if (keysToInsert.length) {
+    const valuesInserted = `\n${lineStartSpacer}${ keysToInsert.map((key) => `${key}: ${JSON.stringify(obj[key])},`).join(`\n${lineStartSpacer}`)}`
 
     splicers.push({
       start: objectLiteralStartIndex,
@@ -209,11 +209,17 @@ function setRootKeysSplicers (
   }
 
   // update values
-  objFlatKeys.filter((key) => config[key] && config[key] !== obj[key]).forEach(
+  const keysToUpdate = objKeys.filter((key) => key in config && config[key] !== obj[key])
+
+  debug('keys to update %O', keysToUpdate)
+
+  keysToUpdate.forEach(
     (key) => {
       const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
-      setSplicerToUpdateProperty(splicers, propertyToUpdate, config[key], obj[key], key, obj)
+      if (propertyToUpdate) {
+        setSplicerToUpdateProperty(splicers, propertyToUpdate, config[key], obj[key], key, obj)
+      }
     },
   )
 }
@@ -282,20 +288,19 @@ function setSubKeysSplicers (
 }
 
 function setSplicerToUpdateProperty (splicers: Splicer[],
-  propertyToUpdate: namedTypes.ObjectProperty | undefined,
+  propertyToUpdate: namedTypes.ObjectProperty,
   originalValue: any,
   updatedValue: any,
   key: string,
   obj: Record<string, any>) {
-  if (propertyToUpdate && isPrimitive(propertyToUpdate.value)) {
-    if (propertyToUpdate.value.value === originalValue) {
-      splicers.push({
-        start: (propertyToUpdate.value as any).start,
-        end: (propertyToUpdate.value as any).end,
-        replaceString: JSON.stringify(updatedValue),
-      })
-    }
+  if (propertyToUpdate && (isPrimitive(propertyToUpdate.value) || isUndefinedOrNull(propertyToUpdate.value))) {
+    splicers.push({
+      start: (propertyToUpdate.value as any).start,
+      end: (propertyToUpdate.value as any).end,
+      replaceString: JSON.stringify(updatedValue),
+    })
   } else {
+    debug('error', propertyToUpdate?.value)
     throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, `Value for \`${key}\` is not a primitive. Updating this value could break your config.`)
   }
 }
@@ -308,6 +313,10 @@ function propertyFromKey (objectLiteralNode: namedTypes.ObjectExpression | undef
 
 function isPrimitive (value: NodePath['node']): value is namedTypes.NumericLiteral | namedTypes.StringLiteral | namedTypes.BooleanLiteral {
   return value.type === 'NumericLiteral' || value.type === 'StringLiteral' || value.type === 'BooleanLiteral'
+}
+
+function isUndefinedOrNull (value: NodePath['node']): value is namedTypes.Identifier {
+  return value.type === 'Identifier' && ['undefined', 'null'].includes(value.name)
 }
 
 interface Splicer{

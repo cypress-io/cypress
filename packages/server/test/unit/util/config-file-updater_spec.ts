@@ -214,6 +214,23 @@ describe('lib/util/config-file-updater', () => {
           expect(output).to.equal(expectedOutput)
         })
 
+        it('updates a value even when this value is explicitely undefined', async () => {
+          const src = stripIndent`\
+              export default {
+                foo: undefined,
+              }
+            `
+          const expectedOutput = stripIndent`\
+              export default {
+                foo: 1000,
+              }
+            `
+
+          const output = await insertValueInJSString(src, { foo: 1000 }, { foo: undefined })
+
+          expect(output).to.equal(expectedOutput)
+        })
+
         it('updates values and inserts config', async () => {
           const src = stripIndent`\
             export default {
