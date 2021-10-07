@@ -3690,16 +3690,6 @@
     "@intlify/shared" "9.1.7"
     "@intlify/vue-devtools" "9.1.7"
 
-"@intlify/core-base@9.2.0-beta.1":
-  version "9.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@intlify/core-base/-/core-base-9.2.0-beta.1.tgz#962f8900a6a97481a1f317b66145ff8ad16c4ae1"
-  integrity sha512-nWX67QD565+qog8qxLVJAkoKXQGazEBVyIhgr3pjXUtEUh5JasP4PY+7/KeAW776IJ2EduzLJekNI66Mfy413A==
-  dependencies:
-    "@intlify/devtools-if" "9.2.0-beta.1"
-    "@intlify/message-compiler" "9.2.0-beta.1"
-    "@intlify/shared" "9.2.0-beta.1"
-    "@intlify/vue-devtools" "9.2.0-beta.1"
-
 "@intlify/core-base@9.2.0-beta.7":
   version "9.2.0-beta.7"
   resolved "https://registry.yarnpkg.com/@intlify/core-base/-/core-base-9.2.0-beta.7.tgz#4ecf4d8ec615e085e45b4dccec359a652d051a22"
@@ -3724,13 +3714,6 @@
   dependencies:
     "@intlify/shared" "9.1.7"
 
-"@intlify/devtools-if@9.2.0-beta.1":
-  version "9.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@intlify/devtools-if/-/devtools-if-9.2.0-beta.1.tgz#c4e38215fe53f9ca46794ddc3b3fa9dc6d2dd16a"
-  integrity sha512-XznonwirTr7ilEeGGlU8nceOhXYXqA2eil1NfeeQH0NVrmhLQQL2l+X91eadqHLfcett23XPtv8Y2uBp9U/EXA==
-  dependencies:
-    "@intlify/shared" "9.2.0-beta.1"
-
 "@intlify/devtools-if@9.2.0-beta.7":
   version "9.2.0-beta.7"
   resolved "https://registry.yarnpkg.com/@intlify/devtools-if/-/devtools-if-9.2.0-beta.7.tgz#9e4f37364d0851dc0c10c0198ecb0d1dcf2422c2"
@@ -3754,14 +3737,6 @@
   dependencies:
     "@intlify/message-resolver" "9.1.7"
     "@intlify/shared" "9.1.7"
-    source-map "0.6.1"
-
-"@intlify/message-compiler@9.2.0-beta.1":
-  version "9.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@intlify/message-compiler/-/message-compiler-9.2.0-beta.1.tgz#ee16b565408d4f13d78a461a51bd696cb71a7836"
-  integrity sha512-Bj7/udWMhB2RSy6VvM7mp48ZTN3bbSwxOVBRFrK6rvhezQHZvtod/NQG2EQJQfOV+b2A6g0TTxpPQWWYfwPhIQ==
-  dependencies:
-    "@intlify/shared" "9.2.0-beta.1"
     source-map "0.6.1"
 
 "@intlify/message-compiler@9.2.0-beta.7":
@@ -3810,11 +3785,6 @@
   resolved "https://registry.yarnpkg.com/@intlify/shared/-/shared-9.1.7.tgz#e7d8bc90cb59dc17dd7b4c85a73db16fcb7891fc"
   integrity sha512-zt0zlUdalumvT9AjQNxPXA36UgOndUyvBMplh8uRZU0fhWHAwhnJTcf0NaG9Qvr8I1n3HPSs96+kLb/YdwTavQ==
 
-"@intlify/shared@9.2.0-beta.1":
-  version "9.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@intlify/shared/-/shared-9.2.0-beta.1.tgz#52e587a094b30582bac6a80837961aea5348a653"
-  integrity sha512-O90dCE2o212XEZoByZdwIC8WBANB2uQwxf7EIpN4pRQPlNTVCYvI+xVINsTUCxjLt83p7OHiHPZEAXPPa8Vtpw==
-
 "@intlify/shared@9.2.0-beta.7":
   version "9.2.0-beta.7"
   resolved "https://registry.yarnpkg.com/@intlify/shared/-/shared-9.2.0-beta.7.tgz#1be4de81f2cc8298e85b986a1ca4c1080b460a7d"
@@ -3839,14 +3809,6 @@
     "@intlify/message-resolver" "9.1.7"
     "@intlify/runtime" "9.1.7"
     "@intlify/shared" "9.1.7"
-
-"@intlify/vue-devtools@9.2.0-beta.1":
-  version "9.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@intlify/vue-devtools/-/vue-devtools-9.2.0-beta.1.tgz#a099bdd56bc3eba3e66dbbf86daa09a00289cdf1"
-  integrity sha512-DuxYANwKCn8EdMW1LuQjt1UzzJgNu4n3Nn47ZMRph/b+oOsJGuZZ9b96VK+ryDO+ercB8DX4P3z39bk3IXJ7UA==
-  dependencies:
-    "@intlify/core-base" "9.2.0-beta.1"
-    "@intlify/shared" "9.2.0-beta.1"
 
 "@intlify/vue-devtools@9.2.0-beta.7":
   version "9.2.0-beta.7"
@@ -41661,17 +41623,7 @@ vue-i18n@9.0.0-rc.6:
     "@intlify/shared" "9.0.0-rc.6"
     "@vue/devtools-api" "^6.0.0-beta.5"
 
-vue-i18n@9.2.0-beta.1:
-  version "9.2.0-beta.1"
-  resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-9.2.0-beta.1.tgz#f871b3b5411b286dc5df94950341210c0909f888"
-  integrity sha512-W311FkT4WJfhBxOuv8hcnJbZoKbPfg0Klq3417MKGTueUqR1lnEed6OtKgqqqPX7U1aeRAIpzveibeiT5uNLgg==
-  dependencies:
-    "@intlify/core-base" "9.2.0-beta.1"
-    "@intlify/shared" "9.2.0-beta.1"
-    "@intlify/vue-devtools" "9.2.0-beta.1"
-    "@vue/devtools-api" "^6.0.0-beta.13"
-
-vue-i18n@^9.2.0-beta.7:
+vue-i18n@9.2.0-beta.7, vue-i18n@^9.2.0-beta.7:
   version "9.2.0-beta.7"
   resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-9.2.0-beta.7.tgz#d1f68759873c4f5ea2db5c08877afd8f26482430"
   integrity sha512-SwzwGQFlHbS1rI+qp9dKJB+jP0HmlCUdWL99CugCPhhnDKm2sdd0Vw2Hiwa6cMxxWs6fpccGFTlmTwWtTpvAog==
