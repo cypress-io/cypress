@@ -4,8 +4,8 @@ import Foo from './Foo.vue'
 describe('Foo', () => {
   it('renders something', () => {
     cy.mountFragment(FooFragmentDoc, {
-      type: (ctx) => {
-        return ctx.stubApp
+      onResult: (ctx) => {
+        return ctx
       },
       render: (gqlVal) => {
         return <Foo gql={gqlVal} />

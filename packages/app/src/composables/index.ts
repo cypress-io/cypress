@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { useI18n as _useI18n } from 'vue-i18n'
-import type { MessageSchema } from '../locales/schema'
+import type { MessageSchema } from '@packages/frontend-shared/src/locales/schema'
 
 /**
  * This snippet comes from Thorsten Lünborg and is explained in this blog post https://www.vuemastery.com/blog/vue-3-data-down-events-up/

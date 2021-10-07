@@ -4,12 +4,8 @@ describe('<SpecsListHeader />', () => {
   beforeEach(() => {
     cy.mount(() => (
       <div class="py-4 px-8">
-        <SpecsListHeader/>
+        <SpecsListHeader modelValue='' />
       </div>
     ))
-  })
-
-  it('renders', () => {
-
   })
 })

@@ -9,9 +9,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const search = ref('')
     const searchString = 'my/component.cy.tsx'
 
-    cy.mount(<SpecsListHeader
-      vModel={search.value}
-    />)
+    cy.mount(<SpecsListHeader modelValue={search.value} />)
     .get(inputSelector)
     .type(searchString, { delay: 0 })
     .should(() => {
@@ -24,7 +22,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const search = ref('')
 
     cy.mount(<SpecsListHeader
-      vModel={search.value}
+      modelValue={search.value}
       onNewSpec={onNewSpec}
     />)
     .get(buttonSelector)

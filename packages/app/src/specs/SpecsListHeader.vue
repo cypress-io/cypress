@@ -16,7 +16,7 @@
         :prefix-icon="IconAdd"
         prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
         class="min-w-127px text-size-16px focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-        @click="$emit('new-spec')"
+        @click="$emit('newSpec')"
       >
         {{ t('specPage.newSpecButton') }}
       </Button>
@@ -40,7 +40,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void,
-  (e: 'new-spec'): void
+  (e: 'newSpec'): void
 }>()
 
 const inputValue = useVModel(props, 'modelValue', emit)
