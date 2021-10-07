@@ -111,6 +111,11 @@ export class ProjectActions {
 
   async addProject (args: MutationAddProjectArgs) {
     const path = await this.getDirectoryPath(args.path)
+    const dirStat = await this.ctx.fs.stat(path)
+
+    if (!dirStat.isDirectory()) {
+      throw Error(`Cannot add ${path} to projects as it is not a directory`)
+    }
 
     const found = this.projects.find((x) => x.projectRoot === path)
 
