@@ -335,12 +335,6 @@ export function mergeAllConfigs (config: Record<string, any> = {}, options: Reco
     return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
   })
 
-  const testingType = isComponentTesting(options) ? 'component' : 'e2e'
-
-  if (testingType in config) {
-    config = { ...config, ...config[testingType] }
-  }
-
   // 3 - merge the defaults
   _.defaults(config, defaultValues)
 
@@ -463,6 +457,14 @@ export function updateWithPluginValues (cfg, overrides) {
   }
 
   debug('merged plugins config %o', merged)
+
+  // only merge with the current testing type after all changes
+  // have been process on the config object
+  const testingType = isComponentTesting(cfg) ? 'component' : 'e2e'
+
+  if (testingType in merged) {
+    return { ...merged, ...merged[testingType] }
+  }
 
   return merged
 }
