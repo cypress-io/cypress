@@ -1046,10 +1046,15 @@ module.exports = {
     return this.currentWriteVideoFrameCallback(...arguments)
   },
 
-  waitForBrowserToConnect (options = {}, shouldLaunchBrowser = true) {
+  waitForBrowserToConnect (options = {}, isFirstSpec = false) {
     const { project, socketId, timeout, onError, writeVideoFrame, spec } = options
     const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
+
+    const shouldLaunchBrowser = project.shouldLaunchBrowser || isFirstSpec
+
+    // Reset to e2e only once we've gotten the state for this run
+    project.shouldLaunchBrowser = options.testingType === 'e2e'
 
     // short circuit current browser callback so that we
     // can rewire it without relaunching the browser
@@ -1079,6 +1084,12 @@ module.exports = {
         // we tell it that we are ready
         // to receive the next spec
         return Promise.resolve(this.navigateToNextSpec(options.spec))
+      }
+
+      if (!project.shouldLaunchBrowser) {
+        project.on('socket:disconnect', () => {
+          project.shouldLaunchBrowser = true
+        })
       }
 
       return Promise.join(
@@ -1406,6 +1417,8 @@ module.exports = {
   runSpec (config, spec = {}, options = {}, estimated, firstSpec) {
     const { project, browser, onError } = options
 
+    project.shouldLaunchBrowser = options.testingType === 'e2e'
+
     const { isHeadless } = browser
 
     debug('about to run spec %o', {
@@ -1464,7 +1477,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, options.testingType === 'e2e' || firstSpec),
+        }, firstSpec),
       })
     })
   },

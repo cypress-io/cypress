@@ -146,6 +146,7 @@ export class SocketBase {
       onTestsReceivedAndMaybeRecord () {},
       onMocha () {},
       onConnect () {},
+      onDisconnect () {},
       onRequest () {},
       onResolveUrl () {},
       onFocusTests () {},
@@ -186,7 +187,10 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    this.io.on('connection', (socket: Socket & { inReporterRoom?: boolean }) => {
+    this.io.on('connection', (socket: Socket & {
+      inRunnerRoom?: boolean
+      inReporterRoom?: boolean
+    }) => {
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
@@ -195,6 +199,7 @@ export class SocketBase {
 
       socket.on('disconnect', (reason) => {
         debug(`socket-disconnect ${reason}`)
+        options.onDisconnect(reason)
       })
 
       socket.on('error', (err) => {

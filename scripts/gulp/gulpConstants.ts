@@ -45,6 +45,7 @@ export const ENV_VARS = {
 interface GulpGlobalVals {
   debug?: Maybe<'--inspect' | '--inspect-brk'>
   shouldWatch?: boolean
+  mode?: 'open' | 'run-ct'
 }
 
 const globalVals: GulpGlobalVals = {

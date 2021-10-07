@@ -78,6 +78,17 @@ gulp.task(
 )
 
 gulp.task(
+  'debug:run',
+  gulp.series(
+    async function setupDebugRun () {
+      setGulpGlobal('debug', '--inspect')
+      setGulpGlobal('mode', 'run-ct')
+    },
+    'dev',
+  ),
+)
+
+gulp.task(
   'debugBrk',
   gulp.series(
     async function setupDebugBrk () {
