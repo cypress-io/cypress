@@ -8,7 +8,6 @@ module.exports = (on, config) => {
       viteConfig: {
         configFile: path.resolve(__dirname, '..', 'vite.config.ts'),
       },
-      indexHtml: 'cypress/index.html',
     })
   })
 

@@ -168,11 +168,10 @@ function generateSpecFromCsf (parsed: CsfFile, storyFile: path.ParsedPath) {
     throw new Error('Provided story is not supported')
   }
 
-  // const getDependency = () => (isReact ? '@cypress/react' : '@cypress/vue')
   const getDependency = () => {
-    return (isReact
-      ? `import { mount, composeStories } from "@cypress/react"`
-      : `import { mount } from "@cypress/vue"\nimport { composeStories } from "@storybook/testing-vue3"`)
+    return endent`
+    import { mount } from "@cypress/${isReact ? 'react' : 'vue'}"
+    import { composeStories } from "@storybook/testing-${isReact ? 'react' : 'vue3'}"`
   }
   const getMountSyntax = (component: string) => {
     return isReact ? `<${component} />` : `${component}()`
