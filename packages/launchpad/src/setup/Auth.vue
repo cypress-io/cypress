@@ -1,25 +1,15 @@
 <template>
-  <div v-if="error">
-    An error occurred while authenticating: {{ error }}
-  </div>
+  <div v-if="error">An error occurred while authenticating: {{ error }}</div>
 
   <div v-else-if="showLogout">
     <button
-      class="block w-full bg-white py-8px border-gray-100 text-14px text-indigo-500 whitespace-nowrap border-rounded border-1 hover:no-underline hover:border-gray-200"
+      class="block w-full bg-white py-8px border-gray-100 text-14px text-indigo-500 whitespace-nowrap border-rounded border-1 hover:no-underline hocus:border-gray-200 outline-transparent"
       @click="handleLogout"
-    >
-      Log Out
-    </button>
+    >Log Out</button>
   </div>
 
   <div v-else>
-    <Button
-      size="lg"
-      :variant="buttonVariant"
-      @click="handleAuth"
-    >
-      {{ buttonMessage }}
-    </Button>
+    <Button size="lg" :variant="buttonVariant" @click="handleAuth">{{ buttonMessage }}</Button>
   </div>
 </template>
 

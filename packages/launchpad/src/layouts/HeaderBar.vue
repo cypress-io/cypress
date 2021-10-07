@@ -9,7 +9,7 @@
         <span class="text-body-gray-700">{{ props.gql?.app?.activeProject?.title }}</span>
       </div>
       <div class="flex gap-6">
-        <TopNav :gql="props?.gql?.app" :show-browsers="props.showBrowsers">
+        <TopNav :gql="props.gql.app" :show-browsers="props.showBrowsers">
           <template v-if="!!props.gql.cloudViewer" #login-title>
             <div
               :style="`background-image: url(${gravatarUrl(props.gql.cloudViewer?.email)});`"
@@ -25,9 +25,11 @@
                   class="rounded-50px w-48px mr-16px h-48px border-1px border-gray-200 overflow-hidden bg-cover"
                 />
                 <div>
-                  {{ props.gql.cloudViewer?.fullName }}
+                  <span class="text-gray-800">{{ props.gql.cloudViewer?.fullName }}</span>
                   <br />
-                  {{ props.gql.cloudViewer?.email }}
+                  <span class="text-gray-600">{{ props.gql.cloudViewer?.email }}</span>
+                  <br>
+                  <a class="text-indigo-500 outline-transparent hocus:underline" href="https://dashboard-staging.cypress.io/profile">Profile Settings</a>
                 </div>
               </div>
 

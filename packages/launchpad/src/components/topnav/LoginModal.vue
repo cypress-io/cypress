@@ -12,8 +12,8 @@
           <DialogTitle class="text-gray-900 text-18px">
             {{ title }}
           </DialogTitle>
-          <button @click="setIsOpen(false)">
-            Close
+          <button @click="setIsOpen(false)" aria-label="Close" class="hocus-default">
+            <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
           </button>
         </div>
 
@@ -25,6 +25,7 @@
             <a
               href="https://on.cypress.io/dashboard"
               target="_blank"
+              class="text-indigo-500 hocus:underline outline-transparent"
             >{{ t('topNav.login.dashboard') }}</a>
           </i18n-t>
           <i18n-t
