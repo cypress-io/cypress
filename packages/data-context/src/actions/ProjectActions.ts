@@ -55,7 +55,7 @@ export class ProjectActions {
     return this
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
+  async findSpecs (projectRoot: string, specType: Maybe<SpecType>): Promise<FoundSpec[]> {
     const config = await this.ctx.loaders.projectConfig(projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot,
@@ -63,7 +63,7 @@ export class ProjectActions {
       supportFile: config.supportFile ?? false,
       testFiles: config.testFiles ?? [],
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.componentFolder ?? false,
+      componentFolder: config.projectRoot ?? false,
       integrationFolder: config.integrationFolder ?? '',
     })
 

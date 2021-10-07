@@ -23,6 +23,7 @@ export function makeCacheExchange () {
     keys: {
       App: (data) => data.__typename,
       Wizard: (data) => data.__typename,
+      GitInfo: () => null,
     },
   })
 }

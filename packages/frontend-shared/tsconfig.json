@@ -3,6 +3,7 @@
     /* Basic Options */
     "target": "esnext",
     "module": "esnext",
+    "lib": ["dom", "ESNext"],
     /*
      * Allow javascript files to be compiled.
      * Override this in modules that need JS

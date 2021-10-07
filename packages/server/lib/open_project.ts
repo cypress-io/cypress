@@ -242,7 +242,17 @@ export class OpenProject {
 
   getSpecs (cfg) {
     return specsUtil.findSpecs(cfg)
-    .then((specs: Cypress.Spec[] = []) => {
+    .then((_specs: Cypress.Spec[] = []) => {
+      // only want these properties
+      const specs = _specs.map((x) => {
+        return {
+          name: x.name,
+          relative: x.relative,
+          absolute: x.absolute,
+          specType: x.specType,
+        }
+      })
+
       // TODO merge logic with "run.js"
       if (debug.enabled) {
         const names = _.map(specs, 'name')
@@ -442,7 +452,7 @@ export class OpenProject {
     try {
       await this.openProject.initializeConfig(browsers)
       await this.openProject.open()
-    } catch (err) {
+    } catch (err: any) {
       if (err.isCypressErr && err.portInUse) {
         errors.throw(err.type, err.port)
       } else {

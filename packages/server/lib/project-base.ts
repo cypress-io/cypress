@@ -24,15 +24,15 @@ import system from './util/system'
 import user from './user'
 import { ensureProp } from './util/class-helpers'
 import { fs } from './util/fs'
-import settings from './util/settings'
+import * as settings from './util/settings'
 import plugins from './plugins'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 import devServer from './plugins/dev-server'
 import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
-import { checkSupportFile } from './project_utils'
-import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
+import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
+import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
 import { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
@@ -50,7 +50,6 @@ export interface Cfg extends ReceivedCypressOptions {
     lastOpened?: number
     promptsShown?: object
   }
-  resolved: ResolvedConfigurationOptions
 }
 
 const localCwd = cwd()
@@ -72,6 +71,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   protected _server?: TServer
   protected _automation?: Automation
   private _recordTests?: any = null
+  private _isServerOpen: boolean = false
 
   public browser: any
   public options: OpenProjectLaunchOptions
@@ -213,6 +213,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     })
 
     this.ctx.setAppServerPort(port)
+    this._isServerOpen = true
 
     // if we didnt have a cfg.port
     // then get the port once we
@@ -336,6 +337,10 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
 
+    if (!this._isServerOpen) {
+      return
+    }
+
     const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
 
     this.ctx.setAppServerPort(undefined)
@@ -346,6 +351,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.watchers?.close(),
       closePreprocessor?.(),
     ])
+
+    this._isServerOpen = false
 
     process.chdir(localCwd)
     this.isOpen = false
@@ -540,7 +547,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     if (configFile !== false) {
-      this.watchers.watch(settings.pathToConfigFile(projectRoot, { configFile }), obj)
+      this.watchers.watchTree(settings.pathToConfigFile(projectRoot, { configFile }), obj)
     }
 
     return this.watchers.watch(settings.pathToCypressEnvJson(projectRoot), obj)
@@ -558,7 +565,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
-    } catch (err) {
+    } catch (err: any) {
       const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
 
       // only include the message if this is the standard MODULE_NOT_FOUND
@@ -689,6 +696,11 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   async initializeConfig (browsers: FoundBrowser[] = []): Promise<Cfg> {
+    // set default for "configFile" if undefined
+    if (this.options.configFile === undefined || this.options.configFile === null) {
+      this.options.configFile = await getDefaultConfigFilePath(this.projectRoot, !this.options.args?.runProject)
+    }
+
     let theCfg: Cfg = await config.get(this.projectRoot, this.options)
 
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
