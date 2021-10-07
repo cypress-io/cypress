@@ -464,6 +464,11 @@ type Spec implements Node {
   """
   absolute: String!
 
+  """
+  Full name of spec file (e.g. MySpec.test.tsx) without the spec extension
+  """
+  baseName: String!
+
   """The file extension (e.g. tsx, jsx)"""
   fileExtension: String!
 
