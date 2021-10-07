@@ -14,13 +14,14 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
+  "supportFile": "cypress/component/support/index.ts",
   "componentFolder": "src",
   "e2e": {
     "supportFile": false
   },
   "component": {
     "testFiles": "**/*.spec.{js,ts,tsx,jsx}",
-    "supportFile": "cypress/component/support/index.ts",
+    "supportFile": false,
     "pluginsFile": "cypress/component/plugins/index.js"
   }
 }

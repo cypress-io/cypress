@@ -1,4 +1,5 @@
 import httpProxy from 'http-proxy'
+import _ from 'lodash'
 import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
 import Debug from 'debug'
@@ -8,10 +9,9 @@ import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
-import { runner } from './controllers/runner'
+import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import { getPathToDist } from '@packages/resolve-dist'
-import { makeServeConfig } from './runner-ct'
 
 const debug = Debug('cypress:server:routes')
 
@@ -35,8 +35,38 @@ export const createCommonRoutes = ({
   getRemoteState,
   nodeProxy,
   getCurrentBrowser,
-  specsStore
+  specsStore,
 }: InitializeRoutes) => {
+  const makeServeConfig = (options: Partial<ServeOptions>) => {
+    const config = {
+      ...options.config,
+      testingType,
+      browser: options.getCurrentBrowser?.(),
+      specs: options.specsStore?.specFiles,
+    } as Cfg
+
+    if (testingType === 'e2e') {
+      config.remote = getRemoteState()
+    }
+
+    // TODO: move the component file watchers in here
+    // and update them in memory when they change and serve
+    // them straight to the HTML on load
+
+    debug('serving runner index.html with config %o',
+      _.pick(config, 'version', 'platform', 'arch', 'projectName'))
+
+    // base64 before embedding so user-supplied contents can't break out of <script>
+    // https://github.com/cypress-io/cypress/issues/4952
+
+    const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+    return {
+      base64Config,
+      projectName: config.projectName,
+    }
+  }
+
   const router = Router()
 
   router.get('/__cypress/runner/*', (req, res) => {

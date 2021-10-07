@@ -51,6 +51,17 @@ declare global {
       }
 
       /**
+       * Config as served from the backend via an api route
+       * Ideally we should consume config via GraphQL,
+       * but for now we need to pass it to Cypress (the driver)
+       * so just putting it on the window until we figure out how to
+       * manage this.
+       * 
+       * Treat this as immutable and read only.
+       */
+      config: Record<string, any>
+
+      /**
        * To ensure we are only a single copy of React
        * We get a reference to the copy of React (and React DOM)
        * that is used in the Reporter and Driver, which are bundled with

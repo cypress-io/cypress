@@ -51,7 +51,6 @@ function setupRunner () {
  * Get the URL for the spec. This is the URL of the AUT IFrame.
  */
 function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
-  return `/__cypress/iframes/integration/basic.spec.ts`
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
@@ -72,7 +71,7 @@ function teardownSpec (store: Store) {
  */
 function setupSpecE2E (spec: SpecFile) {
   // @ts-ignore - TODO: figure out how to manage window.config.
-  const config = window.config
+  const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = spec
@@ -94,16 +93,13 @@ function setupSpecE2E (spec: SpecFile) {
 
   // create new AUT
   const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+
   autIframe.showInitialBlankContents()
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, spec)
   const $specIframe = createSpecIFrame(specSrc)
-
-  console.log(`$specIframe: ${specSrc}, $aut ${$autIframe.prop('src')}`)
-  const { protocol, host, port } = document.location
-  console.log({protocol, host, port})
 
   // append to document, so the iframe will execute the spec
   $container.appendChild($specIframe)
@@ -119,8 +115,10 @@ function setupSpecE2E (spec: SpecFile) {
  */
 function createSpecIFrame (specSrc: string) {
   const el = document.createElement('iframe')
+
   el.id = `Your Spec: '${specSrc}'`,
   el.className = 'spec-iframe'
+
   return el
 }
 
@@ -129,8 +127,8 @@ function createSpecIFrame (specSrc: string) {
  * to the dev server, and initializing Cypress on the AUT.
  */
 function setupSpecCT (spec: SpecFile) {
-  // @ts-ignore - TODO: figure out how to manage window.config.
-  const config = window.config
+  // TODO: figure out how to manage window.config.
+  const config = window.UnifiedRunner.config
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = spec
@@ -200,8 +198,15 @@ async function executeSpec (spec: SpecFile) {
 
   UnifiedReporterAPI.setupReporter()
 
-  return setupSpecE2E(spec)
-  // return setupSpecCT(spec)
+  if (window.UnifiedRunner.config.testingType === 'e2e') {
+    return setupSpecE2E(spec)
+  }
+
+  if (window.UnifiedRunner.config.testingType === 'component') {
+    return setupSpecCT(spec)
+  }
+
+  throw Error('Unknown or undefined testingType on window.UnifiedRunner.config.testingType')
 }
 
 export const UnifiedRunnerAPI = {

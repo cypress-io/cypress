@@ -32,9 +32,9 @@ export async function injectBundle (ready: () => void) {
   injectReporterStyle()
 
   script.onload = () => {
-    // @ts-ignore - just stick config on window until we figure out how we are
+    // TODO: just stick config on window until we figure out how we are
     // going to manage it
-    window.config = window.UnifiedRunner.decodeBase64(data.base64Config)
+    window.UnifiedRunner.config = window.UnifiedRunner.decodeBase64(data.base64Config)
     ready()
   }
 }
