@@ -60,6 +60,14 @@
       "smartOrchestration": "Smart Orchestration"
     }
   },
+  "launchpadErrors": {
+    "generic": {
+      "header": "Something went wrong",
+      "text": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
+      "readTheDocsButton": "Read the docs",
+      "retryButton": "It's fixed now"
+    }
+  },
   "setupPage": {
     "projectSetup": {
       "frameworkLabel": "Front-end Framework",
