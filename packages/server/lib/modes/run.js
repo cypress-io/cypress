@@ -1545,6 +1545,14 @@ module.exports = {
           trashAssets(config),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
+          // only want these properties
+          specs = specs.map((x) => ({
+            name: x.name,
+            relative: x.relative,
+            absolute: x.absolute,
+            specType: x.specType,
+          }))
+
           // return only what is return to the specPattern
           if (specPattern) {
             specPattern = specsUtil.default.getPatternRelativeToProjectRoot(specPattern, projectRoot)

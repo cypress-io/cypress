@@ -819,7 +819,6 @@ describe('lib/modes/run', () => {
           browser,
           {
             name: 'foo_spec.js',
-            path: 'cypress/integration/foo_spec.js',
             absolute: '/path/to/spec.js',
           },
           {

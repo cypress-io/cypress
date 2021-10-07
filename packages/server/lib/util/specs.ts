@@ -9,7 +9,7 @@ import Bluebird from 'bluebird'
 import pluralize from 'pluralize'
 import glob from './glob'
 import Table from 'cli-table3'
-import type { CommonSearchOptions, FindSpecs } from '@packages/types'
+import type { CommonSearchOptions, FindSpecs, FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:specs')
 
@@ -34,7 +34,7 @@ const getPatternRelativeToProjectRoot = (specPattern: string, projectRoot: strin
  * Finds all spec files that pass the config for given type. Note that "commonSearchOptions" is
  * a subset of the project's "config" object
  */
-function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearchOptions, specPattern?: string) {
+function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearchOptions, specPattern?: string): Bluebird<FoundSpec[]> {
   let fixturesFolderPath: string | undefined = undefined
 
   // @ts-ignore - types are incorrect
@@ -99,14 +99,26 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
     return path.relative(commonSearchOptions.projectRoot, file).replace(/\\/g, '/')
   }
 
-  const setNameParts = (file) => {
+  // TODO: get types working for the glob module.
+  const setNameParts = (file: string) => {
     debug('found spec file %s', file)
 
     if (!path.isAbsolute(file)) {
       throw new Error(`Cannot set parts of file from non-absolute path ${file}`)
     }
 
+    const fileExtension = path.extname(file)
+    const specFileExtension = ['.spec', '.test', '-spec', '-test']
+    .map((ext) => ext + fileExtension)
+    .find((ext) => file.endsWith(ext)) || fileExtension
+
+    const parsedFile = path.parse(file)
+
     return {
+      baseName: parsedFile.base,
+      fileName: parsedFile.base.replace(specFileExtension, ''),
+      specFileExtension,
+      fileExtension,
       name: relativePathFromSearchFolder(file),
       relative: relativePathFromProjectRoot(file),
       absolute: file,
@@ -183,12 +195,19 @@ const findIntegrationSpecs = (searchFolder: string | undefined, commonSearchOpti
   .then(setTestType(SPEC_TYPES.INTEGRATION))
 }
 
-const findComponentSpecs = (searchFolder: string | undefined | false, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
+const findComponentSpecs = (searchFolder: string | undefined | false, integrationFolder: string | undefined | false, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {
   if (!searchFolder) {
     return []
   }
 
-  return findSpecsOfType(searchFolder, commonSearchOptions, specPattern)
+  const ignorePatternFromConfig = Array.isArray(commonSearchOptions.ignoreTestFiles) ? commonSearchOptions.ignoreTestFiles : [commonSearchOptions.ignoreTestFiles]
+  const ignoreTestFiles = [
+    // test files can either be string[] or string.
+    ...ignorePatternFromConfig,
+    `${integrationFolder }/**/*`,
+  ]
+
+  return findSpecsOfType(searchFolder, { ...commonSearchOptions, ignoreTestFiles }, specPattern)
   .then(setTestType(SPEC_TYPES.COMPONENT))
 }
 
@@ -211,11 +230,11 @@ const printFoundSpecs = (foundSpecs: Cypress.Spec[]) => {
  * Resolves with an array of objects. Each object has a "testType" property
  * with one of TEST_TYPES values.
  */
-const findSpecs = (payload: FindSpecs, specPattern?: string) => {
+const findSpecs = (payload: FindSpecs, specPattern?: string): Bluebird<FoundSpec[]> => {
   const { componentFolder, integrationFolder, ...commonSearchOptions } = payload
 
   return Bluebird.all([
-    findComponentSpecs(componentFolder, commonSearchOptions, specPattern),
+    findComponentSpecs(componentFolder, integrationFolder, commonSearchOptions, specPattern),
     findIntegrationSpecs(integrationFolder, commonSearchOptions, specPattern),
   ]).then(([ct, e2e]) => {
     const foundSpecs = [...ct, ...e2e]

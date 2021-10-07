@@ -1,7 +1,7 @@
 <template>
   <a
     href="#"
-    :class="[active ? 'before:bg-green-300' : 'before:bg-transparent']"
+    :class="[active ? 'before:bg-jade-300' : 'before:bg-transparent']"
     class="w-full
       min-w-40px
       relative
@@ -33,11 +33,11 @@
       <component
         :is="icon"
         v-if="icon"
-        :class="[active ? 'icon-dark-green-300 icon-light-green-800' : 'icon-dark-gray-500 icon-light-gray-800']"
-        class="min-w-24px min-h-24px group-hover:icon-dark-indigo-300 group-hover:icon-light-indigo-900 group-focus:icon-dark-indigo-300 group-focus:icon-light-indigo-900"
+        :class="[active ? 'icon-dark-jade-300 icon-light-jade-800' : 'icon-dark-gray-800 icon-light-gray-900']"
+        class="min-w-24px min-h-24px group-hover:icon-dark-indigo-300 group-hover:icon-light-indigo-600 group-focus:icon-dark-indigo-300 group-focus:icon-light-indigo-600"
       />
       <span
-        :class="[active ? 'text-green-300' : 'text-gray-500']"
+        :class="[active ? 'text-jade-300' : 'text-gray-400']"
         class="truncate"
       >
         <slot />

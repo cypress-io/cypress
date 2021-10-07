@@ -6,20 +6,17 @@
     <div class="relative rounded-md">
       <div
         v-if="hasPrefix"
-        class="absolute inset-y-0 left-0 pl-4 flex items-center"
+        class="absolute inset-y-0 left-0 flex items-center pl-4"
       >
-        <span class="text-gray-500 flex items-center justify-center">
+        <span class="flex items-center justify-center text-gray-500">
           <slot name="prefix">
-            <Icon
+            <component
+              :is="prefixIcon"
               v-if="prefixIcon"
               class="pointer-events-none"
-              :icon="prefixIcon"
               :class="prefixIconClasses"
             />
-            <Icon
-              v-else-if="type === 'search'"
-              :icon="IconSearch"
-            />
+            <i-cy-magnifying-glass_x16 v-else-if="type === 'search'" />
           </slot>
         </span>
       </div>
@@ -27,17 +24,18 @@
         v-model="localValue"
         :type="type"
         :class="_inputClasses"
-        class="placeholder-gray-400 disabled:bg-gray-100 disabled:text-gray-400 leading-tight focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 py-2 border-gray-300 rounded-md"
+        class="block w-full pl-10 leading-tight placeholder-gray-400 border-gray-300 rounded-md disabled:bg-gray-100 disabled:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500 py-9px"
         v-bind="inputAttrs"
       >
       <div
         v-if="hasSuffix"
-        class="absolute inset-y-0 right-0 pr-3 flex items-center"
+        class="absolute inset-y-0 right-0 flex items-center pr-3"
       >
-        <span class="text-gray-500 flex items-center justify-center">
+        <span class="flex items-center justify-center text-gray-500">
           <slot name="suffix">
-            <Icon
-              :icon="suffixIcon"
+            <component
+              :is="suffixIcon"
+              v-if="suffixIcon"
               class="pointer-events-none"
               :class="suffixIconClasses"
             />
@@ -56,8 +54,6 @@ export default {
 
 <script lang="ts" setup>
 import _ from 'lodash'
-import Icon from './Icon.vue'
-import IconSearch from '~icons/mdi/magnify'
 
 import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
