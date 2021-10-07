@@ -15,7 +15,9 @@
     "configFile": "../../mocha-reporter-config.json"
   },
   "componentFolder": "src",
-  "supportFile": false,
+  "e2e": {
+    "supportFile": false
+  },
   "component": {
     "testFiles": "**/*.spec.{js,ts,tsx,jsx}",
     "supportFile": "cypress/component/support/index.ts",
