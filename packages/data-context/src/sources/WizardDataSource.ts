@@ -274,51 +274,35 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
       `,
       ts: dedent`
         import { defineConfig } from 'cypress'
-        import { startDevServer } from '@cypress/webpack-dev-server'
-        import { getWebpackConfig } from 'nuxt'
 
         export default defineConfig({
-          component (on, config) {
-            on('dev-server:start', async (options) => {
-              let webpackConfig = await getWebpackConfig('modern', 'dev')
-
-              return startDevServer({
-                options,
-                webpackConfig,
-              })
-            })
-          },
+          component: {
+            testFiles: "**/*cy-spec.tsx",
+            componentFolder: "src"
+          }
         })
       `,
     },
     cra: {
       js: endent`
         const { defineConfig } = require('cypress')
-        const { devServer, defineDevServerConfig } = require('@cypress/react/plugins/react-scripts')
-        
+
         module.exports = defineConfig({
           component: {
-            devServer,
-            devServerConfig: defineDevServerConfig(${endent.pretty({
-        indexHtml: 'cypress/component/support/index.html',
-        ...(opts.storybook ? { addTranspiledFolders: ['.storybook'] } : null) })})
+            testFiles: "**/*cy-spec.tsx",
+            componentFolder: "src"
           }
         })
       `,
       ts: endent`
-        import { devServer } from '@cypress/react/plugins/react-scripts'
-        import type { ConfigOptions } from 'cypress'
-        import type { CypressCRADevServerConfig } from '@cypress/react/plugins/react-scripts'
-        
-        const config: ConfigOptions = {
+        import { defineConfig } from 'cypress'
+
+        export default defineConfig({
           component: {
-            devServer,
-            devServerConfig: ${endent.pretty({
-        indexHtml: 'cypress/component/support/index.html',
-        ...(opts.storybook ? { addTranspiledFolders: ['.storybook'] } : null) })} as CypressCRADevServerConfig
+            testFiles: "**/*cy-spec.tsx",
+            componentFolder: "src"
           }
-        }
-        export default config
+        })
       `,
     },
   }[opts.framework.type as string]
