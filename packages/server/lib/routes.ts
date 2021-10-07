@@ -1,6 +1,7 @@
 import httpProxy from 'http-proxy'
 import { ErrorRequestHandler, Router } from 'express'
 import send from 'send'
+import Debug from 'debug'
 
 import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
@@ -10,7 +11,7 @@ import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import { getPathToDist } from '@packages/resolve-dist'
-import Debug from 'debug'
+import { makeServeConfig } from './runner-ct'
 
 const debug = Debug('cypress:server:routes')
 
@@ -33,6 +34,8 @@ export const createCommonRoutes = ({
   getSpec,
   getRemoteState,
   nodeProxy,
+  getCurrentBrowser,
+  specsStore
 }: InitializeRoutes) => {
   const router = Router()
 
@@ -46,12 +49,24 @@ export const createCommonRoutes = ({
 
   router.get('/__cypress/iframes/*', (req, res) => {
     if (testingType === 'e2e') {
+      debug(`proxying ${req.url} matching /__cypress/iframes/* for e2e`)
       iframesController.e2e({ config, getSpec, getRemoteState }, req, res)
     }
 
     if (testingType === 'component') {
+      debug(`proxying ${req.url} matching /__cypress/iframes/* for ct`)
       iframesController.component({ config, nodeProxy }, req, res)
     }
+  })
+
+  router.get(['/api', '/__/api'], (req, res) => {
+    const options = makeServeConfig({
+      config,
+      getCurrentBrowser,
+      specsStore,
+    })
+
+    res.json(options)
   })
 
   if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {

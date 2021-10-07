@@ -51,6 +51,7 @@ function setupRunner () {
  * Get the URL for the spec. This is the URL of the AUT IFrame.
  */
 function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
+  return `/__cypress/iframes/integration/basic.spec.ts`
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
@@ -65,11 +66,69 @@ function teardownSpec (store: Store) {
 }
 
 /**
- * Set up a spec by creating a fresh AUT and initializing
- * Cypress on it.
- *
+ * Set up an E2E spec by creating a fresh AUT for the spec to evaluate under,
+ * a Spec IFrame to load the spec's source code, and
+ * initialize Cypress on the AUT.
  */
-function setupSpec (spec: SpecFile) {
+function setupSpecE2E (spec: SpecFile) {
+  // @ts-ignore - TODO: figure out how to manage window.config.
+  const config = window.config
+
+  // this is how the Cypress driver knows which spec to run.
+  config.spec = spec
+
+  // creates a new instance of the Cypress driver for this spec,
+  // initializes a bunch of listeners
+  // watches spec file for changes.
+  window.UnifiedRunner.eventManager.setup(config)
+
+  const $runnerRoot = getRunnerElement()
+
+  // clear AUT, if there is one.
+  empty($runnerRoot)
+
+  // create root for new AUT
+  const $container = document.createElement('div')
+
+  $runnerRoot.append($container)
+
+  // create new AUT
+  const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
+  autIframe.showInitialBlankContents()
+  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
+  // create Spec IFrame
+  const specSrc = getSpecUrl(config.namespace, spec)
+  const $specIframe = createSpecIFrame(specSrc)
+
+  console.log(`$specIframe: ${specSrc}, $aut ${$autIframe.prop('src')}`)
+  const { protocol, host, port } = document.location
+  console.log({protocol, host, port})
+
+  // append to document, so the iframe will execute the spec
+  $container.appendChild($specIframe)
+
+  $specIframe.src = specSrc
+
+  // initialize Cypress (driver) with the AUT!
+  window.UnifiedRunner.eventManager.initialize($autIframe, config)
+}
+
+/**
+ * Create a Spec IFrame. Used for loading the spec to execute in E2E
+ */
+function createSpecIFrame (specSrc: string) {
+  const el = document.createElement('iframe')
+  el.id = `Your Spec: '${specSrc}'`,
+  el.className = 'spec-iframe'
+  return el
+}
+
+/**
+ * Set up a CT spec by creating a fresh AUT with the URL pointing
+ * to the dev server, and initializing Cypress on the AUT.
+ */
+function setupSpecCT (spec: SpecFile) {
   // @ts-ignore - TODO: figure out how to manage window.config.
   const config = window.config
 
@@ -129,7 +188,7 @@ function initialize () {
  *
  * 4. Force the Reporter to re-render with the new spec we are executed.
  *
- * 5. Setup the spec. This involves a few things, see the `setupSpec` function's
+ * 5. Setup the spec. This involves a few things, see the `setupSpecCT` function's
  *    description for more information.
  */
 async function executeSpec (spec: SpecFile) {
@@ -141,7 +200,8 @@ async function executeSpec (spec: SpecFile) {
 
   UnifiedReporterAPI.setupReporter()
 
-  return setupSpec(spec)
+  return setupSpecE2E(spec)
+  // return setupSpecCT(spec)
 }
 
 export const UnifiedRunnerAPI = {

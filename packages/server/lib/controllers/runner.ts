@@ -74,7 +74,7 @@ export const runner = {
     config.browser = getCurrentBrowser()
 
     debug('serving runner index.html with config %o',
-      _.pick(config, 'version', 'platform', 'arch', 'projectName'))
+      _.pick(config, 'version', 'platform', 'arch', 'projectName', 'remote'))
 
     // log the env object's keys without values to avoid leaking sensitive info
     debug('env object has the following keys: %s', _.keys(config.env).join(', '))
@@ -83,7 +83,10 @@ export const runner = {
   },
 
   handle (testingType, req, res) {
-    const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
+    const pathToFile = getPathToDist(testingType === 'e2e' 
+      ? 'runner-ct' 
+      // ? 'runner' 
+      : 'runner-ct', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)

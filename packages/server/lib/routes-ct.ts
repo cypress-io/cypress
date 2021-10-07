@@ -1,5 +1,4 @@
 import Debug from 'debug'
-import { makeServeConfig } from './runner-ct'
 import { Request, Response, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -25,18 +24,6 @@ export const createRoutesCT = ({
 }: InitializeRoutes) => {
   const routesCt = Router()
 
-  // TODO If prod, serve the build app files from app/dist
-
-  routesCt.get(['/api', '/__/api'], (req, res) => {
-    const options = makeServeConfig({
-      config,
-      getCurrentBrowser,
-      specsStore,
-    })
-
-    res.json(options)
-  })
-
   routesCt.get('/__cypress/static/*', (req, res) => {
     const pathToFile = getPathToDist('static', req.params[0])
 
@@ -45,6 +32,7 @@ export const createRoutesCT = ({
   })
 
   routesCt.get('/__cypress/iframes/*', (req, res) => {
+    debug(`proxying ${req.url}`)
     // always proxy to the index.html file
     // attach header data for webservers
     // to properly intercept and serve assets from the correct src root
