@@ -1,9 +1,8 @@
 import { debug as debugFn } from 'debug'
 import { AddressInfo } from 'net'
 import { Server } from 'http'
-import { start as createDevServer, StartDevServer } from './startServer'
+import { start as createDevServer, StartDevServer, WebpackConfigurationWithDevServer } from './startServer'
 import { webpackDevServerFacts } from './webpackDevServerFacts'
-import webpack from 'webpack'
 
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
@@ -60,7 +59,7 @@ export async function startDevServer (startDevServerArgs: StartDevServer, exitPr
 
 export interface CypressWebpackDevServerConfig{
   /* support passing a path to the user's webpack config */
-  webpackConfig?: webpack.WebpackOptionsNormalized
+  webpackConfig?: WebpackConfigurationWithDevServer
   /* base html template to render in AUT */
   template?: string
 }
