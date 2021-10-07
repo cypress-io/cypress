@@ -1,5 +1,6 @@
 const sinon = require('sinon')
 const { logger } = require('./logger')
+import _ from 'lodash'
 
 describe('logger', () => {
   let spyLog = sinon.spy(logger, 'log')
@@ -20,17 +21,20 @@ describe('logger', () => {
   })
 
   describe('_logValues', () => {
+    let spyTrim = sinon.spy(_, 'trim')
+
     afterEach(() => {
       // reset after each unit test
-      spyLog.resetHistory()
+      spyTrim.resetHistory()
     })
 
-    it('should not call log', () => {
-      logger._logValues({ javascriptObject: { key: 'value' } })
-      logger._logValues([])
-      logger._logValues('')
+    it('should not call trim', () => {
+      logger._logValues({})
+      logger._logValues({ test: '' })
+      logger._logValues(null)
+      logger._logValues(undefined)
 
-      expect(spyLog.calledOnce)
+      expect(!spyTrim.calledOnce)
     })
 
     // The positive unit tests to capture if log has been called are already written in
