@@ -21,18 +21,54 @@
         <TopNav
           :gql="props?.gql?.app"
           :show-browsers="props.showBrowsers"
-        />
-        <button @click="openLogin">
+        >
+          <template
+            v-if="!!props.gql.cloudViewer"
+            #login-title
+          >
+            <div
+              :style="`background-image: url(${gravatarUrl(props.gql.cloudViewer?.email)});`"
+              class="rounded-50px w-24px h-24px border-1px border-gray-200 overflow-hidden bg-cover"
+            />
+          </template>
+          <template
+            v-if="!!props.gql.cloudViewer"
+            #login-panel
+          >
+            <div class="min-w-248px">
+              <div class="flex border-b-gray-100 border-b p-16px">
+                <div
+                  v-if="props.gql.cloudViewer"
+                  :style="`background-image: url(${gravatarUrl(props.gql.cloudViewer?.email)});`"
+                  class="rounded-50px w-48px mr-16px h-48px border-1px border-gray-200 overflow-hidden bg-cover"
+                />
+                <div>
+                  {{ props.gql.cloudViewer?.fullName }}
+                  <br>
+                  {{ props.gql.cloudViewer?.email }}
+                </div>
+              </div>
+
+              <div class="p-16px">
+                <Auth
+                  :gql="props.gql"
+                  :show-logout="true"
+                />
+              </div>
+            </div>
+          </template>
+        </TopNav>
+        <button
+          v-if="!props.gql.cloudViewer"
+          @click="openLogin"
+        >
           Login
         </button>
-        <div v-if="props.gql.cloudViewer">
-          {{ props.gql.cloudViewer?.fullName }}
-        </div>
-        <LoginModal
-          v-model="isLoginOpen"
-          :gql="props.gql"
-        />
       </div>
+      <LoginModal
+        v-model="isLoginOpen"
+        :gql="props.gql"
+      />
     </div>
   </div>
 </template>
@@ -43,6 +79,8 @@ import { ref } from 'vue'
 import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBarFragment } from '../generated/graphql'
 import TopNav from '../components/topnav/TopNav.vue'
 import LoginModal from '../components/topnav/LoginModal.vue'
+import gravatar from 'gravatar'
+import Auth from '../setup/Auth.vue'
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -81,6 +119,16 @@ const clearActiveProject = () => {
   if (props.gql.app.activeProject) {
     clearActiveProjectMutation.executeMutation({})
   }
+}
+
+const gravatarUrl = (email) => {
+  let opts: { size: string, default: string, forcedefault?: string } = { size: '48', default: 'mm' }
+
+  if (!email) {
+    opts.forcedefault = 'y'
+  }
+
+  return gravatar.url(email, opts, true)
 }
 
 const props = defineProps<{
