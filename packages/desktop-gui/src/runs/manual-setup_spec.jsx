@@ -31,7 +31,7 @@ describe('ManualSetup', () => {
 
     cy.percySnapshot()
 
-    cy.contains('button', 'Try Again').click().then(() => {
+    cy.contains('button', 'Try again').click().then(() => {
       expect(retryInsertStub).not.to.have.been.called
       expect(projectsApi.reopenProject).to.have.been.called
     })
