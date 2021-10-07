@@ -25,7 +25,7 @@ const debug = debugModule('cypress:server:browsers:chrome')
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
-const CHROME_VERSION_INTRODUCING_EVERY_NTH_FRAME = 89
+const CHROME_VERSION_WITH_FPS_INCREASE = 89
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
