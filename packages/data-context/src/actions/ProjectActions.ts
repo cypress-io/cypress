@@ -63,7 +63,7 @@ export class ProjectActions {
       supportFile: config.supportFile ?? false,
       testFiles: config.testFiles ?? [],
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.componentFolder ?? false,
+      componentFolder: config.projectRoot ?? false,
       integrationFolder: config.integrationFolder ?? '',
     })
 
