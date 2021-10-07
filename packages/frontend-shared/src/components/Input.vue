@@ -10,8 +10,13 @@
       >
         <span class="flex items-center justify-center text-gray-500">
           <slot name="prefix">
-            <component v-if="prefixIcon" :is="prefixIcon" class="pointer-events-none" :class="prefixIconClasses"></component>
-            <i-magnifying-glass_x24 v-else-if="type === 'search'"></i-magnifying-glass_x24>
+            <component
+              :is="prefixIcon"
+              v-if="prefixIcon"
+              class="pointer-events-none"
+              :class="prefixIconClasses"
+            />
+            <i-cy-magnifying-glass_x16 v-else-if="type === 'search'" />
           </slot>
         </span>
       </div>
@@ -28,7 +33,12 @@
       >
         <span class="flex items-center justify-center text-gray-500">
           <slot name="suffix">
-            <component v-if="suffixIcon" :is="suffixIcon" class="pointer-events-none" :class="suffixIconClasses"></component>
+            <component
+              :is="suffixIcon"
+              v-if="suffixIcon"
+              class="pointer-events-none"
+              :class="suffixIconClasses"
+            />
           </slot>
         </span>
       </div>
