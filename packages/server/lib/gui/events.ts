@@ -1,5 +1,6 @@
 /* eslint-disable no-case-declarations */
 const _ = require('lodash')
+const path = require('path')
 const ipc = require('electron').ipcMain
 const { clipboard } = require('electron')
 const debug = require('debug')('cypress:server:events')
@@ -334,6 +335,20 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           onWarning,
         })
       }).call('getConfig')
+      .then((config) => {
+        if (config.configFile && path.isAbsolute(config.configFile)) {
+          config.configFile = path.relative(arg, config.configFile)
+        }
+
+        // those two values make no sense to display in
+        // the GUI
+        if (config.resolved) {
+          config.resolved.configFile = undefined
+          config.resolved.testingType = undefined
+        }
+
+        return config
+      })
       .then(send)
       .catch(sendErr)
 
@@ -348,7 +363,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'set:project:id':
-      return ProjectStatic.writeProjectId(arg.id, arg.projectRoot)
+      return ProjectStatic.writeProjectId(arg)
       .then(send)
       .catch(sendErr)
 

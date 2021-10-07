@@ -519,6 +519,7 @@ describe('lib/util/ci_provider', () => {
       DRONE_COMMIT_AUTHOR: 'droneCommitAuthor',
       DRONE_COMMIT_AUTHOR_EMAIL: 'droneCommitAuthorEmail',
       DRONE_REPO_BRANCH: 'droneRepoBranch',
+      DRONE_GIT_HTTP_URL: 'droneRemoteOrigin',
     }, { clear: true })
 
     expectsName('drone')
@@ -536,6 +537,7 @@ describe('lib/util/ci_provider', () => {
       authorName: 'droneCommitAuthor',
       authorEmail: 'droneCommitAuthorEmail',
       defaultBranch: 'droneRepoBranch',
+      remoteOrigin: 'droneRemoteOrigin',
     })
   })
 
