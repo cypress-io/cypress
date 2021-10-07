@@ -33,6 +33,7 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions, ResolvedConfigurationOptions } from '@packages/types'
+import { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -66,6 +67,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public id: string
 
   protected watchers: Watchers
+  protected ctx: DataContextShell
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -104,6 +106,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
+    this.ctx = options.ctx ?? new DataContextShell()
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -208,6 +211,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       SocketCtor: this.testingType === 'e2e' ? SocketE2E : SocketCt,
       specsStore,
     })
+
+    this.ctx.setAppServerPort(port)
 
     // if we didnt have a cfg.port
     // then get the port once we
@@ -332,6 +337,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.browser = null
 
     const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+
+    this.ctx.setAppServerPort(undefined)
+    this.ctx.emitter.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -587,7 +595,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
 
-    this.server.startWebsockets(this.automation, this.cfg, {
+    const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
@@ -643,6 +651,8 @@ export class ProjectBase<TServer extends Server> extends EE {
         return
       },
     })
+
+    this.ctx.emitter.setAppSocketServer(io)
   }
 
   changeToUrl (url) {

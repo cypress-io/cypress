@@ -32,8 +32,6 @@ import { openProject } from '../open_project'
 import type { LaunchArgs } from '@packages/types'
 import type { EventEmitter } from 'events'
 
-import type { DataContext } from '@packages/data-context'
-
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
   // https://github.com/cypress-io/cypress/issues/6750
@@ -474,7 +472,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 }
 
 interface EventsStartArgs extends LaunchArgs {
-  ctx: DataContext
   onFocusTests: () => void
 }
 

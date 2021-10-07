@@ -17,6 +17,7 @@ Cached Theme Material Design.pak
 packages/desktop-gui/cypress/videos
 packages/desktop-gui/src/jsconfig.json
 
+
 # from driver
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
@@ -39,6 +40,10 @@ packages/server/.projects
 packages/server/support
 packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
+
+# from socket, dist built files
+packages/socket/index.js
+packages/socket/lib/*.js
 
 # from npm/react
 /npm/react/bin/*

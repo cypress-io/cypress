@@ -13,19 +13,20 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   type?: 'INDEX'
   url?: string
   devTools?: boolean
+  graphqlPort?: number
 }
 
 let windows = {}
 let recentlyCreatedWindow = false
 
-const getUrl = function (type) {
+const getUrl = function (type, port?: number) {
   switch (type) {
     case 'INDEX':
       if (process.env.LAUNCHPAD) {
-        return getPathToDesktopIndex('launchpad')
+        return getPathToDesktopIndex('launchpad', port)
       }
 
-      return getPathToDesktopIndex('desktop-gui')
+      return getPathToDesktopIndex('desktop-gui', port)
 
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
@@ -223,7 +224,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 // open desktop-gui BrowserWindow
-export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
+export function open (projectRoot, graphqlPort: number | undefined, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
   let win
@@ -249,7 +250,7 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
   })
 
   if (!options.url) {
-    options.url = getUrl(options.type)
+    options.url = getUrl(options.type, graphqlPort)
   }
 
   win = create(projectRoot, options, newBrowserWindow)

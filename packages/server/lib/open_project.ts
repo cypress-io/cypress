@@ -229,6 +229,10 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
+        if (options.skipBrowserOpen) {
+          return
+        }
+
         return browsers.open(browser, options, automation)
       })
     }

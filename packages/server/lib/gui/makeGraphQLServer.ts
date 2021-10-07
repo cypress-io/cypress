@@ -2,12 +2,10 @@ import express from 'express'
 import { addGraphQLHTTP } from '@packages/graphql/src/server'
 import type { AddressInfo } from 'net'
 import type { DataContext } from '@packages/data-context'
-import getenv from 'getenv'
 import pDefer from 'p-defer'
 import cors from 'cors'
 import type { Server } from 'http'
-
-const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52200)
+import { SocketIOServer } from '@packages/socket'
 
 let graphqlServer: Server | undefined
 
@@ -41,8 +39,9 @@ export async function makeGraphQLServer (ctx: DataContext) {
   // it's not jammed into the projects
   addGraphQLHTTP(app, ctx)
 
-  const srv = graphqlServer = app.listen(GRAPHQL_PORT, () => {
-    const endpoint = `http://localhost:${(srv.address() as AddressInfo).port}/graphql`
+  const srv = graphqlServer = app.listen(() => {
+    const port = (srv.address() as AddressInfo).port
+    const endpoint = `http://localhost:${port}/graphql`
 
     if (process.env.NODE_ENV === 'development') {
       /* eslint-disable-next-line no-console */
@@ -51,8 +50,14 @@ export async function makeGraphQLServer (ctx: DataContext) {
 
     ctx.debug(`GraphQL Server at ${endpoint}`)
 
-    dfd.resolve(GRAPHQL_PORT)
+    dfd.resolve(port)
   })
+
+  let socketServer = new SocketIOServer(srv, {
+    transports: ['websocket'],
+  })
+
+  ctx.emitter.setLaunchpadSocketServer(socketServer)
 
   return dfd.promise
 }

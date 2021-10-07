@@ -1,4 +1,3 @@
-import type { WebContents } from 'electron'
 import { DataContext } from '@packages/data-context'
 import specsUtil from './util/specs'
 import type { FindSpecs, FoundBrowser, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
@@ -17,7 +16,6 @@ interface MakeDataContextOptions {
   os: PlatformName
   rootBus: EventEmitter
   launchArgs: LaunchArgs
-  webContents: WebContents
 }
 
 export function makeDataContext (options: MakeDataContextOptions) {

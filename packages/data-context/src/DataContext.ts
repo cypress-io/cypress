@@ -1,9 +1,6 @@
-import type { WebContents } from 'electron'
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import debugLib from 'debug'
 import fsExtra from 'fs-extra'
-import type { EventEmitter } from 'events'
-
 import type { AuthApiShape } from './actions/AuthActions'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
@@ -15,11 +12,10 @@ import type { AppApiShape, ProjectApiShape } from './actions'
 import { makeLoaders } from './data/loaders'
 import { BrowserDataSource } from './sources/BrowserDataSource'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
+import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 
-export interface DataContextConfig {
+export interface DataContextConfig extends DataContextShellConfig {
   os: PlatformName
-  webContents: WebContents
-  rootBus: EventEmitter
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
   /**
@@ -34,12 +30,16 @@ export interface DataContextConfig {
   projectApi: ProjectApiShape
 }
 
-export class DataContext {
+export class DataContext extends DataContextShell {
   private _coreData: CoreDataShape
 
-  fs = fsExtra
+  @cached
+  get fs () {
+    return fsExtra
+  }
 
   constructor (private config: DataContextConfig) {
+    super(config)
     this._coreData = config.coreData ?? makeCoreData()
   }
 
@@ -59,6 +59,10 @@ export class DataContext {
     }
 
     return Promise.all(toAwait)
+  }
+
+  get os () {
+    return this.config.os
   }
 
   get launchArgs () {
@@ -131,7 +135,7 @@ export class DataContext {
       appApi: this.config.appApi,
       authApi: this.config.authApi,
       projectApi: this.config.projectApi,
-      webContents: this.config.webContents,
+      busApi: this.config.rootBus,
     }
   }
 

@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import os from 'os'
-import EE from 'events'
 import { app, nativeImage as image } from 'electron'
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
@@ -9,9 +8,9 @@ import savedState from '../saved_state'
 import menu from '../gui/menu'
 import Events from '../gui/events'
 import * as Windows from '../gui/windows'
-import { makeDataContext } from '../makeDataContext'
-import type { PlatformName } from '@packages/types'
-import { makeGraphQLServer } from '../gui/makeGraphQLServer'
+import { runInternalServer } from './internal-server'
+import type { LaunchArgs, PlatformName } from '@packages/types'
+import EventEmitter from 'events'
 
 const isDev = () => {
   return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
@@ -129,10 +128,11 @@ export = {
    * @param {import('@packages/types').LaunchArgs} options
    * @returns
    */
-  ready (options) {
-    const bus = new EE
-
+  ready (options: {projectRoot?: string} = {}) {
     const { projectRoot } = options
+    const { serverPortPromise, bus } = process.env.LAUNCHPAD
+      ? runInternalServer(options)
+      : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined) }
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
@@ -143,38 +143,21 @@ export = {
       },
     })
 
-    return savedState.create(projectRoot, false)
-    .then((state) => {
-      return state.get()
-    })
-    .then((state) => {
-      return Windows.open(projectRoot, this.getWindowArgs(state))
-      .then(async (win) => {
-        const platform = os.platform()
-
-        assertValidPlatform(platform)
-
-        const ctx = makeDataContext({
-          rootBus: bus,
-          os: platform,
-          launchArgs: options,
-          webContents: win.webContents,
-        })
-
+    return Promise.all([
+      serverPortPromise,
+      savedState.create(projectRoot, false).then((state) => state.get()),
+    ])
+    .then(([port, state]) => {
+      return Windows.open(projectRoot, port, this.getWindowArgs(state))
+      .then((win) => {
         Events.start({
-          ...options,
-          ctx,
+          ...(options as LaunchArgs),
           onFocusTests () {
             // @ts-ignore
             return app.focus({ steal: true }) || win.focus()
           },
-          os: platform,
+          os: os.platform() as PlatformName,
         }, bus)
-
-        // Initializing the data context, loading browsers, etc.
-        ctx.initializeData()
-
-        await makeGraphQLServer(ctx)
 
         return win
       })
@@ -186,12 +169,4 @@ export = {
 
     return this.ready(options)
   },
-}
-
-const SUPPORTED_PLATFORMS = ['linux', 'darwin', 'win32'] as const
-
-function assertValidPlatform (platform: NodeJS.Platform): asserts platform is PlatformName {
-  if (!SUPPORTED_PLATFORMS.includes(platform as any)) {
-    throw new Error(`Unsupported platform ${platform}, expected ${SUPPORTED_PLATFORMS.join(', ')}`)
-  }
 }

@@ -8,8 +8,15 @@ import {
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
-import { GRAPHQL_URL } from '../utils/env'
 import { pubSubExchange } from './urqlExchangePubsub'
+import { client } from '@packages/socket/lib/browser'
+
+const GRAPHQL_PORT = window.location.search.slice(9)
+const GRAPHQL_URL = `http://localhost:${GRAPHQL_PORT}/graphql`
+
+const io = client(`http://localhost:${GRAPHQL_PORT}`, {
+  transports: ['websocket'],
+})
 
 export function makeCacheExchange () {
   return graphcacheExchange({
@@ -23,7 +30,7 @@ export function makeCacheExchange () {
 export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
   const exchanges: Exchange[] = [
     dedupExchange,
-    pubSubExchange(),
+    pubSubExchange(io),
     errorExchange({
       onError (error) {
         // eslint-disable-next-line

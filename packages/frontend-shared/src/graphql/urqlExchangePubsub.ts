@@ -1,38 +1,8 @@
 import { pipe, tap } from 'wonka'
 import type { Exchange, Operation } from '@urql/core'
-import type { IpcRendererEvent } from 'electron'
+import type { Socket } from '@packages/socket/lib/browser'
 
-type Handler = (evt: IpcRendererEvent, ...args: any[]) => void
-
-declare global {
-  interface Window {
-    ipc: {
-      on: (evt: string, handler: Handler) => void
-      send: (msg: string, ...args: any[]) => void
-      // For testing
-      trigger?: (evt: string, ...args: any[]) => void
-    }
-  }
-}
-
-if (typeof window.ipc === 'undefined') {
-  // const handlers: Record<string, Handler[]> = {}
-  window.ipc = {
-    on () {},
-    send () {},
-    trigger (evt, ...args) {
-      // if (handlers[evt]) {
-      //   for (const handler of handlers[evt]) {
-      //     handler(evt, ...args)
-      //   }
-      // }
-    },
-  }
-}
-
-const ipc = window.ipc
-
-export const pubSubExchange = (): Exchange => {
+export const pubSubExchange = (io: Socket): Exchange => {
   return ({ client, forward }) => {
     return (ops$) => {
       if (typeof window === 'undefined') {
@@ -42,7 +12,7 @@ export const pubSubExchange = (): Exchange => {
       const watchedOperations = new Map<number, Operation>()
       const observedOperations = new Map<number, number>()
 
-      ipc.on('data-context', (...args) => {
+      io.on('data-context', (...args) => {
         watchedOperations.forEach((op) => {
           client.reexecuteOperation(
             client.createRequestOperation('query', op, {

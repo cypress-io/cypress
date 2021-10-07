@@ -6,8 +6,11 @@ export const mutation = mutationType({
   definition (t) {
     t.field('internal_triggerIpcToLaunchpad', {
       type: 'Boolean',
+      args: {
+        msg: nonNull(stringArg()),
+      },
       resolve: (root, args, ctx) => {
-        ctx.actions.emitter.toLaunchpad('someData')
+        ctx.emitter.toLaunchpad(args.msg)
 
         return true
       },
@@ -16,7 +19,7 @@ export const mutation = mutationType({
     t.field('internal_triggerIpcToApp', {
       type: 'Boolean',
       resolve: (root, args, ctx) => {
-        ctx.actions.emitter.toApp('someData')
+        ctx.emitter.toApp('someData')
 
         return true
       },
