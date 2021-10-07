@@ -13,11 +13,24 @@
         </p>
       </button>
     </div>
+    <button
+      class="h-10"
+      data-testid="removeProjectButton"
+      @click="$emit('removeProject', props.gql.projectRoot)"
+    >
+      <Icon
+        icon="ant-design:close-circle-outlined"
+        width="1.5em"
+        height="1.5em"
+        class="text-gray-600"
+      />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
+import { Icon } from '@iconify/vue'
 import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
 
 gql`
@@ -60,6 +73,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'projectSelected', project: GlobalProjectCardFragment): void
+  (event: 'removeProject', path: string): void
 }>()
 </script>
 

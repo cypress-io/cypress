@@ -56,7 +56,7 @@
     "vite-plugin-windicss": "1.2.4",
     "vite-svg-loader": "2.1.1",
     "vue": "3.2.6",
-    "vue-i18n": "9.2.0-beta.1",
+    "vue-i18n": "9.2.0-beta.7",
     "vue-prism-component": "2.0.0",
     "vue-prism-editor": "^2.0.0-alpha.2",
     "vue-tsc": "^0.3.0",

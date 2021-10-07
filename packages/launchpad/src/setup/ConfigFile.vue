@@ -48,7 +48,7 @@
     </nav>
     <div
       v-if="tsInstalled"
-      class="relative"
+      class="relative p-4"
     >
       <PrismJs
         :key="language"
@@ -67,7 +67,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import 'prismjs'
-import '@packages/reporter/src/errors/prism.scss'
+import '@packages/frontend-shared/src/styles/prism.scss'
 import { gql } from '@urql/core'
 import PrismJs from 'vue-prism-component'
 import WizardLayout from './WizardLayout.vue'

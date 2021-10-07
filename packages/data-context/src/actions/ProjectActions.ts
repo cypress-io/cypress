@@ -1,7 +1,7 @@
 import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
-import type { Maybe } from '../data/coreDataShape'
+import type { Maybe, ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 
@@ -16,6 +16,7 @@ export interface ProjectApiShape {
   initializeProject(args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[]): Promise<unknown>
   launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): void
   insertProjectToCache(projectRoot: string): void
+  removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
   clearLatestProjectsCache(): Promise<unknown>
 }
@@ -33,6 +34,14 @@ export class ProjectActions {
     return
   }
 
+  private get projects () {
+    return this.ctx.coreData.app.projects
+  }
+
+  private set projects (projects: ProjectShape[]) {
+    this.ctx.coreData.app.projects = projects
+  }
+
   async setActiveProject (projectRoot: string) {
     this.ctx.coreData.app.activeProject = {
       projectRoot,
@@ -46,7 +55,7 @@ export class ProjectActions {
     return this
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
+  async findSpecs (projectRoot: string, specType: Maybe<SpecType>): Promise<FoundSpec[]> {
     const config = await this.ctx.loaders.projectConfig(projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot,
@@ -54,7 +63,7 @@ export class ProjectActions {
       supportFile: config.supportFile ?? false,
       testFiles: config.testFiles ?? [],
       ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.componentFolder ?? false,
+      componentFolder: config.projectRoot ?? false,
       integrationFolder: config.integrationFolder ?? '',
     })
 
@@ -66,14 +75,14 @@ export class ProjectActions {
   }
 
   async loadProjects () {
-    const projectRoots = await this.ctx._apis.projectApi.getProjectRootsFromCache()
+    const projectRoots = await this.api.getProjectRootsFromCache()
 
-    this.ctx.coreData.app.projects = [
-      ...this.ctx?.coreData?.app?.projects,
+    this.projects = [
+      ...this.projects,
       ...projectRoots.map((projectRoot) => ({ projectRoot })),
     ]
 
-    return this.ctx.coreData.app.projects
+    return this.projects
   }
 
   async initializeActiveProject () {
@@ -107,10 +116,10 @@ export class ProjectActions {
       throw new Error(`Cannot add ${args.path} as a project, it is not a directory`)
     }
 
-    const found = this.ctx.projectsList.find((x) => x.projectRoot === args.path)
+    const found = this.projects.find((x) => x.projectRoot === args.path)
 
     if (!found) {
-      this.ctx.coreData.app.projects.push({ projectRoot: args.path })
+      this.projects.push({ projectRoot: args.path })
       this.api.insertProjectToCache(args.path)
     }
 
@@ -136,8 +145,15 @@ export class ProjectActions {
     return this.api.launchProject(browser, spec, {})
   }
 
-  removeProject () {
-    //
+  removeProject (projectRoot: string) {
+    const found = this.ctx.projectsList.find((x) => x.projectRoot === projectRoot)
+
+    if (!found) {
+      throw new Error(`Cannot remove ${projectRoot}, it is not a known project`)
+    }
+
+    this.projects = this.projects.filter((project) => project.projectRoot !== projectRoot)
+    this.api.removeProjectFromCache(projectRoot)
   }
 
   syncProjects () {

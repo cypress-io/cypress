@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 import _ from 'lodash'
 import 'prismjs'
-import '@packages/reporter/src/errors/prism.scss'
+import '@packages/frontend-shared/src/styles/prism.scss'
 import CodeEditor from './CodeEditor.vue'
 import Icon from '@cy/components/Icon.vue'
 import type { FunctionalComponent, SVGAttributes } from 'vue'

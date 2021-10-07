@@ -147,6 +147,7 @@
   "requestTimeout": 5000,
   "resolvedNodePath": null,
   "resolvedNodeVersion": "1.2.3",
+  "configFile": "cypress.json",
   "hosts": {
     "*.foobar.com": "127.0.0.1"
   },
