@@ -56,7 +56,7 @@ export class ProjectActions {
   }
 
   async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.ctx.loaders.projectConfig(projectRoot)
+    const config = await this.ctx.project.getConfig(projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,

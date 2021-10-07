@@ -6,6 +6,7 @@
     "script"
   ],
   "compilerOptions": {
+    "lib": ["es2020"],
     "importHelpers": true,
     "strict": true,
     "allowJs": false,

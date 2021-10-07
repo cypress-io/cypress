@@ -1,3 +1,4 @@
+import type { FullConfig } from '@packages/types'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -16,12 +17,16 @@ export class ProjectDataSource {
   }
 
   getConfig (projectRoot: string) {
-    return this.ctx.loaders.projectConfig(projectRoot)
+    return this.configLoader.load(projectRoot)
   }
+
+  private configLoader = this.ctx.loader<string, FullConfig>((projectRoots) => {
+    return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root)))
+  })
 
   async isFirstTimeAccessing (projectRoot: string, testingType: 'e2e' | 'component') {
     try {
-      const config = await this.ctx.loaders.jsonFile<{ e2e?: object, component?: object }>(path.join(projectRoot, 'cypress.json'))
+      const config = await this.ctx.file.readJsonFile<{ e2e?: object, component?: object }>(path.join(projectRoot, 'cypress.json'))
       const type = testingType === 'e2e' ? 'e2e' : 'component'
       const overrides = config[type] || {}
 
