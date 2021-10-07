@@ -5,7 +5,7 @@
   >
     <PopoverButton class="flex-grow h-full group focus:outline-none focus:ring-0">
       <div
-        class="flex items-center gap-8px group-hocus:text-indigo-600"
+        class="flex items-center gap-8px text-gray-600 group-hocus:text-indigo-600"
         :class="open ? 'text-indigo-600' : ''"
       >
         <slot
