@@ -34,7 +34,7 @@ const getPatternRelativeToProjectRoot = (specPattern: string, projectRoot: strin
  * Finds all spec files that pass the config for given type. Note that "commonSearchOptions" is
  * a subset of the project's "config" object
  */
-function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearchOptions, specPattern?: string) {
+function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearchOptions, specPattern?: string): Bluebird<FoundSpec[]> {
   let fixturesFolderPath: string | undefined = undefined
 
   // @ts-ignore - types are incorrect
@@ -90,7 +90,14 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
   // integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
   // relativePathFromSearchFolder      = foo.js
   // relativePathFromProjectRoot       = cypress/integration/foo.js
-  const toPosixPath = (s) => s.split(path.sep).join(path.posix.sep)
+
+  const relativePathFromSearchFolder = (file) => {
+    return path.relative(searchFolder, file).replace(/\\/g, '/')
+  }
+
+  const relativePathFromProjectRoot = (file) => {
+    return path.relative(commonSearchOptions.projectRoot, file).replace(/\\/g, '/')
+  }
 
   // TODO: get types working for the glob module.
   const setNameParts = (file: string) => {
@@ -108,12 +115,13 @@ function findSpecsOfType (searchFolder: string, commonSearchOptions: CommonSearc
     const parsedFile = path.parse(file)
 
     return {
-      name: parsedFile.base,
+      baseName: parsedFile.base,
       fileName: parsedFile.base.replace(specFileExtension, ''),
       specFileExtension,
       fileExtension,
-      absolute: toPosixPath(path.resolve(file)),
-      relative: toPosixPath(path.relative(commonSearchOptions.projectRoot, file)),
+      name: relativePathFromSearchFolder(file),
+      relative: relativePathFromProjectRoot(file),
+      absolute: file,
     }
   }
 

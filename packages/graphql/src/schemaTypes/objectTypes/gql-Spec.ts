@@ -20,6 +20,10 @@ export const Spec = objectType({
       description: 'Relative path to spec (e.g. src/component/MySpec.test.tsx)',
     })
 
+    t.nonNull.string('baseName', {
+      description: 'Full name of spec file (e.g. MySpec.test.tsx) without the spec extension',
+    })
+
     t.nonNull.string('name', {
       description: 'Full name of spec file (e.g. MySpec.test.tsx)',
     })
