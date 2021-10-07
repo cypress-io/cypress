@@ -9,7 +9,7 @@ import Bluebird from 'bluebird'
 import pluralize from 'pluralize'
 import glob from './glob'
 import Table from 'cli-table3'
-import type { CommonSearchOptions, FindSpecs } from '@packages/types'
+import type { CommonSearchOptions, FindSpecs, FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:specs')
 
@@ -222,7 +222,7 @@ const printFoundSpecs = (foundSpecs: Cypress.Spec[]) => {
  * Resolves with an array of objects. Each object has a "testType" property
  * with one of TEST_TYPES values.
  */
-const findSpecs = (payload: FindSpecs, specPattern?: string) => {
+const findSpecs = (payload: FindSpecs, specPattern?: string): Bluebird<FoundSpec[]> => {
   const { componentFolder, integrationFolder, ...commonSearchOptions } = payload
 
   return Bluebird.all([
