@@ -60,12 +60,12 @@ export async function insertValuesInJavaScript (projectRoot: string, obj, option
   const config = await read(projectRoot, options)
   const fileContents = await fs.readFile(file, { encoding: 'utf8' })
 
-  await fs.writeFile(file, await insertValueInJSString(fileContents, obj, config))
+  await fs.writeFile(file, await insertValueInJSString(fileContents, obj))
 
   return { ...config, ...obj }
 }
 
-export async function insertValueInJSString (fileContents: string, obj: Record<string, any>, config: Record<string, any>): Promise<string> {
+export async function insertValueInJSString (fileContents: string, obj: Record<string, any>): Promise<string> {
   const ast = parse(fileContents, { plugins: ['typescript'], sourceType: 'module' })
 
   let objectLiteralNode: namedTypes.ObjectExpression | undefined
@@ -115,8 +115,8 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'No export could be found')
   }
 
-  setRootKeysSplicers(splicers, obj, config, objectLiteralNode, '  ')
-  setSubKeysSplicers(splicers, obj, config, objectLiteralNode, '  ', '  ')
+  setRootKeysSplicers(splicers, obj, objectLiteralNode, '  ')
+  setSubKeysSplicers(splicers, obj, objectLiteralNode, '  ', '  ')
 
   // sort splicers to keep the order of the original file
   const sortedSplicers = splicers.sort((a, b) => a.start === b.start ? 0 : a.start > b.start ? 1 : -1)
@@ -186,7 +186,6 @@ export function isDefineConfigFunction (ast: File, functionName: string): boolea
 function setRootKeysSplicers (
   splicers: Splicer[],
   obj: Record<string, any>,
-  config: Record<string, any>,
   objectLiteralNode: namedTypes.ObjectExpression,
   lineStartSpacer: string,
 ) {
@@ -194,7 +193,28 @@ function setRootKeysSplicers (
   // add values
   const objKeys = Object.keys(obj).filter((key) => ['boolean', 'number', 'string'].includes(typeof obj[key]))
 
-  const keysToInsert = objKeys.filter((key) => !(key in config))
+  // update values
+  const keysToUpdate = objKeys.filter((key) => {
+    return objectLiteralNode.properties.find((prop) => {
+      return prop.type === 'ObjectProperty'
+        && prop.key.type === 'Identifier'
+        && prop.key.name === key
+    })
+  })
+
+  debug('keys to update %O', keysToUpdate)
+
+  keysToUpdate.forEach(
+    (key) => {
+      const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
+
+      if (propertyToUpdate) {
+        setSplicerToUpdateProperty(splicers, propertyToUpdate, obj[key], key, obj)
+      }
+    },
+  )
+
+  const keysToInsert = objKeys.filter((key) => !keysToUpdate.includes(key))
 
   debug('keys to instert %O', keysToInsert)
 
@@ -207,27 +227,11 @@ function setRootKeysSplicers (
       replaceString: valuesInserted,
     })
   }
-
-  // update values
-  const keysToUpdate = objKeys.filter((key) => key in config && config[key] !== obj[key])
-
-  debug('keys to update %O', keysToUpdate)
-
-  keysToUpdate.forEach(
-    (key) => {
-      const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
-
-      if (propertyToUpdate) {
-        setSplicerToUpdateProperty(splicers, propertyToUpdate, config[key], obj[key], key, obj)
-      }
-    },
-  )
 }
 
 function setSubKeysSplicers (
   splicers: Splicer[],
   obj: Record<string, any>,
-  config: Record<string, any>,
   objectLiteralNode: namedTypes.ObjectExpression,
   lineStartSpacer: string,
   parentLineStartSpacer: string,
@@ -248,7 +252,13 @@ function setSubKeysSplicers (
   }, [])
 
   // add values where the parent key needs to be created
-  const subkeysToInsertWithoutKey = objSubkeys.filter((key) => !config[key.parent])
+  const subkeysToInsertWithoutKey = objSubkeys.filter(({ parent }) => {
+    return !objectLiteralNode.properties.find((prop) => {
+      return prop.type === 'ObjectProperty'
+        && prop.key.type === 'Identifier'
+        && prop.key.name === parent
+    })
+  })
   const keysToInsertForSubKeys: Record<string, string[]> = {}
 
   subkeysToInsertWithoutKey.forEach((keyTuple) => {
@@ -278,18 +288,23 @@ function setSubKeysSplicers (
   }
 
   // add/update values where parent key already exists
-  keysToUpdateWithObjects.filter((key) => config[key]).forEach((key) => {
+  keysToUpdateWithObjects.filter((parent) => {
+    return objectLiteralNode.properties.find((prop) => {
+      return prop.type === 'ObjectProperty'
+        && prop.key.type === 'Identifier'
+        && prop.key.name === parent
+    })
+  }).forEach((key) => {
     const propertyToUpdate = propertyFromKey(objectLiteralNode, key)
 
     if (propertyToUpdate?.value.type === 'ObjectExpression') {
-      setRootKeysSplicers(splicers, obj[key], config[key], propertyToUpdate.value, parentLineStartSpacer + lineStartSpacer)
+      setRootKeysSplicers(splicers, obj[key], propertyToUpdate.value, parentLineStartSpacer + lineStartSpacer)
     }
   })
 }
 
 function setSplicerToUpdateProperty (splicers: Splicer[],
   propertyToUpdate: namedTypes.ObjectProperty,
-  originalValue: any,
   updatedValue: any,
   key: string,
   obj: Record<string, any>) {
