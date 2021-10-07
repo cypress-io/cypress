@@ -13,7 +13,7 @@ Thanks for taking the time to contribute! :smile:
 
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- [Help triage existing issue](#triaging-issues).
+- [Help triage existing issues](#triaging-issues).
 - Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. Please thoroughly read our [Writing Code guide](#writing-code).
 
 ## Table of Contents
