@@ -27,6 +27,10 @@ export const defaultConfig = {
     IconDuotoneColorsPlugin,
     InteractionVariants,
   ],
+  shortcuts: {
+    'focus-default': 'focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent transition transition-colors duration-100 disabled:hover:ring-0 disabled:hover:border-0',
+    'hocus-default': 'hocus:border hover:border-indigo-100 focus:border-indigo-300 hocus:ring-2 hocus:ring-indigo-100 hocus:outline-transparent transition transition-colors duration-100 disabled:ring-0 disabled:border-0',
+  },
   extract: {
     // accepts globs and file paths relative to project root
     include: [
@@ -34,7 +38,7 @@ export const defaultConfig = {
       '**/*.{vue,html,tsx}',
       path.join(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
       path.join(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
-      path.join(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}')
+      path.join(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
     ],
     exclude: ['node_modules/**/*', '.git/**/*'],
   },

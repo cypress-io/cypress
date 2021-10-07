@@ -112,6 +112,14 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('unselects all options if called with empty array', () => {
+      cy.get('select[name=movies]').select(['apoc', 'br'])
+
+      cy.get('select[name=movies]').select([]).then(($select) => {
+        expect($select.val()).to.deep.eq([])
+      })
+    })
+
     // readonly should only be limited to inputs, not checkboxes
     it('can select a readonly select', () => {
       cy.get('select[name=hunter]').select('gon').then(($select) => {

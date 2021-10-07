@@ -55,5 +55,6 @@
     "windicss": "3.1.8",
     "windicss-analysis": "^0.3.4",
     "wonka": "^4.0.15"
-  }
+  },
+  "module": "es2020"
 }

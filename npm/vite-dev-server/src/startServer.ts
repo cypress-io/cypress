@@ -52,12 +52,21 @@ const resolveServerConfig = async ({ viteConfig, options }: StartDevServerOption
   // Ask vite to pre-optimize all dependencies of the specs
   finalConfig.optimizeDeps = finalConfig.optimizeDeps || {}
 
-  // pre-optimizea all the specs
+  // pre-optimize all the specs
   if ((options.specs && options.specs.length)) {
-    finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    // fix: we must preserve entries configured on target project
+    const existingOptimizeDepsEntries = finalConfig.optimizeDeps.entries
+
+    if (existingOptimizeDepsEntries) {
+      finalConfig.optimizeDeps.entries = [...existingOptimizeDepsEntries, ...options.specs.map((spec) => spec.relative)]
+    } else {
+      finalConfig.optimizeDeps.entries = [...options.specs.map((spec) => spec.relative)]
+    }
+
     // only optimize a supportFile is it is not false or undefined
     if (supportFile) {
-      finalConfig.optimizeDeps.entries.push(supportFile)
+      // fix: on windows we need to replace backslashes with slashes
+      finalConfig.optimizeDeps.entries.push(supportFile.replace(/\\/g, '/'))
     }
   }
 

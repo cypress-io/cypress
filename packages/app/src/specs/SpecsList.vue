@@ -18,10 +18,6 @@
       >
         <SpecsListRow
           :gql="spec"
-          data-testid="specs-list-row"
-          role="link"
-          tabindex="0"
-          class="grid grid-cols-2"
           @click="navigate"
           @keypress.enter="navigate"
         />

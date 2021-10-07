@@ -1,4 +1,3 @@
-import { registerMountFn } from '@packages/frontend-shared/cypress/support/common'
 // ***********************************************************
 // This example support/index.js is processed and
 // loaded automatically before your test files.
@@ -17,7 +16,9 @@ import { registerMountFn } from '@packages/frontend-shared/cypress/support/commo
 // Import commands.js using ES2015 syntax:
 
 import 'virtual:windi.css'
-import '../../src/main.scss'
-import { createRouter } from '../../src/router/router'
+import '../../../src/main.scss'
+import '@iconify/iconify'
+import '@purge-icons/generated'
 
-registerMountFn({ plugins: [() => createRouter()] })
+import './commands'
+import './attachFileWithPath'

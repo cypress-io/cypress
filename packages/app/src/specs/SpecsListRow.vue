@@ -1,5 +1,10 @@
 <template>
-  <div class="outline-none children:cursor-pointer group">
+  <div
+    class="grid grid-cols-2 outline-none children:cursor-pointer group"
+    data-testid="specs-list-row"
+    role="link"
+    tabindex="0"
+  >
     <div class="grid grid-cols-[16px,auto,auto] items-center gap-10px">
       <component
         :is="icon.component"
