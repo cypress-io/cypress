@@ -611,11 +611,6 @@ export class ProjectBase<TServer extends Server> extends EE {
         this.emit('socket:connected', id)
       },
 
-      onDisconnect: () => {
-        debug('socket:disconnect')
-        this.emit('socket:disconnect')
-      },
-
       onTestsReceivedAndMaybeRecord: async (runnables: unknown[], cb: () => void) => {
         debug('received runnables %o', runnables)
 

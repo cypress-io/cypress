@@ -142,7 +142,6 @@ async function spawnCypressWithMode (
  *------------------------------------------------------------------------**/
 
 export async function startCypressWatch () {
-  const mode = getGulpGlobal('mode') ?? 'open'
   const watcher = chokidar.watch([
     'packages/{graphql,data-context}/src/**/*.{js,ts}',
     'packages/server/lib/graphql/**/*.{js,ts}',
@@ -157,7 +156,7 @@ export async function startCypressWatch () {
   let child: ChildProcess | null = null
 
   async function startCypressWithListeners () {
-    child = await spawnCypressWithMode(mode, 'dev', ENV_VARS.DEV)
+    child = await spawnCypressWithMode('open', 'dev', ENV_VARS.DEV)
 
     child.on('exit', (code) => {
       if (isClosing) {
