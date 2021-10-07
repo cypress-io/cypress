@@ -38,7 +38,7 @@ export const defaultConfig = {
       '**/*.{vue,html,tsx}',
       path.join(__dirname, '../frontend-shared/**/*.{vue,html,tsx,svg}'),
       path.join(__dirname, '../app/**/*.{vue,html,tsx,svg}'),
-      path.join(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}')
+      path.join(__dirname, '../launchpad/**/*.{vue,html,tsx,svg}'),
     ],
     exclude: ['node_modules/**/*', '.git/**/*'],
   },

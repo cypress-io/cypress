@@ -9,9 +9,11 @@ import { map, reduce, kebabCase } from 'lodash'
 const textSafelist = ['xs', 'sm', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl'].map((v) => `text-${v}`).join(' ')
 const colorSafelist = reduce(colors, (acc, variants, colorName) => {
   const name = kebabCase(colorName)
+
   return `${acc}
     ${map(variants, (_: string, k: string) => {
     if (k === 'DEFAULT') return ``
+
     return `
     icon-light-${name}-${k}
     icon-dark-${name}-${k}

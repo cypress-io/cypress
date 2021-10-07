@@ -10,6 +10,6 @@ describe('<SpecsListHeader />', () => {
   })
 
   it('renders', () => {
-    
+
   })
 })

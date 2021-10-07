@@ -9,7 +9,10 @@
       class="justify-self-start flex items-center"
     >
       <slot name="prefix">
-        <component :is="prefixIcon" :class="prefixIconClass"></component>
+        <component
+          :is="prefixIcon"
+          :class="prefixIconClass"
+        />
       </slot>
     </span>
     <span class="flex-grow">
@@ -20,7 +23,10 @@
       class="justify-self-start flex items-center"
     >
       <slot name="suffix">
-        <component :is="suffixIcon" :class="suffixIconClass"></component>
+        <component
+          :is="suffixIcon"
+          :class="suffixIconClass"
+        />
       </slot>
     </span>
   </button>

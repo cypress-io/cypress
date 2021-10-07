@@ -4,19 +4,20 @@ import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import combineProperties from 'combine-properties'
-templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+
+templateSettings.interpolate = /{{([\s\S]+?)}}/g
 
 let jml
 const setupSeeds = () => {
   const seed = 2
+
   faker.seed(seed)
-  jml = new JustMyLuck(JustMyLuck.MersenneTwister(seed))  
+  jml = new JustMyLuck(JustMyLuck.MersenneTwister(seed))
 }
 
 setupSeeds()
 
 beforeEach(() => setupSeeds)
-
 
 /**
  * Component Naming Fixtures
@@ -26,7 +27,7 @@ export const modifiers = [
   'Dynamic',
   'Static',
   'Virtual',
-  'Lazy'
+  'Lazy',
 ]
 
 export const domainModels = [
@@ -38,7 +39,7 @@ export const domainModels = [
   'Login',
   'Logout',
   'Launchpad',
-  'Wizard'
+  'Wizard',
 ]
 
 export const componentNames = [
@@ -46,7 +47,7 @@ export const componentNames = [
   'Table',
   'Header',
   'Footer',
-  'Button',  
+  'Button',
   'Cell',
   'Row',
   'Skeleton',
@@ -55,7 +56,9 @@ export const componentNames = [
 ]
 
 export const specPattern = ['.spec', '_spec']
+
 export const fileExtension = ['.tsx', '.jsx', '.ts', '.js']
+
 export const directories = {
   rootDedicated: template('tests'),
   rootSrc: template('src'),
@@ -89,9 +92,10 @@ const nameTemplates = {
 
 const prefixes = ['I', 'V', 'Cy', null]
 
-export const componentNameGenerator = (options: { template: any, omit: any, overrides: any } = {template: nameTemplates.medium1, omit: [], overrides: {}}) => {
+export const componentNameGenerator = (options: { template: any, omit: any, overrides: any } = { template: nameTemplates.medium1, omit: [], overrides: {} }) => {
   const withoutValues = reduce(options.omit, (acc, v) => {
     acc[v] = null
+
     return acc
   }, {})
 
@@ -101,13 +105,13 @@ export const componentNameGenerator = (options: { template: any, omit: any, over
     domain: jml.pick(domainModels),
     prefix: jml.pick(prefixes),
     component: components[0],
-    component2: components[1]
+    component2: components[1],
   }
 
   return options.template({
     ...defaultOptions,
     ...withoutValues,
-    ...options.overrides
+    ...options.overrides,
   })
 }
 
@@ -119,17 +123,18 @@ const allRandomComponents = combineProperties({
   component2: componentNames,
   fileExtension,
   specPattern,
-  directory: keys(directories)
+  directory: keys(directories),
 })
 
 export const randomComponents = (n = 200) => {
-  return faker.random.arrayElements(allRandomComponents, n).map(d => {
+  return faker.random.arrayElements(allRandomComponents, n).map((d) => {
     const name = componentNameGenerator({
       overrides: d,
-      template: faker.random.objectElement(nameTemplates)
+      template: faker.random.objectElement(nameTemplates),
     })
 
     const gitFileState = jml.pick(['modified', 'unmodified', 'added', 'deleted'])
+
     return {
       componentName: name,
       relativePath: directories[d.directory](d),
@@ -140,8 +145,8 @@ export const randomComponents = (n = 200) => {
       gitInfo: {
         comitter: gitFileState ? faker.internet.userName() : undefined,
         timeAgo: gitFileState ? faker.datatype.datetime() : undefined,
-        fileState: gitFileState
-      }
+        fileState: gitFileState,
+      },
     }
   }, n)
 }
