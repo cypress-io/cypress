@@ -1,4 +1,4 @@
-// TODO: rename this file to 5_module_api_spec
+// TODO: rename this file to module_api_spec
 
 const path = require('path')
 const _ = require('lodash')

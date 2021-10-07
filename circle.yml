@@ -427,7 +427,20 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
+          command: |
+            ALL_SPECS=`circleci tests glob "/root/cypress/packages/server/test/e2e/*spec*"`
+            SPECS=
+            for file in $ALL_SPECS; do
+              # filter out non_root tests, they have their own stage
+              if [[ "$file" == *"non_root"* ]]; then
+                echo "Skipping $file"
+                continue
+              fi
+              SPECS="$SPECS $file"
+            done
+            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @packages/server test $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress

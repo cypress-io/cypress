@@ -144,7 +144,7 @@ foo\
 const haveRoot = !process.env.USE_HIGH_PORTS && (process.geteuid() === 0)
 
 if (!haveRoot) {
-  console.warn('(e2e tests warning) You are not running as root; therefore, 2_cookies_spec cannot cover the case where the default (80/443) HTTP(s) port is used. Alternate ports (2121/2323) will be used instead.')
+  console.warn('(e2e tests warning) You are not running as root; therefore, cookies_spec cannot cover the case where the default (80/443) HTTP(s) port is used. Alternate ports (2121/2323) will be used instead.')
 }
 
 let httpPort = 2121
