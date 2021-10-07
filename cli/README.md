@@ -29,7 +29,7 @@ yarn test-watch --scope cypress
 yarn test-debug --scope cypress
 ```
 
-### Updating snaphots
+### Updating snapshots
 
 Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
 
