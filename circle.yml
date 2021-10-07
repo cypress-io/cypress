@@ -1189,7 +1189,7 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
-    parallelism: 3
+    parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
