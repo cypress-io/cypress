@@ -1195,7 +1195,7 @@ jobs:
           browser: chrome
           package: launchpad
           type: ct
-          debug: cypress:*
+          debug: cypress:*,engine:socket
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults

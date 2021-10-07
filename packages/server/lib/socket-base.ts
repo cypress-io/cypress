@@ -186,7 +186,7 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    this.io.on('connection', (socket: Socket) => {
+    this.io.on('connection', (socket: Socket & { inReporterRoom?: boolean }) => {
       debug('socket connected')
 
       socket.on('disconnecting', (reason) => {
