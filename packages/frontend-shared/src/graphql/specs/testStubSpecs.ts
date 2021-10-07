@@ -2,7 +2,7 @@ import * as JustMyLuck from 'just-my-luck'
 import faker from 'faker'
 import { template, keys, reduce, templateSettings } from 'lodash'
 import combineProperties from 'combine-properties'
-import type { Spec } from '../../generated/test-graphql-types.gen'
+import type { FoundSpec } from '@packages/types'
 
 templateSettings.interpolate = /{{([\s\S]+?)}}/g
 
@@ -126,7 +126,7 @@ const allRandomComponents = combineProperties({
   directory: keys(directories),
 })
 
-export const randomComponents = (n = 200): Spec[] => {
+export const randomComponents = (n = 200): FoundSpec[] => {
   return faker.random.arrayElements(allRandomComponents, n).map((d: ReturnType<typeof combineProperties>) => {
     const componentName = componentNameGenerator({
       overrides: d,
@@ -136,6 +136,7 @@ export const randomComponents = (n = 200): Spec[] => {
     const name = `${componentName}${d.specPattern}${d.fileExtension}`
 
     return {
+      baseName: componentName,
       relative: `${directories[d.directory](d)}/${name}`,
       absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
       name: `${componentName}${d.specPattern}`,

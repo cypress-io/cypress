@@ -10,6 +10,7 @@ import { MaybeResolver, testNodeId } from './clientTestUtils'
 export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
   const snakeTitle = _.kebabCase(title)
 
+  // TODO: What a mess, type this without all the hacks
   return {
     ...testNodeId('Project'),
     isFirstTimeCT: true,
@@ -23,13 +24,15 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
         hasNextPage: true,
         hasPreviousPage: false,
       },
-      __typename: 'SpecConnection',
+      __typename: 'SpecConnection' as const,
       edges: [
         ...randomComponents(200).map((c) => {
           return {
             __typename: 'SpecEdge' as const,
             cursor: 'eoifjew',
             node: {
+              id: c.absolute,
+              __typename: 'Spec' as const,
               ...c,
             },
           }
