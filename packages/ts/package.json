@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "dirt-simple-file-cache": "^0.4.0",
-    "packherd": "thlorenz/packherd#a7fb7ff"
+    "packherd": "thlorenz/packherd#5161dd9"
   },
   "devDependencies": {
     "debug": "^4.3.1",
