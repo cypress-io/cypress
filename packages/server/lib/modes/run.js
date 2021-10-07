@@ -1464,7 +1464,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, options.testingType === 'e2e' || firstSpec),
+        }, true), // options.testingType === 'e2e' || firstSpec
       })
     })
   },
