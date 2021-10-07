@@ -6,7 +6,10 @@
           class="mr-2 w-32px h-32px"
           src="../images/cypress-dark.png"
         >
-        <span class="text-primary">Projects</span>
+        <span
+          class="text-primary"
+          @click="clearActiveProject"
+        >Projects</span>
         <!-- TODO: Replace with a cy icon -->
         <i-oi-chevron-right
           v-if="props.gql?.app?.activeProject"
@@ -26,11 +29,24 @@
 </template>
 
 <script setup lang="ts">
-import { gql } from '@urql/vue'
-import type { HeaderBarFragment } from '../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBarFragment } from '../generated/graphql'
 import TopNav from '../components/topnav/TopNav.vue'
 
 import Auth from '../setup/Auth.vue'
+
+gql`
+mutation GlobalPageHeader_clearActiveProject {
+  clearActiveProject {
+    app {
+      isInGlobalMode
+      activeProject {
+        id
+      }
+    }
+  }
+}
+`
 
 gql`
 fragment HeaderBar on Query {
@@ -39,11 +55,19 @@ fragment HeaderBar on Query {
       id
       title
     }
-      ...TopNav
+    ...TopNav
   }
   ...Auth
 }
 `
+
+const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
+
+const clearActiveProject = () => {
+  if (props.gql.app.activeProject) {
+    clearActiveProjectMutation.executeMutation({})
+  }
+}
 
 const props = defineProps<{
   gql: HeaderBarFragment,

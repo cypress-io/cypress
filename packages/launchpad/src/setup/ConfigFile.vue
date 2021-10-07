@@ -1,7 +1,7 @@
 <template>
   <WizardLayout
     :next="nextButtonName"
-    alt="Create file manually"
+    :alt="t('setupPage.configFile.createManually')"
     :alt-fn="altFn"
     :next-fn="createConfig"
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
@@ -9,18 +9,25 @@
     <nav
       class="
         rounded-t
-        text-left text-gray-500
+        text-left
+        text-gray-500
         px-5
         bg-gray-50
         flex
         gap-2
-        border-b-1 border-gray-200
-      "
+        border-b-1
+        border-gray-200"
     >
       <button
         v-for="lang of languages"
         :key="lang.id"
-        class="p-4 w-28 relative focus:outline-transparent"
+        class="
+          p-4
+          w-28
+          relative
+          border-transparent
+          border-1
+          focus-default"
         :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''"
         @click="language = lang.id"
       >
@@ -35,14 +42,13 @@
             block
             h-1
             bg-indigo-500
-            rounded-t
-          "
+            rounded-t"
         />
       </button>
     </nav>
     <div
       v-if="tsInstalled"
-      class="relative"
+      class="relative p-4"
     >
       <PrismJs
         :key="language"
@@ -61,7 +67,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import 'prismjs'
-import '@packages/reporter/src/errors/prism.scss'
+import '@packages/frontend-shared/src/styles/prism.scss'
 import { gql } from '@urql/core'
 import PrismJs from 'vue-prism-component'
 import WizardLayout from './WizardLayout.vue'
@@ -69,6 +75,9 @@ import CopyButton from '@cy/components/CopyButton.vue'
 import { languages } from '../utils/configFile'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment ConfigFile on Query {

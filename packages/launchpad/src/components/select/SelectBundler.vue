@@ -23,7 +23,7 @@
       "
       :class="disabledClass
         + (isOpen ? ' border-indigo-600' : ' border-gray-200')
-        + (props.disabled ? ' bg-gray-300 text-gray-600' : '')"
+        + (props.disabled ? ' bg-gray-100 text-gray-800' : '')"
       :disabled="props.disabled"
       @click="
         if (!props.disabled) {

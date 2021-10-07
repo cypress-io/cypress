@@ -143,6 +143,10 @@ module.exports = {
     return fileUtil.set({ USER: {} })
   },
 
+  removeLatestProjects () {
+    return fileUtil.set({ PROJECTS: [] })
+  },
+
   remove () {
     return fileUtil.remove()
   },

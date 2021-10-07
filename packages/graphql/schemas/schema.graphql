@@ -263,15 +263,21 @@ scalar JSON
 
 type Mutation {
   """Add project to projects array and cache it"""
-  addProject(path: String!): App!
+  addProject(
+    """Whether to open the project when added"""
+    open: Boolean
+    path: String!
+  ): App!
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
+  clearActiveProject: Query!
 
   """
   Initializes open_project global singleton to manager current project state
   """
   initializeOpenProject: Wizard
+  internal_clearLatestProjectCache: Boolean
 
   """Launches project from open_project global singleton"""
   launchOpenProject: App
@@ -290,6 +296,9 @@ type Mutation {
 
   """Set the current navigation item"""
   navigationMenuSetItem(type: NavItem!): NavigationMenu
+
+  """Remove project from projects array and cache"""
+  removeProject(path: String!): App!
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): App!

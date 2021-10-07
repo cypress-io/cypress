@@ -39,7 +39,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { gql } from '@urql/core'
 import 'prismjs'
-import '@packages/reporter/src/errors/prism.scss'
+import '@packages/frontend-shared/src/styles/prism.scss'
 import Icon from '@cy/components/Icon.vue'
 import IconCodeBraces from '~icons/mdi/code-braces'
 import IconDashedSquare from '~icons/si-glyph/square-dashed-2'

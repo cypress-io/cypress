@@ -58,6 +58,9 @@
     },
     "openBrowser": {
       "launch": "Launch"
+    },
+    "configFile": {
+      "createManually": "Create file manually"
     }
   },
   "globalPage": {
@@ -68,7 +71,7 @@
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",
-    "newProjectButton": "New Project"
+    "addProjectButton": "New Project"
   },
   "welcomeGuide": {
     "header": {

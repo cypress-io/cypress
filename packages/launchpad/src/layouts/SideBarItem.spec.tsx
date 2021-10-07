@@ -9,7 +9,6 @@ describe('<SideBarItem />', { viewportWidth: 200, viewportHeight: 150 }, () => {
     }
 
     cy.mountFragmentList(SideBarItemFragmentDoc, {
-      type: (ctx) => ctx.navigationMenu.items,
       render: (gqlArr) => (
         <div class="m-10px w-140px border">
           <SideBarItem

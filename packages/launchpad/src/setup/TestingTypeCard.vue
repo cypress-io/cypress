@@ -1,7 +1,7 @@
 <template>
   <div
-    class="relative flex flex-col w-full border border-gray-200 rounded p-30px text text-body-gray-500"
-    :role="role"
+    class="relative flex flex-col w-full border border-gray-200 rounded p-30px text text-body-gray-500 hocus-default"
+    tabindex="0"
   >
     <div class="border h-152px">
       <!-- temp wrapper for icon -->
@@ -36,7 +36,6 @@ const props = defineProps<{
   id: TestingTypeEnum
   title: string
   description: string
-  role: string
 }>()
 
 const icon = TestingTypeIcons[props.id]

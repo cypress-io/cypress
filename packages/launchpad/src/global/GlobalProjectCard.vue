@@ -3,7 +3,7 @@
     <div class="flex-1 min-w-0">
       <button
         class="focus:outline-none underline-transparent grid w-full text-left children:truncate"
-        @dblclick="setActiveProject(props.gql.projectRoot)"
+        @click="setActiveProject(props.gql.projectRoot)"
       >
         <p class="text-16px row-[1] leading-normal font-medium text-indigo-600">
           {{ props.gql.title }}
@@ -13,18 +13,43 @@
         </p>
       </button>
     </div>
+    <button
+      class="h-10"
+      data-testid="removeProjectButton"
+      @click="$emit('removeProject', props.gql.projectRoot)"
+    >
+      <Icon
+        icon="ant-design:close-circle-outlined"
+        width="1.5em"
+        height="1.5em"
+        class="text-gray-600"
+      />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { gql } from '@urql/vue'
-import { useSetActiveProject } from '@packages/frontend-shared/src/composables'
-import type { GlobalProjectCard_ProjectFragment } from '../generated/graphql'
-
-const { setActiveProject } = useSetActiveProject()
+import { gql, useMutation } from '@urql/vue'
+import { Icon } from '@iconify/vue'
+import { GlobalProjectCardFragment, GlobalProjectCard_SetActiveProjectDocument } from '../generated/graphql'
 
 gql`
-fragment GlobalProjectCard_Project on Project {
+mutation GlobalProjectCard_setActiveProject($path: String!) {
+  setActiveProject(path: $path) {
+    activeProject {
+      id
+      title
+      projectId
+      projectRoot
+      isFirstTimeCT
+      isFirstTimeE2E
+    }
+  }
+}
+`
+
+gql`
+fragment GlobalProjectCard on Project {
   id
   title
   projectRoot
@@ -36,12 +61,19 @@ fragment GlobalProjectCard_Project on Project {
 }
 `
 
+const setActiveProjectMutation = useMutation(GlobalProjectCard_SetActiveProjectDocument)
+
+const setActiveProject = (project: string) => {
+  setActiveProjectMutation.executeMutation({ path: project })
+}
+
 const props = defineProps<{
-  gql: GlobalProjectCard_ProjectFragment
+  gql: GlobalProjectCardFragment
 }>()
 
 const emit = defineEmits<{
-  (event: 'projectSelected', project: GlobalProjectCard_ProjectFragment): void
+  (event: 'projectSelected', project: GlobalProjectCardFragment): void
+  (event: 'removeProject', path: string): void
 }>()
 </script>
 
