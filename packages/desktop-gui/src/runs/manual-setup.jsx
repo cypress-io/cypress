@@ -10,7 +10,7 @@ function ManualSetup ({ error, configFile, project, retryInsert }) {
   const relativeFile = configFile
   const absoluteFile = `${ appStore.projectRoot }/${ relativeFile }`
 
-  const codeToToAddKeys = `projectId: '${error.payload.projectId}'',`
+  const codeToToAddKeys = `projectId: '${error.payload.projectId}',`
   const helpCodeAfter = `module.exports = {
   ${codeToToAddKeys} // <- add this line
   ...config
@@ -32,7 +32,7 @@ function ManualSetup ({ error, configFile, project, retryInsert }) {
         <div className='full-alert alert alert-danger error'>
           <p className='header'>
             <i className='fas fa-exclamation-triangle'></i>{' '}
-            <strong>Failed to configure your project for Cypress Cloud</strong>
+            <strong>Failed to configure your project</strong>
           </p>
           <span className='alert-content'>
             <MarkdownRenderer markdown={error.message}/>
@@ -45,13 +45,13 @@ function ManualSetup ({ error, configFile, project, retryInsert }) {
             onClick={retry}
           >
             <i className='fas fa-sync-alt'/>{' '}
-            Try Again
+            Try again
           </button>
         </div>
       </div>
-      <h4>Add the projectId manually</h4>
+      <h4>Add the projectId manually and try again</h4>
       <ol>
-        <li>Copy the projectId
+        <li>Copy the projectId:
           <pre id="code-projecId-config" className="copy-to-clipboard">
             <a className="action-copy" onClick={() => ipc.setClipboardText(codeToToAddKeys)}>
               <Tooltip
@@ -67,7 +67,7 @@ function ManualSetup ({ error, configFile, project, retryInsert }) {
         </li>
 
         <li>
-          Open your config file<br/>
+          Open your{' '}
           <FileOpener
             fileDetails={{
               absoluteFile,
@@ -75,17 +75,18 @@ function ManualSetup ({ error, configFile, project, retryInsert }) {
               originalFile: absoluteFile,
             }}
           >
-            { absoluteFile }
+            { relativeFile }
           </FileOpener>
+          {' '}file.
         </li>
         <li>
-          Add the projectId to the root of the config object
+          Add the projectId to the root of the config object:
           <pre>
             {helpCodeAfter}
           </pre>
         </li>
         <li>
-          Save and wait a second or two.<br/> This screen should refresh and the error disapear.<br/>If it does not refresh, click "Try Again".
+          Save and click the "Try again" button above.
         </li>
       </ol>
     </form>)

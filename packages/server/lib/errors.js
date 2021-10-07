@@ -645,7 +645,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     case 'COULD_NOT_UPDATE_CONFIG_FILE':
 
       if (Object.keys(arg1).length === 1 && typeof Object.values(arg1)[0] !== 'object') {
-        msg = `Cannot automatically set your \`${Object.keys(arg1)[0]}\` to \`${Object.values(arg1)[0]}\``
+        msg = `We cannot automatically set your \`${Object.keys(arg1)[0]}\` to \`${Object.values(arg1)[0]}\` in your configuration file.`
       } else {
         msg = `Cypress was unable to add/update values in your configuration file.`
       }
