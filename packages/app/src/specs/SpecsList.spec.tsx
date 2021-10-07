@@ -1,12 +1,13 @@
 import SpecsList from './SpecsList.vue'
-import { SpecsListFragmentDoc } from '../generated/graphql-test'
+import { SpecsListFragmentDoc, SpecListRowFragment } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
-import type { SpecEdge } from '@packages/frontend-shared/src/generated/test-graphql-types.gen'
 
 const rowSelector = '[data-testid=specs-list-row]'
 const inputSelector = 'input'
 const fullFile = (s) => `${s.node.fileName}${s.node.specFileExtension}${s.node.fileExtension}`
-const hasSpecText = ($node, spec) => {
+const hasSpecText = (_node: JQuery<HTMLElement>, spec: SpecListRowFragment) => {
+  const $node = _node as JQuery<HTMLDivElement>
+
   expect($node).to.contain(spec.node.fileName)
   expect($node).to.contain(spec.node.fileExtension)
   expect($node).to.contain(spec.node.gitInfo?.author)
@@ -15,18 +16,18 @@ const hasSpecText = ($node, spec) => {
   return $node
 }
 
-let specs: SpecEdge[] = []
+let specs: Array<SpecListRowFragment> = []
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   beforeEach(() => {
     cy.mountFragment(SpecsListFragmentDoc, {
+      onResult: (ctx) => {
+        specs = ctx.activeProject?.specs?.edges || []
+
+        return ctx
+      },
       render: (gqlVal) => {
         return <SpecsList gql={gqlVal} />
-      },
-      type: (ctx) => {
-        specs = ctx.stubApp.activeProject?.specs?.edges || []
-
-        return ctx.stubApp
       },
     })
   })

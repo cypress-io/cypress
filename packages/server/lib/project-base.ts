@@ -697,7 +697,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     if (!theCfg.browsers || theCfg.browsers.length === 0) {
       // @ts-ignore - we don't know if the browser is headed or headless at this point.
       // this is handled in open_project#launch.
-      theCfg.browsers = await browsers.get()
+      theCfg.browsers = browsers
     }
 
     if (theCfg.browsers) {
