@@ -13,6 +13,7 @@ export type FindSpecs = {
 
 export interface FoundSpec {
   name: string
+  baseName: string
   fileName: string
   relative: string
   absolute: string
