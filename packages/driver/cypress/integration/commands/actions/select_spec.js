@@ -513,17 +513,6 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=foods]').select('')
       })
 
-      it('throws invalid array argument error when called with empty array', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[]`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
-
-          done()
-        })
-
-        cy.get('select[name=foods]').select([])
-      })
-
       it('throws invalid array argument error when called with invalid array', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[true,false]`')
