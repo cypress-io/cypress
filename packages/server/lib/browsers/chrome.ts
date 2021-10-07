@@ -274,7 +274,7 @@ const _maybeRecordVideo = async function (client, options, browserMajorVersion) 
     client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
   })
 
-  await client.send('Page.startScreencast', browserMajorVersion >= CHROME_VERSION_INTRODUCING_EVERY_NTH_FRAME ? screencastOpts() : screencastOpts(1))
+  await client.send('Page.startScreencast', browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1))
 
   return client
 }
