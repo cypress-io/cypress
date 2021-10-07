@@ -278,6 +278,8 @@ type Mutation {
   """
   initializeOpenProject: Wizard
   internal_clearLatestProjectCache: Boolean
+  internal_triggerIpcToApp: Boolean
+  internal_triggerIpcToLaunchpad: Boolean
 
   """Launches project from open_project global singleton"""
   launchOpenProject: App
@@ -302,7 +304,6 @@ type Mutation {
 
   """Set active project to run tests on"""
   setActiveProject(path: String!): App!
-  triggerIpc: Boolean
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
