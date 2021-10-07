@@ -1,9 +1,8 @@
-import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, WIZARD_STEPS } from '@packages/types'
+import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
 import dedent from 'dedent'
 import endent from 'endent'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
-import type { StorybookInfo } from '../data/util/storybook'
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
@@ -78,7 +77,7 @@ export class WizardDataSource {
 
   async sampleCode (lang: 'js' | 'ts') {
     const data = this.ctx.wizardData
-    const storybook = await this.storybook
+    const storybookInfo = await this.ctx.storybook.storybookInfo
 
     if (data.chosenTestingType === 'component') {
       if (!this.chosenFramework || !this.chosenBundler) {
@@ -90,7 +89,7 @@ export class WizardDataSource {
         framework: this.chosenFramework,
         bundler: this.chosenBundler,
         lang,
-        storybook,
+        storybookInfo,
       })
     }
 
@@ -105,7 +104,7 @@ export class WizardDataSource {
   }
 
   async sampleTemplate () {
-    const storybook = await this.storybook
+    const storybookInfo = await this.ctx.storybook.storybookInfo
 
     if (!this.chosenFramework || !this.chosenBundler) {
       return null
@@ -114,7 +113,7 @@ export class WizardDataSource {
     return wizardGetComponentIndexHtml({
       framework: this.chosenFramework,
       bundler: this.chosenBundler,
-      storybook,
+      storybookInfo,
     })
   }
 
@@ -128,14 +127,6 @@ export class WizardDataSource {
 
   get chosenBundler () {
     return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler)
-  }
-
-  get storybook () {
-    if (!this.ctx.activeProject?.projectRoot) {
-      return Promise.resolve(null)
-    }
-
-    return this.ctx.loaders.storybookInfo(this.ctx.activeProject?.projectRoot)
   }
 }
 
@@ -151,7 +142,7 @@ interface GetCodeOptsCt {
   framework: FrontendFramework
   bundler: Bundler
   lang: WizardCodeLanguage
-  storybook?: StorybookInfo | null
+  storybookInfo?: StorybookInfo | null
 }
 
 type GetCodeOpts = GetCodeOptsCt | GetCodeOptsE2E
@@ -289,7 +280,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
 
         module.exports = defineConfig({
           component: {
-            testFiles: "**/*cy-spec.tsx",
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
             componentFolder: "src"
           }
         })
@@ -299,7 +290,29 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
 
         export default defineConfig({
           component: {
-            testFiles: "**/*cy-spec.tsx",
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            componentFolder: "src"
+          }
+        })
+      `,
+    },
+    vuecli: {
+      js: endent`
+        const { defineConfig } = require('cypress')
+
+        module.exports = defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            componentFolder: "src"
+          }
+        })
+      `,
+      ts: endent`
+        import { defineConfig } from 'cypress'
+
+        export default defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
             componentFolder: "src"
           }
         })
@@ -317,13 +330,13 @@ export const wizardGetComponentIndexHtml = (opts: Omit<GetCodeOptsCt, 'lang' | '
     headModifier += '<div id="__next_css__DO_NOT_USE__"></div>'
   }
 
-  const previewHead = opts.storybook?.files.find(({ name }) => name === 'preview-head.html')
+  const previewHead = opts.storybookInfo?.files.find(({ name }) => name === 'preview-head.html')
 
   if (previewHead) {
     headModifier += previewHead.content
   }
 
-  const previewBody = opts.storybook?.files.find(({ name }) => name === 'preview-body.html')
+  const previewBody = opts.storybookInfo?.files.find(({ name }) => name === 'preview-body.html')
 
   if (previewBody) {
     headModifier += previewBody.content

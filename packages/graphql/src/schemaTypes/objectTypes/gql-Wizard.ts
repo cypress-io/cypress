@@ -100,7 +100,7 @@ export const Wizard = objectType({
 
     t.field('storybook', {
       type: Storybook,
-      resolve: (source, args, ctx) => ctx.wizard.storybook,
+      resolve: (source, args, ctx) => ctx.storybook.storybookInfo,
     })
   },
   sourceType: {

@@ -125,7 +125,7 @@ export const mutation = mutationType({
         storyPath: nonNull('String'),
       },
       async resolve (_root, args, ctx) {
-        await ctx.actions.project.generateSpecFromStory(args.storyPath)
+        await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
 
         return ctx.wizardData
       },

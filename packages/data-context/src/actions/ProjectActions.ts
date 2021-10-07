@@ -4,7 +4,6 @@ import path from 'path'
 import type { Maybe, ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
-import { generateSpecFromStory } from '../data/util/storybook'
 
 export interface ProjectApiShape {
   getConfig(projectRoot: string): Promise<FullConfig>
@@ -199,17 +198,5 @@ export class ProjectActions {
 
       this.ctx.fs.outputFileSync(indexHtmlPath, template)
     }
-  }
-
-  async generateSpecFromStory (storyPath: string) {
-    const project = this.ctx.activeProject
-
-    if (!project) {
-      throw Error(`Cannot generate a spec without activeProject.`)
-    }
-
-    const spec = await generateSpecFromStory(storyPath, project.projectRoot)
-
-    this.ctx.wizardData.generatedSpec = spec
   }
 }

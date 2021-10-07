@@ -6,13 +6,13 @@ export const Storybook = objectType({
   definition (t) {
     t.boolean('configured', {
       description: 'Whether this is the selected framework bundler',
-      resolve: async (source, args, ctx) => !!(await ctx.wizard.storybook),
+      resolve: async (source, args, ctx) => !!(await ctx.storybook.storybookInfo),
     })
 
     t.nonNull.list.nonNull.string('stories', {
       description: 'List of all Storybook stories',
       resolve: async (source, args, ctx) => {
-        const storybook = await ctx.wizard.storybook
+        const storybook = await ctx.storybook.storybookInfo
 
         if (!storybook) {
           return []

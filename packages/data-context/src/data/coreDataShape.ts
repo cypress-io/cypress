@@ -1,6 +1,5 @@
-import { BUNDLERS, FoundBrowser, FoundSpec } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, StorybookFile } from '@packages/types'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
-import type { StorybookFile } from '.'
 
 export type Maybe<T> = T | null | undefined
 
