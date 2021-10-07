@@ -17,19 +17,22 @@ describe('ManualSetup', () => {
     }
 
     appStore.projectRoot = '/exp/test-config-js/cypress.config.js'
-    cy.stub(projectsApi, 'reopenProject').resolves({ projectId: 'id1234' })
+    cy.stub(projectsApi, 'reopenProject').resolves({ id: 'id1234' })
+    const retryInsertStub = cy.stub()
 
     mount(<div style={{ width: '500px', margin: '24px auto' }}>
       <ManualSetup
         error={error}
         configFile={'config.custom.js'}
         project={{ id: 'test' }}
+        retryInsert={retryInsertStub}
       />
     </div>)
 
     cy.percySnapshot()
 
     cy.contains('button', 'Try Again').click().then(() => {
+      expect(retryInsertStub).not.to.have.been.called
       expect(projectsApi.reopenProject).to.have.been.called
     })
   })
