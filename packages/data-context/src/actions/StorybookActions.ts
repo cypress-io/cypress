@@ -1,3 +1,4 @@
+import type { FoundSpec, FullConfig } from '@packages/types'
 import { CsfFile, readCsfOrMdx } from '@storybook/csf-tools'
 import endent from 'endent'
 import * as path from 'path'
@@ -13,7 +14,9 @@ export class StorybookActions {
       throw Error(`Cannot generate a spec without activeProject.`)
     }
 
-    const spec = await this.generate(storyPath, project.projectRoot)
+    const config = await this.ctx.project.getConfig(project.projectRoot)
+
+    const spec = await this.generate(storyPath, project.projectRoot, config.componentFolder)
 
     this.ctx.wizardData.generatedSpec = spec
   }
@@ -21,7 +24,8 @@ export class StorybookActions {
   private async generate (
     storyPath: string,
     projectRoot: string,
-  ): Promise<Cypress.Cypress['spec'] | null> {
+    componentFolder: FullConfig['componentFolder'],
+  ): Promise<FoundSpec | null> {
     const storyFile = path.parse(storyPath)
     const storyName = storyFile.name.split('.')[0]
 
@@ -38,11 +42,12 @@ export class StorybookActions {
         return null
       }
 
+      const specFileExtension = '.cy-spec'
       const newSpecContent = this.generateSpecFromCsf(parsed, storyFile)
       const newSpecPath = path.join(
         storyPath,
         '..',
-        `${parsed.meta.component}.cy-spec${storyFile.ext}`,
+        `${parsed.meta.component}${specFileExtension}${storyFile.ext}`,
       )
 
       // If this passes then the file exists and we don't want to overwrite it
@@ -56,10 +61,18 @@ export class StorybookActions {
 
       await this.ctx.fs.outputFileSync(newSpecPath, newSpecContent)
 
+      const parsedSpec = path.parse(newSpecPath)
+
+      // Can this be obtained from the spec watcher?
       return {
-        name: path.parse(newSpecPath).name,
+        baseName: parsedSpec.base,
+        fileName: parsedSpec.base.replace(specFileExtension, ''),
+        specFileExtension,
+        fileExtension: parsedSpec.ext,
+        name: path.relative(componentFolder || projectRoot, newSpecPath),
         relative: path.relative(projectRoot, newSpecPath),
         absolute: newSpecPath,
+        specType: 'component',
       }
     } catch (e) {
       return null

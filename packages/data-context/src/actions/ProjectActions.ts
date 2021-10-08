@@ -186,7 +186,7 @@ export class ProjectActions {
     await this.api.clearLatestProjectsCache()
   }
 
-  async createComponentIndexHtml (template: string) {
+  createComponentIndexHtml (template: string) {
     const project = this.ctx.activeProject
 
     if (!project) {
@@ -196,7 +196,7 @@ export class ProjectActions {
     if (this.ctx.activeProject?.isFirstTimeCT) {
       const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
 
-      this.ctx.fs.outputFileSync(indexHtmlPath, template)
+      this.ctx.fs.outputFile(indexHtmlPath, template)
     }
   }
 }
