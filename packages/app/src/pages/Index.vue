@@ -4,7 +4,7 @@
       Loading...
     </div>
     <div v-else-if="query.data.value?.app?.activeProject">
-      <Specs :gql="query.data.value.app.activeProject" />
+      <Specs :gql="query.data.value.app" />
     </div>
   </div>
 </template>
@@ -17,9 +17,7 @@ import { IndexDocument } from '../generated/graphql'
 gql`
 query Index {
   app {
-    activeProject {
-      ...Specs_Specs
-    }
+    ...Specs_Specs
   }
 }`
 

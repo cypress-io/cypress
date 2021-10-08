@@ -31,25 +31,31 @@ import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
 import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
-import type { SpecsListFragment } from '../generated/graphql'
+import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}${spec.node.fileExtension}`
 
 gql`
-fragment SpecsList on App {
+fragment SpecNode_SpecsList on SpecEdge {
+  node {
+    name
+    specType
+    relative
+  }
+  ...SpecListRow
+}
+`
+
+gql`
+fragment Specs_SpecsList on App {
   activeProject {
     id
     projectRoot
-    specs(first: 1) {
+    specs(first: 10) {
       edges {
-        node {
-          name
-          specType
-          relative
-        }
-        ...SpecListRow
+        ...SpecNode_SpecsList
       }
     }
   }
@@ -57,14 +63,19 @@ fragment SpecsList on App {
 `
 
 const props = defineProps<{
-  gql: SpecsListFragment
+  gql: Specs_SpecsListFragment
 }>()
 
 const search = ref('')
 const specs = computed(() => props.gql.activeProject?.specs?.edges)
 
 // If this search becomes any more complex, push it into the server
-const sortByGitStatus = (a, b) => a.node.gitInfo ? 1 : -1
+const sortByGitStatus = (
+  a: SpecNode_SpecsListFragment,
+  b: SpecNode_SpecsListFragment,
+) => {
+  return a.node.gitInfo ? 1 : -1
+}
 const filteredSpecs = computed(() => {
   return specs.value?.filter((s) => {
     return s.node.relative.toLowerCase().includes(search.value.toLowerCase())

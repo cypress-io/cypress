@@ -1,8 +1,11 @@
 <template>
   <h2>Specs Page</h2>
-  <template v-if="props.gql?.specs">
-    <SpecsList :gql="props.gql?.specs" />
-  </template>
+
+  <SpecsList
+    v-if="props.gql"
+    :gql="props?.gql"
+  />
+
   <p v-else>
     Loading...
   </p>
@@ -31,31 +34,20 @@
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
 import { onMounted } from 'vue'
+import SpecsList from '../specs/SpecsList.vue'
 import { UnifiedRunnerAPI } from '../runner'
 import { REPORTER_ID, RUNNER_ID } from '../runner/utils'
 import type { Specs_SpecsFragment } from '../generated/graphql'
 import type { SpecFile } from '@packages/types/src'
 
 gql`
-fragment Specs_Spec on Spec {
-  specType
-  absolute
-  name
-  relative
-}
-`
+fragment Specs_Specs on App {
+  ...Specs_SpecsList
+}`
 
-gql`
-fragment Specs_Specs on Project {
-  specs(first: 10) {
-    edges {
-      node {
-        ...Specs_Spec
-      }
-    }
-  }
-}
-`
+const props = defineProps<{
+  gql: Specs_SpecsFragment
+}>()
 
 onMounted(() => {
   UnifiedRunnerAPI.initialize()
@@ -68,10 +60,6 @@ const execute = (spec?: SpecFile) => {
 
   UnifiedRunnerAPI.executeSpec(spec)
 }
-
-const props = defineProps<{
-  gql: Specs_SpecsFragment
-}>()
 </script>
 
 <route>
