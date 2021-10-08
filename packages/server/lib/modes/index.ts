@@ -7,19 +7,20 @@ export = (mode, options) => {
     return require('./smoke_test').run(options)
   }
 
-  if (mode === 'run' && options.testingType === 'e2e') {
+  if (mode === 'run') {
+    if (options.testingType === 'component') {
+      return require('./run-ct').run(options)
+    }
+
     return require('./run-e2e').run(options)
   }
 
-  if (mode === 'run' && options.testingType === 'component') {
-    return require('./run-ct').run(options)
-  }
+  if (mode === 'interactive') {
+    if (options.testingType === 'component' && !process.env.LAUNCHPAD) {
+      return require('./interactive-ct').run(options)
+    }
 
-  if (mode === 'interactive' && options.testingType === 'e2e') {
+    // Either launchpad or straight to e2e tests
     return require('./interactive-e2e').run(options)
-  }
-
-  if (mode === 'interactive' && options.testingType === 'component') {
-    return require('./interactive-ct').run(options)
   }
 }

@@ -5,7 +5,6 @@ import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import cwd from '../cwd'
 import savedState from '../saved_state'
-import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = Debug('cypress:server:windows')
 
@@ -32,7 +31,6 @@ const getUrl = function (type, port?: number) {
       throw new Error(`No acceptable window type found for: '${type}'`)
   }
 }
-
 const getByType = (type) => {
   return windows[type]
 }
