@@ -39,6 +39,7 @@ export interface LaunchArgs {
   cwd: string
   browser?: Browser['name']
   configFile?: string
+  exit?: boolean
   project: string // projectRoot
   projectRoot: string // same as above
   testingType: Cypress.TestingType
