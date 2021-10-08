@@ -7,7 +7,6 @@ import deepDiff from 'return-deep-diff'
 import errors from './errors'
 import scaffold from './scaffold'
 import { fs } from './util/fs'
-import keys from './util/keys'
 import origin from './util/origin'
 import * as settings from './util/settings'
 import Debug from 'debug'
@@ -18,10 +17,14 @@ const debug = Debug('cypress:server:config')
 
 import { options, breakingOptions } from './config_options'
 import { getProcessEnvVars } from './util/config'
+import { validate, validateFile, validateNoBreakingConfig } from './config_validator'
+import * as utils from './config_utils'
 
 export const RESOLVED_FROM = ['plugin', 'env', 'default', 'runtime', 'config'] as const
 
 export type ResolvedConfigurationOptionSource = typeof RESOLVED_FROM[number]
+
+const defaultValues: Record<string, any> = utils.createIndex(options, 'name', 'defaultValue')
 
 export type ResolvedFromConfig = {
   from: ResolvedConfigurationOptionSource
@@ -46,171 +49,8 @@ export const CYPRESS_SPECIAL_ENV_VARS = [
 
 const dashesOrUnderscoresRe = /^(_-)+/
 
-// takes an array and creates an index object of [keyKey]: [valueKey]
-const createIndex = (arr, keyKey, valueKey) => {
-  return _.reduce(arr, (memo, item) => {
-    if (item[valueKey] !== undefined) {
-      memo[item[keyKey]] = item[valueKey]
-    }
-
-    return memo
-  }, {})
-}
-
 const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
 const breakingKeys = _.map(breakingOptions, 'name')
-const folders = _(options).filter({ isFolder: true }).map('name').value()
-const validationRules = createIndex(options, 'name', 'validation')
-const defaultValues: Record<string, any> = createIndex(options, 'name', 'defaultValue')
-const onlyInOverrideValues = createIndex(options, 'name', 'onlyInOverride')
-
-const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
-  return _.reduce(folders, (memo, folder) => {
-    const val = obj[folder]
-
-    if ((val != null) && (val !== false)) {
-      memo[folder] = path.resolve(projectRoot, val)
-    }
-
-    return memo
-  }
-  , {})
-}
-
-const validateNoBreakingConfig = (cfg) => {
-  return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
-    if (_.has(cfg, name)) {
-      if (isWarning) {
-        return errors.warning(errorKey, name, newName)
-      }
-
-      return errors.throw(errorKey, name, newName)
-    }
-  })
-}
-
-/**
- * validate a root config object
- * @param {object} cfg config object to validate
- * @param {(errMsg:string) => void} onErr function run when invalid config is found
- * @param {boolean} bypassRootLimitations skip checks related to position when we are working with merged configs
- * @returns
- */
-function validate (cfg, onErr,
-  { bypassRootLimitations } = { bypassRootLimitations: false }) {
-  return _.each(cfg, (value, key) => {
-    const validationFn = validationRules[key]
-
-    if (!bypassRootLimitations && onlyInOverrideValues[key]) {
-      if (onlyInOverrideValues[key] === true) {
-        return onErr(`key \`${key}\` is only valid in a testingType object, it is invalid to use it in the root`)
-      }
-
-      return onErr(`key \`${key}\` is only valid in the \`${onlyInOverrideValues[key]}\` object, it is invalid to use it in the root`)
-    }
-
-    // does this key have a validation rule?
-    if (validationFn) {
-      // and is the value different from the default?
-      if (value !== defaultValues[key]) {
-        const result = validationFn(key, value)
-
-        if (result !== true) {
-          return onErr(result)
-        }
-      }
-    }
-  })
-}
-
-const validateFile = (file) => {
-  return (configObject) => {
-    // disallow use of pluginFile in evaluated configuration files
-    if (/\.(ts|js)$/.test(file) && configObject.pluginsFile) {
-      errors.throw('CONFLICT_PLUGINSFILE_CONFIGJS', file)
-    }
-
-    return validate(configObject, (errMsg) => {
-      return errors.throw('SETTINGS_VALIDATION_ERROR', file, errMsg)
-    })
-  }
-}
-
-const hideSpecialVals = function (val, key) {
-  if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
-    return keys.hide(val)
-  }
-
-  return val
-}
-
-function isComponentTesting (options: Record<string, string> = {}) {
-  return options.testingType === 'component'
-}
-
-// an object with a few utility methods
-// for easy stubbing from unit tests
-export const utils = {
-  resolveModule (name) {
-    return require.resolve(name)
-  },
-
-  // tries to find support or plugins file
-  // returns:
-  //   false - if the file should not be set
-  //   string - found filename
-  //   null - if there is an error finding the file
-  discoverModuleFile (options) {
-    debug('discover module file %o', options)
-    const { filename, isDefault } = options
-
-    if (!isDefault) {
-      // they have it explicitly set, so it should be there
-      return fs.pathExists(filename)
-      .then((found) => {
-        if (found) {
-          debug('file exists, assuming it will load')
-
-          return filename
-        }
-
-        debug('could not find %o', { filename })
-
-        return null
-      })
-    }
-
-    // support or plugins file doesn't exist on disk?
-    debug(`support file is default, check if ${path.dirname(filename)} exists`)
-
-    return fs.pathExists(filename)
-    .then((found) => {
-      if (found) {
-        debug('is there index.ts in the support or plugins folder %s?', filename)
-        const tsFilename = path.join(filename, 'index.ts')
-
-        return fs.pathExists(tsFilename)
-        .then((foundTsFile) => {
-          if (foundTsFile) {
-            debug('found index TS file %s', tsFilename)
-
-            return tsFilename
-          }
-
-          // if the directory exists, set it to false so it's ignored
-          debug('setting support or plugins file to false')
-
-          return false
-        })
-      }
-
-      debug('folder does not exist, set to default index.js')
-
-      // otherwise, set it up to be scaffolded later
-      return path.join(filename, 'index.js')
-    })
-  },
-}
 
 export function getConfigKeys () {
   return publicConfigKeys
@@ -235,8 +75,7 @@ export function get (projectRoot, options = {}) {
   return Promise.all([
     settings.read(projectRoot, options).then(validateFile(configFilename)),
     settings.readEnv(projectRoot).then(validateFile('cypress.env.json')),
-  ])
-  .spread((configObject, envFile) => {
+  ]).then(([configObject, envFile]) => {
     return set({
       projectName: getNameFromRoot(projectRoot),
       projectRoot,
@@ -365,9 +204,11 @@ export function setResolvedConfigValues (config, defaults, resolved) {
   return obj
 }
 
-// Given an object "resolvedObj" and a list of overrides in "obj"
-// marks all properties from "obj" inside "resolvedObj" using
-// {value: obj.val, from: "plugin"}
+/**
+ * Given an object "resolvedObj" and a list of overrides in "obj"
+ * marks all properties from "obj" inside "resolvedObj" using
+ * {value: obj.val, from: "plugin"}
+ */
 export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Record<string, any>) {
   return _.each(obj, (val, key) => {
     if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
@@ -460,7 +301,7 @@ export function updateWithPluginValues (cfg, overrides) {
 
   // only merge with the current testing type after all changes
   // have been process on the config object
-  const testingType = isComponentTesting(cfg) ? 'component' : 'e2e'
+  const testingType = cfg.testingType || 'e2e'
 
   if (testingType in merged) {
     return { ...merged, ...merged[testingType] }
@@ -469,9 +310,11 @@ export function updateWithPluginValues (cfg, overrides) {
   return merged
 }
 
-// combines the default configuration object with values specified in the
-// configuration file like "cypress.json". Values in configuration file
-// overwrite the defaults.
+/**
+ * combines the default configuration object with values specified in the
+ * configuration file like "cypress.json". Values in configuration file
+ * overwrite the defaults.
+ */
 export function resolveConfigValues (config, defaults, resolved = {}) {
   // pick out only known configuration keys
   return _
@@ -506,7 +349,9 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
   }).value()
 }
 
-// instead of the built-in Node process, specify a path to 3rd party Node
+/**
+ * instead of the built-in Node process, specify a path to 3rd party Node
+ */
 export const setNodeBinary = Promise.method((obj, onWarning) => {
   if (obj.nodeVersion !== 'system') {
     obj.resolvedNodeVersion = process.versions.node
@@ -539,7 +384,7 @@ export function setScaffoldPaths (obj) {
 }
 
 // async function
-export function setSupportFileAndFolder (obj) {
+export function setSupportFileAndFolder (obj): Promise<any> {
   if (!obj.supportFile) {
     return Promise.resolve(obj)
   }
@@ -612,20 +457,22 @@ export function setSupportFileAndFolder (obj) {
   })
 }
 
-// set pluginsFile to an absolute path with the following rules:
-// - do nothing if pluginsFile is falsey
-// - look up the absolute path via node, so 'cypress/plugins' can resolve
-//   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
-// - if not found
-//   * and the pluginsFile is set to the default
-//     - and the path to the pluginsFile directory exists
-//       * assume the user doesn't need a pluginsFile, set it to false
-//         so it's ignored down the pipeline
-//     - and the path to the pluginsFile directory does not exist
-//       * set it to cypress/plugins/index.js, it will get scaffolded
-//   * and the pluginsFile is NOT set to the default
-//     - throw an error, because it should be there if the user
-//       explicitly set it
+/**
+ * set pluginsFile to an absolute path with the following rules:
+ * - do nothing if pluginsFile is falsey
+ * - look up the absolute path via node, so 'cypress/plugins' can resolve
+ *   to 'cypress/plugins/index.js' or 'cypress/plugins/index.coffee'
+ * - if not found
+ *   * and the pluginsFile is set to the default
+ *     - and the path to the pluginsFile directory exists
+ *       * assume the user doesn't need a pluginsFile, set it to false
+ *         so it's ignored down the pipeline
+ *     - and the path to the pluginsFile directory does not exist
+ *       * set it to cypress/plugins/index.js, it will get scaffolded
+ *   * and the pluginsFile is NOT set to the default
+ *     - throw an error, because it should be there if the user
+ *       explicitly set it
+ */
 export const setPluginsFile = Promise.method((obj) => {
   if (!obj.pluginsFile) {
     return obj
@@ -700,7 +547,7 @@ export function setAbsolutePaths (obj, defaults) {
     // obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
 
     // and do the same for all the rest
-    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj, defaults))
+    _.extend(obj, utils.convertRelativeToAbsolutePaths(pr, obj, defaults))
   }
 
   return obj
@@ -783,7 +630,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
 
   envProc = _.chain(envProc)
   .omit(configFromEnv)
-  .mapValues(hideSpecialVals)
+  .mapValues(utils.hideSpecialVals)
   .value()
 
   resolveFrom('config', envCfg)

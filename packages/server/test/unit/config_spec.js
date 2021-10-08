@@ -5,6 +5,7 @@ const path = require('path')
 const R = require('ramda')
 const debug = require('debug')('test')
 const config = require(`${root}lib/config`)
+const config_utils = require(`${root}lib/config_utils`)
 const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
 const findSystemNode = require(`${root}lib/util/find_system_node`)
@@ -123,11 +124,11 @@ describe('lib/config', () => {
     context('validation', () => {
       beforeEach(function () {
         this.expectValidationPasses = () => {
-          return config.get(this.projectRoot) // shouldn't throw
+          return config.get(this.projectRoot, { configFile: 'cypress.json' }) // shouldn't throw
         }
 
         this.expectValidationFails = (errorMessage = 'validation error') => {
-          return config.get(this.projectRoot)
+          return config.get(this.projectRoot, { configFile: 'cypress.json' })
           .then(() => {
             throw new Error('should throw validation error')
           }).catch((err) => {
@@ -1427,11 +1428,11 @@ describe('lib/config', () => {
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
             clientCertificates: { value: [], from: 'default' },
-            component: { from: 'default', value: {} },
+            component: { from: 'default', value: null },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
-            e2e: { from: 'default', value: {} },
+            e2e: { from: 'default', value: null },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
@@ -1511,12 +1512,12 @@ describe('lib/config', () => {
             blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             chromeWebSecurity: { value: true, from: 'default' },
-            component: { from: 'default', value: {} },
+            component: { from: 'default', value: null },
             clientCertificates: { value: [], from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
             downloadsFolder: { value: 'cypress/downloads', from: 'default' },
-            e2e: { from: 'default', value: {} },
+            e2e: { from: 'default', value: null },
             execTimeout: { value: 60000, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
@@ -2093,7 +2094,7 @@ describe('lib/config', () => {
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(supportFolder).throws(e)
+      sinon.stub(config_utils, 'resolveModule').withArgs(supportFolder).throws(e)
 
       const obj = config.setAbsolutePaths({
         projectRoot,
@@ -2120,7 +2121,7 @@ describe('lib/config', () => {
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(supportFilename).throws(e)
+      sinon.stub(config_utils, 'resolveModule').withArgs(supportFilename).throws(e)
 
       const obj = config.setAbsolutePaths({
         projectRoot,
@@ -2194,7 +2195,7 @@ describe('lib/config', () => {
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(pluginsFolder).throws(e)
+      sinon.stub(config_utils, 'resolveModule').withArgs(pluginsFolder).throws(e)
 
       const obj = {
         projectRoot,
@@ -2249,7 +2250,7 @@ describe('lib/config', () => {
       const e = new Error('Cannot resolve TS file by default')
 
       e.code = 'MODULE_NOT_FOUND'
-      sinon.stub(config.utils, 'resolveModule').withArgs(pluginsFile).throws(e)
+      sinon.stub(config_utils, 'resolveModule').withArgs(pluginsFile).throws(e)
 
       const obj = {
         projectRoot,
