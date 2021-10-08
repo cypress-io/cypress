@@ -8488,6 +8488,13 @@
   resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.28.tgz#c054e8af4d9dd75db4e63abc76f885168714d4b3"
   integrity sha1-wFTor02d11205jq8dviFFocU1LM=
 
+"@types/fluent-ffmpeg@^2.1.18":
+  version "2.1.18"
+  resolved "https://registry.yarnpkg.com/@types/fluent-ffmpeg/-/fluent-ffmpeg-2.1.18.tgz#72246c2f8c0f0a590aefc1cdbe13736c73f22a81"
+  integrity sha512-LTteOx3RUmnPlKkvhvW9aGOHdJYyEtIiRBVbYVO/zPU65ZYQelbPJ+zBBT+IXup7doMvxVstX7NMoUTWKZOhww==
+  dependencies:
+    "@types/node" "*"
+
 "@types/fs-extra@^8.0.1":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-8.1.1.tgz#1e49f22d09aa46e19b51c0b013cb63d0d923a068"
@@ -41698,6 +41705,11 @@ vue-template-es2015-compiler@^1.9.0, vue-template-es2015-compiler@^1.9.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
+
+vue-toast-notification@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/vue-toast-notification/-/vue-toast-notification-2.0.1.tgz#5fe607c493b5dc9b238bf49bc3bcf80366edd4e4"
+  integrity sha512-8GPJq1J6lsTPTCxSgPhnM8d0v+ivwT+u4R/xmtaDXeYNRkaRxqFOn3ewaVqmm+aCT8Y3/PQQS8dFqkMV7JOf/A==
 
 vue-tsc@^0.3.0:
   version "0.3.0"

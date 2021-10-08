@@ -1,8 +1,3 @@
-/**
- * @type {import('@cypress/vite-dev-server')}
- */
-const { startDevServer } = require('@cypress/vite-dev-server')
-
 /// <reference types="cypress" />
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
@@ -20,23 +15,4 @@ const { startDevServer } = require('@cypress/vite-dev-server')
  * @type {Cypress.PluginConfig}
  */
 // eslint-disable-next-line no-unused-vars
-module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
-
-  if (config.testingType === 'component') {
-    on('dev-server:start', async (options) => {
-      return startDevServer({
-        options,
-        viteConfig: {
-          // TODO(tim): Figure out why this isn't being picked up
-          optimizeDeps: {
-            include: ['@headlessui/vue', 'vue-prism-component'],
-          },
-        },
-      })
-    })
-  }
-
-  return config // IMPORTANT to return a config
-}
+module.exports = require('@packages/frontend-shared/cypress/plugins/index')
