@@ -403,6 +403,9 @@ type Project implements Node {
   """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject
 
+  """Project configuration"""
+  config: JSON!
+
   """Relay style Node ID field for the Project field"""
   id: ID!
 
