@@ -21,6 +21,7 @@ TEST_DIR=$SERVER_DIR/test/e2e
 SNAPSHOT_DIR=$SERVER_DIR/__snapshots__
 PROJECT_DIR=$SERVER_DIR/test/support/fixtures/projects
 
+# print commands
 set -x
 
 rm -rf $DEST_TEST_DIR
@@ -33,9 +34,21 @@ rm -rf $DEST_SNAPSHOT_DIR
 mkdir -p $DEST_SNAPSHOT_DIR
 
 set +e
+
 # move snapshots for e2e test filenames only
 for EXT in "js" "ts"; do
     # it's normal for many of these to fail, this is the shotgun-blast approach to copying these
     ls $DEST_TEST_DIR | xargs -I {} mv "$SNAPSHOT_DIR"/{}."$EXT" "$DEST_SNAPSHOT_DIR"
 done
+
 set -e
+
+# bashcodemods
+for PATTERN in \
+  's|../support/helpers/e2e|../lib/e2e|g' \
+  's|../support/helpers/fixtures|../lib/fixtures|g' \
+  's|../../lib|@packages/server/lib|g' \
+; do sed -i -se $PATTERN $DEST_TEST_DIR/*; done
+
+sed -i -se 's|../../../../test/support/helpers/performance|@internal/system-tests/lib/performance|g' \
+  $DEST_PROJECT_DIR/e2e/cypress/plugins/index.js
