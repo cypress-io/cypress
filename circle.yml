@@ -398,10 +398,16 @@ commands:
         description: ct or e2e
         type: enum
         enum: ['ct', 'e2e']
+      debug:
+        description: debug option
+        type: string
+        default: ''
     steps:
       - restore_cached_workspace
       - run: 
           command: |
+            DEBUG=<<parameters.debug>> \
+            CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH='true' \
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$TEST_LAUNCHPAD_RECORD_KEY \
             yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
@@ -454,7 +460,20 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
+          command: |
+            ALL_SPECS=`circleci tests glob "/root/cypress/packages/server/test/e2e/*spec*"`
+            SPECS=
+            for file in $ALL_SPECS; do
+              # filter out non_root tests, they have their own stage
+              if [[ "$file" == *"non_root"* ]]; then
+                echo "Skipping $file"
+                continue
+              fi
+              SPECS="$SPECS $file"
+            done
+            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @packages/server test $SPECS --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -1032,9 +1051,6 @@ jobs:
       - run: yarn test
       # run type checking for each individual package
       - run: yarn lerna run types
-      # check for compile errors with the releaserc scripts
-      - run: yarn test-npm-package-release-script
-
       - verify-mocha-results:
           expectedResultCount: 9
       - store_test_results:
@@ -1184,12 +1200,13 @@ jobs:
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
-    parallelism: 3
+    parallelism: 7
     steps:
       - run-new-ui-tests:
           browser: chrome
           package: launchpad
           type: ct
+          # debug: cypress:*,engine:socket
 
   run-launchpad-integration-tests-chrome:
     <<: *defaults

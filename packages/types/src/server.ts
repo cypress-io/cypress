@@ -25,6 +25,11 @@ export interface LaunchArgs {
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
   global: boolean
   project: string // projectRoot
+  /**
+   * in run mode, the path of the project run
+   * path is relative if specified with --project,
+   * absolute if implied by current working directory
+   */
   runProject?: string
   projectRoot: string // same as above
   testingType: Cypress.TestingType
@@ -52,7 +57,7 @@ export interface OpenProjectLaunchOptions {
   ctx?: DataContext
   args?: LaunchArgs
 
-  configFile?: string | boolean
+  configFile?: string | false
   browsers?: Cypress.Browser[]
 
   // Callback to reload the Desktop GUI when cypress.json is changed.

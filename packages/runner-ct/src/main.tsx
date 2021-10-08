@@ -1,23 +1,54 @@
-import { autorun, action, configure } from 'mobx'
 import React from 'react'
-import { render } from 'react-dom'
+import ReactDOM from 'react-dom'
 import $Cypress from '@packages/driver'
+const driverUtils = $Cypress.utils
+import { eventManager, AutIframe, Container } from '@packages/runner-shared'
 import defaultEvents from '@packages/reporter/src/lib/events'
+import { Reporter } from '@packages/reporter/src/main'
+
+export function getSpecUrl (namespace: string, spec: FoundSpec, prefix = '') {
+  return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
+}
+
+const UnifiedRunner = {
+  React,
+
+  ReactDOM,
+
+  Reporter,
+
+  AutIframe,
+
+  defaultEvents,
+
+  eventManager,
+
+  decodeBase64: (base64: string) => {
+    return JSON.parse(driverUtils.decodeBase64Unicode(base64))
+  },
+
+  emit (evt: string, ...args: unknown[]) {
+    defaultEvents.emit(evt, ...args)
+  },
+}
+
+// @ts-ignore
+window.UnifiedRunner = UnifiedRunner
+
+/** This is the OG runner-ct */
+import 'regenerator-runtime/runtime'
+import type { FoundSpec } from '@packages/types/src/spec'
+
+import { autorun, action, configure } from 'mobx'
 
 import App from './app/RunnerCt'
 import State from './lib/state'
-import { Container, eventManager } from '@packages/runner-shared'
 import util from './lib/util'
-
-// to support async/await
-import 'regenerator-runtime/runtime'
-
-const driverUtils = $Cypress.utils
 
 configure({ enforceActions: 'always' })
 
-const Runner = {
-  emit (evt, ...args) {
+const Runner: any = {
+  emit (evt: string, ...args: unknown[]) {
     defaultEvents.emit(evt, ...args)
   },
 
@@ -78,9 +109,10 @@ const Runner = {
         />
       )
 
-      render(container, el)
+      ReactDOM.render(container, el)
     })()
   },
 }
 
+// @ts-ignore
 window.Runner = Runner

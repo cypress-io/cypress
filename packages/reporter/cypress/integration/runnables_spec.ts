@@ -59,20 +59,6 @@ describe('runnables', () => {
     cy.percySnapshot()
   })
 
-  it('displays multi-spec reporters', () => {
-    start({ runMode: 'multi', allSpecs: [
-      {
-        relative: 'fizz',
-      },
-      {
-        relative: 'buzz',
-      },
-    ] })
-
-    cy.contains('buzz').should('be.visible')
-    cy.percySnapshot()
-  })
-
   it('displays bundle error if specified', () => {
     const error = {
       title: 'Oops...we found an error preparing this test file:',

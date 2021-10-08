@@ -4,5 +4,7 @@
 export * from './AppActions'
 export * from './AuthActions'
 export * from './DataEmitterActions'
+export * from './FileActions'
 export * from './ProjectActions'
+export * from './StorybookActions'
 export * from './WizardActions'

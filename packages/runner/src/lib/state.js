@@ -22,7 +22,6 @@ const _defaults = {
 export default class State extends BaseStore {
   defaults = _defaults
 
-  @observable isLoading = true
   @observable isRunning = false
 
   @observable messageTitle = _defaults.messageTitle
@@ -107,10 +106,6 @@ export default class State extends BaseStore {
         top: (actualHeight + this.headerHeight + nudge),
       },
     }
-  }
-
-  @action setIsLoading (isLoading) {
-    this.isLoading = isLoading
   }
 
   @action updateDimensions (width, height) {

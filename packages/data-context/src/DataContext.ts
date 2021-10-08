@@ -1,18 +1,23 @@
 import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
+import type { AppApiShape, ProjectApiShape } from './actions'
+import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
+import type { AuthApiShape } from './actions/AuthActions'
 import debugLib from 'debug'
 import fsExtra from 'fs-extra'
-import type { AuthApiShape } from './actions/AuthActions'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
-import { AppDataSource } from './sources/AppDataSource'
-import { ProjectDataSource } from './sources/ProjectDataSource'
+import {
+  AppDataSource,
+  GitDataSource,
+  FileDataSource,
+  ProjectDataSource,
+  WizardDataSource,
+  BrowserDataSource,
+  UtilDataSource,
+  StorybookDataSource,
+} from './sources/'
 import { cached } from './util/cached'
-import { WizardDataSource } from './sources'
-import type { AppApiShape, ProjectApiShape } from './actions'
-import { makeLoaders } from './data/loaders'
-import { BrowserDataSource } from './sources/BrowserDataSource'
-import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
-import { DataContextShell, DataContextShellConfig } from './DataContextShell'
+import type { DataContextShellConfig } from './DataContextShell'
 
 export interface DataContextConfig extends DataContextShellConfig {
   os: PlatformName
@@ -42,8 +47,6 @@ export class DataContext extends DataContextShell {
     super(config)
     this._coreData = config.coreData ?? makeCoreData()
   }
-
-  loaders = makeLoaders(this)
 
   async initializeData () {
     const toAwait: Promise<any>[] = [
@@ -86,6 +89,21 @@ export class DataContext extends DataContextShell {
   }
 
   @cached
+  get util () {
+    return new UtilDataSource(this)
+  }
+
+  @cached
+  get file () {
+    return new FileDataSource(this)
+  }
+
+  @cached
+  get git () {
+    return new GitDataSource(this)
+  }
+
+  @cached
   get browser () {
     return new BrowserDataSource(this)
   }
@@ -111,6 +129,11 @@ export class DataContext extends DataContextShell {
   @cached
   get wizard () {
     return new WizardDataSource(this)
+  }
+
+  @cached
+  get storybook () {
+    return new StorybookDataSource(this)
   }
 
   get wizardData () {
@@ -165,6 +188,10 @@ export class DataContext extends DataContextShell {
   }
 
   dispose () {
-    this.loaders.dispose()
+    this.util.disposeLoaders()
+  }
+
+  get loader () {
+    return this.util.loader
   }
 }

@@ -1,3 +1,4 @@
+import type { FullConfig } from '@packages/types'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -16,14 +17,24 @@ export class ProjectDataSource {
   }
 
   getConfig (projectRoot: string) {
-    return this.ctx.loaders.projectConfig(projectRoot)
+    return this.configLoader.load(projectRoot)
   }
+
+  private configLoader = this.ctx.loader<string, FullConfig>((projectRoots) => {
+    return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root)))
+  })
 
   async isFirstTimeAccessing (projectRoot: string, testingType: 'e2e' | 'component') {
     try {
-      const config = await this.ctx.loaders.jsonFile<{ e2e?: object, component?: object }>(path.join(projectRoot, 'cypress.json'))
-      const type = testingType === 'e2e' ? 'e2e' : 'component'
-      const overrides = config[type] || {}
+      const config = await this.ctx.file.readJsonFile<{ e2e?: object, component?: object }>(path.join(projectRoot, 'cypress.json'))
+
+      // If we have a cypress.json file, even with no overrides, assume that it's not our
+      // first time accessing (for now, until the config refactor lands)
+      if (testingType === 'e2e') {
+        return false
+      }
+
+      const overrides = config.component || {}
 
       return Object.keys(overrides).length === 0
     } catch (e) {

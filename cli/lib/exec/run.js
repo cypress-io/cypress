@@ -137,7 +137,7 @@ const processRunOptions = (options = {}) => {
     args.push('--tag', options.tag)
   }
 
-  args.push(...processTestingType(options.testingType))
+  args.push(...processTestingType(options))
 
   return args
 }
