@@ -513,7 +513,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     projectRoot,
   }: {
     projectRoot: string
-    configFile?: string | boolean
+    configFile?: string | false
     onSettingsChanged?: false | (() => void)
   }) {
     // bail if we havent been told to

@@ -10,7 +10,7 @@ const debug = Debug('cypress:server:settings')
 
 interface SettingsOptions {
   testingType?: 'component' |'e2e'
-  configFile?: string | boolean
+  configFile?: string | false
   args?: {
     runProject?: string
   }

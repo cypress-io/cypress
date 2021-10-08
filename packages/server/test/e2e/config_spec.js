@@ -70,6 +70,12 @@ describe('e2e config', () => {
     })
   })
 
+  it('supports custom configFile in a default TypeScript file', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('config-with-ts'),
+    })
+  })
+
   it('throws error when multiple default config file are found in project', function () {
     const projectRoot = Fixtures.projectPath('pristine')
 
