@@ -437,11 +437,17 @@ describe('Project Nav', function () {
         cy.get('.browsers .fa-exclamation-triangle').trigger('mouseover')
 
         cy.get('.cy-tooltip').should('contain', 'Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see')
-        cy.get('.cy-tooltip a').click().then(function () {
+
+        // prevent tooltips from being hidden so we can snapshot the state
+        // of the browser warning tooltip
+        cy.percySnapshot({ elementOverrides: [] })
+
+        cy
+        .get('.cy-tooltip a')
+        .click()
+        .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/bad-browser-policy')
         })
-
-        cy.percySnapshot()
       })
     })
 
