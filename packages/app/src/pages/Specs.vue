@@ -9,22 +9,6 @@
   <p v-else>
     Loading...
   </p>
-
-  <!-- <div
-    v-for="spec of props.gql?.specs?.edges"
-    :key="spec?.node?.absolute"
-  >
-    <button
-      @click="execute(spec?.node ?? undefined)"
-    >
-      {{ spec?.node?.relative }}
-    </button>
-  </div> -->
-
-  <!--
-       We want to manage the reporter and runner iframe with vanilla JS/jQuery
-       Prevent Vue from re-rendering these elements with v-once.
-   -->
 </template>
 
 <script lang="ts" setup>
