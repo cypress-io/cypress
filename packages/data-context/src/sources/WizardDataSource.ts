@@ -1,5 +1,6 @@
-import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, WIZARD_STEPS } from '@packages/types'
+import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
 import dedent from 'dedent'
+import endent from 'endent'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 
@@ -74,8 +75,9 @@ export class WizardDataSource {
     return true
   }
 
-  sampleCode (lang: 'js' | 'ts') {
+  async sampleCode (lang: 'js' | 'ts') {
     const data = this.ctx.wizardData
+    const storybookInfo = await this.ctx.storybook.storybookInfo
 
     if (data.chosenTestingType === 'component') {
       if (!this.chosenFramework || !this.chosenBundler) {
@@ -87,6 +89,7 @@ export class WizardDataSource {
         framework: this.chosenFramework,
         bundler: this.chosenBundler,
         lang,
+        storybookInfo,
       })
     }
 
@@ -98,6 +101,20 @@ export class WizardDataSource {
     }
 
     return null
+  }
+
+  async sampleTemplate () {
+    const storybookInfo = await this.ctx.storybook.storybookInfo
+
+    if (!this.chosenFramework || !this.chosenBundler) {
+      return null
+    }
+
+    return wizardGetComponentIndexHtml({
+      framework: this.chosenFramework,
+      bundler: this.chosenBundler,
+      storybookInfo,
+    })
   }
 
   get chosenTestingType () {
@@ -125,6 +142,7 @@ interface GetCodeOptsCt {
   framework: FrontendFramework
   bundler: Bundler
   lang: WizardCodeLanguage
+  storybookInfo?: StorybookInfo | null
 }
 
 type GetCodeOpts = GetCodeOptsCt | GetCodeOptsE2E
@@ -162,7 +180,7 @@ const wizardGetConfigCodeCt = (opts: GetCodeOptsCt): string | null => {
   const { framework, bundler, lang } = opts
 
   const comments = `Component testing, ${LanguageNames[opts.lang]}, ${framework.name}, ${bundler.name}`
-  const frameworkConfig = FRAMEWORK_CONFIG_FILE[framework.type]
+  const frameworkConfig = getFrameworkConfigFile(opts)
 
   if (frameworkConfig) {
     return `// ${comments}
@@ -204,63 +222,144 @@ ${exportStatement}
 }`
 }
 
-const FRAMEWORK_CONFIG_FILE: Partial<Record<NexusGenEnums['FrontendFrameworkEnum'], Record<NexusGenEnums['WizardCodeLanguage'], string> | null>> = {
-  nextjs: {
-    js: dedent`
-      const injectNextDevServer = require('@cypress/react/plugins/next')
+const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
+  return {
+    nextjs: {
+      js: dedent`
+        const injectNextDevServer = require('@cypress/react/plugins/next')
 
-      module.exports = {
-        component (on, config) {
-          injectNextDevServer(on, config)
-        },
-      }
-    `,
-    ts: dedent`
-      import { defineConfig } from 'cypress'
-      import injectNextDevServer from '@cypress/react/plugins/next'
+        module.exports = {
+          component (on, config) {
+            injectNextDevServer(on, config)
+          },
+        }
+      `,
+      ts: dedent`
+        import { defineConfig } from 'cypress'
+        import injectNextDevServer from '@cypress/react/plugins/next'
 
-      export default defineConfig({
-        component (on, config) {
-          injectNextDevServer(on, config)
-        },
-      })
-    `,
-  },
-  nuxtjs: {
-    js: dedent`
-      const { startDevServer } = require('@cypress/webpack-dev-server')
-      const { getWebpackConfig } = require('nuxt')
+        export default defineConfig({
+          component (on, config) {
+            injectNextDevServer(on, config)
+          },
+        })
+      `,
+    },
+    nuxtjs: {
+      js: dedent`
+        const { startDevServer } = require('@cypress/webpack-dev-server')
+        const { getWebpackConfig } = require('nuxt')
 
-      module.exports = {
-        component (on, config) {
-          on('dev-server:start', async (options) => {
-            let webpackConfig = await getWebpackConfig('modern', 'dev')
+        module.exports = {
+          component (on, config) {
+            on('dev-server:start', async (options) => {
+              let webpackConfig = await getWebpackConfig('modern', 'dev')
 
-            return startDevServer({
-              options,
-              webpackConfig,
+              return startDevServer({
+                options,
+                webpackConfig,
+              })
             })
-          })
-        },
-      }
-    `,
-    ts: dedent`
-      import { defineConfig } from 'cypress'
-      import { startDevServer } from '@cypress/webpack-dev-server'
-      import { getWebpackConfig } from 'nuxt'
+          },
+        }
+      `,
+      ts: dedent`
+        import { defineConfig } from 'cypress'
 
-      export default defineConfig({
-        component (on, config) {
-          on('dev-server:start', async (options) => {
-            let webpackConfig = await getWebpackConfig('modern', 'dev')
+        export default defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.tsx",
+            componentFolder: "src"
+          }
+        })
+      `,
+    },
+    cra: {
+      js: endent`
+        const { defineConfig } = require('cypress')
 
-            return startDevServer({
-              options,
-              webpackConfig,
-            })
-          })
-        },
-      })
-    `,
-  },
+        module.exports = defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            componentFolder: "src"
+          }
+        })
+      `,
+      ts: endent`
+        import { defineConfig } from 'cypress'
+
+        export default defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            componentFolder: "src"
+          }
+        })
+      `,
+    },
+    vuecli: {
+      js: endent`
+        const { defineConfig } = require('cypress')
+
+        module.exports = defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            componentFolder: "src"
+          }
+        })
+      `,
+      ts: endent`
+        import { defineConfig } from 'cypress'
+
+        export default defineConfig({
+          component: {
+            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            componentFolder: "src"
+          }
+        })
+      `,
+    },
+  }[opts.framework.type as string]
+}
+
+export const wizardGetComponentIndexHtml = (opts: Omit<GetCodeOptsCt, 'lang' | 'type'>) => {
+  const framework = opts.framework.type
+  let headModifier = ''
+  let bodyModifier = ''
+
+  if (framework === 'nextjs') {
+    headModifier += '<div id="__next_css__DO_NOT_USE__"></div>'
+  }
+
+  const previewHead = opts.storybookInfo?.files.find(({ name }) => name === 'preview-head.html')
+
+  if (previewHead) {
+    headModifier += previewHead.content
+  }
+
+  const previewBody = opts.storybookInfo?.files.find(({ name }) => name === 'preview-body.html')
+
+  if (previewBody) {
+    headModifier += previewBody.content
+  }
+
+  return getComponentTemplate({ headModifier, bodyModifier })
+}
+
+const getComponentTemplate = (opts: {headModifier: string, bodyModifier: string}) => {
+  // TODO: Properly indent additions and strip newline if none
+  return endent`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <title>Components App</title>
+        ${opts.headModifier}
+      </head>
+      <body>
+        ${opts.bodyModifier}
+        <div id="__cy_root"></div>
+      </body>
+    </html>`
 }

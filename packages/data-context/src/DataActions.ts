@@ -1,5 +1,5 @@
 import type { DataContext } from '.'
-import { AppActions, ProjectActions, WizardActions } from './actions'
+import { AppActions, ProjectActions, StorybookActions, WizardActions } from './actions'
 import { AuthActions } from './actions/AuthActions'
 import { cached } from './util'
 
@@ -24,5 +24,10 @@ export class DataActions {
   @cached
   get project () {
     return new ProjectActions(this.ctx)
+  }
+
+  @cached
+  get storybook () {
+    return new StorybookActions(this.ctx)
   }
 }

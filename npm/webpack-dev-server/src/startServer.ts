@@ -10,12 +10,12 @@ export interface StartDevServer extends UserWebpackDevServerOptions {
   /* support passing a path to the user's webpack config */
   webpackConfig?: Record<string, any>
   /* base html template to render in AUT */
-  template?: string
+  indexHtml?: string
 }
 
 const debug = Debug('cypress:webpack-dev-server:start')
 
-export async function start ({ webpackConfig: userWebpackConfig, template, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
+export async function start ({ webpackConfig: userWebpackConfig, indexHtml, options, ...userOptions }: StartDevServer, exitProcess = process.exit): Promise<WebpackDevServer> {
   if (!userWebpackConfig) {
     debug('User did not pass in any webpack configuration')
   }
@@ -24,7 +24,7 @@ export async function start ({ webpackConfig: userWebpackConfig, template, optio
 
   const webpackConfig = await makeWebpackConfig(userWebpackConfig || {}, {
     files: options.specs,
-    template,
+    indexHtml,
     projectRoot,
     devServerPublicPathRoute,
     devServerEvents: options.devServerEvents,
