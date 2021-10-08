@@ -3,5 +3,8 @@
 
 export * from './AppDataSource'
 export * from './BrowserDataSource'
+export * from './FileDataSource'
+export * from './GitDataSource'
 export * from './ProjectDataSource'
+export * from './UtilDataSource'
 export * from './WizardDataSource'
