@@ -35,7 +35,7 @@ import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../gen
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
-const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}${spec.node.fileExtension}`
+const path = (spec: SpecNode_SpecsListFragment) => `/runner/tests/${spec.node.specType}/${spec.node.relative}`
 
 gql`
 fragment SpecNode_SpecsList on SpecEdge {

@@ -12,7 +12,7 @@
       />
       <div>
         <span class="font-medium text-gray-700 group-hocus:text-indigo-500">{{ spec.fileName }}</span>
-        <span class="font-light text-gray-400 group-hocus:text-indigo-500">{{ spec.specFileExtension + spec.fileExtension }}</span>
+        <span class="font-light text-gray-400 group-hocus:text-indigo-500">{{ spec.specFileExtension }}</span>
       </div>
     </div>
     <div class="grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
