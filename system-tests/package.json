@@ -5,7 +5,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "node ./scripts/run.js --glob-in-dir=test",
+    "test": "node ./scripts/run.js",
     "import:from:server": "./scripts/import_from_server.sh"
   },
   "dependencies": {
