@@ -47,7 +47,7 @@ const props = defineProps<{
 }>()
 
 defineEmits<{
-  retry: () => void,
+  (event: 'retry')
 }>()
 
 const headerText = computed(() => props.header ? props.header : t('launchpadErrors.generic.header'))

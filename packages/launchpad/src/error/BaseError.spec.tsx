@@ -52,9 +52,8 @@ describe('<BaseError />', () => {
   })
 
   it('renders the header, message, and footer slots', () => {
-    const buttonSpy = cy.spy().as('buttonSpy')
     cy.mount(<BaseError v-slots={{
-      footer: () => <Button onClick={buttonSpy} size="lg" data-testid="custom-error-footer">{ customFooterText }</Button>,
+      footer: () => <Button size="lg" data-testid="custom-error-footer">{ customFooterText }</Button>,
       header: () => <>{customHeaderMessage}</>,
       message: () => <>{customMessage}</>
     }}></BaseError>)
@@ -63,8 +62,5 @@ describe('<BaseError />', () => {
       .and('contain.text', customMessage)
       .get(customFooterSelector)
       .should('contain.text', customFooterText)
-      .click()
-      .get('@buttonSpy')
-      .should('have.been.called')
   })
 })
