@@ -1,47 +1,29 @@
 <template>
-  <div>
-    <h2>Runner Page</h2>
-
-    <div v-once>
-      <div :id="RUNNER_ID" />
-      <div :id="REPORTER_ID" />
-    </div>
-  </div>
+  <Runner
+    v-if="query.data.value?.app?.activeProject"
+    :gql="query.data.value.app?.activeProject?.currentSpec"
+  />
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue'
-import type { SpecFile } from '@packages/types/src'
-import { UnifiedRunnerAPI } from '../../runner'
-import { REPORTER_ID, RUNNER_ID } from '../../runner/utils'
-import { useRoute } from 'vue-router'
+import { gql } from '@urql/core'
+import { useQuery } from '@urql/vue'
+import { Runner_AllDocument } from '../../generated/graphql'
+import Runner from '../../runs/Runner.vue'
 
-onMounted(() => {
-  UnifiedRunnerAPI.initialize(executeSpec)
-})
-
-const route = useRoute()
-
-function executeSpec () {
-  const absolute = route.hash.slice(1)
-
-  if (absolute) {
-    // @ts-ignore
-    execute({
-      absolute,
-      relative: `src/Basic.spec.tsx`,
-      name: `Basic.spec.tsx`,
-    })
+gql`
+query Runner_All {
+  app {
+    activeProject {
+      currentSpec {
+        ...CurrentSpec_Runner
+      }
+    }
   }
 }
+`
 
-const execute = (spec?: SpecFile) => {
-  if (!spec) {
-    return
-  }
-
-  UnifiedRunnerAPI.executeSpec(spec)
-}
+const query = useQuery({ query: Runner_AllDocument })
 </script>
 
 <route>
