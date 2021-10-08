@@ -112,6 +112,7 @@ commands:
                   mkdir -p /tmp/node_modules_cache
                   mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
                   mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
+                  mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
                   mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
 
   build-and-persist:
@@ -142,6 +143,7 @@ commands:
             if [[ -d "/tmp/node_modules_cache" ]]; then
               mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
               mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
+              mv /tmp/node_modules_cache/system-tests_node_modules ~/cypress/system-tests/node_modules
               mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
               rm -rf /tmp/node_modules_cache
             fi
@@ -194,6 +196,7 @@ commands:
                 paths:
                   - node_modules
                   - cli/node_modules
+                  - system-tests/node_modules
                   - globbed_node_modules
       - unless:
           condition: <<parameters.is-mac>>
