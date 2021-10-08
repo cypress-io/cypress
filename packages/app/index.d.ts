@@ -73,6 +73,9 @@ declare global {
        */
       AutIframe: any
       Reporter: any
+      shortcuts: {
+        stop: () => void
+      }
     }
   }
 }

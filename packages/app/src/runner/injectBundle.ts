@@ -14,11 +14,21 @@ function injectReporterStyle () {
 }
 
 export async function injectBundle (ready: () => void) {
+  const src = '/__cypress/runner/cypress_runner.js'
+
+  const alreadyInjected = document.querySelector(`script[src="${src}"]`)
+
+  if (alreadyInjected) {
+    ready()
+
+    return
+  }
+
   const response = await window.fetch('/api')
   const data = await response.json()
   const script = document.createElement('script')
 
-  script.src = '/__cypress/runner/cypress_runner.js'
+  script.src = src
   script.type = 'text/javascript'
 
   const link = document.createElement('link')

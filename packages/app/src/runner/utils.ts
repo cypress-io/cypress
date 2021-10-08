@@ -19,3 +19,11 @@ export function getRunnerElement () {
 export function getReporterElement () {
   return getElementById(REPORTER_ID)
 }
+
+export function empty (el: HTMLElement) {
+  while (el.lastChild) {
+    if (el && el.firstChild) {
+      el.removeChild(el.firstChild)
+    }
+  }
+}

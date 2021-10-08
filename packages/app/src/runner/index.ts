@@ -18,15 +18,7 @@ import { store, Store } from '../store'
 import { injectBundle } from './injectBundle'
 import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
-import { getRunnerElement } from './utils'
-
-function empty (el: HTMLElement) {
-  while (el.lastChild) {
-    if (el && el.firstChild) {
-      el.removeChild(el.firstChild)
-    }
-  }
-}
+import { getRunnerElement, empty } from './utils'
 
 const randomString = `${Math.random()}`
 
