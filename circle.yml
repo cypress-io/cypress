@@ -1080,7 +1080,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  server-system-tests-chrome:
+  system-tests-chrome:
     <<: *defaults
     resource_class: medium
     parallelism: 8
@@ -1088,7 +1088,7 @@ jobs:
       - run-system-tests:
           browser: chrome
 
-  server-system-tests-electron:
+  system-tests-electron:
     <<: *defaults
     resource_class: medium
     parallelism: 8
@@ -1096,7 +1096,7 @@ jobs:
       - run-system-tests:
           browser: electron
 
-  server-system-tests-firefox:
+  system-tests-firefox:
     <<: *defaults
     resource_class: medium
     parallelism: 8
@@ -1104,7 +1104,7 @@ jobs:
       - run-system-tests:
           browser: firefox
 
-  server-system-tests-non-root:
+  system-tests-non-root:
     <<: *defaults
     resource_class: medium
     steps:
@@ -2007,16 +2007,16 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-system-tests-chrome:
+    - system-tests-chrome:
         requires:
           - build
-    - server-system-tests-electron:
+    - system-tests-electron:
         requires:
           - build
-    - server-system-tests-firefox:
+    - system-tests-firefox:
         requires:
           - build
-    - server-system-tests-non-root:
+    - system-tests-non-root:
         executor: non-root-docker-user
         requires:
           - build
@@ -2123,10 +2123,10 @@ linux-workflow: &linux-workflow
           - driver-integration-tests-firefox
           - driver-integration-tests-chrome
           - driver-integration-tests-electron
-          - server-system-tests-non-root
-          - server-system-tests-firefox
-          - server-system-tests-electron
-          - server-system-tests-chrome
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
           - server-performance-tests
           - server-integration-tests
           - server-unit-tests
