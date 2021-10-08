@@ -146,6 +146,7 @@ describe('Routes', () => {
               specsStore: new SpecsStore({}, 'e2e'),
               createRoutes,
               testingType: 'e2e',
+              exit: false,
             })
             .spread(async (port) => {
               const automationStub = {
@@ -374,6 +375,21 @@ describe('Routes', () => {
           expect(configStr).to.include('version')
 
           expect(configStr).to.include(pkg.version)
+        })
+      })
+    })
+
+    it('sends exit config', function () {
+      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+      .then(() => {
+        return this.rp('http://localhost:9999/__')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          const configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include('"exit":false')
         })
       })
     })
