@@ -30,11 +30,11 @@ describe('logger', () => {
 
     it('should not call trim', () => {
       logger._logValues({})
-      logger._logValues({ test: '' })
+      logger._logValues({ test: {} })
       logger._logValues(null)
       logger._logValues(undefined)
 
-      expect(!spyTrim.calledOnce)
+      expect(spyTrim.getCalls()).to.have.length(0)
     })
 
     // The positive unit tests to capture if log has been called are already written in
