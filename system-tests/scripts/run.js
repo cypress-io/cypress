@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
-const execa = require('execa')
+const cp = require('child_process')
 
 const path = require('path')
 const os = require('os')
@@ -114,7 +114,7 @@ commandAndArguments.args.push(
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
-  'configFile=../mocha-reporter-config.json',
+  'configFile=../../mocha-reporter-config.json',
   '--extension=js,ts',
   // restore mocha 2.x behavior to force end process after spec run
   '--exit',
@@ -167,7 +167,7 @@ console.log('specfiles:', run)
 console.log('test command:')
 console.log(cmd)
 
-const child = execa(cmd, { env, stdio: 'inherit' })
+const child = cp.spawn(cmd, { shell: true, env, stdio: 'inherit' })
 
 child.on('exit', (code, signal) => {
   if (signal) {

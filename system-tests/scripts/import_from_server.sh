@@ -45,10 +45,10 @@ set -e
 
 # bashcodemods
 for PATTERN in \
-  's|../support/helpers/e2e|../lib/e2e|g' \
-  's|../support/helpers/fixtures|../lib/fixtures|g' \
+  's|../support/helpers/|../lib/|g' \
   's|../../lib|@packages/server/lib|g' \
+  "s|'../spec_helper'|'../lib/spec_helper'|g" \
 ; do sed -i -se $PATTERN $DEST_TEST_DIR/*; done
 
-sed -i -se 's|../../../../test/support/helpers/performance|@internal/system-tests/lib/performance|g' \
+sed -i -se 's|../../../../test/support/helpers/performance|@tooling/system-tests/lib/performance|g' \
   $DEST_PROJECT_DIR/e2e/cypress/plugins/index.js
