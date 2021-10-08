@@ -67,19 +67,9 @@ yarn test test/integration/cli_spec.js
 yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 ```
 
-### Running individual e2e tests
+### Running e2e/system tests
 
-```bash
-yarn test <path/to/test>
-yarn test test/e2e/1_async_timeouts_spec.js
-## or
-yarn test-e2e async_timeouts ## shorthand, uses globbing to find spec
-```
-
-To keep the browser open after a spec run (for easier debugging and iterating on specs), you can pass the `--no-exit` flag to the e2e test command. Live reloading due to spec changes should also work:
-```sh
-yarn test test/e2e/go_spec.js --browser chrome --no-exit
-```
+> With the addition of Component Testing, `e2e` tests have been renamed to `system-tests` and moved to the [`system-tests`](../../system-tests) directory.
 
 ### Updating snaphots
 
