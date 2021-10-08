@@ -14,7 +14,7 @@ import {
   WizardDataSource,
   BrowserDataSource,
   UtilDataSource,
-  StorybookDataSource
+  StorybookDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 

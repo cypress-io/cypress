@@ -22,7 +22,7 @@ export class StorybookDataSource {
     return this.storybookInfoLoader.load(this.ctx.activeProject?.projectRoot)
   }
 
-  private storybookInfoLoader = this.ctx.loaders.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))
+  private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))
 
   private batchStorybookInfo (projectRoots: readonly string[]) {
     return Promise.all(projectRoots.map((projectRoot) => this.detectStorybook(projectRoot)))
