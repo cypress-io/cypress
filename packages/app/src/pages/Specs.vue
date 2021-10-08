@@ -1,5 +1,13 @@
 <template>
-  <div
+  <h2>Specs Page</h2>
+  <template v-if="props.gql?.specs">
+    <SpecsList :gql="props.gql?.specs" />
+  </template>
+  <p v-else>
+    Loading...
+  </p>
+
+  <!-- <div
     v-for="spec of props.gql?.specs?.edges"
     :key="spec?.node?.absolute"
   >
@@ -8,7 +16,7 @@
     >
       {{ spec?.node?.relative }}
     </button>
-  </div>
+  </div> -->
 
   <!--
        We want to manage the reporter and runner iframe with vanilla JS/jQuery
@@ -27,10 +35,6 @@ import { UnifiedRunnerAPI } from '../runner'
 import { REPORTER_ID, RUNNER_ID } from '../runner/utils'
 import type { Specs_SpecsFragment } from '../generated/graphql'
 import type { SpecFile } from '@packages/types/src'
-
-onMounted(() => {
-  UnifiedRunnerAPI.initialize()
-})
 
 gql`
 fragment Specs_Spec on Spec {
@@ -52,6 +56,10 @@ fragment Specs_Specs on Project {
   }
 }
 `
+
+onMounted(() => {
+  UnifiedRunnerAPI.initialize()
+})
 
 const execute = (spec?: SpecFile) => {
   if (!spec) {

@@ -19,6 +19,7 @@ export interface LaunchArgs {
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
   global: boolean
   project: string // projectRoot
+  runProject?: string
   projectRoot: string // same as above
   testingType: Cypress.TestingType
   invokedFromCli: boolean

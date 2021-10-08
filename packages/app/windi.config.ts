@@ -1,3 +1,4 @@
-import WindiConfig from '@packages/frontend-shared/windi.config'
+import { defaultConfig } from '@packages/frontend-shared/windi.config'
+import { defineConfig } from 'windicss/helpers'
 
-export default WindiConfig
+export default defineConfig(defaultConfig)

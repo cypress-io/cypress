@@ -11,8 +11,7 @@ const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   })
 }
 
-// TODO: Network retries leak between tests, causing flake.
-describe('network stubbing', { retries: 2 }, function () {
+describe('network stubbing', function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {

@@ -9,6 +9,6 @@ module.exports = {
       localSchemaFile: path.join(__dirname, 'packages/graphql/schemas/schema.graphql'),
     },
     tagName: 'gql',
-    includes: [path.join(__dirname, 'packages/launchpad/src/**/*.vue')],
+    includes: [path.join(__dirname, 'packages/{launchpad,app}/src/**/*.vue')],
   },
 }
