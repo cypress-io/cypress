@@ -9,8 +9,8 @@
       class="justify-self-start flex items-center"
     >
       <slot name="prefix">
-        <Icon
-          :icon="prefixIcon"
+        <component
+          :is="prefixIcon"
           :class="prefixIconClass"
         />
       </slot>
@@ -23,8 +23,8 @@
       class="justify-self-start flex items-center"
     >
       <slot name="suffix">
-        <Icon
-          :icon="suffixIcon"
+        <component
+          :is="suffixIcon"
           :class="suffixIconClass"
         />
       </slot>
@@ -41,7 +41,6 @@ export default defineComponent({
 </script>
 
 <script lang="ts" setup>
-import Icon from './Icon.vue'
 
 // eslint-disable-next-line no-duplicate-imports
 import { computed, useAttrs } from 'vue'

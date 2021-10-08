@@ -41,6 +41,7 @@ const makePlugins = (plugins) => {
       ...plugins.vueI18nOptions,
     }),
     Icons({
+      scale: 1,
       customCollections: {
       // ~icons/cy/book-x16
         cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
