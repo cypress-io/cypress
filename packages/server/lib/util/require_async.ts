@@ -26,10 +26,6 @@ const killChildProcess = () => {
 }
 
 export async function requireAsync (filePath: string, options: RequireAsyncOptions): Promise<any> {
-  if (/\.json$/.test(filePath)) {
-    return fs.readJson(path.resolve(options.projectRoot, filePath))
-  }
-
   return new Promise((resolve, reject) => {
     if (requireProcess) {
       debug('kill existing config process')
