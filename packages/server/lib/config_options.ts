@@ -1,4 +1,16 @@
-const v = require('./util/validation')
+import * as v from './util/validation'
+
+function isOneOf (...values) {
+  let curried
+
+  return (...args) => {
+    if (!curried) {
+      curried = v.isOneOf(...values)
+    }
+
+    return curried(...args)
+  }
+}
 
 // NOTE:
 // If you add/remove/change a config value, make sure to update the following
@@ -162,7 +174,7 @@ export const options = [
   }, {
     name: 'nodeVersion',
     defaultValue: 'default',
-    validation: v.isOneOf('default', 'bundled', 'system'),
+    validation: isOneOf('default', 'bundled', 'system'),
   }, {
     name: 'numTestsKeptInMemory',
     defaultValue: 50,
@@ -242,7 +254,7 @@ export const options = [
   }, {
     name: 'scrollBehavior',
     defaultValue: 'top',
-    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
+    validation: isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'socketIoCookie',
     defaultValue: '__socket.io',

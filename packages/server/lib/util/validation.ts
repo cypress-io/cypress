@@ -1,9 +1,12 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:validation')
-const is = require('check-more-types')
-const { commaListsOr } = require('common-tags')
-const configOptions = require('../config_options')
-const path = require('path')
+import path from 'path'
+import _ from 'lodash'
+import Debug from 'debug'
+import is from 'check-more-types'
+import { commaListsOr } from 'common-tags'
+import * as configOptions from '../config_options'
+import type { Browser } from '../browsers/types'
+
+const debug = Debug('cypress:server:validation')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
@@ -18,33 +21,29 @@ const str = JSON.stringify
  * @param {any} value - The actual value
  * @returns {string} Formatted error message
 */
-const errMsg = (key, value, type) => {
+const errMsg = (key: string, value: any, type: string): string => {
   return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
     value,
   )}\``
 }
 
-const isFullyQualifiedUrl = (value) => {
-  return isString(value) && /^https?\:\/\//.test(value)
+const _isFullyQualifiedUrl = (value: any): value is String => {
+  return _.isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value) => {
-  return isArray(value) && _.every(value, isString)
+const _isArrayOfStrings = (value: any): value is String[] => {
+  return _.isArray(value) && _.every(value, _.isString)
 }
 
-const isFalse = (value) => {
+const isFalse = (value: any): value is false => {
   return value === false
 }
-
-const { isArray } = _
-const isNumber = _.isFinite
-const { isString } = _
 
 /**
  * Validates a single browser object.
  * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
  */
-const isValidBrowser = (browser) => {
+export const isValidBrowser = (browser: Browser) => {
   if (!is.unemptyString(browser.name)) {
     return errMsg('name', browser, 'a non-empty string')
   }
@@ -64,11 +63,11 @@ const isValidBrowser = (browser) => {
     return errMsg('version', browser, 'a non-empty string')
   }
 
-  if (!is.string(browser.path)) {
+  if (!_.isString(browser.path)) {
     return errMsg('path', browser, 'a string')
   }
 
-  if (!is.string(browser.majorVersion) && !is.positive(browser.majorVersion)) {
+  if (!_.isString(browser.majorVersion) && !is.number(browser.majorVersion)) {
     return errMsg('majorVersion', browser, 'a string or a positive number')
   }
 
@@ -78,7 +77,7 @@ const isValidBrowser = (browser) => {
 /**
  * Validates the list of browsers.
  */
-const isValidBrowserList = (key, browsers) => {
+export const isValidBrowserList = (key, browsers?) => {
   debug('browsers %o', browsers)
   if (!browsers) {
     return 'Missing browsers list'
@@ -105,7 +104,7 @@ const isValidBrowserList = (key, browsers) => {
   return true
 }
 
-const isValidRetriesConfig = (key, value) => {
+export const isValidRetriesConfig = (key: string, value: any) => {
   const optionalKeys = ['runMode', 'openMode']
   const isValidRetryValue = (val) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
   const optionalKeysAreValid = (val, k) => optionalKeys.includes(k) && isValidRetryValue(val)
@@ -121,7 +120,7 @@ const isValidRetriesConfig = (key, value) => {
   return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
 }
 
-const isPlainObject = (key, value) => {
+export const isPlainObject = (key, value) => {
   if (value == null || _.isPlainObject(value)) {
     return true
   }
@@ -129,7 +128,7 @@ const isPlainObject = (key, value) => {
   return errMsg(key, value, 'a plain object')
 }
 
-const isValidTestingTypeConfig = (key, config) => {
+export const isValidTestingTypeConfig = (key, config) => {
   const status = isPlainObject(key, config)
 
   if (status !== true) {
@@ -155,8 +154,17 @@ const isValidTestingTypeConfig = (key, config) => {
   return true
 }
 
-const isOneOf = (...values) => {
-  return (key, value) => {
+/**
+ * Checks if given value for a key is equal to one of the provided values.
+ * @example
+ * ```
+ * validate = v.isOneOf("foo", "bar")
+ * validate("example", "foo") // true
+ * validate("example", "else") // error message string
+ * ```
+ */
+export const isOneOf = (...values: any[]) => {
+  return (key: string, value: any) => {
     if (values.some((v) => {
       if (typeof value === 'function') {
         return value(v)
@@ -167,7 +175,7 @@ const isOneOf = (...values) => {
       return true
     }
 
-    const strings = values.map(str).join(', ')
+    const strings = values.map((val) => str(val)).join(', ')
 
     return errMsg(key, value, `one of these values: ${strings}`)
   }
@@ -177,14 +185,14 @@ const isOneOf = (...values) => {
  * Validates whether the supplied set of cert information is valid
  * @returns {string|true} Returns `true` if the information set is valid. Returns an error message if it is not.
  */
-const isValidClientCertificatesSet = (key, certsForUrls) => {
+export const isValidClientCertificatesSet = (key: string, certsForUrls) => {
   debug('clientCerts: %o', certsForUrls)
 
   if (!Array.isArray(certsForUrls)) {
     return errMsg(`clientCertificates.certs`, certsForUrls, 'an array of certs for URLs')
   }
 
-  let urls = []
+  let urls: string[] = []
 
   for (let i = 0; i < certsForUrls.length; i++) {
     debug(`Processing clientCertificates: ${i}`)
@@ -263,95 +271,78 @@ const isValidClientCertificatesSet = (key, certsForUrls) => {
   return true
 }
 
-module.exports = {
-  isValidClientCertificatesSet,
+export function isNumber (key: string, value: any): true | string {
+  if (value == null || _.isFinite(value)) {
+    return true
+  }
 
-  isValidBrowser,
+  return errMsg(key, value, 'a number')
+}
 
-  isValidBrowserList,
+export function isNumberOrFalse (key, value): true | string {
+  if (_.isFinite(value) || isFalse(value)) {
+    return true
+  }
 
-  isValidRetriesConfig,
+  return errMsg(key, value, 'a number or false')
+}
 
-  isValidTestingTypeConfig,
+export function isFullyQualifiedUrl (key: string, value) {
+  if (value == null || _isFullyQualifiedUrl(value)) {
+    return true
+  }
 
-  isPlainObject,
+  return errMsg(
+    key,
+    value,
+    'a fully qualified URL (starting with `http://` or `https://`)',
+  )
+}
 
-  isNumber (key, value) {
-    if (value == null || isNumber(value)) {
-      return true
-    }
+export function isBoolean (key: string, value) {
+  if (value == null || _.isBoolean(value)) {
+    return true
+  }
 
-    return errMsg(key, value, 'a number')
-  },
+  return errMsg(key, value, 'a boolean')
+}
 
-  isNumberOrFalse (key, value) {
-    if (isNumber(value) || isFalse(value)) {
-      return true
-    }
+export function isString (key: string, value) {
+  if (value == null || _.isString(value)) {
+    return true
+  }
 
-    return errMsg(key, value, 'a number or false')
-  },
+  return errMsg(key, value, 'a string')
+}
 
-  isFullyQualifiedUrl (key, value) {
-    if (value == null || isFullyQualifiedUrl(value)) {
-      return true
-    }
+export function isArray (key: string, value) {
+  if (value == null || _.isArray(value)) {
+    return true
+  }
 
-    return errMsg(
-      key,
-      value,
-      'a fully qualified URL (starting with `http://` or `https://`)',
-    )
-  },
+  return errMsg(key, value, 'an array')
+}
 
-  isBoolean (key, value) {
-    if (value == null || _.isBoolean(value)) {
-      return true
-    }
+export function isStringOrFalse (key: string, value) {
+  if (_.isString(value) || isFalse(value)) {
+    return true
+  }
 
-    return errMsg(key, value, 'a boolean')
-  },
+  return errMsg(key, value, 'a string or false')
+}
 
-  isString (key, value) {
-    if (value == null || isString(value)) {
-      return true
-    }
+export function isStringOrArrayOfStrings (key: string, value) {
+  if (_.isString(value) || _isArrayOfStrings(value)) {
+    return true
+  }
 
-    return errMsg(key, value, 'a string')
-  },
+  return errMsg(key, value, 'a string or an array of strings')
+}
 
-  isArray (key, value) {
-    if (value == null || isArray(value)) {
-      return true
-    }
+export function isFunction (key: string, value: any): true | string {
+  if (value == null || _.isFunction(value)) {
+    return true
+  }
 
-    return errMsg(key, value, 'an array')
-  },
-
-  isStringOrFalse (key, value) {
-    if (isString(value) || isFalse(value)) {
-      return true
-    }
-
-    return errMsg(key, value, 'a string or false')
-  },
-
-  isStringOrArrayOfStrings (key, value) {
-    if (isString(value) || isArrayOfStrings(value)) {
-      return true
-    }
-
-    return errMsg(key, value, 'a string or an array of strings')
-  },
-
-  /**
-   * Checks if given value for a key is equal to one of the provided values.
-   * @example
-    ```
-    validate = v.isOneOf("foo", "bar")
-    validate("example", "foo") // true
-    validate("example", "else") // error message string
-    ```
-   */
-  isOneOf,
+  return errMsg(key, value, 'a function')
 }

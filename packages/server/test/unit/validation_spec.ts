@@ -1,6 +1,6 @@
 require('../spec_helper')
-const snapshot = require('snap-shot-it')
-const v = require(`${root}lib/util/validation`)
+import snapshot from 'snap-shot-it'
+import * as v from '../../lib/util/validation'
 
 describe('lib/util/validation', () => {
   context('#isValidBrowserList', () => {
@@ -52,7 +52,7 @@ describe('lib/util/validation', () => {
           displayName: 'Bad family browser',
           family: 'unknown family',
         },
-      ]
+      ] as any[]
 
       // data-driven testing - computers snapshot value for each item in the list passed through the function
       // https://github.com/bahmutov/snap-shot-it#data-driven-testing

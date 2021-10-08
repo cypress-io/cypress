@@ -1,25 +1,13 @@
-exports['not one of the strings error message'] = `
-Expected \`test\` to be one of these values: "foo", "bar". Instead the value was: \`"nope"\`
+exports['undefined browsers'] = `
+Missing browsers list
 `
 
-exports['number instead of string'] = `
-Expected \`test\` to be one of these values: "foo", "bar". Instead the value was: \`42\`
+exports['empty list of browsers'] = `
+Expected at least one browser
 `
 
-exports['null instead of string'] = `
-Expected \`test\` to be one of these values: "foo", "bar". Instead the value was: \`null\`
-`
-
-exports['not one of the numbers error message'] = `
-Expected \`test\` to be one of these values: 1, 2, 3. Instead the value was: \`4\`
-`
-
-exports['string instead of a number'] = `
-Expected \`test\` to be one of these values: 1, 2, 3. Instead the value was: \`"foo"\`
-`
-
-exports['null instead of a number'] = `
-Expected \`test\` to be one of these values: 1, 2, 3. Instead the value was: \`null\`
+exports['browsers list with a string'] = `
+Found an error while validating the \`browsers\` list. Expected \`name\` to be a non-empty string. Instead the value was: \`"foo"\`
 `
 
 exports['lib/util/validation #isValidBrowser passes valid browsers and forms error messages for invalid ones isValidBrowser 1'] = {
@@ -76,14 +64,26 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
   ]
 }
 
-exports['undefined browsers'] = `
-Missing browsers list
+exports['not one of the strings error message'] = `
+Expected \`test\` to be one of these values: "foo", "bar". Instead the value was: \`"nope"\`
 `
 
-exports['empty list of browsers'] = `
-Expected at least one browser
+exports['number instead of string'] = `
+Expected \`test\` to be one of these values: "foo", "bar". Instead the value was: \`42\`
 `
 
-exports['browsers list with a string'] = `
-Found an error while validating the \`browsers\` list. Expected \`name\` to be a non-empty string. Instead the value was: \`"foo"\`
+exports['null instead of string'] = `
+Expected \`test\` to be one of these values: "foo", "bar". Instead the value was: \`null\`
+`
+
+exports['not one of the numbers error message'] = `
+Expected \`test\` to be one of these values: 1, 2, 3. Instead the value was: \`4\`
+`
+
+exports['string instead of a number'] = `
+Expected \`test\` to be one of these values: 1, 2, 3. Instead the value was: \`"foo"\`
+`
+
+exports['null instead of a number'] = `
+Expected \`test\` to be one of these values: 1, 2, 3. Instead the value was: \`null\`
 `
