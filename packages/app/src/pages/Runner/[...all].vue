@@ -15,6 +15,7 @@ gql`
 query Runner_All {
   app {
     activeProject {
+      id
       currentSpec {
         ...CurrentSpec_Runner
       }

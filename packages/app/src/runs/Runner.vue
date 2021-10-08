@@ -1,9 +1,10 @@
 <template>
   <div>
-    <h2>Runner Page</h2>
     <div v-once>
-      <div :id="RUNNER_ID" />
-      <div :id="REPORTER_ID" />
+      <div class="flex">
+        <div :id="RUNNER_ID" />
+        <div :id="REPORTER_ID" />
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +50,18 @@ const execute = () => {
   UnifiedRunnerAPI.executeSpec(props.gql)
 }
 </script>
+
+<style scoped>
+#unified-runner {
+  position: relative;
+}
+
+#unified-reporter {
+  position: relative;
+  width: 300px;
+  height: 100vh;
+}
+</style>
 
 <route>
 {

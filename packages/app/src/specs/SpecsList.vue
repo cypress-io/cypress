@@ -12,6 +12,7 @@
       <button
         v-for="spec in filteredSpecs"
         :key="spec.node.id"
+        class="text-left"
         @click.prevent="selectSpec(spec)"
       >
         <SpecsListRow :gql="spec" />
