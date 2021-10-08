@@ -1,5 +1,5 @@
 import SpecsList from './SpecsList.vue'
-import { SpecsListFragmentDoc, SpecListRowFragment } from '../generated/graphql-test'
+import { Specs_SpecsListFragmentDoc, SpecListRowFragment } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-testid=specs-list-row]'
@@ -20,7 +20,7 @@ let specs: Array<SpecListRowFragment> = []
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   beforeEach(() => {
-    cy.mountFragment(SpecsListFragmentDoc, {
+    cy.mountFragment(Specs_SpecsListFragmentDoc, {
       onResult: (ctx) => {
         specs = ctx.activeProject?.specs?.edges || []
 

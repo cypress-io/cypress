@@ -40,11 +40,13 @@ const randomString = `${Math.random()}`
  * for communication between driver, runner, reporter via event bus,
  * and server (via web socket).
  */
-function setupRunner () {
+function setupRunner (done: () => void) {
   window.UnifiedRunner.eventManager.addGlobalListeners(store, {
     automationElement: '__cypress-string',
     randomString,
   })
+
+  done()
 }
 
 /**
@@ -95,8 +97,10 @@ function setupSpec (spec: SpecFile) {
   const autIframe = new window.UnifiedRunner.AutIframe('Test Project')
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  const specSrc = getSpecUrl(config.namespace, spec)
+
   autIframe.showInitialBlankContents()
-  $autIframe.prop('src', getSpecUrl(config.namespace, spec))
+  $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
   window.UnifiedRunner.eventManager.initialize($autIframe, config)
@@ -109,8 +113,8 @@ function setupSpec (spec: SpecFile) {
  *
  * This only needs to happen once, prior to running the first spec.
  */
-function initialize () {
-  injectBundle(setupRunner)
+function initialize (ready: () => void) {
+  injectBundle(() => setupRunner(ready))
 }
 
 /**
