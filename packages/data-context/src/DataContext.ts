@@ -1,17 +1,22 @@
 import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+import type { AppApiShape, ProjectApiShape } from './actions'
+import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
+import type { AuthApiShape } from './actions/AuthActions'
 import debugLib from 'debug'
 import fsExtra from 'fs-extra'
-import type { AuthApiShape } from './actions/AuthActions'
 import { CoreDataShape, makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
-import { AppDataSource } from './sources/AppDataSource'
-import { ProjectDataSource } from './sources/ProjectDataSource'
+import {
+  AppDataSource,
+  GitDataSource,
+  FileDataSource,
+  ProjectDataSource,
+  WizardDataSource,
+  BrowserDataSource,
+  UtilDataSource,
+  StorybookDataSource,
+} from './sources/'
 import { cached } from './util/cached'
-import { WizardDataSource } from './sources'
-import type { AppApiShape, ProjectApiShape } from './actions'
-import { makeLoaders } from './data/loaders'
-import { BrowserDataSource } from './sources/BrowserDataSource'
-import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 
 export interface DataContextConfig {
   launchArgs: LaunchArgs
@@ -37,8 +42,6 @@ export class DataContext {
     this._coreData = config.coreData ?? makeCoreData()
   }
 
-  loaders = makeLoaders(this)
-
   get launchArgs () {
     return this.config.launchArgs
   }
@@ -57,6 +60,21 @@ export class DataContext {
 
   get browserList () {
     return this.coreData.app.browsers
+  }
+
+  @cached
+  get util () {
+    return new UtilDataSource(this)
+  }
+
+  @cached
+  get file () {
+    return new FileDataSource(this)
+  }
+
+  @cached
+  get git () {
+    return new GitDataSource(this)
   }
 
   @cached
@@ -85,6 +103,11 @@ export class DataContext {
   @cached
   get wizard () {
     return new WizardDataSource(this)
+  }
+
+  @cached
+  get storybook () {
+    return new StorybookDataSource(this)
   }
 
   get wizardData () {
@@ -138,6 +161,10 @@ export class DataContext {
   }
 
   dispose () {
-    this.loaders.dispose()
+    this.util.disposeLoaders()
+  }
+
+  get loader () {
+    return this.util.loader
   }
 }

@@ -101,6 +101,7 @@
     "@types/detect-port": "^1.3.1",
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/execa": "0.9.0",
+    "@types/fluent-ffmpeg": "^2.1.18",
     "@types/fs-extra": "^8.0.1",
     "@types/getenv": "^1.0.0",
     "@types/glob": "7.1.1",

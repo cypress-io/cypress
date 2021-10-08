@@ -4,11 +4,25 @@ This is the front-end for the Cypress App.
 
 ## Development
 
-1. Use existing project to get a server (for example `cd packages/runner-ct && yarn cypress:open`)
-2. It will open in a new browser on port 8080
-3. Do `yarn start`. It will start the front-end for the new Cypress app 
-4. To back to the browser opened in step 2
-5. Visit http://localhost:8080/__vite__/ for the new front-end powered by Vite (currently running the RunnerCt)
+1. `yarn dev` (inside of `packages/app`)
+2. It will open launchpad
+3. Select Component Testing (current E2E is not fully working)
+3. Open chrome (or another browser)
+4. This launches the existing CT Runner. Change the URL to http://localhost:3000/__vite__/ (note the trailing `/`)
+5. It should show the new Vite powered app 
+
+## Using existing, Vite-incompatible modules
+
+Some of our modules, like `@packages/reporter`, `@packages/driver` and `@packages/runner-shared` cannot be easily
+used with Vite due to circular dependencies and modules that do not have compatible ESM builds.
+
+To work around this, when consuming existing code, it is bundled with webpack and made available under the
+`window.UnifiedRunner` namespace. It is injected via [`injectBundle`](./src/runner/injectBundle.ts).
+
+To add more code to the bundle, add it in the bundle root, `@packages/runner-ct/src/main.tsx` and attach it to
+`window.UnifiedRunner`.
+
+As a rule of thumb, avoid importing from the older, webpack based modules into this package. Instead, if you want to consume code from those older, webpack bundled modules, you should add them to the webpack root and consume them via `window.UnifiedRunner`. Ideally, update [`index.d.ts`](./index.d.ts) to add the types, as well.
 
 ### Icons
 
@@ -63,3 +77,4 @@ You can see this in the video with the Settings cog. It uses and `evenodd` fill 
 ## Diagram
 
 ![](./unified-runner-diagram.png)]
+

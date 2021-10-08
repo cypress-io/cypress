@@ -1,36 +1,42 @@
 <template>
-  <div>
-    <h2>Specs Page</h2>
-    <template v-if="query.data.value?.app">
-      <SpecsList :gql="query.data.value?.app" />
-    </template>
-    <p v-else>
-      Loading...
-    </p>
-  </div>
+  <h2>Specs Page</h2>
+
+  <SpecsList
+    v-if="props.gql"
+    :gql="props?.gql"
+  />
+
+  <p v-else>
+    Loading...
+  </p>
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/core'
-import { useQuery } from '@urql/vue'
-import { Specs_AppDocument } from '../generated/graphql'
+import { gql } from '@urql/vue'
 import SpecsList from '../specs/SpecsList.vue'
+import { REPORTER_ID, RUNNER_ID } from '../runner/utils'
+import type { Specs_SpecsFragment } from '../generated/graphql'
 
 gql`
-query Specs_App {
-  app {
-    ...SpecsList
-  } 
-}
-`
+fragment Specs_Specs on App {
+  ...Specs_SpecsList
+}`
 
-const query = useQuery({
-  query: Specs_AppDocument,
-})
-
+const props = defineProps<{
+  gql: Specs_SpecsFragment
+}>()
 </script>
+
 <route>
 {
   name: "Specs Page"
 }
 </route>
+
+<style>
+iframe {
+  border: 5px solid black;
+  margin: 10px;
+  background: lightgray;
+}
+</style>

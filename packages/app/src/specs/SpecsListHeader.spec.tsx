@@ -1,5 +1,5 @@
 import SpecsListHeader from './SpecsListHeader.vue'
-import { ref } from 'vue'
+import { defineComponent, ref, h } from 'vue'
 
 const buttonSelector = '[data-testid=new-spec-button]'
 const inputSelector = 'input[type=search]'
@@ -9,10 +9,19 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const search = ref('')
     const searchString = 'my/component.cy.tsx'
 
-    cy.mount(<SpecsListHeader modelValue={search.value} />)
+    cy.mount(defineComponent({
+      setup () {
+        return () => h(SpecsListHeader, {
+          modelValue: search.value,
+          'onUpdate:modelValue': (val: string) => {
+            search.value = val
+          },
+        })
+      },
+    }))
     .get(inputSelector)
     .type(searchString, { delay: 0 })
-    .should(() => {
+    .then(() => {
       expect(search.value).to.equal(searchString)
     })
   })

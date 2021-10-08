@@ -1464,7 +1464,8 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
-        }, options.testingType === 'e2e' || firstSpec),
+          // TODO(tim): investigate the socket disconnect
+        }, process.env.CYPRESS_INTERNAL_FORCE_BROWSER_RELAUNCH || options.testingType === 'e2e' || firstSpec),
       })
     })
   },

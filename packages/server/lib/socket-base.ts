@@ -15,6 +15,8 @@ import { openFile } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
+// eslint-disable-next-line no-duplicate-imports
+import type { Socket } from '@packages/socket'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -184,8 +186,20 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    this.io.on('connection', (socket: any) => {
+    this.io.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
       debug('socket connected')
+
+      socket.on('disconnecting', (reason) => {
+        debug(`socket-disconnecting ${reason}`)
+      })
+
+      socket.on('disconnect', (reason) => {
+        debug(`socket-disconnect ${reason}`)
+      })
+
+      socket.on('error', (err) => {
+        debug(`socket-error ${err.message}`)
+      })
 
       // cache the headers so we can access
       // them at any time

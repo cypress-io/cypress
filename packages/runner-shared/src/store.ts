@@ -1,22 +1,18 @@
 import { action, observable } from 'mobx'
 import { nanoid } from 'nanoid'
+import { automation, automationStatus } from './automation'
 
-export type RunMode = 'single' | 'multi'
+export type RunMode = 'single'
 
-export abstract class BaseStore {
-  @observable spec: Cypress.Cypress['spec'] | undefined
-  @observable specs: Cypress.Cypress['spec'][] = []
+export class BaseStore {
+  @observable spec: Cypress.Spec | undefined
+  @observable specs: Cypress.Spec[] = []
   @observable specRunId: string | undefined
-  /** @type {"single" | "multi"} */
   @observable runMode: RunMode = 'single'
-  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+  @observable automation: typeof automationStatus[number] = automation.CONNECTING
+  @observable isLoading = true
 
-  @action setSingleSpec (spec: Cypress.Cypress['spec'] | undefined) {
-    if (this.runMode === 'multi') {
-      this.runMode = 'single'
-      this.multiSpecs = []
-    }
-
+  @action setSingleSpec (spec: Cypress.Spec | undefined) {
     this.setSpec(spec)
   }
 
@@ -25,7 +21,7 @@ export abstract class BaseStore {
     this.specRunId = nanoid()
   }
 
-  @action setSpecs (specs: Cypress.Cypress['spec'][]) {
+  @action setSpecs (specs: Cypress.Spec[]) {
     this.specs = specs
   }
 
@@ -35,5 +31,9 @@ export abstract class BaseStore {
     if (foundSpec) {
       this.spec = foundSpec
     }
+  }
+
+  @action setIsLoading (isLoading) {
+    this.isLoading = isLoading
   }
 }
