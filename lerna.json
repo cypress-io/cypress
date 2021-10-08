@@ -4,7 +4,7 @@
     "cli",
     "packages/*",
     "npm/*",
-    "system-tests/*"
+    "system-tests"
   ],
   "useWorkspaces": true,
   "version": "0.0.0"
