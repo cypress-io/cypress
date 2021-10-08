@@ -43,17 +43,12 @@ const isGteNode12 = () => {
 
 if (!run || !run.length) {
   return exitErr(`
-    Error: A path to a spec file must be specified!
+    Error: A path to a spec file or a pattern must be specified!
 
     It should look something like this:
 
       $ yarn test ./test/unit/api_spec.js
-
-    If you want to run all a specific group of tests:
-
-      $ yarn test-unit
-      $ yarn test-integration
-      $ yarn test-e2e
+      $ yarn test api_spec
   `)
 }
 
@@ -91,13 +86,13 @@ if (isGteNode12()) {
   )
 }
 
-// if (!isWindows()) {
-//   commandAndArguments.args.push(
-//     'node_modules/.bin/_mocha',
-//   )
+if (!isWindows()) {
+  commandAndArguments.args.push(
+    'node_modules/.bin/_mocha',
+  )
 
-//   commandAndArguments.args = commandAndArguments.args.concat(run)
-// }
+  commandAndArguments.args = commandAndArguments.args.concat(run)
+}
 
 if (options.fgrep) {
   commandAndArguments.args.push(
