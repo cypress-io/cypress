@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 import path from 'path'
+
 import errors from '../errors'
 import { fs } from '../util/fs'
 import { requireAsync } from './require_async'
@@ -101,11 +102,12 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return requireAsync(file,
-    {
-      projectRoot,
-      loadErrorCode: 'CONFIG_FILE_ERROR',
-    })
+  const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
+    projectRoot,
+    loadErrorCode: 'CONFIG_FILE_ERROR',
+  })
+
+  return readPromise
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT' && isJSONFile(file)) {
       if (options.args?.runProject) {

@@ -4,7 +4,6 @@ import * as cp from 'child_process'
 import * as inspector from 'inspector'
 import * as util from '../plugins/util'
 import * as errors from '../errors'
-import { fs } from '../util/fs'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:require_async')
