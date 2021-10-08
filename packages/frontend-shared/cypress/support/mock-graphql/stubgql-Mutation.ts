@@ -40,4 +40,17 @@ export const stubMutation: MaybeResolver<Mutation> = {
 
     return ctx.app
   },
+  setCurrentSpec (source, args, ctx) {
+    if (!ctx.app.activeProject) {
+      throw Error('Cannot set currentSpec without active project')
+    }
+
+    ctx.app.activeProject.currentSpec = {
+      id: args.spec.absolute,
+      __typename: 'BaseSpec',
+      ...args.spec,
+    }
+
+    return ctx.app.activeProject
+  },
 }
