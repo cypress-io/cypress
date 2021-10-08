@@ -18,7 +18,6 @@ export interface StartDevServerOptions {
    * @optional
    */
   viteConfig?: Omit<InlineConfig, 'base' | 'root'>
-
   /**
    * Path to an index.html file that will serve as the template in
    * which your components will be rendered.
