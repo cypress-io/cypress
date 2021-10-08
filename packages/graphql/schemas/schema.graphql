@@ -25,16 +25,11 @@ type App {
 
 """Most basic representation of a spec in Cypress"""
 type BaseSpec implements Node {
-  """Absolute path to spec"""
   absolute: String!
 
   """Relay style Node ID field for the BaseSpec field"""
   id: ID!
-
-  """Spec filename, including extension"""
   name: String!
-
-  """Relative path spec"""
   relative: String!
 }
 
