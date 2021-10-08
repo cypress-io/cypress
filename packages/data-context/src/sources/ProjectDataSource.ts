@@ -31,8 +31,14 @@ export class ProjectDataSource {
   async isFirstTimeAccessing (projectRoot: string, testingType: 'e2e' | 'component') {
     try {
       const config = await this.ctx.file.readJsonFile<{ e2e?: object, component?: object }>(path.join(projectRoot, 'cypress.json'))
-      const type = testingType === 'e2e' ? 'e2e' : 'component'
-      const overrides = config[type] || {}
+
+      // If we have a cypress.json file, even with no overrides, assume that it's not our
+      // first time accessing (for now, until the config refactor lands)
+      if (testingType === 'e2e') {
+        return false
+      }
+
+      const overrides = config.component || {}
 
       return Object.keys(overrides).length === 0
     } catch (e) {
