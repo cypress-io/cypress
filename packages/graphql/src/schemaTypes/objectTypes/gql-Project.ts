@@ -46,6 +46,14 @@ export const Project = objectType({
       },
     })
 
+    t.field('currentSpec', {
+      description: 'Currently selected spec',
+      type: 'BaseSpec',
+      resolve: (source, args, ctx) => {
+        return ctx.project.currentSpec ?? null
+      },
+    })
+
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',

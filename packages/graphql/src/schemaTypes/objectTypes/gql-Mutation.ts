@@ -1,4 +1,4 @@
-import { booleanArg, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { booleanArg, idArg, mutationType, nonNull, stringArg, inputObjectType } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
@@ -193,6 +193,38 @@ export const mutation = mutationType({
         await ctx.actions.project.setActiveProject(args.path)
 
         return ctx.coreData.app
+      },
+    })
+
+    t.nonNull.field('setCurrentSpec', {
+      type: 'Project',
+      description: 'Set the current spec under test',
+      args: {
+        spec: nonNull(inputObjectType({
+          name: 'SetCurrentSpec',
+          definition (t) {
+            t.nonNull.field('name', {
+              type: 'String',
+            })
+
+            t.nonNull.field('relative', {
+              type: 'String',
+            })
+
+            t.nonNull.field('absolute', {
+              type: 'String',
+            })
+          },
+        })),
+      },
+      resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
+        ctx.actions.project.setCurrentSpec(args.spec)
+
+        return ctx.activeProject
       },
     })
   },

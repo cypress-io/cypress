@@ -1,4 +1,4 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SetCurrentSpec, SpecType } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { Maybe, ProjectShape } from '../data/coreDataShape'
@@ -180,6 +180,14 @@ export class ProjectActions {
     }
 
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
+  }
+
+  setCurrentSpec (spec: SetCurrentSpec) {
+    if (!this.ctx.activeProject) {
+      throw Error(`Cannot set current spec without activeProject.`)
+    }
+
+    this.ctx.activeProject.currentSpec = spec
   }
 
   async clearLatestProjectCache () {
