@@ -1,8 +1,5 @@
 <template>
   <div class="p-24px">
-    <button @click="go">
-      go
-    </button>
     <SpecsListHeader
       v-model="search"
       class="pb-32px"
@@ -35,12 +32,7 @@ import { gql } from '@urql/vue'
 import { computed, ref } from 'vue'
 import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
-const go = () => {
-  router.push('/runner')
-}
 const { t } = useI18n()
 const path = (spec: SpecNode_SpecsListFragment) => `/runner/#${spec.node.absolute}`
 
