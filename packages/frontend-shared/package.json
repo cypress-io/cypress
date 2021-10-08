@@ -9,8 +9,8 @@
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
     "test": "yarn cypress:run && yarn types",
     "windi": "yarn windicss-analysis",
-    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open-ct --project ${PWD}",
-    "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run-ct --project ${PWD}",
+    "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --ct --project ${PWD}",
+    "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --ct --project ${PWD}",
     "dev": "vite --open"
   },
   "dependencies": {},

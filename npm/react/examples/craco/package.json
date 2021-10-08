@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
+    "test": "node ../../../../scripts/cypress run --ct",
     "start": "craco start",
     "build": "craco build"
   },

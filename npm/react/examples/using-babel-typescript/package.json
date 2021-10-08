@@ -3,8 +3,8 @@
   "description": "Component testing for TypeScript projects using Babel config",
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "cy:open": "node ../../../../scripts/cypress open --ct",
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",

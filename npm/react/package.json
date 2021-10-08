@@ -6,9 +6,9 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile-plugins && rollup -c rollup.config.js",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress.js open-ct",
+    "cy:open": "node ../../scripts/cypress.js open --ct",
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct",
+    "cy:run": "node ../../scripts/cypress.js run --ct",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "yarn test-unit && yarn test-component",

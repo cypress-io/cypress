@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "dev": "next",
     "start": "next start",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "dependencies": {
     "next": "10.1.3",

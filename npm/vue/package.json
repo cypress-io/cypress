@@ -6,8 +6,8 @@
   "scripts": {
     "build": "rimraf dist && rollup -c rollup.config.js",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress.js open-ct --project ${PWD}",
-    "cy:run": "node ../../scripts/cypress.js run-ct --project ${PWD}",
+    "cy:open": "node ../../scripts/cypress.js open --ct --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run --ct --project ${PWD}",
     "typecheck": "vue-tsc --noEmit",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*",

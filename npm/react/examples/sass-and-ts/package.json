@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "check-coverage": "check-coverage src/App.tsx",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "only-covered": "only-covered src/App.tsx",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "dependencies": {
     "sass-loader": "10.0.2"

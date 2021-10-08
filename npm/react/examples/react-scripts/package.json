@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "check-coverage": "check-coverage src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "only-covered": "only-covered src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
     "start": "react-scripts start",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",

@@ -5,9 +5,9 @@
   "scripts": {
     "build:css": "tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
     "precy:open": "npm run build:css",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "pretest": "npm run build:css",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",

@@ -64,8 +64,8 @@ function printCypressCommandsHelper (options: { shouldSetupComponentTesting: boo
   printCommand('cypress run', 'Runs tests in headless mode.')
 
   if (options.shouldSetupComponentTesting) {
-    printCommand('cypress open-ct', 'Opens cypress component-testing web app.')
-    printCommand('cypress run-ct', 'Runs component testing in headless mode.')
+    printCommand('cypress open --ct', 'Opens Cypress component testing interactive mode.')
+    printCommand('cypress run-ct', 'Runs all Cypress component testing suites.')
   }
 }
 

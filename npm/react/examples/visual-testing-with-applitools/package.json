@@ -3,8 +3,8 @@
   "description": "Visual diffing for component testing using Applittols",
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "cy:open": "node ../../../../scripts/cypress open --ct",
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "devDependencies": {
     "@applitools/eyes-cypress": "3.14.0",

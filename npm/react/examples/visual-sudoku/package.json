@@ -6,11 +6,11 @@
   "license": "MIT",
   "scripts": {
     "build": "react-scripts build",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "docker:run": "docker run -it -v $PWD/../..:/e2e -w /e2e/examples/visual-sudoku cypress/included:4.5.0",
     "eject": "react-scripts eject",
     "start": "react-scripts start",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "browserslist": {
     "production": [

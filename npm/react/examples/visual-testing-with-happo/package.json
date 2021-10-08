@@ -3,8 +3,8 @@
   "description": "Visual component testing using Happo.io",
   "private": true,
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
+    "test": "node ../../../../scripts/cypress run --ct",
     "test:happo": "../../node_modules/.bin/happo-cypress -- npm test"
   },
   "devDependencies": {

@@ -6,11 +6,11 @@
     "build": "next build",
     "build:static": "next build && next out",
     "check-coverage": "check-coverage components/Search.jsx && check-coverage pages/index.js && check-coverage pages/router.js",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "dev": "next",
     "only-covered": "only-covered components/Search.jsx pages/index.js pages/router.js",
     "start": "next start",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",

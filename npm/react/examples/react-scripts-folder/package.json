@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "check-coverage": "check-coverage src/App.js src/calc.js src/Child.js",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "only-covered": "only-covered src/App.js src/calc.js src/Child.js",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run --ct"
   },
   "devDependencies": {
     "@cypress/react": "file:../../dist",

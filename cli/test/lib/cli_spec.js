@@ -629,12 +629,24 @@ describe('cli', () => {
     })
 
     it('spawns server with correct args for component-testing', () => {
+      this.exec('open --ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
+      expect(spawn.start.firstCall.args[0]).to.include('component')
+    })
+
+    it('spawns server with correct args for depricated component-testing command', () => {
       this.exec('open-ct --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
 
     it('runs server with correct args for component-testing', () => {
+      this.exec('run --ct --dev')
+      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
+      expect(spawn.start.firstCall.args[0]).to.include('component')
+    })
+
+    it('runs server with correct args for depricated component-testing command', () => {
       this.exec('run-ct --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')

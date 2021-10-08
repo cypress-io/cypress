@@ -5,8 +5,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "cy:open": "node ../../../../scripts/cypress open-ct",
-    "test": "node ../../../../scripts/cypress run-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
+    "test": "node ../../../../scripts/cypress run --ct",
     "report:coverage": "nyc report",
     "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },

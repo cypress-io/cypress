@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "check-coverage": "check-coverage Test.js calc.js ParentComponent.js ChildComponent.js",
-    "cy:open": "node ../../../../scripts/cypress open-ct",
+    "cy:open": "node ../../../../scripts/cypress open --ct",
     "only-covered": "only-covered Test.js calc.js ParentComponent.js ChildComponent.js",
-    "test": "node ../../../../scripts/cypress run-ct"
+    "test": "node ../../../../scripts/cypress run ---ct"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",

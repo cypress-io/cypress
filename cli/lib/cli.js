@@ -419,7 +419,7 @@ module.exports = {
     program
     .command('open-ct')
     .usage('[options]')
-    .description('Opens Cypress component testing interactive mode.')
+    .description('Opens Cypress component testing interactive mode. Deprecated: use "open --ct"')
     .option('-b, --browser <browser-path>', text('browserOpenMode'))
     .option('-c, --config <config>', text('config'))
     .option('-C, --config-file <config-file>', text('configFile'))
@@ -431,6 +431,16 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('opening Cypress')
+
+      let msg = `
+      ${logSymbols.warning} Warning: open-ct is deprecated and will be removed in a future release.
+      Use \`open --ct\` or \`open --component\` instead.
+      `
+
+      logger.log()
+      logger.warn(stripIndent(msg))
+      logger.log()
+
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
       .catch(util.logErrorExit1)
@@ -439,7 +449,7 @@ module.exports = {
     program
     .command('run-ct')
     .usage('[options]')
-    .description('Runs all Cypress Component Testing suites')
+    .description('Runs all Cypress component testing suites. Deprecated: use "run --ct"')
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
     .option('--ci-build-id <id>', text('ciBuildId'))
     .option('-c, --config <config>', text('config'))
@@ -462,6 +472,16 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       debug('running Cypress run-ct')
+
+      let msg = `
+      ${logSymbols.warning} Warning: run-ct is deprecated and will be removed in a future release.
+      Use \`run --ct\` or \`run --component\` instead.
+      `
+
+      logger.log()
+      logger.warn(stripIndent(msg))
+      logger.log()
+
       require('./exec/run')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
       .then(util.exit)

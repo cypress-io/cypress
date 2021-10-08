@@ -7,8 +7,8 @@
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "watch": "tsc --project tsconfig.lib.json -w",
-    "cy:open": "node ../../scripts/cypress.js open-ct",
-    "cy:run": "node ../../scripts/cypress.js run-ct",
+    "cy:open": "node ../../scripts/cypress.js open --ct",
+    "cy:run": "node ../../scripts/cypress.js run --ct",
     "ng": "ng",
     "app-start": "ng serve",
     "app-build": "ng build",

@@ -143,7 +143,7 @@ declare namespace Cypress {
 
   /**
    * Spec type for the given test. "integration" is the default, but
-   * tests run using `open-ct` will be "component"
+   * tests run using `open --ct` will be "component"
    *
    * @see https://on.cypress.io/experiments
    */
