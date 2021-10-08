@@ -9,7 +9,12 @@
   </div>
 
   <div v-else>
-    <Button size="lg" :variant="buttonVariant" @click="handleAuth">{{ buttonMessage }}</Button>
+    <Button size="lg" :variant="buttonVariant" @click="handleAuth">
+    <template #prefix v-if="isLoggingIn">
+      <i-cy-loading_x16  v-if="isLoggingIn" class="animate-spin icon-dark-white icon-light-gray-400" />
+    </template>
+    {{ buttonMessage }}
+    </Button>
   </div>
 </template>
 
@@ -86,13 +91,14 @@ const handleLogout = async () => {
 }
 
 const viewer = computed(() => props.gql?.cloudViewer)
+const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const buttonMessage = computed(() => {
   if (!clickedOnce.value && !viewer.value) {
     return t('topNav.login.actionLogin')
   }
 
-  if (clickedOnce.value && !viewer.value) {
+  if (isLoggingIn.value) {
     return t('topNav.login.actionWaiting')
   }
 
