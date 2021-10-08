@@ -29,7 +29,7 @@
                   <br />
                   <span class="text-gray-600">{{ props.gql.cloudViewer?.email }}</span>
                   <br>
-                  <a class="text-indigo-500 outline-transparent hocus:underline" href="https://dashboard-staging.cypress.io/profile">Profile Settings</a>
+                  <a class="text-indigo-500 outline-transparent hocus:underline" :href="getProfileLink()" target="_blank">Profile Settings</a>
                 </div>
               </div>
 
@@ -94,6 +94,13 @@ fragment HeaderBar on Query {
 
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
+
+
+
+const getProfileLink = () => {
+  const subdomain = process.env.VITE_CYPRESS_INTERNAL_ENV === 'production' ? 'dashboard': 'dashboard-staging'  
+  return `https://${subdomain}.cypress.io/profile`
+}
 
 const openLogin = () => {
   isLoginOpen.value = true
