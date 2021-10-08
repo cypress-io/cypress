@@ -72,7 +72,7 @@ export const runner = {
     config.spec = getSpec() ?? null
     config.specs = specsStore.specFiles
     config.browser = getCurrentBrowser()
-    config.exit = exit
+    config.exit = exit ?? true
 
     debug('serving runner index.html with config %o',
       _.pick(config, 'version', 'platform', 'arch', 'projectName'))
