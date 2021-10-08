@@ -5,6 +5,7 @@
     "src/**/*.tsx", 
     "cypress/**/*.ts", 
     "cypress/**/*.tsx",
+    "index.d.ts",
     "../frontend-shared/src/**/*.vue", 
     "../frontend-shared/src/**/*.tsx", 
     "../frontend-shared/cypress/**/*.ts"
@@ -14,6 +15,7 @@
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],
       "@packages/*": ["../*"]
-    }
+    },
+    "allowJs": true
   }
 }
