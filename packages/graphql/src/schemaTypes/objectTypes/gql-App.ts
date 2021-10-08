@@ -36,6 +36,13 @@ export const App = objectType({
       },
     })
 
+    t.nonNull.boolean('isAuthBrowserOpened', {
+      description: 'Whether the browser has been opened for auth or not',
+      resolve: (source, args, ctx) => {
+        return ctx.app.isAuthBrowserOpened
+      },
+    })
+
     t.nonNull.list.nonNull.field('projects', {
       type: Project,
       description: 'All known projects for the app',

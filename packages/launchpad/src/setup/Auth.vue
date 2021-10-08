@@ -26,6 +26,7 @@ import { useMutation } from '@urql/vue'
 import {
   LoginDocument,
   LogoutDocument,
+  CheckAuthBrowserDocument,
   AuthFragment,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
@@ -42,6 +43,9 @@ fragment Auth on Query {
     id
     email
     fullName
+  }
+  app {
+    isAuthBrowserOpened
   }
 }
 `
@@ -62,8 +66,19 @@ mutation Login {
 }
 `
 
+gql`
+mutation CheckAuthBrowser {
+  checkAuthBrowser {
+    ...Auth
+  }
+}
+`
+
+
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
+const checkAuthBrowser = useMutation(CheckAuthBrowserDocument)
+
 const error = ref<string>()
 const clickedOnce = ref(false)
 
@@ -71,14 +86,24 @@ const emit = defineEmits<{
   (event: 'continue', value: boolean): void
 }>()
 
+const viewer = computed(() => props.gql?.cloudViewer)
+const isBrowserOpened = computed(() => props.gql?.app?.isAuthBrowserOpened)
+const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
+
 const handleAuth = async () => {
   if (viewer.value) {
     emit('continue', true)
-
     return
   }
 
-  clickedOnce.value = true
+  clickedOnce.value = true;
+  const browserCheckInterval = setInterval(async () => {
+    await checkAuthBrowser.executeMutation({})
+    if (isBrowserOpened.value) {
+        clearInterval(browserCheckInterval)
+    }
+  }, 1500)
+
   const result = await login.executeMutation({})
 
   error.value = result.error?.message ?? undefined
@@ -90,10 +115,13 @@ const handleLogout = async () => {
   await logout.executeMutation({})
 }
 
-const viewer = computed(() => props.gql?.cloudViewer)
-const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
+
 
 const buttonMessage = computed(() => {
+
+  if (!isBrowserOpened.value && isLoggingIn.value) {
+    return t('topNav.login.actionOpening')
+  }
   if (!clickedOnce.value && !viewer.value) {
     return t('topNav.login.actionLogin')
   }

@@ -13,6 +13,9 @@ type App {
   """See if the GraphQL server is alive"""
   healthCheck: String!
 
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
+
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
@@ -271,6 +274,9 @@ type Mutation {
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
+
+  """Check the Auth Browser Status"""
+  checkAuthBrowser: Query
   clearActiveProject: Query!
 
   """

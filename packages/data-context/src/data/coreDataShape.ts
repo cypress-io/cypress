@@ -27,7 +27,8 @@ export interface AppDataShape {
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
-  isInGlobalMode: boolean
+  isInGlobalMode: boolean,
+  isAuthBrowserOpened: boolean
 }
 
 export interface WizardDataShape {
@@ -37,7 +38,7 @@ export interface WizardDataShape {
   allBundlers: typeof BUNDLERS
   chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
-  chosenManualInstall: boolean
+  chosenManualInstall: boolean | false
   chosenBrowser: FoundBrowser | null
 }
 
