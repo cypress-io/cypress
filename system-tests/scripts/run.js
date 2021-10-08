@@ -91,13 +91,13 @@ if (isGteNode12()) {
   )
 }
 
-if (!isWindows()) {
-  commandAndArguments.args.push(
-    'node_modules/.bin/_mocha',
-  )
+// if (!isWindows()) {
+//   commandAndArguments.args.push(
+//     'node_modules/.bin/_mocha',
+//   )
 
-  commandAndArguments.args = commandAndArguments.args.concat(run)
-}
+//   commandAndArguments.args = commandAndArguments.args.concat(run)
+// }
 
 if (options.fgrep) {
   commandAndArguments.args.push(
