@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { randomComponents } from '../../../src/graphql/specs/testStubSpecs'
-import config from '@packages/desktop-gui/cypress/fixtures/config.json'
+import config from '../../fixtures/config.json'
 
 import type {
   Project,
