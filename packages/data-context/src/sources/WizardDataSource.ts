@@ -135,10 +135,14 @@ const LanguageNames: Record<WizardCodeLanguage, string> = {
 }
 
 export const wizardGetConfigCodeE2E = (opts: GetCodeOptsE2E): string | null => {
-  return `{
+  const exportStatement =
+    opts.lang === 'js' ? 'module.exports = {' : 'export default {'
+
+  return `${exportStatement}{
   e2e: {
     viewportHeight: 660,
     viewportWidth: 1000,
+  }
 }`
 }
 

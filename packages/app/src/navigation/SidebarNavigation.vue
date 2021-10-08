@@ -21,6 +21,7 @@
           :to="item.href"
         >
           <SidebarNavigationRow
+            :data-e2e-href="item.href"
             :active="isActive"
             :icon="item.icon"
           >

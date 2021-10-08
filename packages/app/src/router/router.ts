@@ -5,8 +5,11 @@ import { setupLayouts } from 'virtual:generated-layouts'
 export const createRouter = () => {
   const routes = setupLayouts(generatedRoutes)
 
+  // TODO: clean this up
+  const historyBase = window.location.href.includes('__vite__') ? '__vite__' : ''
+
   return _createRouter({
-    history: createWebHistory('/__vite__/'),
+    history: createWebHistory(historyBase),
     routes,
   })
 }
