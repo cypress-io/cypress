@@ -54,6 +54,10 @@ const execute = () => {
 <style scoped>
 #unified-runner {
   position: relative;
+  flex-grow: 1;
+  margin: 20px;
+  box-shadow: 0px 0px 5px 0 black;
+  padding: 10px;
 }
 
 #unified-reporter {

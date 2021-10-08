@@ -24,7 +24,11 @@ query Runner_All {
 }
 `
 
-const query = useQuery({ query: Runner_AllDocument })
+// network-only - we do not want to execute a stale spec
+const query = useQuery({
+  query: Runner_AllDocument,
+  requestPolicy: 'network-only',
+})
 </script>
 
 <route>

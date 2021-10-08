@@ -62,7 +62,7 @@ fragment Specs_SpecsList on App {
   activeProject {
     id
     projectRoot
-    specs(first: 10) {
+    specs(first: 25) {
       edges {
         ...SpecNode_SpecsList
       }
