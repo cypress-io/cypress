@@ -24,10 +24,10 @@ export class ProjectDataSource {
     const config = await this.configLoader.load(projectRoot)
 
     const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromConfig => {
-      return Object.values(config).reduce<ResolvedFromConfig>((acc, value: { value: string, field: string }) => {
+      return Object.entries(config).reduce<ResolvedFromConfig>((acc, [field, value]) => {
         return {
           ...acc,
-          value: { ...acc.value, [value.field]: value.value },
+          value: { ...acc.value, [field]: value.value },
         }
       }, {
         value: {},
@@ -41,7 +41,7 @@ export class ProjectDataSource {
         return mapEnvResolvedConfigToObj(value)
       }
 
-      return value
+      return { ...value, field: key }
     }) as ResolvedFromConfig[]
   }
 

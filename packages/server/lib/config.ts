@@ -339,7 +339,6 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
     const valueFrom: ResolvedFromConfig = {
       value: val,
       from: 'plugin',
-      field: key,
     }
 
     resolvedObj[key] = valueFrom
@@ -436,7 +435,6 @@ export function resolveConfigValues (config, defaults, resolved = {}) {
       return {
         value: val,
         from: s,
-        field: key,
       }
     }
 
@@ -689,7 +687,6 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
       return envVars[key] = {
         value: val,
         from,
-        field: key,
       }
     })
   }
@@ -726,7 +723,6 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
         resolved[cfgKey] = {
           value: val,
           from: 'env',
-          field: cfgKey,
         } as ResolvedFromConfig
       }
 
@@ -755,7 +751,7 @@ export function parseEnv (cfg: Record<string, any>, envCLI: Record<string, any>,
 }
 
 export function getResolvedRuntimeConfig (config, runtimeConfig) {
-  const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v): ResolvedFromConfig => ({ value: v, from: 'runtime', field: v }))
+  const resolvedRuntimeFields = _.mapValues(runtimeConfig, (v): ResolvedFromConfig => ({ value: v, from: 'runtime' }))
 
   return {
     ...config,
