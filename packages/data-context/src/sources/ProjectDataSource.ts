@@ -1,4 +1,4 @@
-import type { FullConfig } from '@packages/types'
+import type { FullConfig, ResolvedFromConfig } from '@packages/types'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -20,9 +20,36 @@ export class ProjectDataSource {
     return this.configLoader.load(projectRoot)
   }
 
+  async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
+    const config = await this.configLoader.load(projectRoot)
+
+    return Object.entries(config.resolved).map(([key, value]) => {
+      if (key === 'env') {
+        // @ts-ignore this is a ResolvedFromConfig
+        return this.mapEnvResolvedConfigToObj(value)
+      }
+
+      return value
+    }) as ResolvedFromConfig[]
+  }
+
   private configLoader = this.ctx.loader<string, FullConfig>((projectRoots) => {
     return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root)))
   })
+
+  private mapEnvResolvedConfigToObj (config: ResolvedFromConfig): ResolvedFromConfig {
+    let envValues = {}
+
+    Object.values(config).forEach((value) => {
+      Object.assign(envValues, { [value.field]: value.value }, envValues)
+    })
+
+    return {
+      value: envValues,
+      field: 'env',
+      from: 'env',
+    }
+  }
 
   async isFirstTimeAccessing (projectRoot: string, testingType: 'e2e' | 'component') {
     try {

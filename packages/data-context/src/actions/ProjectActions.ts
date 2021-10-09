@@ -50,7 +50,7 @@ export class ProjectActions {
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
-      config: await this.ctx.project.getConfig(projectRoot),
+      config: await this.ctx.project.getResolvedConfigFields(projectRoot),
     }
 
     return this

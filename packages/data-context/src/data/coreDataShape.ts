@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, FullConfig, StorybookFile } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, StorybookFile } from '@packages/types'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 
 export type Maybe<T> = T | null | undefined
@@ -20,7 +20,7 @@ export interface ActiveProjectShape extends ProjectShape {
   isFirstTimeCT: Maybe<boolean>
   isFirstTimeE2E: Maybe<boolean>
   specs?: FoundSpec[]
-  config: FullConfig
+  config: ResolvedFromConfig[]
 }
 
 export interface AppDataShape {
