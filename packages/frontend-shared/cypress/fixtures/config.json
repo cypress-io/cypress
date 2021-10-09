@@ -257,17 +257,14 @@
   ],
   "resolved": {
     "animationDistanceThreshold": {
-      "field": "animationDistanceThreshold",
       "from": "default",
       "value": 5
     },
     "baseUrl": {
-      "field": "baseUrl",
       "from": "config",
       "value": "http://localhost:8080"
     },
     "browsers": {
-      "field": "browsers",
       "from": "plugin",
       "value": [
         {
@@ -305,12 +302,10 @@
       ]
     },
     "commandTimeout": {
-      "field": "commandTimeout",
       "from": "default",
       "value": 4000
     },
     "env": {
-      "field": "env",
       "fileServerFolder": {
         "from": "default",
         "value": ""
@@ -329,92 +324,74 @@
       }
     },
     "execTimeout": {
-      "field": "execTimeout",
       "from": "default",
       "value": 60000
     },
     "fileServerFolder": {
-      "field": "fileServerFolder",
       "from": "default",
       "value": null
     },
     "fixturesFolder": {
-      "field": "fixturesFolder",
       "from": "default",
       "value": "cypress/fixtures"
     },
     "integrationFolder": {
-      "field": "integrationFolder",
       "from": "envFile",
       "value": "cypress/integration/project"
     },
     "numTestsKeptInMemory": {
-      "field": "numTestsKeptInMemory",
       "from": "cli",
       "value": 10
     },
     "pageLoadTimeout": {
-      "field": "pageLoadTimeout",
       "from": "default",
       "value": 30000
     },
     "pluginsFile": {
-      "field": "pluginsFile",
       "from": "default",
       "value": "cypress/plugins/index.js"
     },
     "port": {
-      "field": "port",
       "from": "default",
       "value": 2020
     },
     "reporter": {
-      "field": "reporter",
       "from": "env",
       "value": "mocha"
     },
     "requestTimeout": {
-      "field": "requestTimeout",
       "from": "default",
       "value": 5000
     },
     "responseTimeout": {
-      "field": "responseTimeout",
       "from": "default",
       "value": 20000
     },
     "supportFolder": {
-      "field": "supportFolder",
       "from": "default",
       "value": "cypress/support"
     },
     "viewportHeight": {
-      "field": "viewportHeight",
       "from": "default",
       "value": 660
     },
     "viewportWidth": {
-      "field": "viewportWidth",
       "from": "default",
       "value": 1000
     },
     "waitForAnimations": {
-      "field": "waitForAnimations",
       "from": "default",
       "value": true
     },
     "scrollBehavior": {
-      "field": "scrollBehavior",
       "from": "default",
       "value": "top"
     },
     "watchForFileChanges": {
-      "field": "watchForFileChanges",
       "from": "default",
       "value": true
     },
     "blockHosts": {
-      "field": "blockHosts",
       "from": "config",
       "value": [
         "www.google-analytics.com",
@@ -422,7 +399,6 @@
       ]
     },
     "hosts": {
-      "field": "hosts",
       "from": "config",
       "value": {
         "*.foobar.com": "127.0.0.1",
