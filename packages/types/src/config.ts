@@ -8,7 +8,6 @@ export type ResolvedFromConfig = {
   from: ResolvedConfigurationOptionSource
   // TODO: Generic somehow with better type safety
   value: any
-  field: string
 }
 
 export type ResolvedConfigurationOptions = Partial<{

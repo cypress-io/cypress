@@ -1,4 +1,4 @@
-import type { FullConfig, ResolvedFromConfig } from '@packages/types'
+import type { FullConfig, ResolvedFromConfig, RESOLVED_FROM } from '@packages/types'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -23,33 +23,35 @@ export class ProjectDataSource {
   async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
     const config = await this.configLoader.load(projectRoot)
 
+    interface ResolvedFromWithField extends ResolvedFromConfig {
+      field: typeof RESOLVED_FROM[number]
+    }
+
+    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
+      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
+        return {
+          ...acc,
+          value: { ...acc.value, [field]: value.value },
+        }
+      }, {
+        value: {},
+        field: 'env',
+        from: 'env',
+      })
+    }
+
     return Object.entries(config.resolved).map(([key, value]) => {
-      if (key === 'env') {
-        // @ts-ignore this is a ResolvedFromConfig
-        return this.mapEnvResolvedConfigToObj(value)
+      if (key === 'env' && value) {
+        return mapEnvResolvedConfigToObj(value)
       }
 
-      return value
+      return { ...value, field: key }
     }) as ResolvedFromConfig[]
   }
 
   private configLoader = this.ctx.loader<string, FullConfig>((projectRoots) => {
     return Promise.all(projectRoots.map((root) => this.ctx._apis.projectApi.getConfig(root)))
   })
-
-  private mapEnvResolvedConfigToObj (config: ResolvedFromConfig): ResolvedFromConfig {
-    let envValues = {}
-
-    Object.values(config).forEach((value) => {
-      Object.assign(envValues, { [value.field]: value.value }, envValues)
-    })
-
-    return {
-      value: envValues,
-      field: 'env',
-      from: 'env',
-    }
-  }
 
   async isFirstTimeAccessing (projectRoot: string, testingType: 'e2e' | 'component') {
     try {
