@@ -1,4 +1,4 @@
-import type { FullConfig } from '@packages/types'
+import type { FullConfig, ResolvedFromConfig, RESOLVED_FROM } from '@packages/types'
 import path from 'path'
 
 import type { DataContext } from '..'
@@ -18,6 +18,35 @@ export class ProjectDataSource {
 
   getConfig (projectRoot: string) {
     return this.configLoader.load(projectRoot)
+  }
+
+  async getResolvedConfigFields (projectRoot: string): Promise<ResolvedFromConfig[]> {
+    const config = await this.configLoader.load(projectRoot)
+
+    interface ResolvedFromWithField extends ResolvedFromConfig {
+      field: typeof RESOLVED_FROM[number]
+    }
+
+    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
+      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
+        return {
+          ...acc,
+          value: { ...acc.value, [field]: value.value },
+        }
+      }, {
+        value: {},
+        field: 'env',
+        from: 'env',
+      })
+    }
+
+    return Object.entries(config.resolved).map(([key, value]) => {
+      if (key === 'env' && value) {
+        return mapEnvResolvedConfigToObj(value)
+      }
+
+      return { ...value, field: key }
+    }) as ResolvedFromConfig[]
   }
 
   private configLoader = this.ctx.loader<string, FullConfig>((projectRoots) => {

@@ -140,7 +140,7 @@ export const randomComponents = (n = 200): FoundSpec[] => {
       relative: `${directories[d.directory](d)}/${name}`,
       absolute: `${faker.system.directoryPath()}/${directories[d.directory](d)}/${name}`,
       name: `${componentName}${d.specPattern}`,
-      specFileExtension: d.specPattern,
+      specFileExtension: `${d.specPattern}${d.fileExtension}`,
       fileExtension: d.fileExtension,
       specType: 'component',
       fileName: componentName,
