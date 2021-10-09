@@ -30,10 +30,10 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     const onNewSpec = cy.spy().as('new-spec')
     const search = ref('')
 
-    cy.mount(<SpecsListHeader
+    cy.mount(<div class="max-w-800px p-12 resize overflow-auto"><SpecsListHeader
       modelValue={search.value}
       onNewSpec={onNewSpec}
-    />)
+    /></div>)
     .get(buttonSelector)
     .click()
     .get('@new-spec')

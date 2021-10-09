@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-testid=specs-list-row]'
 const inputSelector = 'input'
-const fullFile = (s) => `${s.node.fileName}${s.node.specFileExtension}${s.node.fileExtension}`
+const fullFile = (s) => `${s.node.fileName}${s.node.specFileExtension}`
 const hasSpecText = (_node: JQuery<HTMLElement>, spec: SpecListRowFragment) => {
   const $node = _node as JQuery<HTMLDivElement>
 
