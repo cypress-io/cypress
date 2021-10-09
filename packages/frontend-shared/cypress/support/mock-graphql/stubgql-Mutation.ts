@@ -1,4 +1,5 @@
 import type { Mutation, Project } from '../generated/test-graphql-types.gen'
+import config from '../../fixtures/config.json'
 import path from 'path'
 
 import type { MaybeResolver } from './clientTestUtils'
@@ -13,6 +14,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       isFirstTimeCT: true,
       isFirstTimeE2E: true,
       __typename: 'Project',
+      config,
     }
 
     ctx.app.projects.push(project)
