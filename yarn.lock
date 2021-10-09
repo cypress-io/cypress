@@ -41409,6 +41409,21 @@ vite-plugin-icons@0.6.3:
     "@iconify/json-tools" "^1.0.10"
     vue-template-es2015-compiler "^1.9.1"
 
+vite-plugin-optimize-persist@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/vite-plugin-optimize-persist/-/vite-plugin-optimize-persist-0.0.5.tgz#fdfb40e502c87ac09186c6ba47856cb33c891029"
+  integrity sha512-lQvUn+hSIyAxCt4jiPOgV65usVGYkbMUrRE8toI3BdSx0KBg0o4sThL0HEyO/vzHgIhrCO6eA7WCkJL9KhKXFw==
+  dependencies:
+    debug "^4.3.2"
+    fs-extra "^10.0.0"
+
+vite-plugin-package-config@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/vite-plugin-package-config/-/vite-plugin-package-config-0.0.3.tgz#8667dbffffd3eafa0f697c386659d653f737b887"
+  integrity sha512-xneYdCd9fqmehemphnfyHJDE/IyiXe2rtg39lNcQq9jaA5oZCIBBTG+lLAaal3zIyABjKd7fp9oHG/Y+sq5Xlw==
+  dependencies:
+    debug "^4.3.2"
+
 vite-plugin-pages@0.18.1:
   version "0.18.1"
   resolved "https://registry.yarnpkg.com/vite-plugin-pages/-/vite-plugin-pages-0.18.1.tgz#c6b73b88d82448520a87ba0f92e432e8d332301d"
