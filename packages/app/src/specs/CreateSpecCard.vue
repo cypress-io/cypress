@@ -23,7 +23,7 @@ import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 defineProps<{
   icon: FunctionalComponent<SVGAttributes>,
-  header?: string,
-  description?: string
+  header: string,
+  description: string
 }>()
 </script>
