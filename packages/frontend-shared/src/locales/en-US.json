@@ -1,10 +1,18 @@
 {
   "links": {
-    "learnMore": "Learn more."
+    "learnMore": "Learn more.",
+    "needHelp": "Need help"
   },
   "components": {
     "modal": {
       "dismiss": "Dismiss"
+    },
+    "fileSearch": {
+      "byFilenameInput": "Search by filename...",
+      "matchesIndicator": "No Matches | 1 Match | {count} Matches"
+    },
+    "button": {
+      "cancel": "Cancel"
     },
     "select": {
       "placeholder": "Choose an option..."
@@ -27,6 +35,49 @@
   "status": {
     "enabled": "Enabled",
     "disabled": "Disabled"
+  },
+  "createSpec": {
+    "successPage": {
+      "header": "Great! The spec was successfully added",
+      "runSpecButton": "Okay, run the spec",
+      "createAnotherSpecButton": "Create another spec"
+    },
+    "page": {
+      "title": "Create your first spec",
+      "component": {
+        "description": "Since this project looks new, we recommend that you get started by creating a spec for one of your components."
+      },
+      "e2e": {
+        "description": "Since this project looks new, we recommend that you use the specs and tests that we've written for you to get started."
+      }
+    },
+    "noSpecsMessage": "If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.",
+    "viewSpecPatternButton": "View spec pattern",
+    "e2e": {
+      "importFromScaffold": {
+        "header": "Scaffold example specs",
+        "description": "We'll generate several example specs to help guide you on how to write tests in Cypress.",
+        "specsAddedHeader": "Great! We added the following files to your project:",
+        "specsAddedButton": "Okay, I got it!"
+      },
+      "importEmptySpec": {
+        "header": "Create an empty spec",
+        "description": "We'll generate an empty spec file which can be used to start testing your application.",
+        "chooseFilenameHeader": "Choose a filename for this spec"
+      }
+    },
+    "component": {
+      "importFromStory": {
+        "header": "Create from story",
+        "description": "We'll generate a spec file from the Storybook files that you've written for each component in this project.",
+        "chooseAStoryHeader": "Choose a story"
+      },
+      "importFromComponent": {
+        "header": "Create from component",
+        "description": "We'll generate an empty spec file which can be used to import and test any component in this project.",
+        "chooseAComponentHeader": "Choose a component"
+      }
+    }
   },
   "specPage": {
     "pageTitle": "Specs",

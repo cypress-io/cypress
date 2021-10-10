@@ -18,12 +18,14 @@ interface RuleConfig {
 
 const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
   const resolvedColor = color ? color : weight ? theme?.(`colors.${name}.${weight}`) : theme?.(`colors.${name}`)
-  let [lightKey, darkKey] = [`.icon-light-${name}`, `.icon-dark-${name}`]
+  let [lightKey, darkKey, secondaryLightKey, secondaryDarkKey] = [`.icon-light-${name}`, `.icon-dark-${name}`, `.icon-light-secondary-${name}`, `.icon-dark-secondary-${name}`]
 
   // transparent, black, and white
   if (weight) {
     lightKey += `-${weight}`
     darkKey += `-${weight}`
+    secondaryLightKey += `-${weight}`
+    secondaryDarkKey += `-${weight}`
   }
 
   return {
@@ -41,6 +43,17 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
         fill: resolvedColor,
       },
     },
+    [secondaryLightKey]: {
+      '> *[fill].icon-light-secondary': {
+        fill: resolvedColor,
+      },
+      '> *[stroke].icon-light-secondary': {
+        stroke: resolvedColor,
+      },
+      '> *[fill][stroke].icon-light-secondary-fill': {
+        fill: resolvedColor,
+      },
+    },
     [darkKey]: {
       '> *[fill].icon-dark-fill': {
         fill: resolvedColor,
@@ -51,8 +64,16 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[stroke].icon-dark': {
         stroke: resolvedColor,
       },
-      '> *[fill][stroke].icon-dark-stroke': {
+    },
+    [secondaryDarkKey]: {
+      '> *[fill].icon-dark-secondary': {
+        fill: resolvedColor,
+      },
+      '> *[stroke].icon-dark-secondary': {
         stroke: resolvedColor,
+      },
+      '> *[fill][stroke].icon-light-dark-fill': {
+        fill: resolvedColor,
       },
     },
   }

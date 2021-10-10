@@ -76,11 +76,22 @@
   "vite": {
     "optimizeDeps": {
       "include": [
+        "@iconify/iconify",
+        "@testing-library/cypress/add-commands",
+        "@urql/exchange-execute",
         "@urql/vue",
         "@vueuse/core",
+        "cypress-file-upload",
+        "dedent",
+        "fake-uuid",
+        "graphql",
+        "graphql-relay",
+        "graphql/jsutils/Path",
         "lodash",
+        "path",
         "vue",
-        "vue-toast-notification"
+        "vue-toast-notification",
+        "wonka"
       ]
     }
   }
