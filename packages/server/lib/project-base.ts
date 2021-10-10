@@ -84,7 +84,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   constructor ({
     projectRoot,
     testingType,
-    options,
+    options = {},
   }: {
     projectRoot: string
     testingType: Cypress.TestingType

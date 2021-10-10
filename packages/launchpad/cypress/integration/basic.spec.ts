@@ -8,7 +8,7 @@ describe('Launchpad', () => {
   })
 
   it('resolves the home page', () => {
-    cy.visit(`dist/index.html?serverPort=${GQL_PORT}`)
+    cy.visit(`dist/index.html?gqlPort=${GQL_PORT}`)
     cy.get('h1').should('contain', 'Welcome')
   })
 })

@@ -5,7 +5,6 @@
     "src/**/*.ts"
   ],
   "compilerOptions": {
-    "lib": ["es2018", "ES2020.Promise"],
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
