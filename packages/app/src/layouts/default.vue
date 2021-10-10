@@ -1,6 +1,6 @@
 <template>
-  <div class="h-screen overflow-hidden flex flex-row bg-red">
-    <main class="min-w-0 flex-1 border-t bg-green border-gray-200 lg:flex">
+  <div class="h-screen overflow-hidden flex flex-row">
+    <main class="min-w-0 flex-1 border-t border-gray-200 lg:flex">
       <section
         aria-labelledby="primary-heading"
         class="min-w-0 flex-1 h-full flex flex-col overflow-hidden lg:order-last"
