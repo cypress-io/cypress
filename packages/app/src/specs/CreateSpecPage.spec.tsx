@@ -49,7 +49,7 @@ describe('<CreateSpecPage />', () => {
         <Button variant="outline" size="md" onClick={() => testingType.value = testingType.value === 'component' ? 'e2e' : 'component'}>Toggle Testing Types</Button>
 
         { /* Subject Under Test */ }
-        <CreateSpecPage class="border-1 rounded p-8" testingType={testingType.value} />
+        <CreateSpecPage testingType={testingType.value} />
       </div>))
   })
 })

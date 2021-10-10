@@ -61,7 +61,7 @@
         "specsAddedButton": "Okay, I got it!"
       },
       "importEmptySpec": {
-        "header": "Create an empty spec",
+        "header": "Create new empty spec",
         "description": "We'll generate an empty spec file which can be used to start testing your application.",
         "chooseFilenameHeader": "Choose a filename for this spec"
       }

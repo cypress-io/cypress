@@ -42,6 +42,9 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[fill][stroke].icon-light-fill': {
         fill: resolvedColor,
       },
+      '> *[fill][stroke].icon-light-stroke': {
+        stroke: resolvedColor
+      }
     },
     [secondaryLightKey]: {
       '> *[fill].icon-light-secondary': {
@@ -53,15 +56,21 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[fill][stroke].icon-light-secondary-fill': {
         fill: resolvedColor,
       },
+      '> *[fill][stroke].icon-light-secondary-stroke': {
+        stroke: resolvedColor
+      }
     },
     [darkKey]: {
-      '> *[fill].icon-dark-fill': {
-        fill: resolvedColor,
-      },
       '> *[fill].icon-dark': {
         fill: resolvedColor,
       },
       '> *[stroke].icon-dark': {
+        stroke: resolvedColor,
+      },
+      '> *[fill].icon-dark-fill': {
+        fill: resolvedColor,
+      },
+      '> *[fill].icon-dark-stroke': {
         stroke: resolvedColor,
       },
     },
@@ -72,9 +81,12 @@ const makeRuleForClass = ({ name, theme, weight, color }: RuleConfig) => {
       '> *[stroke].icon-dark-secondary': {
         stroke: resolvedColor,
       },
-      '> *[fill][stroke].icon-light-dark-fill': {
+      '> *[fill][stroke].icon-dark-secondary-fill': {
         fill: resolvedColor,
       },
+      '> *[fill][stroke].icon-dark-secondary-stroke': {
+        stroke: resolvedColor
+      }
     },
   }
 }

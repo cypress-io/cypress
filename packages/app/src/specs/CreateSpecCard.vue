@@ -1,7 +1,10 @@
 <template>
+<div>
   <div
     role="button"
-    class="block h-auto overflow-scroll text-center rounded w-280px min-h-216px max-h-350px p-32px children:hyphens-manual border-1 hocus-default"
+  class="block h-auto overflow-scroll text-center rounded w-280px m-2px
+  min-h-216px max-h-350px px-32px pt-32px pb-24px children:hyphens-manual border-1
+  hocus-default"
     tabindex="0"
   >
     <component
@@ -12,9 +15,10 @@
     <h2 class="leading-normal text-indigo-500 mt-10px text-18px mb-4px">
       {{ header }}
     </h2>
-    <p class="font-light text-gray-500 text-14px leading-[20px]">
+    <p class="text-gray-500 tracking-tight text-14px leading-[20px]">
       {{ description }}
     </p>
+  </div>
   </div>
 </template>
 
