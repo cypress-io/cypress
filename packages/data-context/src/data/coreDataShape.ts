@@ -59,6 +59,7 @@ export function makeCoreData (): CoreDataShape {
       projects: [],
       activeProject: null,
       isInGlobalMode: false,
+      isAuthBrowserOpened: false
     },
     wizard: {
       chosenTestingType: null,

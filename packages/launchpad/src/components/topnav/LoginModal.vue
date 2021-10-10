@@ -32,7 +32,7 @@
             v-else-if="viewer"
             keypath="topNav.login.bodySuccess"
           >
-            <span>{{ viewer.fullName }}</span>
+            <span class="text-indigo-500">{{ viewer.fullName }}</span>
           </i18n-t>
         </DialogDescription>
 
@@ -76,6 +76,9 @@ fragment LoginModal on Query {
     id
     email
     fullName
+  }
+  app {
+    isAuthBrowserOpened
   }
 }
 `
