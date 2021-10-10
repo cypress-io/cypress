@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import isHtml from 'is-html'
 import _ from 'lodash'
-import stream from 'stream'
+import stream, { EventEmitter } from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { getRouteForRequest } from '@packages/net-stubbing'
@@ -16,6 +16,7 @@ import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
 import type { Cfg } from './project-base'
+import { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 type WarningErr = Record<string, any>
 
@@ -44,8 +45,8 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
-  constructor () {
-    super()
+  constructor (ctx: DataContextShell = new DataContextShell({ rootBus: new EventEmitter })) {
+    super(ctx)
 
     this._urlResolver = null
   }

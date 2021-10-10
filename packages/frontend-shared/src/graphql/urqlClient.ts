@@ -3,25 +3,22 @@ import {
   createClient,
   dedupExchange,
   errorExchange,
-  Exchange,
   fetchExchange,
+  Exchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import VueToast, { ToastPluginApi } from 'vue-toast-notification'
+import { client } from '@packages/socket/lib/browser'
+
 import 'vue-toast-notification/dist/theme-sugar.css'
 
 export { VueToast }
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { pubSubExchange } from './urqlExchangePubsub'
-import { client } from '@packages/socket/lib/browser'
 
-const GRAPHQL_PORT = window.location.search.slice(9)
-const GRAPHQL_URL = `http://localhost:${GRAPHQL_PORT}/graphql`
-
-const io = client(`http://localhost:${GRAPHQL_PORT}`, {
-  transports: ['websocket'],
-})
+const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
+const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 
 declare global {
   interface Window {
@@ -40,6 +37,26 @@ export function makeCacheExchange () {
 }
 
 export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
+  let gqlPort: string
+
+  if (GQL_PORT_MATCH) {
+    gqlPort = GQL_PORT_MATCH[1]
+  } else {
+    // @ts-ignore
+    gqlPort = window.__CYPRESS_GRAPHQL_PORT
+  }
+
+  if (!gqlPort) {
+    throw new Error(`${window.location.href} cannot be visited without a gqlPort`)
+  }
+
+  const GRAPHQL_URL = `http://localhost:${gqlPort}/graphql`
+
+  // If we're in the launchpad, we connect to the known GraphQL Socket port,
+  // otherwise we connect to the /__socket.io of the current domain, unless we've explicitly
+  //
+  const io = getPubSubSource({ target, gqlPort, serverPort: SERVER_PORT_MATCH?.[1] })
+
   const exchanges: Exchange[] = [
     dedupExchange,
     pubSubExchange(io),
@@ -61,6 +78,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
+    // target === 'launchpad' ? fetchExchange : socketExchange(io), TODO
     fetchExchange,
   ]
 
@@ -74,3 +92,37 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     exchanges,
   })
 }
+
+interface PubSubConfig {
+  target: 'launchpad' | 'app'
+  gqlPort: string
+  serverPort?: string
+}
+
+function getPubSubSource (config: PubSubConfig) {
+  if (config.target === 'launchpad') {
+    return client(`http://localhost:${config.gqlPort}`, {
+      path: '/__gqlSocket',
+      transports: ['websocket'],
+    })
+  }
+
+  if (config.serverPort) {
+    return client(`http://localhost:${config.serverPort}`, {
+      path: '/__socket.io',
+      transports: ['websocket'],
+    })
+  }
+
+  return client({
+    path: '/__socket.io',
+    transports: ['websocket'],
+  })
+}
+
+// const socketExchange = (io: Socket): Exchange => {
+//   return (input) => {
+//     return (ops$) => {
+//     }
+//   }
+// }

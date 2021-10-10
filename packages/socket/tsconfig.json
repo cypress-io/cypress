@@ -5,7 +5,6 @@
     "./lib/**/*.ts"
   ],
   "files": [
-    "index.ts",
     "./../ts/index.d.ts"
   ]
 }

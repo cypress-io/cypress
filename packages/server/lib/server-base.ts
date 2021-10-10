@@ -31,6 +31,7 @@ import type { Browser } from '@packages/server/lib/browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import { createRoutesE2E } from './routes-e2e'
 import { createRoutesCT } from './routes-ct'
+import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -126,7 +127,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _remoteDomainName: unknown
   protected _remoteFileServer: unknown
 
-  constructor () {
+  constructor (private ctx: DataContextShell) {
     this.isListening = false
     // @ts-ignore
     this.request = Request()
@@ -211,6 +212,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.createHosts(config.hosts)
 
     const routeOptions: InitializeRoutes = {
+      ctx: this.ctx,
       config,
       specsStore,
       getRemoteState,

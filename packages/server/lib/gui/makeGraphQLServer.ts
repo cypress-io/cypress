@@ -53,7 +53,8 @@ export async function makeGraphQLServer (ctx: DataContext) {
     dfd.resolve(port)
   })
 
-  let socketServer = new SocketIOServer(srv, {
+  const socketServer = new SocketIOServer(srv, {
+    path: '/__gqlSocket',
     transports: ['websocket'],
   })
 

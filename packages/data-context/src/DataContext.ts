@@ -17,7 +17,7 @@ import {
   StorybookDataSource,
 } from './sources/'
 import { cached } from './util/cached'
-import type { DataContextShellConfig } from './DataContextShell'
+import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 
 export interface DataContextConfig extends DataContextShellConfig {
   os: PlatformName
@@ -187,8 +187,11 @@ export class DataContext extends DataContextShell {
     console.error(e)
   }
 
-  dispose () {
-    this.util.disposeLoaders()
+  async dispose () {
+    return Promise.all([
+      this.util.disposeLoaders(),
+      this.actions.project.clearActiveProject(),
+    ])
   }
 
   get loader () {

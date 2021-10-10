@@ -19,15 +19,11 @@ export class DataEmitterActions {
     })
   }
 
-  toAll () {
-    // this.ctx
-  }
-
   toApp (...args: any[]) {
-    // this.ctx
+    this._appSocketServer?.emit('data-context-push', ...args)
   }
 
   toLaunchpad (ev: string, ...args: any[]) {
-    this._launchpadSocketServer?.emit(ev, ...args)
+    this._launchpadSocketServer?.emit('data-context-push', ...args)
   }
 }

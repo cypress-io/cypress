@@ -5,6 +5,7 @@ import { Request, Response, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import type { InitializeRoutes } from './routes'
+import { fs } from './util/fs'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -15,6 +16,7 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 }
 
 export const createRoutesCT = ({
+  ctx,
   config,
   nodeProxy,
   getCurrentBrowser,
@@ -23,19 +25,55 @@ export const createRoutesCT = ({
   const routesCt = Router()
 
   if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
-    const myProxy = httpProxy.createProxyServer({
+    const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+    })
+    const proxyIndex = httpProxy.createProxyServer({
+      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+      selfHandleResponse: true,
+    })
+
+    proxyIndex.on('proxyRes', function (proxyRes, _req, _res) {
+      if ((_req as Request).params[0] === '') {
+        const body: any[] = []
+
+        proxyRes.on('data', function (chunk) {
+          let chunkData = String(chunk)
+
+          if (chunkData.includes('<head>')) {
+            chunkData = chunkData.replace('<body>', `<body><script>window.__CYPRESS_GRAPHQL_PORT = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`)
+          }
+
+          body.push(chunkData)
+        })
+
+        proxyRes.on('end', function () {
+          (_res as Response).send(body.join(''))
+        })
+      } else {
+        proxyRes.pipe(_res)
+      }
     })
 
     // TODO: can namespace this onto a "unified" route like __app-unified__
     // make sure to update the generated routes inside of vite.config.ts
     routesCt.get('/__vite__/*', (req, res) => {
-      myProxy.web(req, res, {}, (e) => {
-      })
+      if (req.params[0] === '') {
+        proxyIndex.web(req, res, {}, (e) => {})
+      } else {
+        proxy.web(req, res, {}, (e) => {})
+      }
     })
   } else {
     routesCt.get('/__vite__/*', (req, res) => {
       const pathToFile = getPathToDist('app', req.params[0])
+
+      if (req.params[0] === '') {
+        return fs.readFile(pathToFile, 'utf8')
+        .then((file) => {
+          res.send(file.replace('<div id="app">', '<script>window.__CYPRESS_GRAPHQL_PORT = 1234</script><div id="app">'))
+        })
+      }
 
       return send(req, pathToFile).pipe(res)
     })

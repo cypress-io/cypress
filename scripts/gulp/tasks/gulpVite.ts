@@ -73,24 +73,36 @@ function spawnViteDevServer (
  *------------------------------------------------------------------------**/
 
 export function viteBuildApp () {
-  return spawned('vite:build-app', `yarn vite build`, {
+  return spawned('vite:build-app', `yarn vite build --manifest`, {
     cwd: monorepoPaths.pkgApp,
     waitForExit: true,
     env: {
-      ...process.env,
+      // ...process.env,
+      NODE_ENV: 'production',
+    },
+  })
+}
+
+export function viteBuildAndWatchApp () {
+  return watchViteBuild('vite:build-watch-app', `yarn vite build --manifest --watch`, {
+    cwd: monorepoPaths.pkgApp,
+    env: {
+      // ...process.env,
       NODE_ENV: 'production',
     },
   })
 }
 
 export function viteBuildLaunchpad () {
-  return spawned('vite:build-launchpad', `yarn vite build`, {
+  return spawned('vite:build-launchpad', `yarn vite build --manifest`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
-    env: {
-      ...process.env,
-      NODE_ENV: 'production',
-    },
+  })
+}
+
+export function viteBuildAndWatchLaunchpad () {
+  return watchViteBuild('vite:build-watch-launchpad', `yarn vite build --manifest --watch`, {
+    cwd: monorepoPaths.pkgLaunchpad,
   })
 }
 
@@ -105,54 +117,5 @@ export function viteCleanLaunchpad () {
   return spawned('vite-clean', `yarn clean`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
-  })
-}
-
-/**------------------------------------------------------------------------
- *                             Testing Tasks
- * Build and serve the Vite frontend(s) as web apps on a static server.
- *  * viteBuildLaunchpadForTest
- *  * viteBuildAppForTest
- *------------------------------------------------------------------------**/
-
-export function viteBuildLaunchpadForTest () {
-  return spawned('vite:build-launchpad-for-test', `yarn vite build --outDir=./dist-e2e`, {
-    cwd: monorepoPaths.pkgLaunchpad,
-    waitForExit: true,
-    env: {
-      NODE_ENV: 'production',
-    },
-  })
-}
-
-export async function viteBuildAndWatchLaunchpadForTest () {
-  return watchViteBuild('vite:build-watch-launchpad-for-test', `yarn vite build --watch --outDir=./dist-e2e`, {
-    cwd: monorepoPaths.pkgLaunchpad,
-    env: {
-      NODE_ENV: 'production',
-    },
-  })
-}
-
-/**----------------------
- *todo    Implement E2E tests for the App.
- *------------------------**/
-
-export function viteBuildAppForTest () {
-  return spawned('vite:build-app-for-test', `yarn vite build --outDir=./dist-e2e`, {
-    cwd: monorepoPaths.pkgApp,
-    waitForExit: true,
-    env: {
-      ...process.env,
-    },
-  })
-}
-
-export async function viteBuildAndWatchAppForTest () {
-  return watchViteBuild('vite:build-watch-app-for-test', `yarn vite build --watch --outDir=./dist-e2e`, {
-    cwd: monorepoPaths.pkgApp,
-    env: {
-      NODE_ENV: 'production',
-    },
   })
 }

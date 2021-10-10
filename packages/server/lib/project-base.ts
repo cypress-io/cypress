@@ -165,8 +165,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
-      ? new ServerE2E() as TServer
-      : new ServerCt() as TServer
+      ? new ServerE2E(this.ctx) as TServer
+      : new ServerCt(this.ctx) as TServer
   }
 
   async open () {
@@ -189,7 +189,9 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    cfg = await this.initializePlugins(cfg, this.options)
+    if (!this.options.skipPluginIntializeForTesting) {
+      cfg = await this.initializePlugins(cfg, this.options)
+    }
 
     const {
       specsStore,
@@ -443,7 +445,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     config,
   }: {
     specs: Cypress.Cypress['spec'][]
-    config: any
+    config: Cfg
   }) {
     const specsStore = new SpecsStore(config, this.testingType)
 
@@ -465,7 +467,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.testingType === 'component') {
+    if (this.testingType === 'component' && !this.options.skipPluginIntializeForTesting) {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port

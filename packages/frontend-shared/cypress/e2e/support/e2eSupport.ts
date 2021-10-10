@@ -1,5 +1,7 @@
 import type { DataContext } from '@packages/data-context'
 
+const SIXTY_SECONDS = 60 * 1000
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -9,5 +11,17 @@ declare global {
 }
 
 Cypress.Commands.add('withCtx', (fn) => {
-  cy.task('withCtx', fn.toString())
+  const _log = Cypress.log({
+    name: 'withCtx',
+    message: '(view in console)',
+    consoleProps () {
+      return {
+        'Executed': fn.toString(),
+      }
+    },
+  })
+
+  cy.task('withCtx', fn.toString(), { timeout: SIXTY_SECONDS, log: false }).then(() => {
+    _log.end()
+  })
 })

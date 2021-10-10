@@ -10,6 +10,7 @@ export interface DataContextShellConfig {
 // for non-unified parts of the codebase
 export class DataContextShell {
   private _appServerPort: number | undefined
+  private _gqlServerPort: number | undefined
 
   constructor (private shellConfig: DataContextShellConfig = { rootBus: new EventEmitter }) {}
 
@@ -17,8 +18,16 @@ export class DataContextShell {
     this._appServerPort = port
   }
 
+  setGqlServerPort (port: number | undefined) {
+    this._gqlServerPort = port
+  }
+
   get appServerPort () {
     return this._appServerPort
+  }
+
+  get gqlServerPort () {
+    return this._gqlServerPort
   }
 
   @cached

@@ -4,7 +4,6 @@
  *
  * @summary Gulp tasks to run the Cypress app.
  */
-// @ts-expect-error - no types
 import chokidar from 'chokidar'
 import path from 'path'
 import pDefer from 'p-defer'
@@ -91,6 +90,7 @@ async function spawnCypressWithMode (
     ...process.env,
     ...env,
     LAUNCHPAD: '1',
+    TS_NODE_COMPILER: 'typescript-cached-transpile',
   }
 
   return await forked(`cy:${mode}:${type}`, pathToCli, [mode, ...argv], {

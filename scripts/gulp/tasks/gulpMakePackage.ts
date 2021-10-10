@@ -68,9 +68,7 @@ export async function makePackage () {
               'test-integration': 'mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit',
             } : {}),
           },
-          dependencies: {
-            'tslib': '2.3.0',
-          },
+          dependencies: {},
           devDependencies: results.scaffoldTests ? {
             'mocha': '7.0.1',
             'chai': '4.2.0',
@@ -94,7 +92,6 @@ export async function makePackage () {
             'script',
           ],
           'compilerOptions': {
-            'importHelpers': true,
             'strict': true,
             'allowJs': false,
             'rootDir': 'src',

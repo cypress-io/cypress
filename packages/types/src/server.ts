@@ -13,7 +13,7 @@ export interface LaunchOpts {
    * Whether we want to skip opening the browser, in the case we're
    * using Cypress to test the server directly
    */
-  skipBrowserOpen?: boolean
+  skipBrowserOpenForTest?: true
 }
 
 export interface LaunchArgs {
@@ -56,6 +56,11 @@ type WebSocketOptionsCallback = (...args: any[]) => any
 export interface OpenProjectLaunchOptions {
   ctx?: DataContext
   args?: LaunchArgs
+  /**
+   * Whether to skip the plugin initialization, useful when
+   * we're using Cypress to test Cypress
+   */
+  skipPluginIntializeForTesting?: boolean
 
   configFile?: string | false
   browsers?: Cypress.Browser[]

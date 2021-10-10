@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
 
-import { client } from '@packages/socket'
+import { client } from '@packages/socket/lib/browser'
 import type { BaseStore } from './store'
 
 import { studioRecorder } from './studio'
@@ -14,11 +14,15 @@ import { selectorPlaygroundModel } from './selector-playground'
 import $Cypress from '@packages/driver'
 import type { automationElementId } from './automation-element'
 
-const $ = $Cypress.$
-const ws = client.connect({
+const PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
+
+const socketConfig = {
   path: '/__socket.io',
   transports: ['websocket'],
-})
+}
+
+const $ = $Cypress.$
+const ws = PORT_MATCH ? client(`http://localhost:${PORT_MATCH[1]}`, socketConfig) : client(socketConfig)
 
 ws.on('connect', () => {
   ws.emit('runner:connected')

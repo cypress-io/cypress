@@ -8,9 +8,8 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "lib": ["ES2020"],
+    "lib": ["ES2018", "ES2020.Promise"],
     "types": ["mocha", "node"],
-    "importHelpers": true,
     "resolveJsonModule": true,
     "noUnusedLocals": false,
   }

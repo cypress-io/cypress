@@ -229,7 +229,7 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
-        if (options.skipBrowserOpen) {
+        if (options.skipBrowserOpenForTest) {
           return
         }
 

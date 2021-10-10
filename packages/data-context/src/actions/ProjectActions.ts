@@ -19,6 +19,7 @@ export interface ProjectApiShape {
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
   clearLatestProjectsCache(): Promise<unknown>
+  closeActiveProject(): Promise<unknown>
 }
 
 export class ProjectActions {
@@ -28,8 +29,9 @@ export class ProjectActions {
     return this.ctx._apis.projectApi
   }
 
-  clearActiveProject () {
+  async clearActiveProject () {
     this.ctx.appData.activeProject = null
+    await this.api.closeActiveProject()
 
     return
   }
@@ -85,7 +87,7 @@ export class ProjectActions {
     return this.projects
   }
 
-  async initializeActiveProject () {
+  async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
     if (!this.ctx.activeProject?.projectRoot) {
       throw Error('Cannot initialize project without an active project')
     }
@@ -105,7 +107,8 @@ export class ProjectActions {
     try {
       await this.api.initializeProject(launchArgs, {
         ...this.ctx.launchOptions,
-        ctx: this,
+        ...options,
+        ctx: this.ctx,
       }, browsers)
     } catch (e) {
       // TODO(tim): remove / replace with ctx.log.error

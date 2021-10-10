@@ -30,6 +30,7 @@
     "lib",
     "patches"
   ],
+  "types": "lib/socket.ts",
   "workspaces": {
     "nohoist": [
       "socket.io",

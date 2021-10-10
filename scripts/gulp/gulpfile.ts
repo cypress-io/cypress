@@ -11,18 +11,24 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildAppForTest, viteBuildAndWatchAppForTest, viteBuildApp, viteBuildLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
 import { setGulpGlobal } from './gulpConstants'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
+import { webpackRunner } from './tasks/gulpWebpack'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
  *  * `yarn dev` is your primary command for getting work done
  *------------------------------------------------------------------------**/
+
+gulp.task('viteClean', gulp.parallel(
+  viteCleanApp,
+  viteCleanLaunchpad,
+))
 
 gulp.task(
   'codegen',
@@ -44,6 +50,14 @@ gulp.task(
 )
 
 gulp.task(
+  'commonSetup',
+  gulp.series(
+    'codegen',
+    killExistingCypress,
+  ),
+)
+
+gulp.task(
   'dev',
   gulp.series(
     'codegen',
@@ -54,6 +68,7 @@ gulp.task(
     gulp.parallel(
       viteApp,
       viteLaunchpad,
+      webpackRunner,
     ),
 
     // And we're finally ready for electron, watching for changes in
@@ -74,11 +89,7 @@ gulp.task(
 
 gulp.task('dev:clean', gulp.series(
   // Clean any vite assets
-  gulp.parallel(
-    viteCleanApp,
-    viteCleanLaunchpad,
-  ),
-
+  'viteClean',
   'dev',
 ))
 
@@ -109,10 +120,7 @@ gulp.task(
 
 gulp.task('buildProd',
   gulp.series(
-    gulp.parallel(
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
+    'viteClean',
 
     syncRemoteGraphQL,
     nexusCodegen,
@@ -150,9 +158,6 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 1. Build the Cypress App itself
   'buildProd',
 
-  // 2. Build the Launchpad under test.
-  viteBuildLaunchpadForTest,
-
   // Ensure we have no existing cypress processes running
   killExistingCypress,
 
@@ -166,12 +171,6 @@ gulp.task('cyRunAppE2E', gulp.series(
   // 1. Build the Cypress App itself
   'buildProd',
 
-  // 2. Build the Launchpad under test.
-  gulp.parallel(
-    viteBuildLaunchpadForTest,
-    viteBuildAppForTest,
-  ),
-
   killExistingCypress,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
@@ -184,7 +183,10 @@ const cyOpenLaunchpad = gulp.series(
   // 1. Build + watch Launchpad under test.
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
-  viteBuildAndWatchLaunchpadForTest,
+  gulp.parallel(
+    viteBuildApp,
+    viteBuildAndWatchLaunchpad,
+  ),
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressLaunchpad,
@@ -195,8 +197,11 @@ const cyOpenApp = gulp.series(
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
   gulp.parallel(
-    viteBuildLaunchpadForTest,
-    viteBuildAndWatchAppForTest,
+    gulp.series(
+      viteBuildAndWatchLaunchpad,
+      viteBuildAndWatchApp,
+    ),
+    webpackRunner,
   ),
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
@@ -206,8 +211,10 @@ const cyOpenApp = gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenLaunchpadE2E', gulp.series(
+  'viteClean',
+
   // 1. Build the Cypress App itself
-  'buildProd',
+  'commonSetup',
 
   // 2. Open the "app"
   cyOpenLaunchpad,
@@ -216,8 +223,10 @@ gulp.task('cyOpenLaunchpadE2E', gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenAppE2E', gulp.series(
+  'viteClean',
+
   // 1. Build the Cypress App itself
-  'buildProd',
+  'commonSetup',
 
   // 2. Open the launchpad app
   cyOpenApp,
@@ -252,14 +261,10 @@ gulp.task(graphqlCodegenWatch)
 gulp.task(viteCleanApp)
 gulp.task(viteCleanLaunchpad)
 
-gulp.task(viteBuildLaunchpadForTest)
-gulp.task(viteBuildAppForTest)
-
-gulp.task(viteBuildAndWatchLaunchpadForTest)
-gulp.task(viteBuildAndWatchAppForTest)
-
 gulp.task(viteBuildApp)
 gulp.task(viteBuildLaunchpad)
+gulp.task(viteBuildAndWatchApp)
+gulp.task(viteBuildAndWatchLaunchpad)
 
 gulp.task('debugCypressLaunchpad', gulp.series(
   async function setupDebugBrk () {

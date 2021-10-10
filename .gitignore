@@ -42,7 +42,6 @@ packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
 # from socket, dist built files
-packages/socket/index.js
 packages/socket/lib/*.js
 
 # from npm/react

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { randomComponents } from '../../../src/graphql/specs/testStubSpecs'
+import { randomComponents } from './testStubSpecs'
 
 import type {
   Project,

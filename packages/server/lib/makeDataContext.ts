@@ -63,6 +63,9 @@ export function makeDataContext (options: MakeDataContextOptions) {
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
       },
+      closeActiveProject () {
+        return openProject.closeOpenProjectAndBrowsers()
+      },
     },
   })
 }

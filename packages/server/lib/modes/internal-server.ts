@@ -23,6 +23,10 @@ export function runInternalServer (options) {
 
   const serverPortPromise = makeGraphQLServer(ctx)
 
+  serverPortPromise.then((port) => {
+    ctx.setGqlServerPort(port)
+  })
+
   return { ctx, bus, serverPortPromise }
 }
 

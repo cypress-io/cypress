@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { gql, useQuery } from '@urql/vue'
-import { MainQueryDocument } from './generated/graphql'
+import { MainLaunchpadQueryDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import WizardHeader from './setup/WizardHeader.vue'
@@ -33,7 +33,7 @@ import HeaderBar from './layouts/HeaderBar.vue'
 import GlobalPage from './global/GlobalPage.vue'
 
 gql`
-query MainQuery {
+query MainLaunchpadQuery {
   ...TestingTypeCards
   ...Wizard
 
@@ -50,5 +50,5 @@ query MainQuery {
 }
 `
 
-const query = useQuery({ query: MainQueryDocument })
+const query = useQuery({ query: MainLaunchpadQueryDocument })
 </script>

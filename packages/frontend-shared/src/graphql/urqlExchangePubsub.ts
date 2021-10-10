@@ -12,7 +12,7 @@ export const pubSubExchange = (io: Socket): Exchange => {
       const watchedOperations = new Map<number, Operation>()
       const observedOperations = new Map<number, number>()
 
-      io.on('data-context', (...args) => {
+      io.on('data-context-push', (...args) => {
         watchedOperations.forEach((op) => {
           client.reexecuteOperation(
             client.createRequestOperation('query', op, {
