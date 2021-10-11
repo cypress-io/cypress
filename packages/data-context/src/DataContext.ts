@@ -63,11 +63,15 @@ export class DataContext extends DataContextShell {
       toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
     }
 
+    if (this.config.launchArgs.testingType) {
+      toAwait.push(this.actions.wizard.setTestingType(this.config.launchArgs.testingType))
+    }
+
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }
 
-    return Promise.all(toAwait)
+    return Promise.all(toAwait).then(this.actions.wizard.navigate('forward'))
   }
 
   get os () {
