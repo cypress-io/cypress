@@ -29,7 +29,7 @@ class SelectorPlayground extends Component {
 
   render () {
     const { model } = this.props
-    const selectorText = `cy.${model.method}('${model.selector}')`
+    const selectorText = `cy.${model.method}('${this._setQuotesToAttrSelector(model.selector)}')`
 
     return (
       <div className={cs('header-popup selector-playground', `method-${model.method}`, {
@@ -75,7 +75,7 @@ class SelectorPlayground extends Component {
             </span>
             <span>)</span>
             {/* eslint-disable-next-line react/no-string-refs */}
-            <input ref='copyText' className='copy-backer' value={selectorText} readOnly={true} />
+            <input ref='copyText' className='copy-backer' value={this._setQuotesToAttrSelector(selectorText)} readOnly={true} />
             <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
                 {model.isValid ?
@@ -225,6 +225,22 @@ class SelectorPlayground extends Component {
 
   _resetPrintText = () => {
     this._setPrintText(defaultPrintText)
+  }
+
+  /**
+   * @param {string} selector -> a string that represents a HTML attribute selector
+   * @returns {string} -> the selector with wrapped in single quotes if it's a HTML attribute selector
+   */
+  _setQuotesToAttrSelector = (selector) => {
+    const [attributeName, attributeValue] = selector.split('=')
+
+    const hasQuotes = (attributeValue[0] === '"' || attributeValue[0] === '\'')
+
+    if (selector.split('').includes('[', ']') && !hasQuotes) {
+      return `[${attributeName.replace('[', '')}="${attributeValue.replace(']', '"]')}`
+    }
+
+    return selector
   }
 
   _toggleEnablingSelectorPlayground = () => {
