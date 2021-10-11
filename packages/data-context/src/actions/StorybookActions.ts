@@ -1,5 +1,5 @@
 import type { FoundSpec, FullConfig } from '@packages/types'
-import { CsfFile, readCsfOrMdx } from '@storybook/csf-tools'
+import { readCsfOrMdx } from '@storybook/csf-tools'
 import endent from 'endent'
 import * as path from 'path'
 import type { DataContext } from '..'
@@ -16,82 +16,95 @@ export class StorybookActions {
 
     const config = await this.ctx.project.getConfig(project.projectRoot)
 
-    const spec = await this.generate(storyPath, project.projectRoot, config.componentFolder)
+    const spec = await this.generateSpec(
+      storyPath,
+      project.projectRoot,
+      config.componentFolder,
+    )
 
     this.ctx.wizardData.generatedSpec = spec
   }
 
-  private async generate (
+  private async generateSpec (
     storyPath: string,
     projectRoot: string,
     componentFolder: FullConfig['componentFolder'],
   ): Promise<FoundSpec | null> {
-    const storyFile = path.parse(storyPath)
-    const storyName = storyFile.name.split('.')[0]
+    const specFileExtension = '.cy'
+    const parsedFile = path.parse(storyPath)
+    const fileName = parsedFile.name.split('.')[0] as string
+
+    let newSpecContent: string | null
 
     try {
-      const raw = await readCsfOrMdx(storyPath, {
-        defaultTitle: storyName || '',
-      })
-      const parsed = raw.parse()
-
-      if (
-        (!parsed.meta.title && !parsed.meta.component) ||
-        !parsed.stories.length
-      ) {
-        return null
-      }
-
-      const specFileExtension = '.cy-spec'
-      const newSpecContent = this.generateSpecFromCsf(parsed, storyFile)
-      const newSpecPath = path.join(
+      newSpecContent = await this.generateSpecFromCsf(
         storyPath,
-        '..',
-        `${parsed.meta.component}${specFileExtension}${storyFile.ext}`,
+        fileName,
       )
 
-      // If this passes then the file exists and we don't want to overwrite it
-      try {
-        await this.ctx.fs.access(newSpecPath, this.ctx.fs.constants.F_OK)
-
+      if (!newSpecContent) {
         return null
-      } catch (e) {
-        // eslint-disable-line no-empty
-      }
-
-      await this.ctx.fs.outputFileSync(newSpecPath, newSpecContent)
-
-      const parsedSpec = path.parse(newSpecPath)
-
-      // Can this be obtained from the spec watcher?
-      return {
-        baseName: parsedSpec.base,
-        fileName: parsedSpec.base.replace(specFileExtension, ''),
-        specFileExtension,
-        fileExtension: parsedSpec.ext,
-        name: path.relative(componentFolder || projectRoot, newSpecPath),
-        relative: path.relative(projectRoot, newSpecPath),
-        absolute: newSpecPath,
-        specType: 'component',
       }
     } catch (e) {
       return null
     }
+
+    let newSpecAbsolute = path.join(
+      parsedFile.dir,
+      `${fileName}${specFileExtension}${parsedFile.ext}`,
+    )
+
+    try {
+      newSpecAbsolute = await this.getFilename(
+        newSpecAbsolute,
+        fileName,
+        specFileExtension,
+      )
+
+      await this.ctx.fs.outputFileSync(newSpecAbsolute, newSpecContent)
+    } catch (e) {
+      return null
+    }
+
+    const parsedNewSpec = path.parse(newSpecAbsolute)
+
+    // Can this be obtained from the spec watcher?
+    return {
+      absolute: newSpecAbsolute,
+      baseName: parsedNewSpec.base,
+      fileExtension: parsedNewSpec.ext,
+      fileName,
+      name: path.relative(componentFolder || projectRoot, newSpecAbsolute),
+      relative: path.relative(projectRoot, newSpecAbsolute),
+      specFileExtension,
+      specType: 'component',
+    }
   }
 
-  private generateSpecFromCsf (parsed: CsfFile, storyFile: path.ParsedPath) {
-    const isReact = parsed._ast.program.body.some(
-      (statement) => {
-        return statement.type === 'ImportDeclaration' &&
+  private async generateSpecFromCsf (
+    absolute: string,
+    storyName: string,
+  ): Promise<null | string> {
+    const csf = await readCsfOrMdx(absolute, {
+      defaultTitle: storyName,
+    }).then((res) => res.parse())
+
+    if ((!csf.meta.title && !csf.meta.component) || !csf.stories.length) {
+      return null
+    }
+
+    const isReact = csf._ast.program.body.some((statement) => {
+      return (
+        statement.type === 'ImportDeclaration' &&
         statement.source.value === 'react'
-      },
-    )
-    const isVue = parsed._ast.program.body.some(
-      (statement) => {
-        return statement.type === 'ImportDeclaration' &&
+      )
+    })
+    const isVue = csf._ast.program.body.some((statement) => {
+      return (
+        statement.type === 'ImportDeclaration' &&
         statement.source.value.endsWith('.vue')
-      },
-    )
+      )
+    })
 
     if (!isReact && !isVue) {
       throw new Error('Provided story is not supported')
@@ -100,12 +113,14 @@ export class StorybookActions {
     const getDependency = () => {
       return endent`
       import { mount } from "@cypress/${isReact ? 'react' : 'vue'}"
-      import { composeStories } from "@storybook/testing-${isReact ? 'react' : 'vue3'}"`
+      import { composeStories } from "@storybook/testing-${
+        isReact ? 'react' : 'vue3'
+      }"`
     }
     const getMountSyntax = (component: string) => {
       return isReact ? `<${component} />` : `${component}()`
     }
-    const itContent = parsed.stories
+    const itContent = csf.stories
     .map((story, i) => {
       const component = story.name.replace(/\s+/, '')
       let it = endent`
@@ -126,13 +141,38 @@ export class StorybookActions {
     .join('\n\n')
 
     return endent`${isReact ? `import React from "react"` : ''}
-      import * as stories from "./${storyFile.name}"
+      import * as stories from "./${path.parse(absolute).name}"
       ${getDependency()}
   
       const composedStories = composeStories(stories)
   
-      describe('${parsed.meta.title || parsed.meta.component}', () => {
+      describe('${csf.meta.title || csf.meta.component}', () => {
         ${itContent}
       })`
+  }
+
+  private async getFilename (absolute: string, fileName: string, specFileExtension: string) {
+    let fileToGenerate = absolute
+    const { dir, ext } = path.parse(absolute)
+    let i = 0
+
+    while (this.fileExists(fileToGenerate)) {
+      fileToGenerate = path.join(
+        dir,
+        `${fileName}-copy-${++i}${specFileExtension}${ext}`,
+      )
+    }
+
+    return fileToGenerate
+  }
+
+  private fileExists (absolute: string) {
+    try {
+      this.ctx.fs.accessSync(absolute, this.ctx.fs.constants.F_OK)
+
+      return true
+    } catch (e) {
+      return false
+    }
   }
 }
