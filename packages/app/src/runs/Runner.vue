@@ -21,6 +21,7 @@ fragment CurrentSpec_Runner on Spec {
   id
   relative
   absolute
+  name
 }
 `
 

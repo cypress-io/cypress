@@ -51,7 +51,7 @@ export const Project = objectType({
       type: 'Spec',
       resolve: (source, args, ctx) => {
         if (!ctx.activeProject || !ctx.activeProject.currentSpecId) {
-          return
+          return null
         }
 
         return ctx.actions.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)

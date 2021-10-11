@@ -84,7 +84,7 @@ export class ProjectActions {
     // in this case, Spec:/my/abs/path
     const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
 
-    return specs.find((x) => x.absolute === currentSpecAbs)
+    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
   async loadProjects () {
