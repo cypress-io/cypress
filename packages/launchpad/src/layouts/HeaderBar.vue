@@ -15,6 +15,7 @@
               :style="`background-image: url(${gravatarUrl(props.gql.cloudViewer?.email)});`"
               class="rounded-50px w-24px h-24px border-1px border-gray-200 overflow-hidden bg-cover"
             />
+            <span class="sr-only">{{t('topNav.login.actionLogin')}}</span>
           </template>
           <template v-if="!!props.gql.cloudViewer" #login-panel>
             <div class="min-w-248px">
@@ -28,8 +29,12 @@
                   <span class="text-gray-800">{{ props.gql.cloudViewer?.fullName }}</span>
                   <br />
                   <span class="text-gray-600">{{ props.gql.cloudViewer?.email }}</span>
-                  <br>
-                  <a class="text-indigo-500 outline-transparent hocus:underline" :href="getProfileLink()" target="_blank">Profile Settings</a>
+                  <br />
+                  <a
+                    class="text-indigo-500 outline-transparent hocus:underline"
+                    :href="getProfileLink()"
+                    target="_blank"
+                  >Profile Settings</a>
                 </div>
               </div>
 
@@ -39,16 +44,16 @@
             </div>
           </template>
         </TopNav>
-        <div class>
+        <div>
           <button
             v-if="!props.gql.cloudViewer"
             @click="openLogin"
-            class="flex group items-center text-gray-600  focus:outline-transparent"
+            class="flex group items-center text-gray-600 focus:outline-transparent"
           >
             <i-cy-profile_x16
               class="block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px mr-8px"
             />
-            <span class="group-hocus:text-indigo-500">Log In</span>
+            <span class="group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
       </div>
@@ -65,6 +70,8 @@ import TopNav from '../components/topnav/TopNav.vue'
 import LoginModal from '../components/topnav/LoginModal.vue'
 import gravatar from 'gravatar'
 import Auth from '../setup/Auth.vue'
+import { useI18n } from '@cy/i18n'
+
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -98,7 +105,7 @@ const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProje
 
 
 const getProfileLink = () => {
-  const subdomain = process.env.VITE_CYPRESS_INTERNAL_ENV === 'production' ? 'dashboard': 'dashboard-staging'  
+  const subdomain = process.env.VITE_CYPRESS_INTERNAL_ENV === 'production' ? 'dashboard' : 'dashboard-staging'
   return `https://${subdomain}.cypress.io/profile`
 }
 
@@ -126,5 +133,7 @@ const props = defineProps<{
   gql: HeaderBarFragment,
   showBrowsers?: Boolean
 }>()
+
+const { t } = useI18n()
 
 </script>

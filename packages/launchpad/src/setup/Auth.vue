@@ -5,11 +5,11 @@
     <button
       class="block w-full bg-white py-8px border-gray-100 text-14px text-indigo-500 whitespace-nowrap border-rounded border-1 hover:no-underline hocus:border-gray-200 outline-transparent"
       @click="handleLogout"
-    >Log Out</button>
+    >{{t('topNav.login.actionLogout')}}</button>
   </div>
 
   <div v-else>
-    <Button size="lg" :variant="buttonVariant" @click="handleAuth">
+    <Button size="lg" :variant="buttonVariant" @click="handleAuth" :disabled="isLoggingIn">
     <template #prefix v-if="isLoggingIn">
       <i-cy-loading_x16  v-if="isLoggingIn" class="animate-spin icon-dark-white icon-light-gray-400" />
     </template>

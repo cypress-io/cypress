@@ -83,7 +83,7 @@ const classes = computed(() => {
     variantClasses.value,
     sizeClasses.value,
     attrs.class,
-    attrs.disabled ? 'opacity-50' : '',
+    (attrs.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
   ]
 })
 </script>

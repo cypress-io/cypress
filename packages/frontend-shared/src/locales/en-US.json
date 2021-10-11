@@ -14,6 +14,9 @@
     "copy": "Copy",
     "copied": "Copied"
   },
+  "actions": {
+    "close": "Close"
+  },
   "file": {
     "edit": "Edit",
     "git": {
@@ -70,6 +73,7 @@
       "titleFailed": "Login Failed",
       "titleBrowserError": "Browser Error",
       "actionLogin": "Log In",
+      "actionLogout": "Log Out",
       "actionContinue": "Continue",
       "actionOpening": "Opening Browser",
       "actionWaiting": "Waiting for you to log in",
