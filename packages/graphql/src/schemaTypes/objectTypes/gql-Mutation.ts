@@ -1,6 +1,5 @@
-import { booleanArg, idArg, mutationType, nonNull, stringArg, inputObjectType } from 'nexus'
+import { booleanArg, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
-import { baseSpecDefinition } from '../../definitions/'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
@@ -201,19 +200,14 @@ export const mutation = mutationType({
       type: 'Project',
       description: 'Set the current spec under test',
       args: {
-        spec: nonNull(
-          inputObjectType({
-            name: 'SetCurrentSpec',
-            definition: baseSpecDefinition,
-          }),
-        ),
+        id: nonNull(idArg()),
       },
       resolve (_root, args, ctx) {
         if (!ctx.activeProject) {
           throw Error(`Cannot set spec without active project!`)
         }
 
-        ctx.actions.project.setCurrentSpec(args.spec)
+        ctx.actions.project.setCurrentSpec(args.id)
 
         return ctx.activeProject
       },

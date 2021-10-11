@@ -17,11 +17,10 @@ import { gql } from '@urql/core'
 import type { CurrentSpec_RunnerFragment } from '../generated/graphql'
 
 gql`
-fragment CurrentSpec_Runner on BaseSpec {
+fragment CurrentSpec_Runner on Spec {
   id
-  name
   relative
-  absolute 
+  absolute
 }
 `
 

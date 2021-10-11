@@ -2,7 +2,6 @@
 // created by autobarrel, do not modify directly
 
 export * from './gql-App'
-export * from './gql-BaseSpec'
 export * from './gql-Browser'
 export * from './gql-GitInfo'
 export * from './gql-Mutation'

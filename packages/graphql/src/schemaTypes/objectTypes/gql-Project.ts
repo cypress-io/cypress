@@ -48,9 +48,13 @@ export const Project = objectType({
 
     t.field('currentSpec', {
       description: 'Currently selected spec',
-      type: 'BaseSpec',
+      type: 'Spec',
       resolve: (source, args, ctx) => {
-        return ctx.project.currentSpec ?? null
+        if (!ctx.activeProject || !ctx.activeProject.currentSpecId) {
+          return
+        }
+
+        return ctx.actions.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
       },
     })
 

@@ -33,8 +33,8 @@ import { useRouter } from 'vue-router'
 const { t } = useI18n()
 
 gql`
-mutation SpecsList_SetCurrentSpec($spec: SetCurrentSpec!) {
-  setCurrentSpec(spec: $spec) {
+mutation SpecsList_SetCurrentSpec($id: ID!) {
+  setCurrentSpec(id: $id) {
     currentSpec {
       id
       relative
@@ -76,9 +76,9 @@ const setSpecMutation = useMutation(SpecsList_SetCurrentSpecDocument)
 const router = useRouter()
 
 async function selectSpec (spec: SpecNode_SpecsListFragment) {
-  const { name, absolute, relative } = spec.node
+  const { id } = spec.node
 
-  await setSpecMutation.executeMutation({ spec: { name, absolute, relative } })
+  await setSpecMutation.executeMutation({ id })
   router.push('/runner')
 }
 

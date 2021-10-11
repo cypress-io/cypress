@@ -16,10 +16,6 @@ export class ProjectDataSource {
     return path.basename(projectRoot)
   }
 
-  get currentSpec () {
-    return this.ctx.activeProject?.currentSpec
-  }
-
   getConfig (projectRoot: string) {
     return this.configLoader.load(projectRoot)
   }

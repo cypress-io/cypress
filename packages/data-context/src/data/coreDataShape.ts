@@ -1,4 +1,4 @@
-import { BaseSpec, BUNDLERS, FoundBrowser, FoundSpec } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec } from '@packages/types'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 
 export type Maybe<T> = T | null | undefined
@@ -19,7 +19,7 @@ export interface ActiveProjectShape extends ProjectShape {
   e2ePluginsInitialized: Maybe<boolean>
   isFirstTimeCT: Maybe<boolean>
   isFirstTimeE2E: Maybe<boolean>
-  currentSpec?: Maybe<BaseSpec>
+  currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
 }
 

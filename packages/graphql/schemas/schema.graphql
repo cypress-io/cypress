@@ -23,16 +23,6 @@ type App {
   selectedBrowser: Browser
 }
 
-"""Most basic representation of a spec in Cypress"""
-type BaseSpec implements Node {
-  absolute: String!
-
-  """Relay style Node ID field for the BaseSpec field"""
-  id: ID!
-  name: String!
-  relative: String!
-}
-
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
@@ -314,7 +304,7 @@ type Mutation {
   setActiveProject(path: String!): App!
 
   """Set the current spec under test"""
-  setCurrentSpec(spec: SetCurrentSpec!): Project!
+  setCurrentSpec(id: ID!): Project!
 
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
@@ -411,7 +401,7 @@ type Project implements Node {
   cloudProject: CloudProject
 
   """Currently selected spec"""
-  currentSpec: BaseSpec
+  currentSpec: Spec
 
   """Relay style Node ID field for the Project field"""
   id: ID!
@@ -471,12 +461,6 @@ type Query {
 
   """Metadata about the wizard, null if we arent showing the wizard"""
   wizard: Wizard!
-}
-
-input SetCurrentSpec {
-  absolute: String!
-  name: String!
-  relative: String!
 }
 
 """Represents a spec on the file system"""
