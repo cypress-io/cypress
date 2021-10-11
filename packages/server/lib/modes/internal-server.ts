@@ -1,9 +1,9 @@
-import type { PlatformName } from '@packages/types'
 import os from 'os'
 import { EventEmitter } from 'events'
 
 import { makeDataContext } from '../makeDataContext'
 import { makeGraphQLServer } from '../gui/makeGraphQLServer'
+import { assertValidPlatform } from '@packages/types/src/platform'
 
 export function runInternalServer (options) {
   const bus = new EventEmitter()
@@ -28,12 +28,4 @@ export function runInternalServer (options) {
   })
 
   return { ctx, bus, serverPortPromise }
-}
-
-const SUPPORTED_PLATFORMS = ['linux', 'darwin', 'win32'] as const
-
-function assertValidPlatform (platform: NodeJS.Platform): asserts platform is PlatformName {
-  if (!SUPPORTED_PLATFORMS.includes(platform as any)) {
-    throw new Error(`Unsupported platform ${platform}, expected ${SUPPORTED_PLATFORMS.join(', ')}`)
-  }
 }

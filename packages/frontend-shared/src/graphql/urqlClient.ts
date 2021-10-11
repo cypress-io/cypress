@@ -78,7 +78,9 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     }),
     // https://formidable.com/open-source/urql/docs/graphcache/errors/
     makeCacheExchange(),
-    // target === 'launchpad' ? fetchExchange : socketExchange(io), TODO
+    // TODO(tim): add this when we want to use the socket as the GraphQL
+    // transport layer for all operations
+    // target === 'launchpad' ? fetchExchange : socketExchange(io),
     fetchExchange,
   ]
 
@@ -121,6 +123,8 @@ function getPubSubSource (config: PubSubConfig) {
   })
 }
 
+// TODO(tim): add this when we want to use the socket as the GraphQL
+// transport layer for all operations
 // const socketExchange = (io: Socket): Exchange => {
 //   return (input) => {
 //     return (ops$) => {

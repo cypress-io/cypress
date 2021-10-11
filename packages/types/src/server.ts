@@ -1,5 +1,6 @@
 import type { DataContext } from '@packages/data-context'
-import type { Browser, FoundBrowser, PlatformName } from './browser'
+import type { Browser, FoundBrowser } from './browser'
+import type { PlatformName } from './platform'
 
 export interface LaunchOpts {
   browser?: FoundBrowser
