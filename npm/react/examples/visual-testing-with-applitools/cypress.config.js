@@ -1,23 +1,12 @@
+const { defineConfig } = require('cypress')
+
 // @ts-check
 
 // load file devServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install
 const devServer = require('@cypress/react/plugins/react-scripts')
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  devServer(on, config)
-
-  // IMPORTANT to return the config object
-  // with the any changed environment variables
-  return config
-}
-
-// @ts-ignore
-require('@applitools/eyes-cypress')(module)
-const json = {
+ module.exports = defineConfig({
   "video": false,
   "fixturesFolder": false,
   "testFiles": "**/*spec.js",
@@ -26,5 +15,17 @@ const json = {
   "componentFolder": "src",
   "env": {
     "coverage": false
+  },
+  e2e: {
+		setupNodeEvents(on, config) {
+      devServer(on, config)
+
+       // IMPORTANT to return the config object
+       // with the any changed environment variables
+       return config
+		}
   }
-}
+ })
+
+// @ts-ignore
+require('@applitools/eyes-cypress')(module)

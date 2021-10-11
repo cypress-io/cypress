@@ -1,11 +1,15 @@
-const webpackPreprocessor = require('../../../..')
+const { defineConfig } = require('cypress')
 
-module.exports = (on) => {
-  const webpack = require('../../webpack.config.js')
+const webpackPreprocessor = require('../..')
 
-  on('file:preprocessor', webpackPreprocessor({ webpack }))
-}
-const json = {
+module.exports = defineConfig({
   "fixturesFolder": false,
-  "supportFile": false
-}
+  "supportFile": false,
+  e2e: {
+    setupNodeEvents(on, config) {
+      const webpack = require('./webpack.config.js')
+
+      on('file:preprocessor', webpackPreprocessor({ webpack }))
+    }
+  }
+})
