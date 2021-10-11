@@ -179,9 +179,7 @@ export async function startCypressWatch () {
     watcher.close()
   })
 
-  const restartWatcher = chokidar.watch(DevActions.CY_TRIGGER_UPDATE, {
-    ignoreInitial: true,
-  })
+  const restartWatcher = chokidar.watch(DevActions.CY_TRIGGER_UPDATE)
 
   restartWatcher.on('add', restartServer)
   restartWatcher.on('change', restartServer)
