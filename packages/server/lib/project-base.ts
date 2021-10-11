@@ -33,6 +33,7 @@ import preprocessor from './plugins/preprocessor'
 import { SpecsStore } from './specs-store'
 import { checkSupportFile, getDefaultConfigFilePath } from './project_utils'
 import type { FoundBrowser, OpenProjectLaunchOptions } from '@packages/types'
+import { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 // Cannot just use RuntimeConfigOptions as is because some types are not complete.
 // Instead, this is an interface of values that have been manually validated to exist
@@ -65,6 +66,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   public id: string
 
   protected watchers: Watchers
+  protected ctx: DataContextShell
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
@@ -82,7 +84,7 @@ export class ProjectBase<TServer extends Server> extends EE {
   constructor ({
     projectRoot,
     testingType,
-    options,
+    options = {},
   }: {
     projectRoot: string
     testingType: Cypress.TestingType
@@ -104,6 +106,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.spec = null
     this.browser = null
     this.id = createHmac('sha256', 'secret-key').update(projectRoot).digest('hex')
+    this.ctx = options.ctx ?? new DataContextShell()
 
     debug('Project created %o', {
       testingType: this.testingType,
@@ -162,8 +165,8 @@ export class ProjectBase<TServer extends Server> extends EE {
 
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
-      ? new ServerE2E() as TServer
-      : new ServerCt() as TServer
+      ? new ServerE2E(this.ctx) as TServer
+      : new ServerCt(this.ctx) as TServer
   }
 
   async open () {
@@ -186,7 +189,9 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._server = this.createServer(this.testingType)
 
-    cfg = await this.initializePlugins(cfg, this.options)
+    if (!this.options.skipPluginIntializeForTesting) {
+      cfg = await this.initializePlugins(cfg, this.options)
+    }
 
     const {
       specsStore,
@@ -209,6 +214,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       specsStore,
     })
 
+    this.ctx.setAppServerPort(port)
     this._isServerOpen = true
 
     // if we didnt have a cfg.port
@@ -337,7 +343,10 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
+
+    this.ctx.setAppServerPort(undefined)
+    this.ctx.emitter.setAppSocketServer(undefined)
 
     await Promise.all([
       this.server?.close(),
@@ -436,7 +445,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     config,
   }: {
     specs: Cypress.Cypress['spec'][]
-    config: any
+    config: Cfg
   }) {
     const specsStore = new SpecsStore(config, this.testingType)
 
@@ -458,7 +467,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     let ctDevServerPort: number | undefined
 
-    if (this.testingType === 'component') {
+    if (this.testingType === 'component' && !this.options.skipPluginIntializeForTesting) {
       const { port } = await this.startCtDevServer(specs, config)
 
       ctDevServerPort = port
@@ -595,7 +604,7 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
 
-    this.server.startWebsockets(this.automation, this.cfg, {
+    const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
@@ -651,6 +660,8 @@ export class ProjectBase<TServer extends Server> extends EE {
         return
       },
     })
+
+    this.ctx.emitter.setAppSocketServer(io)
   }
 
   changeToUrl (url) {

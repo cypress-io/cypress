@@ -2,6 +2,8 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
+const { URL } = require('url')
+
 const configOptions = require('../config_options')
 const path = require('path')
 

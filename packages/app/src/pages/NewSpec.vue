@@ -25,10 +25,10 @@
 </route>
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { MainQueryDocument, GenerateSpecFromStoryDocument } from '../generated/graphql'
+import { NewSpecQueryDocument, NewSpec_GenerateSpecFromStoryDocument } from '../generated/graphql'
 
 gql`
-query MainQuery {
+query NewSpecQuery {
   wizard {
     storybook {
       configured
@@ -39,7 +39,7 @@ query MainQuery {
 `
 
 gql`
-mutation GenerateSpecFromStory($storyPath: String!) {
+mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
   generateSpecFromStory (storyPath: $storyPath) {
     storybook {
       configured,
@@ -49,8 +49,8 @@ mutation GenerateSpecFromStory($storyPath: String!) {
 } 
 `
 
-const query = useQuery({ query: MainQueryDocument })
-const mutation = useMutation(GenerateSpecFromStoryDocument)
+const query = useQuery({ query: NewSpecQueryDocument })
+const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
 
 async function storyClick (story) {
   await mutation.executeMutation({ storyPath: story })

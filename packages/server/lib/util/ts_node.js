@@ -1,11 +1,17 @@
-const debug = require('debug')('cypress:server:ts-node')
+// @ts-check
+const debugLib = require('debug')
 const path = require('path')
 const tsnode = require('ts-node')
 const resolve = require('./resolve')
 
+const debug = debugLib('cypress:server:ts-node')
+
 const getTsNodeOptions = (tsPath, registeredFile) => {
-  return {
-    compiler: tsPath, // use the user's installed typescript
+  /**
+   * @type {import('ts-node').RegisterOptions}
+   */
+  const opts = {
+    compiler: process.env.TS_NODE_COMPILER || tsPath, // use the user's installed typescript
     compilerOptions: {
       module: 'CommonJS',
     },
@@ -14,6 +20,8 @@ const getTsNodeOptions = (tsPath, registeredFile) => {
     dir: path.dirname(registeredFile),
     transpileOnly: true, // transpile only (no type-check) for speed
   }
+
+  return opts
 }
 
 const register = (projectRoot, registeredFile) => {

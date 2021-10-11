@@ -4,6 +4,27 @@ import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('internal_triggerIpcToLaunchpad', {
+      type: 'Boolean',
+      args: {
+        msg: nonNull(stringArg()),
+      },
+      resolve: (root, args, ctx) => {
+        ctx.emitter.toLaunchpad(args.msg)
+
+        return true
+      },
+    })
+
+    t.field('internal_triggerIpcToApp', {
+      type: 'Boolean',
+      resolve: (root, args, ctx) => {
+        ctx.emitter.toApp('someData')
+
+        return true
+      },
+    })
+
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: (source, args, ctx) => {

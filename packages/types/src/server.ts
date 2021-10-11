@@ -1,4 +1,6 @@
-import type { Browser, FoundBrowser, PlatformName } from './browser'
+import type { DataContext } from '@packages/data-context'
+import type { Browser, FoundBrowser } from './browser'
+import type { PlatformName } from './platform'
 
 export interface LaunchOpts {
   browser?: FoundBrowser
@@ -8,6 +10,11 @@ export interface LaunchOpts {
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
   onError?: (err: Error) => void
+  /**
+   * Whether we want to skip opening the browser, in the case we're
+   * using Cypress to test the server directly
+   */
+  skipBrowserOpenForTest?: true
 }
 
 export interface LaunchArgs {
@@ -48,7 +55,13 @@ export interface AutomationMiddleware {
 type WebSocketOptionsCallback = (...args: any[]) => any
 
 export interface OpenProjectLaunchOptions {
+  ctx?: DataContext
   args?: LaunchArgs
+  /**
+   * Whether to skip the plugin initialization, useful when
+   * we're using Cypress to test Cypress
+   */
+  skipPluginIntializeForTesting?: boolean
 
   configFile?: string | false
   browsers?: Cypress.Browser[]

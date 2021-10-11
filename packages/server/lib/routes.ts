@@ -9,10 +9,12 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
+  ctx: DataContextShell
   specsStore: SpecsStore
   config: Cfg
   getSpec: () => Cypress.Spec | null
