@@ -124,14 +124,16 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.openProject!.reset()
 
-    const url = getSpecUrl({
-      absoluteSpecPath: spec.absolute,
-      specType: spec.specType,
-      browserUrl: this.openProject.cfg.browserUrl,
-      integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
-      componentFolder: this.openProject.cfg.componentFolder || 'component?',
-      projectRoot: this.openProject.projectRoot,
-    })
+    const url = process.env.LAUNCHPAD
+      ? `${this.openProject.cfg.browserUrl.replace('/__/', '/__vite__/')}`
+      : getSpecUrl({
+        absoluteSpecPath: spec.absolute,
+        specType: spec.specType,
+        browserUrl: this.openProject.cfg.browserUrl,
+        integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
+        componentFolder: this.openProject.cfg.componentFolder || 'component?',
+        projectRoot: this.openProject.projectRoot,
+      })
 
     debug('open project url %s', url)
 
