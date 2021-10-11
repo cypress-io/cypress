@@ -183,14 +183,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('checkAuthBrowser', {
-      type: 'Query',
-      description: 'Check the Auth Browser Status',
-      async resolve (_root, args, ctx) {
-        return ctx.app.isAuthBrowserOpened
-      },
-    })
-
     t.field('initializeOpenProject', {
       type: 'Wizard',
       description: 'Initializes open_project global singleton to manager current project state',

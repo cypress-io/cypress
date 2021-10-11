@@ -19,7 +19,7 @@ interface MakeDataContextOptions {
 }
 
 export function makeDataContext (options: MakeDataContextOptions) {
-  const ctx = new DataContext({
+  return new DataContext({
     ...options,
     launchOptions: {},
     appApi: {
@@ -28,16 +28,10 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
     authApi: {
-      logIn () {
-        return auth.start((message: {type: string, browserOpened: boolean, name: string, message: string}) => {
-          const { browserOpened } = message
-
-          ctx.appData.isAuthBrowserOpened = browserOpened
-        }, 'launchpad')
+      logIn (onMessage) {
+        return auth.start(onMessage, 'launchpad')
       },
       logOut () {
-        ctx.appData.isAuthBrowserOpened = false
-
         return user.logOut()
       },
       checkAuth (context) {
@@ -74,6 +68,4 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
   })
-
-  return ctx
 }

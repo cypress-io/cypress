@@ -277,9 +277,6 @@ type Mutation {
 
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
-
-  """Check the Auth Browser Status"""
-  checkAuthBrowser: Query
   clearActiveProject: Query!
 
   """Generate spec from Storybook story"""

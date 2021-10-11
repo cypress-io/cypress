@@ -38,13 +38,13 @@
 <script lang="ts" setup>
 import { computed, ref, onMounted } from 'vue'
 import { gql } from '@urql/core'
-import { useMutation } from '@urql/vue'
+import { useMutation, useQuery } from '@urql/vue'
 
 import {
   LoginDocument,
   LogoutDocument,
-  CheckAuthBrowserDocument,
   AuthFragment,
+  MainLaunchpadQueryDocument,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
@@ -83,18 +83,9 @@ mutation Login {
 }
 `
 
-gql`
-mutation CheckAuthBrowser {
-  checkAuthBrowser {
-    ...Auth
-  }
-}
-`
-
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
-const checkAuthBrowser = useMutation(CheckAuthBrowserDocument)
-const loginButtonRef = ref <{$el: HTMLButtonElement} | null>(null)
+const loginButtonRef = ref<{ $el: HTMLButtonElement } | null>(null)
 
 onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
@@ -111,6 +102,10 @@ const viewer = computed(() => props.gql?.cloudViewer)
 const isBrowserOpened = computed(() => props.gql?.app?.isAuthBrowserOpened)
 const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
+const query = useQuery({
+  query: MainLaunchpadQueryDocument,
+})
+
 const handleAuth = async () => {
   if (viewer.value) {
     emit('continue', true)
@@ -120,7 +115,7 @@ const handleAuth = async () => {
 
   clickedOnce.value = true
   const browserCheckInterval = setInterval(async () => {
-    await checkAuthBrowser.executeMutation({})
+    await query.executeQuery({})
     if (isBrowserOpened.value) {
       clearInterval(browserCheckInterval)
     }

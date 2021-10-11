@@ -1,8 +1,9 @@
 import type { DataContext } from '..'
 import type { AuthenticatedUserShape } from '../data'
 
+interface AuthMessage {type: string, browserOpened: boolean, name: string, message: string}
 export interface AuthApiShape {
-  logIn(): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthMessage) => void): Promise<AuthenticatedUserShape>
   logOut(): Promise<void>
   checkAuth(context: DataContext): Promise<void>
 }
@@ -14,20 +15,21 @@ export class AuthActions {
     return this.ctx._apis.authApi
   }
 
-  checkAuthBrowser () {
-    return this.ctx.app.isAuthBrowserOpened
-  }
-
   async checkAuth () {
     return this.authApi.checkAuth(this.ctx)
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn())
+    this.setAuthenticatedUser(await this.authApi.logIn((message: AuthMessage) => {
+      const { browserOpened } = message
+
+      this.ctx.appData.isAuthBrowserOpened = browserOpened
+    }))
   }
 
   async logout () {
     try {
+      this.ctx.appData.isAuthBrowserOpened = false
       await this.authApi.logOut()
     } catch {
       //
