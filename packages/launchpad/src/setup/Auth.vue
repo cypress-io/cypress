@@ -44,7 +44,7 @@ import {
   LoginDocument,
   LogoutDocument,
   AuthFragment,
-  MainLaunchpadQueryDocument,
+  BrowserOpenedDocument,
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
@@ -83,6 +83,14 @@ mutation Login {
 }
 `
 
+gql`
+query BrowserOpened {
+  app {
+    isAuthBrowserOpened
+  }
+}
+`
+
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
 const loginButtonRef = ref<{ $el: HTMLButtonElement } | null>(null)
@@ -103,7 +111,7 @@ const isBrowserOpened = computed(() => props.gql?.app?.isAuthBrowserOpened)
 const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const query = useQuery({
-  query: MainLaunchpadQueryDocument,
+  query: BrowserOpenedDocument,
 })
 
 const handleAuth = async () => {
@@ -114,6 +122,7 @@ const handleAuth = async () => {
   }
 
   clickedOnce.value = true
+
   const browserCheckInterval = setInterval(async () => {
     await query.executeQuery({})
     if (isBrowserOpened.value) {
