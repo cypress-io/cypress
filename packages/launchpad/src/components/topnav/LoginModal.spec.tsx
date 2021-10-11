@@ -51,8 +51,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.findByRole('button', { name: text.login.actionLogin }).click()
 
     cy.findByRole('button', { name: text.login.actionWaiting })
-      .should('be.visible')
-      .and('be.disabled')
+    .should('be.visible')
+    .and('be.disabled')
   })
 
   it('shows successful login status', () => {

@@ -40,7 +40,7 @@ export interface WizardDataShape {
   allBundlers: typeof BUNDLERS
   chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
-  chosenManualInstall: boolean 
+  chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
   generatedSpec: Omit<StorybookFile, 'content'> | null
 }

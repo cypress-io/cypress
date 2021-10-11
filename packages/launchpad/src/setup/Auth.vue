@@ -14,6 +14,7 @@
 
   <div v-else>
     <Button
+      ref="loginButtonRef"
       size="lg"
       :variant="buttonVariant"
       :disabled="isLoggingIn"
@@ -35,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 
@@ -93,6 +94,11 @@ mutation CheckAuthBrowser {
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
 const checkAuthBrowser = useMutation(CheckAuthBrowserDocument)
+const loginButtonRef = ref <{$el: HTMLButtonElement} | null>(null)
+
+onMounted(() => {
+  loginButtonRef?.value?.$el?.focus()
+})
 
 const error = ref<string>()
 const clickedOnce = ref(false)
