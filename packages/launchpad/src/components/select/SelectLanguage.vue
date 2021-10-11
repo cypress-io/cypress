@@ -8,14 +8,21 @@
         name
       }}
     </label>
-    <div @click="() => selectOption('js')">
-      js
+    <div class="inline-flex gap-1 border border-gray-300 rounded p-1">
+      <button
+        v-for="opt in options"
+        :key="opt.type"
+        class="px-2 py-1 rounded-sm"
+        :class="opt.isSelected ? 'bg-secondary-50 text-secondary-600': 'text-gray-700'"
+        @click="() => selectOption(opt.type)"
+      >
+        {{ opt.name }}
+      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import type { EnvironmentSetupFragment, CodeLanguageEnum } from '../../generated/graphql'
 
 const emit = defineEmits<{
@@ -24,18 +31,11 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   name: string
-  value?: CodeLanguageEnum
-  options: Array<{type:string, name:string}> //EnvironmentSetupFragment['languages']
+  value: CodeLanguageEnum
+  options: EnvironmentSetupFragment['allLanguages']
   disabled?: boolean
 }>(), {
   disabled: false,
-  value: undefined,
-})
-
-const isOpen = ref(false)
-
-const selectedOptionObject = computed(() => {
-  return props.options.find((opt) => opt.type === props.value)
 })
 
 const selectOption = (opt: CodeLanguageEnum) => {
