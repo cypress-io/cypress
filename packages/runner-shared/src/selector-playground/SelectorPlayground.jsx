@@ -65,7 +65,7 @@ class SelectorPlayground extends Component {
               <input
                 ref={(node) => this._input = node}
                 name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector playground */}
-                value={model.selector}
+                value={this._setQuotesToAttrSelector(model.selector)}
                 onChange={this._updateSelector}
                 onFocus={this._setHighlight(true)}
               />
@@ -75,7 +75,7 @@ class SelectorPlayground extends Component {
             </span>
             <span>)</span>
             {/* eslint-disable-next-line react/no-string-refs */}
-            <input ref='copyText' className='copy-backer' value={this._setQuotesToAttrSelector(selectorText)} readOnly={true} />
+            <input ref='copyText' className='copy-backer' value={selectorText} readOnly={true} />
             <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
                 {model.isValid ?
@@ -228,16 +228,19 @@ class SelectorPlayground extends Component {
   }
 
   /**
+   * Method to wrap the HTML attribute selector text in double quotes if there's missing
    * @param {string} selector -> a string that represents a HTML attribute selector
-   * @returns {string} -> the selector with wrapped in single quotes if it's a HTML attribute selector
+   * @returns {string} -> the selector wrapped in double quotes if needed
    */
   _setQuotesToAttrSelector = (selector) => {
     const [attributeName, attributeValue] = selector.split('=')
 
-    const hasQuotes = (attributeValue[0] === '"' || attributeValue[0] === '\'')
+    if (attributeName && attributeValue) {
+      const hasQuotes = (attributeValue[0] === '"' || attributeValue[0] === '\'')
 
-    if (selector.split('').includes('[', ']') && !hasQuotes) {
-      return `[${attributeName.replace('[', '')}="${attributeValue.replace(']', '"]')}`
+      if (selector.split('').includes('[', ']') && !hasQuotes) {
+        return `[${attributeName.replace('[', '')}="${attributeValue.replace(']', '"]')}`
+      }
     }
 
     return selector
