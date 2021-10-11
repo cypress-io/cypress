@@ -6,6 +6,7 @@
   "browser": "lib/browser.ts",
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors'",
+    "clean": "rimraf lib/*.js",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",

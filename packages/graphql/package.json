@@ -8,7 +8,7 @@
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean": "rimraf './{src,test}/**/*.js'",
     "postinstall": "echo '@packages/graphql needs: yarn build'",
     "test-unit": "mocha -r @packages/ts/register test/unit/**/*.spec.ts --config ./test/.mocharc.js --exit",
     "test-integration": "mocha -r @packages/ts/register test/integration/**/*.spec.ts --config ./test/.mocharc.js --exit"

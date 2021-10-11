@@ -13,6 +13,9 @@ cypress.zip
 Cached Theme.pak
 Cached Theme Material Design.pak
 
+# from data-context, compiled .js files
+packages/data-context/src/**/*.js
+
 # from desktop-gui
 packages/desktop-gui/cypress/videos
 packages/desktop-gui/src/jsconfig.json
@@ -22,9 +25,22 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# from launcher, compiled .js files
+packages/launcher/index.js
+packages/launcher/lib/**/*.js
+
+# from network, compiled .js files
+packages/network/lib/**/*.js
+
+# from net-stubbing, compiled .js files
+packages/net-stubbing/lib/**/*.js
+
 # from runner
 packages/runner/cypress/videos
 packages/runner/cypress/screenshots
+
+# from proxy, compiled .js files
+packages/proxy/lib/**/*.js
 
 # npm packages
 npm/**/cypress/screenshots
