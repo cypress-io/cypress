@@ -4,8 +4,9 @@ import { IconDuotoneColorsPlugin } from './.windicss/icon-color-plugins'
 import { safelist } from './.windicss/safelist'
 import { colors } from './.windicss/colors'
 import path from 'path'
+import type { WindiCssOptions } from '@windicss/config'
 
-export const defaultConfig = {
+export const defaultConfig: WindiCssOptions = {
   // This adds !important to all utility classes. https://csswizardry.com/2016/05/the-importance-of-important/
   important: true,
   theme: {

@@ -106,10 +106,12 @@ const descriptions = {
   cachePath: 'print the path to the binary cache',
   cacheSize: 'Used with the list command to show the sizes of the cached folders',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
+  component: 'runs component tests',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
   configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
   detached: 'runs Cypress application in detached mode',
   dev: 'runs cypress in development and bypasses binary check',
+  e2e: 'runs end to end tests',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
@@ -248,8 +250,10 @@ const addCypressRunCommand = (program) => {
   .description('Runs Cypress tests from the CLI without the GUI')
   .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
   .option('--ci-build-id <id>', text('ciBuildId'))
+  .option('--ct, --component', text('component'))
   .option('-c, --config <config>', text('config'))
   .option('-C, --config-file <config-file>', text('configFile'))
+  .option('--e2e', text('e2e'))
   .option('-e, --env <env>', text('env'))
   .option('--group <name>', text('group'))
   .option('-k, --key <record-key>', text('key'))
@@ -386,8 +390,10 @@ module.exports = {
     .description('Opens Cypress in the interactive GUI.')
     .option('-b, --browser <browser-path>', text('browserOpenMode'))
     .option('-c, --config <config>', text('config'))
+    .option('--ct, --component', text('component'))
     .option('-C, --config-file <config-file>', text('configFile'))
     .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('--e2e', text('e2e'))
     .option('-e, --env <env>', text('env'))
     .option('--global', text('global'))
     .option('-p, --port <port>', text('port'))

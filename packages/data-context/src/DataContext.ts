@@ -14,6 +14,7 @@ import {
   WizardDataSource,
   BrowserDataSource,
   UtilDataSource,
+  StorybookDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 
@@ -102,6 +103,11 @@ export class DataContext {
   @cached
   get wizard () {
     return new WizardDataSource(this)
+  }
+
+  @cached
+  get storybook () {
+    return new StorybookDataSource(this)
   }
 
   get wizardData () {

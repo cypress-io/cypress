@@ -79,7 +79,7 @@ async function selectSpec (spec: SpecNode_SpecsListFragment) {
   const { id } = spec.node
 
   await setSpecMutation.executeMutation({ id })
-  router.push('/runner')
+  router.push('runner')
 }
 
 const props = defineProps<{

@@ -21,10 +21,12 @@ exports['shows help for open --foo 1'] = `
     -c, --config <config>            sets configuration values. separate multiple
                                      values with a comma. overrides any value in
                                      cypress.json.
+    --ct, --component                runs component tests
     -C, --config-file <config-file>  path to JSON file where configuration values
                                      are set. defaults to "cypress.json". pass
                                      "false" to disable.
     -d, --detached [bool]            runs Cypress application in detached mode
+    --e2e                            runs end to end tests
     -e, --env <env>                  sets environment variables. separate
                                      multiple values with a comma. overrides any
                                      value in cypress.json or cypress.env.json
@@ -64,8 +66,10 @@ exports['shows help for run --foo 1'] = `
   Options:
     -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
+    --ct, --component                          runs component tests
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.
     -C, --config-file <config-file>            path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.
+    --e2e                                      runs end to end tests
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json
     --group <name>                             a named group for recorded runs in the Cypress Dashboard
     -k, --key <record-key>                     your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.

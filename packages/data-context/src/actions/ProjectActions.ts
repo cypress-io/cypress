@@ -50,6 +50,7 @@ export class ProjectActions {
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
+      config: await this.ctx.project.getResolvedConfigFields(projectRoot),
     }
 
     return this
@@ -204,5 +205,19 @@ export class ProjectActions {
 
   async clearLatestProjectCache () {
     await this.api.clearLatestProjectsCache()
+  }
+
+  createComponentIndexHtml (template: string) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create index.html without activeProject.`)
+    }
+
+    if (this.ctx.activeProject?.isFirstTimeCT) {
+      const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
+
+      this.ctx.fs.outputFile(indexHtmlPath, template)
+    }
   }
 }

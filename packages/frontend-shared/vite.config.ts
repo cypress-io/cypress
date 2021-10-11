@@ -9,6 +9,8 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 import { FileSystemIconLoader } from 'unplugin-icons/loaders'
+import OptimizationPersist from 'vite-plugin-optimize-persist'
+import PkgConfig from 'vite-plugin-package-config'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { UserConfig } from 'vite'
@@ -35,29 +37,37 @@ const alias = {
 const makePlugins = (plugins) => {
   return ([
     vue(),
-    vueJsx(),
+    vueJsx(), // Used mostly for testing in *.(t|j)sx files.
     VueI18n({
       include: path.resolve(__dirname, './src/locales/**'),
       ...plugins.vueI18nOptions,
     }),
     Icons({
+      // 1em. Default, without this options is 1.2em.
+      // If you notice that your icons are bigger than they should be, this
+      // is probably why.
       scale: 1,
       customCollections: {
-      // ~icons/cy/book-x16
+        // ~icons/cy/book_x16
         cy: FileSystemIconLoader(path.resolve(__dirname, './src/assets/icons')),
         ...plugins.iconsOptions?.customCollections,
       },
       ...plugins.iconsOptions,
     }),
     Components({
-    // <i-cy-book-x16/>
       resolvers: IconsResolver({
+        // <i-cy-book_x16/>
         customCollections: ['cy'],
       }),
       ...plugins?.componentsOptions,
     }),
     WindiCSS(),
     VueSvgLoader(),
+
+    // package.json is modified and auto-updated when new cjs dependencies
+    // are added
+    PkgConfig(),
+    OptimizationPersist(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
     ...(plugins?.plugins || []),
   ])

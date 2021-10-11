@@ -72,5 +72,18 @@
     "dist",
     "lib",
     "src"
-  ]
+  ],
+  "vite": {
+    "optimizeDeps": {
+      "include": [
+        "@urql/vue",
+        "@vueuse/core",
+        "lodash",
+        "mobx",
+        "nanoid",
+        "vue",
+        "vue-toast-notification"
+      ]
+    }
+  }
 }

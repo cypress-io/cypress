@@ -1,4 +1,5 @@
 import type { Mutation, Project } from '../generated/test-graphql-types.gen'
+import config from '../../fixtures/config.json'
 import path from 'path'
 
 import type { MaybeResolver } from './clientTestUtils'
@@ -13,6 +14,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
       isFirstTimeCT: true,
       isFirstTimeE2E: true,
       __typename: 'Project',
+      config,
     }
 
     ctx.app.projects.push(project)
@@ -46,11 +48,21 @@ export const stubMutation: MaybeResolver<Mutation> = {
     }
 
     ctx.app.activeProject.currentSpec = {
-      id: args.spec.absolute,
-      __typename: 'BaseSpec',
-      ...args.spec,
+      id: 'U3BlYzovVXNlcnMvbGFjaGxhbi9jb2RlL3dvcmsvY3lwcmVzczUvcGFja2FnZXMvYXBwL3NyYy9CYXNpYy5zcGVjLnRzeA==',
+      __typename: 'Spec',
+      absolute: '/Users/lachlan/code/work/cypress5/packages/app/src/Basic.spec.tsx',
+      relative: 'app/src/Basic.spec.tsx',
+      specFileExtension: '.spec.tsx',
+      specType: 'component',
+      name: 'Basic',
+      fileExtension: 'spec.tsx',
+      fileName: 'Basic.spec.tsx',
+      baseName: 'Basic',
     }
 
     return ctx.app.activeProject
+  },
+  generateSpecFromStory (source, args, ctx) {
+    return ctx.wizard
   },
 }

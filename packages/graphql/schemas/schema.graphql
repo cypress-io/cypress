@@ -269,9 +269,15 @@ type Mutation {
     path: String!
   ): App!
 
+  """Create an Index HTML file for a new component testing project"""
+  appCreateComponentIndexHtml(template: String!): App
+
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
   clearActiveProject: Query!
+
+  """Generate spec from Storybook story"""
+  generateSpecFromStory(storyPath: String!): Wizard!
 
   """
   Initializes open_project global singleton to manager current project state
@@ -400,6 +406,9 @@ type Project implements Node {
   """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProject
 
+  """Project configuration"""
+  config: JSON!
+
   """Currently selected spec"""
   currentSpec: Spec
 
@@ -527,6 +536,18 @@ enum SpecType {
   integration
 }
 
+"""Storybook"""
+type Storybook {
+  """Whether this is the selected framework bundler"""
+  configured: Boolean
+
+  """Most recent generated spec"""
+  generatedSpec: String
+
+  """List of all Storybook stories"""
+  stories: [String!]!
+}
+
 """The bundlers that we can use with Cypress"""
 enum SupportedBundlers {
   vite
@@ -580,7 +601,11 @@ type Wizard {
 
   """Configuration file based on bundler and framework of choice"""
   sampleCode(lang: WizardCodeLanguage! = js): String
+
+  """IndexHtml file based on bundler and framework of choice"""
+  sampleTemplate: String
   step: WizardStep!
+  storybook: Storybook
 
   """
   The testing type we are setting in the wizard, null if this has not been chosen

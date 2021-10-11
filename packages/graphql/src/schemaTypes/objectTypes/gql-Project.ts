@@ -68,5 +68,12 @@ export const Project = objectType({
         return ctx.actions.project.findSpecs(source.projectRoot, args.specType)
       },
     })
+
+    t.nonNull.json('config', {
+      description: 'Project configuration',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getResolvedConfigFields(source.projectRoot)
+      },
+    })
   },
 })
