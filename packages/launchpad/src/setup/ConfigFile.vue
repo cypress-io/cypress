@@ -6,46 +6,6 @@
     :next-fn="createConfig"
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
   >
-    <nav
-      class="
-        rounded-t
-        text-left
-        text-gray-500
-        px-5
-        bg-gray-50
-        flex
-        gap-2
-        border-b-1
-        border-gray-200"
-    >
-      <button
-        v-for="lang of languages"
-        :key="lang.id"
-        class="
-          p-4
-          w-28
-          relative
-          border-transparent
-          border-1
-          focus-default"
-        :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''"
-        @click="language = lang.id"
-      >
-        {{ lang.name }}
-        <span
-          v-if="language === lang.id"
-          class="
-            absolute
-            bottom-0
-            left-0
-            right-0
-            block
-            h-1
-            bg-indigo-500
-            rounded-t"
-        />
-      </button>
-    </nav>
     <div
       v-if="tsInstalled"
       class="relative p-4"
@@ -72,7 +32,6 @@ import { gql } from '@urql/core'
 import PrismJs from 'vue-prism-component'
 import WizardLayout from './WizardLayout.vue'
 import CopyButton from '@cy/components/CopyButton.vue'
-import { languages } from '../utils/configFile'
 import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument, ConfigFile_AppCreateComponentIndexHtmlDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
@@ -96,8 +55,7 @@ fragment ConfigFile on Query {
 gql`
 fragment SampleCode on Wizard {
   canNavigateForward
-  sampleCodeJs: sampleCode(lang: js)
-  sampleCodeTs: sampleCode(lang: ts)
+  sampleCode
   sampleTemplate
 }
 `
@@ -135,7 +93,9 @@ const altFn = (val: boolean) => {
 }
 
 const tsInstalled = ref(false)
-const language = ref<'js' | 'ts'>('ts')
+const language = computed(() => {
+  return props.gql.wizard.chosenLanguage?.type
+})
 const nextButtonName = computed(() => {
   return manualCreate.value ? 'I\'ve added this file' : 'Create File'
 })
@@ -148,11 +108,7 @@ const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
 const createComponentIndexHtml = useMutation(ConfigFile_AppCreateComponentIndexHtmlDocument)
 
 const code = computed(() => {
-  if (language.value === 'js') {
-    return props.gql.wizard.sampleCodeJs
-  }
-
-  return props.gql.wizard.sampleCodeTs
+  return props.gql.wizard.sampleCode
 })
 
 const createConfig = async () => {
