@@ -64,12 +64,8 @@
     "type-check": "node scripts/type_check",
     "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "prewatch": "yarn ensure-deps",
-    "watch": "lerna exec yarn watch --parallel --stream"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "watch": "lerna exec yarn watch --parallel --stream",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",
@@ -147,7 +143,7 @@
     "hasha": "5.0.0",
     "http-server": "0.12.3",
     "human-interval": "1.0.0",
-    "husky": "2.4.1",
+    "husky": "7.0.2",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
     "jest": "24.9.0",
@@ -157,7 +153,7 @@
     "konfig": "0.2.1",
     "lazy-ass": "1.6.0",
     "lerna": "3.20.2",
-    "lint-staged": "11.0.0",
+    "lint-staged": "11.1.2",
     "listr2": "3.8.3",
     "lodash": "4.17.21",
     "make-empty-github-commit": "cypress-io/make-empty-github-commit#4a592aedb776ba2f4cc88979055315a53eec42ee",
