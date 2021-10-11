@@ -106,7 +106,6 @@ const isLoggingIn = computed(() => clickedOnce.value && !viewer.value)
 
 const handleAuth = async () => {
   if (viewer.value) {
-    console.log('emit continue')
     emit('continue', true)
 
     return
