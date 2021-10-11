@@ -41825,10 +41825,10 @@ vue-template-es2015-compiler@^1.9.0, vue-template-es2015-compiler@^1.9.1:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
-vue-toast-notification@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/vue-toast-notification/-/vue-toast-notification-2.0.1.tgz#5fe607c493b5dc9b238bf49bc3bcf80366edd4e4"
-  integrity sha512-8GPJq1J6lsTPTCxSgPhnM8d0v+ivwT+u4R/xmtaDXeYNRkaRxqFOn3ewaVqmm+aCT8Y3/PQQS8dFqkMV7JOf/A==
+vue-toastification@2.0.0-rc.1:
+  version "2.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/vue-toastification/-/vue-toastification-2.0.0-rc.1.tgz#6a994c19635a493eec0ee290e84a966e07c709d2"
+  integrity sha512-hjauv/FyesNZdwcr5m1SCyvu1JmlB+Ts5bTptDLDmsYYlj6Oqv8NYakiElpCF+Abwkn9J/AChh6FwkTL1HOb7Q==
 
 vue-tsc@^0.3.0:
   version "0.3.0"

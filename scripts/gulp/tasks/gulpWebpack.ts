@@ -48,7 +48,8 @@ export async function runWebpack (cfg: RunWebpackCfg) {
         line.includes('Compiled successfully') ||
           line.includes('Compiled with warnings') ||
           line.includes('Failed to compile') ||
-          line.includes('Built at: ')
+          line.includes('Built at: ') ||
+          line.includes('Live Reload listening')
       ) {
         dfd.resolve({})
       }

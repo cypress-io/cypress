@@ -7,6 +7,8 @@
 import chokidar from 'chokidar'
 import path from 'path'
 import pDefer from 'p-defer'
+import fs from 'fs-extra'
+import { DevActions } from '@packages/data-context/src/actions/DevActions'
 
 import { monorepoPaths } from '../monorepoPaths'
 import { ENV_VARS, getGulpGlobal } from '../gulpConstants'
@@ -125,6 +127,16 @@ export async function startCypressWatch () {
     })
   }
 
+  // Ensure that the directory we're using to touch the file for update exists
+  fs.ensureDirSync(path.dirname(DevActions.CY_STATE_PATH))
+
+  function signalRestart () {
+    fs.writeFile(DevActions.CY_STATE_PATH, JSON.stringify(new Date().toString()))
+  }
+
+  /**
+   * We touch a file within
+   */
   async function restartServer () {
     if (isRestarting) {
       return
@@ -150,24 +162,29 @@ export async function startCypressWatch () {
     isRestarting = false
   }
 
-  if (getGulpGlobal('shouldWatch')) {
-    const watcher = chokidar.watch([
-      'packages/{graphql,data-context}/src/**/*.{js,ts}',
-      'packages/server/lib/**/*.{js,ts}',
-    ], {
-      cwd: monorepoPaths.root,
-      ignored: /\.gen\.ts/,
-      ignoreInitial: true,
-    })
+  const watcher = chokidar.watch([
+    'packages/{graphql,data-context}/src/**/*.{js,ts}',
+    'packages/server/lib/**/*.{js,ts}',
+  ], {
+    cwd: monorepoPaths.root,
+    ignored: /\.gen\.ts/,
+    ignoreInitial: true,
+  })
 
-    watcher.on('add', restartServer)
-    watcher.on('change', restartServer)
+  watcher.on('add', signalRestart)
+  watcher.on('change', signalRestart)
 
-    process.on('beforeExit', () => {
-      isClosing = true
-      watcher.close()
-    })
-  }
+  process.on('beforeExit', () => {
+    isClosing = true
+    watcher.close()
+  })
+
+  const restartWatcher = chokidar.watch(DevActions.CY_TRIGGER_UPDATE, {
+    ignoreInitial: true,
+  })
+
+  restartWatcher.on('add', restartServer)
+  restartWatcher.on('change', restartServer)
 
   await startCypressWithListeners()
 }

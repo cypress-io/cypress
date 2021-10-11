@@ -54,7 +54,7 @@ export const Project = objectType({
           return null
         }
 
-        return ctx.actions.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
+        return ctx.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
       },
     })
 
@@ -65,7 +65,7 @@ export const Project = objectType({
         specType: arg({ type: SpecTypeEnum }),
       },
       nodes: (source, args, ctx) => {
-        return ctx.actions.project.findSpecs(source.projectRoot, args.specType)
+        return ctx.project.findSpecs(source.projectRoot, args.specType)
       },
     })
 
