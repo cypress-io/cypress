@@ -19,9 +19,11 @@ register({
   },
 })
 
-const io = returnMockRequire('@packages/socket/lib/browser', { client: {} })
-
-io.client.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
+returnMockRequire('@packages/socket/lib/browser', {
+  client () {
+    return { emit: () => {}, on: () => {} }
+  },
+})
 
 const _useFakeTimers = sinon.useFakeTimers
 let timers = []
