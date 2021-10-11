@@ -1,4 +1,4 @@
-import { BUNDLERS, FRONTEND_FRAMEWORKS, NAV_ITEMS, TESTING_TYPES, WIZARD_STEPS } from '@packages/types'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, NAV_ITEMS, TESTING_TYPES, WIZARD_STEPS } from '@packages/types'
 import { enumType } from 'nexus'
 
 export const SupportedBundlerEnum = enumType({
@@ -15,6 +15,11 @@ export const WizardNavigateDirectionEnum = enumType({
 export const FrontendFrameworkEnum = enumType({
   name: 'FrontendFrameworkEnum',
   members: FRONTEND_FRAMEWORKS.map((t) => t.type),
+})
+
+export const CodeLanguageEnum = enumType({
+  name: 'CodeLanguageEnum',
+  members: CODE_LANGUAGES.map((t) => t.type),
 })
 
 export const TestingTypeEnum = enumType({
