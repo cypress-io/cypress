@@ -10,3 +10,10 @@
     <!-- </keep-alive> -->
   </router-view>
 </template>
+
+<style>
+.reporter {
+  position: relative;
+  width: 100%;
+}
+</style>

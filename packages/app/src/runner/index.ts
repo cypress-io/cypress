@@ -16,17 +16,9 @@
  */
 import { store, Store } from '../store'
 import { injectBundle } from './injectBundle'
-import type { SpecFile } from '@packages/types/src/spec'
+import type { BaseSpec } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
-import { getRunnerElement } from './utils'
-
-function empty (el: HTMLElement) {
-  while (el.lastChild) {
-    if (el && el.firstChild) {
-      el.removeChild(el.firstChild)
-    }
-  }
-}
+import { getRunnerElement, empty } from './utils'
 
 const randomString = `${Math.random()}`
 
@@ -52,7 +44,7 @@ function setupRunner (done: () => void) {
 /**
  * Get the URL for the spec. This is the URL of the AUT IFrame.
  */
-function getSpecUrl (namespace: string, spec: SpecFile, prefix = '') {
+function getSpecUrl (namespace: string, spec: BaseSpec, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.absolute}` : ''
 }
 
@@ -71,7 +63,7 @@ function teardownSpec (store: Store) {
  * Cypress on it.
  *
  */
-function setupSpec (spec: SpecFile) {
+function setupSpec (spec: BaseSpec) {
   // @ts-ignore - TODO: figure out how to manage window.config.
   const config = window.config
 
@@ -136,7 +128,7 @@ function initialize (ready: () => void) {
  * 5. Setup the spec. This involves a few things, see the `setupSpec` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile) {
+async function executeSpec (spec: BaseSpec) {
   store.setSpec(spec)
 
   await UnifiedReporterAPI.resetReporter()

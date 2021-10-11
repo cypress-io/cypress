@@ -221,5 +221,22 @@ export const mutation = mutationType({
         return ctx.coreData.app
       },
     })
+
+    t.nonNull.field('setCurrentSpec', {
+      type: 'Project',
+      description: 'Set the current spec under test',
+      args: {
+        id: nonNull(idArg()),
+      },
+      resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
+        ctx.actions.project.setCurrentSpec(args.id)
+
+        return ctx.activeProject
+      },
+    })
   },
 })
