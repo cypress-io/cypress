@@ -49,22 +49,20 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.findByRole('button', { name: text.login.actionLogin })
       .click()
 
-    cy.contains('h2', text.login.titleInitial).should('be.visible')
-    cy.findByRole('button', { name: defaultMessages.actions.close }).should('be.visible').and('have.focus')
+      cy.contains('h2', text.login.titleInitial).should('be.visible')
 
-    // just grabbing a small fragment of the body text since it has some dynamically replacable content
-    cy.contains(text.login.bodyInitial.slice(0, 10)).should('be.visible')
-
-    // begin the login process
-    cy.findByRole('button', { name: text.login.actionLogin }).click()
-
-    // ensure we reach "browser is opening" status on the CTA
-    cy.findByRole('button', { name: text.login.actionOpening })
+    cy.findByRole('button', {name: defaultMessages.actions.close})
       .should('be.visible')
-      .and('be.disabled')
+      .and('have.focus')
+      .click()
+    
+      cy.contains('h2', text.login.titleInitial).should('not.exist')
+
+    
+    
   })
 
-  it.only('the logged in state is correctly presented in header', () => {
+  it('the logged in state is correctly presented in header', () => {
 
     const cloudViewer = {
       id: "1",
@@ -84,8 +82,7 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     cy.findByRole('button', { name: text.login.actionLogin }).click()
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
-    cy.findByRole('button', { name: text.login.actionLogout }).click()
-
+    cy.findByRole('button', { name: text.login.actionLogout }).should('be.visible')
   })
 
 })

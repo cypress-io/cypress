@@ -32,7 +32,7 @@
             v-else-if="viewer"
             keypath="topNav.login.bodySuccess"
           >
-            <span class="text-indigo-500">{{ viewer.fullName }}</span>
+            <a href="https://on.cypress.io/dashboard/profile" target="_blank" class="text-indigo-500 hover:underline font-medium">{{ viewer.fullName }}</a>
           </i18n-t>
         </DialogDescription>
 
