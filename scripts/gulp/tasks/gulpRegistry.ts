@@ -1,6 +1,7 @@
 import type { ChildProcess } from 'child_process'
 import pDefer from 'p-defer'
 import treeKill from 'tree-kill'
+import gulp from 'gulp'
 
 const childProcesses = new Set<ChildProcess>()
 const exitedPids = new Set<number>()
@@ -52,6 +53,19 @@ export async function exitAllProcesses () {
 }
 
 process.stdin.resume() //so the program will not close instantly
+
+const _task = gulp.task
+
+// So that we auto-exit on single tasks
+// @ts-expect-error
+gulp.task = function () {
+  if (arguments.length === 1 && typeof arguments[0] === 'function') {
+    process.stdin.pause()
+  }
+
+  // @ts-ignore
+  return _task.apply(this, arguments)
+}
 
 export async function exitAfterAll () {
   process.stdin.pause()

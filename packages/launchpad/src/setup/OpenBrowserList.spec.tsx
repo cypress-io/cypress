@@ -1,6 +1,6 @@
 import { OpenBrowserListFragmentDoc } from '../generated/graphql-test'
 import OpenBrowserList from './OpenBrowserList.vue'
-import { longBrowsersList } from '../../cypress/fixtures/browsers/long-browsers-list'
+import { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-App'
 
 const launchButtonSelector = 'button[data-testid=launch-button]'
 

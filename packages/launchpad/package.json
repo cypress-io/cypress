@@ -100,6 +100,7 @@
         "prismjs",
         "prismjs/components/prism-typescript",
         "prismjs/components/prism-yaml",
+        "socket.io-client",
         "vue",
         "vue-demi",
         "vue-i18n",

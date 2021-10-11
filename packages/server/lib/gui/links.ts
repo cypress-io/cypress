@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { shell } from 'electron'
+import { URL, URLSearchParams } from 'url'
 
 // NOTE: in order for query params to be passed through on links
 // forwardQueryParams: true must be set for that slug in the on package

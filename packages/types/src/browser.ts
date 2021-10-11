@@ -6,8 +6,6 @@ export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | 
 
 export type BrowserFamily = typeof BROWSER_FAMILY[number]
 
-export type PlatformName = 'darwin' | 'linux' | 'win32'
-
 /**
  * Represents a typical browser to try to detect and turn into a `FoundBrowser`.
  */
