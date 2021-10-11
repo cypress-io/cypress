@@ -30,7 +30,13 @@ const props = defineProps<{
 }>()
 
 onMounted(() => {
-  UnifiedRunnerAPI.initialize(execute)
+  UnifiedRunnerAPI.initialize(() => {
+    window.UnifiedRunner.eventManager.on('restart', () => {
+      execute()
+    })
+
+    execute()
+  })
 })
 
 onBeforeUnmount(() => {

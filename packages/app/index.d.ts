@@ -48,6 +48,8 @@ declare global {
         teardown: (state: Store) => Promise<void>
         teardownReporter: () => Promise<void>
         [key: string]: any
+
+        on (event: 'restart', ...args: unknown[]): void
       }
 
       /**
