@@ -43,7 +43,7 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
     gqlPort = GQL_PORT_MATCH[1]
   } else {
     // @ts-ignore
-    gqlPort = window.__CYPRESS_GRAPHQL_PORT
+    gqlPort = window.__CYPRESS_GRAPHQL_PORT__
   }
 
   if (!gqlPort) {

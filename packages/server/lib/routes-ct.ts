@@ -6,6 +6,7 @@ import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import type { InitializeRoutes } from './routes'
 import { fs } from './util/fs'
+import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -34,25 +35,21 @@ export const createRoutesCT = ({
     })
 
     proxyIndex.on('proxyRes', function (proxyRes, _req, _res) {
-      if ((_req as Request).params[0] === '') {
-        const body: any[] = []
+      const body: any[] = []
 
-        proxyRes.on('data', function (chunk) {
-          let chunkData = String(chunk)
+      proxyRes.on('data', function (chunk) {
+        let chunkData = String(chunk)
 
-          if (chunkData.includes('<head>')) {
-            chunkData = chunkData.replace('<body>', `<body><script>window.__CYPRESS_GRAPHQL_PORT = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`)
-          }
+        if (chunkData.includes('<head>')) {
+          chunkData = chunkData.replace('<body>', replaceBody(ctx))
+        }
 
-          body.push(chunkData)
-        })
+        body.push(chunkData)
+      })
 
-        proxyRes.on('end', function () {
-          (_res as Response).send(body.join(''))
-        })
-      } else {
-        proxyRes.pipe(_res)
-      }
+      proxyRes.on('end', function () {
+        (_res as Response).send(body.join(''))
+      })
     })
 
     // TODO: can namespace this onto a "unified" route like __app-unified__
@@ -71,7 +68,7 @@ export const createRoutesCT = ({
       if (req.params[0] === '') {
         return fs.readFile(pathToFile, 'utf8')
         .then((file) => {
-          res.send(file.replace('<div id="app">', '<script>window.__CYPRESS_GRAPHQL_PORT = 1234</script><div id="app">'))
+          res.send(file.replace('<body>', replaceBody(ctx)))
         })
       }
 
@@ -159,4 +156,8 @@ export const createRoutesCT = ({
   })
 
   return routesCt
+}
+
+function replaceBody (ctx: DataContextShell) {
+  return `<body><script>window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`
 }
