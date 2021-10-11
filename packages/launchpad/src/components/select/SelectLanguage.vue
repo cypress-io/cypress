@@ -12,7 +12,7 @@
       <button
         v-for="opt in options"
         :key="opt.type"
-        class="px-2 py-1 rounded-sm focus:outline-secondary-600"
+        class="px-2 py-1 rounded-sm focus:outline-none"
         :class="opt.id === value ? 'bg-secondary-50 text-secondary-600': 'text-gray-700'"
         @click="() => selectOption(opt.type)"
       >

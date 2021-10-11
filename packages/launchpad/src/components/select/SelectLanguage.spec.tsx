@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import type { CodeLanguageEnum } from '../../generated/graphql-test'
 import Select from './SelectLanguage.vue'
 
@@ -16,18 +17,39 @@ const manyOptions = [
   },
 ]
 
-describe('<BigSelect />', () => {
+describe('<SelectLanguage />', () => {
   it('playground', () => {
     cy.mount(() => (
       <div class="m-10">
         <Select
           name="Language"
           options={manyOptions}
-          value="1"
+          value="js"
         />
       </div>
     ))
 
-    cy.contains('Button', 'JavaScript').click()
+    cy.contains('Button', 'JavaScript').should('exist')
+  })
+
+  it('changes the language whan clicking', () => {
+    const val = ref('js')
+
+    cy.mount(() => (
+      <div class="m-10">
+        <Select
+          name="Language"
+          options={manyOptions}
+          value={val.value}
+          onSelect={(newVal) => {
+            val.value = newVal
+          }}
+        />
+      </div>
+    ))
+
+    cy.contains('Button', 'TypeScript').click().then(() => {
+      expect(val.value).to.equal('ts')
+    })
   })
 })
