@@ -1,4 +1,4 @@
-@internal/system-tests
+@tooling/system-tests
 ===
 
 This package contains Cypress's suite of system tests.
