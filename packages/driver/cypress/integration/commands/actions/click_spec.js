@@ -1093,7 +1093,7 @@ describe('src/cy/commands/actions/click', () => {
       it('can click an element behind a sticky header', () => {
         cy.viewport(400, 400)
         cy.visit('./fixtures/sticky-header.html')
-        cy.get('p').click()
+        cy.get('p').click({ scrollBehavior: 'top' })
       })
 
       it('does not scroll when being forced', () => {

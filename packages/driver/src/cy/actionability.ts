@@ -350,6 +350,24 @@ const verify = function (cy, $el, options, callbacks) {
     }
   }
 
+  const scrollElementIntoView = ($el, scrollBehaviorOption) => {
+    if (scrollBehaviorOption !== false) {
+      // scroll the element into view
+      const scrollBehavior = scrollBehaviorOptionsMap[scrollBehaviorOption]
+
+      const removeScrollBehaviorFix = addScrollBehaviorFix()
+
+      debug('scrollIntoView:', $el[0])
+      $el.get(0).scrollIntoView({ block: scrollBehavior })
+
+      removeScrollBehaviorFix()
+
+      if (onScroll) {
+        onScroll($el, 'element')
+      }
+    }
+  }
+
   return Promise.try(() => {
     const coordsHistory = []
 
@@ -365,25 +383,26 @@ const verify = function (cy, $el, options, callbacks) {
           cy.ensureNotDisabled($el, _log)
         }
 
-        if (options.scrollBehavior !== false) {
-          // scroll the element into view
-          const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
-
-          const removeScrollBehaviorFix = addScrollBehaviorFix()
-
-          debug('scrollIntoView:', $el[0])
-          $el.get(0).scrollIntoView({ block: scrollBehavior })
-
-          removeScrollBehaviorFix()
-
-          if (onScroll) {
-            onScroll($el, 'element')
-          }
-        }
+        scrollElementIntoView($el, options.scrollBehavior)
 
         // ensure its visible
         if (options.ensure.visibility) {
-          cy.ensureVisibility($el, _log)
+          try {
+            cy.ensureVisibility($el, _log)
+          } catch {
+            try {
+              scrollElementIntoView($el, 'center')
+              cy.ensureVisibility($el, _log)
+            } catch {
+              try {
+                scrollElementIntoView($el, 'bottom')
+                cy.ensureVisibility($el, _log)
+              } catch {
+                scrollElementIntoView($el, 'nearest')
+                cy.ensureVisibility($el, _log)
+              }
+            }
+          }
         }
 
         if (options.ensure.notReadonly) {
