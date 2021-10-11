@@ -1,10 +1,8 @@
 import Debug from 'debug'
-import httpProxy from 'http-proxy'
-import { makeServeConfig } from './runner-ct'
 import { Request, Response, Router } from 'express'
+import type { InitializeRoutes } from './routes'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import type { InitializeRoutes } from './routes'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -17,51 +15,8 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 export const createRoutesCT = ({
   config,
   nodeProxy,
-  getCurrentBrowser,
-  specsStore,
 }: InitializeRoutes) => {
   const routesCt = Router()
-
-  if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
-    const myProxy = httpProxy.createProxyServer({
-      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
-    })
-
-    // TODO: can namespace this onto a "unified" route like __app-unified__
-    // make sure to update the generated routes inside of vite.config.ts
-    routesCt.get('/__vite__/*', (req, res) => {
-      myProxy.web(req, res, {}, (e) => {
-      })
-    })
-  } else {
-    routesCt.get('/__vite__/*', (req, res) => {
-      const pathToFile = getPathToDist('app', req.params[0])
-
-      return send(req, pathToFile).pipe(res)
-    })
-  }
-
-  // TODO If prod, serve the build app files from app/dist
-
-  routesCt.get('/api', (req, res) => {
-    const options = makeServeConfig({
-      config,
-      getCurrentBrowser,
-      specsStore,
-    })
-
-    res.json(options)
-  })
-
-  routesCt.get('/__/api', (req, res) => {
-    const options = makeServeConfig({
-      config,
-      getCurrentBrowser,
-      specsStore,
-    })
-
-    res.json(options)
-  })
 
   routesCt.get('/__cypress/static/*', (req, res) => {
     const pathToFile = getPathToDist('static', req.params[0])
