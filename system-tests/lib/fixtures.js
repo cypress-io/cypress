@@ -3,6 +3,8 @@ const path = require('path')
 const chokidar = require('chokidar')
 
 const root = path.join(__dirname, '..')
+
+const serverRoot = path.join(__dirname, '../../packages/server/')
 const projects = path.join(root, 'projects')
 const tmpDir = path.join(root, '.projects')
 
@@ -29,7 +31,7 @@ module.exports = {
   },
 
   scaffoldWatch () {
-    const watchdir = path.resolve(__dirname, '../fixtures/projects')
+    const watchdir = path.resolve(__dirname, '../projects')
 
     console.log('watching files due to --no-exit', watchdir)
 
@@ -68,10 +70,10 @@ module.exports = {
   },
 
   get (fixture, encoding = 'utf8') {
-    return fs.readFileSync(path.join(root, 'test', 'support', 'fixtures', fixture), encoding)
+    return fs.readFileSync(path.join(serverRoot, 'test', 'support', 'fixtures', fixture), encoding)
   },
 
   path (fixture) {
-    return path.join(root, 'test', 'support', 'fixtures', fixture)
+    return path.join(serverRoot, 'test', 'support', 'fixtures', fixture)
   },
 }
