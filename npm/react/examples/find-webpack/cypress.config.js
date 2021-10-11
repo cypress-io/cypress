@@ -17,7 +17,7 @@ module.exports = defineConfig({
       root: '#__cy_root',
     },
   },
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       const map = _.map([4, 8], (n) => n * 2)
 

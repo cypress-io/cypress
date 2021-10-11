@@ -9,7 +9,7 @@ module.exports = defineConfig({
     testFiles: '**/*.test.{js,ts,jsx,tsx}',
     componentFolder: 'src',
   },
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       devServer(on, config, cracoConfig)
 

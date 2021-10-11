@@ -17,7 +17,7 @@ module.exports = defineConfig({
   env: {
     coverage: true,
   },
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       devServer(on, config, {
         webpackFilename: 'webpack.config.js',

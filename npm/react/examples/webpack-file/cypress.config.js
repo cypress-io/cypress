@@ -6,7 +6,8 @@ module.exports = defineConfig({
   testFiles: '**/*cy-spec.js',
   viewportWidth: 500,
   viewportHeight: 500,
-  e2e: {
+  component: {
+    testFiles: '**/*cy-spec.js',
     setupNodeEvents (on, config) {
       require('@cypress/react/plugins/load-webpack')(on, config, {
         // from the root of the project (folder with cypress.json file)

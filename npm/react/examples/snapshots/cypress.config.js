@@ -22,7 +22,7 @@ module.exports = defineConfig({
       prettier: true,
     },
   },
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       devServer(on, config)
 

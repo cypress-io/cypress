@@ -14,7 +14,7 @@ module.exports = defineConfig({
   viewportWidth: 500,
   viewportHeight: 500,
   componentFolder: 'src',
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       devServer(on, config)
 

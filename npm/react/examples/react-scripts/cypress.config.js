@@ -13,7 +13,7 @@ module.exports = defineConfig({
   viewportHeight: 800,
   experimentalFetchPolyfill: true,
   componentFolder: 'src',
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       devServer(on, config)
 

@@ -12,7 +12,7 @@ module.exports = defineConfig({
   testFiles: '**/*spec.js',
   viewportWidth: 500,
   viewportHeight: 500,
-  e2e: {
+  component: {
     setupNodeEvents (on, config) {
       devServer(on, config)
 

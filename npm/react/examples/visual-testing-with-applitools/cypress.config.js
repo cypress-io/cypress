@@ -16,7 +16,7 @@ const devServer = require('@cypress/react/plugins/react-scripts')
   "env": {
     "coverage": false
   },
-  e2e: {
+  component: {
 		setupNodeEvents(on, config) {
       devServer(on, config)
 
