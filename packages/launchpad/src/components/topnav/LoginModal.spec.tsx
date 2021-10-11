@@ -39,6 +39,23 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     .and('be.disabled')
   })
 
+  it('shows correct "waiting for login" status', () => {
+    cy.mountFragment(LoginModalFragmentDoc, {
+      onResult: (result) => {
+        result.__typename = 'Query'
+        result.app.isAuthBrowserOpened = true
+      },
+      render: (gqlVal) => <div class="resize overflow-auto border-current border-1 h-700px"><LoginModal gql={gqlVal} modelValue={true} /></div>,
+    })
+
+    cy.findByRole('button', { name: text.login.actionLogin }).click()
+
+    cy.pause();
+    cy.findByRole('button', { name: text.login.actionWaiting })
+      .should('be.visible')
+      .and('be.disabled')
+  })
+
   it('shows successful login status', () => {
     mountSuccess()
     cy.contains('h2', text.login.titleSuccess).should('be.visible')

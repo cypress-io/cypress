@@ -17,6 +17,7 @@
       size="lg"
       :variant="buttonVariant"
       :disabled="isLoggingIn"
+      aria-live="polite"
       @click="handleAuth"
     >
       <template
