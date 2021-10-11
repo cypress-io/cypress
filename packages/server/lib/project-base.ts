@@ -343,7 +343,7 @@ export class ProjectBase<TServer extends Server> extends EE {
       return
     }
 
-    const closePreprocessor = (this.testingType === 'e2e' && preprocessor.close) ?? undefined
+    const closePreprocessor = this.testingType === 'e2e' ? preprocessor.close : undefined
 
     this.ctx.setAppServerPort(undefined)
     this.ctx.emitter.setAppSocketServer(undefined)
