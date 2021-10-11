@@ -22,5 +22,8 @@
     "mocha": "7.0.1",
     "rimraf": "3.0.2"
   },
+  "files": [
+    "src"
+  ],
   "types": "src/index.ts"
 }
