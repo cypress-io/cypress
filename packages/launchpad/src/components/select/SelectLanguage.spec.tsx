@@ -23,7 +23,7 @@ describe('<BigSelect />', () => {
         <Select
           name="Language"
           options={manyOptions}
-          value="js"
+          value="1"
         />
       </div>
     ))

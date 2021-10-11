@@ -1,5 +1,5 @@
 import type { CodegenTypeMap, Wizard } from '../generated/test-graphql-types.gen'
-import { BUNDLERS, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types/src/constants'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types/src/constants'
 import { MaybeResolver, testNodeId } from './clientTestUtils'
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
@@ -52,6 +52,13 @@ export const stubWizard: MaybeResolver<Wizard> = {
       ...testNodeId('WizardFrontendFramework'),
       ...framework,
       supportedBundlers,
+      isSelected: idx === 0,
+    }
+  }),
+  allLanguages: CODE_LANGUAGES.map((language, idx) => {
+    return {
+      ...testNodeId('WizardCodeLanguage'),
+      ...language,
       isSelected: idx === 0,
     }
   }),

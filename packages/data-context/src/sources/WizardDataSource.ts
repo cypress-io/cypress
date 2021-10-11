@@ -1,4 +1,4 @@
-import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
+import { Bundler, BUNDLERS, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
 import dedent from 'dedent'
 import endent from 'endent'
 import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
@@ -128,9 +128,13 @@ export class WizardDataSource {
   get chosenBundler () {
     return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler)
   }
+
+  get chosenLanguage () {
+    return CODE_LANGUAGES.find((f) => f.type === this.ctx.wizardData.chosenLanguage)
+  }
 }
 
-type WizardCodeLanguage = NexusGenEnums['WizardCodeLanguage']
+type WizardCodeLanguage = NexusGenEnums['WizardCodeLanguageLitteral']
 
 interface GetCodeOptsE2E {
   type: 'e2e'

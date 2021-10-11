@@ -3,9 +3,10 @@ import { WizardBundler } from './gql-WizardBundler'
 import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { arg, nonNull, objectType } from 'nexus'
-import { BUNDLERS, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
 import { TestingTypeEnum, WizardCodeLanguageEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { Storybook } from './gql-Storybook'
+import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -48,6 +49,17 @@ export const Wizard = objectType({
       type: WizardFrontendFramework,
       description: 'All of the component testing frameworks to choose from',
       resolve: () => Array.from(FRONTEND_FRAMEWORKS), // TODO(tim): fix this in nexus to accept Readonly
+    })
+
+    t.field('language', {
+      type: WizardCodeLanguage,
+      resolve: (source, args, ctx) => ctx.wizard.chosenLanguage ?? null,
+    })
+
+    t.nonNull.list.nonNull.field('allLanguages', {
+      type: WizardCodeLanguage,
+      description: 'All of the languages to choose from',
+      resolve: () => Array.from(CODE_LANGUAGES), // TODO(tim): fix this in nexus to accept Readonly
     })
 
     t.nonNull.boolean('isManualInstall', {

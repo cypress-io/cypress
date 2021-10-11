@@ -73,7 +73,8 @@
       "frameworkLabel": "Front-end Framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerPlaceholder": "Pick a bundler"
+      "bundlerPlaceholder": "Pick a bundler",
+      "languageLabel": "Language"
     },
     "install": {
       "startButton": "Install",

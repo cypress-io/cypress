@@ -38,6 +38,6 @@ export const WizardStepEnum = enumType({
 })
 
 export const WizardCodeLanguageEnum = enumType({
-  name: 'WizardCodeLanguage',
+  name: 'WizardCodeLanguageLitteral',
   members: ['js', 'ts'],
 })

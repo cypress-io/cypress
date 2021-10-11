@@ -39,6 +39,7 @@ export interface WizardDataShape {
   allBundlers: typeof BUNDLERS
   chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
   generatedSpec: Omit<StorybookFile, 'content'> | null
@@ -66,6 +67,7 @@ export function makeCoreData (): CoreDataShape {
       chosenTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
+      chosenLanguage: 'js',
       chosenManualInstall: false,
       currentStep: 'welcome',
       allBundlers: BUNDLERS,
