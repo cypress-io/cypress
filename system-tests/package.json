@@ -1,6 +1,6 @@
 {
   "name": "@tooling/system-tests",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "Internal cypress tests for running across multiple projects which have their own configuration for E2E and CT",
   "private": true,
   "main": "index.js",
