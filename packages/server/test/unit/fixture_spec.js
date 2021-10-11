@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const config = require(`${root}lib/config`)
 const fixture = require(`${root}lib/fixture`)
 const { fs } = require(`${root}lib/util/fs`)
-const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
+const FixturesHelper = require('@tooling/system-tests/lib/fixtures')
 const os = require('os')
 const eol = require('eol')
 

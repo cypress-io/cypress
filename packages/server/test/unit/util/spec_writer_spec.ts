@@ -5,7 +5,7 @@ import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import { expect } from 'chai'
 
-import Fixtures from '../../support/helpers/fixtures'
+import Fixtures from '@tooling/system-tests/lib/fixtures'
 import { fs } from '../../../lib/util/fs'
 import {
   generateCypressCommand,

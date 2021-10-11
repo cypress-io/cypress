@@ -5,7 +5,7 @@ const path = require('path')
 const repl = require('repl')
 const history = require('repl.history')
 const browsers = require('./browsers')
-const Fixtures = require('../test/support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 
 const replServer = repl.start({
   prompt: '> ',
