@@ -32,3 +32,9 @@ const props = defineProps<{
   name: "Specs Page"
 }
 </route>
+
+<style>
+iframe {
+  width: 100%;
+}
+</style>

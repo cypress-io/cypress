@@ -1,16 +1,13 @@
-import httpProxy from 'http-proxy'
-import _ from 'lodash'
+import type httpProxy from 'http-proxy'
 import Debug from 'debug'
 import { ErrorRequestHandler, Router } from 'express'
-import send from 'send'
-import { getPathToDist } from '@packages/resolve-dist'
 
 import type { SpecsStore } from './specs-store'
 import type { Browser } from './browsers/types'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
-import { runner, ServeOptions } from './controllers/runner'
+import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 
 const debug = Debug('cypress:server:routes')
@@ -37,69 +34,7 @@ export const createCommonRoutes = ({
   getRemoteState,
   nodeProxy,
 }: InitializeRoutes) => {
-  const makeServeConfig = (options: Partial<ServeOptions>) => {
-    const config = {
-      ...options.config,
-      testingType,
-      browser: options.getCurrentBrowser?.(),
-      specs: options.specsStore?.specFiles,
-    } as Cfg
-
-    if (testingType === 'e2e') {
-      config.remote = getRemoteState()
-    }
-
-    // TODO: move the component file watchers in here
-    // and update them in memory when they change and serve
-    // them straight to the HTML on load
-
-    debug('serving runner index.html with config %o',
-      _.pick(config, 'version', 'platform', 'arch', 'projectName'))
-
-    // base64 before embedding so user-supplied contents can't break out of <script>
-    // https://github.com/cypress-io/cypress/issues/4952
-
-    const base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
-
-    return {
-      base64Config,
-      projectName: config.projectName,
-    }
-  }
-
   const router = Router()
-
-  router.get(['/api', '/__/api'], (req, res) => {
-    const options = makeServeConfig({
-      config,
-      getCurrentBrowser,
-      specsStore,
-    })
-
-    res.json(options)
-  })
-
-  if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
-    const webProxy = httpProxy.createProxyServer({
-      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
-    })
-
-    // TODO: can namespace this onto a "unified" route like __app-unified__
-    // make sure to update the generated routes inside of vite.config.ts
-    router.get('/__vite__/*', (req, res) => {
-      debug('Proxy to __vite__')
-      webProxy.web(req, res, {}, (e) => {
-        debug('error proxying request to %s. error %s', req.url, e.message)
-      })
-    })
-  } else {
-    router.get('/__vite__/*', (req, res) => {
-      debug(`serving dist'd app via __vite__/*`)
-      const pathToFile = getPathToDist('app', req.params[0])
-
-      return send(req, pathToFile).pipe(res)
-    })
-  }
 
   router.get('/__cypress/runner/*', (req, res) => {
     runner.handle(testingType, req, res)

@@ -72,14 +72,3 @@ const execute = () => {
   name: "Runner"
 }
 </route>
-
-<style>
-#unified-runner > div {
-  height: 100%;
-}
-
-iframe {
-  width: 100%;
-  height: 100%;
-}
-</style>
