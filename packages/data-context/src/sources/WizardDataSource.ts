@@ -179,47 +179,39 @@ export const wizardGetConfigCode = (opts: GetCodeOpts): string | null => {
 const wizardGetConfigCodeCt = (opts: GetCodeOptsCt): string | null => {
   const { framework, bundler, lang } = opts
 
-  const comments = `Component testing, ${LanguageNames[opts.lang]}, ${framework.name}, ${bundler.name}`
-  const frameworkConfig = getFrameworkConfigFile(opts)
+  if (opts.lang === "ts") {
+return (
+`import { startDevServer } from '@cypress/vite-dev-server'
 
-  if (frameworkConfig) {
-    return `// ${comments}
-
-${frameworkConfig[lang]}`
-  }
-
-  const exportStatement =
-    lang === 'js' ? 'module.exports = {' : 'export default {'
-
-  const importStatements =
-    lang === 'js'
-      ? ''
-      : [
-          `import { startDevServer } from \'${bundler.package}\'`,
-          `import webpackConfig from './webpack.config'`,
-          '',
-      ].join('\n')
-
-  const requireStatements =
-    lang === 'ts'
-      ? ''
-      : [
-          `const { startDevServer } = require('${bundler.package}')`,
-          `const webpackConfig = require('./webpack.config')`,
-          '',
-      ].join('\n  ')
-
-  const startServerReturn = `return startDevServer({ options, webpackConfig })`
-
-  return `// ${comments}
-${importStatements}
-${exportStatement}
-  ${requireStatements}component(on, config) {
-    on('dev-server:start', (options) => {
-      ${startServerReturn}
+export default (on, config) => {
+  on('dev-server:start', async (options) => {
+    return startDevServer({
+      options,
     })
-  }
+  })
+
+  return config
 }`
+)
+  }
+
+  if (opts.lang === "js") {
+    return (
+`const { startDevServer } = require('@cypress/vite-dev-server')
+
+module.exports = (on, config) => {
+  on('dev-server:start', async (options) => {
+    return startDevServer({
+      options,
+    })
+  })
+
+  return config
+}`
+    )
+  }
+
+  return null
 }
 
 const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {

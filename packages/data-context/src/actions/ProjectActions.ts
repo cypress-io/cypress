@@ -199,7 +199,7 @@ export class ProjectActions {
       throw Error(`Cannot create config file without activeProject.`)
     }
 
-    this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
+    this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, 'cypress', 'plugins', 'index.js'), args.code)
   }
 
   setCurrentSpec (id: string) {
