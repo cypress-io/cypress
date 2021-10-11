@@ -3,7 +3,7 @@ import { CodeLanguageEnum } from '../enumTypes/gql-WizardEnums'
 
 export const WizardCodeLanguage = objectType({
   name: 'WizardCodeLanguage',
-  description: 'A code language that user can choose from to create their cypress.config',
+  description: 'A code language that the user can choose from to create their cypress.config',
   node: 'type',
   definition (t) {
     t.nonNull.field('type', {
