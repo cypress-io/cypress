@@ -104,7 +104,7 @@
         "vue-i18n",
         "vue-prism-component",
         "vue-prism-editor",
-        "vue-toast-notification",
+        "vue-toastification",
         "vue3-file-selector",
         "wonka"
       ]

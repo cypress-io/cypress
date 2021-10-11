@@ -23,7 +23,7 @@ export class DataEmitterActions {
     this._appSocketServer?.emit('data-context-push', ...args)
   }
 
-  toLaunchpad (ev: string, ...args: any[]) {
+  toLaunchpad (...args: any[]) {
     this._launchpadSocketServer?.emit('data-context-push', ...args)
   }
 }

@@ -13,6 +13,10 @@ export interface ProjectShape {
   projectRoot: string
 }
 
+export interface DevStateShape {
+  refreshState: null | string
+}
+
 export interface ActiveProjectShape extends ProjectShape {
   title: string
   ctPluginsInitialized: Maybe<boolean>
@@ -45,6 +49,7 @@ export interface WizardDataShape {
 }
 
 export interface CoreDataShape {
+  dev: DevStateShape
   app: AppDataShape
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
@@ -55,6 +60,9 @@ export interface CoreDataShape {
  */
 export function makeCoreData (): CoreDataShape {
   return {
+    dev: {
+      refreshState: null,
+    },
     app: {
       navItem: 'settings',
       browsers: null,
