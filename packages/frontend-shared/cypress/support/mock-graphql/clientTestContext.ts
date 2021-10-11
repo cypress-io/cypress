@@ -16,7 +16,7 @@ export interface ClientTestContext {
     projects: Project[]
     activeProject: Project | null
     isInGlobalMode: boolean
-    isAuthBrowserOpened: boolean;
+    isAuthBrowserOpened: boolean
   }
   wizard: {
     step: WizardStep
@@ -61,7 +61,7 @@ export function makeClientTestContext (): ClientTestContext {
       selectedBrowser: browsers[0],
       activeProject: testProject,
       isInGlobalMode: false,
-      isAuthBrowserOpened: false
+      isAuthBrowserOpened: false,
     },
     wizard: {
       step: 'createConfig',

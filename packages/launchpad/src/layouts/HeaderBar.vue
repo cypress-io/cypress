@@ -2,27 +2,51 @@
   <div class="px-6 py-4 border-b mb-7">
     <div class="flex items-center justify-between max-content">
       <div class="flex items-center">
-        <img class="mr-2 w-32px h-32px" src="../images/cypress-dark.png" />
-        <span class="text-primary" @click="clearActiveProject">Projects</span>
+        <img
+          class="mr-2 w-32px h-32px"
+          src="../images/cypress-dark.png"
+        >
+        <span
+          class="text-primary"
+          @click="clearActiveProject"
+        >Projects</span>
         <!-- TODO: Replace with a cy icon -->
-        <i-oi-chevron-right v-if="props.gql?.app?.activeProject" class="text-gray-300 h-8px" />
+        <i-oi-chevron-right
+          v-if="props.gql?.app?.activeProject"
+          class="text-gray-300 h-8px"
+        />
         <span class="text-body-gray-700">{{ props.gql?.app?.activeProject?.title }}</span>
       </div>
       <div class="flex gap-6">
-        <TopNav :gql="props.gql.app" :show-browsers="props.showBrowsers">
-          <template v-if="!!props.gql.cloudViewer" #login-title>
-          <UserAvatar :email="email" class="w-24px h-24px"/>
-            <span class="sr-only">{{t('topNav.login.actionLogin')}}</span>
+        <TopNav
+          :gql="props.gql.app"
+          :show-browsers="props.showBrowsers"
+        >
+          <template
+            v-if="!!props.gql.cloudViewer"
+            #login-title
+          >
+            <UserAvatar
+              :email="email"
+              class="w-24px h-24px"
+            />
+            <span class="sr-only">{{ t('topNav.login.actionLogin') }}</span>
           </template>
-          <template v-if="!!props.gql.cloudViewer" #login-panel>
+          <template
+            v-if="!!props.gql.cloudViewer"
+            #login-panel
+          >
             <div class="min-w-248px">
               <div class="flex border-b-gray-100 border-b p-16px">
-                <UserAvatar :email="email" class="w-48px mr-16px h-48px"/>
+                <UserAvatar
+                  :email="email"
+                  class="w-48px mr-16px h-48px"
+                />
                 <div>
                   <span class="text-gray-800">{{ props.gql.cloudViewer?.fullName }}</span>
-                  <br />
+                  <br>
                   <span class="text-gray-600">{{ props.gql.cloudViewer?.email }}</span>
-                  <br />
+                  <br>
                   <a
                     class="text-indigo-500 outline-transparent hocus:underline"
                     href="https://on.cypress.io/dashboard/profile"
@@ -32,7 +56,10 @@
               </div>
 
               <div class="p-16px">
-                <Auth :gql="props.gql" :show-logout="true" />
+                <Auth
+                  :gql="props.gql"
+                  :show-logout="true"
+                />
               </div>
             </div>
           </template>
@@ -40,8 +67,8 @@
         <div>
           <button
             v-if="!props.gql.cloudViewer"
-            @click="openLogin"
             class="flex group items-center text-gray-600 focus:outline-transparent"
+            @click="openLogin"
           >
             <i-cy-profile_x16
               class="block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50 h-16px w-16px mr-8px"
@@ -50,7 +77,10 @@
           </button>
         </div>
       </div>
-      <LoginModal v-model="isLoginOpen" :gql="props.gql" />
+      <LoginModal
+        v-model="isLoginOpen"
+        :gql="props.gql"
+      />
     </div>
   </div>
 </template>
@@ -64,7 +94,6 @@ import LoginModal from '../components/topnav/LoginModal.vue'
 import UserAvatar from '../components/topnav/UserAvatar.vue'
 import Auth from '../setup/Auth.vue'
 import { useI18n } from '@cy/i18n'
-
 
 gql`
 mutation GlobalPageHeader_clearActiveProject {
@@ -105,8 +134,6 @@ const clearActiveProject = () => {
     clearActiveProjectMutation.executeMutation({})
   }
 }
-
-
 
 const props = defineProps<{
   gql: HeaderBarFragment,

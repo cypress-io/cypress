@@ -527,13 +527,15 @@ module.exports = {
       },
       authApi: {
         logIn () {
-          return auth.start((message : {type: string, browserOpened: boolean, name: string, message: string}) => {
+          return auth.start((message: {type: string, browserOpened: boolean, name: string, message: string}) => {
             const { browserOpened } = message
-            ctx.appData.isAuthBrowserOpened = browserOpened;
+
+            ctx.appData.isAuthBrowserOpened = browserOpened
           }, 'launchpad')
         },
         logOut () {
-          ctx.appData.isAuthBrowserOpened = false;
+          ctx.appData.isAuthBrowserOpened = false
+
           return user.logOut()
         },
         checkAuth (context) {

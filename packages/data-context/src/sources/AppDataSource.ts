@@ -10,7 +10,7 @@ export class AppDataSource {
     return hasGlobalModeArg || isMissingActiveProject
   }
 
-  get isAuthBrowserOpened() {
+  get isAuthBrowserOpened () {
     return this.ctx.appData.isAuthBrowserOpened ?? false
   }
 }

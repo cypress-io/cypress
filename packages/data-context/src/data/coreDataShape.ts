@@ -27,7 +27,7 @@ export interface AppDataShape {
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
-  isInGlobalMode: boolean,
+  isInGlobalMode: boolean
   isAuthBrowserOpened: boolean
 }
 
@@ -59,7 +59,7 @@ export function makeCoreData (): CoreDataShape {
       projects: [],
       activeProject: null,
       isInGlobalMode: false,
-      isAuthBrowserOpened: false
+      isAuthBrowserOpened: false,
     },
     wizard: {
       chosenTestingType: null,

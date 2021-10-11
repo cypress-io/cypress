@@ -14,8 +14,8 @@ export class AuthActions {
     return this.ctx._apis.authApi
   }
 
-  checkAuthBrowser() {
-      return this.ctx.app.isAuthBrowserOpened
+  checkAuthBrowser () {
+    return this.ctx.app.isAuthBrowserOpened
   }
 
   async checkAuth () {

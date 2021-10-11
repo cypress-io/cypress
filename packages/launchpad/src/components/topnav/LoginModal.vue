@@ -5,14 +5,18 @@
     @close="setIsOpen"
   >
     <div class="flex items-center justify-center min-h-screen">
-      <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
+      <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90"/>
 
       <div class="relative w-480px mx-auto bg-white rounded">
         <div class="border-b-1px min-h-64px flex justify-between items-center px-24px">
           <DialogTitle class="text-gray-900 text-18px">
             {{ title }}
           </DialogTitle>
-          <button @click="setIsOpen(false)" aria-label="Close" class="hocus-default">
+          <button
+            aria-label="Close"
+            class="hocus-default"
+            @click="setIsOpen(false)"
+          >
             <i-cy-delete_x12 class="icon-dark-gray-400 w-12px h-12px" />
           </button>
         </div>
@@ -32,7 +36,11 @@
             v-else-if="viewer"
             keypath="topNav.login.bodySuccess"
           >
-            <a href="https://on.cypress.io/dashboard/profile" target="_blank" class="text-indigo-500 hover:underline font-medium">{{ viewer.fullName }}</a>
+            <a
+              href="https://on.cypress.io/dashboard/profile"
+              target="_blank"
+              class="text-indigo-500 hover:underline font-medium"
+            >{{ viewer.fullName }}</a>
           </i18n-t>
         </DialogDescription>
 

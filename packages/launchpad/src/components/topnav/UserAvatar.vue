@@ -1,16 +1,16 @@
 <template>
-<div
-              :style="`background-image: url(${gravatarUrl});`"
-              class="rounded-50px border-1px border-gray-200 overflow-hidden bg-cover"
-            />
+  <div
+    :style="`background-image: url(${gravatarUrl});`"
+    class="rounded-50px border-1px border-gray-200 overflow-hidden bg-cover"
+  />
 </template>
 
 <script setup lang="ts" >
 import gravatar from 'gravatar'
-import {computed} from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
-  email:  string | undefined,
+  email: string | undefined,
 }>()
 
 const gravatarUrl = computed(() => {

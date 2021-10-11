@@ -1,19 +1,34 @@
 <template>
-  <div v-if="error">An error occurred while authenticating: {{ error }}</div>
+  <div v-if="error">
+    An error occurred while authenticating: {{ error }}
+  </div>
 
   <div v-else-if="showLogout">
     <button
       class="block w-full bg-white py-8px border-gray-100 text-14px text-indigo-500 whitespace-nowrap border-rounded border-1 hover:no-underline hocus:border-gray-200 outline-transparent"
       @click="handleLogout"
-    >{{t('topNav.login.actionLogout')}}</button>
+    >
+      {{ t('topNav.login.actionLogout') }}
+    </button>
   </div>
 
   <div v-else>
-    <Button size="lg" :variant="buttonVariant" @click="handleAuth" :disabled="isLoggingIn">
-    <template #prefix v-if="isLoggingIn">
-      <i-cy-loading_x16  v-if="isLoggingIn" class="animate-spin icon-dark-white icon-light-gray-400" />
-    </template>
-    {{ buttonMessage }}
+    <Button
+      size="lg"
+      :variant="buttonVariant"
+      :disabled="isLoggingIn"
+      @click="handleAuth"
+    >
+      <template
+        v-if="isLoggingIn"
+        #prefix
+      >
+        <i-cy-loading_x16
+          v-if="isLoggingIn"
+          class="animate-spin icon-dark-white icon-light-gray-400"
+        />
+      </template>
+      {{ buttonMessage }}
     </Button>
   </div>
 </template>
@@ -74,7 +89,6 @@ mutation CheckAuthBrowser {
 }
 `
 
-
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
 const checkAuthBrowser = useMutation(CheckAuthBrowserDocument)
@@ -94,14 +108,15 @@ const handleAuth = async () => {
   if (viewer.value) {
     console.log('emit continue')
     emit('continue', true)
+
     return
   }
 
-  clickedOnce.value = true;
+  clickedOnce.value = true
   const browserCheckInterval = setInterval(async () => {
     await checkAuthBrowser.executeMutation({})
     if (isBrowserOpened.value) {
-        clearInterval(browserCheckInterval)
+      clearInterval(browserCheckInterval)
     }
   }, 1500)
 
@@ -116,13 +131,11 @@ const handleLogout = async () => {
   await logout.executeMutation({})
 }
 
-
-
 const buttonMessage = computed(() => {
-
   if (!isBrowserOpened.value && isLoggingIn.value) {
     return t('topNav.login.actionOpening')
   }
+
   if (!clickedOnce.value && !viewer.value) {
     return t('topNav.login.actionLogin')
   }
