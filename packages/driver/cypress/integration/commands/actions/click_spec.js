@@ -1090,6 +1090,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#overflow-auto-container').contains('quux').click()
       })
 
+      // https://github.com/cypress-io/cypress/issues/4233
       it('can click an element behind a sticky header', () => {
         cy.viewport(400, 400)
         cy.visit('./fixtures/sticky-header.html')

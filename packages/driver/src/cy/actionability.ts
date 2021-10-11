@@ -368,6 +368,17 @@ const verify = function (cy, $el, options, callbacks) {
     }
   }
 
+  const scrollUntilVisible = ($el, scrollOptions) => {
+    try {
+      cy.ensureVisibility($el, _log)
+    } catch (err) {
+      if (!scrollOptions[0]) throw err
+
+      scrollElementIntoView($el, scrollOptions[0])
+      scrollUntilVisible($el, scrollOptions.slice(1))
+    }
+  }
+
   return Promise.try(() => {
     const coordsHistory = []
 
@@ -385,23 +396,15 @@ const verify = function (cy, $el, options, callbacks) {
 
         scrollElementIntoView($el, options.scrollBehavior)
 
-        // ensure its visible
         if (options.ensure.visibility) {
-          try {
+          if (options.scrollBehavior !== false) {
+            // if not already visible, try remaining scroll behavior options
+            // https://github.com/cypress-io/cypress/issues/4233
+            const scrollOptions = Object.keys(scrollBehaviorOptionsMap).filter((option) => option !== options.scrollBehavior)
+
+            scrollUntilVisible($el, scrollOptions)
+          } else {
             cy.ensureVisibility($el, _log)
-          } catch {
-            try {
-              scrollElementIntoView($el, 'center')
-              cy.ensureVisibility($el, _log)
-            } catch {
-              try {
-                scrollElementIntoView($el, 'bottom')
-                cy.ensureVisibility($el, _log)
-              } catch {
-                scrollElementIntoView($el, 'nearest')
-                cy.ensureVisibility($el, _log)
-              }
-            }
           }
         }
 
