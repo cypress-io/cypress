@@ -64,14 +64,17 @@ export class DataContext extends DataContextShell {
     }
 
     if (this.config.launchArgs.testingType) {
-      toAwait.push(this.actions.wizard.setTestingType(this.config.launchArgs.testingType))
+      // It should be possible to skip the first step in the wizard, if the
+      // user already told us the testing type via command line argument
+      this.actions.wizard.setTestingType(this.config.launchArgs.testingType)
+      this.actions.wizard.navigate('forward')
     }
 
     if (IS_DEV_ENV) {
       this.actions.dev.watchForRelaunch()
     }
 
-    return Promise.all(toAwait).then(this.actions.wizard.navigate('forward'))
+    return Promise.all(toAwait)
   }
 
   get os () {
