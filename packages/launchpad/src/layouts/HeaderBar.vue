@@ -11,20 +11,13 @@
       <div class="flex gap-6">
         <TopNav :gql="props.gql.app" :show-browsers="props.showBrowsers">
           <template v-if="!!props.gql.cloudViewer" #login-title>
-            <div
-              :style="`background-image: url(${gravatarUrl(props.gql.cloudViewer?.email)});`"
-              class="rounded-50px w-24px h-24px border-1px border-gray-200 overflow-hidden bg-cover"
-            />
+          <UserAvatar :email="email" class="w-24px h-24px"/>
             <span class="sr-only">{{t('topNav.login.actionLogin')}}</span>
           </template>
           <template v-if="!!props.gql.cloudViewer" #login-panel>
             <div class="min-w-248px">
               <div class="flex border-b-gray-100 border-b p-16px">
-                <div
-                  v-if="props.gql.cloudViewer"
-                  :style="`background-image: url(${gravatarUrl(props.gql.cloudViewer?.email)});`"
-                  class="rounded-50px w-48px mr-16px h-48px border-1px border-gray-200 overflow-hidden bg-cover"
-                />
+                <UserAvatar :email="email" class="w-48px mr-16px h-48px"/>
                 <div>
                   <span class="text-gray-800">{{ props.gql.cloudViewer?.fullName }}</span>
                   <br />
@@ -32,7 +25,7 @@
                   <br />
                   <a
                     class="text-indigo-500 outline-transparent hocus:underline"
-                    :href="getProfileLink()"
+                    href="https://on.cypress.io/dashboard/profile"
                     target="_blank"
                   >Profile Settings</a>
                 </div>
@@ -64,11 +57,11 @@
 
 <script setup lang="ts">
 import { gql, useMutation } from '@urql/vue'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { GlobalPageHeader_ClearActiveProjectDocument, HeaderBarFragment } from '../generated/graphql'
 import TopNav from '../components/topnav/TopNav.vue'
 import LoginModal from '../components/topnav/LoginModal.vue'
-import gravatar from 'gravatar'
+import UserAvatar from '../components/topnav/UserAvatar.vue'
 import Auth from '../setup/Auth.vue'
 import { useI18n } from '@cy/i18n'
 
@@ -101,13 +94,7 @@ fragment HeaderBar on Query {
 
 const isLoginOpen = ref(false)
 const clearActiveProjectMutation = useMutation(GlobalPageHeader_ClearActiveProjectDocument)
-
-
-
-const getProfileLink = () => {
-  const subdomain = process.env.VITE_CYPRESS_INTERNAL_ENV === 'production' ? 'dashboard' : 'dashboard-staging'
-  return `https://${subdomain}.cypress.io/profile`
-}
+const email = computed(() => props.gql.cloudViewer?.email || undefined)
 
 const openLogin = () => {
   isLoginOpen.value = true
@@ -119,15 +106,7 @@ const clearActiveProject = () => {
   }
 }
 
-const gravatarUrl = (email) => {
-  let opts: { size: string, default: string, forcedefault?: string } = { size: '48', default: 'mm' }
 
-  if (!email) {
-    opts.forcedefault = 'y'
-  }
-
-  return gravatar.url(email, opts, true)
-}
 
 const props = defineProps<{
   gql: HeaderBarFragment,
