@@ -10,7 +10,6 @@
             id="primary-heading"
             class="sr-only"
           >
-            {{ route.name }}
           </h1>
           <transition
             name="fade"
