@@ -46,6 +46,7 @@ export class ProjectActions {
     this.ctx.coreData.app.activeProject = {
       projectRoot,
       title: '',
+      launchMode: null,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
@@ -154,6 +155,10 @@ export class ProjectActions {
   }
 
   async launchProject () {
+    if (!this.ctx.activeProject) {
+      throw Error(`Cannot create index.html without activeProject.`)
+    }
+
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
@@ -166,6 +171,8 @@ export class ProjectActions {
       relative: '',
       specType: this.ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
     }
+
+    this.ctx.activeProject.launchMode = this.ctx.wizardData.chosenTestingType
 
     return this.api.launchProject(browser, spec, {})
   }
