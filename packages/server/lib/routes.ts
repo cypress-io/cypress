@@ -63,7 +63,9 @@ export const createCommonRoutes = ({
   router.get(clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runner.serve(req, res, testingType === 'e2e' ? 'runner' : 'runner-ct', {
+    const toServe = process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner'
+
+    runner.serve(req, res, toServe, {
       config,
       testingType,
       getSpec,

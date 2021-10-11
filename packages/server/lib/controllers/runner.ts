@@ -83,7 +83,9 @@ export const runner = {
   },
 
   handle (testingType, req, res) {
-    const pathToFile = getPathToDist(testingType === 'e2e' ? 'runner' : 'runner-ct', req.params[0])
+    const toServe = process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner'
+
+    const pathToFile = getPathToDist(toServe, req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
