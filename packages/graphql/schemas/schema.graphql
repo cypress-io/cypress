@@ -259,6 +259,31 @@ type DevState {
   needsRelaunch: Boolean
 }
 
+"""Represents a spec on the file system"""
+type FileParts implements Node {
+  """
+  Absolute path to spec (e.g. /Users/jess/my-project/src/component/MySpec.test.tsx)
+  """
+  absolute: String!
+
+  """
+  Full name of spec file (e.g. MySpec.test.tsx) without the spec extension
+  """
+  baseName: String!
+
+  """The first part of the file, without extensions (e.g. MySpec)"""
+  fileName: String!
+
+  """Relay style Node ID field for the FileParts field"""
+  id: ID!
+
+  """Full name of spec file (e.g. MySpec.test.tsx)"""
+  name: String!
+
+  """Relative path to spec (e.g. src/component/MySpec.test.tsx)"""
+  relative: String!
+}
+
 enum FrontendFrameworkEnum {
   cra
   nextjs
@@ -573,15 +598,18 @@ enum SpecType {
 }
 
 """Storybook"""
-type Storybook {
-  """Whether this is the selected framework bundler"""
-  configured: Boolean
-
+type Storybook implements Node {
   """Most recent generated spec"""
   generatedSpec: String
 
+  """Relay style Node ID field for the Storybook field"""
+  id: ID!
+
   """List of all Storybook stories"""
-  stories: [String!]!
+  stories: [FileParts!]!
+
+  """Folder containing storybook configuration files"""
+  storybookRoot: String!
 }
 
 """The bundlers that we can use with Cypress"""

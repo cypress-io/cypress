@@ -1,13 +1,15 @@
 <template>
-  <div v-if="query.data.value?.wizard.storybook?.configured">
+  <div v-if="query.data.value?.wizard.storybook">
     <h2>New Spec</h2>
-    <ul v-if="query.data.value.wizard.storybook.stories.length">
+    <ul v-if="stories.length">
       <li
-        v-for="story of query.data.value.wizard.storybook.stories"
-        :key="story"
-        @click="storyClick(story)"
+        v-for="story of stories"
+        :key="story.relative"
+        @click="storyClick(story.absolute)"
       >
-        {{ story }}
+        <span class="text-indigo-600 font-medium">{{ story.fileName }}</span>
+        <span class="font-light text-gray-400">{{ story.fileExtension }}</span>
+        <span class="font-light text-gray-400 pl-16px show-on-hover">{{ story.relativeFromProjectRoot }}</span>
       </li>
     </ul>
     <p v-else>
@@ -25,14 +27,21 @@
 </route>
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
+import { computed } from 'vue-demi'
 import { NewSpecQueryDocument, NewSpec_GenerateSpecFromStoryDocument } from '../generated/graphql'
 
 gql`
 query NewSpecQuery {
   wizard {
     storybook {
-      configured
-      stories
+      id
+      stories {
+        id
+        relative
+        fileName
+        baseName
+        absolute
+      }
     }
   }
 }
@@ -42,7 +51,6 @@ gql`
 mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
   generateSpecFromStory (storyPath: $storyPath) {
     storybook {
-      configured,
       generatedSpec
     }
   }
@@ -52,7 +60,7 @@ mutation NewSpec_GenerateSpecFromStory($storyPath: String!) {
 const query = useQuery({ query: NewSpecQueryDocument })
 const mutation = useMutation(NewSpec_GenerateSpecFromStoryDocument)
 
-async function storyClick (story) {
+async function storyClick (story: string) {
   await mutation.executeMutation({ storyPath: story })
   const generatedSpec = mutation.data.value?.generateSpecFromStory.storybook?.generatedSpec
 
@@ -61,4 +69,24 @@ async function storyClick (story) {
     window.location.href = `${window.location.origin}/__/#/tests/component/${generatedSpec}`
   }, 500)
 }
+
+const stories = computed(() => {
+  return query.data.value?.wizard.storybook?.stories.map((story) => {
+    return {
+      ...story,
+      fileExtension: story.baseName.replace(story.fileName, ''),
+      relativeFromProjectRoot: story.relative.replace(story.baseName, ''),
+    }
+  }) || []
+})
+
 </script>
+
+<style>
+.show-on-hover {
+  display: none;
+}
+li:hover .show-on-hover {
+  display: inline;
+}
+</style>

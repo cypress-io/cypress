@@ -1,4 +1,6 @@
 import type { DataContext } from '..'
+import * as path from 'path'
+import type { SpecFile } from '@packages/types'
 
 export class FileDataSource {
   private watchedFilePaths = new Set<string>()
@@ -17,6 +19,18 @@ export class FileDataSource {
       this.jsonFileLoader.clear(e)
       throw e
     }) as Promise<Result>
+  }
+
+  normalizeFileToSpec (absolute: string, projectRoot: string, searchFolder: string): SpecFile {
+    const parsed = path.parse(absolute)
+
+    return {
+      absolute,
+      name: path.relative(searchFolder, absolute),
+      relative: path.relative(projectRoot, absolute),
+      baseName: parsed.base,
+      fileName: parsed.base.split('.')[0] || '',
+    }
   }
 
   private trackFile () {

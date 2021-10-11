@@ -1,7 +1,5 @@
-import glob from 'glob'
 import * as path from 'path'
 import type { DataContext } from '..'
-import { promisify } from 'util'
 import type { StorybookInfo } from '@packages/types'
 
 const STORYBOOK_FILES = [
@@ -34,7 +32,6 @@ export class StorybookDataSource {
       storybookRoot,
       files: [],
       storyGlobs: [],
-      getStories: this.getStories,
     }
 
     try {
@@ -75,18 +72,5 @@ export class StorybookDataSource {
     }
 
     return storybookInfo
-  }
-
-  private async getStories (storybookRoot: string, storyGlobs: string[]) {
-    const files: string[] = []
-
-    for (const storyPattern of storyGlobs) {
-      const res = await promisify(glob)(path.join(storybookRoot, storyPattern))
-
-      files.push(...res)
-    }
-
-    // Don't currently support mdx
-    return files.filter((file) => !file.endsWith('.mdx'))
   }
 }
