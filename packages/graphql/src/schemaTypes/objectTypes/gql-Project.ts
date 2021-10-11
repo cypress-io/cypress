@@ -46,6 +46,18 @@ export const Project = objectType({
       },
     })
 
+    t.field('currentSpec', {
+      description: 'Currently selected spec',
+      type: 'Spec',
+      resolve: (source, args, ctx) => {
+        if (!ctx.activeProject || !ctx.activeProject.currentSpecId) {
+          return null
+        }
+
+        return ctx.actions.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
+      },
+    })
+
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',

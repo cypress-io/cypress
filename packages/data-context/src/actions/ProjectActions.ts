@@ -77,6 +77,18 @@ export class ProjectActions {
     return specs.filter((spec) => spec.specType === specType)
   }
 
+  async getCurrentSpecById (projectRoot: string, base64Id: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs(projectRoot, null)
+
+    // id is base64 formatted as per Relay: <type>:<string>
+    // in this case, Spec:/my/abs/path
+    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
+
+    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
+  }
+
   async loadProjects () {
     const projectRoots = await this.api.getProjectRootsFromCache()
 
@@ -194,6 +206,14 @@ export class ProjectActions {
     }
 
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
+  }
+
+  setCurrentSpec (id: string) {
+    if (!this.ctx.activeProject) {
+      throw Error(`Cannot set current spec without activeProject.`)
+    }
+
+    this.ctx.activeProject.currentSpecId = id
   }
 
   async clearLatestProjectCache () {

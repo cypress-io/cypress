@@ -311,6 +311,9 @@ type Mutation {
   """Set active project to run tests on"""
   setActiveProject(path: String!): App!
 
+  """Set the current spec under test"""
+  setCurrentSpec(id: ID!): Project!
+
   """Installs the dependencies for the component testing step"""
   wizardInstallDependencies: Wizard
 
@@ -407,6 +410,9 @@ type Project implements Node {
 
   """Project configuration"""
   config: JSON!
+
+  """Currently selected spec"""
+  currentSpec: Spec
 
   """Relay style Node ID field for the Project field"""
   id: ID!

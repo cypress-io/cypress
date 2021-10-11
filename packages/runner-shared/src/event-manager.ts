@@ -430,6 +430,11 @@ export const eventManager = {
     })
 
     Cypress.on('log:added', (log) => {
+      // TODO: Race condition in unified runner - we should not need this null check
+      if (!Cypress.runner) {
+        return
+      }
+
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       this._interceptStudio(displayProps)
@@ -438,6 +443,11 @@ export const eventManager = {
     })
 
     Cypress.on('log:changed', (log) => {
+      // TODO: Race condition in unified runner - we should not need this null check
+      if (!Cypress.runner) {
+        return
+      }
+
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       this._interceptStudio(displayProps)
