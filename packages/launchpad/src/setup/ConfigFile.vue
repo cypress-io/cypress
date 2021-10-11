@@ -73,7 +73,7 @@ import PrismJs from 'vue-prism-component'
 import WizardLayout from './WizardLayout.vue'
 import CopyButton from '@cy/components/CopyButton.vue'
 import { languages } from '../utils/configFile'
-import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument } from '../generated/graphql'
+import { ConfigFileFragment, ConfigFile_AppCreateConfigFileDocument, ConfigFile_AppCreateComponentIndexHtmlDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 
@@ -98,12 +98,24 @@ fragment SampleCode on Wizard {
   canNavigateForward
   sampleCodeJs: sampleCode(lang: js)
   sampleCodeTs: sampleCode(lang: ts)
+  sampleTemplate
 }
 `
 
 gql`
 mutation ConfigFile_appCreateConfigFile($code: String!, $configFilename: String!) {
   appCreateConfigFile(code: $code, configFilename: $configFilename) {
+    activeProject {
+      id
+      projectRoot
+    }
+  }
+}
+`
+
+gql`
+mutation ConfigFile_appCreateComponentIndexHtml($template: String!) {
+  appCreateComponentIndexHtml(template: $template) {
     activeProject {
       id
       projectRoot
@@ -133,6 +145,7 @@ import('prismjs/components/prism-typescript').then(() => {
 })
 
 const createConfigFile = useMutation(ConfigFile_AppCreateConfigFileDocument)
+const createComponentIndexHtml = useMutation(ConfigFile_AppCreateComponentIndexHtmlDocument)
 
 const code = computed(() => {
   if (language.value === 'js') {
@@ -159,6 +172,10 @@ const createConfig = async () => {
   await createConfigFile.executeMutation({
     code: code.value,
     configFilename: `cypress.config.${language.value}`,
+  })
+
+  await createComponentIndexHtml.executeMutation({
+    template: props.gql.wizard.sampleTemplate as string,
   })
 }
 </script>

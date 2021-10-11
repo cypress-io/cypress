@@ -16,15 +16,14 @@
       >
         <router-link
           v-for="item in navigation"
-          v-slot="{ href, isActive }"
+          v-slot="{ isActive }"
           :key="item.name"
-          custom
           :to="item.href"
         >
           <SidebarNavigationRow
+            :data-e2e-href="item.href"
             :active="isActive"
             :icon="item.icon"
-            :href="href"
           >
             {{ item.name }}
           </SidebarNavigationRow>
@@ -43,8 +42,9 @@ import SettingsIcon from '~icons/cy/settings_x24'
 
 const navigation = [
   { name: 'Specs', icon: SpecsIcon, href: '/' },
-  { name: 'Runs', icon: CodeIcon, href: '/runs' },
+  { name: 'Runs', icon: CodeIcon, href: '/runner' },
   { name: 'Settings', icon: SettingsIcon, href: '/settings' },
+  { name: 'New Spec', icon: SettingsIcon, href: '/newspec' },
 ]
 
 defineProps<{

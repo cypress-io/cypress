@@ -5,7 +5,7 @@
       class="flex-grow h-full min-w-200px"
       prefix-icon-classes="icon-light-gray-50 icon-dark-gray-500"
       :prefix-icon="IconMagnifyingGlass"
-      :model-value="inputValue"
+      :model-value="props.modelValue"
       :placeholder="t('specPage.searchPlaceholder')"
       @input="onInput"
     />
@@ -25,7 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useVModel } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import Input from '@cy/components/Input.vue'
@@ -43,9 +42,9 @@ const emit = defineEmits<{
   (e: 'newSpec'): void
 }>()
 
-const inputValue = useVModel(props, 'modelValue', emit)
+const onInput = (e: Event) => {
+  const value = (e.target as HTMLInputElement).value
 
-const onInput = (e) => {
-  inputValue.value = (e as Event & { target: HTMLInputElement | null }).target?.value || ''
+  emit('update:modelValue', value)
 }
 </script>

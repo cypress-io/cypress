@@ -50,13 +50,14 @@ export class ProjectActions {
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
       isFirstTimeE2E: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'e2e'),
+      config: await this.ctx.project.getResolvedConfigFields(projectRoot),
     }
 
     return this
   }
 
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>): Promise<FoundSpec[]> {
-    const config = await this.ctx.loaders.projectConfig(projectRoot)
+  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
+    const config = await this.ctx.project.getConfig(projectRoot)
     const specs = await this.api.findSpecs({
       projectRoot,
       fixturesFolder: config.fixturesFolder ?? false,
@@ -72,6 +73,18 @@ export class ProjectActions {
     }
 
     return specs.filter((spec) => spec.specType === specType)
+  }
+
+  async getCurrentSpecById (projectRoot: string, base64Id: string) {
+    // TODO: should cache current specs so we don't need to
+    // call findSpecs each time we ask for the current spec.
+    const specs = await this.findSpecs(projectRoot, null)
+
+    // id is base64 formatted as per Relay: <type>:<string>
+    // in this case, Spec:/my/abs/path
+    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
+
+    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
   async loadProjects () {
@@ -110,21 +123,33 @@ export class ProjectActions {
   }
 
   async addProject (args: MutationAddProjectArgs) {
-    const dirStat = await this.ctx.fs.stat(args.path)
+    const projectRoot = await this.getDirectoryPath(args.path)
 
-    if (!dirStat.isDirectory()) {
-      throw new Error(`Cannot add ${args.path} as a project, it is not a directory`)
-    }
-
-    const found = this.projects.find((x) => x.projectRoot === args.path)
+    const found = this.projects.find((x) => x.projectRoot === projectRoot)
 
     if (!found) {
-      this.projects.push({ projectRoot: args.path })
-      this.api.insertProjectToCache(args.path)
+      this.projects.push({ projectRoot })
+      this.api.insertProjectToCache(projectRoot)
     }
 
     if (args.open) {
-      await this.setActiveProject(args.path)
+      await this.setActiveProject(projectRoot)
+    }
+  }
+
+  private async getDirectoryPath (projectRoot: string) {
+    try {
+      const { dir, base } = path.parse(projectRoot)
+      const fullPath = path.join(dir, base)
+      const dirStat = await this.ctx.fs.stat(fullPath)
+
+      if (dirStat.isDirectory()) {
+        return fullPath
+      }
+
+      return dir
+    } catch (exception) {
+      throw Error(`Cannot add ${projectRoot} to projects as it does not exist in the file system`)
     }
   }
 
@@ -170,7 +195,29 @@ export class ProjectActions {
     this.ctx.fs.writeFileSync(path.resolve(project.projectRoot, args.configFilename), args.code)
   }
 
+  setCurrentSpec (id: string) {
+    if (!this.ctx.activeProject) {
+      throw Error(`Cannot set current spec without activeProject.`)
+    }
+
+    this.ctx.activeProject.currentSpecId = id
+  }
+
   async clearLatestProjectCache () {
     await this.api.clearLatestProjectsCache()
+  }
+
+  createComponentIndexHtml (template: string) {
+    const project = this.ctx.activeProject
+
+    if (!project) {
+      throw Error(`Cannot create index.html without activeProject.`)
+    }
+
+    if (this.ctx.activeProject?.isFirstTimeCT) {
+      const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
+
+      this.ctx.fs.outputFile(indexHtmlPath, template)
+    }
   }
 }

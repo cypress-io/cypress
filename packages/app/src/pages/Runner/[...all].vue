@@ -1,33 +1,36 @@
 <template>
-  <div>
-    <h2>Runs Page</h2>
-    <h4 v-if="!ready">
-      Loading
-    </h4>
-    <h4 v-else>
-      Error: TODO add gql backend for getting the base64Config into the browser
-    </h4>
-  </div>
+  <Runner
+    v-if="query.data.value?.app?.activeProject"
+    :gql="query.data.value.app?.activeProject?.currentSpec"
+  />
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { renderRunner } from '../../runner/renderRunner'
+<script lang="ts" setup>
+import { gql } from '@urql/core'
+import { useQuery } from '@urql/vue'
+import { Runner_AllDocument } from '../../generated/graphql'
+import Runner from '../../runs/Runner.vue'
 
-const ready = ref(false)
+gql`
+query Runner_All {
+  app {
+    activeProject {
+      id
+      currentSpec {
+        ...CurrentSpec_Runner
+      }
+    }
+  }
+}
+`
 
-// @ts-ignore
-window.__Cypress__ = true
-
-renderRunner(() => {
-  setTimeout(function () {
-    // @ts-ignore
-    window.Runner.start(document.getElementById('app'), '{{base64Config | safe}}')
-  }, 0)
-
-  ready.value = true
+// network-only - we do not want to execute a stale spec
+const query = useQuery({
+  query: Runner_AllDocument,
+  requestPolicy: 'network-only',
 })
 </script>
+
 <route>
 {
   name: "Runner"

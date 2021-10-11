@@ -58,7 +58,6 @@ const _defaults: Defaults = {
 export default class State extends BaseStore {
   defaults = _defaults
 
-  @observable isLoading = true
   @observable isRunning = false
   @observable waitingForInitialBuild = false
 
@@ -209,10 +208,6 @@ export default class State extends BaseStore {
 
   @action setIsSpecsListOpen (open: boolean) {
     this.isSpecsListOpen = open
-  }
-
-  @action setIsLoading (isLoading) {
-    this.isLoading = isLoading
   }
 
   @action updateReporterWidth (width: number) {

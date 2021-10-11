@@ -10,7 +10,7 @@ const debug = Debug('cypress:server:settings')
 
 interface SettingsOptions {
   testingType?: 'component' |'e2e'
-  configFile?: string | boolean
+  configFile?: string | false
   args?: {
     runProject?: string
   }
@@ -146,11 +146,12 @@ export function read (projectRoot, options: SettingsOptions = {}) {
 
   const file = pathToConfigFile(projectRoot, options)
 
-  return requireAsync(file,
-    {
-      projectRoot,
-      loadErrorCode: 'CONFIG_FILE_ERROR',
-    })
+  const readPromise = /\.json$/.test(file) ? fs.readJSON(path.resolve(projectRoot, file)) : requireAsync(file, {
+    projectRoot,
+    loadErrorCode: 'CONFIG_FILE_ERROR',
+  })
+
+  return readPromise
   .catch((err) => {
     if (err.type === 'MODULE_NOT_FOUND' || err.code === 'ENOENT') {
       if (options.args?.runProject) {

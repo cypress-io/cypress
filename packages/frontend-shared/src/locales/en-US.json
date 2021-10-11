@@ -81,6 +81,14 @@
       "actionCancel": "Cancel"
     }
   },
+  "launchpadErrors": {
+    "generic": {
+      "header": "Something went wrong",
+      "message": "It looks like there's some issues that need to be resolved before we continue. Please confirm that everything looks correct in your {0} file.",
+      "readTheDocsButton": "Read the docs",
+      "retryButton": "It's fixed now"
+    }
+  },
   "setupPage": {
     "projectSetup": {
       "frameworkLabel": "Front-end Framework",
@@ -107,7 +115,7 @@
     "empty": {
       "title": "Welcome to Cypress!",
       "helper": "Add your first project below to start testing with Cypress.",
-      "dropText": "Drag your project here or {0}",
+      "dropText": "Drag your project directory here or {0}",
       "browseManually": "browse manually."
     },
     "searchPlaceholder": "Search Projects",

@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, StorybookFile } from '@packages/types'
 import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
 
 export type Maybe<T> = T | null | undefined
@@ -19,7 +19,9 @@ export interface ActiveProjectShape extends ProjectShape {
   e2ePluginsInitialized: Maybe<boolean>
   isFirstTimeCT: Maybe<boolean>
   isFirstTimeE2E: Maybe<boolean>
+  currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
+  config: ResolvedFromConfig[]
 }
 
 export interface AppDataShape {
@@ -40,6 +42,7 @@ export interface WizardDataShape {
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
   chosenManualInstall: boolean | false
   chosenBrowser: FoundBrowser | null
+  generatedSpec: Omit<StorybookFile, 'content'> | null
 }
 
 export interface CoreDataShape {
@@ -70,6 +73,7 @@ export function makeCoreData (): CoreDataShape {
       allBundlers: BUNDLERS,
       history: ['welcome'],
       chosenBrowser: null,
+      generatedSpec: null,
     },
     user: null,
   }

@@ -46,6 +46,18 @@ export const Project = objectType({
       },
     })
 
+    t.field('currentSpec', {
+      description: 'Currently selected spec',
+      type: 'Spec',
+      resolve: (source, args, ctx) => {
+        if (!ctx.activeProject || !ctx.activeProject.currentSpecId) {
+          return null
+        }
+
+        return ctx.actions.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
+      },
+    })
+
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
@@ -54,6 +66,13 @@ export const Project = objectType({
       },
       nodes: (source, args, ctx) => {
         return ctx.actions.project.findSpecs(source.projectRoot, args.specType)
+      },
+    })
+
+    t.nonNull.json('config', {
+      description: 'Project configuration',
+      resolve: (source, args, ctx) => {
+        return ctx.project.getResolvedConfigFields(source.projectRoot)
       },
     })
   },

@@ -9,19 +9,14 @@
         <div>{{ t('specPage.componentSpecsHeader') }}</div>
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
-      <router-link
+      <button
         v-for="spec in filteredSpecs"
-        v-slot="{ navigate }"
         :key="spec.node.id"
-        :to="path(spec)"
-        custom
+        class="text-left"
+        @click.prevent="selectSpec(spec)"
       >
-        <SpecsListRow
-          :gql="spec"
-          @click="navigate"
-          @keypress.enter="navigate"
-        />
-      </router-link>
+        <SpecsListRow :gql="spec" />
+      </button>
     </div>
   </div>
 </template>
@@ -29,42 +24,78 @@
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import { computed, ref } from 'vue'
-import type { SpecsListFragment } from '../generated/graphql'
+import { Specs_SpecsListFragment, SpecNode_SpecsListFragment, SpecsList_SetCurrentSpecDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
-const path = (spec) => `/runner/tests/${spec.node.specType}/${spec.node.name}${spec.node.fileExtension}`
 
 gql`
-fragment SpecsList on App {
+mutation SpecsList_SetCurrentSpec($id: ID!) {
+  setCurrentSpec(id: $id) {
+    currentSpec {
+      id
+      relative
+      absolute
+      name
+    }
+  }
+}
+`
+
+gql`
+fragment SpecNode_SpecsList on SpecEdge {
+  node {
+    name
+    specType
+    absolute
+    relative
+  }
+  ...SpecListRow
+}
+`
+
+gql`
+fragment Specs_SpecsList on App {
   activeProject {
     id
     projectRoot
-    specs(first: 1) {
+    specs(first: 25) {
       edges {
-        node {
-          name
-          specType
-          relative
-        }
-        ...SpecListRow
+        ...SpecNode_SpecsList
       }
     }
   }
 }
 `
 
+const setSpecMutation = useMutation(SpecsList_SetCurrentSpecDocument)
+
+const router = useRouter()
+
+async function selectSpec (spec: SpecNode_SpecsListFragment) {
+  const { id } = spec.node
+
+  await setSpecMutation.executeMutation({ id })
+  router.push('runner')
+}
+
 const props = defineProps<{
-  gql: SpecsListFragment
+  gql: Specs_SpecsListFragment
 }>()
 
 const search = ref('')
 const specs = computed(() => props.gql.activeProject?.specs?.edges)
 
 // If this search becomes any more complex, push it into the server
-const sortByGitStatus = (a, b) => a.node.gitInfo ? 1 : -1
+const sortByGitStatus = (
+  a: SpecNode_SpecsListFragment,
+  b: SpecNode_SpecsListFragment,
+) => {
+  return a.node.gitInfo ? 1 : -1
+}
 const filteredSpecs = computed(() => {
   return specs.value?.filter((s) => {
     return s.node.relative.toLowerCase().includes(search.value.toLowerCase())

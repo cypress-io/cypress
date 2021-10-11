@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import { action } from 'mobx'
 
 import { client } from '@packages/socket'
+import type { BaseStore } from './store'
 
 import { studioRecorder } from './studio'
 import { automation } from './automation'
@@ -11,6 +12,7 @@ import { logger } from './logger'
 import { selectorPlaygroundModel } from './selector-playground'
 
 import $Cypress from '@packages/driver'
+import type { automationElementId } from './automation-element'
 
 const $ = $Cypress.$
 const ws = client.connect({
@@ -55,7 +57,7 @@ export const eventManager = {
     return Cypress
   },
 
-  addGlobalListeners (state, connectionInfo) {
+  addGlobalListeners (state: BaseStore, connectionInfo: { automationElement: typeof automationElementId, randomString: string }) {
     const rerun = () => {
       if (!this) {
         // if the tests have been reloaded
@@ -63,7 +65,7 @@ export const eventManager = {
         return
       }
 
-      return this._reRun(state)
+      return this.runSpec(state)
     }
 
     ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
@@ -292,6 +294,7 @@ export const eventManager = {
 
     const $window = $(window)
 
+    //  TODO(lachlan): best place to do this?
     $window.on('hashchange', rerun)
 
     // when we actually unload then
@@ -331,7 +334,7 @@ export const eventManager = {
       window.Cypress = Cypress
     }
 
-    this._addListeners(Cypress)
+    this._addListeners()
 
     ws.emit('watch:test:file', config.spec)
   },
@@ -342,7 +345,7 @@ export const eventManager = {
     return this.Cypress.isBrowser(browserName)
   },
 
-  initialize ($autIframe, config) {
+  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
     performance.mark('initialize-start')
 
     return Cypress.initialize({
@@ -423,6 +426,11 @@ export const eventManager = {
     })
 
     Cypress.on('log:added', (log) => {
+      // TODO: Race condition in unified runner - we should not need this null check
+      if (!Cypress.runner) {
+        return
+      }
+
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       this._interceptStudio(displayProps)
@@ -431,6 +439,11 @@ export const eventManager = {
     })
 
     Cypress.on('log:changed', (log) => {
+      // TODO: Race condition in unified runner - we should not need this null check
+      if (!Cypress.runner) {
+        return
+      }
+
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       this._interceptStudio(displayProps)
@@ -525,8 +538,10 @@ export const eventManager = {
     ws.off()
   },
 
-  _reRun (state) {
-    if (!Cypress) return
+  async teardown (state: BaseStore) {
+    if (!Cypress) {
+      return
+    }
 
     state.setIsLoading(true)
 
@@ -536,24 +551,35 @@ export const eventManager = {
 
     studioRecorder.setInactive()
     selectorPlaygroundModel.setOpen(false)
-
-    return this._restart()
-    .then(() => {
-      // this probably isn't 100% necessary
-      // since Cypress will fall out of scope
-      // but we want to be aggressive here
-      // and force GC early and often
-      Cypress.removeAllListeners()
-
-      localBus.emit('restart')
-    })
   },
 
-  _restart () {
+  teardownReporter () {
     return new Promise((resolve) => {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run')
     })
+  },
+
+  async _rerun () {
+    await this.teardownReporter()
+
+    // this probably isn't 100% necessary
+    // since Cypress will fall out of scope
+    // but we want to be aggressive here
+    // and force GC early and often
+    Cypress.removeAllListeners()
+
+    localBus.emit('restart')
+  },
+
+  async runSpec (state: BaseStore) {
+    if (!Cypress) {
+      return
+    }
+
+    await this.teardown(state)
+
+    return this._rerun()
   },
 
   _interceptStudio (displayProps) {

@@ -52,6 +52,8 @@
     "vite": "2.4.4",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-icons": "0.6.3",
+    "vite-plugin-optimize-persist": "0.0.5",
+    "vite-plugin-package-config": "0.0.3",
     "vite-plugin-purge-icons": "0.7.0",
     "vite-plugin-windicss": "1.2.4",
     "vite-svg-loader": "2.1.1",
@@ -70,5 +72,42 @@
     "lib",
     "script",
     "src"
-  ]
+  ],
+  "vite": {
+    "optimizeDeps": {
+      "include": [
+        "@headlessui/vue",
+        "@iconify/iconify",
+        "@iconify/vue",
+        "@purge-icons/generated",
+        "@testing-library/cypress/add-commands",
+        "@urql/core",
+        "@urql/devtools",
+        "@urql/exchange-execute",
+        "@urql/exchange-graphcache",
+        "@urql/vue",
+        "@vue/test-utils",
+        "@vueuse/core",
+        "cypress-file-upload",
+        "dedent",
+        "fake-uuid",
+        "graphql",
+        "graphql-relay",
+        "graphql/jsutils/Path",
+        "lodash",
+        "path",
+        "prismjs",
+        "prismjs/components/prism-typescript",
+        "prismjs/components/prism-yaml",
+        "vue",
+        "vue-demi",
+        "vue-i18n",
+        "vue-prism-component",
+        "vue-prism-editor",
+        "vue-toast-notification",
+        "vue3-file-selector",
+        "wonka"
+      ]
+    }
+  }
 }

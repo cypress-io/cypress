@@ -11,12 +11,21 @@ export type FindSpecs = {
   integrationFolder: Cypress.ResolvedConfigOptions['integrationFolder']
 } & CommonSearchOptions
 
-export interface FoundSpec {
+// TODO: Do we need this many ways to describe a spec?
+
+// represents a spec file on file system and
+export interface BaseSpec {
   name: string
-  baseName: string
-  fileName: string
   relative: string
   absolute: string
+}
+
+export interface SpecFile extends BaseSpec {
+  baseName: string
+  fileName: string
+}
+
+export interface FoundSpec extends SpecFile {
   specFileExtension: string
   fileExtension: string
   specType: Cypress.CypressSpecType

@@ -190,6 +190,20 @@ describe('exec run', function () {
       })
     })
 
+    it('spawns with --testing-type e2e when given --e2e', function () {
+      return run.start({ e2e: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'e2e'])
+      })
+    })
+
+    it('spawns with --testing-type component when given --ct', function () {
+      return run.start({ ct: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'component'])
+      })
+    })
+
     it('spawns with --tag value', function () {
       return run.start({ tag: 'nightly' })
       .then(() => {

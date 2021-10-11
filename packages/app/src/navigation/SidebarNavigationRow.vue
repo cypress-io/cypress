@@ -1,6 +1,5 @@
 <template>
-  <a
-    href="#"
+  <div
     :class="[active ? 'before:bg-jade-300' : 'before:bg-transparent']"
     class="w-full
       min-w-40px
@@ -43,16 +42,16 @@
         <slot />
       </span>
     </span>
-  </a>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 withDefaults(defineProps <{
-  icon?: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes, {}>
   // Currently active row (generally the current route)
-  active?: boolean
+  active: boolean
   }>(), {
   active: false,
   icon: undefined,

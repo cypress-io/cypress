@@ -51,6 +51,7 @@
     "vue": "3.2.6",
     "vue-eslint-parser": "7.11.0",
     "vue-i18n": "^9.2.0-beta.7",
+    "vue-toast-notification": "2.0.1",
     "vue-tsc": "^0.3.0",
     "windicss": "3.1.8",
     "windicss-analysis": "^0.3.4",

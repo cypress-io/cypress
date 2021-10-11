@@ -2,7 +2,6 @@
 import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 // @ts-ignore
@@ -19,14 +18,16 @@ import shortcuts from './lib/shortcuts'
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 
+let runnerListenersAdded = false
+
 interface BaseReporterProps {
-  appState: AppState
+  appState?: AppState
   className?: string
-  runnablesStore: RunnablesStore
+  runnablesStore?: RunnablesStore
   runner: Runner
-  scroller: Scroller
-  statsStore: StatsStore
-  events: Events
+  scroller?: Scroller
+  statsStore?: StatsStore
+  events?: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
@@ -40,33 +41,9 @@ export interface SingleReporterProps extends BaseReporterProps{
   runMode: 'single'
 }
 
-export interface MultiReporterProps extends BaseReporterProps{
-  runMode: 'multi'
-  allSpecs: Array<Cypress.Cypress['spec']>
-}
-
 @observer
-class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
-  static propTypes = {
-    error: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      link: PropTypes.string,
-      callout: PropTypes.string,
-      message: PropTypes.string.isRequired,
-    }),
-    runner: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-    spec: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      relative: PropTypes.string.isRequired,
-      absolute: PropTypes.string.isRequired,
-    }),
-    experimentalStudioEnabled: PropTypes.bool,
-  }
-
-  static defaultProps = {
+class Reporter extends Component<SingleReporterProps> {
+  static defaultProps: Partial<SingleReporterProps> = {
     runMode: 'single',
     appState,
     events,
@@ -79,7 +56,6 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
     const {
       appState,
       className,
-      runMode,
       runnablesStore,
       scroller,
       error,
@@ -90,29 +66,18 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
 
     return (
       <div className={cs(className, 'reporter', {
-        multiSpecs: runMode === 'multi',
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}
-        {this.props.runMode === 'single' ? (
-          <Runnables
-            appState={appState}
-            error={error}
-            runnablesStore={runnablesStore}
-            scroller={scroller}
-            spec={this.props.spec}
-          />
-        ) : this.props.allSpecs.map((spec) => (
-          <Runnables
-            key={spec.relative}
-            appState={appState}
-            error={error}
-            runnablesStore={runnablesStore}
-            scroller={scroller}
-            spec={spec}
-          />
-        ))}
+        <Runnables
+          appState={appState}
+          error={error}
+          runnablesStore={runnablesStore}
+          scroller={scroller}
+          spec={this.props.spec}
+        />
+        )
       </div>
     )
   }
@@ -121,7 +86,6 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: BaseReporterProps) {
     this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
-
     if (
       this.props.resetStatsOnSpecChange &&
       this.props.specRunId !== newProps.specRunId
@@ -146,7 +110,10 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
       statsStore,
     })
 
-    this.props.events.listen(runner)
+    if (!runnerListenersAdded) {
+      this.props.events.listen(runner)
+      runnerListenersAdded = true
+    }
 
     shortcuts.start()
     EQ.init()

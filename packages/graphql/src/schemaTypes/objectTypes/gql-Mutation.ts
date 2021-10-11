@@ -105,6 +105,32 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('appCreateComponentIndexHtml', {
+      type: 'App',
+      args: {
+        template: nonNull('String'),
+      },
+      description: 'Create an Index HTML file for a new component testing project',
+      resolve: async (root, args, ctx) => {
+        await ctx.actions.project.createComponentIndexHtml(args.template)
+
+        return ctx.appData
+      },
+    })
+
+    t.nonNull.field('generateSpecFromStory', {
+      type: 'Wizard',
+      description: 'Generate spec from Storybook story',
+      args: {
+        storyPath: nonNull('String'),
+      },
+      async resolve (_root, args, ctx) {
+        await ctx.actions.storybook.generateSpecFromStory(args.storyPath)
+
+        return ctx.wizardData
+      },
+    })
+
     t.field('navigationMenuSetItem', {
       type: 'NavigationMenu',
       description: 'Set the current navigation item',
@@ -201,6 +227,23 @@ export const mutation = mutationType({
         await ctx.actions.project.setActiveProject(args.path)
 
         return ctx.coreData.app
+      },
+    })
+
+    t.nonNull.field('setCurrentSpec', {
+      type: 'Project',
+      description: 'Set the current spec under test',
+      args: {
+        id: nonNull(idArg()),
+      },
+      resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
+        ctx.actions.project.setCurrentSpec(args.id)
+
+        return ctx.activeProject
       },
     })
   },
