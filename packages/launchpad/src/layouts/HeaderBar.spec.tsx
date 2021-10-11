@@ -52,11 +52,12 @@ describe('<HeaderBar />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     cy.contains('h2', text.login.titleInitial).should('be.visible')
 
-    cy.findByRole('button', { name: defaultMessages.actions.close })
+    cy.findByRole('button', { name: text.login.actionLogin })
     .should('be.visible')
     .and('have.focus')
-    .click()
 
+    cy.findByRole('button', { name: defaultMessages.actions.close}).click()
+    
     cy.contains('h2', text.login.titleInitial).should('not.exist')
   })
 
