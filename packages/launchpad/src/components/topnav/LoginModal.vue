@@ -5,7 +5,7 @@
     @close="setIsOpen"
   >
     <div class="flex items-center justify-center min-h-screen">
-      <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90"/>
+      <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
 
       <div class="relative w-480px mx-auto bg-white rounded">
         <div class="border-b-1px min-h-64px flex justify-between items-center px-24px">
