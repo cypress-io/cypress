@@ -428,6 +428,7 @@ commands:
     steps:
       - restore_cached_workspace
       - run:
+          name: Run system tests
           command: |
             ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
             SPECS=
