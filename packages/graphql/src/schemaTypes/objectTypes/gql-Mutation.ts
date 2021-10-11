@@ -176,7 +176,11 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Launches project from open_project global singleton',
       async resolve (_root, args, ctx) {
-        await ctx.actions.project.launchProject()
+        if (!ctx.wizardData.chosenTestingType) {
+          throw Error('Cannot launch project without chosen testing type')
+        }
+
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType)
 
         return ctx.appData
       },

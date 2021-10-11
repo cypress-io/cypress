@@ -1,4 +1,4 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { Maybe, ProjectShape } from '../data/coreDataShape'
@@ -154,9 +154,9 @@ export class ProjectActions {
     }
   }
 
-  async launchProject () {
+  async launchProject (testingType: TestingTypeEnum) {
     if (!this.ctx.activeProject) {
-      throw Error(`Cannot create index.html without activeProject.`)
+      throw Error(`Cannot launch project without activeProject.`)
     }
 
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
@@ -169,10 +169,10 @@ export class ProjectActions {
       name: '',
       absolute: '',
       relative: '',
-      specType: this.ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
+      specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.activeProject.launchMode = this.ctx.wizardData.chosenTestingType
+    this.ctx.activeProject.launchMode = testingType
 
     return this.api.launchProject(browser, spec, {})
   }
