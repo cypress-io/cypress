@@ -4,7 +4,6 @@ import * as cp from 'child_process'
 import * as inspector from 'inspector'
 import * as util from '../plugins/util'
 import * as errors from '../errors'
-import { fs } from '../util/fs'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:require_async')
@@ -14,10 +13,6 @@ let requireProcess: cp.ChildProcess | null
 interface RequireAsyncOptions{
   projectRoot: string
   loadErrorCode: string
-  /**
-   * members of the object returned that are functions and will need to be wrapped
-   */
-  functionNames: string[]
 }
 
 interface ChildOptions{
@@ -35,10 +30,6 @@ export async function requireAsync (filePath: string, options: RequireAsyncOptio
     if (requireProcess) {
       debug('kill existing config process')
       killChildProcess()
-    }
-
-    if (/\.json$/.test(filePath)) {
-      fs.readJson(path.resolve(options.projectRoot, filePath)).then((result) => resolve(result)).catch(reject)
     }
 
     const childOptions: ChildOptions = {
