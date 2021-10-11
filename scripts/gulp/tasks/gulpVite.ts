@@ -73,7 +73,7 @@ function spawnViteDevServer (
  *------------------------------------------------------------------------**/
 
 export function viteBuildApp () {
-  return spawned('vite:build-app', `yarn vite build --manifest`, {
+  return spawned('vite:build-app', `yarn vite build`, {
     cwd: monorepoPaths.pkgApp,
     waitForExit: true,
     env: {
@@ -84,7 +84,7 @@ export function viteBuildApp () {
 }
 
 export function viteBuildAndWatchApp () {
-  return watchViteBuild('vite:build-watch-app', `yarn vite build --manifest --watch`, {
+  return watchViteBuild('vite:build-watch-app', `yarn vite build --watch`, {
     cwd: monorepoPaths.pkgApp,
     env: {
       // ...process.env,
@@ -94,14 +94,14 @@ export function viteBuildAndWatchApp () {
 }
 
 export function viteBuildLaunchpad () {
-  return spawned('vite:build-launchpad', `yarn vite build --manifest`, {
+  return spawned('vite:build-launchpad', `yarn vite build`, {
     cwd: monorepoPaths.pkgLaunchpad,
     waitForExit: true,
   })
 }
 
 export function viteBuildAndWatchLaunchpad () {
-  return watchViteBuild('vite:build-watch-launchpad', `yarn vite build --manifest --watch`, {
+  return watchViteBuild('vite:build-watch-launchpad', `yarn vite build --watch`, {
     cwd: monorepoPaths.pkgLaunchpad,
   })
 }

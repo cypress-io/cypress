@@ -107,6 +107,7 @@ function getPubSubSource (config: PubSubConfig) {
     })
   }
 
+  // Only happens during testing
   if (config.serverPort) {
     return client(`http://localhost:${config.serverPort}`, {
       path: '/__socket.io',
