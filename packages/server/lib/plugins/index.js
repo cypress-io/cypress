@@ -98,9 +98,11 @@ const init = (config, options) => {
     debug('forking to run %s', childIndexFilename)
 
     if (inspector.url()) {
+      const inspectType = process.argv.some((a) => a.startsWith('--inspect-brk')) ? '--inspect-brk' : '--inspect'
+
       childOptions.execArgv = _.chain(process.execArgv.slice(0))
       .remove('--inspect-brk')
-      .push(`--inspect=${process.debugPort + 1}`)
+      .push(`${inspectType}=${process.debugPort + 1}`)
       .value()
     }
 

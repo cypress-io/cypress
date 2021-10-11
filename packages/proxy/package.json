@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
+    "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",

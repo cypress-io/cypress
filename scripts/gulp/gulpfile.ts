@@ -9,20 +9,26 @@
 
 import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
-import { startCypressWatch, startCypressForTest, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, waitForTestGraphQLApi, killExistingCypress } from './tasks/gulpCypress'
+import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteBuildAndWatchLaunchpadForTest, viteBuildLaunchpadForTest, serveBuiltLaunchpadForTest, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, serveBuiltAppForTest, viteBuildAppForTest, viteBuildAndWatchAppForTest, viteBuildApp, viteBuildLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
 import { setGulpGlobal } from './gulpConstants'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
+import { webpackRunner } from './tasks/gulpWebpack'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
  *  * `yarn dev` is your primary command for getting work done
  *------------------------------------------------------------------------**/
+
+gulp.task('viteClean', gulp.parallel(
+  viteCleanApp,
+  viteCleanLaunchpad,
+))
 
 gulp.task(
   'codegen',
@@ -30,11 +36,6 @@ gulp.task(
     // Autobarrel watcher
     autobarrelWatcher,
 
-    // Clean any vite assets
-    gulp.parallel(
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
     // Codegen for our GraphQL Server so we have the latest schema to build
     // the frontend codegen correctly
     // Fetch the latest "remote" schema from the Cypress cloud
@@ -49,23 +50,48 @@ gulp.task(
 )
 
 gulp.task(
+  'commonSetup',
+  gulp.series(
+    'codegen',
+    killExistingCypress,
+  ),
+)
+
+gulp.task(
   'dev',
   gulp.series(
     'codegen',
+
+    killExistingCypress,
 
     // Now that we have the codegen, we can start the frontend(s)
     gulp.parallel(
       viteApp,
       viteLaunchpad,
+      webpackRunner,
     ),
-
-    killExistingCypress,
 
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
   ),
 )
+
+gulp.task(
+  'dev:no-watch',
+  gulp.series(
+    async function setNoWatch () {
+      setGulpGlobal('shouldWatch', false)
+    },
+    'dev',
+  ),
+)
+
+gulp.task('dev:clean', gulp.series(
+  // Clean any vite assets
+  'viteClean',
+  'dev',
+))
 
 gulp.task(
   'debug',
@@ -94,10 +120,7 @@ gulp.task(
 
 gulp.task('buildProd',
   gulp.series(
-    gulp.parallel(
-      viteCleanApp,
-      viteCleanLaunchpad,
-    ),
+    'viteClean',
 
     syncRemoteGraphQL,
     nexusCodegen,
@@ -135,21 +158,8 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 1. Build the Cypress App itself
   'buildProd',
 
-  // 2. Build the Launchpad under test.
-  viteBuildLaunchpadForTest,
-
-  // 3. Host the Launchpad on a static server for cy.visit.
-  serveBuiltLaunchpadForTest,
-
   // Ensure we have no existing cypress processes running
   killExistingCypress,
-
-  // 4. Start the TEST Cypress App, such that its ports and other globals
-  //    don't conflict with the real Cypress App.
-  startCypressForTest,
-
-  // Wait for the Test Cypress open to start
-  waitForTestGraphQLApi,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
   async function _runCypressLaunchpad () {
@@ -161,23 +171,7 @@ gulp.task('cyRunAppE2E', gulp.series(
   // 1. Build the Cypress App itself
   'buildProd',
 
-  // 2. Build the Launchpad under test.
-  gulp.parallel(
-    viteBuildLaunchpadForTest,
-    viteBuildAppForTest,
-  ),
-
-  // 3. Host the Launchpad on a static server for cy.visit.
-  serveBuiltAppForTest,
-
   killExistingCypress,
-
-  // 4. Start the TEST Cypress App, such that its ports and other globals
-  //    don't conflict with the real Cypress App.
-  startCypressForTest,
-
-  // Wait for the Test Cypress open to start
-  waitForTestGraphQLApi,
 
   // 5. Start the REAL Cypress App, which will execute the integration specs.
   async function _runCypressApp () {
@@ -186,47 +180,41 @@ gulp.task('cyRunAppE2E', gulp.series(
 ))
 
 const cyOpenLaunchpad = gulp.series(
-  // 2. Build + watch Launchpad under test.
+  // 1. Build + watch Launchpad under test.
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
-  viteBuildAndWatchLaunchpadForTest,
+  gulp.parallel(
+    viteBuildApp,
+    viteBuildAndWatchLaunchpad,
+  ),
 
-  // 4. Start the TEST Cypress App, such that its ports and other globals
-  //    don't conflict with the real Cypress App.
-  startCypressForTest,
-
-  // 3. Host the Launchpad on a static server for cy.visit.
-  serveBuiltLaunchpadForTest,
-
-  // 5. Start the REAL (dev) Cypress App, which will launch in open mode.
+  // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressLaunchpad,
 )
 
 const cyOpenApp = gulp.series(
-  // 2. Build + watch Launchpad under test.
+  // 1. Build + watch Launchpad under test.
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
   gulp.parallel(
-    viteBuildLaunchpadForTest,
-    viteBuildAndWatchAppForTest,
+    gulp.series(
+      viteBuildAndWatchLaunchpad,
+      viteBuildAndWatchApp,
+    ),
+    webpackRunner,
   ),
 
-  // 3. Start the TEST Cypress App, such that its ports and other globals
-  //    don't conflict with the real Cypress App.
-  startCypressForTest,
-
-  // 4. Host the Launchpad on a static server for cy.visit.
-  serveBuiltAppForTest,
-
-  // 5. Start the REAL (dev) Cypress App, which will launch in open mode.
+  // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressApp,
 )
 
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenLaunchpadE2E', gulp.series(
+  'viteClean',
+
   // 1. Build the Cypress App itself
-  'buildProd',
+  'commonSetup',
 
   // 2. Open the "app"
   cyOpenLaunchpad,
@@ -235,8 +223,10 @@ gulp.task('cyOpenLaunchpadE2E', gulp.series(
 // Open Cypress in production mode.
 // Rebuild the Launchpad app between changes.
 gulp.task('cyOpenAppE2E', gulp.series(
+  'viteClean',
+
   // 1. Build the Cypress App itself
-  'buildProd',
+  'commonSetup',
 
   // 2. Open the launchpad app
   cyOpenApp,
@@ -267,22 +257,14 @@ gulp.task(nexusCodegen)
 gulp.task(nexusCodegenWatch)
 gulp.task(graphqlCodegen)
 gulp.task(graphqlCodegenWatch)
-gulp.task(startCypressForTest)
 
 gulp.task(viteCleanApp)
 gulp.task(viteCleanLaunchpad)
 
-gulp.task(viteBuildLaunchpadForTest)
-gulp.task(viteBuildAppForTest)
-
-gulp.task(serveBuiltAppForTest)
-gulp.task(serveBuiltLaunchpadForTest)
-
-gulp.task(viteBuildAndWatchLaunchpadForTest)
-gulp.task(viteBuildAndWatchAppForTest)
-
 gulp.task(viteBuildApp)
 gulp.task(viteBuildLaunchpad)
+gulp.task(viteBuildAndWatchApp)
+gulp.task(viteBuildAndWatchLaunchpad)
 
 gulp.task('debugCypressLaunchpad', gulp.series(
   async function setupDebugBrk () {

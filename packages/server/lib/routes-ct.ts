@@ -5,6 +5,8 @@ import { Request, Response, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import type { InitializeRoutes } from './routes'
+import { fs } from './util/fs'
+import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -15,6 +17,7 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 }
 
 export const createRoutesCT = ({
+  ctx,
   config,
   nodeProxy,
   getCurrentBrowser,
@@ -23,19 +26,51 @@ export const createRoutesCT = ({
   const routesCt = Router()
 
   if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
-    const myProxy = httpProxy.createProxyServer({
+    const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+    })
+    const proxyIndex = httpProxy.createProxyServer({
+      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+      selfHandleResponse: true,
+    })
+
+    proxyIndex.on('proxyRes', function (proxyRes, _req, _res) {
+      const body: any[] = []
+
+      proxyRes.on('data', function (chunk) {
+        let chunkData = String(chunk)
+
+        if (chunkData.includes('<head>')) {
+          chunkData = chunkData.replace('<body>', replaceBody(ctx))
+        }
+
+        body.push(chunkData)
+      })
+
+      proxyRes.on('end', function () {
+        (_res as Response).send(body.join(''))
+      })
     })
 
     // TODO: can namespace this onto a "unified" route like __app-unified__
     // make sure to update the generated routes inside of vite.config.ts
     routesCt.get('/__vite__/*', (req, res) => {
-      myProxy.web(req, res, {}, (e) => {
-      })
+      if (req.params[0] === '') {
+        proxyIndex.web(req, res, {}, (e) => {})
+      } else {
+        proxy.web(req, res, {}, (e) => {})
+      }
     })
   } else {
     routesCt.get('/__vite__/*', (req, res) => {
       const pathToFile = getPathToDist('app', req.params[0])
+
+      if (req.params[0] === '') {
+        return fs.readFile(pathToFile, 'utf8')
+        .then((file) => {
+          res.send(file.replace('<body>', replaceBody(ctx)))
+        })
+      }
 
       return send(req, pathToFile).pipe(res)
     })
@@ -121,4 +156,8 @@ export const createRoutesCT = ({
   })
 
   return routesCt
+}
+
+function replaceBody (ctx: DataContextShell) {
+  return `<body><script>window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`
 }

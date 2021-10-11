@@ -19,6 +19,7 @@ export interface ProjectApiShape {
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
   clearLatestProjectsCache(): Promise<unknown>
+  closeActiveProject(): Promise<unknown>
 }
 
 export class ProjectActions {
@@ -28,8 +29,9 @@ export class ProjectActions {
     return this.ctx._apis.projectApi
   }
 
-  clearActiveProject () {
+  async clearActiveProject () {
     this.ctx.appData.activeProject = null
+    await this.api.closeActiveProject()
 
     return
   }
@@ -98,8 +100,8 @@ export class ProjectActions {
     return this.projects
   }
 
-  async initializeActiveProject () {
-    if (!this.ctx.activeProject?.projectRoot || !this.ctx.wizardData.chosenTestingType) {
+  async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
+    if (!this.ctx.activeProject?.projectRoot) {
       throw Error('Cannot initialize project without an active project')
     }
 
@@ -115,7 +117,18 @@ export class ProjectActions {
       testingType: this.ctx.wizardData.chosenTestingType,
     }
 
-    await this.api.initializeProject(launchArgs, this.ctx.launchOptions, browsers)
+    try {
+      await this.api.initializeProject(launchArgs, {
+        ...this.ctx.launchOptions,
+        ...options,
+        ctx: this.ctx,
+      }, browsers)
+    } catch (e) {
+      // TODO(tim): remove / replace with ctx.log.error
+      // eslint-disable-next-line
+      console.error(e)
+      throw e
+    }
   }
 
   createProject () {
@@ -153,7 +166,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject () {
+  async launchProject (options: LaunchOpts = {}) {
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
@@ -167,7 +180,7 @@ export class ProjectActions {
       specType: this.ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
     }
 
-    return this.api.launchProject(browser, spec, {})
+    return this.api.launchProject(browser, spec, options)
   }
 
   removeProject (projectRoot: string) {

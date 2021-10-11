@@ -11,7 +11,6 @@ const errors = require('../errors')
 const machineId = require('../util/machine_id')
 const random = require('../util/random')
 const user = require('../user')
-const windows = require('./windows')
 
 let app
 let authCallback
@@ -101,7 +100,7 @@ const start = (onMessage, utmCode) => {
   })
   .finally(() => {
     _stopServer()
-    windows.focusMainWindow()
+    require('./windows').focusMainWindow()
   })
 }
 

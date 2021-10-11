@@ -1,7 +1,6 @@
 import fs from 'fs'
 import type http from 'http'
 import server, { Server as SocketIOBaseServer, ServerOptions, Socket } from 'socket.io'
-import { client } from './browser'
 
 export type { Socket }
 
@@ -30,7 +29,6 @@ class SocketIOServer extends SocketIOBaseServer {
 }
 
 export {
-  client,
   server,
   SocketIOServer,
 }

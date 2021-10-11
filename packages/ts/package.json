@@ -15,7 +15,8 @@
   },
   "devDependencies": {
     "rimraf": "3.0.2",
-    "ts-node": "5.0.1"
+    "ts-node": "^10.2.1",
+    "typescript-cached-transpile": "^0.0.6"
   },
   "files": [
     "register.js"

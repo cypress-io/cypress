@@ -1,4 +1,7 @@
 /// <reference types="cypress" />
+const { monorepoPaths } = require('../../../../scripts/gulp/monorepoPaths')
+import { e2ePluginSetup } from '@packages/frontend-shared/cypress/e2e/e2ePluginSetup'
+
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
 //
@@ -15,8 +18,6 @@
 /**
  * @type {Cypress.PluginConfig}
  */
-// eslint-disable-next-line no-unused-vars
-module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
+export default async (on, config) => {
+  return await e2ePluginSetup(monorepoPaths.pkgLaunchpad, on, config)
 }

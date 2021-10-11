@@ -9,7 +9,7 @@ import { createI18n } from '@cy/i18n'
 const app = createApp(App)
 
 app.use(VueToast)
-app.use(urql, makeUrqlClient())
+app.use(urql, makeUrqlClient('launchpad'))
 app.use(createI18n())
 
 window.$app = app.mount('#app')
