@@ -28,6 +28,11 @@ export const Project = objectType({
     })
 
     t.nonNull.string('projectRoot')
+    t.field('launchMode', {
+      description: 'The mode the interactive runner was launched in',
+      type: 'TestingTypeEnum',
+    })
+
     t.nonNull.string('title', {
       resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
     })
