@@ -11,6 +11,6 @@ export class AppDataSource {
   }
 
   get isAuthBrowserOpened () {
-    return this.ctx.appData.isAuthBrowserOpened ?? false
+    return this.ctx.appData.isAuthBrowserOpened
   }
 }

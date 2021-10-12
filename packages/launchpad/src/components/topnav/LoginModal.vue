@@ -91,7 +91,7 @@ fragment LoginModal on Query {
 }
 `
 
-const setIsOpen = (value) => {
+const setIsOpen = (value: boolean) => {
   emit('update:modelValue', value)
 }
 const { t } = useI18n()

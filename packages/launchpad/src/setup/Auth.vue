@@ -93,7 +93,7 @@ query BrowserOpened {
 
 const login = useMutation(LoginDocument)
 const logout = useMutation(LogoutDocument)
-const loginButtonRef = ref<{ $el: HTMLButtonElement } | null>(null)
+const loginButtonRef = ref(Button)
 
 onMounted(() => {
   loginButtonRef?.value?.$el?.focus()
