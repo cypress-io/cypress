@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /// <reference types="vite-svg-loader" />
 
-import { ref, useSlots, defineEmits } from 'vue'
+import { useSlots } from 'vue'
 import IconCaret from '../../icons/dropcaret.svg?component'
 
 const slots = useSlots()
