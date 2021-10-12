@@ -1,6 +1,5 @@
 import Debug from 'debug'
 import path from 'path'
-import qs from 'querystring'
 
 import * as settings from './util/settings'
 import errors from './errors'
@@ -73,7 +72,6 @@ export const getSpecUrl = ({
   integrationFolder,
   componentFolder,
   projectRoot,
-  queryParams,
 }: {
   absoluteSpecPath?: string
   browserUrl?: string
@@ -81,24 +79,19 @@ export const getSpecUrl = ({
   componentFolder: string
   projectRoot: string
   specType?: 'integration' | 'component'
-  queryParams?: Record<string, string | undefined>
 }) => {
   specType ??= 'integration'
   browserUrl ??= ''
-  queryParams ??= {}
 
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
-
-  const query = qs.stringify(queryParams)
 
   // if we don't have a absoluteSpecPath or its __all
   if (!absoluteSpecPath || absoluteSpecPath === '__all') {
     const url = normalizeSpecUrl(browserUrl, '/__all')
-    const finalUrl = query ? `${url}?${query}` : url
 
-    debug('returning url to run all specs: %s', finalUrl)
+    debug('returning url to run all specs: %s', url)
 
-    return finalUrl
+    return url
   }
 
   // TODO:
@@ -115,13 +108,11 @@ export const getSpecUrl = ({
     pathToSpec: absoluteSpecPath,
     type: specType,
   })
-
   const url = normalizeSpecUrl(browserUrl, prefixedPath)
-  const finalUrl = query ? `${url}?${query}` : url
 
-  debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, finalUrl })
+  debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
 
-  return finalUrl
+  return url
 }
 
 export const checkSupportFile = async ({

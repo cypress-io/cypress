@@ -25,6 +25,16 @@ interface SpecsByType {
   integration: Cypress.Spec[]
 }
 
+function appendGqlPort (url: string) {
+  const gqlPort = getExistingGraphqlServerPort()?.toString()
+
+  if (gqlPort) {
+    return `${url}?gqlPort=${gqlPort}`
+  }
+
+  return url
+}
+
 // @see https://github.com/cypress-io/cypress/issues/18094
 async function win32BitWarning (onWarning: (error: Error) => void) {
   if (os.platform() !== 'win32' || os.arch() !== 'ia32') return
@@ -103,10 +113,6 @@ export class OpenProject {
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component',
       projectRoot: this.openProject.projectRoot,
-      queryParams: process.env.LAUNCHPAD
-        ? { gqlPort: getExistingGraphqlServerPort()?.toString() }
-        : {},
-
     })
 
     this.openProject.changeToUrl(newSpecUrl)
@@ -128,15 +134,18 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.openProject!.reset()
 
-    const url = getSpecUrl({
+    let url = getSpecUrl({
       absoluteSpecPath: spec.absolute,
       specType: spec.specType,
       browserUrl: this.openProject.cfg.browserUrl,
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component?',
       projectRoot: this.openProject.projectRoot,
-      queryParams: { gqlPort: getExistingGraphqlServerPort()?.toString() },
     })
+
+    if (process.env.LAUNCHPAD) {
+      url = appendGqlPort(url)
+    }
 
     debug('open project url %s', url)
 
