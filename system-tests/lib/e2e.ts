@@ -22,6 +22,8 @@ const screenshots = require(`@packages/server/lib/screenshots`)
 const videoCapture = require(`@packages/server/lib/video_capture`)
 const settings = require(`@packages/server/lib/util/settings`)
 
+const serverPath = path.dirname(require.resolve('@packages/server'))
+
 // mutates mocha test runner - needed for `test.titlePath`
 require(`@packages/server/lib/project-base`)
 
@@ -551,7 +553,7 @@ const e2e = {
 
     const args = [
       // hides a user warning to go through NPM module
-      `--cwd=${process.cwd()}`,
+      `--cwd=${serverPath}`,
       `--run-project=${options.project}`,
       `--testingType=${options.testingType || 'e2e'}`,
     ]

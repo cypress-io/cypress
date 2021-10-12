@@ -1,7 +1,5 @@
 const root = '@packages/server'
 
-require(`@packages/server/lib/environment`)
-
 const chai = require('chai')
 
 chai.use(require('chai-subset'))
