@@ -1,15 +1,12 @@
 <script setup lang="ts">
-/// <reference types="vite-svg-loader" />
-
 import { useSlots } from 'vue'
-import IconCaret from '../../icons/dropcaret.svg?component'
 
 const slots = useSlots()
 const emit = defineEmits(['click'])
 
 </script>
 <template>
-  <div class="border border-gray-200 rounded mb-4 cursor-pointer">
+  <div class="border border-gray-200 rounded mb-4 cursor-pointer overflow-hidden">
     <div
       class="py-3 flex cursor-pointer"
       @click="emit('click')"
@@ -18,7 +15,7 @@ const emit = defineEmits(['click'])
         <slot name="icon" />
       </div>
       <div class="px-3 flex-grow">
-        <p class="text-indigo-700">
+        <p class="text-indigo-700 whitespace-nowrap">
           <slot name="header" />
         </p>
         <p class="text-gray-500 text-sm">
@@ -29,13 +26,8 @@ const emit = defineEmits(['click'])
         v-if="slots.slider"
         class="px-4 flex items-center"
       >
-        <IconCaret />
+        <i-cy-dropcaret />
       </div>
-    </div>
-    <div
-      v-if="slots.warning"
-    >
-      <slot name="warning" />
     </div>
     <slot name="slider" />
   </div>

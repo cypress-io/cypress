@@ -9,7 +9,7 @@ import IconPass from '../../icons/duo/pass.svg?component'
 import IconWarn from '../../icons/duo/warn.svg?component'
 import IconFail from '../../icons/duo/fail.svg?component'
 import IconSkip from '../../icons/duo/skip.svg?component'
-import CardForList from '../list/CardForList.vue'
+import ListRow from '@cy/components/ListRow.vue'
 import Button from '@cy/components/Button.vue'
 import Badge from '@cy/components/Badge.vue'
 
@@ -32,7 +32,7 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
 
 </script>
 <template>
-  <CardForList @click="open = !open">
+  <ListRow @click="open = !open">
     <template #icon>
       <IconPass v-if="status === 'valid'" />
       <IconWarn v-if="status === 'changes'" />
@@ -50,13 +50,10 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
     <template #description>
       {{ description }}
     </template>
-    <template
-      #warning
-    >
+    <template #slider>
       <div
         v-if="warning && open"
-        class="border-t border-gray-200 p-3 flex items-center"
-        :class="statusClasses"
+        class="border-t border-gray-200 p-3 flex items-center bg-warning-100 text-warning-600"
       >
         <span class="font-semibold">{{ statusLabel }}: </span>
         <p class="flex-grow ml-1">
@@ -64,8 +61,6 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         </p>
         <Button>Learn more</Button>
       </div>
-    </template>
-    <template #slider>
       <div
         class="border-t border-gray-200 p-3 pt-4 overflow-auto"
         :class="open ? 'block': 'hidden'"
@@ -75,5 +70,5 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         </PrismJs>
       </div>
     </template>
-  </CardForList>
+  </ListRow>
 </template>

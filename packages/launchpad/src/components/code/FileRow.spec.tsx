@@ -74,4 +74,23 @@ describe('FileRow', () => {
     cy.contains('Changes required').should('be.visible')
     cy.get('pre').should('be.visible')
   })
+
+  it('responds nice to small screens', { viewportWidth: 500 }, () => {
+    cy.mount(() => (
+      <div class="p-5 w-full">
+        <FileRow
+          status="changes"
+          language="js"
+          content={content}
+          filePath="cypress/integration/command.js"
+          description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam at temporibus nulla ratione a nam inventore esse facere vel nemo est veniam dolore, ullam fuga quidem, cum dolor quibusdam officiis."
+          warning={{ description: 'Please merge the code below with your existing `cypress.config.js`', docsLink: '' }}
+        />
+      </div>
+    ))
+
+    cy.contains('cypress/integration/command.js').click()
+    cy.contains('Changes required').should('be.visible')
+    cy.get('pre').should('be.visible')
+  })
 })
