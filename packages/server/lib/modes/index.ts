@@ -1,4 +1,4 @@
-module.exports = (mode, options) => {
+export = (mode, options) => {
   if (mode === 'record') {
     return require('./record').run(options)
   }

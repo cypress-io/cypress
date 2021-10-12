@@ -1,7 +1,7 @@
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import Debug from 'debug'
-import { ErrorRequestHandler, Router } from 'express'
+import { ErrorRequestHandler, Router, Response } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 
@@ -12,10 +12,12 @@ import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner, ServeOptions } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
+import type { DataContextShell } from '@packages/data-context/src/DataContextShell'
 
 const debug = Debug('cypress:server:routes')
 
 export interface InitializeRoutes {
+  ctx: DataContextShell
   specsStore: SpecsStore
   config: Cfg
   getSpec: () => Cypress.Spec | null
@@ -27,6 +29,10 @@ export interface InitializeRoutes {
   testingType: Cypress.TestingType
 }
 
+function replaceBody (ctx: DataContextShell) {
+  return `<body><script>window.__CYPRESS_GRAPHQL_PORT__ = ${JSON.stringify(ctx.gqlServerPort)};</script>\n`
+}
+
 export const createCommonRoutes = ({
   config,
   networkProxy,
@@ -36,6 +42,7 @@ export const createCommonRoutes = ({
   specsStore,
   getRemoteState,
   nodeProxy,
+  ctx,
 }: InitializeRoutes) => {
   const makeServeConfig = (options: Partial<ServeOptions>) => {
     const config = {
@@ -82,6 +89,29 @@ export const createCommonRoutes = ({
   if (process.env.CYPRESS_INTERNAL_VITE_APP_PORT) {
     const webProxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+    })
+
+    const proxyIndex = httpProxy.createProxyServer({
+      target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,
+      selfHandleResponse: true,
+    })
+
+    proxyIndex.on('proxyRes', function (proxyRes, _req, _res) {
+      const body: any[] = []
+
+      proxyRes.on('data', function (chunk) {
+        let chunkData = String(chunk)
+
+        if (chunkData.includes('<head>')) {
+          chunkData = chunkData.replace('<body>', replaceBody(ctx))
+        }
+
+        body.push(chunkData)
+      })
+
+      proxyRes.on('end', function () {
+        (_res as Response).send(body.join(''))
+      })
     })
 
     // TODO: can namespace this onto a "unified" route like __app-unified__

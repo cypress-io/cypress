@@ -13,11 +13,14 @@ export interface ProjectShape {
   projectRoot: string
 }
 
+export interface DevStateShape {
+  refreshState: null | string
+}
+
 export interface ActiveProjectShape extends ProjectShape {
   title: string
   ctPluginsInitialized: Maybe<boolean>
   e2ePluginsInitialized: Maybe<boolean>
-  launchMode: Maybe<TestingTypeEnum>
   isFirstTimeCT: Maybe<boolean>
   isFirstTimeE2E: Maybe<boolean>
   currentSpecId?: Maybe<string>
@@ -31,6 +34,7 @@ export interface AppDataShape {
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
   isInGlobalMode: boolean
+  activeTestingType: Maybe<TestingTypeEnum>
 }
 
 export interface WizardDataShape {
@@ -46,6 +50,7 @@ export interface WizardDataShape {
 }
 
 export interface CoreDataShape {
+  dev: DevStateShape
   app: AppDataShape
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
@@ -56,7 +61,11 @@ export interface CoreDataShape {
  */
 export function makeCoreData (): CoreDataShape {
   return {
+    dev: {
+      refreshState: null,
+    },
     app: {
+      activeTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],

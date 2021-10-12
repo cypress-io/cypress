@@ -3,6 +3,8 @@
 
 export * from './AppActions'
 export * from './AuthActions'
+export * from './DataEmitterActions'
+export * from './DevActions'
 export * from './FileActions'
 export * from './ProjectActions'
 export * from './StorybookActions'

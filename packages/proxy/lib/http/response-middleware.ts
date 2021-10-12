@@ -11,6 +11,7 @@ import { InterceptResponse } from '@packages/net-stubbing'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
+import { URL } from 'url'
 
 export type ResponseMiddleware = HttpMiddleware<{
   /**

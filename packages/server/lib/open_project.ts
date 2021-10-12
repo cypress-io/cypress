@@ -13,10 +13,10 @@ import * as session from './session'
 import { getSpecUrl } from './project_utils'
 import errors from './errors'
 import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } from '@packages/types'
-import { closeGraphQLServer } from '@packages/graphql/src/server'
 import { fs } from './util/fs'
 import path from 'path'
 import os from 'os'
+import { closeGraphQLServer, getExistingGraphqlServerPort } from './gui/makeGraphQLServer'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -103,6 +103,7 @@ export class OpenProject {
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component',
       projectRoot: this.openProject.projectRoot,
+      queryParams: { gqlPort: getExistingGraphqlServerPort()?.toString() },
     })
 
     this.openProject.changeToUrl(newSpecUrl)
@@ -131,6 +132,7 @@ export class OpenProject {
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component?',
       projectRoot: this.openProject.projectRoot,
+      queryParams: { gqlPort: getExistingGraphqlServerPort()?.toString() },
     })
 
     debug('open project url %s', url)
@@ -229,6 +231,10 @@ export class OpenProject {
         session.clearSessions()
       })
       .then(() => {
+        if (options.skipBrowserOpenForTest) {
+          return
+        }
+
         return browsers.open(browser, options, automation)
       })
     }
@@ -380,8 +386,6 @@ export class OpenProject {
       this.componentSpecsWatcher.close()
       this.componentSpecsWatcher = null
     }
-
-    return closeGraphQLServer()
   }
 
   closeBrowser () {
@@ -405,7 +409,10 @@ export class OpenProject {
 
     this.stopSpecsWatcher()
 
-    return this.closeOpenProjectAndBrowsers()
+    return Promise.all([
+      closeGraphQLServer(),
+      this.closeOpenProjectAndBrowsers(),
+    ]).then(() => null)
   }
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {

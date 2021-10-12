@@ -1,19 +1,22 @@
-const _ = require('lodash')
-const os = require('os')
-const EE = require('events')
-const { app } = require('electron')
-const image = require('electron').nativeImage
-const cyIcons = require('@cypress/icons')
-const savedState = require('../saved_state')
-const menu = require('../gui/menu')
-const Events = require('../gui/events')
-const Windows = require('../gui/windows')
+import _ from 'lodash'
+import os from 'os'
+import { app, nativeImage as image } from 'electron'
+// eslint-disable-next-line no-duplicate-imports
+import type { WebContents } from 'electron'
+import cyIcons from '@cypress/icons'
+import savedState from '../saved_state'
+import menu from '../gui/menu'
+import Events from '../gui/events'
+import * as Windows from '../gui/windows'
+import { runInternalServer } from './internal-server'
+import type { LaunchArgs, PlatformName } from '@packages/types'
+import EventEmitter from 'events'
 
 const isDev = () => {
   return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
 }
 
-module.exports = {
+export = {
   isMac () {
     return os.platform() === 'darwin'
   },
@@ -80,7 +83,7 @@ module.exports = {
         y: 'appY',
         devTools: 'isAppDevToolsOpen',
       },
-      onBlur () {
+      onBlur (this: {webContents: WebContents}) {
         if (this.webContents.isDevToolsOpened()) {
           return
         }
@@ -121,10 +124,15 @@ module.exports = {
     return args[os.platform()]
   },
 
-  ready (options = {}) {
-    const bus = new EE
-
+  /**
+   * @param {import('@packages/types').LaunchArgs} options
+   * @returns
+   */
+  ready (options: {projectRoot?: string} = {}) {
     const { projectRoot } = options
+    const { serverPortPromise, bus } = process.env.LAUNCHPAD
+      ? runInternalServer(options)
+      : { bus: new EventEmitter, serverPortPromise: Promise.resolve(undefined) }
 
     // TODO: potentially just pass an event emitter
     // instance here instead of callback functions
@@ -135,19 +143,21 @@ module.exports = {
       },
     })
 
-    return savedState.create(projectRoot, false)
-    .then((state) => {
-      return state.get()
-    })
-    .then((state) => {
-      return Windows.open(projectRoot, this.getWindowArgs(state, options))
+    return Promise.all([
+      serverPortPromise,
+      savedState.create(projectRoot, false).then((state) => state.get()),
+    ])
+    .then(([port, state]) => {
+      return Windows.open(projectRoot, port, this.getWindowArgs(state))
       .then((win) => {
-        Events.start(_.extend({}, options, {
+        Events.start({
+          ...(options as LaunchArgs),
           onFocusTests () {
+            // @ts-ignore
             return app.focus({ steal: true }) || win.focus()
           },
-          os: os.platform(),
-        }), bus)
+          os: os.platform() as PlatformName,
+        }, bus)
 
         return win
       })

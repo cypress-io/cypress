@@ -13,6 +13,7 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 }
 
 export const createRoutesCT = ({
+  ctx,
   config,
   nodeProxy,
 }: InitializeRoutes) => {

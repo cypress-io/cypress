@@ -1,6 +1,5 @@
-import { arg, objectType } from 'nexus'
+import { objectType } from 'nexus'
 import { cloudProjectBySlug } from '../../stitching/remoteGraphQLCalls'
-import { SpecTypeEnum } from '../enumTypes'
 
 export interface ProjectShape {
   projectId?: string | null
@@ -28,10 +27,6 @@ export const Project = objectType({
     })
 
     t.nonNull.string('projectRoot')
-    t.field('launchMode', {
-      description: 'The mode the interactive runner was launched in',
-      type: 'TestingTypeEnum',
-    })
 
     t.nonNull.string('title', {
       resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
@@ -59,18 +54,15 @@ export const Project = objectType({
           return null
         }
 
-        return ctx.actions.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
+        return ctx.project.getCurrentSpecById(source.projectRoot, ctx.activeProject.currentSpecId)
       },
     })
 
     t.connectionField('specs', {
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
-      additionalArgs: {
-        specType: arg({ type: SpecTypeEnum }),
-      },
       nodes: (source, args, ctx) => {
-        return ctx.actions.project.findSpecs(source.projectRoot, args.specType)
+        return ctx.project.findSpecs(source.projectRoot, ctx.appData.activeTestingType === 'component' ? 'component' : 'integration')
       },
     })
 
@@ -78,11 +70,11 @@ export const Project = objectType({
       description: 'Specs for current testing mode conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        if (!ctx.activeProject || !ctx.activeProject.launchMode) {
-          throw Error('Need activeProject anad launchMode to query for specs')
+        if (!ctx.activeProject || !ctx.appData.activeTestingType) {
+          throw Error('Need activeProject and activeTestingType to query for specs')
         }
 
-        return ctx.actions.project.findSpecs(source.projectRoot, ctx.activeProject.launchMode === 'component' ? 'component' : 'integration')
+        return ctx.project.findSpecs(source.projectRoot, ctx.appData.activeTestingType === 'component' ? 'component' : 'integration')
       },
     })
 

@@ -1,7 +1,7 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, SpecType } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, BaseSpec } from '@packages/types'
 import path from 'path'
-import type { Maybe, ProjectShape } from '../data/coreDataShape'
+import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
 
@@ -19,6 +19,7 @@ export interface ProjectApiShape {
   removeProjectFromCache(projectRoot: string): void
   getProjectRootsFromCache(): Promise<string[]>
   clearLatestProjectsCache(): Promise<unknown>
+  closeActiveProject(): Promise<unknown>
 }
 
 export class ProjectActions {
@@ -28,10 +29,10 @@ export class ProjectActions {
     return this.ctx._apis.projectApi
   }
 
-  clearActiveProject () {
+  async clearActiveProject () {
     this.ctx.appData.activeProject = null
 
-    return
+    return this.api.closeActiveProject()
   }
 
   private get projects () {
@@ -46,7 +47,6 @@ export class ProjectActions {
     this.ctx.coreData.app.activeProject = {
       projectRoot,
       title: '',
-      launchMode: null,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
@@ -55,37 +55,6 @@ export class ProjectActions {
     }
 
     return this
-  }
-
-  async findSpecs (projectRoot: string, specType: Maybe<SpecType>) {
-    const config = await this.ctx.project.getConfig(projectRoot)
-    const specs = await this.api.findSpecs({
-      projectRoot,
-      fixturesFolder: config.fixturesFolder ?? false,
-      supportFile: config.supportFile ?? false,
-      testFiles: config.testFiles ?? [],
-      ignoreTestFiles: config.ignoreTestFiles as string[] ?? [],
-      componentFolder: config.projectRoot ?? false,
-      integrationFolder: config.integrationFolder ?? '',
-    })
-
-    if (!specType) {
-      return specs
-    }
-
-    return specs.filter((spec) => spec.specType === specType)
-  }
-
-  async getCurrentSpecById (projectRoot: string, base64Id: string) {
-    // TODO: should cache current specs so we don't need to
-    // call findSpecs each time we ask for the current spec.
-    const specs = await this.findSpecs(projectRoot, null)
-
-    // id is base64 formatted as per Relay: <type>:<string>
-    // in this case, Spec:/my/abs/path
-    const currentSpecAbs = Buffer.from(base64Id, 'base64').toString().split(':')[1]
-
-    return specs.find((x) => x.absolute === currentSpecAbs) ?? null
   }
 
   async loadProjects () {
@@ -99,8 +68,8 @@ export class ProjectActions {
     return this.projects
   }
 
-  async initializeActiveProject () {
-    if (!this.ctx.activeProject?.projectRoot || !this.ctx.wizardData.chosenTestingType) {
+  async initializeActiveProject (options: OpenProjectLaunchOptions = {}) {
+    if (!this.ctx.activeProject?.projectRoot) {
       throw Error('Cannot initialize project without an active project')
     }
 
@@ -116,7 +85,18 @@ export class ProjectActions {
       testingType: this.ctx.wizardData.chosenTestingType,
     }
 
-    await this.api.initializeProject(launchArgs, this.ctx.launchOptions, browsers)
+    try {
+      await this.api.initializeProject(launchArgs, {
+        ...this.ctx.launchOptions,
+        ...options,
+        ctx: this.ctx,
+      }, browsers)
+    } catch (e) {
+      // TODO(tim): remove / replace with ctx.log.error
+      // eslint-disable-next-line
+      console.error(e)
+      throw e
+    }
   }
 
   createProject () {
@@ -154,9 +134,9 @@ export class ProjectActions {
     }
   }
 
-  async launchProject () {
+  async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
     if (!this.ctx.activeProject) {
-      throw Error(`Cannot create index.html without activeProject.`)
+      return null
     }
 
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
@@ -165,16 +145,16 @@ export class ProjectActions {
       throw Error(`Could not find browser`)
     }
 
-    const spec: Cypress.Spec = {
+    const spec: BaseSpec = {
       name: '',
       absolute: '',
       relative: '',
-      specType: this.ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
+      specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.activeProject.launchMode = this.ctx.wizardData.chosenTestingType
+    this.ctx.appData.activeTestingType = testingType
 
-    return this.api.launchProject(browser, spec, {})
+    return this.api.launchProject(browser, spec, options)
   }
 
   removeProject (projectRoot: string) {
@@ -214,7 +194,7 @@ export class ProjectActions {
     await this.api.clearLatestProjectsCache()
   }
 
-  createComponentIndexHtml (template: string) {
+  async createComponentIndexHtml (template: string) {
     const project = this.ctx.activeProject
 
     if (!project) {
@@ -224,7 +204,7 @@ export class ProjectActions {
     if (this.ctx.activeProject?.isFirstTimeCT) {
       const indexHtmlPath = path.resolve(this.ctx.activeProject.projectRoot, 'cypress/component/support/index.html')
 
-      this.ctx.fs.outputFile(indexHtmlPath, template)
+      await this.ctx.fs.outputFile(indexHtmlPath, template)
     }
   }
 }

@@ -1,6 +1,7 @@
-export type {
+export {
   DataContext,
-  DataContextConfig,
 } from './DataContext'
 
-export * from './makeDataContext'
+export type {
+  DataContextConfig,
+} from './DataContext'

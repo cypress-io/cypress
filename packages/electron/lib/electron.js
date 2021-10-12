@@ -119,8 +119,9 @@ module.exports = {
       // we have an active debugger session
       if (inspector.url()) {
         const dp = process.debugPort + 1
+        const inspectFlag = process.execArgv.includes('--inspect') ? '--inspect' : '--inspect-brk'
 
-        argv.unshift(`--inspect-brk=${dp}`)
+        argv.unshift(`${inspectFlag}=${dp}`)
       } else {
         const opts = minimist(argv)
 
