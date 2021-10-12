@@ -1,9 +1,50 @@
-import { booleanArg, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
+import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('devRelaunch', {
+      type: 'Boolean',
+      description: 'Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts',
+      args: {
+        action: nonNull(enumType({
+          name: 'DevRelaunchAction',
+          members: ['trigger', 'dismiss'],
+        }).asArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        if (args.action === 'trigger') {
+          await ctx.actions.dev.triggerRelaunch()
+        } else {
+          ctx.actions.dev.dismissRelaunch()
+        }
+
+        return true
+      },
+    })
+
+    t.field('internal_triggerIpcToLaunchpad', {
+      type: 'Boolean',
+      args: {
+        msg: nonNull(stringArg()),
+      },
+      resolve: (root, args, ctx) => {
+        ctx.emitter.toLaunchpad(args.msg)
+
+        return true
+      },
+    })
+
+    t.field('internal_triggerIpcToApp', {
+      type: 'Boolean',
+      resolve: (root, args, ctx) => {
+        ctx.emitter.toApp('someData')
+
+        return true
+      },
+    })
+
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: (source, args, ctx) => {
@@ -46,6 +87,13 @@ export const mutation = mutationType({
         bundler: nonNull(SupportedBundlerEnum),
       },
       resolve: (root, args, ctx) => ctx.actions.wizard.setBundler(args.bundler),
+    })
+
+    t.field('wizardSetCodeLanguage', {
+      type: Wizard,
+      description: 'Sets the language we want to use for the config file',
+      args: { language: nonNull(CodeLanguageEnum) },
+      resolve: (_, args, ctx) => ctx.actions.wizard.setCodeLanguage(args.language),
     })
 
     t.field('wizardNavigate', {
@@ -176,7 +224,11 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Launches project from open_project global singleton',
       async resolve (_root, args, ctx) {
-        await ctx.actions.project.launchProject()
+        if (!ctx.wizardData.chosenTestingType) {
+          throw Error('Cannot launch project without chosen testing type')
+        }
+
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
 
         return ctx.appData
       },
@@ -219,6 +271,23 @@ export const mutation = mutationType({
         await ctx.actions.project.setActiveProject(args.path)
 
         return ctx.coreData.app
+      },
+    })
+
+    t.nonNull.field('setCurrentSpec', {
+      type: 'Project',
+      description: 'Set the current spec under test',
+      args: {
+        id: nonNull(idArg()),
+      },
+      resolve (_root, args, ctx) {
+        if (!ctx.activeProject) {
+          throw Error(`Cannot set spec without active project!`)
+        }
+
+        ctx.actions.project.setCurrentSpec(args.id)
+
+        return ctx.activeProject
       },
     })
   },

@@ -4,7 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 
 const rowSelector = '[data-testid=specs-list-row]'
 const inputSelector = 'input'
-const fullFile = (s) => `${s.node.fileName}${s.node.specFileExtension}${s.node.fileExtension}`
+const fullFile = (s) => `${s.node.fileName}${s.node.specFileExtension}`
 const hasSpecText = (_node: JQuery<HTMLElement>, spec: SpecListRowFragment) => {
   const $node = _node as JQuery<HTMLDivElement>
 
@@ -62,7 +62,5 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     .should('contain.text', specs[0].node.fileName)
     .and('contain.text', specs[0].node.fileExtension)
     .click()
-    .url()
-    .should('contain', fullFile(specs[0]))
   })
 })

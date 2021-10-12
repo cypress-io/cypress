@@ -29,11 +29,20 @@ export const App = objectType({
       resolve: () => 'OK',
     })
 
+    t.field('activeTestingType', {
+      description: 'The mode the interactive runner was launched in',
+      type: 'TestingTypeEnum',
+    })
+
     t.nonNull.boolean('isInGlobalMode', {
       description: 'Whether the app is in global mode or not',
       resolve: (source, args, ctx) => {
         return ctx.app.isGlobalMode
       },
+    })
+
+    t.nonNull.boolean('isAuthBrowserOpened', {
+      description: 'Whether the browser has been opened for auth or not',
     })
 
     t.nonNull.list.nonNull.field('projects', {

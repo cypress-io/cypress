@@ -142,4 +142,7 @@ export const stubApp: MaybeResolver<App> = {
   activeProject (source, args, ctx) {
     return ctx.app.activeProject
   },
+  isAuthBrowserOpened (source, args, ctx) {
+    return ctx.app.isAuthBrowserOpened
+  },
 }

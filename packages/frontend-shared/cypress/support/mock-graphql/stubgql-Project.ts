@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import { randomComponents } from '../../../src/graphql/specs/testStubSpecs'
+import { randomComponents } from './testStubSpecs'
+import config from '../../fixtures/config.json'
 
 import type {
   Project,
@@ -39,6 +40,7 @@ export const createTestProject = (title: string): CodegenTypeMap['Project'] => {
         }),
       ],
     },
+    config,
   }
 }
 

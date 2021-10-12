@@ -5,6 +5,7 @@ export const monorepoPaths = {
   root: path.join(__dirname, '../..'),
   pkgDir: path.join(__dirname, '../../packages'),
   pkgApp: path.join(__dirname, '../../packages/app'),
+  pkgDataContext: path.join(__dirname, '../../packages/data-context'),
   pkgDesktopGui: path.join(__dirname, '../../packages/desktop-gui'),
   pkgDriver: path.join(__dirname, '../../packages/driver'),
   pkgElectron: path.join(__dirname, '../../packages/electron'),
@@ -31,4 +32,4 @@ export const monorepoPaths = {
   pkgTypes: path.join(__dirname, '../../packages/types'),
   pkgUiComponents: path.join(__dirname, '../../packages/ui-components'),
   pkgWebConfig: path.join(__dirname, '../../packages/web-config')
-}
+} as const

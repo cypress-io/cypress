@@ -20,8 +20,8 @@ describe('<ConfigFile />', () => {
     })
   })
 
-  it('playground', { viewportWidth: 1280, viewportHeight: 1024 }, () => {
-    cy.contains('button', 'JavaScript').click()
+  it('playground', () => {
+    cy.contains('button', 'Create File').should('exist')
   })
 
   it('should display a copy button when in manual mode', () => {

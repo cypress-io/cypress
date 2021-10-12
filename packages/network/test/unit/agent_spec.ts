@@ -9,7 +9,7 @@ import tls from 'tls'
 import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import request from '@cypress/request-promise'
-import * as socketIo from '@packages/socket'
+import * as socketIo from '@packages/socket/lib/browser'
 import {
   buildConnectReqHead,
   createProxySock,

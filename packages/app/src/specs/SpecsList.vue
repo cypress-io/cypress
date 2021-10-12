@@ -9,18 +9,14 @@
         <div>{{ t('specPage.componentSpecsHeader') }}</div>
         <div>{{ t('specPage.gitStatusHeader') }}</div>
       </div>
-      <router-link
+      <button
         v-for="spec in filteredSpecs"
-        v-slot="{ navigate }"
         :key="spec.node.id"
-        :to="path(spec)"
+        class="text-left"
+        @click.prevent="selectSpec(spec)"
       >
-        <SpecsListRow
-          :gql="spec"
-          @click="navigate"
-          @keypress.enter="navigate"
-        />
-      </router-link>
+        <SpecsListRow :gql="spec" />
+      </button>
     </div>
   </div>
 </template>
@@ -28,13 +24,26 @@
 <script setup lang="ts">
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecsListRow from './SpecsListRow.vue'
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import { computed, ref } from 'vue'
-import type { Specs_SpecsListFragment, SpecNode_SpecsListFragment } from '../generated/graphql'
+import { Specs_SpecsListFragment, SpecNode_SpecsListFragment, SpecsList_SetCurrentSpecDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
-const path = (spec: SpecNode_SpecsListFragment) => `/runner/#${spec.node.absolute}`
+
+gql`
+mutation SpecsList_SetCurrentSpec($id: ID!) {
+  setCurrentSpec(id: $id) {
+    currentSpec {
+      id
+      relative
+      absolute
+      name
+    }
+  }
+}
+`
 
 gql`
 fragment SpecNode_SpecsList on SpecEdge {
@@ -53,7 +62,7 @@ fragment Specs_SpecsList on App {
   activeProject {
     id
     projectRoot
-    specs(first: 10) {
+    specs(first: 25) {
       edges {
         ...SpecNode_SpecsList
       }
@@ -61,6 +70,17 @@ fragment Specs_SpecsList on App {
   }
 }
 `
+
+const setSpecMutation = useMutation(SpecsList_SetCurrentSpecDocument)
+
+const router = useRouter()
+
+async function selectSpec (spec: SpecNode_SpecsListFragment) {
+  const { id } = spec.node
+
+  await setSpecMutation.executeMutation({ id })
+  router.push('runner')
+}
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment

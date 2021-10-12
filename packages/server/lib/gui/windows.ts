@@ -13,19 +13,20 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   type?: 'INDEX'
   url?: string
   devTools?: boolean
+  graphqlPort?: number
 }
 
 let windows = {}
 let recentlyCreatedWindow = false
 
-const getUrl = function (type) {
+const getUrl = function (type, port?: number) {
   switch (type) {
     case 'INDEX':
       if (process.env.LAUNCHPAD) {
-        return getPathToDesktopIndex('launchpad')
+        return getPathToDesktopIndex('launchpad', port)
       }
 
-      return getPathToDesktopIndex('desktop-gui')
+      return getPathToDesktopIndex('desktop-gui', port)
 
     default:
       throw new Error(`No acceptable window type found for: '${type}'`)
@@ -158,14 +159,6 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
     options.webPreferences.partition = options.partition
   }
 
-  // When we're E2E testing the launchpad or app, we want to stand up a real Cy server.
-  // It's best to do this without rendering the launchpad, so we won't visually render the electron window.
-  // TODO(jess): Is it better to stub the electron window? The server is pretty coupled to it.
-  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-    options.frame = false
-    options.show = false
-  }
-
   const win = newBrowserWindow(options)
 
   win.on('blur', function (...args) {
@@ -223,7 +216,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 // open desktop-gui BrowserWindow
-export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
+export function open (projectRoot, graphqlPort: number | undefined, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
   let win
@@ -249,7 +242,7 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
   })
 
   if (!options.url) {
-    options.url = getUrl(options.type)
+    options.url = getUrl(options.type, graphqlPort)
   }
 
   win = create(projectRoot, options, newBrowserWindow)

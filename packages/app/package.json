@@ -14,10 +14,7 @@
     "debug": "gulp debug --project ${PWD}",
     "dev": "gulp dev --project ${PWD}",
     "start": "echo \"run 'yarn dev' from the root\" && exit 1",
-    "watch": "echo \"run 'yarn dev' from the root\" && exit 1",
-    "vite:dev": "vite",
-    "vite:build": "vite build",
-    "vite:preview": "yarn vite:build && vite preview"
+    "watch": "echo \"run 'yarn dev' from the root\" && exit 1"
   },
   "dependencies": {},
   "devDependencies": {
@@ -88,9 +85,12 @@
         "graphql-relay",
         "graphql/jsutils/Path",
         "lodash",
+        "mobx",
+        "nanoid",
         "path",
+        "socket.io-client",
         "vue",
-        "vue-toast-notification",
+        "vue-toastification",
         "wonka"
       ]
     }

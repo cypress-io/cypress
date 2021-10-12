@@ -11,32 +11,18 @@ export const ENV_VARS = {
   PROD: {
     CYPRESS_INTERNAL_ENV: 'production',
     CYPRESS_INTERNAL_CLOUD_ENV: 'production',
-    CYPRESS_INTERNAL_GQL_PORT: `52200`,
-  },
-
-  // Used when we're spawning Cypress as the E2E target for the
-  // test runner. We build the assets w/ GQL_TEST_PORT into `dist-e2e`,
-  // and spawn the server against
-  E2E_TEST_TARGET: {
-    CYPRESS_INTERNAL_CLOUD_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // staging for now, until we get an e2e workflow w/ cloud project
-    CYPRESS_INTERNAL_GQL_PORT: `52300`,
-    CYPRESS_INTERNAL_ENV: 'staging', // Different than DEV, which will default to "development". TODO: Make this do less things internall
-    CYPRESS_INTERNAL_E2E_TESTING_SELF: `true`,
-    XVFB_DISPLAY_NUM: `44`,
   },
 
   // Uses the "built" vite assets, not the served ones
   DEV_OPEN: {
     CYPRESS_KONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove konfig
     CYPRESS_INTERNAL_CLOUD_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // staging for now, until we get an e2e workflow w/ cloud project
-    CYPRESS_INTERNAL_GQL_PORT: `52200`,
   },
 
   // Used when we're running Cypress in true "development" mode
   DEV: {
     CYPRESS_KONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove konfig
     CYPRESS_INTERNAL_CLOUD_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // staging for now, until we get an e2e workflow w/ cloud project
-    CYPRESS_INTERNAL_GQL_PORT: `52200`,
     CYPRESS_INTERNAL_VITE_APP_PORT: `3333`,
     CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT: `3001`,
   },

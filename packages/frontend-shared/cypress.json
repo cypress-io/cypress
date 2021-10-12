@@ -17,6 +17,6 @@
     "componentFolder": "src/components"
   },
   "e2e": {
-    "supportFile": false
+    "supportFile": "cypress/e2e/support/e2eSupport.ts"
   }
 }

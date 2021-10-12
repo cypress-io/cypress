@@ -1,5 +1,5 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, StorybookFile } from '@packages/types'
-import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
+import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, StorybookFile } from '@packages/types'
+import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 
 export type Maybe<T> = T | null | undefined
 
@@ -13,13 +13,19 @@ export interface ProjectShape {
   projectRoot: string
 }
 
+export interface DevStateShape {
+  refreshState: null | string
+}
+
 export interface ActiveProjectShape extends ProjectShape {
   title: string
   ctPluginsInitialized: Maybe<boolean>
   e2ePluginsInitialized: Maybe<boolean>
   isFirstTimeCT: Maybe<boolean>
   isFirstTimeE2E: Maybe<boolean>
+  currentSpecId?: Maybe<string>
   specs?: FoundSpec[]
+  config: ResolvedFromConfig[]
 }
 
 export interface AppDataShape {
@@ -28,6 +34,8 @@ export interface AppDataShape {
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
   isInGlobalMode: boolean
+  isAuthBrowserOpened: boolean
+  activeTestingType: Maybe<TestingTypeEnum>
 }
 
 export interface WizardDataShape {
@@ -37,12 +45,14 @@ export interface WizardDataShape {
   allBundlers: typeof BUNDLERS
   chosenTestingType: NexusGenEnums['TestingTypeEnum'] | null
   chosenFramework: NexusGenEnums['FrontendFrameworkEnum'] | null
+  chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
   generatedSpec: Omit<StorybookFile, 'content'> | null
 }
 
 export interface CoreDataShape {
+  dev: DevStateShape
   app: AppDataShape
   wizard: WizardDataShape
   user: AuthenticatedUserShape | null
@@ -53,17 +63,23 @@ export interface CoreDataShape {
  */
 export function makeCoreData (): CoreDataShape {
   return {
+    dev: {
+      refreshState: null,
+    },
     app: {
+      activeTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],
       activeProject: null,
       isInGlobalMode: false,
+      isAuthBrowserOpened: false,
     },
     wizard: {
       chosenTestingType: null,
       chosenBundler: null,
       chosenFramework: null,
+      chosenLanguage: 'js',
       chosenManualInstall: false,
       currentStep: 'welcome',
       allBundlers: BUNDLERS,
