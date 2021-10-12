@@ -36,9 +36,9 @@ mkdir -p $DEST_SNAPSHOT_DIR
 set +e
 
 # move snapshots for e2e test filenames only
-for EXT in "js" "ts"; do
+for EXT in "" ".ts"; do
     # it's normal for many of these to fail, this is the shotgun-blast approach to copying these
-    ls $DEST_TEST_DIR | xargs -I {} mv "$SNAPSHOT_DIR"/{}."$EXT" "$DEST_SNAPSHOT_DIR"
+    ls $DEST_TEST_DIR | xargs -I {} mv "$SNAPSHOT_DIR"/{}"$EXT" "$DEST_SNAPSHOT_DIR"
 done
 
 set -e
