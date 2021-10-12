@@ -2599,7 +2599,7 @@ declare namespace Cypress {
     pageLoadTimeout: number
     /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
-     * @default 10000
+     * @default 5000
      */
     requestTimeout: number
     /**

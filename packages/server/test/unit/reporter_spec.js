@@ -94,18 +94,6 @@ describe('lib/reporter', () => {
 
       expect(junitFn).to.be.calledWith(reporter.runner)
     })
-
-    it('passes the slowTestThreshold option through to mocha', function () {
-      const reporter = new Reporter('spec', {}, undefined, 2000)
-
-      reporter.setRunnables(this.root)
-
-      Object.values(reporter.runnables).forEach(function (v) {
-        expect(v._slow).to.eq(2000)
-      })
-
-      expect(reporter.mocha.suite._slow).to.eq(2000)
-    })
   })
 
   context('createSuite', () => {

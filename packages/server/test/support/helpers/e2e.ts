@@ -605,10 +605,6 @@ const e2e = {
       args.push(`--reporter-options=${options.reporterOptions}`)
     }
 
-    if (options.slowTestThreshold) {
-      args.push(`--slowTestThreshold=${options.slowTestThreshold}`)
-    }
-
     if (options.browser) {
       args.push(`--browser=${options.browser}`)
     }

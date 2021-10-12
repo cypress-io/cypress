@@ -8,6 +8,7 @@ const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
 const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
 const mochaColor = mochaReporters.Base.color
+const mochaSymbols = mochaReporters.Base.symbols
 
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
@@ -70,10 +71,8 @@ const getParentTitle = function (runnable, titles) {
   return titles
 }
 
-const createSuite = function (obj, parent, slowTestThreshold) {
+const createSuite = function (obj, parent) {
   const suite = new Mocha.Suite(obj.title, {})
-
-  suite.slow(slowTestThreshold)
 
   if (parent) {
     suite.parent = parent
@@ -85,7 +84,7 @@ const createSuite = function (obj, parent, slowTestThreshold) {
   return suite
 }
 
-const createRunnable = function (obj, parent, slowTestThreshold) {
+const createRunnable = function (obj, parent) {
   let fn
   const { body } = obj
 
@@ -106,9 +105,6 @@ const createRunnable = function (obj, parent, slowTestThreshold) {
   runnable._retries = obj._retries
   // shouldn't need to set _currentRetry, but we'll do it anyways
   runnable._currentRetry = obj._currentRetry
-  // Because of the way we create the runnables without belonging to an instantiated mocha object,
-  // we have to set the 'slow' speed for each test and suite individually
-  runnable.slow(slowTestThreshold)
 
   if (runnable.body == null) {
     runnable.body = body
@@ -255,7 +251,7 @@ const reporters = {
 }
 
 class Reporter {
-  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot, slowTestThreshold) {
+  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
       return new Reporter(reporterName)
     }
@@ -263,7 +259,6 @@ class Reporter {
     this.reporterName = reporterName
     this.projectRoot = projectRoot
     this.reporterOptions = reporterOptions
-    this.slowTestThreshold = slowTestThreshold
     this.normalizeTest = this.normalizeTest.bind(this)
   }
 
@@ -279,7 +274,6 @@ class Reporter {
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
     this.mocha = new Mocha({ reporter })
-    this.mocha.slow(this.slow)
     this.mocha.suite = rootRunnable
     this.runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(this.runner)
@@ -300,6 +294,34 @@ class Reporter {
       reporterOptions: this.reporterOptions,
     })
 
+    if (this.reporterName === 'spec') {
+      // Unfortunately the reporter doesn't expose its indentation logic, so we have to replicate it here
+      let indents = 0
+
+      this.runner.on('suite', function (suite) {
+        ++indents
+      })
+
+      this.runner.on('suite end', function () {
+        --indents
+      })
+
+      // Override the default reporter to always show test timing even for fast tests
+      // and display slow ones in yellow rather than red
+      this.runner._events.pass[2] = function (test) {
+        const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
+        const fmt =
+          Array(indents).join('  ') +
+          mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
+          mochaColor('pass', ' %s') +
+          mochaColor(durationColor, ' (%dms)')
+
+        // Log: `✓ test title (300ms)` when a test passes
+        // eslint-disable-next-line no-console
+        console.log(fmt, test.title, test.duration)
+      }
+    }
+
     this.runner.ignoreLeaks = true
   }
 
@@ -308,7 +330,7 @@ class Reporter {
       switch (type) {
         case 'suite':
           // eslint-disable-next-line no-case-declarations
-          const suite = createSuite(runnableProps, parent, this.slowTestThreshold)
+          const suite = createSuite(runnableProps, parent)
 
           suite.tests = _.map(runnableProps.tests, (testProps) => {
             return this._createRunnable(testProps, 'test', suite)
@@ -320,7 +342,7 @@ class Reporter {
 
           return suite
         case 'test':
-          return createRunnable(runnableProps, parent, this.slowTestThreshold)
+          return createRunnable(runnableProps, parent)
         default:
           throw new Error(`Unknown runnable type: '${type}'`)
       }
@@ -479,8 +501,8 @@ class Reporter {
     })
   }
 
-  static create (reporterName, reporterOptions, projectRoot, slow) {
-    return new Reporter(reporterName, reporterOptions, projectRoot, slow)
+  static create (reporterName, reporterOptions, projectRoot) {
+    return new Reporter(reporterName, reporterOptions, projectRoot)
   }
 
   static loadReporter (reporterName, projectRoot) {
