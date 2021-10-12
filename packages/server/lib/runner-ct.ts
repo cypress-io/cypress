@@ -15,7 +15,7 @@ interface ServeOptions {
 const debug = Debug('cypress:server:runner-ct')
 
 export const handle = (req, res) => {
-  const pathToFile = getPathToDist('runner-ct', req.params[0])
+  const pathToFile = getPathToDist(process.env.LAUNCHPAD ? 'runner-ct' : 'runner', req.params[0])
 
   return send(req, pathToFile)
   .pipe(res)

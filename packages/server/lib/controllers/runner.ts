@@ -83,7 +83,7 @@ export const runner = {
   },
 
   handle (testingType, req, res) {
-    const pathToFile = getPathToDist('runner-ct', req.params[0])
+    const pathToFile = getPathToDist(process.env.LAUNCHPAD ? 'runner-ct' : 'runner', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
