@@ -65,6 +65,7 @@ export function makeCoreData (): CoreDataShape {
       refreshState: null,
     },
     app: {
+      activeTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],
