@@ -840,8 +840,12 @@ describe('lib/cypress', () => {
     // also make sure we test the rest of the integration functionality
     // for headed errors! <-- not unit tests, but integration tests!
     it('logs error and exits when project folder has read permissions only and cannot write cypress.json', function () {
-      const permissionsPath = path.resolve('./permissions')
+      // test disabled if running as root (such as inside docker) - root can write all things at all times
+      if (process.geteuid() === 0) {
+        return
+      }
 
+      const permissionsPath = path.resolve('./permissions')
       const cypressJson = path.join(permissionsPath, 'cypress.json')
 
       return fs.mkdirAsync(permissionsPath)
