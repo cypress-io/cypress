@@ -92,7 +92,7 @@ For some issues, there are places you can check for more information. This may h
 
 ### Fill out our Issue Template
 
-When opening an issue, there is a provided issue template. Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that don't fill out the issue template will be closed.
+When opening an issue, there is a provided issue template. Fill out the information according to the template. This is the information needed for Cypress to continue forward with your problem. Any issues that don't fill out the issue template will be closed.
 
 ### Describe Problems
 
@@ -184,7 +184,7 @@ When opening an issue, there is a provided issue template based on the type of i
 
 ### Are they running the current version of Cypress?
 
-If they listed an older version of Cypress in their issue. We don't want to spend the time to set up a reproducible project (which can be time consuming) only to find that bumping the Cypress version fixes it. You should:
+If they listed an older version of Cypress in their issue. We don't want to spend the time to set up a reproducible project (which can be time-consuming) only to find that bumping the Cypress version fixes it. You should:
 
 - Ask them to update to the newest version of Cypress and comment about the results.
 - Add the `stage: awaiting response` label to the issue.
@@ -237,7 +237,7 @@ Some issues are opened and sadly forgotten about by the person originally openin
 
 #### Not enough information ever provided
 
-Sometimes we request more information to be provided (label `stage: needs information`) for an open issue, but no one is able to provide a reproducible example or they simply never respond. **This does not mean that we don't believe that there is a bug!** We just, unfortunately, don't have a path forward to fix it without this information. In this case you should:
+Sometimes we request more information to be provided (label `stage: needs information`) for an open issue, but no one can provide a reproducible example, or they simply never respond. **This does not mean that we don't believe that there is a bug!** We just, unfortunately, don't have a path forward to fix it without this information. In this case, you should:
 
 - Add a comment reminding them or our request for more information and that the issue will be closed if it is not provided. Sometimes issues get forgotten about, and all the person needs is a gentle reminder.
 - If there is still no response after a weeks time, explain that you are closing the issue due to not enough information or inactivity and that they can comment in the issue with a reproducible example and we will reopen the issue.
@@ -321,8 +321,7 @@ You must have the following installed on your system to contribute locally:
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
 
 ### Getting Started
-
-The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) and leverages [lerna](https://lerna.js.org/) to orchestrate running within the context of one or more packages. While it is not as important to understand lerna or yarn workspaces, it **is important** to note that running scripts or installing new dependencies should always happen from the repo's root directory.
+The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) and leverages [lerna](https://lerna.js.org/) to orchestrate running within the context of one or more packages. While it is not as important to understand Lerna or yarn workspaces, it **is important** to note that running scripts or installing new dependencies should always happen from the repo's root directory.
 
 > **⚠ Running on Windows?**
 >
