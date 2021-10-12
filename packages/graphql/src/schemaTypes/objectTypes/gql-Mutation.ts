@@ -1,9 +1,29 @@
-import { booleanArg, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('devRelaunch', {
+      type: 'Boolean',
+      description: 'Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts',
+      args: {
+        action: nonNull(enumType({
+          name: 'DevRelaunchAction',
+          members: ['trigger', 'dismiss'],
+        }).asArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        if (args.action === 'trigger') {
+          await ctx.actions.dev.triggerRelaunch()
+        } else {
+          ctx.actions.dev.dismissRelaunch()
+        }
+
+        return true
+      },
+    })
+
     t.field('internal_triggerIpcToLaunchpad', {
       type: 'Boolean',
       args: {
@@ -197,7 +217,11 @@ export const mutation = mutationType({
       type: 'App',
       description: 'Launches project from open_project global singleton',
       async resolve (_root, args, ctx) {
-        await ctx.actions.project.launchProject()
+        if (!ctx.wizardData.chosenTestingType) {
+          throw Error('Cannot launch project without chosen testing type')
+        }
+
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
 
         return ctx.appData
       },

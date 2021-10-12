@@ -60,6 +60,8 @@ gulp.task(
 gulp.task(
   'dev',
   gulp.series(
+    makePathMap,
+
     'codegen',
 
     killExistingCypress,
@@ -74,16 +76,6 @@ gulp.task(
     // And we're finally ready for electron, watching for changes in
     // /graphql to auto-restart the server
     startCypressWatch,
-  ),
-)
-
-gulp.task(
-  'dev:no-watch',
-  gulp.series(
-    async function setNoWatch () {
-      setGulpGlobal('shouldWatch', false)
-    },
-    'dev',
   ),
 )
 

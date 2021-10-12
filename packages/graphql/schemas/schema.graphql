@@ -7,6 +7,9 @@ type App {
   """Active project"""
   activeProject: Project
 
+  """The mode the interactive runner was launched in"""
+  activeTestingType: TestingTypeEnum
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -238,6 +241,19 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+enum DevRelaunchAction {
+  dismiss
+  trigger
+}
+
+"""State associated/helpful for local development of Cypress"""
+type DevState {
+  """
+  When we have edited server related files, we may want to relaunch the client.
+  """
+  needsRelaunch: Boolean
+}
+
 enum FrontendFrameworkEnum {
   cra
   nextjs
@@ -278,6 +294,11 @@ type Mutation {
   """Create a Cypress config file for a new project"""
   appCreateConfigFile(code: String!, configFilename: String!): App
   clearActiveProject: Query!
+
+  """
+  Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
+  """
+  devRelaunch(action: DevRelaunchAction!): Boolean
 
   """Generate spec from Storybook story"""
   generateSpecFromStory(storyPath: String!): Wizard!
@@ -443,7 +464,6 @@ type Project implements Node {
 
     """Returns the last n elements from the list."""
     last: Int
-    specType: SpecType
   ): SpecConnection
   title: String!
 }
@@ -469,6 +489,9 @@ type Query {
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
+
+  """The state of any info related to local development of the runner"""
+  dev: DevState!
 
   """Metadata about the nagivation menu"""
   navigationMenu: NavigationMenu

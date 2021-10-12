@@ -1,5 +1,6 @@
 import { objectType } from 'nexus'
 import { App } from './gql-App'
+import { DevState } from './gql-DevState'
 import { NavigationMenu } from './gql-NavigationMenu'
 import { Wizard } from './gql-Wizard'
 
@@ -21,6 +22,12 @@ export const Query = objectType({
       type: Wizard,
       description: 'Metadata about the wizard, null if we arent showing the wizard',
       resolve: (root, args, ctx) => ctx.coreData.wizard,
+    })
+
+    t.nonNull.field('dev', {
+      type: DevState,
+      description: 'The state of any info related to local development of the runner',
+      resolve: (root, args, ctx) => ctx.coreData.dev,
     })
   },
 })

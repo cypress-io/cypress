@@ -32,7 +32,6 @@
     "cypress:run:debug": "node ./scripts/debug.js cypress:run",
     "cypress:verify": "cypress verify --dev",
     "dev": "gulp dev",
-    "dev:no-watch": "gulp dev:no-watch",
     "dev:clean": "gulp dev:clean",
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "dev-debug": "node ./scripts/debug.js dev",

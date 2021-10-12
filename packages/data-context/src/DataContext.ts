@@ -19,6 +19,8 @@ import {
 import { cached } from './util/cached'
 import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 
+const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+
 export interface DataContextConfig extends DataContextShellConfig {
   os: PlatformName
   launchArgs: LaunchArgs
@@ -59,6 +61,10 @@ export class DataContext extends DataContextShell {
 
     if (this.config.launchArgs.projectRoot) {
       toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+    }
+
+    if (IS_DEV_ENV) {
+      this.actions.dev.watchForRelaunch()
     }
 
     return Promise.all(toAwait)
@@ -191,6 +197,7 @@ export class DataContext extends DataContextShell {
     return Promise.all([
       this.util.disposeLoaders(),
       this.actions.project.clearActiveProject(),
+      this.actions.dev.dispose(),
     ])
   }
 
