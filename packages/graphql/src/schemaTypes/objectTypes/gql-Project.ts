@@ -62,10 +62,6 @@ export const Project = objectType({
       description: 'Specs for a project conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        if (!ctx.activeProject || !ctx.appData.activeTestingType) {
-          return null
-        }
-
         return ctx.project.findSpecs(source.projectRoot, ctx.appData.activeTestingType === 'component' ? 'component' : 'integration')
       },
     })
