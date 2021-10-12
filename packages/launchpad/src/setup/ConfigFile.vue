@@ -7,42 +7,19 @@
     :can-navigate-forward="props.gql.wizard.canNavigateForward"
   >
     <nav
-      class="
-        rounded-t
-        text-left
-        text-gray-500
-        px-5
-        bg-gray-50
-        flex
-        gap-2
-        border-b-1
-        border-gray-200"
+      class="flex gap-2 px-5 text-left text-gray-500 border-gray-200 rounded-t  bg-gray-50 border-b-1"
     >
       <button
         v-for="lang of languages"
         :key="lang.id"
-        class="
-          p-4
-          w-28
-          relative
-          border-transparent
-          border-1
-          focus-default"
+        class="relative p-4 border-transparent  w-28 border-1 focus-default"
         :class="language === lang.id ? 'text-indigo-600 font-semibold' : ''"
         @click="language = lang.id"
       >
         {{ lang.name }}
         <span
           v-if="language === lang.id"
-          class="
-            absolute
-            bottom-0
-            left-0
-            right-0
-            block
-            h-1
-            bg-indigo-500
-            rounded-t"
+          class="absolute bottom-0 left-0 right-0 block h-1 bg-indigo-500 rounded-t "
         />
       </button>
     </nav>

@@ -130,6 +130,9 @@
     "linkHeader": "Quick Access",
     "confirmWelcomeGuide": "Show the welcome guide when opening Cypress."
   },
+  "welcomePage": {
+    "review": "Review the differences between each testing type"
+  },
   "settingsPage": {
     "config": {
       "title": "Resolved Configuration",
