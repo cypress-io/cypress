@@ -66,18 +66,6 @@ export const Project = objectType({
       },
     })
 
-    t.connectionField('specsForCurrentTestingType', {
-      description: 'Specs for current testing mode conforming to Relay Connection specification',
-      type: 'Spec',
-      nodes: (source, args, ctx) => {
-        if (!ctx.activeProject || !ctx.appData.activeTestingType) {
-          throw Error('Need activeProject and activeTestingType to query for specs')
-        }
-
-        return ctx.project.findSpecs(source.projectRoot, ctx.appData.activeTestingType === 'component' ? 'component' : 'integration')
-      },
-    })
-
     t.nonNull.json('config', {
       description: 'Project configuration',
       resolve: (source, args, ctx) => {

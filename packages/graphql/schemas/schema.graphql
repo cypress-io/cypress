@@ -462,23 +462,6 @@ type Project implements Node {
     """Returns the last n elements from the list."""
     last: Int
   ): SpecConnection
-
-  """
-  Specs for current testing mode conforming to Relay Connection specification
-  """
-  specsForCurrentTestingType(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """Returns the last n elements from the list."""
-    last: Int
-  ): SpecConnection
   title: String!
 }
 

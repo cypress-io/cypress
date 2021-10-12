@@ -62,7 +62,7 @@ fragment Specs_SpecsList on App {
   activeProject {
     id
     projectRoot
-    specs: specsForCurrentTestingType(first: 25) {
+    specs: specs(first: 25) {
       edges {
         ...SpecNode_SpecsList
       }

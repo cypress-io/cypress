@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import send from 'send'
 import os from 'os'
 import { fs } from '../util/fs'
@@ -82,8 +82,8 @@ export const runner = {
     return serveRunner(runnerPkg, config, res)
   },
 
-  handle (testingType, req, res) {
-    const pathToFile = getPathToDist(process.env.LAUNCHPAD ? 'runner-ct' : 'runner', req.params[0])
+  handle (testingType: Cypress.TestingType, req: Request, res: Response) {
+    const pathToFile = getPathToDist(process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner', req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
