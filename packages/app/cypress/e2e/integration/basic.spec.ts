@@ -11,7 +11,7 @@ describe('App', () => {
         skipPluginIntializeForTesting: true,
       })
 
-      await ctx.actions.project.launchProject({
+      await ctx.actions.project.launchProject('e2e', {
         skipBrowserOpenForTest: true,
       })
 
