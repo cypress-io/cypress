@@ -32,7 +32,7 @@ describe('<SelectLanguage />', () => {
     cy.contains('Button', 'JavaScript').should('exist')
   })
 
-  it('changes the language whan clicking', () => {
+  it('changes the language when clicking', () => {
     const val = ref('js')
 
     cy.mount(() => (
