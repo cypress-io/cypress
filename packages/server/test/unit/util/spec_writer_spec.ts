@@ -19,10 +19,6 @@ import {
   countStudioUsage,
 } from '../../../lib/util/spec_writer'
 
-const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
-const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
-const writtenSpec = Fixtures.get('projects/studio/cypress/integration/written.spec.js')
-
 const exampleTestCommands = [
   {
     selector: '.input',
@@ -46,10 +42,18 @@ const verifyOutput = (ast) => {
 }
 
 describe('lib/util/spec_writer', () => {
-  let readFile
+  let readFile; let mockSpec; let emptyCommentsSpec; let writtenSpec
+
+  before(() => {
+  })
 
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
+    Fixtures.scaffold()
+    mockSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/integration/unwritten.spec.js'))
+    emptyCommentsSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/integration/empty-comments.spec.js'))
+    writtenSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/integration/written.spec.js'))
+
     readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
       snapshot(output)
