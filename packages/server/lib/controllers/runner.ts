@@ -83,7 +83,13 @@ export const runner = {
   },
 
   handle (testingType: Cypress.TestingType, req: Request, res: Response) {
-    const pathToFile = getPathToDist(process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner', req.params[0])
+    let pathToFile: string
+
+    if (process.env.FORCE_E2E_RUNNER) {
+      pathToFile = getPathToDist('runner', req.params[0])
+    } else {
+      pathToFile = getPathToDist(process.env.LAUNCHPAD || testingType === 'component' ? 'runner-ct' : 'runner', req.params[0])
+    }
 
     return send(req, pathToFile)
     .pipe(res)
