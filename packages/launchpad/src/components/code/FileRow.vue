@@ -10,8 +10,8 @@ import IconWarn from '../../icons/duo/warn.svg?component'
 import IconFail from '../../icons/duo/fail.svg?component'
 import IconSkip from '../../icons/duo/skip.svg?component'
 import CardForList from '../list/CardForList.vue'
-import Button from '../../../../frontend-shared/src/components/Button.vue'
-import Badge from '../../../../frontend-shared/src/components/Badge.vue'
+import Button from '@cy/components/Button.vue'
+import Badge from '@cy/components/Badge.vue'
 
 const props = defineProps<{
     status: 'changes' | 'valid' | 'skipped' | 'fail'
@@ -28,7 +28,7 @@ const props = defineProps<{
 const open = ref(false)
 
 const statusLabel = computed(() => props.status === 'skipped' ? 'Skipped' : props.status === 'changes' ? 'Changes required' : undefined)
-const statusClasses = computed(() => props.status === 'skipped' ? 'disabled' : props.status === 'changes' ? 'warning' : undefined)
+const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : props.status === 'changes' ? 'warning' : undefined)
 
 </script>
 <template>

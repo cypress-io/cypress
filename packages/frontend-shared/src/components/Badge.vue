@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 const props = defineProps<{
     label: string,
-    status: 'success' | 'warning' | 'error' | 'disabled'
+    status: 'success' | 'warning' | 'error' | 'disabled' | 'skipped'
 }>()
+
+const statusClasses = {
+  success: '',
+  warning: '',
+  error: '',
+  disabled: '',
+  skipped: '',
+}
 </script>
 <template>
-  <div class="text-sm inline-block rounded px-1">
-    <p
-      class="whitespace-nowrap w-min"
-      data-testid="badge-label"
-      v-bind="$attrs"
-    >
-      {{ label }}
-    </p>
+  <div
+    class="text-sm inline-block rounded px-1 whitespace-nowrap"
+    :class="statusClasses[status]"
+  >
+    {{ label }}
   </div>
 </template>

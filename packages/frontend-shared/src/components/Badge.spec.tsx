@@ -8,6 +8,7 @@ describe('<Badge />', () => {
         <Badge status="error" label="Error" />
         <Badge status="disabled" label="Disabled" />
         <Badge status="warning" label="Warning" />
+        <Badge status="skipped" label="Skipped" />
       </div>
     ))
   })
