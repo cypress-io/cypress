@@ -18,7 +18,7 @@ export default class Spec {
     this.relative = relative
     this.displayName = displayName
     this.type = type
-    this.specType = specType || 'e2e'
+    this.specType = specType || 'integration'
   }
 
   @computed get hasChildren () {
