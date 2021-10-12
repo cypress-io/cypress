@@ -1,7 +1,7 @@
 name: Update Browser Versions
 on:
   schedule:
-    - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
+    - cron: "0 8 * * *" #  every day at 8am UTC (3/4am EST/EDT)
 jobs:
   update-browser-versions:
     runs-on: ubuntu-latest
@@ -27,6 +27,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
+          cache: npm
       - name: Check for new Chrome versions
         id: get-versions
         uses: actions/github-script@v4
