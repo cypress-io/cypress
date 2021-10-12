@@ -91,7 +91,6 @@ async function spawnCypressWithMode (
   const finalEnv = {
     ...process.env,
     ...env,
-    LAUNCHPAD: '1',
     TS_NODE_COMPILER: 'typescript-cached-transpile',
   }
 
