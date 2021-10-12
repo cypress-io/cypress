@@ -14,6 +14,9 @@
     "copy": "Copy",
     "copied": "Copied"
   },
+  "actions": {
+    "close": "Close"
+  },
   "file": {
     "edit": "Edit",
     "git": {
@@ -58,6 +61,24 @@
       "ciSetup": "Set up CI",
       "fasterTests": "Run tests faster",
       "smartOrchestration": "Smart Orchestration"
+    },
+    "login": {
+      "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
+      "bodySuccess": "You are now logged in as {0}.",
+      "bodyError": "An error occured while attempting to log in:",
+      "bodyBrowserError": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
+      "dashboard": "Cypress Dashboard Service",
+      "titleInitial": "Log In To Cypress",
+      "titleSuccess": "Login Successful",
+      "titleFailed": "Login Failed",
+      "titleBrowserError": "Browser Error",
+      "actionLogin": "Log In",
+      "actionLogout": "Log Out",
+      "actionContinue": "Continue",
+      "actionOpening": "Opening Browser",
+      "actionWaiting": "Waiting for you to log in",
+      "actionTryAgain": "Try again",
+      "actionCancel": "Cancel"
     }
   },
   "launchpadErrors": {

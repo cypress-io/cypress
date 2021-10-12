@@ -34,6 +34,7 @@ export interface AppDataShape {
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
   isInGlobalMode: boolean
+  isAuthBrowserOpened: boolean
   activeTestingType: Maybe<TestingTypeEnum>
 }
 
@@ -71,6 +72,7 @@ export function makeCoreData (): CoreDataShape {
       projects: [],
       activeProject: null,
       isInGlobalMode: false,
+      isAuthBrowserOpened: false,
     },
     wizard: {
       chosenTestingType: null,

@@ -28,8 +28,8 @@ export function makeDataContext (options: MakeDataContextOptions) {
       },
     },
     authApi: {
-      logIn () {
-        return auth.start(() => {}, 'launchpad')
+      logIn (onMessage) {
+        return auth.start(onMessage, 'launchpad')
       },
       logOut () {
         return user.logOut()

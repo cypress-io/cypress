@@ -51,6 +51,7 @@ import type { ButtonHTMLAttributes, FunctionalComponent, SVGAttributes } from 'v
 const VariantClassesTable = {
   primary: 'border-indigo-500 bg-indigo-600 text-white',
   outline: 'border-gray-100 text-indigo-600',
+  pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600',
   text: 'border-0',
 }
@@ -66,22 +67,23 @@ const props = defineProps<{
   prefixIcon?: FunctionalComponent<SVGAttributes>
   suffixIcon?: FunctionalComponent<SVGAttributes>
   size?: 'sm' | 'md' | 'lg' | 'lg-wide'
-  variant?: 'primary' | 'outline' | 'link' | 'text'
+  variant?: 'primary' | 'outline' | 'link' | 'text' | 'pending'
   prefixIconClass?: string
   suffixIconClass?: string
 }>()
 
 const attrs = useAttrs() as ButtonHTMLAttributes
 
-const variantClasses = VariantClassesTable[props.variant || 'primary']
-const sizeClasses = SizeClassesTable[props.size || 'md']
+const variantClasses = computed(() => (VariantClassesTable[props.variant || 'primary']))
+
+const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))
 
 const classes = computed(() => {
   return [
-    variantClasses,
-    sizeClasses,
+    variantClasses.value,
+    sizeClasses.value,
     attrs.class,
-    attrs.disabled ? 'opacity-50' : '',
+    (attrs.disabled && props.variant !== 'pending') ? 'opacity-50' : '',
   ]
 })
 </script>
