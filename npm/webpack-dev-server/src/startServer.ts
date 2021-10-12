@@ -7,7 +7,7 @@ import { webpackDevServerFacts } from './webpackDevServerFacts'
 export interface StartDevServer extends UserWebpackDevServerOptions {
   /* this is the Cypress dev server configuration object */
   options: Cypress.DevServerConfig
-  /* support passing a path to the user's webpack config */
+  /* Base webpack config object used for loading component testing */
   webpackConfig?: WebpackConfigurationWithDevServer
   /* base html template to render in AUT */
   template?: string
