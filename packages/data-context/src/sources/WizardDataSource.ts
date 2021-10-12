@@ -1,7 +1,7 @@
-import { Bundler, BUNDLERS, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
+import { Bundler, BUNDLERS, CodeLanguage, CODE_LANGUAGES, FrontendFramework, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, StorybookInfo, WIZARD_STEPS } from '@packages/types'
 import dedent from 'dedent'
 import endent from 'endent'
-import type { NexusGenEnums, NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 
 export class WizardDataSource {
@@ -75,28 +75,30 @@ export class WizardDataSource {
     return true
   }
 
-  async sampleCode (lang: 'js' | 'ts') {
+  async sampleCode () {
     const data = this.ctx.wizardData
     const storybookInfo = await this.ctx.storybook.storybookInfo
+
+    if (!this.chosenLanguage) {
+      return null
+    }
 
     if (data.chosenTestingType === 'component') {
       if (!this.chosenFramework || !this.chosenBundler) {
         return null
       }
 
-      return wizardGetConfigCode({
-        type: 'component',
+      return wizardGetConfigCodeCt({
         framework: this.chosenFramework,
         bundler: this.chosenBundler,
-        lang,
+        lang: this.chosenLanguage,
         storybookInfo,
       })
     }
 
     if (this.chosenTestingType === 'e2e') {
-      return wizardGetConfigCode({
-        type: 'e2e',
-        lang,
+      return wizardGetConfigCodeE2E({
+        lang: this.chosenLanguage,
       })
     }
 
@@ -128,33 +130,26 @@ export class WizardDataSource {
   get chosenBundler () {
     return BUNDLERS.find((f) => f.type === this.ctx.wizardData.chosenBundler)
   }
+
+  get chosenLanguage () {
+    return CODE_LANGUAGES.find((f) => f.type === this.ctx.wizardData.chosenLanguage)
+  }
 }
 
-type WizardCodeLanguage = NexusGenEnums['WizardCodeLanguage']
-
 interface GetCodeOptsE2E {
-  type: 'e2e'
-  lang: WizardCodeLanguage
+  lang: CodeLanguage
 }
 
 interface GetCodeOptsCt {
-  type: 'component'
   framework: FrontendFramework
   bundler: Bundler
-  lang: WizardCodeLanguage
+  lang: CodeLanguage
   storybookInfo?: StorybookInfo | null
-}
-
-type GetCodeOpts = GetCodeOptsCt | GetCodeOptsE2E
-
-const LanguageNames: Record<WizardCodeLanguage, string> = {
-  js: 'JavaScript',
-  ts: 'TypeScript',
 }
 
 export const wizardGetConfigCodeE2E = (opts: GetCodeOptsE2E): string | null => {
   const exportStatement =
-    opts.lang === 'js' ? 'module.exports = {' : 'export default {'
+    opts.lang.type === 'js' ? 'module.exports = {' : 'export default {'
 
   return `${exportStatement}{
   e2e: {
@@ -164,35 +159,23 @@ export const wizardGetConfigCodeE2E = (opts: GetCodeOptsE2E): string | null => {
 }`
 }
 
-export const wizardGetConfigCode = (opts: GetCodeOpts): string | null => {
-  if (opts.type === 'component') {
-    return wizardGetConfigCodeCt(opts)
-  }
-
-  if (opts.type === 'e2e') {
-    return wizardGetConfigCodeE2E(opts)
-  }
-
-  return null
-}
-
 const wizardGetConfigCodeCt = (opts: GetCodeOptsCt): string | null => {
   const { framework, bundler, lang } = opts
 
-  const comments = `Component testing, ${LanguageNames[opts.lang]}, ${framework.name}, ${bundler.name}`
+  const comments = `Component testing, ${opts.lang.name}, ${framework.name}, ${bundler.name}`
   const frameworkConfig = getFrameworkConfigFile(opts)
 
   if (frameworkConfig) {
     return `// ${comments}
 
-${frameworkConfig[lang]}`
+${frameworkConfig[lang.type]}`
   }
 
   const exportStatement =
-    lang === 'js' ? 'module.exports = {' : 'export default {'
+    lang.type === 'js' ? 'module.exports = {' : 'export default {'
 
   const importStatements =
-    lang === 'js'
+    lang.type === 'js'
       ? ''
       : [
           `import { startDevServer } from \'${bundler.package}\'`,
@@ -201,7 +184,7 @@ ${frameworkConfig[lang]}`
       ].join('\n')
 
   const requireStatements =
-    lang === 'ts'
+    lang.type === 'ts'
       ? ''
       : [
           `const { startDevServer } = require('${bundler.package}')`,

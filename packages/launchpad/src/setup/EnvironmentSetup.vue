@@ -16,6 +16,12 @@
         :placeholder="t('setupPage.projectSetup.bundlerPlaceholder')"
         @select="setFEBundler"
       />
+      <SelectLanguage
+        :name="t('setupPage.projectSetup.languageLabel')"
+        :options="languages || []"
+        :value="props.gql.language?.id ?? 'js'"
+        @select="setLanguage"
+      />
     </div>
   </WizardLayout>
 </template>
@@ -25,8 +31,17 @@ import { computed } from 'vue'
 import WizardLayout from './WizardLayout.vue'
 import SelectFramework from '../components/select/SelectFramework.vue'
 import SelectBundler from '../components/select/SelectBundler.vue'
+import SelectLanguage from '../components/select/SelectLanguage.vue'
 import { gql } from '@urql/core'
-import { EnvironmentSetupFragment, EnvironmentSetupSetFrameworkDocument, EnvironmentSetupSetBundlerDocument, FrontendFrameworkEnum, SupportedBundlers } from '../generated/graphql'
+import {
+  EnvironmentSetupFragment,
+  EnvironmentSetupSetFrameworkDocument,
+  EnvironmentSetupSetBundlerDocument,
+  EnvironmentSetupSetCodeLanguageDocument,
+  FrontendFrameworkEnum,
+  SupportedBundlers,
+  CodeLanguageEnum,
+} from '../generated/graphql'
 import { useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 
@@ -41,6 +56,14 @@ mutation EnvironmentSetupSetFramework($framework: FrontendFrameworkEnum!) {
 gql`
 mutation EnvironmentSetupSetBundler($bundler: SupportedBundlers!) {
   wizardSetBundler(bundler: $bundler) {
+    ...EnvironmentSetup
+  }
+}
+`
+
+gql`
+mutation EnvironmentSetupSetCodeLanguage($language: CodeLanguageEnum!) {
+  wizardSetCodeLanguage(language: $language) {
     ...EnvironmentSetup
   }
 }
@@ -77,6 +100,17 @@ fragment EnvironmentSetup on Wizard {
     name
     type
   }
+  language {
+    id
+    name
+    isSelected
+    type
+  }
+  allLanguages {
+    id
+    name
+    type
+  }
   ...InstallDependencies
   ...SampleCode
 }
@@ -88,6 +122,7 @@ const props = defineProps<{
 
 const setFramework = useMutation(EnvironmentSetupSetFrameworkDocument)
 const setBundler = useMutation(EnvironmentSetupSetBundlerDocument)
+const setLanguageMutation = useMutation(EnvironmentSetupSetCodeLanguageDocument)
 
 const setFEBundler = (bundler: SupportedBundlers) => {
   setBundler.executeMutation({ bundler })
@@ -97,8 +132,13 @@ const setFEFramework = (framework: FrontendFrameworkEnum) => {
   setFramework.executeMutation({ framework })
 }
 
+const setLanguage = (language: CodeLanguageEnum) => {
+  setLanguageMutation.executeMutation({ language })
+}
+
 const { t } = useI18n()
 
 const bundlers = computed(() => props.gql.framework?.supportedBundlers ?? props.gql.allBundlers)
 const frameworks = computed(() => props.gql.frameworks ?? [])
+const languages = computed(() => props.gql.allLanguages ?? [])
 </script>

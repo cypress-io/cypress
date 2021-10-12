@@ -1,5 +1,5 @@
 import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
-import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
+import { CodeLanguageEnum, FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
@@ -87,6 +87,13 @@ export const mutation = mutationType({
         bundler: nonNull(SupportedBundlerEnum),
       },
       resolve: (root, args, ctx) => ctx.actions.wizard.setBundler(args.bundler),
+    })
+
+    t.field('wizardSetCodeLanguage', {
+      type: Wizard,
+      description: 'Sets the language we want to use for the config file',
+      args: { language: nonNull(CodeLanguageEnum) },
+      resolve: (_, args, ctx) => ctx.actions.wizard.setCodeLanguage(args.language),
     })
 
     t.field('wizardNavigate', {
