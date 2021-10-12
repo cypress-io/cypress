@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const HttpsProxyAgent = require('https-proxy-agent')
 const os = require('os')
-const socketIo = require('@packages/socket')
+const socketIo = require('@packages/socket/lib/browser')
 
 module.exports = (on) => {
   on('task', {

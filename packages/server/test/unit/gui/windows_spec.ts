@@ -47,7 +47,7 @@ describe('lib/gui/windows', () => {
         type: 'INDEX',
       }
 
-      return Windows.open('/path/to/project', options, () => this.win)
+      return Windows.open('/path/to/project', undefined, options, () => this.win)
       .then((win) => {
         expect(options).to.include({
           height: 500,

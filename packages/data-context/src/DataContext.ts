@@ -1,4 +1,4 @@
-import type { LaunchArgs, OpenProjectLaunchOptions } from '@packages/types'
+import type { LaunchArgs, OpenProjectLaunchOptions, PlatformName } from '@packages/types'
 import type { AppApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
@@ -17,8 +17,12 @@ import {
   StorybookDataSource,
 } from './sources/'
 import { cached } from './util/cached'
+import { DataContextShell, DataContextShellConfig } from './DataContextShell'
 
-export interface DataContextConfig {
+const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
+
+export interface DataContextConfig extends DataContextShellConfig {
+  os: PlatformName
   launchArgs: LaunchArgs
   launchOptions: OpenProjectLaunchOptions
   /**
@@ -33,13 +37,41 @@ export interface DataContextConfig {
   projectApi: ProjectApiShape
 }
 
-export class DataContext {
+export class DataContext extends DataContextShell {
   private _coreData: CoreDataShape
 
-  fs = fsExtra
+  @cached
+  get fs () {
+    return fsExtra
+  }
 
   constructor (private config: DataContextConfig) {
+    super(config)
     this._coreData = config.coreData ?? makeCoreData()
+  }
+
+  async initializeData () {
+    const toAwait: Promise<any>[] = [
+      // Fetch the browsers when the app starts, so we have some by
+      // the time we're continuing.
+      this.actions.app.refreshBrowsers(),
+      // load projects from cache on start
+      this.actions.project.loadProjects(),
+    ]
+
+    if (this.config.launchArgs.projectRoot) {
+      toAwait.push(this.actions.project.setActiveProject(this.config.launchArgs.projectRoot))
+    }
+
+    if (IS_DEV_ENV) {
+      this.actions.dev.watchForRelaunch()
+    }
+
+    return Promise.all(toAwait)
+  }
+
+  get os () {
+    return this.config.os
   }
 
   get launchArgs () {
@@ -132,6 +164,7 @@ export class DataContext {
       appApi: this.config.appApi,
       authApi: this.config.authApi,
       projectApi: this.config.projectApi,
+      busApi: this.config.rootBus,
     }
   }
 
@@ -160,8 +193,12 @@ export class DataContext {
     console.error(e)
   }
 
-  dispose () {
-    this.util.disposeLoaders()
+  async dispose () {
+    return Promise.all([
+      this.util.disposeLoaders(),
+      this.actions.project.clearActiveProject(),
+      this.actions.dev.dispose(),
+    ])
   }
 
   get loader () {

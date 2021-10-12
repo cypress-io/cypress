@@ -1,9 +1,50 @@
-import { booleanArg, idArg, mutationType, nonNull, stringArg } from 'nexus'
+import { booleanArg, enumType, idArg, mutationType, nonNull, stringArg } from 'nexus'
 import { FrontendFrameworkEnum, NavItemEnum, SupportedBundlerEnum, TestingTypeEnum, WizardNavigateDirectionEnum } from '../enumTypes/gql-WizardEnums'
 import { Wizard } from './gql-Wizard'
 
 export const mutation = mutationType({
   definition (t) {
+    t.field('devRelaunch', {
+      type: 'Boolean',
+      description: 'Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts',
+      args: {
+        action: nonNull(enumType({
+          name: 'DevRelaunchAction',
+          members: ['trigger', 'dismiss'],
+        }).asArg()),
+      },
+      resolve: async (source, args, ctx) => {
+        if (args.action === 'trigger') {
+          await ctx.actions.dev.triggerRelaunch()
+        } else {
+          ctx.actions.dev.dismissRelaunch()
+        }
+
+        return true
+      },
+    })
+
+    t.field('internal_triggerIpcToLaunchpad', {
+      type: 'Boolean',
+      args: {
+        msg: nonNull(stringArg()),
+      },
+      resolve: (root, args, ctx) => {
+        ctx.emitter.toLaunchpad(args.msg)
+
+        return true
+      },
+    })
+
+    t.field('internal_triggerIpcToApp', {
+      type: 'Boolean',
+      resolve: (root, args, ctx) => {
+        ctx.emitter.toApp('someData')
+
+        return true
+      },
+    })
+
     t.field('internal_clearLatestProjectCache', {
       type: 'Boolean',
       resolve: (source, args, ctx) => {
@@ -180,7 +221,7 @@ export const mutation = mutationType({
           throw Error('Cannot launch project without chosen testing type')
         }
 
-        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType)
+        await ctx.actions.project.launchProject(ctx.wizardData.chosenTestingType, {})
 
         return ctx.appData
       },

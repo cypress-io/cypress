@@ -1,82 +1,55 @@
-import { graphqlHTTP } from 'express-graphql'
-import express from 'express'
-import Debug from 'debug'
-import type { Server } from 'http'
-import type { AddressInfo } from 'net'
-import cors from 'cors'
-import getenv from 'getenv'
+//
+
+import { graphqlHTTP, GraphQLParams } from 'express-graphql'
 import { graphqlSchema } from './schema'
 import type { DataContext } from '@packages/data-context'
+import type express from 'express'
+import { parse } from 'graphql'
 
-const debug = Debug('cypress:server:graphql')
-const GRAPHQL_PORT = getenv.int('CYPRESS_INTERNAL_GQL_PORT', 52200)
+const SHOW_GRAPHIQL = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
-let app: ReturnType<typeof express>
-let server: Server
-
-export function closeGraphQLServer (): Promise<void | null> {
-  if (!server || !server.listening) {
-    return Promise.resolve(null)
-  }
-
-  return new Promise<void | null>((res, rej) => {
-    server.close((err) => {
-      if (err) {
-        rej(err)
-      }
-
-      res(null)
-    })
-  })
-}
-
-// singleton during the lifetime of the application
-let dataContext: DataContext | undefined
-
-// Injected this way, since we want to set this up where the IPC layer
-// is established in the server package, which should be an independent
-// layer from GraphQL
-export function setDataContext (ctx: DataContext) {
-  dataContext = ctx
-
-  return ctx
-}
-
-export function startGraphQLServer ({ port }: { port: number } = { port: GRAPHQL_PORT }): Promise<{
-  server: Server
-  app: Express.Application
-  endpoint: string
-}> {
-  app = express()
-  app.use(cors())
-  app.use('/graphql', graphqlHTTP((req) => {
-    if (!dataContext) {
-      throw new Error(`setDataContext has not been called`)
-    }
+export function addGraphQLHTTP (app: ReturnType<typeof express>, context: DataContext) {
+  app.use('/graphql', graphqlHTTP((req, res, params) => {
+    const ctx = SHOW_GRAPHIQL ? maybeProxyContext(params, context) : context
 
     return {
       schema: graphqlSchema,
-      graphiql: true,
-      context: dataContext,
+      graphiql: SHOW_GRAPHIQL,
+      context: ctx,
     }
   }))
 
-  return new Promise((resolve, reject) => {
-    server = app.listen(port, () => {
-      if (process.env.NODE_ENV === 'development') {
-        /* eslint-disable-next-line no-console */
-        console.log(`GraphQL server is running at http://localhost:${port}/graphql`)
+  return app
+}
+
+/**
+ * Adds runtime validations during development to ensure patterns of access are enforced
+ * on the DataContext
+ */
+function maybeProxyContext (params: GraphQLParams | undefined, context: DataContext): DataContext {
+  if (params?.query) {
+    const parsed = parse(params.query)
+    const def = parsed.definitions[0]
+
+    if (def?.kind === 'OperationDefinition') {
+      return def.operation === 'query' ? proxyContext(context, def.name?.value ?? '(anonymous)') : context
+    }
+  }
+
+  return context
+}
+
+function proxyContext (ctx: DataContext, operationName: string) {
+  return new Proxy(ctx, {
+    get (target, p, receiver) {
+      if (p === 'actions' || p === 'emitter') {
+        throw new Error(
+          `Cannot access ctx.${p} within a query, only within mutations / outside of a GraphQL request\n` +
+          `Seen in operation: ${operationName}`,
+        )
       }
 
-      const endpoint = `http://localhost:${(server.address() as AddressInfo).port}/graphql`
-
-      debug(`GraphQL Server at ${endpoint}`)
-
-      return resolve({
-        server,
-        endpoint,
-        app,
-      })
-    })
+      return Reflect.get(target, p, receiver)
+    },
   })
 }

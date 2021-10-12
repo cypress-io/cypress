@@ -1,1 +1,0 @@
-export { longBrowsersList } from '@packages/frontend-shared/cypress/support/mock-graphql/stubgql-App'
