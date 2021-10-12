@@ -20,11 +20,11 @@ export class AuthActions {
   }
 
   async login () {
-    this.setAuthenticatedUser(await this.authApi.logIn((message: AuthMessage) => {
-      const { browserOpened } = message
-
+  async login () {
+    this.setAuthenticatedUser(await this.authApi.logIn(({ browserOpened } ) => {
       this.ctx.appData.isAuthBrowserOpened = browserOpened
     }))
+  }
   }
 
   async logout () {
