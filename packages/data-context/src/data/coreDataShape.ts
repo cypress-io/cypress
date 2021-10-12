@@ -21,7 +21,6 @@ export interface ActiveProjectShape extends ProjectShape {
   title: string
   ctPluginsInitialized: Maybe<boolean>
   e2ePluginsInitialized: Maybe<boolean>
-  launchMode: Maybe<TestingTypeEnum>
   isFirstTimeCT: Maybe<boolean>
   isFirstTimeE2E: Maybe<boolean>
   currentSpecId?: Maybe<string>
@@ -35,6 +34,7 @@ export interface AppDataShape {
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
   isInGlobalMode: boolean
+  launchMode: Maybe<TestingTypeEnum>
 }
 
 export interface WizardDataShape {

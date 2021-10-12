@@ -16,6 +16,9 @@ type App {
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
 
+  """The mode the interactive runner was launched in"""
+  launchMode: TestingTypeEnum
+
   """All known projects for the app"""
   projects: [Project!]!
 
@@ -440,9 +443,6 @@ type Project implements Node {
 
   """Whether the user configured this project to use e2e Testing"""
   isFirstTimeE2E: Boolean!
-
-  """The mode the interactive runner was launched in"""
-  launchMode: TestingTypeEnum
 
   """Used to associate project with Cypress cloud"""
   projectId: String

@@ -29,6 +29,11 @@ export const App = objectType({
       resolve: () => 'OK',
     })
 
+    t.field('launchMode', {
+      description: 'The mode the interactive runner was launched in',
+      type: 'TestingTypeEnum',
+    })
+
     t.nonNull.boolean('isInGlobalMode', {
       description: 'Whether the app is in global mode or not',
       resolve: (source, args, ctx) => {

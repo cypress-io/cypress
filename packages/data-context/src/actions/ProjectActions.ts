@@ -47,7 +47,6 @@ export class ProjectActions {
     this.ctx.coreData.app.activeProject = {
       projectRoot,
       title: '',
-      launchMode: null,
       ctPluginsInitialized: false,
       e2ePluginsInitialized: false,
       isFirstTimeCT: await this.ctx.project.isFirstTimeAccessing(projectRoot, 'component'),
@@ -153,7 +152,7 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.activeProject.launchMode = testingType
+    this.ctx.appData.launchMode = testingType
 
     return this.api.launchProject(browser, spec, options)
   }

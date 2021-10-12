@@ -28,10 +28,6 @@ export const Project = objectType({
     })
 
     t.nonNull.string('projectRoot')
-    t.field('launchMode', {
-      description: 'The mode the interactive runner was launched in',
-      type: 'TestingTypeEnum',
-    })
 
     t.nonNull.string('title', {
       resolve: (source, args, ctx) => ctx.project.projectTitle(source.projectRoot),
@@ -78,11 +74,11 @@ export const Project = objectType({
       description: 'Specs for current testing mode conforming to Relay Connection specification',
       type: 'Spec',
       nodes: (source, args, ctx) => {
-        if (!ctx.activeProject || !ctx.activeProject.launchMode) {
+        if (!ctx.activeProject || !ctx.appData.launchMode) {
           return null
         }
 
-        return ctx.project.findSpecs(source.projectRoot, ctx.activeProject.launchMode === 'component' ? 'component' : 'integration')
+        return ctx.project.findSpecs(source.projectRoot, ctx.appData.launchMode === 'component' ? 'component' : 'integration')
       },
     })
 
