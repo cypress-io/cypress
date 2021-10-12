@@ -1,3 +1,5 @@
+const snapshot = require('snap-shot-it')
+
 import { SpawnOptions } from 'child_process'
 import { expect } from './spec_helper'
 
@@ -12,7 +14,6 @@ const morgan = require('morgan')
 const stream = require('stream')
 const express = require('express')
 const Bluebird = require('bluebird')
-const snapshot = require('snap-shot-it')
 const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
@@ -22,6 +23,10 @@ const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
 const videoCapture = require(`@packages/server/lib/video_capture`)
 const settings = require(`@packages/server/lib/util/settings`)
+
+// mutates mocha test runner - needed for `test.titlePath`
+// TODO: fix this - this mutates cwd and is strange in general
+require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
@@ -203,9 +208,6 @@ type SetupOptions = {
 }
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
-
-// mutates mocha test runner - needed for `test.titlePath`
-require(`@packages/server/lib/project-base`)
 
 cp = Bluebird.promisifyAll(cp)
 
@@ -621,7 +623,7 @@ const e2e = {
     return snapshot.apply(null, args)
   },
 
-  setup (options?: SetupOptions) {
+  setup (options: SetupOptions = {}) {
     // cleanup old node_modules that may have been around from legacy tests
     before(() => {
       return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
@@ -880,6 +882,7 @@ const e2e = {
         expect(code).to.eq(expectedExitCode, 'expected exit code')
       })
 
+      console.log(process.cwd())
       // snapshot the stdout!
       if (options.snapshot) {
         // enable callback to modify stdout
