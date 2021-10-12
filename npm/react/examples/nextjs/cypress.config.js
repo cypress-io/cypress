@@ -1,3 +1,4 @@
+// @ts-check
 const { defineConfig } = require('cypress')
 const { devServer } = require('@cypress/react/plugins/next')
 

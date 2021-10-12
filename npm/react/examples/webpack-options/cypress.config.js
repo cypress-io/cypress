@@ -1,7 +1,7 @@
+// @ts-check
 const { defineConfig } = require('cypress')
 const { devServer, defineDevServerConfig } = require('@cypress/webpack-dev-server')
 
-// @ts-check
 const path = require('path')
 const babelConfig = require('./babel.config')
 

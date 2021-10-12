@@ -1,6 +1,5 @@
-const { defineConfig } = require('cypress')
-
 // @ts-check
+const { defineConfig } = require('cypress')
 
 // load file devServer that comes with this plugin
 // https://github.com/bahmutov/cypress-react-unit-test#install

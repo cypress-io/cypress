@@ -1,6 +1,5 @@
-import { defineConfig } from 'cypress'
-
 // @ts-check
+import { defineConfig } from 'cypress'
 
 // let's bundle spec files and the components they include using
 // the same bundling settings as the project by loading .babelrc

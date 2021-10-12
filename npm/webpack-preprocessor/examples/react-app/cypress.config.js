@@ -1,6 +1,6 @@
+// @ts-check
 const { defineConfig } = require('cypress')
 
-// @ts-check
 const findWebpack = require('find-webpack')
 const webpackPreprocessor = require('../..')
 
