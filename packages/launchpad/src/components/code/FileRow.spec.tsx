@@ -29,7 +29,7 @@ describe('FileRow', () => {
           language="js"
           content={content}
           filePath="cypress/integration/command.js"
-          description="Lorem ipsum dolor sit"
+          description="Aenean lacinia bibendum nulla sed consectetur."
         />
         <FileRow
           status="skipped"
@@ -39,7 +39,7 @@ describe('FileRow', () => {
           description="Lorem ipsum dolor sit"
         />
         <FileRow
-          status="fail"
+          status="error"
           language="js"
           content={content}
           filePath="cypress/integration/index.js"

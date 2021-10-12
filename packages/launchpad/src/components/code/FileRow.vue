@@ -1,20 +1,14 @@
 <script lang="ts" setup>
-/// <reference types="vite-svg-loader" />
-
-import { computed, ref, useSlots } from 'vue'
+import { computed, ref } from 'vue'
 import PrismJs from 'vue-prism-component'
 import 'prismjs'
 import '@packages/frontend-shared/src/styles/prism.scss'
-import IconPass from '../../icons/duo/pass.svg?component'
-import IconWarn from '../../icons/duo/warn.svg?component'
-import IconFail from '../../icons/duo/fail.svg?component'
-import IconSkip from '../../icons/duo/skip.svg?component'
 import ListRow from '@cy/components/ListRow.vue'
 import Button from '@cy/components/Button.vue'
 import Badge from '@cy/components/Badge.vue'
 
 const props = defineProps<{
-    status: 'changes' | 'valid' | 'skipped' | 'fail'
+    status: 'changes' | 'valid' | 'skipped' | 'error'
     filePath: string
     language: 'js' | 'ts'
     content: string
@@ -34,13 +28,25 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
 <template>
   <ListRow @click="open = !open">
     <template #icon>
-      <IconPass v-if="status === 'valid'" />
-      <IconWarn v-if="status === 'changes'" />
-      <IconFail v-if="status === 'fail'" />
-      <IconSkip v-if="status === 'skipped'" />
+      <i-cy-file-changes-added_x24
+        v-if="status === 'valid'"
+        class="w-24px h-24px"
+      />
+      <i-cy-file-changes-warning_x24
+        v-if="status === 'changes'"
+        class="w-24px h-24px"
+      />
+      <i-cy-file-changes-skipped_x24
+        v-if="status === 'skipped'"
+        class="w-24px h-24px"
+      />
+      <i-cy-file-changes-error_x24
+        v-if="status === 'error'"
+        class="w-24px h-24px"
+      />
     </template>
     <template #header>
-      {{ filePath }}
+      <span class="inline-block align-top">{{ filePath }}</span>
       <Badge
         v-if="statusLabel && statusClasses && !open"
         :label="statusLabel"
@@ -62,7 +68,7 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         <Button>Learn more</Button>
       </div>
       <div
-        class="border-t border-gray-200 p-3 pt-4 overflow-auto"
+        class="border-t border-gray-100 p-3 pt-4 overflow-auto"
         :class="open ? 'block': 'hidden'"
       >
         <PrismJs :language="language">
