@@ -17,7 +17,6 @@ const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
-const { fs } = require(`@packages/server/lib/util/fs`)
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const cypress = require(`@packages/server/lib/cypress`)
 const screenshots = require(`@packages/server/lib/screenshots`)
@@ -624,11 +623,6 @@ const e2e = {
   },
 
   setup (options: SetupOptions = {}) {
-    // cleanup old node_modules that may have been around from legacy tests
-    before(() => {
-      return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
-    })
-
     beforeEach(async function () {
       // after installing node modules copying all of the fixtures
       // can take a long time (5-15 secs)

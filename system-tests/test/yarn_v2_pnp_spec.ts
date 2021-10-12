@@ -21,7 +21,7 @@ const exec = async (cmd, ...args) => {
   return ret
 }
 
-const fixtureDir = Fixtures.path('projects/yarn-v2-pnp')
+const fixtureDir = Fixtures.projectPath('yarn-v2-pnp')
 const cypressCli = path.join(__dirname, '../../../../cli/bin/cypress')
 
 describe('e2e yarn v2', () => {

@@ -105,6 +105,7 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
+  '-r snap-shot-it',
   '-r @packages/ts/register',
   '--reporter',
   'mocha-multi-reporters',
