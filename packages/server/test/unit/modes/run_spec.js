@@ -685,7 +685,7 @@ describe('lib/modes/run', () => {
     })
 
     it('shows no warnings for default browser', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(errors.warning).to.not.be.called
       })
@@ -696,7 +696,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      return expect(runMode.run({ browser: 'opera' }))
+      return expect(runMode.run({ browser: 'opera', testingType: 'e2e' }))
       .to.be.rejectedWith(/invalid browser family in/)
     })
 
@@ -705,19 +705,19 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      return expect(runMode.run())
+      return expect(runMode.run({ testingType: 'e2e' }))
       .to.be.rejectedWith('blah blah')
     })
 
     it('shows no warnings for chrome browser', () => {
-      return runMode.run({ browser: 'chrome' })
+      return runMode.run({ browser: 'chrome', testingType: 'e2e' })
       .then(() => {
         expect(errors.warning).to.not.be.called
       })
     })
 
     it('names video file with spec name', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(videoCapture.start).to.be.calledWith('videos/foo_spec.js.mp4')
 
@@ -767,21 +767,21 @@ describe('lib/modes/run', () => {
     })
 
     it('no longer ensures user session', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(user.ensureAuthToken).not.to.be.called
       })
     })
 
     it('resolves with object and totalFailed', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then((results) => {
         expect(results).to.have.property('totalFailed', 10)
       })
     })
 
     it('passes projectRoot + options to openProject', () => {
-      const opts = { projectRoot: '/path/to/project', foo: 'bar' }
+      const opts = { projectRoot: '/path/to/project', foo: 'bar', testingType: 'e2e' }
 
       return runMode.run(opts)
       .then(() => {
@@ -790,7 +790,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes project + id to waitForBrowserToConnect', function () {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(runMode.waitForBrowserToConnect).to.be.calledWithMatch({
           project: this.projectInstance,
@@ -800,7 +800,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes project to waitForTestsToFinishRunning', function () {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(runMode.waitForTestsToFinishRunning).to.be.calledWithMatch({
           project: this.projectInstance,
@@ -813,7 +813,7 @@ describe('lib/modes/run', () => {
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 
-      return runMode.run({ headed: true })
+      return runMode.run({ headed: true, testingType: 'e2e' })
       .then(() => {
         expect(openProject.launch).to.be.calledWithMatch(
           browser,
@@ -830,7 +830,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes sys to runSpecs', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(runMode.runSpecs).to.be.calledWithMatch({
           sys: {
@@ -842,7 +842,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes browser to runSpecs', () => {
-      return runMode.run()
+      return runMode.run({ testingType: 'e2e' })
       .then(() => {
         expect(runMode.runSpecs).to.be.calledWithMatch({
           browser: {
