@@ -1,4 +1,4 @@
-const e2e = require('../support/helpers/e2e').default
+const e2e = require('@tooling/system-tests/lib/e2e').default
 
 // https://github.com/cypress-io/cypress/issues/4313
 context('cy.visit performance tests', function () {
