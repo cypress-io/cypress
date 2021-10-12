@@ -50,12 +50,13 @@ const getPrefixedPathToSpec = ({
   // becomes /integration/foo.js
 
   const folderToUse = type === 'e2e' ? integrationFolder : componentFolder
+  const prefix = type === 'e2e' ? 'integration' : 'component'
 
   // To avoid having invalid urls from containing backslashes,
   // we normalize specUrls to posix by replacing backslash by slash
   // Indeed, path.realtive will return something different on windows
   // than on posix systems which can lead to problems
-  const url = `/${path.join(type, path.relative(
+  const url = `/${path.join(prefix, path.relative(
     folderToUse,
     path.resolve(projectRoot, pathToSpec),
   )).replace(backSlashesRe, '/')}`
