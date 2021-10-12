@@ -19,6 +19,12 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
     async resetCtxState () {
       return ctx.dispose()
     },
+    async visitLaunchpad () {
+
+    },
+    async visitApp () {
+
+    },
     getGraphQLPort () {
       return serverPortPromise
     },

@@ -3,6 +3,7 @@
 
 export * from './gql-App'
 export * from './gql-Browser'
+export * from './gql-DevState'
 export * from './gql-GitInfo'
 export * from './gql-Mutation'
 export * from './gql-NavigationItem'

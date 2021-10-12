@@ -1,10 +1,16 @@
 import type { DataContext } from '.'
 import { AppActions, ProjectActions, StorybookActions, WizardActions } from './actions'
 import { AuthActions } from './actions/AuthActions'
+import { DevActions } from './actions/DevActions'
 import { cached } from './util'
 
 export class DataActions {
   constructor (private ctx: DataContext) {}
+
+  @cached
+  get dev () {
+    return new DevActions(this.ctx)
+  }
 
   @cached
   get app () {
