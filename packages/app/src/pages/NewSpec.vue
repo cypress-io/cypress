@@ -27,7 +27,7 @@
 </route>
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { computed } from 'vue-demi'
+import { computed } from 'vue'
 import { NewSpecQueryDocument, NewSpec_GenerateSpecFromStoryDocument } from '../generated/graphql'
 
 gql`

@@ -1,12 +1,8 @@
 import type { FoundSpec, FullConfig } from '@packages/types'
 import { readCsfOrMdx } from '@storybook/csf-tools'
 import endent from 'endent'
-import glob from 'glob'
 import * as path from 'path'
-import { promisify } from 'util'
 import type { DataContext } from '..'
-
-const asyncGlob = promisify(glob)
 
 export class StorybookActions {
   constructor (private ctx: DataContext) {}

@@ -40,7 +40,7 @@ export const Storybook = objectType({
       type: FileParts,
       description: 'List of all Storybook stories',
       resolve: async (source, args, ctx) => {
-        return ctx.actions.storybook.getStories()
+        return ctx.storybook.getStories()
       },
     })
 
