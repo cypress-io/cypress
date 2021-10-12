@@ -78,6 +78,12 @@ export class WizardActions {
     return this.data
   }
 
+  setCodeLanguage (lang: NexusGenEnums['CodeLanguageEnum']) {
+    this.ctx.coreData.wizard.chosenLanguage = lang
+
+    return this.data
+  }
+
   navigate (direction: NexusGenEnums['WizardNavigateDirection']) {
     this.ctx.debug(`_history is ${this._history.join(',')}`)
 

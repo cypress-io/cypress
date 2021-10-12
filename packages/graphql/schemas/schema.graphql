@@ -231,6 +231,11 @@ type CloudUser implements Node {
   userIsViewer: Boolean!
 }
 
+enum CodeLanguageEnum {
+  js
+  ts
+}
+
 """
 A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
@@ -346,6 +351,9 @@ type Mutation {
 
   """Sets the frontend bundler we want to use for the project"""
   wizardSetBundler(bundler: SupportedBundlers!): Wizard
+
+  """Sets the language we want to use for the config file"""
+  wizardSetCodeLanguage(language: CodeLanguageEnum!): Wizard
 
   """Sets the frontend framework we want to use for the project"""
   wizardSetFramework(framework: FrontendFrameworkEnum!): Wizard
@@ -602,6 +610,9 @@ The Wizard is a container for any state associated with initial onboarding to Cy
 type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
+
+  """All of the languages to choose from"""
+  allLanguages: [WizardCodeLanguage!]!
   bundler: WizardBundler
 
   """
@@ -621,6 +632,7 @@ type Wizard {
 
   """Whether we have chosen manual install or not"""
   isManualInstall: Boolean!
+  language: WizardCodeLanguage
 
   """
   A list of packages to install, null if we have not chosen both a framework and bundler
@@ -628,7 +640,7 @@ type Wizard {
   packagesToInstall: [WizardNpmPackage!]
 
   """Configuration file based on bundler and framework of choice"""
-  sampleCode(lang: WizardCodeLanguage! = js): String
+  sampleCode: String
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
@@ -663,7 +675,24 @@ type WizardBundler implements Node {
   type: SupportedBundlers!
 }
 
-enum WizardCodeLanguage {
+"""
+A code language that the user can choose from to create their cypress.config
+"""
+type WizardCodeLanguage implements Node {
+  """Relay style Node ID field for the WizardCodeLanguage field"""
+  id: ID!
+
+  """Whether this is the selected language in the wizard"""
+  isSelected: Boolean!
+
+  """The name of the language"""
+  name: String!
+
+  """The key of the language"""
+  type: CodeLanguageEnum!
+}
+
+enum WizardCodeLanguageLiteral {
   js
   ts
 }

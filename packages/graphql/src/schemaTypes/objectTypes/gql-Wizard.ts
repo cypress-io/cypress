@@ -2,10 +2,11 @@ import { TestingTypeInfo } from './gql-TestingTypeInfo'
 import { WizardBundler } from './gql-WizardBundler'
 import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
-import { arg, nonNull, objectType } from 'nexus'
-import { BUNDLERS, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
-import { TestingTypeEnum, WizardCodeLanguageEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
+import { objectType } from 'nexus'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
+import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { Storybook } from './gql-Storybook'
+import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -50,6 +51,17 @@ export const Wizard = objectType({
       resolve: () => Array.from(FRONTEND_FRAMEWORKS), // TODO(tim): fix this in nexus to accept Readonly
     })
 
+    t.field('language', {
+      type: WizardCodeLanguage,
+      resolve: (source, args, ctx) => ctx.wizard.chosenLanguage ?? null,
+    })
+
+    t.nonNull.list.nonNull.field('allLanguages', {
+      type: WizardCodeLanguage,
+      description: 'All of the languages to choose from',
+      resolve: () => Array.from(CODE_LANGUAGES), // TODO(tim): fix this in nexus to accept Readonly
+    })
+
     t.nonNull.boolean('isManualInstall', {
       description: 'Whether we have chosen manual install or not',
       resolve: (source) => source.chosenManualInstall,
@@ -63,13 +75,7 @@ export const Wizard = objectType({
 
     t.string('sampleCode', {
       description: 'Configuration file based on bundler and framework of choice',
-      args: {
-        lang: arg({
-          type: nonNull(WizardCodeLanguageEnum),
-          default: 'js',
-        }),
-      },
-      resolve: (source, args, ctx) => ctx.wizard.sampleCode(args.lang),
+      resolve: (source, args, ctx) => ctx.wizard.sampleCode(),
     })
 
     t.string('sampleTemplate', {
