@@ -882,7 +882,6 @@ const e2e = {
         expect(code).to.eq(expectedExitCode, 'expected exit code')
       })
 
-      console.log(process.cwd())
       // snapshot the stdout!
       if (options.snapshot) {
         // enable callback to modify stdout
