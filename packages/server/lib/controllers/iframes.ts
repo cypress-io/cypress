@@ -23,7 +23,7 @@ export const iframesController = {
   e2e: ({ getSpec, getRemoteState, config }: E2E, req: Request, res: Response) => {
     const extraOptions = {
       specFilter: getSpec()?.specFilter,
-      specType: 'integration',
+      specType: 'e2e',
     }
 
     debug('handling iframe for project spec %o', {

@@ -78,7 +78,7 @@ describe('lib/util/specs', () => {
           },
           {
             relative: 'cypress/integration/integration-spec.js',
-            specType: 'integration',
+            specType: 'e2e',
           },
         ])
       })

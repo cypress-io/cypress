@@ -58,7 +58,7 @@ describe('lib/open_project', () => {
         componentFolder: path.join(todosPath, 'component'),
         integrationFolder: path.join(todosPath, 'tests'),
         projectRoot: todosPath,
-        specType: 'integration',
+        specType: 'e2e',
       })
 
       openProject.getProject().options = {}

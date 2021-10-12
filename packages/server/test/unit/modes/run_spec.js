@@ -679,7 +679,7 @@ describe('lib/modes/run', () => {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
           absolute: '/path/to/spec.js',
-          specType: 'integration',
+          specType: 'e2e',
         },
       ])
     })
@@ -761,7 +761,7 @@ describe('lib/modes/run', () => {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
           absolute: '/path/to/spec.js',
-          specType: 'integration',
+          specType: 'e2e',
         },
       ])
     })

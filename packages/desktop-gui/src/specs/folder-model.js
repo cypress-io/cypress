@@ -12,7 +12,7 @@ export default class Folder {
   constructor ({ path, displayName, specType }) {
     this.path = path
     this.displayName = displayName
-    this.specType = specType || 'integration'
+    this.specType = specType || 'e2e'
   }
 
   @computed get hasChildren () {

@@ -33,10 +33,10 @@ const getPrefixedPathToSpec = ({
   integrationFolder: string
   componentFolder: string
   projectRoot: string
-  type: string
+  type: Cypress.CypressSpecType
   pathToSpec: string
 }) => {
-  type ??= 'integration'
+  type ??= 'e2e'
 
   // for now hard code the 'type' as integration
   // but in the future accept something different here
@@ -49,7 +49,7 @@ const getPrefixedPathToSpec = ({
   //
   // becomes /integration/foo.js
 
-  const folderToUse = type === 'integration' ? integrationFolder : componentFolder
+  const folderToUse = type === 'e2e' ? integrationFolder : componentFolder
 
   // To avoid having invalid urls from containing backslashes,
   // we normalize specUrls to posix by replacing backslash by slash
@@ -78,9 +78,9 @@ export const getSpecUrl = ({
   integrationFolder: string
   componentFolder: string
   projectRoot: string
-  specType?: 'integration' | 'component'
+  specType?: Cypress.CypressSpecType
 }) => {
-  specType ??= 'integration'
+  specType ??= 'e2e'
   browserUrl ??= ''
 
   debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)

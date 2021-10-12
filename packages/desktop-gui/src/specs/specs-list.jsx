@@ -17,7 +17,7 @@ import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './sp
 /**
  * Returns a label text for a button.
  * @param {boolean} areTestsAlreadyRunning To form the message "running" vs "run"
- * @param {'integration'|'component'} specType Spec type should be included in the label
+ * @param {'e2e'|'component'} specType Spec type should be included in the label
  * @param {number} specsN Number of specs to run or already running
 */
 const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
@@ -104,7 +104,7 @@ class SpecsList extends Component {
 
     const filteredSpecs = specsStore.getFilteredSpecs()
 
-    const integrationSpecsN = _.filter(filteredSpecs, { specType: 'integration' }).length
+    const integrationSpecsN = _.filter(filteredSpecs, { specType: 'e2e' }).length
     const componentSpecsN = _.filter(filteredSpecs, { specType: 'component' }).length
 
     const hasSpecFilter = specsStore.filter
@@ -118,7 +118,7 @@ class SpecsList extends Component {
     const areTestsRunning = this._areTestsRunning()
 
     // store in the component for ease of sharing with other methods
-    this.integrationLabel = formRunButtonLabel(areTestsRunning, 'integration', integrationSpecsN)
+    this.integrationLabel = formRunButtonLabel(areTestsRunning, 'e2e', integrationSpecsN)
     this.componentLabel = formRunButtonLabel(areTestsRunning, 'component', componentSpecsN)
 
     return (
@@ -310,12 +310,12 @@ class SpecsList extends Component {
 
   _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
-    const specType = spec.specType || 'integration'
+    const specType = spec.specType || 'e2e'
 
     // only applied to the top level for "integration" and "component" specs
     const getSpecRunButton = () => {
       const word = this._areTestsRunning() ? 'Running' : 'Run'
-      let buttonText = spec.displayName === 'integration' ? this.integrationLabel : this.componentLabel
+      let buttonText = spec.displayName === 'e2e' ? this.integrationLabel : this.componentLabel
 
       if (this._areTestsRunning()) {
         // selected spec must be set
@@ -332,7 +332,7 @@ class SpecsList extends Component {
         }
       }
 
-      const isActive = specType === 'integration'
+      const isActive = specType === 'e2e'
         ? specsStore.isChosen(allIntegrationSpecsSpec)
         : specsStore.isChosen(allComponentSpecsSpec)
       const className = cs('btn-link all-tests', { active: isActive })
@@ -341,7 +341,7 @@ class SpecsList extends Component {
         className={className}
         title={`${word} ${specType} specs together`}
         onClick={this._selectSpec.bind(this,
-          spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
+          spec.displayName === 'e2e' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
         }><i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}{buttonText}</button>)
     }
 

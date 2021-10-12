@@ -390,16 +390,12 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
       componentFolder: updatedConfig.componentFolder,
       integrationFolder: updatedConfig.integrationFolder,
     })
-    const specs = allSpecs.filter((spec: Cypress.Cypress['spec']) => {
-      if (this.testingType === 'component') {
-        return spec.specType === 'component'
+    const specs = allSpecs.filter((spec: Cypress.Spec) => {
+      if (!this.testingType) {
+        throw Error('testingType is required!')
       }
 
-      if (this.testingType === 'e2e') {
-        return spec.specType === 'integration'
-      }
-
-      throw Error(`Cannot return specType for testingType: ${this.testingType}`)
+      return spec.specType === this.testingType
     })
 
     return this.initSpecStore({ specs, config: updatedConfig })

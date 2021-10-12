@@ -92,7 +92,7 @@ module.exports = {
         .filter((foundSpec) => {
           return componentTestingEnabled
             ? foundSpec.specType === 'component'
-            : foundSpec.specType === 'integration'
+            : foundSpec.specType === 'e2e'
         }).then(R.tap((specs) => {
           return debug('filtered __all specs %o', specs)
         })).map((spec) => {

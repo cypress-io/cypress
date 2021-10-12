@@ -16,7 +16,7 @@ export const allIntegrationSpecsSpec = new Spec({
   absolute: '__all',
   relative: '__all',
   displayName: 'Run all specs',
-  specType: 'integration',
+  specType: 'e2e',
 })
 
 export const allComponentSpecsSpec = new Spec({

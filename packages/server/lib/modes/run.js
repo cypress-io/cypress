@@ -1551,9 +1551,7 @@ module.exports = {
           }
 
           specs = specs.filter((spec) => {
-            return options.testingType === 'component'
-              ? spec.specType === 'component'
-              : spec.specType === 'integration'
+            return options.testingType === spec.specType
           })
 
           if (!specs.length) {

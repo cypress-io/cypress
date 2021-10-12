@@ -296,7 +296,7 @@ export class OpenProject {
 
       // assumes all specs are integration specs
       return {
-        integration: specs.filter((x) => x.specType === 'integration'),
+        integration: specs.filter((x) => x.specType === 'e2e'),
         component: [],
       }
     })

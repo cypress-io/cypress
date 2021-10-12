@@ -1115,7 +1115,7 @@ describe('lib/gui/events', () => {
             name: 'bar',
             absolute: '/path/to/bar',
             relative: 'to/bar',
-            specType: 'integration',
+            specType: 'e2e',
             specFilter: undefined,
           })
 
@@ -1133,7 +1133,7 @@ describe('lib/gui/events', () => {
         const arg = {
           browser: 'foo',
           spec,
-          specType: 'integration',
+          specType: 'e2e',
         }
 
         return this.handleEvent('launch:browser', arg).then(() => {
@@ -1151,7 +1151,7 @@ describe('lib/gui/events', () => {
             name: 'bar',
             absolute: '/path/to/bar',
             relative: 'to/bar',
-            specType: 'integration',
+            specType: 'e2e',
             specFilter: 'network',
           })
 
@@ -1169,7 +1169,7 @@ describe('lib/gui/events', () => {
         const arg = {
           browser: 'foo',
           spec,
-          specType: 'integration',
+          specType: 'e2e',
           specFilter: 'network',
         }
 

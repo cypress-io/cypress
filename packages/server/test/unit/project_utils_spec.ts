@@ -12,7 +12,7 @@ const defaultProps = {
   componentFolder: path.join(todosPath, 'component'),
   integrationFolder: path.join(todosPath, 'tests'),
   projectRoot: todosPath,
-  specType: 'integration',
+  specType: 'e2e',
 } as const
 
 const expect = Chai.expect

@@ -18,10 +18,10 @@ const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
  * Enums to help keep track of what types of spec files we find.
  * By default, every spec file is assumed to be integration.
 */
-const SPEC_TYPES = {
-  INTEGRATION: 'integration',
+const SPEC_TYPES: Record<'E2E' | 'COMPONENT', Cypress.CypressSpecType> = {
+  E2E: 'e2e',
   COMPONENT: 'component',
-} as const
+}
 
 const getPatternRelativeToProjectRoot = (specPattern: string, projectRoot: string) => {
   return _.map(specPattern, (p) => {
@@ -179,7 +179,7 @@ const findIntegrationSpecs = (searchFolder: string | undefined, commonSearchOpti
   }
 
   return findSpecsOfType(searchFolder, commonSearchOptions, specPattern)
-  .then(setTestType(SPEC_TYPES.INTEGRATION))
+  .then(setTestType(SPEC_TYPES.E2E))
 }
 
 const findComponentSpecs = (searchFolder: string | undefined | false, commonSearchOptions: CommonSearchOptions, specPattern: string | undefined) => {

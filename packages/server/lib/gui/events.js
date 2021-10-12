@@ -149,7 +149,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   - browser
       //   - spec (with fields)
       //       name, absolute, relative
-      //   - specType: "integration" | "component"
+      //   - specType: "e2e" | "component"
       //   - specFilter (optional): the string user searched for
       const fullSpec = _.merge({}, arg.spec, {
         specType: arg.specType,

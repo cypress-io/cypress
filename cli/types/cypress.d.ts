@@ -147,7 +147,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/experiments
    */
-  type CypressSpecType = 'integration' | 'component'
+  type CypressSpecType = 'e2e' | 'component'
 
   /**
    * A Cypress spec.
@@ -265,7 +265,7 @@ declare namespace Cypress {
      * //  name: "config_passing_spec.coffee",
      * //  relative: "cypress/integration/config_passing_spec.coffee",
      * //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
-     * //  specType: "integration"
+     * //  specType: "e2e"
      * // }
      * ```
      */
