@@ -1114,7 +1114,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/non_root*spec* --browser electron
+          command: yarn workspace @tooling/system-tests test "test/non_root*spec*" --browser electron
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
