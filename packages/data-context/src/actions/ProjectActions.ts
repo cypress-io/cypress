@@ -1,4 +1,4 @@
-import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
@@ -134,7 +134,11 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (options: LaunchOpts = {}) {
+  async launchProject (testingType: TestingTypeEnum, options: LaunchOpts) {
+    if (!this.ctx.activeProject) {
+      return null
+    }
+
     const browser = this.ctx.wizardData.chosenBrowser ?? this.ctx.appData.browsers?.[0]
 
     if (!browser) {
@@ -145,8 +149,10 @@ export class ProjectActions {
       name: '',
       absolute: '',
       relative: '',
-      specType: this.ctx.wizardData.chosenTestingType === 'e2e' ? 'integration' : 'component',
+      specType: testingType === 'e2e' ? 'integration' : 'component',
     }
+
+    this.ctx.appData.activeTestingType = testingType
 
     return this.api.launchProject(browser, spec, options)
   }

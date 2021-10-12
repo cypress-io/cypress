@@ -7,11 +7,17 @@ type App {
   """Active project"""
   activeProject: Project
 
+  """The mode the interactive runner was launched in"""
+  activeTestingType: TestingTypeEnum
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
   """See if the GraphQL server is alive"""
   healthCheck: String!
+
+  """Whether the browser has been opened for auth or not"""
+  isAuthBrowserOpened: Boolean!
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
@@ -466,7 +472,6 @@ type Project implements Node {
 
     """Returns the last n elements from the list."""
     last: Int
-    specType: SpecType
   ): SpecConnection
   title: String!
 }

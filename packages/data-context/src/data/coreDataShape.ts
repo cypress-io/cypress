@@ -1,5 +1,5 @@
 import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, StorybookFile } from '@packages/types'
-import type { NexusGenEnums } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 
 export type Maybe<T> = T | null | undefined
 
@@ -34,6 +34,8 @@ export interface AppDataShape {
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
   isInGlobalMode: boolean
+  isAuthBrowserOpened: boolean
+  activeTestingType: Maybe<TestingTypeEnum>
 }
 
 export interface WizardDataShape {
@@ -65,11 +67,13 @@ export function makeCoreData (): CoreDataShape {
       refreshState: null,
     },
     app: {
+      activeTestingType: null,
       navItem: 'settings',
       browsers: null,
       projects: [],
       activeProject: null,
       isInGlobalMode: false,
+      isAuthBrowserOpened: false,
     },
     wizard: {
       chosenTestingType: null,

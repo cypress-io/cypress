@@ -47,7 +47,9 @@
         :class="open ? 'grayscale-0' : 'grayscale'"
         :src="allBrowsersIcons[props.gql?.selectedBrowser?.displayName || '']"
       >
-      <span data-cy="topnav-browser-list">{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
+      <span
+        data-cy="topnav-browser-list"
+      >{{ props.gql.selectedBrowser?.displayName }} v{{ props.gql.selectedBrowser?.majorVersion }}</span>
     </template>
     <TopNavListItem
       v-for="browser in props.gql.browsers"
@@ -121,6 +123,16 @@
         </ul>
       </div>
     </div>
+  </TopNavList>
+
+  <TopNavList
+    v-if="$slots['login-title']"
+    variant="panel"
+  >
+    <template #heading>
+      <slot name="login-title" />
+    </template>
+    <slot name="login-panel" />
   </TopNavList>
 </template>
 
