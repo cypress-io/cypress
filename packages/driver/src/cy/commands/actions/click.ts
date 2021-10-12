@@ -172,7 +172,10 @@ export default (Commands, Cypress, cy, state, config) => {
       // properties like `total` and `_retries` are mutated by
       // $actionability.verify and retrying, but each click should
       // have its own full timeout
-      const individualOptions = { ... options }
+      const individualOptions = {
+        customScrollBehavior: userOptions.scrollBehavior !== undefined,
+        ...options,
+      }
 
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchronously

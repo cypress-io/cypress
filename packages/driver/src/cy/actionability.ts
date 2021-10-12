@@ -397,7 +397,7 @@ const verify = function (cy, $el, options, callbacks) {
         scrollElementIntoView($el, options.scrollBehavior)
 
         if (options.ensure.visibility) {
-          if (options.scrollBehavior !== false) {
+          if (!options.customScrollBehavior && options.scrollBehavior !== false) {
             // if not already visible, try remaining scroll behavior options
             // https://github.com/cypress-io/cypress/issues/4233
             const scrollOptions = Object.keys(scrollBehaviorOptionsMap).filter((option) => option !== options.scrollBehavior)
