@@ -13,7 +13,6 @@ const serveChunk = (req: Request, res: Response, clientRoute: string) => {
 }
 
 export const createRoutesCT = ({
-  ctx,
   config,
   nodeProxy,
 }: InitializeRoutes) => {
@@ -24,26 +23,6 @@ export const createRoutesCT = ({
 
     return send(req, pathToFile)
     .pipe(res)
-  })
-
-  routesCt.get('/__cypress/iframes/*', (req, res) => {
-    // always proxy to the index.html file
-    // attach header data for webservers
-    // to properly intercept and serve assets from the correct src root
-    // TODO: define a contract for dev-server plugins to configure this behavior
-    req.headers.__cypress_spec_path = req.params[0]
-    req.url = `${config.devServerPublicPathRoute}/index.html`
-
-    // user the node proxy here instead of the network proxy
-    // to avoid the user accidentally intercepting and modifying
-    // our internal index.html handler
-
-    nodeProxy.web(req, res, {}, (e) => {
-      if (e) {
-        // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
-      }
-    })
   })
 
   // user app code + spec code
