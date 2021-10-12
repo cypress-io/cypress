@@ -1,6 +1,5 @@
 /* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
-import Button from '@cy/components/Button.vue'
 
 const content = `const { defineConfig } = require(’cypress’)
 const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)
@@ -15,7 +14,7 @@ const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server
 })`
 
 describe('FileRow', () => {
-  it('renders', () => {
+  it('renders each status', () => {
     cy.mount(() => (
       <div class="p-5 w-full">
         <FileRow
@@ -23,14 +22,28 @@ describe('FileRow', () => {
           language="js"
           content={content}
           filePath="cypress/integration/support.js"
-          description="Lorem ipsum dolor sit amet"
+          description="Lorem ipsum dolor sit"
         />
         <FileRow
           status="changes"
           language="js"
           content={content}
           filePath="cypress/integration/command.js"
-          description="Lorem ipsum dolor sit amet"
+          description="Lorem ipsum dolor sit"
+        />
+        <FileRow
+          status="skipped"
+          language="js"
+          content={content}
+          filePath="cypress.config.js"
+          description="Lorem ipsum dolor sit"
+        />
+        <FileRow
+          status="fail"
+          language="js"
+          content={content}
+          filePath="cypress/integration/index.js"
+          description="Lorem ipsum dolor sit"
         />
       </div>
     ))
@@ -44,24 +57,15 @@ describe('FileRow', () => {
           language="js"
           content={content}
           filePath="cypress/integration/support.js"
-          description="Lorem ipsum dolor sit amet"
+          description="Lorem ipsum dolor sit"
         />
         <FileRow
           status="changes"
           language="js"
           content={content}
           filePath="cypress/integration/command.js"
-          description="Lorem ipsum dolor sit amet"
-          v-slots={{
-            warningContents: <div class="flex items-center">
-              <div class="flex-grow">
-                <span class="font-semibold">Changes required:</span>{' '}
-                Please merge the code below with your existing{' '}
-                <span class="bg-warning-200 rounded px-1">cypress.config.js</span>
-              </div>
-              <Button>Learn More</Button>
-            </div>,
-          }}
+          description="Lorem ipsum dolor sit"
+          warning={{ description: 'Please merge the code below with your existing `cypress.config.js`', docsLink: '' }}
         />
       </div>
     ))
