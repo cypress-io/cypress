@@ -1,5 +1,5 @@
 import type { MutationAddProjectArgs, MutationAppCreateConfigFileArgs, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
-import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions, BaseSpec } from '@packages/types'
+import type { FindSpecs, FoundBrowser, FoundSpec, FullConfig, LaunchArgs, LaunchOpts, OpenProjectLaunchOptions } from '@packages/types'
 import path from 'path'
 import type { ProjectShape } from '../data/coreDataShape'
 
@@ -145,7 +145,7 @@ export class ProjectActions {
       throw Error(`Could not find browser`)
     }
 
-    const spec: BaseSpec = {
+    const spec: Cypress.Spec = {
       name: '',
       absolute: '',
       relative: '',
