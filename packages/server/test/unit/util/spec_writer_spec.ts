@@ -44,9 +44,6 @@ const verifyOutput = (ast) => {
 describe('lib/util/spec_writer', () => {
   let readFile; let mockSpec; let emptyCommentsSpec; let writtenSpec
 
-  before(() => {
-  })
-
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
     Fixtures.scaffold()
