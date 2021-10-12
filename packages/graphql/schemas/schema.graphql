@@ -614,7 +614,7 @@ type Wizard {
   packagesToInstall: [WizardNpmPackage!]
 
   """Configuration file based on bundler and framework of choice"""
-  sampleCode(lang: WizardCodeLanguageLitteral! = js): String
+  sampleCode(lang: WizardCodeLanguageLiteral! = js): String
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
@@ -666,7 +666,7 @@ type WizardCodeLanguage implements Node {
   type: CodeLanguageEnum!
 }
 
-enum WizardCodeLanguageLitteral {
+enum WizardCodeLanguageLiteral {
   js
   ts
 }
