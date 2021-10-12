@@ -6476,6 +6476,7 @@ exports['src/cypress/runner retries mochaEvents screenshots retry screenshot in 
       "height": 660
     },
     "scaled": false,
+    "overwrite": false,
     "blackout": [],
     "startTime": "match.string",
     "current": 1,
