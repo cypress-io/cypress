@@ -61,7 +61,7 @@ export class StorybookActions {
         specFileExtension,
       )
 
-      await this.ctx.fs.outputFileSync(newSpecAbsolute, newSpecContent)
+      await this.ctx.fs.outputFile(newSpecAbsolute, newSpecContent)
     } catch (e) {
       return null
     }
