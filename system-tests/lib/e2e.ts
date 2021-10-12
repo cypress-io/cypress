@@ -624,6 +624,7 @@ const e2e = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
+      snapshot.cwd = path.join(__dirname, '..')
       // after installing node modules copying all of the fixtures
       // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
