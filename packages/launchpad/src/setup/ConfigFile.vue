@@ -54,6 +54,9 @@ fragment ConfigFile on Query {
 
 gql`
 fragment SampleCode on Wizard {
+  language {
+    type
+  }
   canNavigateForward
   sampleCode
   sampleTemplate
@@ -94,7 +97,7 @@ const altFn = (val: boolean) => {
 
 const tsInstalled = ref(false)
 const language = computed(() => {
-  return props.gql.wizard.chosenLanguage?.type
+  return props.gql.wizard.language?.type
 })
 const nextButtonName = computed(() => {
   return manualCreate.value ? 'I\'ve added this file' : 'Create File'

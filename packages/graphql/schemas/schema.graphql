@@ -640,7 +640,7 @@ type Wizard {
   packagesToInstall: [WizardNpmPackage!]
 
   """Configuration file based on bundler and framework of choice"""
-  sampleCode(lang: WizardCodeLanguageLiteral! = js): String
+  sampleCode: String
 
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String

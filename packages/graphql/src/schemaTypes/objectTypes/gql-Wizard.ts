@@ -2,9 +2,9 @@ import { TestingTypeInfo } from './gql-TestingTypeInfo'
 import { WizardBundler } from './gql-WizardBundler'
 import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
-import { arg, nonNull, objectType } from 'nexus'
+import { objectType } from 'nexus'
 import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, TESTING_TYPES } from '@packages/types'
-import { TestingTypeEnum, WizardCodeLanguageEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
+import { TestingTypeEnum, WizardStepEnum } from '../enumTypes/gql-WizardEnums'
 import { Storybook } from './gql-Storybook'
 import { WizardCodeLanguage } from './gql-WizardCodeLanguage'
 
@@ -75,13 +75,7 @@ export const Wizard = objectType({
 
     t.string('sampleCode', {
       description: 'Configuration file based on bundler and framework of choice',
-      args: {
-        lang: arg({
-          type: nonNull(WizardCodeLanguageEnum),
-          default: 'js',
-        }),
-      },
-      resolve: (source, args, ctx) => ctx.wizard.sampleCode(args.lang),
+      resolve: (source, args, ctx) => ctx.wizard.sampleCode(),
     })
 
     t.string('sampleTemplate', {
