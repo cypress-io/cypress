@@ -1,7 +1,6 @@
 require('../spec_helper')
 
 const _ = require('lodash')
-const path = require('path')
 const R = require('ramda')
 const debug = require('debug')('test')
 const config = require(`${root}lib/config`)
@@ -9,6 +8,7 @@ const errors = require(`${root}lib/errors`)
 const configUtil = require(`${root}lib/util/config`)
 const findSystemNode = require(`${root}lib/util/find_system_node`)
 const scaffold = require(`${root}lib/scaffold`)
+const Fixtures = require('@tooling/system-tests/lib/fixtures')
 let settings = require(`${root}lib/util/settings`)
 
 describe('lib/config', () => {
@@ -2037,7 +2037,7 @@ describe('lib/config', () => {
     })
 
     it('sets the supportFile to default index.js if it does not exist, support folder does not exist, and supportFile is the default', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/no-scaffolding')
+      const projectRoot = Fixtures.projectPath('no-scaffolding')
 
       const obj = config.setAbsolutePaths({
         projectRoot,
@@ -2055,7 +2055,7 @@ describe('lib/config', () => {
     })
 
     it('sets the supportFile to false if it does not exist, support folder exists, and supportFile is the default', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/empty-folders')
+      const projectRoot = Fixtures.projectPath('empty-folders')
 
       const obj = config.setAbsolutePaths({
         projectRoot,
@@ -2086,7 +2086,7 @@ describe('lib/config', () => {
     })
 
     it('sets the supportFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj')
+      const projectRoot = Fixtures.projectPath('ts-proj')
       const supportFolder = `${projectRoot}/cypress/support`
       const supportFilename = `${supportFolder}/index.ts`
 
@@ -2113,7 +2113,7 @@ describe('lib/config', () => {
     })
 
     it('uses custom TS supportFile if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-custom-names')
+      const projectRoot = Fixtures.projectPath('ts-proj-custom-names')
       const supportFolder = `${projectRoot}/cypress`
       const supportFilename = `${supportFolder}/support.ts`
 
@@ -2153,7 +2153,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to default index.js if does not exist', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/no-scaffolding')
+      const projectRoot = Fixtures.projectPath('no-scaffolding')
 
       const obj = {
         projectRoot,
@@ -2170,7 +2170,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to index.ts if it exists', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
+      const projectRoot = Fixtures.projectPath('ts-proj-with-module-esnext')
 
       const obj = {
         projectRoot,
@@ -2187,7 +2187,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
+      const projectRoot = Fixtures.projectPath('ts-proj-with-module-esnext')
       const pluginsFolder = `${projectRoot}/cypress/plugins`
       const pluginsFilename = `${pluginsFolder}/index.ts`
 
@@ -2211,7 +2211,7 @@ describe('lib/config', () => {
     })
 
     it('set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/empty-folders')
+      const projectRoot = Fixtures.projectPath('empty-folders')
 
       const obj = config.setAbsolutePaths({
         projectRoot,
@@ -2242,7 +2242,7 @@ describe('lib/config', () => {
     })
 
     it('uses custom TS pluginsFile if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-custom-names')
+      const projectRoot = Fixtures.projectPath('ts-proj-custom-names')
       const pluginsFolder = `${projectRoot}/cypress`
       const pluginsFile = `${pluginsFolder}/plugins.ts`
 
