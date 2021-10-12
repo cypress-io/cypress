@@ -62,7 +62,5 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     .should('contain.text', specs[0].node.fileName)
     .and('contain.text', specs[0].node.fileExtension)
     .click()
-    .url()
-    .should('contain', fullFile(specs[0]))
   })
 })

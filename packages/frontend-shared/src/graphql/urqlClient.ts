@@ -7,12 +7,8 @@ import {
   Exchange,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
-import VueToast, { ToastPluginApi } from 'vue-toast-notification'
+import { useToast } from 'vue-toastification'
 import { client } from '@packages/socket/lib/browser'
-
-import 'vue-toast-notification/dist/theme-sugar.css'
-
-export { VueToast }
 
 import { cacheExchange as graphcacheExchange } from '@urql/exchange-graphcache'
 import { pubSubExchange } from './urqlExchangePubsub'
@@ -20,16 +16,13 @@ import { pubSubExchange } from './urqlExchangePubsub'
 const GQL_PORT_MATCH = /gqlPort=(\d+)/.exec(window.location.search)
 const SERVER_PORT_MATCH = /serverPort=(\d+)/.exec(window.location.search)
 
-declare global {
-  interface Window {
-    $app?: { $toast: ToastPluginApi }
-  }
-}
+const toast = useToast()
 
 export function makeCacheExchange () {
   return graphcacheExchange({
     keys: {
       App: (data) => data.__typename,
+      DevState: (data) => data.__typename,
       Wizard: (data) => data.__typename,
       GitInfo: () => null,
     },
@@ -67,11 +60,9 @@ export function makeUrqlClient (target: 'launchpad' | 'app'): Client {
         ${error.message}<br>
       `
 
-        window.$app?.$toast.error(message, {
-          message,
-          duration: 0,
+        toast.error(message, {
+          timeout: false,
         })
-
         // eslint-disable-next-line
         console.error(error)
       },

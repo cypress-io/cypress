@@ -90,7 +90,7 @@
         "path",
         "socket.io-client",
         "vue",
-        "vue-toast-notification",
+        "vue-toastification",
         "wonka"
       ]
     }
