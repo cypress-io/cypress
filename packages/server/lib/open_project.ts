@@ -103,7 +103,10 @@ export class OpenProject {
       integrationFolder: this.openProject.cfg.integrationFolder || 'integration',
       componentFolder: this.openProject.cfg.componentFolder || 'component',
       projectRoot: this.openProject.projectRoot,
-      queryParams: { gqlPort: getExistingGraphqlServerPort()?.toString() },
+      queryParams: process.env.LAUNCHPAD
+        ? { gqlPort: getExistingGraphqlServerPort()?.toString() }
+        : {},
+
     })
 
     this.openProject.changeToUrl(newSpecUrl)
