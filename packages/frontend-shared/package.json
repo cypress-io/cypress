@@ -44,7 +44,7 @@
     "rimraf": "3.0.2",
     "unplugin-icons": "^0.11.4",
     "unplugin-vue-components": "^0.15.4",
-    "vite": "2.4.4",
+    "vite": "2.6.7",
     "vite-plugin-icons": "0.6.3",
     "vite-plugin-windicss": "^1.4.7",
     "vite-svg-loader": "^2.2.0",
@@ -57,5 +57,31 @@
     "windicss-analysis": "^0.3.4",
     "wonka": "^4.0.15"
   },
-  "module": "es2020"
+  "module": "es2020",
+  "vite": {
+    "optimizeDeps": {
+      "include": [
+        "@testing-library/cypress/add-commands",
+        "@urql/core",
+        "@urql/devtools",
+        "@urql/exchange-execute",
+        "@urql/exchange-graphcache",
+        "@urql/vue",
+        "@vue/test-utils",
+        "cypress-file-upload",
+        "dedent",
+        "fake-uuid",
+        "graphql",
+        "graphql-relay",
+        "graphql/jsutils/Path",
+        "lodash",
+        "path",
+        "socket.io-client",
+        "vue",
+        "vue-i18n",
+        "vue-toastification",
+        "wonka"
+      ]
+    }
+  }
 }
