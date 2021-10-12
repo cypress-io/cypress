@@ -7,11 +7,11 @@ const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const devServer = require('./dev-server')
 const resolve = require('../../util/resolve')
+const tsNodeUtil = require('../../util/ts_node')
 const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const tsNodeUtil = require('./ts_node')
 
 let registeredEventsById = {}
 let registeredEventsByName = {}
