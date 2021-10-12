@@ -70,10 +70,10 @@ See [npm/react/plugins/next](https://github.com/cypress-io/cypress/blob/develop/
 
 ## Performance tests
 
-In order to get webpack performance statistics run `yarn cypress open --ct` or `yarn cypress run --ct` with `WEBPACK_PERF_MEASURE` env variable:
+In order to get webpack performance statistics run `yarn cypress open --component` or `yarn cypress run --component` with `WEBPACK_PERF_MEASURE` env variable:
 
 ```sh
-WEBPACK_PERF_MEASURE=true yarn cypress run --ct
+WEBPACK_PERF_MEASURE=true yarn cypress run --component
 ```
 
 This will output the timings of whole webpack output and timings for each specified plugin and loader.
@@ -83,7 +83,7 @@ This will output the timings of whole webpack output and timings for each specif
 In order to run performance tests and compare timings with the previous build run:
 
 ```sh
-WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run --ct
+WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run --component
 ```
 
 This will create the file `./__perf-stats/{name-of-project}.json` or if this file exists will compare results with the previously saved version.
@@ -91,7 +91,7 @@ This will create the file `./__perf-stats/{name-of-project}.json` or if this fil
 In order to update the `{name-of-project}.json` file and use new stats as a base for the next comparisons run:
 
 ```sh
-WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run --ct
+WEBPACK_PERF_MEASURE=true WEBPACK_PERF_MEASURE_UPDATE=true WEBPACK_PERF_MEASURE_COMPARE={name-of-project} yarn cypress run --component
 ```
 
 ## Changelog

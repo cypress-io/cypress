@@ -629,7 +629,7 @@ describe('cli', () => {
     })
 
     it('spawns server with correct args for component-testing', () => {
-      this.exec('open --ct --dev')
+      this.exec('open --component --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })
@@ -641,7 +641,7 @@ describe('cli', () => {
     })
 
     it('runs server with correct args for component-testing', () => {
-      this.exec('run --ct --dev')
+      this.exec('run --component --dev')
       expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
       expect(spawn.start.firstCall.args[0]).to.include('component')
     })

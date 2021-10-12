@@ -601,7 +601,7 @@ We were in the middle of moving into the Cypress NPM org, so any references to `
 
 ## Development
 
-To see all local tests, install dependencies, build the code and open Cypress using the open --ct command
+To see all local tests, install dependencies, build the code and open Cypress using the open --component command
 
 ```sh
 yarn install
@@ -611,7 +611,7 @@ yarn workspace @cypress/vue build
 The build is done using `rollup`. It bundles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
 
 ```sh
-# cypress open --ct
+# cypress open --component
 yarn workspace @cypress/vue cy:open
 ```
 

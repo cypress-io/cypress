@@ -71,7 +71,7 @@ Most tests will start with `mount` from `@cypress/react`. This is similar to `re
 Open the component testing runner with:
 
 ```sh
-yarn cypress open --ct
+yarn cypress open --component
 ```
 
 And select the spec to run.
@@ -80,7 +80,7 @@ And select the spec to run.
 
 Try making a change - the tests will re-run instantly. You not only immediately know if the test passed or failed, but be able to visually inspect and debug any changes.
 
-You can run all the specs with `yarn cypress run --ct`. This is useful for executing all the specs in a CI environment, or one last check before you commit and push your code!
+You can run all the specs with `yarn cypress run --component`. This is useful for executing all the specs in a CI environment, or one last check before you commit and push your code!
 
 ## Discussion
 

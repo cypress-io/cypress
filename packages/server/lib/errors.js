@@ -936,7 +936,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         Cypress Component Testing is now a standalone command. You can now run your component tests with:
 
-        ${chalk.yellow(`\`cypress open --ct\``)}
+        ${chalk.yellow(`\`cypress open --component\``)}
 
         https://on.cypress.io/migration-guide`
     case 'EXPERIMENTAL_SHADOW_DOM_REMOVED':
