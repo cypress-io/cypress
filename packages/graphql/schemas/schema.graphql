@@ -7,6 +7,9 @@ type App {
   """Active project"""
   activeProject: Project
 
+  """The mode the interactive runner was launched in"""
+  activeTestingType: TestingTypeEnum
+
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
@@ -15,9 +18,6 @@ type App {
 
   """Whether the app is in global mode or not"""
   isInGlobalMode: Boolean!
-
-  """The mode the interactive runner was launched in"""
-  launchMode: TestingTypeEnum
 
   """All known projects for the app"""
   projects: [Project!]!
@@ -450,24 +450,6 @@ type Project implements Node {
 
   """Specs for a project conforming to Relay Connection specification"""
   specs(
-    """Returns the elements in the list that come after the specified cursor"""
-    after: String
-
-    """Returns the elements in the list that come before the specified cursor"""
-    before: String
-
-    """Returns the first n elements from the list."""
-    first: Int
-
-    """Returns the last n elements from the list."""
-    last: Int
-    specType: SpecType
-  ): SpecConnection
-
-  """
-  Specs for current testing mode conforming to Relay Connection specification
-  """
-  specsForCurrentTestingType(
     """Returns the elements in the list that come after the specified cursor"""
     after: String
 

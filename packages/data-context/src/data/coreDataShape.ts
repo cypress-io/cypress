@@ -34,7 +34,7 @@ export interface AppDataShape {
   projects: ProjectShape[]
   activeProject: ActiveProjectShape | null
   isInGlobalMode: boolean
-  launchMode: Maybe<TestingTypeEnum>
+  activeTestingType: Maybe<TestingTypeEnum>
 }
 
 export interface WizardDataShape {

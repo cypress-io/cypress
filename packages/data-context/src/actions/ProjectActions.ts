@@ -152,7 +152,7 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    this.ctx.appData.launchMode = testingType
+    this.ctx.appData.activeTestingType = testingType
 
     return this.api.launchProject(browser, spec, options)
   }

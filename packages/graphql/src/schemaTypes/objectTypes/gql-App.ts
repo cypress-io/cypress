@@ -29,7 +29,7 @@ export const App = objectType({
       resolve: () => 'OK',
     })
 
-    t.field('launchMode', {
+    t.field('activeTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: 'TestingTypeEnum',
     })
