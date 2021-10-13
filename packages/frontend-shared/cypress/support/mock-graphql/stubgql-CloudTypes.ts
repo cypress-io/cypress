@@ -65,6 +65,8 @@ export function createCloudRunCommitInfo (config: ConfigFor<CloudRunCommitInfo>)
     summary: 'calculate multi-byte panel',
     branch: 'main',
     branchUrl: 'https://',
+    authorName: 'John Appleseed',
+    authorEmail: 'none@cypress.io',
   }
 
   return cloudRunCommitInfo
