@@ -22,12 +22,14 @@ const exec = async (cmd, ...args) => {
 }
 
 const fixtureDir = Fixtures.projectPath('yarn-v2-pnp')
-const cypressCli = path.join(__dirname, '../../../../cli/bin/cypress')
+const cypressCli = path.join(__dirname, '../../cli/bin/cypress')
 
 describe('e2e yarn v2', () => {
   let projectDir
 
   beforeEach(async function () {
+    Fixtures.scaffold()
+
     this.timeout(240000)
 
     // copy yarn-v2 to tmpdir so node_modules resolution won't fall back to project root
