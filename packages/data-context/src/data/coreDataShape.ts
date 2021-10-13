@@ -1,4 +1,4 @@
-import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, StorybookFile } from '@packages/types'
+import { BUNDLERS, FoundBrowser, FoundSpec, ResolvedFromConfig, GeneratedSpec } from '@packages/types'
 import type { NexusGenEnums, TestingTypeEnum } from '@packages/graphql/src/gen/nxs.gen'
 
 export type Maybe<T> = T | null | undefined
@@ -48,7 +48,7 @@ export interface WizardDataShape {
   chosenLanguage: NexusGenEnums['CodeLanguageEnum']
   chosenManualInstall: boolean
   chosenBrowser: FoundBrowser | null
-  generatedSpec: Omit<StorybookFile, 'content'> | null
+  generatedSpec: GeneratedSpec | null
 }
 
 export interface CoreDataShape {
