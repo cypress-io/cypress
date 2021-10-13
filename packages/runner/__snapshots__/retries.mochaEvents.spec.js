@@ -6492,7 +6492,8 @@ exports['src/cypress/runner retries mochaEvents screenshots retry screenshot in 
   "scale": false,
   "waitForCommandSynchronization": false,
   "disableTimersAndAnimations": true,
-  "blackout": []
+  "blackout": [],
+  "overwrite": false
 }
 
 exports['serialize state - retries'] = {
