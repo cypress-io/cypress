@@ -47,6 +47,9 @@ gulp.task(
 
     // ... and generate the correct GraphQL types for the frontend
     graphqlCodegenWatch,
+
+    // ... and generate the patsh for the e2e support file watching
+    e2eTestScaffoldWatch,
   ),
 )
 
@@ -145,6 +148,7 @@ gulp.task('watchForE2E', gulp.series(
     webpackRunner,
   ),
   symlinkViteProjects,
+  e2eTestScaffold,
 ))
 
 /**------------------------------------------------------------------------

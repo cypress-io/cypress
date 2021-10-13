@@ -1,4 +1,15 @@
 import type { DataContext } from '@packages/data-context'
+import * as inspector from 'inspector'
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import chaiSubset from 'chai-subset'
+import sinonChai from '@cypress/sinon-chai'
+import sinon from 'sinon'
+
+chai.use(chaiAsPromised)
+chai.use(chaiSubset)
+chai.use(sinonChai)
+
 import type { WithCtxOptions } from './support/e2eSupport'
 
 export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
@@ -14,26 +25,36 @@ export async function e2ePluginSetup (projectRoot: string, on: Cypress.PluginEve
   interface WithCtxObj {
     fn: string
     options: WithCtxOptions
+    activeTestId: string
   }
+
+  let currentTestId: string | undefined
+  let testState: Record<string, any> = {}
 
   on('task', {
     async withCtx (obj: WithCtxObj) {
       await serverPortPromise
 
-      const val = await Promise.resolve(new Function('ctx', 'options', `return (${obj.fn})(ctx, options)`).call(undefined, ctx, obj.options ?? {}))
+      if (obj.activeTestId !== currentTestId) {
+        currentTestId = obj.activeTestId
+        testState = {}
+      }
+
+      const val = await Promise.resolve(new Function('ctx', 'options', 'chai', 'expect', 'sinon', `return (${obj.fn})(ctx, options, chai, expect, sinon)`).call(undefined, ctx, {
+        ...obj.options,
+        testState,
+        require,
+        process,
+      }, chai, expect, sinon))
 
       return val || null
     },
-    async resetCtxState () {
-      return ctx.dispose()
-    },
-    getGraphQLPort () {
-      return serverPortPromise
-    },
-    getAppServerPort () {
-      return ctx.appServerPort ?? null
-    },
   })
 
-  return config
+  return {
+    ...config,
+    env: {
+      e2e_isDebugging: Boolean(inspector.url()),
+    },
+  }
 }

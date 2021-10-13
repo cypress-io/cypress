@@ -1,7 +1,8 @@
 import type { DataContext } from '@packages/data-context'
 import { e2eProjectPaths } from './e2eProjectRegistry'
 
-const SIXTY_SECONDS = 60 * 1000
+const NO_TIMEOUT = 1000 * 1000
+const FOUR_SECONDS = 4 * 1000
 
 export type ProjectFixture = keyof typeof e2eProjectPaths
 
@@ -10,10 +11,16 @@ export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
   [key: string]: any
 }
 
+export interface WithCtxInjected {
+  testState: Record<string, any>
+  require: typeof require
+  process: typeof process
+}
+
 declare global {
   namespace Cypress {
     interface Chainable {
-      withCtx<T extends Partial<WithCtxOptions>>(fn: (ctx: DataContext, o: T) => any, options?: T): Chainable
+      withCtx: typeof withCtx
       setupE2E: typeof setupE2E
       openProject: typeof openProject
       initializeApp: typeof initializeApp
@@ -110,13 +117,7 @@ function visitLaunchpad (hash?: string) {
   cy.visit(`dist-launchpad/index.html?gqlPort=${e2e_gqlPort}`)
 }
 
-Cypress.Commands.add('visitApp', visitApp)
-Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
-Cypress.Commands.add('initializeApp', initializeApp)
-Cypress.Commands.add('openProject', openProject)
-Cypress.Commands.add('setupE2E', setupE2E)
-
-Cypress.Commands.add('withCtx', (fn, opts: Partial<WithCtxOptions> = {}) => {
+function withCtx<T extends Partial<WithCtxOptions>> (fn: (ctx: DataContext, o: T & WithCtxInjected) => any, opts: T = {} as T): Cypress.Chainable {
   const _log = opts.log === false ? { end () {} } : Cypress.log({
     name: 'withCtx',
     message: '(view in console)',
@@ -129,10 +130,19 @@ Cypress.Commands.add('withCtx', (fn, opts: Partial<WithCtxOptions> = {}) => {
 
   const { log, timeout, ...rest } = opts
 
-  cy.task('withCtx', {
+  return cy.task('withCtx', {
     fn: fn.toString(),
     options: rest,
-  }, { timeout: timeout ?? SIXTY_SECONDS, log }).then(() => {
+    // @ts-expect-error
+    activeTestId: Cypress.mocha.getRunner().test.id ?? Cypress.currentTest.title,
+  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : FOUR_SECONDS, log }).then(() => {
     _log.end()
   })
-})
+}
+
+Cypress.Commands.add('visitApp', visitApp)
+Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
+Cypress.Commands.add('initializeApp', initializeApp)
+Cypress.Commands.add('openProject', openProject)
+Cypress.Commands.add('setupE2E', setupE2E)
+Cypress.Commands.add('withCtx', withCtx)

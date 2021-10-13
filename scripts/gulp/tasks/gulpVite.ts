@@ -74,18 +74,22 @@ function spawnViteDevServer (
 
 export async function symlinkViteProjects () {
   await Promise.all([
-    spawned('cmd-symlink', 'yarn rimraf dist-launchpad && ln -s dist dist-launchpad', {
+    spawned('cmd-symlink', 'ln -s ../app/dist dist-app', {
       cwd: monorepoPaths.pkgLaunchpad,
-    }),
-    spawned('cmd-symlink', 'yarn rimraf dist-app && ln -s ../app/dist dist-app', {
+      waitForExit: true,
+    }).catch((e) => {}),
+    spawned('cmd-symlink', 'ln -s dist dist-app', {
+      cwd: monorepoPaths.pkgApp,
+      waitForExit: true,
+    }).catch((e) => {}),
+    spawned('cmd-symlink', 'ln -s dist dist-launchpad', {
       cwd: monorepoPaths.pkgLaunchpad,
-    }),
-    spawned('cmd-symlink', 'yarn rimraf dist-app && ln -s dist dist-app', {
+      waitForExit: true,
+    }).catch((e) => {}),
+    spawned('cmd-symlink', 'ln -s ../launchpad/dist dist-launchpad', {
       cwd: monorepoPaths.pkgApp,
-    }),
-    spawned('cmd-symlink', 'yarn rimraf dist-launchpad && ln -s ../launchpad/dist dist-launchpad', {
-      cwd: monorepoPaths.pkgApp,
-    }),
+      waitForExit: true,
+    }).catch((e) => {}),
   ])
 }
 
