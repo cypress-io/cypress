@@ -23,9 +23,6 @@ interface Defaults {
   specListWidth: number | null
   isSpecsListOpen: boolean
 
-  height: number
-  width: number
-
   url: string
   highlightUrl: boolean
   isLoadingUrl: boolean
@@ -38,9 +35,6 @@ const _defaults: Defaults = {
   messageDescription: null,
   messageType: '',
   messageControls: null,
-
-  height: 500,
-  width: 500,
 
   pluginsHeight: PLUGIN_BAR_HEIGHT,
 
@@ -76,9 +70,6 @@ export default class State extends BaseStore {
   @observable highlightUrl = _defaults.highlightUrl
   @observable isLoadingUrl = _defaults.isLoadingUrl
 
-  @observable width = _defaults.width
-  @observable height = _defaults.height
-
   @observable screenshotting = false
 
   // if null, the default CSS handles it
@@ -109,19 +100,18 @@ export default class State extends BaseStore {
     spec,
     specs = [],
     runMode = 'single' as RunMode,
-    multiSpecs = [],
     reporterWidth = DEFAULT_REPORTER_WIDTH,
     specListWidth = DEFAULT_LIST_WIDTH,
     isSpecsListOpen = true,
   }, config: Cypress.RuntimeConfigOptions) {
-    super()
+    super('component')
+
     this.reporterWidth = reporterWidth
     this.isSpecsListOpen = isSpecsListOpen
     this.spec = spec
     this.specs = specs
     this.specListWidth = specListWidth
     this.runMode = runMode
-    this.multiSpecs = multiSpecs
 
     // TODO: Refactor so `config` is only needed in MobX, not passed separately to arbitrary components
     if (config.isTextTerminal) {
@@ -195,11 +185,6 @@ export default class State extends BaseStore {
     this.screenshotting = screenshotting
   }
 
-  @action updateDimensions (width: number, height: number) {
-    this.height = height
-    this.width = width
-  }
-
   @action toggleIsSpecsListOpen () {
     this.isSpecsListOpen = !this.isSpecsListOpen
 
@@ -269,37 +254,6 @@ export default class State extends BaseStore {
 
     if (foundSpec) {
       this.spec = foundSpec
-    }
-  }
-
-  @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
-    const isAlreadyRunningNewSpec = this.multiSpecs.some(
-      (existingSpec) => existingSpec.relative === newSpec.relative,
-    )
-
-    if (isAlreadyRunningNewSpec) {
-      this.multiSpecs = this.multiSpecs.filter((existingSpec) => existingSpec.relative !== newSpec.relative)
-    } else if (this.runMode === 'single' && this.spec) {
-      // when the new
-      this.multiSpecs = [this.spec, newSpec]
-    } else {
-      this.multiSpecs = [...this.multiSpecs, newSpec]
-    }
-
-    this.runMode = 'multi'
-    this.runMultiMode().catch((e) => {
-      throw e
-    })
-  }
-
-  runMultiMode = async () => {
-    const eventManager = require('@packages/runner-shared').eventManager
-    const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
-
-    this.setSpec(null)
-    for (const spec of this.multiSpecs) {
-      this.setSpec(spec)
-      await waitForRunEnd()
     }
   }
 

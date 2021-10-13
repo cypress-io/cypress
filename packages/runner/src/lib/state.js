@@ -7,9 +7,6 @@ const _defaults = {
   messageType: '',
   messageControls: null,
 
-  width: 1000,
-  height: 660,
-
   reporterWidth: null,
   specListWidth: null,
   specs: [],
@@ -38,9 +35,6 @@ export default class State extends BaseStore {
   @observable highlightUrl = _defaults.highlightUrl
   @observable isLoadingUrl = _defaults.isLoadingUrl
 
-  @observable width = _defaults.width
-  @observable height = _defaults.height
-
   // if null, the default CSS handles it
   // if non-null, the user has set it by resizing
   @observable reporterWidth = _defaults.reporterWidth
@@ -60,7 +54,7 @@ export default class State extends BaseStore {
   @observable.ref scriptError = null
 
   constructor ({ reporterWidth, specListWidth, specs, useInlineSpecList }) {
-    super()
+    super('e2e')
     this.reporterWidth = reporterWidth || _defaults.reporterWidth
     this.specListWidth = useInlineSpecList ? specListWidth : 0
     this.useInlineSpecList = useInlineSpecList || false
@@ -106,11 +100,6 @@ export default class State extends BaseStore {
         top: (actualHeight + this.headerHeight + nudge),
       },
     }
-  }
-
-  @action updateDimensions (width, height) {
-    this.width = width
-    this.height = height
   }
 
   @action updateWindowDimensions ({

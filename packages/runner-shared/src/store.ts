@@ -4,6 +4,17 @@ import { automation, automationStatus } from './automation'
 
 export type RunMode = 'single'
 
+const defaults = {
+  component: {
+    height: 500,
+    width: 500,
+  },
+  e2e: {
+    height: 660,
+    width: 1000,
+  },
+}
+
 export class BaseStore {
   @observable spec: Cypress.Spec | undefined
   @observable specs: Cypress.Spec[] = []
@@ -11,6 +22,13 @@ export class BaseStore {
   @observable runMode: RunMode = 'single'
   @observable automation: typeof automationStatus[number] = automation.CONNECTING
   @observable isLoading = true
+  @observable width: number
+  @observable height: number
+
+  constructor (testingType: Cypress.TestingType) {
+    this.width = defaults[testingType].width
+    this.height = defaults[testingType].height
+  }
 
   @action setSingleSpec (spec: Cypress.Spec | undefined) {
     this.setSpec(spec)
@@ -35,5 +53,10 @@ export class BaseStore {
 
   @action setIsLoading (isLoading) {
     this.isLoading = isLoading
+  }
+
+  @action updateDimensions (width: number, height: number) {
+    this.height = height
+    this.width = width
   }
 }
