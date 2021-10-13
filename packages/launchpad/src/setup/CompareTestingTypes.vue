@@ -1,13 +1,12 @@
 <template>
-  <div class="flex justify-around">
+  <div class="flex justify-around pt-16px">
     <CompareTestingCard
-      class="w-full p-24px"
+      class="border-r border-r-gray-100"
       title="End-to-end Tests:"
       :code="e2eCode"
       :list-items="e2eItems"
     />
     <CompareTestingCard
-      class="w-full p-24px"
       title="Component Tests:"
       :code="ctCode"
       :list-items="ctItems"
@@ -28,8 +27,7 @@ const ctCode = `import Button from ‘design-system’
 it(‘clicks the confirm button’) {
   cy.mount(<Button>)
   cy.get(‘Button’).click()
-}
-`
+}`
 
 const e2eCode = `it(‘clicks the confirm button’) { \n  cy.visit(‘https://yourwebsite.com’) \n  cy.get(‘button[type=submit]’).click()
 }

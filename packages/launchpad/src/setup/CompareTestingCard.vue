@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="w-full px-24px">
     <h3 class="text-gray-900 mb-12px text-18px">
       {{ title }}
     </h3>
@@ -40,6 +40,9 @@ const localCode = ref(props.code)
 </script>
 
 <style>
+
+/* very hacky CSS that is going to go away the second we have a better code
+rendering solution for our needs than prism */
 .prism-editor-wrapper .prism-editor__line-numbers {
     background-color: #f3f4fa !important;
     padding: 4px 8px !important;
@@ -52,5 +55,9 @@ const localCode = ref(props.code)
 .prism-editor__container {
     padding: 8px 8px !important;
     line-height: 24px !important;
+}
+
+.prism-editor-wrapper .token.parameter {
+    color: #9095AD !important
 }
 </style>
