@@ -1,9 +1,9 @@
 // @ts-check
 const { defineConfig } = require('cypress')
 
-// load file devServer that comes with this plugin
-// https://github.com/bahmutov/cypress-react-unit-test#install
-const devServer = require('@cypress/react/plugins/react-scripts')
+// load the devServer function that comes with this plugin
+// https://github.com/cypress-io/cypress/tree/master/npm/react#install
+const { devServer } = require('@cypress/react/plugins/react-scripts')
 
 const getApplitoolsWrappedSetupFn = (exports) => {
   const placeholderModule = { exports }

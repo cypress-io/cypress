@@ -1,8 +1,8 @@
 // @ts-check
 const { defineConfig } = require('cypress')
 
-// load Webpack file devServer that comes with this plugin
-// https://github.com/bahmutov/cypress-react-unit-test#install
+// load the devServer & defineDevServerConfig functions that come with this plugin
+// https://github.com/cypress-io/cypress/tree/master/npm/react#install
 const { devServer, defineDevServerConfig } = require('@cypress/react/plugins/load-webpack')
 
 module.exports = defineConfig({
