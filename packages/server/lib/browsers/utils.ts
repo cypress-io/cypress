@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
 // @ts-ignore
@@ -7,7 +8,6 @@ import plugins from '../plugins'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
-const Bluebird = require('bluebird')
 const getPort = require('get-port')
 const launcher = require('@packages/launcher')
 const { fs } = require('../util/fs')
@@ -244,8 +244,8 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Promise<FoundBrowser | FoundBrowser[] | undefined> => {
-  const findBrowsers = browsers.length ? Promise.resolve(browsers) : getBrowsers()
+const ensureAndGetByNameOrPath = (nameOrPath: string, returnAll = false, browsers: FoundBrowser[] = []): Bluebird<FoundBrowser | FoundBrowser[] | undefined> => {
+  const findBrowsers = browsers.length ? Bluebird.resolve(browsers) : getBrowsers()
 
   return findBrowsers
   .then((browsers: FoundBrowser[] = []) => {

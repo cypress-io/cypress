@@ -1,9 +1,10 @@
+import type Bluebird from 'bluebird'
 import type { FoundBrowser } from '@packages/types'
 import type { DataContext } from '..'
 
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
-  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Promise<FoundBrowser | FoundBrowser[] | undefined>
+  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Bluebird<FoundBrowser | FoundBrowser[] | undefined>
 }
 
 export class AppActions {
