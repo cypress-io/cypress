@@ -14,7 +14,6 @@
     />
     <ConfigFiles
       v-if="props.gql.wizard.step === 'createConfig'"
-      :gql="props.gql"
     />
     <InitializeConfig
       v-if="props.gql.wizard.step === 'initializePlugins'"
@@ -45,7 +44,6 @@ fragment Wizard on Query {
     ...InstallDependencies
     ...InitializeConfig
   }
-  ...ConfigFiles
 }`
 
 const props = defineProps<{

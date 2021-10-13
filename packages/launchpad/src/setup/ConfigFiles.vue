@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-180 mx-auto my-4 pb-8">
+  <div class="max-w-220 mx-auto py-8">
     <FileRow
       v-for="file in files"
       :key="file.filePath"
@@ -27,37 +27,25 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import { ConfigFilesFragment, ConfigFilesNavigateDocument } from '../generated/graphql'
+import { useMutation, useQuery } from '@urql/vue'
+import { ConfigFilesDocument, ConfigFilesNavigateDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import FileRow from '../components/code/FileRow.vue'
-import { useMutation } from '@urql/vue'
 
 const { t } = useI18n()
 
 gql`
-fragment ConfigFiles on Query {
-  app {
-    activeProject {
-      id
-      projectRoot
-    }
-  }
+query ConfigFiles {
   wizard {
-    ...SampleFiles
-  }
-}
-`
-
-gql`
-fragment SampleFiles on Wizard {
-  sampleConfigFiles {
-    filePath
-    content
-    status
-    description
-    warningText
-    warningLink
+    sampleConfigFiles {
+      filePath
+      content
+      status
+      description
+      warningText
+      warningLink
+    }
   }
 }
 `
@@ -72,11 +60,11 @@ mutation ConfigFilesNavigate($direction: WizardNavigateDirection!) {
 
 const navigate = useMutation(ConfigFilesNavigateDocument)
 
-const props = defineProps<{
-  gql: ConfigFilesFragment
-}>()
+const { data } = useQuery({
+  query: ConfigFilesDocument,
+})
 
-const files = computed(() => props.gql.wizard.sampleConfigFiles)
+const files = computed(() => data.value?.wizard.sampleConfigFiles)
 
 const continueForward: any = () => {
   navigate.executeMutation({ direction: 'forward' })
