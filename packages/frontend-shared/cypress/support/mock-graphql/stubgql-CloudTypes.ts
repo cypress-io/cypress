@@ -122,6 +122,7 @@ export function createCloudRun (config: Partial<CloudRun>): CloudRun {
     status: 'PASSED',
     totalFailed: 0,
     totalSkipped: 0,
+    totalPending: 0,
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
