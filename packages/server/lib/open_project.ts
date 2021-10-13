@@ -124,7 +124,7 @@ export class OpenProject {
     // of potential domain changes, request buffers, etc
     this.openProject!.reset()
 
-    const url = getSpecUrl({
+    let url = getSpecUrl({
       absoluteSpecPath: spec.absolute,
       specType: spec.specType,
       browserUrl: this.openProject.cfg.browserUrl,

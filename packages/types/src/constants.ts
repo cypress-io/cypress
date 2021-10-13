@@ -72,6 +72,19 @@ export const TESTING_TYPES = [
 
 export type TestingType = typeof TESTING_TYPES[number]
 
+export const CODE_LANGUAGES = [
+  {
+    type: 'js',
+    name: 'JavaScript',
+  },
+  {
+    type: 'ts',
+    name: 'TypeScript',
+  },
+] as const
+
+export type CodeLanguage = typeof CODE_LANGUAGES[number]
+
 export const NAV_ITEMS = [
   {
     type: 'projectSetup',
