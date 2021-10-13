@@ -8,11 +8,6 @@ import type { Server } from 'http'
 import { SocketIOServer } from '@packages/socket'
 
 let graphqlServer: Server | undefined
-let graphqlPort: number | undefined
-
-export function getExistingGraphqlServerPort () {
-  return graphqlPort
-}
 
 export async function closeGraphQLServer () {
   if (!graphqlServer) {
@@ -47,7 +42,6 @@ export async function makeGraphQLServer (ctx: DataContext) {
   const srv = graphqlServer = app.listen(() => {
     const port = (srv.address() as AddressInfo).port
 
-    graphqlPort = port
     const endpoint = `http://localhost:${port}/graphql`
 
     if (process.env.NODE_ENV === 'development') {

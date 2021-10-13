@@ -16,23 +16,13 @@ import type { LaunchOpts, LaunchArgs, OpenProjectLaunchOptions, FoundBrowser } f
 import { fs } from './util/fs'
 import path from 'path'
 import os from 'os'
-import { closeGraphQLServer, getExistingGraphqlServerPort } from './gui/makeGraphQLServer'
+import { closeGraphQLServer } from './gui/makeGraphQLServer'
 
 const debug = Debug('cypress:server:open_project')
 
 interface SpecsByType {
   component: Cypress.Spec[]
   integration: Cypress.Spec[]
-}
-
-function appendGqlPort (url: string) {
-  const gqlPort = getExistingGraphqlServerPort()?.toString()
-
-  if (gqlPort) {
-    return `${url}?gqlPort=${gqlPort}`
-  }
-
-  return url
 }
 
 // @see https://github.com/cypress-io/cypress/issues/18094
@@ -142,10 +132,6 @@ export class OpenProject {
       componentFolder: this.openProject.cfg.componentFolder || 'component?',
       projectRoot: this.openProject.projectRoot,
     })
-
-    if (process.env.LAUNCHPAD) {
-      url = appendGqlPort(url)
-    }
 
     debug('open project url %s', url)
 
