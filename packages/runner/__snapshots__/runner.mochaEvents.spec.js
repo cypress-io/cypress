@@ -1939,6 +1939,7 @@ exports['src/cypress/runner other specs screenshots screenshot after failed test
         "height": 660
       },
       "scaled": true,
+      "overwrite": false,
       "blackout": [],
       "startTime": "1970-01-01T00:00:00.000Z"
     }
