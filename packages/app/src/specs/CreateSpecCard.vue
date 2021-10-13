@@ -1,7 +1,7 @@
 <template>
-<div data-testid="create-spec-card" tabindex="0">
   <div
-  class="block h-auto overflow-scroll text-center rounded cursor-pointer w-280px m-2px min-h-216px max-h-350px px-32px pt-32px pb-24px children:hyphens-manual border-1 hocus-default focus-within-default"
+  class="block h-auto overflow-scroll text-center rounded outline-none cursor-pointer w-280px m-2px min-h-216px max-h-350px px-32px pt-32px pb-24px children:hyphens-manual border-1 hocus-default focus-within-default"
+  data-testid="create-spec-card" tabindex="0"
   >
     <component
       :is="icon"
@@ -14,7 +14,6 @@
     <p class="text-gray-500 tracking-tight text-14px leading-[20px]">
       {{ description }}
     </p>
-  </div>
   </div>
 </template>
 

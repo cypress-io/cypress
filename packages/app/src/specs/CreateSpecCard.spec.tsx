@@ -42,7 +42,7 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
   it('emits click events bound to it', () => {
     const onClickSpy = cy.spy().as('onClickSpy')
     cy.mount(() => (<div class="m-12">
-      <CreateSpecCard icon={ DocumentCode } header={ header } description={ shortDescription } onClick={ onClickSpy }/>
+      <CreateSpecCard icon={ DocumentCode } header={ header } description={ shortDescription } onClick={ onClickSpy } />
     </div>))
       .get(specCardSelector)
       .focus()
