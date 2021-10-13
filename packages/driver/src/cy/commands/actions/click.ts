@@ -173,7 +173,7 @@ export default (Commands, Cypress, cy, state, config) => {
       // $actionability.verify and retrying, but each click should
       // have its own full timeout
       const individualOptions = {
-        customScrollBehavior: userOptions.scrollBehavior !== undefined,
+        userSetScrollBehavior: userOptions.scrollBehavior !== undefined,
         ...options,
       }
 
