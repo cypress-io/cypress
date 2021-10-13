@@ -263,7 +263,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
 
         module.exports = defineConfig({
           component: {
-            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            testFiles: "**/*.cy.{js,jsx,ts,tsx}",
             componentFolder: "src"
           }
         })
@@ -273,7 +273,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
 
         export default defineConfig({
           component: {
-            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            testFiles: "**/*.cy.{js,jsx,ts,tsx}",
             componentFolder: "src"
           }
         })
@@ -285,7 +285,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
 
         module.exports = defineConfig({
           component: {
-            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            testFiles: "**/*.cy.{js,jsx,ts,tsx}",
             componentFolder: "src"
           }
         })
@@ -295,7 +295,7 @@ const getFrameworkConfigFile = (opts: GetCodeOptsCt) => {
 
         export default defineConfig({
           component: {
-            testFiles: "**/*cy-spec.{js,jsx,ts,tsx}",
+            testFiles: "**/*.cy.{js,jsx,ts,tsx}",
             componentFolder: "src"
           }
         })
