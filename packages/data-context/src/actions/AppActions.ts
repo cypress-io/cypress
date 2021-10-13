@@ -3,7 +3,7 @@ import type { DataContext } from '..'
 
 export interface AppApiShape {
   getBrowsers(): Promise<FoundBrowser[]>
-  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Promise<FoundBrowser | FoundBrowser[]>
+  ensureAndGetByNameOrPath(nameOrPath: string, returnAll?: boolean, browsers?: FoundBrowser[]): Promise<FoundBrowser | FoundBrowser[] | undefined>
 }
 
 export class AppActions {
