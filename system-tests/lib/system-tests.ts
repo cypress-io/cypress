@@ -640,8 +640,8 @@ const systemTests = {
   snapshot (...args) {
     args = _.compact(args)
 
-    // avoid snapshot cwd issue - see /patches/snap-shot-it for more information
-    snapshot.cwd = path.join(__dirname, '..')
+    // avoid snapshot cwd issue - see /patches/snap-shot* for more information
+    global.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
     return snapshot.apply(null, args)
   },

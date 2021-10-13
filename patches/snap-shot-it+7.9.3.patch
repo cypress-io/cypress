@@ -1,60 +1,43 @@
 diff --git a/node_modules/snap-shot-it/src/index.js b/node_modules/snap-shot-it/src/index.js
-index 0fb68da..2b921e6 100644
+index 0fb68da..2e5c142 100644
 --- a/node_modules/snap-shot-it/src/index.js
 +++ b/node_modules/snap-shot-it/src/index.js
-@@ -14,11 +14,6 @@ const { stripIndent } = require('common-tags')
- const path = require('path')
- const itsName = require('its-name')
+@@ -16,8 +16,11 @@ const itsName = require('its-name')
  
--// save current directory right away to avoid any surprises later
--// when some random tests change it
+ // save current directory right away to avoid any surprises later
+ // when some random tests change it
 -const cwd = process.cwd()
 -const relativeToCwd = path.relative.bind(null, cwd)
--
++// cache CWD globally so we can reset it in the case where a test
++// changes cwd before/after this file is required in a non-deterministic
++// fashion (like in the autobalanced system tests)
++global.CACHED_CWD_FOR_SNAP_SHOT_IT = process.cwd()
++const relativeToCwd = (...args) => path.relative(global.CACHED_CWD_FOR_SNAP_SHOT_IT, ...args)
+ 
  debug('loading snap-shot-it')
  const EXTENSION = '.js'
- 
-@@ -83,7 +78,7 @@ const throwDuplicateSnapshotKeyError = (current, previous) => {
- 
-   throw new Error(stripIndent`
-     Duplicate snapshot key "${current.key}"
--    in spec file: ${relativeToCwd(current.specFile)}
-+    in spec file: ${snapshot.relativeToCwd(current.specFile)}
-     current test title: "${current.testTitle}"
-     current test title in parts: ${current.titleParts.join(' - ')}
-     previous test title in parts: ${previous.titleParts.join(' - ')}
-@@ -239,7 +234,7 @@ function snapshot (value) {
+@@ -239,7 +242,7 @@ function snapshot (value) {
      compare: R.noop,
      store: R.noop
    }
 -  const packageConfigOptions = utils.getPackageConfigOptions(cwd)
-+  const packageConfigOptions = utils.getPackageConfigOptions(snapshot.cwd)
++  const packageConfigOptions = utils.getPackageConfigOptions(global.CACHED_CWD_FOR_SNAP_SHOT_IT)
    const opts = utils.mergeConfigOptions(
      defaultOptions,
      packageConfigOptions,
-@@ -319,6 +314,11 @@ function snapshot (value) {
-       // the code is duplicate from above to get just the key collision error
-       const info = R.assoc('key', e.key, snapshotInfo)
-       info.allowDuplicate = Boolean(snapshotOptions.allowSharedSnapshot)
-+
-+      if (info.allowDuplicate) {
-+        return
-+      }
-+      
-       debug('current snapshot info %o', info)
+@@ -254,12 +257,12 @@ function snapshot (value) {
+   debug('prune options %o', pruneSnapshotsOptions)
  
-       const prevInfo = findExistingSnapshotKey(info)
-@@ -365,3 +365,12 @@ function deleteFromCache () {
-   delete require.cache[__filename]
- }
- global.after(deleteFromCache)
-+
-+// snap-shot-it does not expose a way to set the directory at runtime
-+// it also stores cwd when it is first `require`d
-+// this causes problems in the e2e tests because some of them modify cd,
-+// some of them require snap-shot-it, so by the time this file is required,
-+// cwd is unpredictable.
-+// this patch exposes cwd on the snapshot export so this can be worked around
-+snapshot.cwd = process.cwd()
-+snapshot.relativeToCwd = (...args) => path.relative(snapshot.cwd, ...args)
-\ No newline at end of file
+   const compare = opts.compare
+-    ? utils.load(cwd, opts.compare)
++    ? utils.load(global.CACHED_CWD_FOR_SNAP_SHOT_IT, opts.compare)
+     : require('snap-shot-compare')
+-  const store = opts.store ? utils.load(cwd, opts.store) : null
++  const store = opts.store ? utils.load(global.CACHED_CWD_FOR_SNAP_SHOT_IT, opts.store) : null
+ 
+   const preCompare = opts['pre-compare']
+-    ? utils.load(cwd, opts['pre-compare'])
++    ? utils.load(global.CACHED_CWD_FOR_SNAP_SHOT_IT, opts['pre-compare'])
+     : R.identity
+   const what = preCompare(value)
+ 
