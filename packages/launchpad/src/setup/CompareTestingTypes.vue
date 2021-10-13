@@ -9,7 +9,7 @@
     <CompareTestingCard
       class="w-full p-24px"
       title="Component Tests:"
-      :code="code"
+      :code="ctCode"
       :list-items="ctItems"
     />
   </div>
@@ -21,16 +21,17 @@ import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
 
-const code = `let code = \'here\'
-// more code
-// mutliline things
-
-
+/* eslint-disable no-irregular-whitespace */
+const ctCode = `import Button from ‘design-system’
+​
+it(‘clicks the confirm button’) {
+  cy.mount(<Button>)
+  cy.get(‘Button’).click()
+}
 `
 
 const e2eCode = `it(‘clicks the confirm button’) { \n  cy.visit(‘https://yourwebsite.com’) \n  cy.get(‘button[type=submit]’).click()
 }
-
 
 `
 

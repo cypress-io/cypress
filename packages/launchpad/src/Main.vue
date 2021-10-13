@@ -25,7 +25,7 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="mx-auto text-indigo-500 text-18px"
+            class="block mx-auto text-indigo-500 text-18px"
             @click="isTestingTypeModalOpen = true"
           >
             {{ t('welcomePage.review') }}

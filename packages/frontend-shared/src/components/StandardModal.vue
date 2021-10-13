@@ -11,7 +11,7 @@
         class="relative mx-auto bg-white rounded"
         :class="modalClasses"
       >
-        <div class="flex items-center justify-between border-b-1px min-h-64px px-24px">
+        <div class="flex items-center justify-between border-b-1px min-h-56px px-24px">
           <DialogTitle class="text-gray-900 text-18px">
             <slot name="title" /> - <a
               :href="helpLink"
@@ -65,7 +65,6 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<{
   modelValue?: boolean
   activatorText?: string
-  width?: string,
   modalClasses?: string
   helpLink?: string
   helpText?: string
