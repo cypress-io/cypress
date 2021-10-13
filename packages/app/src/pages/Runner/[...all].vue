@@ -1,7 +1,7 @@
 <template>
   <Runner
-    v-if="query.data.value?.app?.activeProject"
-    :gql="query.data.value.app?.activeProject?.currentSpec"
+    v-if="query.data.value?.app"
+    :gql="query.data.value.app"
   />
 </template>
 
@@ -14,12 +14,7 @@ import Runner from '../../runs/Runner.vue'
 gql`
 query Runner_All {
   app {
-    activeProject {
-      id
-      currentSpec {
-        ...CurrentSpec_Runner
-      }
-    }
+    ...Specs_Runner
   }
 }
 `

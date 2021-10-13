@@ -6,15 +6,9 @@
     tabindex="0"
   >
     <div class="grid grid-cols-[16px,auto,auto] items-center gap-10px">
-      <component
-        :is="icon.component"
-        :class="icon.classes"
-      />
-      <div>
-        <span class="font-medium text-gray-700 group-hocus:text-indigo-500">{{ spec.fileName }}</span>
-        <span class="font-light text-gray-400 group-hocus:text-indigo-500">{{ spec.specFileExtension }}</span>
-      </div>
+      <SpecName :gql="spec" />
     </div>
+
     <div class="grid git-info-row grid-cols-[16px,auto] items-center gap-9px">
       <span class="flex items-center justify-center w-16px">
         <span
@@ -39,6 +33,7 @@ import { gql } from '@urql/core'
 import type { SpecListRowFragment } from '../generated/graphql'
 import { computed } from 'vue'
 import { useTimeAgo } from '@vueuse/core'
+import SpecName from './SpecName.vue'
 import { useI18n } from '@cy/i18n'
 import DocumentIconBlank from '~icons/cy/document-blank_x16'
 import DocumentIconPlus from '~icons/cy/document-plus_x16'
@@ -51,10 +46,7 @@ const { t } = useI18n()
 gql`
 fragment SpecListRow on SpecEdge {
   node {
-    id
-    specFileExtension
-    fileExtension
-    fileName
+    ...Spec_SpecName
     gitInfo {
       lastModifiedTimestamp
       author

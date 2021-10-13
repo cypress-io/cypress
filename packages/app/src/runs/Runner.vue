@@ -1,20 +1,29 @@
 <template>
-  <div>
-    <div v-once>
-      <div class="flex">
-        <div :id="RUNNER_ID" />
-        <div :id="REPORTER_ID" />
-      </div>
-    </div>
+  <div class="grid grid-cols-3 p-12 gap-8">
+    <InlineSpecList
+      :gql="props.gql"
+      @selectSpec="selectSpec"
+    />
+    <div
+      v-once
+      :id="RUNNER_ID"
+    />
+    <div
+      v-once
+      :id="REPORTER_ID"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted } from 'vue'
+import { useMutation } from '@urql/vue'
 import { UnifiedRunnerAPI } from '../runner'
 import { REPORTER_ID, RUNNER_ID, getRunnerElement, getReporterElement, empty } from '../runner/utils'
 import { gql } from '@urql/core'
-import type { CurrentSpec_RunnerFragment } from '../generated/graphql'
+import { Runner_SetCurrentSpecDocument, Specs_RunnerFragment } from '../generated/graphql'
+import InlineSpecList from '../specs/InlineSpecList.vue'
+import type { BaseSpec } from '@packages/types/src'
 
 gql`
 fragment CurrentSpec_Runner on Spec {
@@ -25,17 +34,63 @@ fragment CurrentSpec_Runner on Spec {
 }
 `
 
+gql`
+fragment Specs_Runner on App {
+  ...Specs_InlineSpecList
+  activeProject {
+    id
+    projectRoot
+    currentSpec {
+      ...CurrentSpec_Runner
+    }
+  }
+}
+`
+
+gql`
+mutation Runner_SetCurrentSpec($id: ID!) {
+  setCurrentSpec(id: $id) {
+    currentSpec {
+      id
+      relative
+      absolute
+      name
+    }
+  }
+}
+`
+
+const setSpecMutation = useMutation(Runner_SetCurrentSpecDocument)
+
 const props = defineProps<{
-  gql: CurrentSpec_RunnerFragment | null
+  gql: Specs_RunnerFragment
 }>()
 
+async function selectSpec (id: string) {
+  const specToRun = await setSpecMutation.executeMutation({ id })
+
+  if (!specToRun.data?.setCurrentSpec.currentSpec) {
+    return
+  }
+
+  execute(specToRun.data.setCurrentSpec.currentSpec)
+}
+
 onMounted(() => {
+  const executeSpec = () => {
+    if (!props.gql?.activeProject?.currentSpec) {
+      return
+    }
+
+    execute(props.gql.activeProject.currentSpec)
+  }
+
   UnifiedRunnerAPI.initialize(() => {
     window.UnifiedRunner.eventManager.on('restart', () => {
-      execute()
+      executeSpec()
     })
 
-    execute()
+    executeSpec()
   })
 })
 
@@ -48,22 +103,17 @@ onBeforeUnmount(() => {
   empty(getReporterElement())
 })
 
-const execute = () => {
-  if (!props.gql) {
-    return
-  }
-
-  UnifiedRunnerAPI.executeSpec(props.gql)
+const execute = (spec: BaseSpec) => {
+  UnifiedRunnerAPI.executeSpec(spec)
 }
 </script>
 
 <style scoped>
 #unified-runner {
   position: relative;
-  flex-grow: 1;
-  margin: 20px;
-  box-shadow: 0px 0px 5px 0 black;
-  padding: 10px;
+  /* flex-grow: 1; */
+  /* box-shadow: 0px 0px 5px 0 black; */
+  /* padding: 10px; */
 }
 
 #unified-reporter {
