@@ -67,6 +67,7 @@ const { data } = useQuery({
 const files = computed(() => data.value?.wizard.sampleConfigFiles)
 
 const continueForward: any = () => {
+  // TODO: scaffold files here
   navigate.executeMutation({ direction: 'forward' })
 }
 
