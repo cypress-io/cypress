@@ -19,6 +19,7 @@ import { setGulpGlobal } from './gulpConstants'
 import { exitAfterAll } from './tasks/gulpRegistry'
 import { execSync } from 'child_process'
 import { webpackRunner } from './tasks/gulpWebpack'
+import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
 
 /**------------------------------------------------------------------------
  *                      Local Development Workflow
@@ -71,6 +72,7 @@ gulp.task(
       viteApp,
       viteLaunchpad,
       webpackRunner,
+      e2eTestScaffoldWatch,
     ),
 
     // And we're finally ready for electron, watching for changes in
@@ -176,8 +178,8 @@ const cyOpenLaunchpad = gulp.series(
   //    This watches for changes and is not the same things as statically
   //    building the app for production.
   gulp.parallel(
-    viteBuildApp,
     viteBuildAndWatchLaunchpad,
+    viteBuildApp,
   ),
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
@@ -265,6 +267,8 @@ gulp.task('debugCypressLaunchpad', gulp.series(
   openCypressLaunchpad,
 ))
 
+gulp.task(e2eTestScaffoldWatch)
+gulp.task(e2eTestScaffold)
 gulp.task(startCypressWatch)
 gulp.task(openCypressApp)
 gulp.task(openCypressLaunchpad)
