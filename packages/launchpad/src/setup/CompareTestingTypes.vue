@@ -5,11 +5,13 @@
       title="End-to-end Tests:"
       :code="e2eCode"
       :list-items="e2eItems"
+      code-fragment="cy.visit()"
     />
     <CompareTestingCard
       title="Component Tests:"
       :code="ctCode"
       :list-items="ctItems"
+      code-fragment="cy.mount()"
     />
   </div>
 </template>
