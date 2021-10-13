@@ -1,4 +1,4 @@
-const debug = require('debug')('cypress:e2e')
+const debug = require('debug')('cypress:system-tests')
 
 module.exports = function (onFn, config) {
   debug('plugin file %s', __filename)

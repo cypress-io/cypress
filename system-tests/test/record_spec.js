@@ -514,7 +514,7 @@ describe('e2e record', () => {
       process.env.CIRCLE_PR_NUMBER = '123'
       process.env.CIRCLE_PR_USERNAME = 'brian-mann'
       process.env.CIRCLE_PR_REPONAME = 'cypress'
-      process.env.CYPRESS_INTERNAL_E2E_TESTS = '0'
+      process.env.CYPRESS_INTERNAL_SYSTEM_TESTS = '0'
 
       return e2e.exec(this, {
         spec: 'record_pass*',
@@ -534,7 +534,7 @@ describe('e2e record', () => {
       process.env.CIRCLE_PR_NUMBER = '123'
       process.env.CIRCLE_PR_USERNAME = 'brian-mann'
       process.env.CIRCLE_PR_REPONAME = 'cypress'
-      process.env.CYPRESS_INTERNAL_E2E_TESTS = '0'
+      process.env.CYPRESS_INTERNAL_SYSTEM_TESTS = '0'
 
       return e2e.exec(this, {
         spec: 'record_pass*',
