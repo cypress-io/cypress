@@ -1,6 +1,4 @@
 import path from 'path'
-import snapshot from 'snap-shot-it'
-
 import { root } from '../lib/spec_helper'
 import systemTests from '../lib/system-tests'
 import { projectPath } from '../lib/fixtures'
@@ -11,7 +9,7 @@ const snapshotFile = (project, file, folder = 'integration') => {
   const filePath = path.join(projectPath(project), 'cypress', folder, file)
 
   return fs.readFile(filePath).then((content) => {
-    snapshot(`${project} ${file}`, content.toString())
+    systemTests.snapshot(`${project} ${file}`, content.toString())
   })
 }
 

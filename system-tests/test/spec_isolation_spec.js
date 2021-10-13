@@ -2,7 +2,6 @@
 
 const path = require('path')
 const _ = require('lodash')
-const snapshot = require('snap-shot-it')
 const { fs } = require('@packages/server/lib/util/fs')
 const { default: systemTests, STDOUT_DURATION_IN_TABLES_RE } = require('../lib/system-tests')
 const Fixtures = require('../lib/fixtures')
@@ -48,7 +47,7 @@ describe('e2e spec_isolation', () => {
         e2ePath, runs: 4, video: false,
       })
 
-      snapshot(json, { allowSharedSnapshot: true })
+      systemTests.snapshot(json, { allowSharedSnapshot: true })
     },
   })
 
@@ -72,7 +71,7 @@ describe('e2e spec_isolation', () => {
         e2ePath, runs: 2, video: false,
       })
 
-      snapshot(json)
+      systemTests.snapshot(json)
     },
   })
 })

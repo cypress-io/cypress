@@ -2,7 +2,6 @@ const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const jsonSchemas = require('@cypress/json-schemas').api
-const snapshot = require('snap-shot-it')
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
@@ -223,7 +222,7 @@ describe('e2e record', () => {
 
       runs = systemTests.normalizeRuns(runs)
 
-      snapshot(runs)
+      systemTests.snapshot(runs)
 
       const results = await fs.readJsonAsync(outputPath)
 

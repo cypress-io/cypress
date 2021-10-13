@@ -640,6 +640,8 @@ const systemTests = {
   snapshot (...args) {
     args = _.compact(args)
 
+    snapshot.cwd = path.join(__dirname, '..')
+
     return snapshot.apply(null, args)
   },
 
