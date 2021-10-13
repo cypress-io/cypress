@@ -16,12 +16,12 @@
     <h3 class="text-gray-900 mb-8px">
       Code Example
     </h3>
-    <CodeEditor
+    <!-- <CodeEditor
       v-model="localCode"
       class="border rounded h-160px mb-26px"
       readonly
       line-numbers
-    />
+    /> -->
   </div>
 </template>
 

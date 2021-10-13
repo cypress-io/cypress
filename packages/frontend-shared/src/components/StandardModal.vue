@@ -1,25 +1,23 @@
 <template>
-  <button
-    v-if="activatorText"
-    @click="setIsOpen(true)"
-  >
-    {{ activatorText }}
-  </button>
   <Dialog
     :open="localValue"
     class="fixed inset-0 z-10 overflow-y-auto"
-    @close="setIsOpen"
+    @close="setIsOpen(false)"
   >
     <div class="flex items-center justify-center min-h-screen">
       <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
 
       <div
         class="relative mx-auto bg-white rounded"
-        :class="$attrs.class"
+        :class="modalClasses"
       >
         <div class="flex items-center justify-between border-b-1px min-h-64px px-24px">
           <DialogTitle class="text-gray-900 text-18px">
-            <slot name="title" />- need help?
+            <slot name="title" /> - <a
+              :href="helpLink"
+              target="_blank"
+              class="text-indigo-500"
+            >{{ helpText }}</a>
           </DialogTitle>
           <button
             aria-label="Close"
@@ -67,18 +65,22 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<{
   modelValue?: boolean
   activatorText?: string
-  width?: string
+  width?: string,
+  modalClasses?: string
+  helpLink?: string
+  helpText?: string
 }>(), {
   modelValue: false,
   activatorText: '',
-  width: '480px',
+  modalClasses: 'w-480px',
+  helpText: 'Need help?',
+  helpLink: 'https://docs.cypress.io',
 })
 
 const localValue = useModelWrapper(props, emit, 'modelValue')
 
 const setIsOpen = (val: boolean) => {
-  localValue.value = val
-  //  emit("update:modelValue", val)
+  emit('update:modelValue', val)
 }
 
 const { t } = useI18n()

@@ -146,7 +146,7 @@
       "componentTitle": "Component Tests",
       "ctBullet1": "Import components via",
       "ctBullet2": "Test individual components of a design system in isolation",
-      "ctBbullet3": "Ideal for testing isolated flows and components in CI"
+      "ctBullet3": "Ideal for testing isolated flows and components in CI"
     }
   },
   "settingsPage": {

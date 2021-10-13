@@ -16,7 +16,7 @@
           <WizardHeader :gql="query.data.value.wizard" />
           <StandardModal
             v-model="isTestingTypeModalOpen"
-            class="w-960px"
+            modal-classes="w-960px"
           >
             <template #title>
               Key Differences
@@ -30,11 +30,6 @@
           >
             {{ t('welcomePage.review') }}
           </button>
-          <CodeEditor
-            v-model="code"
-            class="max-w-400px"
-            readonly
-          />
           <TestingTypeCards :gql="query.data.value" />
         </template>
         <Wizard
@@ -62,7 +57,6 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import CodeEditor from './components/code/CodeEditor.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
