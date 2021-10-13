@@ -52,8 +52,6 @@
 import { useI18n } from '@cy/i18n'
 
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
-import 'vue-prism-editor/dist/prismeditor.min.css' // import the styles somewhere
-import 'prismjs/themes/prism.css' // import syntax highlighting styles
 
 import {
   Dialog,
