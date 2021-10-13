@@ -36,10 +36,10 @@ export const Storybook = objectType({
       description: 'Folder containing storybook configuration files',
     })
 
-    t.nonNull.list.nonNull.field('stories', {
+    t.connectionField('stories', {
       type: FileParts,
       description: 'List of all Storybook stories',
-      resolve: async (source, args, ctx) => {
+      nodes: (source, args, ctx) => {
         return ctx.storybook.getStories()
       },
     })

@@ -16,7 +16,7 @@ const STORYBOOK_FILES = [
 export class StorybookDataSource {
   constructor (private ctx: DataContext) {}
 
-  get storybookInfo () {
+  async loadStorybookInfo () {
     if (!this.ctx.activeProject?.projectRoot) {
       return Promise.resolve(null)
     }
@@ -31,7 +31,7 @@ export class StorybookDataSource {
       throw Error(`Cannot find stories without activeProject.`)
     }
 
-    const storybook = await this.ctx.storybook.storybookInfo
+    const storybook = await this.ctx.storybook.loadStorybookInfo()
 
     if (!storybook) {
       return []
@@ -47,9 +47,15 @@ export class StorybookDataSource {
     }
 
     // Don't currently support mdx
-    return files
-    .filter((file) => !file.endsWith('.mdx'))
-    .map((file) => this.ctx.file.normalizeFileToSpec(file, project.projectRoot, config.componentFolder || project.projectRoot))
+    return files.reduce((acc, file) => {
+      if (file.endsWith('.mdx')) {
+        return acc
+      }
+
+      const spec = this.ctx.file.normalizeFileToSpec(file, project.projectRoot, config.componentFolder || project.projectRoot)
+
+      return [...acc, spec]
+    }, [] as SpecFile[])
   }
 
   private storybookInfoLoader = this.ctx.loader<string, StorybookInfo | null>((projectRoots) => this.batchStorybookInfo(projectRoots))

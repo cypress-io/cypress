@@ -1,20 +1,18 @@
 <template>
-  <div v-if="query.data.value?.wizard.storybook">
+  <div v-if="query.data.value?.app.activeProject?.storybook">
     <h2>New Spec</h2>
-    <ul v-if="stories.length">
+    <ul>
       <li
         v-for="story of stories"
         :key="story.relative"
+        class="group"
         @click="storyClick(story.absolute)"
       >
         <span class="text-indigo-600 font-medium">{{ story.fileName }}</span>
         <span class="font-light text-gray-400">{{ story.fileExtension }}</span>
-        <span class="font-light text-gray-400 pl-16px show-on-hover">{{ story.relativeFromProjectRoot }}</span>
+        <span class="font-light text-gray-400 pl-16px hidden group-hover:inline">{{ story.relativeFromProjectRoot }}</span>
       </li>
     </ul>
-    <p v-else>
-      No Stories Detected
-    </p>
   </div>
   <div v-else>
     Storybook is not configured for this project
@@ -31,16 +29,29 @@ import { computed } from 'vue'
 import { NewSpecQueryDocument, NewSpec_GenerateSpecFromStoryDocument } from '../generated/graphql'
 
 gql`
+fragment StoryNode_NewSpec on FilePartsEdge {
+  node {
+    id
+    relative
+    fileName
+    baseName
+    absolute
+  }
+}
+`
+
+gql`
 query NewSpecQuery {
-  wizard {
-    storybook {
+  app {
+    activeProject {
       id
-      stories {
+      storybook {
         id
-        relative
-        fileName
-        baseName
-        absolute
+        stories: stories(first: 25) {
+          edges {
+            ...StoryNode_NewSpec
+          }
+        }
       }
     }
   }
@@ -71,7 +82,7 @@ async function storyClick (story: string) {
 }
 
 const stories = computed(() => {
-  return query.data.value?.wizard.storybook?.stories.map((story) => {
+  return query.data.value?.app.activeProject?.storybook?.stories?.edges.map(({ node: story }) => {
     return {
       ...story,
       fileExtension: story.baseName.replace(story.fileName, ''),
@@ -81,12 +92,3 @@ const stories = computed(() => {
 })
 
 </script>
-
-<style>
-.show-on-hover {
-  display: none;
-}
-li:hover .show-on-hover {
-  display: inline;
-}
-</style>
