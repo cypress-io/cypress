@@ -24,7 +24,6 @@
       >
         <GrommetIcon
           class="fill-current stroke-current text-jade-500"
-          style=""
         />
         {{ t('setupPage.testingCard.configured') }}
       </span>
