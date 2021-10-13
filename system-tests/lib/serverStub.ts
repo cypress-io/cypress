@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
 import { api as jsonSchemas } from '@cypress/json-schemas'
-import e2e from './e2e'
+import systemTests from './system-tests'
 
 export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 
@@ -280,7 +280,7 @@ const onServer = (routes) => {
 }
 
 export const setupStubbedServer = (routes, settings = {}) => {
-  e2e.setup({
+  systemTests.setup({
     settings: _.extend({
       projectId: 'pid123',
       videoUploadOnPasses: false,

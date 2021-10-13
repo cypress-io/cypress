@@ -1,4 +1,4 @@
-import e2e from './e2e'
+import systemTests from './system-tests'
 import dayjs from 'dayjs'
 import _ from 'lodash'
 
@@ -113,7 +113,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
     _.each(run.tests, (test) => {
       try {
         if (test.displayError) {
-          test.displayError = e2e.normalizeStdout(test.displayError)
+          test.displayError = systemTests.normalizeStdout(test.displayError)
         }
 
         const attempts = test.attempts
@@ -122,7 +122,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
         // is around the sum of all of its timings
         attempts.forEach((attempt) => {
           if (attempt.error) {
-            attempt.error.stack = e2e.normalizeStdout(attempt.error.stack).trim()
+            attempt.error.stack = systemTests.normalizeStdout(attempt.error.stack).trim()
           }
 
           // cannot sum an object, must use array of values
@@ -264,18 +264,18 @@ export const expectCorrectModuleApiResult = (json, opts: {
       1234,
     )
 
-    run.spec.absolute = e2e.normalizeStdout(run.spec.absolute)
+    run.spec.absolute = systemTests.normalizeStdout(run.spec.absolute)
 
     _.each(run.tests, (test) => {
       if (test.displayError) {
-        test.displayError = e2e.normalizeStdout(test.displayError)
+        test.displayError = systemTests.normalizeStdout(test.displayError)
       }
     })
 
     attempts.forEach((attempt) => {
       // normalize stack
       if (attempt.error) {
-        attempt.error.stack = e2e.normalizeStdout(attempt.error.stack).trim()
+        attempt.error.stack = systemTests.normalizeStdout(attempt.error.stack).trim()
       }
 
       // normalize startedAt
@@ -300,7 +300,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
         screenshot.takenAt = STATIC_DATE
 
         // screenshot.screenshotId = 'some-random-id'
-        screenshot.path = e2e.normalizeStdout(screenshot.path)
+        screenshot.path = systemTests.normalizeStdout(screenshot.path)
       })
 
       if (attempt.duration) {
@@ -311,7 +311,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
 
     if (opts.video) {
       // normalize video path
-      run.video = e2e.normalizeStdout(run.video)
+      run.video = systemTests.normalizeStdout(run.video)
     }
   })
 }
