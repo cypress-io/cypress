@@ -1,3 +1,11 @@
+# [@cypress/react-v5.10.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.10.0...@cypress/react-v5.10.1) (2021-10-04)
+
+
+### Bug Fixes
+
+* configure proper pages directory for next application ([#18009](https://github.com/cypress-io/cypress/issues/18009)) ([70c7c36](https://github.com/cypress-io/cypress/commit/70c7c3678180d5408c144fa37f94ba5f5f8ceeb8))
+* next trace error ([#18189](https://github.com/cypress-io/cypress/issues/18189)) ([db6f909](https://github.com/cypress-io/cypress/commit/db6f9096bd6668db1937d0e38d3928866f6cd5df))
+
 # [@cypress/react-v5.10.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v5.9.4...@cypress/react-v5.10.0) (2021-09-10)
 
 
