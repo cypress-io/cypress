@@ -15,7 +15,7 @@ const statusClasses = {
 
 <template>
   <div
-    class="text-sm inline-block rounded px-1 m-1 whitespace-nowrap"
+    class="inline-block px-1 mx-1 text-sm rounded whitespace-nowrap"
     :class="statusClasses[status]"
   >
     {{ label }}

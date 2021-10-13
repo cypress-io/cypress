@@ -11,7 +11,7 @@
         <span
           v-for="info in runInfo"
           :key="info.id"
-          class="flex items-center mt-1 mr-3"
+          class="flex items-center mr-3"
         >
           <component
             :is="info.icon"
