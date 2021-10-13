@@ -27,7 +27,7 @@ import { OpenBrowserDocument, LaunchOpenProjectDocument } from '../generated/gra
 gql`
 query OpenBrowser {
   app {
-    ...OpenBrowserList
+    ...Browsers_OpenBrowserList
   }
 }
 `

@@ -67,7 +67,7 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
-import type { LoginModalFragment } from '../../generated/graphql'
+import type { AuthenticatedState_LoginModalFragment } from '../../generated/graphql'
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
@@ -75,11 +75,11 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   modelValue: boolean,
-  gql: LoginModalFragment
+  gql: AuthenticatedState_LoginModalFragment
 }>()
 
 gql`
-fragment LoginModal on Query {
+fragment AuthenticatedState_LoginModal on Query {
   cloudViewer {
     id
     email
