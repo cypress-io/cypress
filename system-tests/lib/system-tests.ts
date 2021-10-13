@@ -640,6 +640,7 @@ const systemTests = {
   snapshot (...args) {
     args = _.compact(args)
 
+    // avoid snapshot cwd issue - see /patches/snap-shot-it for more information
     snapshot.cwd = path.join(__dirname, '..')
 
     return snapshot.apply(null, args)
@@ -647,7 +648,6 @@ const systemTests = {
 
   setup (options: SetupOptions = {}) {
     beforeEach(async function () {
-      snapshot.cwd = path.join(__dirname, '..')
       // after installing node modules copying all of the fixtures
       // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
@@ -942,9 +942,9 @@ const systemTests = {
 
         try {
           if (options.originalTitle) {
-            snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+            systemTests.snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
           } else {
-            snapshot(str)
+            systemTests.snapshot(str)
           }
         } catch (err) {
           // firefox has issues with recording video. for now, ignore snapshot diffs that only differ in this error.

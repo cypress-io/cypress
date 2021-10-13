@@ -25,3 +25,11 @@ yarn test test/go_spec.js --browser chrome --no-exit
 ## Developing tests
 
 TODO
+
+## Updating snaphots
+
+Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
+
+```bash
+SNAPSHOT_UPDATE=1 yarn test go_spec
+```

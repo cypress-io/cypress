@@ -39,15 +39,12 @@ yarn workspace @packages/server build-prod
 * `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
 * `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
 * `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
-* `yarn test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
 
 You can also use the `test-watch` command to rerun a test file whenever there is a change:
 
 ```bash
 yarn test-watch /test/path/to/spec.js
 ```
-
-When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
 
 ### Running individual unit tests
 
@@ -78,5 +75,4 @@ Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instruction
 ```bash
 SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.js
 SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
-SNAPSHOT_UPDATE=1 yarn test-e2e async_timeout
 ```
