@@ -29,6 +29,36 @@ describe('http/response-middleware', function () {
     ])
   })
 
+  describe('SetInjectionLevel', function () {
+    const { SetInjectionLevel } = ResponseMiddleware
+
+    describe('when content-type header is set to text/html', function () {
+      let context
+
+      beforeEach(function () {
+        context = prepareContextForSetInjectionLevel()
+      })
+
+      it(`returns level 'partial' for lowercase content-type header name`, function () {
+        context.incomingRes.headers = { 'content-type': 'text/html' }
+
+        return testMiddleware([SetInjectionLevel], context)
+        .then(() => {
+          expect(context.res.wantsInjection).to.equal('partial')
+        })
+      })
+
+      it(`returns level 'partial' for uppercase content-type header name`, function () {
+        context.incomingRes.headers = { 'Content-Type': 'text/html' }
+
+        return testMiddleware([SetInjectionLevel], context)
+        .then(() => {
+          expect(context.res.wantsInjection).to.equal('partial')
+        })
+      })
+    })
+  })
+
   describe('MaybeStripDocumentDomainFeaturePolicy', function () {
     const { MaybeStripDocumentDomainFeaturePolicy } = ResponseMiddleware
     let ctx
@@ -127,4 +157,20 @@ describe('http/response-middleware', function () {
       }
     }
   })
+
+  function prepareContextForSetInjectionLevel () {
+    return {
+      req: {
+        headers: {
+          accept: 'text/html; application/xhtml+xml',
+        },
+        cookies: {},
+        proxiedUrl: 'http://localhost:8080',
+      },
+      res: {},
+      incomingRes: { headers: {} },
+      getRemoteState: () => ({ strategy: 'http', props: { port: '8080', tld: 'localhost', domain: '' } }),
+      getRenderedHTMLOrigins: () => ({}),
+    }
+  }
 })

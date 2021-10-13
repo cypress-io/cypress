@@ -74,7 +74,7 @@ function reqWillRenderHtml (req: CypressIncomingRequest) {
 }
 
 function resContentTypeIs (res: IncomingMessage, contentType: string) {
-  return (res.headers['content-type'] || '').includes(contentType)
+  return (res.headers['content-type'] || res.headers['Content-Type'] || '').includes(contentType)
 }
 
 function resContentTypeIsJavaScript (res: IncomingMessage) {
