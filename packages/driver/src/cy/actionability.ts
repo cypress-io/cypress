@@ -398,14 +398,14 @@ const verify = function (cy, $el, options, callbacks) {
 
         if (options.ensure.visibility) {
           // if the user specified the scroll behavior explicitly, stick with that and don't try other scroll behaviors
-          if (!options.userSetScrollBehavior) {
+          if (options.userSetScrollBehavior) {
+            cy.ensureVisibility($el, _log)
+          } else {
             // if not already visible, try remaining scroll behavior options
             // https://github.com/cypress-io/cypress/issues/4233
             const scrollOptions = Object.keys(scrollBehaviorOptionsMap).filter((option) => option !== options.scrollBehavior)
 
             scrollUntilVisible($el, scrollOptions)
-          } else {
-            cy.ensureVisibility($el, _log)
           }
         }
 
