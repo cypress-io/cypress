@@ -48,7 +48,17 @@ declare global {
         teardown: (state: Store) => Promise<void>
         teardownReporter: () => Promise<void>
         [key: string]: any
+
+        on (event: 'restart', ...args: unknown[]): void
       }
+
+      /**
+       * This is the config served from the back-end.
+       * We will manage config using GraphQL going forward,
+       * but for now we are also caching it on `window`
+       * to be able to move fast and iterate
+       */
+      config: Record<string, any>
 
       /**
        * To ensure we are only a single copy of React
