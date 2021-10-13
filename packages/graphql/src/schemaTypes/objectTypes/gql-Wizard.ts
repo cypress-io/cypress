@@ -78,6 +78,11 @@ export const Wizard = objectType({
       resolve: (source, args, ctx) => ctx.wizard.sampleCode(),
     })
 
+    t.string('sampleConfigFiles', {
+      description: 'Set of sample configuration files based bundler, framework and language of choice',
+      resolve: (source, args, ctx) => ctx.wizard.sampleConfigFiles(),
+    })
+
     t.string('sampleTemplate', {
       description: 'IndexHtml file based on bundler and framework of choice',
       resolve: (source, args, ctx) => ctx.wizard.sampleTemplate(),

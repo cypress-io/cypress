@@ -642,6 +642,11 @@ type Wizard {
   """Configuration file based on bundler and framework of choice"""
   sampleCode: String
 
+  """
+  Set of sample configuration files based bundler, framework and language of choice
+  """
+  sampleConfigFiles: String
+
   """IndexHtml file based on bundler and framework of choice"""
   sampleTemplate: String
   step: WizardStep!

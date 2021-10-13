@@ -1,8 +1,9 @@
-import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, WIZARD_STEPS } from '@packages/types'
+import { BUNDLERS, CODE_LANGUAGES, FRONTEND_FRAMEWORKS, PACKAGES_DESCRIPTIONS, SampleConfigFile, WIZARD_STEPS } from '@packages/types'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { DataContext } from '..'
 import { wizardGetConfigCodeCt, wizardGetConfigCodeE2E } from '../codegen/config-file'
 import { wizardGetComponentIndexHtml } from '../codegen/template'
+import { getSampleConfigFiles } from '../codegen/sample-config-files'
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
@@ -105,8 +106,22 @@ export class WizardDataSource {
     return null
   }
 
-  async sampleConfigFiles () {
+  async sampleConfigFiles (): Promise<SampleConfigFile[]> {
+    const configFileContent = await this.sampleCode()
+    const testingType = this.chosenTestingType
 
+    if (!this.chosenLanguage || !configFileContent || !testingType) {
+      return []
+    }
+
+    const sampleFiles: SampleConfigFile = {
+      filePath: `cypress.config.${this.chosenLanguage.type}`,
+      content: configFileContent,
+      language: this.chosenLanguage.type,
+      status: 'valid',
+    }
+
+    return [sampleFiles, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
   }
 
   async sampleTemplate () {
