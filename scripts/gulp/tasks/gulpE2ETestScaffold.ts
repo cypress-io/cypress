@@ -30,7 +30,7 @@ import path from 'path'
 export const e2eProjectPaths = {
 ${allDirs
 .map((dir) => {
-  return `  '${path.basename(dir)}': path.join(__dirname, '${path.relative(OUTPUT_PATH, dir)}')`
+  return `  '${path.basename(dir)}': path.join(__dirname, '${path.relative(path.dirname(OUTPUT_PATH), dir)}')`
 }).join(',\n')}
 } as const
 `,

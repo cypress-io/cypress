@@ -11,7 +11,7 @@ import gulp from 'gulp'
 import { autobarrelWatcher } from './tasks/gulpAutobarrel'
 import { startCypressWatch, openCypressLaunchpad, openCypressApp, runCypressLaunchpad, wrapRunWithExit, runCypressApp, killExistingCypress } from './tasks/gulpCypress'
 import { graphqlCodegen, graphqlCodegenWatch, nexusCodegen, nexusCodegenWatch, generateFrontendSchema, syncRemoteGraphQL } from './tasks/gulpGraphql'
-import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad } from './tasks/gulpVite'
+import { viteApp, viteCleanApp, viteCleanLaunchpad, viteLaunchpad, viteBuildApp, viteBuildAndWatchApp, viteBuildLaunchpad, viteBuildAndWatchLaunchpad, symlinkViteProjects } from './tasks/gulpVite'
 import { checkTs } from './tasks/gulpTsc'
 import { makePathMap } from './utils/makePathMap'
 import { makePackage } from './tasks/gulpMakePackage'
@@ -135,6 +135,18 @@ gulp.task(
   ),
 )
 
+gulp.task('watchForE2E', gulp.series(
+  'codegen',
+  gulp.parallel(
+    gulp.series(
+      viteBuildAndWatchLaunchpad,
+      viteBuildAndWatchApp,
+    ),
+    webpackRunner,
+  ),
+  symlinkViteProjects,
+))
+
 /**------------------------------------------------------------------------
  *                         Launchpad Testing
  * This task builds and hosts the launchpad as if it was a static website.
@@ -182,6 +194,8 @@ const cyOpenLaunchpad = gulp.series(
     viteBuildApp,
   ),
 
+  symlinkViteProjects,
+
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressLaunchpad,
 )
@@ -197,6 +211,8 @@ const cyOpenApp = gulp.series(
     ),
     webpackRunner,
   ),
+
+  symlinkViteProjects,
 
   // 2. Start the REAL (dev) Cypress App, which will launch in open mode.
   openCypressApp,
@@ -244,6 +260,7 @@ gulp.task(makePackage)
  * here for debugging, e.g. `yarn gulp syncRemoteGraphQL`
  *------------------------------------------------------------------------**/
 
+gulp.task(symlinkViteProjects)
 gulp.task(syncRemoteGraphQL)
 gulp.task(generateFrontendSchema)
 gulp.task(makePathMap)

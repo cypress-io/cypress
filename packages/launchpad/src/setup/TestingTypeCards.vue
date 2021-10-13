@@ -3,6 +3,7 @@
     <TestingTypeCard
       v-if="ct"
       :id="ct.type"
+      :data-e2e="ct.type"
       :title="ct.title"
       :description="firstTimeCT ? ct.description : 'LAUNCH'"
       role="button"
@@ -14,6 +15,7 @@
     <TestingTypeCard
       v-if="e2e"
       :id="e2e.type"
+      :data-e2e="e2e.type"
       :title="e2e.title"
       :description="firstTimeE2E ? e2e.description : 'LAUNCH'"
       role="button"

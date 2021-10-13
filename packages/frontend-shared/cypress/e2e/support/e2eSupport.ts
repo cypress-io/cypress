@@ -7,6 +7,7 @@ export type ProjectFixture = keyof typeof e2eProjectPaths
 
 export interface WithCtxOptions extends Cypress.Loggable, Cypress.Timeoutable {
   projectName?: string
+  [key: string]: any
 }
 
 declare global {
@@ -18,12 +19,20 @@ declare global {
       initializeApp: typeof initializeApp
       visitApp(href?: string): Chainable<string>
       visitLaunchpad(href?: string): Chainable<string>
+      /**
+       * Get the project path for testing opening a new project
+       */
+      e2eProjectPath(project: ProjectFixture): string
       // graphqlRequest(): Chainable<string>
     }
   }
 }
 
 beforeEach(() => {
+  cy.e2eProjectPath = (project: ProjectFixture) => {
+    return e2eProjectPaths[project]
+  }
+
   // Reset the ports so we know we need to call "setupE2E" before each test
   Cypress.env('e2e_serverPort', undefined)
   Cypress.env('e2e_gqlPort', undefined)
