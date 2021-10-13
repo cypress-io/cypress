@@ -1,11 +1,7 @@
 <template>
-<div>
+<div data-testid="create-spec-card" tabindex="0">
   <div
-    role="button"
-  class="block h-auto overflow-scroll text-center rounded w-280px m-2px
-  min-h-216px max-h-350px px-32px pt-32px pb-24px children:hyphens-manual border-1
-  hocus-default"
-    tabindex="0"
+  class="block h-auto overflow-scroll text-center rounded cursor-pointer w-280px m-2px min-h-216px max-h-350px px-32px pt-32px pb-24px children:hyphens-manual border-1 hocus-default focus-within-default"
   >
     <component
       :is="icon"
@@ -13,7 +9,7 @@
       data-testid="create-spec-card-icon"
     />
     <h2 class="leading-normal text-indigo-500 mt-10px text-18px mb-4px">
-      {{ header }}
+      <button class="focus:outline-none focus:ring-0">{{ header }}</button>
     </h2>
     <p class="text-gray-500 tracking-tight text-14px leading-[20px]">
       {{ description }}

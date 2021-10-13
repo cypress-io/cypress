@@ -1,4 +1,9 @@
 <template>
+  <StandardModal :clickOutside="false" v-model="modal">
+    <template #overlay={classes}>
+        <DialogOverlay :class="classes" class="bg-gray-900 opacity-[0.97]" />
+    </template>
+  </StandardModal>
   <div class="overflow-scroll text-center max-w-600px">
     <h1
       data-testid="create-spec-page-title"
@@ -42,7 +47,7 @@
           :icon="DocumentCodeIcon"
           :header="t('createSpec.e2e.importEmptySpec.header')"
           :description="t('createSpec.e2e.importEmptySpec.description')"
-          @click="openModal('importFromComponent')"
+          @click="openModal('importEmptySpec')"
         />
       </template>
     </div>
@@ -68,14 +73,17 @@
 </template>
 
 <script lang="ts" setup>
+import StandardModal from '@cy/components/StandardModal.vue '
 import { useI18n } from '@cy/i18n'
 import BoxOpenIcon from '~icons/cy/box-open_x48'
 import DocumentCodeIcon from '~icons/cy/document-code_x48'
 import BookCodeIcon from '~icons/cy/book-code_x48'
 import CreateSpecCard from './CreateSpecCard.vue'
+import CreateSpecModal from './CreateSpecModal.vue'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
 import ImportComponentSelector from './ImportComponentSelector.vue'
+import {DialogOverlay} from '@headlessui/vue'
 import { ref } from 'vue'
 const { t } = useI18n()
 
@@ -84,8 +92,9 @@ defineProps<{
   testingType: 'component' | 'e2e'
 }>()
 
-const modal = ref(null)
+const modal = ref(false)
 const openModal = (id) => {
+  modal.value = true
 }
 
 const goToSpecsPattern = () => { /* TODO: route to specific sections in the settings page */ }

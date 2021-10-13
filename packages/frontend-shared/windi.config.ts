@@ -3,6 +3,7 @@ import InteractionVariants from '@windicss/plugin-interaction-variants'
 import { IconDuotoneColorsPlugin } from './.windicss/icon-color-plugins'
 import { safelist } from './.windicss/safelist'
 import { colors } from './.windicss/colors'
+import { shortcuts } from './.windicss/shortcuts'
 import path from 'path'
 import type { WindiCssOptions } from '@windicss/config'
 
@@ -31,14 +32,9 @@ export const defaultConfig: WindiCssOptions = {
   plugins: [
     IconDuotoneColorsPlugin,
     InteractionVariants,
+    require('windicss/plugin/filters'),
   ],
-  shortcuts: {
-    // Not working? Make sure that you have border-1 set on the non-hocus
-    // state. If you don't want a gray outline with that, do
-    // border-transparent for the non-hocus state.
-    'focus-default': 'outline-none focus:border focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:outline-transparent transition duration-150 disabled:hover:ring-0 disabled:hover:border-0',
-    'hocus-default': 'outline-none hocus:border hover:border-indigo-300 focus:border-indigo-300 hocus:ring-2 hocus:ring-indigo-100 hocus:outline-transparent transition duration-150 disabled:ring-0 disabled:border-0',
-  },
+  shortcuts,
   extract: {
     // accepts globs and file paths relative to project root
     include: [

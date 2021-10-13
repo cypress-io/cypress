@@ -1,8 +1,9 @@
 import CreateSpecCard from './CreateSpecCard.vue'
 import DocumentCode from '~icons/cy/document-code_x48'
+import { withKeys } from 'vue'
 
 const iconSelector = '[data-testid=create-spec-card-icon]'
-const specCardSelector = '[role=button]'
+const specCardSelector = '[data-testid=create-spec-card]'
 const header = 'My header text here'
 const shortDescription = `We'll walk you through generating your first spec from a component.`
 
@@ -37,5 +38,17 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
       </div>
     )).get(iconSelector)
     .should('be.visible')
+  })
+
+  it('emits click events bound to it', () => {
+    const onClickSpy = cy.spy().as('onClickSpy')
+    const onKeypressSpy = cy.spy().as('onKeypressSpy')
+    cy.mount(() => (<div class="m-12">
+      <CreateSpecCard icon={ DocumentCode } header={ header } description={ shortDescription } onClick={ onClickSpy }/>
+    </div>))
+      .get(specCardSelector)
+      .focus().click().type('{enter}').type(' ')
+      // .get('@onKeypressSpy').should('have.been.calledTwice')
+      .get('@onClickSpy').should('have.been.called')
   })
 })

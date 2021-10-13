@@ -40,7 +40,7 @@ describe('<CreateSpecPage />', () => {
     .get(pageDescriptionSelector).should('contain.text', messages.page.component.description)
   })
 
-  it('playground', () => {
+  it.only('playground', () => {
     const testingType = ref('component')
 
     cy.mount(() => (
