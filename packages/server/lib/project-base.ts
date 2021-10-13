@@ -45,6 +45,7 @@ type ReceivedCypressOptions =
 export interface Cfg extends ReceivedCypressOptions {
   projectRoot: string
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
+  exit?: boolean
   state?: {
     firstOpened?: number
     lastOpened?: number
@@ -206,6 +207,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
       getSpec: () => this.spec,
+      exit: this.options.args?.exit,
       onError: this.options.onError,
       onWarning: this.options.onWarning,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,

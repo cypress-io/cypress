@@ -28,6 +28,7 @@ export interface InitializeRoutes {
   getRemoteState: () => Cypress.RemoteState
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
+  exit?: boolean
 }
 
 function replaceBody (ctx: DataContextShell) {
@@ -43,7 +44,11 @@ export const createCommonRoutes = ({
   specsStore,
   getRemoteState,
   nodeProxy,
+<<<<<<< HEAD
   ctx,
+=======
+  exit,
+>>>>>>> develop
 }: InitializeRoutes) => {
   const makeServeConfig = (options: Partial<ServeOptions>) => {
     const config = {
@@ -175,6 +180,7 @@ export const createCommonRoutes = ({
       getCurrentBrowser,
       getRemoteState,
       specsStore,
+      exit,
     })
   })
 

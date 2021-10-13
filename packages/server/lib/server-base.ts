@@ -100,6 +100,7 @@ export interface OpenServerOptions {
   testingType: Cypress.TestingType
   onError: any
   onWarning: any
+  exit?: boolean
   getCurrentBrowser: () => Browser
   getSpec: () => Cypress.Cypress['spec'] | null
   shouldCorrelatePreRequests: () => boolean
@@ -178,6 +179,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     specsStore,
     testingType,
     SocketCtor,
+    exit,
   }: OpenServerOptions) {
     debug('server open')
 
@@ -209,7 +211,24 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       createInitialWorkers()
     }
 
+<<<<<<< HEAD
     this.createHosts(config.hosts)
+=======
+      this.createHosts(config.hosts)
+
+      const routeOptions: InitializeRoutes = {
+        config,
+        specsStore,
+        getRemoteState,
+        nodeProxy: this.nodeProxy,
+        networkProxy: this._networkProxy!,
+        onError,
+        getSpec,
+        getCurrentBrowser,
+        testingType,
+        exit,
+      }
+>>>>>>> develop
 
     const routeOptions: InitializeRoutes = {
       ctx: this.ctx,
