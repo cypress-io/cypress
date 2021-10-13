@@ -16,6 +16,8 @@ describe('lib/config', () => {
     this.env = process.env
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+
+    Fixtures.scaffold()
   })
 
   afterEach(function () {
