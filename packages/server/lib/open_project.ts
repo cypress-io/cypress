@@ -25,31 +25,6 @@ interface SpecsByType {
   integration: Cypress.Spec[]
 }
 
-<<<<<<< HEAD
-=======
-export interface LaunchArgs {
-  _: [string] // Cypress App binary location
-  config: Record<string, unknown>
-  cwd: string
-  browser?: Browser['name']
-  configFile?: string
-  exit?: boolean
-  project: string // projectRoot
-  projectRoot: string // same as above
-  testingType: Cypress.TestingType
-  invokedFromCli: boolean
-  os: PlatformName
-
-  onFocusTests?: () => any
-  /**
-   * in run mode, the path of the project run
-   * path is relative if specified with --project,
-   * absolute if implied by current working directory
-   */
-  runProject?: string
-}
-
->>>>>>> develop
 // @see https://github.com/cypress-io/cypress/issues/18094
 async function win32BitWarning (onWarning: (error: Error) => void) {
   if (os.platform() !== 'win32' || os.arch() !== 'ia32') return

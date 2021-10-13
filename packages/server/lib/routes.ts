@@ -44,11 +44,8 @@ export const createCommonRoutes = ({
   specsStore,
   getRemoteState,
   nodeProxy,
-<<<<<<< HEAD
   ctx,
-=======
   exit,
->>>>>>> develop
 }: InitializeRoutes) => {
   const makeServeConfig = (options: Partial<ServeOptions>) => {
     const config = {

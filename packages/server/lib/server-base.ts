@@ -211,24 +211,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       createInitialWorkers()
     }
 
-<<<<<<< HEAD
     this.createHosts(config.hosts)
-=======
-      this.createHosts(config.hosts)
-
-      const routeOptions: InitializeRoutes = {
-        config,
-        specsStore,
-        getRemoteState,
-        nodeProxy: this.nodeProxy,
-        networkProxy: this._networkProxy!,
-        onError,
-        getSpec,
-        getCurrentBrowser,
-        testingType,
-        exit,
-      }
->>>>>>> develop
 
     const routeOptions: InitializeRoutes = {
       ctx: this.ctx,
@@ -241,6 +224,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getSpec,
       getCurrentBrowser,
       testingType,
+      exit,
     }
 
     const runnerSpecificRouter = testingType === 'e2e'
