@@ -435,12 +435,12 @@ module.exports = {
       const msg = `
       ${logSymbols.warning} Warning: open-ct is deprecated and will be removed in a future release.
 
-      Use \`open --component\` instead.
+      Use \`cypress open --component\` instead.
       `
 
-      logger.log()
+      logger.warn()
       logger.warn(stripIndent(msg))
-      logger.log()
+      logger.warn()
 
       require('./exec/open')
       .start({ ...util.parseOpts(opts), testingType: 'component' })
@@ -476,7 +476,7 @@ module.exports = {
 
       const msg = `
       ${logSymbols.warning} Warning: run-ct is deprecated and will be removed in a future release.
-      Use \`run --component\` instead.
+      Use \`cypress run --component\` instead.
       `
 
       logger.warn()
