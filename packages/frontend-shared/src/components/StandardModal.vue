@@ -2,16 +2,21 @@
   <Dialog
     :open="localValue"
     class="fixed inset-0 z-10 overflow-y-auto"
-    @close="setIsOpen(false)"
+    @close="clickOutside && setIsOpen(false)"
   >
     <div class="flex items-center justify-center min-h-screen">
-      <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
+      <slot
+        name="overlay"
+        :classes="'fixed inset-0'"
+      >
+        <DialogOverlay class="fixed inset-0 bg-gray-800 opacity-90" />
+      </slot>
 
       <div
         class="relative mx-auto bg-white rounded"
         :class="modalClasses"
       >
-        <div class="flex items-center justify-between border-b-1px min-h-56px px-24px">
+        <div class="flex items-center justify-between border-b-1px min-h-64px px-24px">
           <DialogTitle class="text-gray-900 text-18px">
             <slot name="title" /> - <a
               :href="helpLink"
@@ -64,13 +69,13 @@ const emit = defineEmits<{
 
 const props = withDefaults(defineProps<{
   modelValue?: boolean
-  activatorText?: string
   modalClasses?: string
   helpLink?: string
   helpText?: string
+  clickOutside?: boolean
 }>(), {
+  clickOutside: true,
   modelValue: false,
-  activatorText: '',
   modalClasses: 'w-480px',
   helpText: 'Need help?',
   helpLink: 'https://docs.cypress.io',

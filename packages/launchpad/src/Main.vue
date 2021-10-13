@@ -25,10 +25,12 @@
             <CompareTestingTypes />
           </StandardModal>
           <button
-            class="block mx-auto text-indigo-500 text-18px"
+            class="block mx-auto text-indigo-500 text-18px focus:outline-transparent hocus:underline group"
             @click="isTestingTypeModalOpen = true"
           >
-            {{ t('welcomePage.review') }}
+            {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
+              class="inline-block transition-transform duration-200 transform ml-4px icon-dark-current group-hocus:translate-x-3px"
+            />
           </button>
           <TestingTypeCards :gql="query.data.value" />
         </template>
