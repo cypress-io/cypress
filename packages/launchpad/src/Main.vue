@@ -21,26 +21,8 @@
             <template #title>
               Key Differences
             </template>
-            <div class="flex justify-around text-center">
-              <div class="w-full border-r p-24px">
-                <h3>E2E</h3>
 
-                <ul class="text-left">
-                  <li>visit</li>
-                  <li>test flow</li>
-                  <li>ideal for cd</li>
-                </ul>
-                <h3>Code Example</h3>
-                <InlineCodeEditor
-                  v-model="code"
-                  class="max-w-400px"
-                  readonly
-                />
-              </div>
-              <div class="w-full border-l p-24px">
-                Component
-              </div>
-            </div>
+            <CompareTestingTypes />
           </StandardModal>
           <button
             class="mx-auto text-indigo-500 text-18px"
@@ -48,6 +30,11 @@
           >
             {{ t('welcomePage.review') }}
           </button>
+          <CodeEditor
+            v-model="code"
+            class="max-w-400px"
+            readonly
+          />
           <TestingTypeCards :gql="query.data.value" />
         </template>
         <Wizard
@@ -72,13 +59,13 @@ import HeaderBar from './layouts/HeaderBar.vue'
 import GlobalPage from './global/GlobalPage.vue'
 import BaseError from './error/BaseError.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
+import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import { useI18n } from '@cy/i18n'
 import { ref } from 'vue'
-import InlineCodeEditor from './components/code/InlineCodeEditor.vue'
+import CodeEditor from './components/code/CodeEditor.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
-const code = 'let code = \'here\''
 
 gql`
 query MainLaunchpadQuery {
