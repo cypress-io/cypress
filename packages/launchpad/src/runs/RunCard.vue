@@ -4,23 +4,33 @@
       <RunIcon :gql="props.gql" />
     </template>
     <template #header>
-      {{ run.commitInfo?.message }}
+      {{ run.commitInfo?.summary }}
     </template>
     <template #description>
       <div class="flex">
         <span
-          v-for="info in runInfo"
-          :key="info.id"
+          v-if="run.commitInfo?.authorName"
           class="flex items-center mr-3"
         >
-          <component
-            :is="info.icon"
-            v-if="info.icon"
-            class="mr-1 text-sm text-gray-500"
-          />
+          <i-cy-general-user_x16 class="mr-1 icon-dark-gray-500 icon-light-gray-200 icon-secondary-light-gray-200" />
           <span class="text-sm font-light text-gray-500">
-            {{ info.text }}
+            {{ run.commitInfo.authorName }}
           </span>
+        </span>
+        <span
+          v-if="run.commitInfo?.branch"
+          class="flex items-center mr-3"
+        >
+          <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300" />
+          <span class="text-sm font-light text-gray-500">
+            {{ run.commitInfo.branch }}
+          </span>
+        </span>
+        <span
+          v-if="run.createdAt"
+          class="flex items-center mr-3"
+        >
+          {{ new Date(run.createdAt).toLocaleTimeString() }}
         </span>
       </div>
     </template>
@@ -37,10 +47,6 @@ import ListRow from '@cy/components/ListRow.vue'
 import { gql } from '@urql/core'
 import RunIcon from './RunIcon.vue'
 import RunResults from './RunResults.vue'
-// bx:bx-user-circle
-import IconUserCircle from '~icons/bx/bx-user-circle'
-// carbon:branch
-import IconBranch from '~icons/carbon/branch'
 import type { RunCardFragment } from '../generated/graphql'
 import { computed } from 'vue-demi'
 
@@ -53,7 +59,7 @@ fragment RunCard on CloudRun {
 	commitInfo {
 		authorName
 		authorEmail
-		message
+		summary
 		branch
 	}
 }
@@ -64,18 +70,5 @@ const props = defineProps<{
 }>()
 
 const run = computed(() => props.gql)
-
-const runInfo = [{
-  id: run.value.id,
-  text: run.value.commitInfo?.authorName,
-  icon: IconUserCircle,
-},
-{
-  text: run.value.commitInfo?.branch,
-  icon: IconBranch,
-},
-{
-  text: run.value.createdAt ? new Date(run.value.createdAt).toLocaleTimeString() : null,
-}].filter((o) => Boolean(o.text))
 
 </script>
