@@ -3,7 +3,9 @@ import type { SampleConfigFile } from '@packages/types'
 
 // FIXME: temporary content
 const content = `const { defineConfig } = require(’cypress’)
-const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)    
+const { devServer, defineDevServerConfig } = require(’@cypress/vite-dev-server’)  
+
+// sample code !!!
 
 module.exports = defineConfig({
   component: {
@@ -31,6 +33,7 @@ export async function getSampleConfigFiles (testingType: NexusGenEnums['TestingT
       filePath,
       content,
       status: 'valid',
+      description: 'Aenean lacinia bibendum nulla sed consectetur.',
     }
   })
 }

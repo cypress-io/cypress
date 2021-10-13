@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-180 mx-auto m-y-4">
+  <div class="max-w-180 mx-auto my-4 pb-8">
     <FileRow
       v-for="file in files"
       :key="file.filePath"
@@ -77,7 +77,6 @@ const props = defineProps<{
 }>()
 
 const files = computed(() => props.gql.wizard.sampleConfigFiles)
-const canNavigateForward = computed(() => props.gql.wizard.canNavigateForward)
 
 const continueForward: any = () => {
   navigate.executeMutation({ direction: 'forward' })

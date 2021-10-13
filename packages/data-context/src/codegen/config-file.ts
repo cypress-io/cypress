@@ -59,7 +59,7 @@ export const wizardGetConfigCodeCt = (opts: GetCodeOptsCt): string | null => {
 
   const startServerReturn = `return startDevServer({ options, webpackConfig })`
 
-  return `// ${comments}
+  return dedent`// ${comments}
   ${importStatements}
   ${exportStatement}
     ${requireStatements}component(on, config) {

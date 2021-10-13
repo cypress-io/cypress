@@ -114,14 +114,16 @@ export class WizardDataSource {
       return []
     }
 
-    const sampleFiles: SampleConfigFile = {
+    const sampleFile: SampleConfigFile = {
       filePath: `cypress.config.${this.chosenLanguage.type}`,
+      description: 'The config file you are supposed to have',
       content: configFileContent,
-      language: this.chosenLanguage.type,
-      status: 'valid',
+      status: 'changes',
+      warningText: 'Please merge the code below with your existing `cypress.config.js`',
+      warningLink: 'https://docs.cypress.io/config-file',
     }
 
-    return [sampleFiles, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
+    return [sampleFile, ...(await getSampleConfigFiles(testingType, this.chosenLanguage.type))]
   }
 
   async sampleTemplate () {
