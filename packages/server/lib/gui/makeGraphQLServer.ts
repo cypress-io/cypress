@@ -41,6 +41,7 @@ export async function makeGraphQLServer (ctx: DataContext) {
 
   const srv = graphqlServer = app.listen(() => {
     const port = (srv.address() as AddressInfo).port
+
     const endpoint = `http://localhost:${port}/graphql`
 
     if (process.env.NODE_ENV === 'development') {
