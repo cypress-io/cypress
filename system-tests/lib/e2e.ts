@@ -31,6 +31,23 @@ type CypressConfig = { [key: string]: any }
 
 type BrowserName = 'electron' | 'firefox' | 'chrome'
 
+type ExecResult = {
+  code: number
+  stdout: string
+  stderr: string
+}
+
+type ExecFn = (options?: ExecOptions) => Promise<ExecResult>
+
+type ItOptions = ExecOptions & {
+  /**
+   * If a function is supplied, it will be executed instead of running the `e2e.exec` function immediately.
+   */
+  onRun?: (
+    execFn: ExecFn
+  ) => Promise<void> | void
+}
+
 type ExecOptions = {
   /**
    * Deprecated. Use `--inspect-brk` from command line instead.
@@ -527,7 +544,7 @@ const normalizeToArray = (value) => {
   return value
 }
 
-const localItFn = function (title, opts: ExecOptions) {
+const localItFn = function (title: string, opts: ItOptions) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
