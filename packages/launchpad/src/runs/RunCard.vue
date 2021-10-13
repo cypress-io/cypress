@@ -1,47 +1,46 @@
 <template>
-  <div class="h-18 border border-gray-200 rounded bg-white flex items-center mb-2 box-border">
-    <div class="w-18 flex items-center justify-center">
+  <ListRow>
+    <template #icon>
       <RunIcon :gql="props.gql" />
-    </div>
-    <div
-      v-if="run.commitInfo"
-      class="pl-4 border-l border-gray-200 flex-grow"
-    >
-      <h2 class="font-medium text-indigo-500 leading-4">
-        {{ run.commitInfo.message }}
-      </h2>
+    </template>
+    <template #header>
+      {{ run.commitInfo?.message }}
+    </template>
+    <template #description>
       <div class="flex">
         <span
           v-for="info in runInfo"
           :key="info.id"
-          class="flex items-center mr-3 mt-1"
+          class="flex items-center mt-1 mr-3"
         >
           <component
             :is="info.icon"
             v-if="info.icon"
-            class="mr-1 text-gray-500 text-sm"
+            class="mr-1 text-sm text-gray-500"
           />
-          <span class="text-gray-500 text-sm font-light">
+          <span class="text-sm font-light text-gray-500">
             {{ info.text }}
           </span>
         </span>
       </div>
-    </div>
-    <RunResults
-      :gql="props.gql"
-      class="m-6 ml-0"
-    />
-  </div>
+    </template>
+    <template #right>
+      <RunResults
+        :gql="props.gql"
+      />
+    </template>
+  </ListRow>
 </template>
 
 <script lang="ts" setup>
+import ListRow from '@cy/components/ListRow.vue'
+import { gql } from '@urql/core'
 import RunIcon from './RunIcon.vue'
 import RunResults from './RunResults.vue'
 // bx:bx-user-circle
 import IconUserCircle from '~icons/bx/bx-user-circle'
 // carbon:branch
 import IconBranch from '~icons/carbon/branch'
-import { gql } from '@urql/core'
 import type { RunCardFragment } from '../generated/graphql'
 import { computed } from 'vue-demi'
 

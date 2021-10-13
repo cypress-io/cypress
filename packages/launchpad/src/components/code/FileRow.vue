@@ -56,10 +56,13 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
     <template #description>
       {{ description }}
     </template>
+    <template #right>
+      <i-cy-dropcaret />
+    </template>
     <template #slider>
       <div
         v-if="warning && open"
-        class="border-t border-gray-200 p-3 flex items-center bg-warning-100 text-warning-600"
+        class="flex items-center p-3 border-t border-gray-200 bg-warning-100 text-warning-600"
       >
         <span class="font-semibold">{{ statusLabel }}: </span>
         <p class="flex-grow ml-1">
@@ -68,7 +71,7 @@ const statusClasses = computed(() => props.status === 'skipped' ? 'skipped' : pr
         <Button>Learn more</Button>
       </div>
       <div
-        class="border-t border-gray-100 p-3 pt-4 overflow-auto"
+        class="p-3 pt-4 overflow-auto border-t border-gray-100"
         :class="open ? 'block': 'hidden'"
       >
         <PrismJs :language="language">
