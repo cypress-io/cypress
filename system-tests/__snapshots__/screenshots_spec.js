@@ -38,6 +38,7 @@ exports['e2e screenshots / passes'] = `
     - does not take a screenshot for a pending test
     ✓ adds padding to element screenshot when specified
     ✓ does not add padding to non-element screenshot
+    ✓ can pass overwrite option to replace existing filename
     clipping
       ✓ can clip app screenshots
       ✓ can clip runner screenshots
@@ -53,7 +54,7 @@ exports['e2e screenshots / passes'] = `
       ✓ takes another screenshot
 
 
-  20 passing
+  21 passing
   1 pending
   6 failing
 
@@ -102,12 +103,12 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        26                                                                               │
-  │ Passing:      20                                                                               │
+  │ Tests:        27                                                                               │
+  │ Passing:      21                                                                               │
   │ Failing:      5                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  34                                                                               │
+  │ Screenshots:  35                                                                               │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshots_spec.js                                                              │
@@ -153,6 +154,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/aut-resize.png                 (1000x2000)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element-padding.png              (420x320)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/non-element-padding.png          (600x200)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/overwrite-test.png                (100x50)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/app-clip.png                      (100x50)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/runner-clip.png                   (120x60)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-clip.png                 (140x70)
@@ -186,9 +188,9 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  screenshots_spec.js                      XX:XX       26       20        5        1        - │
+  │ ✖  screenshots_spec.js                      XX:XX       27       21        5        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX       26       20        5        1        -  
+    ✖  1 of 1 failed (100%)                     XX:XX       27       21        5        1        -  
 
 
 `

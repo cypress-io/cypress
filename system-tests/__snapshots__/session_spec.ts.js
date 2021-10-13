@@ -66,7 +66,7 @@ exports['e2e sessions / session tests'] = `
     ✓ t1
     ✓ t2
 
-  options.validate reruns steps when rejecting
+  options.validate reruns steps when throwing
     ✓ t1
     ✓ t2
 
@@ -105,7 +105,17 @@ exports['e2e sessions / session tests'] = `
     ✓ t2
 
   consoleProps
-    ✓ t1
+    - t1
+
+  ignores setting insecure context data when on secure context
+    no cross origin secure origins, nothing to clear
+      ✓ sets insecure content
+      ✓ nothing to clear - 1/2
+      ✓ nothing to clear - 2/2
+    only secure origins cleared
+      ✓ sets insecure content
+      ✓ switches to secure context - clears only secure context data - 1/2
+      ✓ clears only secure context data - 2/2
 
   errors
     ✓ throws error when experimentalSessionSupport not enabled
@@ -113,16 +123,17 @@ exports['e2e sessions / session tests'] = `
     ✓ throws if multiple session calls with same name but different options
 
 
-  49 passing
+  54 passing
+  1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        49                                                                               │
-  │ Passing:      49                                                                               │
+  │ Tests:        55                                                                               │
+  │ Passing:      54                                                                               │
   │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
@@ -138,9 +149,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX       49       49        -        -        - │
+  │ ✔  session_spec.js                          XX:XX       55       54        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       49       49        -        -        -  
+    ✔  All specs passed!                        XX:XX       55       54        -        1        -  
 
 
 `
