@@ -49,6 +49,7 @@ query MainLaunchpadQuery {
   app {
     isInGlobalMode
     ...GlobalPage
+    ...RecentProjects_WelcomeGuide
   }
   ...HeaderBar
 }
