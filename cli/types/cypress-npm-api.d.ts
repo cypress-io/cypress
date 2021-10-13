@@ -36,7 +36,7 @@ declare namespace CypressCommandLine {
    */
   interface CypressRunOptions extends CypressCommonOptions {
     /**
-     * Specify different browser to run tests in, either by name or by filesystem path
+     * Specify browser to run tests in, either by name or by filesystem path
     */
     browser: string
     /**
@@ -114,7 +114,7 @@ declare namespace CypressCommandLine {
    */
   interface CypressOpenOptions extends CypressCommonOptions {
     /**
-     * Specify a filesystem path to a custom browser
+    * Specify browser to run tests in, either by name or by filesystem path
      */
     browser: string
     /**
