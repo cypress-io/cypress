@@ -1,13 +1,13 @@
 <template>
   <div class="flex justify-around">
     <CompareTestingCard
-      class="w-full border-r p-24px"
+      class="w-full p-24px"
       title="End-to-end Tests:"
-      :code="code"
+      :code="e2eCode"
       :list-items="e2eItems"
     />
     <CompareTestingCard
-      class="w-full border-l p-24px"
+      class="w-full p-24px"
       title="Component Tests:"
       :code="code"
       :list-items="ctItems"
@@ -24,6 +24,12 @@ const { t } = useI18n()
 const code = `let code = \'here\'
 // more code
 // mutliline things
+
+
+`
+
+const e2eCode = `it(‘clicks the confirm button’) { \n  cy.visit(‘https://yourwebsite.com’) \n  cy.get(‘button[type=submit]’).click()
+}
 
 
 `
