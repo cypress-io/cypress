@@ -413,7 +413,10 @@ export class OpenProject {
     ]).then(() => null)
   }
 
-  async closeCurrentProject () {
+  // close existing open project if it exists, for example
+  // if  you are switching from CT to E2E or vice versa.
+  // used by launchpad
+  async closeActiveProject () {
     await this.closeOpenProjectAndBrowsers()
 
     // When closing a project, we should teardown any spec watchers.
@@ -423,10 +426,6 @@ export class OpenProject {
   }
 
   async create (path: string, args: LaunchArgs, options: OpenProjectLaunchOptions, browsers: FoundBrowser[] = []) {
-    // close existing open project if it exists, for example
-    // if  you are switching from CT to E2E or vice versa.
-    await this.closeCurrentProject()
-
     debug('open_project create %s', path)
 
     _.defaults(options, {

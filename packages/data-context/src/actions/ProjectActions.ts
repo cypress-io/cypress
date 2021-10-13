@@ -86,6 +86,7 @@ export class ProjectActions {
     }
 
     try {
+      await this.api.closeActiveProject()
       await this.api.initializeProject(launchArgs, {
         ...this.ctx.launchOptions,
         ...options,
